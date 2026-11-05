@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import type {
   InvestigationSeverityCounts,
@@ -34,8 +35,10 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 /**
  * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
  * record one, for example because its run ended early. There is no failed state.
+ * `closed` holds investigations the user (or system) marked closed — outside the open severity
+ * tiers.
  */
-export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
+export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated' | 'closed';
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
@@ -58,9 +61,10 @@ export interface InvestigationSectionsResult {
 const toInvestigationIds = (investigations: InvestigationSummary[]): Set<string> =>
   new Set(investigations.map(({ id }) => id));
 
-const tierSection = (severity: Severity) => ({
-  inProgress: false,
+const openTierSection = (severity: Severity) => ({
+  inProgress: false as const,
   severities: [severity],
+  status: 'open' as const,
 });
 
 const toSeverityCounts = (counts: InvestigationSeverityCounts | undefined): SeverityCounts => ({
@@ -90,6 +94,7 @@ export const useInvestigationSections = ({
 
   const inProgress = useFetchInvestigations({
     inProgress: true,
+    status: 'open',
     query,
     refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
   });
@@ -97,21 +102,32 @@ export const useInvestigationSections = ({
   // Every item in the in-progress section is being worked on by construction.
   const hasActiveInvestigations = inProgress.total > 0;
 
-  const critical = useFetchInvestigations({ ...tierSection('critical'), query });
-  const high = useFetchInvestigations({ ...tierSection('high'), query });
-  const medium = useFetchInvestigations({ ...tierSection('medium'), query });
-  const low = useFetchInvestigations({ ...tierSection('low'), query });
-  const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
+  const critical = useFetchInvestigations({ ...openTierSection('critical'), query });
+  const high = useFetchInvestigations({ ...openTierSection('high'), query });
+  const medium = useFetchInvestigations({ ...openTierSection('medium'), query });
+  const low = useFetchInvestigations({ ...openTierSection('low'), query });
+  const notRated = useFetchInvestigations({
+    inProgress: false,
+    severities: ['none'],
+    status: 'open',
+    query,
+  });
+  const closed = useFetchInvestigations({
+    inProgress: false,
+    status: 'closed',
+    query,
+  });
 
   // A running investigation starts at medium and its severity can still change, so it is not
-  // counted under a tier until it finishes — same as the sections below.
+  // counted under a tier until it finishes — same as the sections below. Closed investigations
+  // are excluded so the overview tiles match the open severity accordions.
   const severityCountsQuery = useQuery({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', 'open', query],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: { in_progress: false, ...(query ? { query } : {}) },
+        query: { in_progress: false, status: 'open', ...(query ? { query } : {}) },
         signal,
       }),
     keepPreviousData: true,
@@ -122,6 +138,7 @@ export const useInvestigationSections = ({
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
+  const { refetch: refetchClosed } = closed;
   const { refetch: refetchSeverityCounts } = severityCountsQuery;
 
   // An investigation leaving the in-progress section landed in one of the others, so the rest are
@@ -160,6 +177,7 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
+    refetchClosed();
     void refetchSeverityCounts();
   }, [
     query,
@@ -171,6 +189,7 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
+    refetchClosed,
     refetchSeverityCounts,
   ]);
 
@@ -182,8 +201,9 @@ export const useInvestigationSections = ({
       toSectionState({ id: 'medium', queryResult: medium }),
       toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'not-rated', queryResult: notRated }),
+      toSectionState({ id: 'closed', queryResult: closed }),
     ],
-    [inProgress, critical, high, medium, low, notRated]
+    [inProgress, critical, high, medium, low, notRated, closed]
   );
 
   const severityCounts = useMemo(
@@ -197,6 +217,9 @@ export const useInvestigationSections = ({
     }
     void refetchSeverityCounts();
   }, [sections, refetchSeverityCounts]);
+
+  // Status changes happen in the flyout's QueryClient; bump moves open ↔ Closed on this list.
+  useStatusSignal(refetchAll);
 
   return {
     sections,

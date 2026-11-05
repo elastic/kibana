@@ -18,6 +18,9 @@ jest.mock('./use_fetch_investigations', () => ({
   useFetchInvestigations: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  useStatusSignal: jest.fn(),
+}));
 
 const mockUseFetchInvestigations = useFetchInvestigations as jest.MockedFunction<
   typeof useFetchInvestigations
@@ -108,20 +111,26 @@ describe('useInvestigationSections', () => {
     );
   });
 
-  it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
+  it('fetches in progress, open severity tiers, not-rated, then closed', () => {
     const { result } = renderSections('checkout');
 
     expect(
       mockUseFetchInvestigations.mock.calls
-        .slice(0, 6)
-        .map(([{ inProgress, severities, query }]) => ({ inProgress, severities, query }))
+        .slice(0, 7)
+        .map(([{ inProgress, severities, status, query }]) => ({
+          inProgress,
+          severities,
+          status,
+          query,
+        }))
     ).toEqual([
-      { inProgress: true, severities: undefined, query: 'checkout' },
-      { inProgress: false, severities: ['critical'], query: 'checkout' },
-      { inProgress: false, severities: ['high'], query: 'checkout' },
-      { inProgress: false, severities: ['medium'], query: 'checkout' },
-      { inProgress: false, severities: ['low'], query: 'checkout' },
-      { inProgress: false, severities: ['none'], query: 'checkout' },
+      { inProgress: true, severities: undefined, status: 'open', query: 'checkout' },
+      { inProgress: false, severities: ['critical'], status: 'open', query: 'checkout' },
+      { inProgress: false, severities: ['high'], status: 'open', query: 'checkout' },
+      { inProgress: false, severities: ['medium'], status: 'open', query: 'checkout' },
+      { inProgress: false, severities: ['low'], status: 'open', query: 'checkout' },
+      { inProgress: false, severities: ['none'], status: 'open', query: 'checkout' },
+      { inProgress: false, severities: undefined, status: 'closed', query: 'checkout' },
     ]);
     expect(result.current.sections.map(({ id }) => id)).toEqual([
       'in-progress',
@@ -130,6 +139,7 @@ describe('useInvestigationSections', () => {
       'medium',
       'low',
       'not-rated',
+      'closed',
     ]);
   });
 
@@ -147,19 +157,19 @@ describe('useInvestigationSections', () => {
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
       expect.objectContaining({
-        query: { in_progress: false, query: 'checkout' },
+        query: { in_progress: false, status: 'open', query: 'checkout' },
         version: '1',
       })
     );
   });
 
-  it('leaves running investigations out of the tier counts', async () => {
+  it('leaves running and closed investigations out of the open tier counts', async () => {
     const { result } = renderSections();
 
     await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { in_progress: false } })
+      expect.objectContaining({ query: { in_progress: false, status: 'open' } })
     );
   });
 
@@ -182,8 +192,8 @@ describe('useInvestigationSections', () => {
 
     expect(result.current.hasActiveInvestigations).toBe(true);
     expect(
-      mockUseFetchInvestigations.mock.calls.slice(0, 6).map(([params]) => params.refetchInterval)
-    ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
+      mockUseFetchInvestigations.mock.calls.slice(0, 7).map(([params]) => params.refetchInterval)
+    ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined, undefined]);
   });
 
   it('refetches the other sections when work leaves the in-progress section', () => {

@@ -94,6 +94,13 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
           defaultMessage: 'Not rated',
         }),
       };
+    case 'closed':
+      return {
+        ...anchors,
+        title: i18n.translate('xpack.nightshift.investigations.closedSectionTitle', {
+          defaultMessage: 'Closed',
+        }),
+      };
     case 'critical':
     case 'high':
     case 'medium':
@@ -236,7 +243,13 @@ const SectionHeading = ({
     {showCount && (
       <EuiFlexItem grow={false}>
         <EuiBadge
-          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+          color={
+            id === 'closed'
+              ? 'success'
+              : severity != null
+                ? SEVERITY_DOT_COLOR[severity]
+                : 'default'
+          }
           data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
         >
           {total}

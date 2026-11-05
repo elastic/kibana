@@ -108,15 +108,16 @@ describe('InvestigationList', () => {
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
-  it('renders in progress first and not rated last', () => {
+  it('renders in progress first and Closed after the open buckets', () => {
     renderSections([
       makeSection('in-progress', { investigations: [investigation], total: 1 }),
       makeSection('critical', { investigations: [investigation], total: 1 }),
       makeSection('not-rated', { investigations: [investigation], total: 1 }),
+      makeSection('closed', { investigations: [investigation], total: 1 }),
     ]);
 
     const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
-    expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
+    expect(titles).toEqual(['In progress', 'Critical', 'Not rated', 'Closed']);
   });
 
   it('renders each investigation as the shared investigation card', () => {
@@ -146,6 +147,16 @@ describe('InvestigationList', () => {
 
       expect(toggle('critical')).toHaveAttribute('aria-expanded', 'false');
       expect(toggle('high')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('starts Closed collapsed', () => {
+      renderSections([
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('closed', { investigations: [investigation], total: 1 }),
+      ]);
+
+      expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('remembers a closed section in its own space', () => {
