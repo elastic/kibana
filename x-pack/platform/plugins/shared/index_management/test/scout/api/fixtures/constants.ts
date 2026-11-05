@@ -7,6 +7,8 @@
 
 export const API_BASE_PATH = 'api/index_management';
 export const INTERNAL_API_BASE_PATH = 'internal/index_management';
+export const ES_CLIENT_PROXY_PATH = 'internal/es_client';
+export const ES_CLIENT_API_VERSION = '1';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

@@ -117,6 +117,28 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator(manageIndexTab).click();
   }
 
+  async runIndexActionFromContextMenu(
+    indexName: string,
+    action:
+      | 'closeIndexMenuButton'
+      | 'openIndexMenuButton'
+      | 'refreshIndexMenuButton'
+      | 'flushIndexMenuButton'
+      | 'clearCacheIndexMenuButton'
+  ) {
+    await this.manageIndex(indexName);
+    await this.page.testSubj.locator(action).click();
+  }
+
+  async forcemergeIndexFromContextMenu(indexName: string, maxNumSegments: number) {
+    await this.manageIndex(indexName);
+    await this.page.testSubj.locator('forcemergeIndexMenuButton').click();
+    await this.page.testSubj
+      .locator('indexActionsForcemergeNumSegments')
+      .fill(String(maxNumSegments));
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
   async deleteIndexFromContextMenu() {
     await this.page.testSubj.locator('deleteIndexMenuButton').click();
   }

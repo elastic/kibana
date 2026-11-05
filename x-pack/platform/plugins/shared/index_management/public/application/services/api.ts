@@ -54,7 +54,7 @@ import type {
   MappingsResponse,
 } from '../../../common';
 import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
-import { quoteEsqlIndexName } from '../../../common/lib';
+import { buildIndexDocCountQuery, toIndexDocCounts } from '../../../common/lib';
 import { useRequest, sendRequest } from './use_request';
 import { esRequest, runForIndexChunks, sendEsRequest } from './es_request';
 import { httpService } from './http';
@@ -597,29 +597,15 @@ const queryIndexDocCounts = async (
   indexNames: string[],
   signal?: AbortSignal
 ): Promise<Record<string, number>> => {
-  // ES|QL because the list of index names can be too long for query DSL
   const result = await client.esql.query(
     {
-      query: `FROM ${indexNames
-        .map(quoteEsqlIndexName)
-        .join(',')} METADATA _index | STATS count() BY _index`,
+      query: buildIndexDocCountQuery(indexNames),
       // return partial results instead of failing the whole request when some shards are unavailable
       allow_partial_results: true,
     },
     { signal }
   );
-
-  const indexNameColumn = result.columns.findIndex((col) => col.name === '_index');
-  const countColumn = result.columns.findIndex((col) => col.name === 'count()');
-  const counts: Record<string, number> = {};
-  (result.values || []).forEach((row) => {
-    counts[row[indexNameColumn] as string] = row[countColumn] as number;
-  });
-  // indices without documents are absent from the results
-  indexNames.forEach((indexName) => {
-    counts[indexName] ??= 0;
-  });
-  return counts;
+  return toIndexDocCounts(result, indexNames);
 };
 
 export const fetchIndexDocCounts = (indexNames: string[], signal?: AbortSignal) =>
