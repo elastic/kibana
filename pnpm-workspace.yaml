@@ -881,6 +881,7 @@ packages:
   - 'src/platform/packages/shared/kbn-object-versioning'
   - 'src/platform/packages/shared/kbn-object-versioning-utils'
   - 'src/platform/packages/shared/kbn-occ'
+  - 'src/platform/packages/shared/kbn-ols'
   - 'src/platform/packages/shared/kbn-openapi-bundler'
   - 'src/platform/packages/shared/kbn-openapi-common'
   - 'src/platform/packages/shared/kbn-openapi-generator'
