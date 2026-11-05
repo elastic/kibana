@@ -17,7 +17,7 @@ es() {
 kbn() {
   local p=$1
   shift
-  curl -s -H "x-elastic-tenant-id: project-$p" -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' \
+  curl -s -H "x-elastic-project-id: project-$p" -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' \
     -H 'content-type: application/json' "$@"
 }
 
@@ -92,7 +92,7 @@ cleared=$(kbn a -b "$jar" -D - -o /dev/null localhost:5601/internal/security/me 
 check "project-a leaves project-b's cookie alone" "$cleared" 0
 
 # Logout is a browser navigation: AJAX headers like kbn-xsrf make it answer 400 instead of redirecting.
-logout=$(curl -s -b "$jar" -o /dev/null -w '%{http_code}' -H 'x-elastic-tenant-id: project-b' \
+logout=$(curl -s -b "$jar" -o /dev/null -w '%{http_code}' -H 'x-elastic-project-id: project-b' \
   localhost:5601/api/security/logout)
 check "logout through project-b" "$logout" 302
 check "logout removes the session from cluster B" "$(sessions b)" 0

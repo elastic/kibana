@@ -5,7 +5,7 @@ set -uo pipefail
 
 kbn() {
   local p=$1 method=$2 path=$3 body=${4:-}
-  curl -s -u "elastic:changeme-$p" -H "x-elastic-tenant-id: project-$p" -H 'kbn-xsrf: true' \
+  curl -s -u "elastic:changeme-$p" -H "x-elastic-project-id: project-$p" -H 'kbn-xsrf: true' \
     -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json' \
     -X "$method" "localhost:5601$path" ${body:+-d "$body"}
 }
@@ -54,7 +54,7 @@ check "webhook wrote to cluster B" "$(count b mt-m2-webhook)" 1
 c_index=$(index_connector c)
 for i in $(seq 20); do echo "b:$b_index" "c:$c_index"; done | xargs -n 1 -P 8 sh -c '
   p=${1%%:*}; id=${1#*:}
-  curl -s -o /dev/null -u "elastic:changeme-$p" -H "x-elastic-tenant-id: project-$p" -H "kbn-xsrf: true" \
+  curl -s -o /dev/null -u "elastic:changeme-$p" -H "x-elastic-project-id: project-$p" -H "kbn-xsrf: true" \
     -H "content-type: application/json" -X POST "localhost:5601/api/actions/connector/$id/_execute" \
     -d "{\"params\":{\"documents\":[{\"project\":\"project-$p\"}]}}"' _
 others() { count "$1" mt-m2-index "{\"query\":{\"bool\":{\"must_not\":{\"term\":{\"project.keyword\":\"project-$1\"}}}}}"; }

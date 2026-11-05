@@ -27,7 +27,7 @@ check() {
 
 curl -s -o /dev/null -u elastic:changeme-b -H 'content-type: application/json' \
   -X PUT "localhost:9201/_security/user/$user" -d "{\"password\":\"$pass\",\"roles\":[\"superuser\"]}"
-login=$(curl -s -o /dev/null -w '%{http_code}' -H 'x-elastic-tenant-id: project-b' -H 'kbn-xsrf: true' \
+login=$(curl -s -o /dev/null -w '%{http_code}' -H 'x-elastic-project-id: project-b' -H 'kbn-xsrf: true' \
   -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json' \
   -X POST localhost:5601/internal/security/login \
   -d "{\"providerType\":\"basic\",\"providerName\":\"basic\",\"currentURL\":\"http://localhost:5601/login\",\"params\":{\"username\":\"$user\",\"password\":\"$pass\"}}")

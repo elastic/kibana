@@ -11,12 +11,14 @@ dir=$(dirname "$0")
 mt=/usr/share/kibana/config/mt
 jq -e '.home.serviceAccountToken' "$state" >/dev/null || { echo "run eck.sh create first" >&2; exit 1; }
 
-# One encryption key per project, kept in the state file so redeploys can still decrypt.
+# One saved objects key and one session key per project, kept in the state file so redeploys can still decrypt.
 for n in $(jq -r 'keys[]' "$state"); do
-  if [ "$(jq -r --arg n "$n" '.[$n].encryptionKey // empty' "$state")" = "" ]; then
-    jq --arg n "$n" --arg k "$(openssl rand -hex 16)" '.[$n].encryptionKey = $k' "$state" >"$state.tmp"
-    mv "$state.tmp" "$state"
-  fi
+  for key in encryptionKey securityEncryptionKey; do
+    if [ "$(jq -r --arg n "$n" --arg key "$key" '.[$n][$key] // empty' "$state")" = "" ]; then
+      jq --arg n "$n" --arg key "$key" --arg k "$(openssl rand -hex 16)" '.[$n][$key] = $k' "$state" >"$state.tmp"
+      mv "$state.tmp" "$state"
+    fi
+  done
 done
 chmod 600 "$state"
 
@@ -29,7 +31,7 @@ for n in $(jq -r 'keys[]' "$state"); do
 done
 cas="[$(IFS=,; echo "${ca_paths[*]}")]"
 
-tenants=$(jq '[.[] | {key: .id, value: {hosts: [.es], serviceAccountToken, encryptionKey}}] | from_entries' "$state")
+tenants=$(jq '[.[] | {key: .id, value: {hosts: [.es], serviceAccountToken, encryptionKey, securityEncryptionKey}}] | from_entries' "$state")
 kibana_yml=$(jq -r --arg sec "$(openssl rand -hex 16)" --arg rep "$(openssl rand -hex 16)" --arg cas "$cas" \
   --arg mt "$mt" '.home as $h | [
   "server.host: 0.0.0.0",
@@ -40,7 +42,7 @@ kibana_yml=$(jq -r --arg sec "$(openssl rand -hex 16)" --arg rep "$(openssl rand
   "elasticsearch.hosts: [\"\($h.es)\"]",
   "elasticsearch.serviceAccountToken: \"\($h.serviceAccountToken)\"",
   "elasticsearch.ssl.certificateAuthorities: \($cas)",
-  "elasticsearch.multiTenancy.tenantsFile: \($mt)/tenants.yml",
+  "tenants.file: \($mt)/tenants.yml",
   "xpack.encryptedSavedObjects.encryptionKey: \($h.encryptionKey)",
   "xpack.security.encryptionKey: \($sec)",
   "xpack.reporting.encryptionKey: \($rep)",

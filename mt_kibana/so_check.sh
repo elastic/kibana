@@ -4,7 +4,7 @@ set -uo pipefail
 
 kbn() {
   local p=$1 method=$2 path=$3 body=${4:-}
-  curl -s -u "elastic:changeme-$p" -H "x-elastic-tenant-id: project-$p" -H 'kbn-xsrf: true' \
+  curl -s -u "elastic:changeme-$p" -H "x-elastic-project-id: project-$p" -H 'kbn-xsrf: true' \
     -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json' \
     -X "$method" "localhost:5601$path" ${body:+-d "$body"}
 }

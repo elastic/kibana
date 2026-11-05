@@ -6,13 +6,13 @@ You need the three clusters running and initialised, and multi-tenant Kibana run
 
 ## 1. Send each tenant its header
 
-Kibana only knows the tenant from the `x-elastic-tenant-id` header. Install a header extension such as [ModHeader](https://modheader.com/) and add one rule per hostname:
+Kibana only knows the tenant from the `x-elastic-project-id` header. Install a header extension such as [ModHeader](https://modheader.com/) and add one rule per hostname:
 
 | Request URL contains | Header | Value |
 | --- | --- | --- |
-| `project-a.localhost` | `x-elastic-tenant-id` | `project-a` |
-| `project-b.localhost` | `x-elastic-tenant-id` | `project-b` |
-| `project-c.localhost` | `x-elastic-tenant-id` | `project-c` |
+| `project-a.localhost` | `x-elastic-project-id` | `project-a` |
+| `project-b.localhost` | `x-elastic-project-id` | `project-b` |
+| `project-c.localhost` | `x-elastic-project-id` | `project-c` |
 
 Check the extension is on. A request without the header goes to `project-a`, so a missing rule looks like a working login against the wrong cluster.
 

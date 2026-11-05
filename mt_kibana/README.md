@@ -1,6 +1,6 @@
 # Multi-tenant Kibana M1 spike
 
-One Kibana dev server routes API requests to three local Elasticsearch clusters, one per tenant: `project-a`, `project-b`, and `project-c`. The `x-elastic-tenant-id` header picks the tenant, and [`tenants.yml`](tenants.yml) holds each tenant's credentials, saved objects encryption key, and session encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
+One Kibana dev server routes API requests to three local Elasticsearch clusters, one per tenant: `project-a`, `project-b`, and `project-c`. The `x-elastic-project-id` header picks the tenant, and [`tenants.yml`](tenants.yml) holds each tenant's credentials, saved objects encryption key, and session encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
 
 Run every command from the repo root. Remove this folder (`git rm -r mt_kibana`) before opening a PR.
 
@@ -9,7 +9,7 @@ Run every command from the repo root. Remove this folder (`git rm -r mt_kibana`)
 Kibana stays a single process. Each request is tagged with its tenant when it arrives, and the code that talks to Elasticsearch uses that tag to pick the tenant's cluster.
 
 - **Tenants service** (`src/core/packages/tenants/`): reads `tenants.yml` at startup. It's the only code that creates a `TenantId`, and it stays off unless `tenants.file` is set.
-- **HTTP**: checks the `x-elastic-tenant-id` header against the tenants service, then sets `request.tenantId`. Unknown tenants get a 400.
+- **HTTP**: checks the `x-elastic-project-id` header against the tenants service, then sets `request.tenantId`. Unknown tenants get a 400.
 - **Elasticsearch**: `asScoped(request)` returns a client for the request's tenant, built from that tenant's credentials. Requests without a tenant use the home cluster.
 - **Saved objects**: repositories that use Kibana's internal user now take the request, so data views, spaces, and settings are stored in the tenant's cluster. Encrypted saved objects use the tenant's own key: core hands ESO a crypto for it, never the key itself.
 - **Security**: authentication and user profiles follow the request, so basic auth, API keys, and session login work for each tenant.
@@ -76,9 +76,9 @@ Misrouting checks:
 
 ```bash
 # 401: cluster B rejects cluster A's password, so authentication really went to B
-curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-tenant-id: project-b' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-project-id: project-b' localhost:5601/api/stats
 # 400: unknown tenant
-curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-tenant-id: project-z' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-project-id: project-z' localhost:5601/api/stats
 # project-a: no header goes to the home cluster
 curl -s -u elastic:changeme-a -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' \
   -X POST 'localhost:5601/api/console/proxy?method=GET&path=/' | jq -r .cluster_name
@@ -88,14 +88,14 @@ API key created on cluster B (expect 200, then 401):
 
 ```bash
 key=$(curl -s -u elastic:changeme-b -H 'content-type: application/json' -X POST localhost:9201/_security/api_key -d '{"name":"mt-m1"}' | jq -r .encoded)
-curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-tenant-id: project-b' localhost:5601/api/stats
-curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-tenant-id: project-a' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-project-id: project-b' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-project-id: project-a' localhost:5601/api/stats
 ```
 
 Session login through `project-b`, as the browser does it (expect 200, then `elastic`). For a real browser, see [step 5](#5-use-it-in-a-browser):
 
 ```bash
-h=(-H 'x-elastic-tenant-id: project-b' -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json')
+h=(-H 'x-elastic-project-id: project-b' -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json')
 curl -s -c /tmp/mt-cookie -o /dev/null -w '%{http_code}\n' "${h[@]}" -X POST localhost:5601/internal/security/login \
   -d '{"providerType":"basic","providerName":"basic","currentURL":"http://localhost:5601/login","params":{"username":"elastic","password":"changeme-b"}}'
 curl -s -b /tmp/mt-cookie "${h[@]}" localhost:5601/internal/security/me | jq -r .username
@@ -106,7 +106,7 @@ Cross-talk under load. Expect exactly three lines, `100 project-a -> project-a` 
 ```bash
 seq 300 | xargs -P 12 -n 1 sh -c '
   p=$(printf abc | cut -c$(($1 % 3 + 1)))
-  got=$(curl -s -u elastic:changeme-$p -H "x-elastic-tenant-id: project-$p" -H "kbn-xsrf: true" \
+  got=$(curl -s -u elastic:changeme-$p -H "x-elastic-project-id: project-$p" -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: kibana" -X POST "localhost:5601/api/console/proxy?method=GET&path=/" |
     jq -r .cluster_name)
   echo "project-$p -> $got"' _ | sort | uniq -c
@@ -128,7 +128,7 @@ Give each tenant its own hostname, so the browser keeps a separate session cooki
 - `http://project-b.localhost:5601`
 - `http://project-c.localhost:5601`
 
-In a header-injecting extension (for example ModHeader), add one rule per hostname that sets `x-elastic-tenant-id` to that tenant, the way the proxy will. Log in as `elastic` with the tenant's password (`changeme-a` and so on). [MANUAL_UI_TEST.md](MANUAL_UI_TEST.md) is a step-by-step browser walkthrough. On a single hostname, logging into one tenant replaces the other tenant's cookie. Separate browser profiles also work.
+In a header-injecting extension (for example ModHeader), add one rule per hostname that sets `x-elastic-project-id` to that tenant, the way the proxy will. Log in as `elastic` with the tenant's password (`changeme-a` and so on). [MANUAL_UI_TEST.md](MANUAL_UI_TEST.md) is a step-by-step browser walkthrough. On a single hostname, logging into one tenant replaces the other tenant's cookie. Separate browser profiles also work.
 
 Logout is a browser navigation (`/logout`). Calling `/api/security/logout` with `kbn-xsrf` or other AJAX headers returns a 400 instead of redirecting.
 

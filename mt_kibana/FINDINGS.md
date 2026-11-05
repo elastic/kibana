@@ -25,8 +25,8 @@ Run on 2026-11-03 with `so_check.sh`, `eso_check.sh`, and the isolation check in
 
 Run on 2026-11-04 with all three scripts, the misrouting checks, and the session login check in the README:
 
-- Tenants are their own core service. It reads `tenants.file`, and is the only code that creates a `TenantId`, after checking the tenant exists. The header is now `x-elastic-tenant-id`. Results match the earlier runs.
-- Encrypted saved objects no longer get raw keys. Core hands them a crypto for the request's tenant, and only for requests received over HTTP: a fake request that targets a tenant throws. A connector created through `project-b` and copied into cluster A fails to decrypt there with `Failed to decrypt attribute "secrets"`, so it uses B's own key.
+- Tenants are their own core service. It reads `tenants.file`, and is the only code that creates a `TenantId`, after checking the tenant exists. The header was renamed to `x-elastic-tenant-id` (changed back in the second review round below). Results match the earlier runs.
+- Encrypted saved objects no longer get raw keys. Core hands them a crypto for the request's tenant, and only for requests received over HTTP: a fake request that targets a tenant throws (dropped in the second review round below). A connector created through `project-b` and copied into cluster A fails to decrypt there with `Failed to decrypt attribute "secrets"`, so it uses B's own key.
 - Session login works for non-home tenants. User profile activation and profile reads now follow the request, so login through `project-b` returns 200 and syncs the profile in cluster B.
 
 ## M4: sessions per tenant
@@ -41,6 +41,31 @@ Run on 2026-11-04 with `session_check.sh`, `session_cleanup_check.sh`, the token
 - The session cleanup task also cleans the session indices of the tenants this Kibana instance served since it started.
 - In a browser, all three tenants stay logged in side by side on `project-<x>.localhost`, and logging out of one leaves the others logged in.
 
+## Second tenants service review
+
+The low-effort items from [Rudolf's follow-up](https://github.com/elastic/kibana/pull/302955#issuecomment-6655861815):
+
+- The wire header is `x-elastic-project-id` again, the header the Cloud Proxy sets. Internal names stay "tenant". `m3/deploy.sh` now writes `tenants.file` instead of the removed `elasticsearch.multiTenancy.tenantsFile`, and generates a `securityEncryptionKey` per project.
+- Only the HTTP onRequest hook reads the header. `asScoped()` and the tenant crypto no longer fall back to it, so a fake request that only copies the incoming headers goes to the home cluster.
+- `tenants.resolve(id)` is the one function that turns a stored tenant ID into a `TenantId`, after checking the tenant exists. The header lookup uses it.
+- The tenant crypto APIs (`getTenantCrypto`, `getTenantSessionCrypto`, and the tenants service's `getEncryptionCrypto` and `getSessionCrypto`) take a `TenantId` instead of a request. Callers pass `request.tenantId`. The "only for requests received over HTTP" throw is gone.
+- `getUnsafeInternalClient({ request })` gives its encryption extension the request's tenant, so objects it encrypts use the tenant's key instead of the home key.
+- Every tenant in the tenants file must have both `encryptionKey` and `securityEncryptionKey`.
+
+## Deferred from the second tenants service review
+
+- **Ban `as TenantId` outside `@kbn/core-tenants-server-internal`** with a lint rule, so `tenants.resolve` stays the only place that stamps one. Later, `TenantId` could become an opaque handle the service mints and records in a `WeakSet`. This guarantees a tenant ID is valid, not that a plugin may act for it: that boundary is the per-plugin tenant config slices, also deferred.
+- **Fake requests carry the tenant, recorded when work is scheduled**, the same way as `spaceId`:
+  - Task manager: store `userScope.tenantId` from `request.tenantId` in `api_key_utils.ts`, and set it on the fake request in `task_runner.ts` (`buildTaskFakeRequest`) after `tenants.resolve()`. Reporting jobs do the same; tenant reports go to the home cluster until then.
+  - Create the task's API key on the tenant's cluster, or it only works on home.
+  - A tenant deleted before its task runs should fail the task permanently instead of retrying.
+  - Add a core helper (or a `tenantId` argument required in multi-tenant mode) for the roughly 30 callers of `kibanaRequestFactory`.
+  - Schedule system tasks with fixed IDs (`session_cleanup`, telemetry) from the plugin `initialize` lifecycle ([#297124](https://github.com/elastic/kibana/pull/297124)), once per tenant, with the tenant in the task ID for a shared queue. That replaces the session cleanup fan-out over tenants served since startup.
+  - Strict mode: fail (or warn first) on a fake request with no tenant on a multi-tenant node.
+  - With the tenant in the task document, task execution works whatever the claiming design. Today task manager's store isn't routed, so tasks scheduled through tenant B already sit in, and are claimed from, the home cluster's task index.
+- **Per-tenant key rotation:** `withPrimaryCrypto` drops the decryption-only keys, so a tenant can't rotate its key. This needs per-tenant decryption-only keys in the tenants file, the tenants service, and ESO.
+- **Actions client and connector token clients** still use the home ESO client (`createActionsClient`, `createRouteHandlerContext`, `getServicesFactory`), so `getAxiosInstance` and OAuth token reads look for a non-home connector's secrets on the home cluster.
+
 ## What still reaches the home cluster
 
 - **Advanced settings reads:** the value is stored in the right cluster, but reads come from a process-wide cache keyed only by space (`sharedUserProvidedCache` in ui-settings). So one tenant sees another's values. The cache key needs the tenant, and `asScopedToClient(savedObjectsClient)` doesn't have it.
@@ -52,7 +77,7 @@ Run on 2026-11-04 with `session_check.sh`, `session_cleanup_check.sh`, the token
   - the Agent Builder SML indexer (`SmlIndexerImpl.deleteEntry`)
   - Fleet `getSettings`
   - ESO point-in-time finders created without a request, for example Synthetics params
-- **Background work:** `apiKeys.validate()` and task manager fake requests carry no tenant, so they use the home cluster.
+- **Background work:** `apiKeys.validate()`, task manager fake requests, and reporting jobs carry no tenant, so they use the home cluster (see the deferred items above).
 - **Session cleanup** only knows the tenants this Kibana instance served since it started. After a restart, a tenant's expired sessions stay until a request for it arrives, and one task cleaning every tenant in turn won't scale to thousands of tenants (see task claiming in the planning doc).
 - **Session cleanup audit events** are logged without a request, so they don't say which tenant the removed sessions belonged to.
 

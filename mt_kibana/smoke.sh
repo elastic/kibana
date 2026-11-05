@@ -6,9 +6,9 @@ failed=0
 for p in a b c; do
   port=$((9200 + $(printf '%d' "'$p") - 97))
   want=$(curl -s -u "elastic:changeme-$p" "localhost:$port" | jq -r .cluster_uuid)
-  got=$(curl -s -u "elastic:changeme-$p" -H "x-elastic-tenant-id: project-$p" \
+  got=$(curl -s -u "elastic:changeme-$p" -H "x-elastic-project-id: project-$p" \
     "localhost:5601/api/stats?extended=true" | jq -r .cluster_uuid)
-  name=$(curl -s -u "elastic:changeme-$p" -H "x-elastic-tenant-id: project-$p" -H 'kbn-xsrf: true' \
+  name=$(curl -s -u "elastic:changeme-$p" -H "x-elastic-project-id: project-$p" -H 'kbn-xsrf: true' \
     -H 'x-elastic-internal-origin: kibana' -X POST "localhost:5601/api/console/proxy?method=GET&path=/" |
     jq -r .cluster_name)
   if [ "$got" = "$want" ] && [ "$name" = "project-$p" ]; then
