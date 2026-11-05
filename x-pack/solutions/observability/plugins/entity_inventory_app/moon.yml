@@ -29,6 +29,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/datemath'
   - '@kbn/data-views-plugin'
+  - '@kbn/react-hooks'
+  - '@kbn/ui-callout'
   - '@kbn/typed-react-router-config'
   - '@kbn/deeplinks-observability'
   - '@kbn/share-plugin'
