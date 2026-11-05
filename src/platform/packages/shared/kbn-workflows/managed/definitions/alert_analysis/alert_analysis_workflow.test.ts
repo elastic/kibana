@@ -944,6 +944,23 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     }
   });
 
+  it('tells the model a corroborated attack chain makes a routine-looking alert a true positive', () => {
+    const message = (
+      findStepByName(workflow.steps, 'build_agent_message') as { with: { message: string } }
+    ).with.message;
+
+    // Gate B must not depend on the investigated alert's own activity looking suspicious, and
+    // Gate D must not be able to set the alert aside; the entity/rule-name-only guard stays.
+    expect(message).toContain("This alert's own activity does NOT need to look suspicious");
+    expect(message).toContain(
+      "This gate does NOT require this alert's own activity to look suspicious"
+    );
+    expect(message).toContain('Gate D must not be used to set it aside');
+    expect(message).toContain(
+      'Entity correlation or scary rule names without suspicious command lines do not satisfy this gate.'
+    );
+  });
+
   it('puts the related alert process and truncated command lines on each summary line', () => {
     const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
       with: { related_summary: { summary: string } };
