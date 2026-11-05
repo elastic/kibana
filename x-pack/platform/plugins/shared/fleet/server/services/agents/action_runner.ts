@@ -24,6 +24,13 @@ import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { RetryParams } from './retry_helper';
 import { CHECK_TASK_INTERVAL_MINUTES, getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
 
+/**
+ * Keep alive for the point in time the runner pages with. Every search resets the point in time's
+ * TTL to this value, so it has to comfortably exceed how long a single batch takes: the 1m default
+ * in getAgentsByKuery expires it whenever a batch is slower than that, and the next search 404s.
+ */
+export const PIT_KEEP_ALIVE = '10m';
+
 export interface ActionParams {
   kuery: string;
   showInactive?: boolean;
@@ -135,10 +142,14 @@ export abstract class ActionRunner {
         })
         .catch(async (error) => {
           try {
+            // A 404 here means the point in time opened when the action started has expired.
+            // Retrying with the same pitId would 404 again every time until the retry budget is
+            // spent, so drop it: searchAfter alone pages the live index.
             if (isResponseError(error) && error.statusCode === 404) {
               logger.error(
-                `404 error from Elasticsearch during action ${this.actionParams.actionId}: ${error.message}`
+                `404 error from Elasticsearch during action ${this.actionParams.actionId}, retrying without the expired point in time: ${error.message}`
               );
+              this.retryParams = { ...this.retryParams, pitId: undefined };
             }
             if (this.retryParams.retryCount) {
               logger.error(
@@ -195,9 +206,9 @@ export abstract class ActionRunner {
    * the checkpoint in its state, never remove and recreate it.
    */
   private async ensureCheckResultTask() {
-    const taskId = this.bulkActionsResolver!.getTaskId(
+    const taskId = this.bulkActionsResolver!.getCheckTaskId(
       this.actionParams.actionId!,
-      this.getTaskType() + ':check'
+      this.getTaskType()
     );
     const retryParams: RetryParams = getRetryParams(this.getTaskType(), this.retryParams);
 
@@ -285,6 +296,7 @@ export abstract class ActionRunner {
         page: 1,
         perPage,
         pitId,
+        pitKeepAlive: PIT_KEEP_ALIVE,
         searchAfter: this.retryParams.searchAfter,
       });
     };

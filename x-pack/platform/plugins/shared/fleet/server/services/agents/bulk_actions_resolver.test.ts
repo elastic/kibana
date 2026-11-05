@@ -135,42 +135,52 @@ describe('BulkActionsResolver', () => {
       ).resolves.toBeUndefined();
       expect(taskManager.bulkUpdateState).toHaveBeenCalledTimes(2);
     });
+
+    it('throws when the update failed for the task', async () => {
+      // bulkUpdateState resolves with per-task failures in `errors` rather than throwing
+      taskManager.bulkUpdateState.mockResolvedValue({
+        tasks: [],
+        errors: [{ type: 'task', id: 'task1:check', error: { message: 'Not Found' } }],
+      } as any);
+
+      await expect(
+        resolver.updateCheckTaskState('task1:check', { nbAgentsProcessed: 1 })
+      ).rejects.toThrow('Could not update the state of task task1:check: Not Found');
+    });
   });
 });
 
 describe('createRetryTask', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const soClient = savedObjectsClientMock.create();
-  let resolver: jest.Mocked<Pick<BulkActionsResolver, 'removeIfExists'>>;
+  let resolver: {
+    removeIfExists: jest.Mock;
+    getCheckTaskState: jest.Mock;
+  };
 
   const getDeps = async () => ({ esClient, soClient });
+
+  const CHECK_TASK_ID = `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`;
 
   const createTaskInstance = (
     overrides: Partial<ConcreteTaskInstance> = {}
   ): ConcreteTaskInstance =>
     ({
-      id: `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`,
+      id: CHECK_TASK_ID,
       taskType: BulkActionTaskType.REASSIGN_RETRY,
       params: {
         actionParams: { kuery: '', actionId: 'action1', total: 100000, batchSize: 10000 },
-        retryParams: { retryCount: 1 },
+        retryParams: { retryCount: 1, pitId: 'stale-pit' },
         isCheckTask: true,
       },
       state: {},
       ...overrides,
     } as ConcreteTaskInstance);
 
-  /** `nbBatches` action documents exist, `hasRecentBatch` of them within the check interval. */
-  const mockActionProgress = ({
-    nbBatches,
-    hasRecentBatch = false,
-  }: {
-    nbBatches: number;
-    hasRecentBatch?: boolean;
-  }) => {
+  /** The liveness probe returns one hit when a batch landed within the interval. */
+  const mockRecentBatch = (hasRecentBatch: boolean) => {
     esClient.search.mockResolvedValue({
-      hits: { total: nbBatches, hits: [] },
-      aggregations: { recent: { doc_count: hasRecentBatch ? 1 : 0 } },
+      hits: { hits: hasRecentBatch ? [{ _id: 'a' }] : [] },
     } as any);
   };
 
@@ -178,8 +188,9 @@ describe('createRetryTask', () => {
     jest.clearAllMocks();
     loggerMock.clear(logger);
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    resolver = { removeIfExists: jest.fn() };
+    resolver = { removeIfExists: jest.fn(), getCheckTaskState: jest.fn() };
     jest.spyOn(appContextService, 'getBulkActionsResolver').mockReturnValue(resolver as any);
+    mockRecentBatch(false);
   });
 
   describe('retry task', () => {
@@ -210,7 +221,7 @@ describe('createRetryTask', () => {
     it('passes the checkpoint from params to the runner', async () => {
       const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
 
-      const task = createRetryTask(
+      await createRetryTask(
         createTaskInstance({
           id: `${BulkActionTaskType.REASSIGN_RETRY}:action1`,
           params: {
@@ -220,8 +231,7 @@ describe('createRetryTask', () => {
         }),
         getDeps,
         doRetry
-      );
-      await task.run();
+      ).run();
 
       expect(doRetry).toHaveBeenCalledWith(
         esClient,
@@ -233,31 +243,45 @@ describe('createRetryTask', () => {
   });
 
   describe('check task', () => {
-    it('removes itself once the action has all of its batches', async () => {
-      mockActionProgress({ nbBatches: 10 });
+    it('removes itself once the checkpoint says every agent was processed', async () => {
+      const doRetry = jest.fn();
+
+      await createRetryTask(
+        createTaskInstance({ state: { nbAgentsProcessed: 100000 } }),
+        getDeps,
+        doRetry
+      ).run();
+
+      expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
+      expect(doRetry).not.toHaveBeenCalled();
+    });
+
+    it('does not use action document counts to decide completion', async () => {
+      // rollback writes its documents under its own action ids, so a runner can be mid-flight
+      // with no documents at all under this action id
+      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
+
+      await createRetryTask(
+        createTaskInstance({ state: { nbAgentsProcessed: 20000 } }),
+        getDeps,
+        doRetry
+      ).run();
+
+      expect(resolver.removeIfExists).not.toHaveBeenCalled();
+      expect(doRetry).toHaveBeenCalled();
+    });
+
+    it('does not resume while a batch was written within the interval', async () => {
+      mockRecentBatch(true);
       const doRetry = jest.fn();
 
       await createRetryTask(createTaskInstance(), getDeps, doRetry).run();
 
-      expect(resolver.removeIfExists).toHaveBeenCalledWith(
-        `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`
-      );
-      expect(doRetry).not.toHaveBeenCalled();
-    });
-
-    it('does not resume while a batch was written within the interval', async () => {
-      mockActionProgress({ nbBatches: 6, hasRecentBatch: true });
-      const doRetry = jest.fn();
-
-      const result = await createRetryTask(createTaskInstance(), getDeps, doRetry).run();
-
       expect(doRetry).not.toHaveBeenCalled();
       expect(resolver.removeIfExists).not.toHaveBeenCalled();
-      expect(result).toEqual({ state: expect.objectContaining({}) });
     });
 
     it('does not resume while the runner keeps moving the checkpoint', async () => {
-      mockActionProgress({ nbBatches: 6 });
       const doRetry = jest.fn();
 
       const result = await createRetryTask(
@@ -273,7 +297,6 @@ describe('createRetryTask', () => {
       ).run();
 
       expect(doRetry).not.toHaveBeenCalled();
-      // the observed checkpoint moves forward, so a stall from now on is detected next time
       expect(result).toEqual({
         state: expect.objectContaining({
           lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
@@ -281,8 +304,39 @@ describe('createRetryTask', () => {
       });
     });
 
+    it('merges watcher fields onto the freshest state, not the claimed one', async () => {
+      // the live runner checkpointed while this check was running
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['newer'],
+        nbAgentsProcessed: 40000,
+        checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
+      });
+      const doRetry = jest.fn();
+
+      const result = await createRetryTask(
+        createTaskInstance({
+          state: {
+            searchAfter: ['older'],
+            nbAgentsProcessed: 20000,
+            checkpointUpdatedAt: '2026-10-16T18:48:34.000Z',
+            lastObservedCheckpointAt: '2026-10-16T18:43:30.000Z',
+          },
+        }),
+        getDeps,
+        doRetry
+      ).run();
+
+      expect(result).toEqual({
+        state: {
+          searchAfter: ['newer'],
+          nbAgentsProcessed: 40000,
+          checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
+          lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
+        },
+      });
+    });
+
     it('resumes the runner from the checkpoint when nothing progressed', async () => {
-      mockActionProgress({ nbBatches: 6 });
       const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
 
       const result = await createRetryTask(
@@ -304,14 +358,30 @@ describe('createRetryTask', () => {
         expect.objectContaining({
           searchAfter: ['lastAgent'],
           retryCount: 1,
-          taskId: `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`,
+          taskId: CHECK_TASK_ID,
         })
       );
       expect(result).toEqual({ state: expect.objectContaining({ resumeCount: 1 }) });
     });
 
+    it('drops the expired point in time when resuming', async () => {
+      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
+
+      await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['lastAgent'] } }),
+        getDeps,
+        doRetry
+      ).run();
+
+      expect(doRetry).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.anything(),
+        expect.objectContaining({ pitId: undefined, searchAfter: ['lastAgent'] })
+      );
+    });
+
     it('drops the checkpoint for update tags, which must restart from scratch', async () => {
-      mockActionProgress({ nbBatches: 6 });
       const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
 
       await createRetryTask(
@@ -331,8 +401,27 @@ describe('createRetryTask', () => {
       );
     });
 
+    it('treats a legacy check task with no isCheckTask param as a check task', async () => {
+      const doRetry = jest.fn();
+
+      await createRetryTask(
+        createTaskInstance({
+          params: {
+            actionParams: { kuery: '', actionId: 'action1', total: 100000, batchSize: 10000 },
+            retryParams: { retryCount: 1 },
+          },
+          state: { nbAgentsProcessed: 100000 },
+        }),
+        getDeps,
+        doRetry
+      ).run();
+
+      // it took the check branch (removed itself) rather than launching a runner
+      expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
+      expect(doRetry).not.toHaveBeenCalled();
+    });
+
     it('stops resuming after MAX_CHECK_TASK_RESUMES attempts', async () => {
-      mockActionProgress({ nbBatches: 6 });
       const doRetry = jest.fn();
 
       await createRetryTask(
@@ -342,14 +431,11 @@ describe('createRetryTask', () => {
       ).run();
 
       expect(doRetry).not.toHaveBeenCalled();
-      expect(resolver.removeIfExists).toHaveBeenCalledWith(
-        `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`
-      );
+      expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stalled after'));
     });
 
     it('catches a rejection from the resumed runner', async () => {
-      mockActionProgress({ nbBatches: 6 });
       const doRetry = jest.fn().mockRejectedValue(new Error('Request timed out'));
 
       await createRetryTask(createTaskInstance(), getDeps, doRetry).run();
@@ -361,7 +447,7 @@ describe('createRetryTask', () => {
       );
     });
 
-    it('never throws out of the recurring task when the progress probe fails', async () => {
+    it('never throws out of the recurring task when the liveness probe fails', async () => {
       esClient.search.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
 
       const result = await createRetryTask(
@@ -375,26 +461,6 @@ describe('createRetryTask', () => {
         expect.stringContaining('check task'),
         expect.anything()
       );
-    });
-
-    it('keeps watching when the total is unknown and no progress can be inferred', async () => {
-      mockActionProgress({ nbBatches: 0 });
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
-      await createRetryTask(
-        createTaskInstance({
-          params: {
-            actionParams: { kuery: '', actionId: 'action1' },
-            retryParams: {},
-            isCheckTask: true,
-          },
-        }),
-        getDeps,
-        doRetry
-      ).run();
-
-      expect(resolver.removeIfExists).not.toHaveBeenCalled();
-      expect(doRetry).toHaveBeenCalled();
     });
   });
 });

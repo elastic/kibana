@@ -15,7 +15,7 @@ import type {
 import moment from 'moment';
 
 import { appContextService } from '../app_context';
-import { AGENT_ACTIONS_INDEX, SO_SEARCH_LIMIT } from '../../../common/constants';
+import { AGENT_ACTIONS_INDEX } from '../../../common/constants';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { ReassignActionRunner } from './reassign_action_runner';
@@ -35,6 +35,19 @@ import { MigrateActionRunner } from './migrate_action_runner';
 import { ChangePrivilegeActionRunner } from './change_privilege_runner';
 import { RollbackActionRunner } from './rollback_action_runner';
 import { RestartActionRunner } from './restart_action_runner';
+
+/** Suffix appended to the task type to build a check task's id: `<taskType>:check:<actionId>`. */
+export const CHECK_TASK_TYPE_SUFFIX = ':check';
+const CHECK_TASK_ID_MARKER = `${CHECK_TASK_TYPE_SUFFIX}:`;
+
+/**
+ * A check task scheduled before this was introduced has no `isCheckTask` param. `ensureScheduled`
+ * updates an existing task's schedule but not its params, so such a task would be adopted as a
+ * recurring task and then keep taking the ordinary retry branch forever. Fall back to its id.
+ */
+export const isCheckTaskInstance = (taskInstance: ConcreteTaskInstance): boolean =>
+  (taskInstance.params as BulkActionTaskParams)?.isCheckTask === true ||
+  taskInstance.id.includes(CHECK_TASK_ID_MARKER);
 
 export interface BulkActionTaskParams {
   actionParams: ActionParams;
@@ -124,6 +137,10 @@ export class BulkActionsResolver {
     return `${type}:${actionId}`;
   }
 
+  public getCheckTaskId(actionId: string, type: string) {
+    return this.getTaskId(actionId, `${type}${CHECK_TASK_TYPE_SUFFIX}`);
+  }
+
   public async run(
     actionParams: ActionParams,
     retryParams: RetryParams,
@@ -182,7 +199,7 @@ export class BulkActionsResolver {
     if (!this.taskManager) {
       return;
     }
-    await retryTransientEsErrors(
+    const result = await retryTransientEsErrors(
       () =>
         this.taskManager!.bulkUpdateState([taskId], (state) => ({
           ...state,
@@ -191,50 +208,69 @@ export class BulkActionsResolver {
         })),
       { logger }
     );
+
+    // bulkUpdateState resolves even when the update failed for the task: a missing task, or a
+    // conflict still failing after its own retries, comes back in `errors`.
+    const [firstError] = result?.errors ?? [];
+    if (firstError) {
+      throw new Error(
+        `Could not update the state of task ${taskId}: ${
+          firstError.error.message ?? firstError.error
+        }`
+      );
+    }
+  }
+
+  /**
+   * Read a check task's current state. Used to merge watcher metadata onto the freshest
+   * checkpoint rather than onto the one claimed at the start of the run.
+   */
+  public async getCheckTaskState(taskId: string): Promise<BulkActionCheckTaskState | undefined> {
+    if (!this.taskManager) {
+      return undefined;
+    }
+    try {
+      const task = await this.taskManager.get(taskId);
+      return task?.state as BulkActionCheckTaskState | undefined;
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .debug(`Could not read the state of task ${taskId}: ${error.message}`);
+      return undefined;
+    }
   }
 }
 
 /**
- * Cheap progress probe against `.fleet-actions`: how many batch documents the action has so far,
- * and whether one of them was written within the given window.
+ * Liveness probe against `.fleet-actions`: whether a document for this action was written within
+ * the given window. Only ever used as a positive signal that a runner is alive, never to conclude
+ * that an action is finished — runners do not all write exactly one document per batch, and
+ * rollback writes its documents under its own action ids rather than the runner's.
  */
-const getActionProgress = async (
+const hasRecentActionDoc = async (
   esClient: ElasticsearchClient,
   actionId: string,
   recentWindowMinutes: number
-): Promise<{ nbBatches: number; hasRecentBatch: boolean }> => {
+): Promise<boolean> => {
   const res = await esClient.search({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    size: 0,
-    track_total_hits: true,
-    rest_total_hits_as_int: true,
-    query: { bool: { must: [{ term: { action_id: actionId } }] } },
-    aggs: {
-      recent: {
-        filter: { range: { '@timestamp': { gte: `now-${recentWindowMinutes}m` } } },
+    // one hit is enough to know a runner is alive
+    size: 1,
+    _source: false,
+    track_total_hits: false,
+    terminate_after: 1,
+    query: {
+      bool: {
+        must: [
+          { term: { action_id: actionId } },
+          { range: { '@timestamp': { gte: `now-${recentWindowMinutes}m` } } },
+        ],
       },
     },
   });
 
-  const recent = res.aggregations?.recent as { doc_count: number } | undefined;
-  return {
-    nbBatches: res.hits.total as unknown as number,
-    hasRecentBatch: (recent?.doc_count ?? 0) > 0,
-  };
-};
-
-/**
- * Number of batch documents a completed action is expected to have, or undefined when the
- * total is not known up front.
- */
-const getExpectedBatchCount = (actionParams: ActionParams): number | undefined => {
-  const { total, batchSize } = actionParams;
-  if (!total) {
-    return undefined;
-  }
-  // mirrors the page size the runner uses in processAgentsInBatches
-  return Math.ceil(total / (batchSize ?? SO_SEARCH_LIMIT));
+  return (res.hits.hits?.length ?? 0) > 0;
 };
 
 /**
@@ -253,19 +289,30 @@ const runCheckTask = async (
   const { actionParams } = taskInstance.params as BulkActionTaskParams;
   const actionId = actionParams.actionId!;
 
+  const resolver = await appContextService.getBulkActionsResolver();
   const removeSelf = async () => {
-    const resolver = await appContextService.getBulkActionsResolver();
     await resolver?.removeIfExists(taskInstance.id);
   };
 
-  const progress = await getActionProgress(esClient, actionId, CHECK_TASK_INTERVAL_MINUTES);
-  const expectedBatches = getExpectedBatchCount(actionParams);
+  /**
+   * Task Manager writes the state returned here over the current task document, so echoing back
+   * the state claimed at the start of the run would rewind a checkpoint the live runner wrote in
+   * the meantime. Merge the watcher's own fields onto the freshest state instead.
+   */
+  const withWatcherFields = async (
+    fields: Partial<BulkActionCheckTaskState>
+  ): Promise<{ state: BulkActionCheckTaskState }> => ({
+    state: { ...((await resolver?.getCheckTaskState(taskInstance.id)) ?? state), ...fields },
+  });
 
-  // The runner removes this task when it finishes, but that removal can itself fail, so the
-  // check task also stops itself once the action has all of its batches.
-  if (expectedBatches !== undefined && progress.nbBatches >= expectedBatches) {
+  // The runner removes this task when it finishes, but that removal can itself fail, so the check
+  // task also stops itself once the checkpoint says every agent was processed. This uses the
+  // runner's own count rather than counting action documents: runners do not all write one
+  // document per batch, and rollback writes none under this action id.
+  const { total } = actionParams;
+  if (total !== undefined && (state.nbAgentsProcessed ?? 0) >= total) {
     logger.debug(
-      `Bulk action ${actionId} is complete (${progress.nbBatches} batches), removing check task ${taskInstance.id}`
+      `Bulk action ${actionId} is complete (${state.nbAgentsProcessed}/${total} agents), removing check task ${taskInstance.id}`
     );
     await removeSelf();
     return { state };
@@ -273,12 +320,11 @@ const runCheckTask = async (
 
   const checkpointMoved =
     !!state.checkpointUpdatedAt && state.checkpointUpdatedAt !== state.lastObservedCheckpointAt;
+  const hasRecentBatch = await hasRecentActionDoc(esClient, actionId, CHECK_TASK_INTERVAL_MINUTES);
 
-  if (checkpointMoved || progress.hasRecentBatch) {
-    logger.debug(
-      `Bulk action ${actionId} is still progressing (${progress.nbBatches} batches), not resuming`
-    );
-    return { state: { ...state, lastObservedCheckpointAt: state.checkpointUpdatedAt } };
+  if (checkpointMoved || hasRecentBatch) {
+    logger.debug(`Bulk action ${actionId} is still progressing, not resuming`);
+    return await withWatcherFields({ lastObservedCheckpointAt: state.checkpointUpdatedAt });
   }
 
   const resumeCount = (state.resumeCount ?? 0) + 1;
@@ -299,6 +345,11 @@ const runCheckTask = async (
   const retryParams = getRetryParams(taskInstance.taskType, {
     ...(taskInstance.params as BulkActionTaskParams).retryParams,
     searchAfter: state.searchAfter,
+    // The params still carry the point in time the API handler opened when the action started.
+    // We only get here after at least one interval without progress, and getAgentsByKuery renews
+    // the PIT with a 1m keep alive, so it is long expired and searching with it would 404.
+    // searchAfter alone pages the live index.
+    pitId: undefined,
   });
 
   // Intentionally not awaited: the runner outlives this task's 1m timeout. The catch is what
@@ -314,9 +365,10 @@ const runCheckTask = async (
     );
   });
 
-  return {
-    state: { ...state, resumeCount, lastObservedCheckpointAt: state.checkpointUpdatedAt },
-  };
+  return await withWatcherFields({
+    resumeCount,
+    lastObservedCheckpointAt: state.checkpointUpdatedAt,
+  });
 };
 
 export function createRetryTask(
@@ -329,7 +381,7 @@ export function createRetryTask(
       const logger = appContextService.getLogger();
       const { esClient, soClient } = await getDeps();
 
-      if ((taskInstance.params as BulkActionTaskParams).isCheckTask) {
+      if (isCheckTaskInstance(taskInstance)) {
         try {
           return await runCheckTask(taskInstance, esClient, soClient, doRetry);
         } catch (error) {

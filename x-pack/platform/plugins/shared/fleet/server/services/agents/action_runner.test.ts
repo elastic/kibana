@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 
-import { ActionRunner } from './action_runner';
+import { ActionRunner, PIT_KEEP_ALIVE } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentsByKuery } from './crud';
 import { CHECK_TASK_INTERVAL_MINUTES, MAX_RETRY_COUNT } from './retry_helper';
@@ -76,6 +76,7 @@ describe('ActionRunner', () => {
 
   let resolver: {
     getTaskId: jest.Mock;
+    getCheckTaskId: jest.Mock;
     run: jest.Mock;
     removeIfExists: jest.Mock;
     updateCheckTaskState: jest.Mock;
@@ -87,6 +88,7 @@ describe('ActionRunner', () => {
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
     resolver = {
       getTaskId: jest.fn((actionId: string, type: string) => `${type}:${actionId}`),
+      getCheckTaskId: jest.fn((actionId: string, type: string) => `${type}:check:${actionId}`),
       run: jest.fn(async (_params, _retry, _taskType, taskId) => taskId),
       removeIfExists: jest.fn(),
       updateCheckTaskState: jest.fn(),
@@ -99,7 +101,7 @@ describe('ActionRunner', () => {
       esClient,
       soClient,
       { kuery: '', actionId: ACTION_ID, batchSize: 2, total: 4, ...actionParams },
-      { retryCount: 1, taskId: RETRY_TASK_ID, ...retryParams }
+      { retryCount: 1, taskId: RETRY_TASK_ID, pitId: 'stale-pit', ...retryParams }
     );
 
   describe('check task lifecycle', () => {
@@ -262,9 +264,25 @@ describe('ActionRunner', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('404 error from Elasticsearch')
       );
+      // the expired PIT is dropped, otherwise every retry would 404 the same way
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ retryCount: 2 }),
+        expect.objectContaining({ retryCount: 2, pitId: undefined }),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
+    it('keeps the point in time on a retry that is not a 404', async () => {
+      mockAgentPages(2, 2);
+      const runner = createRunner();
+      runner.processAgentsError = new EsErrors.TimeoutError('Request timed out');
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ retryCount: 2, pitId: 'stale-pit' }),
         TASK_TYPE,
         RETRY_TASK_ID
       );
@@ -288,6 +306,23 @@ describe('ActionRunner', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`Stopping after retry #${MAX_RETRY_COUNT}`)
       );
+    });
+  });
+
+  describe('point in time', () => {
+    it('pages with a keep alive long enough to outlast a slow batch', async () => {
+      mockAgentPages(2, 2);
+
+      await createRunner().runActionAsyncWithRetry();
+
+      // every search resets the PIT TTL, so the 1m getAgentsByKuery default would expire it
+      // whenever a single batch takes longer than that
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.objectContaining({ pitKeepAlive: PIT_KEEP_ALIVE })
+      );
+      expect(PIT_KEEP_ALIVE).toBe('10m');
     });
   });
 
