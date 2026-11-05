@@ -101,6 +101,7 @@ export const useGridLayoutState = ({
           'allowGaps',
           'shiftSnapSize',
           'showResizeGauge',
+          'resizeGaugeScale',
         ])
       )
     )

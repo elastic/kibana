@@ -38,6 +38,8 @@ export interface GridSettings {
   shiftSnapSize?: number;
   /** Whether a panel shows its size in columns and rows while it is resized. Defaults to true. */
   showResizeGauge?: boolean;
+  /** How many columns and rows make up one unit in the resize gauge. Defaults to 1. */
+  resizeGaugeScale?: number;
 }
 
 /** The grid settings that change how a layout is resolved. */

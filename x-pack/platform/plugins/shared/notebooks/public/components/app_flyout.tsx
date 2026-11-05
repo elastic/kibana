@@ -435,6 +435,7 @@ const AppGrid = ({
   const scale = snapToGrid ? 1 : GRID_SUBDIVISIONS;
   const columns = getGridColumns(app);
   const layout = useMemo(() => toGridLayout(app.panels, scale), [app.panels, scale]);
+  const isShiftHeld = useIsShiftHeld(!snapToGrid);
   const gridSettings = useMemo<GridSettings>(
     () => ({
       gutterSize: snapToGrid ? gutterSize : 0,
@@ -443,12 +444,12 @@ const AppGrid = ({
       keyboardDragTopLimit: 0,
       allowGaps: app.freePlacement ?? false,
       shiftSnapSize: snapToGrid ? undefined : scale,
-      showResizeGauge: snapToGrid,
+      showResizeGauge: snapToGrid || isShiftHeld,
+      resizeGaugeScale: scale,
     }),
-    [snapToGrid, gutterSize, scale, columns, app.freePlacement]
+    [snapToGrid, gutterSize, scale, columns, app.freePlacement, isShiftHeld]
   );
   const panelInset = snapToGrid ? 0 : gutterSize / 2;
-  const isShiftHeld = useIsShiftHeld(!snapToGrid);
   const dotStep = snapToGrid ? 1 : isShiftHeld ? scale : undefined;
   const gridStyles = useMemo(
     () => getGridStyles(euiTheme, { dotStep, inset: panelInset }),

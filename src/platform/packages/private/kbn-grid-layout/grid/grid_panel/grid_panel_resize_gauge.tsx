@@ -14,6 +14,10 @@ import { i18n } from '@kbn/i18n';
 import { useGridPanelState } from './use_panel_grid_data';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
+/** A size in gauge units, to at most two decimal places when it doesn't divide evenly. */
+const toGaugeUnits = (cells: number, scale: number): number =>
+  Math.round((cells / scale) * 100) / 100;
+
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
@@ -27,32 +31,34 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     const activePanelStyleSubscription = combineLatest([
       gridLayoutStateManager.activePanelEvent$,
       panel$,
+      gridLayoutStateManager.runtimeSettings$,
     ])
       .pipe(skip(1))
-      .subscribe(([activePanel, currentPanel]) => {
-        const { showResizeGauge = true } = gridLayoutStateManager.runtimeSettings$.getValue();
-        if (!currentPanel || !showResizeGauge) {
-          setIsResizing(false);
-          return;
-        }
-        const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
+      .subscribe(
+        ([activePanel, currentPanel, { showResizeGauge = true, resizeGaugeScale = 1 }]) => {
+          if (!currentPanel || !showResizeGauge) {
+            setIsResizing(false);
+            return;
+          }
+          const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
 
-        if (!ref) {
-          setIsResizing(false);
-          return;
-        }
+          if (!ref) {
+            setIsResizing(false);
+            return;
+          }
 
-        const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
-        const isResize = activePanel?.type === 'resize';
+          const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
+          const isResize = activePanel?.type === 'resize';
 
-        if (isPanelActive && isResize) {
-          setIsResizing(true);
-          setWidth(currentPanel.width);
-          setHeight(currentPanel.height);
-        } else {
-          setIsResizing(false);
+          if (isPanelActive && isResize) {
+            setIsResizing(true);
+            setWidth(toGaugeUnits(currentPanel.width, resizeGaugeScale));
+            setHeight(toGaugeUnits(currentPanel.height, resizeGaugeScale));
+          } else {
+            setIsResizing(false);
+          }
         }
-      });
+      );
 
     return () => {
       activePanelStyleSubscription.unsubscribe();
