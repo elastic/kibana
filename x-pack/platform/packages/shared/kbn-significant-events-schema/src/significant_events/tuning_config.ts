@@ -20,15 +20,9 @@ export interface TuningConfigFieldBounds {
 export const significantEventsTuningConfigSchema = lazySchema(() =>
   z.object({
     feature_ttl_days: z.number(),
-    entity_filtered_ratio: z.number(),
-    diverse_ratio: z.number(),
-    max_excluded_features_in_prompt: z.number(),
-    max_entity_filters: z.number(),
     semantic_min_score: z.number(),
     rrf_rank_constant: z.number(),
-    sampling_timeout_ms: z.number(),
     query_validation_timeout_ms: z.number(),
-    computed_features_timeout_ms: z.number(),
   })
 );
 
@@ -39,28 +33,16 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
   TuningConfigFieldBounds
 > = {
   feature_ttl_days: { min: 1, integer: true },
-  entity_filtered_ratio: { min: 0, max: 1 },
-  diverse_ratio: { min: 0, max: 1 },
-  max_excluded_features_in_prompt: { min: 0, max: 50, integer: true },
-  max_entity_filters: { min: 1, max: 50, integer: true },
   semantic_min_score: { min: 0, max: 1 },
   rrf_rank_constant: { min: 1, max: 100, integer: true },
-  sampling_timeout_ms: { min: 1000, max: 240_000, integer: true },
   query_validation_timeout_ms: { min: 1000, max: 240_000, integer: true },
-  computed_features_timeout_ms: { min: 1000, max: 240_000, integer: true },
 };
 
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
   feature_ttl_days: 30,
-  entity_filtered_ratio: 0.4,
-  diverse_ratio: 0.4,
-  max_excluded_features_in_prompt: 10,
-  max_entity_filters: 10,
   semantic_min_score: 0.15,
   rrf_rank_constant: 20,
-  sampling_timeout_ms: 60_000,
   query_validation_timeout_ms: 10_000,
-  computed_features_timeout_ms: 60_000,
 };
 
 /**
@@ -99,21 +81,6 @@ export function validateSignificantEventsTuningConfig(parsed: Record<string, unk
         errors.push(`"${key}" must be at least ${bounds.min}`);
       }
     }
-  }
-
-  const entityRatio =
-    typeof parsed.entity_filtered_ratio === 'number'
-      ? parsed.entity_filtered_ratio
-      : DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.entity_filtered_ratio;
-  const diverseRatio =
-    typeof parsed.diverse_ratio === 'number'
-      ? parsed.diverse_ratio
-      : DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.diverse_ratio;
-  if (entityRatio + diverseRatio > 1.0) {
-    errors.push(
-      `entity_filtered_ratio (${entityRatio}) + diverse_ratio (${diverseRatio}) must be <= 1.0 ` +
-        `(remainder ${(1 - entityRatio - diverseRatio).toFixed(2)} is used for random sampling)`
-    );
   }
 
   return errors;

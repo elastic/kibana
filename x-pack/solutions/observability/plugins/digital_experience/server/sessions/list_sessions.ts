@@ -46,12 +46,22 @@ const SEARCH_FIELDS = [
   'geo.city',
 ] as const;
 
+/** Narrow the list and every count; unlike facets, they have no values to pick from. */
+export interface SessionListFilters {
+  hasErrors?: boolean;
+  /** Inclusive lower bound of the session duration. */
+  minDurationMs?: number;
+  /** Exclusive upper bound of the session duration. */
+  maxDurationMs?: number;
+}
+
 export interface ListSessionsParams {
   serviceName: string;
   start: string;
   end: string;
   query?: string;
   facets?: Partial<Record<FacetName, string>>;
+  filters?: SessionListFilters;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
   page: number;
@@ -125,15 +135,61 @@ const facetFilters = (
     .filter((name) => name !== exclude && facets[name])
     .map((name) => ({ term: { [SESSION_FACET_FIELDS[name]]: facets[name] } }));
 
+const durationRange = (
+  field: string,
+  { minDurationMs, maxDurationMs }: SessionListFilters = {}
+): QueryDslQueryContainer[] =>
+  minDurationMs !== undefined || maxDurationMs !== undefined
+    ? [
+        {
+          range: {
+            [field]: {
+              ...(minDurationMs !== undefined ? { gte: minDurationMs } : {}),
+              ...(maxDurationMs !== undefined ? { lt: maxDurationMs } : {}),
+            },
+          },
+        },
+      ]
+    : [];
+
+const sessionFilters = (filters: SessionListFilters = {}): QueryDslQueryContainer[] => [
+  ...(filters.hasErrors ? [{ term: { has_error: true } }] : []),
+  ...durationRange('duration_ms', filters),
+];
+
+/**
+ * The dest pipeline sets `duration_ms`, so a summary it failed on may lack it; its start and end
+ * come from the transform. Mapped at search time only when a duration range is set.
+ */
+const FAILED_SUMMARY_DURATION_FIELD = 'failed_summary_duration_ms';
+const FAILED_SUMMARY_DURATION_MAPPING = {
+  [FAILED_SUMMARY_DURATION_FIELD]: {
+    type: 'long' as const,
+    script: {
+      source:
+        "if (doc['start_time'].size() > 0 && doc['end_time'].size() > 0) { emit(doc['end_time'].value.toInstant().toEpochMilli() - doc['start_time'].value.toInstant().toEpochMilli()); }",
+    },
+  },
+};
+
+const hasDurationRange = ({ minDurationMs, maxDurationMs }: SessionListFilters = {}) =>
+  minDurationMs !== undefined || maxDurationMs !== undefined;
+
 const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
   filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
 
 /** Set by the dest pipeline when it couldn't summarize a session; its counts are missing. */
 const FAILED_SUMMARY: QueryDslQueryContainer = { exists: { field: 'error.message' } };
 
-/** The listed sessions: selected facets, and only summaries the pipeline completed. */
-const listedFilter = (facets: ListSessionsParams['facets'], exclude?: FacetName) => ({
-  bool: { filter: facetFilters(facets, exclude), must_not: [FAILED_SUMMARY] },
+/** The listed sessions: selected filters and facets, and only summaries the pipeline completed. */
+const listedFilter = (
+  { facets, filters }: Pick<ListSessionsParams, 'facets' | 'filters'>,
+  exclude?: FacetName
+) => ({
+  bool: {
+    filter: [...sessionFilters(filters), ...facetFilters(facets, exclude)],
+    must_not: [FAILED_SUMMARY],
+  },
 });
 
 export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequest => {
@@ -145,7 +201,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
       name,
       {
         // Each facet ignores its own selection so its other values stay selectable.
-        filter: listedFilter(params.facets, name),
+        filter: listedFilter(params, name),
         aggs: { values: { terms: { field: SESSION_FACET_FIELDS[name], size: FACET_SIZE } } },
       },
     ])
@@ -173,13 +229,22 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     from,
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
+    ...(hasDurationRange(params.filters)
+      ? { runtime_mappings: FAILED_SUMMARY_DURATION_MAPPING }
+      : {}),
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
-    post_filter: listedFilter(params.facets),
+    post_filter: listedFilter(params),
     aggs: {
       ...facetAggs,
-      kpis: { filter: listedFilter(params.facets), aggs: kpiAggs },
+      kpis: { filter: listedFilter(params), aggs: kpiAggs },
+      // Narrowed like the list, by search, facets and duration, but not by errors: `has_error`
+      // is set by the pipeline that failed on them.
       failed_summaries: {
-        filter: allOf([...facetFilters(params.facets), FAILED_SUMMARY]),
+        filter: allOf([
+          ...facetFilters(params.facets),
+          ...durationRange(FAILED_SUMMARY_DURATION_FIELD, params.filters),
+          FAILED_SUMMARY,
+        ]),
       },
     },
   };

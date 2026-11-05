@@ -40,6 +40,7 @@ describe('CoreWebVitalsPanel', () => {
 
     expect(screen.getByTestId('coreVitals')).toBeInTheDocument();
     expect(mockedCoreVitals).toHaveBeenCalledWith({
+      headingLevel: 'h2',
       loading: false,
       data: {
         lcp: 2412.5,

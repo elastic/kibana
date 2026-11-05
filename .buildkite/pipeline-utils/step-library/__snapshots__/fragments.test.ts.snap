@@ -184,7 +184,6 @@ exports[`pull_request fragments pull_request/api_contracts 1`] = `
           },
         ],
       },
-      "soft_fail": true,
       "timeout_in_minutes": 30,
     },
   ],
@@ -544,9 +543,6 @@ exports[`pull_request fragments pull_request/check_oas_snapshot 1`] = `
         "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c",
       },
       "command": ".buildkite/scripts/steps/checks/capture_oas_snapshot.sh",
-      "depends_on": [
-        "build",
-      ],
       "env": {
         "CHECK_GATE": "true",
       },

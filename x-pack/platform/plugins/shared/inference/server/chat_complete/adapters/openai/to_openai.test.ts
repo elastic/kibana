@@ -471,3 +471,48 @@ describe('messagesToOpenAI', () => {
     });
   });
 });
+
+describe('toolChoiceToOpenAI with a model id', () => {
+  it('downgrades a named function to "auto" for a Claude model that rejects forced tool choice', () => {
+    expect(
+      toolChoiceToOpenAI({ function: 'foo' }, { modelId: 'eu.anthropic.claude-sonnet-5-5' })
+    ).toEqual('auto');
+  });
+
+  it('downgrades "required" to "auto" for a Claude model that rejects forced tool choice', () => {
+    expect(
+      toolChoiceToOpenAI(ToolChoiceType.required, { modelId: 'anthropic-claude-5.5-opus' })
+    ).toEqual('auto');
+  });
+
+  it('keeps the named function for a model that accepts forced tool choice', () => {
+    expect(toolChoiceToOpenAI({ function: 'foo' }, { modelId: 'claude-sonnet-4-6' })).toEqual({
+      type: 'function',
+      function: { name: 'foo' },
+    });
+    expect(toolChoiceToOpenAI({ function: 'foo' }, { modelId: 'gpt-5' })).toEqual({
+      type: 'function',
+      function: { name: 'foo' },
+    });
+  });
+
+  it('downgrades before the single-tool "required" coercion for Other providers', () => {
+    const connector = {
+      config: {
+        apiProvider: OpenAiProviderType.Other,
+        enableNativeFunctionCalling: true,
+      },
+    } as unknown as InferenceConnector;
+
+    const tools: NonNullable<ToolOptions['tools']> = {
+      myTool: { description: 'my tool' },
+    };
+
+    expect(
+      toolChoiceToOpenAI(
+        { function: 'myTool' },
+        { connector, tools, modelId: 'eu.anthropic.claude-opus-5-5' }
+      )
+    ).toEqual('auto');
+  });
+});

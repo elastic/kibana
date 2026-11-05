@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
@@ -18,13 +18,18 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import {
+  CONNECTOR_ID_MAX_LENGTH,
+  IF_CONDITION_MAX_LENGTH,
+  WORKFLOW_RUN_NAME_MAX_LENGTH,
+} from '../common/constants';
 import {
   HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
+  HITL_SLACK2_INTERACTIVE_DESCRIPTION,
   MAX_HITL_ACTION_LABEL_LENGTH,
   MAX_HITL_EMAIL_ADDRESS_LENGTH,
   MAX_HITL_EMAIL_RECIPIENTS,
@@ -53,19 +58,26 @@ export const RetryPolicySchema = z.object({
 export const RetryDelayStrategySchema = z.enum(['fixed', 'exponential']);
 export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 
-export const WorkflowRetrySchema = z.object({
-  'max-attempts': z.number().min(1),
-  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
-  /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
-  strategy: RetryDelayStrategySchema.optional(),
-  /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
-  multiplier: z.number().min(1).optional(),
-  /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
-  'max-delay': DurationSchema.optional(),
-  /** Add jitter to delay to avoid thundering herd. Default: false. */
-  jitter: z.boolean().optional(),
-});
+export const WorkflowRetrySchema = lazySchema(() =>
+  z.object({
+    'max-attempts': z.number().min(1),
+    condition: z
+      .string()
+      .optional()
+      .describe(
+        'Retry only when this expression is true, e.g. "${{ error.type == \'TimeoutError\' }}". Without it, every error is retried except errors with `error.retryable: false`.'
+      ),
+    delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
+    /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
+    strategy: RetryDelayStrategySchema.optional(),
+    /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
+    multiplier: z.number().min(1).optional(),
+    /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
+    'max-delay': DurationSchema.optional(),
+    /** Add jitter to delay to avoid thundering herd. Default: false. */
+    jitter: z.boolean().optional(),
+  })
+);
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 const IfConditionSchema = z
@@ -379,27 +391,30 @@ export const HitlEmailChannelSchema = z.object({
     .describe('Email subject. Defaults to a built-in subject when omitted.'),
 });
 
-export const HitlSlack2ChannelSchema = z.object({
-  'connector-id': z
-    .string()
-    .min(1)
-    .max(CONNECTOR_ID_MAX_LENGTH)
-    .describe('Slack (v2) connector saved object id or name'),
-  channels: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
-        .describe(
-          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
-        )
-    )
-    .min(1)
-    .describe(
-      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
-    ),
-});
+export const HitlSlack2ChannelSchema = lazySchema(() =>
+  z.object({
+    'connector-id': z
+      .string()
+      .min(1)
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .describe('Slack (v2) connector saved object id or name'),
+    channels: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+          .describe(
+            'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+          )
+      )
+      .min(1)
+      .describe(
+        'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
+      ),
+    interactive: z.boolean().optional().describe(HITL_SLACK2_INTERACTIVE_DESCRIPTION),
+  })
+);
 
 export const HitlTeamsChannelSchema = z.object({
   'connector-id': z
@@ -514,7 +529,7 @@ const hitlChannelDescriptions = {
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
   slack2:
-    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs. Set interactive: true to collect the response in Slack (requires connector Receive events and Slack Interactivity Request URL).',
   teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
   servicenow:
     'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
@@ -1240,15 +1255,18 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
 });
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
-export const WorkflowFailStepSchema = BaseStepSchema.extend({
-  type: z.literal('workflow.fail'),
-  with: z
-    .object({
-      message: z.string().optional(),
-      reason: z.string().optional(),
-    })
-    .optional(),
-});
+export const WorkflowFailStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.fail'),
+    with: z
+      .object({
+        message: z.string().optional(),
+        reason: z.string().optional(),
+        type: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */
@@ -1321,17 +1339,26 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
 // Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
-const WorkflowSchemaBase = z.object({
-  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  settings: WorkflowSettingsSchema.optional(),
-  enabled: z.boolean().default(true),
-  tags: z.array(z.string()).optional(),
-  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
-  consts: WorkflowConstsSchema.optional(),
-  steps: z.array(StepSchema).min(1),
-});
+const WorkflowSchemaBase = lazySchema(() =>
+  z.object({
+    version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
+    name: z.string().min(1),
+    'run-name': z
+      .string()
+      .max(WORKFLOW_RUN_NAME_MAX_LENGTH)
+      .optional()
+      .describe(
+        'Execution name, evaluated once at creation using Liquid and the workflow context.'
+      ),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true),
+    tags: z.array(z.string()).optional(),
+    outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
+    consts: WorkflowConstsSchema.optional(),
+    steps: z.array(StepSchema).min(1),
+  })
+);
 
 /** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
@@ -1388,46 +1415,49 @@ export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 // The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
 // We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
 // Base schema without transform - can be extended
-const WorkflowSchemaForAutocompleteBase = z
-  .object({
-    version: z.literal('1').optional(),
-    name: z.string().min(1).optional(),
-    description: z.string().optional(),
-    settings: WorkflowSettingsSchema.optional(),
-    enabled: z.boolean().default(true).optional(),
-    tags: z.array(z.string()).optional(),
-    triggers: z
-      .array(z.object({ type: z.string().catch('') }).passthrough())
-      .catch([])
-      .default([]),
-    outputs: z
-      .union([
-        JsonModelSchema,
-        z.array(
+const WorkflowSchemaForAutocompleteBase = lazySchema(() =>
+  z
+    .object({
+      version: z.literal('1').optional(),
+      name: z.string().min(1).optional(),
+      'run-name': WorkflowSchemaBase.shape['run-name'],
+      description: z.string().optional(),
+      settings: WorkflowSettingsSchema.optional(),
+      enabled: z.boolean().default(true).optional(),
+      tags: z.array(z.string()).optional(),
+      triggers: z
+        .array(z.object({ type: z.string().catch('') }).passthrough())
+        .catch([])
+        .default([]),
+      outputs: z
+        .union([
+          JsonModelSchema,
+          z.array(
+            z
+              .object({
+                name: z.string().catch(''),
+                type: z.string().catch(''),
+              })
+              .passthrough()
+          ),
+        ])
+        .optional()
+        .catch(undefined),
+      consts: WorkflowConstsSchema.optional(),
+      steps: z
+        .array(
           z
             .object({
-              name: z.string().catch(''),
               type: z.string().catch(''),
+              name: z.string().catch(''),
             })
             .passthrough()
-        ),
-      ])
-      .optional()
-      .catch(undefined),
-    consts: WorkflowConstsSchema.optional(),
-    steps: z
-      .array(
-        z
-          .object({
-            type: z.string().catch(''),
-            name: z.string().catch(''),
-          })
-          .passthrough()
-      )
-      .catch([])
-      .default([]),
-  })
-  .passthrough();
+        )
+        .catch([])
+        .default([]),
+    })
+    .passthrough()
+);
 
 // Final schema with transform - ensure version default is applied
 export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(
@@ -1616,11 +1646,15 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
+export const BaseSerializedErrorSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    message: z.string(),
+    details: z.record(z.string(), z.unknown()).optional(),
+    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
+    retryable: z.boolean().optional(),
+  })
+);
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
 
 export const WhileContextSchema = z.object({

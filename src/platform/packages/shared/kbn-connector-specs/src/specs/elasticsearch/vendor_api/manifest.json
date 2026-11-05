@@ -1,0 +1,80 @@
+{
+  "operations": {
+    "esql": [
+      {
+        "method": "post",
+        "path": "/_query",
+        "source": "stack"
+      }
+    ],
+    "getClusterInfo": [
+      {
+        "method": "get",
+        "path": "/",
+        "source": "stack"
+      }
+    ],
+    "getMapping": [
+      {
+        "method": "get",
+        "path": "/{index}/_field_caps",
+        "source": "stack"
+      }
+    ],
+    "listIndices": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/_cat/indices",
+        "source": "stack"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/_cat/indices/{index}",
+        "source": "stack"
+      }
+    ],
+    "request": [
+      {
+        "method": "get",
+        "path": "/",
+        "source": "stack"
+      }
+    ],
+    "search": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "in": "body",
+            "offsetParam": "from",
+            "sizeParam": "size"
+          },
+          "response": {
+            "itemsPath": "hits.hits",
+            "totalPath": "hits.total.value"
+          },
+          "style": "offset"
+        },
+        "path": "/{index}/_search",
+        "source": "stack"
+      }
+    ]
+  },
+  "sources": {
+    "serverless": {
+      "apiVersion": "",
+      "fetchedAt": "2026-10-07T20:20:11.683Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/openapi/elasticsearch-serverless-openapi.json"
+    },
+    "stack": {
+      "apiVersion": "",
+      "fetchedAt": "2026-10-07T20:20:11.683Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/openapi/elasticsearch-openapi.json"
+    }
+  }
+}
