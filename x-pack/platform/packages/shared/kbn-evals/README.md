@@ -471,6 +471,12 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
 | `minimize` | Lower is better (latency)            |
 | `neutral`  | No clear better direction            |
 
+### Scores: `null` versus `0`
+
+A score of `0` means the evaluator ran and judged the output wrong. A `null` score means the run could not be scored: the task threw, the evaluator threw, a judge was unavailable, or the evaluator had nothing to compare against. Return `{ score: null, label: 'error', explanation: <reason> }` from an evaluator for its own failures, and reserve `0` for output that is genuinely wrong. Do not turn a failure into `0`, which would pull the mean down as if the model had answered badly.
+
+`runExperiment` follows the same policy. A task that throws is recorded for that example with `output: null` and every evaluator scores it `null`/`error`; an evaluator that throws scores `null`/`error` for that evaluator only. Neither rejects the experiment. Unscored runs are left out of mean, median, min and max, and the stats table reports them as `errors: N` per evaluator.
+
 ### Tagging datasets
 
 Datasets can declare `tags` and a `maturity` level, which the dataset list in Kibana filters on. Declaring them alongside the examples keeps them current on every run:

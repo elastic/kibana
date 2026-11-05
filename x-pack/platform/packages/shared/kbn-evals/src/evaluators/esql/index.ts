@@ -34,14 +34,25 @@ export function createEsqlEquivalenceEvaluator({
       const prediction = predictionExtractor(output);
       const groundTruth = groundTruthExtractor(expected);
 
-      if (!prediction || !groundTruth) {
+      if (!groundTruth) {
         return {
-          explanation: 'Missing prediction or ground truth query',
+          explanation: 'Missing ground truth query; cannot compare',
+          label: 'error',
+          score: null,
+          metadata: {
+            reason: 'Missing ground truth query for comparison',
+          },
+        };
+      }
+
+      if (!prediction) {
+        return {
+          explanation: 'Missing prediction query',
           label: 'No',
           score: 0,
           metadata: {
             equivalent: false,
-            reason: 'Missing prediction or ground truth query for comparison',
+            reason: 'Missing prediction query for comparison',
           },
         };
       }
@@ -74,33 +85,44 @@ export function createEsqlEquivalenceEvaluator({
         return response.toolCalls[0].function.arguments;
       }
 
-      const { equivalent, reason } = await pRetry(runEsqlEquivalenceAnalysis, {
-        retries: 3,
-        onFailedAttempt: (error) => {
-          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+      let analysis: EsqlEquivalenceAnalysis;
+      try {
+        analysis = await pRetry(runEsqlEquivalenceAnalysis, {
+          retries: 3,
+          onFailedAttempt: (error) => {
+            const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
 
-          if (isLastAttempt) {
-            log.error(
-              new Error(
-                `Failed to retrieve ES|QL equivalence analysis after ${error.attemptNumber} attempts (no valid tool call or malformed response)`,
-                {
-                  cause: error,
-                }
-              )
-            );
-          } else {
-            log.warning(
-              new Error(
-                `ES|QL equivalence analysis returned an invalid or missing tool call on attempt ${error.attemptNumber}; retrying...`,
-                {
-                  cause: error,
-                }
-              )
-            );
-          }
-        },
-      });
+            if (isLastAttempt) {
+              log.error(
+                new Error(
+                  `Failed to retrieve ES|QL equivalence analysis after ${error.attemptNumber} attempts (no valid tool call or malformed response)`,
+                  {
+                    cause: error,
+                  }
+                )
+              );
+            } else {
+              log.warning(
+                new Error(
+                  `ES|QL equivalence analysis returned an invalid or missing tool call on attempt ${error.attemptNumber}; retrying...`,
+                  {
+                    cause: error,
+                  }
+                )
+              );
+            }
+          },
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          score: null,
+          label: 'error',
+          explanation: `ES|QL equivalence analysis failed: ${message}`,
+        };
+      }
 
+      const { equivalent, reason } = analysis;
       const isEquivalent = equivalent?.trim().toLowerCase() === 'yes';
       return {
         explanation: reason,

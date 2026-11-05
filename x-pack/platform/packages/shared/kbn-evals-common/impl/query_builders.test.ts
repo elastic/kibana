@@ -196,6 +196,12 @@ describe('query_builders', () => {
       });
     });
 
+    it('counts null scores apart from the score stats', () => {
+      const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
+
+      expect(aggs.score_missing).toEqual({ missing: { field: 'evaluator.score' } });
+    });
+
     it('aggregates the evaluator kind so code evaluators are never attributed a model', () => {
       const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
 
@@ -795,6 +801,7 @@ describe('query_builders', () => {
                     key: 'correctness',
                     score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
                     score_median: { values: { '50.0': 0.85 } },
+                    score_missing: { doc_count: 2 },
                   },
                 ],
               },
@@ -810,8 +817,31 @@ describe('query_builders', () => {
         dataset_name: 'Dataset One',
         evaluator_name: 'correctness',
         example_count: 5,
-        stats: { mean: 0.8, median: 0.85, std_dev: 0.1, min: 0.5, max: 1.0, count: 10 },
+        stats: {
+          mean: 0.8,
+          median: 0.85,
+          std_dev: 0.1,
+          min: 0.5,
+          max: 1.0,
+          count: 10,
+          error_count: 2,
+        },
       });
+    });
+
+    it('reports a zero error_count when the missing-score aggregation is absent', () => {
+      const result = parseStatsAggregationResponse({
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              by_evaluator: { buckets: [{ key: 'correctness', score_stats: { count: 3 } }] },
+            },
+          ],
+        },
+      });
+
+      expect(result[0].stats.error_count).toBe(0);
     });
 
     it('attributes each evaluator to its own judge model, and none to code evaluators', () => {
@@ -1027,6 +1057,7 @@ describe('query_builders', () => {
         min: 0,
         max: 0,
         count: 0,
+        error_count: 0,
       });
     });
   });

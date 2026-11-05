@@ -235,4 +235,49 @@ describe('report_table', () => {
       expect(result).toContain('3 x');
     });
   });
+
+  describe('createTable with unscored runs', () => {
+    const withErrors = (errorCount: number, count: number): EvaluatorStats[] => [
+      {
+        datasetId: 'ds-id',
+        datasetName: 'ds',
+        evaluatorName: 'Factuality',
+        stats: { mean: 0.5, median: 0.5, stdDev: 0, min: 0.5, max: 0.5, count, errorCount },
+      },
+    ];
+
+    it('shows the number of unscored runs next to the stats', () => {
+      const result = createTable(withErrors(3, 7), 1);
+
+      expect(result).toContain('mean: 0.50');
+      expect(result).toContain('errors: 3');
+    });
+
+    it('shows errors, not zero stats, when every run was unscored', () => {
+      const result = createTable(withErrors(4, 0), 1);
+
+      expect(result).toContain('errors: 4');
+      expect(result).not.toContain('mean:');
+    });
+
+    it('omits the errors line when every run was scored', () => {
+      const result = createTable(withErrors(0, 7), 1);
+
+      expect(result).not.toContain('errors:');
+    });
+
+    it('sums unscored runs across datasets in the overall row', () => {
+      const result = createTable(
+        [
+          ...withErrors(1, 5),
+          ...withErrors(2, 5).map((s) => ({ ...s, datasetId: 'ds-2', datasetName: 'ds2' })),
+        ],
+        1
+      );
+
+      expect(result).toContain('errors: 1');
+      expect(result).toContain('errors: 2');
+      expect(result).toContain('errors: 3');
+    });
+  });
 });

@@ -17,6 +17,8 @@ interface StatsDisplay {
   min: number;
   max: number;
   count: number;
+  /** Runs with a null score (could not be scored); excluded from every other stat. */
+  errorCount?: number;
 }
 
 export interface EvaluatorDisplayOptions {
@@ -67,13 +69,22 @@ function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
     }
 
     const totalCount = evaluatorStats.reduce((sum, s) => sum + s.stats.count, 0);
+    const totalErrorCount = evaluatorStats.reduce((sum, s) => sum + (s.stats.errorCount ?? 0), 0);
 
     if (totalCount === 0) {
       return {
         datasetId: 'overall',
         datasetName: 'Overall',
         evaluatorName,
-        stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
+        stats: {
+          mean: 0,
+          median: 0,
+          stdDev: 0,
+          min: 0,
+          max: 0,
+          count: 0,
+          errorCount: totalErrorCount,
+        },
       };
     }
 
@@ -103,6 +114,7 @@ function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
         min: Math.min(...evaluatorStats.map((s) => s.stats.min)),
         max: Math.max(...evaluatorStats.map((s) => s.stats.max)),
         count: totalCount,
+        errorCount: totalErrorCount,
       },
     };
   });
@@ -187,7 +199,7 @@ function formatStatsCell(
     ['max', 'max'],
   ];
 
-  return statLabels
+  const statLines = (stats.count === 0 ? [] : statLabels)
     .filter(
       ([key]) => stats[key] !== undefined && (!statsToInclude || statsToInclude.includes(key))
     )
@@ -195,8 +207,14 @@ function formatStatsCell(
       const value = stats[key] as number;
       const formatted = Number.isInteger(value) ? value.toFixed(0) : value.toFixed(decimalPlaces);
       return colorFn(`${label}: ${formatted}${unitSuffix}`);
-    })
-    .join('\n');
+    });
+
+  // Unscored runs are not part of the stats above, so surface them rather than let them vanish.
+  if (stats.errorCount) {
+    statLines.push(chalk.red(`errors: ${stats.errorCount}`));
+  }
+
+  return statLines.join('\n');
 }
 
 function formatEvaluatorScoreGroupCell(
@@ -208,7 +226,7 @@ function formatEvaluatorScoreGroupCell(
   const sections = group.evaluatorNames
     .map((evaluatorName) => {
       const stats = statsMap.get(evaluatorName);
-      if (!stats || !stats.count || stats.count === 0) return null;
+      if (!stats || (!stats.count && !stats.errorCount)) return null;
       const statsContent = formatStatsCell(stats, evaluatorName, isBold, evaluatorFormats);
       return statsContent ? `${chalk.white(evaluatorName)}\n${statsContent}` : null;
     })
@@ -241,7 +259,7 @@ function formatRowCells(
     }
 
     const stats = statsMap.get(columnName);
-    if (stats && stats.count > 0) {
+    if (stats && (stats.count > 0 || (stats.errorCount ?? 0) > 0)) {
       return formatStatsCell(stats, columnName, isBold, evaluatorFormats);
     }
     return isBold ? chalk.bold.green('-') : chalk.gray('-');

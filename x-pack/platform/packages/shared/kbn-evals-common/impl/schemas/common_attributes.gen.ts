@@ -237,6 +237,10 @@ export const EvaluatorStats = lazySchema(() =>
       min: z.number(),
       max: z.number(),
       count: z.number().int(),
+      /**
+       * Score documents with a null score (the evaluator or task could not produce a score). These are excluded from the other stats.
+       */
+      error_count: z.number().int().min(0).optional(),
     }),
   })
 );

@@ -70,7 +70,8 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
  * references and evaluator-specific details for explainability.
  *
  * This shape is intentionally compatible with the existing evaluator implementations:
- * - `score` may be omitted or `null` for "unavailable"/"error" cases
+ * - `score` may be omitted or `null` for "unavailable"/"error" cases: `null` means the run
+ *   could not be scored, while `0` means it was scored and is wrong
  * - `label`/`explanation` are used widely in tests and reporting
  */
 export interface EvaluationResult {
@@ -179,8 +180,11 @@ export interface TaskRun {
   input: Example['input'];
   expected: Example['output'];
   metadata: Example['metadata'];
+  /** `null` when the task threw, in which case `taskError` carries the reason. */
   output: TaskOutput;
   traceId?: string | null;
+  /** Set when the task threw. Evaluators are not run on such a run; they score `null`/`error`. */
+  taskError?: { message: string };
 }
 
 export interface EvaluationRun {
