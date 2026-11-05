@@ -16,7 +16,10 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),
@@ -30,7 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 
-  const auditLogPath = resolve(__dirname, './packages/helpers/audit/pki.log');
+  const auditLogPath = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/packages/helpers/audit/pki.log'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,

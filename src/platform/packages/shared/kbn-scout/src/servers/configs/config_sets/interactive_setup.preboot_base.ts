@@ -20,7 +20,7 @@ import { defaultConfig } from './default/stateful/base.config';
 
 const TEST_ENDPOINTS_PLUGIN_PATH = resolve(
   REPO_ROOT,
-  'src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints'
+  'src/platform/plugins/private/interactive_setup_test_endpoints'
 );
 
 export const ES_HTTP_KEYSTORE_PATH = resolve(

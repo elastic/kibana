@@ -26,7 +26,7 @@ Scout server configuration. Role loading and service account responses are not m
     expires, so that test waits 65 seconds too.
 
 The config set loads the `service_accounts` test plugin from
-`x-pack/platform/test/security_api_integration/plugins/service_accounts`. It
+`x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts`. It
 binds, unbinds and runs workloads over HTTP. It also sets UIAM's exchange token
 lifetime to one minute, the shortest UIAM allows, so the renewal tests finish in
 reasonable time.

@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // This validates the shouldTransformIfDecryptionFails flag
-      // (see x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
+      // (see x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
       it('performs model version transforms even if decryption fails', async () => {
         const { body: decryptedResponse } = await supertest
           .get(

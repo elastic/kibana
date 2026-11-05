@@ -20,7 +20,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.ts')
   );
 
-  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
