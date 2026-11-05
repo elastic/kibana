@@ -128,6 +128,11 @@ describe('Forensics close investigation gate', () => {
         type: 'integer',
         minimum: 0,
       });
+      // Optional: a containment gate that settled normally has nothing to add.
+      expect(trigger?.inputs?.properties?.caveat).toMatchObject({
+        type: 'string',
+        maxLength: 2000,
+      });
     });
 
     // The reasons end up in the action's input, so they must be values the action takes.
@@ -281,6 +286,25 @@ describe('Forensics close investigation gate', () => {
 
       expect(render()).not.toContain('Its assessment');
       expect(render('')).not.toContain('Its assessment');
+    });
+
+    // Whatever went wrong before the question changes what Approve means, so it is read
+    // first; without one the card reads as it always has.
+    it('leads with the caveat the run passed, when there is one', () => {
+      const render = (caveat?: string) =>
+        liquid.parseAndRenderSync(build.comment, {
+          inputs: { ...inputs, ...(caveat === undefined ? {} : { caveat }) },
+        });
+
+      const withCaveat = render('1 containment proposal(s) did not reach the approval queue.');
+      expect(
+        withCaveat.startsWith(
+          '**Before you close:** 1 containment proposal(s) did not reach the approval queue.\n\nEndpoint analysis is done with this Investigation.'
+        )
+      ).toBe(true);
+      expect(withCaveat).toContain('**Dismiss** keeps everything open.');
+      expect(render().startsWith('Endpoint analysis is done with this Investigation.')).toBe(true);
+      expect(render('')).toBe(render());
     });
 
     // An approval can reach at most the alerts the attack lists: one another open

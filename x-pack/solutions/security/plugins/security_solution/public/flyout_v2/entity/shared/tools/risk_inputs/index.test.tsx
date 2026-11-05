@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { RiskInputs } from '.';
 import { RISK_INPUTS_TOOL_TEST_ID } from './test_ids';
+import { getEntityAnalyticsNewHomeScopeId } from '../../../../../entity_analytics/common/scope_time_ranges';
 
 const mockOpenSystemFlyout = jest.fn();
 
@@ -44,11 +45,13 @@ jest.mock(
       entityName,
       entityId,
       onShowAlert,
+      historyDefaultRange,
     }: {
       entityType: string;
       entityName: string;
       entityId?: string;
       onShowAlert?: (id: string, indexName: string) => void;
+      historyDefaultRange?: { from: string; to: string };
     }) => (
       <button
         type="button"
@@ -56,6 +59,8 @@ jest.mock(
         data-entity-type={entityType}
         data-entity-name={entityName}
         data-entity-id={entityId ?? ''}
+        data-history-from={historyDefaultRange?.from}
+        data-history-to={historyDefaultRange?.to}
         onClick={() => onShowAlert?.('alert-1', '.alerts-security')}
       />
     ),
@@ -154,6 +159,28 @@ describe('<RiskInputs /> host', () => {
       expect.anything(),
       expect.objectContaining({ session: 'inherit' })
     );
+  });
+});
+
+describe('<RiskInputs /> risk score history range', () => {
+  it('opens the history over the Entity Analytics home page range that opened the flyout', () => {
+    const { getByTestId } = render(
+      <RiskInputs
+        entityType={EntityType.host}
+        entityName="my-host"
+        scopeId={getEntityAnalyticsNewHomeScopeId('7d')}
+      />
+    );
+    const tab = getByTestId('mockRiskInputsTab');
+    expect(tab).toHaveAttribute('data-history-from', 'now-7d');
+    expect(tab).toHaveAttribute('data-history-to', 'now');
+  });
+
+  it('leaves the history range to the tab default when the scope pins no range', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.host} entityName="my-host" scopeId="alerts-page" />
+    );
+    expect(getByTestId('mockRiskInputsTab')).not.toHaveAttribute('data-history-from');
   });
 });
 

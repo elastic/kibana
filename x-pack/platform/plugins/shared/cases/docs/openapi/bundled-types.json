@@ -2724,7 +2724,7 @@
         },
         "responses": {
           "201": {
-            "description": "Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.\n",
+            "description": "Indicates a successful call. Returns the new attachment. If some of the alert or event IDs are already attached to the case, they are skipped and the new attachment holds only the remaining IDs.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2793,6 +2793,21 @@
                 "examples": {
                   "response404": {
                     "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Every alert or event ID in the request is already attached to the case.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409_attachment_already_attached"
                   }
                 }
               }
@@ -9439,6 +9454,14 @@
           "error": "Bad Request",
           "message": "Invalid attachment payload for type 'comment': data.content: Comment content must be a non-empty string",
           "statusCode": 400
+        }
+      },
+      "response_409_attachment_already_attached": {
+        "summary": "Every alert or event in the request is already attached to the case.",
+        "value": {
+          "error": "Conflict",
+          "message": "Every id in the request is already attached to case 293f1bfe-c4ab-4a0b-9a36-9fd4a1d7d2b1.",
+          "statusCode": 409
         }
       },
       "response_404_no_attachments": {

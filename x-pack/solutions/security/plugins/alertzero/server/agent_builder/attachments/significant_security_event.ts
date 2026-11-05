@@ -29,6 +29,8 @@ export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
  * Sized so the sum of all sections, plus one over-budget item each and the fixed header,
  * stays inside `maxContentLength`. Real payloads carry short items and never reach it.
  */
+const HIT_SOURCE_LABELS = { tier1: 'IOC Hunt', tier2: 'Behavior Hunt' } as const;
+
 const SECTION_CHAR_BUDGET = 8_000;
 
 /**
@@ -115,9 +117,11 @@ const formatSignificantSecurityEventForAgent = (
       // Tier 1 status of `environment_hits_found` can accompany a finding Tier 1 never
       // corroborated; without this line the model attributes the hit to the wrong tier.
       `Confirmed by: ${
-        hitSources.length > 0 ? hitSources.join(', ') : 'nothing (no confirmed hit)'
+        hitSources.length > 0
+          ? hitSources.map((source) => HIT_SOURCE_LABELS[source]).join(', ')
+          : 'nothing (no confirmed hit)'
       }`,
-      `Tier 1: ${tier1.status} — ${tier1.counts.total_hits} total hits${
+      `IOC Hunt: ${tier1.status} — ${tier1.counts.total_hits} total hits${
         tier1.counts.returned_hits < tier1.counts.total_hits
           ? ` (${tier1.counts.returned_hits} returned)`
           : ''
@@ -139,7 +143,7 @@ const formatSignificantSecurityEventForAgent = (
       pushBoundedSection(lines, tier1.resolved_iocs, (ioc) => `    ${ioc.type}: ${ioc.value}`);
     }
     if (tier2) {
-      lines.push(`Tier 2: ${tier2.status}${truncationNote(tier2.behaviors_truncated)}`);
+      lines.push(`Behavior Hunt: ${tier2.status}${truncationNote(tier2.behaviors_truncated)}`);
       pushBoundedSection(
         lines,
         tier2.behaviors,
@@ -271,8 +275,8 @@ The payload contains:
 - alerts: \`{ alert_id, index, timestamp? }\` — always include the concrete alerts index
 - events: \`{ event_id, source_index, timestamp?, matched? }\` — matched names the IOC or technique that produced the hit; source_index must be the hit's concrete _index (the .ds-... backing name for a data stream), never the data stream or alias searched
 - timeline: an ordered sequence of (at, what) entries describing what happened
-- hunt_result: structured Tier 1 / Tier 2 findings (status, counts, per-index hit detail, resolved IOCs, Tier 2 behaviors). Prefer these numbers over evidence_for/evidence_against when both are present.
-  "Confirmed by" names the tier(s) that corroborated this finding; the tier statuses are report-scoped, so attribute the hit to that line and not to a tier status. A Tier 2 behavior with "no verdict" learned nothing and is not evidence of a clean environment.
+- hunt_result: structured IOC Hunt / Behavior Hunt findings (status, counts, per-index hit detail, resolved IOCs, derived behaviors). Prefer these numbers over evidence_for/evidence_against when both are present.
+  "Confirmed by" names the hunt(s) that corroborated this finding; the hunt statuses are report-scoped, so attribute the hit to that line and not to a hunt status. A behavior with "no verdict" learned nothing and is not evidence of a clean environment.
 - hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its analyst narrative on top of hunt_result
 - maps_to_proposal, evaluation_record_ref: optional links into the proposal/evaluation subsystem
 

@@ -27,9 +27,22 @@ export class DigitalExperiencePage {
   public readonly summary: Locator;
   public readonly pageLoadsChart: Locator;
   public readonly otelOverviewKpis: Locator;
+  public readonly otelOverviewVitals: Locator;
   public readonly otelOverviewPageLoads: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
+  public readonly sessionsTab: Locator;
+  public readonly sessionsTable: EuiBasicTableObject;
+  public readonly sessionsSearch: Locator;
+  public readonly sessionsErrorsFilter: Locator;
+  public readonly sessionsClearFilters: Locator;
+  public readonly sessionsKpis: Locator;
+  public readonly sessionsEmpty: Locator;
+  public readonly sessionSummary: Locator;
+  public readonly sessionBack: Locator;
+  public readonly sessionWaterfallSegments: Locator;
+  public readonly sessionWaterfallErrors: Locator;
+  public readonly sessionPageVisits: Locator;
   public readonly breadcrumbs: Locator;
   public readonly navEntry: Locator;
   public readonly legacyNavEntry: Locator;
@@ -52,9 +65,23 @@ export class DigitalExperiencePage {
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
     this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
+    this.otelOverviewVitals = page.getByTestId('digitalExperienceOverviewVitals');
     this.otelOverviewPageLoads = page.getByTestId('digitalExperienceOverviewPageLoads');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
+    this.sessionsTab = page.getByTestId('digitalExperienceTab-sessions');
+    this.sessionsTable = page.components.basicTable('digitalExperienceSessionsTable');
+    this.sessionsSearch = page.getByTestId('digitalExperienceSessionsSearch');
+    this.sessionsErrorsFilter = page.getByTestId('digitalExperienceSessionsErrorsFilter');
+    this.sessionsClearFilters = page.getByTestId('digitalExperienceSessionsClearFilters');
+    this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
+    this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
+    this.sessionSummary = page.getByTestId('digitalExperienceSessionSummary');
+    // The session page's AppHeader back control.
+    this.sessionBack = page.getByTestId('appHeaderBack');
+    this.sessionWaterfallSegments = page.getByTestId('digitalExperienceSessionWaterfallSegment');
+    this.sessionWaterfallErrors = page.getByTestId('digitalExperienceSessionWaterfallError');
+    this.sessionPageVisits = page.getByTestId('digitalExperiencePageVisit');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');
@@ -73,10 +100,24 @@ export class DigitalExperiencePage {
     await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(query)}`));
   }
 
-  async gotoApplication(serviceName: string, timeRange = TIME_RANGE): Promise<void> {
+  /** Opens the Overview with the given URL query, by default only the time range. */
+  async gotoApplication(
+    serviceName: string,
+    query: Record<string, string> = TIME_RANGE
+  ): Promise<void> {
     await this.page.goto(
-      this.kbnUrl.get(`${APP_PATH}/${serviceName}?${new URLSearchParams(timeRange)}`)
+      this.kbnUrl.get(`${APP_PATH}/${serviceName}?${new URLSearchParams(query)}`)
     );
+  }
+
+  /** Opens the Sessions tab of an EDOT Browser application, with more list params if given. */
+  async gotoSessions(
+    serviceName: string,
+    query: Record<string, string> = {},
+    timeRange: Record<string, string> = TIME_RANGE
+  ): Promise<void> {
+    const search = new URLSearchParams({ ...timeRange, source: 'otel', ...query });
+    await this.page.goto(this.kbnUrl.get(`${APP_PATH}/${serviceName}/sessions?${search}`));
   }
 
   async gotoLegacyUserExperience(): Promise<void> {
@@ -110,6 +151,34 @@ export class DigitalExperiencePage {
   async selectSource(label: string): Promise<void> {
     await this.sourceFilter.click();
     await this.sourceList.selectOption(label);
+  }
+
+  sessionRow(sessionId: string): Locator {
+    return this.page.getByTestId(`digitalExperienceSessionRow-${sessionId}`);
+  }
+
+  sessionLink(sessionId: string): Locator {
+    return this.sessionRow(sessionId).getByTestId('digitalExperienceSessionLink');
+  }
+
+  sessionsKpi(
+    id: 'total' | 'withErrors' | 'medianDuration' | 'avgPageViews' | 'bounceRate'
+  ): Locator {
+    return this.page.getByTestId(`digitalExperienceSessionsKpi-${id}`);
+  }
+
+  /** Narrows the sessions to one value of a facet, e.g. `('browser', 'Firefox')`. */
+  async selectSessionsFacet(
+    facet: 'browser' | 'os' | 'country' | 'entryPage',
+    value: string
+  ): Promise<void> {
+    const testSubj = `digitalExperienceSessionsFacet-${facet}`;
+    await this.page.getByTestId(testSubj).click();
+    await this.page.getByTestId(`${testSubj}Option-${value}`).click();
+  }
+
+  async gotoSessionsPage(pageNumber: number): Promise<void> {
+    await this.page.getByTestId(`pagination-button-${pageNumber - 1}`).click();
   }
 
   breadcrumbLink(name: string): Locator {

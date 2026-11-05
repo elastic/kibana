@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
@@ -27,24 +27,28 @@ import {
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
-} from './app/app_header';
+} from './components/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useDeveloperMode } from './hooks/use_developer_mode';
-import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
+import { StartInvestigationPanel } from './components/start_investigation_panel';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from './service_account/use_investigator_service_account';
+} from './data/service_accounts/use_investigator_service_account';
 import { DETECTION_TAB_IDS, isDetectionTabId } from './pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from './knowledge/knowledge_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
+
+// Module-lifetime state survives app remounts but resets on browser reload.
+const onboardingFinishedSpacesThisLoad = new Set<string>();
 
 /** Fixed page names, so ids and query strings never reach execution context. */
 const getExecutionContextPage = (pathname: string, canUseAutomationsPage: boolean): string => {
@@ -110,6 +114,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
   const { pathname, search } = useLocation();
   const history = useHistory();
+  const spaceBasePath = basePath.get() || 'default';
   const { canShow, canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
@@ -187,8 +192,38 @@ export function NightshiftPage(): React.ReactElement | null {
     dismissOnboarding();
   }, [dismissOnboarding, history]);
   const isOnboarding = !canUseAutomationsPage && onboarding.showOnboarding;
+  const previousIsOnboarding = useRef(isOnboarding);
+  const [onboardingFinishedSpace, setOnboardingFinishedSpace] = useState<string | undefined>(() =>
+    onboardingFinishedSpacesThisLoad.has(spaceBasePath) ? spaceBasePath : undefined
+  );
+  useEffect(() => {
+    if (previousIsOnboarding.current && !isOnboarding) {
+      onboardingFinishedSpacesThisLoad.add(spaceBasePath);
+      setOnboardingFinishedSpace(spaceBasePath);
+    }
+    previousIsOnboarding.current = isOnboarding;
+  }, [isOnboarding, spaceBasePath]);
+  const onboardingFinishedThisLoad =
+    onboardingFinishedSpace === spaceBasePath ||
+    onboardingFinishedSpacesThisLoad.has(spaceBasePath);
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
+
+  // The landing page owns the start investigation modal so the header's primary action can toggle it.
+  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
+  const toggleStartInvestigation = useCallback(
+    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
+    []
+  );
+  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
+  useEffect(() => {
+    setIsStartInvestigationOpen(false);
+  }, [pathname]);
+  const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
+  // Starting an investigation only needs the investigations client, so the action and its modal
+  // don't depend on what the landing list renders.
+  const canStartInvestigation =
+    canManage && isLandingContent && nightshiftInvestigations?.investigationsClient != null;
 
   // Nightshift only works as its service account, so a space that is not set up shows the setup
   // step instead of the app. A failed status read (e.g. missing privileges) does not block it.
@@ -412,6 +447,7 @@ export function NightshiftPage(): React.ReactElement | null {
             automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
             onDetectionsClick={!hidesHeaderActions ? navigateToDetections : undefined}
             detectionsHref={!hidesHeaderActions ? detectionsHref : undefined}
+            onStartInvestigationClick={canStartInvestigation ? toggleStartInvestigation : undefined}
             back={
               canUseAutomationsPage
                 ? {
@@ -449,10 +485,13 @@ export function NightshiftPage(): React.ReactElement | null {
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp />
+              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
             )}
           </EuiPageTemplate.Section>
         </>
+      )}
+      {canStartInvestigation && isStartInvestigationOpen && (
+        <StartInvestigationPanel onClose={closeStartInvestigation} />
       )}
       {canViewCustomContext && isCustomContextFlyoutOpen && (
         <CustomContextFlyout canEdit={canManage} onClose={closeCustomContextFlyout} />

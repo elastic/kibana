@@ -275,6 +275,8 @@ describe('sessions routes', () => {
           start: START,
           end: END,
           browser: 'Chrome',
+          hasErrors: true,
+          minDurationMs: 10_000,
           sortField: 'start_time',
           sortDirection: 'desc',
           page: 0,
@@ -293,6 +295,7 @@ describe('sessions routes', () => {
       page: 0,
       perPage: 25,
       facets: { browsers: 'Chrome', os: undefined, countries: undefined, entryPages: undefined },
+      filters: { hasErrors: true, minDurationMs: 10_000, maxDurationMs: undefined },
     });
   });
 
@@ -333,6 +336,24 @@ describe('sessions routes', () => {
 
     it('rejects a start that is not before the end', () => {
       expect(querySchemaOf().safeParse({ start: range.end, end: range.start }).success).toBe(false);
+    });
+
+    it('parses the errors and duration filters', () => {
+      expect(
+        querySchemaOf().parse({
+          ...range,
+          hasErrors: 'true',
+          minDurationMs: '10000',
+          maxDurationMs: '60000',
+        })
+      ).toMatchObject({ hasErrors: true, minDurationMs: 10_000, maxDurationMs: 60_000 });
+      expect(querySchemaOf().parse({ ...range, hasErrors: 'false' }).hasErrors).toBe(false);
+      expect(querySchemaOf().safeParse({ ...range, hasErrors: 'yes please' }).success).toBe(false);
+      expect(querySchemaOf().safeParse({ ...range, minDurationMs: '-1' }).success).toBe(false);
+      expect(
+        querySchemaOf().safeParse({ ...range, minDurationMs: '60000', maxDurationMs: '60000' })
+          .success
+      ).toBe(false);
     });
 
     it('only accepts the shared sort fields, and bounded paging', () => {

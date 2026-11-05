@@ -59,6 +59,10 @@ describe('EvalsPlugin modes', () => {
   };
 
   describe('runtime', () => {
+    it('is the default', () => {
+      expect(configSchema.validate({ enabled: true }).mode).toBe('runtime');
+    });
+
     it('is accepted alongside full, and no other mode is', () => {
       expect(configSchema.validate({ enabled: true, mode: 'runtime' }).mode).toBe('runtime');
       expect(() => configSchema.validate({ enabled: true, mode: 'ui' })).toThrow();
@@ -110,10 +114,6 @@ describe('EvalsPlugin modes', () => {
   });
 
   describe('full', () => {
-    it('is the default', () => {
-      expect(configSchema.validate({ enabled: true }).mode).toBe('full');
-    });
-
     it('loads routes, the feature, data streams, saved objects and workflow steps', () => {
       const { coreSetup, features, encryptedSavedObjects, workflowsExtensions } = setup({
         mode: 'full',

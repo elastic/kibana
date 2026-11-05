@@ -9,12 +9,13 @@
 
 jest.mock('../../affected-packages/index.ts', () => ({
   ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: ['always/jest.integration.config.js'],
-  CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT'],
-  CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT', 'global/**/*.ts'],
+  CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT', 'broad_int/**'],
+  CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT', 'global/**/*.ts', 'broad/**'],
   getAffectedPackages: jest.fn(),
   filterFilesByPackages: (files: string[], pkgs: Set<string>) =>
     files.filter((f) => [...pkgs].some((pkg) => f.startsWith(pkg))),
   createScopeMatcher: jest.requireActual('../../affected-packages/utils.ts').createScopeMatcher,
+  filterIgnoredFiles: jest.requireActual('../../affected-packages/utils.ts').filterIgnoredFiles,
 }));
 
 jest.mock('./jest_configs.ts', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
@@ -93,6 +94,17 @@ describe('filterJestIntegrationConfigsByAffected', () => {
     ]);
   });
 
+  it('does not treat a documentation-only change to a critical file as critical', () => {
+    const configs = ['other/jest.integration.config.js', 'affected/jest.integration.config.js'];
+
+    const result = filterJestIntegrationConfigsByAffected(
+      configs,
+      context(['affected/'], ['broad_int/README.md'])
+    );
+
+    expect(result).toEqual(['affected/jest.integration.config.js']);
+  });
+
   it('returns all configs unchanged when a critical file changed', () => {
     const configs = ['other/jest.integration.config.js'];
 
@@ -105,6 +117,28 @@ describe('filterJestIntegrationConfigsByAffected', () => {
 describe('filterJestUnitConfigsByAffected', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('does not treat documentation-only changes in a critical path as critical', () => {
+    const configs = ['other/jest.config.js', 'affected/jest.config.js'];
+
+    const result = filterJestUnitConfigsByAffected(
+      configs,
+      context(['affected/'], ['broad/README.md', 'broad/docs/guide.md', 'broad/CHANGELOG'])
+    );
+
+    expect(result).toEqual(['affected/jest.config.js']);
+  });
+
+  it('still treats a critical source file as critical when mixed with documentation changes', () => {
+    const configs = ['other/jest.config.js', 'affected/jest.config.js'];
+
+    const result = filterJestUnitConfigsByAffected(
+      configs,
+      context(['affected/'], ['broad/README.md', 'broad/index.ts'])
+    );
+
+    expect(result).toEqual(configs);
   });
 
   it('keeps package-selected configs while comparing Moon unit selection', () => {
