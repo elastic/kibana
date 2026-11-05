@@ -71,15 +71,13 @@ export const moveAction = (
   const previewRect = (() => {
     if (isResize) {
       const { resizeOptions } = currentPanelData;
-      const maxRight = gridLayoutElement
-        ? gridLayoutElement.getBoundingClientRect().right
-        : window.innerWidth;
+      const maxRight = gridLayoutRect?.right ?? window.innerWidth;
       return getResizePreviewRect({
         activePanel,
         pointerPixel,
         runtimeSettings,
         resizeOptions,
-        maxRight,
+        maxRight: maxRight - gutterSize,
       });
     } else {
       return getDragPreviewRect({ activePanel, pointerPixel });

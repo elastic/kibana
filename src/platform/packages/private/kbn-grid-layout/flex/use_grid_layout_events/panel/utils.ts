@@ -63,6 +63,17 @@ export const getResizePreviewRect = ({
     ...getDefaultResizeOptions(runtimeSettings),
     ...resizeOptions,
   };
+  console.log({
+    right: Math.max(
+      Math.min(
+        pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
+        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }), // max width of panel
+        // cannot extend width past the right edge of the grid layout
+        maxRight
+      ),
+      panelRect.left + getColumnCountInPixels({ columnCount: minWidth, runtimeSettings }) // min width of panel
+    ),
+  });
   return {
     left: panelRect.left,
     top: panelRect.top,
