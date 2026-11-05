@@ -18,25 +18,18 @@ jest.mock('@kbn/core-di-browser', () => ({
         getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
       };
     }
-    if (token === 'http') {
-      return {
-        basePath: { prepend: (path: string) => `/base${path}` },
-      };
-    }
     return {};
   },
   CoreStart: (key: string) => key,
 }));
 
-const mockWorkflowData: Record<string, object> = {};
 const mockUseFetchWorkflow = jest.fn();
 
 jest.mock('../../../hooks/use_fetch_workflow', () => ({
-  useFetchWorkflow: (id: string, isEnabled?: boolean, options?: { notifyOnError?: boolean }) =>
-    mockUseFetchWorkflow(id, isEnabled, options),
+  useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
-const successState = (id: string) => ({
+const successState = (id: string, overrides: object = {}) => ({
   data: {
     id,
     name: `Workflow ${id}`,
@@ -46,7 +39,7 @@ const successState = (id: string) => ({
         { type: '.slack', name: 'send slack' },
       ],
     },
-    ...mockWorkflowData[id],
+    ...overrides,
   },
   isLoading: false,
   isError: false,
@@ -70,7 +63,7 @@ const renderCard = (destination: ActionPolicyDestination) =>
 describe('DestinationCard', () => {
   beforeEach(() => {
     mockUseFetchWorkflow.mockReset();
-    mockUseFetchWorkflow.mockImplementation(successState);
+    mockUseFetchWorkflow.mockImplementation((id: string) => successState(id));
   });
 
   it('fetches the workflow without an error toast', () => {
@@ -165,14 +158,13 @@ describe('DestinationCard', () => {
   });
 
   it('renders the connector icons for a workflow with only a console step', () => {
-    mockWorkflowData['wf-console'] = {
-      definition: { steps: [{ type: 'console', name: 'log' }] },
-    };
+    mockUseFetchWorkflow.mockReturnValue(
+      successState('wf-console', { definition: { steps: [{ type: 'console', name: 'log' }] } })
+    );
     renderCard({ type: 'workflow', id: 'wf-console' });
 
     const icons = screen.getByTestId('actionPolicyDestinationConnectorIcons');
     expect(icons.children.length).toBe(1);
-    delete mockWorkflowData['wf-console'];
   });
 
   it('renders a link button pointing to the workflow URL', () => {
@@ -185,13 +177,14 @@ describe('DestinationCard', () => {
   });
 
   it('renders the workflow description when present', () => {
-    mockWorkflowData['wf-42'] = { description: 'Sends alerts to email and Slack' };
+    mockUseFetchWorkflow.mockReturnValue(
+      successState('wf-42', { description: 'Sends alerts to email and Slack' })
+    );
     renderCard({ type: 'workflow', id: 'wf-42' });
 
     expect(screen.getByTestId('actionPolicyDestinationCardDescription')).toHaveTextContent(
       'Sends alerts to email and Slack'
     );
-    delete mockWorkflowData['wf-42'];
   });
 
   it('does not render a description element when description is absent', () => {

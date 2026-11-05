@@ -16,18 +16,12 @@ interface Props {
 }
 
 /** Stacked detail cards for action policy destinations. */
-export const DestinationCardList = ({ destinations, 'data-test-subj': dataTestSubj }: Props) => {
-  if (destinations.length === 0) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
-      {destinations.map((destination) => (
-        <EuiFlexItem key={`${destination.type}-${destination.id}`}>
-          <DestinationCard destination={destination} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
+export const DestinationCardList = ({ destinations, 'data-test-subj': dataTestSubj }: Props) => (
+  <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
+    {destinations.map((destination) => (
+      <EuiFlexItem key={`${destination.type}-${destination.id}`}>
+        <DestinationCard destination={destination} />
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);

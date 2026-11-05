@@ -123,12 +123,12 @@ export const WorkflowSelector = () => {
   const createWorkflowUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path: '/create' });
 
   return (
-    <Controller
-      name="destinations"
-      control={control}
-      rules={DESTINATIONS_RULES}
-      render={({ field, fieldState: { error } }) => (
-        <>
+    <>
+      <Controller
+        name="destinations"
+        control={control}
+        rules={DESTINATIONS_RULES}
+        render={({ field, fieldState: { error } }) => (
           <EuiFormRow
             label={i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflows', {
               defaultMessage: 'Workflows',
@@ -173,13 +173,17 @@ export const WorkflowSelector = () => {
               options={workflowOptions}
             />
           </EuiFormRow>
-          {field.value.length > 0 && <EuiSpacer size="s" />}
+        )}
+      />
+      {destinations.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
           <DestinationCardList
-            destinations={field.value}
+            destinations={destinations}
             data-test-subj="actionPolicyFormDestinationCards"
           />
         </>
       )}
-    />
+    </>
   );
 };
