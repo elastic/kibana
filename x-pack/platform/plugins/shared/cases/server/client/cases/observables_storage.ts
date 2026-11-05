@@ -120,6 +120,7 @@ export const toObservable = ({
   typeKey: attributes.data.typeKey,
   value: attributes.data.value,
   description: attributes.data.description ?? null,
+  ...(attributes.data.metadata != null && { metadata: attributes.data.metadata }),
   createdAt: attributes.created_at,
   updatedAt: attributes.updated_at ?? null,
 });
@@ -195,7 +196,7 @@ const toAttachmentUser = (user: CasesClientArgs['user']): AttachmentUser => ({
 
 /** Attributes of an observable attachment; `legacyId` is set only for observables migrated off the case. */
 export const buildObservableAttachmentAttributes = ({
-  observable: { typeKey, value, description },
+  observable: { typeKey, value, description, metadata },
   legacyId,
   owner,
   createdAt,
@@ -215,6 +216,7 @@ export const buildObservableAttachmentAttributes = ({
     typeKey,
     value,
     description: description ?? null,
+    ...(metadata != null && { metadata }),
     ...(legacyId != null && { legacyId }),
   },
   created_at: createdAt,
@@ -268,12 +270,13 @@ export const createCaseObservables = async ({
     const failures: string[] = [];
     results.forEach((result, index) => {
       if (!isSavedObjectErrorResult(result)) {
-        const { typeKey, value, description } = chunk[index];
+        const { typeKey, value, description, metadata } = chunk[index];
         added.push({
           id: result.id,
           typeKey,
           value,
           description: description ?? null,
+          ...(metadata != null && { metadata }),
           createdAt,
           updatedAt: null,
         });
@@ -294,8 +297,12 @@ export const createCaseObservables = async ({
   return { added, duplicates };
 };
 
-/** Updates an observable's description in place; its type key and value, and so its id, stay. */
-export const updateCaseObservableDescription = async (
+/**
+ * Updates an observable's description and metadata in place; its type key and value, and so its
+ * id, stay. `data.metadata` is mapped `flattened`, so a partial update replaces it whole instead of
+ * merging keys: absent keeps it, an object replaces it and `null` clears it.
+ */
+export const updateCaseObservable = async (
   observableId: string,
   data: ObservableAttachmentData,
   { unsecuredSavedObjectsClient, user }: CasesClientArgs
@@ -419,6 +426,18 @@ export const findCaseObservables = async (
   };
 };
 
+/**
+ * Fields the case preview reads. Metadata is left out: it is read through observables `_find`, and
+ * up to 50 previews with 20 entries each would otherwise grow every case response. Saved-object
+ * aggregations accept `_source` only as include paths, not excludes.
+ */
+const PREVIEW_SOURCE_FIELDS = [
+  'type',
+  ...['type', 'data.typeKey', 'data.value', 'data.description', 'created_at', 'updated_at'].map(
+    attachmentField
+  ),
+];
+
 interface ObservablesSummaryAggs {
   refs: {
     caseIds: {
@@ -470,6 +489,7 @@ export const getObservablesSummary = async (
                   preview: {
                     top_hits: {
                       size: previewSize,
+                      _source: PREVIEW_SOURCE_FIELDS,
                       sort: [{ [attachmentField('created_at')]: { order: 'asc' } }],
                     },
                   },
