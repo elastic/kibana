@@ -8,6 +8,7 @@
 import type {
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingDeploymentListItem,
   CloudOnboardingInstance,
   CloudProvider,
   DeploymentMethod,
@@ -30,6 +31,8 @@ export interface CreateCloudOnboardingDeploymentRequest {
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
     agentPolicyIds?: string[];
+    packageNames?: string[];
+    serviceNames?: Record<string, string>;
   };
 }
 
@@ -39,6 +42,33 @@ export interface CreateCloudOnboardingDeploymentResponse {
 
 export interface GetCloudOnboardingDeploymentResponse {
   item: CloudOnboardingDeployment;
+}
+
+export interface GetCloudOnboardingDeploymentsRequest {
+  query?: {
+    packageName?: string;
+    provider?: CloudProvider;
+    page?: number;
+    perPage?: number;
+  };
+}
+
+export interface GetCloudOnboardingDeploymentsResponse {
+  items: CloudOnboardingDeploymentListItem[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export interface GetCloudOnboardingDeploymentCountsRequest {
+  query?: {
+    provider?: CloudProvider;
+  };
+}
+
+export interface GetCloudOnboardingDeploymentCountsResponse {
+  /** Number of deployment instances that cover each package, by package name. */
+  counts: Record<string, number>;
 }
 
 export interface UpdateCloudOnboardingDeploymentRequest {
@@ -55,6 +85,8 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     /** Set to null to clear the namespace. */
     namespace?: string | null;
     services?: string[];
+    packageNames?: string[];
+    serviceNames?: Record<string, string>;
     serviceVars?: Record<string, Record<string, unknown>>;
     /** Replaces the stored list of service instances. */
     instances?: CloudOnboardingInstance[];
@@ -69,6 +101,10 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
     connectorId?: string | null;
   };
+}
+
+export interface DeleteCloudOnboardingDeploymentResponse {
+  id: string;
 }
 
 export interface UpdateCloudOnboardingDeploymentResponse {

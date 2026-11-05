@@ -28,7 +28,7 @@ export function SvlSearchNavigationServiceProvider({
         await PageObjects.common.navigateToApp('searchHomepage', {
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
+        await testSubjects.existOrFail('elasticsearchHomePage', { timeout: 2000 });
       });
     },
     async navigateToGettingStartedPage() {
