@@ -6,7 +6,7 @@
  */
 
 import Fs from 'fs';
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import { compareScores, pairScores } from '@kbn/evals-common';
@@ -18,6 +18,12 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
+import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
+import {
+  DEFAULT_REGRESSION_MIN_PAIRS,
+  evaluateRegressionGate,
+  formatRegressionGateReport,
+} from '../../utils/reporting/regression_gate';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
@@ -42,6 +48,20 @@ export const compareCmd: Command<void> = {
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     --space-ids        Spaces the experiments were run in (same value as "evals run")
 
+  Regression gate:
+    --fail-on-regression            Exit non-zero if any evaluator got significantly worse
+                                    (direction-aware; higher-is-better and lower-is-better
+                                    evaluators are both handled, neutral ones never trip)
+    --regression-evaluators         Comma-separated evaluator names that can trip the gate
+                                    (default: all). Names absent from the
+                                    comparison warn; if none match, the run fails.
+    --min-pairs                     Minimum paired scores for an evaluator to be gated
+                                    (default: ${DEFAULT_REGRESSION_MIN_PAIRS}). Fewer pairs are reported as
+                                    "insufficient pairs" and cannot trip the gate.
+    --no-multiplicity-correction    Judge significance on raw p-values. By default p-values are
+                                    Holm-Bonferroni adjusted across all comparisons in the run
+                                    and both raw and adjusted values are shown.
+
   Environment:
     EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
     EVAL_KBN_API_KEY  API key for authenticating to the target Kibana
@@ -56,7 +76,11 @@ export const compareCmd: Command<void> = {
       'output',
       'refresh-url',
       'space-ids',
+      'regression-evaluators',
+      'min-pairs',
     ],
+    boolean: ['fail-on-regression', 'multiplicity-correction'],
+    default: { 'fail-on-regression': false, 'multiplicity-correction': true },
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
       --suite            Suite ID filter for baseline lookup and score filtering
@@ -65,6 +89,10 @@ export const compareCmd: Command<void> = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
+      --fail-on-regression            Exit non-zero if any evaluator got significantly worse
+      --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
+      --min-pairs                     Minimum paired scores for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
+      --no-multiplicity-correction    Use raw p-values instead of Holm-Bonferroni adjusted ones
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -75,12 +103,24 @@ export const compareCmd: Command<void> = {
     const kibanaUrl = flagsReader.string('kibana-url');
     const outputPath = flagsReader.string('output');
     const refreshUrl = flagsReader.string('refresh-url');
+    const failOnRegression = flagsReader.boolean('fail-on-regression');
+    const multiplicityCorrection = flagsReader.boolean('multiplicity-correction');
+    const regressionEvaluators = flagsReader
+      .string('regression-evaluators')
+      ?.split(',')
+      .map((name) => name.trim())
+      .filter(Boolean);
+    const minPairs = flagsReader.number('min-pairs') ?? DEFAULT_REGRESSION_MIN_PAIRS;
     // Scores are only readable from the spaces they were ingested into, so a
     // comparison has to be made from where the runs put them.
     const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
+    }
+
+    if (!Number.isInteger(minPairs) || minPairs < 1) {
+      throw createFlagError('--min-pairs must be a positive integer.');
     }
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
@@ -168,7 +208,9 @@ export const compareCmd: Command<void> = {
 
       if (!baselineMetadata) {
         log.warning(
-          `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`
+          `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.${
+            failOnRegression ? ' --fail-on-regression: regression gate was NOT evaluated.' : ''
+          }`
         );
         return;
       }
@@ -279,11 +321,42 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = compareScores(pairs);
-    if (results.length === 0) {
-      log.warning('No comparison results returned.');
+    const comparisonResults = compareScores(pairs);
+    if (comparisonResults.length === 0) {
+      log.warning(
+        `No comparison results returned.${
+          failOnRegression ? ' --fail-on-regression: regression gate was NOT evaluated.' : ''
+        }`
+      );
       return;
     }
+
+    if (regressionEvaluators) {
+      const known = new Set(comparisonResults.map((result) => result.evaluatorName));
+      const unknown = regressionEvaluators.filter((name) => !known.has(name));
+      if (failOnRegression && unknown.length === regressionEvaluators.length) {
+        // Every name missing means the gate would check nothing and pass vacuously, most likely a typo.
+        throw createFlagError(
+          `--regression-evaluators matches no evaluator in this comparison. Available: ${[...known]
+            .sort()
+            .join(', ')}`
+        );
+      }
+      if (unknown.length > 0) {
+        // Partial mismatch is only a warning: one list may be shared across suites with different evaluators.
+        log.warning(
+          `--regression-evaluators names evaluator(s) not present in this comparison: ${unknown.join(
+            ', '
+          )}. Available: ${[...known].sort().join(', ')}`
+        );
+      }
+    }
+
+    // Holm runs over every comparison in this run (all datasets x evaluators), so the family is
+    // the full set of hypotheses the report shows.
+    const results = multiplicityCorrection
+      ? applyHolmCorrection(comparisonResults)
+      : comparisonResults;
 
     if (format === 'markdown') {
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
@@ -327,6 +400,20 @@ export const compareCmd: Command<void> = {
 
       log.info(`\n\n${report.header.join('\n')}`);
       log.info(`\n${report.summary}\n${report.tableOutput}`);
+    }
+
+    if (failOnRegression) {
+      const decision = evaluateRegressionGate({
+        results,
+        minPairs,
+        evaluators: regressionEvaluators,
+      });
+      const gateReport = formatRegressionGateReport({ decision, minPairs });
+
+      if (decision.tripped) {
+        throw createFailError(gateReport);
+      }
+      log.info(gateReport);
     }
   },
 };

@@ -8,6 +8,7 @@
 import type { ComparisonResult } from '@kbn/evals-common';
 import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
+import { applyHolmCorrection } from './holm_correction';
 
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
@@ -366,6 +367,37 @@ describe('formatMarkdownCompareReport', () => {
 
       expect(output).not.toContain('Warning');
       expect(output).toContain('yesterday');
+    });
+  });
+
+  describe('multiplicity correction', () => {
+    const manyResults = Array.from({ length: 10 }, (_, i) =>
+      makeResult({ evaluatorName: `Eval${i}`, pValue: i === 0 ? 0.03 : 0.9 })
+    );
+
+    it('shows raw and adjusted p-values and bases Sig on the adjusted one', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: applyHolmCorrection(manyResults),
+      });
+
+      expect(output).toContain('| p-value | Adj. p-value | Sig | Outcome |');
+      expect(output).toContain('Holm-Bonferroni adjusted p < 0.05');
+      expect(output).toContain('| 0.03 | 0.30 | No | - |');
+      expect(output).toContain('No significant regressions detected');
+      expect(output).not.toContain('**Significant changes**');
+    });
+
+    it('keeps the single-p-value layout when no correction was applied', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: manyResults,
+      });
+
+      expect(output).not.toContain('Adj. p-value');
+      expect(output).toContain('| 0.03 | Yes | Improvement |');
     });
   });
 });

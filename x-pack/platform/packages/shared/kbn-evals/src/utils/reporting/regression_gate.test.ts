@@ -1,0 +1,191 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ComparisonResult } from '@kbn/evals-common';
+import { applyHolmCorrection } from './holm_correction';
+import { evaluateRegressionGate, formatRegressionGateReport } from './regression_gate';
+
+const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
+  datasetId: 'ds-1',
+  datasetName: 'Dataset One',
+  evaluatorName: 'Correctness',
+  sampleSize: 20,
+  meanTarget: 0.6,
+  meanBaseline: 0.8,
+  pValue: 0.01,
+  direction: 'maximize',
+  metricType: 'continuous_bounded',
+  hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
+  ...overrides,
+});
+
+describe('evaluateRegressionGate', () => {
+  it('trips on a significant drop in a higher-is-better evaluator', () => {
+    const decision = evaluateRegressionGate({ results: [makeResult()] });
+
+    expect(decision.tripped).toBe(true);
+    expect(decision.regressions).toEqual([
+      expect.objectContaining({
+        evaluatorName: 'Correctness',
+        pValue: 0.01,
+        adjustedPValue: null,
+        testId: 'wilcoxon_signed_rank',
+        sampleSize: 20,
+      }),
+    ]);
+    expect(decision.regressions[0].delta).toBeCloseTo(-0.2, 10);
+  });
+
+  it('trips on a significant rise in a lower-is-better evaluator', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({
+          evaluatorName: 'Latency',
+          direction: 'minimize',
+          meanTarget: 5,
+          meanBaseline: 3,
+        }),
+      ],
+    });
+
+    expect(decision.tripped).toBe(true);
+    expect(decision.regressions[0].delta).toBeCloseTo(2, 10);
+  });
+
+  it('does not trip on a significant improvement, in either direction', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({ meanTarget: 0.9, meanBaseline: 0.7 }),
+        makeResult({
+          evaluatorName: 'Latency',
+          direction: 'minimize',
+          meanTarget: 2,
+          meanBaseline: 3,
+        }),
+      ],
+    });
+
+    expect(decision.tripped).toBe(false);
+    expect(decision.regressions).toEqual([]);
+  });
+
+  it('does not trip on a non-significant drop, a null p-value, or a neutral evaluator', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({ evaluatorName: 'NotSignificant', pValue: 0.2 }),
+        makeResult({ evaluatorName: 'NoPValue', pValue: null }),
+        makeResult({ evaluatorName: 'Neutral', direction: 'neutral' }),
+      ],
+    });
+
+    expect(decision.tripped).toBe(false);
+  });
+
+  it('does not trip when the means are equal, whatever the p-value', () => {
+    const decision = evaluateRegressionGate({
+      results: [makeResult({ meanTarget: 0.7, meanBaseline: 0.7, pValue: 0.001 })],
+    });
+
+    expect(decision.tripped).toBe(false);
+  });
+
+  it('reports insufficient pairs without tripping, even for a large significant drop', () => {
+    const decision = evaluateRegressionGate({
+      results: [makeResult({ sampleSize: 4 })],
+      minPairs: 10,
+    });
+
+    expect(decision.tripped).toBe(false);
+    expect(decision.insufficientPairs).toEqual([
+      { datasetName: 'Dataset One', evaluatorName: 'Correctness', sampleSize: 4 },
+    ]);
+  });
+
+  it('uses --min-pairs as an inclusive lower bound', () => {
+    expect(
+      evaluateRegressionGate({ results: [makeResult({ sampleSize: 10 })], minPairs: 10 }).tripped
+    ).toBe(true);
+    expect(
+      evaluateRegressionGate({ results: [makeResult({ sampleSize: 9 })], minPairs: 10 }).tripped
+    ).toBe(false);
+  });
+
+  it('limits the gate to the listed evaluators', () => {
+    const results = [
+      makeResult({ evaluatorName: 'Correctness' }),
+      makeResult({ evaluatorName: 'Groundedness' }),
+    ];
+
+    const scoped = evaluateRegressionGate({ results, evaluators: ['Groundedness'] });
+    expect(scoped.regressions.map((r) => r.evaluatorName)).toEqual(['Groundedness']);
+
+    const none = evaluateRegressionGate({ results, evaluators: ['Relevance'] });
+    expect(none.tripped).toBe(false);
+    expect(none.insufficientPairs).toEqual([]);
+
+    const all = evaluateRegressionGate({ results, evaluators: [] });
+    expect(all.regressions).toHaveLength(2);
+  });
+
+  it('judges significance on the Holm-adjusted p-value when a correction was applied', () => {
+    // 10 comparisons, one raw p of 0.03 (below alpha) that Holm lifts to 0.3.
+    const results = Array.from({ length: 10 }, (_, i) =>
+      makeResult({ evaluatorName: `E${i}`, pValue: i === 0 ? 0.03 : 0.9 })
+    );
+
+    expect(evaluateRegressionGate({ results }).tripped).toBe(true);
+
+    const corrected = evaluateRegressionGate({ results: applyHolmCorrection(results) });
+    expect(corrected.tripped).toBe(false);
+  });
+
+  it('still trips when the drop survives Holm correction and reports both p-values', () => {
+    const results = [
+      makeResult({ evaluatorName: 'Strong', pValue: 0.001 }),
+      makeResult({ evaluatorName: 'Other', pValue: 0.8, meanTarget: 0.8, meanBaseline: 0.8 }),
+    ];
+
+    const decision = evaluateRegressionGate({ results: applyHolmCorrection(results) });
+
+    expect(decision.tripped).toBe(true);
+    expect(decision.regressions[0]).toEqual(
+      expect.objectContaining({ pValue: 0.001, adjustedPValue: 0.002, effectivePValue: 0.002 })
+    );
+  });
+
+  it('honours a custom significance threshold', () => {
+    const results = [makeResult({ pValue: 0.03 })];
+
+    expect(evaluateRegressionGate({ results, significanceThreshold: 0.01 }).tripped).toBe(false);
+    expect(evaluateRegressionGate({ results, significanceThreshold: 0.05 }).tripped).toBe(true);
+  });
+});
+
+describe('formatRegressionGateReport', () => {
+  it('lists each regression with delta, p-values, test and pair count', () => {
+    const decision = evaluateRegressionGate({
+      results: applyHolmCorrection([makeResult({ pValue: 0.004 })]),
+    });
+
+    expect(formatRegressionGateReport({ decision })).toBe(
+      [
+        'Regression gate tripped: 1 evaluator(s) got significantly worse (p < 0.05).',
+        '  - Dataset One / Correctness: delta -0.200, p=0.004, adjusted p=0.004, Wilcoxon, n=20 pairs',
+      ].join('\n')
+    );
+  });
+
+  it('warns about unchecked evaluators instead of claiming a clean pass for them', () => {
+    const decision = evaluateRegressionGate({ results: [makeResult({ sampleSize: 3 })] });
+
+    const report = formatRegressionGateReport({ decision, minPairs: 10 });
+
+    expect(report).toContain('Regression gate passed');
+    expect(report).toContain('fewer than 10 pairs and were NOT checked');
+    expect(report).toContain('Dataset One / Correctness: insufficient pairs (n=3)');
+  });
+});
