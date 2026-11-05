@@ -77,6 +77,36 @@ describe('alertAnalysisSkill', () => {
       expect(alertAnalysisSkill.content).toContain("'totalMatched' and 'isTruncated'");
     });
 
+    it('makes an independently suspicious related-alert chain override a routine-looking alert', () => {
+      const corroboration = alertAnalysisSkill.content
+        .split('\n')
+        .find((line) =>
+          line.startsWith('- When multiple related alerts are each independently suspicious')
+        );
+
+      expect(corroboration).toBeDefined();
+      expect(corroboration).toContain("share the investigated alert's host or user");
+      expect(corroboration).toContain('classify the investigated alert as true_positive');
+      expect(corroboration).toContain(
+        'never as false_positive solely because its own command line looks benign'
+      );
+      expect(corroboration).toContain(
+        'Entity correlation or alarming rule names without suspicious command lines do not count'
+      );
+      expect(corroboration).toContain(
+        'a shared generic account (root, SYSTEM, administrator) alone does not count'
+      );
+    });
+
+    it('requires the final Verdict line in the exact accepted form', () => {
+      expect(alertAnalysisSkill.content).toContain(
+        "Always end the reply with the final line in exactly the required 'Verdict: true_positive|false_positive|inconclusive' form"
+      );
+      expect(alertAnalysisSkill.content).toContain(
+        'the classification is not complete without that line'
+      );
+    });
+
     it('bans platform.core search/ESQL, index discovery and workflow tools for alerts, with the reason', () => {
       const guardrail = alertAnalysisSkill.content
         .split('\n')

@@ -56,6 +56,7 @@ Use this skill when:
 - Review the related alerts for patterns: same rule triggering, escalating severity, or multi-stage attack chains
 - Weigh process.command_line and process.parent.command_line alongside rule name, severity and MITRE technique; no single signal settles disposition, and living-off-the-land commands can look ordinary
 - The result includes 'totalMatched' and 'isTruncated'; when 'isTruncated' is true the list is incomplete, so say so and do not infer absence of an alert from the list
+- When multiple related alerts are each independently suspicious on their own process/command-line evidence and share the investigated alert's host or user, they form a coherent attack chain: classify the investigated alert as true_positive even if its own activity looks routine, and never as false_positive solely because its own command line looks benign. Entity correlation or alarming rule names without suspicious command lines do not count, and a shared generic account (root, SYSTEM, administrator) alone does not count.
 
 ### 3. Search Security Labs
 - Query Elastic Security Labs using 'security.security_labs_search' for:
@@ -95,7 +96,8 @@ Use this skill when:
 - Maintain chronological context when analyzing events and alerts
 - Prioritize high-severity alerts and entities with critical asset criticality
 - Document your analysis reasoning for future reference
-- Cross-reference multiple data points before making disposition decisions`,
+- Cross-reference multiple data points before making disposition decisions
+- Always end the reply with the final line in exactly the required 'Verdict: true_positive|false_positive|inconclusive' form — the classification is not complete without that line`,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
