@@ -51,6 +51,8 @@ export interface RelatedAlertFixture {
   technique: { id: string; name: string };
   /** Flat ECS keys; `buildRelatedAlertDoc` nests the `host`, `user` and `process` ones. */
   observable: Record<string, unknown>;
+  /** Aggregating-rule alert: drops the endpoint host/process/agent noise, keeping only `host.id`. */
+  identityOnly?: boolean;
 }
 
 export interface RelatedAlertCase {
@@ -411,6 +413,32 @@ const INJECTION_RELATED = windowsAlert(
   }
 );
 
+// ── ID-only malicious control: the target carries host.id and user.id but no names ─────────
+
+// An ES|QL rule `STATS ... BY host.id, user.id` writes only the grouped identity columns plus its
+// own `Esql.*` outputs, so the alert has no host.name/user.name; related Defend alerts keep theirs.
+const ID_ONLY_TARGET: RelatedAlertFixture = {
+  key: 'target-esql-id-only',
+  ruleName: 'Repeated File Downloads via Curl by Host and User',
+  ruleDescription:
+    'Detects a host and user pair that downloaded files with curl several times within the rule window.',
+  severity: 'medium',
+  riskScore: 47,
+  tactic: { id: 'TA0011', name: 'Command and Control' },
+  technique: { id: 'T1105', name: 'Ingress Tool Transfer' },
+  identityOnly: true,
+  observable: {
+    'event.kind': 'signal',
+    'host.id': MAC_HOST['host.id'],
+    'user.id': MAC_HOST['user.id'],
+    'Esql.event_count': 6,
+    'Esql.process_name_values': ['curl'],
+    'Esql.process_command_line_values': [
+      '/usr/bin/curl -fsS --retry 3 -o /Users/jdoe/.cache/build-index.json https://artifacts.corp.example.com/macos/build-index.json',
+    ],
+  },
+};
+
 export const RELATED_ALERT_CASES: RelatedAlertCase[] = [
   {
     id: 'related-benign-sshd-scary-names',
@@ -444,7 +472,19 @@ export const RELATED_ALERT_CASES: RelatedAlertCase[] = [
     target: INJECTED_TARGET,
     related: [INJECTION_RELATED],
   },
+  {
+    id: 'related-malicious-id-only-control',
+    description:
+      'Same malicious related alerts as the malicious control, but the investigated alert is an ES|QL rule alert with only host.id and user.id (no names) while the related lines show names. Must be true_positive.',
+    expected: 'true_positive',
+    target: ID_ONLY_TARGET,
+    related: [REVERSE_SHELL_RULE, CURL_PIPE_SH_RULE, LAUNCH_AGENT_RULE],
+  },
 ];
+
+const ENDPOINT_NOISE_PREFIXES = ['process.', 'elastic.agent.', 'data_stream.', 'ecs.'];
+const ENDPOINT_NOISE_KEYS = ['agent', 'Endpoint', 'Events', 'Responses'];
+const KEPT_ID_ONLY_KEYS = ['host.id', 'event.kind'];
 
 /** Moves flat `host.*`, `user.*` and `process.*` keys into nested objects; other keys stay flat. */
 export const nestEntityFields = (doc: Record<string, unknown>): Record<string, unknown> => {
@@ -504,6 +544,20 @@ export const buildRelatedAlertDoc = (
     'host.id': hostId,
   };
 
+  if (fixture.identityOnly) {
+    for (const key of Object.keys(doc)) {
+      const isHostOrEventNoise =
+        (key.startsWith('host.') || key.startsWith('event.')) && !KEPT_ID_ONLY_KEYS.includes(key);
+      if (
+        isHostOrEventNoise ||
+        ENDPOINT_NOISE_KEYS.includes(key) ||
+        ENDPOINT_NOISE_PREFIXES.some((prefix) => key.startsWith(prefix))
+      ) {
+        delete doc[key];
+      }
+    }
+  }
+
   if (isMac) {
     // The noise envelope models a Windows PE binary; drop the parts that cannot exist on macOS.
     for (const key of Object.keys(doc)) {
@@ -513,7 +567,7 @@ export const buildRelatedAlertDoc = (
     }
     doc['kibana.alert.entity.id'] = [
       `host:${hostId}`,
-      `user:${observable['user.name']}@${hostId}@local`,
+      `user:${observable['user.name'] ?? observable['user.id']}@${hostId}@local`,
     ];
   }
 
