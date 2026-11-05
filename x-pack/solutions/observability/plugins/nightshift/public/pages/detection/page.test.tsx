@@ -23,16 +23,12 @@ import { DetectionPage } from './page';
 jest.mock('../../components/app_header', () => ({
   NightshiftAppHeader: ({
     hideMenu,
-    onKnowledgeClick,
-    knowledgeHref,
     onSourcesClick,
     sourcesHref,
     onSettingsClick,
     settingsHref,
   }: {
     hideMenu?: boolean;
-    onKnowledgeClick?: () => void;
-    knowledgeHref?: string;
     onSourcesClick?: () => void;
     sourcesHref?: string;
     onSettingsClick?: () => void;
@@ -50,9 +46,6 @@ jest.mock('../../components/app_header', () => ({
             <a data-test-subj="nightshiftSettingsLinkStub" href={settingsHref}>
               Settings
             </a>
-          )}
-          {onKnowledgeClick && knowledgeHref && (
-            <button data-test-subj="nightshiftOverflowMenuStub">More</button>
           )}
         </>
       )}
@@ -255,7 +248,6 @@ describe('DetectionPage', () => {
     expect(screen.queryByTestId('nightshiftDetectionTab-events')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftSourcesLinkStub')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftSettingsLinkStub')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftOverflowMenuStub')).not.toBeInTheDocument();
   });
 
   it('shows earlier results and a warning when the space has no sources', async () => {
@@ -411,7 +403,6 @@ describe('DetectionPage', () => {
       'href',
       '/app/nightshift/settings/detections'
     );
-    expect(screen.getByTestId('nightshiftOverflowMenuStub')).toBeInTheDocument();
   });
 
   it('shows the locked onboarding to a viewer with no sources or history', () => {

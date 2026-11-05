@@ -10,6 +10,9 @@ import { catchError, from, map, of, Subscription, type BehaviorSubject } from 'r
 import type { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type { NightshiftStartDependencies } from './types';
 
+/** Deep links the solution side nav lists in the Nightshift panel. */
+const SIDE_NAV_DEEP_LINK_IDS = new Set(['automations', 'detections', 'knowledge']);
+
 /** Starts focused-event auto-attach and updates app visibility from the detection availability API. */
 export const startNightshiftServices = ({
   pluginsStart,
@@ -49,7 +52,11 @@ export const startNightshiftServices = ({
               visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
               deepLinks: (app.deepLinks ?? []).map((link) => ({
                 ...link,
-                visibleIn: isAvailable ? ['globalSearch'] : [],
+                visibleIn: !isAvailable
+                  ? []
+                  : SIDE_NAV_DEEP_LINK_IDS.has(link.id)
+                  ? ['globalSearch', 'projectSideNav']
+                  : ['globalSearch'],
               })),
             })
         )
