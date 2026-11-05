@@ -17,8 +17,8 @@ export interface Acl {
   /** Version of the ACL format. Only `1` exists. */
   version: 1;
   /**
-   * The object's owner. Every ACL Kibana writes has one: an object without an owner has no ACL
-   * at all, and its type's default general access applies.
+   * The object's owner. Every ACL Kibana writes has one. A stored ACL without an owner can still
+   * exist, for example after a direct write to the index, and then nobody owns the object.
    */
   owner: Principal;
   /** What everyone who can reach the object can do. */
@@ -48,11 +48,18 @@ export interface AclEntry extends Principal {
  * such as `added_at`, are arrays only so that every field is read the same way.
  */
 export interface StoredAcl {
-  /** Every stored version value. A valid ACL holds only `1`. */
+  /**
+   * Every stored version value. The ACL is `valid` only when it holds at least one value and every
+   * value is `1`.
+   */
   version: unknown[];
-  /** Every stored owner kind and ID. A valid owner has one of each. */
+  /**
+   * Every stored owner kind and ID. Unknown kinds are ignored. When exactly one known kind remains,
+   * each ID owns the object, otherwise nobody does. The package README explains why several IDs all
+   * count.
+   */
   owner: { type: string[]; id: string[] };
-  /** Every stored general access value. */
+  /** Every stored general access value. The lowest one the type allows applies, else `none`. */
   general_access: string[];
   /** Every stored entry. */
   entries: StoredAclEntry[];
@@ -62,13 +69,16 @@ export interface StoredAcl {
  * Entry of a {@link StoredAcl}. Like every other field of a stored ACL, each field is an array.
  */
 export interface StoredAclEntry {
-  /** Every stored principal kind. A valid entry has one. */
+  /**
+   * Every stored principal kind. Unknown kinds are ignored, and the entry grants nothing unless
+   * exactly one known kind remains.
+   */
   type: string[];
-  /** Every stored principal ID. */
+  /** Every stored principal ID. The entry grants its level to each of them. */
   id: string[];
-  /** Every stored level. */
+  /** Every stored level. The lowest one the type allows for entries applies, else nothing. */
   access: string[];
-  /** Every stored timestamp. A valid entry has one. */
+  /** Every stored timestamp. It doesn't affect access. */
   added_at: string[];
 }
 

@@ -93,6 +93,34 @@ An ACL is in one of three states (`AclState`):
 - `valid`: the version is `1`, and the ACL is enforced.
 - `invalid`: the ACL is damaged, for example has an unsupported version, and grants no ordinary access at all.
 
+## Reading a stored ACL
+
+These are the rules for reading a stored ACL, and the fixture table follows them. Each rule has to hold both when
+Kibana reads a single object and when it filters a search, so a list never disagrees with opening the object.
+
+- **State.** An ACL where no field holds a value is `absent`. Otherwise it is `valid` when it holds at least one
+  version value and every one is `1`, and `invalid` when it doesn't. An invalid ACL grants nothing at all, not even
+  ownership.
+- **Values are text.** Numbers and booleans are read as text, the way Elasticsearch indexes them into `keyword`
+  fields: an owner ID stored as `1` matches a principal whose ID is `"1"`, and a general access of `true` is an
+  unknown value.
+- **General access.** The lowest value the type allows applies. Unknown values, `manage`, and values the type
+  doesn't allow are ignored. When nothing is left, general access is `none`, including in a `valid` ACL that
+  doesn't set it.
+- **Kinds.** Unknown kinds are ignored. An owner or an entry needs exactly one known kind, and with two it grants
+  nothing. A principal only matches its own kind, so a service account never matches a user whose ID has the same
+  text.
+- **IDs.** Every stored ID counts. An entry grants its level to each ID, and an owner with several IDs makes each of
+  them an owner. This is the one place where several values don't fall back to the most restrictive reading: a
+  search matches a document when any stored ID matches, and a search filter can't cheaply tell one stored ID from
+  several, so reading a single object has to agree with it. Kibana never writes more than one owner ID, so only a
+  direct write to the index can produce such an ACL.
+- **Entry levels.** The lowest level the type allows for entries applies, and an entry without one grants nothing.
+- **Entries stay separate.** A kind, an ID, and a level from different entries never combine into a grant.
+- **One ACL, however it is spelled.** Dotted keys, such as `"acl.owner.id"` at the document root or `"owner.id"`
+  inside `acl`, and an array of `acl` objects all add their values to the same ACL, the way Elasticsearch indexes
+  them. A dotted `"acl.entries"` key adds its own entries.
+
 ## The fixture table
 
 `src/__fixtures__` holds test-only data. The package build drops that folder, and the entry point doesn't export it.
