@@ -20,7 +20,6 @@ import type {
   ChatRequestBodyPayload,
   ChatTriggerMode,
 } from '../../../common/http_api/chat';
-import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
 import { propagateEvents } from './propagate_events';
@@ -97,31 +96,6 @@ export class ChatService {
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
       project_routing: params.projectRouting,
-    });
-  }
-
-  /**
-   * Append a user message to an existing conversation without running the agent.
-   */
-  sendUserMessage({
-    conversationId,
-    input,
-    attachments,
-    triggerMode,
-  }: {
-    conversationId: string;
-    input: string;
-    attachments?: AttachmentInput[];
-    triggerMode: ChatTriggerMode;
-  }): Promise<ConversationWithPermissions> {
-    const payload: ChatRequestBodyPayload = {
-      trigger_mode: triggerMode,
-      conversation_id: conversationId,
-      input,
-      attachments,
-    };
-    return this.http.post<ConversationWithPermissions>(`${chatApiPath}/converse`, {
-      body: JSON.stringify(payload),
     });
   }
 
