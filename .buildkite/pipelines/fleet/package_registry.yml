@@ -113,6 +113,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     timeout_in_minutes: 60
     parallelism: 8
     depends_on: build
@@ -130,6 +131,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     timeout_in_minutes: 60
     parallelism: 8
     depends_on: build
