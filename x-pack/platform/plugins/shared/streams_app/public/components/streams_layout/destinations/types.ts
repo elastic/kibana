@@ -9,13 +9,18 @@ import type { UnitDestinationSignal, UnitDestinationSignalTargets } from '@kbn/s
 import type { DestinationNameValidationError } from './destination_helpers';
 /**
  * Destination storage choices shown in the create form.
- * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
- * component, and a registry entry to introduce another type.
+ * Add a kind here, a fields component, and a registry entry to introduce another type.
  */
-export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
+export type DestinationStorageKind =
+  | 'local_elasticsearch'
+  | 'remote_elasticsearch'
+  | 'external_storage';
+
+/** Working name until the backend settles it: https://github.com/elastic/ingest-dev/issues/10236 */
+export const REMOTE_ELASTICSEARCH_TYPE = 'remote_elasticsearch' as const;
 
 /** Unit destination types the UI can list and create. */
-export type DestinationType = 'elasticsearch' | 's3';
+export type DestinationType = 'elasticsearch' | typeof REMOTE_ELASTICSEARCH_TYPE | 's3';
 
 export type DestinationSignal = UnitDestinationSignal;
 /** How an Elasticsearch destination chooses its indices. */
@@ -59,7 +64,19 @@ export interface S3DestinationViewModel extends DestinationViewModelBase {
   prefix?: string;
 }
 
-export type DestinationViewModel = ElasticsearchDestinationViewModel | S3DestinationViewModel;
+/** The API key is never read into the view model. */
+export interface RemoteElasticsearchDestinationViewModel extends DestinationViewModelBase {
+  type: typeof REMOTE_ELASTICSEARCH_TYPE;
+  endpoint: string;
+  mode: DestinationIndexMode;
+  /** Unscoped index, or the per-signal ones. Empty in auto. */
+  indexBySignal: Partial<Record<DestinationSignal, string>>;
+}
+
+export type DestinationViewModel =
+  | ElasticsearchDestinationViewModel
+  | RemoteElasticsearchDestinationViewModel
+  | S3DestinationViewModel;
 
 /** Fixed mode: one name composed onto every signal, or a name per signal. */
 export type StaticIndexNaming = 'shared' | 'perSignal';
@@ -78,6 +95,16 @@ export interface ElasticsearchDestinationFormData {
   tracesIndex: string;
 }
 
+/** Remote indices are full names: no signal prefix and no write patterns. */
+export interface RemoteElasticsearchDestinationFormData
+  extends Pick<
+    ElasticsearchDestinationFormData,
+    'auto' | 'staticNaming' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+  > {
+  endpoint: string;
+  apiKey: string;
+}
+
 export interface S3DestinationFormData {
   region: string;
   bucket: string;
@@ -91,6 +118,7 @@ export interface DestinationCreationFormData {
   destinationName: string;
   description: string;
   elasticsearch: ElasticsearchDestinationFormData;
+  remoteElasticsearch: RemoteElasticsearchDestinationFormData;
   s3: S3DestinationFormData;
 }
 
@@ -103,6 +131,8 @@ export interface DestinationCreationFormErrors {
   logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  endpoint?: 'required' | 'invalid';
+  apiKey?: 'required';
   region?: 'required';
   bucket?: S3BucketValidationError;
   accessKeyId?: 'required';
@@ -110,6 +140,11 @@ export interface DestinationCreationFormErrors {
 }
 
 export type DestinationCreationFormField = keyof DestinationCreationFormErrors;
+
+export type RemoteElasticsearchConnectionErrors = Pick<
+  DestinationCreationFormErrors,
+  'endpoint' | 'apiKey'
+>;
 
 export type S3FieldsErrors = Pick<
   DestinationCreationFormErrors,
@@ -126,6 +161,16 @@ export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormD
   tracesIndex: '',
 };
 
+export const EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM: RemoteElasticsearchDestinationFormData = {
+  auto: true,
+  staticNaming: 'shared',
+  logsIndex: '',
+  metricsIndex: '',
+  tracesIndex: '',
+  endpoint: '',
+  apiKey: '',
+};
+
 export const EMPTY_S3_DESTINATION_FORM: S3DestinationFormData = {
   region: '',
   bucket: '',
@@ -139,5 +184,6 @@ export const EMPTY_DESTINATION_CREATION_FORM: DestinationCreationFormData = {
   destinationName: '',
   description: '',
   elasticsearch: EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  remoteElasticsearch: EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   s3: EMPTY_S3_DESTINATION_FORM,
 };
