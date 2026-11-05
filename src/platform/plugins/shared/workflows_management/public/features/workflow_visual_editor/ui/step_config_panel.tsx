@@ -52,6 +52,7 @@ import { isReferenceValue } from '@kbn/workflows-yaml';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
+import { KeyValueField } from './key_value_field';
 import { ReferenceCapableField } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import { ReferenceValueBox } from './reference_value_box';
@@ -67,8 +68,8 @@ import { ValueSourceToggle } from './value_source_toggle';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import type { ReferenceForm } from '../lib/reference_value';
 import { findReferenceTokens } from '../lib/reference_tokens';
+import type { ReferenceForm } from '../lib/reference_value';
 import {
   fieldLabelDivergesFromKey,
   getStepFormSchema,
@@ -1698,6 +1699,39 @@ function StepFieldRow({
         </StepValidatedFormRow>
       );
     }
+    case 'key-value':
+      return wrapRow(
+        <StepValidatedFormRow {...rowProps}>
+          <KeyValueField
+            value={value}
+            onChange={onChange}
+            catalog={referenceCatalog}
+            fieldLabel={field.label}
+            addLabel={
+              field.path.length === 1
+                ? i18n.translate('workflows.stepConfigPanel.keyValue.addVariable', {
+                    defaultMessage: 'Add variable',
+                  })
+                : i18n.translate('workflows.stepConfigPanel.keyValue.addField', {
+                    defaultMessage: 'Add field',
+                  })
+            }
+            testSubj={testSubj}
+            renderJsonValue={(cell) => (
+              <CodeField
+                field={{ ...field, kind: 'code', language: 'json', label: cell.ariaLabel }}
+                value={cell.value}
+                catalog={referenceCatalog}
+                onChange={cell.onChange}
+                testSubj={cell.testSubj}
+                isInvalid={false}
+                onBlur={accuseIfInvalid}
+                onDraftErrorChange={cell.onDraftErrorChange}
+              />
+            )}
+          />
+        </StepValidatedFormRow>
+      );
     case 'code':
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>

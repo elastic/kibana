@@ -44,6 +44,17 @@ export const toValueFormToken = (token: string): string => {
 };
 
 /**
+ * Applies the written-form rule to a value that may be anything: a whole reference keeps its
+ * type (`${{ }}`), while a reference inside a sentence is text (`{{ }}`), because the value form
+ * only works as the whole value.
+ */
+export const normalizeReferenceForm = (text: string): string => {
+  const whole = parseWholeReference(text);
+  if (whole) return whole.form === 'text' ? formatValueReferenceToken(whole.expression) : text;
+  return text.includes('${{') ? text.replaceAll('${{', '{{') : text;
+};
+
+/**
  * Type label the catalog declares for a reference expression, or undefined when the catalog
  * doesn't know the path. Step entities and their undeclared `output` leaf share a path, so the
  * leaf (the more specific label) wins.

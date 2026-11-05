@@ -71,6 +71,42 @@ describe('step_form_schema', () => {
       expect(items?.templatable).toBeUndefined();
     });
 
+    it('gives a map-valued `with` (data.set) one required key-value field', () => {
+      const fields = getStepFormSchema('data.set', [])?.fields;
+      expect(fields).toHaveLength(1);
+      expect(fields?.[0]).toMatchObject({
+        key: 'with',
+        path: ['with'],
+        label: 'Variables',
+        required: true,
+        kind: 'key-value',
+      });
+    });
+
+    it('edits maps of scalars as key-value, and leaves maps of anything else as JSON', () => {
+      const mapConnectors = [
+        {
+          type: 'mapper',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            headers: z.record(z.string(), z.string()).optional(),
+            labels: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+            settings: z.record(z.string(), z.unknown()).optional(),
+            nested: z.record(z.string(), z.object({ a: z.string() })).optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const kindOf = (key: string) =>
+        getStepFormSchema('mapper', mapConnectors)?.fields.find((f) => f.key === key)?.kind;
+      expect(kindOf('headers')).toBe('key-value');
+      expect(kindOf('labels')).toBe('key-value');
+      expect(kindOf('settings')).toBe('code');
+      expect(kindOf('nested')).toBe('code');
+    });
+
     it('adds a non-templatable max-iterations field to loop steps', () => {
       const maxIterations = getStepFormSchema('while', [])?.fields.find(
         (f) => f.key === 'max-iterations'
@@ -447,6 +483,14 @@ describe('step_form_schema', () => {
   });
 
   describe('buildDefaultStep', () => {
+    it('starts a data.set step with an empty map of variables', () => {
+      expect(buildDefaultStep('data.set', 'vars', [])).toEqual({
+        name: 'vars',
+        type: 'data.set',
+        with: {},
+      });
+    });
+
     it('pre-fills required fields and schema defaults only', () => {
       const step = buildDefaultStep('slack', 'slack_step', connectors);
       expect(step).toEqual({
@@ -513,6 +557,14 @@ describe('step_form_schema', () => {
       expect(isFieldValueRepresentable(text, 'x')).toBe(true);
       expect(isFieldValueRepresentable(text, { a: 1 })).toBe(false);
       expect(isFieldValueRepresentable({ ...text, kind: 'code' }, { a: 1 })).toBe(true);
+    });
+
+    it('takes a plain map in a key-value control, but not a string or a list', () => {
+      const map = { ...text, kind: 'key-value' as const };
+      expect(isFieldValueRepresentable(map, { a: 'b' })).toBe(true);
+      expect(isFieldValueRepresentable(map, undefined)).toBe(true);
+      expect(isFieldValueRepresentable(map, '{{ steps.a.output }}')).toBe(false);
+      expect(isFieldValueRepresentable(map, ['a'])).toBe(false);
     });
   });
 

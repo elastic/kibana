@@ -8,7 +8,12 @@
  */
 
 import type { DataReferenceCatalog, DataReferenceItem } from './build_data_reference_catalog';
-import { lookupReferenceTypeLabel, parseWholeReference, toValueFormToken } from './reference_value';
+import {
+  lookupReferenceTypeLabel,
+  normalizeReferenceForm,
+  parseWholeReference,
+  toValueFormToken,
+} from './reference_value';
 
 describe('parseWholeReference', () => {
   it('parses a whole text-form and value-form reference', () => {
@@ -76,5 +81,24 @@ describe('lookupReferenceTypeLabel', () => {
   it('ignores filters and returns undefined for unknown paths', () => {
     expect(lookupReferenceTypeLabel(catalog, 'steps.b.output.hits | json')).toBe('array');
     expect(lookupReferenceTypeLabel(catalog, 'inputs.nope')).toBeUndefined();
+  });
+});
+
+describe('normalizeReferenceForm', () => {
+  it('keeps a whole reference typed: text form becomes value form', () => {
+    expect(normalizeReferenceForm('{{ steps.a.output.hits }}')).toBe('${{ steps.a.output.hits }}');
+    expect(normalizeReferenceForm('${{ steps.a.output.hits }}')).toBe('${{ steps.a.output.hits }}');
+  });
+
+  it('writes references inside a sentence as text, including several value forms', () => {
+    expect(normalizeReferenceForm('Found ${{ steps.a.output.total }} alerts')).toBe(
+      'Found {{ steps.a.output.total }} alerts'
+    );
+    expect(normalizeReferenceForm('${{ a }} ${{ b }}')).toBe('{{ a }} {{ b }}');
+  });
+
+  it('leaves plain text alone', () => {
+    expect(normalizeReferenceForm('escalated')).toBe('escalated');
+    expect(normalizeReferenceForm('')).toBe('');
   });
 });

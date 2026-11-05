@@ -30,6 +30,7 @@ export type StepFieldKind =
   | 'boolean'
   | 'select'
   | 'code'
+  | 'key-value'
   | 'switch-cases'
   | 'parallel-branches';
 export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
@@ -233,6 +234,21 @@ const isStringLikeSchema = (schema: z.ZodType): boolean => {
   return false;
 };
 
+/** A map's value type is a single scalar, so each entry fits one text cell (e.g. HTTP headers). */
+const isScalarValueSchema = (schema: z.ZodType): boolean => {
+  const inner = unwrapSchema(schema);
+  if (inner instanceof z.ZodUnion) {
+    return (inner.options as z.ZodType[]).every(isScalarValueSchema);
+  }
+  return (
+    inner instanceof z.ZodString ||
+    inner instanceof z.ZodNumber ||
+    inner instanceof z.ZodBoolean ||
+    inner instanceof z.ZodEnum ||
+    inner instanceof z.ZodLiteral
+  );
+};
+
 const resolveKind = (
   stepType: string,
   key: string,
@@ -288,7 +304,11 @@ const resolveKind = (
       return { kind: 'text' };
     }
   }
-  // Objects, arrays, records and mixed unions are edited as JSON.
+  // Maps of scalars (headers, labels…) are edited as name/value rows. Maps of anything else are
+  // arbitrary documents and stay JSON, as do objects, arrays and mixed unions.
+  if (inner instanceof z.ZodRecord && isScalarValueSchema(inner.valueType as z.ZodType)) {
+    return { kind: 'key-value' };
+  }
   return { kind: 'code', language: 'json' };
 };
 
@@ -306,6 +326,20 @@ const fieldsFromObject = (
 ) => {
   if (!schema) return [] as StepFormField[];
   const inner = unwrapSchema(schema);
+  // A step whose whole `with` is a map of names to values (`data.set`): one field for the map.
+  if (inner instanceof z.ZodRecord && basePath.length === 1 && basePath[0] === 'with') {
+    const withField: StepFormField = {
+      key: 'with',
+      path: basePath,
+      label:
+        (readFieldMeta(schema)?.title as string | undefined) ??
+        i18n.translate('workflows.stepConfigPanel.recordWithLabel', { defaultMessage: 'Fields' }),
+      description: describe(schema),
+      required: isRequired(schema),
+      kind: 'key-value',
+    };
+    return [withField];
+  }
   if (!(inner instanceof z.ZodObject)) return [] as StepFormField[];
   // Nested-steps arrays (`steps`, `else`, `cases[].steps`…) are a root-level
   // (`configSchema`) concept only — they're never under `with`. Scoping the
@@ -566,6 +600,8 @@ export const isFieldValueRepresentable = (field: StepFormField, value: unknown):
     case 'switch-cases':
     case 'parallel-branches':
       return true;
+    case 'key-value':
+      return typeof value === 'object' && !Array.isArray(value);
     case 'boolean':
       return typeof value === 'boolean' || typeof value === 'string';
     case 'number':
@@ -598,6 +634,8 @@ const placeholderFor = (field: StepFormField): unknown => {
     case 'switch-cases':
     case 'parallel-branches':
       return [];
+    case 'key-value':
+      return {};
     case 'text':
     default:
       return '';

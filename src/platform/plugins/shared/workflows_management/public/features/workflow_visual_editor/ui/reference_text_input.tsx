@@ -121,6 +121,9 @@ export function ReferenceTextInput({
   isOpenRef.current = isOpen;
   const valueRef = useRef(value);
   valueRef.current = value;
+  // The editor registers its blur listener once, at mount; it must still call the latest handler.
+  const onBlurRef = useRef(onBlur);
+  onBlurRef.current = onBlur;
 
   const tokens = useMemo(
     () => findReferenceTokens(value, { catalog, warnContainersInSentence }),
@@ -186,7 +189,7 @@ export function ReferenceTextInput({
       });
       mounted.onDidBlurEditorText(() => {
         if (isOpenRef.current) return;
-        onBlur();
+        onBlurRef.current();
         stopEditing();
       });
       setEditor((current) => current ?? mounted);
@@ -212,7 +215,7 @@ export function ReferenceTextInput({
       }
       bridge.setCaret(pending.kind === 'caret' ? pending.offset : valueRef.current.length);
     },
-    [onBlur, openPickerAtRange, registerSelection, stopEditing]
+    [openPickerAtRange, registerSelection, stopEditing]
   );
 
   const boxCss = {

@@ -1278,4 +1278,142 @@ with:
       expect(writes.every((fragment) => !fragment.includes('| json'))).toBe(true);
     });
   });
+
+  describe('key/value rows', () => {
+    const setStep = (withBlock: string) => ({
+      stepType: 'data.set',
+      initialFragment: `name: vars\ntype: data.set\nwith:${withBlock}\n`,
+    });
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('shows the map of a data.set step as Variables rows', () => {
+      renderPanel(setStep('\n  alert_count: "3"\n  user_name: ana'));
+      expect(screen.getByText('Variables')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigField-with-key-0')).toHaveValue('alert_count');
+      expect(screen.getByTestId('workflowStepConfigField-with-key-1')).toHaveValue('user_name');
+      expect(activateField('workflowStepConfigField-with-value-1')).toHaveValue('ana');
+      expect(screen.getByTestId('workflowStepConfigField-with-add')).toHaveTextContent(
+        'Add variable'
+      );
+    });
+
+    it('starts an empty data.set with just the add button, and writes rows as they are named', () => {
+      const { onFragmentChange } = renderPanel(setStep(' {}'));
+      expect(screen.queryByTestId('workflowStepConfigField-with-key-0')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+      // A row without a name is a draft: nothing is written for it yet.
+      expect(lastFragment(onFragmentChange)).not.toMatch(/: ""/);
+
+      fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-0'), {
+        target: { value: 'status' },
+      });
+      fireEvent.change(activateField('workflowStepConfigField-with-value-0'), {
+        target: { value: 'escalated' },
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(/status: escalated/);
+    });
+
+    it('flags a repeated name and does not write the repeat', () => {
+      const { onFragmentChange } = renderPanel(setStep('\n  user_name: ana'));
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+      fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-1'), {
+        target: { value: 'user_name' },
+      });
+      fireEvent.change(activateField('workflowStepConfigField-with-value-1'), {
+        target: { value: 'bob' },
+      });
+      expect(screen.getByText('Duplicate name "user_name"')).toBeInTheDocument();
+      expect(lastFragment(onFragmentChange)).toMatch(/user_name: ana/);
+      expect(lastFragment(onFragmentChange)).not.toMatch(/bob/);
+    });
+
+    it('keeps rows in the order shown and removes a row on its trash button', () => {
+      const { onFragmentChange } = renderPanel(setStep('\n  zeta: "1"\n  alpha: "2"'));
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+      fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-2'), {
+        target: { value: 'mid' },
+      });
+      const keys = (lastFragment(onFragmentChange).match(/^ {2}(\w+):/gm) ?? []).map((k) =>
+        k.trim()
+      );
+      expect(keys).toEqual(['zeta:', 'alpha:', 'mid:']);
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with-remove-0'));
+      expect(lastFragment(onFragmentChange)).not.toMatch(/zeta/);
+      expect(lastFragment(onFragmentChange)).toMatch(/alpha: "2"/);
+    });
+
+    it('shows a value that is not text as JSON and keeps its type', () => {
+      const { onFragmentChange } = renderPanel(setStep('\n  retries: 5'));
+      const cell = screen.getByTestId('workflowStepConfigField-with-value-0');
+      expect(cell).toHaveAttribute('data-language', 'json');
+      fireEvent.change(activateField('workflowStepConfigField-with-value-0'), {
+        target: { value: '7' },
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(/retries: 7/);
+    });
+
+    it('keeps a whole reference typed and writes one inside a sentence as text, on blur', () => {
+      // One character short of a whole reference, so the last keystroke completes it.
+      const whole = renderPanel(setStep('\n  hits: "{{ steps.search.output.hits }"'));
+      const cell = activateField('workflowStepConfigField-with-value-0');
+      fireEvent.change(cell, {
+        target: { value: '{{ steps.search.output.hits }}', selectionStart: 30, selectionEnd: 30 },
+      });
+      fireEvent.blur(cell);
+      expect(lastFragment(whole.onFragmentChange)).toMatch(
+        /hits: \$\{\{ steps\.search\.output\.hits \}\}/
+      );
+    });
+
+    it('does not rewrite a stored reference just because its cell was focused and left', () => {
+      const { onFragmentChange } = renderPanel(setStep("\n  window: \"{{ 'now' | date: '%s' }}\""));
+      const before = onFragmentChange.mock.calls.length;
+      fireEvent.blur(activateField('workflowStepConfigField-with-value-0'));
+      const written = onFragmentChange.mock.calls.slice(before).map(([fragment]) => fragment);
+      expect(written.every((fragment) => !fragment.includes('${{'))).toBe(true);
+    });
+
+    it('rewrites a value-form reference inside a sentence as text, on blur', () => {
+      const sentence = renderPanel(setStep('\n  note: "Found ${{ steps.search.output.total }"'));
+      const cell = activateField('workflowStepConfigField-with-value-0');
+      fireEvent.change(cell, {
+        target: {
+          value: 'Found ${{ steps.search.output.total }}',
+          selectionStart: 38,
+          selectionEnd: 38,
+        },
+      });
+      fireEvent.blur(cell);
+      expect(lastFragment(sentence.onFragmentChange)).toMatch(
+        /note: Found \{\{ steps\.search\.output\.total \}\}/
+      );
+    });
+
+    it('edits scalar maps such as HTTP headers as rows too', () => {
+      const headerConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'fetcher',
+          hasConnectorId: false,
+          paramsSchema: z.object({ headers: z.record(z.string(), z.string()).optional() }),
+          outputSchema: z.unknown(),
+          summary: 'Fetcher',
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      renderPanel({
+        stepType: 'fetcher',
+        connectors: headerConnectors,
+        initialFragment:
+          'name: f\ntype: fetcher\nwith:\n  headers:\n    Content-Type: application/json\n',
+      });
+      expect(screen.getByTestId('workflowStepConfigField-with.headers-key-0')).toHaveValue(
+        'Content-Type'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-with.headers-add')).toHaveTextContent(
+        'Add field'
+      );
+    });
+  });
 });
