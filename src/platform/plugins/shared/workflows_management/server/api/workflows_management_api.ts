@@ -1129,21 +1129,28 @@ export class WorkflowsManagementApi {
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    // A saved workflow's test run belongs to that document, including a test of unsaved
+    // YAML for the same id. An unsaved draft has no document, so it stays unlinked.
+    const workflowModel = toWorkflowExecutionEngineModel(
+      {
+        id: resolvedWorkflowId,
+        name: workflowJson.name,
+        enabled: workflowJson.enabled,
+        definition: workflowJson.definition,
+        yaml: resolvedYaml,
+        version: existingWorkflow?.version,
+        ...(existingWorkflow?.workflowUid ? { workflowUid: existingWorkflow.workflowUid } : {}),
+        managed: existingWorkflow?.managed,
+        managedBy: existingWorkflow?.managedBy,
+        originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
+        managedVersion: existingWorkflow?.managedVersion,
+      },
+      { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
+    );
     // A test run is still a top-level run: it holds the same concurrency slot and would
     // fail the same way on an inherited step. Unsaved drafts of delegated-identity-only
     // workflows reach the engine through this path, so gate it too.
-    this.assertRunnableStandalone(
-      toWorkflowExecutionEngineModel(
-        {
-          id: resolvedWorkflowId,
-          name: workflowJson.name,
-          enabled: workflowJson.enabled,
-          definition: workflowJson.definition,
-          yaml: resolvedYaml,
-        },
-        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
-      )
-    );
+    this.assertRunnableStandalone(workflowModel);
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -1153,21 +1160,7 @@ export class WorkflowsManagementApi {
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
-      toWorkflowExecutionEngineModel(
-        {
-          id: resolvedWorkflowId,
-          name: workflowJson.name,
-          enabled: workflowJson.enabled,
-          definition: workflowJson.definition,
-          yaml: resolvedYaml,
-          version: existingWorkflow?.version,
-          managed: existingWorkflow?.managed,
-          managedBy: existingWorkflow?.managedBy,
-          originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
-          managedVersion: existingWorkflow?.managedVersion,
-        },
-        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
-      ),
+      workflowModel,
       context,
       request
     );
@@ -1183,10 +1176,13 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
+    let workflowUid: string | undefined;
     if (workflowId) {
       await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request, {
         allowAdminOverride: false,
       });
+      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      workflowUid = existingWorkflow?.workflowUid;
     }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
@@ -1210,6 +1206,7 @@ export class WorkflowsManagementApi {
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
         yaml: workflowYaml,
+        ...(workflowUid ? { workflowUid } : {}),
         isTestRun: true,
         isEphemeral: true,
         spaceId,
