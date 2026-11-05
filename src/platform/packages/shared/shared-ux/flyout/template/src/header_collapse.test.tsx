@@ -176,6 +176,34 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     expect(closeButton).toHaveFocus();
   });
 
+  it('stays expanded while a control in the collapsible region is expanded', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.InfoBlock title="Status">
+            <button type="button" aria-expanded="true">
+              Open
+            </button>
+          </FlyoutTemplate.Header.InfoBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
+
+    collapseByScroll(overflowEl);
+    expect(region).not.toHaveAttribute('aria-hidden');
+
+    screen.getByRole('button', { name: 'Open' }).setAttribute('aria-expanded', 'false');
+    act(() => {
+      fireEvent.scroll(overflowEl);
+    });
+    expect(region).toHaveAttribute('aria-hidden', 'true');
+  });
+
   it('keeps the title heading visible with its id in collapsed state', () => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');

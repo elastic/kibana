@@ -159,6 +159,10 @@ export const useHeaderCollapse = ({
       // incorrectly think it can't collapse, and expand again. This would cause an endless loop
       // of collapsing and expanding. Therefore, expanding is based purely on the scroll position.
       next = scrollTop > EXPAND_AT;
+    } else if (collapsibleNodeRef.current?.querySelector('[aria-expanded="true"]')) {
+      // An open popover's panel is portalled outside the region, so collapsing would leave it
+      // floating over a hidden trigger that focus can no longer return to.
+      next = false;
     } else {
       next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
     }
