@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/** EBT click `element` values: where in the entity inventory the click happened. */
 export const ENTITY_INVENTORY_EBT_ACTIONS = {
   OPEN_FILTER: 'openFilter',
   CLEAR_FILTERS: 'clearFilters',
