@@ -85,11 +85,9 @@ export const executeDashboardUpsert = async ({
   dashboardData,
   upsert,
   logger,
-  resolvePanelContent = missingResolver(
-    'Inline panel resolver is required for request-source panels.'
-  ),
+  resolvePanelContent = missingResolver('Inline panel resolver is required for generated panels.'),
   resolveAttachmentPanel = missingResolver(
-    'Attachment panel resolver is required for attachment-source panels.'
+    'Attachment panel resolver is required for attachment panels.'
   ),
   resolveControlFieldCapabilities,
   resolveEsqlControlColumnType,

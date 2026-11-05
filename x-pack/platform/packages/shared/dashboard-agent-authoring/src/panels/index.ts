@@ -15,11 +15,10 @@ export type {
 export {
   buildConfigPanelContent,
   createPanelContentResolver,
+  findPanelKind,
   getConfigPanelReferences,
-  getEditableEmbeddableTypes,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
-  getRendererEmbeddableType,
   requiresRegisteredSchema,
   upsertPanelContentSchema,
 } from './registry';

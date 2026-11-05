@@ -27,7 +27,6 @@ export {
   getConfigPanelReferences,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
-  getRendererEmbeddableType,
   parseVegaSpec,
   requiresRegisteredSchema,
 } from './src/panels';

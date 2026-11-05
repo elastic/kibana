@@ -8,7 +8,7 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
-import type { ConfigPanelKind, ReferencedConfigPanelKind, RequestPanelKind } from './panel_kind';
+import type { ConfigPanelKind, ReferencedConfigPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
 import { customContentPanelKind, type CustomContentPanelResolutionRequest } from './custom_content';
@@ -22,18 +22,17 @@ import { attachmentPanelInputSchema } from './attachment_source';
 /**
  * Panel kind registry.
  *
- * Panel inputs are discriminated by `source`:
- * - `'request'`: generated server-side, discriminated by `renderer`
- *   (`lens` — the default when omitted —, `vega`, or `custom_content`).
- * - `'config'`: authored by value, discriminated by `type`. Common kinds put their full config
- *   schema in the tool schema; referenced kinds share one member whose `config` is any object,
- *   validated against the kind's `configSchema` when the panel is planned.
- * - `'attachment'`: an existing visualization attachment from the conversation.
+ * Panel content is discriminated by `type`, the name of its panel kind:
+ * - request kinds (`vis`, `vega`, `custom_content`) are generated server-side by the host.
+ * - config kinds are authored by value. Common kinds put their full config schema in the tool
+ *   schema; referenced kinds share one member whose `config` is any object, validated against the
+ *   kind's `configSchema` when the panel is planned.
+ * - `attachment` places an existing visualization attachment from the conversation.
  *
  * Each kind's module describes it once, with `defineConfigPanelKind` or `defineRequestPanelKind`,
  * including one content schema that both creates and edits its panels. Registering it in one of
  * the lists below derives its member of the content schema and the embeddable-type lookups. List
- * order is the order of the schema unions sent to the model.
+ * order is the order of the schema union sent to the model.
  */
 
 const INLINE_CONFIG_PANEL_KINDS = [markdownPanelKind] as const;
@@ -50,18 +49,18 @@ const CONFIG_PANEL_KINDS = [
 ] as const;
 
 /**
- * The `satisfies` check makes a request kind whose renderer has no `PanelResolutionRequest`
+ * The `satisfies` check makes a request kind whose type has no `PanelResolutionRequest`
  * fail to compile, so the host can resolve every request kind.
  */
 const REQUEST_PANEL_KINDS = [
   lensPanelKind,
   vegaPanelKind,
   customContentPanelKind,
-] as const satisfies ReadonlyArray<{ readonly renderer: PanelRenderer }>;
+] as const satisfies ReadonlyArray<{ readonly type: PanelResolutionRequest['type'] }>;
 
 /**
  * `z.discriminatedUnion` expects a non-empty tuple, while `Array.map` returns a plain array.
- * Only called with the kind lists above, which are never empty.
+ * Only called with lists built from the kind lists above, which are never empty.
  */
 const toNonEmpty = <T>([first, ...rest]: readonly T[]): [T, ...T[]] => [first, ...rest];
 
@@ -70,7 +69,6 @@ const MAX_REFERENCED_CONFIG_LENGTH = 50000;
 
 const referencedConfigPanelContentSchema = lazySchema(() =>
   z.object({
-    source: z.literal('config'),
     type: z.enum(toNonEmpty(REFERENCED_CONFIG_PANEL_KINDS.map(({ type }) => type))),
     config: z
       .record(z.string(), z.unknown())
@@ -88,31 +86,35 @@ const referencedConfigPanelContentSchema = lazySchema(() =>
  * same kind.
  */
 export const upsertPanelContentSchema = lazySchema(() =>
-  z.discriminatedUnion('source', [
-    z.discriminatedUnion(
-      'type',
-      toNonEmpty([
-        ...INLINE_CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema),
-        referencedConfigPanelContentSchema,
-      ])
-    ),
-    z.discriminatedUnion(
-      'renderer',
-      toNonEmpty(REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
-    ),
-    attachmentPanelInputSchema,
-  ])
+  z.discriminatedUnion(
+    'type',
+    toNonEmpty([
+      ...REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema),
+      ...INLINE_CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema),
+      referencedConfigPanelContentSchema,
+      attachmentPanelInputSchema,
+    ])
+  )
 );
 
 export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 
-type ConfigPanelContent = Extract<UpsertPanelContent, { source: 'config' }>;
+type ConfigPanelType = (typeof CONFIG_PANEL_KINDS)[number]['type'];
 
-export type PanelRequestContent = Extract<UpsertPanelContent, { source: 'request' }>;
+/** The kind types the host executes. */
+type RequestPanelType = (typeof REQUEST_PANEL_KINDS)[number]['type'];
+
+type ConfigPanelContent = Extract<UpsertPanelContent, { type: ConfigPanelType }>;
+
+export type PanelRequestContent = Extract<UpsertPanelContent, { type: RequestPanelType }>;
 
 const configPanelKindByType = new Map<string, ConfigPanelKind | ReferencedConfigPanelKind>(
   CONFIG_PANEL_KINDS.map((kind) => [kind.type, kind])
 );
+
+/** Whether the content authors a by-value panel, whose config the agent wrote. */
+export const isConfigPanelContent = (content: UpsertPanelContent): content is ConfigPanelContent =>
+  configPanelKindByType.has(content.type);
 
 const getConfigPanelKind = (
   type: ConfigPanelContent['type']
@@ -159,76 +161,20 @@ export const getConfigPanelReferences = (): ConfigPanelReference[] =>
     content: [
       `# ${label} panel config`,
       guidance,
-      `Use it as \`content: { source: "config", type: "${type}", config }\`, where \`config\` matches this JSON Schema:`,
+      `Use it as \`content: { type: "${type}", config }\`, where \`config\` matches this JSON Schema:`,
       `\`\`\`json\n${JSON.stringify(toConfigJsonSchema(configSchema))}\n\`\`\``,
     ].join('\n\n'),
   }));
 
-/** Finds the by-value panel type stored as the given embeddable type, if any. */
-export const findConfigPanelType = (
-  embeddableType: string
-): { type: ConfigPanelContent['type']; label: string } | undefined => {
-  const kind = CONFIG_PANEL_KINDS.find((entry) => entry.embeddableType === embeddableType);
-  return kind && { type: kind.type, label: kind.label };
-};
-
-/**
- * Embeddable types an upsert content can edit. A request without a renderer edits Lens or Vega
- * panels. Attachment content only creates panels.
- */
-export const getEditableEmbeddableTypes = (content: UpsertPanelContent): string[] => {
-  if (content.source === 'config') {
-    return [getConfigPanelKind(content.type).embeddableType];
-  }
-  if (content.source === 'attachment') {
-    return [];
-  }
-  const { renderer } = content;
-  return renderer
-    ? [getRendererEmbeddableType(renderer)]
-    : [lensPanelKind.embeddableType, vegaPanelKind.embeddableType];
-};
-
-/** Every panel resolution request the resolver can receive, discriminated by `renderer`. */
+/** Every panel resolution request the resolver can receive, discriminated by `type`. */
 export type PanelResolutionRequest =
   | VisPanelResolutionRequest
   | CustomContentPanelResolutionRequest;
 
-/** Engine that renders a `source: 'request'` panel. */
-export type PanelRenderer = NonNullable<PanelResolutionRequest['renderer']>;
-
-/** The renderers that have a request kind. */
-type RegisteredPanelRenderer = (typeof REQUEST_PANEL_KINDS)[number]['renderer'];
-
-/**
- * Keyed by `RegisteredPanelRenderer`, so passing a `PanelRenderer` to `get` below fails to compile
- * when a resolution request's renderer has no request kind.
- */
-const requestPanelKindByRenderer = new Map<RegisteredPanelRenderer, RequestPanelKind>(
-  REQUEST_PANEL_KINDS.map((kind) => [kind.renderer, kind])
-);
-
-/**
- * Embeddable type a renderer's panels are stored as. With `findPanelRenderer`, this is the only
- * mapping between renderers and panel types: upsert uses it to decide an existing panel's
- * renderer once, and resolvers trust the `renderer` they receive.
- */
-export const getRendererEmbeddableType = (renderer: PanelRenderer): string => {
-  const kind = requestPanelKindByRenderer.get(renderer);
-  if (!kind) {
-    throw new Error(`Panel renderer "${renderer}" is not registered.`);
-  }
-  return kind.embeddableType;
-};
-
-/** Finds the renderer whose panels are stored as the given embeddable type, if any. */
-export const findPanelRenderer = (embeddableType: string): PanelRenderer | undefined =>
-  REQUEST_PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType)?.renderer;
-
 /**
  * Contract for inline panel content resolution. Dashboard authoring consumes this
  * to turn a panel resolution request into panel content. The host implements it
- * by routing each request to the resolver for its `renderer`; it is injected so
+ * by routing each request to the resolver for its `type`; it is injected so
  * authoring stays host-agnostic and tests can supply a fake.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;
@@ -252,21 +198,13 @@ const toTitle = (label: string): string => label.replace(/\b\w/g, (letter) => le
 
 const capitalize = (label: string): string => label.charAt(0).toUpperCase() + label.slice(1);
 
-const describeKindInput = (kind: PanelKind): string => {
-  if (kind.source === 'config') {
-    return `\`source: "config"\`, \`type: "${kind.type}"\``;
-  }
-  const rendererIsOptional = kind.contentSchema.shape.renderer.safeParse(undefined).success;
-  return `\`renderer: "${kind.renderer}"\`${rendererIsOptional ? ' or omitted' : ''}`;
-};
-
 /** The skill's numbered panel type list, in ascending kind priority. */
 export const getPanelTypeSelection = (): string =>
   PANEL_KINDS.flatMap((kind) => (kind.selection ? [{ kind, ...kind.selection }] : []))
     .sort((a, b) => a.priority - b.priority)
     .map(
       ({ kind, whenToUse }, index) =>
-        `${index + 1}. **${capitalize(kind.label)}** (${describeKindInput(kind)}) — ${whenToUse}`
+        `${index + 1}. **${capitalize(kind.label)}** (\`type: "${kind.type}"\`) — ${whenToUse}`
     )
     .join('\n');
 
@@ -278,34 +216,29 @@ export const getInlinePanelKindGuidance = (): string =>
     )
     .join('\n\n');
 
-/** The resolution request of the kind with the given renderer. */
-type RequestForRenderer<
-  Renderer extends RegisteredPanelRenderer,
+/** The resolution request of the kind with the given type. */
+type RequestForType<
+  Type extends RequestPanelType,
   Request = PanelResolutionRequest
-> = Request extends { renderer?: infer Renderers }
-  ? Renderer extends Renderers
-    ? Request
-    : never
-  : never;
+> = Request extends { type: infer Types } ? (Type extends Types ? Request : never) : never;
 
 /**
- * The host's executor for each request kind, keyed by renderer, so a request kind without one
+ * The host's executor for each request kind, keyed by kind type, so a request kind without one
  * fails to compile. Executors may close over host services such as the model provider.
  */
 export type PanelKindExecutors = {
-  readonly [Renderer in RegisteredPanelRenderer]: (
-    request: RequestForRenderer<Renderer>
+  readonly [Type in RequestPanelType]: (
+    request: RequestForType<Type>
   ) => Promise<PanelContentAttempt>;
 };
 
 type ExecutePanelRequest = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;
 
-/** Routes each resolution request to the executor of its kind. Lens when `renderer` is omitted. */
+/** Routes each resolution request to the executor of its kind. */
 export const createPanelContentResolver =
   (executors: PanelKindExecutors): ResolvePanelContent =>
   (request) => {
-    const renderer = request.renderer ?? lensPanelKind.renderer;
-    // Indexing by the request's renderer selects the executor typed for that request.
-    const execute = executors[renderer] as ExecutePanelRequest;
+    // Indexing by the request's type selects the executor typed for that request.
+    const execute = executors[request.type] as ExecutePanelRequest;
     return execute(request);
   };
