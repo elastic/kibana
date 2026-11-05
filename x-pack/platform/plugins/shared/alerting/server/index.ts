@@ -48,6 +48,13 @@ export type {
   RuleQueryInspectorResult,
   RuleQueryInspectorTimeRange,
 } from './rule_query_inspector/types';
+export type {
+  RuleParamsV2Draft,
+  RuleTypeV2Migration,
+  RuleV2Draft,
+  ToV2DraftFn,
+} from './rule_type_v2_migration/types';
+export { buildV2Draft } from './rule_type_v2_migration/build_v2_draft';
 export type { RulesClientCreateOptions } from './rules_client_factory';
 export { RulesNotFoundError } from './rules_client/lib/rules_not_found_error';
 export { RulesNotVisibleError } from './rules_client/lib/rules_not_visible_error';
