@@ -14,7 +14,7 @@ import { isResponseError } from '@kbn/es-errors';
 import moment from 'moment';
 
 import type { Agent } from '../../types';
-import { appContextService } from '..';
+import { appContextService } from '../app_context';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
@@ -22,7 +22,7 @@ import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { RetryParams } from './retry_helper';
-import { getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
+import { CHECK_TASK_INTERVAL_MINUTES, getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
 
 export interface ActionParams {
   kuery: string;
@@ -96,77 +96,105 @@ export abstract class ActionRunner {
   /**
    * Common runner logic accross all agent bulk actions
    * Starts action execution immeditalely, asynchronously
-   * On errors, starts a task with Task Manager to retry max 3 times
-   * If the last batch was stored in state, retry continues from there (searchAfter)
+   * On errors, starts a task with Task Manager to retry max MAX_RETRY_COUNT times
+   * If the last batch was stored in the check task's state, retry continues from there (searchAfter)
    */
   public async runActionAsyncWithRetry(): Promise<{ actionId: string }> {
+    const logger = appContextService.getLogger();
     if (!this.bulkActionsResolver) {
       this.bulkActionsResolver = await appContextService.getBulkActionsResolver();
     }
 
-    // create task to check result with some delay, this runs in case of kibana crash too
-    this.checkTaskId = await this.createCheckResultTask();
+    // Recurring task that watches this action, so it is resumed after a Kibana crash or after a
+    // runner dies mid-flight. Failing to schedule it must not stop the action from running.
+    try {
+      this.checkTaskId = await this.ensureCheckResultTask();
+    } catch (error) {
+      logger.error(
+        `Could not schedule the check task for action ${this.actionParams.actionId}, continuing without it: ${error.message}`,
+        { error }
+      );
+    }
 
     await withSpan({ name: this.getActionType(), type: 'action' }, () =>
       this.processAgentsInBatches()
         .then(async () => {
-          if (this.checkTaskId) {
+          if (!this.checkTaskId) {
+            return;
+          }
+          try {
             // no need for check task, action succeeded
             await this.bulkActionsResolver!.removeIfExists(this.checkTaskId);
+          } catch (error) {
+            // The action did succeed, so this must not be treated as a failure and retried.
+            // The check task removes itself once it sees the action is complete.
+            logger.warn(
+              `Could not remove check task ${this.checkTaskId} after action ${this.actionParams.actionId} completed, it will remove itself: ${error.message}`
+            );
           }
         })
         .catch(async (error) => {
-          // 404 error comes when PIT query is closed
-          if (isResponseError(error) && error.statusCode === 404) {
-            const errorMessage =
-              '404 error from elasticsearch, not retrying. Error: ' + error.message;
-            appContextService.getLogger().warn(errorMessage);
-            return;
-          }
-          if (this.retryParams.retryCount) {
-            appContextService
-              .getLogger()
-              .error(
+          try {
+            if (isResponseError(error) && error.statusCode === 404) {
+              logger.error(
+                `404 error from Elasticsearch during action ${this.actionParams.actionId}: ${error.message}`
+              );
+            }
+            if (this.retryParams.retryCount) {
+              logger.error(
                 `Retry #${this.retryParams.retryCount} of task ${this.retryParams.taskId} failed: ${error.message}`
               );
 
-            if (this.retryParams.retryCount === MAX_RETRY_COUNT) {
-              const errorMessage = `Stopping after retry #${MAX_RETRY_COUNT}. Error: ${error.message}`;
-              appContextService.getLogger().warn(errorMessage);
+              if (this.retryParams.retryCount >= MAX_RETRY_COUNT) {
+                logger.warn(`Stopping after retry #${MAX_RETRY_COUNT}. Error: ${error.message}`);
 
-              // clean up tasks after last retry reached
-              await Promise.all([
-                this.bulkActionsResolver!.removeIfExists(this.checkTaskId!),
-                this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!),
-              ]);
+                // clean up tasks after last retry reached
+                await Promise.all(
+                  [this.checkTaskId, this.retryParams.taskId]
+                    .filter((taskId): taskId is string => !!taskId)
+                    .map((taskId) => this.bulkActionsResolver!.removeIfExists(taskId))
+                );
 
-              return;
+                return;
+              }
+            } else {
+              logger.error(`Action failed: ${error.message}`);
             }
-          } else {
-            appContextService.getLogger().error(`Action failed: ${error.message}`);
-          }
-          const taskId = this.bulkActionsResolver!.getTaskId(
-            this.actionParams.actionId!,
-            this.getTaskType()
-          );
-          await this.bulkActionsResolver!.run(
-            this.actionParams,
-            {
-              ...this.retryParams,
-              retryCount: (this.retryParams.retryCount ?? 0) + 1,
-            },
-            this.getTaskType(),
-            taskId
-          );
+            const taskId = this.bulkActionsResolver!.getTaskId(
+              this.actionParams.actionId!,
+              this.getTaskType()
+            );
+            await this.bulkActionsResolver!.run(
+              this.actionParams,
+              {
+                ...this.retryParams,
+                retryCount: (this.retryParams.retryCount ?? 0) + 1,
+              },
+              this.getTaskType(),
+              taskId
+            );
 
-          appContextService.getLogger().info(`Retrying in task: ${taskId}`);
+            logger.info(`Retrying in task: ${taskId}`);
+          } catch (schedulingError) {
+            // Last line of defence: if we cannot even schedule the retry, the recurring check
+            // task is what will pick the action back up.
+            logger.error(
+              `Could not schedule a retry for action ${this.actionParams.actionId} after "${error.message}": ${schedulingError.message}. The check task will resume it.`,
+              { error: schedulingError }
+            );
+          }
         })
     );
 
     return { actionId: this.actionParams.actionId! };
   }
 
-  private async createCheckResultTask() {
+  /**
+   * Schedule the recurring check task for this action, or leave the existing one in place.
+   * It is recurring so that Task Manager owns the rescheduling: the runner only has to update
+   * the checkpoint in its state, never remove and recreate it.
+   */
+  private async ensureCheckResultTask() {
     const taskId = this.bulkActionsResolver!.getTaskId(
       this.actionParams.actionId!,
       this.getTaskType() + ':check'
@@ -181,8 +209,35 @@ export abstract class ActionRunner {
       },
       this.getTaskType(),
       taskId,
-      moment(new Date()).add(5, 'm').toDate()
+      {
+        runAt: moment(new Date()).add(CHECK_TASK_INTERVAL_MINUTES, 'm').toDate(),
+        schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` },
+        isCheckTask: true,
+      }
     );
+  }
+
+  /**
+   * Record the latest batch checkpoint on the check task so a resumed runner continues from it.
+   * A failed checkpoint only costs re-processing one batch on resume, which processBatch already
+   * guards against, so it must never abort the action.
+   */
+  private async updateCheckpoint(nbAgentsProcessed: number) {
+    if (!this.checkTaskId) {
+      return;
+    }
+    try {
+      await this.bulkActionsResolver!.updateCheckTaskState(this.checkTaskId, {
+        searchAfter: this.retryParams.searchAfter,
+        nbAgentsProcessed,
+      });
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Could not update the checkpoint on check task ${this.checkTaskId}: ${error.message}`
+        );
+    }
   }
 
   private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
@@ -268,11 +323,8 @@ export abstract class ActionRunner {
       }
       await this.processBatch(currentAgents);
       allAgentsProcessed += currentAgents.length;
-      if (this.checkTaskId) {
-        // updating check task with latest checkpoint (this.retryParams.searchAfter)
-        await this.bulkActionsResolver?.removeIfExists(this.checkTaskId);
-        this.checkTaskId = await this.createCheckResultTask();
-      }
+      // updating check task with latest checkpoint (this.retryParams.searchAfter)
+      await this.updateCheckpoint(allAgentsProcessed);
     }
 
     if (pitId) {

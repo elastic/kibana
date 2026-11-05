@@ -11,11 +11,34 @@ import { BulkActionTaskType } from './bulk_action_types';
 
 export const MAX_RETRY_COUNT = 20;
 
+/** How often the check task wakes up to verify that the action is still making progress. */
+export const CHECK_TASK_INTERVAL_MINUTES = 5;
+
+/**
+ * Upper bound on how many times the check task may restart a stalled runner before giving up,
+ * so a permanently failing action cannot be resumed forever.
+ */
+export const MAX_CHECK_TASK_RESUMES = 20;
+
 export interface RetryParams {
   pitId?: string;
   searchAfter?: SortResults;
   retryCount?: number;
   taskId?: string;
+}
+
+/**
+ * State of the recurring check task that watches over a bulk action runner.
+ *
+ * `searchAfter` / `nbAgentsProcessed` / `checkpointUpdatedAt` are written by the runner after
+ * every batch; `lastObservedCheckpointAt` / `resumeCount` are written by the check task itself.
+ */
+export interface BulkActionCheckTaskState {
+  searchAfter?: SortResults;
+  nbAgentsProcessed?: number;
+  checkpointUpdatedAt?: string;
+  lastObservedCheckpointAt?: string;
+  resumeCount?: number;
 }
 
 export function getRetryParams(taskType: string, retryParams: RetryParams): RetryParams {
