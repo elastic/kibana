@@ -87,6 +87,7 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
+- For semantic string fields, prefer the built-in helpers from `@kbn/config-schema` / `@kbn/zod` (`savedObjectId`, `savedObjectType`, `savedObjectVersion`, `spaceId`, `displayName`, `description`, `searchFilter`, `aggregation`, `querySortField`) over ad-hoc limits; override with `{ maxLength }` only to keep an existing stricter contract. On existing routes with unknown real-world lengths, use `.warn({ label })` (static label only) to report instead of reject. If a field truly can't be bounded, use `unboundedString({ reason })` instead of a CodeQL suppression. See `docs/extend/key-concepts/security/bounded-string-schemas.md`.
 
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
