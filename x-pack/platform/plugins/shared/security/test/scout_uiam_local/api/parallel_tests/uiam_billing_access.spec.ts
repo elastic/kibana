@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY } from '@kbn/mock-idp-utils';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
+import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
 import type { ApiClientFixture, SamlAuth } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -92,8 +97,15 @@ apiTest.describe('[NON-MKI] UIAM billing access through Core', { tag: tags.serve
       });
       expect(grantResponse).toHaveStatusCode(200);
 
+      // A key granted through Kibana is internal: on a real request it only authenticates
+      // alongside Kibana's caller attestation, the way Kibana's own loopback callers send it.
+      const credential = new HTTPAuthorizationHeader('ApiKey', grantResponse.body.api_key);
       const response = await billingAccessWith(apiClient, {
-        Authorization: `ApiKey ${grantResponse.body.api_key}`,
+        Authorization: credential.toString(),
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          MOCK_IDP_UIAM_SHARED_SECRET,
+          credential
+        ),
       });
 
       expect(response).toHaveStatusCode(200);
