@@ -157,4 +157,15 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
+  jestConfigs:
+    - '**/jest.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!ftr_e2e/**/*'
+  jestIntegrationConfigs:
+    - '**/jest.integration.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!ftr_e2e/**/*'
+  scoutConfigs:
+    - '**/test/scout*/**/*playwright.config.ts'
+    - '!ftr_e2e/**/*'
 tasks: {}

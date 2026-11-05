@@ -16,6 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getAffectedMoonJestTargets } from './query_projects';
 
 const moon = path.join(REPO_ROOT, 'node_modules/.bin/moon');
+const fixtureEnv = { ...process.env, MOON_BASE: 'main', MOON_HEAD: 'HEAD' };
 
 describe('Moon Jest task inputs', () => {
   let fixtureRoot: string;
@@ -33,7 +34,7 @@ describe('Moon Jest task inputs', () => {
       cwd: fixtureRoot,
       encoding: 'utf8',
       input: JSON.stringify({ files: [changedFile] }),
-      env: { ...process.env, CI: 'true' },
+      env: { ...fixtureEnv, CI: 'true' },
     });
     return Object.keys((JSON.parse(result) as { tasks: Record<string, object> }).tasks).sort();
   };
@@ -186,6 +187,25 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
     ).toEqual(['leaf']);
   });
 
+  it('selects the hand-authored Buildkite Jest task for Buildkite source changes', async () => {
+    const targets = await getAffectedMoonJestTargets({
+      changedFilesJson: JSON.stringify({
+        files: ['.buildkite/pipeline-utils/affected-packages/index.ts'],
+      }),
+    });
+    expect(targets).toContain('kibana-buildkite:jest');
+  }, 30_000);
+
+  it('selects the child project for a nested Jest config', async () => {
+    const targets = await getAffectedMoonJestTargets({
+      changedFilesJson: JSON.stringify({
+        files: ['x-pack/platform/test/alerting_api_integration/packages/helpers/jest.config.js'],
+      }),
+    });
+    expect(targets).toContain('@kbn/alerting-api-integration-helpers:jest');
+    expect(targets).not.toContain('@kbn/test-suites-xpack-platform:jest');
+  }, 30_000);
+
   it('runs transitive consumers when downstream expansion is requested', async () => {
     const outputFile = path.join(fixtureRoot, 'selected.txt');
     const argsFile = path.join(fixtureRoot, 'args.txt');
@@ -213,7 +233,7 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
         cwd: fixtureRoot,
         encoding: 'utf8',
         env: {
-          ...process.env,
+          ...fixtureEnv,
           MOON_FIXTURE_OUTPUT: outputFile,
           MOON_FIXTURE_ARGS_OUTPUT: argsFile,
         },
@@ -234,11 +254,15 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
     });
 
     write('leaf/index.ts', 'export const leaf = 2;\n');
-    const after = execFileSync(moon, ['run', 'app:jest', '--summary', 'detailed'], {
-      cwd: fixtureRoot,
-      encoding: 'utf8',
-      env: { ...process.env, MOON_FIXTURE_OUTPUT: outputFile },
-    });
+    const after = execFileSync(
+      moon,
+      ['run', 'app:jest', '--summary', 'detailed', '--', '-u', 'example.test.ts'],
+      {
+        cwd: fixtureRoot,
+        encoding: 'utf8',
+        env: { ...fixtureEnv, MOON_FIXTURE_OUTPUT: outputFile },
+      }
+    );
     const appHash = (output: string) =>
       output
         .replace(/\x1B\[[0-9;]*[A-Za-z]/g, '')
