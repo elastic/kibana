@@ -27,7 +27,9 @@ import { isServiceMapGroupingEnabled } from '../../lib/helpers/is_service_map_gr
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroup } from '../service_groups/get_service_group';
+import type { ServiceMapGrouping } from './get_service_map';
 import { getServiceMap } from './get_service_map';
+import type { ServiceStatsSource } from './get_enhanced_service_stats';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceBadges } from './get_service_map_service_badges';
 import { getConnectionTransactions } from './get_connection_transactions';
@@ -51,6 +53,20 @@ async function assertServiceMapAccess({
   return licensingContext;
 }
 
+/** With service map grouping enabled the client must send the data source, as the service inventory does. */
+function getDocumentSource({
+  documentType,
+  rollupInterval,
+  useDurationSummary,
+}: Partial<ServiceStatsSource>): ServiceStatsSource {
+  if (!documentType || !rollupInterval) {
+    throw Boom.badRequest(
+      '`documentType` and `rollupInterval` are required when service map grouping is enabled'
+    );
+  }
+  return { documentType, rollupInterval, useDurationSummary: useDurationSummary ?? false };
+}
+
 const serviceMapRoute = createApmServerRoute({
   endpoint: routeDefinitions.serviceMap.serviceMap.endpoint,
   params: routeDefinitions.serviceMap.serviceMap.params,
@@ -65,7 +81,18 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
-      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery, esQuery },
+      query: {
+        serviceName,
+        serviceGroup: serviceGroupId,
+        environment,
+        start,
+        end,
+        kuery,
+        esQuery,
+        documentType,
+        rollupInterval,
+        useDurationSummary,
+      },
     } = params;
 
     const {
@@ -86,6 +113,14 @@ const serviceMapRoute = createApmServerRoute({
         uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
         isServiceMapGroupingEnabled({ context }),
       ]);
+
+    // Before any search, so a request with the flag on but without a source fails fast
+    const grouping: ServiceMapGrouping = groupingEnabled
+      ? {
+          enabled: true,
+          source: getDocumentSource({ documentType, rollupInterval, useDurationSummary }),
+        }
+      : { enabled: false };
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -109,7 +144,7 @@ const serviceMapRoute = createApmServerRoute({
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
       esQuery: esQuery as { bool: BoolQuery } | undefined,
-      groupingEnabled,
+      grouping,
     });
   },
 });

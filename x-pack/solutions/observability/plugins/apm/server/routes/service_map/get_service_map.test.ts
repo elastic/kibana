@@ -6,14 +6,16 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { getServiceCallGraph } from './get_service_call_graph';
 import { matchCallGraphToServices } from './match_service_call_graph';
 import { getServiceMap } from './get_service_map';
-import type { IEnvOptions } from './get_service_map';
+import type { IEnvOptions, ServiceMapGrouping } from './get_service_map';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
+import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 
@@ -21,6 +23,7 @@ jest.mock('./get_service_call_graph');
 jest.mock('./match_service_call_graph');
 jest.mock('./get_service_anomalies');
 jest.mock('./get_service_stats');
+jest.mock('./get_enhanced_service_stats');
 jest.mock('./get_trace_sample_ids');
 jest.mock('./fetch_exit_span_samples');
 
@@ -28,6 +31,7 @@ const getServiceCallGraphMock = jest.mocked(getServiceCallGraph);
 const matchCallGraphToServicesMock = jest.mocked(matchCallGraphToServices);
 const getServiceAnomaliesMock = jest.mocked(getServiceAnomalies);
 const getServiceStatsMock = jest.mocked(getServiceStats);
+const getEnhancedServiceStatsMock = jest.mocked(getEnhancedServiceStats);
 const getTraceSampleIdsMock = jest.mocked(getTraceSampleIds);
 const fetchExitSpanSamplesMock = jest.mocked(fetchExitSpanSamplesFromTraceIds);
 
@@ -48,9 +52,18 @@ const spans: ServiceMapSpan[] = [
   },
 ];
 
-function makeOptions(
-  overrides: Partial<IEnvOptions & { maxNumberOfServices: number; groupingEnabled?: boolean }> = {}
-) {
+const disabledGrouping: ServiceMapGrouping = { enabled: false };
+
+const enabledGrouping: ServiceMapGrouping = {
+  enabled: true,
+  source: {
+    documentType: ApmDocumentType.ServiceTransactionMetric,
+    rollupInterval: RollupInterval.TenMinutes,
+    useDurationSummary: true,
+  },
+};
+
+function makeOptions(overrides: Partial<Parameters<typeof getServiceMap>[0]> = {}) {
   const logger = {
     debug: jest.fn(),
     info: jest.fn(),
@@ -67,24 +80,49 @@ function makeOptions(
       start: 1,
       end: 2,
       maxNumberOfServices: 50,
+      grouping: disabledGrouping,
       ...overrides,
     },
     logger,
   };
 }
 
-describe('getServiceMap call graph', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    getServiceStatsMock.mockResolvedValue(servicesData);
-    getServiceAnomaliesMock.mockResolvedValue(DEFAULT_ANOMALIES);
-    getTraceSampleIdsMock.mockResolvedValue({ traceIds: ['trace-1'] });
-    fetchExitSpanSamplesMock.mockResolvedValue(spans);
-    matchCallGraphToServicesMock.mockReturnValue({});
+beforeEach(() => {
+  jest.clearAllMocks();
+  getServiceStatsMock.mockResolvedValue(servicesData);
+  getEnhancedServiceStatsMock.mockResolvedValue(servicesData);
+  getServiceAnomaliesMock.mockResolvedValue(DEFAULT_ANOMALIES);
+  getTraceSampleIdsMock.mockResolvedValue({ traceIds: ['trace-1'] });
+  fetchExitSpanSamplesMock.mockResolvedValue(spans);
+  getServiceCallGraphMock.mockResolvedValue({});
+  matchCallGraphToServicesMock.mockReturnValue({});
+});
+
+describe('getServiceMap services', () => {
+  it('gets the services as before when grouping is disabled', async () => {
+    const { options } = makeOptions({ grouping: disabledGrouping });
+
+    await getServiceMap(options);
+
+    expect(getServiceStatsMock).toHaveBeenCalledWith(options);
+    expect(getEnhancedServiceStatsMock).not.toHaveBeenCalled();
   });
 
+  it('gets the services with their stats when grouping is enabled', async () => {
+    const { options } = makeOptions({ grouping: enabledGrouping });
+
+    await getServiceMap(options);
+
+    expect(getEnhancedServiceStatsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ ...options, source: enabledGrouping.source })
+    );
+    expect(getServiceStatsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('getServiceMap call graph', () => {
   it('does not read the call graph when grouping is off', async () => {
-    const { options, logger } = makeOptions({ groupingEnabled: false });
+    const { options, logger } = makeOptions({ grouping: disabledGrouping });
 
     const map = await getServiceMap(options);
 
@@ -100,7 +138,7 @@ describe('getServiceMap call graph', () => {
   });
 
   it('does not read the call graph for one service', async () => {
-    const { options } = makeOptions({ groupingEnabled: true, serviceName: 'cart' });
+    const { options } = makeOptions({ grouping: enabledGrouping, serviceName: 'cart' });
 
     await getServiceMap(options);
 
@@ -113,7 +151,7 @@ describe('getServiceMap call graph', () => {
       gateway: [{ destination: 'cart-backend.default.svc:8080', calls: 4 }],
     };
     getServiceCallGraphMock.mockResolvedValue(callGraph);
-    const { options, logger } = makeOptions({ groupingEnabled: true });
+    const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
     const map = await getServiceMap(options);
 
@@ -133,7 +171,7 @@ describe('getServiceMap call graph', () => {
 
   it('returns the map when the call graph query fails', async () => {
     getServiceCallGraphMock.mockRejectedValue(new Error('search failed'));
-    const { options, logger } = makeOptions({ groupingEnabled: true });
+    const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
     const map = await getServiceMap(options);
 
@@ -158,7 +196,7 @@ describe('getServiceMap call graph', () => {
     matchCallGraphToServicesMock.mockImplementation(() => {
       throw new Error('match failed');
     });
-    const { options, logger } = makeOptions({ groupingEnabled: true });
+    const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
     const map = await getServiceMap(options);
 
