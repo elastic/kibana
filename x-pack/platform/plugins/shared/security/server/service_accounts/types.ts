@@ -15,6 +15,7 @@ import type {
 
 import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type { ServiceAccountsBackendType } from './metrics';
 import type { ServiceAccountsManagementApi } from './service_accounts_management';
 import type {
   DeleteServiceAccountResponse,
@@ -38,6 +39,9 @@ export interface ListServiceAccountsParams {
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
+  /** Which backend this is, for the service account metrics. */
+  readonly type: ServiceAccountsBackendType;
+
   create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
 
   /**

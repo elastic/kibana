@@ -63,7 +63,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
 
       expect(mintToken).toHaveBeenCalledTimes(1);
-      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined });
+      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined, trigger: 'initial' });
       expect(request.isFakeRequest).toBe(true);
       // The exact lowercase key is load-bearing for the ES client's fake-request header filtering.
       expect(Object.keys(request.headers)).toEqual(['authorization']);
@@ -206,20 +206,35 @@ describe('ServiceAccountFakeRequests', () => {
       );
 
       expect(mintToken).toHaveBeenCalledTimes(1);
-      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined });
+      expect(mintToken).toHaveBeenCalledWith('sa-id', {
+        boundAt: undefined,
+        trigger: 'reauthenticate',
+      });
       expect(request.headers.authorization).toBe('Bearer essu_token_2');
     });
 
     it('tells every mint when the workload was bound', async () => {
       const boundAt = '2026-10-01T00:00:00.000Z';
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id', boundAt });
-      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt });
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt, trigger: 'initial' });
 
       jest.advanceTimersByTime(MAX_AGE_MS);
       await fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
 
       expect(mintToken).toHaveBeenCalledTimes(2);
-      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt });
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt, trigger: 'reauthenticate' });
+    });
+
+    it('tells the mint why the token is replaced', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      await fakeRequests.ensureFreshToken(request, MAX_AGE_MS, 'self_call');
+
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', {
+        boundAt: undefined,
+        trigger: 'self_call',
+      });
     });
 
     it('deduplicates concurrent refreshes into a single mint', async () => {
@@ -653,6 +668,10 @@ describe('ServiceAccountFakeRequests', () => {
         'essu_token_2'
       );
       expect(mintToken).toHaveBeenCalledTimes(1);
+      expect(mintToken).toHaveBeenCalledWith('sa-id', {
+        boundAt: undefined,
+        trigger: 'self_call',
+      });
     });
 
     it('answers a call longer than any token with one younger than a fifth of its lifetime', async () => {

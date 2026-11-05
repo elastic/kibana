@@ -45,6 +45,7 @@ import type {
   ServiceAccountMintedToken,
 } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getOperationErrorType, serviceAccountsMetrics } from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
@@ -62,7 +63,6 @@ import {
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import { securityTelemetry } from '../otel/instrumentation';
 
 /** Elasticsearch's namespace for its built-in service accounts. */
 const ES_BUILT_IN_SERVICE_ACCOUNT_NAMESPACE = 'elastic';
@@ -167,6 +167,8 @@ export interface EsServiceAccountsOptions {
  * handed a short-lived token exchanged from it.
  */
 export class EsServiceAccounts implements ServiceAccountsBackend {
+  readonly type = 'stack';
+
   private readonly fakeRequests: ServiceAccountFakeRequests;
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
@@ -201,7 +203,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.getCurrentUserProfileId = getCurrentUserProfileId;
     this.fakeRequests = new ServiceAccountFakeRequests(
       logger,
-      (serviceAccountId, { boundAt }) => this.exchangeToken(serviceAccountId, boundAt),
+      (serviceAccountId, { boundAt, trigger }) =>
+        serviceAccountsMetrics.measureTokenExchange({ backend: this.type, trigger }, () =>
+          this.exchangeToken(serviceAccountId, boundAt)
+        ),
       requestLifetimeMs
     );
   }
@@ -220,10 +225,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           serviceAccount: { id: account.id, name: account.name },
         })
       );
-      securityTelemetry.recordServiceAccountCreationAttempt({
-        outcome: 'success',
-        serviceAccountBackend: 'stack',
-      });
+      serviceAccountsMetrics.recordOperation({ operation: 'create', backend: this.type });
       return account;
     } catch (e) {
       // Only two failures are audited. An authorization refusal is logged where it happens, by
@@ -241,9 +243,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           })
         );
       }
-      securityTelemetry.recordServiceAccountCreationAttempt({
-        outcome: 'failure',
-        serviceAccountBackend: 'stack',
+      serviceAccountsMetrics.recordOperation({
+        operation: 'create',
+        backend: this.type,
+        errorType: getOperationErrorType(e),
       });
       throw e;
     }
@@ -757,7 +760,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       const token = await this.fakeRequests.ensureFreshToken(
         request,
-        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS,
+        'reauthenticate'
       );
       return { authorization: `Bearer ${token}` };
     } catch {
@@ -1134,9 +1138,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         return true;
       }
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'account',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('account');
       this.logger.error(
         `Could not determine whether the failed create of service account [${principal}] left an ` +
           `account behind. It may need to be removed manually: ${getDetailedErrorMessage(e)}`
@@ -1171,9 +1173,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       await this.deleteToken(esClient, namespace, name, ES_SERVICE_ACCOUNT_TOKEN_NAME);
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'token',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('token');
       this.logger.error(
         `Failed to delete the token of partially created service account [${principal}]: ` +
           getDetailedErrorMessage(e)
@@ -1187,9 +1187,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await this.deleteAccount(esClient, namespace, name, { force: true });
       accountDeleted = true;
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'account',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('account');
       this.logger.error(
         `Failed to roll back partially created service account [${principal}]. It may need to be ` +
           `removed manually: ${getDetailedErrorMessage(e)}`
@@ -1207,9 +1205,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       await this.credentialStore.delete(principal);
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'credential',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('credential');
       this.logger.error(
         `Failed to delete the credential of partially created service account [${principal}]. ` +
           `It may need to be removed manually: ${getDetailedErrorMessage(e)}`

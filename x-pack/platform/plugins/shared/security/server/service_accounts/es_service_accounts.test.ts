@@ -22,15 +22,19 @@ import {
   ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './es_role_limits';
 import { EsServiceAccounts } from './es_service_accounts';
+import { serviceAccountsMetrics } from './metrics';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
-import { securityTelemetry } from '../otel/instrumentation';
 
-jest.mock('../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordServiceAccountCreationAttempt: jest.fn(),
-    recordServiceAccountRollbackFailure: jest.fn(),
+jest.mock('./metrics', () => ({
+  ...jest.requireActual('./metrics'),
+  serviceAccountsMetrics: {
+    recordOperation: jest.fn(),
+    recordRollbackFailure: jest.fn(),
+    measureTokenExchange: jest.fn((_params: unknown, exchange: () => Promise<unknown>) =>
+      exchange()
+    ),
   },
 }));
 
@@ -196,9 +200,9 @@ describe('EsServiceAccounts', () => {
       // creation has no remaining way to fail.
       expect(calls).toHaveLength(3);
 
-      expect(securityTelemetry.recordServiceAccountCreationAttempt).toHaveBeenCalledWith({
-        outcome: 'success',
-        serviceAccountBackend: 'stack',
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+        operation: 'create',
+        backend: 'stack',
       });
 
       expect(credentialStore.set).toHaveBeenCalledWith(
@@ -497,9 +501,7 @@ describe('EsServiceAccounts', () => {
           'Failed to delete the credential of partially created service account'
         )
       );
-      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
-        serviceAccountRollbackResource: 'credential',
-      });
+      expect(serviceAccountsMetrics.recordRollbackFailure).toHaveBeenCalledWith('credential');
     });
 
     it('leaves the account in place when a concurrent create already minted its token', async () => {
@@ -573,15 +575,12 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.delete).not.toHaveBeenCalled();
 
       // Counted separately, since one rollback can strand more than one resource.
-      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
-        serviceAccountRollbackResource: 'token',
-      });
-      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
-        serviceAccountRollbackResource: 'account',
-      });
-      expect(securityTelemetry.recordServiceAccountCreationAttempt).toHaveBeenCalledWith({
-        outcome: 'failure',
-        serviceAccountBackend: 'stack',
+      expect(serviceAccountsMetrics.recordRollbackFailure).toHaveBeenCalledWith('token');
+      expect(serviceAccountsMetrics.recordRollbackFailure).toHaveBeenCalledWith('account');
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+        operation: 'create',
+        backend: 'stack',
+        errorType: expect.any(String),
       });
     });
 
@@ -731,9 +730,7 @@ describe('EsServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Could not determine whether the failed create')
       );
-      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
-        serviceAccountRollbackResource: 'account',
-      });
+      expect(serviceAccountsMetrics.recordRollbackFailure).toHaveBeenCalledWith('account');
     });
 
     // The response is not validated, so this pins the behavior that keeps that safe: a shape
