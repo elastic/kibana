@@ -55,6 +55,7 @@ import {
   healthRoute,
   metricsRoute,
   executionControlRoutes,
+  taskManagerUiRoutes,
 } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
@@ -103,6 +104,7 @@ export interface TaskManagerSetupContract {
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
   registerTaskEventLogger: (logger: TaskEventLogger) => void;
+  registerEventLogIndexPattern: (indexPattern: string) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -174,6 +176,7 @@ export class TaskManagerPlugin
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
   private taskEventLogger?: TaskEventLogger;
+  private eventLogIndexPattern?: string;
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
@@ -288,6 +291,19 @@ export class TaskManagerPlugin
         core.getStartServices().then(() => this.executionControlService!),
       getDefinitions: () => this.definitions,
     });
+    taskManagerUiRoutes({
+      router,
+      config: this.config,
+      taskManagerIndex: TASK_MANAGER_INDEX,
+      getStartDependencies: () =>
+        core.getStartServices().then(([coreStart]) => ({
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          executionControlService: this.executionControlService!,
+          discoveryService: this.kibanaDiscoveryService!,
+        })),
+      getDefinitions: () => this.definitions,
+      getEventLogIndexPattern: () => this.eventLogIndexPattern,
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -365,6 +381,9 @@ export class TaskManagerPlugin
       },
       registerTaskEventLogger: (logger: TaskEventLogger) => {
         this.taskEventLogger = logger;
+      },
+      registerEventLogIndexPattern: (indexPattern: string) => {
+        this.eventLogIndexPattern = indexPattern;
       },
     };
   }

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-manager-ui-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Stack Management page for inspecting Task Manager tasks, task types and recent runs.",
+  "plugin": {
+    "id": "taskManagerUi",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "data",
+      "management"
+    ]
+  }
+}

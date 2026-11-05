@@ -6,3 +6,22 @@
  */
 
 export { TaskErrorSource } from './constants';
+export type {
+  TaskRunsWindow,
+  TaskTypeDefinitionSummary,
+  TaskRunsSummary,
+  TaskTypeSummary,
+  TaskManagerUiOverviewResponse,
+  TaskSummary,
+  TaskLastRun,
+  StoredTaskListItem,
+  RemovedTaskListItem,
+  TaskListItem,
+  TaskManagerUiTaskListResponse,
+  TaskExplanationVerdict,
+  TaskExplanationReason,
+  TaskExplanation,
+  TaskRun,
+  TaskFailuresInWindow,
+  TaskManagerUiTaskDetailResponse,
+} from './ui_api_types';

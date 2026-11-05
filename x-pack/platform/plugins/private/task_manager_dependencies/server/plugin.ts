@@ -51,6 +51,7 @@ export class TaskManagerDependenciesPlugin {
     plugin.taskManager.registerTaskEventLogger(
       plugin.eventLog.getLogger({ event: { provider: EVENT_LOG_PROVIDER } })
     );
+    plugin.taskManager.registerEventLogIndexPattern(plugin.eventLog.getIndexPattern());
   }
 
   public start(core: CoreStart, plugin: TaskManagerDependenciesPluginStart) {

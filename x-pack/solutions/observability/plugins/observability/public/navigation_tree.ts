@@ -628,6 +628,7 @@ function createNavTree({
                 link: 'management:queryActivity',
                 badgeType: 'new',
               },
+              { link: 'management:taskManager' },
             ],
           },
           {

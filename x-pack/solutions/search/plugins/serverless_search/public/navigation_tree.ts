@@ -282,6 +282,10 @@ export function createNavigationTree({
                 breadcrumbStatus: 'hidden',
                 badgeType: 'new',
               },
+              {
+                link: 'management:taskManager',
+                breadcrumbStatus: 'hidden',
+              },
             ],
           },
           {
