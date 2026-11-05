@@ -10,7 +10,7 @@
 /** @typedef {import("eslint").Rule.RuleModule} Rule */
 
 // The page/frame methods that accept raw CSS/XPath selectors
-const WATCHED_METHODS = new Set(['locator', 'waitForSelector', '$', '$$']);
+const WATCHED_METHODS = new Set(['locator', 'frameLocator', 'waitForSelector', '$', '$$']);
 
 // Any selector beginning with a data-test-subj attribute lookup is safe
 const TEST_SUBJ_PREFIX = '[data-test-subj';
@@ -78,9 +78,15 @@ module.exports = {
           return;
         }
 
-        // Template literal: inspect the leading static chunk for the prefix
+        // Template literal: inspect the leading static chunk for the prefix. One that opens with
+        // an interpolation, e.g. `${euiSelectors.contextMenu.PANEL_SELECTOR} ...`, has no prefix
+        // to judge, so it is left alone rather than assumed to be raw CSS.
         if (firstArg.type === 'TemplateLiteral') {
           const firstChunk = firstArg.quasis[0]?.value.cooked ?? '';
+          if (firstChunk === '' && firstArg.expressions.length > 0) {
+            return;
+          }
+
           if (!firstChunk.startsWith(TEST_SUBJ_PREFIX)) {
             context.report({ node, messageId: 'noRawLocator' });
           }

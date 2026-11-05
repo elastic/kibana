@@ -38,6 +38,16 @@ ruleTester.run('@kbn/eslint/scout_no_raw_locators', rule, {
     { code: `page.locator('[data-test-subj="parent"] [data-test-subj="child"]');` },
     // Template literal starting with [data-test-subj
     { code: 'page.locator(`[data-test-subj="${name}"]`);' },
+    // Template opening with an interpolation: the prefix is unknown, so it is not raw CSS.
+    // `euiSelectors` constants are the replacement `scout_no_raw_eui_selectors` recommends.
+    {
+      code: 'page.locator(`${euiSelectors.contextMenu.PANEL_SELECTOR} [data-test-subj="${action}"]`);',
+    },
+    { code: 'page.locator(`${euiSelectors.selectable.ROOT_SELECTOR} li`);' },
+    { code: 'page.locator(`${prefix}`);' },
+
+    // frameLocator with a data-test-subj attribute selector
+    { code: `page.frameLocator('[data-test-subj="vegaSandboxExampleFrame"]');` },
   ],
 
   invalid: [
@@ -73,6 +83,15 @@ ruleTester.run('@kbn/eslint/scout_no_raw_locators', rule, {
     // Template literal with raw CSS
     {
       code: 'page.locator(`.euiBadge.${modifier}`);',
+      errors: [ERROR],
+    },
+    // frameLocator with a raw element/CSS selector
+    {
+      code: `page.frameLocator('iframe');`,
+      errors: [ERROR],
+    },
+    {
+      code: `this.panel.frameLocator('.embedded-frame');`,
       errors: [ERROR],
     },
   ],
