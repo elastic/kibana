@@ -12,7 +12,7 @@ import type { RawRule, IntervalSchedule, RuleTypeParams } from '../../../../type
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -25,6 +25,7 @@ import {
 } from '../../../../rules_client/lib';
 import { authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { invalidateKeys } from '../common_utils/invalidate_keys';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { EnableRuleParams } from './types';
@@ -210,23 +211,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       // on every attempt, so leaving these behind leaks a key per attempt. Only keys this call
       // created can be invalidated: when the rule already had one, `apiKeyAttributes` is empty and
       // the stored key stays in use.
-      const { apiKey, apiKeyCreatedByUser, uiamApiKey } = apiKeyAttributes;
-      const apiKeysToInvalidate = [];
-
-      if (apiKey && !apiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(apiKey);
-      }
-      if (uiamApiKey && !apiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(uiamApiKey);
-      }
-
-      if (apiKeysToInvalidate.length > 0) {
-        await bulkMarkApiKeysForInvalidation(
-          { apiKeys: apiKeysToInvalidate },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        );
-      }
+      await invalidateKeys([apiKeyAttributes], context);
 
       throw e;
     }

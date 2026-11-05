@@ -21,7 +21,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type {
   RulesClientContext,
@@ -48,6 +48,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { invalidateKeys } from '../common_utils/invalidate_keys';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
@@ -233,24 +234,8 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
-  const apiKeysToInvalidate = [];
-  if (apiKey && !apiKeyCreatedByUser) {
-    apiKeysToInvalidate.push(apiKey);
-  }
-  if (uiamApiKey && !apiKeyCreatedByUser) {
-    apiKeysToInvalidate.push(uiamApiKey);
-  }
-
   await Promise.all([
-    apiKeysToInvalidate.length > 0
-      ? bulkMarkApiKeysForInvalidation(
-          {
-            apiKeys: apiKeysToInvalidate,
-          },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        )
-      : null,
+    invalidateKeys([{ apiKey, uiamApiKey, apiKeyCreatedByUser }], context),
     (async () => {
       if (
         updateResult.scheduledTaskId &&

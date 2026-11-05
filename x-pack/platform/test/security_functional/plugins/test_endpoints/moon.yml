@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
+  - '@kbn/response-ops-api-keys'
   - '@kbn/config-schema'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'

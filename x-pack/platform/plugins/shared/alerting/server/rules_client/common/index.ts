@@ -11,7 +11,7 @@ export { retryIfBulkEditConflicts } from './bulk_edit/retry_if_bulk_edit_conflic
 export { retryIfBulkOperationConflicts } from './retry_if_bulk_operation_conflicts';
 export { applyBulkEditOperation } from './apply_bulk_edit_operation';
 export { buildKueryNodeFilter } from './build_kuery_node_filter';
-export { generateAPIKeyName } from './generate_api_key_name';
+export { generateAPIKeyName } from '../../api_keys/generate_api_key_name';
 export {
   MAPPED_PARAMS_PROPERTIES,
   getMappedParams,
@@ -26,7 +26,7 @@ export {
   API_KEY_ATTRIBUTES_TO_STRIP,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
-} from './api_key_as_alert_attributes';
+} from '../../api_keys/api_key_as_alert_attributes';
 export {
   injectReferencesIntoActions,
   injectReferencesIntoParams,
@@ -50,9 +50,9 @@ export {
   verifySnoozeScheduleLimit,
 } from './snooze_utils';
 export { tryToRemoveTasks } from './try_to_remove_tasks';
-export { resolveRuleAPIKey } from './resolve_rule_api_key';
+export { resolveRuleAPIKey } from '../../api_keys/resolve_rule_api_key';
 export type {
   ResolvedAPIKey,
   ResolveRuleAPIKeyOptions,
   RuleApiKeyOwnership,
-} from './resolve_rule_api_key';
+} from '../../api_keys/resolve_rule_api_key';

@@ -102,7 +102,7 @@ import {
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
-} from './invalidate_pending_api_keys/task';
+} from './api_keys/invalidation/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
 import type { AlertingConfig, AlertingRulesConfig } from './config';
 import { getHealth } from './health/get_health';

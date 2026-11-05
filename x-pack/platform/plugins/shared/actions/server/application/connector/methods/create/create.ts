@@ -37,7 +37,7 @@ import {
   invalidateStoredConnectorEventIdentity,
   mintInboundEventIdentityAttributes,
   toRawActionIdentityAttributes,
-} from '../../../../inbound/event_identity';
+} from '../../../../api_keys/event_identity';
 import {
   assertInboundEventsToggleAllowed,
   resolveCreateInboundEventsEnabled,

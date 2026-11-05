@@ -8,7 +8,7 @@
 import type { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import type { SavedObjectOptions } from '../types';
 import type { RulesClientContext } from '../types';

@@ -77,6 +77,7 @@ dependsOn:
   - '@kbn/core-http-server-utils'
   - '@kbn/response-ops-rule-params'
   - '@kbn/response-ops-schedule-schema'
+  - '@kbn/response-ops-api-keys'
   - '@kbn/datemath'
   - '@kbn/elastic-assistant-common'
   - '@kbn/licensing-types'

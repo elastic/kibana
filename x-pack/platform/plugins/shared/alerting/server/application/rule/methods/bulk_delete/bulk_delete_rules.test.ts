@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { RecoveredActionGroup } from '../../../../../common';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import {
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
@@ -40,7 +40,7 @@ import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gap
 import { RulesNotFoundError } from '../../../../rules_client/lib/rules_not_found_error';
 import type { RegistryRuleType } from '../../../../rule_type_registry';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

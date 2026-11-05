@@ -18,8 +18,7 @@ import {
 } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { isUnauthorizedError } from '@kbn/es-errors';
-
-import { getUiamApiKeySecret } from './event_identity/encode_api_key';
+import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
 
 const MAX_API_KEY_CREDENTIAL_LENGTH = 8192;
 

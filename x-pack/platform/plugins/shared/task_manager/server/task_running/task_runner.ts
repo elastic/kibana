@@ -19,7 +19,7 @@ import { flow, identity, isEqual, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
+import { buildChildRequestEnricher, buildTaskFakeRequest } from '../api_keys/fake_request';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
@@ -68,8 +68,8 @@ import {
   SERVICE_ACCOUNT_CREDENTIAL_TYPE,
 } from '../lib/service_account_credential';
 import type { TaskManagerConfig } from '../config';
-import type { ApiKeyStrategy } from '../api_key_strategy';
-import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import type { ApiKeyStrategy } from '../api_keys/strategy';
+import { taskManagerUiamTelemetry } from '../api_keys/uiam_telemetry';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt, getRRuleScheduleDurationMs } from '../lib/get_next_run_at';

@@ -306,6 +306,14 @@ beforeEach(() => {
 
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
+  unsecuredSavedObjectsClient.bulkCreate.mockImplementation(async (objects) => ({
+    saved_objects: objects.map(({ type, attributes }, index) => ({
+      id: `${index}`,
+      type,
+      attributes,
+      references: [],
+    })),
+  }));
 
   taskManager.runSoon.mockResolvedValue({ id: '', forced: false });
   taskManager.schedule.mockResolvedValue({

@@ -11,7 +11,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -21,7 +21,7 @@ import {
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
 } from '../../../../rules_client/common/constants';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

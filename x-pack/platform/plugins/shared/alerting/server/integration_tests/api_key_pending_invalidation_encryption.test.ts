@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupTestServers } from './lib';
-import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../saved_objects';
 
 // Locks in the encryption-on-write contract for `api_key_pending_invalidation`

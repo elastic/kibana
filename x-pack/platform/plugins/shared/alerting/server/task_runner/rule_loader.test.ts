@@ -28,7 +28,7 @@ import { mockedRawRuleSO, mockedRule } from './fixtures';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
-import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
+import { alertingUiamTelemetry } from '../api_keys/uiam_telemetry';
 import { LEGACY_MISSING_UIAM_API_KEY_TAG } from '../application/rule/constants';
 
 // create mocks

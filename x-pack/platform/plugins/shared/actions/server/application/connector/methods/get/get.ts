@@ -14,7 +14,7 @@ import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import { hasInboundEventIdentityAttributes } from '../../../../api_keys/event_identity';
 import { readInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 
 export async function get({

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import type { RulesClientContext } from '../../../../rules_client/types';
 
 export interface ApiKeyEntry {
-  apiKey: string | null;
-  uiamApiKey: string | null;
-  apiKeyCreatedByUser: boolean | null;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  apiKeyCreatedByUser?: boolean | null;
 }
 
 export const invalidateKeys = async (

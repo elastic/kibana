@@ -162,7 +162,8 @@
     "@kbn/test",
     "@kbn/cloud-plugin",
     "@kbn/announcement-banner",
-    "@kbn/ftr-llm-proxy"
+    "@kbn/ftr-llm-proxy",
+    "@kbn/response-ops-api-keys"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

@@ -13,7 +13,7 @@ import type { RuleTypeParams } from '../../../../../common';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -28,7 +28,7 @@ import {
   deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

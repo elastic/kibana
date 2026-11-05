@@ -41,7 +41,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
 import { getFakeKibanaRequest } from './rule_loader';
-import type { CredentialType } from '../otel/uiam_telemetry';
+import type { CredentialType } from '../api_keys/uiam_telemetry';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';

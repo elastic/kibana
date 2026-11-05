@@ -1,0 +1,61 @@
+# @kbn/response-ops-api-keys
+
+The API key lifecycle shared by Task Manager, alerting, alerting v2 and actions: create a key, use it for background work, then invalidate it. Each plugin still owns its saved objects, its task registration and its own rules for which key to use.
+
+```mermaid
+flowchart LR
+  create["Create<br/>grant / clone / fromRequest"] --> store["Plugin stores the keys<br/>(StoredApiKeys)"]
+  store --> use["Use<br/>toFakeRequest / buildFakeRequest"]
+  store --> invNow["Invalidate now<br/>invalidateNow"]
+  store --> queue["Queue<br/>getInvalidationTargets + queueInvalidationTargets"]
+  invNow -. "ES key not found yet" .-> queue
+  queue --> pending["Pending-invalidation SO<br/>(plugin-owned type)"]
+  pending --> task["Plugin task<br/>runInvalidate"]
+```
+
+## Stored keys
+
+The package reads stored keys as `StoredApiKeys`, which uses the alerting rule field names. The other plugins map their own fields into it:
+
+- `apiKey`: an Elasticsearch key, stored as `base64(id:secret)`.
+- `uiamApiKey`: `base64(id:essu_…)` for keys Kibana granted, or a raw `essu_…` secret for user-created Cloud keys.
+- `uiamApiKeyId`: only needed when `uiamApiKey` is a raw secret Kibana owns.
+- `apiKeyCreatedByUser`: user-created keys are never invalidated.
+- `uiamApiKeyExternal`: UIAM's verdict that the key is external. When the credential a run uses is a UIAM key, the fake request is marked so Elasticsearch doesn't attach the UIAM shared secret.
+
+`toFakeRequest` picks the credential from `StoredApiKeys` and builds the request. Code that already has the credential (the Task Manager and actions task runners, the alerting v2 dispatcher) calls `buildFakeRequest` directly; Task Manager picks it with `pickCredential` first.
+
+## Client or function?
+
+`ApiKeysClient` holds what every security API call needs (the security service, a logger, the plugin's UIAM log tags and whether UIAM is enabled). Use it to create, clone or parse a key, or to invalidate one right away.
+
+Everything else is a plain function:
+
+- Stored-key and fake-request helpers (`encodeApiKey`, `decodeApiKey`, `getUiamApiKeySecret`, `getInvalidationTargets`, `pickCredential`, `buildFakeRequest`, `toFakeRequest`) have no dependencies, so they work anywhere, including task runners.
+- `queueInvalidationTargets` needs a saved objects client and the plugin's pending-invalidation type.
+- `runInvalidate` takes its clients and invalidate functions from the task's context at run time.
+
+## To change X, edit Y
+
+| To change | Edit |
+| --- | --- |
+| How keys are granted or cloned, or which UIAM failures are fatal (including the `uiam`, `uiamName`, `missingUiamCredentialsLogLevel` and `onKeyCreated` options) | `src/create.ts` |
+| How a request's own key is parsed | `fromRequest` in `src/create.ts` |
+| How stored keys are encoded, decoded, or turned into invalidation targets | `src/stored_keys.ts` |
+| Which credential a background run uses, and external UIAM marking | `src/fake_request.ts` |
+| Immediate invalidation | `src/invalidate_now.ts` |
+| The pending-invalidation saved object written for each key | `src/queue.ts` |
+| The background invalidation run, including the in-use checks | `src/task/` |
+| The invalidation task's config or state schema | `src/task/config_schema.ts`, `src/task/state_schema.ts` |
+| UIAM log tags | `src/log_tags.ts` |
+
+The task state schema is versioned. Add a new version instead of editing an existing one.
+
+## Where each plugin keeps its API key code
+
+| Plugin | Location |
+| --- | --- |
+| Task Manager | `x-pack/platform/plugins/shared/task_manager/server/api_keys/` |
+| Alerting | `x-pack/platform/plugins/shared/alerting/server/api_keys/` |
+| Alerting v2 | `x-pack/platform/plugins/shared/alerting_v2/server/lib/services/api_key_service/` and `server/lib/tasks/invalidate_pending_api_keys/` |
+| Actions | `x-pack/platform/plugins/shared/actions/server/api_keys/` |

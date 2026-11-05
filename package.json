@@ -1086,6 +1086,7 @@
     "@kbn/response-ops-alerts-fields-browser": "workspace:*",
     "@kbn/response-ops-alerts-filters-form": "workspace:*",
     "@kbn/response-ops-alerts-table": "workspace:*",
+    "@kbn/response-ops-api-keys": "workspace:*",
     "@kbn/response-ops-detections-close-reason": "workspace:*",
     "@kbn/response-ops-form-generator": "workspace:*",
     "@kbn/response-ops-oauth-hooks": "workspace:*",

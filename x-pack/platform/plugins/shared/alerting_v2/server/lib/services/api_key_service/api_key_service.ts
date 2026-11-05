@@ -7,12 +7,17 @@
 
 import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  ApiKeysClient,
+  encodeApiKey,
+  getInvalidationTargets,
+  queueInvalidationTargets,
+  type QueueResult,
+} from '@kbn/response-ops-api-keys';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
@@ -30,19 +35,17 @@ export interface ApiKeyAttributes {
  * of thrown so a caller invalidating a batch still learns about the keys that
  * did register, and so best-effort callers can keep ignoring the result.
  */
-export type ApiKeyInvalidationResult = { success: true } | { success: false; message: string };
+export type ApiKeyInvalidationResult = QueueResult;
 
 export interface ApiKeyServiceContract {
   create(name: string): Promise<ApiKeyAttributes>;
   markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]>;
 }
 
-const encodeApiKey = (id?: string, key?: string): string | null => {
-  return id && key ? Buffer.from(`${id}:${key}`).toString('base64') : null;
-};
-
 @injectable()
 export class ApiKeyService implements ApiKeyServiceContract {
+  private readonly apiKeys: ApiKeysClient;
+
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('security'))
@@ -50,7 +53,13 @@ export class ApiKeyService implements ApiKeyServiceContract {
     @inject(ApiKeyServiceSavedObjectsClientToken)
     private readonly invalidationSavedObjectsClient: SavedObjectsClientContract,
     @inject(PluginLogger) private readonly logger: Logger
-  ) {}
+  ) {
+    this.apiKeys = new ApiKeysClient({
+      security: securityService,
+      logger,
+      pluginTag: 'alerting_v2',
+    });
+  }
 
   public async create(name: string): Promise<ApiKeyAttributes> {
     const username = this.securityService.authc.getCurrentUser(this.request)?.username;
@@ -70,52 +79,18 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   public async markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]> {
-    if (apiKeys.length === 0) {
-      return [];
-    }
-    const decodedApiKeys = apiKeys.map((key) => this.decodeApiKey(key));
-    const apiKeysToInvalidate = decodedApiKeys.map(({ apiKeyId, apiKeyValue }) => ({
-      attributes: {
-        apiKeyId,
-        createdAt: new Date().toISOString(),
-        ...(apiKeyValue && isUiamCredential(apiKeyValue) ? { uiamApiKey: apiKeyValue } : {}),
-      },
+    // Each stored `apiKey` yields at most one target; keys with none have nothing to queue.
+    const targetsByKey = apiKeys.map((apiKey) => getInvalidationTargets({ apiKey }));
+    const results = await queueInvalidationTargets(targetsByKey.flat(), {
       type: API_KEY_PENDING_INVALIDATION_TYPE,
-    }));
-
-    let response;
-    try {
-      response = await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
-    } catch (e) {
-      const message = (e as Error).message;
-      this.logger.error(
-        `Failed to bulk mark list of API keys [${decodedApiKeys
-          .map(({ apiKeyId }) => `"${apiKeyId}"`)
-          .join(', ')}] for invalidation: ${message}`,
-        {
-          error: { stack_trace: (e as Error).stack },
-        }
-      );
-      return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
-    }
-
-    return decodedApiKeys.map(({ apiKeyId }, index): ApiKeyInvalidationResult => {
-      const created = response.saved_objects[index];
-      if (created && !isSavedObjectErrorResult(created)) {
-        return { success: true };
-      }
-
-      const message = created
-        ? created.error.message
-        : 'Saved object was not returned by bulkCreate';
-      this.logger.error(`Failed to mark API key "${apiKeyId}" for invalidation: ${message}`);
-      return { success: false, message };
+      savedObjectsClient: this.invalidationSavedObjectsClient,
+      logger: this.logger,
     });
-  }
 
-  private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {
-    const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
-    return { apiKeyId: id, apiKeyValue: apiKey };
+    let next = 0;
+    return targetsByKey.map((targets) =>
+      targets.length > 0 ? results[next++] : { success: true }
+    );
   }
 
   private isAuthenticationTypeAPIKey(): boolean {
@@ -124,69 +99,54 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   private getAuthenticationAPIKeyAttributes(name: string, username: string): ApiKeyAttributes {
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
-    if (!authorizationHeader?.credentials) {
+    const requestApiKey = this.apiKeys.fromRequest(this.request);
+    if (!requestApiKey) {
       throw new Error(
         `Failed to extract API key from authorization header for action policy: ${name}`
       );
     }
 
-    if (isUiamCredential(authorizationHeader)) {
-      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
-      });
-    }
-
-    const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);
-
-    if (!apiKeyId || !apiKeyValue) {
+    if (requestApiKey.type === 'invalid') {
       throw new Error(
         `Failed to parse API key credentials from authorization header for action policy: ${name}`
       );
     }
 
-    if (isUiamCredential(apiKeyValue) && !this.shouldGrantUiam()) {
+    const { type, id, secret } = requestApiKey;
+    // A raw `essu_…` Cloud API key carries no id, so Kibana can't store it.
+    if (!id) {
+      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
+      });
+    }
+
+    if (type === 'uiam' && !this.shouldGrantUiam()) {
       throw new Error('UIAM API keys should only be used in serverless environments');
     }
 
-    const encoded = encodeApiKey(apiKeyId, apiKeyValue)!;
-
     return {
-      apiKey: encoded,
+      apiKey: encodeApiKey(id, secret),
       owner: username,
       createdByUser: true,
     };
   }
 
   private async grantAPIKeyAttributes(name: string, username: string): Promise<ApiKeyAttributes> {
-    if (this.shouldGrantUiam()) {
-      const uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
-        name: `uiam-${name}`,
-      });
-
-      if (!uiamResult) {
-        throw new Error(`Failed to create UIAM API key for action policy: ${name}`);
-      }
-
-      return {
-        apiKey: encodeApiKey(uiamResult.id, uiamResult.api_key)!,
-        owner: username,
-        createdByUser: false,
-      };
-    }
-
-    const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
+    const keys = await this.apiKeys.grant(this.request, {
       name,
-      role_descriptors: {},
       metadata: { managed: true, kibana: { type: 'action_policy' } },
+      subject: `action policy: ${name}`,
+      uiam: 'only',
     });
 
-    if (!esResult) {
-      throw new Error(`Failed to create ES API key for action policy: ${name}`);
+    const key = keys?.uiam ?? keys?.es;
+    if (!key?.id || !key.api_key) {
+      const keyType = keys?.uiam ? 'UIAM' : 'ES';
+      throw new Error(`Failed to create ${keyType} API key for action policy: ${name}`);
     }
 
     return {
-      apiKey: encodeApiKey(esResult.id, esResult.api_key)!,
+      apiKey: encodeApiKey(key.id, key.api_key),
       owner: username,
       createdByUser: false,
     };
