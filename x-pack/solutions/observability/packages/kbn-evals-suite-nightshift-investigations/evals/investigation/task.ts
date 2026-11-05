@@ -223,14 +223,22 @@ export const runInvestigation = async (
         return undefined;
       }
     };
+    const readRound = async (id: string) => {
+      try {
+        const snapshot = await readConversation(fetch, id);
+        lastTransient = undefined;
+        return snapshot;
+      } catch (error) {
+        if (!isTransientReadError(error)) throw error;
+        lastTransient = error;
+        return undefined;
+      }
+    };
     investigation = await readSnapshot();
     // A pending proposal ends `in_progress` while the agent's round is still running, so the run is
-    // only over once that round has finished too.
-    while (
-      !investigation ||
-      investigation.in_progress ||
-      !isPersisted((conversation = await readConversation(fetch, investigation.id)))
-    ) {
+    // only over once that round has finished too. A transient conversation read is retried on its
+    // own; an unfinished round goes back to the investigation, whose verdict may have landed.
+    while (!investigation || investigation.in_progress || !isPersisted(conversation)) {
       output.workflow_status = 'running';
       if (Date.now() - started > timeoutMs) {
         const minutes = timeoutMs / 60_000;
@@ -242,7 +250,17 @@ export const runInvestigation = async (
         );
       }
       await setTimeout(POLL_INTERVAL_MS);
-      investigation = (await readSnapshot()) ?? investigation;
+      if (!investigation || investigation.in_progress) {
+        investigation = (await readSnapshot()) ?? investigation;
+        continue;
+      }
+      conversation = await readRound(investigation.id);
+      if (!conversation && lastTransient) {
+        continue;
+      }
+      if (!isPersisted(conversation)) {
+        investigation = (await readSnapshot()) ?? investigation;
+      }
     }
     // The verdict may have been written after the last read, while the round was finishing.
     investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;

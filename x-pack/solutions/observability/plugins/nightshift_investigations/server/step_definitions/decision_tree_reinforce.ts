@@ -175,7 +175,7 @@ export const decisionTreeReinforceStepDefinition = ({
       // from the hook's partial view of the round, so the round is left alone instead.
       if (loadedRound.source === 'conversation_unreadable') {
         context.logger.info(
-          `Skipped decision tree reinforcement — conversation ${conversationId} is not readable by this caller`
+          `Skipped decision tree reinforcement — conversation ${inputConversationId} is not readable by this caller`
         );
         return { output: { message: '', skipped: true, submissions_json: '[]' } };
       }
@@ -204,7 +204,7 @@ export const decisionTreeReinforceStepDefinition = ({
       const executionId = workflowContext.execution.id;
       const scopedReinforcementConvId = scopeConversationId(spaceId, conversation.id);
       reinforcementSessionRegistry.registerSession(scopedReinforcementConvId, {
-        conversationId: conversationId || undefined,
+        conversationId: inputConversationId || undefined,
         roundId: resolvedRoundId,
         workflowExecutionId: executionId,
       });
@@ -225,7 +225,7 @@ export const decisionTreeReinforceStepDefinition = ({
             traceId: context.input.background_trace_id || executionId,
             foregroundTraceId: loadedRound.traceId,
             roundId: resolvedRoundId,
-            conversationId: conversationId || undefined,
+            conversationId: inputConversationId || undefined,
             spaceId,
             workflowExecutionId: executionId,
             request,

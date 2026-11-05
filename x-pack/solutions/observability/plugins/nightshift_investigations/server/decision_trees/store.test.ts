@@ -268,6 +268,7 @@ describe('commit', () => {
       learnings: [],
       evidenceGathererMetadata: [],
       conversationId: 'inv-1',
+      updateCounts: zeroCounts,
     });
 
     expect(esClient.index.mock.calls[0][0].document.attributes.conversation_id).toBe('inv-1');
@@ -285,6 +286,7 @@ describe('commit', () => {
       summary: 'Edited by hand.',
       learnings: [],
       evidenceGathererMetadata: [],
+      updateCounts: zeroCounts,
     });
 
     expect(esClient.index.mock.calls[0][0].document.attributes).not.toHaveProperty(
