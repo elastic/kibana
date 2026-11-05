@@ -42,6 +42,11 @@ import type {
   UseRiskContributingAlertsResult,
 } from '../../../../hooks/use_risk_contributing_alerts';
 import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
+import { useBaselineVersion } from '../../../../baseline_prototype/baseline_prototype_state';
+import {
+  JudgementCell,
+  JudgementColumnHeader,
+} from '../../../../baseline_prototype/judgement_cell';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
@@ -440,6 +445,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     setQuery,
   });
 
+  const baselineVersion = useBaselineVersion();
   const alerts = useRiskContributingAlerts<T>({
     riskScore: activeRiskScore,
     entityType,
@@ -567,6 +573,16 @@ const RiskInputsTabContent = <T extends EntityType>({
       },
     ];
 
+    // DESIGN PROTOTYPE, NOT FOR MERGE: the decision model's judgement of each alert (mocked).
+    if (baselineVersion !== 'off') {
+      columns.splice(columns.length - 1, 0, {
+        name: <JudgementColumnHeader />,
+        'data-test-subj': 'risk-input-table-judgement-cell',
+        width: '190px',
+        render: (data: InputAlert) => <JudgementCell alertId={data._id} />,
+      });
+    }
+
     if (isResolutionView) {
       columns.splice(4, 0, {
         name: (
@@ -581,7 +597,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     }
 
     return columns;
-  }, [alertEntityById, isResolutionView, onShowAlert]);
+  }, [alertEntityById, baselineVersion, isResolutionView, onShowAlert]);
 
   const riskInputsAlertSection = (
     <>
