@@ -10,9 +10,11 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 const mockUseAutomaticImportAuthz = jest.fn();
+const mockUseAuthz = jest.fn();
 jest.mock('../../hooks', () => ({
   useStartServices: () => ({ automaticImport: {} }),
   useBreadcrumbs: jest.fn(),
+  useAuthz: () => mockUseAuthz(),
   useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
   IntegrationsStateContextProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
@@ -46,9 +48,13 @@ const renderAt = (path: string) =>
     </MemoryRouter>
   );
 
+const setUploadPackages = (uploadPackages: boolean) =>
+  mockUseAuthz.mockReturnValue({ integrations: { uploadPackages } });
+
 describe('EPMApp create integration routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setUploadPackages(true);
   });
 
   it('mounts the create integration screen on /create when the user can create', () => {
@@ -69,8 +75,18 @@ describe('EPMApp create integration routes', () => {
     expect(screen.getByTestId('epmHomePage')).toBeInTheDocument();
   });
 
-  it('falls back to the integrations home on /upload when the user cannot create', () => {
+  it('mounts the upload screen on /upload when the user can upload packages but cannot create', () => {
     mockUseAutomaticImportAuthz.mockReturnValue({ canCreate: false });
+
+    renderAt('/upload');
+
+    expect(screen.getByTestId('createIntegrationScreen')).toBeInTheDocument();
+    expect(screen.queryByTestId('epmHomePage')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the integrations home on /upload when the user cannot upload packages', () => {
+    mockUseAutomaticImportAuthz.mockReturnValue({ canCreate: true });
+    setUploadPackages(false);
 
     renderAt('/upload');
 
