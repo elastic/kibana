@@ -38,6 +38,8 @@ const WORKFLOW_EXECUTIONS_PATH = (workflowId: string) =>
 const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
 /** Ceiling for draining the triage run the enable started (cancel + poll to terminal). */
 const DRAIN_TIMEOUT_MS = 60_000;
+/** Ceiling for a managed workflow to be installed and report valid after startup or an enable. */
+const INSTALL_TIMEOUT_MS = 20_000;
 
 /** Reads the per-space AlertZero gate; `undefined` while it still holds the default value. */
 const readAlertZeroEnabled = async ({
@@ -76,6 +78,45 @@ const setAlertZeroEnabled = async ({
     responseType: 'json',
     body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: enabled ?? null } },
   });
+  expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
+};
+
+type SpaceSolution = 'security' | 'classic' | 'oblt' | 'es';
+
+/** A space without a solution view is a Classic space. */
+const readSpaceSolution = async ({
+  apiClient,
+  headers,
+  spaceId,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<SpaceSolution> => {
+  // Spaces is a public API: it takes the public API version, not the internal one.
+  const response = await apiClient.get(`api/spaces/space/${encodeURIComponent(spaceId)}`, {
+    headers: { ...headers, ...PUBLIC_API_HEADERS },
+    responseType: 'json',
+  });
+  expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
+  return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
+};
+
+const setSpaceSolution = async ({
+  apiClient,
+  headers,
+  spaceId,
+  solution,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+  solution: SpaceSolution;
+}): Promise<void> => {
+  const response = await apiClient.put(
+    `internal/spaces/space/${encodeURIComponent(spaceId)}/solution`,
+    { headers, responseType: 'json', body: { solution } }
+  );
   expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
 };
 
@@ -157,6 +198,9 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
   // does not pin this setting (an override would make it read-only and break other suites'
   // settings writes), so this suite enables it itself — every route it drives is behind it.
   let alertZeroBaseline: { enabled: boolean | undefined } | undefined;
+  // The default space's solution view before this suite switched it to Security; unset when it
+  // already was Security, so teardown leaves it alone.
+  let solutionBaseline: SpaceSolution | undefined;
   // Execution ids of the triage workflow that existed before this suite's enable; teardown
   // cancels and drains the rest (see `cancelNewExecutions`).
   let knownExecutionIds: string[] = [];
@@ -164,6 +208,24 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const internalHeaders = { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader };
+
+    // AlertZero answers 404 outside a Security solution space even with the gate on, and the
+    // default space of a fresh stateful stack is Classic. Recorded before the switch so
+    // afterAll (which runs even when this hook throws) restores it.
+    const solution = await readSpaceSolution({
+      apiClient,
+      headers: internalHeaders,
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    if (solution !== 'security') {
+      solutionBaseline = solution;
+      await setSpaceSolution({
+        apiClient,
+        headers: internalHeaders,
+        spaceId: DEFAULT_SPACE_ID,
+        solution: 'security',
+      });
+    }
 
     alertZeroBaseline = {
       enabled: await readAlertZeroEnabled({
@@ -286,6 +348,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
           headers,
           responseType: 'json',
         });
+        expect(catalog.statusCode, JSON.stringify(catalog.body)).toBe(200);
         const worker = (
           catalog.body as { workers: Array<{ id: string; settingsRevision?: string | null }> }
         ).workers.find((candidate) => candidate.id === FLOOR_ALERT_TRIAGE_WORKER_ID);
@@ -323,6 +386,16 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
         });
       }
     });
+    await attempt(async () => {
+      if (solutionBaseline) {
+        await setSpaceSolution({
+          apiClient,
+          headers,
+          spaceId: DEFAULT_SPACE_ID,
+          solution: solutionBaseline,
+        });
+      }
+    });
     if (errors.length > 0) {
       throw new Error(
         `AlertZero managed workflows teardown failed: ${errors
@@ -356,7 +429,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
             });
             return response.statusCode === 200 ? response.body.valid : false;
           },
-          { timeout: 20_000, intervals: [1_000] }
+          { timeout: INSTALL_TIMEOUT_MS, intervals: [1_000] }
         )
         .toBe(true);
     });
