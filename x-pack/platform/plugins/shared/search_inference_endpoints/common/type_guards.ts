@@ -7,6 +7,7 @@
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type {
+  TestableTaskType,
   CspRegion,
   EisInferenceEndpoint,
   InferenceEndpointWithMetadata,
@@ -15,6 +16,10 @@ import type {
   ReasoningEffortLevel,
   RegionPolicyConflictAttributes,
 } from './types';
+import { TESTABLE_TASK_TYPES } from './types';
+
+export const isTestableTaskType = (taskType: string): taskType is TestableTaskType =>
+  (TESTABLE_TASK_TYPES as readonly string[]).includes(taskType);
 
 export const isEisEndpoint = (ep: InferenceInferenceEndpointInfo): ep is EisInferenceEndpoint =>
   ep.service === 'elastic';

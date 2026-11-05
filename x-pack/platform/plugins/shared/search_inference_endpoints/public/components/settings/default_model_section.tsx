@@ -9,6 +9,8 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
@@ -18,6 +20,8 @@ import {
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
+import { TEST_BUTTON_CLASS_NAME, revealTestButtonOnHoverStyles } from './reveal_test_button_styles';
+import { TestModelButton } from './test_model_button';
 import { useConnectors } from '../../hooks/use_connectors';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
 import type { DefaultModelValidationResult } from '../../hooks/use_default_model_validation';
@@ -58,6 +62,11 @@ export const DefaultModelSection: React.FC<Props> = ({
     () => getGlobalModelSelectedOptions(state.defaultModelId, options, state.featureSpecificModels),
     [state.defaultModelId, options, state.featureSpecificModels]
   );
+
+  const selectedModel =
+    state.defaultModelId !== NO_DEFAULT_MODEL && selectedOptions[0]?.value
+      ? { value: selectedOptions[0].value, label: selectedOptions[0].label }
+      : undefined;
 
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
     usageTracker.count(EventType.DEFAULT_MODEL_CHANGED);
@@ -142,23 +151,40 @@ export const DefaultModelSection: React.FC<Props> = ({
               isInvalid={validation.errors.length > 0}
               error={validation.errors as string[]}
             >
-              <EuiComboBox
-                data-test-subj="globalModelComboBox"
-                placeholder={i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.globalModel.placeholder',
-                  {
-                    defaultMessage: 'Select a default model',
-                  }
+              <EuiFlexGroup
+                responsive={false}
+                gutterSize="s"
+                alignItems="center"
+                css={revealTestButtonOnHoverStyles}
+              >
+                <EuiFlexItem>
+                  <EuiComboBox
+                    data-test-subj="globalModelComboBox"
+                    placeholder={i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.globalModel.placeholder',
+                      {
+                        defaultMessage: 'Select a default model',
+                      }
+                    )}
+                    singleSelection={{ asPlainText: true }}
+                    options={options}
+                    selectedOptions={selectedOptions}
+                    onChange={onChangeDefaultModel}
+                    isLoading={connectorsLoading}
+                    isInvalid={validation.errors.length > 0}
+                    isClearable={false}
+                    isDisabled={disabled}
+                  />
+                </EuiFlexItem>
+                {selectedModel && !disabled && (
+                  <EuiFlexItem grow={false} className={TEST_BUTTON_CLASS_NAME}>
+                    <TestModelButton
+                      connectorId={selectedModel.value}
+                      label={selectedModel.label}
+                    />
+                  </EuiFlexItem>
                 )}
-                singleSelection={{ asPlainText: true }}
-                options={options}
-                selectedOptions={selectedOptions}
-                onChange={onChangeDefaultModel}
-                isLoading={connectorsLoading}
-                isInvalid={validation.errors.length > 0}
-                isClearable={false}
-                isDisabled={disabled}
-              />
+              </EuiFlexGroup>
             </EuiFormRow>
           </EuiDescribedFormGroup>
 

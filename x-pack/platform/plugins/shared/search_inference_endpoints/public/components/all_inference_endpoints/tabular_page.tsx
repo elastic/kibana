@@ -18,6 +18,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
+import { isTestableTaskType } from '../../../common/type_guards';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { type FilterOptions, GroupByOptions } from '../../types';
@@ -34,6 +35,7 @@ import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_in
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
+import { TestEndpointModal } from './render_table_columns/render_actions/actions/test_endpoint/test_endpoint_modal';
 
 import { EndpointsTable } from './endpoints_table';
 import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
@@ -72,10 +74,13 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const {
     showDeleteAction,
     showInferenceFlyout,
+    showTestAction,
     selectedInferenceEndpoint,
     copyContent,
     onCancelDeleteModal,
     displayDeleteActionItem,
+    displayTestActionItem,
+    onCloseTestModal,
     displayInferenceFlyout,
     onCloseInferenceFlyout,
   } = useEndpointActions();
@@ -164,6 +169,19 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             'data-test-subj': 'inference-endpoints-action-edit-endpoint-label',
           },
           {
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.testEndpoint', {
+              defaultMessage: 'Test endpoint',
+            }),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.testEndpoint', {
+              defaultMessage: 'Test endpoint',
+            }),
+            icon: 'play',
+            type: 'icon',
+            available: (item) => canManage && isTestableTaskType(item.task_type),
+            onClick: displayTestActionItem,
+            'data-test-subj': 'inference-endpoints-action-test-endpoint',
+          },
+          {
             name: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
               defaultMessage: 'Copy endpoint ID',
             }),
@@ -196,7 +214,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [canManage, copyContent, displayDeleteActionItem, displayInferenceFlyout]
+    [canManage, copyContent, displayDeleteActionItem, displayTestActionItem, displayInferenceFlyout]
   );
 
   return (
@@ -252,6 +270,13 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           selectedEndpoint={selectedInferenceEndpoint}
           displayModal={showDeleteAction}
           onCancel={onCancelDeleteModal}
+        />
+      )}
+      {showTestAction && selectedInferenceEndpoint && (
+        <TestEndpointModal
+          target={{ inferenceId: selectedInferenceEndpoint.inference_id }}
+          taskType={selectedInferenceEndpoint.task_type}
+          onClose={onCloseTestModal}
         />
       )}
       {showInferenceFlyout && selectedInferenceEndpoint && (
