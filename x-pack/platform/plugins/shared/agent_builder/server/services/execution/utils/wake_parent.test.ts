@@ -80,10 +80,16 @@ const chosenForParent = {
   workflowExecutionId: 'workflow-run-1',
 };
 
+const parentInteractivity = {
+  enabled: false,
+  auto_approved_apis: [{ method: 'DELETE', path: '/api/x' }],
+};
+
 const parentRun = {
   executionId: 'parent-1',
   agentId: 'parent-agent',
   executionMode: AgentExecutionMode.conversation,
+  interactivity: parentInteractivity,
   agentParams: {
     conversationId: 'conversation-1',
     nextInput: { message: 'start' },
@@ -128,12 +134,12 @@ describe('wakeParent', () => {
     conversationClient = createConversationClientMock();
     conversationClient.get.mockResolvedValue({
       id: 'conversation-1',
-      agent_id: 'parent-agent',
+      agent_id: 'creation-agent',
       state: { background_executions: pendingState },
     } as never);
   });
 
-  it("reads the conversation as the owner and starts a run on the parent's agent and model that carries the result", async () => {
+  it("reads the conversation as the owner and starts a run on the parent's agent, model and interactivity that carries the result", async () => {
     await expect(wake()).resolves.toBe('woken');
 
     expect(getScopedClientAsUser).toHaveBeenCalledWith({
@@ -145,6 +151,7 @@ describe('wakeParent', () => {
       request,
       useTaskManager: true,
       requestImmediateClaim: true,
+      interactive: parentInteractivity,
       params: {
         agentId: 'parent-agent',
         ...chosenForParent,
@@ -160,10 +167,12 @@ describe('wakeParent', () => {
   it('leaves the agent defaults in place when the run that spawned the child chose nothing', async () => {
     get = executionById({
       ...parentRun,
+      interactivity: undefined,
       agentParams: { conversationId: 'conversation-1', nextInput: { message: 'start' } },
     } as AgentExecution);
 
     await expect(wake()).resolves.toBe('woken');
+    expect(maybeExecuteAgent.mock.calls[0][0]).not.toHaveProperty('interactive');
     for (const key of Object.keys(chosenForParent)) {
       expect(maybeExecuteAgent.mock.calls[0][0].params).not.toHaveProperty(key);
     }

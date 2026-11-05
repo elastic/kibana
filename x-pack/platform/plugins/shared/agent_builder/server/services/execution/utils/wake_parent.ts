@@ -142,9 +142,11 @@ export const wakeParent = async ({
       request,
       useTaskManager: true,
       requestImmediateClaim: true,
+      // A parent that ran without a live caller keeps running without one, and keeps its approvals.
+      ...(parent.interactivity ? { interactive: parent.interactivity } : {}),
       params: {
-        // The service defaults a missing agent, it does not read the conversation's.
-        agentId: conversation.agent_id,
+        // The agent that spawned the child, which may not be the one the conversation was created with.
+        agentId: parent.agentId,
         ...inheritedRunSettings(parent.agentParams),
         conversationId,
         nextInput: { message: describeFinishedChild(child) },
