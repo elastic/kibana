@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createPrompt } from '@kbn/inference-common';
+import type { ToolSchema } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { gradeSchema } from '../run_judge';
 import systemPromptText from './system_prompt.text';
@@ -15,8 +15,7 @@ export const CORTEX_PAGE_INFLUENCE_TOOL_NAME = 'score_cortex_page_influence';
 /** Generous bound on judge text; explanations are capped separately before persisting. */
 const MAX_JUDGE_TEXT_LENGTH = 100_000;
 
-/** The judge cuts the pages and the answer to this length, below the prompt bound. */
-export const MAX_JUDGE_INPUT_CHARS = 90_000;
+export const CORTEX_PAGE_INFLUENCE_SYSTEM_PROMPT: string = systemPromptText;
 
 export const cortexPageInfluenceOutputSchema = lazySchema(() =>
   z.object({
@@ -30,72 +29,73 @@ export const cortexPageInfluenceOutputSchema = lazySchema(() =>
 
 export type CortexPageInfluenceOutput = z.infer<typeof cortexPageInfluenceOutputSchema>;
 
-export const cortexPageInfluencePrompt = createPrompt({
-  name: 'nightshift_cortex_page_influence',
+export const cortexPageInfluenceTool: {
+  name: string;
+  description: string;
+  schema: ToolSchema;
+} = {
+  name: CORTEX_PAGE_INFLUENCE_TOOL_NAME,
   description:
-    'Grades how the Cortex pages a Nightshift investigator read shaped its answer, and how much more they could have',
-  input: lazySchema(() =>
-    z.object({
-      task: z.string().max(MAX_JUDGE_TEXT_LENGTH),
-      pages: z.string().max(MAX_JUDGE_TEXT_LENGTH),
-      answer: z.string().max(MAX_JUDGE_TEXT_LENGTH),
-    })
-  ),
-})
-  .version({
-    system: {
-      mustache: {
-        template: systemPromptText,
-      },
-    },
-    template: {
-      mustache: {
-        template:
-          'Investigation task:\n{{{task}}}\n\nCortex pages the agent read:\n{{{pages}}}\n\nAgent final answer:\n{{{answer}}}',
-      },
-    },
-    tools: {
-      [CORTEX_PAGE_INFLUENCE_TOOL_NAME]: {
+    'Return how the Cortex pages influenced the answer and how much more they could have.',
+  schema: {
+    type: 'object',
+    properties: {
+      pages_used: {
+        type: 'array',
+        items: { type: 'string' },
         description:
-          'Return how the Cortex pages influenced the answer and how much more they could have.',
-        schema: {
-          type: 'object',
-          properties: {
-            pages_used: {
-              type: 'array',
-              items: { type: 'string' },
-              description:
-                'Ids of the pages whose content the answer relies on, named or paraphrased. Use only ids from the provided pages.',
-            },
-            influence: {
-              type: 'number',
-              description: 'Integer 0-3: how much the pages actually shaped the answer.',
-            },
-            influence_reasoning: {
-              type: 'string',
-              description:
-                'One or two sentences: how the pages shaped the answer, or that they did not.',
-            },
-            missed_influence: {
-              type: 'number',
-              description:
-                'Integer 0-3: how much useful page content the answer left unused or contradicted.',
-            },
-            missed_influence_reasoning: {
-              type: 'string',
-              description:
-                'One or two sentences: what the pages offered that the answer could have used.',
-            },
-          },
-          required: [
-            'pages_used',
-            'influence',
-            'influence_reasoning',
-            'missed_influence',
-            'missed_influence_reasoning',
-          ],
-        },
+          'Ids of the pages whose content the final answer relies on, named or paraphrased. Use only the listed ids.',
+      },
+      influence: {
+        type: 'number',
+        description:
+          'Integer 0-3: how much the pages actually shaped the investigation and answer.',
+      },
+      influence_reasoning: {
+        type: 'string',
+        description:
+          'One or two sentences: how the pages shaped the investigation, or that they did not.',
+      },
+      missed_influence: {
+        type: 'number',
+        description:
+          'Integer 0-3: how much useful page content the investigation and answer left unused or contradicted.',
+      },
+      missed_influence_reasoning: {
+        type: 'string',
+        description: 'One or two sentences: what the pages offered that could have been used.',
       },
     },
-  } as const)
-  .get();
+    required: [
+      'pages_used',
+      'influence',
+      'influence_reasoning',
+      'missed_influence',
+      'missed_influence_reasoning',
+    ],
+  },
+};
+
+/**
+ * The human message that closes the conversation and asks for the scores. Lists the pages read
+ * so the judge can name them by id.
+ */
+export const buildScoringRequest = ({
+  pageIds,
+  omittedToolCalls,
+}: {
+  pageIds: readonly string[];
+  omittedToolCalls: number;
+}): string =>
+  [
+    'The conversation above is the investigation to evaluate.',
+    omittedToolCalls > 0
+      ? `${omittedToolCalls} later tool calls were left out to fit your context.`
+      : undefined,
+    `The agent opened these Cortex pages. Their text is in the tool results above:\n${pageIds
+      .map((id) => `- ${id}`)
+      .join('\n')}`,
+    `Score how these pages influenced the investigation by calling ${CORTEX_PAGE_INFLUENCE_TOOL_NAME}.`,
+  ]
+    .filter((part): part is string => part !== undefined)
+    .join('\n\n');

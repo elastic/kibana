@@ -9,6 +9,7 @@ import {
   MAX_TOOL_CALLS_CHARS,
   MAX_TOOL_FIELD_CHARS,
   renderRound,
+  renderTraceMessages,
   roundEvidenceSchema,
 } from './render_round';
 
@@ -81,5 +82,74 @@ describe('roundEvidenceSchema', () => {
     expect(
       roundEvidenceSchema.safeParse({ input: { message: '' }, response: { message: 'a' } }).success
     ).toBe(false);
+  });
+});
+
+describe('renderTraceMessages', () => {
+  it('renders tool calls as assistant and tool messages between the input and the answer', () => {
+    const { messages, omittedToolCalls } = renderTraceMessages({
+      input: { message: 'Why is checkout slow?' },
+      steps: [
+        { tool_call_id: 't1', tool_id: 'search', arguments: { q: 'x' }, result: { hits: 2 } },
+        { tool_id: 'other', arguments: 'raw', result: undefined },
+      ],
+      response: { message: 'The deploy.' },
+    });
+
+    expect(omittedToolCalls).toBe(0);
+    expect(messages).toEqual([
+      { role: 'user', content: 'Why is checkout slow?' },
+      {
+        role: 'assistant',
+        content: null,
+        toolCalls: [{ toolCallId: 't1', function: { name: 'search', arguments: { q: 'x' } } }],
+      },
+      { role: 'tool', name: 'search', toolCallId: 't1', response: '{"hits":2}' },
+      {
+        role: 'assistant',
+        content: null,
+        toolCalls: [
+          { toolCallId: 'call_2', function: { name: 'other', arguments: { value: 'raw' } } },
+        ],
+      },
+      { role: 'tool', name: 'other', toolCallId: 'call_2', response: '(empty)' },
+      { role: 'assistant', content: 'The deploy.' },
+    ]);
+  });
+
+  it('truncates large results and arguments', () => {
+    const { messages } = renderTraceMessages({
+      input: { message: 'q' },
+      steps: [
+        {
+          tool_id: 'search',
+          arguments: { q: 'x'.repeat(MAX_TOOL_FIELD_CHARS + 50) },
+          result: 'y'.repeat(MAX_TOOL_FIELD_CHARS + 50),
+        },
+      ],
+      response: { message: 'a' },
+    });
+
+    const [, call, result] = messages as Array<{ toolCalls?: any[]; response?: string }>;
+    expect(call.toolCalls![0].function.arguments.arguments).toContain('[truncated');
+    expect(result.response).toContain('[truncated 50 characters]');
+  });
+
+  it('counts the tool calls left out once the budget is spent', () => {
+    const steps = Array.from({ length: 80 }, (_, index) => ({
+      tool_id: 'search',
+      arguments: { index },
+      result: 'z'.repeat(MAX_TOOL_FIELD_CHARS),
+    }));
+
+    const { messages, omittedToolCalls } = renderTraceMessages({
+      input: { message: 'q' },
+      steps,
+      response: { message: 'a' },
+    });
+
+    expect(omittedToolCalls).toBeGreaterThan(0);
+    expect(messages).toHaveLength(1 + (80 - omittedToolCalls) * 2 + 1);
+    expect(messages[messages.length - 1]).toEqual({ role: 'assistant', content: 'a' });
   });
 });

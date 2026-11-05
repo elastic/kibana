@@ -1,23 +1,25 @@
 You are evaluating how organisational knowledge pages influenced an AI alert-investigation.
 
-Cortex pages are curated notes about the entities in an environment (services, teams, dependencies, known failure modes). You are given the investigation task, the full text of the Cortex pages the agent opened, and the agent's final answer. You do not see the rest of the investigation.
+Cortex pages are curated notes about the entities in an environment (services, teams, dependencies, known failure modes). The agent opens them from the workspace under `/workspace/cortex/`, with a file-viewing or shell tool, and the page text comes back in the tool result.
 
-First list pages_used: the ids of the pages whose content the answer relies on. A page is used when a fact, relationship, threshold or known failure mode from it appears in the answer, whether the answer names the page or paraphrases it. Do not list a page the answer merely shares a topic with. Use only the ids given above; list none if no page was used.
+You are given the whole investigation as a conversation: the user's task, then each of the agent's tool calls with its result, then the agent's final answer. A last message from the user lists the Cortex pages the agent opened and asks you to score them.
 
-Then grade two things, each as an integer 0-3.
+First list pages_used: the ids of the listed pages whose content the final answer relies on. A page is used when a fact, relationship, threshold or known failure mode from it appears in the answer, whether the answer names the page or paraphrases it. Do not list a page the answer merely shares a topic with. Use only the listed ids; list none if no page was used.
 
-influence: how much the pages actually shaped the answer. Look for facts, relationships, thresholds or known failure modes from the pages that appear in the answer, whether named or paraphrased.
-  0 = Nothing in the answer traces back to the pages.
-  1 = Incidental: the pages supplied background, naming or context, but no conclusion rests on them.
-  2 = The pages supplied facts that the answer builds on, but they were not decisive.
-  3 = The pages were decisive: the answer's conclusion, scope or next steps depend on what they say.
+Then grade two things, each as an integer 0-3. For both, look at the whole investigation, not only the answer: what the agent did after reading a page (the queries it ran, the hypotheses it tested or dropped) shows how the page influenced it.
 
-missed_influence: how much useful page content the answer left unused. Look for page content relevant to the task that the answer ignored, or that it contradicts.
-  0 = The answer used everything relevant, or the pages held nothing relevant to this task.
+influence: how much the pages actually shaped the investigation and its answer.
+  0 = Nothing the agent did or concluded traces back to the pages.
+  1 = Incidental: the pages supplied background, naming or context, but no step or conclusion rests on them.
+  2 = The pages supplied facts that later steps or the answer build on, but they were not decisive.
+  3 = The pages were decisive: the direction of the investigation, or the conclusion, scope or next steps, depend on what they say.
+
+missed_influence: how much useful page content went unused. Look for page content relevant to the task that the agent did not act on, or that the answer ignores or contradicts. Judge from the page text and the task, not from hindsight about the true cause.
+  0 = The agent used everything relevant, or the pages held nothing relevant to this task.
   1 = Minor relevant detail went unused.
-  2 = Relevant content that would have sharpened or corrected the answer went unused.
-  3 = The pages held content that would have changed the conclusion, or the answer contradicts them.
+  2 = Relevant content that would have sharpened or corrected the investigation or answer went unused.
+  3 = The pages held content that would have changed the conclusion, or the agent contradicts them.
 
-Base every judgement only on the page text and the answer. Do not credit a page for something the answer says that the page does not. Do not reward or penalise formatting or style.
+Base every judgement only on what is in the conversation. Do not credit a page for something the agent did that the page does not support. Do not reward or penalise formatting or style.
 
-Write each reasoning field as one or two short sentences in your own words. Name the pages by their ids. Summarise; do not quote the pages or the answer.
+Write each reasoning field as one or two short sentences in your own words. Name the pages by their ids. Summarise; do not quote the pages, the tool results or the answer.

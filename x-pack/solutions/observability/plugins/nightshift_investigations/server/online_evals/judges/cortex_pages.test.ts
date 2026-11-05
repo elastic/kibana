@@ -67,22 +67,53 @@ describe('cortex page judges', () => {
       missed_influence_reasoning: 'The pool-size advice went unused.',
     };
 
-    it('sends the page contents and counts the pages the model says were used, and grades influence', async () => {
-      const prompt = jest.fn().mockResolvedValue({
+    it('sends the whole trace, ends with the scoring request, and scores from the reply', async () => {
+      const chatComplete = jest.fn().mockResolvedValue({
         toolCalls: [{ function: { arguments: judgeOutput } }],
       });
 
       const { scores } = await cortexPageInfluenceJudge.evaluate({
         round: readTwoPages('Payments was slow.'),
-        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+        inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
         log,
       });
 
-      const { input, toolChoice } = prompt.mock.calls[0][0];
+      const { system, messages, tools, toolChoice } = chatComplete.mock.calls[0][0];
+      expect(system).toContain('Cortex pages');
       expect(toolChoice).toEqual({ function: 'score_cortex_page_influence' });
-      expect(input.pages).toContain('## cortex_service_checkout\nCheckout depends on the payments');
-      expect(input.pages).toContain('## cortex_runbook_pool-exhaustion\nRaise the pool size.');
-      expect(input.answer).toBe('Payments was slow.');
+      expect(Object.keys(tools)).toEqual(['score_cortex_page_influence']);
+
+      // user task, then six tool calls each as an assistant call and a tool result, then the answer
+      expect(messages).toHaveLength(1 + 6 * 2 + 1 + 1);
+      expect(messages[0]).toEqual({
+        role: 'user',
+        content: 'Investigate the checkout latency alert',
+      });
+      expect(messages[1]).toEqual({
+        role: 'assistant',
+        content: null,
+        toolCalls: [
+          {
+            toolCallId: 'call_1',
+            function: {
+              name: 'nightshift_sandbox_view_file',
+              arguments: { file_path: '/workspace/cortex/INDEX.md' },
+            },
+          },
+        ],
+      });
+      expect(messages[4]).toEqual({
+        role: 'tool',
+        name: 'nightshift_sandbox_view_file',
+        toolCallId: 'call_2',
+        response: expect.stringContaining('Checkout depends on the payments service.'),
+      });
+      expect(messages[13]).toEqual({ role: 'assistant', content: 'Payments was slow.' });
+      const closing = messages[14];
+      expect(closing.role).toBe('user');
+      expect(closing.content).toContain('- cortex_service_checkout');
+      expect(closing.content).toContain('- cortex_runbook_pool-exhaustion');
+
       expect(scores).toEqual([
         {
           name: 'cortex_pages_referenced',
@@ -108,15 +139,15 @@ describe('cortex page judges', () => {
     });
 
     it('is not applicable, and skips the model, when no page was read', async () => {
-      const prompt = jest.fn();
+      const chatComplete = jest.fn();
 
       const result = await cortexPageInfluenceJudge.evaluate({
         round: round('a'),
-        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+        inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
         log,
       });
 
-      expect(prompt).not.toHaveBeenCalled();
+      expect(chatComplete).not.toHaveBeenCalled();
       expect(result).toEqual({
         scores: [],
         notApplicable: { reason: 'no Cortex pages were read' },

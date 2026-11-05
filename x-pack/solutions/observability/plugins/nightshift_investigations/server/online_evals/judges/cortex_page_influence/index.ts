@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { MessageRole } from '@kbn/inference-common';
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
-import { roundEvidenceSchema, truncate } from '../render_round';
-import { capExplanation, gradeToScore, runJudge } from '../run_judge';
+import { renderTraceMessages, roundEvidenceSchema } from '../render_round';
+import { capExplanation, gradeToScore, runConversationJudge } from '../run_judge';
 import { collectCortexPageReads } from '../cortex_pages';
 import {
-  CORTEX_PAGE_INFLUENCE_TOOL_NAME,
-  MAX_JUDGE_INPUT_CHARS,
+  CORTEX_PAGE_INFLUENCE_SYSTEM_PROMPT,
   cortexPageInfluenceOutputSchema,
-  cortexPageInfluencePrompt,
+  cortexPageInfluenceTool,
+  buildScoringRequest,
 } from './prompt';
 
 export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
@@ -22,7 +23,7 @@ export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    'Reference-free: which of the Cortex pages an investigation read its final answer used, how they shaped it, and how much more they could have.',
+    'Reference-free: which of the Cortex pages an investigation read its final answer used, how they shaped the investigation, and how much more they could have.',
   evidenceSchema: roundEvidenceSchema,
   async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {
@@ -36,20 +37,21 @@ export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
       return { scores: [], notApplicable: { reason: 'no Cortex pages were read' } };
     }
 
-    const perPageChars = Math.floor(MAX_JUDGE_INPUT_CHARS / pages.length);
-    const output = await runJudge({
+    const { messages, omittedToolCalls } = renderTraceMessages(round);
+    const output = await runConversationJudge({
       inferenceClient,
-      prompt: cortexPageInfluencePrompt,
-      input: {
-        task: truncate(round.input.message, MAX_JUDGE_INPUT_CHARS),
-        pages: pages
-          .map(
-            ({ id, content }) => `## ${id}\n${truncate(content || '[no content]', perPageChars)}`
-          )
-          .join('\n\n'),
-        answer: truncate(round.response.message, MAX_JUDGE_INPUT_CHARS),
-      },
-      toolName: CORTEX_PAGE_INFLUENCE_TOOL_NAME,
+      system: CORTEX_PAGE_INFLUENCE_SYSTEM_PROMPT,
+      messages: [
+        ...messages,
+        {
+          role: MessageRole.User,
+          content: buildScoringRequest({
+            pageIds: pages.map(({ id }) => id),
+            omittedToolCalls,
+          }),
+        },
+      ],
+      tool: cortexPageInfluenceTool,
       outputSchema: cortexPageInfluenceOutputSchema,
     });
 
