@@ -44,7 +44,7 @@ import { useNotebookServices } from '../services';
 import { LazyEsqlEditor } from './lazy_esql_editor';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
-import { ResultGrid, ResultPreview } from './result_preview';
+import { ResultPreview } from './result_preview';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
 
@@ -137,9 +137,14 @@ const NoData = ({ message }: { message: string }) => (
 /** A source cell's latest results; keyed by cell id so it subscribes to the right runtime. */
 const SourceCellData = ({ cellId }: { cellId: string }) => {
   const { store } = useNotebook();
-  const table = getTable(useStateFromPublishingSubject(store.getRuntime$(cellId)));
-  return table ? (
-    <ResultGrid table={table} />
+  const { output, durationMs } = useStateFromPublishingSubject(store.getRuntime$(cellId));
+  return output?.kind === 'table' ? (
+    <ResultPreview
+      id={`notebookCustomSource-${cellId}`}
+      table={output.table}
+      truncated={output.truncated}
+      durationMs={durationMs}
+    />
   ) : (
     <NoData
       message={i18n.translate('xpack.notebook.customCell.flyout.noSourceData', {
