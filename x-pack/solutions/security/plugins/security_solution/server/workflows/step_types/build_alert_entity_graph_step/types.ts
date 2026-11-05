@@ -21,7 +21,9 @@ export interface AlertMeta {
   process_command_line?: string;
   process_parent_command_line?: string;
   host_name?: string;
+  host_id?: string;
   user_name?: string;
+  user_id?: string;
   ts_ms?: number;
 }
 
@@ -53,7 +55,9 @@ export interface RelatedAlertsGraphOutput {
     process_command_line?: string;
     process_parent_command_line?: string;
     host_name?: string;
+    host_id?: string;
     user_name?: string;
+    user_id?: string;
   }>;
   stats?: {
     depth_reached: number;

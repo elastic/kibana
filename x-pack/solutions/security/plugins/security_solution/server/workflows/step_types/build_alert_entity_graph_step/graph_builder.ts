@@ -139,13 +139,15 @@ const fetchSeedAlert = async (
 
 // ── Alert metadata extraction ───────────────────────────────────────────────
 
-const ALERT_PROCESS_FIELDS = {
+const ALERT_RELATED_FIELDS = {
   process_name: 'process.name',
   process_executable: 'process.executable',
   process_command_line: 'process.command_line',
   process_parent_command_line: 'process.parent.command_line',
   host_name: 'host.name',
+  host_id: 'host.id',
   user_name: 'user.name',
+  user_id: 'user.id',
 } as const;
 
 const getFirstString = (source: Record<string, unknown> | undefined, field: string) => {
@@ -171,15 +173,17 @@ const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
     timestamp: typeof ts === 'string' ? ts : undefined,
     rule_name: source?.['kibana.alert.rule.name'] as string | undefined,
     severity: source?.['kibana.alert.severity'] as string | undefined,
-    process_name: getFirstString(source, ALERT_PROCESS_FIELDS.process_name),
-    process_executable: getFirstString(source, ALERT_PROCESS_FIELDS.process_executable),
-    process_command_line: getFirstString(source, ALERT_PROCESS_FIELDS.process_command_line),
+    process_name: getFirstString(source, ALERT_RELATED_FIELDS.process_name),
+    process_executable: getFirstString(source, ALERT_RELATED_FIELDS.process_executable),
+    process_command_line: getFirstString(source, ALERT_RELATED_FIELDS.process_command_line),
     process_parent_command_line: getFirstString(
       source,
-      ALERT_PROCESS_FIELDS.process_parent_command_line
+      ALERT_RELATED_FIELDS.process_parent_command_line
     ),
-    host_name: getFirstString(source, ALERT_PROCESS_FIELDS.host_name),
-    user_name: getFirstString(source, ALERT_PROCESS_FIELDS.user_name),
+    host_name: getFirstString(source, ALERT_RELATED_FIELDS.host_name),
+    host_id: getFirstString(source, ALERT_RELATED_FIELDS.host_id),
+    user_name: getFirstString(source, ALERT_RELATED_FIELDS.user_name),
+    user_id: getFirstString(source, ALERT_RELATED_FIELDS.user_id),
     ts_ms: Number.isFinite(tsMs) ? tsMs : undefined,
   };
 };
@@ -276,7 +280,7 @@ export const buildRelatedAlertsGraph = async (
       '@timestamp',
       'kibana.alert.rule.name',
       'kibana.alert.severity',
-      ...Object.values(ALERT_PROCESS_FIELDS),
+      ...Object.values(ALERT_RELATED_FIELDS),
       ...entityFields,
     ])
   );

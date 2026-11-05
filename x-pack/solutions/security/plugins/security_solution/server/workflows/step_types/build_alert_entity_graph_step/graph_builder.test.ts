@@ -308,7 +308,9 @@ describe('buildRelatedAlertsGraph', () => {
         'process.command_line',
         'process.parent.command_line',
         'host.name',
+        'host.id',
         'user.name',
+        'user.id',
       ])
     );
   });
@@ -375,6 +377,27 @@ describe('buildRelatedAlertsGraph', () => {
         }),
       ]);
       expect(result.alerts[0]).not.toHaveProperty('ts_ms');
+    });
+
+    it('returns host and user ids from nested and flat-array fields', async () => {
+      const result = await run(
+        [
+          {
+            _id: 'A',
+            _index: seedIndex,
+            _source: src({
+              '@timestamp': iso(t0),
+              host: { id: 'hid-1' },
+              'user.id': [7, 'uid-1'],
+            }),
+          },
+        ],
+        ['host.id']
+      );
+
+      expect(result.alerts[0]).toEqual(
+        expect.objectContaining({ host_id: 'hid-1', user_id: 'uid-1' })
+      );
     });
 
     it('returns host and user names from nested and flat-array fields', async () => {

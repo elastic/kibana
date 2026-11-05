@@ -150,7 +150,9 @@ export const buildAlertEntityGraphOutputSchema = lazySchema(() =>
         process_command_line: z.string().optional(),
         process_parent_command_line: z.string().optional(),
         host_name: z.string().optional(),
+        host_id: z.string().optional(),
         user_name: z.string().optional(),
+        user_id: z.string().optional(),
       })
     ),
     stats: z
