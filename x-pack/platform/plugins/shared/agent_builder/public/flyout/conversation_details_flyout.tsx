@@ -36,7 +36,7 @@ import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_
 import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
-  defaultMessage: 'Chat info',
+  defaultMessage: 'Summary',
 });
 
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
