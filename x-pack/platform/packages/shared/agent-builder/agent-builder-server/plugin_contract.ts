@@ -270,6 +270,25 @@ export interface ConversationsStart {
   getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
+/**
+ * AgentBuilder space settings service's start contract.
+ *
+ * Settings are stored per space, and the space is the one the request targets.
+ */
+export interface SpaceSettingsStart {
+  /**
+   * Returns the id of the agent used as the default of the request's space,
+   * or `null` when the space has no default agent assigned.
+   */
+  getDefaultAgentId(opts: { request: KibanaRequest }): Promise<string | null>;
+  /**
+   * Assigns the default agent of the request's space. Pass `null` to clear the assignment.
+   *
+   * Rejects with a bad request error when the agent is private, which cannot be a space default.
+   */
+  setDefaultAgentId(opts: { request: KibanaRequest; agentId: string | null }): Promise<void>;
+}
+
 /** AgentBuilder callbacks setup contract. */
 export interface CallbacksSetup {
   /**
@@ -394,4 +413,8 @@ export interface AgentBuilderPluginStart {
    * Conversation templates service, to look up registered templates.
    */
   conversationTemplates: ConversationTemplatesStart;
+  /**
+   * Space settings service, to read and write per-space Agent Builder settings.
+   */
+  spaceSettings: SpaceSettingsStart;
 }

@@ -44,18 +44,28 @@ const setup = ({
     ensure: jest.fn().mockResolvedValue(undefined),
   };
   const agentAvailability = { kind: 'always' } as never;
+  const spaceSettings = {
+    getDefaultAgentId: jest.fn().mockResolvedValue(null),
+    setDefaultAgentId: jest.fn().mockResolvedValue(undefined),
+  };
   const client = createOnboardingClient({
     getDeps: () => ({
       workflowsManagement: { management } as unknown as WorkflowsServerPluginSetup,
       agentBuilder: withAgentBuilder
-        ? ({ agents } as unknown as AgentBuilderPluginStart)
+        ? ({ agents, spaceSettings } as unknown as AgentBuilderPluginStart)
         : undefined,
       agentAvailability,
       assistantEnabled,
     }),
     logger: loggingSystemMock.createLogger(),
   });
-  return { client, management, agents, request: httpServerMock.createKibanaRequest() };
+  return {
+    client,
+    management,
+    agents,
+    spaceSettings,
+    request: httpServerMock.createKibanaRequest(),
+  };
 };
 
 describe('createOnboardingClient', () => {
@@ -100,6 +110,38 @@ describe('createOnboardingClient', () => {
         agent: expect.objectContaining({ id: 'nightshift.assistant' }),
       })
     );
+  });
+
+  it('makes the assistant the default agent of the space when it is enabled', async () => {
+    const { client, spaceSettings, request } = setup({
+      agentInstalled: false,
+      assistantEnabled: true,
+    });
+
+    await client.enable(request);
+
+    expect(spaceSettings.setDefaultAgentId).toHaveBeenCalledWith({
+      request,
+      agentId: 'nightshift.assistant',
+    });
+  });
+
+  it('leaves the default agent alone when the assistant is not enabled', async () => {
+    const { client, spaceSettings, request } = setup({ agentInstalled: false });
+
+    await client.enable(request);
+
+    expect(spaceSettings.setDefaultAgentId).not.toHaveBeenCalled();
+  });
+
+  it('still enables Nightshift when the default agent cannot be changed', async () => {
+    const { client, spaceSettings, request } = setup({
+      agentInstalled: false,
+      assistantEnabled: true,
+    });
+    spaceSettings.setDefaultAgentId.mockRejectedValue(new Error('no privileges'));
+
+    expect(await client.enable(request)).toEqual({ agent_installed: true });
   });
 
   it('cannot enable Nightshift without Agent Builder', async () => {
