@@ -117,6 +117,10 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['x-pack/platform/plugins/shared/alerting/server/index.ts'],
   },
   {
+    name: 'alerting_v2 path',
+    changedFiles: ['x-pack/platform/plugins/shared/alerting_v2/server/index.ts'],
+  },
+  {
     name: 'response ops step definition path',
     changedFiles: ['.buildkite/pipeline-utils/step-library/steps/response_ops.ts'],
   },
