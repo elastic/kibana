@@ -69,7 +69,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { getGeoPrecisionsForZoom } from '../data_model/geo_precisions';
+import { getGeoPrecisionParamValues } from '@kbn/esql-utils';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -95,13 +95,15 @@ const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
 
-const GEO_PRECISION_PARAM_REGEX = /\?_geo(tile|hex|hash)_precision\b/i;
+const queriesUseGeoPrecisionParam = (queries: string[]) =>
+  queries.some((query) => Object.keys(getGeoPrecisionParamValues(query, 0)).length > 0);
 
-const specUsesGeoPrecisionParam = (spec: unknown) =>
-  GEO_PRECISION_PARAM_REGEX.test(typeof spec === 'string' ? spec : JSON.stringify(spec) ?? '');
-
-const isSameGeoPrecisions = (zoomA: number, zoomB: number) =>
-  JSON.stringify(getGeoPrecisionsForZoom(zoomA)) === JSON.stringify(getGeoPrecisionsForZoom(zoomB));
+const isSameGeoPrecisions = (queries: string[], zoomA: number, zoomB: number) =>
+  queries.every(
+    (query) =>
+      JSON.stringify(getGeoPrecisionParamValues(query, zoomA)) ===
+      JSON.stringify(getGeoPrecisionParamValues(query, zoomB))
+  );
 
 /**
  * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
@@ -380,9 +382,10 @@ export const vegaEmbeddableFactory = (
     const onMapViewChange = (view: VegaMapPosition) => {
       mapView = view;
       const visData = renderInput$.getValue()?.visData;
-      if (!visData?.useMap || !specUsesGeoPrecisionParam(spec$.getValue().value)) return;
+      const queries = esql$.getValue().map(({ esql }) => esql);
+      if (!visData?.useMap || !queriesUseGeoPrecisionParam(queries)) return;
       const zoomOfFetch = fetchedZoom ?? visData.mapConfig?.zoom ?? 0;
-      if (!isSameGeoPrecisions(zoomOfFetch, view.zoom)) {
+      if (!isSameGeoPrecisions(queries, zoomOfFetch, view.zoom)) {
         mapViewChange$.next();
       }
     };

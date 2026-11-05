@@ -87,13 +87,16 @@ export {
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
+  getEsqlSearchParams,
+} from './utils/run_query';
+export {
   hasGeotilePrecisionParam,
   hasGeohexPrecisionParam,
   hasGeohashPrecisionParam,
-  getNamedParams,
-  getEsqlSearchParams,
+  getGeoPrecisionParamValues,
   type GeoPrecisionParams,
-} from './utils/run_query';
+} from './utils/geo_precision_params';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,

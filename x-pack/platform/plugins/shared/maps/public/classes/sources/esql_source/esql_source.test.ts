@@ -37,9 +37,8 @@ jest.mock('@kbn/esql-utils', () => ({
   getNamedParams: (...args: any[]) => mockGetNamedParams(...args),
   hasStartEndParams: () => false,
   hasAggregatingCommand: (query: string) => /\|\s*stats\b/i.test(query),
-  hasGeohexPrecisionParam: (query: string) => query.includes('?_geohex_precision'),
-  hasGeohashPrecisionParam: (query: string) => query.includes('?_geohash_precision'),
-  hasGeotilePrecisionParam: (query: string) => query.includes('?_geotile_precision'),
+  getGeoPrecisionParamValues: (...args: any[]) =>
+    jest.requireActual('@kbn/esql-utils').getGeoPrecisionParamValues(...args),
   getIndexPatternFromESQLQuery: () => 'logstash-*',
   getProjectRoutingFromEsqlQuery: () => undefined,
   getESQLAdHocDataview: jest.fn(),
@@ -223,7 +222,7 @@ describe('getGeoJsonWithMeta', () => {
   });
 
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
-    mockGetNamedParams.mockReturnValue([{ _geotile_precision: 9 }]);
+    mockGetNamedParams.mockReturnValue([{ geotile: 9 }]);
     mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
 
     await createSource().getGeoJsonWithMeta(
@@ -238,7 +237,7 @@ describe('getGeoJsonWithMeta', () => {
       zoom: 4.5,
       resolution: GRID_RESOLUTION.FINE,
     });
-    expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
+    expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ geotile: 9 }]);
   });
 });
 
@@ -254,16 +253,16 @@ describe('getSyncMeta', () => {
   const GEOTILE_ESQL =
     'FROM logs | STATS count = COUNT(*) BY ST_GEOTILE(geo.coordinates, ?_geotile_precision)';
 
-  test('should include geotilePrecision derived from zoom when the query uses ?_geotile_precision', () => {
+  test('should include geotile precision derived from zoom when the query uses ?_geotile_precision', () => {
     const source = createSource(GEOTILE_ESQL);
-    expect(source.getSyncMeta({ zoom: 4.2 } as any).geotilePrecision).toBe(8);
-    expect(source.getSyncMeta({ zoom: 4.9 } as any).geotilePrecision).toBe(8);
-    expect(source.getSyncMeta({ zoom: 5.1 } as any).geotilePrecision).toBe(9);
+    expect(source.getSyncMeta({ zoom: 4.2 } as any)).toMatchObject({ geotile: 8 });
+    expect(source.getSyncMeta({ zoom: 4.9 } as any)).toMatchObject({ geotile: 8 });
+    expect(source.getSyncMeta({ zoom: 5.1 } as any)).toMatchObject({ geotile: 9 });
   });
 
-  test('should not include geotilePrecision when the query does not use ?_geotile_precision', () => {
+  test('should not include geotile precision when the query does not use ?_geotile_precision', () => {
     const source = createSource('FROM logs');
-    expect(source.getSyncMeta({ zoom: 4.2 } as any)).not.toHaveProperty('geotilePrecision');
+    expect(source.getSyncMeta({ zoom: 4.2 } as any)).not.toHaveProperty('geotile');
   });
 });
 
@@ -276,7 +275,9 @@ describe('getGeotilePrecision', () => {
     });
 
   test('should default to fine resolution', () => {
-    expect(createSource().getSyncMeta({ zoom: 4.5 } as any).geotilePrecision).toBe(8);
+    expect(createSource().getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({
+      geotile: 8,
+    });
   });
 
   test.each([
@@ -286,7 +287,9 @@ describe('getGeotilePrecision', () => {
     [GRID_RESOLUTION.SUPER_FINE, 13],
   ])('should use source resolution %s', (resolution, expected) => {
     const source = createSource(resolution);
-    expect(source.getSyncMeta({ zoom: 4.5 } as any).geotilePrecision).toBe(expected);
+    expect(source.getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({
+      geotile: expected,
+    });
   });
 });
 
@@ -296,7 +299,9 @@ describe('getGeohexPrecision', () => {
     new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
 
   test('should default to fine resolution', () => {
-    expect(createSource(GEOHEX_ESQL).getSyncMeta({ zoom: 4.5 } as any).geohexPrecision).toBe(4);
+    expect(createSource(GEOHEX_ESQL).getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({
+      geohex: 4,
+    });
   });
 
   test.each([
@@ -306,15 +311,14 @@ describe('getGeohexPrecision', () => {
     [GRID_RESOLUTION.SUPER_FINE, 6], // geotile level 13
   ])('should use source resolution %s', (resolution, expected) => {
     const source = createSource(GEOHEX_ESQL, resolution);
-    expect(source.getSyncMeta({ zoom: 4.5 } as any).geohexPrecision).toBe(expected);
+    expect(source.getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({ geohex: expected });
   });
 
   test('should only include the precision of the params used in the sync meta', () => {
     const geohexMeta = createSource(GEOHEX_ESQL).getSyncMeta({ zoom: 4.5 } as any);
-    expect(geohexMeta).toHaveProperty('geohexPrecision');
-    expect(geohexMeta).not.toHaveProperty('geotilePrecision');
+    expect(geohexMeta).toMatchObject({ geohex: 4 });
     expect(createSource('FROM logs').getSyncMeta({ zoom: 4.5 } as any)).not.toHaveProperty(
-      'geohexPrecision'
+      'geohex'
     );
   });
 });
@@ -325,7 +329,9 @@ describe('getGeohashPrecision', () => {
     new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
 
   test('should default to fine resolution', () => {
-    expect(createSource(GEOHASH_ESQL).getSyncMeta({ zoom: 4.5 } as any).geohashPrecision).toBe(3);
+    expect(createSource(GEOHASH_ESQL).getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({
+      geohash: 3,
+    });
   });
 
   test.each([
@@ -335,12 +341,14 @@ describe('getGeohashPrecision', () => {
     [GRID_RESOLUTION.SUPER_FINE, 5],
   ])('should use source resolution %s', (resolution, expected) => {
     const source = createSource(GEOHASH_ESQL, resolution);
-    expect(source.getSyncMeta({ zoom: 4.5 } as any).geohashPrecision).toBe(expected);
+    expect(source.getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({
+      geohash: expected,
+    });
   });
 
-  test('should only include geohashPrecision in the sync meta when the query uses the param', () => {
+  test('should only include geohash precision in the sync meta when the query uses the param', () => {
     expect(createSource('FROM logs').getSyncMeta({ zoom: 4.5 } as any)).not.toHaveProperty(
-      'geohashPrecision'
+      'geohash'
     );
   });
 });

@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getGeoPrecisionsForZoom } from './geo_precisions';
-
-describe('getGeoPrecisionsForZoom', () => {
-  test('returns the FINE precisions', () => {
-    expect(getGeoPrecisionsForZoom(4.5)).toEqual({ geotile: 8, geohex: 4, geohash: 3 });
-  });
-
-  test('caps at the maximum precisions', () => {
-    expect(getGeoPrecisionsForZoom(30)).toEqual({ geotile: 29, geohex: 15, geohash: 12 });
-  });
-});
+export const hasNamedParam = (query: string, name: string) =>
+  new RegExp(`\\?${name}\\b`, 'i').test(query);

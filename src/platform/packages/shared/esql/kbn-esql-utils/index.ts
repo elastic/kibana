@@ -40,6 +40,7 @@ export {
   hasGeotilePrecisionParam,
   hasGeohexPrecisionParam,
   hasGeohashPrecisionParam,
+  getGeoPrecisionParamValues,
   getNamedParams,
   getEsqlSearchParams,
   type GeoPrecisionParams,

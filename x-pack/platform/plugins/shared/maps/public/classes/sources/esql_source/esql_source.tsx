@@ -19,10 +19,8 @@ import {
   getLimitFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
   getNamedParams,
+  getGeoPrecisionParamValues,
   hasAggregatingCommand,
-  hasGeohashPrecisionParam,
-  hasGeohexPrecisionParam,
-  hasGeotilePrecisionParam,
   hasStartEndParams,
 } from '@kbn/esql-utils';
 import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
@@ -33,12 +31,7 @@ import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
-import {
-  getGeohashPrecision,
-  getGeohexPrecision,
-  getGeotilePrecision,
-  DEFAULT_GRID_RESOLUTION,
-} from '@kbn/geo-precision';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import {
   FIELD_ORIGIN,
   GEOJSON_FEATURE_ID_PROPERTY_NAME,
@@ -68,7 +61,8 @@ import { ESQLField } from '../../fields/esql_field';
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
   'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
-> & { geotilePrecision?: number; geohexPrecision?: number; geohashPrecision?: number };
+> &
+  ReturnType<typeof getGeoPrecisionParamValues>;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -395,14 +389,8 @@ export class ESQLSource
 
   getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {
     return {
-      ...(dataFilters && hasGeotilePrecisionParam(this._descriptor.esql)
-        ? { geotilePrecision: getGeotilePrecision(dataFilters.zoom, this._getResolution()) }
-        : {}),
-      ...(dataFilters && hasGeohexPrecisionParam(this._descriptor.esql)
-        ? { geohexPrecision: getGeohexPrecision(dataFilters.zoom, this._getResolution()) }
-        : {}),
-      ...(dataFilters && hasGeohashPrecisionParam(this._descriptor.esql)
-        ? { geohashPrecision: getGeohashPrecision(dataFilters.zoom, this._getResolution()) }
+      ...(dataFilters
+        ? getGeoPrecisionParamValues(this._descriptor.esql, dataFilters.zoom, this._getResolution())
         : {}),
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,

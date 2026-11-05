@@ -17,21 +17,10 @@ import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import {
-  getGeohashPrecision,
-  getGeohexPrecision,
-  getGeotilePrecision,
-  type GRID_RESOLUTION,
-} from '@kbn/geo-precision';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import {
-  GEOHASH_PRECISION_PARAM,
-  GEOHEX_PRECISION_PARAM,
-  GEOTILE_PRECISION_PARAM,
-} from '@kbn/esql-language';
 import { getESQLQueryVariables } from './query_parsing_helpers';
-
-const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);
+import { hasNamedParam } from './has_named_param';
+import { getGeoPrecisionParams, type GeoPrecisionParams } from './geo_precision_params';
 
 export const hasStartEndParams = (query: string) =>
   hasNamedParam(query, '_tstart') || hasNamedParam(query, '_tend');
@@ -54,40 +43,6 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
     return namedParams;
   }
   return [];
-};
-
-/** Map zoom and grid resolution used to derive the values of the geo precision params. */
-export interface GeoPrecisionParams {
-  zoom: number;
-  resolution?: GRID_RESOLUTION;
-}
-
-export const hasGeotilePrecisionParam = (query: string) =>
-  hasNamedParam(query, GEOTILE_PRECISION_PARAM);
-
-export const hasGeohashPrecisionParam = (query: string) =>
-  hasNamedParam(query, GEOHASH_PRECISION_PARAM);
-
-export const hasGeohexPrecisionParam = (query: string) =>
-  hasNamedParam(query, GEOHEX_PRECISION_PARAM);
-
-/**
- * Returns the `?_geotile_precision`, `?_geohex_precision` and `?_geohash_precision` named params
- * the query uses.
- * Values are derived from the map zoom and grid resolution.
- */
-const getGeoPrecisionParams = (query: string, zoom: number, resolution?: GRID_RESOLUTION) => {
-  const namedParams: Array<Record<string, number>> = [];
-  if (hasGeotilePrecisionParam(query)) {
-    namedParams.push({ [GEOTILE_PRECISION_PARAM]: getGeotilePrecision(zoom, resolution) });
-  }
-  if (hasGeohexPrecisionParam(query)) {
-    namedParams.push({ [GEOHEX_PRECISION_PARAM]: getGeohexPrecision(zoom, resolution) });
-  }
-  if (hasGeohashPrecisionParam(query)) {
-    namedParams.push({ [GEOHASH_PRECISION_PARAM]: getGeohashPrecision(zoom, resolution) });
-  }
-  return namedParams;
 };
 
 export const getNamedParams = (
