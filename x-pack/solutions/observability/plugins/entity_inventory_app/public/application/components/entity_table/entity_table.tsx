@@ -32,6 +32,7 @@ import { getColumnLabel } from './column_labels';
 import { EntityCell, EntityNameCell } from './entity_table_cells';
 import {
   NAME_COLUMN_ID,
+  getColumnIds,
   getColumnValue,
   getDefaultVisibleColumns,
   getDisplayConfig,
@@ -63,7 +64,7 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
   } = useKibana();
   const { type, name: typeName } = entityType;
   const displayConfig = useMemo(() => getDisplayConfig(type), [type]);
-  const { iconType, mergedColumns, badgeColumns } = displayConfig;
+  const { iconType, badgeColumns } = displayConfig;
   const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
   const defaultVisibleColumns = useMemo(
@@ -88,15 +89,13 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
   );
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
-      [NAME_COLUMN_ID, ...Object.keys(mergedColumns), ...list.columns.map(({ name }) => name)].map(
-        (id) => ({
-          id,
-          displayAsText: getColumnLabel(id),
-          isSortable: true,
-          initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
-        })
-      ),
-    [mergedColumns, list.columns, columnKinds]
+      getColumnIds(type, list.columns).map((id) => ({
+        id,
+        displayAsText: getColumnLabel(id),
+        isSortable: true,
+        initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
+      })),
+    [type, list.columns, columnKinds]
   );
 
   const getSortValue = useCallback(

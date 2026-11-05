@@ -15,6 +15,7 @@ import {
   NAME_COLUMN_ID,
   NAMESPACE_COLUMN_ID,
   CLUSTER_COLUMN_ID,
+  getColumnIds,
   getColumnValue,
   getDefaultVisibleColumns,
   getDisplayConfig,
@@ -132,6 +133,57 @@ describe('entity type config', () => {
     const columns = toListColumns(['k8s.cluster.name', 'available_replicas']);
 
     expect(getDefaultVisibleColumns('k8s.deployment', columns)).toContain(CLUSTER_COLUMN_ID);
+  });
+
+  describe('getColumnIds', () => {
+    const toColumns = (type: { columns: Array<{ name: string }> }) =>
+      toListColumns(type.columns.map(({ name }) => name));
+
+    it('lists the host columns in the design order, then the rest in response order', () => {
+      const ids = getColumnIds('host', toColumns(HOST_TYPE_FIXTURE));
+
+      expect(ids.slice(0, 4)).toEqual([
+        NAME_COLUMN_ID,
+        'cloud.account.id',
+        'last_seen',
+        'cloud.provider',
+      ]);
+      expect(ids.slice(4)).toEqual(
+        HOST_TYPE_FIXTURE.columns
+          .map(({ name }) => name)
+          .filter((name) => !ids.slice(0, 4).includes(name))
+      );
+      expect(new Set(ids).size).toBe(ids.length);
+    });
+
+    it('lists the deployment columns with the cluster after the name', () => {
+      const ids = getColumnIds('k8s.deployment', toColumns(K8S_DEPLOYMENT_TYPE_FIXTURE));
+
+      expect(ids.slice(0, 5)).toEqual([
+        NAME_COLUMN_ID,
+        CLUSTER_COLUMN_ID,
+        NAMESPACE_COLUMN_ID,
+        'available_replicas',
+        'last_seen',
+      ]);
+      expect(new Set(ids).size).toBe(ids.length);
+    });
+
+    it('skips an ordered column that the response does not have', () => {
+      expect(getColumnIds('host', toListColumns(['host.name', 'last_seen']))).toEqual([
+        NAME_COLUMN_ID,
+        'last_seen',
+        'host.name',
+      ]);
+    });
+
+    it('keeps the Name column, the merged columns and the response order for an unconfigured type', () => {
+      expect(getColumnIds('service', toListColumns(['entity.id', 'service.name']))).toEqual([
+        NAME_COLUMN_ID,
+        'entity.id',
+        'service.name',
+      ]);
+    });
   });
 
   it('has no merged columns for types that do not configure any', () => {

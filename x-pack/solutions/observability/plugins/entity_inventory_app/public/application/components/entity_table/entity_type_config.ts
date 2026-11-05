@@ -47,6 +47,11 @@ export interface EntityTypeDisplayConfig {
    * They sit after the Name column, for entities reported under more than one naming convention.
    */
   mergedColumns: Readonly<Record<string, readonly string[]>>;
+  /**
+   * Columns listed first in the column menu, in order, from the design's list of all possible
+   * columns. The remaining columns follow in response order.
+   */
+  columnOrder: readonly string[];
   /** Columns visible by default, in order; `undefined` shows every attribute. */
   defaultVisibleColumns?: readonly string[];
   /** Columns whose values render as badges, for values that name a group such as a cluster. */
@@ -60,6 +65,7 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisp
     // Last seen stands in for Up time until the metrics exist. The spec's host Type has no
     // attribute in the host definition yet (see the decision log).
     defaultVisibleColumns: [NAME_COLUMN_ID, 'cloud.account.id', 'last_seen'],
+    columnOrder: [NAME_COLUMN_ID, 'cloud.account.id', 'last_seen', 'cloud.provider'],
   },
   'k8s.deployment': {
     iconType: 'logoKubernetes',
@@ -68,6 +74,15 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisp
       [NAMESPACE_COLUMN_ID]: ['k8s.namespace.name', 'kubernetes.namespace'],
       [CLUSTER_COLUMN_ID]: ['k8s.cluster.name', 'orchestrator.cluster.name'],
     },
+    // The design has no k8s.deployment row. The menu order follows its K8s namespace row: Name,
+    // then Cluster.
+    columnOrder: [
+      NAME_COLUMN_ID,
+      CLUSTER_COLUMN_ID,
+      NAMESPACE_COLUMN_ID,
+      'available_replicas',
+      'last_seen',
+    ],
     // Last seen stands in for Restarts and Up time until the metrics exist (#6272).
     defaultVisibleColumns: [
       NAME_COLUMN_ID,
@@ -84,6 +99,7 @@ const DEFAULT_DISPLAY_CONFIG: EntityTypeDisplayConfig = {
   iconType: 'grid',
   nameFields: ['entity.id'],
   mergedColumns: {},
+  columnOrder: [],
   badgeColumns: [],
 };
 
@@ -110,6 +126,17 @@ export const getDefaultVisibleColumns = (
   return defaultVisibleColumns.filter(
     (id) => id === NAME_COLUMN_ID || id in mergedColumns || available.has(id)
   );
+};
+
+/**
+ * The ids of every column of the grid, in column menu order: the type's `columnOrder` first, then
+ * the Name column, the merged columns and the response columns that it leaves out.
+ */
+export const getColumnIds = (type: string, columns: readonly InventoryListColumn[]): string[] => {
+  const { columnOrder, mergedColumns } = getDisplayConfig(type);
+  const all = [NAME_COLUMN_ID, ...Object.keys(mergedColumns), ...columns.map(({ name }) => name)];
+  const ordered = columnOrder.filter((id) => all.includes(id));
+  return [...ordered, ...all.filter((id) => !ordered.includes(id))];
 };
 
 /** The first value among `fields` of a row, or `null`. */
