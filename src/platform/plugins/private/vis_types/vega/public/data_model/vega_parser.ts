@@ -28,6 +28,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import type { SearchAPI } from './search_api';
 import type { TimeCache } from './time_cache';
+import { DEFAULT_MAP_ZOOM } from '../vega_view/vega_map_view/constants';
 import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
 import type {
   Bool,
@@ -650,7 +651,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           onWarn,
           this.esqlVariables,
           // Map zoom is only known for `type: map` specs
-          this.useMap ? { zoom: this.mapZoom ?? this.mapConfig?.zoom ?? 0 } : undefined
+          this.useMap ? { zoom: this.mapZoom ?? this.mapConfig?.zoom ?? DEFAULT_MAP_ZOOM } : undefined
         ),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),

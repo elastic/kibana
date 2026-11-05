@@ -11,6 +11,7 @@ import { BehaviorSubject, Subscription, distinctUntilChanged, skip, type Observa
 import type { AggregateQuery } from '@kbn/es-query';
 import { getGeoPrecisionParamValues } from '@kbn/esql-utils';
 import type { VegaMapPosition, VegaRenderDescriptor } from '../data_model/types';
+import { DEFAULT_MAP_ZOOM } from '../vega_view/vega_map_view/constants';
 
 type GeoPrecisionValues = ReturnType<typeof getGeoPrecisionParamValues>;
 
@@ -76,7 +77,7 @@ export function initializeGeoPrecisionManager({
       const nextPrecisions = getPrecisions(queries, view.zoom);
       if (!usesGeoPrecisionParam(nextPrecisions)) return;
       const prevPrecisions =
-        fetchedPrecisions ?? getPrecisions(queries, visData.mapConfig?.zoom ?? 0);
+        fetchedPrecisions ?? getPrecisions(queries, visData.mapConfig?.zoom ?? DEFAULT_MAP_ZOOM);
       if (JSON.stringify(prevPrecisions) !== JSON.stringify(nextPrecisions)) {
         mapViewChange$.next();
       }
