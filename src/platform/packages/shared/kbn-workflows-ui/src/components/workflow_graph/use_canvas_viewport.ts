@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type Node,
-  type ReactFlowInstance,
-  useNodesInitialized,
-  useStore,
-  type Viewport,
-} from '@xyflow/react';
+import { type Node, type ReactFlowInstance, useStore, type Viewport } from '@xyflow/react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { LayoutDirection } from '@kbn/workflows';
 import {
@@ -79,31 +73,40 @@ export const useCanvasViewport = ({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
 
-  // Keep the selected node visible beside a floating config panel (right inset).
+  // Centre the viewport so the selected node sits in the unobstructed region left of the floating
+  // config panel (right inset), keeping the current zoom. Returns false when there is nothing to
+  // focus yet. A node inside a group has a `position` relative to its group, so the centre comes
+  // from where React Flow actually placed the node on the canvas.
+  const focusNodeBesidePanel = useCallback(
+    (instance: ReactFlowInstance, duration: number): boolean => {
+      if (!panelFocusNodeId || !selectedNodePanelInset || selectedNodePanelInset <= 0) return false;
+      const node = instance.getInternalNode(panelFocusNodeId);
+      if (!node) return false;
+      const zoom = instance.getZoom();
+      const w = node.measured?.width ?? node.width ?? 200;
+      const h = node.measured?.height ?? node.height ?? 80;
+      const { x, y } = node.internals.positionAbsolute;
+      // Shift the viewport center so the node sits in the unobstructed left region.
+      const panelFlowOffset = selectedNodePanelInset / (2 * zoom);
+      instance.setCenter(x + w / 2 + panelFlowOffset, y + h / 2, { zoom, duration });
+      return true;
+    },
+    [panelFocusNodeId, selectedNodePanelInset]
+  );
+
   useEffect(() => {
-    if (!panelFocusNodeId || !selectedNodePanelInset || selectedNodePanelInset <= 0) return;
     const instance = flowInstanceRef.current;
-    if (!instance) return;
-    const node = instance.getNode(panelFocusNodeId);
-    if (!node) return;
-    const zoom = instance.getZoom();
-    console.debug('[vp] PANEL-FOCUS setCenter zoom', zoom, 'inset', selectedNodePanelInset, 'node', panelFocusNodeId);
-    const w = node.measured?.width ?? node.width ?? 200;
-    const h = node.measured?.height ?? node.height ?? 80;
-    const centerX = node.position.x + w / 2;
-    const centerY = node.position.y + h / 2;
-    // Shift the viewport center so the node sits in the unobstructed left region.
-    const panelFlowOffset = selectedNodePanelInset / (2 * zoom);
-    instance.setCenter(centerX + panelFlowOffset, centerY, { zoom, duration: 220 });
-  }, [panelFocusNodeId, selectedNodePanelInset]);
+    if (instance) focusNodeBesidePanel(instance, 220);
+  }, [focusNodeBesidePanel]);
 
   // React Flow's `setCenter` derives the viewport from the store's container
   // `width`/`height`, which are 0 until its ResizeObserver measures the canvas
   // (usually *after* `onInit` fires). Subscribe to those measured dimensions so
-  // the initial centering can wait until they are known.
+  // the initial centering can wait until they are known. (Not `useNodesInitialized`: in this
+  // canvas it stays false after load and only flips on a later node update, e.g. the first node
+  // click, so gating on it fired the centering then, over the zoom and position the user chose.)
   const measuredWidth = useStore((s) => s.width);
   const measuredHeight = useStore((s) => s.height);
-  const nodesInitialized = useNodesInitialized();
   const hasCenteredInitialViewRef = useRef(false);
   const readySignalledRef = useRef(false);
   const signalReady = useCallback(() => {
@@ -131,7 +134,6 @@ export const useCanvasViewport = ({
       const wrapperHeight = measuredHeight || wrapperRef.current?.clientHeight || 0;
       const homeBounds = getHomeFrameBounds(nodes, graphBounds);
       const target = getResetViewTarget(direction, homeBounds, wrapperWidth, wrapperHeight);
-      console.debug('[vp] applyHomeViewport', JSON.stringify({ duration, wrapperWidth, wrapperHeight }));
       instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration });
     },
     [nodes, graphBounds, direction, measuredWidth, measuredHeight]
@@ -145,7 +147,6 @@ export const useCanvasViewport = ({
     (instance: ReactFlowInstance, duration: number) => {
       if (nodes.length === 0) return;
       const homeBounds = getHomeFrameBounds(nodes, graphBounds);
-      console.debug('[vp] applyCenteredViewport', duration);
       instance.setCenter(homeBounds.centerX, homeBounds.centerY, {
         zoom: INITIAL_ZOOM,
         duration,
@@ -186,7 +187,6 @@ export const useCanvasViewport = ({
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
       flowInstanceRef.current = instance;
-      console.debug('[vp] handleInit', JSON.stringify({ fitViewProp, hasDefaultViewport: Boolean(defaultViewport) }));
 
       // When fitView is declarative (fitViewProp=true), ReactFlow handles the
       // viewport positioning internally before firing onInit. Just signal ready.
@@ -294,7 +294,6 @@ export const useCanvasViewport = ({
   // Perform the one-time initial centering when the page loads with structure
   // already present. Empty → first structure is handled above.
   useEffect(() => {
-    console.debug('[vp] initial effect run', JSON.stringify({ homeAfterFirst: homeAfterFirstStructureRef.current, centered: hasCenteredInitialViewRef.current, instanceReady, nodes: nodes.length, measuredWidth, measuredHeight, nodesInitialized }));
     if (homeAfterFirstStructureRef.current) {
       return;
     }
@@ -305,21 +304,21 @@ export const useCanvasViewport = ({
     if (!instance || nodes.length === 0) {
       return;
     }
-    if (measuredWidth <= 0 || measuredHeight <= 0 || !nodesInitialized) {
+    if (measuredWidth <= 0 || measuredHeight <= 0) {
       return;
     }
 
-    console.debug('[vp] INITIAL-CENTERING fires');
     hasCenteredInitialViewRef.current = true;
     hadWorkflowStructureRef.current = hasWorkflowStructure;
-    applyHomeViewport(instance, 0);
+    // A page opened on a step (`?stepId=`) shows that step beside its panel, not the home frame.
+    if (!focusNodeBesidePanel(instance, 0)) applyHomeViewport(instance, 0);
     signalReady();
   }, [
     instanceReady,
     measuredWidth,
     measuredHeight,
-    nodesInitialized,
     nodes.length,
+    focusNodeBesidePanel,
     applyHomeViewport,
     signalReady,
     hasWorkflowStructure,
