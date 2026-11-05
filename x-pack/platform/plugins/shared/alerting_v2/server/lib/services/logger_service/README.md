@@ -53,6 +53,19 @@ this.logger.error({
 });
 ```
 
+## Who a failure is attributed to
+
+`RULE_EXECUTION_STEP_FAILED` carries the label `error_source`:
+
+| Value       | Meaning                                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `user`      | The step tagged the error as a user error (for example an invalid rule query). Task Manager counts it in `user_errors`. |
+| `framework` | Every other failure. Task Manager counts it in `framework_errors`.                                                      |
+
+The value comes from the error source Task Manager already holds for the error, so
+it always agrees with those counters. Filter on `labels.error_source: framework` to
+leave out failures that the rule's owner has to fix.
+
 ## Subsystem loggers
 
 `forSubsystem(name)` returns a service whose records carry

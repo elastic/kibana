@@ -200,7 +200,7 @@ Object {
 }
 `;
 
-exports[`runs expected fs operations pointer-compression variant (CI_FORCE_NODE_POINTER_COMPRESSION) 1`] = `
+exports[`runs expected fs operations pointer-compression variant (--force-node-pointer-compression) 1`] = `
 Object {
   "copy": Array [
     Array [

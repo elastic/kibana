@@ -7,11 +7,9 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import pLimit from 'p-limit';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
-  QueriesOccurrencesGetResponse,
   QueryLink,
   SignificantEventsQueriesGenerationResult,
   StreamQuery,
@@ -43,7 +41,6 @@ import { createSignificantEventsTracedEsClient } from '../../../../lib/significa
 import {
   computeOccurrences,
   fetchQueryLinks,
-  getQueryOccurrences,
   toQueryWithOccurrences,
   type QueryOccurrences,
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
@@ -54,14 +51,13 @@ import {
   MAX_SOURCE_IDS_PER_REQUEST,
   filterReadableSourceIds,
   requestedOrAllSourceIds,
-  sourceIdsArraySchema,
   sourceIdsQuerySchema,
 } from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
 import { getLiveEntities } from '../../../../lib/significant_events/entities/get_live_entities';
+import { filterQueryLinksByEntity } from '../../../../lib/significant_events/entities/filter_query_links_by_entity';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
-import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 import type {
   KnowledgeIndicatorClient,
   PromoteQueriesResult,
@@ -70,9 +66,6 @@ import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cl
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_events/validate_esql_query';
 
-const RECONCILE_SOURCE_CONCURRENCY = 3;
-// Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
-const RECONCILE_MAX_SOURCES = 10;
 // Id lookups are for deep links into the discovery table, not bulk reads.
 const MAX_DISCOVERY_QUERY_IDS = 100;
 
@@ -349,124 +342,6 @@ const bulkDeleteQueriesRoute = createServerRoute({
   },
 });
 
-const reconcileQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/queries/_reconcile',
-  options: {
-    access: 'internal',
-    summary: 'Reconcile rule-backed queries',
-    description:
-      'Re-syncs stored rule-backed queries through the current rule scheduling policy in the current space.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      sourceIds: sourceIdsArraySchema({ min: 1, max: RECONCILE_MAX_SOURCES }),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    maintenanceService,
-    logger,
-  }): Promise<{
-    reconciled: number;
-    failed: number;
-    sources: Array<{
-      sourceId: string;
-      status: 'reconciled' | 'failed';
-      queries: number;
-      error?: string;
-    }>;
-  }> => {
-    const scopedClients = await getScopedClients({ request });
-    const { sourcesClient, licensing } = scopedClients;
-
-    await assertSignificantEventsAccess({ server, licensing });
-    await assertNotPaused({ maintenanceService, request });
-
-    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const { sourceIds } = params.body;
-    const sourceResults = await Promise.allSettled(
-      sourceIds.map((sourceId) => sourcesClient.get(sourceId))
-    );
-    const limiter = pLimit(RECONCILE_SOURCE_CONCURRENCY);
-
-    const sources = await Promise.all(
-      sourceResults.map((result, index) =>
-        limiter(async () => {
-          if (result.status === 'rejected') {
-            const sourceId = sourceIds[index];
-            const error =
-              result.reason instanceof Error ? result.reason.message : String(result.reason);
-            logger.warn(`Skipping query reconciliation for missing source ${sourceId}: ${error}`);
-            return { sourceId, status: 'failed' as const, queries: 0, error };
-          }
-
-          const sourceId = result.value.source.id;
-          let reconciledQueries = 0;
-          try {
-            assertSourceEnabled(result.value.source);
-            await kiClient.replaceSourceQueries(sourceId, (currentLinks) => {
-              reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
-              return currentLinks.map(queryFromLink);
-            });
-            return {
-              sourceId,
-              status: 'reconciled' as const,
-              queries: reconciledQueries,
-            };
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.warn(`Query reconciliation failed for source ${sourceId}: ${errorMessage}`);
-            return {
-              sourceId,
-              status: 'failed' as const,
-              queries: reconciledQueries,
-              error: errorMessage,
-            };
-          }
-        })
-      )
-    );
-
-    return {
-      reconciled: sources.filter((source) => source.status === 'reconciled').length,
-      failed: sources.filter((source) => source.status === 'failed').length,
-      sources,
-    };
-  },
-});
-
-/**
- * Keeps links whose query names a selected entity, or, for Unassigned, names no live entity. Runs
- * before pagination so the total and the page reflect the selection.
- */
-const filterQueryLinksByEntity = async (
-  links: QueryLink[],
-  { entityIds = [], unassignedEntities }: { entityIds?: string[]; unassignedEntities?: boolean },
-  loadLiveEntities: () => ReturnType<typeof getLiveEntities>
-): Promise<QueryLink[]> => {
-  const live = unassignedEntities ? await loadLiveEntities() : undefined;
-  // A truncated live set would misreport entities past the cap as unassigned, so skip Unassigned.
-  const liveIds = live && !live.truncated ? new Set(live.entities.map(({ id }) => id)) : undefined;
-  if (entityIds.length === 0 && !liveIds) {
-    return links;
-  }
-  const selected = new Set(entityIds);
-  return links.filter(({ query }) => {
-    const ids = (query.features ?? []).map(({ id }) => id);
-    return (
-      ids.some((id) => selected.has(id)) || Boolean(liveIds && !ids.some((id) => liveIds.has(id)))
-    );
-  });
-};
-
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
   params: z.object({
@@ -602,81 +477,6 @@ const getDiscoveryQueriesRoute = createServerRoute({
     });
 
     return { queries: queriesPage, page, perPage, total };
-  },
-});
-
-// baseRequestParamsSchema (no searchMode): the histogram is an aggregate,
-// always default-ranked, not a list of individual queries.
-const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_queries/_occurrences',
-  params: z.object({
-    query: baseRequestParamsSchema,
-  }),
-  options: {
-    access: 'internal',
-    summary: 'Read aggregated occurrences for the discovery histogram',
-    description:
-      'Returns the aggregated occurrences histogram series for the chart above the queries table.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    getSpaceId,
-    server,
-    logger,
-  }): Promise<QueriesOccurrencesGetResponse> => {
-    const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing } = scopedClients;
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    const { from, to, bucketSize, query, sourceIds: requestedSourceIds } = params.query;
-    assertValidDateRange(from, to);
-
-    // The readers below run as the internal user, so keep only the sources the caller can read.
-    const sourceIds = await filterReadableSourceIds(
-      await requestedOrAllSourceIds(requestedSourceIds, scopedClients.sourcesClient),
-      scopedClients.sourcesClient
-    );
-
-    const [kiClient, { alertsReader }] = await Promise.all([
-      scopedClients.getKnowledgeIndicatorClient(),
-      scopedClients.getSignificantEventsAlertingContext(),
-    ]);
-    const esClient = createSignificantEventsTracedEsClient({
-      client: scopedClusterClient.asCurrentUser,
-      logger,
-    });
-    const { aggregatedOccurrences: aggregatedOccurrenceBuckets } = await getQueryOccurrences(
-      {
-        from,
-        to,
-        bucketSize,
-        query,
-        sourceIds,
-        alertsReader,
-        spaceId: await getSpaceId(request),
-      },
-      { kiClient, esClient }
-    );
-
-    const occurrencesHistogram = aggregatedOccurrenceBuckets.map((bucket) => ({
-      x: bucket.date,
-      y: bucket.count,
-    }));
-
-    const totalOccurrences = aggregatedOccurrenceBuckets.reduce(
-      (sum, bucket) => sum + bucket.count,
-      0
-    );
-
-    return { occurrences_histogram: occurrencesHistogram, total_occurrences: totalOccurrences };
   },
 });
 
@@ -969,9 +769,7 @@ export const internalKIQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,
-  ...reconcileQueriesRoute,
   ...getDiscoveryQueriesRoute,
-  ...getDiscoveryQueriesOccurrencesRoute,
   ...generateQueriesRoute,
   ...persistQueriesRoute,
   ...upsertQueryRoute,

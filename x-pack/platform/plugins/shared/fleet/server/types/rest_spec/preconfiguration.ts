@@ -18,6 +18,9 @@ export const PutPreconfigurationSchema = {
 
 export const PostResetOnePreconfiguredAgentPoliciesSchema = {
   params: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.preconfiguration.reset.agentPolicyId',
+    }),
   }),
 };

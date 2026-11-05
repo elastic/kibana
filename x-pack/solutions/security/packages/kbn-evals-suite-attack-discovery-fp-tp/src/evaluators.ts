@@ -421,18 +421,19 @@ export const claimGrounding: Evaluator = {
       rawChecks.map((check) => [check.name, { result: check.result, status: check.status }])
     );
     // The permitted evidence source for each world check, per the managed YAML
-    // prompt: entity ids live in entity store hits, process and event ids in raw
-    // event hits. Seeding a valid id in one source must not ground a claim that
-    // cites the other.
+    // prompt: an entity claim may cite entity.id or the hit _id, and a raw-event
+    // claim cites the event _id. Seeding a valid id in one source must not ground
+    // a claim that cites the other.
     const CHECK_SOURCES: Record<string, 'entity_store' | 'raw_event'> = {
       entity_role: 'entity_store',
       process_parent: 'raw_event',
       network_destination: 'raw_event',
     };
     const seededEntityIds = new Set(
-      seededEvidence.entities.map(
-        ({ id, source }) => (source.entity as { id?: string } | undefined)?.id ?? id
-      )
+      seededEvidence.entities.flatMap(({ id, source }) => {
+        const entityId = (source.entity as { id?: string } | undefined)?.id;
+        return [entityId, id].filter((value): value is string => Boolean(value));
+      })
     );
     const seededEventIds = new Set(seededEvidence.events.map(({ id }) => id));
 

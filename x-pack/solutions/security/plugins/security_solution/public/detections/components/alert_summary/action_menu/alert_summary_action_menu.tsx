@@ -16,18 +16,26 @@ import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
 
 interface AlertSummaryActionMenuProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
+  removeFromCaseItems?: EuiContextMenuPanelItemDescriptor[];
   alertTagsItems: EuiContextMenuPanelItemDescriptor[];
   panels: EuiContextMenuPanelDescriptor[];
 }
 
+const EMPTY_ITEMS: EuiContextMenuPanelItemDescriptor[] = [];
+
 export const AlertSummaryActionMenu = ({
   addToCaseItems,
+  removeFromCaseItems = EMPTY_ITEMS,
   alertTagsItems,
   panels,
 }: AlertSummaryActionMenuProps) => {
   const items = useMemo(
-    () => withActionIcons([...addToCaseItems, ...alertTagsItems], ACTION_ICONS_BY_ID),
-    [addToCaseItems, alertTagsItems]
+    () =>
+      withActionIcons(
+        [...addToCaseItems, ...removeFromCaseItems, ...alertTagsItems],
+        ACTION_ICONS_BY_ID
+      ),
+    [addToCaseItems, removeFromCaseItems, alertTagsItems]
   );
 
   const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(

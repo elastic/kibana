@@ -474,10 +474,10 @@ describe('Data Loader', () => {
     await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
-          internalApi.dataViews$,
+          internalApi.dataSources$,
           (v: NonNullable<unknown>) => Array.isArray(v) && v.length > 0
         );
-        const outputIndexPatterns = internalApi.dataViews$.getValue() || [];
+        const outputIndexPatterns = internalApi.dataSources$.getValue() || [];
 
         expect(outputIndexPatterns.length).toEqual(2);
         expect(outputIndexPatterns[0].id).toEqual('123');

@@ -9,6 +9,7 @@ import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-bu
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
@@ -120,6 +121,35 @@ describe('generateVisualizationEsql', () => {
     expect(mockedGenerateEsql).toHaveBeenCalledWith(
       expect.not.objectContaining({ timeRange: expect.anything() })
     );
+  });
+
+  describe('control values', () => {
+    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+
+    it('forwards the values of the dashboard controls to the generator', async () => {
+      mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+        ReturnType<typeof generateEsql>
+      >);
+
+      await generateVisualizationEsql({ ...params, esqlVariables });
+
+      expect(mockedGenerateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('forwards them on the fallback attempt too', async () => {
+      mockedGenerateEsql
+        .mockResolvedValueOnce({ query: 'FROM a', error: 'bad' } as Awaited<
+          ReturnType<typeof generateEsql>
+        >)
+        .mockResolvedValueOnce({ query: 'FROM b' } as Awaited<ReturnType<typeof generateEsql>>);
+
+      await generateVisualizationEsql({ ...params, esqlVariables });
+
+      expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
+      expect(mockedGenerateEsql.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ esqlVariables })
+      );
+    });
   });
 
   it('passes the request through unchanged when there are no existing queries', async () => {

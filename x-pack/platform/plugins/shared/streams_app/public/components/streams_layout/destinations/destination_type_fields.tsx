@@ -6,51 +6,41 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
-import type {
-  DestinationCreationFormErrors,
-  DestinationStorageKind,
-  ElasticsearchDestinationFormData,
-} from './types';
+import { RemoteElasticsearchConnectionFields } from './remote_elasticsearch_connection_fields';
+import { RemoteElasticsearchRoutingFields } from './remote_elasticsearch_routing_fields';
+import { S3Fields } from './s3_fields';
+import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
 
 interface DestinationTypeFieldsProps {
   storageKind: DestinationStorageKind;
-  auto: boolean;
-  logsIndex: string;
-  metricsIndex: string;
-  tracesIndex: string;
-  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
-  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
-  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
-  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
+  errors: DestinationCreationFormErrors;
   disabled: boolean;
-  onAutoChange: (auto: boolean) => void;
-  onIndexesChange: (
-    indexes: Partial<
-      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-    >
-  ) => void;
-  onBlur: () => void;
 }
 
 /**
  * Renders the form section for the selected destination type.
  * Add a case and a fields component when a new type becomes available.
+ * Fields read and write their values through the surrounding `FormProvider`.
  */
-export const DestinationTypeFields = ({ storageKind, ...fields }: DestinationTypeFieldsProps) => {
+export const DestinationTypeFields = ({
+  storageKind,
+  errors,
+  disabled,
+}: DestinationTypeFieldsProps) => {
   switch (storageKind) {
     case 'local_elasticsearch':
-      return <LocalElasticsearchFields {...fields} />;
-    case 'external_storage':
+      return <LocalElasticsearchFields errors={errors} disabled={disabled} />;
+    case 'remote_elasticsearch':
       return (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.streams.destinations.externalStorageUnavailableDescription"
-            defaultMessage="External storage isn't available yet."
-          />
-        </EuiText>
+        <>
+          <RemoteElasticsearchRoutingFields errors={errors} disabled={disabled} />
+          <EuiSpacer size="m" />
+          <RemoteElasticsearchConnectionFields errors={errors} disabled={disabled} />
+        </>
       );
+    case 'external_storage':
+      return <S3Fields errors={errors} disabled={disabled} />;
   }
 };
