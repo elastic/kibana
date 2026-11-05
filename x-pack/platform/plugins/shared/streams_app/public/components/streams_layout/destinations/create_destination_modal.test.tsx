@@ -53,6 +53,12 @@ const pasteInto = async (testSubject: string, value: string) => {
   await userEvent.paste(value);
 };
 
+const addDocsPattern = async (input: HTMLElement, value: string) => {
+  await userEvent.click(input);
+  await userEvent.paste(value);
+  await userEvent.keyboard('{Enter}');
+};
+
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
     renderModal();
@@ -123,9 +129,9 @@ describe('CreateDestinationModal', () => {
       renderModal();
       const input = await docsPatternsInput();
 
-      await userEvent.type(input, 'Logs-a-*{Enter}');
-      await userEvent.type(input, 'logs-a-*{Enter}');
-      await userEvent.type(input, 'logs-a-*{Enter}');
+      await addDocsPattern(input, 'Logs-a-*');
+      await addDocsPattern(input, 'logs-a-*');
+      await addDocsPattern(input, 'logs-a-*');
 
       expect(docsPills()).toEqual(['Logs-a-*', 'logs-a-*']);
     });
@@ -135,14 +141,11 @@ describe('CreateDestinationModal', () => {
 
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
       expect(screen.getByText('Name all OTel signals')).toBeInTheDocument();
-      await userEvent.type(
-        screen.getByTestId('streamsCreateDestination-docs-index'),
-        'accounting-2026'
-      );
-      await userEvent.type(screen.getByTestId('streamsCreateDestinationIndex'), 'billing-default');
+      await pasteInto('streamsCreateDestination-docs-index', 'accounting-2026');
+      await pasteInto('streamsCreateDestinationIndex', 'billing-default');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
       await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
-      await userEvent.type(screen.getByTestId('streamsCreateDestinationName'), 'Central');
+      await pasteInto('streamsCreateDestinationName', 'Central');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
 
       await waitFor(() =>
@@ -158,34 +161,36 @@ describe('CreateDestinationModal', () => {
       );
     });
 
-    it('clears the docs fields when the mode, the custom switch or the docs badge changes', async () => {
+    it('clears the docs write patterns when the docs badge is turned off', async () => {
       renderModal();
-      const input = await docsPatternsInput();
-      await userEvent.type(input, 'logs-a-*{Enter}');
+      await addDocsPattern(await docsPatternsInput(), 'logs-a-*');
       expect(docsPills()).toEqual(['logs-a-*']);
 
       await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
       await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
-      expect(docsPills()).toEqual([]);
 
-      await userEvent.type(
-        within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByTestId(
-          'comboBoxSearchInput'
-        ),
-        'logs-a-*{Enter}'
-      );
+      expect(docsPills()).toEqual([]);
+    });
+
+    it('clears the docs write patterns when the custom switch is turned off', async () => {
+      renderModal();
+      await addDocsPattern(await docsPatternsInput(), 'logs-a-*');
+
       await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
       await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
       await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
-      expect(docsPills()).toEqual([]);
 
+      expect(docsPills()).toEqual([]);
+    });
+
+    it('clears the docs index when the mode changes', async () => {
+      renderModal();
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
-      await userEvent.type(
-        screen.getByTestId('streamsCreateDestination-docs-index'),
-        'accounting-2026'
-      );
+      await pasteInto('streamsCreateDestination-docs-index', 'accounting-2026');
+
       await userEvent.click(screen.getByLabelText('Auto (default)'));
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+
       expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
     });
   });
