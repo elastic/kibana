@@ -61,6 +61,8 @@ const EcfStackSchema = schema.object({
   ),
   /** Stack-relevant settings per service when the stack was last launched or updated. Used for settings drift detection on session resume. */
   serviceConfigs: schema.maybe(schema.arrayOf(EcfServiceConfigSchema, { maxSize: 1000 })),
+  /** `DataStreamNamespace` the stack was last launched or updated with. Used for namespace drift detection on session resume. */
+  namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 100 })),
 });
 
 const SharedFields = {

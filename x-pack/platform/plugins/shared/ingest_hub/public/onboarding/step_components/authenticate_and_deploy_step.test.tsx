@@ -163,6 +163,7 @@ function makeEcfReturn(
     stackArns?: Record<string, string>;
     isStaleByFamily?: Record<string, boolean>;
     currentConfigsByFamily?: ReturnType<typeof useEcfDeployment>['currentConfigsByFamily'];
+    currentNamespaceByFamily?: ReturnType<typeof useEcfDeployment>['currentNamespaceByFamily'];
   } = {}
 ): ReturnType<typeof useEcfDeployment> {
   return {
@@ -177,6 +178,7 @@ function makeEcfReturn(
       otel: [],
       crowdstrike: [],
     },
+    currentNamespaceByFamily: overrides.currentNamespaceByFamily ?? {},
     advanceStaleSnapshots: jest.fn(),
     sectionProps: {
       ecfUnifiedConfigs: [],
@@ -1104,6 +1106,41 @@ describe('AuthenticateAndDeployStep', () => {
           ]),
         })
       );
+    });
+
+    it('includes the stack namespace in ecfStacks for the families that take one', async () => {
+      const mockUpdate = jest.fn().mockResolvedValue(true);
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: jest.fn(),
+        updateDeployment: mockUpdate,
+        persistDeploymentId: jest.fn(),
+      });
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({
+          hasAnyEcf: true,
+          isDone: true,
+          launchedFamilies: ['unified', 'otel'],
+          stackVersions: { unified: '1.2.3', otel: '1.2.3' },
+          currentNamespaceByFamily: { unified: 'prod' },
+        })
+      );
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+      const { ecfStacks } = mockUpdate.mock.calls[0][1];
+      expect(ecfStacks).toEqual([
+        expect.objectContaining({ family: 'unified', namespace: 'prod' }),
+        expect.not.objectContaining({ namespace: expect.anything() }),
+      ]);
     });
 
     it('includes the current service settings in ecfStacks as serviceConfigs', async () => {

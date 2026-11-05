@@ -48616,6 +48616,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -49226,6 +49231,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -49661,6 +49671,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -49991,6 +50006,11 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      namespace:
+                        description: Data stream namespace the stack was last launched or updated with.
+                        maxLength: 100
+                        minLength: 1
+                        type: string
                       serviceConfigs:
                         description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                         items:
@@ -50244,6 +50264,11 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
                               type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
@@ -50606,6 +50631,11 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
                                 type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
