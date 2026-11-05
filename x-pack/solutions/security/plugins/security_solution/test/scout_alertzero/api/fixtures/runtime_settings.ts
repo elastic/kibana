@@ -46,7 +46,13 @@ export const getRuntimeSettingChanges = (
   };
 };
 
-type PriorValues = Record<string, unknown>;
+type SettingValues = Record<string, unknown>;
+
+/** What a suite persists for its teardown: the baseline to restore and the values it wrote. */
+interface RuntimeSettingsCapture {
+  prior: SettingValues;
+  applied: SettingValues;
+}
 
 const stateFile = (suiteKey: string): string =>
   resolve(STATE_DIR, `runtime_settings_${suiteKey}.json`);
@@ -79,6 +85,10 @@ const writeSettings = async (
  *
  * An existing capture file is left alone: it comes from a run that never reached teardown, and
  * its values are the real baseline, while the live ones are that run's leftovers.
+ *
+ * Ordering rule: the AlertZero plugin suite writes `alertAnalysisWorkflowEnabled` too. When both
+ * setups run before either teardown, the second one captures the first one's applied value as its
+ * baseline, so each teardown restores a setting only while it still holds what that suite applied.
  */
 export const applyRuntimeSettings = async ({
   kbnClient,
@@ -96,17 +106,21 @@ export const applyRuntimeSettings = async ({
     log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${file}`);
   } else {
     const current = await readUserValues(kbnClient);
-    const prior: PriorValues = Object.fromEntries(
-      Object.keys(changes).map((key) => [key, current[key] ?? null])
-    );
+    const capture: RuntimeSettingsCapture = {
+      prior: Object.fromEntries(Object.keys(changes).map((key) => [key, current[key] ?? null])),
+      applied: changes,
+    };
     mkdirSync(dirname(file), { recursive: true });
-    writeFileSync(file, JSON.stringify(prior, null, 2));
+    writeFileSync(file, JSON.stringify(capture, null, 2));
   }
   await writeSettings(kbnClient, changes);
   log.debug(`[setup] applied runtime settings: ${Object.keys(changes).join(', ')}`);
 };
 
-/** Restores the values `applyRuntimeSettings` captured. A missing capture file is not an error. */
+/**
+ * Restores the values `applyRuntimeSettings` captured, for the settings that still hold the value
+ * this suite applied. A missing capture file is not an error.
+ */
 export const restoreRuntimeSettings = async ({
   kbnClient,
   log,
@@ -121,8 +135,20 @@ export const restoreRuntimeSettings = async ({
     log.warning(`[teardown] no prior-value capture at ${file}; leaving the settings as they are`);
     return;
   }
-  const prior = JSON.parse(readFileSync(file, 'utf8')) as PriorValues;
-  await writeSettings(kbnClient, prior);
+  const { prior, applied } = JSON.parse(readFileSync(file, 'utf8')) as RuntimeSettingsCapture;
+  const current = await readUserValues(kbnClient);
+  const restorable = Object.keys(prior).filter((key) => current[key] === applied[key]);
+  const skipped = Object.keys(prior).filter((key) => !restorable.includes(key));
+  if (skipped.length > 0) {
+    log.warning(
+      `[teardown] leaving settings changed since setup (another suite owns them now): ${skipped.join(
+        ', '
+      )}`
+    );
+  }
+  if (restorable.length > 0) {
+    await writeSettings(kbnClient, Object.fromEntries(restorable.map((key) => [key, prior[key]])));
+  }
   rmSync(file, { force: true });
-  log.debug(`[teardown] restored runtime settings: ${Object.keys(prior).join(', ')}`);
+  log.debug(`[teardown] restored runtime settings: ${restorable.join(', ')}`);
 };

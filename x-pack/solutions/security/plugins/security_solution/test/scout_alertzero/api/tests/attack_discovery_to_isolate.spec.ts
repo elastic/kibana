@@ -40,16 +40,10 @@ import {
   waitForNewExecution,
 } from '../fixtures';
 import type { RunReferences, SeededScenario } from '../fixtures';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
 const FORENSICS_WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
-
-interface EndpointAction {
-  id: string;
-  command: string;
-  agents: string[];
-  startedAt: string;
-}
 
 /** Index the AlertZero generation step writes its correlated Attack Discovery alert to. */
 const ATTACK_DISCOVERY_ALERTS_INDEX = '.alerts-security.attack.discovery.alerts-default';
@@ -182,6 +176,14 @@ apiTest.describe(
      // dismissal has already finished. The drain is what bounds that.
      */
     const executionBaselines = new Map<string, string[]>();
+    const baselineWorkflowExecutions = async (
+      api: Awaited<ReturnType<typeof getAdminApi>>,
+      workflowIds: readonly string[]
+    ) => {
+      for (const workflowId of workflowIds) {
+        executionBaselines.set(workflowId, await listExecutionIds(api, workflowId));
+      }
+    };
     // The Investigation the Investigate approval creates and the Attack Discovery alert the flow
     // generates; both are business records pointing at seed data this suite deletes, so teardown
     // removes them once the executions have settled. Both ids are minted by the product, so both
@@ -377,6 +379,14 @@ apiTest.describe(
             await listExecutionIds(api, forensicsWorkflowId)
           );
         }
+        // The runs the forensics Worker dispatches once it is enabled: the endpoint analysis, the
+        // proposal gate that parks on the analyst, and the close gate behind it. Same baseline
+        // timing as the Worker itself, so a run another suite left behind is never cancelled.
+        await baselineWorkflowExecutions(api, [
+          testData.FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+          testData.FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+          testData.FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+        ]);
         expect((await updateWorker(api, FORENSICS_WORKER_ID, { enabled: true })).enabled).toBe(
           true
         );
@@ -392,7 +402,30 @@ apiTest.describe(
         // this enable starts — the AD workflow's scheduled run, the review it dispatches, and
         // any handoff children — never another suite's.
         executionBaselines.set(workerWorkflowId, knownExecutionIds);
-        const startedAt = new Date().toISOString();
+        // Fixed-id workflows the AD run and the two approvals start: the review the AD workflow
+        // dispatches, and the handoff and isolate action workflows the approvals run. A failure
+        // between the approval and the end of the action otherwise leaves them running as the
+        // service account teardown deletes next.
+        await baselineWorkflowExecutions(api, [
+          testData.ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
+          testData.HANDOFF_TO_FORENSICS_ACTION_ID,
+          testData.ISOLATE_HOST_ACTION_ID,
+        ]);
+        // Actions already filed against the seeded host, so the poll below can only match one
+        // this run's approval created. Known ids, not a timestamp: the client and server clocks
+        // need not agree.
+        const seededAgentId = hosts.hosts[0].agentId;
+        const listIsolateActions = async (): Promise<ActionDetails[]> =>
+          ok(
+            await api.public<{ data: ActionDetails[] }>(
+              'GET',
+              `/api/endpoint/action?commands=isolate&pageSize=100&agentIds=${encodeURIComponent(
+                seededAgentId
+              )}`
+            ),
+            'list endpoint actions'
+          ).data;
+        const knownActionIds = (await listIsolateActions()).map(({ id }) => id);
         expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
         const workflowExecutionId = await waitForNewExecution(
           api,
@@ -467,31 +500,28 @@ apiTest.describe(
         // The lookup requires the action to target THIS run's seeded host: its agent id is
         // minted by seedEndpointHosts for this spec alone, so an isolate action from an
         // unrelated AlertZero run can no longer satisfy the test.
-        const seededAgentId = hosts.hosts[0].agentId;
         const action = await pollUntil(
           'the Defend isolate action',
           async () =>
-            ok(
-              await api.public<{ data: EndpointAction[] }>(
-                'GET',
-                '/api/endpoint/action?commands=isolate&pageSize=20'
-              ),
-              'list endpoint actions'
-            ).data.find(
+            (
+              await listIsolateActions()
+            ).find(
               (candidate) =>
-                candidate.startedAt >= startedAt && candidate.agents.includes(seededAgentId)
+                !knownActionIds.includes(candidate.id) && candidate.agents.includes(seededAgentId)
             ),
           { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
         expect(action.agents).toContain(seededAgentId);
         submittedActionIds.push(action.id);
-        await completeHostAction({ esClient, config, action: action as never });
+        await completeHostAction({ esClient, config, action });
 
         // 6. The simulated acknowledgement only writes Fleet/Endpoint responses; it does not
         // mean the product observed success. Assert the action's product-observed terminal
         // state so regressions in response processing or action-status calculation fail here.
-        await pollUntil(
-          `the isolate action ${action.id} to complete successfully`,
+        // The poll ends on any terminal state and the verdict is asserted below: pollUntil retries
+        // errors thrown from `read`, so a failure thrown there would only surface at the timeout.
+        const finished = await pollUntil(
+          `the isolate action ${action.id} to complete`,
           async () => {
             const details = ok(
               await api.public<{
@@ -499,15 +529,15 @@ apiTest.describe(
               }>('GET', `/api/endpoint/action/${action.id}`),
               'read the isolate action details'
             ).data;
-            if (details.isCompleted && !details.wasSuccessful) {
-              throw new Error(
-                `Isolate action ${action.id} completed unsuccessfully: ${JSON.stringify(details)}`
-              );
-            }
-            return details.isCompleted && details.wasSuccessful ? details : undefined;
+            return details.isCompleted ? details : undefined;
           },
           { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
+        if (!finished.wasSuccessful) {
+          throw new Error(
+            `Isolate action ${action.id} completed unsuccessfully: ${JSON.stringify(finished)}`
+          );
+        }
       }
     );
   }

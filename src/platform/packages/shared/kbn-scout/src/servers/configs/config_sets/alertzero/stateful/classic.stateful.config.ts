@@ -27,10 +27,10 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *
  * - service accounts: alertzero installs no managed workflows without them, and a Worker
  *   cannot be enabled without a service account to run as.
- * - the `endpointForensicAnalysisSkill` securitySolution experimental feature. The managed
- *   `system-security-forensics-endpoint-analysis` Worker is hidden until the
- *   `endpoint-forensic-analysis` Agent Builder skill is registered, and the forensics workflow
- *   that proposes Isolate runs that skill. The Defend endpoint package is not preinstalled: the
+ * - the `endpointForensicAnalysisSkill` securitySolution experimental feature, on by default and
+ *   pinned only so an external `enableExperimental` override cannot drop it: the managed
+ *   `system-security-forensics-endpoint-analysis` Worker stays hidden without the
+ *   `endpoint-forensic-analysis` skill. The Defend endpoint package is not preinstalled: the
  *   isolation spec installs it while seeding hosts (`indexHostsAndAlerts`).
  * - the Attack Discovery workflows feature flag the review and forensics workflows rely on.
  *

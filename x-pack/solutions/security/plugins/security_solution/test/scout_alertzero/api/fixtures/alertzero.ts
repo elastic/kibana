@@ -456,13 +456,38 @@ export interface RunReferences {
   readonly alertIds?: readonly string[];
 }
 
-export const listPendingProposals = async (api: AlertZeroApi): Promise<PendingProposal[]> =>
-  ok(
-    await api.internal<ListProposalsResponse>('GET', '/internal/proposals', {
-      query: { origin: 'alertzero', status: 'pending', size: 100 },
-    }),
-    'list pending proposals'
-  ).proposals;
+const PROPOSALS_PAGE_SIZE = 100;
+// The list route rejects an offset past this.
+const PROPOSALS_MAX_OFFSET = 9_900;
+
+/**
+ * Reads every pending AlertZero proposal, not just the first page: the space is shared, so
+ * leftovers from other runs can push this run's proposals past page one. `order: 'newest'` is a
+ * total order, which keeps the pages from repeating or skipping a row. Paging follows `total`
+ * rather than the page length, because the route drops a proposal it settles while reading.
+ */
+export const listPendingProposals = async (api: AlertZeroApi): Promise<PendingProposal[]> => {
+  const proposals: PendingProposal[] = [];
+  for (let from = 0; from <= PROPOSALS_MAX_OFFSET; from += PROPOSALS_PAGE_SIZE) {
+    const page = ok(
+      await api.internal<ListProposalsResponse>('GET', '/internal/proposals', {
+        query: {
+          origin: 'alertzero',
+          status: 'pending',
+          order: 'newest',
+          size: PROPOSALS_PAGE_SIZE,
+          from,
+        },
+      }),
+      `list pending proposals from ${from}`
+    );
+    proposals.push(...page.proposals);
+    if (from + PROPOSALS_PAGE_SIZE >= page.total) {
+      break;
+    }
+  }
+  return proposals;
+};
 
 /**
  * Whether this run raised the proposal. The default space is shared, so `actionWorkflowId` and

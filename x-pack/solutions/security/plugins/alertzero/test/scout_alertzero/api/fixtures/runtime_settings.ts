@@ -33,10 +33,27 @@ const writeSettings = async (
   });
 };
 
+/** What setup persists for teardown: the baseline to restore and the value it wrote. */
+interface AlertAnalysisCapture {
+  prior: unknown;
+  applied: unknown;
+}
+
+const readUserValue = async (kbnClient: KbnClient): Promise<unknown> => {
+  const { data } = await kbnClient.request<{
+    settings?: Record<string, { userValue?: unknown }>;
+  }>({ method: 'GET', path: KIBANA_SETTINGS_PATH, description: 'read advanced settings' });
+  return data.settings?.[ALERT_ANALYSIS_SETTING]?.userValue ?? null;
+};
+
 /**
  * Captures the setting's user value (absent -> `null`) for the teardown project, then turns it on.
  * An existing capture file comes from a run that never reached teardown and holds the real
  * baseline, so it is kept.
+ *
+ * Ordering rule: the security_solution suite writes this setting too. When both setups run before
+ * either teardown, the second one captures the first one's applied value as its baseline, so
+ * teardown restores the setting only while it still holds what this suite applied.
  */
 export const applyAlertAnalysisSetting = async ({
   kbnClient,
@@ -48,19 +65,17 @@ export const applyAlertAnalysisSetting = async ({
   if (existsSync(STATE_FILE)) {
     log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${STATE_FILE}`);
   } else {
-    const { data } = await kbnClient.request<{
-      settings?: Record<string, { userValue?: unknown }>;
-    }>({ method: 'GET', path: KIBANA_SETTINGS_PATH, description: 'read advanced settings' });
-    const prior = {
-      [ALERT_ANALYSIS_SETTING]: data.settings?.[ALERT_ANALYSIS_SETTING]?.userValue ?? null,
-    };
+    const capture: AlertAnalysisCapture = { prior: await readUserValue(kbnClient), applied: true };
     mkdirSync(dirname(STATE_FILE), { recursive: true });
-    writeFileSync(STATE_FILE, JSON.stringify(prior, null, 2));
+    writeFileSync(STATE_FILE, JSON.stringify(capture, null, 2));
   }
   await writeSettings(kbnClient, { [ALERT_ANALYSIS_SETTING]: true });
 };
 
-/** Restores the captured value. A missing capture file is not an error. */
+/**
+ * Restores the captured value while the setting still holds what this suite applied. A missing
+ * capture file is not an error.
+ */
 export const restoreAlertAnalysisSetting = async ({
   kbnClient,
   log,
@@ -72,6 +87,13 @@ export const restoreAlertAnalysisSetting = async ({
     log.warning(`[teardown] no prior-value capture at ${STATE_FILE}; leaving the setting as it is`);
     return;
   }
-  await writeSettings(kbnClient, JSON.parse(readFileSync(STATE_FILE, 'utf8')));
+  const { prior, applied } = JSON.parse(readFileSync(STATE_FILE, 'utf8')) as AlertAnalysisCapture;
+  if ((await readUserValue(kbnClient)) === applied) {
+    await writeSettings(kbnClient, { [ALERT_ANALYSIS_SETTING]: prior });
+  } else {
+    log.warning(
+      `[teardown] leaving ${ALERT_ANALYSIS_SETTING} as it is: it changed since setup (another suite owns it now)`
+    );
+  }
   rmSync(STATE_FILE, { force: true });
 };

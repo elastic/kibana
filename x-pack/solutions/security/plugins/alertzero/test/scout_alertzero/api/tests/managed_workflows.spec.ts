@@ -154,6 +154,8 @@ const cancelNewExecutions = async (
       headers,
       responseType: 'json',
     });
+    // A failed list would read as "nothing in flight" and let teardown pass over a live run.
+    expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
     return ((response.body as { results?: Array<{ id: string; status: string }> }).results ?? [])
       .filter((run) => !knownIds.includes(run.id))
       .filter((run) => !TERMINAL_EXECUTION_STATUSES.includes(run.status));

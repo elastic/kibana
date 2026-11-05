@@ -36,6 +36,12 @@ export const ATTACK_DISCOVERY_WORKER_WORKFLOW_ID = 'system-security-attack-disco
 export const FLOOR_ATTACK_DISCOVERY_WORKER_ID = 'system-security-floor-attack-discovery';
 export const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-endpoint-analysis';
+export const ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
+export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
+  'system-security-forensics-run-endpoint-analysis';
+export const FORENSICS_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-forensics-proposal-gate';
+export const FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID =
+  'system-security-forensics-close-investigation-gate';
 export const HANDOFF_TO_FORENSICS_ACTION_ID = 'system-alertzero-action-handoff-to-forensics';
 export const ISOLATE_HOST_ACTION_ID = 'system-alertzero-action-isolate-host';
 
