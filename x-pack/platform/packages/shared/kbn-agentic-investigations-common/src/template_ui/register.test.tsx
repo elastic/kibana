@@ -317,8 +317,6 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.tabs).toEqual(getInvestigationTabIds('investigation'));
     // The header and footer are data, described by the module `load` resolves to.
     expect(definition?.detailsFlyout?.load).toBeDefined();
-    expect(definition?.detailsFlyout?.header).toBeUndefined();
-    expect(definition?.detailsFlyout?.footer).toBeUndefined();
   });
 
   it('adds a Copy link flyout action that calls onCopyLink', () => {
@@ -478,8 +476,6 @@ describe('registerEscalationTemplateUI', () => {
     const definition = contract.getTemplateUIDefinition('escalation');
     expect(definition?.tabs).toEqual(['escalation.overview']);
     expect(definition?.detailsFlyout?.load).toBeDefined();
-    expect(definition?.detailsFlyout?.header).toBeUndefined();
-    expect(definition?.detailsFlyout?.footer).toBeUndefined();
   });
 
   it('adds a Copy link flyout action that calls onCopyLink', () => {

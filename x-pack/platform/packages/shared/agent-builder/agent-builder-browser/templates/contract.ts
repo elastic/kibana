@@ -21,7 +21,7 @@ import type {
 import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
- * Props shared by conversation details tabs, headers, and footers.
+ * Props for conversation details tabs and for `useDetailsFlyout`.
  */
 export interface ConversationTemplateDetailsFlyoutRenderProps {
   /** The conversation the flyout is showing. */
@@ -135,14 +135,11 @@ export interface ConversationTemplateUIDefinition {
   briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
   /** Optional flyout content; capture capabilities from the template registration context. */
   detailsFlyout?: {
-    /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
-    header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
-    /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
-    footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
     /**
      * Loads the module that describes the flyout's header and footer. Called once, the first time
      * a flyout for this template opens; the flyout shows its loading state until it resolves. Use
-     * a dynamic `import()` so the module stays out of the page-load bundle.
+     * a dynamic `import()` so the module stays out of the page-load bundle. Without it, the flyout
+     * is titled "Chat info" and has no footer.
      */
     load?: () => Promise<ConversationTemplateDetailsFlyoutModule>;
     /**

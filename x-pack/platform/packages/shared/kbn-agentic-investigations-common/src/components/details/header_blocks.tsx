@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { InfoBlocks, type InfoBlockItem } from '@kbn/flyout-info-blocks';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import { AssigneeAvatarStack } from '../escalation_queue/assignee_avatar_stack';
 import { getEmptyValue } from '../helpers';
 import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
@@ -69,26 +69,3 @@ export const getHeaderBlocks = (values: HeaderBlockValues): InfoBlockItem[] => [
     : []),
   { id: 'assignees', title: TEMPLATE_UI_LABELS.assignees, value: getAssigneesValue(values) },
 ];
-
-export interface ConversationHeaderBlocksProps extends HeaderBlockValues {
-  'data-test-subj'?: string;
-}
-
-/** The header tiles, rendered with `InfoBlocks`. */
-export const ConversationHeaderBlocks = ({
-  status,
-  statusNode,
-  assigneesNode,
-  assigneeUids,
-  severityNode,
-  'data-test-subj': dataTestSubj = 'investigationHeaderBlocks',
-}: ConversationHeaderBlocksProps) => {
-  const items = useMemo<InfoBlockItem[]>(
-    () => getHeaderBlocks({ status, statusNode, assigneesNode, assigneeUids, severityNode }),
-    [status, statusNode, assigneesNode, assigneeUids, severityNode]
-  );
-
-  return (
-    <InfoBlocks items={items} maxColumns={items.length > 2 ? 3 : 2} data-test-subj={dataTestSubj} />
-  );
-};

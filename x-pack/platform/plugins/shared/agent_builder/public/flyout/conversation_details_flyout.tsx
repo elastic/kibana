@@ -7,17 +7,6 @@
 
 import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
-import {
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
-  useGeneratedHtmlId,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { FlyoutTemplate } from '@kbn/flyout-template';
@@ -245,54 +234,6 @@ class DetailsErrorBoundary extends Component<
   }
 }
 
-interface FlyoutFrameProps {
-  header?: React.ReactNode;
-  footer?: React.ReactNode;
-  tabs?: React.ReactNode;
-  children: React.ReactNode;
-}
-
-/** Frame for templates that still register `header` and `footer` components. */
-const FlyoutFrame = ({ header, footer, tabs, children }: FlyoutFrameProps) => {
-  const { euiTheme } = useEuiTheme();
-  const titleId = useGeneratedHtmlId({ prefix: 'agentBuilderConversationDetailsFlyoutTitle' });
-
-  // Align the selected-tab underline with the flyout header border.
-  const tabsStyles = css`
-    margin-block-end: calc(-${euiTheme.size.base} - ${euiTheme.border.width.thin});
-  `;
-
-  return (
-    <>
-      <EuiFlyoutHeader hasBorder={Boolean(tabs)}>
-        {header ? (
-          <div id={titleId}>{header}</div>
-        ) : (
-          <EuiTitle size="xs">
-            <h4 id={titleId}>{FLYOUT_TITLE}</h4>
-          </EuiTitle>
-        )}
-        {tabs && (
-          <EuiTabs css={tabsStyles} bottomBorder={false}>
-            {tabs}
-          </EuiTabs>
-        )}
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
-      {footer && (
-        <EuiFlyoutFooter
-          css={{
-            backgroundColor: euiTheme.colors.backgroundBasePlain,
-            borderBlockStart: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-          }}
-        >
-          {footer}
-        </EuiFlyoutFooter>
-      )}
-    </>
-  );
-};
-
 export interface ConversationDetailsFlyoutContentProps {
   isOpenedFromChat: boolean;
   conversation: Conversation;
@@ -338,36 +279,6 @@ export const ConversationDetailsFlyoutContent = ({
           onClose={onClose}
         />
       </DetailsErrorBoundary>
-    );
-  }
-
-  if (detailsFlyout?.header || detailsFlyout?.footer) {
-    const Header = detailsFlyout.header;
-    const Footer = detailsFlyout.footer;
-    const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
-    // Render as a component so registered tabs can use hooks.
-    const SelectedTabContent = selectedTab?.content;
-    return (
-      <FlyoutFrame
-        header={Header && <Header {...renderProps} />}
-        footer={Footer && <Footer {...renderProps} />}
-        tabs={
-          tabs.length > 1 &&
-          tabs.map((entry) => (
-            <EuiTab
-              key={entry.id}
-              isSelected={entry.id === effectiveSelectedTabId}
-              onClick={() => setSelectedTabId(entry.id)}
-            >
-              {entry.label}
-            </EuiTab>
-          ))
-        }
-      >
-        {selectedTab && SelectedTabContent && (
-          <SelectedTabContent key={selectedTab.id} {...renderProps} />
-        )}
-      </FlyoutFrame>
     );
   }
 
