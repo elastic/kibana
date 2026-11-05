@@ -253,6 +253,26 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
     });
 
+    it('returns cancelled without waiting when the step is aborted during the child read', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockImplementation(async () => {
+        mockStepRuntime.abortController.abort();
+        return { id: 'child-exec-1', status: ExecutionStatus.RUNNING } as any;
+      });
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result).toEqual({ status: 'cancelled' });
+      expect(mockStepRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
     it('still waits when reading the child after start throws', async () => {
       mockExecRepo.getWorkflowExecutionById.mockRejectedValue(new Error('es down'));
 

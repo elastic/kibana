@@ -151,11 +151,14 @@ export class WorkflowExecuteSyncStrategy {
 
       this.stepExecutionRuntime.setCurrentStepState(state);
 
+      const childAlreadyTerminal = await this.isChildAlreadyTerminal(state, spaceId);
+
+      // Checked after the read so a cancellation that lands during it is not overwritten below.
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
         return { status: 'cancelled' };
       }
 
-      if (await this.isChildAlreadyTerminal(state, spaceId)) {
+      if (childAlreadyTerminal) {
         return this.readChildExecutionFromEs(state, spaceId);
       }
 
