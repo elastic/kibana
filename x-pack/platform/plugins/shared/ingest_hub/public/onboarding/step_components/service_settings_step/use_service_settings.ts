@@ -251,8 +251,15 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         dedicatedNamespaceTemplates: value,
       });
+      // Turning it off changes nothing on the package, so nothing else would save it, and a saved
+      // "on" would come back when the deployment is reopened. Turning it on is saved once it was
+      // applied, so that it stays paired with the namespace it was applied for.
+      const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+      if (!value && deploymentId) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: false });
+      }
     },
-    [persisted, setPersisted]
+    [persisted, setPersisted, detectAndReviewStep?.onboardingDeploymentId, updateDeployment]
   );
 
   const integrationName = persisted?.integrationName ?? '';

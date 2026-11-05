@@ -50,6 +50,9 @@ const seedDeployedAgentBasedFlow = async (
   await mockAwsPackage(page, TWO_SERVICE_AWS_PACKAGE);
   // After the package mock, so these routes answer first.
   const packageRequests = await mockInstalledAwsPackage(page, enabledFor);
+  // An uncaught error can unmount the step the test is waiting for, or only show up after it.
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
   await page.route(
     (url) => /\/api\/fleet\/cloud_connectors/.test(url.pathname),
     (route) => route.fulfill(fulfillJson({ items: [] }))
@@ -135,7 +138,7 @@ const seedDeployedAgentBasedFlow = async (
     hash: 'authenticate-and-deploy',
   });
   await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-  return packageRequests;
+  return { packageRequests, pageErrors };
 };
 
 /**
@@ -152,7 +155,10 @@ const deployWithNext = async (
   await namespaceInput.fill(namespace);
   await namespaceInput.press('Enter');
   if (dedicatedTemplates) {
-    await page.testSubj.locator('sharedSettingsDedicatedNamespaceTemplates').click();
+    const dedicatedSwitch = page.testSubj.locator('sharedSettingsDedicatedNamespaceTemplates');
+    await expect(dedicatedSwitch).toBeEnabled();
+    await dedicatedSwitch.click();
+    await expect(dedicatedSwitch).toHaveAttribute('aria-checked', 'true');
   }
   await continueToDeploy(page);
   await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
@@ -173,24 +179,32 @@ test.describe(
       browserAuth,
       page,
     }) => {
-      const packageRequests = await seedDeployedAgentBasedFlow(browserAuth, page, ['staging']);
+      const { packageRequests, pageErrors } = await seedDeployedAgentBasedFlow(browserAuth, page, [
+        'staging',
+      ]);
 
       await deployWithNext(page, { namespace: 'prod', dedicatedTemplates: true });
 
       // The step is gone by now, so this fails if the opt-in only reacts to the step's own state.
       await expect.poll(() => packageRequests.updates.length).toBe(1);
+      // The next step loads the installed package right after the opt-in. A page error from it can
+      // arrive after the step is already visible, so wait for that request before looking.
+      await expect
+        .poll(() => packageRequests.calls.slice(packageRequests.calls.lastIndexOf('PUT')).length)
+        .toBeGreaterThan(1);
       expect(packageRequests.updates[0]).toStrictEqual({
         packageName: 'aws',
         version: '7.1.1',
         body: { namespace_customization_enabled_for: ['staging', 'prod'] },
       });
+      expect(pageErrors).toStrictEqual([]);
     });
 
     test('with the switch off, the deploy leaves the package alone', async ({
       browserAuth,
       page,
     }) => {
-      const packageRequests = await seedDeployedAgentBasedFlow(browserAuth, page);
+      const { packageRequests } = await seedDeployedAgentBasedFlow(browserAuth, page);
 
       await deployWithNext(page, { namespace: 'prod', dedicatedTemplates: false });
 
