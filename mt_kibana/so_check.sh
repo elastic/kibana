@@ -6,11 +6,11 @@ kbn() {
   local p=$1 method=$2 path=$3 body=${4:-}
   curl -s -u "elastic:changeme-$p" -H "x-elastic-project-id: project-$p" -H 'kbn-xsrf: true' \
     -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json' \
-    -X "$method" "localhost:5601$path" ${body:+-d "$body"}
+    -X "$method" "localhost:${MT_KBN_PORT:-5601}$path" ${body:+-d "$body"}
 }
 
 es_count() {
-  local p=$1 doc_id=$2 port=$((9200 + $(printf '%d' "'$1") - 97))
+  local p=$1 doc_id=$2 port=$((${MT_ES_PORT:-9200} + $(printf '%d' "'$1") - 97))
   curl -s -u "elastic:changeme-$p" -H 'content-type: application/json' \
     "localhost:$port/.kibana*/_count?expand_wildcards=all" \
     -d "{\"query\":{\"ids\":{\"values\":[\"$doc_id\"]}}}" | jq -r .count
@@ -39,7 +39,7 @@ config_id="config:$(kbn a GET /api/status | jq -r .version.number)"
 kbn b POST /api/kibana/settings '{"changes":{"csv:separator":";"}}' >/dev/null
 separator() { kbn "$1" GET /api/kibana/settings | jq -r '.settings["csv:separator"].userValue // "unset"'; }
 es_separator() {
-  local port=$((9200 + $(printf '%d' "'$1") - 97))
+  local port=$((${MT_ES_PORT:-9200} + $(printf '%d' "'$1") - 97))
   curl -s -u "elastic:changeme-$1" "localhost:$port/.kibana/_doc/$config_id" |
     jq -r '._source.config["csv:separator"] // "unset"'
 }

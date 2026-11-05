@@ -15,7 +15,7 @@ import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   ElasticsearchClient,
@@ -341,7 +341,7 @@ export class SavedObjectsService
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = [],
       extensions?: SavedObjectsExtensions,
-      serverTiming?: RequestTiming
+      request?: KibanaRequest
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -351,7 +351,8 @@ export class SavedObjectsService
         this.logger.get('repository'),
         includedHiddenTypes,
         extensions,
-        serverTiming
+        request?.serverTiming,
+        request?.tenantId
       );
     };
 
@@ -365,19 +366,14 @@ export class SavedObjectsService
           request ? client.asScoped(request).asInternalUser : client.asInternalUser,
           includedHiddenTypes,
           extensions,
-          request?.serverTiming
+          request
         ),
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
       ) =>
-        createRepository(
-          client.asScoped(req).asCurrentUser,
-          includedHiddenTypes,
-          extensions,
-          req.serverTiming
-        ),
+        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions, req),
     };
 
     const clientProvider = new SavedObjectsClientProvider({

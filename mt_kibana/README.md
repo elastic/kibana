@@ -11,8 +11,9 @@ Kibana stays a single process. Each request is tagged with its tenant when it ar
 - **Tenants service** (`src/core/packages/tenants/`): reads `tenants.yml` at startup. It's the only code that creates a `TenantId`, and it stays off unless `tenants.file` is set.
 - **HTTP**: checks the `x-elastic-project-id` header against the tenants service, then sets `request.tenantId`. Unknown tenants get a 400.
 - **Elasticsearch**: `asScoped(request)` returns a client for the request's tenant, built from that tenant's credentials. Requests without a tenant use the home cluster.
-- **Saved objects**: repositories that use Kibana's internal user now take the request, so data views, spaces, and settings are stored in the tenant's cluster. Encrypted saved objects use the tenant's own key: core hands ESO a crypto for it, never the key itself.
+- **Saved objects**: repositories that use Kibana's internal user now take the request, so data views, spaces, and settings are stored in the tenant's cluster. Each repository and client knows its tenant (`getTenantId()`), and advanced settings cache their values per tenant and space. Encrypted saved objects use the tenant's own key: core hands ESO a crypto for it, never the key itself.
 - **Security**: authentication and user profiles follow the request, so basic auth, API keys, and session login work for each tenant.
+- **Data and data views**: field lists, searches (`es`, `ese`, ES|QL), and KQL value suggestions already used request-scoped clients, so they follow the tenant with no changes. The default data view is an advanced setting, so it follows the tenant through the settings cache fix.
 - **Sessions**: each tenant's sessions are stored in its own cluster's session index, encrypted with the tenant's session key, and the session cookie only works for the tenant it was created for. Token-based login providers (SAML, OIDC, PKI, token, Kerberos) get and refresh tokens on the tenant's cluster.
 
 [`FINDINGS.md`](FINDINGS.md) lists what still goes to the home cluster.
@@ -36,7 +37,7 @@ mt_kibana/start_es.sh b   # project-b on :9201, elastic:changeme-b
 mt_kibana/start_es.sh c   # project-c on :9202, elastic:changeme-c
 ```
 
-The passwords differ on purpose, so a misrouted request fails with a 401. Installs and data live in `.es/mt/`, which git ignores. Every start wipes that cluster's data, so rerun its init (step 2) after a restart. Extra arguments go to Elasticsearch, for example `mt_kibana/start_es.sh b -E xpack.security.authc.token.enabled=true`.
+The passwords differ on purpose, so a misrouted request fails with a 401. If other clusters already use 9200-9202 or Kibana 5601, set `MT_ES_PORT=9220` (clusters on 9220-9222) and `MT_KBN_PORT=5611` for `start_es.sh`, `init_tenant.sh`, `smoke.sh`, `so_check.sh`, and `data_check.sh`. Then start Kibana with `--server.port=5611 --elasticsearch.hosts=http://localhost:9220` and a copy of `tenants.yml` with the same ports. Installs and data live in `.es/mt/`, which git ignores. Every start wipes that cluster's data, so rerun its init (step 2) after a restart. Extra arguments go to Elasticsearch, for example `mt_kibana/start_es.sh b -E xpack.security.authc.token.enabled=true`.
 
 ## 2. Initialise each cluster
 
@@ -61,7 +62,9 @@ Drop the last flag to get the single-tenant "red" baseline: `smoke.sh` then pass
 
 `mt_kibana/smoke.sh` prints `PASS` for each tenant whose `/api/stats` `cluster_uuid` (internal-user path) and console proxy `cluster_name` (current-user path) come from that tenant's cluster. The console proxy is an internal API, so its calls send `x-elastic-internal-origin: kibana` like the browser does.
 
-`mt_kibana/so_check.sh` writes a data view, an advanced setting, and a space through `project-b`, then checks where each one is stored and who can see it. The setting check through `project-a` fails because advanced settings are cached per space for the whole process, not per tenant (see [`FINDINGS.md`](FINDINGS.md)).
+`mt_kibana/so_check.sh` writes a data view, an advanced setting, and a space through `project-b`, then checks where each one is stored and who can see it. Advanced settings are cached per tenant and space, so the setting written through `project-b` doesn't show up in `project-a`.
+
+`mt_kibana/data_check.sh` (M5) gives clusters A and B an index with the same name but different documents and one field each. Through `project-b` it checks field lists, a data view's fields, `es`, `ese`, and ES|QL searches, KQL value suggestions, the default data view, and the KQL opt-in counter, and that each only sees or writes cluster B.
 
 `mt_kibana/eso_check.sh` creates `.index` and webhook connectors through `project-b` and `project-c` and runs them, including in parallel. It checks that each run reads its own tenant's connector, decrypts its secrets, and writes only to its own cluster. It also prints where the connector's event log entries landed.
 

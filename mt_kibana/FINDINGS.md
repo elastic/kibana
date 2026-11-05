@@ -66,9 +66,18 @@ The low-effort items from [Rudolf's follow-up](https://github.com/elastic/kibana
 - **Per-tenant key rotation:** `withPrimaryCrypto` drops the decryption-only keys, so a tenant can't rotate its key. This needs per-tenant decryption-only keys in the tenants file, the tenants service, and ESO.
 - **Actions client and connector token clients** still use the home ESO client (`createActionsClient`, `createRouteHandlerContext`, `getServicesFactory`), so `getAxiosInstance` and OAuth token reads look for a non-home connector's secrets on the home cluster.
 
+## M5: data views and the data plugin
+
+Run on 2026-11-05 with `data_check.sh`, `so_check.sh`, and `smoke.sh` (clusters on 9220-9222, Kibana on 5611):
+
+- Most of it already worked. Field lists (`_fields_for_wildcard`), a data view's fields, the `es`, `ese`, and ES|QL search strategies, and KQL value suggestions all use request-scoped clients, so they read the tenant's cluster with no changes. 10 of 13 `data_check.sh` checks passed before any change.
+- **Default data view:** setting it through `project-b` stored it in cluster B, but `project-b` then read `project-a`'s value. The default data view is the `defaultIndex` advanced setting, and settings reads came from a process-wide cache keyed only by space. Saved objects repositories and clients now know their tenant (`getTenantId()`), and the settings cache key is `<tenant>:<space>`. This also fixes the advanced settings leak that `so_check.sh` found. 300 parallel settings reads across three tenants, each with its own value, show zero cross-talk.
+- **KQL opt-in counter:** the data plugin's `/internal/kql_opt_in_stats` route created an internal repository without the request, so every tenant's counter went to cluster A. It now passes the request.
+- After both fixes: `data_check.sh` 13/13, `so_check.sh` 13/13, `smoke.sh` 3/3.
+- Not checked: search sessions (background search saved in a session saved object). The search usage collector and the data views usage collector use internal repositories without a request, so they only count the home cluster, like the other usage collectors.
+
 ## What still reaches the home cluster
 
-- **Advanced settings reads:** the value is stored in the right cluster, but reads come from a process-wide cache keyed only by space (`sharedUserProvidedCache` in ui-settings). So one tenant sees another's values. The cache key needs the tenant, and `asScopedToClient(savedObjectsClient)` doesn't have it.
 - **Project name and other cloud settings:** the project picker showed the same name for every project, because `xpack.cloud.serverless.project_name` is one value per process. As a stopgap, a tenant can set `projectName` in the tenants file, and core swaps it into the cloud plugin's browser config when it renders a page for that tenant. Server-side reads of `cloud.serverless.projectName`, and the other cloud settings (`project_id`, the "Manage project" and "View all projects" URLs), still have one value per process. They belong to the per-tenant config slices.
 - **Initial solution view setup:** the spaces plugin's `InitialSolutionSetupService` keeps one `setupComplete` flag for the whole process. Once one tenant picks a solution view, no other tenant is asked, even though its default space has none.
 - **User profiles through core's public API:** `core.userProfile` `suggest`, `bulkGet`, and `update` take no request, so they use the home cluster. Callers include Cases, alerting, Agent Builder, and the Spaces plugin, which fails to save "last selected space" for non-home tenants with `document_missing_exception`. The fix is an optional `request` on core's user profile API, then updating each caller.

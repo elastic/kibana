@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TenantId } from '@kbn/core-tenants-server';
 import type { SavedObject, SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
@@ -465,6 +466,12 @@ export interface SavedObjectsClientContract {
    * Returns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`.
    */
   getCurrentNamespace(): string | undefined;
+
+  /**
+   * Returns the tenant the client reads and writes, when multi-tenancy is enabled and the client was created for a
+   * request that targets a tenant. Returns `undefined` for the home cluster.
+   */
+  getTenantId?(): TenantId | undefined;
 
   /**
    * Returns a clone of the current Saved Objects client but scoped to the specified namespace.

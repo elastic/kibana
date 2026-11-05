@@ -30,6 +30,7 @@
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
+    "@kbn/core-tenants-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/utility-types",

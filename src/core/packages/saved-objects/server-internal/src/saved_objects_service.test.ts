@@ -708,6 +708,22 @@ describe('SavedObjectsService', () => {
           expect(includedHiddenTypes).toEqual([]);
         });
 
+        it("passes the request's tenant to the repository", async () => {
+          const coreContext = createCoreContext({ skipMigration: false });
+          const soService = new SavedObjectsService(coreContext);
+          await soService.setup(createSetupDeps());
+          const { createScopedRepository } = await soService.start(createStartDeps());
+
+          const req = httpServerMock.createKibanaRequest();
+          Object.defineProperty(req, 'tenantId', { value: 'project-b' });
+          createScopedRepository(req);
+
+          const [[, , , , , , , , tenantId]] = (
+            SavedObjectsRepository.createRepository as jest.Mocked<any>
+          ).mock.calls;
+          expect(tenantId).toBe('project-b');
+        });
+
         it('creates a repository including hidden types when specified', async () => {
           const coreContext = createCoreContext({ skipMigration: false });
           const soService = new SavedObjectsService(coreContext);
