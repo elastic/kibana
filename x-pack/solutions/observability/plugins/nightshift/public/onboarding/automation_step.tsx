@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import { css, keyframes } from '@emotion/react';
+import React from 'react';
 import {
   EuiButton,
   EuiCallOut,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,72 +18,21 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
-import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { InvestigationCardActions } from '../components/entities/investigation/investigation_card_actions';
-import { useInvestigationAssignees } from '../components/entities/investigation/use_investigation_assignees';
-import { useAgentConnectors } from '../data/sandbox_connectors/use_agent_connectors';
-import { useFetchSandboxConnectors } from '../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
-interface SuggestedAutomation {
-  id: string;
-  icon: string;
-  title: string;
-  description: string;
-  /** Only suggested once a connector is assigned to the agent. */
-  requiresConnector?: boolean;
-}
+const flow = keyframes`
+  to { stroke-dashoffset: -16; }
+`;
 
-const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
-  {
-    id: 'triage_alerts',
-    icon: 'bell',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.triageAlertsTitle', {
-      defaultMessage: 'Triage incoming alerts',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.triageAlertsDescription', {
-      defaultMessage: 'Investigate new alerts from your deployments as soon as they fire.',
-    }),
-  },
-  {
-    id: 'daily_health_check',
-    icon: 'clock',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.dailyCheckTitle', {
-      defaultMessage: 'Daily health check',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.dailyCheckDescription', {
-      defaultMessage:
-        'Every morning, look for new errors, latency regressions and violated SLOs from the night.',
-    }),
-  },
-  {
-    id: 'triage_slack',
-    icon: 'logoSlack',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.slackTitle', {
-      defaultMessage: 'Triage alerts posted in Slack',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.slackDescription', {
-      defaultMessage:
-        'Start from Slack messages that look like alerts, then reply in the same thread with findings.',
-    }),
-  },
-  {
-    id: 'review_changes',
-    icon: 'logoGithub',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.githubTitle', {
-      defaultMessage: 'Check recent releases',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.githubDescription', {
-      defaultMessage:
-        'After a release or merged pull request, check the affected services for new errors.',
-    }),
-    requiresConnector: true,
-  },
-];
+const pulse = keyframes`
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.9); opacity: 0; }
+`;
 
 /** Step 3: the trial investigation keeps running while the user sets up a first automation. */
 export function OnboardingAutomationStep({
@@ -97,13 +45,6 @@ export function OnboardingAutomationStep({
   automationsHref?: string;
   onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
-  const { assignedIds } = useAgentConnectors();
-  const listed = useFetchSandboxConnectors().data?.connectors ?? [];
-  const hasConnector = listed.some(({ id }) => assignedIds.includes(id));
-  const automations = SUGGESTED_AUTOMATIONS.filter(
-    ({ requiresConnector }) => !requiresConnector || hasConnector
-  );
-
   return (
     <div data-test-subj="nightshiftOnboardingAutomationStep">
       <EuiTitle size="xs">
@@ -120,19 +61,13 @@ export function OnboardingAutomationStep({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.nightshift.onboarding.automate.suggestedTitle', {
-            defaultMessage: 'Suggested automations',
+            defaultMessage: 'Create your first automation',
           })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       {automationsHref ? (
-        <EuiFlexGrid columns={2} gutterSize="m">
-          {automations.map((automation) => (
-            <EuiFlexItem key={automation.id}>
-              <SuggestedAutomationCard automation={automation} href={automationsHref} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
+        <FirstAutomationCard href={`${automationsHref}/new`} />
       ) : (
         <EuiCallOut
           announceOnMount
@@ -157,8 +92,6 @@ function TrialInvestigationCard({
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
   const { in_progress: isActive } = investigation;
-  const investigations = useMemo(() => [investigation], [investigation]);
-  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <EuiPanel
@@ -169,19 +102,7 @@ function TrialInvestigationCard({
         overflow: hidden;
       `}
     >
-      {InvestigationCard && (
-        <InvestigationCard
-          investigation={investigation}
-          onClick={onClick}
-          actions={
-            <InvestigationCardActions
-              investigation={investigation}
-              assignees={renderAssignees(investigation)}
-              ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION}
-            />
-          }
-        />
-      )}
+      {InvestigationCard && <InvestigationCard investigation={investigation} onClick={onClick} />}
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
@@ -245,69 +166,211 @@ function TrialInvestigationCard({
   );
 }
 
-function SuggestedAutomationCard({
-  automation,
-  href,
-}: {
-  automation: SuggestedAutomation;
-  href: string;
-}): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
+function FirstAutomationCard({ href }: { href: string }): React.ReactElement {
   const { application } = useKibana().services;
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="m"
-      data-test-subj={`nightshiftOnboardingSuggestedAutomation-${automation.id}`}
+    <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingFirstAutomation">
+      <EuiFlexGroup alignItems="center" gutterSize="xl">
+        <EuiFlexItem grow={false}>
+          <AutomationIllustration />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationTitle', {
+                defaultMessage: 'Let Elastic nightshift investigate for you, automatically',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationDescription', {
+                defaultMessage:
+                  'Automations let you choose what gets investigated without you asking, such as alerts that fire or Slack notifications in a channel. When one arrives, the agent starts investigating straight away.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <div>
+            <EuiButton
+              size="s"
+              iconType="plus"
+              href={href}
+              onClick={(event: React.MouseEvent) => {
+                event.preventDefault();
+                void application.navigateToUrl(href);
+              }}
+              data-test-subj="nightshiftOnboardingCreateAutomation"
+            >
+              {i18n.translate('xpack.nightshift.onboarding.automate.createAutomationButton', {
+                defaultMessage: 'Create automation',
+              })}
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+const ILLUSTRATION_WIDTH = 264;
+const ILLUSTRATION_HEIGHT = 156;
+const AGENT_X = 210;
+const AGENT_Y = 70;
+
+/** Triggers (a Slack message and an alert) flowing into the agent. Decorative only. */
+function AutomationIllustration(): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  const chipShadow = useEuiShadow('s');
+  const triggers = [
+    {
+      icon: 'logoSlack',
+      top: 24,
+      label: i18n.translate('xpack.nightshift.onboarding.automate.illustrationSlack', {
+        defaultMessage: 'Slack message',
+      }),
+    },
+    {
+      icon: 'bell',
+      top: 86,
+      label: i18n.translate('xpack.nightshift.onboarding.automate.illustrationAlert', {
+        defaultMessage: 'Alert fires',
+      }),
+    },
+  ];
+  const chipWidth = 112;
+  const chipHeight = 32;
+  const chipLeft = 14;
+
+  return (
+    <div
+      aria-hidden={true}
       css={css`
-        display: flex;
-        flex-direction: column;
-        height: 100%;
+        position: relative;
+        width: ${ILLUSTRATION_WIDTH}px;
+        height: ${ILLUSTRATION_HEIGHT}px;
+        overflow: hidden;
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
+        background: repeating-linear-gradient(
+            to bottom,
+            transparent 0 38px,
+            ${euiTheme.colors.borderBasePlain} 38px 39px
+          ),
+          linear-gradient(
+            110deg,
+            ${euiTheme.colors.backgroundLightSuccess},
+            ${euiTheme.colors.backgroundLightPrimary} 55%,
+            ${euiTheme.colors.backgroundLightAssistance}
+          );
       `}
     >
-      <div
+      <svg
+        width={ILLUSTRATION_WIDTH}
+        height={ILLUSTRATION_HEIGHT}
         css={css`
-          align-items: center;
-          border: ${euiTheme.border.thin};
-          border-radius: ${euiTheme.border.radius.medium};
-          display: flex;
-          height: ${euiTheme.size.xxl};
-          justify-content: center;
-          width: ${euiTheme.size.xxl};
+          position: absolute;
+          inset: 0;
         `}
       >
-        <EuiIcon type={automation.icon} size="m" aria-hidden={true} />
+        {triggers.map(({ icon, top }) => {
+          const startX = chipLeft + chipWidth;
+          const startY = top + chipHeight / 2;
+          const midX = (startX + AGENT_X) / 2;
+          return (
+            <path
+              key={icon}
+              d={`M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${AGENT_Y}, ${AGENT_X} ${AGENT_Y}`}
+              fill="none"
+              stroke={euiTheme.colors.primary}
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              strokeLinecap="round"
+              css={css`
+                animation: ${flow} 0.8s linear infinite;
+                @media (prefers-reduced-motion: reduce) {
+                  animation: none;
+                }
+              `}
+            />
+          );
+        })}
+      </svg>
+
+      {triggers.map(({ icon, top, label }) => (
+        <div
+          key={icon}
+          css={css`
+            position: absolute;
+            left: ${chipLeft}px;
+            top: ${top}px;
+            width: ${chipWidth}px;
+            height: ${chipHeight}px;
+            display: flex;
+            align-items: center;
+            gap: ${euiTheme.size.s};
+            padding: 0 ${euiTheme.size.s};
+            box-sizing: border-box;
+            background: ${euiTheme.colors.backgroundBasePlain};
+            border: ${euiTheme.border.thin};
+            border-radius: ${euiTheme.border.radius.medium};
+            ${chipShadow}
+          `}
+        >
+          <EuiIcon type={icon} size="s" aria-hidden={true} />
+          <EuiText size="xs">
+            <strong>{label}</strong>
+          </EuiText>
+        </div>
+      ))}
+
+      <div
+        css={css`
+          position: absolute;
+          left: ${AGENT_X - 22}px;
+          top: ${AGENT_Y - 22}px;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: ${euiTheme.colors.backgroundBasePlain};
+          border: 2px solid ${euiTheme.colors.primary};
+          &::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            border: 2px solid ${euiTheme.colors.primary};
+            animation: ${pulse} 1.8s ease-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            &::before {
+              animation: none;
+              opacity: 0;
+            }
+          }
+        `}
+      >
+        <EuiIcon type="sparkles" color="primary" size="m" aria-hidden={true} />
       </div>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <strong>{automation.title}</strong>
-      </EuiText>
       <EuiText
         size="xs"
         color="subdued"
+        textAlign="center"
         css={css`
-          flex-grow: 1;
+          position: absolute;
+          left: ${AGENT_X - 45}px;
+          top: ${AGENT_Y + 30}px;
+          width: 90px;
         `}
       >
-        {automation.description}
+        {i18n.translate('xpack.nightshift.onboarding.automate.illustrationAgent', {
+          defaultMessage: 'Agent investigates',
+        })}
       </EuiText>
-      <EuiSpacer size="m" />
-      <div>
-        <EuiButton
-          size="s"
-          color="text"
-          href={href}
-          onClick={(event: React.MouseEvent) => {
-            event.preventDefault();
-            void application.navigateToUrl(href);
-          }}
-          data-test-subj={`nightshiftOnboardingSetUpAutomation-${automation.id}`}
-        >
-          {i18n.translate('xpack.nightshift.onboarding.automate.setUpButton', {
-            defaultMessage: 'Set up',
-          })}
-        </EuiButton>
-      </div>
-    </EuiPanel>
+    </div>
   );
 }
