@@ -115,8 +115,8 @@ export class FetchAlertsStep implements DispatcherStep {
         code: ALERTING_LOG_CODES.DISPATCHER_ALERT_SCAN_TRUNCATED,
         message: () =>
           `alert scan returned ${this.alertsPerTick} rows (dispatcher.run.alerts.max) for ` +
-          `[${gte}, ${lte}]; the tail is deferred to the next tick and the watermark advances ` +
-          `only to the truncation edge ${truncationEdge}.`,
+          `[${gte}, ${lte}]; the tail is deferred to the next tick and the watermark can ` +
+          `advance at most to the truncation edge ${truncationEdge}.`,
       });
       this.telemetry.recordAlertScanTruncated();
     }
