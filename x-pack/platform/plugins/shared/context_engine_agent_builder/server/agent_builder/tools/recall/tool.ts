@@ -77,7 +77,9 @@ export const createRecallTool = ({
     meaning. Use it before answering when earlier sessions may hold preferences, facts, or decisions
     relevant to the question. By default every session of the user is searched; pass
     scope 'session' to look only at the current conversation. Results come back best match first
-    with a relevance score, the memory text, and the session it was recorded in.
+    with a relevance score, the memory text, and the session it was recorded in. When a memory holds
+    a PDF or image, the text read out of it comes back as extracted_content; content is the note
+    saved with the memory.
   `,
   schema: recallSchema,
   handler: async (params, context) => {
@@ -129,6 +131,9 @@ export const createRecallTool = ({
                 timestamp: memory['@timestamp'],
                 session_id: memory.session_id,
                 ...(memory.content ? { content: memory.content } : {}),
+                ...(memory.extracted_content
+                  ? { extracted_content: memory.extracted_content }
+                  : {}),
                 ...(memory.media?.length
                   ? { media: memory.media.map(({ type }) => ({ type })) }
                   : {}),

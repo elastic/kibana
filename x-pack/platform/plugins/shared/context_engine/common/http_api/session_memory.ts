@@ -34,6 +34,11 @@ export interface RememberSessionMemoryBody {
 export interface SessionMemory extends RememberSessionMemoryBody {
   id: string;
   '@timestamp': string;
+  /**
+   * Text ES extracted from the PDF, image, or HTML media at remember time. Absent when extraction
+   * is off or the memory has no extractable media. Set by ES only; remember rejects it in a body.
+   */
+  extracted_content?: string;
 }
 
 export type RememberSessionMemoryResponse = SessionMemory;

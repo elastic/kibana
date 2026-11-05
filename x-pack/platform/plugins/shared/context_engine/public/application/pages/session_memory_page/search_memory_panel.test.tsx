@@ -213,6 +213,35 @@ describe('SearchMemoryPanel', () => {
     );
   });
 
+  it('shows the text extracted from media as a collapsed section', () => {
+    mockUseSearchSessionMemory.mockReturnValue(
+      mutationResult({
+        data: {
+          count: 2,
+          results: [
+            {
+              _score: 1,
+              memory: {
+                ...memory,
+                content: 'The Q3 invoice',
+                media: [{ type: 'pdf', value: 'data:application/pdf;base64,JVBERg==' }],
+                extracted_content: 'Invoice 42\nTotal due: $1,200',
+              },
+            },
+            { _score: 0.5, memory: { ...memory, id: 'm-2', content: 'No media' } },
+          ],
+        },
+      })
+    );
+    renderWithProviders(<SearchMemoryPanel />);
+
+    expect(screen.getAllByTestId('contextSessionMemoryResult-extracted')).toHaveLength(1);
+    expect(screen.getByText('Extracted text')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSessionMemoryResult-extracted-text')).toHaveTextContent(
+      'Invoice 42 Total due: $1,200'
+    );
+  });
+
   it('expands a result to its raw JSON with long media values shortened', () => {
     const value = `data:image/png;base64,${'A'.repeat(200)}`;
     mockUseSearchSessionMemory.mockReturnValue(

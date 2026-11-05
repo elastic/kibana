@@ -274,6 +274,9 @@ describe('session memory routes', () => {
     expect(() => bodySchema.validate({ ...scope, user_id: 'u-1', content: 'x' })).toThrow(
       /user_id/
     );
+    expect(() => bodySchema.validate({ ...scope, extracted_content: 'x', content: 'x' })).toThrow(
+      /extracted_content/
+    );
   });
 
   it('accepts a text or media search query and defaults the size', () => {

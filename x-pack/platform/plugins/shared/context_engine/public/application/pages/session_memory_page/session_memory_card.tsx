@@ -41,6 +41,10 @@ const detailsLabel = i18n.translate('xpack.contextEngine.sessionMemory.card.deta
   defaultMessage: 'Details',
 });
 
+const extractedLabel = i18n.translate('xpack.contextEngine.sessionMemory.card.extracted', {
+  defaultMessage: 'Extracted text',
+});
+
 const MAX_MEDIA_VALUE_PREVIEW_LENGTH = 80;
 
 /** The stored memory as JSON, with inline media payloads shortened so the block stays readable. */
@@ -75,7 +79,10 @@ interface SessionMemoryCardProps {
   'data-test-subj': string;
 }
 
-/** A stored memory: its image or document thumbnail, text, age, and (for a search hit) score. */
+/**
+ * A stored memory: its image or document thumbnail, text, the text ES extracted from its media
+ * (collapsed), age, and (for a search hit) score.
+ */
 export const SessionMemoryCard = ({
   memory,
   score,
@@ -85,6 +92,7 @@ export const SessionMemoryCard = ({
   const imageSrc = getImagePreviewSrc(memory.media);
   const hasPdf = memory.media?.some(({ type }) => type === 'pdf') ?? false;
   const detailsId = useGeneratedHtmlId({ prefix: 'sessionMemoryDetails' });
+  const extractedId = useGeneratedHtmlId({ prefix: 'sessionMemoryExtracted' });
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
@@ -151,6 +159,26 @@ export const SessionMemoryCard = ({
               <EuiText size="s" data-test-subj={`${dataTestSubj}-content`}>
                 <p>{memory.content}</p>
               </EuiText>
+            </>
+          )}
+          {memory.extracted_content && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiAccordion
+                id={extractedId}
+                buttonContent={extractedLabel}
+                paddingSize="s"
+                data-test-subj={`${dataTestSubj}-extracted`}
+              >
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  css={{ whiteSpace: 'pre-wrap' }}
+                  data-test-subj={`${dataTestSubj}-extracted-text`}
+                >
+                  {memory.extracted_content}
+                </EuiText>
+              </EuiAccordion>
             </>
           )}
           <EuiSpacer size="xs" />

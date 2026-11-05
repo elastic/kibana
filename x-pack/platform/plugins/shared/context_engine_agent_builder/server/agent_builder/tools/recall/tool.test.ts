@@ -169,6 +169,42 @@ describe('recall tool', () => {
     expect(JSON.stringify(result)).not.toContain('base64');
   });
 
+  it('includes the text extracted from media apart from the saved note', async () => {
+    search.mockResolvedValue({
+      count: 1,
+      results: [
+        {
+          _score: 0.5,
+          memory: {
+            ...memory,
+            content: 'The Q3 invoice.',
+            media: [{ type: 'pdf', value: 'data:application/pdf;base64,AA' }],
+            extracted_content: 'Invoice 42\nTotal due: $1,200',
+          },
+        },
+      ],
+    });
+
+    const result = await run({ query: 'invoice total', scope: 'user', size: 10 });
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.other,
+          data: {
+            memories: [
+              expect.objectContaining({
+                content: 'The Q3 invoice.',
+                extracted_content: 'Invoice 42\nTotal due: $1,200',
+                media: [{ type: 'pdf' }],
+              }),
+            ],
+          },
+        },
+      ],
+    });
+  });
+
   it('rejects session scope outside a conversation', async () => {
     const result = await run({ query: 'dark mode', scope: 'session', size: 10 }, '');
 
