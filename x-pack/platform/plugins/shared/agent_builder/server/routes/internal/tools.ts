@@ -32,8 +32,6 @@ import type {
   ListMcpToolsResponse,
   GetConnectorResponse,
   ListMcpToolsHealthResponse,
-  McpToolHealthState,
-  McpToolHealthStatus,
   ValidateNamespaceResponse,
   BulkDeleteConnectorResult,
   BulkDeleteConnectorsResponse,
@@ -42,7 +40,7 @@ import { OAUTH_STATUS } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
-import { getNotMcpConnectorMessage, listMcpTools } from '../../services/tools/tool_types/mcp';
+import { getMcpToolsHealth, getNotMcpConnectorMessage } from '../../services/tools/tool_types/mcp';
 import { toConnectorItem } from '../utils';
 
 const PER_USER_AUTH_MODE = 'per-user';
@@ -714,105 +712,7 @@ export function registerInternalToolsRoutes({
       }
 
       const healthStates = await healthClient.listBySpace();
-      const healthByToolId = new Map(
-        healthStates.map((healthState) => [healthState.toolId, healthState])
-      );
-
-      const connectorIds = [...new Set(mcpTools.map((tool) => tool.configuration.connector_id))];
-
-      const connectorResults = await Promise.allSettled(
-        connectorIds.map(async (connectorId) => {
-          const { actionTypeId } = await actionsClient.get({ id: connectorId });
-          if (actionTypeId !== MCP_CONNECTOR_ID) {
-            return {
-              connectorError: getNotMcpConnectorMessage(connectorId, actionTypeId),
-              mcpServerTools: [],
-              listToolsError: undefined,
-            };
-          }
-          try {
-            const { tools: mcpServerTools } = await listMcpTools({
-              actions: pluginsStart.actions,
-              request,
-              connectorId,
-            });
-            return { connectorError: undefined, mcpServerTools, listToolsError: undefined };
-          } catch (error) {
-            return {
-              connectorError: undefined,
-              mcpServerTools: [],
-              listToolsError: error instanceof Error ? error.message : String(error),
-            };
-          }
-        })
-      );
-
-      const connectorDataMap = new Map<
-        string,
-        {
-          connectorError?: string;
-          mcpServerTools: string[];
-          listToolsError?: string;
-        }
-      >();
-
-      for (let i = 0; i < connectorIds.length; i++) {
-        const connectorId = connectorIds[i];
-        const result = connectorResults[i];
-
-        if (result.status === 'fulfilled') {
-          connectorDataMap.set(connectorId, {
-            connectorError: result.value.connectorError,
-            mcpServerTools: result.value.mcpServerTools.map((mcpServerTool) => mcpServerTool.name),
-            listToolsError: result.value.listToolsError,
-          });
-        } else {
-          connectorDataMap.set(connectorId, {
-            connectorError: `Connector '${connectorId}' not found`,
-            mcpServerTools: [],
-          });
-        }
-      }
-
-      const results: McpToolHealthState[] = mcpTools.map((tool) => {
-        const toolConnectorId = tool.configuration.connector_id;
-        const mcpToolName = tool.configuration.tool_name;
-        const connectorData = connectorDataMap.get(toolConnectorId);
-        const toolHealth = healthByToolId.get(tool.id);
-
-        let status: McpToolHealthStatus = 'healthy';
-        let errorMessage: string | undefined;
-
-        // Check connector exists and is an MCP connector
-        if (!connectorData || connectorData.connectorError) {
-          status = 'connector_not_found';
-          errorMessage =
-            connectorData?.connectorError ?? `Connector '${toolConnectorId}' not found`;
-        }
-        // Check if listing MCP tools failed
-        else if (connectorData.listToolsError) {
-          status = 'list_tools_failed';
-          errorMessage = connectorData.listToolsError;
-        }
-        // Check if the specific MCP tool exists on the server
-        else if (!connectorData.mcpServerTools.includes(mcpToolName)) {
-          status = 'tool_not_found';
-          errorMessage = `Tool '${mcpToolName}' not found on MCP server`;
-        }
-        // Check if the tool has failed health checks
-        else if (toolHealth && toolHealth.status !== 'healthy') {
-          status = 'tool_unhealthy';
-          errorMessage = toolHealth.errorMessage;
-        }
-
-        return {
-          toolId: tool.id,
-          connectorId: toolConnectorId,
-          mcpToolName,
-          status,
-          errorMessage,
-        };
-      });
+      const results = await getMcpToolsHealth({ actionsClient, mcpTools, healthStates });
 
       return response.ok<ListMcpToolsHealthResponse>({
         body: { results },

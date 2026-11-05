@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { isObject, isPlainObject, isString } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  ActionResult,
+  ActionsClient,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse, Tool } from '@kbn/mcp-client';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
@@ -19,11 +24,14 @@ import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
 
 const isMcpServerTool = (value: unknown): value is Tool =>
-  typeof value === 'object' && value !== null && 'name' in value && typeof value.name === 'string';
+  isObject(value) &&
+  'name' in value &&
+  isString(value.name) &&
+  'inputSchema' in value &&
+  isPlainObject(value.inputSchema);
 
 const isListToolsResponse = (value: unknown): value is ListToolsResponse =>
-  typeof value === 'object' &&
-  value !== null &&
+  isObject(value) &&
   'tools' in value &&
   Array.isArray(value.tools) &&
   value.tools.every(isMcpServerTool);
@@ -39,23 +47,20 @@ export const getNotMcpConnectorMessage = (connectorId: string, actionTypeId: str
   `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '${actionTypeId}'`;
 
 /**
- * Lists available tools from an MCP connector by calling the listTools subAction.
+ * Lists available tools from an already-loaded connector by calling the listTools subAction.
  *
- * @throws {Error} when the connector cannot be loaded, is not an MCP (`.mcp`) connector,
- * or the sub-action fails or returns an unexpected response.
+ * @param actionsClient - Actions client scoped to the current request.
+ * @param connector - The connector to list tools from, as returned by `actionsClient.get`.
+ * @throws {Error} when the connector is not an MCP (`.mcp`) connector, or the sub-action
+ * fails or returns an unexpected response.
  */
-export async function listMcpTools({
-  actions,
-  request,
-  connectorId,
+export async function listConnectorMcpTools({
+  actionsClient,
+  connector: { id: connectorId, actionTypeId },
 }: {
-  actions: ActionsPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
+  actionsClient: ActionsClient;
+  connector: Pick<ActionResult, 'id' | 'actionTypeId'>;
 }): Promise<ListToolsResponse> {
-  const actionsClient = await actions.getActionsClientWithRequest(request);
-
-  const { actionTypeId } = await actionsClient.get({ id: connectorId });
   if (actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
     throw new Error(getNotMcpConnectorMessage(connectorId, actionTypeId));
   }
@@ -78,6 +83,26 @@ export async function listMcpTools({
   }
 
   return data;
+}
+
+/**
+ * Lists available tools from an MCP connector by calling the listTools subAction.
+ *
+ * @throws {Error} when the connector cannot be loaded, is not an MCP (`.mcp`) connector,
+ * or the sub-action fails or returns an unexpected response.
+ */
+export async function listMcpTools({
+  actions,
+  request,
+  connectorId,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+}): Promise<ListToolsResponse> {
+  const actionsClient = await actions.getActionsClientWithRequest(request);
+  const connector = await actionsClient.get({ id: connectorId });
+  return listConnectorMcpTools({ actionsClient, connector });
 }
 
 /**

@@ -11,3 +11,4 @@ export {
   getNamedMcpTools,
   getNotMcpConnectorMessage,
 } from './tool_type';
+export { getMcpToolsHealth } from './mcp_tools_health';

@@ -137,6 +137,7 @@ describe('MCP tool_type', () => {
       ['an object without tools', {}],
       ['a bare tools array', mockToolsResponse.tools],
       ['an array of non-tool values', ['test_tool']],
+      ['a tool without an input schema', { tools: [{ name: 'test_tool' }] }],
     ])('should throw when the connector returns %s', async (_label, data) => {
       mockActionsClient.execute.mockResolvedValue({ status: 'ok', data });
 
