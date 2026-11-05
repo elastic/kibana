@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
+  - '@kbn/geo-precision'
   - '@kbn/scout'
   - '@kbn/presentation-util'
   - '@kbn/zod'

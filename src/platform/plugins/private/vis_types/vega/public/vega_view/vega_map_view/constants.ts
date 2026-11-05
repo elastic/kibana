@@ -10,8 +10,6 @@
 import type { StyleSpecification } from '@kbn/mapbox-gl';
 
 export const vegaLayerId = 'vega';
-/** Zoom the map starts at when `config.kibana.zoom` is not set. */
-export const DEFAULT_MAP_ZOOM = 3;
 export const defaultMapConfig = {
   maxZoom: 20,
   minZoom: 0,

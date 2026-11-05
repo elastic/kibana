@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_MAP_ZOOM } from '../constants';
 
 function validate(
   name: string,
@@ -52,7 +51,9 @@ export function validateZoomSettings(
   },
   onWarn: (message: any) => void
 ) {
-  let { maxZoom, minZoom, zoom = DEFAULT_MAP_ZOOM } = mapConfig;
+  const DEFAULT_ZOOM = 3;
+
+  let { maxZoom, minZoom, zoom = DEFAULT_ZOOM } = mapConfig;
 
   minZoom = validate('minZoom', minZoom, limits.minZoom, limits.minZoom, limits.maxZoom, onWarn);
   maxZoom = validate('maxZoom', maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom, onWarn);
@@ -70,7 +71,7 @@ export function validateZoomSettings(
     [minZoom, maxZoom] = [maxZoom, minZoom];
   }
 
-  zoom = validate('zoom', zoom, DEFAULT_MAP_ZOOM, minZoom, maxZoom, onWarn);
+  zoom = validate('zoom', zoom, DEFAULT_ZOOM, minZoom, maxZoom, onWarn);
 
   return {
     zoom,

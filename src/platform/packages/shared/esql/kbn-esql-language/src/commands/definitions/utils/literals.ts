@@ -66,15 +66,15 @@ export const getGeoPrecisionSystemParam = (functionName: string, paramName?: str
 export const GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS: Record<string, string> = {
   [GEOTILE_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geotilePrecisionSystemParam',
-    { defaultMessage: 'The geotile precision for the current map zoom level' }
+    { defaultMessage: 'The geotile precision for the current map zoom level. Only supported in Maps.' }
   ),
   [GEOHEX_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geohexPrecisionSystemParam',
-    { defaultMessage: 'The geohex (H3) resolution for the current map zoom level' }
+    { defaultMessage: 'The geohex (H3) resolution for the current map zoom level. Only supported in Maps.' }
   ),
   [GEOHASH_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geohashPrecisionSystemParam',
-    { defaultMessage: 'The geohash precision for the current map zoom level' }
+    { defaultMessage: 'The geohash precision for the current map zoom level. Only supported in Maps.' }
   ),
 };
 
@@ -82,11 +82,11 @@ export function getGeoPrecisionLiterals(systemParam: string, options?: BuildCons
   return buildConstantsDefinitions(
     [systemParam],
     i18n.translate('esqlLanguage.esql.autocomplete.namedParamGeoPrecisionDefinition', {
-      defaultMessage: 'Bind to map zoom level',
+      defaultMessage: 'Bind to map zoom level (Maps only)',
     }),
     options,
     i18n.translate('esqlLanguage.esql.autocomplete.geoPrecisionNamedParamDoc', {
-      defaultMessage: `Use the \`{param}\` parameter to bind the precision to the zoom level of the map.`,
+      defaultMessage: `Use the \`{param}\` parameter to bind the precision to the zoom level of the map. Only supported in Maps.`,
       values: { param: systemParam },
     }),
     SuggestionCategory.GEO_PRECISION_PARAM
