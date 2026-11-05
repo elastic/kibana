@@ -56,7 +56,8 @@ spaceTest.describe('Dashboard time picker', { tag: tags.deploymentAgnostic }, ()
       await page.gotoApp('dashboards', {
         hash:
           '/create?' +
-          '_g=(refreshInterval:(pause:!t,value:2000),' +
+          // Keep refreshInterval at or above query.timefilter.minRefreshInterval (5000ms on serverless)
+          '_g=(refreshInterval:(pause:!t,value:10000),' +
           "time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&" +
           "_a=(description:'',filters:!())",
       });
@@ -67,7 +68,7 @@ spaceTest.describe('Dashboard time picker', { tag: tags.deploymentAgnostic }, ()
       // The date range picker exposes the absolute range as ISO strings
       expect(time.start).toBe('2012-11-17T00:00:00.000Z');
       expect(time.end).toBe('2015-11-17T18:01:36.621Z');
-      expect(refresh.interval).toBe('2');
+      expect(refresh.interval).toBe('10');
     }
   );
 
