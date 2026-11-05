@@ -5,15 +5,11 @@
  * 2.0.
  */
 
+import { buildEpisodesViewQuery } from '@kbn/alerting-v2-common-queries';
 import type { EsqlViewDefinition } from '../../lib/services/resource_service/esql_view_initializer';
 
 export const getAlertEpisodesViewDefinition = (): EsqlViewDefinition => ({
   key: 'view:alert-episodes',
   name: '$.alert-episodes',
-  query: `FROM .rule-events
-| WHERE @timestamp > NOW() - 90 days
-| INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id
-| EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
-| WHERE @timestamp == last_timestamp AND type == "alert"
-| SORT @timestamp DESC`,
+  query: buildEpisodesViewQuery().print('basic'),
 });

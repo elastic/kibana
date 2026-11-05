@@ -36,6 +36,8 @@ export {
   DURATION_LOWER_BOUND_FIELD,
   buildEpisodesBaseQuery,
   buildEpisodesQuery,
+  buildEpisodesViewQuery,
+  EPISODES_VIEW_LOOKBACK,
   addEpisodeAggregation,
   applyFilterState,
 } from './episodes_query';
