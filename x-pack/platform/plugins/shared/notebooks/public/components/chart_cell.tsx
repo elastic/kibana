@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -21,14 +20,13 @@ import {
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ChartType } from '@kbn/visualization-utils';
 import type { ChartCellDefinition, LensAttributes } from '../../common/types';
 import { getCellDisplayName } from '../model/references';
 import {
-  CHART_TYPE_OPTIONS,
   applyEditorState,
   getChartType,
   hasAllReferencedColumns,
@@ -45,27 +43,9 @@ import { NotebookFlyout } from './notebook_flyout';
 const SOURCE_LABEL = i18n.translate('xpack.notebook.chartCell.source', {
   defaultMessage: 'Source',
 });
-const TYPE_LABEL = i18n.translate('xpack.notebook.chartCell.type', { defaultMessage: 'Type' });
 const EDIT_CHART_LABEL = i18n.translate('xpack.notebook.chartCell.editFlyout', {
   defaultMessage: 'Edit chart',
 });
-
-const CHART_TYPE_LABELS: Record<NotebookChartType, string> = {
-  [ChartType.Bar]: i18n.translate('xpack.notebook.chartCell.type.bar', { defaultMessage: 'Bar' }),
-  [ChartType.Line]: i18n.translate('xpack.notebook.chartCell.type.line', {
-    defaultMessage: 'Line',
-  }),
-  [ChartType.Area]: i18n.translate('xpack.notebook.chartCell.type.area', {
-    defaultMessage: 'Area',
-  }),
-  [ChartType.Metric]: i18n.translate('xpack.notebook.chartCell.type.metric', {
-    defaultMessage: 'Metric',
-  }),
-  [ChartType.Table]: i18n.translate('xpack.notebook.chartCell.type.table', {
-    defaultMessage: 'Table',
-  }),
-  [ChartType.Pie]: i18n.translate('xpack.notebook.chartCell.type.pie', { defaultMessage: 'Pie' }),
-};
 
 const PICK_SOURCE_MESSAGE = i18n.translate('xpack.notebook.chartCell.pickSource', {
   defaultMessage: 'Pick an ES|QL cell as the source.',
@@ -155,7 +135,6 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
   const cells = useStateFromPublishingSubject(store.cells$);
   const [regenerated, setRegenerated] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string>();
-  const [unavailableType, setUnavailableType] = useState<NotebookChartType>();
   const [editor, setEditor] = useState<ChartEditor>();
   const [preview, setPreview] = useState<LensAttributes>();
   const latestSuggestion = useRef<object>();
@@ -175,8 +154,9 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     [store, id]
   );
 
+  /** Suggests a chart for the results; regenerating keeps the current type when it still fits. */
   const suggest = useCallback(
-    async (chartType?: NotebookChartType, isRegeneration = false) => {
+    async (regeneratedType?: NotebookChartType) => {
       if (!table || !sourceQuery) return;
       const token = {};
       latestSuggestion.current = token;
@@ -186,18 +166,11 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
           dataViews: plugins.data.dataViews,
           query: sourceQuery,
           table,
-          chartType,
+          chartType: regeneratedType,
         });
         if (latestSuggestion.current !== token) return;
         setSuggestionError(undefined);
-        // Lens falls back to another type when the requested one doesn't fit the columns.
-        const isUnavailable =
-          chartType !== undefined &&
-          !isRegeneration &&
-          (!attributes || getChartType(attributes) !== chartType);
-        setUnavailableType(isUnavailable ? chartType : undefined);
-        if (isUnavailable) return;
-        setRegenerated(isRegeneration);
+        setRegenerated(regeneratedType !== undefined);
         setAttributes(attributes ?? null);
       } catch (error) {
         if (latestSuggestion.current === token) setSuggestionError(error.message);
@@ -211,7 +184,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     if (!lensAttributes) {
       suggest();
     } else if (!hasAllReferencedColumns(lensAttributes, table)) {
-      suggest(getChartType(lensAttributes), true);
+      suggest(getChartType(lensAttributes));
     }
   }, [table, lensAttributes, suggest]);
 
@@ -391,27 +364,6 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
         </EuiFlexItem>
       }
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
-          <EuiSelect
-            compressed
-            prepend={TYPE_LABEL}
-            aria-label={TYPE_LABEL}
-            hasNoInitialSelection={!currentType}
-            value={currentType ?? ''}
-            disabled={!table}
-            options={CHART_TYPE_OPTIONS.map((chartType) => ({
-              value: chartType,
-              text: CHART_TYPE_LABELS[chartType],
-            }))}
-            onChange={(event) =>
-              suggest(CHART_TYPE_OPTIONS.find((chartType) => chartType === event.target.value))
-            }
-            data-test-subj="notebookChartType"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       {regenerated && (
         <>
           <KbnInfoCallout
@@ -422,21 +374,6 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
             })}
             onDismiss={() => setRegenerated(false)}
             data-test-subj="notebookChartRegenerated"
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {unavailableType && (
-        <>
-          <KbnWarningCallout
-            announceOnMount
-            size="s"
-            title={i18n.translate('xpack.notebook.chartCell.typeUnavailable', {
-              defaultMessage: "{type} isn't available for these columns",
-              values: { type: CHART_TYPE_LABELS[unavailableType] },
-            })}
-            onDismiss={() => setUnavailableType(undefined)}
-            data-test-subj="notebookChartTypeUnavailable"
           />
           <EuiSpacer size="s" />
         </>
