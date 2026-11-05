@@ -16,7 +16,7 @@ import {
 import { UnitStatsClient } from './client';
 
 const unit: StreamsUnit.Configuration = {
-  sources: [],
+  sources: [{ id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs'] }],
   destinations: [
     { id: 'es-prod', type: 'elasticsearch', supported_telemetry: ['logs'] },
     { id: 'es-dev', type: 'elasticsearch', supported_telemetry: ['logs'] },
@@ -199,6 +199,7 @@ describe('UnitStatsClient.getStats', () => {
 
       expect(Object.keys(response.components.destinations)).toEqual(['es-prod', 'es-dev', 'dbg']);
       expect(Object.keys(response.components.processors)).toEqual(['uppercase-message']);
+      expect(Object.keys(response.components.sources)).toEqual(['otlp-input']);
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
 
@@ -207,7 +208,7 @@ describe('UnitStatsClient.getStats', () => {
 
       const response = await run(esql, { components: [] });
 
-      expect(response.components).toEqual({ destinations: {}, processors: {} });
+      expect(response.components).toEqual({ destinations: {}, processors: {}, sources: {} });
       expect(esql).not.toHaveBeenCalled();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
@@ -235,6 +236,21 @@ describe('UnitStatsClient.getStats', () => {
       );
     });
 
+    it('answers a source of the unit with no data, and nothing for the other kinds', async () => {
+      const response = await run(makeEsql(), {
+        components: [{ kind: 'source', id: 'otlp-input' }],
+      });
+
+      expect(response.components.destinations).toEqual({});
+      expect(response.components.processors).toEqual({});
+      expect(response.components.sources).toEqual({
+        'otlp-input': {
+          events: { accepted: { rate: { value: null, unit: '{item}', time_unit: 's' } } },
+        },
+      });
+      expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+    });
+
     it('answers not_found from the config without querying', async () => {
       const esql = makeEsql();
 
@@ -242,12 +258,14 @@ describe('UnitStatsClient.getStats', () => {
         components: [
           { kind: 'destination', id: 'nope' },
           { kind: 'processor', id: 'nope' },
+          { kind: 'source', id: 'nope' },
         ],
       });
 
       expect(esql).not.toHaveBeenCalled();
       expect(response.components.destinations.nope.error?.code).toBe('not_found');
       expect(response.components.processors.nope.error?.code).toBe('not_found');
+      expect(response.components.sources.nope.error?.code).toBe('not_found');
     });
   });
 
@@ -294,6 +312,7 @@ describe('UnitStatsClient.getStats', () => {
     describe('with the most destinations one request allows', () => {
       const destinationsOf = (count: number): StreamsUnit.Configuration => ({
         ...unit,
+        sources: [],
         processors: [],
         destinations: Array.from({ length: count }, (_, index) => ({
           id: `destination-${index}`,
@@ -336,6 +355,15 @@ describe('UnitStatsClient.getStats', () => {
 
         await expect(
           run(esql, {}, destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS + 1))
+        ).rejects.toMatchObject({ statusCode: 400 });
+        expect(esql).not.toHaveBeenCalled();
+      });
+
+      it('counts the sources toward that limit', async () => {
+        const esql = makeEsql();
+
+        await expect(
+          run(esql, {}, { ...maxDestinations, sources: unit.sources })
         ).rejects.toMatchObject({ statusCode: 400 });
         expect(esql).not.toHaveBeenCalled();
       });

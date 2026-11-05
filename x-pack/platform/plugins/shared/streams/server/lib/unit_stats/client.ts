@@ -35,7 +35,7 @@ import { buildProcessorSumsQuery } from './query_builders/build_processor_stats_
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import { getSeriesBucketMs } from './utils/series_bucket';
-import { validateDestination, validateProcessor } from './validate_components';
+import { validateDestination, validateProcessor, validateSource } from './validate_components';
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
@@ -72,13 +72,15 @@ export class UnitStatsClient {
 
     const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
     const processorConfigs = new Map((unit.processors ?? []).map((p) => [p.id, p]));
+    const sourceConfigs = new Map((unit.sources ?? []).map((s) => [s.id, s]));
 
-    // Omitted: every destination and processor in the unit, if one request can hold them. A list,
-    // even an empty one, names exactly the components to answer for.
+    // Omitted: every destination, processor and source in the unit, if one request can hold them. A
+    // list, even an empty one, names exactly the components to answer for.
     const refs = request.components ?? this.getAllUnitRefs(unit);
 
     const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
     const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};
+    const sources: Record<string, StreamsUnit.StatsSourceResult> = {};
     const queryableRefs: StreamsUnit.StatsComponentRef[] = [];
 
     for (const ref of refs) {
@@ -89,12 +91,15 @@ export class UnitStatsClient {
         });
         destinations[ref.id] = result;
         if (queryable) queryableRefs.push(ref);
-      } else {
+      } else if (ref.kind === 'processor') {
         const { result, queryable } = validateProcessor({
           config: processorConfigs.get(ref.id),
         });
         processors[ref.id] = result;
         if (queryable) queryableRefs.push(ref);
+      } else {
+        // No source query yet, so a source in the unit stays a no data result.
+        sources[ref.id] = validateSource({ config: sourceConfigs.get(ref.id) }).result;
       }
     }
 
@@ -117,16 +122,17 @@ export class UnitStatsClient {
     }
 
     return {
-      components: { destinations, processors },
+      components: { destinations, processors, sources },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
   }
 
-  /** Every destination and processor in the unit, as long as one request can name them all. */
+  /** Every destination, processor and source in the unit, as long as one request can name them all. */
   private getAllUnitRefs(unit: StreamsUnit.Configuration): StreamsUnit.StatsComponentRef[] {
     const refs = [
       ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
       ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
+      ...(unit.sources ?? []).map(({ id }) => ({ kind: 'source' as const, id })),
     ];
     if (refs.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
       throw new StatusError(
