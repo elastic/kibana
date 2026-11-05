@@ -28,7 +28,7 @@ export interface SeededScenario {
   readonly runMarker: string;
   readonly alertIds: readonly string[];
   /**
-   * Host and user names of the seeded scenario, rewritten to be owned by this run (see
+   * Run-owned host and user names the seeded scenario was rewritten to (see
    * `seedAttackScenario`): teardown discovers this run's Investigations by them.
    */
   readonly entityNames: readonly string[];
@@ -48,7 +48,7 @@ export interface SeededScenario {
 const runOwnEntityNames = (
   docs: ReadonlyArray<Ad2IndexedAlert | Ad2IndexedRawEvent>,
   runMarker: string
-): Map<string, string> => {
+): { docs: Array<Ad2IndexedAlert | Ad2IndexedRawEvent>; entityNames: readonly string[] } => {
   const names = new Set<string>();
   for (const doc of docs) {
     const source = doc.source as {
@@ -64,14 +64,14 @@ const runOwnEntityNames = (
   const replacements = [...names]
     .map((name) => [name, `${name}-${runMarker}`] as const)
     .sort(([a], [b]) => b.length - a.length);
-  for (const doc of docs) {
+  const rewritten = docs.map((doc) => {
     let encoded = JSON.stringify(doc.source);
     for (const [name, runOwned] of replacements) {
       encoded = encoded.split(name).join(runOwned);
     }
-    doc.source = JSON.parse(encoded);
-  }
-  return new Map(replacements);
+    return { ...doc, source: JSON.parse(encoded) };
+  });
+  return { docs: rewritten, entityNames: replacements.map(([, runOwned]) => runOwned) };
 };
 
 export const seedAttackScenario = async (
@@ -86,7 +86,16 @@ export const seedAttackScenario = async (
     .toString(36)
     .slice(2, 8)}`;
   const plan = buildAd2SeedPlan({ scenarioKey, runMarker, baseTime: new Date(), agentIdByHost });
-  const entityNames = runOwnEntityNames([...plan.alerts, ...plan.rawEvents], runMarker);
+  const { docs: scenarioDocs, entityNames } = runOwnEntityNames(
+    [...plan.alerts, ...plan.rawEvents],
+    runMarker
+  );
+  const alerts = scenarioDocs.filter((doc): doc is Ad2IndexedAlert =>
+    plan.alerts.some((alert) => alert.id === doc.id)
+  );
+  const rawEvents = scenarioDocs.filter((doc): doc is Ad2IndexedRawEvent =>
+    plan.rawEvents.some((event) => event.id === doc.id)
+  );
 
   // Creates the alerts index + mappings the seeded alerts are written into.
   ok(await api.public('POST', '/api/detection_engine/index'), 'create the detection alerts index');
@@ -132,9 +141,9 @@ export const seedAttackScenario = async (
   };
 
   try {
-    await bulk(plan.alerts, 'index');
+    await bulk(alerts, 'index');
     // Raw endpoint events live in data streams, which only accept `create`.
-    await bulk(plan.rawEvents, 'create');
+    await bulk(rawEvents, 'create');
   } catch (error) {
     // A failed bulk can still have written some documents (the raw-events bulk can fail after
     // every alert already landed). Throwing here without a rollback would leave this function's
