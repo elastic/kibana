@@ -380,6 +380,21 @@ describe('getActionStatuses version specific policy actions', () => {
     expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-id-2' });
   });
 
+  it('keeps all the chunks of an action that spans pages', async () => {
+    const esClient = makeEsClient([
+      [
+        ...Array.from({ length: 9 }, (_, i) => actionDoc(`sentinel-${i}`, 1, 'p1#sentinel')),
+        ...Array.from({ length: 10 }, (_, i) => actionDoc(`single-${i}`, 1, 'p1')),
+        actionDoc('A', 2, 'p1'),
+      ],
+      Array.from({ length: 10 }, () => actionDoc('A', 2, 'p1')),
+    ]);
+
+    const actions = await getActionStatuses(esClient, { errorSize: 0 });
+
+    expect(actions.find((action) => action.actionId === 'A')?.nbAgentsActionCreated).toBe(22);
+  });
+
   it('does a single search when the first page has enough docs', async () => {
     const esClient = makeEsClient([
       Array.from({ length: 20 }, (_, i) => actionDoc(`action-${i}`, 2, 'p1')),

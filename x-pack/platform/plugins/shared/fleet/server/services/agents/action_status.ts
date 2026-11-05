@@ -279,8 +279,10 @@ async function getActions(
     await esClient.closePointInTime({ id: pitId }).catch(() => {});
   }
 
-  return Object.values(
-    hits.slice(0, limit).reduce((acc, hit) => {
+  // Aggregate all the docs read, so that no chunk of a returned action is dropped, and cap the
+  // number of actions afterwards. They are in the order of the sort, newest first.
+  const actions = Object.values(
+    hits.reduce((acc, hit) => {
       if (!hit._source || !hit._source.action_id) {
         return acc;
       }
@@ -322,6 +324,8 @@ async function getActions(
       return acc;
     }, {} as { [k: string]: ActionStatus })
   );
+
+  return actions.slice(0, limit);
 }
 
 export async function getCancelledActions(
