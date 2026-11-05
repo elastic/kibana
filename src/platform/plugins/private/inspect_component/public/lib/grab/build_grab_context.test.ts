@@ -11,12 +11,23 @@ import type { DebugSource, ReactFiberNode } from '@kbn/react-fiber';
 import { buildGrabContext, getRepoRoot } from './build_grab_context';
 
 const REPO_ROOT = '/Users/dev/kibana/';
+const FOO_PLUGIN = 'src/platform/plugins/shared/foo/public';
 
 const createSource = (relativePath: string, lineNumber: number): DebugSource => ({
   fileName: `${REPO_ROOT}${relativePath}`,
   lineNumber,
   columnNumber: 5,
 });
+
+// Functions passed inline, e.g. to `memo`, have no name unlike the ones assigned to a variable
+const createAnonymousComponent = () => () => null;
+
+/** Links the fibers into an owner chain, closest first, and returns the closest one. */
+const createOwnerChain = (fibers: ReactFiberNode[]): ReactFiberNode | null =>
+  fibers.reduceRight<ReactFiberNode | null>(
+    (owner, fiber) => ({ ...fiber, _debugOwner: owner }),
+    null
+  );
 
 describe('buildGrabContext', () => {
   let element: HTMLElement;
@@ -53,6 +64,71 @@ describe('buildGrabContext', () => {
         '  in SaveButton (src/foo/save_button.tsx:42:5)',
         '  in FooPanel (src/foo/foo_panel.tsx:118:5)',
         '  in FooApp (src/foo/application.tsx:30:5)',
+      ].join('\n')
+    );
+  });
+
+  it('should drop wrapper frames, collapse frames of one file and keep only module transitions beyond the closest frames', () => {
+    // Each fiber's source is the JSX of its element, the frame it yields is named after its owner
+    const fiber = createOwnerChain([
+      {
+        type: { displayName: 'EuiButton' },
+        _debugSource: createSource(`${FOO_PLUGIN}/save_button.tsx`, 42),
+      },
+      {
+        // rendered by an unnamed higher order component, yielding an Anonymous frame
+        type: { name: 'SaveButton' },
+        _debugSource: createSource(`${FOO_PLUGIN}/with_tracking.tsx`, 10),
+      },
+      {
+        type: { type: createAnonymousComponent() },
+        _debugSource: createSource(`${FOO_PLUGIN}/foo_panel.tsx`, 118),
+      },
+      {
+        // a second frame of foo_panel.tsx, collapsed into the previous one
+        type: { name: 'FooPanel' },
+        _debugSource: createSource(`${FOO_PLUGIN}/foo_panel.tsx`, 140),
+      },
+      {
+        type: { name: 'FooPanelContainer' },
+        _debugSource: createSource(`${FOO_PLUGIN}/foo_layout.tsx`, 20),
+      },
+      {
+        // rendered through a Route, whose own JSX yields a frame located in the router module
+        type: { name: 'FooLayout' },
+        _debugSource: createSource(
+          'src/platform/packages/shared/shared-ux/router/impl/route.tsx',
+          47
+        ),
+      },
+      {
+        // the fourth frame of the foo plugin, beyond the closest frames and not a transition
+        type: { name: 'Route' },
+        _debugSource: createSource(`${FOO_PLUGIN}/application.tsx`, 30),
+      },
+      {
+        type: { name: 'FooApp' },
+        _debugSource: createSource('src/platform/plugins/shared/bar/public/shell.tsx', 12),
+      },
+      {
+        type: { name: 'BarShell' },
+        _debugSource: createSource(
+          'src/platform/packages/shared/react/kibana_context/render/render_provider.tsx',
+          50
+        ),
+      },
+      { type: { name: 'KibanaRenderContextProvider' } },
+    ]);
+
+    const result = buildGrabContext({ element, fiber, repoRoot: REPO_ROOT });
+
+    expect(result).toBe(
+      [
+        '<button class="euiButton" data-test-subj="saveButton">Save changes</button>',
+        `  in SaveButton (${FOO_PLUGIN}/save_button.tsx:42:5)`,
+        `  in FooPanel (${FOO_PLUGIN}/foo_panel.tsx:118:5)`,
+        `  in FooLayout (${FOO_PLUGIN}/foo_layout.tsx:20:5)`,
+        '  in BarShell (src/platform/plugins/shared/bar/public/shell.tsx:12:5)',
       ].join('\n')
     );
   });
