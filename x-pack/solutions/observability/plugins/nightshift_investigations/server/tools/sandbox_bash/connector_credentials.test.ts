@@ -130,6 +130,30 @@ describe('buildConnectorEnv', () => {
     ]);
   });
 
+  it('forwards declared hosts for a headerless connector so default-deny egress allows the destination', () => {
+    const { env, secretValues, secretEnvKeys } = buildConnectorEnv({
+      connectorId: 'http-no-auth',
+      actionTypeId: '.http',
+      config: { url: 'https://internal-api.example.com/status', hasAuth: false },
+      headers: {},
+      hosts: ['internal-api.example.com'],
+    });
+
+    expect(env).toEqual({
+      CONNECTOR_ID: 'http-no-auth',
+      CONNECTOR_TYPE: '.http',
+      CONNECTOR_CONFIG_URL: 'https://internal-api.example.com/status',
+      CONNECTOR_CONFIG_HASAUTH: 'false',
+    });
+    expect(secretValues).toEqual([]);
+    expect(secretEnvKeys).toEqual([
+      {
+        key: '',
+        allowed_hosts: ['internal-api.example.com'],
+      },
+    ]);
+  });
+
   it('adds the values derived from the Authorization header to secretValues', () => {
     const { secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,

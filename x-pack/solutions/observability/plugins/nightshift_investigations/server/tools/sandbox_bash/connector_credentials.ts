@@ -169,9 +169,16 @@ export const buildConnectorEnv = ({
     }
   }
 
-  const secretEnvKeys = Object.keys(env)
+  const headerSecretKeys = Object.keys(env)
     .filter((key) => key.startsWith(`${CONNECTOR_ENV_PREFIX}HEADER_`))
     .map((key) => ({ key, allowed_hosts: [...hosts] }));
+  // When a connector has no auth headers (e.g. a `.http` connector with `hasAuth: false`),
+  // still forward its declared hosts in a keyless entry so `sandbox-api` allowlists the
+  // destination under default-deny egress without swapping any env var.
+  const secretEnvKeys =
+    headerSecretKeys.length > 0 || hosts.length === 0
+      ? headerSecretKeys
+      : [{ key: '', allowed_hosts: [...hosts] }];
 
   return { env, secretValues: [...new Set(secretValues)], secretEnvKeys };
 };
