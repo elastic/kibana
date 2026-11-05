@@ -15,7 +15,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { createStreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createActor, createMachine, waitFor, type Actor, type SnapshotFrom } from 'xstate';
-import { disconnectFromDestination } from '../../../../../services/unit_connections';
+import { disconnectLine } from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import { createDefaultUnit, type Unit } from '../../../../../services/unit_repository';
 import type { UnitDestination } from '@kbn/streams-schema';
@@ -264,7 +264,7 @@ describe('canvas processing flyout', () => {
 });
 
 describe('canvas save', () => {
-  it('keeps an unhooked processing node staged but refuses to save it', async () => {
+  const processedUnit = (): Unit => {
     const processed = loadedUnit();
     processed.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
     processed.unit.pipelines[0].config = [
@@ -272,6 +272,10 @@ describe('canvas save', () => {
       { name: 'processors', value: ['tag'] },
       { name: 'destinations', value: ['es'] },
     ];
+    return processed;
+  };
+
+  const refuseToSave = async (processed: Unit, unhooked: Unit) => {
     const persisted: Unit[] = [];
     const { canvas } = startCanvas(async (unit) => {
       persisted.push(unit);
@@ -279,20 +283,106 @@ describe('canvas save', () => {
     }, processed);
     await waitForUnitReady(canvas);
 
-    const unhooked = disconnectFromDestination(
-      processed,
-      { kind: 'processing', ref: sourceSlot },
-      'es'
-    );
     canvas.send({ type: 'unit.stage', unitDefinition: unhooked });
     canvas.send({ type: 'unit.save' });
     await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
 
     expect(persisted).toEqual([]);
     expect(canvas.getSnapshot().context.nextUnit).toBe(unhooked);
-    expect(canvas.getSnapshot().context.error?.message).toBe(
+    return canvas.getSnapshot().context.error?.message;
+  };
+
+  it('keeps a processing node without a destination staged but refuses to save it', async () => {
+    const processed = processedUnit();
+    const unhooked = disconnectLine(
+      processed,
+      { kind: 'processing', ref: sourceSlot },
+      { kind: 'destination', id: 'es' }
+    );
+    expect(unhooked.unit.pipelines[0].config).toEqual([
+      { name: 'sources', value: ['src'] },
+      { name: 'processors', value: ['tag'] },
+    ]);
+
+    expect(await refuseToSave(processed, unhooked)).toBe(
       'Connect each processing node to a destination before saving. To remove a processing node, delete all of its processors.'
     );
+  });
+
+  it('keeps a processing node nothing feeds staged but refuses to save it', async () => {
+    const processed = processedUnit();
+    const unhooked = disconnectLine(
+      processed,
+      { kind: 'source', id: 'src' },
+      { kind: 'pipeline', id: 'p-src' }
+    );
+    expect(unhooked.unit.pipelines[0].config).toEqual([
+      { name: 'processors', value: ['tag'] },
+      { name: 'destinations', value: ['es'] },
+    ]);
+
+    expect(await refuseToSave(processed, unhooked)).toBe(
+      'Connect a source or a routing rule to each processing and routing node before saving. To remove a processing node, delete all of its processors.'
+    );
+  });
+
+  it('keeps a routing rule without a target staged but refuses to save it', async () => {
+    const routed = loadedUnit();
+    routed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src'] },
+      { name: 'routes', value: [{ when: 'true', destinations: ['es'] }, { destinations: ['es'] }] },
+    ];
+    const unhooked = disconnectLine(
+      routed,
+      { kind: 'rule', rule: { pipelineId: 'p-src', ruleIndex: 0 } },
+      { kind: 'destination', id: 'es' }
+    );
+    expect(unhooked.unit.pipelines[0].config).toEqual([
+      { name: 'sources', value: ['src'] },
+      { name: 'routes', value: [{ when: 'true', destinations: [] }, { destinations: ['es'] }] },
+    ]);
+
+    expect(await refuseToSave(routed, unhooked)).toBe(
+      'Connect each routing rule to a destination or a pipeline before saving, or remove the rule.'
+    );
+  });
+
+  it('still persists a destination create while a line is unhooked, keeping the staged wiring', async () => {
+    const processed = processedUnit();
+    const unhooked = disconnectLine(
+      processed,
+      { kind: 'processing', ref: sourceSlot },
+      { kind: 'destination', id: 'es' }
+    );
+    const withNewDestination: Unit = {
+      ...unhooked,
+      unit: {
+        ...unhooked.unit,
+        destinations: [
+          ...unhooked.unit.destinations,
+          { id: 'archive', type: 'elasticsearch', supported_telemetry: ['logs'] },
+        ],
+      },
+    };
+    const persisted: Unit[] = [];
+    const { canvas } = startCanvas(async (unit) => {
+      persisted.push(unit);
+      return unit;
+    }, processed);
+    await waitForUnitReady(canvas);
+
+    canvas.send({ type: 'unit.stage', unitDefinition: unhooked });
+    canvas.send({
+      type: 'unit.changed',
+      unitDefinition: withNewDestination,
+      destinationIds: ['archive'],
+      intent: 'create',
+    });
+    await waitForUnitReady(canvas);
+
+    expect(persisted).toEqual([withNewDestination]);
+    expect(canvas.getSnapshot().context.nextUnit).toEqual(withNewDestination);
+    expect(canvas.getSnapshot().context.error).toBeUndefined();
   });
 });
 

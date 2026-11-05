@@ -75,7 +75,7 @@ export function AnimatedEdge({
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const canUnhook = Boolean(data?.unitConnection);
+  const canUnhook = Boolean(data?.editable);
   const processingTarget = data?.processingTarget;
 
   // The built-in unhook circles sit on the line just outside each handle and are

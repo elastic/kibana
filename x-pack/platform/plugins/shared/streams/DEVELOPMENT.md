@@ -192,7 +192,7 @@ Content-Type: application/json
               {
                 "action": "upsert",
                 "location": "resource",
-                "path": "attributes[\"env\"]",
+                "name": "env",
                 "value": "prod"
               }
             ]

@@ -43,7 +43,12 @@ export interface CanvasStateServiceDeps extends DestinationsTimeDeps {
   loadSourceEnvironment?: SourceEnvironmentLoader;
   loadUnitDefinition: UnitRepository['load'];
   persistUnitDefinition: UnitRepository['persist'];
-  validateUnitDefinition?: (unit: Unit) => Promise<void>;
+  validateUnitDefinition?: (input: UnitValidationInput) => Promise<void>;
+}
+
+export interface UnitValidationInput {
+  unit: Unit;
+  checkConnections: boolean;
 }
 
 export type CanvasFlyoutKind = 'destination' | 'index';

@@ -17,6 +17,7 @@ import {
   intersectSignals,
   pipelineForwards,
   readEntryIds,
+  readRouteAt,
   readRoutes,
   pruneUnit,
   replaceUnit,
@@ -59,24 +60,6 @@ const slotProcessorIds = (pipeline: UnitPipeline, ref: ProcessingNodeRef): strin
     ? readEntryIds(pipeline.config, PIPELINE_ENTRY.processors)
     : readRoutes(pipeline.config)[ref.routeIndex]?.processors ?? [];
 
-/** The route at a slot's `routeIndex`, with the selector of the `routes` entry it sits in. */
-const findRoute = (
-  pipeline: UnitPipeline,
-  routeIndex: number
-): { route: RouteRule; entryTelemetry?: UnitSignal[] } | undefined => {
-  let offset = 0;
-  for (const entry of pipeline.config) {
-    if (entry.name !== PIPELINE_ENTRY.routes) {
-      continue;
-    }
-    if (routeIndex < offset + entry.value.length) {
-      return { route: entry.value[routeIndex - offset], entryTelemetry: entry.telemetry };
-    }
-    offset += entry.value.length;
-  }
-  return undefined;
-};
-
 /** Signals the processors of a slot run on. */
 export const getProcessingSlotTelemetry = (unit: Unit, ref: ProcessingNodeRef): UnitSignal[] => {
   const pipeline = findPipeline(unit, ref.pipelineId);
@@ -86,7 +69,7 @@ export const getProcessingSlotTelemetry = (unit: Unit, ref: ProcessingNodeRef): 
   if (ref.kind === PROCESSING_SLOT_KIND.pipeline) {
     return [...pipeline.supported_telemetry];
   }
-  const found = findRoute(pipeline, ref.routeIndex);
+  const found = readRouteAt(pipeline.config, ref.routeIndex);
   if (!found) {
     return [];
   }
