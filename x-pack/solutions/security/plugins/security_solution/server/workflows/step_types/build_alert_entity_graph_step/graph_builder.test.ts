@@ -307,6 +307,8 @@ describe('buildRelatedAlertsGraph', () => {
         'process.executable',
         'process.command_line',
         'process.parent.command_line',
+        'host.name',
+        'user.name',
       ])
     );
   });
@@ -373,6 +375,54 @@ describe('buildRelatedAlertsGraph', () => {
         }),
       ]);
       expect(result.alerts[0]).not.toHaveProperty('ts_ms');
+    });
+
+    it('returns host and user names from nested and flat-array fields', async () => {
+      const result = await run(
+        [
+          {
+            _id: 'A',
+            _index: seedIndex,
+            _source: src({
+              '@timestamp': iso(t0),
+              host: { id: 'h1', name: 'mac-1' },
+              'user.name': [7, 'dev'],
+            }),
+          },
+        ],
+        ['host.id']
+      );
+
+      expect(result.alerts[0]).toEqual(
+        expect.objectContaining({ host_name: 'mac-1', user_name: 'dev' })
+      );
+    });
+
+    it('returns no alerts on the no-entity early exit when the seed is excluded', async () => {
+      const result = await buildRelatedAlertsGraph({
+        esClient: makeEsClient({
+          seedIndex,
+          seedId: 'A',
+          docs: [{ _id: 'A', _index: seedIndex, _source: src(seedSource) }],
+        }),
+        seed: { alertId: 'A', alertIndex: seedIndex },
+        searchIndex,
+        entityFields: ['host.id'],
+        seedWindowMs: 60 * 60 * 1000,
+        expandWindowMs: 60 * 60 * 1000,
+        maxDepth: 1,
+        maxAlerts: 10,
+        pageSize: 100,
+        maxTermsPerQuery: 100,
+        maxEntitiesPerField: 100,
+        ignoreEntities: [],
+        entityFieldScores: { 'host.id': 4 },
+        minEntityScore: 4,
+        includeSeed: false,
+      });
+
+      expect(result.nodes).toEqual([]);
+      expect(result.alerts).toEqual([]);
     });
 
     it('takes the first string of a flat dotted array value', async () => {

@@ -20,6 +20,8 @@ export interface AlertMeta {
   process_executable?: string;
   process_command_line?: string;
   process_parent_command_line?: string;
+  host_name?: string;
+  user_name?: string;
   ts_ms?: number;
 }
 
@@ -50,6 +52,8 @@ export interface RelatedAlertsGraphOutput {
     process_executable?: string;
     process_command_line?: string;
     process_parent_command_line?: string;
+    host_name?: string;
+    user_name?: string;
   }>;
   stats?: {
     depth_reached: number;

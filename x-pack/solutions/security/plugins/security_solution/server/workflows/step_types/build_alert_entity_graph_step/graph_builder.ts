@@ -144,6 +144,8 @@ const ALERT_PROCESS_FIELDS = {
   process_executable: 'process.executable',
   process_command_line: 'process.command_line',
   process_parent_command_line: 'process.parent.command_line',
+  host_name: 'host.name',
+  user_name: 'user.name',
 } as const;
 
 const getFirstString = (source: Record<string, unknown> | undefined, field: string) => {
@@ -176,6 +178,8 @@ const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
       source,
       ALERT_PROCESS_FIELDS.process_parent_command_line
     ),
+    host_name: getFirstString(source, ALERT_PROCESS_FIELDS.host_name),
+    user_name: getFirstString(source, ALERT_PROCESS_FIELDS.user_name),
     ts_ms: Number.isFinite(tsMs) ? tsMs : undefined,
   };
 };
