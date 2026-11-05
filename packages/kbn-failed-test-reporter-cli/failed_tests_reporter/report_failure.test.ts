@@ -9,11 +9,14 @@
 
 import dedent from 'dedent';
 
+import type { FlakySuiteIssue } from './existing_failed_test_issues';
+import type { TestFailure } from './get_failures';
 import {
   createFailureIssue,
   extractErrorMessage,
   redactSensitiveGithubFailureText,
   updateFailureIssue,
+  updateSuiteIssue,
 } from './report_failure';
 
 jest.mock('./github_api');
@@ -122,6 +125,7 @@ describe('createFailureIssue()', () => {
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\"}} -->",
             Array [
               "failed-test",
+              "ftr",
             ],
           ],
         ],
@@ -159,6 +163,32 @@ describe('createFailureIssue()', () => {
     expect(title).toContain(classname);
     expect(body).toContain('| Location | x-pack/platform/example/tests/example.test.ts |');
     expect(body).toContain(`"test.class":"${classname}"`);
+  });
+
+  it.each([
+    ['ftr', ['failed-test', 'ftr']],
+    ['jest', ['failed-test', 'jest']],
+    ['cypress', ['failed-test', 'cypress']],
+    [undefined, ['failed-test']],
+  ] as const)('labels a %s failure with %j', async (testType, expectedLabels) => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname: 'Jest Tests.x-pack/platform/example',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+        testType,
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    expect(api.createIssue.mock.calls[0][2]).toEqual(expectedLabels);
   });
 
   it('normalizes multiple code owners in the details table', async () => {
@@ -1131,5 +1161,117 @@ describe('createFailureIssue() - Scout failures', () => {
     expect(body).not.toContain(
       'Failure screenshots are available in the Buildkite HTML report and artifacts.'
     );
+  });
+});
+
+describe('updateSuiteIssue()', () => {
+  const FTR_FILE = 'x-pack/test/functional/apps/maps/group1/maps_app.ts';
+  const SUITE_METADATA =
+    '{"flaky-test-suite":{"suite.filePath":"x-pack/test/functional/apps/maps/group1/maps_app.ts","report.count":3}}';
+  const suiteIssue = (body: string): FlakySuiteIssue => ({
+    kind: 'suite',
+    suite: { filePath: FTR_FILE, title: 'maps app sample data', testIds: [] },
+    github: {
+      htmlUrl: 'https://github.com/elastic/kibana/issues/9000',
+      number: 9000,
+      nodeId: 'suite-node',
+      state: 'closed',
+      body,
+    },
+  });
+  const ftrFailure: TestFailure = {
+    classname: `Chrome X-Pack UI Functional Tests.${FTR_FILE.replace(/\./g, '·')}`,
+    name: 'maps app sample data ecommerce should load the layers',
+    testType: 'ftr',
+    time: '1',
+    failure: 'Error: expected 3 layers, got 2',
+    likelyIrrelevant: false,
+  };
+
+  it('counts the failure in its own metadata, reopens the issue and names the test in the comment', async () => {
+    const api = createGithubApi();
+
+    const { newCount } = await updateSuiteIssue(
+      'https://build-url',
+      suiteIssue(`Flaky suite\n\n<!-- kibanaCiData = ${SUITE_METADATA} -->`),
+      api,
+      'main',
+      'kibana-on-merge',
+      ftrFailure
+    );
+
+    expect(newCount).toBe(1);
+    const [number, body] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
+    expect(number).toBe(9000);
+    // the daily report's metadata is untouched, the count sits next to it
+    expect(body).toBe(
+      `Flaky suite\n\n<!-- kibanaCiData = ${SUITE_METADATA.slice(
+        0,
+        -1
+      )},"failed-test":{"test.failCount":1}} -->`
+    );
+    expect(body).not.toContain('Test history:');
+    const [, comment] = api.addIssueComment.mock.calls[0];
+    expect(comment.split('\n')[0]).toBe(
+      'New failure of `maps app sample data ecommerce should load the layers`: [kibana-on-merge - main](https://build-url)'
+    );
+    // the per-test history link belongs in the comment, not in the suite's body
+    expect(comment).toContain('Test history: [passes and failures over time](');
+    expect(comment).toContain('New error message:\n```\nError: expected 3 layers, got 2\n```');
+  });
+
+  it('counts on the body GitHub has now rather than on the ci-stats copy', async () => {
+    const api = createGithubApi();
+    api.getIssue.mockResolvedValue({
+      number: 9000,
+      body: 'Flaky suite\n\n<!-- kibanaCiData = {"failed-test":{"test.failCount":7}} -->',
+    });
+
+    const { newCount, newBody } = await updateSuiteIssue(
+      'https://build-url',
+      suiteIssue('Flaky suite\n\n<!-- kibanaCiData = {"failed-test":{"test.failCount":2}} -->'),
+      api,
+      'main',
+      'kibana-on-merge',
+      ftrFailure
+    );
+
+    expect(newCount).toBe(8);
+    expect(newBody).toContain('"test.failCount":8');
+  });
+
+  it('names a Scout test by its describe block and title, with the target', async () => {
+    const api = createGithubApi();
+
+    await updateSuiteIssue(
+      'https://build-url',
+      suiteIssue('Flaky suite'),
+      api,
+      '8.19',
+      'kibana-on-merge',
+      {
+        classname: 'Attachments',
+        name: 'uploads a file',
+        failure: 'test failure',
+        errorMessage: 'Error: upload timed out',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-123',
+        target: 'stateful',
+        location: 'x-pack/test/scout/ui/tests/attachments.spec.ts',
+        duration: 5000,
+        owners: 'team:test',
+        commandLine: 'node scripts/playwright test --config=config.ts',
+      }
+    );
+
+    expect(api.addIssueComment.mock.calls[0][1]).toMatchInlineSnapshot(`
+      "New failure of \`Attachments uploads a file\` for \\"stateful\\" target: [kibana-on-merge - 8.19](https://build-url)
+
+      New error message:
+      \`\`\`
+      Error: upload timed out
+      \`\`\`"
+    `);
   });
 });

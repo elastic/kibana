@@ -20,11 +20,13 @@ import {
 import { getValidatedESClient } from '../helpers/elasticsearch';
 import {
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
+  FLAKY_TEST_CLASSIFICATIONS,
   ScoutFlakyTests,
   TEST_FRAMEWORKS,
+  type FlakyTestClassification,
   type TestFramework,
 } from '../reporting/flaky_tests';
-import { displaySummary } from './flaky_tests_summary';
+import { DEFAULT_TERMINAL_WIDTH, displaySummary, terminalWidth } from './flaky_tests_summary';
 
 // The per-framework aggregations scan hundreds of millions of documents; the client default of
 // 60s is not enough for them.
@@ -36,8 +38,10 @@ const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 const DEFAULT_LOOKBACK_DAYS = defaults.lookbackDays;
 const DEFAULT_PIPELINES = defaults.pipelines.join(',');
 const ALL_FRAMEWORKS = TEST_FRAMEWORKS.join(',');
+const ALL_CLASSIFICATIONS = FLAKY_TEST_CLASSIFICATIONS.join(',');
 const DEFAULT_MIN_BUILDS = defaults.thresholds.minBuilds;
 const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
+const DEFAULT_MIN_FAIL_RATE = defaults.thresholds.minFailRate;
 const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
 const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
 // Only affects the printed summary; the JSON report is bounded by --maxTests
@@ -53,27 +57,39 @@ const readList = (flagsReader: FlagsReader, key: string): string[] => [
   ),
 ];
 
-const isTestFramework = (value: string): value is TestFramework =>
-  (TEST_FRAMEWORKS as readonly string[]).includes(value);
-
-const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
-  const frameworks = readList(flagsReader, 'frameworks');
-  const invalid = frameworks.filter((value) => !isTestFramework(value));
+/** Reads a list flag whose values must all belong to `allowed`. */
+const readEnumList = <T extends string>(
+  flagsReader: FlagsReader,
+  key: string,
+  allowed: readonly T[]
+): T[] => {
+  const isAllowed = (value: string): value is T => (allowed as readonly string[]).includes(value);
+  const values = readList(flagsReader, key);
+  const invalid = values.filter((value) => !isAllowed(value));
   if (invalid.length > 0) {
     throw createFlagError(
-      `--frameworks contains unknown value(s) ${invalid.join(
+      `--${key} contains unknown value(s) ${invalid.join(', ')}; expected any of ${allowed.join(
         ', '
-      )}; expected any of ${TEST_FRAMEWORKS.join(', ')}`
+      )}`
     );
   }
-  return frameworks.filter(isTestFramework);
+  return values.filter(isAllowed);
 };
+
+const readFrameworks = (flagsReader: FlagsReader): TestFramework[] =>
+  readEnumList(flagsReader, 'frameworks', TEST_FRAMEWORKS);
+
+const readClassifications = (flagsReader: FlagsReader): FlakyTestClassification[] =>
+  readEnumList(flagsReader, 'classifications', FLAKY_TEST_CLASSIFICATIONS);
 
 export const discoverFlakyTests: Command<void> = {
   name: 'discover-flaky-tests',
   description: `
   Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
+
+  The build thresholds apply per branch: a test qualifies when one branch clears all of them
+  on its own, so a clean branch cannot dilute a flaky one.
 
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
@@ -84,6 +100,9 @@ export const discoverFlakyTests: Command<void> = {
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
+
+    # Flaky tests only, leaving consistently failing tests out of the report
+    node scripts/scout discover-flaky-tests --classifications flaky
 
     # Show the 25 worst offenders in the summary table
     node scripts/scout discover-flaky-tests --summaryLimit 25
@@ -97,12 +116,15 @@ export const discoverFlakyTests: Command<void> = {
       'pipelines',
       'branches',
       'frameworks',
+      'classifications',
       'minBuilds',
       'minFailedBuilds',
+      'minFailRate',
       'maxTests',
       'samplesPerTest',
       'outputPath',
       'summaryLimit',
+      'summaryWidth',
     ],
     boolean: ['verifyTLSCerts'],
     default: {
@@ -112,28 +134,33 @@ export const discoverFlakyTests: Command<void> = {
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
       lookbackDays: String(DEFAULT_LOOKBACK_DAYS),
       pipelines: DEFAULT_PIPELINES,
+      classifications: ALL_CLASSIFICATIONS,
       minBuilds: String(DEFAULT_MIN_BUILDS),
       minFailedBuilds: String(DEFAULT_MIN_FAILED_BUILDS),
+      minFailRate: String(DEFAULT_MIN_FAIL_RATE),
       maxTests: String(DEFAULT_MAX_TESTS),
       samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
       summaryLimit: String(DEFAULT_SUMMARY_LIMIT),
     },
     help: `
-    --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
-    --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
-    --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried [default: 1]
-    --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-    --lookbackDays     (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
-    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
-    --branches         (optional)  Comma-separated branches; no filter when omitted
-    --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
-    --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEFAULT_MIN_BUILDS}]
-    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEFAULT_MIN_FAILED_BUILDS}]
-    --maxTests         (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
-    --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
-    --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
-    --summaryLimit     (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
+    --esURL              (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
+    --esAPIKey           (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --esMaxRetries       (optional)  How many times should Elasticsearch API requests be retried [default: 1]
+    --verifyTLSCerts     (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
+    --lookbackDays       (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
+    --pipelines          (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
+    --branches           (optional)  Comma-separated branches; no filter when omitted
+    --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
+    --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
+    --minBuilds          (optional)  Builds a branch must have run the test in to qualify it [default: ${DEFAULT_MIN_BUILDS}]
+    --minFailedBuilds    (optional)  Builds a branch must have failed the test in to qualify it [default: ${DEFAULT_MIN_FAILED_BUILDS}]
+    --minFailRate        (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it; 0 disables [default: ${DEFAULT_MIN_FAIL_RATE}, i.e. 3%]
+    --maxTests           (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
+    --samplesPerTest     (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
+    --outputPath         (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
+    --summaryLimit       (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
+    --summaryWidth       (optional)  Columns the summary table may use [default: terminal width, or ${DEFAULT_TERMINAL_WIDTH} when not a terminal]
     `,
   },
   run: async ({ flagsReader, log }) => {
@@ -142,13 +169,27 @@ export const discoverFlakyTests: Command<void> = {
     const esAPIKey = flagsReader.requiredString('esAPIKey');
     const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('outputPath'));
     const frameworks = readFrameworks(flagsReader);
+    const classifications = readClassifications(flagsReader);
+    if (classifications.length === 0) {
+      throw createFlagError(
+        `--classifications must include at least one of ${ALL_CLASSIFICATIONS}`
+      );
+    }
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
     if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
       throw createFlagError('--lookbackDays must be a positive integer');
     }
+    const minFailRate = flagsReader.requiredNumber('minFailRate');
+    if (!(minFailRate >= 0 && minFailRate <= 1)) {
+      throw createFlagError('--minFailRate must be a number between 0 and 1');
+    }
     const summaryLimit = flagsReader.requiredNumber('summaryLimit');
     if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
       throw createFlagError('--summaryLimit must be a non-negative integer');
+    }
+    const summaryWidth = flagsReader.number('summaryWidth') ?? terminalWidth();
+    if (!Number.isInteger(summaryWidth) || summaryWidth < 1) {
+      throw createFlagError('--summaryWidth must be a positive integer');
     }
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
@@ -170,9 +211,11 @@ export const discoverFlakyTests: Command<void> = {
         pipelines: readList(flagsReader, 'pipelines'),
         branches: readList(flagsReader, 'branches'),
         frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
+        classifications,
         thresholds: {
           minBuilds: flagsReader.requiredNumber('minBuilds'),
           minFailedBuilds: flagsReader.requiredNumber('minFailedBuilds'),
+          minFailRate,
           maxTests: flagsReader.requiredNumber('maxTests'),
         },
         samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),
@@ -190,7 +233,7 @@ export const discoverFlakyTests: Command<void> = {
 
     // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
     if (!flagsReader.boolean('quiet')) {
-      displaySummary(report, summaryLimit, log);
+      displaySummary(report, summaryLimit, log, summaryWidth);
     }
 
     log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
