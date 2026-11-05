@@ -17,6 +17,7 @@ import {
   resolveOrcaRun,
   resolveOrcaTelemetryVariant,
   sliceOrcaDataset,
+  storeOrcaSlice,
   validateOrcaDataset,
 } from './orca_dataset';
 
@@ -74,7 +75,10 @@ describe('pinned ORCA release', () => {
   });
   it('fails if Golden is unavailable, without reading a bundled file', async () => {
     await expect(
-      loadOrcaDataset({ getDatasetByName: jest.fn().mockResolvedValue(null) })
+      loadOrcaDataset({
+        getDatasetByName: jest.fn().mockResolvedValue(null),
+        upsertDataset: jest.fn(),
+      })
     ).rejects.toThrow('missing from Golden');
   });
 });
@@ -128,8 +132,65 @@ describe('ORCA release slices', () => {
   it('validates the whole release before slicing it', async () => {
     const run = { release: { ...release, examples: 2 }, slice: { index: 1, count: 2 } };
     await expect(
-      loadOrcaDataset({ getDatasetByName: jest.fn().mockResolvedValue(dataset) }, run)
+      loadOrcaDataset(
+        { getDatasetByName: jest.fn().mockResolvedValue(dataset), upsertDataset: jest.fn() },
+        run
+      )
     ).rejects.toThrow('every pinned incident');
+  });
+
+  describe('storing a slice', () => {
+    const slice = sliceOrcaDataset(
+      {
+        ...many,
+        examples: many.examples.map((each, index) => ({ ...each, id: `release-${index}` })),
+      },
+      { index: 1, count: 3 }
+    );
+    const stored = (examples: typeof slice.examples) => ({
+      id: 'slice-dataset',
+      name: slice.name,
+      description: slice.description,
+      examples: examples.map(({ input, metadata }) => ({
+        id: `slice-${metadata.case_id}`,
+        input,
+        output: {},
+        metadata,
+      })),
+    });
+
+    it('stores the slice under its own name and runs it with the ids the server assigned', async () => {
+      const client = {
+        upsertDataset: jest.fn().mockResolvedValue('slice-dataset'),
+        getDatasetByName: jest.fn().mockResolvedValue(stored([...slice.examples].reverse())),
+      };
+
+      const result = await storeOrcaSlice(client, slice);
+
+      expect(client.upsertDataset).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: slice.name,
+          examples: slice.examples.map(({ input, metadata }) => ({
+            input,
+            output: undefined,
+            metadata,
+          })),
+        })
+      );
+      expect(client.getDatasetByName).toHaveBeenCalledWith(slice.name);
+      expect(result.examples).toEqual(
+        slice.examples.map((each) => ({ ...each, id: `slice-${each.metadata.case_id}` }))
+      );
+    });
+
+    it('fails when the stored slice does not hold exactly its cases', async () => {
+      const client = {
+        upsertDataset: jest.fn().mockResolvedValue('slice-dataset'),
+        getDatasetByName: jest.fn().mockResolvedValue(stored(slice.examples.slice(1))),
+      };
+
+      await expect(storeOrcaSlice(client, slice)).rejects.toThrow(/exactly the slice's cases/);
+    });
   });
 });
 

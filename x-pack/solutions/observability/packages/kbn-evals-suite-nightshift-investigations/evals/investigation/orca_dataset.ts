@@ -166,15 +166,51 @@ export const sliceOrcaDataset = (
   };
 };
 
+/**
+ * Stores a slice under its own name and gives each example the id the server stored it under.
+ * The server derives example ids from the dataset id, so the parent release's ids would match no
+ * example of the slice dataset and its scores would show no history. The executor's own upsert of
+ * the same examples is then a no-op.
+ */
+export const storeOrcaSlice = async (
+  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
+  slice: EvaluationDataset<InvestigationExample>
+): Promise<EvaluationDataset<InvestigationExample>> => {
+  await client.upsertDataset({
+    name: slice.name,
+    description: slice.description,
+    tags: slice.tags,
+    maturity: slice.maturity,
+    examples: slice.examples.map(({ input, output, metadata }) => ({ input, output, metadata })),
+  });
+  const stored = await client.getDatasetByName(slice.name);
+  assert(stored, `ORCA slice dataset ${slice.name} is missing after it was stored`);
+  const idsByCase = new Map(
+    stored.examples.map(({ id, metadata }) => [metadata?.case_id, id] as const)
+  );
+  assert(
+    stored.examples.length === slice.examples.length &&
+      slice.examples.every(({ metadata }) => idsByCase.has(metadata.case_id)),
+    `ORCA slice dataset ${slice.name} does not hold exactly the slice's cases`
+  );
+  return {
+    ...slice,
+    examples: slice.examples.map((example) => ({
+      ...example,
+      id: idsByCase.get(example.metadata.case_id),
+    })),
+  };
+};
+
 /** Fetches a pinned Golden release, optionally one slice of it, without a file or synthetic fallback. */
 export const loadOrcaDataset = async (
-  client: Pick<EvalsClient, 'getDatasetByName'>,
+  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
   { release, slice }: OrcaRun = { release: ORCA_RELEASE }
 ): Promise<EvaluationDataset<InvestigationExample>> => {
   const dataset = await client.getDatasetByName(release.name);
   assert(dataset, 'Pinned ORCA dataset is missing from Golden');
   const validated = validateOrcaDataset(dataset, release);
-  return slice ? sliceOrcaDataset(validated, slice) : validated;
+  return slice ? storeOrcaSlice(client, sliceOrcaDataset(validated, slice)) : validated;
 };
 
 const hasRows = (stdout: string): boolean => {

@@ -729,7 +729,9 @@ paper's 25.3% and 10.0% are not like-for-like.
 `nightshift/orca-bench-public755-v1` (`342ac04a-b9f7-59a1-9462-3503b3bd52a6`, 755 examples, sha256
 `5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb`) holds every task of the public
 Harbor dataset above: 617 incident tasks and 138 controls, with tiers easy 245, hard 264 and
-universal 246. It has no medium tasks. Each example is built from its Harbor task:
+universal 246. The tiers are the question's granularity, not the paper's difficulty: the paper's
+Easy, Medium and Hard (`orca_difficulty`) are our `easy`, `hard` and `universal`, one to one. Each
+example is built from its Harbor task:
 
 - `case_id` is the name whose `sha256` prefix is the task's package name, and `harbor_task` is
   the package. Every one of the 755 resolves to exactly one name.
@@ -758,13 +760,35 @@ eight investigations at a time the 755 needs tens of hours, so run it in slices.
 runs one contiguous part of it in `case_id` order. Each run validates the whole release before
 slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v1/slice-<index>-of-<count>`,
 because the eval client upserts the dataset it runs, and under the release name a slice would
-remove the other tasks. Keep one `<count>` for a baseline and join the slices on `case_id`.
+remove the other tasks. The eval stores the slice first and runs it with the example ids the
+server gave it, so its scores show up in each example's history in the Evals UI. Keep one `<count>` for a baseline and join the slices on `case_id`.
 
-Report the 755 per tier, with `execution_success` next to each rate. Quote the 40 sampled tasks
-against Verified only with the task-by-task match above. The 10 medium tasks in the sampled 50
-are their own line and are not a paper tier. Flag ablation, removing flag documents from the same
-agent and scoring with RCA accuracy, is a later issue. The headline run keeps flag telemetry
-visible.
+Report the 755 by `orca_difficulty` (Easy, Medium, Hard), so a rate is read against the paper's
+tier of the same name, with `execution_success` and the number of unscored runs next to each
+rate. Quote the 40 sampled tasks against Verified only with the task-by-task match above. The 10
+medium tasks in the sampled 50 are their own line and are not a paper tier. The headline run keeps
+flag telemetry visible.
+
+The flag ablation runs the same agent, tasks, judge and cutoff with every flag document hidden:
+flagd's own logs, spans and metrics, any document with a `feature_flag` field, flag-evaluation
+spans, and log lines that name a flag. Elasticsearch hides them through document-level security on
+a separate read key, so no query the agent writes can bring them back. To run it:
+
+1. Have an ORCA cluster admin create an API key whose role reads the three ORCA index patterns
+   with a `query` of `{"bool": {"must_not": [<the flag documents>]}}`. The key cannot be derived
+   from the read-only key above.
+2. Put that key in `nightshiftOrcaEs.apiKey` of the config the run uses, in place of the full
+   key. The Scout hook binds the telemetry connector to that block.
+3. Set `NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags`. The preflight then expects the flag-free
+   document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts), so a run on
+   the full key fails before any investigation, and every score records
+   `telemetry_variant: no-flags`.
+
+```bash
+NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
+  NIGHTSHIFT_ORCA_RELEASE=public755 NIGHTSHIFT_ORCA_SLICE=1/8 \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault
+```
 
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
