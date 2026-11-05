@@ -282,6 +282,7 @@ export function createNavigationTree({
                 breadcrumbStatus: 'hidden',
                 badgeType: 'new',
               },
+              { link: 'management:housekeeping', breadcrumbStatus: 'hidden' },
             ],
           },
           {

@@ -297,6 +297,7 @@ export const createNavigationTree = (
             children: [
               { link: 'management:license_management' },
               { link: 'management:upgrade_assistant' },
+              { link: 'management:housekeeping' },
             ],
           },
         ],
