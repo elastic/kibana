@@ -38,7 +38,7 @@ const IFRAME_TITLE = i18n.translate('xpack.notebook.customCell.iframeTitle', {
 
 const cellContainerCss = css`
   height: 300px;
-  min-height: 120px;
+  min-height: 300px;
   resize: vertical;
   overflow: hidden;
 `;

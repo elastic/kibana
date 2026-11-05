@@ -67,13 +67,14 @@ interface ChartEditor {
 
 const chartContainerCss = css`
   height: 300px;
-  min-height: 120px;
+  min-height: 300px;
   resize: vertical;
   overflow: hidden;
 `;
 
 const metricContainerCss = css`
   height: 160px;
+  min-height: 160px;
 `;
 
 /** The rendered chart, or a prompt explaining why there is none yet. */
