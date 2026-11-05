@@ -14,14 +14,14 @@ import { createCustomContentPanelResolver } from './custom_content_panel_resolve
 
 /**
  * Default implementation of dashboard authoring's `ResolvePanelContent` seam: the executor of
- * each request panel kind, keyed by its `renderer`.
+ * each request panel kind, keyed by its `type`.
  */
 export const createPanelResolver = (deps: VisPanelResolverDeps): ResolvePanelContent => {
   const resolveVisPanel = createVisPanelResolver(deps);
   const resolveCustomContentPanel = createCustomContentPanelResolver(deps);
 
   return createPanelContentResolver({
-    lens: resolveVisPanel,
+    vis: resolveVisPanel,
     vega: resolveVisPanel,
     custom_content: resolveCustomContentPanel,
   });

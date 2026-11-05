@@ -38,17 +38,17 @@ Make all changes in a single ${dashboardTools.generateDashboard} call whenever p
 For a new dashboard, set both \`title\` and \`description\`.
 
 For an existing dashboard:
-- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
+- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, custom content, markdown, and ML anomaly panels, with the \`type\` of the panel's kind.
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
 - These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
 
 ## Panel Inputs
 
-Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens, Vega, and custom content panels with \`hasData: true\` pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Never write a custom content panel's \`esql\` yourself (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
 
-- Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
-- Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels. ${panelConfigReferenceGuidance}
+- Lens, Vega, and custom content panels (\`type: "vis"\`, \`"vega"\` or \`"custom_content"\`) are generated server-side from a natural-language \`query\` — this is the only way to make a **new** generated panel.
+- Use \`type: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A generated panel would be a **new**, different panel instead.
+- Markdown and ML anomaly panels are authored by value, with their \`type\` and \`config\`. ${panelConfigReferenceGuidance}
 
 ## Panel Type Selection
 

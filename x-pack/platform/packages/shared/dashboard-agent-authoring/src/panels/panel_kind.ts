@@ -17,6 +17,8 @@ import type { PanelContent } from '../resolve_panel';
  * schema descriptions: the dashboards skill is assembled from them, so a kind is described once.
  */
 interface PanelKindBase {
+  /** The kind's name, which panel content carries as its `type`. */
+  readonly type: string;
   /** Embeddable type panels of this kind are stored as. Edits may only target panels of this type. */
   readonly embeddableType: string;
   /** Human-readable name used in the skill, references and errors, e.g. "anomaly charts". */
@@ -49,12 +51,10 @@ export type ExecuteConfigPanelKind = (config: AttachmentPanel['config']) => Exec
 export type ExecuteConfigResult = { panelContent: PanelContent } | { error: string };
 
 /**
- * A kind the agent authors by value (`source: 'config'`), discriminated by `type`, whose content
- * schema is part of the tool schema. Declare with `defineConfigPanelKind`.
+ * A kind the agent authors by value, whose content schema is part of the tool schema. Declare with
+ * `defineConfigPanelKind`.
  */
 export interface ConfigPanelKind extends PanelKindBase {
-  readonly source: 'config';
-  readonly type: string;
   /** Content of an upsert item that creates a panel of this kind or edits one. */
   readonly contentSchema: z.ZodObject;
   readonly execute: ExecuteConfigPanelKind;
@@ -67,8 +67,6 @@ export interface ConfigPanelKind extends PanelKindBase {
  * Declare with `defineReferencedConfigPanelKind`.
  */
 export interface ReferencedConfigPanelKind extends PanelKindBase {
-  readonly source: 'config';
-  readonly type: string;
   readonly guidance: string;
   /** The agent-facing config, published in the kind's reference. */
   readonly configSchema: z.ZodType<AttachmentPanel['config']>;
@@ -76,19 +74,15 @@ export interface ReferencedConfigPanelKind extends PanelKindBase {
 }
 
 /**
- * A kind generated server-side (`source: 'request'`), discriminated by `renderer`. The host
- * executes its requests: `PanelKindExecutors` needs one executor per request kind. Declare with
- * `defineRequestPanelKind`.
+ * A kind generated server-side. The host executes its requests:
+ * `PanelKindExecutors` needs one executor per request kind. Declare with `defineRequestPanelKind`.
  */
 export interface RequestPanelKind extends PanelKindBase {
-  readonly source: 'request';
-  readonly renderer: string;
   /** Content of an upsert item that creates a panel of this kind or edits one. */
   readonly contentSchema: z.ZodObject;
 }
 
-interface ConfigDiscriminator<Type extends string> {
-  source: z.ZodLiteral<'config'>;
+interface TypeDiscriminator<Type extends string> {
   type: z.ZodLiteral<Type>;
 }
 
@@ -98,7 +92,7 @@ interface ConfigDiscriminator<Type extends string> {
  */
 export const defineConfigPanelKind = <
   const Type extends string,
-  Shape extends ConfigDiscriminator<Type> & z.ZodRawShape
+  Shape extends TypeDiscriminator<Type> & z.ZodRawShape
 >({
   execute,
   ...kind
@@ -108,7 +102,6 @@ export const defineConfigPanelKind = <
   execute?: ExecuteConfigPanelKind;
 }) =>
   ({
-    source: 'config',
     ...kind,
     execute: execute ?? ((config) => ({ panelContent: { type: kind.embeddableType, config } })),
   } as const satisfies ConfigPanelKind);
@@ -129,7 +122,6 @@ export const defineReferencedConfigPanelKind = <const Type extends string>({
   toEmbeddableConfig?: (config: AttachmentPanel['config']) => AttachmentPanel['config'];
 }) =>
   ({
-    source: 'config',
     ...kind,
     execute: (config) => {
       const result = kind.configSchema.safeParse(config);
@@ -146,23 +138,13 @@ export const defineReferencedConfigPanelKind = <const Type extends string>({
     },
   } as const satisfies ReferencedConfigPanelKind);
 
-/** Lens is the default renderer, so its `renderer` field may be optional. */
-type RendererField<Renderer extends string> =
-  | z.ZodLiteral<Renderer>
-  | z.ZodOptional<z.ZodLiteral<Renderer>>;
-
-interface RequestDiscriminator<Renderer extends string> {
-  source: z.ZodLiteral<'request'>;
-  renderer: RendererField<Renderer>;
-}
-
-/** Declares a server-side generated kind. The content schema must carry the kind's `renderer` literal. */
+/** Declares a server-side generated kind. The content schema must carry the kind's `type` literal. */
 export const defineRequestPanelKind = <
-  const Renderer extends string,
-  Shape extends RequestDiscriminator<Renderer> & z.ZodRawShape
+  const Type extends string,
+  Shape extends TypeDiscriminator<Type> & z.ZodRawShape
 >(
   kind: PanelKindBase & {
-    renderer: Renderer;
+    type: Type;
     contentSchema: z.ZodObject<Shape>;
   }
-) => ({ source: 'request', ...kind } as const satisfies RequestPanelKind);
+): RequestPanelKind & { type: Type; contentSchema: z.ZodObject<Shape> } => kind;

@@ -19,13 +19,13 @@ import { defineRequestPanelKind } from '../panel_kind';
  * Custom content panel requests.
  *
  * Custom content is an HTML template generated server-side, so it is requested
- * like a Lens or Vega panel (`source: 'request'`, `renderer: 'custom_content'`).
+ * like a Lens or Vega panel (`type: 'custom_content'`).
  * The host provides the resolver that turns these requests into panel content.
  */
 
 /** Request to generate a new custom content panel's template. */
 export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase {
-  renderer: 'custom_content';
+  type: 'custom_content';
   /** What to display. */
   nlQuery: string;
   /** ES|QL query feeding the template. Wins over `hasData`. */
@@ -39,7 +39,7 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
 
 /** Request to refine an existing custom content panel's template. */
 export interface CustomContentPanelEditRequest extends PanelResolutionRequestBase {
-  renderer: 'custom_content';
+  type: 'custom_content';
   existingPanel: AttachmentPanel;
   /** What to change. Omitted when the edit only changes the query. */
   nlQuery?: string;
@@ -61,11 +61,10 @@ export type CustomContentPanelResolutionRequest =
 /** Creates or edits a custom content panel. */
 const customContentPanelContentSchema = lazySchema(() =>
   z.object({
-    source: z.literal('request'),
-    renderer: z
+    type: z
       .literal('custom_content')
       .describe(
-        'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
+        'An HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
       ),
     query: z
       .string()
@@ -109,10 +108,10 @@ const customContentGuidance = `A custom content panel with live data does not ne
 
 To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
 
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.`;
+To edit one, list its id in \`panels\` with \`type: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.`;
 
 export const customContentPanelKind = defineRequestPanelKind({
-  renderer: 'custom_content',
+  type: 'custom_content',
   embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   label: 'custom content',
   selection: {

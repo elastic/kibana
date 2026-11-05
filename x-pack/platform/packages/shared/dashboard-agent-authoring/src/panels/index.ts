@@ -19,8 +19,6 @@ export {
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
   requiresRegisteredSchema,
-  getEditableEmbeddableTypes,
-  getRendererEmbeddableType,
   upsertPanelContentSchema,
 } from './registry';
 export type {
