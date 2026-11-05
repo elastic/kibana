@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { bulkPurgeRollupSchema } from '@kbn/slo-schema';
+import { bulkPurgeRollupSchema, bulkPurgeRollupResponseSchema } from '@kbn/slo-schema';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { BulkPurgeRollupData } from '../services/bulk_purge_rollup_data';
@@ -27,6 +27,9 @@ export const bulkPurgeRollupRoute = createSloServerRoute({
     },
   },
   params: bulkPurgeRollupSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => bulkPurgeRollupResponseSchema },
+  },
   handler: async ({ request, context, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 

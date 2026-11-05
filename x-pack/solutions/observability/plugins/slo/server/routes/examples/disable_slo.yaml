@@ -10,7 +10,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
           badRequestExample:
             summary: Bad request
@@ -23,7 +23,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
@@ -36,7 +36,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden
@@ -49,7 +49,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/404_response
+          $ref: ../oas_error_schemas.yaml#/404_response
         examples:
           notFoundExample:
             summary: Not found

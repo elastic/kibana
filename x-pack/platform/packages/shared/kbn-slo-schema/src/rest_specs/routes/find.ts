@@ -85,14 +85,26 @@ const findSLOParamsSchema = z.object({
   query: findSLOQuerySchema.optional(),
 });
 
-const findSLOResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloWithDataResponseSchema),
-  searchAfter: searchAfterArraySchema.optional(),
-  size: z.number().optional(),
-});
+const findSLOResponseSchema = lazySchema(() =>
+  z
+    .object({
+      page: z.number(),
+      perPage: z.number(),
+      total: z.number(),
+      results: z.array(sloWithDataResponseSchema),
+      searchAfter: searchAfterArraySchema
+        .optional()
+        .describe(
+          'The cursor to provide to get the next page of results, when using cursor-based pagination'
+        ),
+      size: z.number().optional().describe('Size provided for cursor based pagination'),
+    })
+    .meta({
+      id: 'SLOFindResponse',
+      description: 'A paginated response of SLOs matching the query.',
+      additionalProperties: true,
+    })
+);
 
 type FindSLOParams = z.output<typeof findSLOQuerySchema>;
 type FindSLOResponse = z.input<typeof findSLOResponseSchema>;
