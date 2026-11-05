@@ -72,8 +72,8 @@ export class EncryptedSavedObjectsPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  private getTenantService = (request: KibanaRequest) => {
-    const crypto = this.#getTenantCrypto?.(request);
+  private getTenantService = ({ tenantId }: KibanaRequest) => {
+    const crypto = tenantId === undefined ? undefined : this.#getTenantCrypto?.(tenantId);
     if (!crypto || !this.#service) {
       return undefined;
     }

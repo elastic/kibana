@@ -29,6 +29,7 @@ import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type {
   SavedObjectsClientFactoryProvider,
@@ -957,7 +958,25 @@ describe('SavedObjectsService', () => {
 
           getUnsafeInternalClient({ excludedExtensions });
 
-          expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions);
+          expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions, undefined);
+        });
+
+        it("gives the extensions the request's tenant when a request is given", async () => {
+          const coreContext = createCoreContext();
+          const soService = new SavedObjectsService(coreContext);
+          const setup = await soService.setup(createSetupDeps());
+          const encryptionExtensionFactory = jest.fn();
+          setup.setEncryptionExtension(encryptionExtensionFactory);
+          const { getUnsafeInternalClient } = await soService.start(createStartDeps());
+          const request = Object.assign(httpServerMock.createKibanaRequest(), {
+            tenantId: 'project-b' as KibanaRequest['tenantId'],
+          });
+
+          getUnsafeInternalClient({ request });
+
+          expect(encryptionExtensionFactory).toHaveBeenCalledWith(
+            expect.objectContaining({ request: expect.objectContaining({ tenantId: 'project-b' }) })
+          );
         });
 
         it('calls internal repository factory, not scoped repository factory', async () => {

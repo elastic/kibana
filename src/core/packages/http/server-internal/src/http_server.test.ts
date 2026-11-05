@@ -2461,12 +2461,13 @@ describe('space extraction in onRequest', () => {
 
     const tenants = {
       enabled: true,
-      getTenantId: jest.fn(({ 'x-elastic-tenant-id': id }: Headers) => {
+      getTenantId: jest.fn(({ 'x-elastic-project-id': id }: Headers) => {
         if (id === 'project-z') {
           throw Boom.badRequest('Unknown tenant [project-z]');
         }
         return id as TenantId | undefined;
       }),
+      resolve: jest.fn(),
       getClientConfig: jest.fn(),
     };
     const { registerRouter, server: innerServer } = await server.setup({ config$, tenants });
@@ -2475,12 +2476,12 @@ describe('space extraction in onRequest', () => {
 
     await supertest(innerServer.listener)
       .get('/foo')
-      .set('x-elastic-tenant-id', 'project-b')
+      .set('x-elastic-project-id', 'project-b')
       .expect(200, { tenantId: 'project-b' });
     await supertest(innerServer.listener).get('/foo').expect(200, { tenantId: null });
     await supertest(innerServer.listener)
       .get('/foo')
-      .set('x-elastic-tenant-id', 'project-z')
+      .set('x-elastic-project-id', 'project-z')
       .expect(400, {
         statusCode: 400,
         error: 'Bad Request',

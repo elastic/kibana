@@ -13,17 +13,12 @@ jest.mock('./tenants_file', () => ({
 
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { hapiMocks } from '@kbn/hapi-mocks';
 import type { TenantId } from '@kbn/core-tenants-server';
 import { readTenantsFile } from './tenants_file';
 import { TenantsService } from './tenants_service';
 
 const tenantB = 'project-b' as TenantId;
 const tenantC = 'project-c' as TenantId;
-
-const tenantRequest = (tenantId?: TenantId) =>
-  kibanaRequestFactory(hapiMocks.createRequest({ app: { tenantId } }));
 
 const setupService = async (file?: string) => {
   const configService = configServiceMock.create({ atPath: { file } });
@@ -41,7 +36,12 @@ describe('TenantsService', () => {
         encryptionKey: 'b'.repeat(32),
         securityEncryptionKey: 'B'.repeat(32),
       },
-      'project-c': { hosts: ['http://localhost:9202'], serviceAccountToken: 'token-c' },
+      'project-c': {
+        hosts: ['http://localhost:9202'],
+        serviceAccountToken: 'token-c',
+        encryptionKey: 'c'.repeat(32),
+        securityEncryptionKey: 'C'.repeat(32),
+      },
     });
   });
 
@@ -49,7 +49,7 @@ describe('TenantsService', () => {
     const { setup } = await setupService();
 
     expect(setup.enabled).toBe(false);
-    expect(setup.getTenantId({ 'x-elastic-tenant-id': 'project-b' })).toBeUndefined();
+    expect(setup.getTenantId({ 'x-elastic-project-id': 'project-b' })).toBeUndefined();
     expect(readTenantsFile).not.toHaveBeenCalled();
   });
 
@@ -58,14 +58,21 @@ describe('TenantsService', () => {
 
     expect(readTenantsFile).toHaveBeenCalledWith('/tenants.yml');
     expect(setup.enabled).toBe(true);
-    expect(setup.getTenantId({ 'x-elastic-tenant-id': 'project-b' })).toBe(tenantB);
+    expect(setup.getTenantId({ 'x-elastic-project-id': 'project-b' })).toBe(tenantB);
     expect(setup.getTenantId({})).toBeUndefined();
-    expect(() => setup.getTenantId({ 'x-elastic-tenant-id': 'project-z' })).toThrow(
+    expect(() => setup.getTenantId({ 'x-elastic-project-id': 'project-z' })).toThrow(
       'Unknown tenant [project-z]'
     );
   });
 
-  it('returns the client config without the encryption key', async () => {
+  it('resolves stored tenant IDs and rejects unknown tenants', async () => {
+    const { setup } = await setupService('/tenants.yml');
+
+    expect(setup.resolve('project-b')).toBe(tenantB);
+    expect(() => setup.resolve('project-z')).toThrow('Unknown tenant [project-z]');
+  });
+
+  it('returns the client config without the encryption keys', async () => {
     const { setup } = await setupService('/tenants.yml');
 
     expect(setup.getClientConfig(tenantB)).toEqual({
@@ -79,39 +86,21 @@ describe('TenantsService', () => {
     });
   });
 
-  it("returns the tenant's crypto only for requests received over HTTP", async () => {
+  it("returns each tenant's own saved objects crypto", async () => {
     const { service } = await setupService('/tenants.yml');
     const { getEncryptionCrypto } = service.start();
 
-    const crypto = getEncryptionCrypto(tenantRequest(tenantB));
-    const encrypted = await crypto?.encrypt('secret');
-    expect(encrypted).toBeDefined();
-    await expect(crypto?.decrypt(encrypted ?? '')).resolves.toBe('secret');
-
-    expect(getEncryptionCrypto(tenantRequest(tenantC))).toBeUndefined();
-    expect(getEncryptionCrypto(tenantRequest())).toBeUndefined();
-    expect(() =>
-      getEncryptionCrypto(kibanaRequestFactory({ headers: { 'x-elastic-tenant-id': 'project-b' } }))
-    ).toThrow(
-      'The encryption key of tenant [project-b] is only available to requests received over HTTP'
-    );
+    const encrypted = await getEncryptionCrypto(tenantB).encrypt('secret');
+    await expect(getEncryptionCrypto(tenantB).decrypt(encrypted)).resolves.toBe('secret');
+    await expect(getEncryptionCrypto(tenantC).decrypt(encrypted)).rejects.toThrow();
   });
 
   it("returns the tenant's session crypto, separate from its saved objects crypto", async () => {
     const { service } = await setupService('/tenants.yml');
     const { getEncryptionCrypto, getSessionCrypto } = service.start();
 
-    const sessionCrypto = getSessionCrypto(tenantRequest(tenantB));
-    const encrypted = await sessionCrypto?.encrypt('session');
-    await expect(sessionCrypto?.decrypt(encrypted ?? '')).resolves.toBe('session');
-    await expect(
-      getEncryptionCrypto(tenantRequest(tenantB))?.decrypt(encrypted ?? '')
-    ).rejects.toThrow();
-
-    expect(getSessionCrypto(tenantRequest(tenantC))).toBeUndefined();
-    expect(getSessionCrypto(tenantRequest())).toBeUndefined();
-    expect(() =>
-      getSessionCrypto(kibanaRequestFactory({ headers: { 'x-elastic-tenant-id': 'project-b' } }))
-    ).toThrow('only available to requests received over HTTP');
+    const encrypted = await getSessionCrypto(tenantB).encrypt('session');
+    await expect(getSessionCrypto(tenantB).decrypt(encrypted)).resolves.toBe('session');
+    await expect(getEncryptionCrypto(tenantB).decrypt(encrypted)).rejects.toThrow();
   });
 });

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
 import type {
   ElasticsearchClientConfig,
   ICustomClusterClient,
@@ -25,24 +24,19 @@ export class TenantClients {
   private readonly clients = new Map<TenantId, ICustomClusterClient>();
   private readonly tenants: InternalTenantsServiceSetup;
   private readonly createClient: CreateTenantClient;
-  private readonly log: Logger;
 
   constructor({
     tenants,
     createClient,
-    log,
   }: {
     tenants: InternalTenantsServiceSetup;
     createClient: CreateTenantClient;
-    log: Logger;
   }) {
     this.tenants = tenants;
     this.createClient = createClient;
-    this.log = log;
   }
 
-  public resolve(request: ScopeableRequest): ICustomClusterClient | undefined {
-    const tenantId = this.getTenantId(request);
+  public resolve({ tenantId }: ScopeableRequest): ICustomClusterClient | undefined {
     if (tenantId === undefined) {
       return undefined;
     }
@@ -57,16 +51,5 @@ export class TenantClients {
 
   public async close() {
     await Promise.all([...this.clients.values()].map((client) => client.close()));
-  }
-
-  private getTenantId(request: ScopeableRequest) {
-    if (request.tenantId !== undefined) {
-      return request.tenantId;
-    }
-    const tenantId = this.tenants.getTenantId(request.headers);
-    if (tenantId !== undefined) {
-      this.log.debug(`Read tenant [${tenantId}] from the request headers, not request.tenantId`);
-    }
-    return tenantId;
   }
 }

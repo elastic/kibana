@@ -77,9 +77,8 @@ export interface SecurityServiceStart {
    */
   serviceAccounts: CoreServiceAccountsService;
   /**
-   * Returns the crypto for the session encryption key of the request's tenant when multi-tenancy is
-   * enabled and the tenant has its own key. Throws for fake requests that target a tenant.
+   * Returns the crypto for the session encryption key of a tenant, such as `request.tenantId`.
    * @internal
    */
-  getTenantSessionCrypto?: (request: KibanaRequest) => Crypto | undefined;
+  getTenantSessionCrypto?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => Crypto;
 }

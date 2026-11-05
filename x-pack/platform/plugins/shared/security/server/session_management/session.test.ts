@@ -8,6 +8,7 @@
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -1397,11 +1398,13 @@ describe('Session', () => {
 
     it("encrypts and decrypts content with the tenant's key", async () => {
       getTenantCrypto.mockReturnValue(tenantCrypto);
-      const request = httpServerMock.createKibanaRequest();
+      const request = Object.assign(httpServerMock.createKibanaRequest(), {
+        tenantId: 'project-b' as KibanaRequest['tenantId'],
+      });
 
       const { content, aad } = await createSession(request);
 
-      expect(getTenantCrypto).toHaveBeenCalledWith(request);
+      expect(getTenantCrypto).toHaveBeenCalledWith('project-b');
       await expect(tenantCrypto.decrypt(content, aad)).resolves.toBe(
         JSON.stringify({ username: 'user', userProfileId: 'uid', state: 'some-state' })
       );
@@ -1415,11 +1418,10 @@ describe('Session', () => {
       });
     });
 
-    it('uses the configured key if the tenant has no key', async () => {
-      getTenantCrypto.mockReturnValue(undefined);
-
+    it('uses the configured key for requests without a tenant', async () => {
       const { content, aad } = await createSession(httpServerMock.createKibanaRequest());
 
+      expect(getTenantCrypto).not.toHaveBeenCalled();
       await expect(homeCrypto.decrypt(content, aad)).resolves.toBe(
         JSON.stringify({ username: 'user', userProfileId: 'uid', state: 'some-state' })
       );

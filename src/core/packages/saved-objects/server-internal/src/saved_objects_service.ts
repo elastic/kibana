@@ -408,7 +408,7 @@ export class SavedObjectsService
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [], request } = {}) => {
         const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
-        const extensions = this.getInternalExtensions(safeExcludedExtensions);
+        const extensions = this.getInternalExtensions(safeExcludedExtensions, request?.tenantId);
         const repository = repositoryFactory.createInternalRepository(
           includedHiddenTypes,
           extensions,
@@ -457,7 +457,10 @@ export class SavedObjectsService
     };
   }
 
-  private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
+  private getInternalExtensions(
+    excludedExtensions: string[] = [],
+    tenantId?: KibanaRequest['tenantId']
+  ): SavedObjectsExtensions {
     // For internal clients, we automatically exclude security extension to avoid user scoping
     // and handle extensions that can work without a request context
     const createExt = <T>(
@@ -478,6 +481,7 @@ export class SavedObjectsService
         route: { settings: {} },
         url: { href: '/' },
         raw: { req: { url: '/' } },
+        tenantId,
       } as unknown as KibanaRequest;
 
       return extensionFactory({

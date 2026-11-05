@@ -290,9 +290,8 @@ export interface SavedObjectsServiceStart {
    */
   getAllIndices: () => string[];
   /**
-   * Returns the crypto for the encryption key of the request's tenant when multi-tenancy is enabled
-   * and the tenant has its own key. Throws for fake requests that target a tenant.
+   * Returns the crypto for the saved objects encryption key of a tenant, such as `request.tenantId`.
    * @internal
    */
-  getTenantCrypto?: (request: KibanaRequest) => Crypto | undefined;
+  getTenantCrypto?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => Crypto;
 }

@@ -8,7 +8,6 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { TenantId } from '@kbn/core-tenants-server';
 import { TenantClients } from './tenant_clients';
 
@@ -34,11 +33,11 @@ const setup = () => {
   const tenants = {
     enabled: true,
     getTenantId: jest.fn(),
+    resolve: jest.fn(),
     getClientConfig: jest.fn((tenantId: TenantId) => clientConfigs[tenantId]),
   };
   const createClient = jest.fn(() => elasticsearchClientMock.createCustomClusterClient());
-  const log = loggingSystemMock.createLogger();
-  return { createClient, tenantClients: new TenantClients({ tenants, createClient, log }) };
+  return { createClient, tenantClients: new TenantClients({ tenants, createClient }) };
 };
 
 describe('TenantClients', () => {
@@ -64,5 +63,12 @@ describe('TenantClients', () => {
     for (const { value: client } of createClient.mock.results) {
       expect(client.close).toHaveBeenCalledTimes(1);
     }
+  });
+
+  it('ignores the tenant header of requests without a tenant', () => {
+    const { createClient, tenantClients } = setup();
+
+    expect(tenantClients.resolve({ headers: { 'x-elastic-project-id': tenantB } })).toBeUndefined();
+    expect(createClient).not.toHaveBeenCalled();
   });
 });

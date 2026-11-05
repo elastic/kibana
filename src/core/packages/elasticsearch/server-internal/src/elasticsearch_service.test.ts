@@ -88,7 +88,12 @@ beforeEach(() => {
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createInternalSetup(),
     loggingSystem: loggingSystemMock.create(),
-    tenants: { enabled: false, getTenantId: jest.fn(), getClientConfig: jest.fn() },
+    tenants: {
+      enabled: false,
+      getTenantId: jest.fn(),
+      resolve: jest.fn(),
+      getClientConfig: jest.fn(),
+    },
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -687,9 +692,10 @@ describe('multi-tenancy', () => {
   beforeEach(() => {
     setupDeps.tenants = {
       enabled: true,
-      getTenantId: jest.fn(({ 'x-elastic-tenant-id': id }: Headers) =>
+      getTenantId: jest.fn(({ 'x-elastic-project-id': id }: Headers) =>
         id === tenantB ? tenantB : undefined
       ),
+      resolve: jest.fn(),
       getClientConfig: jest.fn().mockReturnValue({
         hosts: ['http://localhost:9201'],
         username: 'kibana_system',
@@ -736,14 +742,14 @@ describe('multi-tenancy', () => {
     );
   });
 
-  it('falls back to the tenant header for fake requests that only copy headers', async () => {
+  it('ignores the tenant header of requests without a tenant', async () => {
     await elasticsearchService.setup(setupDeps);
     const { client } = await elasticsearchService.start();
 
-    client.asScoped({ headers: { 'x-elastic-tenant-id': 'project-b' } });
+    client.asScoped({ headers: { 'x-elastic-project-id': 'project-b' } });
 
-    expect(tenantClient.asScoped).toHaveBeenCalledTimes(1);
-    expect(mockClusterClientInstance.asScoped).not.toHaveBeenCalled();
+    expect(tenantClient.asScoped).not.toHaveBeenCalled();
+    expect(mockClusterClientInstance.asScoped).toHaveBeenCalledTimes(1);
   });
 
   it('closes the tenant clients on stop', async () => {

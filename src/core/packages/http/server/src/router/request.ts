@@ -59,7 +59,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   traceId?: string;
   /** The resolved space ID for this request. Defaults to 'default'. */
   spaceId?: SpaceId;
-  /** The tenant from the `x-elastic-tenant-id` header, if any. */
+  /** The tenant from the `x-elastic-project-id` header, if any. */
   tenantId?: TenantId;
   /** The top HTTP Otel Span for this request. */
   httpSpan?: OTelSpan;
@@ -229,7 +229,7 @@ export interface KibanaRequest<
   readonly spaceId: SpaceId;
 
   /**
-   * The tenant this request targets, from the `x-elastic-tenant-id` header.
+   * The tenant this request targets, from the `x-elastic-project-id` header.
    * Only set when multi-tenancy is enabled, and the tenants service has checked that the tenant exists.
    */
   readonly tenantId?: TenantId;

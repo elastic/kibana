@@ -11,12 +11,12 @@ import { firstValueFrom } from 'rxjs';
 import Boom from '@hapi/boom';
 import nodeCrypto, { type Crypto } from '@elastic/node-crypto';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { Headers, KibanaRequest } from '@kbn/core-http-server';
+import type { Headers } from '@kbn/core-http-server';
 import type { TenantId } from '@kbn/core-tenants-server';
 import { tenantsConfig, type TenantsConfigType } from './tenants_config';
 import { readTenantsFile } from './tenants_file';
 
-const TENANT_ID_HEADER = 'x-elastic-tenant-id';
+const TENANT_ID_HEADER = 'x-elastic-project-id';
 
 /** Elasticsearch hosts and credentials of a tenant. */
 export interface TenantClientConfig {
@@ -31,32 +31,31 @@ export interface InternalTenantsServiceSetup {
   /** Whether a tenants file is configured. */
   readonly enabled: boolean;
   /**
-   * Returns the tenant named by the `x-elastic-tenant-id` header, or `undefined` without the header
+   * Returns the tenant named by the `x-elastic-project-id` header, or `undefined` without the header
    * or without a tenants file. Throws a 400 error for tenants that the tenants file doesn't list.
    */
   getTenantId(headers: Headers): TenantId | undefined;
+  /**
+   * Returns the `TenantId` for a stored tenant ID, such as one recorded with background work.
+   * Throws for tenants that the tenants file doesn't list.
+   */
+  resolve(id: string): TenantId;
   /** Returns the Elasticsearch hosts and credentials of a tenant. */
   getClientConfig(tenantId: TenantId): TenantClientConfig;
 }
 
 /** @internal */
 export interface InternalTenantsServiceStart {
-  /**
-   * Returns the crypto for the saved objects encryption key of the request's tenant, if the tenant has a key.
-   * Throws for fake requests that target a tenant, so a tenant's key only serves requests received over HTTP.
-   */
-  getEncryptionCrypto(request: KibanaRequest): Crypto | undefined;
-  /**
-   * Returns the crypto for the session encryption key of the request's tenant, if the tenant has a key.
-   * Throws for fake requests that target a tenant, so a tenant's key only serves requests received over HTTP.
-   */
-  getSessionCrypto(request: KibanaRequest): Crypto | undefined;
+  /** Returns the crypto for the saved objects encryption key of a tenant. */
+  getEncryptionCrypto(tenantId: TenantId): Crypto;
+  /** Returns the crypto for the session encryption key of a tenant. */
+  getSessionCrypto(tenantId: TenantId): Crypto;
 }
 
 interface Tenant {
   clientConfig: TenantClientConfig;
-  crypto?: Crypto;
-  sessionCrypto?: Crypto;
+  crypto: Crypto;
+  sessionCrypto: Crypto;
 }
 
 /** @internal */
@@ -80,10 +79,8 @@ export class TenantsService
       )) {
         this.tenants.set(id, {
           clientConfig,
-          crypto: encryptionKey ? nodeCrypto({ encryptionKey }) : undefined,
-          sessionCrypto: securityEncryptionKey
-            ? nodeCrypto({ encryptionKey: securityEncryptionKey })
-            : undefined,
+          crypto: nodeCrypto({ encryptionKey }),
+          sessionCrypto: nodeCrypto({ encryptionKey: securityEncryptionKey }),
         });
       }
     }
@@ -91,31 +88,19 @@ export class TenantsService
     return {
       enabled: this.enabled,
       getTenantId: this.getTenantId,
+      resolve: this.resolve,
       getClientConfig: (tenantId) => this.getTenant(tenantId).clientConfig,
     };
   }
 
   public start(): InternalTenantsServiceStart {
     return {
-      getEncryptionCrypto: (request) => this.getRequestTenant(request)?.crypto,
-      getSessionCrypto: (request) => this.getRequestTenant(request)?.sessionCrypto,
+      getEncryptionCrypto: (tenantId) => this.getTenant(tenantId).crypto,
+      getSessionCrypto: (tenantId) => this.getTenant(tenantId).sessionCrypto,
     };
   }
 
   public stop() {}
-
-  private getRequestTenant(request: KibanaRequest) {
-    const tenantId = request.tenantId ?? this.getTenantId(request.headers);
-    if (tenantId === undefined) {
-      return undefined;
-    }
-    if (request.isFakeRequest) {
-      throw new Error(
-        `The encryption key of tenant [${tenantId}] is only available to requests received over HTTP`
-      );
-    }
-    return this.getTenant(tenantId);
-  }
 
   private getTenantId = (headers: Headers): TenantId | undefined => {
     const value = headers[TENANT_ID_HEADER];
@@ -123,8 +108,16 @@ export class TenantsService
     if (!this.enabled || id === undefined) {
       return undefined;
     }
+    try {
+      return this.resolve(id);
+    } catch (error) {
+      throw Boom.badRequest(error.message);
+    }
+  };
+
+  private resolve = (id: string): TenantId => {
     if (!this.tenants.has(id)) {
-      throw Boom.badRequest(`Unknown tenant [${id}]`);
+      throw new Error(`Unknown tenant [${id}]`);
     }
     return id as TenantId;
   };

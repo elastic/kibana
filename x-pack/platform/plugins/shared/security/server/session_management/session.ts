@@ -91,7 +91,7 @@ export interface SessionValue<TState = unknown> {
 export interface SessionOptions {
   readonly logger: Logger;
   readonly getSessionIndex: (request: KibanaRequest) => PublicMethodsOf<SessionIndex>;
-  readonly getTenantCrypto?: (request: KibanaRequest) => Crypto | undefined;
+  readonly getTenantCrypto?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => Crypto;
   readonly sessionCookie: PublicMethodsOf<SessionCookie>;
   readonly config: Pick<ConfigType, 'encryptionKey' | 'session'>;
   readonly audit: AuditServiceSetup;
@@ -534,8 +534,12 @@ export class Session {
     return invalidatedCount;
   }
 
-  private getCrypto(request: KibanaRequest) {
-    return this.options.getTenantCrypto?.(request) ?? this.crypto;
+  private getCrypto({ tenantId }: KibanaRequest) {
+    const { getTenantCrypto } = this.options;
+    if (tenantId === undefined || !getTenantCrypto) {
+      return this.crypto;
+    }
+    return getTenantCrypto(tenantId);
   }
 
   private calculateExpiry(

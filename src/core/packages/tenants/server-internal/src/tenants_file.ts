@@ -16,8 +16,8 @@ const hosts = schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
   maxSize: 100,
 });
 
-const encryptionKey = schema.maybe(schema.string({ minLength: 32 }));
-const securityEncryptionKey = schema.maybe(schema.string({ minLength: 32 }));
+const encryptionKey = schema.string({ minLength: 32 });
+const securityEncryptionKey = schema.string({ minLength: 32 });
 
 const tenantSchema = schema.oneOf([
   schema.object({

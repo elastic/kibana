@@ -137,7 +137,6 @@ export class ElasticsearchService
         tenants: deps.tenants,
         createClient: (tenantId, clientConfig) =>
           this.createClusterClient(`tenant-${tenantId}`, config, clientConfig),
-        log: this.log,
       });
     }
 

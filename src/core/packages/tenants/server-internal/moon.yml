@@ -22,9 +22,7 @@ dependsOn:
   - '@kbn/core-base-server-internal'
   - '@kbn/core-base-server-mocks'
   - '@kbn/core-http-server'
-  - '@kbn/core-http-server-utils'
   - '@kbn/core-tenants-server'
-  - '@kbn/hapi-mocks'
 tags:
   - shared-server
   - package
