@@ -14,5 +14,9 @@ describe('url parts', () => {
       'cdn.net/…/x.js'
     );
     expect(toUrlFileName('https://shop.example.com/', 'https://shop.example.com')).toBe('/');
+    expect(toUrlFileName('https://shop.example.com/v3/', 'https://shop.example.com')).toBe('/v3/');
+    expect(toUrlFileName('https://js.pay.com/v3/', 'https://shop.example.com')).toBe(
+      'js.pay.com/v3/'
+    );
   });
 });

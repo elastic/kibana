@@ -7,7 +7,7 @@
 
 import { NO_STACKTRACE } from './search_request';
 import type { ErrorGroupBucket, ErrorsAggregations } from './search_response';
-import { toJsErrors } from './to_js_errors';
+import { toHasMoreErrors, toJsErrors } from './to_js_errors';
 
 const group = (
   type: string,
@@ -26,12 +26,14 @@ const group = (
   };
 };
 
-const aggregations = (groups: ErrorGroupBucket[]): ErrorsAggregations => {
+const aggregations = (groups: ErrorGroupBucket[], otherCount = 0): ErrorsAggregations => {
   return {
     environments: { buckets: [] },
     environmentNames: { buckets: [] },
     environmentNotDefined: { doc_count: 0 },
-    inEnvironment: { exceptions: { groups: { buckets: groups } } },
+    inEnvironment: {
+      exceptions: { groups: { buckets: groups, sum_other_doc_count: otherCount } },
+    },
   };
 };
 
@@ -72,5 +74,11 @@ describe('toJsErrors', () => {
         lastSeen: new Date(5000).toISOString(),
       },
     ]);
+  });
+
+  it('tells whether less frequent groups were left out', () => {
+    expect(toHasMoreErrors(undefined)).toBe(false);
+    expect(toHasMoreErrors(aggregations([]))).toBe(false);
+    expect(toHasMoreErrors(aggregations([], 3))).toBe(true);
   });
 });

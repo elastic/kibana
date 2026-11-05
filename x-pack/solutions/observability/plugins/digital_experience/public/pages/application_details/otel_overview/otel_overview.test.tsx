@@ -75,6 +75,7 @@ const ERRORS_RESPONSE: ApplicationErrorsResponse = {
       lastSeen: '2021-01-18T12:30:00.000Z',
     },
   ],
+  hasMoreErrors: false,
   environments: ['production'],
 };
 

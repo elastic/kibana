@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { EXCEPTION_MESSAGE, EXCEPTION_TYPE } from '@kbn/apm-types';
-import { TOP_ROWS } from '../../../../common/top_rows';
+import { ERROR_GROUPS_ROWS } from '../../../../common/top_rows';
 import {
   EVENT_EXCEPTION,
   EXCEPTION_STACKTRACE,
@@ -22,7 +22,7 @@ import {
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
-/** A missing stack trace's key, the same as an empty one, so both form one group per type. */
+/** The group key of a missing stack trace, shared with empty ones. */
 export const NO_STACKTRACE = '';
 
 const ERROR_GROUP_AGGS = {
@@ -64,7 +64,7 @@ export const errorsSearch = ({
                 { field: EXCEPTION_TYPE },
                 { field: EXCEPTION_STACKTRACE, missing: NO_STACKTRACE },
               ],
-              size: TOP_ROWS,
+              size: ERROR_GROUPS_ROWS,
             },
             aggs: ERROR_GROUP_AGGS,
           },

@@ -31,6 +31,7 @@ describe('getOtelErrors', () => {
     await expect(getOtelErrors({ esClient, ...PARAMS })).resolves.toEqual({
       serviceName: 'shop',
       errors: [],
+      hasMoreErrors: false,
       environments: [],
     });
   });

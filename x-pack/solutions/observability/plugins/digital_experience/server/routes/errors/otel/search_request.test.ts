@@ -48,7 +48,7 @@ describe('errorsSearch', () => {
         { field: 'exception.type' },
         { field: 'exception.stacktrace', missing: NO_STACKTRACE },
       ],
-      size: 10,
+      size: 100,
     });
     expect(JSON.stringify(errorsSearch(PARAMS))).not.toContain('"field":"exception.message"}');
   });

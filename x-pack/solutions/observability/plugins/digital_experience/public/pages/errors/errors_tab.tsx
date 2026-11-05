@@ -50,6 +50,7 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
       ) : (
         <JsErrorsPanel
           errors={response?.errors ?? []}
+          hasMoreErrors={response?.hasMoreErrors}
           isLoading={isLoading}
           sessionsWithErrorsHref={sessionsHref({ hasErrors: true })}
         />

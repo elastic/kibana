@@ -25,5 +25,5 @@ export interface ErrorGroupBucket {
 
 /** `errorsSearch`: the error groups in the selected environment, and every environment. */
 export type ErrorsAggregations = ByEnvironmentAggregations<{
-  exceptions: { groups: { buckets: ErrorGroupBucket[] } };
+  exceptions: { groups: { buckets: ErrorGroupBucket[]; sum_other_doc_count?: number } };
 }>;

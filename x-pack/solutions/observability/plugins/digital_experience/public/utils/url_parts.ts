@@ -22,6 +22,11 @@ export const toUrlFileName = (url: string, pageOrigin?: string): string => {
   if (!parsed) {
     return url;
   }
-  const fileName = parsed.pathname.split('/').pop() || parsed.pathname;
-  return pageOrigin && parsed.origin !== pageOrigin ? `${parsed.host}/…/${fileName}` : fileName;
+  const { host, origin, pathname } = parsed;
+  const isOtherOrigin = pageOrigin !== undefined && origin !== pageOrigin;
+  if (pathname.endsWith('/')) {
+    return isOtherOrigin ? `${host}${pathname}` : pathname;
+  }
+  const fileName = pathname.slice(pathname.lastIndexOf('/') + 1);
+  return isOtherOrigin ? `${host}/…/${fileName}` : fileName;
 };

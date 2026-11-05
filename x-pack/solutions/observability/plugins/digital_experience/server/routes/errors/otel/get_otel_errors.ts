@@ -15,7 +15,7 @@ import type { ApplicationSearchParams } from '../../application_tab_route';
 import { ERRORS_SEARCH_SPAN_NAME } from '../constants';
 import { errorsSearch } from './search_request';
 import type { ErrorsAggregations } from './search_response';
-import { toJsErrors } from './to_js_errors';
+import { toHasMoreErrors, toJsErrors } from './to_js_errors';
 
 /** The JS errors of one EDOT Browser application, for its Errors tab. */
 export const getOtelErrors = ({
@@ -31,6 +31,7 @@ export const getOtelErrors = ({
     return {
       serviceName: searchParams.serviceName,
       errors: toJsErrors(aggregations),
+      hasMoreErrors: toHasMoreErrors(aggregations),
       environments: sortEnvironments(pickerEnvironments(aggregations)),
     };
   });

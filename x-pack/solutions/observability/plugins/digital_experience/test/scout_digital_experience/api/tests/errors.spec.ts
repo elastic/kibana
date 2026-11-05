@@ -30,9 +30,11 @@ apiTest.describe('Digital Experience errors API', { tag: DIGITAL_EXPERIENCE_TAGS
     });
 
     expect(response).toHaveStatusCode(200);
-    const { serviceName, errors, environments } = response.body as ApplicationErrorsResponse;
+    const { serviceName, errors, hasMoreErrors, environments } =
+      response.body as ApplicationErrorsResponse;
     expect(serviceName).toBe(OTEL_APPS.shop);
     expect(errors).toStrictEqual(OTEL_SHOP_ERRORS);
+    expect(hasMoreErrors).toBe(false);
     expect(environments).toStrictEqual(['production']);
   });
 
@@ -50,6 +52,7 @@ apiTest.describe('Digital Experience errors API', { tag: DIGITAL_EXPERIENCE_TAGS
       expect(missing.body).toStrictEqual({
         serviceName: 'no-such-application',
         errors: [],
+        hasMoreErrors: false,
         environments: [],
       });
 
@@ -62,6 +65,7 @@ apiTest.describe('Digital Experience errors API', { tag: DIGITAL_EXPERIENCE_TAGS
       expect(staging.body).toStrictEqual({
         serviceName: OTEL_APPS.shop,
         errors: [],
+        hasMoreErrors: false,
         environments: ['production'],
       });
     }
@@ -81,6 +85,7 @@ apiTest.describe('Digital Experience errors API', { tag: DIGITAL_EXPERIENCE_TAGS
       expect(response.body).toStrictEqual({
         serviceName: OTEL_APPS.docs,
         errors: [],
+        hasMoreErrors: false,
         environments: [STAGING_ENVIRONMENT],
       });
     }

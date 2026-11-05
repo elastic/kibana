@@ -7,3 +7,6 @@
 
 /** The rows of every "top" list of an application: pages, clicks, errors, requests, resources. */
 export const TOP_ROWS = 10;
+
+/** The error groups the Errors tab lists, most frequent first, for its table to page through. */
+export const ERROR_GROUPS_ROWS = 100;

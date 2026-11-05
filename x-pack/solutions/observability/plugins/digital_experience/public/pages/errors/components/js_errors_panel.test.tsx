@@ -107,7 +107,6 @@ describe('JsErrorsPanel', () => {
     rerender(panel([{ ...ERRORS[0], count: 7 }]));
     expect(flyout()).toHaveTextContent('7');
 
-    // Kept while loading, then forgotten once the loaded response lacks it.
     rerender(panel([], true));
     rerender(panel(ERRORS));
     expect(flyout()).toBeInTheDocument();
@@ -116,6 +115,24 @@ describe('JsErrorsPanel', () => {
 
     rerender(panel(ERRORS));
     expect(flyout()).not.toBeInTheDocument();
+  });
+
+  it('pages through the groups and says when less frequent ones were left out', () => {
+    const groups = Array.from({ length: 12 }, (_, index) => {
+      return { ...ERRORS[0], type: `Error${index}`, count: 12 - index };
+    });
+    render(
+      <JsErrorsPanel
+        errors={groups}
+        hasMoreErrors
+        isLoading={false}
+        sessionsWithErrorsHref="/sessions"
+      />,
+      { wrapper: Wrapper }
+    );
+
+    expect(screen.getAllByTestId('digitalExperienceError')).toHaveLength(10);
+    expect(screen.getByText(/The 100 most frequent groups/)).toBeInTheDocument();
   });
 
   it('says so when an error group has no stack trace', () => {

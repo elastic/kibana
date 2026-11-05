@@ -33,7 +33,7 @@ export const OTEL_APPS = {
 } as const;
 
 /** The page loads of `OTEL_APPS.shop` inside `TIME_RANGE`, as its Overview KPI shows them. */
-export const OTEL_SHOP_PAGE_LOADS = '4';
+export const OTEL_SHOP_PAGE_LOADS = '5';
 
 export const STAGING_ENVIRONMENT = 'staging';
 
@@ -46,7 +46,7 @@ export const OTEL_SHOP_USAGE = {
     { url: 'https://otel-shop.example.com/', pageLoads: 3, loadTimeP75Ms: null },
     { url: 'https://otel-shop.example.com/products', pageLoads: 2, loadTimeP75Ms: 1200 },
   ],
-  // One page load has no browser attributes and one click no selector, so each total exceeds its rows.
+  // A page load without browser attributes and a click without a selector sit in no row.
   breakdowns: {
     pageLoads: 5,
     browsers: [

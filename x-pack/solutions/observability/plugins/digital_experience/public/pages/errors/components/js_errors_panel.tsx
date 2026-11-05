@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import { ERROR_GROUPS_ROWS } from '../../../../common/top_rows';
 import type { JsErrorGroup } from '../../../../common/types/errors';
 import { DataPanel } from '../../../components/data_panel';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
@@ -31,6 +32,17 @@ const TOP_TITLE = i18n.translate('xpack.digitalExperience.errors.table.topTitle'
 const SUBTITLE = i18n.translate('xpack.digitalExperience.errors.table.subtitle', {
   defaultMessage: 'Grouped by type and stack trace. Open an error to see its stack trace.',
 });
+
+const TRUNCATED_SUBTITLE = i18n.translate(
+  'xpack.digitalExperience.errors.table.truncatedSubtitle',
+  {
+    defaultMessage:
+      'The {max} most frequent groups, by type and stack trace. Narrow the time range or environment to see the others.',
+    values: { max: ERROR_GROUPS_ROWS },
+  }
+);
+
+const PAGE_SIZE = 10;
 
 const ERROR_LABEL = i18n.translate('xpack.digitalExperience.errors.table.error', {
   defaultMessage: 'Error',
@@ -57,6 +69,7 @@ export function JsErrorsPanel({
   sessionsWithErrorsHref,
   maxRows,
   viewAllHref,
+  hasMoreErrors = false,
 }: {
   errors: JsErrorGroup[];
   isLoading: boolean;
@@ -66,6 +79,8 @@ export function JsErrorsPanel({
   maxRows?: number;
   /** The Errors tab, linked from the panel's header. */
   viewAllHref?: string;
+  /** Whether less frequent groups were left out; the full list then says so. */
+  hasMoreErrors?: boolean;
 }) {
   const { formatNumber, formatDate } = useFormatters();
   const [selectedKey, setSelectedKey] = useState<ErrorGroupKey>();
@@ -75,7 +90,7 @@ export function JsErrorsPanel({
     errors.find(({ type, stacktrace }) => {
       return type === selectedKey.type && stacktrace === selectedKey.stacktrace;
     });
-  // Forgotten once a loaded response lacks it, so the flyout never reopens by itself.
+  // Cleared once a loaded response lacks the group, so the flyout never reopens.
   useEffect(() => {
     if (selectedKey && !selected && !isLoading) {
       setSelectedKey(undefined);
@@ -141,7 +156,7 @@ export function JsErrorsPanel({
   return (
     <DataPanel
       title={isCompact ? TOP_TITLE : TITLE}
-      subtitle={SUBTITLE}
+      subtitle={!isCompact && hasMoreErrors ? TRUNCATED_SUBTITLE : SUBTITLE}
       actions={
         viewAllHref && (
           <EuiLink
@@ -166,6 +181,7 @@ export function JsErrorsPanel({
         items={items}
         columns={columns}
         sorting={isCompact ? false : { sort: { field: 'count', direction: 'desc' } }}
+        pagination={isCompact ? false : { pageSize: PAGE_SIZE, showPerPageOptions: false }}
       />
       {selected && (
         <JsErrorFlyout

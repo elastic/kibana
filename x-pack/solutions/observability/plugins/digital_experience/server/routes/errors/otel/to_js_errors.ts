@@ -16,6 +16,11 @@ const toMessage = ({ hits }: MessageAggregation): string | null => {
   return typeof message === 'string' ? message : null;
 };
 
+/** Whether the search left out less frequent groups. */
+export const toHasMoreErrors = (aggregations?: ErrorsAggregations): boolean => {
+  return (aggregations?.inEnvironment.exceptions.groups.sum_other_doc_count ?? 0) > 0;
+};
+
 /** Maps the error groups, most frequent first; missing aggregations map to no groups. */
 export const toJsErrors = (aggregations?: ErrorsAggregations): JsErrorGroup[] => {
   const buckets = aggregations?.inEnvironment.exceptions.groups.buckets ?? [];

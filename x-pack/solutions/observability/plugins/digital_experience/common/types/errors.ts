@@ -20,8 +20,10 @@ export interface JsErrorGroup {
 /** The Errors tab of one EDOT Browser application over the time range and environment. */
 export interface ApplicationErrorsResponse {
   serviceName: string;
-  /** Grouped by type and stack trace, by count, descending; up to `TOP_ROWS`. */
+  /** Grouped by type and stack trace, by count, descending; up to `ERROR_GROUPS_ROWS`. */
   errors: JsErrorGroup[];
+  /** Whether less frequent groups were left out of `errors`. */
+  hasMoreErrors: boolean;
   /** The environments of the application, whatever the `environment` filter, for the picker. */
   environments: string[];
 }
