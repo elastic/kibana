@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
   serviceUrl: schema.uri({ scheme: ['http', 'https'], defaultValue: 'http://localhost:8800' }),
   sharedSecret: schema.maybe(schema.string({ minLength: 1 })),
   projectId: schema.string({

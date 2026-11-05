@@ -22,6 +22,7 @@ import { registerRoutes } from '.';
 
 const SECRET = 'dev-secret-do-not-leak';
 const CONFIG: TaskRunnerPocConfig = {
+  enabled: true,
   serviceUrl: 'http://task-runner.test:8800',
   sharedSecret: SECRET,
   projectId: 'tenant-a',
