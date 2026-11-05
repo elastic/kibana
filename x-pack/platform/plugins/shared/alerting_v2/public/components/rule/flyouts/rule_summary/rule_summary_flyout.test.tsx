@@ -14,7 +14,10 @@ import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
-import { AlertingV2RulesLocatorDefinition, createAlertingV2HostApp } from '../../../../locators';
+import {
+  AlertingV2RulesLocatorDefinition,
+  createAlertingV2HostApp,
+} from '../../../../../common/locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',

@@ -34,13 +34,14 @@ export interface AlertTriageStepDependencies {
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
 }
 
-const toApiError = (error: unknown, action: string): ExecutionError =>
-  error instanceof ExecutionError
-    ? error
-    : new ExecutionError({
-        type: 'ApiError',
-        message: error instanceof Error ? error.message : `Failed to ${action}`,
-      });
+const toApiError = (error: unknown, action: string): ExecutionError => {
+  if (error instanceof ExecutionError) return error;
+  const message = error instanceof Error ? error.message : `Failed to ${action}`;
+  // The engine's error class is not exported to steps, so it is matched by name. Reporting it with
+  // the type the output size check uses lets a workflow stop retrying a size error.
+  const isTooLarge = error instanceof Error && error.name === 'CallKibanaApiResponseTooLargeError';
+  return new ExecutionError({ type: isTooLarge ? 'StepSizeLimitExceeded' : 'ApiError', message });
+};
 
 export const getTriageHeadroomStepDefinition = ({ getTaskManager }: AlertTriageStepDependencies) =>
   createServerStepDefinition({

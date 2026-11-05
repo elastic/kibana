@@ -1,5 +1,5 @@
 {
-  "sha1": "eaadc42c2158de123411fd5bd442e34390e1a216",
+  "sha1": "7eb4eea8af34b4f1dfc6d4ad0f0ea9ddb17c6b71",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
-        "line": 15,
+        "line": 14,
         "column": 11
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
-        "line": 24,
+        "line": 23,
         "column": 17
       }
     },
@@ -386,7 +386,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
-        "column": 43
+        "column": 41
       }
     },
     {

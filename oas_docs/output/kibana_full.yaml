@@ -21513,7 +21513,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_unified_attachment_response'
           description: |
-            Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.
+            Indicates a successful call. Returns the new attachment. If some of the alert or event IDs are already attached to the case, they are skipped and the new attachment holds only the remaining IDs.
         '400':
           content:
             application/json:
@@ -21555,6 +21555,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The case was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409_attachment_already_attached'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Every alert or event ID in the request is already attached to the case.
       summary: Create a case attachment
       tags:
         - cases
@@ -23924,9 +23933,7 @@ paths:
 
         Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.
 
-        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.
-
-        The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-chat-message
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24054,7 +24061,7 @@ paths:
                     error: Not Found
                     message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
                     statusCode: 404
-          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
+          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist or an `agent_id` that the caller cannot use. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
       summary: Send a message and get the answer
       tags:
         - agent builder
@@ -24077,7 +24084,7 @@ paths:
               "message": "What is Elasticsearch?",
               "agent_id": "elastic-ai-agent"
             }
-      x-state: Experimental; added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -43468,7 +43475,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: (fleet-agent-policies-read AND integrations-read) OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - description: The ID of the agent policy
@@ -43586,7 +43593,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.
+        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - description: The ID of the agent policy
@@ -142958,12 +142965,14 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 4096
             type: string
         - description: Number of results per page.
           in: query
           name: size
           required: false
           schema:
+            maximum: 10000
             minimum: 1
             type: number
         - description: Page number.
@@ -142988,6 +142997,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -142997,6 +143007,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -143625,6 +143636,7 @@ paths:
           name: stepExecutionId
           required: false
           schema:
+            maxLength: 255
             type: string
         - description: Number of log entries per page.
           in: query
@@ -143648,6 +143660,7 @@ paths:
           name: sortField
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Sort order.
           in: query
@@ -145479,6 +145492,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -145487,6 +145501,7 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
@@ -145500,6 +145515,7 @@ paths:
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
@@ -145507,6 +145523,7 @@ paths:
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
@@ -145569,6 +145586,7 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
@@ -145576,6 +145594,7 @@ paths:
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
       responses:
@@ -145700,6 +145719,7 @@ paths:
           name: stepId
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Include step input data.
           in: query
@@ -145733,12 +145753,14 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
       responses:
         '200':
@@ -145867,6 +145889,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -145875,30 +145898,35 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Datemath lower bound for filtering executions by startedAt.
           in: query
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by startedAt.
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath lower bound for filtering executions by finishedAt.
           in: query
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by finishedAt.
           in: query
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Field to collapse execution results by.
           in: query
@@ -148819,6 +148847,12 @@ components:
       value:
         error: Conflict
         message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
+    Cases_response_409_attachment_already_attached:
+      summary: Every alert or event in the request is already attached to the case.
+      value:
+        error: Conflict
+        message: Every id in the request is already attached to case 293f1bfe-c4ab-4a0b-9a36-9fd4a1d7d2b1.
         statusCode: 409
     Cases_response_409_attachment_version_conflict:
       summary: The attachment version is out of date.
@@ -156419,7 +156453,7 @@ components:
     Cases_unified_attachment_data:
       additionalProperties: true
       description: |
-        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       example:
         content: A new comment.
       nullable: true
@@ -156427,7 +156461,7 @@ components:
     Cases_unified_attachment_metadata:
       additionalProperties: true
       description: |
-        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       nullable: true
       type: object
     Cases_unified_attachment_put_request:
@@ -161241,6 +161275,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -161530,6 +161569,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental; added in 9.5.0
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -161544,6 +161588,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -167737,6 +167786,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -187017,6 +187071,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         packagePolicyIds:
           items:
             type: string
@@ -204905,6 +204964,7 @@ components:
         * `endpoint_event_filters`: Event filters list
         * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
         * `endpoint_blocklists`: Blocklist
+        * `endpoint_custom_yara_signatures`: Custom YARA signatures list
       example: simple_list
       format: nonempty
       minLength: 1
@@ -208936,6 +208996,7 @@ components:
         * `endpoint_event_filters`: Event filters list
         * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
         * `endpoint_blocklists`: Blocklist
+        * `endpoint_custom_yara_signatures`: Custom YARA signatures list
       example: simple_list
       format: nonempty
       minLength: 1

@@ -12,7 +12,9 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowRepository } from '@kbn/workflows/server';
 import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_event_handler';
+import { buildWorkflowExecutionDocument } from '../lib/build_workflow_execution_document';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { buildChildEventChainContext } from '../step/workflow_execute_step/build_child_event_chain_context';
 
 const mockClassifyWorkflowTriggerMatch = jest.fn().mockReturnValue('matched');
 
@@ -452,6 +454,43 @@ describe('TriggerEventHandler', () => {
           scheduledSuccessCount: 0,
         }),
       })
+    );
+  });
+
+  it('should not re-schedule an event-triggered parent from an event emitted by its child workflow', async () => {
+    const childExecution = buildWorkflowExecutionDocument({
+      workflow: { id: 'loop-child', name: 'loop-child', enabled: true, yaml: '', isTestRun: false },
+      spaceId: 'default',
+      context: {
+        parentWorkflowId: 'loop-parent',
+        ...buildChildEventChainContext({ workflowId: 'loop-parent', eventChainDepth: 1 }),
+      },
+      defaultTriggeredBy: 'workflow-step',
+      authenticatedUser: 'user-1',
+      now: new Date(),
+      maxEventChainDepth: 10,
+      getConcurrencyGroupKey: () => null,
+    });
+    mockGetEventChainContext.mockReturnValue(undefined);
+    mockGetEmitterWorkflowExecutionIdFromRequest.mockReturnValue(childExecution.id);
+    mockGetWorkflowExecutionById.mockResolvedValue(childExecution);
+
+    const scheduleWorkflow = jest.fn();
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'loop-parent' })]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { caseId: '1' },
+      request: mockRequest,
+    });
+
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Event chain cycle guard skipped scheduling workflow loop-parent')
     );
   });
 

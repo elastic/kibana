@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
@@ -1240,15 +1240,18 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
 });
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
-export const WorkflowFailStepSchema = BaseStepSchema.extend({
-  type: z.literal('workflow.fail'),
-  with: z
-    .object({
-      message: z.string().optional(),
-      reason: z.string().optional(),
-    })
-    .optional(),
-});
+export const WorkflowFailStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.fail'),
+    with: z
+      .object({
+        message: z.string().optional(),
+        reason: z.string().optional(),
+        type: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */

@@ -127,7 +127,7 @@ export const WorkflowDetailHeader = React.memo(
       canReadManagedWorkflowExecution,
     } = useWorkflowsCapabilities();
 
-    const { activeTab, setActiveTab } = useWorkflowUrlState();
+    const { activeTab, isViewingExecution, setActiveTab } = useWorkflowUrlState();
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
@@ -205,14 +205,14 @@ export const WorkflowDetailHeader = React.memo(
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
       return getSaveWorkflowTooltipContent({
-        isExecutionsTab,
+        isExecutionsTab: isViewingExecution,
         canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
         isCreate,
         hasUnsavedChanges,
         isManagedWorkflow,
       });
     }, [
-      isExecutionsTab,
+      isViewingExecution,
       workflowId,
       canCreateWorkflow,
       canUpdateWorkflow,
@@ -272,7 +272,7 @@ export const WorkflowDetailHeader = React.memo(
     const openHistoryModal = useCallback(() => {
       changeHistoryModal?.openModal();
     }, [changeHistoryModal]);
-    const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
+    const showHistoryButton = Boolean(canReadWorkflow && !isViewingExecution && changeHistoryModal);
 
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
       if (!showHistoryButton) {
@@ -397,7 +397,7 @@ export const WorkflowDetailHeader = React.memo(
           iconType: 'save',
           run: handleSaveWorkflow,
           disableButton:
-            isExecutionsTab ||
+            isViewingExecution ||
             !canSaveWorkflow ||
             isLoading ||
             isSaving ||
@@ -412,7 +412,7 @@ export const WorkflowDetailHeader = React.memo(
         items,
       };
     }, [
-      isExecutionsTab,
+      isViewingExecution,
       workflowId,
       executionsToggleItem,
       historyItem,

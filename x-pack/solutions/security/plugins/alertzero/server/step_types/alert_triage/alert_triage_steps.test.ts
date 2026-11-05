@@ -8,6 +8,7 @@
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
+import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import {
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,
@@ -237,7 +238,22 @@ describe('triage load alerts step', () => {
     expect(callKibanaApi.mock.calls[0][0].body).toEqual({
       size: 2,
       query: { ids: { values: ['a-1', 'a-2'] } },
+      _source: LOADED_ALERT_FIELDS,
     });
+  });
+
+  it.each([
+    ['a response over the size cap', 'CallKibanaApiResponseTooLargeError', 'StepSizeLimitExceeded'],
+    ['any other failure', 'Error', 'ApiError'],
+  ])('reports %s as %s', async (_label, name, type) => {
+    const error = Object.assign(new Error('failed'), { name });
+    const callKibanaApi = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      getTriageLoadAlertsStepDefinition().handler(
+        createContext({ alert_ids: ['a-1'] }, callKibanaApi)
+      )
+    ).rejects.toMatchObject({ type });
   });
 });
 

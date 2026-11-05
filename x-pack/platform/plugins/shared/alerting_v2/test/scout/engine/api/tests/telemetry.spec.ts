@@ -24,6 +24,10 @@ const sortByName = (buckets: NameValuePair[] | undefined): NameValuePair[] =>
   [...(buckets ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
 apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () => {
+  // The snooze API rejects past dates, so the "expired snooze" policy is snoozed a few
+  // seconds into the future and the test waits for it to lapse before running the task.
+  let expiredSnoozeUntilMs = 0;
+
   apiTest.beforeAll(async ({ apiServices }) => {
     await Promise.all([
       apiServices.alertingV2.rules.cleanUp(),
@@ -139,7 +143,42 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
       ),
     ]);
 
-    await apiServices.alertingV2.rules.bulkDisable({ ids: [rule3.id] });
+    // Status variants: no throttle / grouping, so they count as `none` / `per_alert`.
+    const [disabledPolicy, snoozedPolicy, expiredSnoozePolicy] = await Promise.all([
+      apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'policy-3-disabled',
+          destinations: [
+            { type: 'workflow', id: 'workflow-3' },
+            { type: 'workflow', id: 'workflow-4' },
+          ],
+        })
+      ),
+      apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'policy-4-snoozed',
+          destinations: [{ type: 'workflow', id: 'workflow-5' }],
+        })
+      ),
+      apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'policy-5-expired-snooze',
+          destinations: [{ type: 'workflow', id: 'workflow-6' }],
+        })
+      ),
+    ]);
+
+    expiredSnoozeUntilMs = Date.now() + 3_000;
+
+    await Promise.all([
+      apiServices.alertingV2.rules.bulkDisable({ ids: [rule3.id] }),
+      apiServices.alertingV2.actionPolicies.disable(disabledPolicy.id),
+      apiServices.alertingV2.actionPolicies.snooze(snoozedPolicy.id, '2099-01-01T00:00:00.000Z'),
+      apiServices.alertingV2.actionPolicies.snooze(
+        expiredSnoozePolicy.id,
+        new Date(expiredSnoozeUntilMs).toISOString()
+      ),
+    ]);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -150,6 +189,11 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
   });
 
   apiTest('should retrieve telemetry data in the expected format', async ({ apiServices }) => {
+    const untilExpiredSnoozeLapses = expiredSnoozeUntilMs + 100 - Date.now();
+    if (untilExpiredSnoozeLapses > 0) {
+      await new Promise((resolve) => setTimeout(resolve, untilExpiredSnoozeLapses));
+    }
+
     const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
 
     expect(state.has_errors).toBe(false);
@@ -186,8 +230,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
     expect(state.executions_delay_p99_ms).toBeDefined();
 
     // Action policy stats
-    expect(state.action_policies_count).toBe(2);
-    expect(state.action_policies_unique_workflow_count).toBe(2);
+    expect(state.action_policies_count).toBe(5);
+    expect(state.action_policies_unique_workflow_count).toBe(6);
     expect(state.action_policies_count_with_matcher).toBe(1);
     expect(state.action_policies_count_with_group_by).toBe(1);
     expect(state.action_policies_avg_group_by_fields_count).toBe(2);
@@ -195,5 +239,25 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
       { name: '1h', value: 1 },
       { name: '5m', value: 1 },
     ]);
+    // An expired snooze counts as enabled.
+    expect(state.action_policies_count_by_status).toStrictEqual({
+      enabled: 3,
+      disabled: 1,
+      snoozed: 1,
+    });
+    expect(state.action_policies_count_by_grouping_mode).toStrictEqual({
+      per_alert: 4,
+      per_field: 1,
+    });
+    expect(state.action_policies_count_by_throttle_strategy).toStrictEqual({
+      time_interval: 1,
+      per_status_interval: 1,
+      none: 3,
+    });
+    expect(state.action_policies_workflows_per_policy?.p50).toBe(1);
+    expect(state.action_policies_workflows_per_policy?.p99).toBeGreaterThanOrEqual(1);
+    expect(state.action_policies_workflows_per_policy?.p99).toBeLessThanOrEqual(2);
+    expect(state.action_policies_workflows_per_policy?.avg).toBeCloseTo(1.2);
+    expect(state.action_policies_count_with_multiple_workflows).toBe(1);
   });
 });

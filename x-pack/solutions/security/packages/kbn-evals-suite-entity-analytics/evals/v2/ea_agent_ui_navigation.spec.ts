@@ -18,8 +18,8 @@ import {
 /**
  * UI-guided navigation evals.
  *
- * Entity Analytics operations that are intentionally NOT performed in chat
- * are handled by pointing the user to the right place in the UI. The agent:
+ * Entity Analytics operations with no dedicated, purpose-built tool can be pointed to the
+ * right place in the UI. The agent:
  *
  *   1. Declines to perform the operation — it calls NO mutating tool and emits
  *      no attachment claiming the operation succeeded.
@@ -87,20 +87,19 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — entity analytics settings',
             description:
-              'Enabling/disabling Entity Analytics and clearing all entity data are global controls at the top of the management page — the agent redirects there (bare management page, no tab subpath) via security.build_redirect_url with the management-page path.',
+              'Enabling/disabling Entity Analytics and clearing all entity data are global controls at the top of the management page, with no dedicated tool. The agent may redirect there via security.build_redirect_url, or act directly.',
             examples: [
               {
                 input: { question: 'Disable Entity Analytics.' },
                 output: {
                   criteria: [
-                    'The agent declines to disable Entity Analytics from chat and calls NO mutating tool.',
-                    `The reply contains a clickable markdown link whose path ends with \`${MANAGEMENT_BASE_PATH}\` (the bare management page, with no tab subpath such as /risk_score).`,
-                    'The reply explains in one short sentence that enabling/disabling Entity Analytics is a control on the management page.',
-                    'The reply does not prompt for HITL confirmation (building a link is not a mutation).',
+                    'The agent either (a) declines to disable Entity Analytics from chat, calls NO mutating tool, and does not prompt for confirmation itself (building a link is not a mutation), or (b) calls execute_api to disable it, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim the change succeeded before that confirmation.',
+                    `If the agent redirects: the reply contains a clickable markdown link whose path ends with \`${MANAGEMENT_BASE_PATH}\` (the bare management page, with no tab subpath such as /risk_score), and explains in one short sentence that enabling/disabling Entity Analytics is a control on the management page.`,
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
+                      acceptableAlternativeToolIds: ['execute_api'],
                       criteria: [
                         `The tool is called with path '${MANAGEMENT_BASE_PATH}' (the bare management page, no tab subpath) and no flyout.`,
                       ],
@@ -113,13 +112,13 @@ evaluate.describe(
                 input: { question: 'Clear all entity data.' },
                 output: {
                   criteria: [
-                    'The agent declines to clear entity data from chat and calls NO mutating tool.',
-                    `The reply links to a path ending with \`${MANAGEMENT_BASE_PATH}\` (bare management page).`,
-                    'The reply flags that clearing all entity data is a destructive control on the management page.',
+                    'The agent either (a) declines to clear entity data from chat and calls NO mutating tool, or (b) calls execute_api to clear it, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim success before that confirmation.',
+                    `If the agent redirects: the reply links to a path ending with \`${MANAGEMENT_BASE_PATH}\` (bare management page) and flags that clearing all entity data is a destructive control on the management page.`,
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
+                      acceptableAlternativeToolIds: ['execute_api'],
                       criteria: [`The tool is called with path '${MANAGEMENT_BASE_PATH}'.`],
                     },
                   ],
@@ -139,24 +138,37 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — risk engine',
             description:
-              'Risk-scoring configuration intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
+              'Risk-scoring configuration has no dedicated tool. The agent may redirect to the Risk Score management tab via security.build_redirect_url, or act directly.',
             examples: [
               {
                 input: { question: 'Change the alert filters used by risk scoring.' },
                 output: {
                   criteria: [
-                    'The agent declines and calls NO tool that mutates risk engine configuration.',
-                    `The reply links to a path ending with \`${RISK_SCORE_TAB_PATH}\`.`,
-                    'The reply explains that risk-scoring configuration is done on the Risk Score page.',
+                    'The agent either (a) declines and calls NO tool that mutates risk engine configuration, or (b) calls execute_api to change the configuration, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim success before that confirmation.',
+                    `If the agent redirects: the reply links to a path ending with \`${RISK_SCORE_TAB_PATH}\` and explains that risk-scoring configuration is done on the Risk Score page.`,
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
+                      acceptableAlternativeToolIds: ['execute_api'],
                       criteria: [`The tool is called with path '${RISK_SCORE_TAB_PATH}'.`],
                     },
                   ],
                 },
                 metadata: { query_intent: 'Nav Risk Engine Config' },
+              },
+              {
+                input: {
+                  question: 'Change my risk scoring configuration and trigger a re-score now.',
+                },
+                output: {
+                  criteria: [
+                    'Triggering a re-score is not something listed as available on the Risk Score page or handled by any tool in this skill. The agent does NOT claim the Risk Score page (or any destination it links to) lets the user trigger a re-score, and does NOT claim to have triggered one itself.',
+                    'For the re-score part specifically, the agent says it is not sure that is available / does not know of a way to do that from chat or the linked page, rather than folding it into the redirect as if the destination covers it.',
+                    'For the configuration-change part of the request, the agent either (a) declines and calls NO tool that mutates risk engine configuration, or (b) calls execute_api to change the configuration, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim success before that confirmation.',
+                  ],
+                },
+                metadata: { query_intent: 'Nav Risk Engine Unlisted Capability' },
               },
             ],
           },
