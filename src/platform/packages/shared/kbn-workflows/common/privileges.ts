@@ -23,6 +23,7 @@ export enum WorkflowsManagementApiActions {
   'readExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:readExecution`,
   'readManagedExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:readExecution`,
   'cancelExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:cancelExecution`,
+  'managePages' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:pages:manage`,
 }
 
 /**
@@ -64,6 +65,11 @@ export const WorkflowsManagementOperationPrivileges = {
     WorkflowsManagementApiActions.readManagedExecution,
   ],
   cancelExecution: [WorkflowsManagementApiActions.cancelExecution],
+  // Anyone who can run the workflow can copy its page link and see the page status.
+  readPage: [WorkflowsManagementApiActions.execute],
+  // Rotating the secret, setting the access level, and taking a page offline do not edit the
+  // workflow, so they need neither `update` nor security admin rights.
+  managePage: [WorkflowsManagementApiActions.managePages],
 } as const satisfies Record<string, readonly WorkflowsManagementApiActions[]>;
 
 // The UI actions (aka capabilities) added by feature privileges, to be checked in the UI components.
@@ -79,4 +85,5 @@ export enum WorkflowsManagementUiActions {
   'readExecution' = 'readWorkflowExecution',
   'readManagedExecution' = 'readManagedWorkflowExecution',
   'cancelExecution' = 'cancelWorkflowExecution',
+  'managePages' = 'manageWorkflowPages',
 }

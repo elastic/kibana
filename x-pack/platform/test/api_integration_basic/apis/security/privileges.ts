@@ -248,6 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
               'workflow_execution_cancel',
               'workflow_execution_read',
               'workflow_execution_read_managed',
+              'workflow_page_manage',
               'workflow_read',
               'workflow_read_managed',
               'workflow_update',

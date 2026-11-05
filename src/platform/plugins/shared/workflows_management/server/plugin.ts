@@ -32,6 +32,7 @@ import {
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerWorkflowPageType } from './pages/page_saved_object';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -77,6 +78,11 @@ export class WorkflowsPlugin
     registerUISettings(core, plugins);
 
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
+
+    registerWorkflowPageType({
+      savedObjects: core.savedObjects,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
 
     this.logger.debug('Workflows Management: Creating workflows service');
 

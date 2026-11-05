@@ -16,6 +16,7 @@ import {
   WorkflowsManagementApiActions,
   WorkflowsManagementUiActions,
 } from '@kbn/workflows';
+import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './pages/page_saved_object';
 
 // The kibana feature configuration for the Workflows Management plugin.
 export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
@@ -77,7 +78,8 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
                 defaultMessage: 'Execute',
               }),
               includeIn: 'all',
-              savedObject: { all: [], read: [] },
+              // Reads the page status before the link is decrypted.
+              savedObject: { all: [], read: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE] },
               api: [WorkflowsManagementApiActions.execute],
               ui: [WorkflowsManagementUiActions.execute],
             },
@@ -113,6 +115,19 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.cancelExecution],
               ui: [WorkflowsManagementUiActions.cancelExecution],
+            },
+            {
+              id: 'workflow_page_manage',
+              name: i18n.translate(
+                'workflows.featureRegistry.manageWorkflowPagesSubFeaturePrivilege',
+                {
+                  defaultMessage: 'Manage Pages',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE], read: [] },
+              api: [WorkflowsManagementApiActions.managePages],
+              ui: [WorkflowsManagementUiActions.managePages],
             },
           ],
         },

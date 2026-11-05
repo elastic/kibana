@@ -10,6 +10,11 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
+import type { WorkflowPageAccess } from '../../../pages/page_saved_object';
+import type {
+  WorkflowPageAuditLog,
+  WorkflowPageAuditParams,
+} from '../../../pages/workflow_pages_service';
 import type { WorkflowsService } from '../../workflows_management_service';
 
 /**
@@ -35,6 +40,10 @@ export const WorkflowManagementAuditActions = {
   RESUME_EXECUTION: 'workflow_execution_resume',
   HITL_WAITING: 'workflow_hitl_waiting',
   HITL_TIMED_OUT: 'workflow_hitl_timed_out',
+  PAGE_LINK_READ: 'workflow_page_link_read',
+  PAGE_SECRET_ROTATE: 'workflow_page_secret_rotate',
+  PAGE_ACCESS_CHANGE: 'workflow_page_access_change',
+  PAGE_OFFLINE_CHANGE: 'workflow_page_offline_change',
 } as const;
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
@@ -109,7 +118,7 @@ interface WorkflowManagementAuditLogDeps {
  * Instantiated once with deps; each method takes only `request` + params.
  * Best-effort: sync throws are caught; audit never affects HTTP responses.
  */
-export class WorkflowManagementAuditLog {
+export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
   private security?: SecurityServiceStart;
 
   constructor(private readonly deps: WorkflowManagementAuditLogDeps) {
@@ -542,5 +551,57 @@ export class WorkflowManagementAuditLog {
         `${actor} timed out HITL wait [executionId=${executionId}]${stepPart}${typePart}`
       )
     );
+  }
+
+  logPageLinkRead(request: KibanaRequest, params: WorkflowPageAuditParams): void {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_LINK_READ, 'access', {
+      ...params,
+      verb: 'read the link of',
+    });
+  }
+
+  logPageSecretRotated(request: KibanaRequest, params: WorkflowPageAuditParams): void {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_SECRET_ROTATE, 'change', {
+      ...params,
+      verb: 'rotated the secret of',
+    });
+  }
+
+  logPageAccessChanged(
+    request: KibanaRequest,
+    params: WorkflowPageAuditParams & { access: WorkflowPageAccess | null }
+  ): void {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_ACCESS_CHANGE, 'change', {
+      ...params,
+      verb: 'set the access level of',
+      detail: `access=${params.access?.level ?? 'none'}`,
+    });
+  }
+
+  logPageOfflineChanged(
+    request: KibanaRequest,
+    params: WorkflowPageAuditParams & { offline: boolean }
+  ): void {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_OFFLINE_CHANGE, 'change', {
+      ...params,
+      verb: params.offline ? 'took offline' : 'brought online',
+    });
+  }
+
+  private logPageEvent(
+    request: KibanaRequest,
+    action: string,
+    eventType: WorkflowAuditEventType,
+    params: WorkflowPageAuditParams & { verb: string; detail?: string }
+  ): void {
+    const { workflowId, pageId, spaceId, verb, detail, error } = params;
+    const fields = `[workflowId=${workflowId}] [pageId=${pageId}] [space=${spaceId}]${
+      detail ? ` [${detail}]` : ''
+    }`;
+    const message =
+      error !== undefined
+        ? `User failed to run "${verb}" on workflow page ${fields}`
+        : `User ${verb} workflow page ${fields}`;
+    this.log(request, createEvent(action, eventType, message, error));
   }
 }

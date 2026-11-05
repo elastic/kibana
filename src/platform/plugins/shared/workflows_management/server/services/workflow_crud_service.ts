@@ -724,6 +724,8 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
     });
 
+    await this.syncWorkflowPages([{ id, document: workflowData }]);
+
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
@@ -926,6 +928,10 @@ export class WorkflowCrudService {
       );
     }
 
+    await this.syncWorkflowPages(
+      successfullyWritten.map((vw) => ({ id: vw.id, document: vw.workflowData }))
+    );
+
     return { created, failed };
   }
 
@@ -1043,6 +1049,8 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
+    await this.syncWorkflowPages([{ id, document: finalData }]);
+
     return {
       response: {
         id,
@@ -1144,6 +1152,24 @@ export class WorkflowCrudService {
       options?.force === true &&
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
+    const result = await this.deleteWorkflowsWithBindings(ids, spaceId, options, deletionOptions);
+    await this.retireWorkflowPages(result.successfulIds ?? [], spaceId);
+    return result;
+  }
+
+  private async deleteWorkflowsWithBindings(
+    ids: string[],
+    spaceId: string,
+    options: { force?: boolean; acknowledgeAclLoss?: boolean } | undefined,
+    deletionOptions: {
+      force?: boolean;
+      acknowledgeAclLoss?: boolean;
+      profileId?: string;
+      request?: KibanaRequest;
+      isAdmin?: boolean;
+    }
+  ): Promise<DeleteWorkflowsResponse> {
+    const { profileId, request, isAdmin } = deletionOptions;
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1289,6 +1315,46 @@ export class WorkflowCrudService {
         logger: this.deps.logger,
       });
     return result;
+  }
+
+  /**
+   * Creates and retires pages after a write. A failure only logs: the workflow write already
+   * happened, and the public route also checks that the workflow still has the page trigger.
+   */
+  private async syncWorkflowPages(
+    workflows: Array<{ id: string; document: WorkflowProperties }>
+  ): Promise<void> {
+    const { pagesService } = this.deps;
+    if (!pagesService) return;
+    await pMap(
+      workflows,
+      async ({ id, document }) => {
+        try {
+          await pagesService.syncWorkflowPages({
+            workflowId: id,
+            spaceId: document.spaceId,
+            definition: document.definition,
+            valid: document.valid,
+          });
+        } catch (error) {
+          this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
+        }
+      },
+      { concurrency: 10 }
+    );
+  }
+
+  private async retireWorkflowPages(workflowIds: string[], spaceId: string): Promise<void> {
+    const { pagesService } = this.deps;
+    if (!pagesService || workflowIds.length === 0) return;
+    try {
+      await pagesService.retireWorkflowPages({ workflowIds, spaceId });
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to retire the pages of deleted workflows [${workflowIds.join(', ')}]`,
+        { error }
+      );
+    }
   }
 
   private accessAuditContext(

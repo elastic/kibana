@@ -88,6 +88,8 @@ import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
+import { createWorkflowPagesService } from '../pages/create_workflow_pages_service';
+import type { WorkflowPagesService } from '../pages/workflow_pages_service';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
@@ -173,6 +175,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private pagesService!: WorkflowPagesService;
   private accessControlService?: WorkflowAccessControlService;
   private managedWorkflowsService!: ManagedWorkflowsService;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
@@ -294,6 +297,14 @@ export class WorkflowsService {
 
     await this.initializeChangeHistoryService(coreStart);
 
+    this.pagesService = createWorkflowPagesService({
+      coreStart,
+      encryptedSavedObjectsSetup: this.plugins.encryptedSavedObjects,
+      encryptedSavedObjectsStart: pluginsStart.encryptedSavedObjects,
+      logger: this.logger.get('pages'),
+      audit: new WorkflowManagementAuditLog({ service: this }),
+    });
+
     this.crudService = new WorkflowCrudService({
       authz: this.pluginsStart.security?.authz,
       getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
@@ -309,6 +320,7 @@ export class WorkflowsService {
       changeHistoryService: this.changeHistoryService,
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
+      pagesService: this.pagesService,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -338,6 +350,11 @@ export class WorkflowsService {
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
     await this.ensureInitialized();
     return this.pluginsStart;
+  }
+
+  public async getPagesService(): Promise<WorkflowPagesService> {
+    await this.ensureInitialized();
+    return this.pagesService;
   }
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {
