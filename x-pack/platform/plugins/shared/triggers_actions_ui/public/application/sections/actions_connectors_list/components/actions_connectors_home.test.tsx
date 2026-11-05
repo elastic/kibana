@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import { act, render, screen } from '@testing-library/react';
+import * as React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -21,35 +21,13 @@ import userEvent from '@testing-library/user-event';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 
-// Jest resolves @elastic/eui to test-env, whose EuiIcon ignores component types.
-// Production EuiIcon renders them, so a lazy icon suspends. Mirror that here.
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   const ReactActual = jest.requireActual('react');
-
-  const EuiIcon = ({
-    type,
-    className,
-    ...rest
-  }: {
-    type?: unknown;
-    className?: string;
-    [key: string]: unknown;
-  }) => {
-    const classes = ['euiIcon', className].filter(Boolean).join(' ');
-    if (typeof type === 'string' || type == null) {
-      return ReactActual.createElement('span', {
-        ...rest,
-        className: classes,
-        'data-euiicon-type': type,
-      });
-    }
-    return ReactActual.createElement(type as React.ElementType, { ...rest, className: classes });
-  };
-
   return {
     ...actual,
-    EuiIcon,
+    EuiIcon: ({ type, ...props }: { type?: React.ElementType; [key: string]: unknown }) =>
+      ReactActual.createElement(typeof type === 'string' ? 'span' : type ?? 'span', props),
   };
 });
 
@@ -99,15 +77,17 @@ const queryClient = new QueryClient();
 
 const renderHome = (props: RouteComponentProps<MatchParams>) =>
   render(
-    <IntlProvider locale="en">
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <MockAppHeaderProvider>
-            <ActionsConnectorsHome {...props} />
-          </MockAppHeaderProvider>
-        </QueryClientProvider>
-      </Router>
-    </IntlProvider>
+    <React.Suspense fallback={<div data-test-subj="outer-fallback" />}>
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <QueryClientProvider client={queryClient}>
+            <MockAppHeaderProvider>
+              <ActionsConnectorsHome {...props} />
+            </MockAppHeaderProvider>
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
+    </React.Suspense>
   );
 
 const expectDocumentationInOverflow = async () => {
@@ -217,17 +197,12 @@ describe('ActionsConnectorsHome', () => {
     expect(selectConnectorFlyout).toBeInTheDocument();
   });
 
-  it('keeps the page mounted when create connector card icons are lazy', async () => {
-    let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void = () =>
-      undefined;
-    const deferred = new Promise<{ default: React.FC<React.SVGProps<SVGSVGElement>> }>(
-      (resolve) => {
-        resolveIcon = resolve;
-      }
-    );
+  it('keeps the flyout open while connector icons load', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: 'lazy-home-type',
-      iconClass: lazy(() => deferred),
+      id: 'lazy-icon-type',
+      iconClass: React.lazy(
+        () => new Promise<{ default: React.ComponentType<React.SVGProps<SVGSVGElement>> }>(() => {})
+      ),
       selectMessage: 'test',
       actionConnectorFields: null,
     });
@@ -238,7 +213,7 @@ describe('ActionsConnectorsHome', () => {
       {
         id: actionType.id,
         enabled: true,
-        name: 'Lazy home',
+        name: 'Lazy icon',
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
@@ -246,37 +221,14 @@ describe('ActionsConnectorsHome', () => {
       },
     ]);
 
-    const props = connectorsTabProps();
-    render(
-      <Suspense fallback={<div data-test-subj="outer-fallback" />}>
-        <IntlProvider locale="en">
-          <Router history={props.history}>
-            <QueryClientProvider client={queryClient}>
-              <MockAppHeaderProvider>
-                <ActionsConnectorsHome {...props} />
-              </MockAppHeaderProvider>
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      </Suspense>
-    );
-
+    renderHome(connectorsTabProps());
     await userEvent.click(await screen.findByTestId('createConnectorButton'));
+    await waitFor(() => expect(actionTypeRegistry.get).toHaveBeenCalledWith(actionType.id));
 
-    expect(await screen.findByRole('heading', { name: 'Select a connector' })).toBeInTheDocument();
-    expect(await screen.findByTestId(`${actionType.id}-card`)).toBeInTheDocument();
+    const flyout = screen.getByTestId('create-connector-flyout');
+    expect(flyout).toHaveTextContent('Select a connector');
+    expect(flyout).toHaveTextContent('Loading connector types');
     expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('centerJustifiedSpinner')).not.toBeInTheDocument();
-
-    await act(async () => {
-      resolveIcon({
-        default: (iconProps) => <svg {...iconProps} data-test-subj="resolved-home-icon" />,
-      });
-    });
-
-    expect(await screen.findByTestId('resolved-home-icon')).toBeInTheDocument();
-    expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('centerJustifiedSpinner')).not.toBeInTheDocument();
   });
 
   it('hide "Create connector" button when the user only has read access', async () => {

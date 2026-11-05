@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, Suspense } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiText,
   EuiFlyoutHeader,
   EuiSpacer,
@@ -20,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ConnectorIcon } from '../connector_icon';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 
 interface Props {
@@ -53,7 +53,9 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {icon ? (
           <EuiFlexItem grow={false} data-test-subj="create-connector-flyout-header-icon">
-            <ConnectorIcon type={icon} size="xl" />
+            <Suspense fallback={<EuiIcon type="plugs" size="xl" aria-hidden={true} />}>
+              <EuiIcon type={icon} size="xl" aria-hidden={true} />
+            </Suspense>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={true}>

@@ -24,11 +24,11 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
         await testSubjects.click('createFirstActionButton');
       }
 
-      // Defensive retry. Card icons load inside the flyout, so a click should land on a
-      // stable card. Keep the retry in case the grid is still settling. existOrFail defaults
-      // to the same 2 minute budget as retry.try, which would spend it all on the first
-      // attempt, so bound it. Skip the click once the form is up, since the card is gone
-      // by then and a slow form must not be mistaken for a dropped click.
+      // The card grid re-orders as the action types resolve and a click on a card React is
+      // re-creating is silently dropped, so the selection has to be retried. existOrFail
+      // defaults to the same 2 minute budget as retry.try, which would spend it all on the
+      // first attempt, so bound it. Skip the click once the form is up, since the card is
+      // gone by then and a slow form must not be mistaken for a dropped click.
       await retry.try(async () => {
         if (await testSubjects.exists(`.${name}-card`)) {
           await testSubjects.click(`.${name}-card`);

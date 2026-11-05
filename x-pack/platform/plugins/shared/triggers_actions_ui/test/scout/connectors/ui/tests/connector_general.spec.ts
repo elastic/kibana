@@ -55,10 +55,11 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await page.testSubj.click('createConnectorButton');
 
-    // Defensive wait. Card icons load inside the flyout without remounting the cards.
-    // Keep the wait in case the grid is still settling. Waiting for a sibling card
-    // proves the grid is painted; then confirm the selection registered before
-    // navigating back.
+    // Wait for the connector-type card grid to finish loading and settle before
+    // clicking, otherwise the click can land on a card node React is re-creating as
+    // the action-type list/capabilities resolve, silently losing the selection so
+    // the back button never appears. Waiting for a sibling card proves the grid is
+    // painted; then confirm the selection registered before navigating back.
     await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
