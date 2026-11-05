@@ -20,7 +20,15 @@ export type InventoryCellValue = InventoryCellScalar | InventoryCellScalar[];
 /** One entity, keyed by output column name. */
 export type InventoryRow = Readonly<Record<string, InventoryCellValue>>;
 
-/** The role of an output column. A `metric` kind arrives with the metrics phases. */
+/**
+ * The role of an output column. A `metric` kind arrives with the metrics phases.
+ * - `id`: `entity.id`, the key of the entity as a whole. It is always the first column.
+ * - `identity`: a field of the definition's identity fields, such as `host.id` or `host.name`.
+ *   Several can be null on one row, as an entity may be reported under one naming convention.
+ * - `attribute`: any other field of the definition.
+ * - `last_seen`: when the entity was last reported.
+ * The table only distinguishes `attribute` and `last_seen`.
+ */
 export type InventoryOutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
 
 /** An output column of a list response, with its Elasticsearch field type when known. */
