@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WaitForInputStep } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import { WaitForInputStepSchema } from '@kbn/workflows/spec/schema';
 import { WaitForInputStepImpl } from './wait_for_input_step';
 import type { ConnectorExecutor } from '../../connector_executor';
+import { RESUME_AS_CONTEXT_KEY, withWorkflowResponder } from '../../resume_as_responder';
 import { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
@@ -563,6 +565,71 @@ describe('WaitForInputStepImpl', () => {
     it('should not call updateWorkflowExecution when context is null', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resume-as: responder', () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    beforeEach(() => {
+      node.configuration = { ...node.configuration, 'resume-as': 'responder' };
+      (
+        mockStepExecutionRuntime.contextManager as unknown as { getFakeRequest: jest.Mock }
+      ).getFakeRequest = jest.fn().mockReturnValue(request);
+      (mockStepExecutionRuntime as unknown as { failStep: jest.Mock }).failStep = jest.fn();
+    });
+
+    const answer = () => {
+      mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: {
+          resumeInput: { reason: 'escalate' },
+          resumedBy: 'u_analyst',
+          pendingInteractiveResume: true,
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: null },
+        },
+      } as any);
+    };
+
+    it('should record the wait even without a with block', async () => {
+      node.configuration = { ...node.configuration, with: undefined };
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
+        context: {
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: null },
+        },
+      });
+    });
+
+    it('should apply the answer as the responder when the run is the person who answered', async () => {
+      answer();
+
+      await withWorkflowResponder(request, 'u_analyst', () => underTest.run());
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: { reason: 'escalate' },
+        respondedBy: 'u_analyst',
+      });
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
+        context: expect.objectContaining({
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: 'u_analyst' },
+        }),
+      });
+    });
+
+    it('should fail the step when the run is not the person who answered', async () => {
+      answer();
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'ResumeAsResponderError' }),
+        { respondedBy: 'u_analyst' }
+      );
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
     });
   });
 

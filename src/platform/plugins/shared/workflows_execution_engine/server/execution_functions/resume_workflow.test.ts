@@ -8,7 +8,12 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 
@@ -29,6 +34,7 @@ import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { getWorkflowResponder, RESUME_AS_CONTEXT_KEY } from '../resume_as_responder';
 import { DYNAMIC_TIMEOUT_STATE_KEY } from '../step/wait_for_input_step/hitl_timeout_helpers';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
@@ -136,6 +142,148 @@ describe('resumeWorkflow', () => {
     );
     expect(mockSetupDependencies).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+  });
+
+  describe('resume-as: responder', () => {
+    const answer = {
+      pendingInteractiveResume: true,
+      resumeInput: { approved: true },
+      resumedBy: 'u_analyst',
+    };
+    const record = (responder: string | null) => ({
+      [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'approval-step', responder },
+    });
+
+    const resumeAs = async (context: Record<string, unknown>, runIdentity: string) => {
+      jest.clearAllMocks();
+      const dependencies = mockContextDependencies();
+      const fakeRequest = createFakeKibanaRequest();
+      const scopedRequest = createFakeKibanaRequest();
+      jest
+        .spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled')
+        .mockReturnValue(true);
+      const withScopedRequestForWorkload = jest
+        .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
+        .mockImplementation(async (_params, run) => run(scopedRequest));
+      jest
+        .spyOn(dependencies.coreStart.security.authc, 'getCurrentUser')
+        .mockReturnValue(
+          securityServiceMock.createMockAuthenticatedUser({ profile_uid: runIdentity })
+        );
+      const workflowExecutionRepository = new WorkflowExecutionRepository(
+        createMockWorkflowDataClient()
+      );
+      const execution: EsWorkflowExecution = {
+        isTestRun: false,
+        context,
+        yaml: '',
+        scopeStack: [],
+        createdAt: '2026-11-05T00:00:00Z',
+        startedAt: '2026-11-05T00:00:00Z',
+        finishedAt: '',
+        error: null,
+        cancelRequested: false,
+        duration: 0,
+        id: 'run-resume-as',
+        workflowId: 'workflow',
+        spaceId: 'default',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowDefinition: {
+          version: '1',
+          name: 'Resume as test',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+          settings: { run_as: 'account-a' },
+        },
+      };
+      jest
+        .spyOn(workflowExecutionRepository, 'getWorkflowExecutionById')
+        .mockResolvedValue(execution);
+      jest
+        .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
+        .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
+      jest
+        .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
+        .mockResolvedValue(true);
+      jest
+        .spyOn(workflowExecutionRepository, 'updateWorkflowExecution')
+        .mockResolvedValue(undefined);
+      const stepExecutionRepository = createMockStepExecutionRepository();
+      const runs: Array<{ request?: KibanaRequest; responder?: string }> = [];
+      mockSetupDependencies.mockImplementation(async (...args) => {
+        const request = args[7];
+        runs.push({ request, responder: request && getWorkflowResponder(request) });
+        return {
+          workflowExecutionState: {
+            getWorkflowExecution: () => ({ status: ExecutionStatus.COMPLETED }),
+          },
+        } as never;
+      });
+
+      const result = resumeWorkflow({
+        workflowRunId: 'run-resume-as',
+        spaceId: 'default',
+        signal: new AbortController().signal,
+        dependencies,
+        logger: createMockLogger(),
+        config: createMockWorkflowExecutionEngineConfig(),
+        fakeRequest,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+      });
+      return {
+        result,
+        runs,
+        fakeRequest,
+        scopedRequest,
+        withScopedRequestForWorkload,
+        stepExecutionRepository,
+      };
+    };
+
+    it('should run the answer as the responder instead of the service account when the run is the person who answered', async () => {
+      const { result, runs, fakeRequest, withScopedRequestForWorkload } = await resumeAs(
+        { ...record(null), ...answer },
+        'u_analyst'
+      );
+
+      await expect(result).resolves.toEqual({});
+      expect(runs).toEqual([{ request: fakeRequest, responder: 'u_analyst' }]);
+      expect(withScopedRequestForWorkload).not.toHaveBeenCalled();
+    });
+
+    it('should keep the service account when the run is not the person who answered', async () => {
+      const { result, runs, scopedRequest } = await resumeAs(
+        { ...record(null), ...answer },
+        'u_previous_approver'
+      );
+
+      await expect(result).resolves.toEqual({});
+      expect(runs).toEqual([{ request: scopedRequest, responder: undefined }]);
+    });
+
+    it('should keep running as the responder after their answer while the run is that person', async () => {
+      const { result, runs, fakeRequest } = await resumeAs(record('u_analyst'), 'u_analyst');
+
+      await expect(result).resolves.toEqual({});
+      expect(runs).toEqual([{ request: fakeRequest, responder: 'u_analyst' }]);
+    });
+
+    it('should fail the execution when a later run is not the responder it runs as', async () => {
+      const { result, runs, withScopedRequestForWorkload, stepExecutionRepository } =
+        await resumeAs(record('u_analyst'), 'u_original_caller');
+
+      await expect(result).rejects.toThrow('does not hold their credentials');
+      expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
+        'run-resume-as',
+        expect.objectContaining({ type: 'ResumeAsResponderError' }),
+        undefined
+      );
+      expect(runs).toEqual([]);
+      expect(withScopedRequestForWorkload).not.toHaveBeenCalled();
+    });
   });
 
   describe('terminal state and resume gating', () => {

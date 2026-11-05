@@ -12,6 +12,7 @@ import {
   ConsoleStepInputSchema,
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
+  HitlResumeAsPropSchema,
   IfStepConfigSchema,
   ParallelStepConfigSchema,
   SwitchStepConfigSchema,
@@ -295,6 +296,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
       ...hitlAuditOutputFields,
     }),
+    configSchema: HitlResumeAsPropSchema,
     documentation: {
       examples: [
         `- name: wait_for_approval
@@ -381,6 +383,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       response: z.object({ approved: z.boolean() }),
       ...hitlAuditOutputFields,
     }),
+    configSchema: HitlResumeAsPropSchema,
     documentation: {
       examples: [
         `- name: request-approval
@@ -415,6 +418,11 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         method: POST
         body: |
           {"approve":"{{ context.hitl.externalApproveLink }}","reject":"{{ context.hitl.externalRejectLink }}"}`,
+        `- name: approve-as-responder
+  type: waitForApproval
+  resume-as: responder
+  with:
+    message: "Close case {{ inputs.caseId }}? The next steps run as you."`,
       ],
     },
   },
