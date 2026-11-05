@@ -22,7 +22,7 @@ import type { EvidenceRound } from '../evaluators/evidence/types';
 import type { EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
 import { EvaluationExecutionError } from './evaluation_execution_error';
-import { createModelUsageTally } from './model_usage_tally';
+import { createModelUsageTally, MAX_ERROR_MESSAGE_LENGTH } from './model_usage_tally';
 
 /** Max evaluators graded in parallel for one trace; bounds concurrent judge-model calls. */
 export const EVALUATOR_CONCURRENCY = 4;
@@ -264,6 +264,17 @@ export const executeEvaluators = async (
         })
       );
 
+      if (result.notApplicable) {
+        return withUsage({
+          status: 'error',
+          evaluator: await describeEvaluator(definition, connectorId),
+          error: {
+            code: 'not_applicable',
+            message: `Evaluator not applicable: ${result.notApplicable.reason}`,
+          },
+        });
+      }
+
       return withUsage({
         status: 'ok',
         evaluator: await describeEvaluator(definition, connectorId),
@@ -275,7 +286,12 @@ export const executeEvaluators = async (
       return withUsage({
         status: 'error',
         evaluator: await describeEvaluator(definition, connectorId),
-        error: { message: error instanceof Error ? error.message : String(error) },
+        error: {
+          message: (error instanceof Error ? error.message : String(error)).slice(
+            0,
+            MAX_ERROR_MESSAGE_LENGTH
+          ),
+        },
       });
     }
   };

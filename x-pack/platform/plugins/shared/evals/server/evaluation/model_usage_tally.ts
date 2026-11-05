@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { EvaluateResultUsage } from '@kbn/evals-common';
+import type { EvaluateResultUsage, EvaluateResultUsageCall } from '@kbn/evals-common';
 import type { InferenceCallbacks } from '@kbn/inference-common';
+import { isInferenceError } from '@kbn/inference-common';
+
+/**
+ * The response schema's bound on error messages. Provider errors can carry the upstream response
+ * body, and the kbn-evals client rejects a whole response with a message over it.
+ */
+export const MAX_ERROR_MESSAGE_LENGTH = 8192;
 
 export interface ModelUsageTally {
   /** Inference client callbacks that count every model call the client makes. */
@@ -21,7 +28,7 @@ export interface ModelUsageTally {
  * so a retried call counts once with its final attempt's tokens and a failed call with none.
  */
 export const createModelUsageTally = (): ModelUsageTally => {
-  let llmCalls = 0;
+  const calls: EvaluateResultUsageCall[] = [];
   let llmCallsWithoutUsage = 0;
   let inputTokens = 0;
   let outputTokens = 0;
@@ -30,37 +37,55 @@ export const createModelUsageTally = (): ModelUsageTally => {
 
   return {
     callbacks: {
-      complete: ({ tokens }) => {
-        llmCalls += 1;
+      complete: ({ tokens, model }) => {
+        const modelField = model ? { model } : {};
         if (!tokens) {
           llmCallsWithoutUsage += 1;
+          calls.push({ status: 'ok', ...modelField });
           return;
         }
-        inputTokens += tokens.prompt;
+        const { prompt, completion, cached, thinking } = tokens;
         // The inference client counts thinking apart from completion.
-        outputTokens += tokens.completion + (tokens.thinking ?? 0);
-        if (tokens.cached !== undefined) {
-          cachedInputTokens = (cachedInputTokens ?? 0) + tokens.cached;
+        const callOutputTokens = completion + (thinking ?? 0);
+        inputTokens += prompt;
+        outputTokens += callOutputTokens;
+        if (cached !== undefined) {
+          cachedInputTokens = (cachedInputTokens ?? 0) + cached;
         }
-        if (tokens.thinking !== undefined) {
-          reasoningTokens = (reasoningTokens ?? 0) + tokens.thinking;
+        if (thinking !== undefined) {
+          reasoningTokens = (reasoningTokens ?? 0) + thinking;
         }
+        calls.push({
+          status: 'ok',
+          ...modelField,
+          input_tokens: prompt,
+          ...(cached === undefined ? {} : { cached_input_tokens: cached }),
+          output_tokens: callOutputTokens,
+          ...(thinking === undefined ? {} : { reasoning_tokens: thinking }),
+        });
       },
-      error: () => {
-        llmCalls += 1;
+      error: ({ error }) => {
         llmCallsWithoutUsage += 1;
+        calls.push({
+          status: 'error',
+          error: {
+            ...(isInferenceError(error) ? { code: error.code } : {}),
+            message: error.message.slice(0, MAX_ERROR_MESSAGE_LENGTH),
+          },
+        });
       },
     },
     getUsage: () =>
-      llmCalls === 0
+      calls.length === 0
         ? undefined
         : {
             input_tokens: inputTokens,
             ...(cachedInputTokens === undefined ? {} : { cached_input_tokens: cachedInputTokens }),
             output_tokens: outputTokens,
             ...(reasoningTokens === undefined ? {} : { reasoning_tokens: reasoningTokens }),
-            llm_calls: llmCalls,
+            llm_calls: calls.length,
             llm_calls_without_usage: llmCallsWithoutUsage,
+            calls: [...calls],
           },
   };
 };

@@ -23,11 +23,10 @@ import {
 } from '@kbn/workflows/managed';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
-import { getTelemetryTargets } from '../../telemetry_targets';
-import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
+import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
 import knowledgeCortexSection from './instructions/knowledge_cortex.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
@@ -91,13 +90,10 @@ export interface InvestigationAgentTypeOptions {
   investigationToolsEnabled?: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled?: boolean;
-  telemetryConnectorId?: string;
-  telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   /**
-   * Resolves connector ids this type inherits from another agent on every run, in addition to the
-   * telemetry connectors. The assistant inherits the investigator's saved connectors so both
+   * Resolves connector ids this type inherits from another agent on every run. The assistant inherits the investigator's saved connectors so both
    * agents share the single allow list users edit on the investigator.
    */
   getInheritedConnectorIds?: (ctx: AgentConfigContext) => Promise<string[]>;
@@ -156,7 +152,7 @@ const inheritConnectorIds = async ({
     return [...new Set([...connectorIds, ...(await getInheritedConnectorIds(ctx))])];
   } catch (error) {
     // Inherited connectors only widen the allow list, so failing to read them must not block a
-    // run: the agent keeps the telemetry connectors from its own type.
+    // run: the agent keeps the connectors from its own type.
     logger?.warn(
       `Failed to resolve inherited connectors for space "${ctx.spaceId}": ${error.message}`
     );
@@ -173,8 +169,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent lists only its own tools. Agent Builder's own prompt and internal
- * tools still apply to it.
+ * With `standalone`, the agent lists only its own tools and the Slack read tool.
+ * Agent Builder's own prompt and internal tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
@@ -184,8 +180,6 @@ export const buildNightshiftAgentConfiguration = ({
   investigationToolsEnabled,
   proposalsEnabled,
   standalone = false,
-  telemetryConnectorId,
-  telemetryConfig,
   getCustomContextInstructions,
   getInheritedConnectorIds,
   logger,
@@ -193,18 +187,6 @@ export const buildNightshiftAgentConfiguration = ({
   instructions: string;
   standalone?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
-  const telemetryConnectorIds: string[] = telemetryConfig
-    ? [
-        ...new Set(
-          getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
-            connectorId ? [connectorId] : []
-          )
-        ),
-      ]
-    : telemetryConnectorId
-    ? [telemetryConnectorId]
-    : [];
-
   const configurationFor = ({
     materializeWorkflowId,
     optimizeWorkflowId,
@@ -214,17 +196,22 @@ export const buildNightshiftAgentConfiguration = ({
       skill_ids: [],
       tools: [
         {
-          tool_ids: standalone
-            ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
-            : [
-                ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
-                ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
-                ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-              ],
+          tool_ids: [
+            ...(standalone
+              ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+              : [
+                  ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+                  ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
+                  ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+                ]),
+            // No Slack auth type hands credentials to the sandbox, and the Elastic Slack app's
+            // token never leaves the Relay, so the agent reads Slack through a tool.
+            SLACK_READ_TOOL_ID,
+          ],
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConnectorIds,
+      connector_ids: [],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
@@ -274,8 +261,8 @@ export const buildNightshiftAgentConfiguration = ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through an Elasticsearch connector as
- * described in `/workspace/.connector-docs/elastic.md`.
+ * standalone prompt and no Elastic tools. Telemetry is reached through an Elasticsearch connector the
+ * user assigned, as described in `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
@@ -305,8 +292,6 @@ export const registerInvestigationAgentType = (
     decisionTreesEnabled = false,
     investigationToolsEnabled,
     proposalsEnabled,
-    telemetryConnectorId,
-    telemetryConfig,
     getCustomContextInstructions,
     getInheritedConnectorIds,
     logger,
@@ -320,8 +305,6 @@ export const registerInvestigationAgentType = (
       decisionTreesEnabled,
       investigationToolsEnabled,
       proposalsEnabled,
-      telemetryConnectorId,
-      telemetryConfig,
       getCustomContextInstructions,
       getInheritedConnectorIds,
       logger,

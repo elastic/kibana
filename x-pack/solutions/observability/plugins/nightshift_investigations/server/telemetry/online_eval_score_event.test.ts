@@ -28,6 +28,24 @@ const results: EvaluateResult[] = [
       reasoning_tokens: 200,
       llm_calls: 2,
       llm_calls_without_usage: 0,
+      calls: [
+        {
+          status: 'ok',
+          model: 'gpt-5',
+          input_tokens: 600,
+          cached_input_tokens: 400,
+          output_tokens: 150,
+          reasoning_tokens: 100,
+        },
+        {
+          status: 'ok',
+          model: 'gpt-5',
+          input_tokens: 600,
+          cached_input_tokens: 400,
+          output_tokens: 150,
+          reasoning_tokens: 100,
+        },
+      ],
     },
   },
   {

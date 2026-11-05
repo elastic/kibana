@@ -92,6 +92,7 @@ components:
         - output_tokens
         - llm_calls
         - llm_calls_without_usage
+        - calls
       properties:
         input_tokens:
           type: integer
@@ -119,6 +120,55 @@ components:
           description: >-
             Calls with no token counts in the totals: the call failed, or the provider
             reported no usage.
+        calls:
+          type: array
+          description: Each model call, in the order it finished.
+          items:
+            $ref: '#/components/schemas/EvaluateResultUsageCall'
+    EvaluateResultUsageCall:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - error
+        model:
+          type: string
+          maxLength: 256
+          description: Model the provider reported serving the call, when it did.
+        input_tokens:
+          type: integer
+          minimum: 0
+          description: Input tokens, including cached ones. Absent when no usage was reported.
+        cached_input_tokens:
+          type: integer
+          minimum: 0
+          description: Input tokens served from the prompt cache, when reported.
+        output_tokens:
+          type: integer
+          minimum: 0
+          description: Output tokens, including reasoning ones. Absent when no usage was reported.
+        reasoning_tokens:
+          type: integer
+          minimum: 0
+          description: Reasoning tokens, when reported.
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            code:
+              type: string
+              maxLength: 64
+              description: >-
+                The inference client's error code, such as `providerError` or
+                `requestError`, when the error carries one.
+            message:
+              type: string
+              maxLength: 8192
     EvaluateResultEvaluator:
       type: object
       required:
@@ -186,6 +236,11 @@ components:
           type: string
           enum:
             - evidence_unmet
+            - not_applicable
+          description: >-
+            `evidence_unmet`: the round lacks the evidence the evaluator requires.
+            `not_applicable`: the evaluator read the round and reported that it
+            does not apply.
         message:
           type: string
           maxLength: 8192

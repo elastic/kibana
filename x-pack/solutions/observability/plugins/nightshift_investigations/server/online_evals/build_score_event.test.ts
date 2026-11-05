@@ -113,6 +113,30 @@ describe('buildOnlineEvalScoreEvent', () => {
     expect(event.scores[1]).not.toHaveProperty('explanation');
   });
 
+  it('keeps not_applicable apart from evidence_unmet and counts both as skipped', () => {
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [
+        errorResult('investigation_process', { code: 'evidence_unmet', message: 'No tool calls' }),
+        errorResult('alert_outcome_rca_accuracy', {
+          code: 'not_applicable',
+          message: 'Evaluator not applicable: recovery states no verified cause',
+        }),
+      ],
+      includeExplanations: false,
+    });
+
+    expect(event).toMatchObject({
+      evaluator_count: 2,
+      failed_count: 0,
+      skipped_count: 2,
+      errors: [
+        { evaluator_name: 'investigation_process', code: 'evidence_unmet' },
+        { evaluator_name: 'alert_outcome_rca_accuracy', code: 'not_applicable' },
+      ],
+    });
+  });
+
   it('never sends error messages, which can quote evidence', () => {
     const event = buildOnlineEvalScoreEvent({ metadata, results, includeExplanations: true });
 
@@ -169,11 +193,31 @@ describe('buildOnlineEvalScoreEvent', () => {
             reasoning_tokens: 150,
             llm_calls: 2,
             llm_calls_without_usage: 1,
+            calls: [
+              {
+                status: 'ok',
+                input_tokens: 1000,
+                cached_input_tokens: 600,
+                output_tokens: 250,
+                reasoning_tokens: 150,
+              },
+              { status: 'error', error: { code: 'providerError', message: 'rate limited' } },
+            ],
           },
         },
         {
           ...errorResult('conclusion_quality', { message: 'Invalid judge output' }),
-          usage: { input_tokens: 500, output_tokens: 50, llm_calls: 3, llm_calls_without_usage: 0 },
+          usage: {
+            input_tokens: 500,
+            output_tokens: 50,
+            llm_calls: 3,
+            llm_calls_without_usage: 0,
+            calls: [
+              { status: 'ok', input_tokens: 200, output_tokens: 20 },
+              { status: 'ok', input_tokens: 200, output_tokens: 20 },
+              { status: 'ok', input_tokens: 100, output_tokens: 10 },
+            ],
+          },
         },
         llmResult('investigation_process', [{ name: 'process', score: 0.5 }]),
       ],
