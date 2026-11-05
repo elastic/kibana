@@ -259,7 +259,7 @@ export const syntheticsFeature = {
       }),
       description: i18n.translate('xpack.synthetics.features.app.runTest.description', {
         defaultMessage:
-          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors.',
+          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors. Users with the All privilege can always run tests manually, even if this is unchecked.',
       }),
       privilegeGroups: [canRunTestManuallyPrivilege],
     },
@@ -308,7 +308,7 @@ export const syntheticsFeature = {
       }),
       description: i18n.translate('xpack.synthetics.features.app.rules.description', {
         defaultMessage:
-          'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors.',
+          'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors. Users with the All privilege can always manage rules, even if this is unchecked.',
       }),
       privilegeGroups: [canManageRulesPrivilege],
     },
