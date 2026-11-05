@@ -782,7 +782,7 @@
       "reason": "Intentional removal of the risk engine schedule-now route. On a default 9.4 deployment this operation already returned 400 while Entity Store V2 was on. It was not marked deprecated, and it still ran if that setting was turned off. Approved in elastic/dev#3471.",
       "approvedBy": "@elastic/security-entity-analytics",
       "oasdiffId": "api-path-removed-without-deprecation",
-      "prUrl": "https://github.com/elastic/kibana/pull/266023"
+      "prUrl": "https://github.com/elastic/kibana/pull/303438"
     }
   ]
 }
