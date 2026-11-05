@@ -26,7 +26,6 @@ import {
   answeredPromptRequestIds,
   interruptionOfTerminal,
   isExecutionTerminalEvent,
-  isLegacyTodosStep,
   isTimelineEvent,
   isToolCallStep,
   parseExecutionId,
@@ -108,9 +107,8 @@ export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRoun
       (event): event is ExecutionStepEvent => event.type === TimelineEventType.executionStep
     );
     // Interrupted terminals carry no steps: an interrupted execution's steps are its step events only.
-    const steps = withoutLegacySteps(
-      stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated?.data.steps ?? []
-    );
+    const steps =
+      stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated?.data.steps ?? [];
 
     const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
     const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
@@ -216,13 +214,6 @@ const answersFromPromptResponse = (
   }
   return answers;
 };
-
-/**
- * Steps persisted by features that no longer exist (the todo tool) have no runtime type and nothing
- * renders them, so they are dropped at load time rather than carried through.
- */
-const withoutLegacySteps = (steps: ConversationRoundStep[]): ConversationRoundStep[] =>
-  steps.filter((step) => !isLegacyTodosStep(step));
 
 const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] => {
   const byId = new Map<string, ExecutionStepEvent>();

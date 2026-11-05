@@ -10,12 +10,7 @@ import type {
   ConversationRound,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
-import {
-  isAskUserQuestionStep,
-  isLegacyTodosStep,
-  isToolCallStep,
-  parseExecutionId,
-} from '@kbn/agent-builder-common';
+import { isAskUserQuestionStep, isToolCallStep, parseExecutionId } from '@kbn/agent-builder-common';
 import {
   isAskUserQuestionPromptResponse,
   type PromptRequest,
@@ -93,21 +88,15 @@ const bucketExecutions = (events: TimelineEvent[]): ExecutionBucket[] => {
   return [...buckets.values()];
 };
 
-/**
- * Same rule as `eventsToRounds`: dedupe by event id, order by `sequence`, fall back to the terminal
- * snapshot. Steps written by the removed todo tool are dropped, as `eventsToRounds` does, so a
- * resumed legacy turn has the same steps as its loaded conversation.
- */
+/** Same rule as `eventsToRounds`: dedupe by event id, order by `sequence`, fall back to the terminal snapshot. */
 const executionSteps = ({ stepEvents, terminal }: ExecutionBucket): ConversationRoundStep[] => {
   const terminated =
     terminal?.type === TimelineEventType.executionTerminated ? terminal : undefined;
-  const raw =
-    stepEvents.length === 0
-      ? terminated?.data.steps ?? []
-      : [...new Map(stepEvents.map((event) => [event.id, event])).values()]
-          .sort((a, b) => a.data.sequence - b.data.sequence)
-          .map((event) => event.data.step);
-  return raw.filter((step) => !isLegacyTodosStep(step));
+  return stepEvents.length === 0
+    ? terminated?.data.steps ?? []
+    : [...new Map(stepEvents.map((event) => [event.id, event])).values()]
+        .sort((a, b) => a.data.sequence - b.data.sequence)
+        .map((event) => event.data.step);
 };
 
 /** Converts a resume execution's persisted (execution-owned) steps into updates over the turn's steps. */
