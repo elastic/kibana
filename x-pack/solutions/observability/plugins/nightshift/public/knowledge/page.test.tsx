@@ -17,7 +17,7 @@ import { KnowledgePage, type KnowledgePageHeaderProps } from './page';
 jest.mock('../hooks/use_kibana');
 jest.mock('./hooks/use_knowledge_tabs_availability');
 const mockAppHeader = jest.fn();
-jest.mock('../app/app_header', () => ({
+jest.mock('../components/app_header', () => ({
   NightshiftAppHeader: (props: unknown) => {
     mockAppHeader(props);
     return <div data-test-subj="knowledgeHeader" />;

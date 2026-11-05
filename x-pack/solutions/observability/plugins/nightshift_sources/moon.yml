@@ -39,6 +39,7 @@ tags:
   - scout-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - public/**/*
     - test/scout/**/*

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -14,40 +14,54 @@ import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
-import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
+
+const createSearchSchemaShape = () => ({
+  query: z.string().describe('A natural language query expressing the search request'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
+    ),
+  time_range: z
+    .object({
+      from: z
+        .string()
+        .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
+      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+    })
+    .optional()
+    .describe(
+      '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
+    ),
+});
 
 const createSearchSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
-    query: z.string().describe('A natural language query expressing the search request'),
-    index: z
-      .string()
-      .optional()
-      .describe(
-        '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
-      ),
-    time_range: z
-      .object({
-        from: z
-          .string()
-          .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
-        to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
-      })
-      .optional()
-      .describe(
-        '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
-      ),
+    ...createSearchSchemaShape(),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
   })
 );
 
-type SearchSchema = ReturnType<typeof createSearchSchema>;
+const createServerlessSearchSchema = once(() => z.object(createSearchSchemaShape()));
+
+type SearchSchema =
+  | ReturnType<typeof createSearchSchema>
+  | ReturnType<typeof createServerlessSearchSchema>;
 
 export const searchTool = ({
   coreSetup,
   topSnippetsDefaults,
+  isServerless = false,
 }: {
   coreSetup: CoreSetup;
   topSnippetsDefaults: TopSnippetsConfig;
+  isServerless?: boolean;
 }): DynamicSchemaBuiltinToolDefinition<SearchSchema> => {
   // Cache the start services promise so it is resolved at most once.
   let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
@@ -88,11 +102,14 @@ Note:
       openWorldHint: false,
     },
     getSchema: async (schemaContext) =>
-      createSearchSchema(await getIncludeFrozenByDefault(schemaContext)),
+      isServerless
+        ? createServerlessSearchSchema()
+        : createSearchSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
-      { query: nlQuery, index, time_range: explicitTimeRange, include_frozen: includeFrozen },
+      params,
       { esClient, modelProvider, logger, events, attachments, savedObjectsClient }
     ) => {
+      const { query: nlQuery, index, time_range: explicitTimeRange } = params;
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -127,7 +144,7 @@ Note:
         logger,
         topSnippetsConfig,
         includeDatasets: true,
-        includeFrozen,
+        includeFrozen: getIncludeFrozenParam(params),
         rowLimit: 100,
       });
       return { results };

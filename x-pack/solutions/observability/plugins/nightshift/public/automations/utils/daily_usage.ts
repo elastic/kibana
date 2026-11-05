@@ -6,6 +6,7 @@
  */
 
 export const MAX_DAILY_LIMIT = 50;
+export const UNLIMITED_DAILY_LIMIT = 'unlimited';
 export const SOFT_DAILY_LIMIT = 30;
 const HIGH_USAGE_RATIO = 0.71;
 const RAISE_FACTOR = 1.5;

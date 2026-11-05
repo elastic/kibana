@@ -2,10 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
   "include": [
     "**/*.ts",
@@ -18,9 +15,7 @@
     "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/projects-solutions-groups",
-    "@kbn/swc-register",
+    "@kbn/swc-register"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

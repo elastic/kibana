@@ -183,11 +183,17 @@ describe('floor_alert_triage_review — create collision', () => {
     );
     // The owner gets the alerts and the same join message as a join made when the batch ran.
     expect(names).toEqual(
-      expect.arrayContaining(['attach_joined_alert_chunk', 'post_comment_joined_owner'])
+      expect.arrayContaining(['tag_joined_alert_chunk', 'post_comment_joined_owner'])
     );
-    expect(stepByName('attach_joined_alert_chunk')?.with?.conversation_id).toBe(
-      '{{ steps.join_on_collision.output.conversation_id }}'
+    expect(stepByName('attach_joined_alerts')).toBeUndefined();
+    // Its Investigation tag puts them in the owner's Investigation, whose attachment matches it.
+    expect(stepByName('tag_joined_alerts')?.foreach).toBe(
+      '${{ steps.join_on_collision.output.alert_ids | chunk: 500 | json }}'
     );
+    expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: ['az:triage_investigation:{{ steps.join_on_collision.output.conversation_id }}'],
+      tags_to_remove: [],
+    });
     const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
     expect(
       renderString(message, {
@@ -460,9 +466,13 @@ describe('floor_alert_triage_review — post_comment_outcome_dismissed', () => {
     expect(comment).not.toContain('Rationale');
   });
 
-  it('names the decider when decidedBy is present', () => {
-    const comment = renderDismissedComment({ decidedBy: { username: 'analyst1' } });
-    expect(comment).toContain('@analyst1');
+  // On serverless an API key can be the decider, and its username is not readable. The proposal
+  // card already shows who decided, so the comment does not repeat it.
+  it('does not name the decider, even when decidedBy is present', () => {
+    const comment = renderDismissedComment({ decidedBy: { username: 'kcoM-oC2SUmTy-Gcu7F5zw' } });
+    expect(comment).not.toContain('kcoM-oC2SUmTy-Gcu7F5zw');
+    expect(comment).not.toContain(' by @');
+    expect(comment).toContain('Proposal dismissed (reason:');
   });
 
   it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
@@ -615,29 +625,70 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.with?.exclude_alert_ids).toBe('${{ variables.live_alert_ids }}');
   });
 
-  it('reports a failed sweep of the leftovers in the count and the comment', () => {
+  // The proposal card shows who approved and the Investigation shows what closed, so the approved
+  // branch posts a comment only when the leftovers sweep did not finish.
+  it('counts a failed sweep of the leftovers and comments only when it failed', () => {
+    const step = stepByName('post_comment_retag_incomplete_approved');
     const expr = stepByName('record_approved_retag_failures')?.with?.failed_retag_count as string;
     expect(evalExpr(expr, { steps: { retag_approved_leftovers: { output: { failed: 3 } } } })).toBe(
       3
     );
-    const template = (stepByName('post_comment_outcome_approved')?.with as { message: string })
-      .message;
-    const render = (context: Record<string, unknown>) =>
-      renderString(template, {
-        variables: { fp_candidate_count: 2, failed_retag_count: 0 },
-        ...context,
-      });
-    expect(
-      render({ steps: { retag_approved_leftovers: { error: { message: 'x' } }, get_proposal: {} } })
-    ).toContain('did not fully succeed');
-    expect(
-      render({
+    expect(branchStepNames('handle_approved')).toContain('post_comment_retag_incomplete_approved');
+    expect(stepByName('post_comment_outcome_approved')).toBeUndefined();
+    expect((step?.with as { message: string }).message).toContain('did not fully succeed');
+
+    const shouldPost = (steps: Record<string, unknown>, failedRetagCount: number) =>
+      evalExpr(step?.if as string, { steps, variables: { failed_retag_count: failedRetagCount } });
+    expect(shouldPost({ retag_approved_leftovers: { error: { message: 'x' } } }, 0)).toBe(true);
+    expect(shouldPost({ retag_approved_leftovers: { output: { failed: 2 } } }, 2)).toBe(true);
+    expect(shouldPost({ retag_approved_leftovers: { output: { failed: 0 } } }, 0)).toBe(false);
+  });
+
+  // The approval closes the Investigation as a false positive, so an analyst's earlier closure
+  // must be visible there. The proposal API does not expose the close output, so a search counts
+  // the live alerts closed with another reason.
+  it('tells the Investigation how many alerts an analyst had already closed, only when some were', () => {
+    const search = stepByName('count_analyst_closed');
+    const step = stepByName('post_comment_already_closed_approved');
+    expect(branchStepNames('handle_approved')).toEqual(
+      expect.arrayContaining(['count_analyst_closed', 'post_comment_already_closed_approved'])
+    );
+    expect(search?.type).toBe('elasticsearch.search');
+    expect(search?.['on-failure']?.continue).toBe(true);
+    // Each clause matters: dropping the id filter counts the whole space, dropping `closed` counts
+    // open alerts, and moving `false_positive` out of `must_not` counts the wrong alerts.
+    expect(search?.with?.query).toEqual({
+      bool: {
+        filter: [
+          { terms: { _id: '${{ variables.live_alert_ids }}' } },
+          { term: { 'kibana.alert.workflow_status': 'closed' } },
+        ],
+        must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
+      },
+    });
+
+    const shouldPost = (total?: number) =>
+      evalExpr(step?.if as string, {
         steps: {
-          retag_approved_leftovers: { output: { matched: 0, failed: 0 } },
-          get_proposal: {},
+          count_analyst_closed:
+            total === undefined
+              ? { error: { message: 'x' } }
+              : { output: { hits: { total: { value: total } } } },
         },
-      })
-    ).not.toContain('did not fully succeed');
+      });
+    expect(shouldPost(2)).toBe(true);
+    expect(shouldPost(0)).toBe(false);
+    // A failed search leaves the comment out instead of failing the run.
+    expect(shouldPost(undefined)).toBe(false);
+
+    const render = (closed: number, total: number) =>
+      renderString((step?.with as { message: string }).message, {
+        steps: { count_analyst_closed: { output: { hits: { total: { value: closed } } } } },
+        variables: { fp_candidate_count: total },
+      }).replace(/\s+/g, ' ');
+    expect(render(2, 5)).toContain('2 of 5 alerts were already closed by an analyst');
+    expect(render(1, 1)).toContain('1 of 1 alert was already closed by an analyst');
+    expect(render(2, 5)).not.toContain('@');
   });
 
   it('re-tags by the proposal tag and by id, in every outcome that uses the live revision', () => {
@@ -664,8 +715,11 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.with?.alert_ids).toBe('${{ inputs.fp_candidate_ids }}');
   });
 
-  it('keeps no kibana.SetAlertTags step: the typed step does every re-tag', () => {
-    expect(allSteps.some((step) => step.type === 'kibana.SetAlertTags')).toBe(false);
+  it('keeps no kibana.SetAlertTags step that re-tags: the typed step does every re-tag', () => {
+    const setTags = allSteps.filter((step) => step.type === 'kibana.SetAlertTags');
+    // The only one adds the owner's Investigation tag to joined alerts and removes nothing.
+    expect(setTags.map(({ name }) => name)).toEqual(['tag_joined_alert_chunk']);
+    expect((setTags[0].with?.tags as { tags_to_remove: string[] }).tags_to_remove).toEqual([]);
   });
 
   it.each([

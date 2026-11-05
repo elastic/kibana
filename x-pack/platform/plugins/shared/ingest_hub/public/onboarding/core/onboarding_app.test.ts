@@ -298,6 +298,45 @@ describe('hydrateOnboardingSession', () => {
     expect(launchStep?.launchedServiceIds).toEqual({ unified: ['cloudtrail', 'elb'] });
   });
 
+  it('restores launchedConfigs from ecfStacks serviceConfigs for settings drift detection', async () => {
+    const serviceConfigs = [
+      { serviceId: 'cloudtrail', bucketArns: ['arn:aws:s3:::trail'], logGroupArns: [] },
+    ];
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        ecfStacks: [
+          {
+            family: 'unified',
+            stackName: 'my-stack',
+            templateVersion: '1.10.0',
+            serviceIds: ['cloudtrail'],
+            serviceConfigs,
+          },
+        ],
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const launchStep = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.ecfLaunchStep`) ?? 'null'
+    );
+    expect(launchStep?.launchedConfigs).toEqual({ unified: serviceConfigs });
+  });
+
+  it('leaves launchedConfigs empty for stacks saved without serviceConfigs', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        ecfStacks: [
+          { family: 'unified', stackName: 'my-stack', templateVersion: '1.10.0', serviceIds: [] },
+        ],
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const launchStep = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.ecfLaunchStep`) ?? 'null'
+    );
+    expect(launchStep?.launchedConfigs).toEqual({});
+  });
+
   it('does not write ecfLaunchStep when ecfStacks is absent', async () => {
     mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks: undefined }) });
     await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
