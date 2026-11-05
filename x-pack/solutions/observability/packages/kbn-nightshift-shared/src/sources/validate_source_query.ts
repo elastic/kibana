@@ -314,16 +314,6 @@ export const getSourceCommandQuery = (esql: string): string => {
   return BasicPrettyPrinter.command(firstCommand);
 };
 
-/** The query with a leading `TS` swapped for `FROM`, so `COUNT(*)` counts documents (`TS` rejects it). */
-export const getSourceDocumentQuery = (esql: string): string => {
-  const [firstCommand] = Parser.parse(esql).root.commands;
-  if (firstCommand?.name !== 'ts') {
-    return esql;
-  }
-  const { min } = firstCommand.location;
-  return `${esql.slice(0, min)}FROM${esql.slice(min + 'ts'.length)}`;
-};
-
 /**
  * True when FROM/TS names more than one index. `Unknown index` then cannot mean the whole
  * source is empty, because another named index may still have data.

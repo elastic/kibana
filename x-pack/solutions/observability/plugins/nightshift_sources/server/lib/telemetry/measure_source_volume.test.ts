@@ -37,14 +37,16 @@ const crossCluster = (
 });
 
 const statefulStats = (docs: number, bytes: number) => ({
-  _all: { primaries: { docs: { count: docs }, store: { total_data_set_size_in_bytes: bytes } } },
+  _shards: { total: 1, successful: 1, failed: 0 },
+  _all: {
+    primaries: {
+      docs: { count: docs, total_size_in_bytes: bytes },
+      store: { size_in_bytes: 0, reserved_in_bytes: 0, total_data_set_size_in_bytes: bytes },
+    },
+  },
 });
 
-const setup = ({
-  esql = 'FROM logs-nginx-* | WHERE status >= 500',
-  isServerless = false,
-  cpsEnabled = false,
-} = {}) => {
+const setup = ({ esql = 'FROM logs-nginx-* | WHERE status >= 500', isServerless = false } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
   const measure = () =>
@@ -52,7 +54,6 @@ const setup = ({
       esClient,
       esql,
       isServerless,
-      cpsEnabled,
       window,
       signal: new AbortController().signal,
       logger,
@@ -61,10 +62,8 @@ const setup = ({
 };
 
 describe('measureSourceVolume', () => {
-  it('counts the window and sizes exact stateful expressions', async () => {
-    const { esClient, measure } = setup({
-      esql: 'FROM logs-*,-logs-archive-*,<logs-{now/d}> | WHERE status >= 500',
-    });
+  it('counts the window and sizes the local indices on stateful', async () => {
+    const { esClient, measure } = setup();
     esClient.esql.query.mockResolvedValue(countOf(42));
     esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
 
@@ -77,30 +76,20 @@ describe('measureSourceVolume', () => {
     expect(esClient.esql.query).toHaveBeenCalledWith(
       {
         query:
-          'FROM logs-*,-logs-archive-*,<logs-{now/d}> | WHERE status >= 500\n| STATS doc_count = COUNT(*)',
+          'FROM logs-nginx-* | WHERE status >= 500\n' +
+          `| WHERE @timestamp >= "${window.start}" AND @timestamp <= "${window.end}"\n` +
+          '| STATS doc_count = COUNT(*)',
         format: 'json',
         include_ccs_metadata: true,
-        filter: { range: { '@timestamp': { gte: window.start, lte: window.end } } },
       },
       expect.objectContaining({ requestTimeout: expect.any(Number) })
     );
     expect(esClient.indices.stats).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: ['logs-*', '-logs-archive-*', '<logs-{now/d}>'],
+        index: ['logs-nginx-*'],
       }),
       expect.anything()
     );
-  });
-
-  it('counts the documents of a TS source with FROM', async () => {
-    const { esClient, measure } = setup({ esql: 'TS metrics-* | WHERE host != "c"' });
-    esClient.esql.query.mockResolvedValue(countOf(60));
-    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
-
-    await expect(measure()).resolves.toMatchObject({ status: 'ok', doc_count: 60 });
-    expect(esClient.esql.query.mock.calls[0][0]).toMatchObject({
-      query: 'FROM metrics-* | WHERE host != "c"\n| STATS doc_count = COUNT(*)',
-    });
   });
 
   it('sizes exact expressions with serverless metering stats', async () => {
@@ -125,15 +114,6 @@ describe('measureSourceVolume', () => {
       expect.anything()
     );
     expect(esClient.indices.stats).not.toHaveBeenCalled();
-  });
-
-  it('counts across linked projects and extrapolates the local average under CPS', async () => {
-    const { esClient, measure } = setup({ cpsEnabled: true });
-    esClient.esql.query.mockResolvedValue(countOf(100));
-    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
-
-    await expect(measure()).resolves.toMatchObject({ doc_count: 100, bytes_estimated: 50_000 });
-    expect(esClient.esql.query.mock.calls[0][0]).toMatchObject({ project_routing: '_alias:*' });
   });
 
   it('reports a failed count as an error with the ES error type', async () => {

@@ -7,13 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
-import {
-  getSourceDocumentQuery,
-  getSourceLocalIndexExpressions,
-  getSourceReadTargets,
-} from '@kbn/nightshift-shared';
+import { getSourceLocalIndexExpressions, getSourceReadTargets } from '@kbn/nightshift-shared';
 import type { SourceVolume } from './source_volume_event';
 
 const COUNT_TIMEOUT_MS = 60_000;
@@ -27,9 +22,10 @@ interface MeteringStatsResponse {
   indices?: Array<{ num_docs: number; size_in_bytes: number }>;
 }
 
-// Trailing `--` / `//` on the stored query would swallow the pipe if it sat on the same line.
-const appendCount = (esql: string): string =>
-  `${getSourceDocumentQuery(esql)}\n| STATS doc_count = COUNT(*)`;
+// Inline, not a request `filter`, which applies above a view's output and blocks pushdown.
+// Newlines: a trailing `//` comment would swallow a pipe on the same line.
+const buildCountQuery = (esql: string, { start, end }: MeasurementWindow): string =>
+  `${esql}\n| WHERE @timestamp >= "${start}" AND @timestamp <= "${end}"\n| STATS doc_count = COUNT(*)`;
 
 const esErrorType = (error: errors.ResponseError): string | undefined =>
   (error.body as ElasticsearchErrorDetails | undefined)?.error?.type;
@@ -62,13 +58,11 @@ const countDocuments = async ({
   esql,
   window,
   signal,
-  projectRouting,
 }: {
   esClient: ElasticsearchClient;
   esql: string;
   window: MeasurementWindow;
   signal: AbortSignal;
-  projectRouting?: string;
 }): Promise<DocumentCount> => {
   const {
     values,
@@ -76,11 +70,9 @@ const countDocuments = async ({
     _clusters: clusterInfo,
   } = await esClient.esql.query(
     {
-      query: appendCount(esql),
+      query: buildCountQuery(esql, window),
       format: 'json',
       include_ccs_metadata: true,
-      filter: { range: { '@timestamp': { gte: window.start, lte: window.end } } },
-      ...(projectRouting ? { project_routing: projectRouting } : {}),
     },
     { signal, requestTimeout: COUNT_TIMEOUT_MS }
   );
@@ -144,7 +136,6 @@ export const measureSourceVolume = async ({
   esClient,
   esql,
   isServerless,
-  cpsEnabled,
   window,
   signal,
   logger,
@@ -152,7 +143,6 @@ export const measureSourceVolume = async ({
   esClient: ElasticsearchClient;
   esql: string;
   isServerless: boolean;
-  cpsEnabled: boolean;
   window: MeasurementWindow;
   signal: AbortSignal;
   logger: Logger;
@@ -166,16 +156,9 @@ export const measureSourceVolume = async ({
     return { status: 'error', has_remote: false, error: 'invalid_query' };
   }
 
-  // The source's own reads fan out to every linked project; the count must match them.
   let count: DocumentCount;
   try {
-    count = await countDocuments({
-      esClient,
-      esql,
-      window,
-      signal,
-      projectRouting: cpsEnabled ? PROJECT_ROUTING_ALL : undefined,
-    });
+    count = await countDocuments({ esClient, esql, window, signal });
   } catch (error) {
     return toFailure(error, hasRemote);
   }
@@ -199,7 +182,6 @@ export const measureSourceVolume = async ({
     return { ...volume, bytes_estimated: 0 };
   }
 
-  // Only local indices can be sized; their average is extrapolated to remote documents.
   try {
     const averageBytes = await averageDocumentBytes({
       esClient,

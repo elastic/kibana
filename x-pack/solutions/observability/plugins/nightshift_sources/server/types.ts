@@ -29,4 +29,5 @@ export interface NightshiftSourcesServerStart {
    */
   getSourcesClient: GetSourcesClient;
   scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
+  removeSourceVolumeTask: () => Promise<void>;
 }

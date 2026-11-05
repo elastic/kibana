@@ -63,7 +63,9 @@ interface Deps {
   getAgentAvailability: () => AgentAvailabilityConfig;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
+  listInstalledWorkflowStates: PluginScopedManagedWorkflows['listInstalledWorkflowStates'];
   scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
+  removeSourceVolumeTask: () => Promise<void>;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
@@ -107,7 +109,9 @@ export const createInvestigatorServiceAccountService = ({
   getAgentBuilder,
   getAgentAvailability,
   getAutomationsSoClient,
+  listInstalledWorkflowStates,
   scheduleSourceVolumeTask,
+  removeSourceVolumeTask,
   isServerless,
   logger,
 }: Deps) => {
@@ -483,6 +487,18 @@ export const createInvestigatorServiceAccountService = ({
     logger.info(`Nightshift agent in space [${spaceId}] runs as its callers again`);
   };
 
+  // The telemetry task runs as the enabling admin; it stops once no space is set up.
+  const removeSourceVolumeTaskIfUnused = async (): Promise<void> => {
+    const states = await listInstalledWorkflowStates();
+    if (
+      states.some((state) => state.workflowId === getBoundInvestigationWorkflowId(state.spaceId))
+    ) {
+      return;
+    }
+    await removeSourceVolumeTask();
+    logger.info('No space has Nightshift set up; removed the source volume telemetry task');
+  };
+
   const runEnable = async (
     request: KibanaRequest,
     spaceId: string,
@@ -515,7 +531,9 @@ export const createInvestigatorServiceAccountService = ({
       status = await getStatus(request, spaceId);
     }
     assertAllBound(status, spaceId, serviceAccountIds.agent);
-    await scheduleSourceVolumeTask(request);
+    await scheduleSourceVolumeTask(request).catch((error) => {
+      logger.error(`Failed to schedule the source volume telemetry task: ${error.message}`);
+    });
     logger.info(
       `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
     );
@@ -586,6 +604,9 @@ export const createInvestigatorServiceAccountService = ({
         }
       );
     }
+    await removeSourceVolumeTaskIfUnused().catch((error) => {
+      logger.error(`Failed to remove the source volume telemetry task: ${error.message}`);
+    });
     return getStatus(request, spaceId);
   };
 

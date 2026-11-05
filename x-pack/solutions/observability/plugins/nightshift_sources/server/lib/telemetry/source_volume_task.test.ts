@@ -19,7 +19,6 @@ import { measureSourceVolume } from './measure_source_volume';
 import { SOURCE_VOLUME_EVENT_TYPE } from './source_volume_event';
 import {
   registerSourceVolumeTask,
-  removeLegacySourceVolumeTask,
   reportSourceVolumes,
   scheduleSourceVolumeTask,
   SOURCE_VOLUME_TASK_ID,
@@ -58,11 +57,11 @@ const setup = (sources: Array<SavedObjectsFindResult<NightshiftSourceAttributes>
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
     soRepository,
     isServerless: false,
-    cpsEnabled: false,
     logger: loggingSystemMock.createLogger(),
   };
   return {
     deps,
+    soRepository,
     report: (signal = new AbortController().signal) => reportSourceVolumes(deps, signal),
   };
 };
@@ -75,10 +74,9 @@ describe('reportSourceVolumes', () => {
   });
 
   it('reports every configured source across spaces', async () => {
-    const { deps, report } = setup([
+    const { deps, soRepository, report } = setup([
       source('a', 'default'),
       source('b', 'default'),
-      source('c', 'marketing'),
       source('d', 'marketing', 'FROM logs-d-*', false),
     ]);
     measure.mockImplementation(async ({ esql }) =>
@@ -89,14 +87,14 @@ describe('reportSourceVolumes', () => {
 
     await report();
 
-    expect(deps.soRepository.createPointInTimeFinder).toHaveBeenCalledWith(
+    expect(soRepository.createPointInTimeFinder).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'nightshift-source',
         namespaces: ['*'],
         fields: ['enabled', 'esql', 'type'],
       })
     );
-    expect(deps.soRepository.createPointInTimeFinder.mock.calls[0][0]).not.toHaveProperty('filter');
+    expect(soRepository.createPointInTimeFinder.mock.calls[0][0]).not.toHaveProperty('filter');
     expect(deps.analytics.reportEvent).toHaveBeenCalledWith(SOURCE_VOLUME_EVENT_TYPE, {
       window_start: expect.any(String),
       window_end: expect.any(String),
@@ -119,13 +117,6 @@ describe('reportSourceVolumes', () => {
         },
         {
           space_id: 'marketing',
-          source_id: 'c',
-          source_type: 'logs',
-          enabled: true,
-          ...ok,
-        },
-        {
-          space_id: 'marketing',
           source_id: 'd',
           source_type: 'logs',
           enabled: false,
@@ -143,10 +134,10 @@ describe('reportSourceVolumes', () => {
   });
 
   it('stops paging sources once aborted and closes the point in time', async () => {
-    const { deps, report } = setup([]);
+    const { deps, soRepository, report } = setup([]);
     const controller = new AbortController();
     const close = jest.fn();
-    deps.soRepository.createPointInTimeFinder.mockReturnValue({
+    soRepository.createPointInTimeFinder.mockReturnValue({
       async *find() {
         controller.abort();
         yield { saved_objects: [source('a', 'default')] };
@@ -190,29 +181,9 @@ describe('source volume task credentials', () => {
     expect(getDeps).toHaveBeenCalledWith(request);
   });
 
-  it('replaces an uncredentialed task', async () => {
+  it('schedules as the requesting user and refreshes their key on re-enable', async () => {
     const taskManager = taskManagerMock.createStart();
     const request = httpServerMock.createKibanaRequest();
-    taskManager.get.mockResolvedValue(taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID }));
-
-    await scheduleSourceVolumeTask(taskManager, request);
-
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(SOURCE_VOLUME_TASK_ID);
-    expect(taskManager.schedule).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: SOURCE_VOLUME_TASK_ID,
-        taskType: SOURCE_VOLUME_TASK_TYPE,
-      }),
-      { request }
-    );
-  });
-
-  it('refreshes credentials on re-enable', async () => {
-    const taskManager = taskManagerMock.createStart();
-    const request = httpServerMock.createKibanaRequest();
-    taskManager.get.mockResolvedValue(
-      taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID, apiKey: 'existing-key' })
-    );
 
     await scheduleSourceVolumeTask(taskManager, request);
 
@@ -220,23 +191,5 @@ describe('source volume task credentials', () => {
       expect.objectContaining({ id: SOURCE_VOLUME_TASK_ID }),
       { request, regenerateApiKey: true }
     );
-  });
-
-  it('removes only uncredentialed tasks at startup', async () => {
-    const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockResolvedValue(taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID }));
-
-    await removeLegacySourceVolumeTask(taskManager);
-
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(SOURCE_VOLUME_TASK_ID);
-
-    taskManager.removeIfExists.mockClear();
-    taskManager.get.mockResolvedValue(
-      taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID, apiKey: 'user-key' })
-    );
-
-    await removeLegacySourceVolumeTask(taskManager);
-
-    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
   });
 });

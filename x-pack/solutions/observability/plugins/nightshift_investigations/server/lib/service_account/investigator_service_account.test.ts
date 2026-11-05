@@ -15,6 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { BOUND_WORKFLOW_IDS } from './bound_workflows';
+import { getBoundInvestigationWorkflowId } from './constants';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
 const request = {} as KibanaRequest;
@@ -132,7 +133,9 @@ const setup = ({
       NonNullable<Parameters<typeof createInvestigatorServiceAccountService>[0]['getAgentBuilder']>
     >
   >;
+  const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
   const scheduleSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
+  const removeSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
@@ -142,7 +145,9 @@ const setup = ({
     getAgentBuilder: () => agentBuilder,
     getAgentAvailability: () => AVAILABILITY,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
+    listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
+    removeSourceVolumeTask,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
@@ -157,7 +162,9 @@ const setup = ({
     managedWorkflows,
     getWorkflow,
     updateWorkflow,
+    listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
+    removeSourceVolumeTask,
   };
 };
 
@@ -438,6 +445,41 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(managedWorkflows.uninstall.mock.calls.map(([, id]) => id)).toEqual(
       [...BOUND_WORKFLOW_IDS].reverse()
     );
+  });
+
+  it('removes the source volume task once the last space is disabled', async () => {
+    const { service, managedWorkflows, listInstalledWorkflowStates, removeSourceVolumeTask } =
+      setup();
+    listInstalledWorkflowStates.mockResolvedValue([
+      { workflowId: 'other-workflow-marketing', spaceId: 'marketing' },
+    ]);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(removeSourceVolumeTask).toHaveBeenCalledTimes(1);
+    expect(removeSourceVolumeTask.mock.invocationCallOrder[0]).toBeGreaterThan(
+      Math.max(...managedWorkflows.uninstall.mock.invocationCallOrder)
+    );
+  });
+
+  it('keeps the source volume task while another space is set up', async () => {
+    const { service, listInstalledWorkflowStates, removeSourceVolumeTask } = setup();
+    listInstalledWorkflowStates.mockResolvedValue([
+      { workflowId: getBoundInvestigationWorkflowId('marketing'), spaceId: 'marketing' },
+    ]);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(removeSourceVolumeTask).not.toHaveBeenCalled();
+  });
+
+  it('enables and disables the space when the telemetry task cannot be changed', async () => {
+    const { service, scheduleSourceVolumeTask, removeSourceVolumeTask } = setup();
+    scheduleSourceVolumeTask.mockRejectedValue(new Error('grant failed'));
+    removeSourceVolumeTask.mockRejectedValue(new Error('remove failed'));
+
+    await expect(service.enable(request, SPACE_ID, IDS)).resolves.toBeDefined();
+    await expect(service.disable(request, SPACE_ID)).resolves.toBeDefined();
   });
 
   it('refuses to disable a space the caller cannot access', async () => {

@@ -13,7 +13,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
@@ -28,7 +27,7 @@ import { SourcesClient } from './lib/sources_client';
 import { registerSourceVolumeEvent } from './lib/telemetry/source_volume_event';
 import {
   registerSourceVolumeTask,
-  removeLegacySourceVolumeTask,
+  removeSourceVolumeTask,
   scheduleSourceVolumeTask,
 } from './lib/telemetry/source_volume_task';
 import { nightshiftSourcesRouteRepository } from './routes';
@@ -43,7 +42,6 @@ import type {
 } from './types';
 
 interface SetupDeps {
-  cps?: CPSServerSetup;
   taskManager: TaskManagerSetupContract;
 }
 
@@ -110,7 +108,6 @@ export class NightshiftSourcesPlugin
   public setup(core: CoreSetup, plugins: SetupDeps): NightshiftSourcesServerSetup {
     core.savedObjects.registerType(nightshiftSourceSavedObjectType);
     registerSourceVolumeEvent(core.analytics);
-    const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     registerSourceVolumeTask({
       taskManager: plugins.taskManager,
       getDeps: async (request) => {
@@ -125,7 +122,6 @@ export class NightshiftSourcesPlugin
             NIGHTSHIFT_SOURCE_SO_TYPE,
           ]),
           isServerless: this.isServerless,
-          cpsEnabled,
           logger: this.logger.get('source-volume-telemetry'),
         };
       },
@@ -152,13 +148,7 @@ export class NightshiftSourcesPlugin
     return { onSourceChange: this.sourceChangeEmitter.subscribe };
   }
 
-  public async start(core: CoreStart, plugins: StartDeps): Promise<NightshiftSourcesServerStart> {
-    await removeLegacySourceVolumeTask(plugins.taskManager).catch((error) => {
-      this.logger.error(
-        `Failed to remove the legacy source volume telemetry task: ${error.message}`
-      );
-    });
-
+  public start(core: CoreStart, plugins: StartDeps): NightshiftSourcesServerStart {
     if (plugins.features) {
       const hasFeature = plugins.features
         .getKibanaFeatures()
@@ -176,6 +166,7 @@ export class NightshiftSourcesPlugin
       getSourcesClient: async ({ request }) =>
         createSourcesClient(core, request, this.logger.get('sources'), this.sourceChangeEmitter),
       scheduleSourceVolumeTask: (request) => scheduleSourceVolumeTask(plugins.taskManager, request),
+      removeSourceVolumeTask: () => removeSourceVolumeTask(plugins.taskManager),
     };
   }
 

@@ -8,7 +8,6 @@
 import {
   analyzeSourceQuery,
   getSourceCommandQuery,
-  getSourceDocumentQuery,
   getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
@@ -321,13 +320,5 @@ describe('getSourceLocalIndexExpressions', () => {
 
   it('returns no target for exclusions only', () => {
     expect(getSourceLocalIndexExpressions('FROM remote:logs-*,-logs-local-*')).toEqual([]);
-  });
-});
-
-describe('getSourceDocumentQuery', () => {
-  it('swaps only the TS keyword for FROM', () => {
-    expect(getSourceDocumentQuery('// note\n  ts metrics-* | WHERE host != "ts"')).toBe(
-      '// note\n  FROM metrics-* | WHERE host != "ts"'
-    );
   });
 });

@@ -219,13 +219,13 @@ in `config/serverless.oblt.yml` and back on for Observability Complete in
 
 A Task Manager task (`nightshift-sources:source-volume-telemetry:1.0.0`) is scheduled when an
 administrator enables Nightshift and runs once a day. Task Manager captures that administrator's
-credentials; enabling Nightshift again refreshes them. Each run sends one
+credentials; enabling Nightshift again refreshes them. Disabling Nightshift in the last space
+that has it removes the task and invalidates those credentials. Each run sends one
 `nightshift-sources-daily-volume` EBT event, with one entry per configured source of every space
 (`space_id` is on the entry) holding its `enabled` state, `doc_count` and `bytes_estimated` over the
 past 24 hours. `doc_count` runs the stored query (its `WHERE` included) with those credentials, so
 it is the volume the source reads, not what was ingested; under cross-project search it fans out to
-every linked project, as the source's own reads do. On upgrade, a legacy task that has no user
-credentials is removed; an administrator must enable Nightshift again to resume this telemetry.
+every linked project, as the source's own reads do.
 `bytes_estimated` is `doc_count` times the average document size of the local indices behind the
 query, read from `indices.stats` on
 stateful and `_metering/stats` on serverless. Neither size API reaches linked projects or remote

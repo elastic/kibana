@@ -12,7 +12,6 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   TaskCost,
   TaskPriority,
@@ -41,7 +40,6 @@ export interface SourceVolumeTaskDeps {
   esClient: ElasticsearchClient;
   soRepository: ISavedObjectsRepository;
   isServerless: boolean;
-  cpsEnabled: boolean;
   logger: Logger;
 }
 
@@ -78,7 +76,7 @@ const listSources = async (
 };
 
 export const reportSourceVolumes = async (
-  { analytics, esClient, soRepository, isServerless, cpsEnabled, logger }: SourceVolumeTaskDeps,
+  { analytics, esClient, soRepository, isServerless, logger }: SourceVolumeTaskDeps,
   signal: AbortSignal
 ): Promise<void> => {
   const end = Date.now();
@@ -107,7 +105,6 @@ export const reportSourceVolumes = async (
             esClient,
             esql,
             isServerless,
-            cpsEnabled,
             window,
             signal,
             logger,
@@ -146,7 +143,7 @@ export const registerSourceVolumeTask = ({
       createTaskRunner: ({ taskInstance, fakeRequest, signal }) => ({
         async run() {
           if (!fakeRequest) {
-            throwUnrecoverableError(
+            return throwUnrecoverableError(
               new Error('Source volume telemetry task has no user credentials')
             );
           }
@@ -170,34 +167,12 @@ export const scheduleSourceVolumeTask = async (
     state: {},
     scope: ['nightshiftSources'],
   };
-  const existing = await taskManager.get(SOURCE_VOLUME_TASK_ID).catch((error) => {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return undefined;
-    }
-    throw error;
-  });
-
-  if (existing?.apiKey || existing?.uiamApiKey) {
-    await taskManager.ensureScheduled(task, { request, regenerateApiKey: true });
-    return;
-  }
-
-  // Versions before this task became user-scoped scheduled it on plugin start without a key.
-  await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
-  await taskManager.schedule(task, { request });
+  await taskManager.ensureScheduled(task, { request, regenerateApiKey: true });
 };
 
-export const removeLegacySourceVolumeTask = async (
+/** Removing the task also invalidates the API key it was scheduled with. */
+export const removeSourceVolumeTask = async (
   taskManager: TaskManagerStartContract
 ): Promise<void> => {
-  const existing = await taskManager.get(SOURCE_VOLUME_TASK_ID).catch((error) => {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return undefined;
-    }
-    throw error;
-  });
-
-  if (existing && !existing.apiKey && !existing.uiamApiKey) {
-    await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
-  }
+  await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
 };
