@@ -242,6 +242,32 @@ describe('buildComposition', () => {
     }
   });
 
+  it('leaves out attachments whose heading is too long for its header or context', async () => {
+    const longTitle: ToSurfaceComposition = () => ({
+      type: 'view',
+      title: 't'.repeat(201),
+      body: [{ type: 'markdown', text: 'Content' }],
+    });
+
+    const longSubtitle: ToSurfaceComposition = () => ({
+      type: 'view',
+      subtitle: 's'.repeat(501),
+      body: [{ type: 'markdown', text: 'Content' }],
+    });
+
+    for (const toSurfaceComposition of [longTitle, longSubtitle]) {
+      const composition = await compose('Here: <render_attachment id="a1" /> Done', {
+        toSurfaceComposition,
+      });
+
+      expect(composition.body).toEqual([
+        { type: 'markdown', text: 'Here:' },
+        { type: 'markdown', text: 'Done' },
+      ]);
+      expect(runtime.validate(composition).valid).toBe(true);
+    }
+  });
+
   it('passes the attachment at the rendered version, and the request and space', async () => {
     const toSurfaceComposition = jest.fn<
       ReturnType<ToSurfaceComposition>,

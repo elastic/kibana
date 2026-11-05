@@ -139,7 +139,8 @@ const resolveAttachmentNode = async (
       context
     );
 
-    const { valid, errors } = runtime.validate(composition);
+    const nodes = [...toHeadingNodes(composition), ...composition.body];
+    const { valid, errors } = runtime.validate({ type: 'view', body: nodes });
 
     if (!valid) {
       const reasons = errors.map(formatValidationError).join('; ');
@@ -151,7 +152,7 @@ const resolveAttachmentNode = async (
       return [];
     }
 
-    return [...toHeadingNodes(composition), ...composition.body];
+    return nodes;
   } catch (error) {
     logger.warn(
       `Leaving out attachment "${attachment.id}": its toSurfaceComposition failed: ${error.message}`
