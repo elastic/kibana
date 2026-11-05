@@ -166,8 +166,26 @@ describe('createDiscoverProfile', () => {
       expect(renderers['episode.status']).toBeDefined();
       expect(renderers.severity).toBeDefined();
       expect(renderers['rule.id']).toBeDefined();
+      expect(renderers.duration).toBeDefined();
       expect(renderers.last_tags).toBeDefined();
       expect(renderers.last_assignee_uid).toBeDefined();
+    });
+  });
+
+  describe('getColumnsConfiguration', () => {
+    it('uses the alerts page column titles', () => {
+      const provider = createDiscoverProfile();
+      const columns = provider.profile.getColumnsConfiguration!(undefined)();
+      const getTitle = (id: string) =>
+        columns[id]({ column: { id, display: 'element' } }).displayAsText;
+
+      expect(getTitle('episode.status')).toBe('Status');
+      expect(getTitle('severity')).toBe('Severity');
+      expect(getTitle('rule.id')).toBe('Rule');
+      expect(getTitle('duration')).toBe('Duration');
+      expect(columns.duration({ column: { id: 'duration', display: 'element' } }).display).toBe(
+        undefined
+      );
     });
 
     it('spreads previous renderers alongside episode renderers', () => {

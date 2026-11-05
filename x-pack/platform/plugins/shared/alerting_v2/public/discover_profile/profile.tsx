@@ -14,10 +14,12 @@ import type {
   RowControlRowProps,
 } from '@kbn/discover-utils';
 import {
-  STATUS_FILTER_LABEL,
-  SEVERITY_FILTER_LABEL,
-  RULE_FILTER_LABEL,
-} from '@kbn/alerting-v2-episodes-ui/components/filters/translations';
+  STATUS_FIELD_LABEL,
+  SEVERITY_FIELD_LABEL,
+  RULE_FIELD_LABEL,
+  DURATION_FIELD_LABEL,
+} from '@kbn/alerting-v2-episodes-ui/hooks/translations';
+import { DURATION_FIELD_FORMAT } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 import {
   EPISODES_LIST_COLUMN_ALERT_TAGS,
   EPISODES_LIST_COLUMN_ASSIGNEES,
@@ -27,7 +29,9 @@ import {
   EpisodeSeverityCell,
   EpisodeRuleCell,
   EpisodeTagsCell,
+  EpisodeDurationCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { buildAlertEventsTimeRangeFilter } from '@kbn/alerting-v2-episodes-ui/utils/build_alert_events_time_range_filter';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -53,7 +57,9 @@ const DATA_SOURCE_CATEGORY_DEFAULT = 'default';
 
 type DiscoverProfileServices = AlertingV2KibanaServices &
   Pick<AlertEpisodeDetailsServices, 'spaces' | 'unifiedDocViewer' | 'userProfile'> &
-  Pick<CoreStartContract, 'overlays' | 'rendering' | 'docLinks'>;
+  Pick<CoreStartContract, 'overlays' | 'rendering' | 'docLinks'> & {
+    fieldFormats: FieldFormatsStart;
+  };
 
 let profileServicesPromise: Promise<DiscoverProfileServices> | undefined;
 
@@ -69,6 +75,7 @@ const getProfileServices = (): Promise<DiscoverProfileServices> => {
       docLinks: container.get(CoreStart('docLinks')),
       spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
       unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
+      fieldFormats: container.get(PluginStart('fieldFormats')) as FieldFormatsStart,
     };
   });
   return profileServicesPromise;
@@ -121,6 +128,22 @@ const AssigneeCellRenderer: React.FC<AssigneeCellRendererProps> = ({ row, queryC
       />
     </QueryClientProvider>
   );
+};
+
+// Discover's ES|QL data view has no field formats, so the page's duration format is applied here.
+const DurationCellRenderer: React.FC<React.ComponentProps<typeof EpisodeDurationCell>> = (
+  props
+) => {
+  const services = useAlertingV2Services();
+  const formatDuration = React.useMemo(() => {
+    if (!services) return undefined;
+    const formatter = services.fieldFormats.getInstance(
+      DURATION_FIELD_FORMAT.id,
+      DURATION_FIELD_FORMAT.params
+    );
+    return (durationMs: number) => formatter.convertToText(durationMs);
+  }, [services]);
+  return <EpisodeDurationCell {...props} formatDuration={formatDuration} />;
 };
 
 // ES|QL returns a single value of a multi-value field as a plain string.
@@ -186,19 +209,25 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
         'episode.status': ({ column }: any) => ({
           ...column,
           display: undefined,
-          displayAsText: STATUS_FILTER_LABEL,
+          displayAsText: STATUS_FIELD_LABEL,
         }),
 
         severity: ({ column }: any) => ({
           ...column,
           display: undefined,
-          displayAsText: SEVERITY_FILTER_LABEL,
+          displayAsText: SEVERITY_FIELD_LABEL,
         }),
 
         'rule.id': ({ column }: any) => ({
           ...column,
           display: undefined,
-          displayAsText: RULE_FILTER_LABEL,
+          displayAsText: RULE_FIELD_LABEL,
+        }),
+
+        duration: ({ column }: any) => ({
+          ...column,
+          display: undefined,
+          displayAsText: DURATION_FIELD_LABEL,
         }),
 
         last_tags: ({ column }: any) => ({
@@ -225,6 +254,8 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
           'rule.id': (props: any) => (
             <EpisodeRuleCell {...props} rulesCache={{}} isLoadingRules={false} rowHeight={0} />
           ),
+
+          duration: (props: any) => <DurationCellRenderer {...props} />,
 
           last_tags: (props: any) => <EpisodeTagsCell {...props} row={withTagsArray(props.row)} />,
 
