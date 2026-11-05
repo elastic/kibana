@@ -298,6 +298,26 @@ it.each([
   }
 );
 
+it('reports a round interrupted after the verdict as a failure, so ORCA leaves it unscored', async () => {
+  const interruption = {
+    type: 'failed',
+    error: { code: 'internalError', message: 'connector timed out' },
+  };
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'late-failure' })
+    .mockResolvedValueOnce(investigation({ id: 'late-failure' }))
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'late-trace', steps: [], interruption }] });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    execution_error: 'Investigation round failed: connector timed out',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+  });
+});
+
 it('flags a finished investigation whose conversation never finished persisting', async () => {
   const clock = jest
     .spyOn(Date, 'now')

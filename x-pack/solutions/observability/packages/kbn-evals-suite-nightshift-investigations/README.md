@@ -604,7 +604,8 @@ Control passes an empty report and fails when a report places an incident inside
 open-ended bound shown as `null`, as ORCA does. Past incidents and timeline lines that only record
 when the issue was reported are not false positives. A run that crashed, timed out, or ended without recording anything has
 no answer, so all three scores are `unscored` (null) instead of reading it as an empty report,
-as ORCA leaves unscored trials out. `execution_success` still counts those runs, so quote it next
+as ORCA leaves unscored trials out. A run whose last agent round failed or was aborted counts
+as crashed even when it recorded a verdict first. `execution_success` still counts those runs, so quote it next
 to any ORCA rate. A run that ended without a verdict but recorded hypotheses is scored on them.
 A control is `metadata.control`, `metadata.task_type === "control"`,
 `metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination

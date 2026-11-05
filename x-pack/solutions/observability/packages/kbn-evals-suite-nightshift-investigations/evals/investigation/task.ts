@@ -271,10 +271,15 @@ export const runInvestigation = async (
         conclusion: reply,
       };
     }
-    if (!investigation.in_progress && !output.structured_report.conclusion) {
-      // The investigation has no failed state, so its round says whether the agent crashed or
-      // simply recorded no conclusion.
-      output.execution_error ??= roundInterruptionError(conversation.rounds) ?? NO_CONCLUSION_ERROR;
+    if (!investigation.in_progress) {
+      // The investigation has no failed state, so its last round says whether the agent crashed,
+      // even after recording a verdict, or simply recorded no conclusion.
+      const interruption = roundInterruptionError(conversation.rounds);
+      if (interruption) {
+        output.execution_error ??= interruption;
+      } else if (!output.structured_report.conclusion) {
+        output.execution_error ??= NO_CONCLUSION_ERROR;
+      }
     }
     output.conversation_round_count = conversation.rounds.length;
     output.usage = extractUsage(conversation.rounds);
