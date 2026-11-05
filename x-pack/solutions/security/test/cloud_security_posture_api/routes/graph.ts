@@ -3946,7 +3946,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Field type mismatch resilience', () => {
-      // Exercises two failure modes that real integration indices trigger:
+      // Exercises three failure modes that real integration indices trigger:
       //
       //   1. Wrong type — user.id mapped as long (PostgreSQL / AWS IAM pattern).
       //      The aws_bedrock integration uses `TO_STRING(user.id) LIKE "arn:..."` and
@@ -3965,13 +3965,12 @@ export default function (providerContext: FtrProviderContext) {
       //      CASE-result-only fields (host.id, service.id, entity.id, etc.) are left
       //      unmapped since ES|QL accepts null-typed values in result positions.
       //
-      //      NOTE: SET unmapped_fields="LOAD" is NOT used because ES|QL does not support
-      //      accessing subfields of flattened-type parents under LOAD mode
-      //      (e.g. m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
-      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap).  Under NULLIFY those
-      //      subfields are accessible as keyword (flattened maps all leaves to keyword in
-      //      ES|QL).  In production these fields exist in the real integration indices so
-      //      their types come from the merged mapping across all queried indices.
+      //   3. Flattened fields — subfields of flattened fields (e.g.
+      //      m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
+      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap) are not readable by dotted path:
+      //      they are null under NULLIFY and rejected under LOAD.  The integration evaluations
+      //      read them with FIELD_EXTRACT(<flattened field>, "<key>"), so the test index maps the
+      //      flattened roots as flattened.
       const testIndex = 'test-graph-type-mismatch';
 
       before(async () => {
@@ -4015,7 +4014,12 @@ export default function (providerContext: FtrProviderContext) {
               'source.ip': { type: 'ip' },
               'destination.ip': { type: 'ip' },
               'misp.event.orgc_id': { type: 'long' },
-              'greenhouse.audit.event.meta.name': { type: 'keyword' },
+              'greenhouse.audit.event.meta': { type: 'flattened' },
+              'm365_defender.event.additional_fields': { type: 'flattened' },
+              'snyk.audit_logs.content': { type: 'flattened' },
+              'cisco_meraki.8021x_eap_success': { type: 'flattened' },
+              'cisco_meraki.wpa_auth': { type: 'flattened' },
+              'cisco_meraki.splash_auth': { type: 'flattened' },
               'gitlab.audit.target_id': { type: 'long' },
               'jamf_pro.events.event.object_id': { type: 'long' },
               'jamf_pro.events.event.policy_id': { type: 'long' },
@@ -4060,6 +4064,24 @@ export default function (providerContext: FtrProviderContext) {
             //   schema-absent and value-absent — null-typed, safe in result positions.
           },
         });
+
+        await es.index({
+          index: testIndex,
+          id: 'flattened-subfield-evt-1',
+          refresh: true,
+          document: {
+            '@timestamp': '2024-09-01T12:00:00.000Z',
+            'event.id': 'flattened-subfield-evt-1',
+            'event.action': 'logonsuccess',
+            'event.dataset': 'm365_defender.event',
+            'data_stream.dataset': 'm365_defender.event',
+            'user.name': 'flattened-user',
+            'host.name': 'flattened-host',
+            // The value lives in a subfield of a flattened field, which can only be read with
+            // FIELD_EXTRACT.
+            'm365_defender.event.additional_fields': { SourceAccountSid: 'S-1-5-21-flattened' },
+          },
+        });
       });
 
       after(async () => {
@@ -4099,6 +4121,32 @@ export default function (providerContext: FtrProviderContext) {
           .sourceFields;
         // user.id was indexed as long 42 but must surface as the string "42" after TO_STRING
         expect(sourceFields['user.id']).to.equal('42');
+      });
+
+      it('reads user.id from a subfield of a flattened field', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            indexPatterns: [testIndex],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'event.id': 'flattened-subfield-evt-1' } }],
+              },
+            },
+          },
+        }).expect(result(200, logger));
+
+        const userNode = response.body.nodes.find((n: any) =>
+          n.documentsData?.some(
+            (d: any) => d.type === 'entity' && d.entity?.sourceFields?.['user.id'] !== undefined
+          )
+        );
+        expect(userNode).to.not.be(undefined);
+        const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
+          .sourceFields;
+        expect(sourceFields['user.id']).to.equal('S-1-5-21-flattened');
       });
     });
   });

@@ -406,10 +406,11 @@ const buildEsqlQuery = ({
   integrationRuntimeEvalsEnabled,
   showUnknownTarget,
 }: BuildEsqlQueryParams): string => {
-  // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
-  // parents under unmapped_fields="LOAD" (currently throws verification_exception for fields
-  // like m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
-  // greenhouse.audit.event.meta.name, cisco_meraki.*.vap).
+  // NULLIFY is used because LOAD cannot read subfields of flattened fields ("Referencing subfields
+  // of flattened parents is not supported"). The few integration fields that live in flattened
+  // objects (m365_defender.event.additional_fields, snyk.audit_logs.content,
+  // greenhouse.audit.event.meta, cisco_meraki.*.vap) are read with FIELD_EXTRACT(<flattened field>,
+  // "<key>"), which works under NULLIFY.
   // When LOAD is restored, keep the global user.id cast below and add similar casts for any
   // other field known to be mapped with the wrong type in some integration index.
   // See NULLIFY_WORKAROUNDS.md for the full revert checklist and the user.id audit results.

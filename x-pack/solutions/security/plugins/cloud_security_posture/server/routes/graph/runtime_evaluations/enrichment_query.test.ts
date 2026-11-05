@@ -277,3 +277,48 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
     }
   );
 });
+
+describe('buildIntegrationRuntimeEvals — flattened subfields', () => {
+  // Subfields of flattened fields resolve to null under unmapped_fields="NULLIFY" when referenced
+  // by their dotted path, so they are read with FIELD_EXTRACT(<flattened field>, "<key>").
+  const flattenedSubfields: Array<{ integration: string; root: string; key: string }> = [
+    {
+      integration: 'm365_defender',
+      root: 'm365_defender.event.additional_fields',
+      key: 'SourceAccountSid',
+    },
+    {
+      integration: 'm365_defender',
+      root: 'm365_defender.event.additional_fields',
+      key: 'DestinationComputerObjectGuid',
+    },
+    { integration: 'snyk', root: 'snyk.audit_logs.content', key: 'email' },
+    { integration: 'snyk', root: 'snyk.audit_logs.content', key: 'targetId' },
+    { integration: 'snyk', root: 'snyk.audit_logs.content', key: 'serviceAccountPublicId' },
+    { integration: 'greenhouse', root: 'greenhouse.audit.event.meta', key: 'name' },
+    { integration: 'cisco_meraki', root: '`cisco_meraki.8021x_eap_success`', key: 'vap' },
+    { integration: 'cisco_meraki', root: 'cisco_meraki.wpa_auth', key: 'vap' },
+    { integration: 'cisco_meraki', root: 'cisco_meraki.splash_auth', key: 'vap' },
+  ];
+
+  it.each(flattenedSubfields)(
+    'reads $root $key with FIELD_EXTRACT',
+    ({ integration, root, key }) => {
+      const query = buildIntegrationRuntimeEvals({ integrations: [integration] });
+      const extract = `FIELD_EXTRACT(${root}, "${key}")`;
+      expect(query).toContain(extract);
+    }
+  );
+
+  it('does not reference flattened subfields by dotted path', () => {
+    const query = buildIntegrationRuntimeEvals({
+      integrations: ['m365_defender', 'snyk', 'greenhouse', 'cisco_meraki'],
+    });
+    expect(query).not.toMatch(
+      /additional_fields\.(SourceAccountSid|DestinationComputerObjectGuid)/
+    );
+    expect(query).not.toMatch(/snyk\.audit_logs\.content\.\w/);
+    expect(query).not.toContain('greenhouse.audit.event.meta.name');
+    expect(query).not.toMatch(/(8021x_eap_success|wpa_auth|splash_auth)`?\.vap/);
+  });
+});

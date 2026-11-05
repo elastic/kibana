@@ -2,7 +2,8 @@
 
 This document explains why `SET unmapped_fields="NULLIFY"` is used in the graph ES|QL query
 instead of `"LOAD"`, what problems NULLIFY caused, the research done to address them, and why
-reverting to `"LOAD"` is blocked by a second ES|QL limitation.
+`"LOAD"` cannot read subfields of `flattened` fields (the graph reads them with `FIELD_EXTRACT`
+under NULLIFY).
 
 ---
 
@@ -60,16 +61,17 @@ The TODO comment was later removed (`ac225f7d525b`) once NULLIFY was confirmed a
 working mode, and the workarounds described below were put in place.
 
 **Kibana 9.5.0 includes the ES fix** ([elastic/elasticsearch#150676](https://github.com/elastic/elasticsearch/pull/150676),
-confirmed in snapshot SHA `ba0b1375`). However, `"LOAD"` cannot be used yet because of a
-second ES|QL limitation: accessing subfields of `flattened`-type parents is not supported under
-`unmapped_fields="LOAD"`. See **Why LOAD is Still Blocked** below.
+confirmed in snapshot SHA `ba0b1375`). `"LOAD"` still cannot read subfields of `flattened`-type
+parents, which the graph needs for a handful of integration fields. See **Flattened Subfields**
+below.
 
 ---
 
-## Why LOAD is Still Blocked
+## Flattened Subfields
 
-When `unmapped_fields="LOAD"` was tested against real integration indices (2026-07-09), ES|QL
-rejected the query with:
+Under `unmapped_fields="LOAD"`, ES|QL rejects references to subfields of `flattened` fields
+("Referencing subfields of flattened parents is not supported" in the ES|QL docs). Testing against real
+integration indices (2026-07-09) produced:
 
 ```
 verification_exception: Found 9 problems
@@ -97,15 +99,17 @@ The affected integrations and fields:
 | `cisco_meraki` | `cisco_meraki.splash_auth.vap` | CASE result (entity.target.id) |
 
 All parent fields (`m365_defender.event.additional_fields`, `snyk.audit_logs.content`,
-`greenhouse.audit.event.meta`, `cisco_meraki.8021x_eap_success`, etc.) are mapped as the
-`flattened` type in the real integration indices. ES|QL's `LOAD` mechanism cannot load
-individual subfields from a flattened parent — it is a fundamental limitation, not a bug.
+`greenhouse.audit.event.meta`, `cisco_meraki.8021x_eap_success`, `cisco_meraki.wpa_auth`,
+`cisco_meraki.splash_auth`) are mapped as `flattened` in the integration packages.
 
-Under `NULLIFY`, the same subfields are accessible as keyword (the `flattened` type exposes
-all leaf values as keyword in ES|QL schema), so the query works correctly.
+Under `NULLIFY`, a dotted reference to a flattened subfield does not fail but resolves to a
+null-typed column even when the document holds the value, silently dropping the actor or target.
 
-**Blocker to LOAD revert:** a second ES issue needs to be opened/tracked for this limitation
-before the revert guide at the bottom of this document can be executed.
+The graph therefore reads these subfields with `FIELD_EXTRACT(<flattened field>, "<key>")`, which
+returns the stored value as `keyword` under `NULLIFY` and returns null without error for indices
+where the flattened field is not mapped. `FIELD_EXTRACT` is available in ES|QL since 9.6.0 (preview
+in 9.5.0). The key must be a string literal, so each
+subfield read names its flattened root and key explicitly.
 
 ---
 
@@ -285,19 +289,17 @@ support this feature is designed for.
 
 ---
 
-## How to Revert to LOAD Once Both Issues Are Fixed
+## How to Revert to LOAD
 
-Two ES issues must be resolved before LOAD can be used:
+One ES issue had to be fixed before LOAD can be used:
 
 1. **[elastic/elasticsearch#150667](https://github.com/elastic/elasticsearch/issues/150667)**
    — `UnsupportedOperationException` when a keyword field with multi-fields is partially unmapped.
    **Status: FIXED** in ES PR #150676, included in 9.5.0-SNAPSHOT from 2026-07-07 onwards.
 
-2. **Flattened subfield access under LOAD** — accessing `parent.child` when `parent` is of
-   `flattened` type throws `verification_exception: Loading subfield … is not supported with
-   unmapped_fields="load"`. **Status: OPEN** — file an ES issue and track it before reverting.
+The flattened-subfield reads need no change under LOAD because they use `FIELD_EXTRACT`.
 
-When both are fixed, follow these steps:
+To revert, follow these steps:
 
 ### Step 1 — Switch the setting
 

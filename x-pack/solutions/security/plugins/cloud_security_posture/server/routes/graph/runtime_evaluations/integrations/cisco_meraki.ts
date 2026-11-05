@@ -68,9 +68,9 @@ export const cisco_merakiEvaluations = {
   ),
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,
-    data_stream.dataset == "cisco_meraki.log" AND event.action == "wifi-8021x-auth" AND \`cisco_meraki.8021x_eap_success.vap\` IS NOT NULL, \`cisco_meraki.8021x_eap_success.vap\`,
-    data_stream.dataset == "cisco_meraki.log" AND event.action == "wifi-wpa-authentication" AND cisco_meraki.wpa_auth.vap IS NOT NULL, cisco_meraki.wpa_auth.vap,
-    data_stream.dataset == "cisco_meraki.log" AND event.action == "splash-authentication" AND cisco_meraki.splash_auth.vap IS NOT NULL, cisco_meraki.splash_auth.vap,
+    data_stream.dataset == "cisco_meraki.log" AND event.action == "wifi-8021x-auth" AND FIELD_EXTRACT(\`cisco_meraki.8021x_eap_success\`, "vap") IS NOT NULL, FIELD_EXTRACT(\`cisco_meraki.8021x_eap_success\`, "vap"),
+    data_stream.dataset == "cisco_meraki.log" AND event.action == "wifi-wpa-authentication" AND FIELD_EXTRACT(cisco_meraki.wpa_auth, "vap") IS NOT NULL, FIELD_EXTRACT(cisco_meraki.wpa_auth, "vap"),
+    data_stream.dataset == "cisco_meraki.log" AND event.action == "splash-authentication" AND FIELD_EXTRACT(cisco_meraki.splash_auth, "vap") IS NOT NULL, FIELD_EXTRACT(cisco_meraki.splash_auth, "vap"),
     data_stream.dataset == "cisco_meraki.log" AND event.action IN ("http-access", "http-access-error", "ids-signature-matched") AND network.protocol IS NOT NULL, network.protocol,
     data_stream.dataset == "cisco_meraki.log" AND event.action IN ("dhcp-offer", "dhcp-no-offer") AND server.mac IS NOT NULL, server.mac,
     null

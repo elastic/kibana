@@ -69,14 +69,14 @@ export const snykEvaluations = {
       esql: `| EVAL
   user.target.email = CASE(
     user.target.email IS NOT NULL, user.target.email,
-    data_stream.dataset == "snyk.audit_logs" AND event.action == "org.user.invite", snyk.audit_logs.content.email,
+    data_stream.dataset == "snyk.audit_logs" AND event.action == "org.user.invite", FIELD_EXTRACT(snyk.audit_logs.content, "email"),
     null
   ),
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset == "snyk.audit_logs" AND snyk.audit_logs.project_id IS NOT NULL, snyk.audit_logs.project_id,
-    data_stream.dataset == "snyk.audit_logs" AND event.action == "org.target.create", snyk.audit_logs.content.targetId,
-    data_stream.dataset == "snyk.audit_logs" AND event.action == "group.service_account.create", snyk.audit_logs.content.serviceAccountPublicId,
+    data_stream.dataset == "snyk.audit_logs" AND event.action == "org.target.create", FIELD_EXTRACT(snyk.audit_logs.content, "targetId"),
+    data_stream.dataset == "snyk.audit_logs" AND event.action == "group.service_account.create", FIELD_EXTRACT(snyk.audit_logs.content, "serviceAccountPublicId"),
     data_stream.dataset == "snyk.issues", snyk.issues.id,
     null
   ),
