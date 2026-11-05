@@ -14,8 +14,8 @@ and the
 [logging service tutorial](../../../../../../../../../docs/extend/tutorials/logging-service.md),
 and applies ECS structured-logging conventions to this plugin's failure modes.
 
-**Audience assumption — operator first, developer second.** `info` / `warn` /
-`error` lines are for someone paged at 3am running a Serverless project who
+**Audience assumption: operator first, developer second.** `info` / `warn` /
+`error` lines are for a Serverless on-call person who
 needs to act. `debug` lines are for a developer reproducing a bug.
 This split shapes every rule below.
 
@@ -36,20 +36,17 @@ Every log line in this plugin:
    never in the message.
 5. If `warn` or `error`, carries a `code` from `ALERTING_LOG_CODES`.
 6. Logs nothing from the [deny list](#deny-list--never-log-at-any-level).
-7. Is asserted in a unit test on `code` and `labels`.
+7. Is asserted in a unit test on `code` and `labels`. Do not test free-form log messages.
 
 ### 1. Log levels
 
-`LoggerService` exposes four levels. `fatal` and `trace` are deliberately not
-on the contract: nothing in this plugin stops the Kibana process, and
-firehose-level detail belongs in a lazy `debug` message that is free when the
-level is off.
+`LoggerService` exposes four levels:
 
 | Level   | Use when                                                                                                                      | Examples in this plugin                                                                                                                                                                                                                                                                                                                  |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`). A saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`). A background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`). A new rule's task failed and the compensating delete failed too, leaving an orphan (`RULE_CREATE_ROLLBACK_FAILED`). |
 | `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`). A name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`). A KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`). The dispatcher kill switch is on (`DISPATCHER_PAUSED`, once per start).                                      |
-| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window (once, on cold start).                                                                                                                                                                                                                               |
+| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window.                                                                                                                                                                                                                               |
 | `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish. Episode transitions. Dispatch decisions. A route returning a client error.                                                                                                                                                                                                                                          |
 
 Rules:
@@ -86,7 +83,7 @@ Rules:
   Those go in `error` or stay out entirely.
 - **At `info` / `warn` / `error`:** no PII, no secrets, no user KQL / ES|QL /
   ES DSL, no alert document payloads, no implementation details (class names,
-  file paths, internal step names). Logs are read by customers, Elastic
+  file paths, internal step names). Logs are read by users, Elastic
   employees, and contributors.
 - **At `debug`:** still no secrets. User KQL is permitted only when necessary
   to reproduce a bug.
@@ -179,7 +176,7 @@ labels.rule_id: "abc-123"
 labels.code: "DISPATCH_WORKFLOW_NOT_FOUND"
 
 # One incident, correlated by trace
-trace.id: "<id from the customer's report>"
+trace.id: "<id from the user's report>"
 ```
 
 ### 4. Labels
@@ -249,7 +246,7 @@ hour instead of grepping messages.
 
 Naming (the JSDoc above `ALERTING_LOG_CODES` is the source of truth):
 
-- `<DOMAIN>_<WHAT_HAPPENED>`, SCREAMING_SNAKE_CASE.
+- `<DOMAIN>_<WHAT_HAPPENED>`.
 - The domain prefix matches the subsystem that owns the failure, so an operator
   can filter a whole area with a prefix: `ROUTES_`, `RULE_` / `RULE_EXECUTION_`
   / `RULE_TEMPLATE_`, `DIRECTOR_`, `DISPATCH_` / `DISPATCHER_`, `POLICY_` /
@@ -381,8 +378,7 @@ expect(mockLogger.warn).toHaveBeenCalledWith(
 ```
 
 Assert on `code` and `labels`: those are the values dashboards key on. Message
-text may be asserted too, but a test that only pins message text does not
-protect what operators depend on. Lazy messages arrive at the mock as a
+text should not be asserted. Lazy messages arrive at the mock as a
 function. Use `expect.any(Function)` for the first argument.
 
 ## LoggerService API
