@@ -7,7 +7,6 @@
 
 import { navigationHref, z, type PrimitiveNode } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
-import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
 import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 
@@ -18,7 +17,7 @@ import { actionsMarkdownRenderer } from './actions_markdown';
 const buttonSchema = z
   .object({
     label: plainText().describe('What the link opens, in a few words.'),
-    url: navigationHref({ max: SLACK_LIMITS.urlChars }),
+    url: navigationHref(),
     primary: z.boolean().optional().describe('Marks the one action the reader should take.'),
   })
   .strict();

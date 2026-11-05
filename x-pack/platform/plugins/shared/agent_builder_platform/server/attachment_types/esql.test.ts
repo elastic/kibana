@@ -75,6 +75,16 @@ describe('esql attachment type', () => {
       expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
     });
 
+    it('renders a query too long for a Discover button, without the button', async () => {
+      const query = `FROM logs | WHERE message == "${'x | '.repeat(1000)}"`;
+      const composition = await toComposition({ query }, discoverLocator);
+      const { valid, slack } = await renderSurface(composition);
+
+      expect(valid).toBe(true);
+      expect(slack).toContain('FROM logs');
+      expect(slack).not.toContain('/app/discover');
+    });
+
     it('leaves out the link when Discover has no locator', async () => {
       const composition = await toComposition({ query: 'FROM logs' });
 

@@ -89,6 +89,13 @@ describe('link', () => {
     ]);
   });
 
+  it('takes a path of any length, and Slack leaves out a link past its 3,000 characters', () => {
+    const long: LinkNode = { ...discover, path: `/${'x'.repeat(3000)}` };
+
+    expect(view(long)).toBe(true);
+    expect(slack(long, 'https://kibana.example.com')).toEqual([]);
+  });
+
   it('renders nothing in Slack for an app link without a base URL', () => {
     expect(slack(discover)).toEqual([]);
   });
