@@ -7,10 +7,17 @@
 
 import { createHash } from 'crypto';
 import {
+  RELATED_ALERT_CASES,
   buildRelatedAlertDoc,
   type RelatedAlertCase,
   type RelatedAlertFixture,
 } from '@kbn/evals-suite-alert-analysis-workflow';
+
+// get-related-alerts correlates by host.name / user.name / IP only, so cases whose target carries
+// just host.id / user.id would always score premise_unmet here.
+export const TRIAGE_RELATED_ALERT_CASES: RelatedAlertCase[] = RELATED_ALERT_CASES.filter(
+  ({ correlatedBy }) => correlatedBy !== 'id'
+);
 
 export interface RelatedAlertEvalDoc {
   id: string;

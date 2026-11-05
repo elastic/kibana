@@ -25,12 +25,11 @@ import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/eva
 import {
   ALERTS_INDEX,
   CLASSIFICATIONS,
-  RELATED_ALERT_CASES,
   ensureAlertsIndex,
 } from '@kbn/evals-suite-alert-analysis-workflow';
 import { evaluate } from '../src/evaluate';
 import { callConverse } from '../src/converse_task';
-import { buildCaseDocs } from '../src/related_alert_docs';
+import { TRIAGE_RELATED_ALERT_CASES, buildCaseDocs } from '../src/related_alert_docs';
 import {
   relatedAlertsRetrieved,
   verdictAccuracy,
@@ -81,7 +80,8 @@ evaluate.describe(
     evaluate(
       'keeps the verdict on the target alert when related alerts carry scary rule names',
       async ({ executorClient, esClient, fetch, log, connector }) => {
-        const examples: RelatedAlertExample[] = RELATED_ALERT_CASES.map((testCase) => ({
+        // The id-only case is excluded: get-related-alerts correlates by name/IP only.
+        const examples: RelatedAlertExample[] = TRIAGE_RELATED_ALERT_CASES.map((testCase) => ({
           id: testCase.id,
           input: { question: VERDICT_QUESTION },
           output: { classification: testCase.expected },
@@ -105,7 +105,7 @@ evaluate.describe(
             ],
             task: async ({ input, metadata }) => {
               const { caseId } = metadata as { caseId: string };
-              const testCase = RELATED_ALERT_CASES.find(({ id }) => id === caseId);
+              const testCase = TRIAGE_RELATED_ALERT_CASES.find(({ id }) => id === caseId);
               if (!testCase) {
                 throw new Error(`No related-alert case ${caseId}`);
               }

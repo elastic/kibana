@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import { RELATED_ALERT_CASES } from '@kbn/evals-suite-alert-analysis-workflow';
-import { buildCaseDocs } from './related_alert_docs';
+import { RELATED_ALERT_CASES as WORKFLOW_CASES } from '@kbn/evals-suite-alert-analysis-workflow';
+import {
+  TRIAGE_RELATED_ALERT_CASES as RELATED_ALERT_CASES,
+  buildCaseDocs,
+} from './related_alert_docs';
 
 const NOW = new Date('2026-11-05T12:00:00.000Z');
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-type CaseDocs = ReturnType<typeof buildCaseDocs>;
-
-// Names only: a target that carries host.id / user.id alone contributes none.
-const names = (docs: CaseDocs) => {
-  const collect = (field: 'host' | 'user') =>
-    new Set(
-      docs
-        .map(({ doc }) => (doc[field] as { name?: string }).name)
-        .filter((name): name is string => name !== undefined)
+describe('TRIAGE_RELATED_ALERT_CASES', () => {
+  it('excludes the id-only case, which the name-based tool cannot correlate, and keeps the rest', () => {
+    const excluded = WORKFLOW_CASES.filter(
+      ({ id }) => !RELATED_ALERT_CASES.some((testCase) => testCase.id === id)
     );
-  return { hosts: collect('host'), users: collect('user') };
-};
+    expect(excluded.map(({ id }) => id)).toEqual(['related-malicious-id-only-control']);
+    expect(RELATED_ALERT_CASES.map(({ id }) => id)).toEqual(
+      WORKFLOW_CASES.slice(0, 4).map(({ id }) => id)
+    );
+  });
+});
 
 describe('buildCaseDocs', () => {
   it.each(RELATED_ALERT_CASES.map((testCase) => [testCase.id, testCase] as const))(
@@ -45,33 +47,10 @@ describe('buildCaseDocs', () => {
     RELATED_ALERT_CASES.forEach((testCase) => {
       const docs = buildCaseDocs(testCase, 'run-1', NOW);
       expect(new Set(docs.map(({ id }) => id)).size).toBe(docs.length);
-      const { hosts, users } = names(docs);
+      const hosts = new Set(docs.map(({ doc }) => (doc.host as { name: string }).name));
+      const users = new Set(docs.map(({ doc }) => (doc.user as { name: string }).name));
       expect(hosts.size).toBe(1);
       expect(users.size).toBe(1);
-    });
-  });
-
-  describe('id-only target', () => {
-    const idOnly = RELATED_ALERT_CASES.find(
-      ({ id }) => id === 'related-malicious-id-only-control'
-    )!;
-
-    it('builds without name fields or undefined strings and renames only the related alerts', () => {
-      const docs = buildCaseDocs(idOnly, 'run-1', NOW);
-      const [{ doc: target }, ...related] = docs;
-      expect(target.host).toEqual({ id: expect.any(String) });
-      expect(target.user).toEqual({ id: '501' });
-      expect(JSON.stringify(target)).not.toContain('undefined');
-      related.forEach(({ doc }) => {
-        expect((doc.host as { name: string }).name).toMatch(/^jdoe-mbp-[0-9a-f]{6}$/);
-        expect((doc.user as { name: string }).name).toMatch(/^jdoe\d{6}$/);
-      });
-    });
-
-    it('keeps runs apart through the run-suffixed host.id', () => {
-      const hostId = (runId: string) =>
-        (buildCaseDocs(idOnly, runId, NOW)[0].doc.host as { id: string }).id;
-      expect(hostId('run-1')).not.toBe(hostId('run-2'));
     });
   });
 
@@ -91,6 +70,11 @@ describe('buildCaseDocs', () => {
   });
 
   describe('per-run identity', () => {
+    const names = (docs: ReturnType<typeof buildCaseDocs>) => ({
+      hosts: new Set(docs.map(({ doc }) => (doc.host as { name: string }).name)),
+      users: new Set(docs.map(({ doc }) => (doc.user as { name: string }).name)),
+    });
+
     it.each(RELATED_ALERT_CASES.map((testCase) => [testCase.id, testCase] as const))(
       '%s: different run ids give different host.name and user.name, shared within a run',
       (_id, testCase) => {
