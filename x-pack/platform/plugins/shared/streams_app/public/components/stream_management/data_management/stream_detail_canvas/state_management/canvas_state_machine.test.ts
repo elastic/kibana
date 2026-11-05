@@ -15,7 +15,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { createStreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createActor, createMachine, waitFor, type Actor, type SnapshotFrom } from 'xstate';
-import { disconnectLine } from '../../../../../services/unit_connections';
+import { disconnectLine, withoutUnconnectedWiring } from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import { createDefaultUnit, type Unit } from '../../../../../services/unit_repository';
 import type { UnitDestination } from '@kbn/streams-schema';
@@ -364,10 +364,12 @@ describe('canvas save', () => {
         ],
       },
     };
+    // The repository stores the unit without the unhooked processing pipeline.
+    const stored = withoutUnconnectedWiring(withNewDestination);
     const persisted: Unit[] = [];
     const { canvas } = startCanvas(async (unit) => {
       persisted.push(unit);
-      return unit;
+      return stored;
     }, processed);
     await waitForUnitReady(canvas);
 
@@ -381,8 +383,12 @@ describe('canvas save', () => {
     await waitForUnitReady(canvas);
 
     expect(persisted).toEqual([withNewDestination]);
-    expect(canvas.getSnapshot().context.nextUnit).toEqual(withNewDestination);
-    expect(canvas.getSnapshot().context.error).toBeUndefined();
+    expect(stored.unit.pipelines).toEqual([]);
+    const { unit, nextUnit, error } = canvas.getSnapshot().context;
+    expect(unit).toEqual(stored);
+    expect(nextUnit).toEqual(withNewDestination);
+    expect(unit).not.toBe(nextUnit);
+    expect(error).toBeUndefined();
   });
 });
 

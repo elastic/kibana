@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -42,6 +43,7 @@ import {
 import {
   UNCONNECTED_PIPELINE_REASON,
   getUnconnectedPipelines,
+  withPublishedTelemetry,
 } from '../../../../../services/unit_connections';
 import { getFormattedError } from '../../../../../util/errors';
 import {
@@ -200,9 +202,10 @@ export const canvasStateMachine = setup({
       if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
         return {};
       }
+      // Wiring a component save left unhooked stays staged, so it still reads as unsaved.
       return {
         unit: event.output.unitDefinition,
-        nextUnit: event.output.unitDefinition,
+        nextUnit: event.output.stagedUnitDefinition,
         savingUnit: undefined,
         savingComponentIds: undefined,
         savingComponentKind: undefined,
@@ -866,9 +869,16 @@ function createPersistUnitDefinitionActor({
   persistUnitDefinition: UnitRepository['persist'];
 }) {
   return fromPromise(
-    async ({ input }: { input: { unit: Unit; secrets?: StreamsUnit.Secrets } }) => ({
-      unitDefinition: await persistUnitDefinition(input.unit, input.secrets),
-    })
+    async ({ input }: { input: { unit: Unit; secrets?: StreamsUnit.Secrets } }) => {
+      const unitDefinition = await persistUnitDefinition(input.unit, input.secrets);
+      // The staged unit, narrowed like the stored one. A save that left nothing out
+      // hands back the stored unit itself, so the canvas reads as saved.
+      const staged = withPublishedTelemetry(input.unit);
+      return {
+        unitDefinition,
+        stagedUnitDefinition: isEqual(staged, unitDefinition) ? unitDefinition : staged,
+      };
+    }
   );
 }
 

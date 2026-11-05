@@ -129,7 +129,8 @@ export type CanvasUrlEvent =
   | { type: 'xstate.error.actor.validateUnitDefinition'; error: unknown }
   | {
       type: 'xstate.done.actor.persistUnitDefinition';
-      output: { unitDefinition: Unit };
+      /** `unitDefinition` is the unit as stored; `stagedUnitDefinition` keeps wiring the save left out. */
+      output: { unitDefinition: Unit; stagedUnitDefinition: Unit };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'flyout.open'; flyoutName: string; flyoutKind?: CanvasFlyoutKind }
