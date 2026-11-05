@@ -227,13 +227,11 @@ export const useColumns = (
             onClick={() => toggleDetails(item)}
             aria-label={
               expandedRowItemIds.includes(item.config.id)
-                ? i18n.translate('xpack.ml.dataframe.analyticsList.rowCollapse', {
-                    defaultMessage: 'Hide details for {analyticsId}',
-                    values: { analyticsId: item.config.id },
+                ? i18n.translate('xpack.ml.dataframe.analyticsList.rowCollapseAriaLabel', {
+                    defaultMessage: 'Hide details',
                   })
-                : i18n.translate('xpack.ml.dataframe.analyticsList.rowExpand', {
-                    defaultMessage: 'Show details for {analyticsId}',
-                    values: { analyticsId: item.config.id },
+                : i18n.translate('xpack.ml.dataframe.analyticsList.rowExpandAriaLabel', {
+                    defaultMessage: 'Show details',
                   })
             }
             iconType={

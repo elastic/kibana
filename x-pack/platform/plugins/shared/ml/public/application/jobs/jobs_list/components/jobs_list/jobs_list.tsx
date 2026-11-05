@@ -193,6 +193,14 @@ export const JobsList: FC<JobsListProps> = ({
                 defaultMessage: 'Show details for {itemId}',
                 values: { itemId: item.id },
               });
+          // The row header already announces the job ID, so the accessible name omits it.
+          const toggleAriaLabel = itemIdToExpandedRowMap[item.id]
+            ? i18n.translate('xpack.ml.jobsList.collapseDetailsAriaLabel', {
+                defaultMessage: 'Hide details',
+              })
+            : i18n.translate('xpack.ml.jobsList.expandDetailsAriaLabel', {
+                defaultMessage: 'Show details',
+              });
           return (
             <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -200,7 +208,7 @@ export const JobsList: FC<JobsListProps> = ({
                 iconType={
                   itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'
                 }
-                aria-label={toggleLabel}
+                aria-label={toggleAriaLabel}
                 data-row-id={item.id}
                 data-test-subj="mlJobListRowDetailsToggle"
               />
