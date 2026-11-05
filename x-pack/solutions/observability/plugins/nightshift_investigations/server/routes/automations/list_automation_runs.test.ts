@@ -250,6 +250,7 @@ it('links the executed alert branch of a mixed workflow', async () => {
 
 it.each([
   ['alerting.v1.alertStatusChanged', 'trigger_investigation_alert'],
+  ['alerting.alertStatusChanged', 'trigger_investigation_alert_v2'],
   ['slack2.message', 'trigger_investigation_slack'],
   ['scheduled', 'trigger_investigation'],
 ])('links the %s branch of a workflow with all trigger kinds', async (triggeredBy, stepId) => {
