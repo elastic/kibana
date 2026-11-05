@@ -21,7 +21,6 @@ export interface ConnectorBuilderInferenceEndpoints {
       featureDescription: string;
       taskType: 'chat_completion';
       recommendedEndpoints: string[];
-      ignoreGlobalDefault?: boolean;
     }) => { ok: true } | { ok: false; error: string };
   };
 }
@@ -45,8 +44,7 @@ export const registerConnectorBuilderInferenceFeature = (
       { defaultMessage: 'Model used to draft connector types from API documentation.' }
     ),
     taskType: 'chat_completion',
-    recommendedEndpoints: ['.anthropic-claude-4.5-haiku-chat_completion'],
-    ignoreGlobalDefault: true,
+    recommendedEndpoints: [],
   });
 
   if (result.ok) {

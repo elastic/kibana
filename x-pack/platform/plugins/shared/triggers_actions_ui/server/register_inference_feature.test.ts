@@ -37,8 +37,7 @@ describe('registerConnectorBuilderInferenceFeature', () => {
       featureName: 'Connector type builder',
       featureDescription: 'Model used to draft connector types from API documentation.',
       taskType: 'chat_completion',
-      recommendedEndpoints: ['.anthropic-claude-4.5-haiku-chat_completion'],
-      ignoreGlobalDefault: true,
+      recommendedEndpoints: [],
     });
     expect(logger.warn).not.toHaveBeenCalled();
   });
