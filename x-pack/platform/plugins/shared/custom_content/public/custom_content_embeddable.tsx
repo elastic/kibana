@@ -52,12 +52,7 @@ import {
   skip,
   switchMap,
 } from 'rxjs';
-import {
-  isExecutionTerminalEvent,
-  isToolUiEvent,
-  type ToolUiEvent,
-} from '@kbn/agent-builder-common';
-import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
+import { isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -74,20 +69,12 @@ import { getServices } from './services';
 import { getTelemetry } from './telemetry';
 import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
 import {
-  CUSTOM_CONTENT_UPDATED_UI_EVENT,
-  type CustomContentUpdatedUiEventData,
-} from '../common/ui_events';
-import {
   buildCustomContentContextAttachment,
+  isCustomContentUpdatedUiEvent,
   type CustomContentFetchContext,
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import type { CustomContentEmbeddableState } from '../server';
-
-const isCustomContentUpdatedUiEvent = (
-  event: BrowserChatEvent
-): event is ToolUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData> =>
-  isToolUiEvent(event, CUSTOM_CONTENT_UPDATED_UI_EVENT);
 
 const panelMeasureCss = css({
   display: 'flex',

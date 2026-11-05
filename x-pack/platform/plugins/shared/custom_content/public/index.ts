@@ -8,5 +8,11 @@
 import { CustomContentPlugin } from './plugin';
 
 export type { CustomContentEmbeddableState } from '../server';
+export type { CustomContentPublicStart } from './plugin';
+export type {
+  CustomContentPanelChat,
+  CustomContentPanelChatParams,
+  CustomContentPanelUpdate,
+} from './panel_chat';
 
 export const plugin = () => new CustomContentPlugin();

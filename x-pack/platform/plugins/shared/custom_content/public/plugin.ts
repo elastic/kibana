@@ -15,6 +15,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
+import { createPanelChat, type CustomContentPanelChat } from './panel_chat';
 import { setServices } from './services';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
 import { setAnalyticsSetup } from './telemetry/analytics_setup';
@@ -29,7 +30,14 @@ interface StartDeps {
   agentBuilder?: AgentBuilderPluginStart;
 }
 
-export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+export interface CustomContentPublicStart {
+  /** Undefined when Agent Builder is unavailable. */
+  panelChat: CustomContentPanelChat | undefined;
+}
+
+export class CustomContentPlugin
+  implements Plugin<void, CustomContentPublicStart, SetupDeps, StartDeps>
+{
   setup(core: CoreSetup, { embeddable }: SetupDeps) {
     setAnalyticsSetup(core.analytics);
     embeddable.registerEmbeddablePublicDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, async () => {
@@ -38,7 +46,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
     });
   }
 
-  start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps) {
+  start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps): CustomContentPublicStart {
     setServices(core, data.search.search, data.dataViews, agentBuilder);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_CONTENT_ACTION_ID, async () => {
@@ -53,5 +61,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
         customContentContextAttachmentUiDefinition
       );
     }
+
+    return { panelChat: agentBuilder ? createPanelChat(agentBuilder) : undefined };
   }
 }

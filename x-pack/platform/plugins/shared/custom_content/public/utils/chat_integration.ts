@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -13,6 +15,15 @@ import {
   MAX_SHORT_FIELD_LENGTH,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
+import {
+  CUSTOM_CONTENT_UPDATED_UI_EVENT,
+  type CustomContentUpdatedUiEventData,
+} from '../../common/ui_events';
+
+export const isCustomContentUpdatedUiEvent = (
+  event: BrowserChatEvent
+): event is ToolUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData> =>
+  isToolUiEvent(event, CUSTOM_CONTENT_UPDATED_UI_EVENT);
 
 /**
  * Deterministic per-panel attachment id. Attachments are merged by `id` and anything without one is
