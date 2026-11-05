@@ -6,17 +6,7 @@
  */
 
 import type { EntityInventoryApiClient } from './client';
-import type { FixtureScenario } from './fixture_data';
 import { buildListResponseFixture, TYPES_RESPONSE_FIXTURE } from './fixture_data';
-
-export type { FixtureScenario } from './fixture_data';
-
-export interface FixtureEntityInventoryApiClientOptions {
-  /** The list response returned for every known type. Defaults to `normal`. */
-  scenario?: FixtureScenario;
-  /** When set, every list request rejects with this error. */
-  failWith?: Error;
-}
 
 const createAbortError = (): Error => {
   const error = new Error('The request was aborted');
@@ -24,27 +14,21 @@ const createAbortError = (): Error => {
   return error;
 };
 
-const throwIfAborted = (signal?: AbortSignal) => {
+export const throwIfAborted = (signal?: AbortSignal) => {
   if (signal?.aborted) {
     throw createAbortError();
   }
 };
 
 /** Client over static fixtures; it backs the app until the inventory routes exist (#6304). */
-export const createFixtureEntityInventoryApiClient = ({
-  scenario = 'normal',
-  failWith,
-}: FixtureEntityInventoryApiClientOptions = {}): EntityInventoryApiClient => ({
+export const createFixtureEntityInventoryApiClient = (): EntityInventoryApiClient => ({
   getTypes: async ({ signal }) => {
     throwIfAborted(signal);
     return TYPES_RESPONSE_FIXTURE;
   },
   listEntities: async (type, _request, { signal }) => {
     throwIfAborted(signal);
-    if (failWith) {
-      throw failWith;
-    }
-    const response = buildListResponseFixture(type, scenario);
+    const response = buildListResponseFixture(type);
     if (!response) {
       throw new Error(`Entity type "${type}" not found`);
     }

@@ -78,64 +78,6 @@ describe('createFixtureEntityInventoryApiClient', () => {
     expect(rows.some((row) => row.paused === true)).toBe(true);
   });
 
-  it('returns fewer rows than the total for the truncated scenario', async () => {
-    const list = await createFixtureEntityInventoryApiClient({
-      scenario: 'truncated',
-    }).listEntities('host', REQUEST, {});
-
-    expect(list.truncated).toBe(true);
-    expect(list.total).toBeGreaterThan(list.rows.length);
-  });
-
-  it('returns an unknown total for the countFailed scenario', async () => {
-    const list = await createFixtureEntityInventoryApiClient({
-      scenario: 'countFailed',
-    }).listEntities('host', REQUEST, {});
-
-    expect(list.truncated).toBe(true);
-    expect(list.total).toBeNull();
-    expect(list.rows.length).toBeGreaterThan(0);
-  });
-
-  it('returns source errors and unavailable columns for the withDiagnostics scenario', async () => {
-    const list = await createFixtureEntityInventoryApiClient({
-      scenario: 'withDiagnostics',
-    }).listEntities('host', REQUEST, {});
-
-    expect(list.errors.length).toBeGreaterThan(0);
-    expect(list.unavailableColumns.length).toBeGreaterThan(0);
-  });
-
-  it('returns no rows for the empty scenario', async () => {
-    const list = await createFixtureEntityInventoryApiClient({ scenario: 'empty' }).listEntities(
-      'host',
-      REQUEST,
-      {}
-    );
-
-    expect(list.rows).toEqual([]);
-    expect(list.total).toBe(0);
-    expect(list.truncated).toBe(false);
-  });
-
-  it('returns no rows and several errors for the allSourcesFailed scenario', async () => {
-    const list = await createFixtureEntityInventoryApiClient({
-      scenario: 'allSourcesFailed',
-    }).listEntities('host', REQUEST, {});
-
-    expect(list.rows).toEqual([]);
-    expect(list.total).toBeNull();
-    expect(list.errors.length).toBeGreaterThan(1);
-  });
-
-  it('rejects with the given error', async () => {
-    const failWith = new Error('Request failed');
-
-    await expect(
-      createFixtureEntityInventoryApiClient({ failWith }).listEntities('host', REQUEST, {})
-    ).rejects.toBe(failWith);
-  });
-
   it('rejects for an unknown type', async () => {
     await expect(
       createFixtureEntityInventoryApiClient().listEntities('service', REQUEST, {})

@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
 import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../inventory_api/fixture_client';
+import { createScenarioEntityInventoryApiClient } from '../../inventory_api/fixture_scenarios';
 import { createAppServicesMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
 import { EntityTypeNotFoundError, useEntityList } from './use_entity_list';
@@ -53,7 +54,7 @@ describe('useEntityList', () => {
 
   it('surfaces a failed request as the error', async () => {
     const failWith = new Error('Request failed');
-    const { result } = renderUseEntityList(createFixtureEntityInventoryApiClient({ failWith }));
+    const { result } = renderUseEntityList(createScenarioEntityInventoryApiClient({ failWith }));
 
     await waitFor(() => expect(result.current.result.error).toBe(failWith));
     expect(result.current.result.list).toBeUndefined();

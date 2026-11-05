@@ -13,15 +13,6 @@ import type {
   InventoryTypesResponse,
 } from './types';
 
-/** The list scenarios the fixture client can return. */
-export type FixtureScenario =
-  | 'normal'
-  | 'truncated'
-  | 'countFailed'
-  | 'withDiagnostics'
-  | 'empty'
-  | 'allSourcesFailed';
-
 // Columns in `buildColumns` order: id, identity fields, attributes, last_seen.
 const HOST_LIST_COLUMNS: InventoryListColumn[] = [
   { name: 'entity.id', kind: 'id', type: 'keyword' },
@@ -179,78 +170,28 @@ export const buildK8sDeploymentRows = (count: number): InventoryRow[] =>
     };
   });
 
-const FIXTURES_BY_TYPE: Readonly<
+export const LIST_FIXTURES_BY_TYPE: Readonly<
   Record<string, { columns: InventoryListColumn[]; buildRows: (count: number) => InventoryRow[] }>
 > = {
   host: { columns: HOST_LIST_COLUMNS, buildRows: buildHostRows },
   'k8s.deployment': { columns: K8S_DEPLOYMENT_LIST_COLUMNS, buildRows: buildK8sDeploymentRows },
 };
 
-const NORMAL_ROW_COUNT = 120;
-const TRUNCATED_ROW_COUNT = 250;
-const TRUNCATED_TOTAL = 12_345;
+export const NORMAL_ROW_COUNT = 120;
 
-const SOURCE_ERRORS = [
-  {
-    indexPattern: 'metrics-system.*-*',
-    status: 403,
-    reason: 'security_exception: action [indices:data/read/esql] is unauthorized',
-  },
-  {
-    indexPattern: 'metrics-hostmetricsreceiver.otel-*',
-    status: null,
-    reason: 'timeout: the query did not complete in time',
-  },
-];
-
-const UNAVAILABLE_COLUMNS = [
-  {
-    indexPattern: 'metrics-hostmetricsreceiver.otel-*',
-    column: 'k8s.cluster.name',
-    field: 'k8s.cluster.name',
-  },
-];
-
-/** Builds the list response of `type` for `scenario`, or `undefined` for an unknown type. */
-export const buildListResponseFixture = (
-  type: string,
-  scenario: FixtureScenario
-): InventoryListResponse | undefined => {
-  const fixture = FIXTURES_BY_TYPE[type];
+/** Builds the complete list response of `type`, or `undefined` for an unknown type. */
+export const buildListResponseFixture = (type: string): InventoryListResponse | undefined => {
+  const fixture = LIST_FIXTURES_BY_TYPE[type];
   if (!fixture) {
     return undefined;
   }
-  const { columns, buildRows } = fixture;
-  const base = { columns, errors: [], unavailableColumns: [] };
-
-  switch (scenario) {
-    case 'truncated':
-      return {
-        ...base,
-        rows: buildRows(TRUNCATED_ROW_COUNT),
-        total: TRUNCATED_TOTAL,
-        truncated: true,
-      };
-    case 'countFailed':
-      return { ...base, rows: buildRows(TRUNCATED_ROW_COUNT), total: null, truncated: true };
-    case 'withDiagnostics': {
-      const rows = buildRows(NORMAL_ROW_COUNT);
-      return {
-        ...base,
-        rows,
-        total: rows.length,
-        truncated: false,
-        errors: SOURCE_ERRORS.slice(0, 1),
-        unavailableColumns: UNAVAILABLE_COLUMNS,
-      };
-    }
-    case 'empty':
-      return { ...base, rows: [], total: 0, truncated: false };
-    case 'allSourcesFailed':
-      return { ...base, rows: [], total: null, truncated: true, errors: SOURCE_ERRORS };
-    case 'normal': {
-      const rows = buildRows(NORMAL_ROW_COUNT);
-      return { ...base, rows, total: rows.length, truncated: false };
-    }
-  }
+  const rows = fixture.buildRows(NORMAL_ROW_COUNT);
+  return {
+    columns: fixture.columns,
+    rows,
+    total: rows.length,
+    truncated: false,
+    errors: [],
+    unavailableColumns: [],
+  };
 };

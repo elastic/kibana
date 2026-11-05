@@ -14,6 +14,7 @@ import {
   HOST_TYPE_FIXTURE,
   K8S_DEPLOYMENT_TYPE_FIXTURE,
 } from '../../../inventory_api/fixture_data';
+import { buildScenarioListResponse } from '../../../inventory_api/fixture_scenarios';
 import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTable } from './entity_table';
@@ -30,7 +31,7 @@ import { DEFAULT_PAGE_SIZE } from './use_entity_table_state';
 jest.setTimeout(30_000);
 
 const getFixture = (scenario: 'normal' | 'truncated' | 'countFailed'): InventoryListResponse => {
-  const list = buildListResponseFixture('host', scenario);
+  const list = buildScenarioListResponse('host', scenario);
   if (!list) {
     throw new Error('Missing host fixture');
   }
@@ -161,7 +162,7 @@ describe('EntityTable', () => {
   });
 
   it('renders the cluster of a deployment as a badge under either naming convention and leaves an empty cluster as a placeholder', () => {
-    const k8sList = buildListResponseFixture('k8s.deployment', 'normal');
+    const k8sList = buildListResponseFixture('k8s.deployment');
     if (!k8sList) {
       throw new Error('Missing k8s.deployment fixture');
     }
@@ -207,7 +208,7 @@ describe('EntityTable', () => {
   });
 
   it('shows the deployment name and namespace reported under either naming convention', () => {
-    const k8sList = buildListResponseFixture('k8s.deployment', 'normal');
+    const k8sList = buildListResponseFixture('k8s.deployment');
     if (!k8sList) {
       throw new Error('Missing k8s.deployment fixture');
     }

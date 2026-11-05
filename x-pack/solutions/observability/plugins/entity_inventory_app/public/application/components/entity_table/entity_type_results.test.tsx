@@ -11,9 +11,10 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
-import type { FixtureScenario } from '../../../inventory_api/fixture_client';
 import { createFixtureEntityInventoryApiClient } from '../../../inventory_api/fixture_client';
 import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
+import type { FixtureScenario } from '../../../inventory_api/fixture_scenarios';
+import { createScenarioEntityInventoryApiClient } from '../../../inventory_api/fixture_scenarios';
 import { createAppServicesMock } from '../../../mocks';
 import {
   EntityInventorySearchProvider,
@@ -62,7 +63,7 @@ const renderResults = (inventoryApi: EntityInventoryApiClient, entityType = 'hos
 };
 
 const renderScenario = (scenario: FixtureScenario) =>
-  renderResults(createFixtureEntityInventoryApiClient({ scenario }));
+  renderResults(createScenarioEntityInventoryApiClient({ scenario }));
 
 describe('EntityTypeResults', () => {
   it('shows a loading prompt until the entities arrive, then the table', async () => {
