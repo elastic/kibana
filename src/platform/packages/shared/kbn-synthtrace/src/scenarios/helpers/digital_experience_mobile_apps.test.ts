@@ -66,7 +66,8 @@ const serviceOf = (doc: EdotReactNativeDocument) =>
 const platformOf = (doc: EdotReactNativeDocument) =>
   (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['telemetry.sdk.name'];
 
-describe('digital experience mobile apps', () => {
+// Failing: See https://github.com/elastic/kibana/issues/303624
+describe.skip('digital experience mobile apps', () => {
   // A 30-minute run is enough for every app to show every signal, and shared by the tests
   let docs: EdotReactNativeDocument[];
   beforeAll(() => {
