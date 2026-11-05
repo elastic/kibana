@@ -340,7 +340,7 @@ export const CustomCellFlyout = ({
             </EuiText>
           }
           title={i18n.translate('xpack.notebook.customCell.flyout.templateLabel', {
-            defaultMessage: 'Template (HTML)',
+            defaultMessage: 'Template',
           })}
           action={
             onGenerateWithChat && (
@@ -407,7 +407,7 @@ export const CustomCellFlyout = ({
           <SectionTitle
             icon={<EuiIcon type="database" size="s" aria-hidden={true} />}
             title={i18n.translate('xpack.notebook.customCell.flyout.dataSection', {
-              defaultMessage: 'Data source (ES|QL)',
+              defaultMessage: 'Data source',
             })}
             action={
               <EuiText size="xs" color="subdued">
