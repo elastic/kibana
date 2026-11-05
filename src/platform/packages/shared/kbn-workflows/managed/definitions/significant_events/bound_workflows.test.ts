@@ -12,9 +12,9 @@ import BOUND_CLEANUP_YAML from './bound_cleanup.yaml';
 import BOUND_ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
 import BOUND_SOURCE_RECONCILIATION_YAML from './knowledge_indicators/bound_source_reconciliation.yaml';
 import BOUND_SYNC_YAML from './knowledge_indicators/bound_sync.yaml';
+import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
-import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
 
 interface IParsedStep {
   name: string;
