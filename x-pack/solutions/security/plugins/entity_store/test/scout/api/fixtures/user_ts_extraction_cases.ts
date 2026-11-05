@@ -460,6 +460,55 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       entityName: 'mary.blue',
     },
   },
+  // --- IDP: multi-valued IAM fields where the matching value is not the first sorted doc value ---
+  {
+    id: 'idp-iam-multi-value-event-type',
+    query: { term: { 'user.email': 'scout.iam.multi.type@example.com' } },
+    dslFilterSource: {
+      user: { email: 'scout.iam.multi.type@example.com', name: 'scout.iam.multi.type' },
+      event: { kind: 'event', category: ['iam'], type: ['info', 'user'], module: 'zscaler_zpa' },
+    },
+    expectedEuid: 'user:scout.iam.multi.type@example.com@zscaler_zpa',
+    expectedMeta: {
+      namespace: 'zscaler_zpa',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout.iam.multi.type',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T11:00:00.000Z',
+      user: { email: 'scout.iam.multi.type@example.com', name: 'scout.iam.multi.type' },
+      event: { kind: 'event', category: ['iam'], type: ['info', 'user'], module: 'zscaler_zpa' },
+    },
+  },
+  {
+    id: 'idp-iam-multi-value-event-category',
+    query: { term: { 'user.email': 'scout.iam.multi.category@example.com' } },
+    dslFilterSource: {
+      user: { email: 'scout.iam.multi.category@example.com', name: 'scout.iam.multi.category' },
+      event: {
+        kind: 'event',
+        category: ['authentication', 'iam'],
+        type: ['user'],
+        module: 'zscaler_zpa',
+      },
+    },
+    expectedEuid: 'user:scout.iam.multi.category@example.com@zscaler_zpa',
+    expectedMeta: {
+      namespace: 'zscaler_zpa',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout.iam.multi.category',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T11:00:00.000Z',
+      user: { email: 'scout.iam.multi.category@example.com', name: 'scout.iam.multi.category' },
+      event: {
+        kind: 'event',
+        category: ['authentication', 'iam'],
+        type: ['user'],
+        module: 'zscaler_zpa',
+      },
+    },
+  },
   // --- Namespace from data_stream.dataset (first segment) ---
   {
     id: 'idp-iam-okta-from-dataset',

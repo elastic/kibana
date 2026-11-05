@@ -214,7 +214,8 @@ export interface StreamlangToPainlessDocOptions {
 
 /**
  * Translates a streamlang condition to Painless using doc['field'].value and/or evaluated locals.
- * Handles and, or, not, and field predicates (eq, neq, exists, includes).
+ * Handles and, or, not, and field predicates (eq, neq, exists, includes). `includes` matches when
+ * any value of the field equals the given value.
  *
  * @internal Exported for testing.
  */
@@ -256,8 +257,9 @@ export function streamlangConditionToPainlessDoc(
           : `(${varName} == null || ${varName} == "")`;
       }
       if ('includes' in c) {
+        // Evaluated vars hold a single value, so membership is equality.
         const val = escapePainlessString(String(c.includes));
-        return `${varName} != null && ${varName} != "" && ${varName}.contains("${val}")`;
+        return `${varName} != null && ${varName} == "${val}"`;
       }
     }
     const escaped = escapePainlessField(field);
@@ -274,8 +276,10 @@ export function streamlangConditionToPainlessDoc(
       return c.exists ? nonEmpty : `!(${nonEmpty})`;
     }
     if ('includes' in c) {
+      // Membership over all doc values (like ES|QL MV_CONTAINS), not a substring check on
+      // `.value`, which is only the first sorted value of a multi-valued field.
       const val = escapePainlessString(String(c.includes));
-      return `(${nonEmpty} && doc['${escaped}'].value.contains("${val}"))`;
+      return `(doc.containsKey('${escaped}') && doc['${escaped}'].contains("${val}"))`;
     }
   }
   return 'false';
