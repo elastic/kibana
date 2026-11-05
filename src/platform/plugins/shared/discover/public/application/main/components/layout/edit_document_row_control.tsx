@@ -55,14 +55,18 @@ export const createEditDocumentRowControl = (
 ): RowControlColumn => ({
   id: 'editDocument',
   isAvailable: ({ record }) => isDocumentEditable(record),
-  render: (Control, { record }) => (
-    <Control
-      data-test-subj="discoverEditDocumentButton"
-      label={deps.isEsqlMode ? editBackingDocumentLabel : editDocumentLabel}
-      iconType="pencil"
-      onClick={() => {
-        openEditorForDocument(record, deps);
-      }}
-    />
-  ),
+  render: (Control, { record }) => {
+    const label = deps.isEsqlMode ? editBackingDocumentLabel : editDocumentLabel;
+    return (
+      <Control
+        data-test-subj="discoverEditDocumentButton"
+        label={label}
+        tooltipContent={label}
+        iconType="pencil"
+        onClick={() => {
+          openEditorForDocument(record, deps);
+        }}
+      />
+    );
+  },
 });

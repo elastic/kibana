@@ -33,6 +33,7 @@ const Control: RowControlComponent = (props) => (
   <button
     type="button"
     aria-label={props.label}
+    title={typeof props.tooltipContent === 'string' ? props.tooltipContent : undefined}
     data-test-subj={props['data-test-subj']}
     data-icon-type={props.iconType}
     onClick={() => props.onClick?.({ rowIndex: 0, record: editableRecord })}
@@ -99,13 +100,17 @@ describe('createEditDocumentRowControl', () => {
       expect(button).toBeVisible();
       expect(button).toHaveAttribute('data-icon-type', 'pencil');
       expect(button).toHaveAttribute('data-test-subj', 'discoverEditDocumentButton');
+      // The hover tooltip comes from tooltipContent, not the aria-label.
+      expect(button).toHaveAttribute('title', 'Edit document');
     });
 
     it('labels the control "Edit backing document" in ES|QL mode', () => {
       const { control } = setup({ isEsqlMode: true });
       render(<>{control.render(Control, rowProps(editableRecord))}</>);
 
-      expect(screen.getByRole('button', { name: 'Edit backing document' })).toBeVisible();
+      const button = screen.getByRole('button', { name: 'Edit backing document' });
+      expect(button).toBeVisible();
+      expect(button).toHaveAttribute('title', 'Edit backing document');
     });
   });
 
