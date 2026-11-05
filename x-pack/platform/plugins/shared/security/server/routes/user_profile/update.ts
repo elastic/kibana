@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
-import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
+import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components/server';
 import type { DotKeysOf } from '@kbn/utility-types';
 
 import type { RouteDefinitionParams } from '..';
@@ -151,7 +151,10 @@ export function defineUpdateUserProfileDataRoute({
 
       const requestedLocale = userProfileData.userSettings?.locale;
       if (requestedLocale) {
-        const allowedLocales = i18nService.getLocales();
+        const configuredLocales = i18nService.getLocales();
+        // An empty `i18n.locales` disables the picker but Kibana still runs in the default locale.
+        const allowedLocales =
+          configuredLocales.length > 0 ? configuredLocales : [i18nService.getLocale()];
         if (!allowedLocales.includes(requestedLocale)) {
           return response.customError({
             body: `Locale "${requestedLocale}" is not enabled for this deployment`,
