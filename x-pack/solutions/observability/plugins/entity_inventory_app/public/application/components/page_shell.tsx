@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { EntityInventorySearchProvider } from '../context/search_context';
 import { EntityInventorySearchBar } from './search_bar';
@@ -29,19 +29,22 @@ export const EntityInventoryPageShell = ({
     <EntityInventorySearchProvider entityCategory={entityCategory}>
       <EuiFlexGroup
         direction="column"
-        gutterSize="none"
+        gutterSize="m"
         data-test-subj="entityInventoryPageShell"
         data-entity-category={entityCategory}
       >
         <EuiFlexItem grow={false}>
-          <EntityInventorySearchBar />
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EntityInventorySearchBar />
+            </EuiFlexItem>
+            {secondaryControls && (
+              <EuiFlexItem grow={false} data-test-subj="entityInventorySecondaryControls">
+                {secondaryControls}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {secondaryControls && (
-          <EuiFlexItem grow={false} data-test-subj="entityInventorySecondaryControls">
-            {secondaryControls}
-          </EuiFlexItem>
-        )}
-        <EuiSpacer size="m" />
         <EuiFlexItem data-test-subj="entityInventoryPageContent">{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EntityInventorySearchProvider>
