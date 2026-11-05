@@ -13,23 +13,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
-import { CONNECTOR_ENV_PREFIX, redactSecrets } from './connector_credentials';
-import {
-  TELEMETRY_CUTOFF_DIR,
-  TELEMETRY_CUTOFF_PROXY_PATH,
-  TELEMETRY_CUTOFF_PROXY_SOURCE,
-  telemetryCutoffCommand,
-} from './telemetry_cutoff';
+import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
-import { isTelemetryNotAfter } from '../../../common';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
-
-/** Connector type whose reads the telemetry cutoff bounds. */
-const ELASTICSEARCH_CONNECTOR_TYPE = '.elasticsearch';
 
 /**
  * Upper bound (and default) for a sandbox command's own timeout. The sandbox client adds a 10s
@@ -104,19 +94,12 @@ export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
-  readTelemetryNotAfter,
   sandboxAllowlistClient,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
-  /**
-   * Latest inclusive `@timestamp` this conversation's Elasticsearch connector reads may return.
-   * Unset for investigations that do not bound telemetry. A thrown read does not run the command: the
-   * caller cannot tell a missing cutoff from a cutoff that failed to load.
-   */
-  readTelemetryNotAfter?: (conversationId: string) => Promise<string | undefined>;
   sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
@@ -236,94 +219,8 @@ export const createSandboxBashTool = ({
         ...credentialEnv,
       };
 
-      let commandToRun = command;
-      // The cutoff bounds Elasticsearch connectors only; other connectors are not telemetry reads.
-      if (
-        readTelemetryNotAfter &&
-        connector_id &&
-        credentialEnv[`${CONNECTOR_ENV_PREFIX}TYPE`] === ELASTICSEARCH_CONNECTOR_TYPE
-      ) {
-        let notAfter: string | undefined;
-        try {
-          notAfter = await readTelemetryNotAfter(rawConversationId);
-        } catch (error) {
-          logger.warn(
-            `Could not read the telemetry cutoff for conversation ${rawConversationId}: ${
-              error instanceof Error ? error.name : 'Error'
-            }`
-          );
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: 'Could not read the telemetry cutoff, so the command was not run.',
-                },
-              },
-            ],
-          };
-        }
-        if (notAfter) {
-          // Without a URL there is nothing to point at the proxy, so the command would read unbounded.
-          if (!mergedEnv.CONNECTOR_CONFIG_URL) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    message:
-                      'The telemetry connector has no URL to apply the cutoff to, so the command was not run.',
-                  },
-                },
-              ],
-            };
-          }
-          if (!isTelemetryNotAfter(notAfter)) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    message: 'Telemetry cutoff is not a UTC timestamp, so the command was not run.',
-                  },
-                },
-              ],
-            };
-          }
-          let written = false;
-          try {
-            await session.mkdirs([TELEMETRY_CUTOFF_DIR]);
-            const [result] = await session.writeFiles([
-              {
-                path: TELEMETRY_CUTOFF_PROXY_PATH,
-                content: Buffer.from(TELEMETRY_CUTOFF_PROXY_SOURCE, 'utf8'),
-              },
-            ]);
-            written = result?.success === true;
-          } catch {
-            written = false;
-          }
-          if (!written) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    message:
-                      'Could not install the telemetry cutoff proxy, so the command was not run.',
-                  },
-                },
-              ],
-            };
-          }
-          mergedEnv.NIGHTSHIFT_TELEMETRY_CUTOFF = notAfter;
-          mergedEnv.NIGHTSHIFT_SANDBOX_COMMAND = command;
-          commandToRun = telemetryCutoffCommand();
-        }
-      }
-
       const result = await session.runCommand({
-        command: commandToRun,
+        command,
         directory: working_directory,
         env: mergedEnv,
         ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),

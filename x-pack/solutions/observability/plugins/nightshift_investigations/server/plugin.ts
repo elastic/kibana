@@ -32,8 +32,6 @@ import {
   NightshiftSettingsLocatorDefinition,
 } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
-import type { TelemetryCutoffStore } from './lib/telemetry_cutoffs';
-import { createTelemetryCutoffStore } from './lib/telemetry_cutoffs';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
@@ -165,7 +163,6 @@ export class NightshiftInvestigationsPlugin
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private alertingVTwo?: NightshiftInvestigationsStartDeps['alertingVTwo'];
   private elasticsearch?: ElasticsearchServiceStart;
-  private telemetryCutoffs?: TelemetryCutoffStore;
   private savedObjects?: CoreStart['savedObjects'];
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
@@ -426,16 +423,6 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
-            ...(config.telemetry_cutoff.enabled
-              ? {
-                  readTelemetryNotAfter: async (conversationId: string) => {
-                    if (!this.telemetryCutoffs) {
-                      throw new Error('Telemetry cutoffs are read before the plugin started');
-                    }
-                    return this.telemetryCutoffs.get(conversationId);
-                  },
-                }
-              : {}),
             sandboxAllowlistClient,
             logger: sandboxLogger,
           })
@@ -672,7 +659,6 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
-          isTelemetryCutoffEnabled: () => this.ctx.config.get().telemetry_cutoff.enabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
           sandboxAllowlistClient,
@@ -769,12 +755,6 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry = plugins.ruleRegistry;
     this.alertingVTwo = plugins.alertingVTwo;
     this.elasticsearch = coreStart.elasticsearch;
-    if (this.ctx.config.get().telemetry_cutoff.enabled) {
-      this.telemetryCutoffs = createTelemetryCutoffStore({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        logger: this.logger.get('telemetry_cutoffs'),
-      });
-    }
     this.savedObjects = coreStart.savedObjects;
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
@@ -898,7 +878,6 @@ export class NightshiftInvestigationsPlugin
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
       isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
-      telemetryCutoffs: this.telemetryCutoffs,
       isAvailable: (connectorId) =>
         isInvestigationRunAvailable({
           request,

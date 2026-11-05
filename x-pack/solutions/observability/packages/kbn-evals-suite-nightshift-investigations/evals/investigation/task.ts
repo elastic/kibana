@@ -14,7 +14,6 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
-import { orcaCurrentTimeMs } from './orca_dataset';
 import { extractFinalResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 import { countToolCalls, extractUsage } from './usage';
 import type {
@@ -172,25 +171,6 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
-/** Paper grace: sandbox reads may include telemetry up to five minutes after current_time. */
-const TELEMETRY_CUTOFF_GRACE_MS = 5 * 60 * 1000;
-
-/**
- * The last instant a sandbox read may return. ORCA serves each task the first telemetry snapshot
- * after current_time plus five minutes, so a recorded snapshot time is the paper's own bound;
- * otherwise it is five minutes after a parseable current_time.
- */
-const telemetryNotAfter = ({
-  current_time: currentTime,
-  telemetry_snapshot_time: snapshotTime,
-}: InvestigationExample['metadata']): string | undefined => {
-  const snapshot = orcaCurrentTimeMs(snapshotTime);
-  if (snapshot !== undefined) return new Date(snapshot).toISOString();
-  const parsed = orcaCurrentTimeMs(currentTime);
-  if (parsed === undefined) return undefined;
-  return new Date(parsed + TELEMETRY_CUTOFF_GRACE_MS).toISOString();
-};
-
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
@@ -203,7 +183,6 @@ export const runInvestigation = async (
     query: example.input.question,
   };
   let investigation: Investigation | undefined;
-  const notAfter = telemetryNotAfter(example.metadata);
   let conversation: { rounds: ConversationRound[] } | undefined;
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
@@ -214,7 +193,6 @@ export const runInvestigation = async (
           subject: { type: 'manual' },
           message: example.input.question,
           connector_id: connector.id,
-          ...(notAfter ? { telemetry_not_after: notAfter } : {}),
         }),
       }
     );

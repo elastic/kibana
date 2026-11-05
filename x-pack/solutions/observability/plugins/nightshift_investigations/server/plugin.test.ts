@@ -23,7 +23,6 @@ const createPlugin = (memoryEnabled = false) =>
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
       findings_recorder: { enabled: true },
-      telemetry_cutoff: { enabled: false },
     })
   );
 
@@ -41,7 +40,6 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         cortex: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
-        telemetry_cutoff: { enabled: false },
       })
     );
     plugin.setup(coreMock.createSetup(), {

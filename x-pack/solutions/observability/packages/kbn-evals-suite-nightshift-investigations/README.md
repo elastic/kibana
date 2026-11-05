@@ -557,30 +557,14 @@ hint, so the agent discovers the ORCA indices the way it would on any cluster. T
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
-Each example records `metadata.current_time`. The eval sends `telemetry_not_after` on the
-investigation: `metadata.telemetry_snapshot_time` when the example records it, otherwise five
-minutes after `current_time`. ORCA serves each task the first telemetry snapshot taken after
-`current_time` plus five minutes, a median of 1.7 and at most 5 minutes later, so the snapshot time
-is the paper's own bound. On 91 of the 755 public tasks that is ORCA's last snapshot, 2026-04-24
-19:25:42 UTC, which is earlier than `current_time`; the ORCA cluster's data ends there too. The
-sampled 50 do not record a snapshot time and keep the five-minute bound, which can be up to five
-minutes stricter than the paper. Kibana stores that value, keyed by investigation, in its own
-`.kibana-nightshift-telemetry-cutoffs` index before the investigation runs. It is not part of the
-prompt, the workflow inputs or the conversation, and no agent tool can read or write it. While it
-is set, sandbox
-commands that call an Elasticsearch (`.elasticsearch`) connector go through a proxy in that
-investigation's sandbox:
-`_search`, `_count`, and ES|QL `_query` reads are forwarded with an `@timestamp <=` bound at that
-instant, read-only metadata endpoints pass through, and any other read gets a 403 that names the
-reason. If the cluster cannot be reached, the proxy returns a 502, so a failed read does not look
-like no data. The proxy bounds ordinary commands and is not a security boundary, because everything
-in the sandbox runs as one user. Customer-0 and smoke never set the field, so their telemetry reads
-are unchanged. The plugin accepts the field only when
-`xpack.nightshift_investigations.telemetry_cutoff.enabled` is on, which only the
-`evals_nightshift_investigations` Scout config set does; elsewhere a start that sets it gets a 400
-and the sandbox tool reads no cutoff. A follow-up start must carry the cutoff its investigation
-started with. Eight
-investigations run at once and each has its own cutoff, so the bound is not a cluster setting.
+Each example records `metadata.current_time`, and the public 755 also record
+`metadata.telemetry_snapshot_time`. ORCA serves each task the first telemetry snapshot taken after
+`current_time` plus five minutes, so that snapshot time is the latest data the paper's agents can
+see. This suite does not bound reads yet: the ORCA cluster holds all six days, so an agent can read
+telemetry after its task's snapshot, and a rate here can be higher than a bounded run would give.
+The bound is planned in Elasticsearch, not in the investigation: one read key per snapshot time
+whose role filters `@timestamp` with document-level security, set on the `orcabench-es` connector,
+so the agent investigates unchanged and cannot see past its snapshot.
 
 ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
 evaluation connector. The model is the paper's judge model, but not its settings: the paper runs
@@ -699,7 +683,7 @@ rate. Quote the 40 sampled tasks against Verified only with the task-by-task mat
 medium tasks in the sampled 50 are their own line and are not a paper tier. The headline run keeps
 flag telemetry visible.
 
-The flag ablation runs the same agent, tasks, judge and cutoff with every flag document hidden:
+The flag ablation runs the same agent, tasks and judge with every flag document hidden:
 flagd's own logs, spans and metrics, any document with a `feature_flag` field, flag-evaluation
 spans, and log lines that name a flag. Elasticsearch hides them through document-level security on
 a separate read key, so no query the agent writes can bring them back. To run it:

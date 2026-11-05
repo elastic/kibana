@@ -73,7 +73,6 @@ import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
-  isTelemetryNotAfter,
 } from '../../common';
 import {
   buildAlertRecoveredFollowUpMessage,
@@ -90,7 +89,6 @@ import {
 } from './errors';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
-import type { TelemetryCutoffStore } from '../lib/telemetry_cutoffs';
 import {
   findInvestigationConversation,
   findInvestigationConversations,
@@ -377,8 +375,6 @@ export interface NightshiftInvestigationsClientDeps {
   ensureFailureSweep?: () => Promise<void>;
   /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
   isServiceAccountExecutionEnabled?: () => boolean;
-  /** Where a start records its telemetry cutoff. Set only when the cutoff is enabled. */
-  telemetryCutoffs?: TelemetryCutoffStore;
 }
 
 export class NightshiftInvestigationsClient {
@@ -399,7 +395,6 @@ export class NightshiftInvestigationsClient {
   private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
   private readonly checkInfrastructureAvailability: () => Promise<boolean>;
   private readonly isServiceAccountExecutionEnabled: () => boolean;
-  private readonly telemetryCutoffs?: TelemetryCutoffStore;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -419,7 +414,6 @@ export class NightshiftInvestigationsClient {
     this.checkAvailability = deps.isAvailable;
     this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
     this.isServiceAccountExecutionEnabled = deps.isServiceAccountExecutionEnabled ?? (() => false);
-    this.telemetryCutoffs = deps.telemetryCutoffs;
   }
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
@@ -497,7 +491,6 @@ export class NightshiftInvestigationsClient {
       timeout_seconds,
       source_ids,
       connector_id,
-      telemetry_not_after: telemetryNotAfterInput,
       context = {},
       notificationDestinations,
       slack_thread: slackThread,
@@ -572,13 +565,6 @@ export class NightshiftInvestigationsClient {
       await this.releaseBudget(globalBudget);
       await this.releaseBudget(automationBudget);
     }
-    const telemetryNotAfter =
-      telemetryNotAfterInput && isTelemetryNotAfter(telemetryNotAfterInput)
-        ? telemetryNotAfterInput
-        : undefined;
-    if (telemetryNotAfter) {
-      await this.recordTelemetryCutoff(investigationId, telemetryNotAfter, isFollowUp);
-    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install stays because the run
@@ -643,27 +629,6 @@ export class NightshiftInvestigationsClient {
     );
 
     return { investigation_id: investigationId };
-  }
-
-  /**
-   * Records a new investigation's cutoff before its run starts, so its first sandbox read is
-   * already bounded. A follow-up must carry the cutoff its investigation started with.
-   */
-  private async recordTelemetryCutoff(
-    investigationId: string,
-    telemetryNotAfter: string,
-    isFollowUp: boolean
-  ): Promise<void> {
-    if (!this.telemetryCutoffs) {
-      throw badRequest('Telemetry cutoffs are not enabled in this deployment');
-    }
-    if (!isFollowUp) {
-      await this.telemetryCutoffs.set(investigationId, telemetryNotAfter);
-      return;
-    }
-    if ((await this.telemetryCutoffs.get(investigationId)) !== telemetryNotAfter) {
-      throw badRequest('An investigation cannot change its telemetry cutoff');
-    }
   }
 
   /**

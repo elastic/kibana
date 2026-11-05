@@ -20,12 +20,10 @@ const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
 
 const setup = ({
   resolveConnectorCredentials,
-  readTelemetryNotAfter,
   allowedHosts = [],
   stdout = '',
 }: {
   resolveConnectorCredentials?: ResolveConnectorCredentials;
-  readTelemetryNotAfter?: jest.Mock;
   allowedHosts?: string[];
   stdout?: string;
 } = {}) => {
@@ -53,7 +51,6 @@ const setup = ({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
-    readTelemetryNotAfter,
     sandboxAllowlistClient,
     logger,
   });
@@ -345,162 +342,5 @@ describe('sandbox bash tool — output size', () => {
     expect((results[0] as { data: { message: string } }).data.message).toContain(
       'redirect it to a file'
     );
-  });
-});
-
-describe('sandbox bash tool — telemetry cutoff', () => {
-  const telemetryCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-    env: {
-      CONNECTOR_TYPE: '.elasticsearch',
-      CONNECTOR_CONFIG_URL: 'https://telemetry.example',
-      CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc',
-    },
-    secretValues: ['ApiKey abc'],
-    secretEnvKeys: [
-      { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['telemetry.example'] },
-    ],
-  });
-
-  it('leaves the connector URL unchanged when the investigation has no cutoff', async () => {
-    const readTelemetryNotAfter = jest.fn().mockResolvedValue(undefined);
-    const { run, runCommand } = setup({
-      resolveConnectorCredentials: telemetryCredentials,
-      readTelemetryNotAfter,
-    });
-
-    await run({
-      connector_id: 'orcabench-es',
-      command: 'curl "$CONNECTOR_CONFIG_URL"',
-    });
-
-    expect(runCommand.mock.calls[0][0].command).toBe('curl "$CONNECTOR_CONFIG_URL"');
-    expect(runCommand.mock.calls[0][0].env.CONNECTOR_CONFIG_URL).toBe('https://telemetry.example');
-    expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('NIGHTSHIFT_TELEMETRY_UPSTREAM');
-  });
-
-  it('does not proxy a connector that has no telemetry URL', async () => {
-    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { CONNECTOR_TYPE: '.github', CONNECTOR_CONFIG_APIURL: 'https://api.github.com' },
-      secretValues: [],
-      secretEnvKeys: [],
-    });
-    const { run, runCommand } = setup({
-      resolveConnectorCredentials,
-      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
-    });
-
-    await run({ connector_id: 'github', command: 'curl "$CONNECTOR_CONFIG_APIURL"' });
-
-    expect(runCommand.mock.calls[0][0].command).toBe('curl "$CONNECTOR_CONFIG_APIURL"');
-  });
-
-  it('does not run the command when the telemetry connector has no URL to bound', async () => {
-    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { CONNECTOR_TYPE: '.elasticsearch', CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc' },
-      secretValues: ['ApiKey abc'],
-      secretEnvKeys: [],
-    });
-    const { run, runCommand } = setup({
-      resolveConnectorCredentials,
-      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
-    });
-
-    const { results } = await run({
-      connector_id: 'orcabench-es',
-      command: 'curl https://telemetry.example/_search',
-    });
-
-    expect(runCommand).not.toHaveBeenCalled();
-    expect(results).toEqual([
-      {
-        type: ToolResultType.error,
-        data: {
-          message:
-            'The telemetry connector has no URL to apply the cutoff to, so the command was not run.',
-        },
-      },
-    ]);
-  });
-
-  it('does not proxy a connector of another type that has a URL', async () => {
-    const readTelemetryNotAfter = jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z');
-    const { run, runCommand } = setup({
-      resolveConnectorCredentials: jest.fn().mockResolvedValue({
-        env: { CONNECTOR_TYPE: '.http', CONNECTOR_CONFIG_URL: 'https://telemetry.example' },
-        secretValues: [],
-        secretEnvKeys: [],
-      }),
-      readTelemetryNotAfter,
-    });
-
-    await run({ connector_id: 'generic-http', command: 'curl "$CONNECTOR_CONFIG_URL/api/items"' });
-
-    const { command, env } = runCommand.mock.calls[0][0];
-    expect(command).toBe('curl "$CONNECTOR_CONFIG_URL/api/items"');
-    expect(env.CONNECTOR_CONFIG_URL).toBe('https://telemetry.example');
-    expect(readTelemetryNotAfter).not.toHaveBeenCalled();
-  });
-
-  it('runs the command through the cutoff proxy and keeps the cluster URL out of the command', async () => {
-    const { run, runCommand, writeFiles } = setup({
-      resolveConnectorCredentials: telemetryCredentials,
-      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
-    });
-
-    await run({
-      connector_id: 'orcabench-es',
-      command: 'curl "$CONNECTOR_CONFIG_URL"',
-    });
-
-    const { command, env, secret_env_keys: secretEnvKeys } = runCommand.mock.calls[0][0];
-    expect(command).toContain('unset NIGHTSHIFT_TELEMETRY_UPSTREAM');
-    expect(command).not.toContain('https://telemetry.example');
-    expect(env.NIGHTSHIFT_TELEMETRY_CUTOFF).toBe('2026-04-19T16:27:00.000Z');
-    expect(env.NIGHTSHIFT_SANDBOX_COMMAND).toBe('curl "$CONNECTOR_CONFIG_URL"');
-    expect(env).not.toHaveProperty('NIGHTSHIFT_TELEMETRY_UPSTREAM');
-    expect(secretEnvKeys).toEqual([
-      { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['telemetry.example'] },
-    ]);
-    expect(writeFiles).toHaveBeenCalled();
-  });
-
-  it('does not run the command when the cutoff cannot be read', async () => {
-    const { run, runCommand } = setup({
-      resolveConnectorCredentials: telemetryCredentials,
-      readTelemetryNotAfter: jest.fn().mockRejectedValue(new Error('conversation lookup failed')),
-    });
-
-    const { results } = await run({
-      connector_id: 'orcabench-es',
-      command: 'curl "$CONNECTOR_CONFIG_URL"',
-    });
-
-    expect(runCommand).not.toHaveBeenCalled();
-    expect(results).toEqual([
-      {
-        type: ToolResultType.error,
-        data: { message: 'Could not read the telemetry cutoff, so the command was not run.' },
-      },
-    ]);
-  });
-
-  it('does not run the command when the cutoff proxy cannot be installed', async () => {
-    const { run, runCommand, writeFiles } = setup({
-      resolveConnectorCredentials: telemetryCredentials,
-      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
-    });
-    writeFiles.mockResolvedValue([{ success: false }]);
-
-    const { results } = await run({ connector_id: 'orcabench-es' });
-
-    expect(runCommand).not.toHaveBeenCalled();
-    expect(results).toEqual([
-      {
-        type: ToolResultType.error,
-        data: {
-          message: 'Could not install the telemetry cutoff proxy, so the command was not run.',
-        },
-      },
-    ]);
   });
 });
