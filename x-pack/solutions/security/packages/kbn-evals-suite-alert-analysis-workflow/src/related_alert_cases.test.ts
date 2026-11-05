@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '@kbn/workflows/managed';
 import {
@@ -100,12 +101,13 @@ const docsFor = (caseIndex: number, runId: string) => {
 };
 
 describe('related-alert cases: fixtures', () => {
-  it('has the four designed cases with the expected verdicts', () => {
+  it('has the five designed cases with the expected verdicts', () => {
     expect(RELATED_ALERT_CASES.map(({ id, expected }) => [id, expected])).toEqual([
       ['related-benign-sshd-scary-names', 'false_positive'],
       ['related-malicious-control', 'true_positive'],
       ['related-lolbin-procdump-control', 'true_positive'],
       ['related-injection-negative-control', 'true_positive'],
+      ['related-malicious-id-only-control', 'true_positive'],
     ]);
   });
 
@@ -143,12 +145,14 @@ describe('related-alert cases: fixtures', () => {
 
   it('indexes host, user and process as nested objects, not flat dotted keys', () => {
     for (const caseIndex of RELATED_ALERT_CASES.keys()) {
-      for (const doc of docsFor(caseIndex, 'run-a')) {
+      const docs = docsFor(caseIndex, 'run-a');
+      docs.forEach((doc, index) => {
         expect(Object.keys(doc).filter((k) => /^(host|user|process)\./.test(k))).toEqual([]);
         expect(entityValues(doc, 'host.id')).toHaveLength(1);
         expect(entityValues(doc, 'user.id')).toHaveLength(1);
-        expect(entityValues(doc, 'process.entity_id')).toHaveLength(1);
-      }
+        const hasProcess = !(index === 0 && RELATED_ALERT_CASES[caseIndex].target.identityOnly);
+        expect(entityValues(doc, 'process.entity_id')).toHaveLength(hasProcess ? 1 : 0);
+      });
     }
   });
 
@@ -179,6 +183,55 @@ describe('related-alert cases: fixtures', () => {
     const [benign, control] = RELATED_ALERT_CASES;
     expect(control.target).toBe(benign.target);
     expect(control.related.map((r) => r.key)).not.toEqual(benign.related.map((r) => r.key));
+  });
+
+  describe('related-malicious-id-only-control', () => {
+    const caseIndex = RELATED_ALERT_CASES.findIndex(
+      ({ id }) => id === 'related-malicious-id-only-control'
+    );
+
+    it('the target fixture declares no host.name or user.name', () => {
+      const { observable } = RELATED_ALERT_CASES[caseIndex].target;
+      expect(observable['host.id']).toEqual(expect.any(String));
+      expect(observable['user.id']).toEqual(expect.any(String));
+      expect(Object.keys(observable).filter((key) => /^(host|user)\.name$/.test(key))).toEqual([]);
+    });
+
+    it('the target carries host.id and user.id but no host.name or user.name', () => {
+      const [target] = docsFor(caseIndex, 'run-a');
+      expect(at(target, 'host.id')).toEqual(expect.any(String));
+      expect(at(target, 'user.id')).toBe('501');
+      expect(at(target, 'host.name')).toBeUndefined();
+      expect(at(target, 'user.name')).toBeUndefined();
+      expect(JSON.stringify(target)).not.toContain('undefined');
+      expect(target['kibana.alert.entity.id']).toBeUndefined();
+    });
+
+    it('related alerts keep their host and user names', () => {
+      const [, ...related] = docsFor(caseIndex, 'run-a');
+      related.forEach((doc) => {
+        expect(at(doc, 'host.name')).toBe('jdoe-mbp');
+        expect(at(doc, 'user.name')).toBe('jdoe');
+      });
+    });
+
+    it('shares its related alerts with the malicious control', () => {
+      const control = RELATED_ALERT_CASES.find(({ id }) => id === 'related-malicious-control');
+      expect(RELATED_ALERT_CASES[caseIndex].related).toEqual(control?.related);
+    });
+  });
+
+  it('builds the existing four cases byte-identically to the pre-change helper', () => {
+    const digest = (caseIndex: number) =>
+      createHash('sha256')
+        .update(JSON.stringify(docsFor(caseIndex, 'run-a')))
+        .digest('hex');
+    expect(RELATED_ALERT_CASES.slice(0, 4).map((_c, i) => digest(i))).toEqual([
+      '961670ecb96a39a5bd952a9f96e424a0f529929d6c1126d29321be6903aca0f4',
+      '3c4fc050b37ef039516f54cd24693c1b5da40601152a4495abb0cb2f6138c763',
+      'a669467cc83380ed3b4d019ba15c8e6d4dba1c25ffbe6e65a4a116d8bce19229',
+      'f172e51f5f15eaaa1cf9168a1db43f4acfb80f368dd80cd77e6f928f6185f36f',
+    ]);
   });
 
   it('builds per-run docs with unique rule, entity and host ids', () => {
