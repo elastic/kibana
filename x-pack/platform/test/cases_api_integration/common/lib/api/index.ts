@@ -285,6 +285,46 @@ export const seedLegacyCommentAttachment = ({
 }: SeedAttachmentArgs & { attributes: Record<string, unknown> }): Promise<string> =>
   seedAttachmentRow({ ...args, id, soType: CASE_COMMENT_SAVED_OBJECT, attributes });
 
+/** Writes user actions for a case straight to the index, so a test can reach the user action cap quickly. */
+export const seedUserActions = async ({
+  es,
+  caseId,
+  count,
+  owner = 'securitySolutionFixture',
+}: {
+  es: Client;
+  caseId: string;
+  count: number;
+  owner?: string;
+}): Promise<void> => {
+  const operations = Array.from({ length: count }, (_, index) => [
+    {
+      index: {
+        _index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        _id: `${CASE_USER_ACTION_SAVED_OBJECT}:seeded-${caseId}-${index}`,
+      },
+    },
+    {
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      [CASE_USER_ACTION_SAVED_OBJECT]: {
+        action: 'update',
+        type: 'tags',
+        payload: { tags: [`seeded-${index}`] },
+        owner,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'elastic', full_name: null, email: null },
+      },
+      references: [{ type: CASE_SAVED_OBJECT, id: caseId, name: 'associated-cases' }],
+      namespaces: ['default'],
+      updated_at: '2024-01-01T00:00:00.000Z',
+      coreMigrationVersion: '8.8.0',
+    },
+  ]).flat();
+
+  const response = await es.bulk({ operations, refresh: 'wait_for' });
+  expect(response.errors).to.be(false);
+};
+
 /** Checks the index directly, since the read APIs cannot return a corrupted row. */
 export const unifiedAttachmentExists = async ({
   es,

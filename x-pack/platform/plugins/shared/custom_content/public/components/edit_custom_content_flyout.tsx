@@ -166,7 +166,7 @@ export const EditCustomContentFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2
                 id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}
                 data-test-subj={
@@ -352,8 +352,7 @@ export const EditCustomContentFlyout = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  color="success"
-                  iconType="play"
+                  color="text"
                   isLoading={isRenderLoading}
                   disabled={!draftTemplate.trim()}
                   onClick={handleRender}

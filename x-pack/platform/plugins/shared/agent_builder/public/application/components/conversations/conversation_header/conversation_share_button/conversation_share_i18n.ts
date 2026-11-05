@@ -7,9 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const sharingLabel = i18n.translate('xpack.agentBuilder.conversationSharing.title', {
-  defaultMessage: 'Sharing',
+export const shareLabel = i18n.translate('xpack.agentBuilder.conversationSharing.share', {
+  defaultMessage: 'Share',
 });
+
+export const shareThisChatLabel = i18n.translate(
+  'xpack.agentBuilder.conversationSharing.shareThisChat',
+  {
+    defaultMessage: 'Share this chat',
+  }
+);
 
 export const participantsLabel = i18n.translate(
   'xpack.agentBuilder.conversationSharing.participantsTitle',
@@ -48,12 +55,22 @@ export const publicHelpLabel = i18n.translate('xpack.agentBuilder.conversationSh
   defaultMessage: 'Any user can see and join this chat',
 });
 
-export const currentMembersLabel = i18n.translate(
-  'xpack.agentBuilder.conversationSharing.currentMembers',
+export const inviteUsersLabel = i18n.translate(
+  'xpack.agentBuilder.conversationSharing.inviteUsers',
   {
-    defaultMessage: 'Current members',
+    defaultMessage: 'Invite users',
   }
 );
+
+export const addUsersLabel = i18n.translate('xpack.agentBuilder.conversationSharing.addUsers', {
+  defaultMessage: 'Add users',
+});
+
+export const usersSectionTitle = (count: number) =>
+  i18n.translate('xpack.agentBuilder.conversationSharing.usersSectionTitle', {
+    defaultMessage: 'In this chat ({count})',
+    values: { count },
+  });
 
 export const agentAccessHelpLabel = (agentName: string) =>
   i18n.translate('xpack.agentBuilder.conversationSharing.agentAccessHelp', {
@@ -61,13 +78,6 @@ export const agentAccessHelpLabel = (agentName: string) =>
       'Search results display all users, but only users with access to {agentName} can see this chat.',
     values: { agentName },
   });
-
-export const agentAccessHelpAriaLabel = i18n.translate(
-  'xpack.agentBuilder.conversationSharing.agentAccessHelpAriaLabel',
-  {
-    defaultMessage: 'Who can access this chat?',
-  }
-);
 
 export const searchUsersLabel = i18n.translate(
   'xpack.agentBuilder.conversationSharing.searchUsers',
@@ -84,19 +94,6 @@ export const removeMemberLabel = i18n.translate(
   'xpack.agentBuilder.conversationSharing.removeMember',
   {
     defaultMessage: 'Remove member',
-  }
-);
-
-export const participantsCountAriaLabel = (count: number) =>
-  i18n.translate('xpack.agentBuilder.conversationSharing.participantsCountAriaLabel', {
-    defaultMessage: 'Sharing, {count, plural, one {# user has access} other {# users have access}}',
-    values: { count },
-  });
-
-export const publicAccessAriaLabel = i18n.translate(
-  'xpack.agentBuilder.conversationSharing.publicAccessAriaLabel',
-  {
-    defaultMessage: 'Sharing, public',
   }
 );
 
