@@ -14,6 +14,7 @@ export const NOTEBOOK_SAVED_OBJECT_TYPE = 'notebook';
 export const NOTEBOOK_API_BASE_PATH = '/internal/notebook';
 export const MAX_DESCRIPTION_LENGTH = 10_000;
 export const MAX_TITLE_LENGTH = 1024;
+export const MAX_CELL_HEIGHT = 5000;
 
 export const PLUGIN_NAME = i18n.translate('xpack.notebook.pluginName', {
   defaultMessage: 'Notebooks',

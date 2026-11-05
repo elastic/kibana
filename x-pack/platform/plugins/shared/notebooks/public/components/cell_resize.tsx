@@ -9,6 +9,9 @@ import React, { useRef, useState, type KeyboardEvent, type PointerEvent } from '
 import { EuiResizableButton } from '@elastic/eui';
 import { css, type SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { MAX_CELL_HEIGHT } from '../../common/constants';
+import type { ChartCellDefinition, CustomCellDefinition } from '../../common/types';
+import { useNotebook } from './notebook_context';
 
 const KEYBOARD_STEP = 20;
 const KEYBOARD_LARGE_STEP = 100;
@@ -23,13 +26,25 @@ interface CellResize {
   resizeHandle: React.ReactNode;
 }
 
-/** A display height the user can drag taller, never below `defaultHeight`. */
-export const useCellResize = (defaultHeight: number): CellResize => {
-  const [chosenHeight, setChosenHeight] = useState<number>();
+/** The cell's saved display height, which the user can drag taller but never below `defaultHeight`. */
+export const useCellResize = (
+  cell: ChartCellDefinition | CustomCellDefinition,
+  defaultHeight: number
+): CellResize => {
+  const { store } = useNotebook();
+  const [dragHeight, setDragHeight] = useState<number>();
   const drag = useRef<{ startY: number; startHeight: number }>();
-  const height = Math.max(chosenHeight ?? defaultHeight, defaultHeight);
 
-  const resizeTo = (next: number) => setChosenHeight(Math.max(Math.round(next), defaultHeight));
+  const clamp = (next: number) =>
+    Math.min(Math.max(Math.round(next), defaultHeight), MAX_CELL_HEIGHT);
+  const height = clamp(dragHeight ?? cell.height ?? defaultHeight);
+
+  const save = (next: number) =>
+    store.updateCell(cell.id, (current) =>
+      current.type === 'chart' || current.type === 'custom'
+        ? { ...current, height: next === defaultHeight ? undefined : next }
+        : current
+    );
 
   const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -40,13 +55,18 @@ export const useCellResize = (defaultHeight: number): CellResize => {
   const onPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     if (!drag.current) return;
     const { startY, startHeight } = drag.current;
-    resizeTo(startHeight + event.clientY - startY);
+    setDragHeight(clamp(startHeight + event.clientY - startY));
   };
 
   const onPointerUp = (event: PointerEvent<HTMLButtonElement>) => {
     event.currentTarget.releasePointerCapture(event.pointerId);
     drag.current = undefined;
+    if (dragHeight === undefined) return;
+    save(dragHeight);
+    setDragHeight(undefined);
   };
+
+  const resizeTo = (next: number) => save(clamp(next));
 
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const step = event.shiftKey ? KEYBOARD_LARGE_STEP : KEYBOARD_STEP;

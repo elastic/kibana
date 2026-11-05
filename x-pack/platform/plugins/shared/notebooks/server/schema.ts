@@ -9,6 +9,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import { CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH } from '@kbn/custom-content-common';
 import {
   GRID_SUBDIVISIONS,
+  MAX_CELL_HEIGHT,
   MAX_DESCRIPTION_LENGTH,
   MAX_GRID_COLUMNS,
   MAX_TITLE_LENGTH,
@@ -29,6 +30,7 @@ const MAX_GRID_UNITS = 1000;
 const idSchema = schema.string({ minLength: 1, maxLength: MAX_ID_LENGTH });
 const runModeSchema = schema.oneOf([schema.literal('auto'), schema.literal('manual')]);
 const querySchema = schema.string({ maxLength: MAX_QUERY_LENGTH });
+const cellHeightSchema = schema.maybe(schema.number({ min: 1, max: MAX_CELL_HEIGHT }));
 
 const lensAttributesSchema = schema.object(
   {},
@@ -104,6 +106,7 @@ const cellSchema = schema.discriminatedUnion('type', [
     runMode: runModeSchema,
     sourceCell: schema.nullable(idSchema),
     lensAttributes: schema.nullable(lensAttributesSchema),
+    height: cellHeightSchema,
   }),
   schema.object({
     ...cellBaseProps,
@@ -113,6 +116,7 @@ const cellSchema = schema.discriminatedUnion('type', [
     sourceCell: schema.nullable(idSchema),
     query: schema.maybe(querySchema),
     template: schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH }),
+    height: cellHeightSchema,
   }),
   schema.object({
     ...cellBaseProps,

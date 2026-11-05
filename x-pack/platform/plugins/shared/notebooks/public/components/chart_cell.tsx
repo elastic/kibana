@@ -184,6 +184,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
   const attributes = preview ?? cellAttributes;
   const currentType = lensAttributes ? getChartType(lensAttributes) : undefined;
   const { bodyCss, resizeHandle } = useCellResize(
+    cell,
     currentType === ChartType.Metric ? METRIC_HEIGHT : CHART_HEIGHT
   );
 

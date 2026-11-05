@@ -62,7 +62,7 @@ type RunMode = 'auto' | 'manual';
 
 type CellDefinition =
   | { id: string; name: string; type: 'esql'; runMode: RunMode; query: string }
-  | { id: string; name: string; type: 'chart'; runMode: RunMode; sourceCell: string /* cell id */; lensAttributes: LensAttributes }
+  | { id: string; name: string; type: 'chart'; runMode: RunMode; sourceCell: string /* cell id */; lensAttributes: LensAttributes; height?: number }
   | { id: string; name: string; type: 'markdown'; content: string }
   | { id: string; name: string; type: 'input'; input: InputDefinition };
 
@@ -76,6 +76,7 @@ Rules:
 
 - **Edges are never stored**; they are derived (see [References](#references-and-edges)).
 - `lensAttributes` are stored whole, with the injected `table` stripped before save.
+- Display cells (chart, custom) store `height` only when the user drags them taller than their default (300px, or 160px for metric charts); the default is the minimum, and the height is capped at 5000px.
 - Current input values are runtime-only; only `defaultValue` persists.
 - No `layout` field; the app builder (stretch) adds it in a later model version.
 - New notebooks are created with one pinned time input (`now-7d/d` → `now`).

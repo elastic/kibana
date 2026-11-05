@@ -82,6 +82,7 @@ const everyVariant = toNotebook([
     runMode: 'auto',
     sourceCell: 'visits',
     template: '{% for row in rows %}<p>{{ row["c"].value }}</p>{% endfor %}',
+    height: 480,
   },
   {
     id: 'custom_query',
@@ -118,6 +119,14 @@ const withChart = (chartLensAttributes: object) => ({
 describe('notebookAttributesSchema', () => {
   it('accepts every cell type and input kind unchanged', () => {
     expect(notebookAttributesSchema.validate(everyVariant)).toEqual(everyVariant);
+  });
+
+  it.each([0, 5001])('rejects a cell height of %s', (height) => {
+    const notebook = {
+      ...everyVariant,
+      cells: { ...everyVariant.cells, chart: { ...everyVariant.cells.chart, height } },
+    };
+    expect(() => notebookAttributesSchema.validate(notebook)).toThrow();
   });
 
   it('stores a Lens attributes blob whole', () => {

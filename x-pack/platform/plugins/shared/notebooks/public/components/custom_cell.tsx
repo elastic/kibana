@@ -147,7 +147,7 @@ export const CustomCanvas = ({
 export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
   const { plugins } = useNotebookServices();
   const { store, scheduler } = useNotebook();
-  const { bodyCss, resizeHandle } = useCellResize(CELL_HEIGHT);
+  const { bodyCss, resizeHandle } = useCellResize(cell, CELL_HEIGHT);
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState<TemplatePreview>();

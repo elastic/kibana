@@ -68,6 +68,8 @@ export interface ChartCellDefinition extends CellBase {
   sourceCell: string | null;
   /** Null until suggestions have produced a first chart for the source output. */
   lensAttributes: LensAttributes | null;
+  /** Pixel height the user resized the chart to; never below the chart type's default. */
+  height?: number;
 }
 
 /** HTML built from a Liquid template filled with an ES|QL cell's results, like a Dashboard custom panel. */
@@ -80,6 +82,8 @@ export interface CustomCellDefinition extends CellBase {
   sourceCell: string | null;
   query?: string;
   template: string;
+  /** Pixel height the user resized the panel to; never below the default. */
+  height?: number;
 }
 
 export interface MarkdownCellDefinition extends CellBase {
