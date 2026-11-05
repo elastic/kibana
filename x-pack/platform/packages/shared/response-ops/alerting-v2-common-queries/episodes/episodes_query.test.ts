@@ -137,8 +137,14 @@ describe('buildEpisodesViewQuery', () => {
     const esql = buildEpisodesViewQuery().print('basic');
 
     expect(esql).toMatch(
-      /\| KEEP @timestamp, `episode\.id`, .*, space_id, duration_is_lower_bound$/
+      /\| KEEP @timestamp, `episode\.id`, .*, space_id, duration_is_lower_bound/
     );
+  });
+
+  it('keeps the fields the time range filter matches on', () => {
+    const esql = buildEpisodesViewQuery().print('basic');
+
+    expect(esql).toMatch(/\| KEEP .*, type, action_type$/);
   });
 });
 

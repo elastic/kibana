@@ -368,9 +368,11 @@ export const buildEpisodesViewQuery = (): ComposerQuery => {
   addEpisodeRows(query);
   addDurationLowerBoundFlag(query);
 
+  // ES applies a request filter through a view only to fields the view returns,
+  // so the fields the time range filter matches on must be kept.
   return query
     .sort(['@timestamp', 'DESC'])
-    .keep(...ALERT_EPISODE_FIELDS, 'space_id', DURATION_LOWER_BOUND_FIELD);
+    .keep(...ALERT_EPISODE_FIELDS, 'space_id', DURATION_LOWER_BOUND_FIELD, 'type', 'action_type');
 };
 
 /**
