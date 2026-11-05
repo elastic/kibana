@@ -26921,7 +26921,6 @@
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "{savedObjectType}：{savedObjectId}が見つかりませんでした",
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "再試行",
     "xpack.infra.manageViewsFlyout.cancelButton.ariaLabel": "キャンセル",
-    "xpack.infra.metadata.pinnedAriaLabel": "{fieldName}を固定",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "フィルターを追加してページを再読み込み",
     "xpack.infra.metadataEmbeddable.errorAction": "メタデータを再取得",
     "xpack.infra.metadataEmbeddable.errorMessage": "データの読み込みエラーが発生しました。{refetch}し、ホスト詳細をもう一度開いてください。",

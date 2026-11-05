@@ -26927,7 +26927,6 @@
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "无法找到该{savedObjectType}：{savedObjectId}",
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "重试",
     "xpack.infra.manageViewsFlyout.cancelButton.ariaLabel": "取消",
-    "xpack.infra.metadata.pinnedAriaLabel": "已置顶{fieldName}",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "添加筛选条件并重新加载页面",
     "xpack.infra.metadataEmbeddable.errorAction": "重新提取元数据",
     "xpack.infra.metadataEmbeddable.errorMessage": "加载数据时出错。尝试{refetch}并再次打开主机详情。",

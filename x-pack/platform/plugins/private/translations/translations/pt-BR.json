@@ -26908,7 +26908,6 @@
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "Falha ao localizar {savedObjectType}: {savedObjectId}",
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "Tente novamente",
     "xpack.infra.manageViewsFlyout.cancelButton.ariaLabel": "Cancelar",
-    "xpack.infra.metadata.pinnedAriaLabel": "Fixado {fieldName}",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "Adicionar filtro e recarregar página",
     "xpack.infra.metadataEmbeddable.errorAction": "buscar novamente os metadados",
     "xpack.infra.metadataEmbeddable.errorMessage": "Houve um erro ao carregar seus dados. Tente {refetch} e abra os detalhes do host novamente.",

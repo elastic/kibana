@@ -26767,7 +26767,6 @@
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "Impossible de localiser ce {savedObjectType} : {savedObjectId}",
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "Réessayer",
     "xpack.infra.manageViewsFlyout.cancelButton.ariaLabel": "Annuler",
-    "xpack.infra.metadata.pinnedAriaLabel": "Épinglé {fieldName}",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "Ajouter un filtre et recharger la page",
     "xpack.infra.metadataEmbeddable.errorAction": "récupérer de nouveau les métadonnées",
     "xpack.infra.metadataEmbeddable.errorMessage": "Une erreur s'est produite lors du chargement des données. Essayez de {refetch} et d'ouvrir à nouveau les détails de l'hôte.",
