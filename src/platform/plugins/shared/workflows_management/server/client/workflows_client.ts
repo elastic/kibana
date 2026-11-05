@@ -8,20 +8,29 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
+import { isHitlExternalResumeEnabled } from '@kbn/workflows';
 import type {
   ManagedWorkflowsSystemApiProvider,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
 import { REQUIRED_LICENSE_TYPE } from '../api/constants';
+import type { ExternalResumeWorkflowExecutionWithInputParams } from '../api/external_resume/external_resume_service';
 import type { WorkflowsService } from '../api/workflows_management_service';
 import type { WorkflowsManagementConfig } from '../config';
+
+interface AuditedExternalHitlResume {
+  resumeWorkflowExecutionExternallyWithInput: (
+    params: ExternalResumeWorkflowExecutionWithInputParams & { request: KibanaRequest }
+  ) => Promise<unknown>;
+}
 
 export const createWorkflowsClientProvider = (
   workflowsService: WorkflowsService,
   config: WorkflowsManagementConfig,
-  logger: Logger
+  logger: Logger,
+  api: AuditedExternalHitlResume
 ): WorkflowsClientProvider => {
   return async (request) => {
     const { isWorkflowsAvailable, workflowsExecutionEngine } =
@@ -40,6 +49,19 @@ export const createWorkflowsClientProvider = (
           request,
           ...(options?.authenticatedUser ? { authenticatedUser: options.authenticatedUser } : {}),
         });
+      },
+      resumeExternalHitl: async (params) => {
+        if (!isWorkflowsAvailable) {
+          logger.debug(
+            'Workflows is not available in this environment. External HITL resume rejected.'
+          );
+          throw new Error('Workflows is not available in this environment');
+        }
+        if (!isHitlExternalResumeEnabled(config.hitlExternalResume?.enabled)) {
+          logger.debug('External HITL resume is disabled. External HITL resume rejected.');
+          throw new Error('External HITL resume is disabled');
+        }
+        await api.resumeWorkflowExecutionExternallyWithInput({ ...params, request });
       },
       managedWorkflows: {
         install: async (pluginId, id, options) => {
@@ -86,8 +108,8 @@ export const createWorkflowsClientProvider = (
 /**
  * System (requestless) managed-workflows API used by `initManagedWorkflowsClient`.
  *
- * `install` / `ready` are best-effort during Kibana teardown and when Elasticsearch
- * readiness gating skips writes: they may resolve without persisting or without
+ * `install` / `ready` are best-effort during Kibana teardown, while Workflows is unavailable,
+ * and when Elasticsearch readiness gating skips writes: they may resolve without persisting or without
  * running destructive orphan cleanup. When installs were incomplete, `ready()` still
  * runs dynamic auto upgrades once readiness has passed. See
  * {@link RegisteredManagedWorkflowsLifecycleApi}.
@@ -107,6 +129,9 @@ export const createManagedWorkflowsSystemApiProvider = (
       install: async (id, options) => {
         if (!getIsWorkflowsAvailable()) {
           logger.debug('Workflows is not available in this environment. Managed install ignored.');
+          // Availability is live, so ready() may run after a license upgrade; without this
+          // marker it would treat the skipped install's persisted docs as orphans.
+          await workflowsService.markManagedInstallIncomplete(pluginId);
           return;
         }
         await workflowsService.installManagedWorkflow(id, options, pluginId);
