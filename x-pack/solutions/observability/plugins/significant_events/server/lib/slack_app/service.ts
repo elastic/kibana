@@ -575,7 +575,10 @@ export class SlackAppService {
     return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
 
-  async getStatus(request: KibanaRequest): Promise<SlackAppStatusResponse> {
+  async getStatus(
+    request: KibanaRequest,
+    { canAdvanceInstall }: { canAdvanceInstall: boolean }
+  ): Promise<SlackAppStatusResponse> {
     const soClient = this.getSoClient(request);
     const [relayClient, connection] = await Promise.all([
       this.getRelayClient(),
@@ -594,6 +597,7 @@ export class SlackAppService {
     // OAuth callback lands on the Relay, not Kibana). The Relay resolves the pending
     // claim from the transport-level deployment identity.
     if (
+      canAdvanceInstall &&
       connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress &&
       !connection.tenantKey
     ) {

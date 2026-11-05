@@ -56,16 +56,20 @@ const statusSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Elastic Slack App connection status',
     description:
-      'Returns whether the Elastic Slack App is available and its current connection state, advancing an in-progress install when the Relay reports completion.',
+      'Returns whether the Elastic Slack App is available and its current connection state. For callers who can manage the connection, it also advances an in-progress install when the Relay reports completion.',
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+      extendedPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),
   handler: async ({ request, server }): Promise<SlackAppStatusResponse> => {
-    return new SlackAppService(server).getStatus(request);
+    const canAdvanceInstall =
+      request.authzResult?.[NIGHTSHIFT_API_PRIVILEGES.manage] === true &&
+      request.authzResult?.[NIGHTSHIFT_API_PRIVILEGES.configure] === true;
+    return new SlackAppService(server).getStatus(request, { canAdvanceInstall });
   },
 });
 
