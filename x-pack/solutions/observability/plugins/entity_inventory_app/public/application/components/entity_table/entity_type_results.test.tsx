@@ -164,6 +164,36 @@ describe('EntityTypeResults', () => {
     expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 
+  it('keeps the rows up with a progress bar while a new range loads', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    let finishReload: () => void = () => {};
+    const listEntities = jest
+      .fn(fixtureClient.listEntities)
+      .mockImplementationOnce(fixtureClient.listEntities)
+      .mockImplementationOnce(
+        (...args) =>
+          new Promise((resolve) => {
+            finishReload = () => resolve(fixtureClient.listEntities(...args));
+          })
+      );
+    renderResults({ ...fixtureClient, listEntities });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableReloading')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
+
+    finishReload();
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument()
+    );
+    expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+  });
+
   it('shows the error, not the previous results, when a later load fails', async () => {
     const fixtureClient = createFixtureEntityInventoryApiClient();
     const listEntities = jest

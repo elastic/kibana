@@ -250,6 +250,30 @@ describe('EntityTable', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('clears an active sort on reset', async () => {
+    renderTable(
+      smallList([
+        hostRow({ 'host.name': 'web-002' }),
+        hostRow({ 'host.name': 'db-001' }),
+        hostRow({ 'host.name': 'api-003' }),
+      ])
+    );
+    const sortAscending = within(openColumnActions(NAME_COLUMN_ID))
+      .getAllByRole('button')
+      .find((button) => button.textContent?.startsWith('Sort'));
+    if (!sortAscending) {
+      throw new Error('No sort action');
+    }
+    fireEvent.click(sortAscending);
+    await waitFor(() => expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('api-003'));
+
+    fireEvent.click(screen.getByRole('button', { name: RESET_TO_DEFAULT_LABEL }));
+
+    await waitFor(() => expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('web-002'));
+    expect(getCell(1, NAME_COLUMN_ID)).toHaveTextContent('db-001');
+    expect(getCell(2, NAME_COLUMN_ID)).toHaveTextContent('api-003');
+  });
+
   it('restores the default columns on reset', async () => {
     renderTable(getFixture('normal'));
 

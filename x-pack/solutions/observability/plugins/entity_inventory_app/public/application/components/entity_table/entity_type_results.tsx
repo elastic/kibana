@@ -51,7 +51,7 @@ const EntityTypeResultsOfType = ({ entityType }: { entityType: string }) => {
     <EuiFlexGroup direction="column" gutterSize="s">
       {loading && (
         <EuiFlexItem grow={false}>
-          <EuiProgress size="xs" color="accent" />
+          <EuiProgress size="xs" color="accent" data-test-subj="entityInventoryTableReloading" />
         </EuiFlexItem>
       )}
       {(errors.length > 0 || unavailableColumns.length > 0) && (
