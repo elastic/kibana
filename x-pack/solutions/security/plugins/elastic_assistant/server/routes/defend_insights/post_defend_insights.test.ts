@@ -241,4 +241,33 @@ describe('postDefendInsightsRoute', () => {
       expect(response.status).toEqual(200);
     });
   });
+
+  describe('request validation', () => {
+    const BOUNDED_STRING_FIELDS = ['langSmithProject', 'langSmithApiKey', 'model'] as const;
+
+    it.each(BOUNDED_STRING_FIELDS)(
+      'accepts %s at the maximum length of 1,024 characters',
+      (field) => {
+        const request = postDefendInsightsRequest(
+          getDefaultRequestBody({ [field]: 'a'.repeat(1024) })
+        );
+        const result = server.validate(request);
+
+        expect(result.ok).toHaveBeenCalled();
+        expect(result.badRequest).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each(BOUNDED_STRING_FIELDS)('rejects %s longer than 1,024 characters', (field) => {
+      const request = postDefendInsightsRequest(
+        getDefaultRequestBody({ [field]: 'a'.repeat(1025) })
+      );
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining(`${field}: Too big: expected string to have <=1024 characters`)
+      );
+      expect(result.ok).not.toHaveBeenCalled();
+    });
+  });
 });
