@@ -17,7 +17,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.ts')
   );
 
-  const iframeEmbeddedPlugin = resolve(__dirname, './plugins/iframe_embedded');
+  const iframeEmbeddedPlugin = resolve(
+    __dirname,
+    '../../test_plugins/functional_embedded/iframe_embedded'
+  );
 
   const servers = {
     ...kibanaFunctionalConfig.get('servers'),
