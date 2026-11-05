@@ -141,6 +141,23 @@ export const ensureInheritedBindingCurrent = async (
 export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>
   executionContexts.get(request)?.originalRequest ?? request;
 
+/**
+ * Whether minting a binding's request failed for a reason a retry won't fix: the binding is
+ * missing, changed, or not allowed, or the token exchange said not to retry.
+ */
+export const isPermanentMintFailure = (error: unknown): boolean => {
+  if (Boom.isBoom(error)) {
+    const { statusCode } = error.output;
+    return statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429;
+  }
+  return (
+    error instanceof Error &&
+    error.name === 'ServiceAccountTokenExchangeError' &&
+    'retryable' in error &&
+    error.retryable === false
+  );
+};
+
 export const withWorkflowExecutionIdentity = async <T>(
   core: CoreStart,
   execution: IdentityExecution,
