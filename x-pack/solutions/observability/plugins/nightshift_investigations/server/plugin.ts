@@ -86,7 +86,7 @@ import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { setupNightshiftTelemetry } from './telemetry';
+import { setupNightshiftTelemetry, type NightshiftTelemetryClient } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
@@ -178,6 +178,7 @@ export class NightshiftInvestigationsPlugin
   private cortexEnabled = false;
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
+  private telemetry?: NightshiftTelemetryClient;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
 
@@ -214,6 +215,7 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
+    this.telemetry = telemetry;
     for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges]) {
       plugins.evals?.registerEvaluator(judge);
     }
@@ -478,7 +480,8 @@ export class NightshiftInvestigationsPlugin
             this.getAlertsClient,
             this.getEpisodeLookup,
             () => this.actionsStart,
-            settingsLocator
+            settingsLocator,
+            telemetry
           )
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -878,6 +881,7 @@ export class NightshiftInvestigationsPlugin
       agentAvailability: this.getInvestigationAvailability(),
       assistantEnabled: this.assistantEnabled,
       investigationQuotaCallback: this.investigationQuotaCallback,
+      telemetry: this.telemetry,
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
