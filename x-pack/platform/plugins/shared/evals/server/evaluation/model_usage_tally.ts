@@ -9,6 +9,12 @@ import type { EvaluateResultUsage, EvaluateResultUsageCall } from '@kbn/evals-co
 import type { InferenceCallbacks } from '@kbn/inference-common';
 import { isInferenceError } from '@kbn/inference-common';
 
+/**
+ * The response schema's bound on error messages. Provider errors can carry the upstream response
+ * body, and the kbn-evals client rejects a whole response with a message over it.
+ */
+export const MAX_ERROR_MESSAGE_LENGTH = 8192;
+
 export interface ModelUsageTally {
   /** Inference client callbacks that count every model call the client makes. */
   callbacks: InferenceCallbacks;
@@ -64,7 +70,7 @@ export const createModelUsageTally = (): ModelUsageTally => {
           status: 'error',
           error: {
             ...(isInferenceError(error) ? { code: error.code } : {}),
-            message: error.message,
+            message: error.message.slice(0, MAX_ERROR_MESSAGE_LENGTH),
           },
         });
       },

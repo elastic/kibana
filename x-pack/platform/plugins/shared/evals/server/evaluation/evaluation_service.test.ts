@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { EvaluateResponse } from '@kbn/evals-common';
 import type { ChatCompletionTokenCount, InferenceCallbacks } from '@kbn/inference-common';
 import { createInferenceProviderError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -250,6 +251,32 @@ describe('createEvaluationService', () => {
       ['latency', undefined],
     ]);
     expect(results[1].status).toBe('error');
+  });
+
+  it('truncates a provider error that embeds a long response body, so the response stays valid', async () => {
+    const prompt = (inferenceClient: unknown) =>
+      (inferenceClient as { prompt: () => Promise<never> }).prompt();
+    const failing = buildEvaluator({
+      name: 'failing',
+      kind: 'llm',
+      evaluate: jest.fn(async ({ inferenceClient }) => prompt(inferenceClient)),
+    });
+    const { evaluate, getClient } = setup([failing]);
+    getClient.mockImplementation(({ callbacks }: { callbacks: InferenceCallbacks }) => ({
+      prompt: async () => {
+        const error = createInferenceProviderError(`Bad request: ${'x'.repeat(20_000)}`);
+        [callbacks.error].flat().forEach((handler) => handler?.({ error }));
+        throw error;
+      },
+    }));
+
+    const results = await evaluate({
+      evaluators: [{ name: 'failing', connector_id: 'judge-connector' }],
+    });
+
+    expect(EvaluateResponse.safeParse({ results }).success).toBe(true);
+    expect(results[0].error?.message).toHaveLength(8192);
+    expect(results[0].usage?.calls[0].error?.message).toHaveLength(8192);
   });
 
   it('throws for an unknown evaluator before running any', async () => {
