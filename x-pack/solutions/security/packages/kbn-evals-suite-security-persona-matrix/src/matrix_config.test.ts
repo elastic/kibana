@@ -97,7 +97,7 @@ describe('persona_matrix.config.json column wiring', () => {
  * the weekly-evals-matrix branch. Reading them from the global `branch` (main)
  * returns nothing, which renders as an empty column rather than an error — the
  * exact failure that published a matrix with 0/21 translation cells while ~2,500
- * scored documents sat in the golden cluster.
+ * scored documents sat in the scores cluster.
  */
 describe('persona_matrix.config.json extra-suite branch pins', () => {
   const branchByColumn = new Map(config.columns.map((column) => [column.id, column.branch]));

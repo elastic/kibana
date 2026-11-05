@@ -25,7 +25,7 @@ describe('fetchScoreDocs', () => {
   const body = (call: number) => JSON.parse(fetchMock.mock.calls[call][1].body);
 
   it('refuses an unscoped read rather than scanning every archived run', async () => {
-    // 25 config model ids match 136 executions on the golden cluster: an
+    // 25 config model ids match 136 executions on the scores cluster: an
     // unscoped query is ~56 minutes of transfer and never what the caller meant.
     await expect(
       fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], suiteIds: ['s'] })

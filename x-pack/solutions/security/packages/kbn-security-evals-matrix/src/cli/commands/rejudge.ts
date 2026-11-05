@@ -171,7 +171,7 @@ export interface PublishedMatrixRow {
 /**
  * Execution ids the rendered matrix actually published.
  *
- * A suite row is an aggregate: a sharded sweep contributes one execution per VM
+ * A suite row is an aggregate: a sharded sweep contributes one execution per shard
  * and `experimentId` names only the representative experiment, which is not
  * necessarily an `metadata.execution_id`. Reading it would match nothing or drop
  * the other shards, so prefer the recorded executions.
@@ -346,7 +346,7 @@ export const rejudgeCmd: Command<void> = {
     const evaluationsKbnApiKey = profileEnv.EVAL_KBN_API_KEY ?? process.env.EVAL_KBN_API_KEY;
 
     // Read score documents straight from Elasticsearch rather than through the
-    // evals plugin API: the golden cluster stores the data but does not run the
+    // evals plugin API: the scores cluster stores the data but does not run the
     // plugin (/internal/evals answers 400 "not available with the current
     // configuration"), so the API path cannot reach the archive being replayed.
     const esUrl = process.env.GOLDEN_ES_URL;
@@ -362,7 +362,7 @@ export const rejudgeCmd: Command<void> = {
     // by model would grade runs the matrix never published.
     //
     // queryMatrixScores cannot make this selection here: it needs an
-    // EvalsClient, and the golden cluster does not run the evals plugin. The
+    // EvalsClient, and the scores cluster does not run the evals plugin. The
     // rendered matrix already records the executions it published, so the
     // replay reuses that artifact and grades exactly those trajectories.
     let executionIds: string[] | undefined = explicitExecutionIds.length

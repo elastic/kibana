@@ -6,10 +6,9 @@
  */
 
 /**
- * Real golden score documents captured 2026-09-06 from the persona-matrix
- * re-judge waves (executions sweep-1788685888-rj3 and siblings), trimmed to the
+ * Real golden score documents from persona-matrix re-judge runs, trimmed to the
  * fields a replay reads. Used to pin the replay planner against the schema the
- * sweep actually writes -- synthetic fixtures cannot catch that drift.
+ * suite actually writes -- synthetic fixtures cannot catch that drift.
  */
 import type { EvaluationScoreDocument } from '@kbn/evals-common/impl/schemas/common_attributes.gen';
 
@@ -42,7 +41,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-2.5-pro',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-2.5-pro',
     },
   },
   {
@@ -73,7 +72,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-2.5-pro',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-2.5-pro',
     },
   },
   {
@@ -104,7 +103,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-2.5-pro',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-2.5-pro',
     },
   },
   {
@@ -135,7 +134,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-2.5-pro',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-2.5-pro',
     },
   },
   {
@@ -166,7 +165,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-2.5-pro',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-2.5-pro',
     },
   },
   {
@@ -197,7 +196,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-2.5-pro',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-2.5-pro',
     },
   },
   {
@@ -228,7 +227,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::openai-gpt-5.5',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::openai-gpt-5.5',
     },
   },
   {
@@ -259,7 +258,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::openai-gpt-5.5',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::openai-gpt-5.5',
     },
   },
   {
@@ -290,7 +289,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::openai-gpt-5.5',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::openai-gpt-5.5',
     },
   },
   {
@@ -321,7 +320,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::openai-gpt-5.5',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::openai-gpt-5.5',
     },
   },
   {
@@ -352,7 +351,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::openai-gpt-5.5',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::openai-gpt-5.5',
     },
   },
   {
@@ -383,7 +382,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::openai-gpt-5.5',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::openai-gpt-5.5',
     },
   },
   {
@@ -414,8 +413,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id:
-        'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
     },
   },
   {
@@ -446,8 +444,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id:
-        'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
     },
   },
   {
@@ -478,8 +475,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id:
-        'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
     },
   },
   {
@@ -510,8 +506,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id:
-        'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
     },
   },
   {
@@ -542,8 +537,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id:
-        'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
     },
   },
   {
@@ -574,8 +568,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id:
-        'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-flash-lite',
     },
   },
   {
@@ -606,7 +599,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s3of3::security-persona-matrix::google-gemini-3.5-flash',
+      execution_id: 'sweep-a-s3of3::security-persona-matrix::google-gemini-3.5-flash',
     },
   },
   {
@@ -637,7 +630,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s3of3::security-persona-matrix::google-gemini-3.5-flash',
+      execution_id: 'sweep-a-s3of3::security-persona-matrix::google-gemini-3.5-flash',
     },
   },
   {
@@ -668,7 +661,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s3of3::security-persona-matrix::google-gemini-3.5-flash',
+      execution_id: 'sweep-a-s3of3::security-persona-matrix::google-gemini-3.5-flash',
     },
   },
   {
@@ -699,7 +692,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.5-flash',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.5-flash',
     },
   },
   {
@@ -730,7 +723,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.5-flash',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.5-flash',
     },
   },
   {
@@ -761,7 +754,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.5-flash',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.5-flash',
     },
   },
   {
@@ -792,7 +785,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685878-rjc-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
+      execution_id: 'sweep-b-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
     },
   },
   {
@@ -823,7 +816,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685878-rjc-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
+      execution_id: 'sweep-b-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
     },
   },
   {
@@ -854,7 +847,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685878-rjc-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
+      execution_id: 'sweep-b-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
     },
   },
   {
@@ -885,7 +878,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685878-rjc-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
+      execution_id: 'sweep-b-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
     },
   },
   {
@@ -916,7 +909,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685878-rjc-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
+      execution_id: 'sweep-b-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
     },
   },
   {
@@ -947,7 +940,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685878-rjc-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
+      execution_id: 'sweep-b-s3of3::security-persona-matrix::openai-gpt-5.4-mini',
     },
   },
   {
@@ -978,7 +971,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-pro',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-pro',
     },
   },
   {
@@ -1009,7 +1002,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-pro',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-pro',
     },
   },
   {
@@ -1040,7 +1033,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-pro',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-pro',
     },
   },
   {
@@ -1071,7 +1064,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-pro',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-pro',
     },
   },
   {
@@ -1102,7 +1095,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-pro',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-pro',
     },
   },
   {
@@ -1133,7 +1126,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s2of3::security-persona-matrix::google-gemini-3.1-pro',
+      execution_id: 'sweep-a-s2of3::security-persona-matrix::google-gemini-3.1-pro',
     },
   },
   {
@@ -1164,7 +1157,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-3.0-flash',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-3.0-flash',
     },
   },
   {
@@ -1195,7 +1188,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-3.0-flash',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-3.0-flash',
     },
   },
   {
@@ -1226,7 +1219,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s1of3::security-persona-matrix::google-gemini-3.0-flash',
+      execution_id: 'sweep-a-s1of3::security-persona-matrix::google-gemini-3.0-flash',
     },
   },
   {
@@ -1257,7 +1250,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Latency',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s3of3::security-persona-matrix::google-gemini-3.0-flash',
+      execution_id: 'sweep-a-s3of3::security-persona-matrix::google-gemini-3.0-flash',
     },
   },
   {
@@ -1288,7 +1281,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Tool Calls',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s3of3::security-persona-matrix::google-gemini-3.0-flash',
+      execution_id: 'sweep-a-s3of3::security-persona-matrix::google-gemini-3.0-flash',
     },
   },
   {
@@ -1319,7 +1312,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       name: 'Output Tokens',
     },
     metadata: {
-      execution_id: 'sweep-1788685888-rj3-s3of3::security-persona-matrix::google-gemini-3.0-flash',
+      execution_id: 'sweep-a-s3of3::security-persona-matrix::google-gemini-3.0-flash',
     },
   },
 ] as unknown as EvaluationScoreDocument[];

@@ -16,7 +16,7 @@ import {
 } from './replay_plan';
 
 /**
- * Shaped after a real golden document (run sweep-1788679175-gj): the judge
+ * Shaped after a real golden document : the judge
  * inputs live on example.input.question, example.output.expected and
  * task.output.messages[].message.
  */
@@ -52,7 +52,7 @@ function doc(overrides: Record<string, unknown> = {}): EvaluationScoreDocument {
     },
     evaluator: { name: 'Factuality', kind: 'llm' },
     metadata: {
-      execution_id: 'sweep-1788679175-gj-s1of3::security-persona-matrix::nano',
+      execution_id: 'sweep-c-s1of3::security-persona-matrix::nano',
       total_repetitions: 1,
     },
   };

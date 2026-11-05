@@ -1,9 +1,8 @@
-# Tool-surface mapping: original EIS benchmark → current eval stacks
+# Tool-surface mapping: earlier benchmark → current eval stacks
 
-The original benchmark (June 2026, `eis-benchmark` handoff bundle) ran against a
-different agent harness and tool surface than the current persona-matrix suite
-(August 2026, golden cluster). Tool-trail comparison between the two requires
-this mapping — a raw string diff is meaningless without it.
+The earlier benchmark ran against a different tool surface than the current
+persona-matrix suite. Tool-trail comparison between the two requires this
+mapping — a raw string diff is meaningless without it.
 
 ## Renamed / replaced tools
 
@@ -25,8 +24,8 @@ this mapping — a raw string diff is meaningless without it.
 
 | Current tool | Purpose |
 |---|---|
-| `platform.core.write_todos` | Agent framework todo tracking (321 calls in the 2026-08-21 sweep) |
-| `platform.core.execute_api` / `discover_apis` / `describe_api` | Generic API discovery layer (197 calls combined) |
+| `platform.core.write_todos` | Agent framework todo tracking |
+| `platform.core.execute_api` / `discover_apis` / `describe_api` | Generic API discovery layer |
 | `platform.core.sml_search` | Semantic search |
 | `platform.core.run_subagent` | Sub-agent fan-out |
 | `platform.core.list_files`, `platform.core.list_attachments` | Listing primitives |
@@ -34,7 +33,7 @@ this mapping — a raw string diff is meaningless without it.
 ## Known divergences caused by the surface change
 
 1. **Tool-set similarity between benchmark generations is structurally low**
-   (mean Jaccard ≈ 0.13 across 315 paired cells). This is expected and does not
+   (low mean Jaccard across paired cells). This is expected and does not
    indicate model regression.
 2. **Categories hitting `vt.*` flows** (alert-analysis, threat-hunting) lose an
    enrichment step on current stacks. ExpectedTools annotations must reference

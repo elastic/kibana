@@ -181,10 +181,9 @@ const hasRenderedArtifact = (output: TaskOutput): boolean => {
 };
 
 /**
- * Regression gate for the empty-final-message failure mode: 62% of
- * detection-rule-edit runs in the 2026-08-21 sweep ended on a tool call with
- * no user-facing closing text, leaving judges (and users) with nothing to
- * read.
+ * Regression gate for the empty-final-message failure mode: some
+ * detection-rule-edit runs ended on a tool call with no user-facing closing
+ * text, leaving judges (and users) with nothing to read.
  *
  * Scores 1 when the run leaves the user something to read: either non-empty
  * closing prose, or a rendered artifact (a created/updated rule whose
@@ -474,8 +473,8 @@ export function createEvaluatePersonaMatrixDataset({
     dataset: EvaluationDataset<PersonaMatrixExample>;
   }): Promise<void> {
     // Shard before wrapping so a sharded run seeds and grades only its slice.
-    // Slow models need hours for all 21 examples on one stack; the sweeper fans
-    // shards out to one VM each.
+    // Slow models need hours for all 21 examples on one stack; shards can be
+    // fanned out across separate stacks.
     const shardedExamples = selectShard(dataset.examples, process.env.PERSONA_MATRIX_SHARD);
     const wrappedExamples = shardedExamples.map(toDatasetExample);
 

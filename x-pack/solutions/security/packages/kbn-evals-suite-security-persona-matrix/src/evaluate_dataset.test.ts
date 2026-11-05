@@ -316,7 +316,7 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  // Regression: 62% of detection-rule-edit runs in the 2026-08-21 sweep ended
+  // Regression: some detection-rule-edit runs ended
   // on a tool call with no user-facing closing text.
   it('scores 0 when every message is empty', async () => {
     const result = await evaluate({ messages: [{ message: '' }] });
@@ -446,7 +446,7 @@ describe('createPersonaMatrixMinExpectedStepsEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  // Regression: ~90 original-sweep runs produced an answer in <3 steps having
+  // Regression: some runs produced an answer in <3 steps having
   // called nothing — premature termination that FinalAnswerPresent alone misses.
   it('scores 0 when the agent gave up without trying (fewer calls than expected)', async () => {
     const result = await evaluate({ steps: [] }, ['on_call_lookup']);
@@ -516,7 +516,7 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     // A predicate pinned to `filestore.read` can never match, so `skill_invoked`
     // stays 0 while `total_tool_spans` is non-zero -- meaning the "unavailable"
     // guard does NOT trip and the evaluator reports a confident false 0 for
-    // every model. Verified against the golden cluster: over 7 days,
+    // every model. Verified against the scores cluster: over 7 days,
     // filestore.read = 0 spans, load_skill = 7,991 spans.
     const query = jest.fn().mockResolvedValue({
       columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
@@ -659,7 +659,7 @@ describe('task output shape', () => {
 
 describe('task judge failure isolation', () => {
   it('keeps the trajectory and degrades qualitative scores when a judge call rejects', async () => {
-    // Regression guard for the determinism-sweep suite deaths: a single judge
+    // Regression guard for whole-suite aborts: a single judge
     // call failing (e.g. inference 500 toolValidationError) must not throw out
     // of the task and take down all remaining examples.
     const log = buildLog();

@@ -18,7 +18,7 @@
  * resolves to zero authorized indices and ES|QL reports `Unknown column
  * [trace.id]`. That reads like "the model emitted no spans" but means "this key
  * may not see any index under that pattern", and it silently nulled the
- * SkillInvoked metric for every model on the golden cluster.
+ * SkillInvoked metric for every model on the scores cluster.
  *
  * Both forms are listed so the evaluator works against a local Scout cluster
  * (plain datastream name) and a remote one (backing indices) without knowing

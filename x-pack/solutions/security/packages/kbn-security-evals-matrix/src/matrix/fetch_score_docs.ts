@@ -72,7 +72,7 @@ const hasGradablePayload = (doc: RawScoreDoc): boolean => {
 /**
  * Reads score documents directly from Elasticsearch.
  *
- * The golden cluster archives evaluation scores but does not run the evals
+ * The scores cluster archives evaluation scores but does not run the evals
  * plugin, so `/internal/evals/*` answers 400 there. Replay therefore talks to
  * the index the sweeps write to. `task.output` is in `_source` but is NOT
  * indexed, so it can be read but never filtered on.
@@ -106,7 +106,7 @@ export const fetchScoreDocs = async ({
   const filter: unknown[] = [];
 
   // Without a suite filter the query scans every suite ever archived (~2M docs
-  // on the golden cluster) and never returns.
+  // on the scores cluster) and never returns.
   if (suiteIds?.length) {
     filter.push({ terms: { 'metadata.suite_id': suiteIds } });
   }
