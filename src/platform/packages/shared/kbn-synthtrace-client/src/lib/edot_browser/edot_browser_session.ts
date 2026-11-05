@@ -17,7 +17,7 @@ import type {
 } from './edot_browser_client';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { sample, type Distribution, type HealthProfile } from './health_profiles';
-import { between, pick, randomHex } from './random';
+import { between, pick, randomHex } from '../edot_shared/random';
 import { resourceTimings } from './resource_timings';
 
 export interface EdotBrowserResource {
