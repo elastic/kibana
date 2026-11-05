@@ -245,24 +245,34 @@ async function getActions(
   // until the limit of other docs is reached. Otherwise they would crowd the other actions out of the
   // limit, and the actions that are left out would be reported with fewer agents than they have.
   const hits: Array<{ _source?: FleetServerAgentAction }> = [];
-  for (let from = 0; hits.length < limit && from + limit <= MAX_RESULT_WINDOW; ) {
-    const res = await esClient.search<FleetServerAgentAction>({
-      index: AGENT_ACTIONS_INDEX,
-      ignore_unavailable: true,
-      from,
-      size: limit,
-      query: namespacedQuery,
-      // The action id keeps the order stable between pages when documents share a timestamp.
-      sort: [{ '@timestamp': 'desc' }, { action_id: 'asc' }],
-    });
-    const pageHits = res.hits.hits;
-    hits.push(
-      ...pageHits.filter((hit) => !hasVersionSuffix(hit._source?.data?.policy_id as string))
-    );
-    if (pageHits.length < limit) {
-      break;
+  // Page through a point in time, so that documents indexed between searches cannot shift the
+  // offsets and return the same document on two pages.
+  const { id: pitId } = await esClient.openPointInTime({
+    index: AGENT_ACTIONS_INDEX,
+    keep_alive: '1m',
+    ignore_unavailable: true,
+  });
+  try {
+    for (let from = 0; hits.length < limit && from + limit <= MAX_RESULT_WINDOW; ) {
+      const res = await esClient.search<FleetServerAgentAction>({
+        pit: { id: pitId, keep_alive: '1m' },
+        from,
+        size: limit,
+        query: namespacedQuery,
+        // The action id keeps the order stable between pages when documents share a timestamp.
+        sort: [{ '@timestamp': 'desc' }, { action_id: 'asc' }],
+      });
+      const pageHits = res.hits.hits;
+      hits.push(
+        ...pageHits.filter((hit) => !hasVersionSuffix(hit._source?.data?.policy_id as string))
+      );
+      if (pageHits.length < limit) {
+        break;
+      }
+      from += limit;
     }
-    from += limit;
+  } finally {
+    await esClient.closePointInTime({ id: pitId }).catch(() => {});
   }
 
   return Object.values(

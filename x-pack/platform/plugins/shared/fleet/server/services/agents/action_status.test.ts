@@ -119,6 +119,8 @@ describe('getActionStatuses with scheduledOnly', () => {
       },
     };
     return {
+      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-id' }),
+      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
       search: jest
         .fn()
         .mockResolvedValueOnce({ hits: { hits } })
@@ -189,7 +191,9 @@ describe('getActionStatuses policy change actions', () => {
   }) => {
     const pages = [...policyPages];
     return {
-      search: jest.fn().mockImplementation(async (request: { index: string }) => {
+      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-id' }),
+      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
+      search: jest.fn().mockImplementation(async (request: { index?: string }) => {
         if (request.index === '.fleet-policies') {
           return { hits: { hits: pages.shift() ?? [] } };
         }
@@ -298,9 +302,15 @@ describe('getActionStatuses version specific policy actions', () => {
   const makeEsClient = (actionPages: object[][]) => {
     const pages = [...actionPages];
     return {
+      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-id' }),
+      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
       search: jest.fn().mockImplementation(async (request: any) => {
+        if (request.pit) {
+          // getActions reads pages of a point in time, sorted by timestamp
+          return { hits: { hits: pages.shift() ?? [] } };
+        }
         if (request.index === '.fleet-actions') {
-          // getActions reads pages sorted by timestamp, getCancelledActions filters on CANCEL
+          // getCancelledActions filters on CANCEL
           if (request.sort) {
             return { hits: { hits: pages.shift() ?? [] } };
           }
@@ -326,7 +336,7 @@ describe('getActionStatuses version specific policy actions', () => {
   const getActionsSearches = (esClient: ElasticsearchClient) =>
     (esClient.search as jest.Mock).mock.calls
       .map(([request]) => request)
-      .filter((request) => request.index === '.fleet-actions' && request.sort);
+      .filter((request) => request.pit);
 
   it('keeps reading action docs until the limit of non-version-specific docs is reached', async () => {
     const sentinelPage = Array.from({ length: 20 }, (_, i) =>
@@ -345,6 +355,9 @@ describe('getActionStatuses version specific policy actions', () => {
     expect(searches.map((request) => request.from)).toEqual([0, 20]);
     // stable order between pages when documents share a timestamp
     expect(searches[0].sort).toEqual([{ '@timestamp': 'desc' }, { action_id: 'asc' }]);
+    // consistent snapshot between pages, closed afterwards
+    expect(searches.every((request) => request.pit.id === 'pit-id')).toBe(true);
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-id' });
   });
 
   it('does a single search when the first page has enough docs', async () => {
