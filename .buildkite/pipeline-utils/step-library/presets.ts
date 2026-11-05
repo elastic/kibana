@@ -111,6 +111,8 @@ export const withHyperdisk = (agent: AgentConfig): AgentConfig => ({
   diskType: 'hyperdisk-balanced',
 });
 
+export const pdBalanced = { diskType: 'pd-balanced' } as const;
+
 export const k8sMinimalAgent = (): AgentConfig => ({
   provider: 'k8s',
   image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
@@ -147,7 +149,7 @@ export const mainTargetBranchOnly = "build.env('GITHUB_PR_TARGET_BRANCH') == 'ma
 
 // A sharded or single-script test step on a preemptible agent; set `command`, `label` and `key`.
 export const testDefaults = {
-  agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+  agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
   depends_on: ['build'],
   timeout_in_minutes: 60,
   retry: retry.agentLossOrAnyOnce,
@@ -155,5 +157,5 @@ export const testDefaults = {
 
 export const highMemoryTestDefaults = {
   ...testDefaults,
-  agents: spotAgent('n2-highmem-4', spotZones.centralFCA),
+  agents: { ...spotAgent('n2-highmem-4', spotZones.centralFCA), ...pdBalanced },
 };

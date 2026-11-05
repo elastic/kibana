@@ -344,6 +344,61 @@ describe('Agent policy API handlers', () => {
       expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
       expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
     });
+
+    describe('ID immutability', () => {
+      beforeEach(() => {
+        agentPolicyServiceMock.get.mockResolvedValue({ id: 'policy' } as AgentPolicy);
+        agentPolicyServiceMock.update.mockResolvedValue({ id: 'policy' } as AgentPolicy);
+      });
+
+      it('should reject a body id that does not match the path id before any side effect', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy' },
+          body: {
+            id: '../../../some-other-policy',
+            name: 'Policy',
+            namespace: 'default',
+            space_ids: ['*'],
+          },
+        });
+
+        await updateAgentPolicyHandler(context, request, response);
+
+        expect(response.badRequest).toHaveBeenCalledWith({
+          body: {
+            message: expect.stringContaining('Cannot change agent policy ID'),
+          },
+        });
+        expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+        expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should accept a body id matching the path id and not pass it to the service', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy' },
+          body: { id: 'policy', name: 'Policy', namespace: 'default' },
+        });
+
+        await updateAgentPolicyHandler(context, request, response);
+
+        expect(response.badRequest).not.toHaveBeenCalled();
+        expect(agentPolicyServiceMock.update).toHaveBeenCalledTimes(1);
+        expect(agentPolicyServiceMock.update.mock.calls[0][2]).toBe('policy');
+        expect(agentPolicyServiceMock.update.mock.calls[0][3]).not.toHaveProperty('id');
+      });
+
+      it('should accept a request without a body id', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy' },
+          body: { name: 'Policy', namespace: 'default' },
+        });
+
+        await updateAgentPolicyHandler(context, request, response);
+
+        expect(response.badRequest).not.toHaveBeenCalled();
+        expect(agentPolicyServiceMock.update).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('GetListAgentPolicyOutputsHandler', () => {

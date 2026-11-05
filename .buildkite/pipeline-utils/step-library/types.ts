@@ -30,7 +30,7 @@ interface AgentAttributes {
   readonly preemptible?: boolean;
   readonly spotZones?: string;
   readonly zones?: string;
-  readonly diskType?: 'hyperdisk-balanced';
+  readonly diskType?: 'hyperdisk-balanced' | 'pd-balanced';
   readonly diskSizeGb?: number;
   readonly enableNestedVirtualization?: boolean;
   readonly buildDirectory?: string;
