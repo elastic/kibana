@@ -174,6 +174,21 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator(`global-default-row-${featureId}`);
   }
 
+  public addEffortButton(endpointId: string): Locator {
+    return this.page.testSubj.locator(`add-effort-${endpointId}`);
+  }
+
+  public effortBadge(endpointId: string): Locator {
+    return this.page.testSubj.locator(`effort-badge-${endpointId}`);
+  }
+
+  /** Hovers the model row to reveal "+ Effort", then picks the level in the popover. */
+  public async setEffort(endpointId: string, level: string): Promise<void> {
+    await this.endpointRow(endpointId).hover();
+    await this.addEffortButton(endpointId).click();
+    await this.page.testSubj.locator(`reasoningEffort-${level}`).click();
+  }
+
   // --- Composite actions ---
 
   /**

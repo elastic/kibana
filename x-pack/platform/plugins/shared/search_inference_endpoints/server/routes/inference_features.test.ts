@@ -86,7 +86,7 @@ describe('Inference Features API', () => {
       });
     });
 
-    it('should return recommended endpoint ids for entries registered with model parameters', async () => {
+    it('should return recommended endpoint ids and their parameters for entries registered with model parameters', async () => {
       featureRegistry.register({
         featureId: 'agent_builder_general',
         featureName: 'Agent Builder — General Models',
@@ -105,6 +105,24 @@ describe('Inference Features API', () => {
         'gemini-3.0-pro',
         'claude-sonnet-4.6',
       ]);
+      expect(body.features[0].recommendedEndpointParameters).toEqual({
+        'gemini-3.0-pro': { reasoning: { effort: 'low' } },
+      });
+    });
+
+    it('should omit recommended endpoint parameters when no entry declares them', async () => {
+      featureRegistry.register({
+        featureId: 'agent_builder_general',
+        featureName: 'Agent Builder — General Models',
+        featureDescription: 'Large, capable models for agent reasoning.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['gemini-3.0-pro'],
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features[0]).not.toHaveProperty('recommendedEndpointParameters');
     });
 
     it('should return multiple features with parent-child relationships when no conditions', async () => {

@@ -28,8 +28,10 @@ import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
 import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
-import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
+import { EisModelStatus, type EndpointDeprecationInfo, type EndpointEfforts } from '../../types';
 import { ModelsCallout } from './models_callout';
+
+const NO_EFFORTS: EndpointEfforts = {};
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -37,12 +39,15 @@ export const ModelSettings: React.FC = () => {
     isSaving: isFeatureSaving,
     isDirty: isFeatureDirty,
     assignments,
+    efforts,
     effectiveRecommendedEndpoints,
+    effectiveRecommendedEfforts,
     sections,
     invalidEndpointIds,
     hasSavedObject,
     dirtyFeatureIds,
     updateEndpoints,
+    updateEfforts,
     save: saveFeatures,
   } = useModelSettingsForm();
 
@@ -376,11 +381,15 @@ export const ModelSettings: React.FC = () => {
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                       effectiveRecommendedEndpoints:
                         effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
+                      efforts: efforts[f.featureId] ?? NO_EFFORTS,
+                      effectiveRecommendedEfforts:
+                        effectiveRecommendedEfforts[f.featureId] ?? NO_EFFORTS,
                       feature: f,
                       hasSavedObject: hasSavedObject[f.featureId] ?? false,
                       isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
                     onEndpointsChange={updateEndpoints}
+                    onEffortsChange={updateEfforts}
                     invalidEndpointIds={invalidEndpointIds}
                     deprecatedEndpointsMap={deprecatedEndpointsMap}
                     isBeta={section.isBeta}

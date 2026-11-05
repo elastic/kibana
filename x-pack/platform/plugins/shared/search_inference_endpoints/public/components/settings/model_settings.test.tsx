@@ -77,7 +77,9 @@ const defaultFormState = {
   isSaving: false,
   isDirty: false,
   assignments: { child_1: ['ep-1'] },
+  efforts: {},
   effectiveRecommendedEndpoints: { child_1: ['ep-1'] },
+  effectiveRecommendedEfforts: {},
   sections: [
     {
       featureId: 'search',
@@ -92,6 +94,7 @@ const defaultFormState = {
   hasSavedObject: {} as Record<string, boolean>,
   dirtyFeatureIds: new Set<string>() as ReadonlySet<string>,
   updateEndpoints: jest.fn(),
+  updateEfforts: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
 };
 
