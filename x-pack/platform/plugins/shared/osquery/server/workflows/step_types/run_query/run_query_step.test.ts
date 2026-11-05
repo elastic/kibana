@@ -176,7 +176,7 @@ describe('osquery.runQuery step', () => {
       const probe = contextManager.callKibanaApi.mock.calls.find(
         ([call]) => call.method === 'GET' && call.path === '/api/osquery/live_queries'
       );
-      expect(probe?.[0].query).toEqual({ pageSize: 1, sort: '@timestamp' });
+      expect(probe?.[0].query).toEqual({ pageSize: 1 });
     });
 
     it('sends policy targeting as agent_policy_ids and counts the agents first', async () => {
