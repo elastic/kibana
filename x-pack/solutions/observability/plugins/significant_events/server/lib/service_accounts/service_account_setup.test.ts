@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { CoreStart } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -59,7 +60,11 @@ const createCore = ({
     }
     return { has_all_requested: canManageSecurity };
   });
-  const bindWorkload = jest.fn(async () => ({}));
+  let currentAccountId = boundAccountId;
+  const bindWorkload = jest.fn(async (_request: unknown, binding: { serviceAccountId: string }) => {
+    currentAccountId = binding.serviceAccountId;
+    return {};
+  });
   const queryRole = jest.fn(async () => ({ total: roleCount }));
   const core = {
     security: {
@@ -67,7 +72,7 @@ const createCore = ({
         isEnabled: () => enabled,
         bindWorkload,
         getWorkloadBinding: jest.fn(async () =>
-          boundAccountId ? { serviceAccountId: boundAccountId } : null
+          currentAccountId ? { serviceAccountId: currentAccountId } : null
         ),
       },
     },
@@ -84,7 +89,10 @@ const createCore = ({
       },
     },
   } as unknown as CoreStart;
-  return { core, bindWorkload, queryRole, hasPrivileges };
+  const rebind = (serviceAccountId: string) => {
+    currentAccountId = serviceAccountId;
+  };
+  return { core, bindWorkload, queryRole, hasPrivileges, rebind };
 };
 
 describe('createDetectionEngineSetupService.enable', () => {
@@ -289,6 +297,42 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
     ).rejects.toMatchObject({
       statusCode: 500,
       message: expect.stringContaining('[system-sources-ki-onboarding-bound]'),
+    });
+  });
+
+  it('keeps the status of an install error and only suggests a retry for server errors', async () => {
+    const { core } = createCore();
+    const { install, ...workflows } = createWorkflowsExtensions();
+    install.mockRejectedValueOnce(Boom.forbidden('forbidden'));
+
+    const error = await createDetectionEngineSetupService({
+      core,
+      spaces: undefined,
+      ...workflows,
+      isServerless: false,
+    })
+      .enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+      .catch((e) => e);
+
+    expect(error).toMatchObject({ statusCode: 403, message: expect.stringContaining('forbidden') });
+    expect(error.message).not.toContain('call _enable again');
+  });
+
+  it('fails when a concurrent call bound the space to another account while this one installed', async () => {
+    const { core, rebind } = createCore();
+    const { install, ...workflows } = createWorkflowsExtensions();
+    install.mockImplementationOnce(async () => rebind('account-2'));
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...workflows,
+        isServerless: false,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: expect.stringContaining('[account-2]'),
     });
   });
 

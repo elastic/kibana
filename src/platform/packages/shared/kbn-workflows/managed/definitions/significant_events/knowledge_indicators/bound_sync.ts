@@ -18,5 +18,7 @@ export const NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID = 'system-sources-ki-sync-boun
  */
 export const NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  pluginId: 'significantEvents',
   yaml: SYNC_YAML,
+  version: 1,
 });

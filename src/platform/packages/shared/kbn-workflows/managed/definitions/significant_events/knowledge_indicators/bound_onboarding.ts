@@ -19,5 +19,7 @@ export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID = 'system-sources-ki-onb
  */
 export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  pluginId: 'significantEvents',
   yaml: ONBOARDING_YAML,
+  version: 1,
 });
