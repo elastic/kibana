@@ -63,7 +63,6 @@ export interface HousekeepingProviderResult {
 export interface HousekeepingResourceTypeDefinition {
   id: string;
   label: string;
-  iconType: string;
   /** When set, resources of this type with no incoming references and no use are reported. */
   unused?: {
     message: string;
@@ -108,7 +107,6 @@ export interface HousekeepingCheck {
   resourceTypes: string[];
   /** Defaults to `risk`. */
   kind?: HousekeepingFindingKind;
-  iconType?: string;
   isAvailable?(context: HousekeepingContext): boolean;
   run(context: HousekeepingContext): Promise<HousekeepingCheckFinding[]>;
 }

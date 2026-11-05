@@ -11,12 +11,12 @@ import type { HousekeepingFindingGroup, HousekeepingFindingsResponse } from '../
 import type { FindingsState } from '../../findings_store';
 
 export const resourceTypes: HousekeepingFindingsResponse['resourceTypes'] = {
-  index_template: { label: 'Index template', iconType: 'indexSettings' },
-  component_template: { label: 'Component template', iconType: 'indexSettings' },
-  data_stream: { label: 'Data stream', iconType: 'indexManagementApp' },
-  index: { label: 'Index', iconType: 'indexManagementApp' },
-  ingest_pipeline: { label: 'Ingest pipeline', iconType: 'pipelineApp' },
-  ilm_policy: { label: 'Lifecycle policy', iconType: 'clock' },
+  index_template: { label: 'Index template' },
+  component_template: { label: 'Component template' },
+  data_stream: { label: 'Data stream' },
+  index: { label: 'Index' },
+  ingest_pipeline: { label: 'Ingest pipeline' },
+  ilm_policy: { label: 'Lifecycle policy' },
 };
 
 const PIPELINE_IMPACT =
@@ -27,7 +27,6 @@ export const missingPipelines: HousekeepingFindingGroup = {
   kind: 'broken_reference',
   title: 'Missing ingest pipeline',
   description: 'The resources below point to something that does not exist.',
-  iconType: 'pipelineApp',
   findings: [
     {
       id: 'broken_reference|ingest_pipeline:app-parent|ingest_pipeline:app-child',
@@ -60,7 +59,6 @@ export const missingPolicies: HousekeepingFindingGroup = {
   kind: 'broken_reference',
   title: 'Missing lifecycle policy',
   description: 'The resources below point to something that does not exist.',
-  iconType: 'clock',
   findings: [
     {
       id: 'broken_reference|data_stream:logs-app-default|ilm_policy:app-retention',
@@ -79,7 +77,6 @@ export const unusedPipelines: HousekeepingFindingGroup = {
   title: 'Unused ingest pipeline',
   description:
     'No index, template or other pipeline uses this pipeline, and it has not processed any document since the nodes started.',
-  iconType: 'pipelineApp',
   findings: [
     {
       id: 'unused|ingest_pipeline:app-v0',
@@ -94,7 +91,6 @@ export const unusedPolicies: HousekeepingFindingGroup = {
   kind: 'unused',
   title: 'Unused lifecycle policy',
   description: 'No index, data stream or index template uses this policy.',
-  iconType: 'clock',
   findings: [
     {
       id: 'unused|ilm_policy:old-retention',
@@ -110,7 +106,6 @@ export const noRetention: HousekeepingFindingGroup = {
   title: 'Data streams without retention',
   description:
     'Nothing ever deletes the data of these data streams, so they keep growing. Set a data retention with the data stream lifecycle.',
-  iconType: 'indexManagementApp',
   findings: [
     {
       id: 'index_management.data_stream_without_retention|data_stream:metrics-app-default',
@@ -126,15 +121,17 @@ export const noRetention: HousekeepingFindingGroup = {
 };
 
 export const response: HousekeepingFindingsResponse = {
+  kinds: ['broken_reference', 'risk', 'unused'],
   groups: [missingPipelines, missingPolicies, unusedPipelines, unusedPolicies, noRetention],
-  summary: { broken_reference: 4, unused: 2, risk: 1 },
+  summary: { broken_reference: 4, deprecation: 0, unused: 2, risk: 1 },
   skipped: [],
   resourceTypes,
 };
 
 const emptyResponse: HousekeepingFindingsResponse = {
+  kinds: ['broken_reference', 'risk', 'unused'],
   groups: [],
-  summary: { broken_reference: 0, unused: 0, risk: 0 },
+  summary: { broken_reference: 0, deprecation: 0, unused: 0, risk: 0 },
   skipped: [],
   resourceTypes,
 };
@@ -151,7 +148,7 @@ export const states: Record<string, FindingsState> = {
     response: {
       ...response,
       groups: [missingPipelines, unusedPipelines],
-      summary: { broken_reference: 3, unused: 1, risk: 0 },
+      summary: { broken_reference: 3, deprecation: 0, unused: 1, risk: 0 },
       skipped: [
         {
           checkId: 'index_lifecycle_management',

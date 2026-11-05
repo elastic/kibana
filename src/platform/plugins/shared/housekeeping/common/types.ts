@@ -8,14 +8,16 @@
  */
 
 /**
- * What a finding asks for: fixing something that fails today, reviewing a configuration that may
- * cause trouble later, or cleaning up something nothing uses.
+ * What a finding asks for: fixing something that fails today, resolving something that stops
+ * working in the next major version, reviewing a configuration that may cause trouble later, or
+ * cleaning up something nothing uses.
  */
-export type HousekeepingFindingKind = 'broken_reference' | 'risk' | 'unused';
+export type HousekeepingFindingKind = 'broken_reference' | 'deprecation' | 'risk' | 'unused';
 
 /** Most urgent first: unused resources are only clutter. */
 export const HOUSEKEEPING_FINDING_KINDS: HousekeepingFindingKind[] = [
   'broken_reference',
+  'deprecation',
   'risk',
   'unused',
 ];
@@ -25,7 +27,6 @@ export const isFindingKind = (value: string): value is HousekeepingFindingKind =
 
 export interface HousekeepingResourceTypeInfo {
   label: string;
-  iconType: string;
 }
 
 export interface HousekeepingResource {
@@ -56,6 +57,15 @@ export const isResourceUser = (value: unknown): value is HousekeepingResourceUse
   'via' in value &&
   typeof value.via === 'string';
 
+/** How urgent a finding is within its kind, such as a deprecation that blocks the upgrade. */
+export type HousekeepingFindingSeverity = 'critical' | 'warning';
+
+/** A resolution with its own UI, which the owning plugin registers with `registerFindingAction`. */
+export interface HousekeepingFindingAction {
+  id: string;
+  params?: Record<string, unknown>;
+}
+
 /** A request that resolves a finding, for the user to review and run in Console. */
 export interface HousekeepingFix {
   /** What the request does, and what to check before running it. */
@@ -70,10 +80,13 @@ export interface HousekeepingFinding {
   related: HousekeepingResource[];
   /** What this finding means, when it says more than the description of its group. */
   message?: string;
+  severity?: HousekeepingFindingSeverity;
   /** Short facts shown next to the resource, such as the setting that holds a reference. */
   details?: string[];
   /** Only when the fix doesn't need judgement; Agent Builder helps with the rest. */
   fix?: HousekeepingFix;
+  /** For fixes that need more than one request, such as reindexing with progress. */
+  actions?: HousekeepingFindingAction[];
   evidence?: Record<string, unknown>;
 }
 
@@ -84,7 +97,6 @@ export interface HousekeepingFindingGroup {
   kind: HousekeepingFindingKind;
   title: string;
   description?: string;
-  iconType: string;
   findings: HousekeepingFinding[];
 }
 
@@ -96,6 +108,8 @@ export interface HousekeepingSkippedCheck {
 }
 
 export interface HousekeepingFindingsResponse {
+  /** The kinds that the providers and checks of the run can report, most urgent first. */
+  kinds: HousekeepingFindingKind[];
   groups: HousekeepingFindingGroup[];
   summary: Record<HousekeepingFindingKind, number>;
   skipped: HousekeepingSkippedCheck[];

@@ -12,6 +12,8 @@ import { HousekeepingPublicPlugin } from './plugin';
 export const plugin = () => new HousekeepingPublicPlugin();
 
 export type { HousekeepingAppMenuItem, HousekeepingPublicStart } from './housekeeping_service';
+export type { HousekeepingPublicSetup } from './plugin';
+export type { HousekeepingFindingActionDefinition } from './metadata';
 export type {
   HousekeepingFinding,
   HousekeepingResource,

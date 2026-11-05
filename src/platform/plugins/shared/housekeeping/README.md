@@ -3,6 +3,7 @@
 Housekeeping finds what is broken or forgotten in the configuration of a cluster:
 
 - **Broken references**: a resource points at something that doesn't exist, such as an index template with a default pipeline that was deleted.
+- **Deprecations**: something that stops working in the next major version, such as an index that must be reindexed before the upgrade.
 - **Risks**: a configuration that works today but may cause trouble later, such as a data stream without retention.
 - **Unused resources**: a resource that nothing uses, such as a component template that no index template composes.
 
@@ -77,7 +78,6 @@ export const pipelineResourceProvider: HousekeepingResourceProvider = {
       label: i18n.translate('xpack.ingestPipelines.housekeeping.pipelineLabel', {
         defaultMessage: 'Ingest pipeline',
       }),
-      iconType: 'pipelineApp',
       // Where your app shows a resource. The UI links each finding to it.
       locator: {
         id: INGEST_PIPELINES_APP_LOCATOR,
@@ -199,6 +199,25 @@ housekeeping?.registerCheck(readOnlyIndexCheck);
 
 `resourceTypes` tells which scoped runs include the check. Every finding of a check is shown under its `title`, with its `description` behind the info icon.
 
+A kind only shows in the UI when a provider or check of the run can report it. A finding can also have a `severity`, `critical` or `warning`, shown in its own column when a finding in the list has one.
+
+#### Fixes with their own UI
+
+When a fix needs more than one request, such as reindexing with progress, the finding lists `actions` and the plugin that owns it registers their UI in its public `setup`:
+
+```ts
+housekeeping?.registerFindingAction({
+  id: 'upgrade_assistant.reindex',
+  label: i18n.translate('xpack.upgradeAssistant.housekeeping.reindexAction', {
+    defaultMessage: 'Reindex',
+  }),
+  iconType: 'indexSettings',
+  run: (finding) => openReindexFlyout(finding),
+});
+```
+
+Each action of a finding becomes a button in its row. Housekeeping removes the mask of its flyout before `run`, so the flyout that the plugin opens can take the focus.
+
 ### 4. Add Housekeeping to your app
 
 Add the menu item to the `AppHeader` of your app. It opens the flyout with the findings of your types:
@@ -262,11 +281,11 @@ Every component of the UI has stories, so you can review it without Kibana or a 
 
 3. Interact with them. Clicks on links, **Fix**, **Open in Console** and **Ask AI Agent** show up in the **Actions** tab instead of navigating. Use the toolbar to switch between the light and dark themes and to try narrow viewports: the list changes to its compact layout below 900 pixels.
 
-Stories get everything Kibana would provide from the `withResourceTypes` decorator in `public/components/__stories__/decorators.tsx`: the labels and icons of resource types, links to resources, the AI Agent, Console, and the parts of core that the content list reads. Add it to any new story of a component that renders findings; without it, the list renders nothing.
+Stories get everything Kibana would provide from the `withResourceTypes` decorator in `public/components/__stories__/decorators.tsx`: the labels of resource types, links to resources, the AI Agent, Console, and the parts of core that the content list reads. Add it to any new story of a component that renders findings; without it, the list renders nothing.
 
 To see the findings of your plugin, add them to `public/components/__stories__/fixtures.ts`:
 
-1. Add the label and icon of your resource types to `resourceTypes`.
+1. Add the labels of your resource types to `resourceTypes`.
 2. Add a `HousekeepingFindingGroup` with your findings, as your provider or check would return them, with their `details`, `message` and `fix`.
 3. Use the group in a story, such as a new one in `findings_table.stories.tsx`:
 

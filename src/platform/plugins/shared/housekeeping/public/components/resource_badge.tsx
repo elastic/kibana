@@ -13,12 +13,8 @@ import type { HousekeepingResource } from '../../common';
 import { ResourceLinksContext, useResourceTypeInfo } from '../metadata';
 
 export const ResourceTypeBadge = ({ type }: { type: string }) => {
-  const { label, iconType } = useResourceTypeInfo(type);
-  return (
-    <EuiBadge color="hollow" iconType={iconType}>
-      {label}
-    </EuiBadge>
-  );
+  const { label } = useResourceTypeInfo(type);
+  return <EuiBadge color="hollow">{label}</EuiBadge>;
 };
 
 export const ResourceName = ({ resource }: { resource: HousekeepingResource }) => {

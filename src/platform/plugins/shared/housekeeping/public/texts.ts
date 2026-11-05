@@ -16,7 +16,7 @@ export const HOUSEKEEPING_TITLE = i18n.translate('housekeeping.title', {
 
 export const HOUSEKEEPING_DESCRIPTION = i18n.translate('housekeeping.description', {
   defaultMessage:
-    'Broken references, unused resources and risky settings found by the checks that each plugin provides.',
+    'Broken references, deprecations, risky settings and unused resources found by the checks that each plugin provides.',
 });
 
 export const RERUN_LABEL = i18n.translate('housekeeping.rerun', {

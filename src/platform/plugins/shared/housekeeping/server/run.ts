@@ -9,6 +9,7 @@
 
 import type {
   HousekeepingFindingGroup,
+  HousekeepingFindingKind,
   HousekeepingResource,
   HousekeepingFindingsResponse,
   HousekeepingScope,
@@ -26,6 +27,9 @@ import type {
 } from './types';
 
 export const DEFAULT_TIMEOUT_MS = 30_000;
+
+/** What the reference graph reports. */
+const GRAPH_KINDS: HousekeepingFindingKind[] = ['broken_reference', 'unused'];
 
 class TimeoutError extends Error {}
 
@@ -123,7 +127,6 @@ const toGroup = (
   kind: check.kind ?? 'risk',
   title: check.title,
   description: check.description,
-  iconType: check.iconType ?? 'dot',
   findings: findings.map((finding) => ({
     ...finding,
     resource: locateResource(finding.resource),
@@ -251,18 +254,21 @@ export const runHousekeeping = async ({
           HOUSEKEEPING_FINDING_KINDS.indexOf(a.kind) - HOUSEKEEPING_FINDING_KINDS.indexOf(b.kind)
       );
 
-    const summary = { broken_reference: 0, unused: 0, risk: 0 };
+    const summary = { broken_reference: 0, deprecation: 0, risk: 0, unused: 0 };
     for (const { kind, findings } of scoped) {
       summary[kind] += findings.length;
     }
 
     return {
+      kinds: HOUSEKEEPING_FINDING_KINDS.filter(
+        (kind) =>
+          (providers.length > 0 && GRAPH_KINDS.includes(kind)) ||
+          checks.some((check) => (check.kind ?? 'risk') === kind)
+      ),
       groups: scoped,
       summary,
       skipped,
-      resourceTypes: Object.fromEntries(
-        resourceTypes.map(({ id, label, iconType }) => [id, { label, iconType }])
-      ),
+      resourceTypes: Object.fromEntries(resourceTypes.map(({ id, label }) => [id, { label }])),
     };
   } finally {
     abortSignal.removeEventListener('abort', abort);

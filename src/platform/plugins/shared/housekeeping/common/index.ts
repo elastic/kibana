@@ -24,6 +24,8 @@ export type {
   HousekeepingResourceTypeInfo,
   HousekeepingFinding,
   HousekeepingFix,
+  HousekeepingFindingSeverity,
+  HousekeepingFindingAction,
   HousekeepingFindingGroup,
   HousekeepingSkippedCheck,
   HousekeepingFindingsResponse,

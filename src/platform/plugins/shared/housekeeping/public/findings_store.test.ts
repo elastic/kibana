@@ -12,8 +12,9 @@ import type { HousekeepingFindingsResponse } from '../common';
 import { FINDINGS_CACHE_TTL_MS, FindingsStore } from './findings_store';
 
 const response: HousekeepingFindingsResponse = {
+  kinds: [],
   groups: [],
-  summary: { broken_reference: 0, risk: 0, unused: 0 },
+  summary: { broken_reference: 0, deprecation: 0, risk: 0, unused: 0 },
   skipped: [],
   resourceTypes: {},
 };

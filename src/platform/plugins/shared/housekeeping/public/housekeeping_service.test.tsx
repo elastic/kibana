@@ -18,8 +18,9 @@ import { createHousekeepingService } from './housekeeping_service';
 import { OpenInConsoleContext } from './metadata';
 
 const response: HousekeepingFindingsResponse = {
+  kinds: [],
   groups: [],
-  summary: { broken_reference: 0, risk: 0, unused: 0 },
+  summary: { broken_reference: 0, deprecation: 0, risk: 0, unused: 0 },
   skipped: [],
   resourceTypes: {},
 };
@@ -131,7 +132,7 @@ describe('getAppMenuItem', () => {
     const core = coreMock.createStart();
     core.http.get.mockResolvedValue({
       ...response,
-      summary: { broken_reference: 2, risk: 1, unused: 3 },
+      summary: { broken_reference: 2, deprecation: 0, risk: 1, unused: 3 },
     });
     const { start, useFindings } = createHousekeepingService(core);
     const scope = { resourceTypes: ['index'] };
@@ -143,6 +144,8 @@ describe('getAppMenuItem', () => {
     const { result } = renderHook(() => useFindings(scope));
     await waitFor(() => expect(result.current.state.response).toBeDefined());
 
-    expect(tooltip()).toBe('Last run: 2 broken references, 3 unused resources, 1 risks');
+    expect(tooltip()).toBe(
+      'Last run: 2 broken references, 0 deprecations, 3 unused resources, 1 risks'
+    );
   });
 });

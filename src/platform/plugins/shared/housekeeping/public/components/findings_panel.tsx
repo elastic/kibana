@@ -56,7 +56,7 @@ export const FindingsErrorCallout = ({
 
 /** Every finding, or a message when the checks found nothing. */
 export const FindingsList = ({ response }: { response: HousekeepingFindingsResponse }) => {
-  const { groups, skipped, resourceTypes } = response;
+  const { kinds, groups, skipped, resourceTypes } = response;
 
   if (groups.length === 0) {
     return (
@@ -75,7 +75,7 @@ export const FindingsList = ({ response }: { response: HousekeepingFindingsRespo
 
   return (
     <ResourceTypesContext.Provider value={resourceTypes}>
-      <FindingsTable groups={groups} />
+      <FindingsTable groups={groups} kinds={kinds} />
     </ResourceTypesContext.Provider>
   );
 };

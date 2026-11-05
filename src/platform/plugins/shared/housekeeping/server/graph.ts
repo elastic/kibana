@@ -202,7 +202,6 @@ const brokenReferenceGroups = (
       description: i18n.translate('housekeeping.brokenReference.groupDescription', {
         defaultMessage: 'The resources below point to something that does not exist.',
       }),
-      iconType: target?.iconType ?? 'dot',
       findings: references.map(({ source, reference, vias, impacts }) => {
         const users = usedBy.get(toKey(source)) ?? [];
         return {
@@ -318,7 +317,6 @@ const unusedGroups = (
         kind: 'unused',
         title,
         description: unused.message,
-        iconType: type.iconType,
         findings,
       });
     }

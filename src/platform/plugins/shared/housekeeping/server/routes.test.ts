@@ -26,7 +26,7 @@ const setup = (describe?: HousekeepingResourceTypeDefinition['describe']) => {
   const registry = new HousekeepingRegistry();
   registry.registerResourceProvider(
     pipelinesProvider({
-      resourceTypes: [{ id: 'pipeline', label: 'Pipeline', iconType: 'pipeline', describe }],
+      resourceTypes: [{ id: 'pipeline', label: 'Pipeline', describe }],
     })
   );
   const router = httpServiceMock.createRouter();
@@ -53,8 +53,9 @@ const setup = (describe?: HousekeepingResourceTypeDefinition['describe']) => {
 describe('findings route', () => {
   beforeEach(() => {
     jest.mocked(runHousekeeping).mockResolvedValue({
+      kinds: [],
       groups: [],
-      summary: { broken_reference: 0, risk: 0, unused: 0 },
+      summary: { broken_reference: 0, deprecation: 0, risk: 0, unused: 0 },
       skipped: [],
       resourceTypes: {},
     });

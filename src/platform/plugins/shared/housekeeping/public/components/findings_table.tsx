@@ -19,8 +19,10 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   Query,
+  useEuiTheme,
   useGeneratedHtmlId,
   useResizeObserver,
 } from '@elastic/eui';
@@ -50,13 +52,15 @@ import type {
   HousekeepingFinding,
   HousekeepingFindingGroup,
   HousekeepingFindingKind,
+  HousekeepingFindingSeverity,
 } from '../../common';
 import { HOUSEKEEPING_FINDING_KINDS, isFindingKind } from '../../common';
 import {
   AskAgentContext,
   ContentListCoreContext,
   FINDING_KIND_METADATA,
-  ResourceLinksContext,
+  FINDING_SEVERITY_METADATA,
+  FindingActionsContext,
   ResourceTypesContext,
 } from '../metadata';
 import { ResourceName, ResourceTypeBadge } from './resource_badge';
@@ -85,6 +89,9 @@ const i18nTexts = {
   kind: i18n.translate('housekeeping.list.kind', {
     defaultMessage: 'Finding',
   }),
+  severity: i18n.translate('housekeeping.list.severity', {
+    defaultMessage: 'Severity',
+  }),
   problem: i18n.translate('housekeeping.list.problem', {
     defaultMessage: 'Problem',
   }),
@@ -93,9 +100,6 @@ const i18nTexts = {
   }),
   showFix: i18n.translate('housekeeping.list.showFix', {
     defaultMessage: 'Show the fix',
-  }),
-  viewResource: i18n.translate('housekeeping.list.viewResource', {
-    defaultMessage: 'View resource',
   }),
   askAgent: i18n.translate('housekeeping.list.askAgent', {
     defaultMessage: 'Ask AI Agent',
@@ -127,15 +131,29 @@ const KindBadge = ({ kind }: { kind: HousekeepingFindingKind }) => {
   return <EuiBadge color={badgeColor}>{label}</EuiBadge>;
 };
 
-const kindFilter = defineContentListFilter<FindingContent>({
-  id: 'kind',
-  title: i18nTexts.kind,
-  getItemValue: (item) => item.kind,
-  options: HOUSEKEEPING_FINDING_KINDS.map((kind) => ({
-    value: kind,
-    label: FINDING_KIND_METADATA[kind].label,
-  })),
-});
+const SeverityBadge = ({ severity }: { severity: HousekeepingFindingSeverity }) => {
+  const { badgeColor, label } = FINDING_SEVERITY_METADATA[severity];
+  return <EuiBadge color={badgeColor}>{label}</EuiBadge>;
+};
+
+/** Also its query field, so the counts, the toggle and the search use it directly. */
+const KIND_FILTER_ID = 'kind';
+
+/** Only the kinds that the run can report, so a kind that nothing reports never shows. */
+const createKindFilter = (kinds: HousekeepingFindingKind[]) =>
+  defineContentListFilter<FindingContent>({
+    id: KIND_FILTER_ID,
+    title: i18nTexts.kind,
+    getItemValue: (item) => item.kind,
+    options: kinds.map((kind) => ({ value: kind, label: FINDING_KIND_METADATA[kind].label })),
+  });
+
+const createKindFilterControl = (kindFilter: ReturnType<typeof createKindFilter>) =>
+  createFilterControl(kindFilter, {
+    renderOptionContent: ({ value, label }) =>
+      isFindingKind(value) ? <KindBadge kind={value} /> : label,
+    'data-test-subj': 'housekeepingKindFilter',
+  });
 // By label, so legacy and composable index templates are one type.
 const typeFilter = defineContentListFilter<FindingContent>({
   id: 'resourceType',
@@ -148,11 +166,6 @@ const problemFilter = defineContentListFilter<FindingContent>({
   getItemValue: (item) => item.problem,
 });
 
-const KindFilter = createFilterControl(kindFilter, {
-  renderOptionContent: ({ value, label }) =>
-    isFindingKind(value) ? <KindBadge kind={value} /> : label,
-  'data-test-subj': 'housekeepingKindFilter',
-});
 const TypeFilter = createFilterControl(typeFilter, {
   'data-test-subj': 'housekeepingTypeFilter',
 });
@@ -160,11 +173,19 @@ const ProblemFilter = createFilterControl(problemFilter, {
   'data-test-subj': 'housekeepingProblemFilter',
 });
 
+const SEVERITY_ORDER: HousekeepingFindingSeverity[] = ['critical', 'warning'];
+
 const sortFields = {
   kind: defineContentListSortField<FindingContent>({
     id: 'kind',
     title: i18nTexts.kind,
     getValue: (item) => HOUSEKEEPING_FINDING_KINDS.indexOf(item.kind),
+  }),
+  severity: defineContentListSortField<FindingContent>({
+    id: 'severity',
+    title: i18nTexts.severity,
+    getValue: ({ finding: { severity } }) =>
+      severity ? SEVERITY_ORDER.indexOf(severity) : SEVERITY_ORDER.length,
   }),
   resourceType: defineContentListSortField<FindingContent>({
     id: 'resourceType',
@@ -185,54 +206,89 @@ const matchesQuery = (finding: HousekeepingFinding, query: string) =>
 const getIncludedValues = (filter: ActiveFilters[string]) =>
   typeof filter === 'object' && 'include' in filter ? filter.include ?? [] : [];
 
-/** The kind filter as counts: the same counts and selection as the toolbar control. */
-const KindStats = () => {
-  const counts = useClientFilterCounts(kindFilter.id);
+/**
+ * The kind filter as counts: the same counts and selection as the toolbar control. Each count
+ * explains its kind, in a tooltip when the list is compact.
+ */
+const KindStats = ({
+  kinds,
+  isCompact,
+}: {
+  kinds: HousekeepingFindingKind[];
+  isCompact: boolean;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const counts = useClientFilterCounts(KIND_FILTER_ID);
   const { filters } = useContentListFilters();
-  const toggleKind = useFilterToggle(kindFilter.fieldName);
-  const selected = getIncludedValues(filters[kindFilter.fieldName]);
+  const toggleKind = useFilterToggle(KIND_FILTER_ID);
+  const selected = getIncludedValues(filters[KIND_FILTER_ID]);
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} data-test-subj="housekeepingSummary">
-      {HOUSEKEEPING_FINDING_KINDS.map((kind) => {
-        const { summaryLabel, color } = FINDING_KIND_METADATA[kind];
+      {kinds.map((kind) => {
+        const { summaryLabel, description, countColor } = FINDING_KIND_METADATA[kind];
         const count = counts.get(kind) ?? 0;
         const isSelected = selected.includes(kind);
+        const tile = (
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="m"
+            color={isSelected ? 'primary' : 'plain'}
+            onClick={() => toggleKind(kind)}
+            aria-pressed={isSelected}
+            aria-label={i18n.translate('housekeeping.list.kindCountAriaLabel', {
+              defaultMessage: '{kind}: {count}. {description}',
+              values: { kind: summaryLabel, count, description },
+            })}
+            data-test-subj={`housekeepingSummary-${kind}`}
+            css={{ height: '100%' }}
+          >
+            {/* Full height, so labels that wrap in a flyout don't misalign the counts. */}
+            <EuiFlexGroup
+              component="span"
+              direction="column"
+              gutterSize="s"
+              responsive={false}
+              css={{ height: '100%' }}
+            >
+              <EuiTitle size="xxs">
+                <span>{summaryLabel}</span>
+              </EuiTitle>
+              {/* Inside a span, because the title sets its own color on its child. */}
+              <EuiTitle size="m">
+                {/* At the bottom in the flyout, where labels take one or two lines. */}
+                <span css={isCompact ? { marginTop: 'auto' } : undefined}>
+                  <span
+                    css={{
+                      color: count > 0 && countColor ? euiTheme.colors[countColor] : undefined,
+                    }}
+                  >
+                    {count}
+                  </span>
+                </span>
+              </EuiTitle>
+              {!isCompact && (
+                <EuiText component="span" size="xs" color="subdued">
+                  {description}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
+        );
         return (
           <EuiFlexItem key={kind}>
-            <EuiPanel
-              hasBorder
-              hasShadow={false}
-              paddingSize="m"
-              color={isSelected ? 'primary' : 'plain'}
-              onClick={() => toggleKind(kind)}
-              aria-pressed={isSelected}
-              aria-label={i18n.translate('housekeeping.list.kindCountAriaLabel', {
-                defaultMessage: '{kind}: {count}',
-                values: { kind: summaryLabel, count },
-              })}
-              data-test-subj={`housekeepingSummary-${kind}`}
-            >
-              {/* Full height, so labels that wrap in a flyout don't misalign the counts. */}
-              <EuiFlexGroup
-                component="span"
-                direction="column"
-                gutterSize="none"
-                responsive={false}
-                css={{ height: '100%' }}
+            {isCompact ? (
+              <EuiToolTip
+                content={description}
+                display="block"
+                anchorProps={{ css: { height: '100%' } }}
               >
-                <EuiText component="span" size="xs" color="subdued">
-                  {summaryLabel}
-                </EuiText>
-                <EuiText
-                  component="span"
-                  size="s"
-                  color={count > 0 && color !== 'subdued' ? color : undefined}
-                >
-                  <strong>{count}</strong>
-                </EuiText>
-              </EuiFlexGroup>
-            </EuiPanel>
+                {tile}
+              </EuiToolTip>
+            ) : (
+              tile
+            )}
           </EuiFlexItem>
         );
       })}
@@ -274,29 +330,27 @@ const FixButton = ({ item }: { item: FindingListItem }) => {
 
 const FindingActions = ({ item }: { item: FindingListItem }) => {
   const askAgent = useContext(AskAgentContext);
-  const getResourceLink = useContext(ResourceLinksContext);
+  const getFindingActions = useContext(FindingActionsContext);
   const { group, finding, typeLabel } = item;
-  const link = getResourceLink(finding.resource);
 
   return (
     <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
-      {link && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18nTexts.viewResource} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="eye"
-              color="text"
-              href={link.href}
-              onClick={link.onClick}
-              aria-label={i18nTexts.viewResource}
-              data-test-subj="housekeepingViewResource"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         <FixButton item={item} />
       </EuiFlexItem>
+      {getFindingActions(finding).map(({ label, iconType, onClick }) => (
+        <EuiFlexItem grow={false} key={label}>
+          <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={iconType}
+              color="text"
+              aria-label={label}
+              onClick={onClick}
+              data-test-subj="housekeepingFindingAction"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      ))}
       {askAgent && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={i18nTexts.askAgent} disableScreenReaderOutput>
@@ -339,6 +393,11 @@ const ResourceCell = ({ item, isCompact }: { item: FindingListItem; isCompact: b
             <EuiFlexItem grow={false}>
               <KindBadge kind={kind} />
             </EuiFlexItem>
+            {finding.severity && (
+              <EuiFlexItem grow={false}>
+                <SeverityBadge severity={finding.severity} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
@@ -387,7 +446,7 @@ const RefetchOnChange = ({ groups }: { groups: HousekeepingFindingGroup[] }) => 
   const { refetch } = useContentListState();
   const { queryText, setQueryFromText } = useContentListSearch();
   const { filters } = useContentListFilters();
-  const selectedKinds = getIncludedValues(filters[kindFilter.fieldName]);
+  const selectedKinds = getIncludedValues(filters[KIND_FILTER_ID]);
 
   useUpdateEffect(() => {
     if (
@@ -396,8 +455,8 @@ const RefetchOnChange = ({ groups }: { groups: HousekeepingFindingGroup[] }) => 
     ) {
       setQueryFromText(
         Query.parse(queryText)
-          .removeOrFieldClauses(kindFilter.fieldName)
-          .removeSimpleFieldClauses(kindFilter.fieldName).text
+          .removeOrFieldClauses(KIND_FILTER_ID)
+          .removeSimpleFieldClauses(KIND_FILTER_ID).text
       );
     }
     refetch();
@@ -405,8 +464,105 @@ const RefetchOnChange = ({ groups }: { groups: HousekeepingFindingGroup[] }) => 
   return null;
 };
 
+/**
+ * The table of findings. The severity column shows only when a finding of the selected kinds has one,
+ * such as deprecations.
+ */
+const FindingsListTable = ({
+  groups,
+  isCompact,
+}: {
+  groups: HousekeepingFindingGroup[];
+  isCompact: boolean;
+}) => {
+  const { filters } = useContentListFilters();
+  const selectedKinds = getIncludedValues(filters[KIND_FILTER_ID]);
+  const shown = groups
+    .filter(({ kind }) => selectedKinds.includes(kind))
+    .flatMap(({ findings }) => findings);
+  const showsSeverity = !isCompact && shown.some(({ severity }) => severity !== undefined);
+  const { Column } = ContentListTable;
+
+  return (
+    <ContentListTable
+      // The table reads its columns only when it mounts.
+      key={`${isCompact}-${showsSeverity}`}
+      title={i18nTexts.caption}
+      noItemsMessage={i18nTexts.noMatches}
+      data-test-subj="housekeepingFindingsTable"
+    >
+      <Column
+        id="title"
+        name={i18nTexts.resource}
+        sortable
+        // No width, so it takes the space the other columns leave.
+        minWidth="10em"
+        data-test-subj="housekeepingResource"
+        render={(item) => <ResourceCell item={asFinding(item)} isCompact={isCompact} />}
+      />
+      {!isCompact && (
+        <Column
+          id="resourceType"
+          name={i18nTexts.type}
+          sortable
+          width="11em"
+          data-test-subj="housekeepingType"
+          render={(item) => <ResourceTypeBadge type={asFinding(item).finding.resource.type} />}
+        />
+      )}
+      {!isCompact && (
+        <Column
+          id="kind"
+          name={i18nTexts.kind}
+          sortable
+          width="10em"
+          data-test-subj="housekeepingKind"
+          render={(item) => <KindBadge kind={asFinding(item).kind} />}
+        />
+      )}
+      {showsSeverity && (
+        <Column
+          id="severity"
+          name={i18nTexts.severity}
+          sortable
+          width="8em"
+          data-test-subj="housekeepingSeverity"
+          render={(item) => {
+            const { severity } = asFinding(item).finding;
+            return severity && <SeverityBadge severity={severity} />;
+          }}
+        />
+      )}
+      <Column
+        id="problem"
+        name={i18nTexts.problem}
+        sortable
+        width={isCompact ? '9em' : '16em'}
+        data-test-subj="housekeepingProblem"
+        render={(item) => <ProblemCell item={asFinding(item)} />}
+      />
+      <Column
+        id="actions"
+        name={i18nTexts.actions}
+        // Four icons at most.
+        width="136px"
+        render={(item) => <FindingActions item={asFinding(item)} />}
+      />
+    </ContentListTable>
+  );
+};
+
 /** Every finding in one list, filtered by kind, resource type and problem. */
-export const FindingsTable = ({ groups }: { groups: HousekeepingFindingGroup[] }) => {
+export const FindingsTable = ({
+  groups,
+  kinds = HOUSEKEEPING_FINDING_KINDS,
+}: {
+  groups: HousekeepingFindingGroup[];
+  /** The kinds that the run can report. */
+  kinds?: HousekeepingFindingKind[];
+}) => {
+  const kindFilter = useMemo(() => createKindFilter(kinds), [kinds]);
+  const KindFilter = useMemo(() => createKindFilterControl(kindFilter), [kindFilter]);
   const core = useContext(ContentListCoreContext);
   const resourceTypes = useContext(ResourceTypesContext);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -448,16 +604,13 @@ export const FindingsTable = ({ groups }: { groups: HousekeepingFindingGroup[] }
       groups.some((group) => group.kind === candidate)
     );
     return kind
-      ? Query.parse('').addOrFieldValue(kindFilter.fieldName, FINDING_KIND_METADATA[kind].label)
-          .text
+      ? Query.parse('').addOrFieldValue(KIND_FILTER_ID, FINDING_KIND_METADATA[kind].label).text
       : '';
   });
 
   if (!core) {
     return null;
   }
-
-  const { Column } = ContentListTable;
 
   return (
     <div ref={setContainer}>
@@ -493,59 +646,8 @@ export const FindingsTable = ({ groups }: { groups: HousekeepingFindingGroup[] }
               <ProblemFilter />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
-          <KindStats />
-          <ContentListTable
-            title={i18nTexts.caption}
-            noItemsMessage={i18nTexts.noMatches}
-            data-test-subj="housekeepingFindingsTable"
-          >
-            <Column
-              id="title"
-              name={i18nTexts.resource}
-              sortable
-              // No width, so it takes the space the other columns leave.
-              minWidth="10em"
-              data-test-subj="housekeepingResource"
-              render={(item) => <ResourceCell item={asFinding(item)} isCompact={isCompact} />}
-            />
-            {!isCompact && (
-              <Column
-                id="resourceType"
-                name={i18nTexts.type}
-                sortable
-                width="11em"
-                data-test-subj="housekeepingType"
-                render={(item) => (
-                  <ResourceTypeBadge type={asFinding(item).finding.resource.type} />
-                )}
-              />
-            )}
-            {!isCompact && (
-              <Column
-                id="kind"
-                name={i18nTexts.kind}
-                sortable
-                width="10em"
-                data-test-subj="housekeepingKind"
-                render={(item) => <KindBadge kind={asFinding(item).kind} />}
-              />
-            )}
-            <Column
-              id="problem"
-              name={i18nTexts.problem}
-              sortable
-              width={isCompact ? '9em' : '16em'}
-              data-test-subj="housekeepingProblem"
-              render={(item) => <ProblemCell item={asFinding(item)} />}
-            />
-            <Column
-              id="actions"
-              name={i18nTexts.actions}
-              // Three icons at most.
-              width="104px"
-              render={(item) => <FindingActions item={asFinding(item)} />}
-            />
-          </ContentListTable>
+          <KindStats kinds={kinds} isCompact={isCompact} />
+          <FindingsListTable groups={groups} isCompact={isCompact} />
           <ContentListFooter />
         </ContentList>
       </ContentListClientProvider>

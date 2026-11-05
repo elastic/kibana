@@ -20,17 +20,18 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { compressToEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
-import type { HousekeepingResource, HousekeepingScope } from '../common';
+import type { HousekeepingFinding, HousekeepingResource, HousekeepingScope } from '../common';
 import { HOUSEKEEPING_APP_ID, HOUSEKEEPING_RESOURCE_API_PATH } from '../common';
 import { FindingsStore, toKey } from './findings_store';
 import {
   AskAgentContext,
   ContentListCoreContext,
+  FindingActionsContext,
   HOUSEKEEPING_FLYOUT_TITLE_ID,
   OpenInConsoleContext,
   ResourceLinksContext,
 } from './metadata';
-import type { AskAgentRequest } from './metadata';
+import type { AskAgentRequest, HousekeepingFindingActionDefinition } from './metadata';
 import { buildAskAgentPrompt } from './ask_agent_prompt';
 import { resolveAgentBuilder } from './agent_builder';
 import { HOUSEKEEPING_TITLE } from './texts';
@@ -72,7 +73,8 @@ export const createHousekeepingService = (
   core: CoreStart,
   share?: SharePluginStart,
   consolePlugin?: ConsolePluginStart,
-  agentBuilderPlugin?: AgentBuilderPluginStart
+  agentBuilderPlugin?: AgentBuilderPluginStart,
+  findingActions: ReadonlyMap<string, HousekeepingFindingActionDefinition> = new Map()
 ) => {
   const store = new FindingsStore(core.http);
   let closeFlyout: (() => void) | undefined;
@@ -171,12 +173,12 @@ export const createHousekeepingService = (
   /** Links to the owning plugins and to Agent Builder, closing the flyout first when there is one. */
   const LinksProvider = ({
     onNavigate,
-    onAskAgent,
+    onOpenOverlay,
     children,
   }: {
     onNavigate?: () => void;
-    /** Runs before the Agent Builder chat opens, such as to make room for it. */
-    onAskAgent?: () => void;
+    /** Runs before the Agent Builder chat or the flyout of a finding action opens, to make room. */
+    onOpenOverlay?: () => void;
     children: React.ReactNode;
   }) => {
     const [chat, setChat] = useState<AgentBuilderPluginStart>();
@@ -200,19 +202,40 @@ export const createHousekeepingService = (
       () =>
         chat &&
         ((request: AskAgentRequest) => {
-          onAskAgent?.();
+          onOpenOverlay?.();
           askAgent(chat, request);
         }),
-      [chat, onAskAgent]
+      [chat, onOpenOverlay]
     );
     const consoleActions = useMemo(() => getConsoleActions(onNavigate), [onNavigate]);
+    const getFindingActions = useMemo(
+      () => (finding: HousekeepingFinding) =>
+        (finding.actions ?? []).flatMap(({ id }) => {
+          const definition = findingActions.get(id);
+          return definition
+            ? [
+                {
+                  label: definition.label,
+                  iconType: definition.iconType,
+                  onClick: () => {
+                    onOpenOverlay?.();
+                    definition.run(finding);
+                  },
+                },
+              ]
+            : [];
+        }),
+      [onOpenOverlay]
+    );
 
     return (
       <ContentListCoreContext.Provider value={core}>
         <ResourceLinksContext.Provider value={resourceLinks}>
           <AskAgentContext.Provider value={askAgentAbout}>
             <OpenInConsoleContext.Provider value={consoleActions}>
-              {children}
+              <FindingActionsContext.Provider value={getFindingActions}>
+                {children}
+              </FindingActionsContext.Provider>
             </OpenInConsoleContext.Provider>
           </AskAgentContext.Provider>
         </ResourceLinksContext.Provider>
@@ -239,7 +262,7 @@ export const createHousekeepingService = (
     onClose: () => void;
   }) => {
     const { state, rerun } = useFindings(scope);
-    // A mask would cover the Agent Builder chat, so it goes away when the chat opens.
+    // A mask would cover the Agent Builder chat or the flyout of an action, so it goes away first.
     const [hasMask, setHasMask] = useState(true);
     const removeMask = useCallback(() => setHasMask(false), []);
     return (
@@ -252,7 +275,7 @@ export const createHousekeepingService = (
         aria-labelledby={HOUSEKEEPING_FLYOUT_TITLE_ID}
         data-test-subj="housekeepingFlyout"
       >
-        <LinksProvider onNavigate={onClose} onAskAgent={removeMask}>
+        <LinksProvider onNavigate={onClose} onOpenOverlay={removeMask}>
           <Suspense fallback={<EuiSkeletonText lines={4} />}>
             <HousekeepingFlyoutContent
               state={state}
@@ -336,9 +359,10 @@ export const createHousekeepingService = (
         return response
           ? i18n.translate('housekeeping.appMenuItem.tooltip', {
               defaultMessage:
-                'Last run: {broken} broken references, {unused} unused resources, {risk} risks',
+                'Last run: {broken} broken references, {deprecations} deprecations, {unused} unused resources, {risk} risks',
               values: {
                 broken: response.summary.broken_reference,
+                deprecations: response.summary.deprecation,
                 unused: response.summary.unused,
                 risk: response.summary.risk,
               },

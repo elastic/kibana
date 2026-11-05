@@ -14,7 +14,7 @@ export const indicesProvider = (
 ): HousekeepingResourceProvider => ({
   id: 'indices',
   title: 'Indices',
-  resourceTypes: [{ id: 'index', label: 'Index', iconType: 'index' }],
+  resourceTypes: [{ id: 'index', label: 'Index' }],
   referencedTypes: ['pipeline'],
   listResources: async () => [],
   ...overrides,
@@ -29,7 +29,6 @@ export const pipelinesProvider = (
     {
       id: 'pipeline',
       label: 'Pipeline',
-      iconType: 'pipeline',
       unused: {
         message: 'Nothing uses it',
         getFix: (id) => ({ description: 'Deletes it', request: `DELETE _pipeline/${id}` }),

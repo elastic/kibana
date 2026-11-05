@@ -15,7 +15,6 @@ const group: HousekeepingFindingGroup = {
   kind: 'broken_reference',
   title: 'Missing ingest pipeline',
   description: 'The resources below point to something that does not exist.',
-  iconType: 'pipelineApp',
   findings: [],
 };
 
@@ -27,6 +26,7 @@ const finding = {
   message: 'Elasticsearch rejects the documents sent here.',
   evidence: {
     usedBy: [{ type: 'data_stream', id: 'logs-app-default', via: 'data_stream.template' }],
+    existingCount: 2,
   },
 };
 
@@ -53,7 +53,7 @@ describe('buildAskAgentPrompt', () => {
       'Housekeeping already verified these facts against the cluster, so you do not need to check them again:',
       '- app-v1 does not exist, and logs-app references it.',
       '- logs-app is used by: logs-app-default (data_stream.template).',
-      '- The current definition of logs-app is attached, with what Housekeeping found about it, such as the existing resources it could point to instead.',
+      '- The current definition of logs-app is attached, with what Housekeeping found about it, including the existing resources it could point to instead.',
     ]);
   });
 
@@ -93,5 +93,19 @@ describe('buildAskAgentPrompt', () => {
 
     expect(prompt).toContain('- Nothing else in the cluster references logs-app.');
     expect(prompt).not.toContain('is attached');
+  });
+
+  it('mentions alternatives in the attachment only when Housekeeping found some', () => {
+    const prompt = buildAskAgentPrompt({
+      group: { ...group, kind: 'deprecation', id: 'upgrade_assistant.reindex' },
+      finding: { ...finding, related: [], evidence: { level: 'critical' } },
+      resourceTypeLabel: 'Index',
+      hasDefinition: true,
+    });
+
+    expect(prompt).toContain(
+      '- The current definition of logs-app is attached, with what Housekeeping found about it.'
+    );
+    expect(prompt).not.toContain('point to instead');
   });
 });

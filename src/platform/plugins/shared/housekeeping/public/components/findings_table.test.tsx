@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { HousekeepingFindingGroup } from '../../common';
 import { ContentListCoreContext } from '../metadata';
@@ -18,7 +18,6 @@ const broken: HousekeepingFindingGroup = {
   id: 'broken_reference:ingest_pipeline',
   kind: 'broken_reference',
   title: 'Missing ingest pipeline',
-  iconType: 'pipelineApp',
   findings: [
     {
       id: 'logs',
@@ -31,9 +30,21 @@ const unused: HousekeepingFindingGroup = {
   id: 'unused:ingest_pipeline',
   kind: 'unused',
   title: 'Unused ingest pipeline',
-  iconType: 'pipelineApp',
   findings: [
     { id: 'forgotten', resource: { type: 'ingest_pipeline', id: 'forgotten' }, related: [] },
+  ],
+};
+const deprecated: HousekeepingFindingGroup = {
+  id: 'deprecation:index',
+  kind: 'deprecation',
+  title: 'Index needs reindexing',
+  findings: [
+    {
+      id: 'old',
+      resource: { type: 'index', id: 'old-index' },
+      related: [],
+      severity: 'critical',
+    },
   ],
 };
 
@@ -42,9 +53,12 @@ core.uiSettings.get.mockImplementation((key: string) =>
   key === 'savedObjects:listingLimit' ? 1000 : 20
 );
 
-const table = (groups: HousekeepingFindingGroup[]) => (
+const table = (
+  groups: HousekeepingFindingGroup[],
+  kinds?: Parameters<typeof FindingsTable>[0]['kinds']
+) => (
   <ContentListCoreContext.Provider value={core}>
-    <FindingsTable groups={groups} />
+    <FindingsTable groups={groups} kinds={kinds} />
   </ContentListCoreContext.Provider>
 );
 
@@ -73,5 +87,26 @@ describe('FindingsTable', () => {
 
     await waitFor(() => expect(screen.getByText('logs-app')).toBeInTheDocument());
     expect(screen.queryByText('forgotten')).not.toBeInTheDocument();
+  });
+
+  it('shows the counts of the kinds that the run can report only', async () => {
+    render(table([broken, unused], ['broken_reference', 'unused']));
+    await screen.findByText('logs-app');
+
+    expect(screen.getByTestId('housekeepingSummary-broken_reference')).toBeInTheDocument();
+    expect(screen.queryByTestId('housekeepingSummary-deprecation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('housekeepingSummary-risk')).not.toBeInTheDocument();
+  });
+
+  it('shows the severity column when a shown finding has a severity', async () => {
+    render(table([broken, deprecated]));
+    await screen.findByText('logs-app');
+    expect(screen.queryByRole('columnheader', { name: /Severity/ })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('housekeepingSummary-deprecation'));
+
+    expect(await screen.findByText('old-index')).toBeInTheDocument();
+    expect(screen.getByText('logs-app')).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /Severity/ })).toBeInTheDocument();
   });
 });

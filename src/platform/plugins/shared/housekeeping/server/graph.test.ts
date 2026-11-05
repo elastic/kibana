@@ -21,7 +21,6 @@ const indices = indicesProvider({
     {
       id: 'index',
       label: 'Index',
-      iconType: 'index',
       locator: { id: 'INDEX_LOCATOR', getParams: (id) => ({ indexName: id }) },
     },
   ],
@@ -65,7 +64,6 @@ describe('buildGraphFindings', () => {
         id: 'broken_reference:pipeline',
         kind: 'broken_reference',
         title: 'Missing pipeline',
-        iconType: 'pipeline',
         findings: [
           {
             id: 'broken_reference|index:logs|pipeline:gone',
@@ -179,7 +177,6 @@ describe('buildGraphFindings', () => {
         kind: 'unused',
         title: 'Unused pipeline',
         description: 'Nothing uses it',
-        iconType: 'pipeline',
         findings: [
           {
             id: 'unused|pipeline:forgotten',
@@ -407,7 +404,7 @@ describe('buildGraphFindings', () => {
     const templates = indicesProvider({
       id: 'templates',
       title: 'Templates',
-      resourceTypes: [{ id: 'template', label: 'Template', iconType: 'template' }],
+      resourceTypes: [{ id: 'template', label: 'Template' }],
     });
     const { skipped } = build(
       [

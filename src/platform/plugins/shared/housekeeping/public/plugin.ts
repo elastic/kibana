@@ -16,7 +16,13 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { HOUSEKEEPING_APP_ID } from '../common';
 import type { HousekeepingPublicStart, HousekeepingService } from './housekeeping_service';
 import { createHousekeepingService } from './housekeeping_service';
+import type { HousekeepingFindingActionDefinition } from './metadata';
 import { HOUSEKEEPING_TITLE } from './texts';
+
+export interface HousekeepingPublicSetup {
+  /** Registers the UI that resolves the findings whose `action` has this id. */
+  registerFindingAction(definition: HousekeepingFindingActionDefinition): void;
+}
 
 interface SetupDependencies {
   management: ManagementSetup;
@@ -29,12 +35,15 @@ interface StartDependencies {
 }
 
 export class HousekeepingPublicPlugin
-  implements Plugin<void, HousekeepingPublicStart, SetupDependencies, StartDependencies>
+  implements
+    Plugin<HousekeepingPublicSetup, HousekeepingPublicStart, SetupDependencies, StartDependencies>
 {
+  private readonly findingActions = new Map<string, HousekeepingFindingActionDefinition>();
+
   // Created in `start` and shared by the page and the flyout, so they share one cache.
   private readonly service$ = new ReplaySubject<HousekeepingService>(1);
 
-  public setup(core: CoreSetup, { management }: SetupDependencies) {
+  public setup(core: CoreSetup, { management }: SetupDependencies): HousekeepingPublicSetup {
     management.sections.section.stack.registerApp({
       id: HOUSEKEEPING_APP_ID,
       title: HOUSEKEEPING_TITLE,
@@ -49,13 +58,28 @@ export class HousekeepingPublicPlugin
         return renderApp(params, { coreStart, service, title: HOUSEKEEPING_TITLE });
       },
     });
+
+    return {
+      registerFindingAction: (definition) => {
+        if (this.findingActions.has(definition.id)) {
+          throw new Error(`Housekeeping finding action [${definition.id}] is already registered`);
+        }
+        this.findingActions.set(definition.id, definition);
+      },
+    };
   }
 
   public start(
     core: CoreStart,
     { share, console: consolePlugin, agentBuilder }: StartDependencies
   ): HousekeepingPublicStart {
-    const service = createHousekeepingService(core, share, consolePlugin, agentBuilder);
+    const service = createHousekeepingService(
+      core,
+      share,
+      consolePlugin,
+      agentBuilder,
+      this.findingActions
+    );
     this.service$.next(service);
     return service.start;
   }

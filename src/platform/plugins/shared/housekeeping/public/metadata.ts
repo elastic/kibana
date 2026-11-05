@@ -14,6 +14,7 @@ import type {
   HousekeepingFinding,
   HousekeepingFindingGroup,
   HousekeepingFindingKind,
+  HousekeepingFindingSeverity,
   HousekeepingResource,
   HousekeepingResourceTypeInfo,
 } from '../common';
@@ -25,9 +26,11 @@ export const FINDING_KIND_METADATA: Record<
   {
     label: string;
     summaryLabel: string;
-    /** The color of the count when there are findings of the kind. */
-    color: 'danger' | 'warning' | 'subdued';
-    badgeColor: 'danger' | 'warning' | 'default';
+    /** What the kind means, shown with its count. */
+    description: string;
+    /** The text color of the theme for the count, when there are findings of the kind. */
+    countColor: 'textDanger' | 'textWarning' | 'textRisk' | undefined;
+    badgeColor: 'danger' | 'warning' | 'risk' | 'default';
   }
 > = {
   broken_reference: {
@@ -37,8 +40,24 @@ export const FINDING_KIND_METADATA: Record<
     summaryLabel: i18n.translate('housekeeping.kind.brokenReferenceSummary', {
       defaultMessage: 'Broken references',
     }),
-    color: 'danger',
+    description: i18n.translate('housekeeping.kind.brokenReferenceDescription', {
+      defaultMessage: 'Point to something that does not exist, so they fail today.',
+    }),
+    countColor: 'textDanger',
     badgeColor: 'danger',
+  },
+  deprecation: {
+    label: i18n.translate('housekeeping.kind.deprecation', {
+      defaultMessage: 'Deprecation',
+    }),
+    summaryLabel: i18n.translate('housekeeping.kind.deprecationSummary', {
+      defaultMessage: 'Deprecations',
+    }),
+    description: i18n.translate('housekeeping.kind.deprecationDescription', {
+      defaultMessage: 'Stop working in the next major version. Resolve them before you upgrade.',
+    }),
+    countColor: 'textWarning',
+    badgeColor: 'warning',
   },
   unused: {
     label: i18n.translate('housekeeping.kind.unused', {
@@ -47,7 +66,10 @@ export const FINDING_KIND_METADATA: Record<
     summaryLabel: i18n.translate('housekeeping.kind.unusedSummary', {
       defaultMessage: 'Unused resources',
     }),
-    color: 'subdued',
+    description: i18n.translate('housekeeping.kind.unusedDescription', {
+      defaultMessage: 'Nothing in the cluster uses them. Remove them to keep it tidy.',
+    }),
+    countColor: undefined,
     badgeColor: 'default',
   },
   risk: {
@@ -57,16 +79,33 @@ export const FINDING_KIND_METADATA: Record<
     summaryLabel: i18n.translate('housekeeping.kind.riskSummary', {
       defaultMessage: 'Risks',
     }),
-    color: 'warning',
-    badgeColor: 'warning',
+    description: i18n.translate('housekeeping.kind.riskDescription', {
+      defaultMessage: 'Work today, but may cause trouble later.',
+    }),
+    countColor: 'textRisk',
+    badgeColor: 'risk',
   },
 };
 
-/** Labels and icons of the resource types, which providers register on the server. */
+export const FINDING_SEVERITY_METADATA: Record<
+  HousekeepingFindingSeverity,
+  { label: string; badgeColor: 'danger' | 'default' }
+> = {
+  critical: {
+    label: i18n.translate('housekeeping.severity.critical', { defaultMessage: 'Critical' }),
+    badgeColor: 'danger',
+  },
+  warning: {
+    label: i18n.translate('housekeeping.severity.warning', { defaultMessage: 'Warning' }),
+    badgeColor: 'default',
+  },
+};
+
+/** Labels of the resource types, which providers register on the server. */
 export const ResourceTypesContext = createContext<Record<string, HousekeepingResourceTypeInfo>>({});
 
 export const useResourceTypeInfo = (type: string): HousekeepingResourceTypeInfo =>
-  useContext(ResourceTypesContext)[type] ?? { label: type, iconType: 'dot' };
+  useContext(ResourceTypesContext)[type] ?? { label: type };
 
 export interface ResourceLink {
   href: string;
@@ -88,6 +127,25 @@ export interface AskAgentRequest {
 export const AskAgentContext = createContext<((request: AskAgentRequest) => void) | undefined>(
   undefined
 );
+
+/** A fix with its own UI, such as a guided flyout, that the plugin that owns the finding opens. */
+export interface HousekeepingFindingActionDefinition {
+  id: string;
+  label: string;
+  iconType: string;
+  run(finding: HousekeepingFinding): void;
+}
+
+export interface FindingActionButton {
+  label: string;
+  iconType: string;
+  onClick: () => void;
+}
+
+/** Resolves the registered actions of a finding into buttons. */
+export const FindingActionsContext = createContext<
+  (finding: HousekeepingFinding) => FindingActionButton[]
+>(() => []);
 
 export interface ConsoleActions {
   /** Without the embedded Console on the page, Console opens in a new tab. */

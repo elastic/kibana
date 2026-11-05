@@ -22,7 +22,7 @@ const policiesProvider = (
 ): HousekeepingResourceProvider => ({
   id: 'policies',
   title: 'Policies',
-  resourceTypes: [{ id: 'policy', label: 'Policy', iconType: 'clock' }],
+  resourceTypes: [{ id: 'policy', label: 'Policy' }],
   listResources: async () => [],
   ...overrides,
 });
@@ -114,10 +114,11 @@ describe('runHousekeeping', () => {
       ['broken_reference:pipeline', 'broken_reference'],
       ['retention', 'risk'],
     ]);
-    expect(result.summary).toEqual({ broken_reference: 1, unused: 0, risk: 1 });
+    expect(result.summary).toEqual({ broken_reference: 1, deprecation: 0, unused: 0, risk: 1 });
+    expect(result.kinds).toEqual(['broken_reference', 'risk', 'unused']);
     expect(result.resourceTypes).toEqual({
-      index: { label: 'Index', iconType: 'index' },
-      pipeline: { label: 'Pipeline', iconType: 'pipeline' },
+      index: { label: 'Index' },
+      pipeline: { label: 'Pipeline' },
     });
   });
 
@@ -281,5 +282,15 @@ describe('runHousekeeping', () => {
     expect(sharedAbortedOnTimeout).toBe(false);
     // The run is over, so nothing else can use the response.
     expect(shared?.aborted).toBe(true);
+  });
+
+  it('reports only the kinds that the providers and checks of the run can report', async () => {
+    const graphOnly = await run({ providers: [pipelinesProvider()] });
+    const deprecations = await run({
+      checks: [createCheck({ id: 'old_indices', kind: 'deprecation' })],
+    });
+
+    expect(graphOnly.kinds).toEqual(['broken_reference', 'unused']);
+    expect(deprecations.kinds).toEqual(['deprecation']);
   });
 });

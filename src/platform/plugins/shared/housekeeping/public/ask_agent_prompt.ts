@@ -59,6 +59,21 @@ const getVerifiedFacts = (group: HousekeepingFindingGroup, finding: Housekeeping
   return [];
 };
 
+const getDefinitionFact = ({ resource, evidence }: HousekeepingFinding) => {
+  const existingCount = evidence?.existingCount;
+  return typeof existingCount === 'number' && existingCount > 0
+    ? i18n.translate('housekeeping.askAgent.definitionWithAlternativesAttached', {
+        defaultMessage:
+          'The current definition of {resource} is attached, with what Housekeeping found about it, including the existing resources it could point to instead.',
+        values: { resource: resource.id },
+      })
+    : i18n.translate('housekeeping.askAgent.definitionAttached', {
+        defaultMessage:
+          'The current definition of {resource} is attached, with what Housekeeping found about it.',
+        values: { resource: resource.id },
+      });
+};
+
 /** Left out when there is nothing to list, as for a risk whose definition could not be read. */
 const getVerifiedSection = (
   group: HousekeepingFindingGroup,
@@ -67,15 +82,7 @@ const getVerifiedSection = (
 ) => {
   const facts = [
     ...getVerifiedFacts(group, finding),
-    ...(hasDefinition
-      ? [
-          i18n.translate('housekeeping.askAgent.definitionAttached', {
-            defaultMessage:
-              'The current definition of {resource} is attached, with what Housekeeping found about it, such as the existing resources it could point to instead.',
-            values: { resource: finding.resource.id },
-          }),
-        ]
-      : []),
+    ...(hasDefinition ? [getDefinitionFact(finding)] : []),
   ];
   return facts.length
     ? [
@@ -114,6 +121,16 @@ export const buildAskAgentPrompt = ({
         values: { title: group.title },
       })
     ),
+    ...(finding.severity
+      ? [
+          bullet(
+            i18n.translate('housekeeping.askAgent.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: finding.severity },
+            })
+          ),
+        ]
+      : []),
     ...(group.description
       ? [
           bullet(
