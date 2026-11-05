@@ -17,7 +17,11 @@ import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { clientTypes } from '@kbn/connector-specs/server';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { buildHeadersFromSecrets } from './auth_helpers';
-import { MAX_IN_FLIGHT_PER_KEY, mcpExecutionGuard } from './execution_guard';
+import {
+  BREAKER_FAILURE_THRESHOLD,
+  MAX_IN_FLIGHT_PER_KEY,
+  mcpExecutionGuard,
+} from './execution_guard';
 
 jest.mock('@kbn/connector-specs/server', () => ({
   clientTypes: {
@@ -752,6 +756,64 @@ describe('McpConnector', () => {
         connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
       ).resolves.toEqual({ content: [] });
       expect(fakeClient.callTool).toHaveBeenCalledTimes(2);
+    });
+
+    it('opens the breaker after connect failures and fails fast for that connector', async () => {
+      mcpClientType.build.mockRejectedValue(new Error('connect failed'));
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(
+          connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+        ).rejects.toThrow('connect failed');
+      }
+
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      await expect(
+        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).rejects.toThrow('is unavailable');
+      await expect(
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+      ).rejects.toThrow('is unavailable');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      const other = createConnector({
+        connector: { id: 'other-connector', type: CONNECTOR_ID },
+      });
+      await expect(
+        other.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).rejects.toThrow('connect failed');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
+    });
+
+    it('does not open the breaker on tool-level callTool errors', async () => {
+      fakeClient.callTool.mockRejectedValue(new Error('tool failed'));
+      mcpClientType.shouldInvalidateOnError.mockReturnValue(false);
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD + 1; i++) {
+        await expect(
+          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+        ).rejects.toThrow('tool failed');
+      }
+
+      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
+      expect(mcpClientType.build).toHaveBeenCalled();
+    });
+
+    it('does not open the breaker on user errors', async () => {
+      mcpClientType.isUserError.mockReturnValue(true);
+      fakeClient.callTool.mockRejectedValue(new Error('unauthorized'));
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD + 1; i++) {
+        await expect(
+          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+        ).rejects.toThrow('unauthorized');
+      }
+
+      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
     });
   });
 });

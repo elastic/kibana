@@ -42,7 +42,7 @@ import type {
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { buildHeadersFromSecrets } from './auth_helpers';
-import { mcpExecutionGuard } from './execution_guard';
+import { markConnectFailure, mcpExecutionGuard } from './execution_guard';
 
 // TTL for list_tools cache: 15 minutes
 export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -162,16 +162,18 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   }
 
   private buildClient(): Promise<McpClient> {
-    return clientTypes.mcp.build({
-      logger: this.logger,
-      config: {
-        serverUrl: this.config.serverUrl,
-        clientName: `kibana-mcp-connector-${this.connector.id}`,
-      },
-      networkSettings: this.networkSettings,
-      platform: this.platform,
-      credential: this.credential,
-    });
+    return markConnectFailure(
+      clientTypes.mcp.build({
+        logger: this.logger,
+        config: {
+          serverUrl: this.config.serverUrl,
+          clientName: `kibana-mcp-connector-${this.connector.id}`,
+        },
+        networkSettings: this.networkSettings,
+        platform: this.platform,
+        credential: this.credential,
+      })
+    );
   }
 
   /**
