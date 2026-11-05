@@ -9,11 +9,14 @@ import type {
   AnalyticsServiceStart,
   ElasticsearchClient,
   ISavedObjectsRepository,
+  KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   TaskCost,
   TaskPriority,
+  throwUnrecoverableError,
   type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -129,20 +132,25 @@ export const registerSourceVolumeTask = ({
   getDeps,
 }: {
   taskManager: TaskManagerSetupContract;
-  getDeps: () => Promise<SourceVolumeTaskDeps>;
+  getDeps: (request: KibanaRequest) => Promise<SourceVolumeTaskDeps>;
 }): void => {
   taskManager.registerTaskDefinitions({
     [SOURCE_VOLUME_TASK_TYPE]: {
       title: 'Nightshift Sources - daily volume telemetry',
       description:
-        'Reports the data volume each enabled Nightshift source matched over the past 24 hours via EBT.',
+        'Reports the data volume each configured Nightshift source matched over the past 24 hours via EBT.',
       timeout: TASK_TIMEOUT,
       maxAttempts: 1,
       cost: TaskCost.Normal,
       priority: TaskPriority.Maintenance,
-      createTaskRunner: ({ taskInstance, signal }) => ({
+      createTaskRunner: ({ taskInstance, fakeRequest, signal }) => ({
         async run() {
-          await reportSourceVolumes(await getDeps(), signal);
+          if (!fakeRequest) {
+            throwUnrecoverableError(
+              new Error('Source volume telemetry task has no user credentials')
+            );
+          }
+          await reportSourceVolumes(await getDeps(fakeRequest), signal);
           return { state: taskInstance.state };
         },
       }),
@@ -150,20 +158,46 @@ export const registerSourceVolumeTask = ({
   });
 };
 
-export const scheduleSourceVolumeTask = (
+export const scheduleSourceVolumeTask = async (
   taskManager: TaskManagerStartContract,
-  logger: Logger
-): void => {
-  taskManager
-    .ensureScheduled({
-      id: SOURCE_VOLUME_TASK_ID,
-      taskType: SOURCE_VOLUME_TASK_TYPE,
-      schedule: { interval: TASK_INTERVAL },
-      params: {},
-      state: {},
-      scope: ['nightshiftSources'],
-    })
-    .catch((error) => {
-      logger.error(`Failed to schedule the source volume telemetry task: ${error.message}`);
-    });
+  request: KibanaRequest
+): Promise<void> => {
+  const task = {
+    id: SOURCE_VOLUME_TASK_ID,
+    taskType: SOURCE_VOLUME_TASK_TYPE,
+    schedule: { interval: TASK_INTERVAL },
+    params: {},
+    state: {},
+    scope: ['nightshiftSources'],
+  };
+  const existing = await taskManager.get(SOURCE_VOLUME_TASK_ID).catch((error) => {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  });
+
+  if (existing?.apiKey || existing?.uiamApiKey) {
+    await taskManager.ensureScheduled(task, { request, regenerateApiKey: true });
+    return;
+  }
+
+  // Versions before this task became user-scoped scheduled it on plugin start without a key.
+  await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
+  await taskManager.schedule(task, { request });
+};
+
+export const removeLegacySourceVolumeTask = async (
+  taskManager: TaskManagerStartContract
+): Promise<void> => {
+  const existing = await taskManager.get(SOURCE_VOLUME_TASK_ID).catch((error) => {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  });
+
+  if (existing && !existing.apiKey && !existing.uiamApiKey) {
+    await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
+  }
 };

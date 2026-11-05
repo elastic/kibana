@@ -9,13 +9,23 @@ import type { SavedObjectsFindResult } from '@kbn/core/server';
 import {
   analyticsServiceMock,
   elasticsearchServiceMock,
+  httpServerMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { NightshiftSourceAttributes } from '../../saved_objects/nightshift_source_saved_object';
 import { measureSourceVolume } from './measure_source_volume';
 import { SOURCE_VOLUME_EVENT_TYPE } from './source_volume_event';
-import { reportSourceVolumes, type SourceVolumeTaskDeps } from './source_volume_task';
+import {
+  registerSourceVolumeTask,
+  removeLegacySourceVolumeTask,
+  reportSourceVolumes,
+  scheduleSourceVolumeTask,
+  SOURCE_VOLUME_TASK_ID,
+  SOURCE_VOLUME_TASK_TYPE,
+  type SourceVolumeTaskDeps,
+} from './source_volume_task';
 
 jest.mock('./measure_source_volume');
 const measure = jest.mocked(measureSourceVolume);
@@ -160,5 +170,73 @@ describe('reportSourceVolumes', () => {
 
     await expect(report(controller.signal)).rejects.toThrow();
     expect(deps.analytics.reportEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe('source volume task credentials', () => {
+  it("uses the task's captured credentials", async () => {
+    const taskManager = taskManagerMock.createSetup();
+    const request = httpServerMock.createKibanaRequest();
+    const { deps } = setup([]);
+    const getDeps = jest.fn().mockResolvedValue(deps);
+    registerSourceVolumeTask({ taskManager, getDeps });
+    const definition =
+      taskManager.registerTaskDefinitions.mock.calls[0][0][SOURCE_VOLUME_TASK_TYPE];
+
+    await definition
+      .createTaskRunner(taskManagerMock.createRunContext({ fakeRequest: request }))
+      .run();
+
+    expect(getDeps).toHaveBeenCalledWith(request);
+  });
+
+  it('replaces an uncredentialed task', async () => {
+    const taskManager = taskManagerMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
+    taskManager.get.mockResolvedValue(taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID }));
+
+    await scheduleSourceVolumeTask(taskManager, request);
+
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(SOURCE_VOLUME_TASK_ID);
+    expect(taskManager.schedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: SOURCE_VOLUME_TASK_ID,
+        taskType: SOURCE_VOLUME_TASK_TYPE,
+      }),
+      { request }
+    );
+  });
+
+  it('refreshes credentials on re-enable', async () => {
+    const taskManager = taskManagerMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
+    taskManager.get.mockResolvedValue(
+      taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID, apiKey: 'existing-key' })
+    );
+
+    await scheduleSourceVolumeTask(taskManager, request);
+
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: SOURCE_VOLUME_TASK_ID }),
+      { request, regenerateApiKey: true }
+    );
+  });
+
+  it('removes only uncredentialed tasks at startup', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue(taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID }));
+
+    await removeLegacySourceVolumeTask(taskManager);
+
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(SOURCE_VOLUME_TASK_ID);
+
+    taskManager.removeIfExists.mockClear();
+    taskManager.get.mockResolvedValue(
+      taskManagerMock.createTask({ id: SOURCE_VOLUME_TASK_ID, apiKey: 'user-key' })
+    );
+
+    await removeLegacySourceVolumeTask(taskManager);
+
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
   });
 });

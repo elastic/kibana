@@ -28,6 +28,7 @@ import { SourcesClient } from './lib/sources_client';
 import { registerSourceVolumeEvent } from './lib/telemetry/source_volume_event';
 import {
   registerSourceVolumeTask,
+  removeLegacySourceVolumeTask,
   scheduleSourceVolumeTask,
 } from './lib/telemetry/source_volume_task';
 import { nightshiftSourcesRouteRepository } from './routes';
@@ -112,11 +113,14 @@ export class NightshiftSourcesPlugin
     const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     registerSourceVolumeTask({
       taskManager: plugins.taskManager,
-      getDeps: async () => {
+      getDeps: async (request) => {
         const [coreStart] = await core.getStartServices();
         return {
           analytics: coreStart.analytics,
-          esClient: coreStart.elasticsearch.client.asInternalUser,
+          esClient: coreStart.elasticsearch.client.asScoped(request, {
+            projectRouting: 'expression',
+            value: PROJECT_ROUTING_ALL,
+          }).asCurrentUser,
           soRepository: coreStart.savedObjects.createInternalRepository([
             NIGHTSHIFT_SOURCE_SO_TYPE,
           ]),
@@ -148,8 +152,12 @@ export class NightshiftSourcesPlugin
     return { onSourceChange: this.sourceChangeEmitter.subscribe };
   }
 
-  public start(core: CoreStart, plugins: StartDeps): NightshiftSourcesServerStart {
-    scheduleSourceVolumeTask(plugins.taskManager, this.logger.get('source-volume-telemetry'));
+  public async start(core: CoreStart, plugins: StartDeps): Promise<NightshiftSourcesServerStart> {
+    await removeLegacySourceVolumeTask(plugins.taskManager).catch((error) => {
+      this.logger.error(
+        `Failed to remove the legacy source volume telemetry task: ${error.message}`
+      );
+    });
 
     if (plugins.features) {
       const hasFeature = plugins.features
@@ -167,6 +175,7 @@ export class NightshiftSourcesPlugin
     return {
       getSourcesClient: async ({ request }) =>
         createSourcesClient(core, request, this.logger.get('sources'), this.sourceChangeEmitter),
+      scheduleSourceVolumeTask: (request) => scheduleSourceVolumeTask(plugins.taskManager, request),
     };
   }
 

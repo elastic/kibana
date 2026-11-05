@@ -167,6 +167,7 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
@@ -750,6 +751,7 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.nightshiftSources = plugins.nightshiftSources;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
@@ -809,6 +811,13 @@ export class NightshiftInvestigationsPlugin
       isAssistantEnabled: () => this.assistantEnabled,
     };
   }
+
+  private getNightshiftSources = () => {
+    if (!this.nightshiftSources) {
+      throw new Error('nightshiftSources is not available — plugin start() has not been called');
+    }
+    return this.nightshiftSources;
+  };
 
   /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
@@ -914,6 +923,8 @@ export class NightshiftInvestigationsPlugin
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
       getAutomationsSoClient: this.getAutomationsSoClient,
+      scheduleSourceVolumeTask: (request) =>
+        this.getNightshiftSources().scheduleSourceVolumeTask(request),
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });

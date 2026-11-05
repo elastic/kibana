@@ -132,6 +132,7 @@ const setup = ({
       NonNullable<Parameters<typeof createInvestigatorServiceAccountService>[0]['getAgentBuilder']>
     >
   >;
+  const scheduleSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
@@ -141,6 +142,7 @@ const setup = ({
     getAgentBuilder: () => agentBuilder,
     getAgentAvailability: () => AVAILABILITY,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
+    scheduleSourceVolumeTask,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
@@ -155,12 +157,13 @@ const setup = ({
     managedWorkflows,
     getWorkflow,
     updateWorkflow,
+    scheduleSourceVolumeTask,
   };
 };
 
 describe('createInvestigatorServiceAccountService', () => {
   it('binds the workflows to the accounts it is given, and keeps the automations account on the entry point', async () => {
-    const { service, serviceAccounts, managedWorkflows } = setup();
+    const { service, serviceAccounts, managedWorkflows, scheduleSourceVolumeTask } = setup();
 
     const status = await service.enable(request, SPACE_ID, IDS);
 
@@ -169,6 +172,7 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(managedWorkflows.install.mock.calls.map(([, id]) => id)).toEqual([
       ...BOUND_WORKFLOW_IDS,
     ]);
+    expect(scheduleSourceVolumeTask).toHaveBeenCalledWith(request);
     for (const [, id, options] of managedWorkflows.install.mock.calls) {
       expect(options).toEqual({
         spaceId: SPACE_ID,

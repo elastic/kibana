@@ -63,6 +63,7 @@ interface Deps {
   getAgentAvailability: () => AgentAvailabilityConfig;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
+  scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
@@ -106,6 +107,7 @@ export const createInvestigatorServiceAccountService = ({
   getAgentBuilder,
   getAgentAvailability,
   getAutomationsSoClient,
+  scheduleSourceVolumeTask,
   isServerless,
   logger,
 }: Deps) => {
@@ -513,6 +515,7 @@ export const createInvestigatorServiceAccountService = ({
       status = await getStatus(request, spaceId);
     }
     assertAllBound(status, spaceId, serviceAccountIds.agent);
+    await scheduleSourceVolumeTask(request);
     logger.info(
       `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
     );
