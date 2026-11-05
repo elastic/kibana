@@ -112,6 +112,20 @@ const readConversation = async (
   }
 };
 
+/**
+ * Why the last round stopped, when the agent failed or was aborted. Agent Builder keeps such a
+ * round as `completed`, so without this a crash would read as an investigation that concluded nothing.
+ */
+const roundInterruptionError = (rounds: ConversationRound[]): string | undefined => {
+  const interruption = rounds.at(-1)?.interruption;
+  if (!interruption) return undefined;
+  if (interruption.type === 'failed') {
+    return `Investigation round failed: ${interruption.error.message}`;
+  }
+  const source = interruption.aborted_by?.source;
+  return `Investigation round was aborted${source ? ` by ${source}` : ''}`;
+};
+
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
     conversation &&
@@ -261,8 +275,9 @@ export const runInvestigation = async (
       };
     }
     if (!investigation.in_progress && !output.structured_report.conclusion) {
-      // There is no failed state: a run that ended without a conclusion recorded none.
-      output.execution_error ??= NO_CONCLUSION_ERROR;
+      // The investigation has no failed state, so its round says whether the agent crashed or
+      // simply recorded no conclusion.
+      output.execution_error ??= roundInterruptionError(conversation.rounds) ?? NO_CONCLUSION_ERROR;
     }
     output.conversation_round_count = conversation.rounds.length;
     output.usage = extractUsage(conversation.rounds);
