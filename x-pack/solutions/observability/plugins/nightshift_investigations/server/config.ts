@@ -55,7 +55,14 @@ export const config: PluginConfigDescriptor<NightshiftInvestigationsConfig> = {
   schema: configSchema,
   // The former `sandbox.telemetry_*` settings: Elasticsearch is now a connector saved on the
   // investigator. Dropped with a warning so a stale kibana.yml does not stop Kibana from starting.
-  deprecations: ({ unused }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
+    // The feature was renamed from Cortex to Wiki. Deployments that still set the old key keep
+    // working, so cluster configs do not have to change in lockstep with this plugin.
+    renameFromRoot(
+      'xpack.nightshift_investigations.cortex.enabled',
+      'xpack.nightshift_investigations.wiki.enabled',
+      { level: 'warning' }
+    ),
     unused('sandbox', {
       level: 'warning',
       message:

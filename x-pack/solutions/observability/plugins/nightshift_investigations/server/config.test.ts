@@ -52,4 +52,31 @@ describe('Nightshift investigations configuration deprecations', () => {
     expect(migratedConfig).toEqual({ wiki: { enabled: false } });
     expect(() => config.schema.validate(migratedConfig)).not.toThrow();
   });
+
+  it('reads the pre-rename cortex flag as the wiki flag', () => {
+    const deprecations = config.deprecations?.(configDeprecationFactory) ?? [];
+    const levels: string[] = [];
+    const { config: migrated } = applyDeprecations(
+      {
+        xpack: {
+          nightshift_investigations: {
+            cortex: { enabled: false },
+          },
+        },
+      },
+      deprecations.map((deprecation) => ({
+        deprecation,
+        path: 'xpack.nightshift_investigations',
+        context: configDeprecationsMock.createContext(),
+      })),
+      () =>
+        ({ level }) =>
+          levels.push(level)
+    );
+
+    expect(levels).toEqual(['warning']);
+    const { nightshift_investigations: migratedConfig } = migrated.xpack;
+    expect(migratedConfig).toEqual({ wiki: { enabled: false } });
+    expect(config.schema.validate(migratedConfig).wiki.enabled).toBe(false);
+  });
 });
