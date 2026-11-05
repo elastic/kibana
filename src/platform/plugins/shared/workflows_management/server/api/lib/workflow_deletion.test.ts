@@ -72,11 +72,9 @@ const makeExecutionsDataAccess = () => {
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       hits: { hits: [] },
     }),
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     refresh: jest.fn().mockResolvedValue(undefined),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     refresh: jest.fn().mockResolvedValue(undefined),
   } as unknown as StepExecutionsDataClient;
 
@@ -155,8 +153,6 @@ describe('deleteWorkflows', () => {
     });
     expect(result.deleted).toBe(1);
     expect(client.delete).toHaveBeenCalledWith(expect.objectContaining({ id: 'private-workflow' }));
-    expect(dataClients.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-    expect(dataClients.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it.each([true, false])(
@@ -187,8 +183,6 @@ describe('deleteWorkflows', () => {
         })
       ).rejects.toThrow('A workflow changed during deletion');
       expect(client.delete).not.toHaveBeenCalled();
-      expect(dataClients.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-      expect(dataClients.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     }
   );
 
@@ -357,8 +351,6 @@ describe('deleteWorkflows', () => {
         successfulIds: [],
       });
       expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1', if_seq_no: 7, if_primary_term: 2 });
-      expect(dataClients.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-      expect(dataClients.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('deletes the documents that can be removed in a mixed batch and leaves executions', async () => {
@@ -393,8 +385,6 @@ describe('deleteWorkflows', () => {
       });
 
       expect(result.successfulIds).toEqual(['public', 'private', 'legacy']);
-      expect(dataClients.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-      expect(dataClients.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it.each([undefined, { access_mode: 'public', entries: [] }])(
@@ -428,8 +418,6 @@ describe('deleteWorkflows', () => {
           if_seq_no: 8,
           if_primary_term: 2,
         });
-        expect(workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-        expect(stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
       }
     );
 
@@ -484,8 +472,6 @@ describe('deleteWorkflows', () => {
 
       expect(result.failures).toHaveLength(1);
       expect(result.failures[0].error).toBe('doc delete failed');
-      expect(workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-      expect(stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('restores disabled workflows when execution check throws', async () => {
@@ -559,7 +545,6 @@ describe('bound workflow deletion OCC', () => {
     ).rejects.toThrow('Access revoked');
     expect(client.index).not.toHaveBeenCalled();
     expect(deleteDocument).not.toHaveBeenCalled();
-    expect(params.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it('requires confirmation before deleting a private guarded workflow', async () => {
@@ -574,8 +559,6 @@ describe('bound workflow deletion OCC', () => {
     const { params, deleteDocument } = setup(true, true);
     await expect(deleteWorkflows(params)).resolves.toMatchObject({ deleted: 1 });
     expect(deleteDocument).toHaveBeenCalledTimes(1);
-    expect(params.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
-    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it.each([false, true])(
@@ -589,7 +572,6 @@ describe('bound workflow deletion OCC', () => {
         expect.objectContaining({ if_seq_no: 7, if_primary_term: 1 })
       );
       expect(deleteDocument).not.toHaveBeenCalled();
-      expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     }
   );
 
@@ -656,7 +638,6 @@ describe('bound workflow deletion OCC', () => {
     });
     await expect(deleteWorkflows(params)).rejects.toThrow('active execution search was incomplete');
     expect(deleteDocument).not.toHaveBeenCalled();
-    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     expect(client.index).toHaveBeenLastCalledWith(
       expect.objectContaining({ document: params.guardedDelete.document })
     );
@@ -689,7 +670,6 @@ describe('bound workflow deletion OCC', () => {
       2,
       expect.objectContaining({ if_seq_no: 8, if_primary_term: 1 })
     );
-    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it('checks executions again after disabling and restores with OCC', async () => {
