@@ -10,6 +10,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { getNightshiftRoleName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
@@ -18,6 +19,10 @@ import {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import {
+  stateBlocksNewActivity,
+  type SignificantEventsMaintenanceState,
+} from '../../../common/maintenance/state_machine';
 import type { DetectionEngineServiceAccountStatus } from '../../../common';
 import { StatusError } from '../errors/status_error';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
@@ -27,11 +32,12 @@ import {
   canManageSecurity,
   getDetectionEngineAccountId,
 } from './detection_engine_account';
+import { SETUP_ENABLED_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 
 /**
  * The bound workflows every set-up space gets, installed per space with the space id as suffix.
- * The investigation-completed workflow, continuous onboarding and the scheduled discovery pair
- * arrive with the switch-on, which installs them from their settings.
+ * Continuous onboarding and the scheduled discovery pair are installed when their settings are
+ * turned on, because their templates carry the setting's values.
  */
 export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
@@ -39,6 +45,7 @@ export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
 ] as const;
 
 // Boom errors, which the workflows plugin throws, keep their status in `output.statusCode`.
@@ -74,12 +81,15 @@ export function createDetectionEngineSetupService({
   spaces,
   workflowsExtensions,
   workflowsManagement,
+  getMaintenanceState,
   isServerless,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   workflowsManagement: WorkflowsServerPluginSetup | undefined;
+  /** The space's maintenance state, which decides whether the scheduled workflows start. */
+  getMaintenanceState?: (request: KibanaRequest) => Promise<SignificantEventsMaintenanceState>;
   isServerless: boolean;
 }): DetectionEngineSetupService {
   const role = getNightshiftRoleName('detection', { isServerless });
@@ -118,6 +128,38 @@ export function createDetectionEngineSetupService({
         400
       );
     }
+  };
+
+  // The scheduled workflows install off. A paused space keeps them off for Resume to turn on.
+  const enableScheduledWorkflows = async ({
+    request,
+    spaceId,
+    workflowsManagement: workflows,
+  }: {
+    request: KibanaRequest;
+    spaceId: string;
+    workflowsManagement: WorkflowsServerPluginSetup;
+  }) => {
+    const state = (await getMaintenanceState?.(request)) ?? 'enabled';
+    if (stateBlocksNewActivity(state)) {
+      return;
+    }
+    await Promise.all(
+      SETUP_ENABLED_WORKFLOW_IDS.map(async (workflowId) => {
+        const documentId = `${workflowId}-${spaceId}`;
+        const existing = await workflows.management
+          .getClient(request)
+          .getWorkflow(documentId, spaceId);
+        if (existing && existing.enabled !== true) {
+          await workflows.management.updateWorkflow(
+            documentId,
+            { enabled: true },
+            spaceId,
+            request
+          );
+        }
+      })
+    );
   };
 
   const enable: DetectionEngineSetupService['enable'] = async ({
@@ -201,6 +243,7 @@ export function createDetectionEngineSetupService({
         500
       );
     }
+    await enableScheduledWorkflows({ request, spaceId, workflowsManagement });
     return { spaceId, serviceAccountId };
   };
 

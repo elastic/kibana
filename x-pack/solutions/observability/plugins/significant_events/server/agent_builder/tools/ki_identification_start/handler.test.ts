@@ -16,7 +16,7 @@ describe('startKiIdentificationToolHandler', () => {
   const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
-        id: 'system-streams-ki-onboarding',
+        id: 'system-sources-ki-onboarding-bound-default',
         name: 'onboarding',
         enabled: true,
         definition: {},
@@ -60,9 +60,12 @@ describe('startKiIdentificationToolHandler', () => {
       kibanaPath: '/app/nightshift/sources',
     });
 
-    expect(managementApi.getWorkflow).toHaveBeenCalledWith('system-streams-ki-onboarding', '*');
+    expect(managementApi.getWorkflow).toHaveBeenCalledWith(
+      'system-sources-ki-onboarding-bound-default',
+      'default'
+    );
     expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
+      expect.objectContaining({ id: 'system-sources-ki-onboarding-bound-default' }),
       'default',
       expect.objectContaining({
         sourceId: 'logs.nginx',
@@ -70,7 +73,8 @@ describe('startKiIdentificationToolHandler', () => {
         skipFeatures: false,
         skipQueries: false,
       }),
-      request
+      request,
+      'nightshift-detection-engine'
     );
   });
 
@@ -92,7 +96,7 @@ describe('startKiIdentificationToolHandler', () => {
     expect(managementApi.runWorkflow).not.toHaveBeenCalled();
   });
 
-  it('throws when workflow is not found', async () => {
+  it('throws the not-set-up error when the space has no bound workflow', async () => {
     const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
@@ -105,6 +109,6 @@ describe('startKiIdentificationToolHandler', () => {
         maintenanceService,
         request,
       })
-    ).rejects.toThrow(/Workflow .+ not found/);
+    ).rejects.toThrow(/not set up/);
   });
 });

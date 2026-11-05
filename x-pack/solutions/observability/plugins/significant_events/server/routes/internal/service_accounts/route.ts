@@ -48,6 +48,7 @@ const enableServiceAccountRoute = createServerRoute({
     server,
     getScopedClients,
     getSpaceId,
+    maintenanceService,
   }): Promise<{ spaceId: string } & DetectionEngineEnableBody> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -57,6 +58,7 @@ const enableServiceAccountRoute = createServerRoute({
       spaces: server.spaces,
       workflowsExtensions: server.workflowsExtensions,
       workflowsManagement: server.workflowsManagement,
+      getMaintenanceState: (stateRequest) => maintenanceService.getState({ request: stateRequest }),
       isServerless: server.isServerless,
     }).enable({
       request,

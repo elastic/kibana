@@ -21,6 +21,8 @@ import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE } from '@kbn/workflows/managed';
+import { createNotSetUpError } from '../service_accounts/detection_engine_account';
 
 export interface WorkflowExecutionQueryParams {
   size?: number;
@@ -55,23 +57,40 @@ export const isStartedBefore = (
   isoTime: string
 ): boolean => Date.parse(execution.startedAt) < Date.parse(isoTime);
 
+/** The document id of a per-space workflow: its type id with the space id as suffix. */
+export const getPerSpaceWorkflowId = (workflowId: string, spaceId: string): string =>
+  `${workflowId}-${spaceId}`;
+
+/**
+ * Where the workflow lives. A global workflow is one document in a fixed space. A bound workflow
+ * is installed once per space, under its own id, and only the detection engine starts it.
+ */
+export type WorkflowLocation =
+  | { workflowId: string; workflowSpaceId: string; boundToSpace?: never }
+  | { workflowId: string; boundToSpace: true; workflowSpaceId?: never };
+
 export class WorkflowExecutionService<TInput extends object = {}> {
   private readonly managementApi: WorkflowsServerPluginSetup['management'];
-  private readonly workflowId: string;
-  private readonly workflowSpaceId: string;
+  private readonly location: WorkflowLocation;
 
   constructor({
     managementApi,
-    workflowId,
-    workflowSpaceId,
-  }: {
-    managementApi: WorkflowsServerPluginSetup['management'];
-    workflowId: string;
-    workflowSpaceId: string;
-  }) {
+    ...location
+  }: { managementApi: WorkflowsServerPluginSetup['management'] } & WorkflowLocation) {
     this.managementApi = managementApi;
-    this.workflowId = workflowId;
-    this.workflowSpaceId = workflowSpaceId;
+    this.location = location;
+  }
+
+  /** The id of the workflow document that runs for `spaceId`. */
+  private getWorkflowId(spaceId: string): string {
+    return this.location.boundToSpace
+      ? getPerSpaceWorkflowId(this.location.workflowId, spaceId)
+      : this.location.workflowId;
+  }
+
+  /** The space that holds the workflow document that runs for `spaceId`. */
+  private getWorkflowSpaceId(spaceId: string): string {
+    return this.location.boundToSpace ? spaceId : this.location.workflowSpaceId;
   }
 
   static classifyExecutionStatus(
@@ -163,7 +182,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
 
     return WorkflowExecutionService.toStatusResult({
       execution: lastExecution,
-      workflowId: this.workflowId,
+      workflowId: this.getWorkflowId(spaceId),
     });
   }
 
@@ -180,19 +199,26 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     inputs?: TInput;
     request: KibanaRequest;
   }): Promise<string> {
+    const workflowId = this.getWorkflowId(executionSpaceId);
     const workflow = await this.managementApi
       .getClient(request)
-      .getWorkflow(this.workflowId, this.workflowSpaceId);
+      .getWorkflow(workflowId, this.getWorkflowSpaceId(executionSpaceId));
 
     if (!workflow || !workflow.definition) {
-      throw new Error(`Workflow ${this.workflowId} not found`);
+      // A bound workflow is installed by the space's setup, so a missing one means no setup.
+      if (this.location.boundToSpace) {
+        throw createNotSetUpError();
+      }
+      throw new Error(`Workflow ${workflowId} not found`);
     }
 
     return this.managementApi.runWorkflow(
       { ...workflow, definition: workflow.definition },
       executionSpaceId,
       inputs ?? {},
-      request
+      request,
+      // A bound workflow refuses every run the detection engine did not start.
+      this.location.boundToSpace ? NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE : undefined
     );
   }
 
@@ -250,7 +276,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   ) {
     return this.managementApi
       .getClient(request)
-      .getWorkflowExecutions({ workflowId: this.workflowId, ...params }, spaceId);
+      .getWorkflowExecutions({ workflowId: this.getWorkflowId(spaceId), ...params }, spaceId);
   }
 
   async getLastExecution(

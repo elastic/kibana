@@ -8,12 +8,12 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import {
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
+import type { BoundWorkflowsInstaller } from './bound_workflows_installer';
 import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
@@ -54,11 +54,11 @@ export interface SignificantEventsScheduledWorkflowsService {
 export const createSignificantEventsScheduledWorkflowsService = ({
   logger,
   managementApi,
-  getManagedWorkflowsClient,
+  installer,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
-  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
+  installer: BoundWorkflowsInstaller;
 }): SignificantEventsScheduledWorkflowsService => {
   const log = logger.get('significant-events-scheduled-workflows');
 
@@ -122,18 +122,19 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   const installOrUpdate = async ({
-    client,
+    request,
     spaceId,
     config,
   }: {
-    client: PluginScopedManagedWorkflowsApi;
+    request: KibanaRequest;
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
   }) => {
     await Promise.all([
-      client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      installer.install({
+        request,
         spaceId,
-        workflowIdSuffix: spaceId,
+        workflowId: NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
           detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
@@ -141,9 +142,10 @@ export const createSignificantEventsScheduledWorkflowsService = ({
           targetCoverageMinutes: config.targetCoverageMinutes,
         },
       }),
-      client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      installer.install({
+        request,
         spaceId,
-        workflowIdSuffix: spaceId,
+        workflowId: NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
         values: {
           reviewIntervalMinutes: config.reviewIntervalMinutes,
           discoveryBatchSize: config.discoveryBatchSize,
@@ -225,30 +227,23 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   const uninstallScheduledWorkflows = async ({
-    client,
+    request,
     spaceId,
   }: {
-    client: PluginScopedManagedWorkflowsApi;
+    request: KibanaRequest;
     spaceId: string;
   }) => {
-    await Promise.all([
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      }),
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      }),
-    ]);
+    await Promise.all(
+      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
+        installer.uninstall({ request, spaceId, workflowId })
+      )
+    );
   };
 
   return {
     async ensureWorkflow({ enabled, request, spaceId, config }) {
-      const client = await getManagedWorkflowsClient();
-
       if (enabled) {
-        await installOrUpdate({ client, spaceId, config });
+        await installOrUpdate({ request, spaceId, config });
         await setAllEnabled({ enabled: true, request, spaceId });
         log.info(`Enabled scheduled Significant Events discovery workflows in space ${spaceId}`);
         return;
@@ -256,7 +251,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
 
       await setAllEnabled({ enabled: false, request, spaceId });
       await cancelRunningScheduledExecutions({ request, spaceId });
-      await uninstallScheduledWorkflows({ client, spaceId });
+      await uninstallScheduledWorkflows({ request, spaceId });
       log.info(
         `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
       );
