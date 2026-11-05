@@ -76,6 +76,17 @@ export const PROPOSAL_TIMEOUT_MS = 10 * 60_000;
 export const ACTION_TIMEOUT_MS = 3 * 60_000;
 export const POLL_INTERVAL_MS = 5_000;
 
+/** Ceiling `cancelNewExecutions` polls for in-flight executions to stop. */
+export const DRAIN_TIMEOUT_MS = 60_000;
+/** One drain end to end: the poll ceiling plus the list/cancel round trips around it. */
+export const DRAIN_BUDGET_MS = DRAIN_TIMEOUT_MS + 30_000;
+/**
+ * What an `afterAll` needs besides its drains: worker resets, proposal dismissal, record, account
+ * and host deletion, and the settings restore. Playwright's default hook timeout (60s) covers
+ * neither a single slow drain nor this, so each hook sets its own budget.
+ */
+export const TEARDOWN_CLEANUP_BUDGET_MS = 3 * 60_000;
+
 /** Managed AI index the AlertZero producers write knowledge indicators into. */
 export const SECURITY_INVESTIGATIONS_AI_INDEX_ID = 'security-investigations';
 export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS_AI_INDEX_ID}`;

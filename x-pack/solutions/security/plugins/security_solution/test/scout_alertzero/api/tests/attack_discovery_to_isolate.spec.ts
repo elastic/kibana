@@ -208,6 +208,11 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, samlAuth, esClient, config }) => {
+      // One drain per workflow this run baselined, each up to DRAIN_BUDGET_MS, then the cleanup.
+      // Without this a slow drain trips the default hook timeout before the account is deleted.
+      apiTest.setTimeout(
+        executionBaselines.size * testData.DRAIN_BUDGET_MS + testData.TEARDOWN_CLEANUP_BUDGET_MS
+      );
       // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
       // host, the service account or the scenario alerts. Failures are reported together.
       const errors: unknown[] = [];

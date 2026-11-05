@@ -13,7 +13,7 @@ import {
   buildAd2SeedPlan,
   getAd2ScenarioAlertIds,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
-import { ATTACK_SCENARIO_KEY } from './constants';
+import { ATTACK_SCENARIO_KEY, DRAIN_TIMEOUT_MS } from './constants';
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
 
@@ -368,7 +368,7 @@ export const cancelNewExecutions = async (
   api: AlertZeroApi,
   workflowId: string,
   knownIds: readonly string[],
-  { timeoutMs = 60_000 }: { timeoutMs?: number } = {}
+  { timeoutMs = DRAIN_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<void> => {
   const inFlightNew = async () =>
     (await listExecutions(api, workflowId)).filter(

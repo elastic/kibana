@@ -99,6 +99,11 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    // One drain per enabled workflow, each up to DRAIN_BUDGET_MS, then the account cleanup.
+    // Without this a slow drain trips the default hook timeout before the accounts are deleted.
+    apiTest.setTimeout(
+      enabledWorkflows.length * testData.DRAIN_BUDGET_MS + testData.TEARDOWN_CLEANUP_BUDGET_MS
+    );
     // Every step runs even when an earlier one throws (a drain timeout, say), so one failure
     // cannot leak the superuser service accounts or the per-space gate. Failures are reported
     // together.

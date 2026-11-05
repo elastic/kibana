@@ -39,6 +39,32 @@ interface AlertAnalysisCapture {
   applied: unknown;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// `prior` is a single user value here (possibly `null`), so only the keys are checked.
+const isCapture = (value: unknown): value is AlertAnalysisCapture =>
+  isRecord(value) && 'prior' in value && 'applied' in value;
+
+/**
+ * The capture format before `applied` existed: a flat map of setting key -> prior value. An
+ * interrupted run of an older checkout can leave one behind.
+ */
+const isLegacyCapture = (value: unknown): value is Record<string, unknown> =>
+  isRecord(value) &&
+  !('prior' in value) &&
+  !('applied' in value) &&
+  ALERT_ANALYSIS_SETTING in value;
+
+/** The parsed file, or `undefined` when it cannot be read or is not JSON. */
+const readCaptureFile = (): unknown => {
+  try {
+    return JSON.parse(readFileSync(STATE_FILE, 'utf8'));
+  } catch {
+    return undefined;
+  }
+};
+
 const readUserValue = async (kbnClient: KbnClient): Promise<unknown> => {
   const { data } = await kbnClient.request<{
     settings?: Record<string, { userValue?: unknown }>;
@@ -63,7 +89,25 @@ export const applyAlertAnalysisSetting = async ({
   log: ScoutLogger;
 }): Promise<void> => {
   if (existsSync(STATE_FILE)) {
-    log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${STATE_FILE}`);
+    const existing = readCaptureFile();
+    if (isCapture(existing)) {
+      log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${STATE_FILE}`);
+    } else if (isLegacyCapture(existing)) {
+      log.warning(
+        `[setup] converting a flat-map prior-value capture left by an older run: ${STATE_FILE}`
+      );
+      const capture: AlertAnalysisCapture = {
+        prior: existing[ALERT_ANALYSIS_SETTING],
+        applied: true,
+      };
+      writeFileSync(STATE_FILE, JSON.stringify(capture, null, 2));
+    } else {
+      // Neither writing over it nor applying without a baseline is safe: leave both alone.
+      log.warning(
+        `[setup] unreadable prior-value capture at ${STATE_FILE}; leaving the setting as it is`
+      );
+      return;
+    }
   } else {
     const capture: AlertAnalysisCapture = { prior: await readUserValue(kbnClient), applied: true };
     mkdirSync(dirname(STATE_FILE), { recursive: true });
@@ -87,7 +131,14 @@ export const restoreAlertAnalysisSetting = async ({
     log.warning(`[teardown] no prior-value capture at ${STATE_FILE}; leaving the setting as it is`);
     return;
   }
-  const { prior, applied } = JSON.parse(readFileSync(STATE_FILE, 'utf8')) as AlertAnalysisCapture;
+  const capture = readCaptureFile();
+  if (!isCapture(capture)) {
+    log.warning(
+      `[teardown] unreadable prior-value capture at ${STATE_FILE}; leaving the setting and the file as they are`
+    );
+    return;
+  }
+  const { prior, applied } = capture;
   if ((await readUserValue(kbnClient)) === applied) {
     await writeSettings(kbnClient, { [ALERT_ANALYSIS_SETTING]: prior });
   } else {

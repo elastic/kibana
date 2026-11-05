@@ -57,6 +57,31 @@ interface RuntimeSettingsCapture {
 const stateFile = (suiteKey: string): string =>
   resolve(STATE_DIR, `runtime_settings_${suiteKey}.json`);
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isCapture = (value: unknown): value is RuntimeSettingsCapture =>
+  isRecord(value) && isRecord(value.prior) && isRecord(value.applied);
+
+/**
+ * The capture format before `applied` existed: a flat map of setting key -> prior value. An
+ * interrupted run of an older checkout can leave one behind.
+ */
+const isLegacyCapture = (value: unknown): value is SettingValues =>
+  isRecord(value) &&
+  !('prior' in value) &&
+  !('applied' in value) &&
+  Object.keys(value).every((key) => key.includes(':'));
+
+/** The parsed file, or `undefined` when it cannot be read or is not JSON. */
+const readCaptureFile = (file: string): unknown => {
+  try {
+    return JSON.parse(readFileSync(file, 'utf8'));
+  } catch {
+    return undefined;
+  }
+};
+
 const readUserValues = async (kbnClient: KbnClient): Promise<Record<string, unknown>> => {
   const { data } = await kbnClient.request<{
     settings?: Record<string, { userValue?: unknown }>;
@@ -103,7 +128,22 @@ export const applyRuntimeSettings = async ({
 }): Promise<void> => {
   const file = stateFile(suiteKey);
   if (existsSync(file)) {
-    log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${file}`);
+    const existing = readCaptureFile(file);
+    if (isCapture(existing)) {
+      log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${file}`);
+    } else if (isLegacyCapture(existing)) {
+      log.warning(
+        `[setup] converting a flat-map prior-value capture left by an older run: ${file}`
+      );
+      const capture: RuntimeSettingsCapture = { prior: existing, applied: changes };
+      writeFileSync(file, JSON.stringify(capture, null, 2));
+    } else {
+      // Neither writing over it nor applying without a baseline is safe: leave both alone.
+      log.warning(
+        `[setup] unreadable prior-value capture at ${file}; leaving the settings as they are`
+      );
+      return;
+    }
   } else {
     const current = await readUserValues(kbnClient);
     const capture: RuntimeSettingsCapture = {
@@ -135,7 +175,14 @@ export const restoreRuntimeSettings = async ({
     log.warning(`[teardown] no prior-value capture at ${file}; leaving the settings as they are`);
     return;
   }
-  const { prior, applied } = JSON.parse(readFileSync(file, 'utf8')) as RuntimeSettingsCapture;
+  const capture = readCaptureFile(file);
+  if (!isCapture(capture)) {
+    log.warning(
+      `[teardown] unreadable prior-value capture at ${file}; leaving the settings and the file as they are`
+    );
+    return;
+  }
+  const { prior, applied } = capture;
   const current = await readUserValues(kbnClient);
   const restorable = Object.keys(prior).filter((key) => current[key] === applied[key]);
   const skipped = Object.keys(prior).filter((key) => !restorable.includes(key));

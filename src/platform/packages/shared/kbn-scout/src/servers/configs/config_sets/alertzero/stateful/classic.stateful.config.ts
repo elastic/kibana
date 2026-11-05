@@ -9,7 +9,6 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { buildEisServerConfig } from '../shared';
-import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Scout server config for everything under `test/scout_alertzero`: the AlertZero API suites
@@ -85,10 +84,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...eisConfig.kbnTestServer,
     serverArgs: [
-      ...withExperimentalFeatures([
-        ...eisConfig.kbnTestServer.serverArgs,
-        ...serviceAccountsServerArgs,
-      ]),
+      ...withExperimentalFeatures(eisConfig.kbnTestServer.serverArgs),
       // Plugin enable flags: all three default off, and alertzero cascade-disables without the
       // other two.
       '--xpack.alertzero.enabled=true',
@@ -99,7 +95,8 @@ export const servers: ScoutServerConfig = {
       // Mirrors the evals_attack_discovery_agent_builder set.
       '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
       // Already the traditional default; pinned so a local override cannot refuse the service
-      // account the Hunt Watch specs create.
+      // account the Hunt Watch specs create. `serviceAccountsServerArgs` is not spread: it also
+      // loads the security API integration test plugin, whose routes no alertzero suite calls.
       '--xpack.security.serviceAccounts.enabled=true',
       // Stateful Scout defaults restrictInternalApis=false. Pin true so authz specs can assert
       // that hunt/TI internal routes reject requests that omit x-elastic-internal-origin.
