@@ -955,6 +955,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(message).toContain(
       "and share this alert's host or user (name, or ID when no name is shown; host=/user= on each related line), form a coherent attack sequence → true_positive, even if this alert's own activity looks routine; do not fall through to Gate D. Entity correlation or scary rule names without suspicious command lines do not satisfy this gate."
     );
+    expect(message).toContain(
+      'A shared generic account (root, SYSTEM, administrator) alone does not count.'
+    );
     expect(message).not.toContain('share strong entity correlation');
     expect(message).toContain(
       'default to false_positive when positive anomaly evidence (on this alert or, per Gate B, in its related alerts) is absent.'
