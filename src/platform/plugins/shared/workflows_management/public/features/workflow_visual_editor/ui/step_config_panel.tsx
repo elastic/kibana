@@ -955,6 +955,13 @@ export function StepConfigPanel({
                   >
                     {showSettings ? (
                       <div data-test-subj="workflowStepConfigErrorHandlingSection">
+                        <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
+                          <h5>
+                            {i18n.translate('workflows.stepConfigPanel.errorHandlingTitle', {
+                              defaultMessage: 'Error handling',
+                            })}
+                          </h5>
+                        </EuiTitle>
                         <StepErrorHandlingSection
                           fragment={fragment}
                           indent={indent}

@@ -123,8 +123,13 @@ export function FieldEditorSubFlyout({
   // sentence" warning (same rule as the inline fields).
   const isFreeText = language === undefined || language === 'plaintext';
   const tokens = useMemo(
-    () => findReferenceTokens(draft, { catalog, warnContainersInSentence: isFreeText }),
-    [catalog, draft, isFreeText]
+    () =>
+      findReferenceTokens(draft, {
+        catalog,
+        warnContainersInSentence: isFreeText,
+        quotedStringsAreValues: language === 'json',
+      }),
+    [catalog, draft, isFreeText, language]
   );
   useReferenceDecorations(editor, draft, tokens);
   const warning = tokens.find(

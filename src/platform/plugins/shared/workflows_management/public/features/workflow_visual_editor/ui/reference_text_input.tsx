@@ -126,8 +126,13 @@ export function ReferenceTextInput({
   onBlurRef.current = onBlur;
 
   const tokens = useMemo(
-    () => findReferenceTokens(value, { catalog, warnContainersInSentence }),
-    [catalog, value, warnContainersInSentence]
+    () =>
+      findReferenceTokens(value, {
+        catalog,
+        warnContainersInSentence,
+        quotedStringsAreValues: language === 'json',
+      }),
+    [catalog, language, value, warnContainersInSentence]
   );
   useReferenceDecorations(editor, value, tokens);
 

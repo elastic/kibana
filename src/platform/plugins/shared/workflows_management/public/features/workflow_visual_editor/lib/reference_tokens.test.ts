@@ -58,6 +58,21 @@ describe('findReferenceTokens', () => {
     expect(filtered).toMatchObject({ typeLabel: undefined, iconType: 'unknown' });
   });
 
+  it('treats a value-form token that fills a whole JSON string as the whole value', () => {
+    const json = '{ "value": "${{ consts.name }}" }';
+    // In JSON the quotes are just how the string is written: the stored value is the token alone.
+    expect(findReferenceTokens(json, { catalog, quotedStringsAreValues: true })[0]).toMatchObject({
+      isWhole: true,
+      tone: 'neutral',
+    });
+    expect(findReferenceTokens(json, { catalog })[0]).toMatchObject({ tone: 'warning' });
+    // Text around the token inside the string still makes it a sentence.
+    const sentence = '{ "value": "Hi ${{ consts.name }}" }';
+    expect(findReferenceTokens(sentence, { catalog, quotedStringsAreValues: true })[0].tone).toBe(
+      'warning'
+    );
+  });
+
   it('ignores Liquid tags, empty spans and unclosed braces', () => {
     expect(findReferenceTokens('{% if a %}x{% endif %} {{ }} {{ open', { catalog })).toEqual([]);
   });

@@ -43,6 +43,11 @@ export interface FindReferenceTokensOptions {
    * inside JSON or KQL the surrounding syntax decides what the value becomes.
    */
   readonly warnContainersInSentence?: boolean;
+  /**
+   * The text is JSON, where a token filling a whole quoted string (`"${{ x }}"`) is the whole
+   * value: the quotes are only how a string is written.
+   */
+  readonly quotedStringsAreValues?: boolean;
 }
 
 const OPEN = '{{';
@@ -94,7 +99,11 @@ const hoverFor = ({
  */
 export const findReferenceTokens = (
   text: string,
-  { catalog, warnContainersInSentence = false }: FindReferenceTokensOptions = {}
+  {
+    catalog,
+    warnContainersInSentence = false,
+    quotedStringsAreValues = false,
+  }: FindReferenceTokensOptions = {}
 ): ReferenceToken[] => {
   const tokens: ReferenceToken[] = [];
   const trimmedStart = text.length - text.trimStart().length;
@@ -112,7 +121,9 @@ export const findReferenceTokens = (
     if (expression !== '') {
       const typeLabel = catalog ? lookupReferenceTypeLabel(catalog, expression) : undefined;
       const iconType = toReferenceIconType(typeLabel ?? 'unknown');
-      const isWhole = start <= trimmedStart && end >= trimmedEnd;
+      const fillsQuotedString =
+        quotedStringsAreValues && text[start - 1] === '"' && text[end] === '"';
+      const isWhole = (start <= trimmedStart && end >= trimmedEnd) || fillsQuotedString;
       const form: ReferenceForm = isValueForm ? 'value' : 'text';
       const isContainerInSentence =
         warnContainersInSentence &&

@@ -256,7 +256,12 @@ describe('StepConfigPanel', () => {
     expect(settingsAccordion).not.toHaveClass('euiAccordion-isOpen');
     expandSettingsAccordion();
     expect(settingsAccordion).toHaveClass('euiAccordion-isOpen');
-    expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    const errorHandling = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+    expect(errorHandling).toBeInTheDocument();
+    // Error handling is one part of Advanced, so it is titled as a subsection.
+    expect(
+      within(errorHandling).getByRole('heading', { name: 'Error handling' })
+    ).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelAccordion-inputs')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
     // Casing-only labels skip the YAML-key hint.
@@ -535,6 +540,9 @@ with:
     );
     expandSettingsAccordion();
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
+    // No controls, so no subsection title above the "not available" sentence.
+    expect(screen.queryByRole('heading', { name: 'Error handling' })).not.toBeInTheDocument();
+    expect(screen.getByText('Error handling is not available for this step.')).toBeInTheDocument();
     unmount();
 
     renderPanel({
@@ -1213,6 +1221,17 @@ with:
         'workflowReferenceChip'
       );
       expect(chip).toHaveAttribute('aria-label', 'Reference event.alerts[0] != blank, boolean');
+    });
+
+    it('does not flag a whole value-form reference just because JSON quotes it', () => {
+      renderPanel({
+        initialFragment:
+          'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: hi\n  query:\n    value: "${{ inputs.x }}"\n',
+      });
+      const chip = within(screen.getByTestId('workflowStepConfigField-with.query')).getByTestId(
+        'workflowReferenceChip'
+      );
+      expect(chip).toHaveAttribute('data-tone', 'neutral');
     });
 
     it('opens the picker on the chip to swap it when a chip is clicked', () => {
