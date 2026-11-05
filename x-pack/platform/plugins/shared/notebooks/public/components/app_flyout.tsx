@@ -57,7 +57,7 @@ import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
 import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
-import { CodePreview } from './code_cell';
+import { CodeConsole } from './code_cell';
 import { CustomCanvas } from './custom_cell';
 import { InputControl } from './input_cell';
 import { useNotebook } from './notebook_context';
@@ -100,16 +100,16 @@ const EsqlPanelContent = ({ cell }: { cell: CellDefinition }) => {
 const CodePanelContent = ({ cell }: { cell: CellDefinition }) => {
   const { store } = useNotebook();
   const { output } = useStateFromPublishingSubject(store.getRuntime$(cell.id));
-  if (output?.kind !== 'code') {
+  if (output?.kind !== 'code' || output.logs.length === 0) {
     return (
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.notebook.app.noCodeOutput', {
-          defaultMessage: 'Run the code to see its exports.',
+          defaultMessage: 'Run the code to see its console output.',
         })}
       </EuiText>
     );
   }
-  return <CodePreview output={output} />;
+  return <CodeConsole cellId={cell.id} logs={output.logs} />;
 };
 
 const PanelContent = ({ panelId, cell }: { panelId: string; cell: CellDefinition }) => {

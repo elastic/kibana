@@ -11,10 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,17 +20,13 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CodeCellDefinition } from '../../common/types';
-import { formatCodeValue, type CodeLogEntry, type CodeLogLevel } from '../model/code_cell';
-import type { CellOutput } from '../model/types';
+import type { CodeLogEntry, CodeLogLevel } from '../model/code_cell';
 import { CellFrame } from './cell_frame';
 import { useNotebook } from './notebook_context';
 
 const PLACEHOLDER = i18n.translate('xpack.notebook.codeCell.placeholder', {
   defaultMessage:
     "JavaScript. Read other cells' outputs by name, and export values to share them, e.g. export const total = rows.length;",
-});
-const EXPORTS_TITLE = i18n.translate('xpack.notebook.codeCell.exports', {
-  defaultMessage: 'Exports',
 });
 const CONSOLE_TITLE = i18n.translate('xpack.notebook.codeCell.console', {
   defaultMessage: 'Console',
@@ -132,7 +126,13 @@ const LevelCount = ({ level, count }: { level: 'error' | 'warn'; count: number }
 };
 
 /** DevTools-style console listing a code cell's `console.*` calls; collapsible. */
-const CodeConsole = ({ cellId, logs }: { cellId: string; logs: readonly CodeLogEntry[] }) => {
+export const CodeConsole = ({
+  cellId,
+  logs,
+}: {
+  cellId: string;
+  logs: readonly CodeLogEntry[];
+}) => {
   const { euiTheme } = useEuiTheme();
   if (logs.length === 0) return null;
   const countOf = (level: CodeLogLevel) => logs.filter((entry) => entry.level === level).length;
@@ -172,39 +172,6 @@ const CodeConsole = ({ cellId, logs }: { cellId: string; logs: readonly CodeLogE
         ))}
       </div>
     </EuiAccordion>
-  );
-};
-
-/** A code cell's exported values. */
-export const CodePreview = ({ output }: { output: Extract<CellOutput, { kind: 'code' }> }) => {
-  const { euiTheme } = useEuiTheme();
-  const exports = Object.entries(output.values);
-  if (exports.length === 0) return null;
-  return (
-    <EuiPanel
-      color="subdued"
-      paddingSize="s"
-      hasBorder={false}
-      data-test-subj="notebookCodePreview"
-    >
-      <EuiTitle size="xxxs">
-        <h4>{EXPORTS_TITLE}</h4>
-      </EuiTitle>
-      <EuiText
-        size="xs"
-        css={css`
-          font-family: ${euiTheme.font.familyCode};
-          font-size: ${euiTheme.size.m};
-        `}
-        data-test-subj="notebookCodeExports"
-      >
-        {exports.map(([name, value]) => (
-          <div key={name}>
-            <strong>{name}</strong> = {formatCodeValue(value)}
-          </div>
-        ))}
-      </EuiText>
-    </EuiPanel>
   );
 };
 
@@ -260,12 +227,6 @@ export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
         <>
           <EuiSpacer size="s" />
           <CodeConsole cellId={cell.id} logs={output.logs} />
-        </>
-      )}
-      {output?.kind === 'code' && Object.keys(output.values).length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <CodePreview output={output} />
         </>
       )}
     </CellFrame>

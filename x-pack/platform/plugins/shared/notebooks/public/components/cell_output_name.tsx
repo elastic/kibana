@@ -13,7 +13,7 @@ import type { CellDefinition } from '../../common/types';
 import { renameOutput, type CellOutput } from '../model/references';
 import { useNotebook } from './notebook_context';
 
-const getDescription = ({ key, isFixed }: CellOutput): string => {
+const getDescription = ({ key, isFixed }: CellOutput): string | undefined => {
   switch (key) {
     case 'table':
       return i18n.translate('xpack.notebook.output.tableDescription', {
@@ -48,15 +48,11 @@ const getDescription = ({ key, isFixed }: CellOutput): string => {
         defaultMessage: 'The upper bound of the selected range.',
       });
     default:
-      return i18n.translate('xpack.notebook.output.exportDescription', {
-        defaultMessage:
-          'A value this code exports. Other code cells read it by name; ES|QL can use it as ?{name} when it is a string or number.',
-        values: { name: key.replace(/^export:/, '') },
-      });
+      return undefined;
   }
 };
 
-/** One output in the cell footer, renamable in place, with a tooltip saying what it holds. */
+/** One output in the cell footer, renamable in place, with a tooltip saying what it holds when that is known. */
 export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output: CellOutput }) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
@@ -67,6 +63,7 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
   const testSubj = `notebookCellOutput-${key}`;
 
   if (isFixed) {
+    if (!description) return <EuiCode data-test-subj={testSubj}>{name}</EuiCode>;
     return (
       <EuiToolTip content={description}>
         <EuiCode tabIndex={0} data-test-subj={testSubj}>
