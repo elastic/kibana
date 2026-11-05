@@ -269,7 +269,8 @@ describe('connector_setup toSurfaceComposition', () => {
     buttons: [
       {
         label: 'Configure in Kibana',
-        url: `${SURFACE_BASE_URL}/app/agent_builder/manage/connectors`,
+        app: 'agent_builder',
+        path: '/manage/connectors',
         ...(primary ? { primary } : {}),
       },
     ],

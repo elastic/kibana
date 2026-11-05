@@ -9,6 +9,7 @@ import { navigationHref, z, type PrimitiveNode } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 
 import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
+import { appPathSchema, appRouteSchema, refineAppOrUrl } from '../link/link_target';
 
 import { actionsReactRenderer } from './actions_react';
 import { actionsSlackRenderer } from './actions_slack';
@@ -17,10 +18,17 @@ import { actionsMarkdownRenderer } from './actions_markdown';
 const buttonSchema = z
   .object({
     label: plainText().describe('What the link opens, in a few words.'),
-    url: navigationHref(),
+    url: navigationHref().optional().describe('The URL it opens. Give either `url` or `app`.'),
+    app: appRouteSchema
+      .optional()
+      .describe(
+        'The Kibana app route after /app/, such as "discover". Each host resolves it in the current space.'
+      ),
+    path: appPathSchema.optional().describe('A path inside `app`, such as "/manage/skills".'),
     primary: z.boolean().optional().describe('Marks the one action the reader should take.'),
   })
-  .strict();
+  .strict()
+  .superRefine(refineAppOrUrl);
 
 const actionsSchema = z.object({
   type: z.literal('actions'),
@@ -78,7 +86,8 @@ export const actions = definePrimitive<ActionsNode, typeof actionsSchema>({
   ],
   renderers: {
     react: actionsReactRenderer,
-    text: ({ buttons }) => buttons.map(({ label, url }) => `${oneLine(label)}: ${url}`).join('\n'),
+    text: ({ buttons }) =>
+      buttons.flatMap(({ label, url }) => (url ? [`${oneLine(label)}: ${url}`] : [])).join('\n'),
     markdown: actionsMarkdownRenderer,
     slack: actionsSlackRenderer,
   },

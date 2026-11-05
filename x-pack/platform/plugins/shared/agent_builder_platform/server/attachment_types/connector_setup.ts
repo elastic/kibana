@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -97,13 +96,10 @@ export const createConnectorSetupAttachmentType = ({
       },
     };
   },
-  toSurfaceComposition: (
-    {
-      data: { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
-      origin,
-    },
-    { kibanaUrl }
-  ) => {
+  toSurfaceComposition: ({
+    data: { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
+    origin,
+  }) => {
     const displayName =
       connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
 
@@ -129,27 +125,21 @@ export const createConnectorSetupAttachmentType = ({
           }),
       body: [
         { type: 'markdown', text },
-        ...(kibanaUrl
-          ? [
-              {
-                type: 'actions' as const,
-                buttons: [
-                  {
-                    label: i18n.translate(
-                      'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.configureInKibana',
-                      { defaultMessage: 'Configure in Kibana' }
-                    ),
-                    url: toKibanaAppUrl(
-                      kibanaUrl,
-                      AGENT_BUILDER_APP_ID,
-                      AGENT_BUILDER_MANAGE_PATHS.connectors
-                    ),
-                    ...(origin ? {} : { primary: true }),
-                  },
-                ],
-              },
-            ]
-          : []),
+        {
+          type: 'actions',
+          buttons: [
+            {
+              label: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.configureInKibana',
+                { defaultMessage: 'Configure in Kibana' }
+              ),
+              app: AGENT_BUILDER_APP_ID,
+              path: AGENT_BUILDER_MANAGE_PATHS.connectors,
+              // Setting it up is what the agent is waiting on; once connected, it's a way back.
+              ...(origin ? {} : { primary: true }),
+            },
+          ],
+        },
       ],
     };
   },
