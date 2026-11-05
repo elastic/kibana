@@ -13,6 +13,8 @@ import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { DEFAULT_GROUPING } from '../constants';
 import { AlertTriage, PolicyCatalog } from '../state';
+import type { CachedPolicy } from './decrypted_policy_cache';
+import { DecryptedPolicyCache } from './decrypted_policy_cache';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -24,6 +26,7 @@ import type {
 @injectable()
 export class FetchPoliciesStep implements DispatcherStep {
   public readonly name = 'fetch_policies';
+  private readonly cache = new DecryptedPolicyCache();
 
   constructor(
     @inject(ActionPolicySavedObjectServiceInternalToken)
@@ -41,12 +44,41 @@ export class FetchPoliciesStep implements DispatcherStep {
     }
 
     const spaceIds = [...new Set(triage.dispatchable.map(({ space_id: spaceId }) => spaceId))];
+    const versions = await this.actionPolicySavedObjectService.findAllVersions({
+      filter: { enabled: true },
+      spaceIds,
+    });
+    const { cached, staleSpaceIds } = this.cache.lookup(versions);
+    const decrypted = await this.decrypt(staleSpaceIds, logger);
+    const entries = [...cached, ...decrypted];
+
+    this.cache.replaceSpaces(spaceIds, entries);
+
+    logger.debug({
+      message: `Loaded ${entries.length} action policies (${cached.length} cached, ${decrypted.length} decrypted)`,
+    });
+
+    const policies = new Map<ActionPolicyId, ActionPolicy>(
+      entries.map(({ policy }) => [policy.id, policy])
+    );
+
+    return { type: 'continue', data: { policies: PolicyCatalog.of(policies) } };
+  }
+
+  private async decrypt(
+    spaceIds: readonly string[],
+    logger: LoggerServiceContract
+  ): Promise<CachedPolicy[]> {
+    if (spaceIds.length === 0) {
+      return [];
+    }
+
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
       spaceIds,
     });
 
-    const policies = new Map<ActionPolicyId, ActionPolicy>();
+    const entries: CachedPolicy[] = [];
 
     for (const doc of result) {
       if ('error' in doc) {
@@ -59,20 +91,23 @@ export class FetchPoliciesStep implements DispatcherStep {
         continue;
       }
 
-      policies.set(doc.id, {
-        id: doc.id,
-        spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
-        name: doc.attributes.name,
-        enabled: doc.attributes.enabled,
-        destinations: doc.attributes.destinations ?? [],
-        matcher: doc.attributes.matcher ?? undefined,
-        grouping: doc.attributes.grouping ?? DEFAULT_GROUPING,
-        throttle: doc.attributes.throttle ?? undefined,
-        snoozedUntil: doc.attributes.snoozedUntil ?? null,
-        apiKey: doc.attributes.apiKey,
+      entries.push({
+        version: doc.version,
+        policy: {
+          id: doc.id,
+          spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
+          name: doc.attributes.name,
+          enabled: doc.attributes.enabled,
+          destinations: doc.attributes.destinations ?? [],
+          matcher: doc.attributes.matcher ?? undefined,
+          grouping: doc.attributes.grouping ?? DEFAULT_GROUPING,
+          throttle: doc.attributes.throttle ?? undefined,
+          snoozedUntil: doc.attributes.snoozedUntil ?? null,
+          apiKey: doc.attributes.apiKey,
+        },
       });
     }
 
-    return { type: 'continue', data: { policies: PolicyCatalog.of(policies) } };
+    return entries;
   }
 }

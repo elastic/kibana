@@ -562,12 +562,18 @@ describe('ActionPolicySavedObjectService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('returns attributes and namespaces for successful documents', async () => {
+    it('returns attributes, version and namespaces for successful documents', async () => {
       mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
         async *find() {
           yield {
             saved_objects: [
-              { id: 'p1', attributes: mockAttrs, namespaces: ['default'], references: [] },
+              {
+                id: 'p1',
+                attributes: mockAttrs,
+                version: 'WzEsMV0=',
+                namespaces: ['default'],
+                references: [],
+              },
             ],
           };
         },
@@ -576,7 +582,9 @@ describe('ActionPolicySavedObjectService', () => {
 
       const result = await service.findAllDecrypted();
 
-      expect(result).toEqual([{ id: 'p1', attributes: mockAttrs, namespaces: ['default'] }]);
+      expect(result).toEqual([
+        { id: 'p1', attributes: mockAttrs, version: 'WzEsMV0=', namespaces: ['default'] },
+      ]);
       expect(mockClose).toHaveBeenCalled();
     });
 
@@ -594,6 +602,89 @@ describe('ActionPolicySavedObjectService', () => {
       const result = await service.findAllDecrypted();
 
       expect(result).toEqual([{ id: 'p1', error: soError }]);
+    });
+  });
+
+  describe('findAllVersions', () => {
+    const mockClose = jest.fn();
+
+    const mockFinder = (
+      savedObjects: Array<{ id: string; version?: string; namespaces?: string[] }>
+    ) => {
+      mockSoClient.createPointInTimeFinder.mockReturnValue({
+        async *find() {
+          yield {
+            saved_objects: savedObjects.map((savedObject) => ({
+              ...savedObject,
+              type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+              attributes: { enabled: true },
+              references: [],
+              score: 0,
+            })),
+            total: savedObjects.length,
+            page: 1,
+            per_page: 1000,
+          };
+        },
+        close: mockClose,
+      } as any);
+    };
+
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      mockClose.mockReset();
+    });
+
+    it('reads only the enabled field of the policies in the given spaces', async () => {
+      mockFinder([]);
+
+      await service.findAllVersions({
+        filter: { enabled: true },
+        spaceIds: ['default', 'space-a'],
+      });
+
+      expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: ['default', 'space-a'],
+        perPage: 1000,
+        fields: ['enabled'],
+        filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+      });
+    });
+
+    it('reads every space when no space ids are given', async () => {
+      mockFinder([]);
+
+      await service.findAllVersions();
+
+      expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: ['*'],
+        perPage: 1000,
+        fields: ['enabled'],
+      });
+    });
+
+    it('returns no policies without opening a PIT finder when spaceIds is empty', async () => {
+      const result = await service.findAllVersions({ spaceIds: [] });
+
+      expect(result).toEqual([]);
+      expect(mockSoClient.createPointInTimeFinder).not.toHaveBeenCalled();
+    });
+
+    it('returns the id, version and namespaces of every policy and closes the finder', async () => {
+      mockFinder([
+        { id: 'p1', version: 'WzEsMV0=', namespaces: ['default'] },
+        { id: 'p2', version: 'WzIsMV0=', namespaces: ['space-a'] },
+      ]);
+
+      const result = await service.findAllVersions({ filter: { enabled: true } });
+
+      expect(result).toEqual([
+        { id: 'p1', version: 'WzEsMV0=', namespaces: ['default'] },
+        { id: 'p2', version: 'WzIsMV0=', namespaces: ['space-a'] },
+      ]);
+      expect(mockClose).toHaveBeenCalled();
     });
   });
 

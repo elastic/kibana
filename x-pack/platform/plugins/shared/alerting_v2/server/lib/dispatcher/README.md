@@ -85,7 +85,7 @@ The pipeline then moves through these phases:
 4. Split into dispatchable vs suppressed alerts
 5. Hydrate `data` payload for dispatchable alerts only
 6. Load rule metadata for dispatchable alerts
-7. Load enabled action policies
+7. Load enabled action policies (decrypted only when changed)
 8. Evaluate policy matchers
 9. Build action groups
 10. Set aside alerts an earlier, aborted tick already handled
@@ -226,7 +226,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 5   | `HydrateAlertDataStep`       | Fetch `data` payloads for the surviving dispatchable alerts only, via `getAlertDataQueries`.     |
 | 6   | `FetchRulesStep`             | Load rule metadata for the remaining dispatchable set.                                           |
 | 7   | `ApplyMaintenanceWindowStep` | Suppress alerts whose timestamp falls within an active maintenance window in the same space.     |
-| 8   | `FetchPoliciesStep`          | Load enabled action policies in the spaces of the dispatchable alerts. Skipped when no alert is dispatchable. |
+| 8   | `FetchPoliciesStep`          | Load enabled action policies in the spaces of the dispatchable alerts. Skipped when no alert is dispatchable. Reads each policy's saved object version first and decrypts only the spaces with a new, changed or uncached policy; decrypted policies stay cached in memory across ticks on each Kibana node, and policies that are deleted or disabled leave the cache. |
 | 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each alert context.                                         |
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
 | 11  | `ApplyAlreadyNotifiedStep`   | Move the alerts whose `notified` record (per group and alert) covers their current content out of their groups, into `alreadyNotified`. |

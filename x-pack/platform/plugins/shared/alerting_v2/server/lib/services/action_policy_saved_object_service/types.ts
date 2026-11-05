@@ -31,6 +31,13 @@ export type ActionPolicySavedObjectBulkDeleteItem =
   | { id: string }
   | { id: string; error: SavedObjectError };
 
+/** The saved object version of an action policy, read without decrypting it. */
+export interface ActionPolicyVersion {
+  id: string;
+  version?: string;
+  namespaces?: string[];
+}
+
 /** The subset of an action policy needed to attribute it to the routing tags it matches on. */
 export interface ActionPolicyRoutingTagSource {
   id: string;
@@ -70,6 +77,11 @@ export interface ActionPolicySavedObjectServiceContract {
     filter?: { enabled: boolean };
     spaceIds?: readonly string[];
   }): Promise<ActionPolicySavedObjectBulkGetItem[]>;
+  /** Reads the id, version and space of the action policies in `spaceIds` without decrypting them. */
+  findAllVersions(params?: {
+    filter?: { enabled: boolean };
+    spaceIds?: readonly string[];
+  }): Promise<ActionPolicyVersion[]>;
   /**
    * Reads the current space's action policies, up to `maxPolicies`, fetching only the fields
    * needed to group them by routing tag. `isTruncated` is true when more policies exist.

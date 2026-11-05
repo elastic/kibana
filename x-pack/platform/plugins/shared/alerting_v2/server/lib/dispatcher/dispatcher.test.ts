@@ -101,38 +101,44 @@ function mockRulesFindByIds(
   );
 }
 
-function mockNpFindAllDecrypted(
-  spy: jest.SpyInstance,
+type ActionPolicySavedObjectServiceMocks = ReturnType<typeof createActionPolicySavedObjectService>;
+
+function mockNpPolicies(
+  { mockFindAllDecrypted, mockFindAllVersions }: ActionPolicySavedObjectServiceMocks,
   policies: Array<string | { id: string; spaceId: string; apiKey?: string }>,
   overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
-  spy.mockResolvedValue(
-    policies.map((policy) => {
-      const {
-        id,
-        spaceId,
-        apiKey = 'test-api-key',
-      } = typeof policy === 'string' ? { id: policy, spaceId: 'default' } : policy;
+  const docs = policies.map((policy) => {
+    const {
+      id,
+      spaceId,
+      apiKey = 'test-api-key',
+    } = typeof policy === 'string' ? { id: policy, spaceId: 'default' } : policy;
 
-      return {
-        id,
-        attributes: {
-          name: `Policy ${id}`,
-          description: `Description for ${id}`,
-          enabled: true,
-          destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-          apiKey,
-          apiKeyOwner: 'elastic',
-          apiKeyCreatedByUser: false,
-          createdBy: null,
-          updatedBy: null,
-          createdAt: '2026-01-01T00:00:00.000Z',
-          updatedAt: '2026-01-01T00:00:00.000Z',
-          ...overrides,
-        },
-        namespaces: [spaceId],
-      };
-    })
+    return {
+      id,
+      attributes: {
+        name: `Policy ${id}`,
+        description: `Description for ${id}`,
+        enabled: true,
+        destinations: [{ type: 'workflow' as const, id: 'workflow-test-id' }],
+        apiKey,
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        ...overrides,
+      },
+      version: 'v1',
+      namespaces: [spaceId],
+    };
+  });
+
+  mockFindAllDecrypted.mockResolvedValue(docs);
+  mockFindAllVersions.mockResolvedValue(
+    docs.map(({ id, version, namespaces }) => ({ id, version, namespaces }))
   );
 }
 
@@ -201,7 +207,7 @@ describe('DispatcherService', () => {
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: ActionPolicySavedObjectServiceContract;
   let mockFindByIds: jest.SpyInstance;
-  let mockFindAllDecrypted: jest.SpyInstance;
+  let npMocks: ActionPolicySavedObjectServiceMocks;
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
   let mockEventLogService: EventLogServiceContract;
@@ -225,10 +231,9 @@ describe('DispatcherService', () => {
     mockFindByIds = rulesMock.mockFindByIds;
     mockRulesFindByIds(mockFindByIds, ['rule-1', 'rule-2']);
 
-    const npMock = createActionPolicySavedObjectService();
-    npSoService = npMock.actionPolicySavedObjectService;
-    mockFindAllDecrypted = npMock.mockFindAllDecrypted;
-    mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
+    npMocks = createActionPolicySavedObjectService();
+    npSoService = npMocks.actionPolicySavedObjectService;
+    mockNpPolicies(npMocks, ['policy_456']);
 
     mockWfm = createMockWorkflowsManagement();
     mockMwService = createMaintenanceWindowServiceMock();
@@ -489,7 +494,7 @@ describe('DispatcherService', () => {
         'rule-004',
         'rule-005',
       ]);
-      mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
+      mockNpPolicies(npMocks, ['policy_456'], {
         throttle: { interval: '1h' },
       });
 
@@ -806,7 +811,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      mockNpFindAllDecrypted(mockFindAllDecrypted, [
+      mockNpPolicies(npMocks, [
         { id: 'policy_space_a', spaceId: 'space-a' },
         { id: 'policy_space_b', spaceId: 'space-b' },
       ]);
@@ -856,7 +861,7 @@ describe('DispatcherService', () => {
     });
 
     it('only matches alerts whose hydrated data satisfies a KQL matcher', async () => {
-      mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
+      mockNpPolicies(npMocks, ['policy_456'], {
         matcher: { expression: 'data.severity: "critical"' },
       });
 
@@ -1355,7 +1360,7 @@ describe('DispatcherService', () => {
 
     it('still dispatches a shared alert to the policy the aborted tick never reached', async () => {
       const sharedAlerts = alerts.slice(0, 2);
-      mockNpFindAllDecrypted(mockFindAllDecrypted, [
+      mockNpPolicies(npMocks, [
         { id: 'policy-a', spaceId: 'default', apiKey: 'key-a' },
         { id: 'policy-b', spaceId: 'default', apiKey: 'key-b' },
       ]);

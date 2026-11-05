@@ -58,6 +58,10 @@ export function createActionPolicySavedObjectService(): {
     ReturnType<ActionPolicySavedObjectService['findAllDecrypted']>,
     Parameters<ActionPolicySavedObjectService['findAllDecrypted']>
   >;
+  mockFindAllVersions: jest.SpyInstance<
+    ReturnType<ActionPolicySavedObjectService['findAllVersions']>,
+    Parameters<ActionPolicySavedObjectService['findAllVersions']>
+  >;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockSpaces = spacesMock.createStart();
@@ -73,10 +77,15 @@ export function createActionPolicySavedObjectService(): {
     .spyOn(actionPolicySavedObjectService, 'findAllDecrypted')
     .mockResolvedValue([]);
 
+  const mockFindAllVersions = jest
+    .spyOn(actionPolicySavedObjectService, 'findAllVersions')
+    .mockResolvedValue([]);
+
   return {
     actionPolicySavedObjectService,
     mockSavedObjectsClient,
     mockEncryptedSavedObjectsClient,
     mockFindAllDecrypted,
+    mockFindAllVersions,
   };
 }

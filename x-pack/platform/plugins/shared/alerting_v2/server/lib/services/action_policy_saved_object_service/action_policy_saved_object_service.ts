@@ -6,7 +6,10 @@
  */
 
 import { PluginStart } from '@kbn/core-di';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -26,6 +29,7 @@ import type {
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
+  ActionPolicyVersion,
 } from './types';
 
 export type {
@@ -34,9 +38,25 @@ export type {
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
+  ActionPolicyVersion,
 };
 
 const ROUTING_TAG_SOURCES_PER_PAGE = 1000;
+
+interface FindAllParams {
+  filter?: { enabled: boolean };
+  spaceIds?: readonly string[];
+}
+
+const toFindAllOptions = (params?: FindAllParams): SavedObjectsCreatePointInTimeFinderOptions => ({
+  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+  // A space id is already its SO namespace string, `default` included.
+  namespaces: params?.spaceIds ? [...params.spaceIds] : ['*'],
+  perPage: 1000,
+  ...(params?.filter?.enabled !== undefined
+    ? { filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: ${params.filter.enabled}` }
+    : {}),
+});
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
@@ -184,28 +204,16 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     });
   }
 
-  public async findAllDecrypted(params?: {
-    filter?: { enabled: boolean };
-    spaceIds?: readonly string[];
-  }): Promise<ActionPolicySavedObjectBulkGetItem[]> {
+  public async findAllDecrypted(
+    params?: FindAllParams
+  ): Promise<ActionPolicySavedObjectBulkGetItem[]> {
     if (params?.spaceIds?.length === 0) {
       return [];
     }
 
-    const kqlFilter =
-      params?.filter?.enabled !== undefined
-        ? `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: ${params.filter.enabled}`
-        : undefined;
-
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<ActionPolicySavedObjectAttributes>(
-        {
-          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          // A space id is already its SO namespace string, `default` included.
-          namespaces: params?.spaceIds ? [...params.spaceIds] : ['*'],
-          perPage: 1000,
-          ...(kqlFilter ? { filter: kqlFilter } : {}),
-        }
+        toFindAllOptions(params)
       );
 
     const results: ActionPolicySavedObjectBulkGetItem[] = [];
@@ -215,12 +223,42 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
         if (isSavedObjectErrorResult(doc)) {
           results.push({ id: doc.id, error: doc.error });
         } else {
-          results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
+          results.push({
+            id: doc.id,
+            attributes: doc.attributes,
+            version: doc.version,
+            namespaces: doc.namespaces,
+          });
         }
       }
     }
 
     await finder.close();
+
+    return results;
+  }
+
+  public async findAllVersions(params?: FindAllParams): Promise<ActionPolicyVersion[]> {
+    if (params?.spaceIds?.length === 0) {
+      return [];
+    }
+
+    const finder = this.client.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
+      ...toFindAllOptions(params),
+      fields: ['enabled'],
+    });
+
+    const results: ActionPolicyVersion[] = [];
+
+    try {
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        for (const { id, version, namespaces } of savedObjects) {
+          results.push({ id, version, namespaces });
+        }
+      }
+    } finally {
+      await finder.close();
+    }
 
     return results;
   }
