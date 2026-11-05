@@ -10,6 +10,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse, Tool } from '@kbn/mcp-client';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { Logger } from '@kbn/core/server';
@@ -28,9 +29,20 @@ const isListToolsResponse = (value: unknown): value is ListToolsResponse =>
   value.tools.every(isMcpServerTool);
 
 /**
+ * Builds the error message for a connector that is not an MCP (`.mcp`) connector.
+ *
+ * @param connectorId - ID of the connector referenced by the MCP tool.
+ * @param actionTypeId - The connector's actual type.
+ * @returns A message naming the expected and actual connector types.
+ */
+export const getNotMcpConnectorMessage = (connectorId: string, actionTypeId: string): string =>
+  `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '${actionTypeId}'`;
+
+/**
  * Lists available tools from an MCP connector by calling the listTools subAction.
  *
- * @throws {Error} when the sub-action fails or returns neither shape.
+ * @throws {Error} when the connector cannot be loaded, is not an MCP (`.mcp`) connector,
+ * or the sub-action fails or returns an unexpected response.
  */
 export async function listMcpTools({
   actions,
@@ -42,6 +54,12 @@ export async function listMcpTools({
   connectorId: string;
 }): Promise<ListToolsResponse> {
   const actionsClient = await actions.getActionsClientWithRequest(request);
+
+  const { actionTypeId } = await actionsClient.get({ id: connectorId });
+  if (actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
+    throw new Error(getNotMcpConnectorMessage(connectorId, actionTypeId));
+  }
+
   const result = await actionsClient.execute({
     actionId: connectorId,
     params: {
@@ -54,16 +72,12 @@ export async function listMcpTools({
     throw new Error(result.serviceMessage ?? result.message ?? 'Failed to list MCP tools');
   }
 
-  // `.mcp` returns `{ tools }`, connector-spec MCP connectors return the bare array.
   const { data } = result;
-  if (Array.isArray(data) && data.every(isMcpServerTool)) {
-    return { tools: data };
-  }
-  if (isListToolsResponse(data)) {
-    return data;
+  if (!isListToolsResponse(data)) {
+    throw new Error(`Unexpected listTools response from connector '${connectorId}'`);
   }
 
-  throw new Error(`Unexpected listTools response from connector '${connectorId}'`);
+  return data;
 }
 
 /**
@@ -110,7 +124,8 @@ interface McpToolExecutionResultError {
 type McpToolExecutionResult = McpToolExecutionResultSuccess | McpToolExecutionResultError;
 
 /**
- * Executes an MCP tool via the connector's callTool sub-action
+ * Executes an MCP tool via the connector's callTool sub-action.
+ * Connectors that are not of type `.mcp` are rejected without being executed.
  */
 async function executeMcpTool({
   actions,
@@ -126,6 +141,19 @@ async function executeMcpTool({
   toolArguments: Record<string, unknown>;
 }): Promise<McpToolExecutionResult> {
   const actionsClient = await actions.getActionsClientWithRequest(request);
+
+  const { actionTypeId } = await actionsClient.get({ id: connectorId });
+  if (actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
+    return {
+      isError: true,
+      content:
+        `${getNotMcpConnectorMessage(
+          connectorId,
+          actionTypeId
+        )}, so MCP tool '${toolName}' cannot run. ` +
+        'Do not retry. Tell the user this tool must be deleted or updated to use an MCP connector.',
+    };
+  }
 
   const result = await actionsClient.execute({
     actionId: connectorId,

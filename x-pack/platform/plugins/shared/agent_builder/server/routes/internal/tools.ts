@@ -42,7 +42,7 @@ import { OAUTH_STATUS } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
-import { listMcpTools } from '../../services/tools/tool_types/mcp';
+import { getNotMcpConnectorMessage, listMcpTools } from '../../services/tools/tool_types/mcp';
 import { toConnectorItem } from '../utils';
 
 const PER_USER_AUTH_MODE = 'per-user';
@@ -656,7 +656,7 @@ export function registerInternalToolsRoutes({
       if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
         return response.badRequest({
           body: {
-            message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,
+            message: getNotMcpConnectorMessage(connectorId, connector.actionTypeId),
           },
         });
       }
@@ -722,18 +722,24 @@ export function registerInternalToolsRoutes({
 
       const connectorResults = await Promise.allSettled(
         connectorIds.map(async (connectorId) => {
-          const connector = await actionsClient.get({ id: connectorId });
+          const { actionTypeId } = await actionsClient.get({ id: connectorId });
+          if (actionTypeId !== MCP_CONNECTOR_ID) {
+            return {
+              connectorError: getNotMcpConnectorMessage(connectorId, actionTypeId),
+              mcpServerTools: [],
+              listToolsError: undefined,
+            };
+          }
           try {
             const { tools: mcpServerTools } = await listMcpTools({
               actions: pluginsStart.actions,
               request,
               connectorId,
             });
-            return { connectorId, connector, mcpServerTools, listToolsError: undefined };
+            return { connectorError: undefined, mcpServerTools, listToolsError: undefined };
           } catch (error) {
             return {
-              connectorId,
-              connector,
+              connectorError: undefined,
               mcpServerTools: [],
               listToolsError: error instanceof Error ? error.message : String(error),
             };
@@ -744,7 +750,7 @@ export function registerInternalToolsRoutes({
       const connectorDataMap = new Map<
         string,
         {
-          exists: boolean;
+          connectorError?: string;
           mcpServerTools: string[];
           listToolsError?: string;
         }
@@ -756,13 +762,13 @@ export function registerInternalToolsRoutes({
 
         if (result.status === 'fulfilled') {
           connectorDataMap.set(connectorId, {
-            exists: true,
+            connectorError: result.value.connectorError,
             mcpServerTools: result.value.mcpServerTools.map((mcpServerTool) => mcpServerTool.name),
             listToolsError: result.value.listToolsError,
           });
         } else {
           connectorDataMap.set(connectorId, {
-            exists: false,
+            connectorError: `Connector '${connectorId}' not found`,
             mcpServerTools: [],
           });
         }
@@ -777,10 +783,11 @@ export function registerInternalToolsRoutes({
         let status: McpToolHealthStatus = 'healthy';
         let errorMessage: string | undefined;
 
-        // Check connector exists
-        if (!connectorData?.exists) {
+        // Check connector exists and is an MCP connector
+        if (!connectorData || connectorData.connectorError) {
           status = 'connector_not_found';
-          errorMessage = `Connector '${toolConnectorId}' not found`;
+          errorMessage =
+            connectorData?.connectorError ?? `Connector '${toolConnectorId}' not found`;
         }
         // Check if listing MCP tools failed
         else if (connectorData.listToolsError) {
