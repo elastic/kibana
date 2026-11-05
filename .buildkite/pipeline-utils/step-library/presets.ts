@@ -105,6 +105,8 @@ export const retry = {
 
 export const hyperdiskBalanced = { diskType: 'hyperdisk-balanced' } as const;
 
+export const pdBalanced = { diskType: 'pd-balanced' } as const;
+
 export const k8sMinimalAgent = (): AgentConfig => ({
   provider: 'k8s',
   image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
@@ -140,7 +142,7 @@ export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): Age
 export const mainTargetBranchOnly = "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'";
 
 export const securitySolutionCypressDefaults = {
-  agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+  agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
   depends_on: ['build'],
   timeout_in_minutes: 60,
   retry: retry.agentLossOrAnyOnce,
@@ -148,5 +150,5 @@ export const securitySolutionCypressDefaults = {
 
 export const securitySolutionHighMemoryCypressDefaults = {
   ...securitySolutionCypressDefaults,
-  agents: spotAgent('n2-highmem-4', spotZones.centralFCA),
+  agents: { ...spotAgent('n2-highmem-4', spotZones.centralFCA), ...pdBalanced },
 };

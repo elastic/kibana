@@ -32,6 +32,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     # UI stack, then API stack. Serverless is a separate step.
     timeout_in_minutes: 120
@@ -52,6 +53,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     # UI stack, then API stack. ECH is a separate step.
     timeout_in_minutes: 120
