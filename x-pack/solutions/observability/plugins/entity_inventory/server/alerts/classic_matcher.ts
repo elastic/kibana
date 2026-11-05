@@ -8,8 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { GeneratedQuery } from '../inventory/generator';
 import { attributeAlertsToEntities } from './attribute_alerts';
-import { toAlertGroups } from './esql_rows';
-import { getMatchKeys } from './match_keys';
+import { assertLiteralField, toAlertGroups } from './esql_rows';
+import { aliasVariants } from './field_aliases';
 import type { AlertGroup, AlertMatcher, KeyedAlertGroups, MatchKey } from './types';
 
 export const CLASSIC_ALERT_INDICES = '.alerts-stack.*,.alerts-observability.*';
@@ -19,6 +19,12 @@ const MAX_GROUPS = 10000;
 
 const ALERT_UUID = '`kibana.alert.uuid`';
 const quote = (field: string): string => `\`${field}\``;
+
+/** Where a rule's group-by column lands in a classic alert. */
+const alertFieldOf = (column: string): string => {
+  assertLiteralField(column);
+  return `kibana.alert.grouping.${column}`;
+};
 
 const ACTIVE_IN_SPACE_FILTERS = [
   '`kibana.alert.status` == "active"',
@@ -36,9 +42,12 @@ const buildQuery = (filters: string[], stats: string, spaceId: string): Generate
   params: [{ spaceId }],
 });
 
-/** Active alerts grouped by the key's alert fields, with the ids of the alerts in each group. */
-export const buildGroupQuery = (key: MatchKey, spaceId: string): GeneratedQuery => {
-  const fields = key.map(({ alertField }) => quote(alertField));
+/**
+ * Active alerts grouped by the alert fields of one spelling of a key, with the ids of the alerts
+ * in each group.
+ */
+export const buildGroupQuery = (variant: MatchKey, spaceId: string): GeneratedQuery => {
+  const fields = variant.map((column) => quote(alertFieldOf(column)));
   return buildQuery(
     [...ACTIVE_IN_SPACE_FILTERS, ...fields.map((field) => `${field} IS NOT NULL`)],
     `STATS alert_ids = VALUES(${ALERT_UUID}) BY ${fields.join(', ')}`,
@@ -81,14 +90,16 @@ export const createClassicAlertMatcher = ({
   spaceId: string;
 }): AlertMatcher => ({
   source: 'classic',
-  match: async ({ type, entities }) => {
+  match: async ({ keys, entities }) => {
     const [keyedGroups, activeAlerts] = await Promise.all([
       Promise.all(
-        getMatchKeys(type).map(
-          async (key): Promise<KeyedAlertGroups> => ({
-            key,
-            groups: await queryGroups(esClient, key, spaceId),
-          })
+        keys.flatMap((key) =>
+          aliasVariants(key).map(
+            async (variant): Promise<KeyedAlertGroups> => ({
+              key,
+              groups: await queryGroups(esClient, variant, spaceId),
+            })
+          )
         )
       ),
       queryActiveAlerts(esClient, spaceId),

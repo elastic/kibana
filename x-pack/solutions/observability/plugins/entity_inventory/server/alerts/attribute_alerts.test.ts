@@ -8,13 +8,8 @@
 import { attributeAlertsToEntities } from './attribute_alerts';
 import type { EntityRow, MatchKey } from './types';
 
-const uidKey: MatchKey = [
-  { entityColumn: 'k8s.pod.uid', alertField: 'kibana.alert.grouping.k8s.pod.uid' },
-];
-const nameKey: MatchKey = [
-  { entityColumn: 'k8s.pod.name', alertField: 'kibana.alert.grouping.k8s.pod.name' },
-  { entityColumn: 'k8s.namespace.name', alertField: 'kibana.alert.grouping.k8s.namespace.name' },
-];
+const uidKey: MatchKey = ['k8s.pod.uid'];
+const nameKey: MatchKey = ['k8s.pod.name', 'k8s.namespace.name'];
 
 const pod = (uid: string, name: string | null, namespace: string): EntityRow => ({
   'entity.id': `k8s.pod:${uid}`,

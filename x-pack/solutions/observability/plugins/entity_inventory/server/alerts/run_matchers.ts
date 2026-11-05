@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertMatcher, AlertMatchResult, EntityRow } from './types';
+import type { AlertMatcher, AlertMatchParams, AlertMatchResult } from './types';
 
 /** What one alert source produced: its result, or why it could not. A failing source does not fail the rest. */
 export interface SourceOutcome {
@@ -18,7 +18,7 @@ const MAX_ERROR_LENGTH = 300;
 
 export const runMatchers = async (
   matchers: readonly AlertMatcher[],
-  params: { type: string; entities: readonly EntityRow[] }
+  params: AlertMatchParams
 ): Promise<SourceOutcome[]> =>
   Promise.all(
     matchers.map(async (matcher): Promise<SourceOutcome> => {

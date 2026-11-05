@@ -12,10 +12,10 @@ import {
   CLASSIC_ALERT_INDICES,
   createClassicAlertMatcher,
 } from './classic_matcher';
-import { getMatchKeys } from './match_keys';
 import type { EntityRow } from './types';
 
-const [, nameKey] = getMatchKeys('k8s.pod');
+const uidKey = ['k8s.pod.uid'];
+const nameKey = ['k8s.pod.name', 'k8s.namespace.name'];
 
 /** The client types a cell as a scalar, though ES|QL returns an array for a multi-value cell. */
 const multiValue = (...values: string[]): string => values as never;
@@ -72,6 +72,12 @@ describe('createClassicAlertMatcher', () => {
       if (query.includes('COUNT_DISTINCT')) {
         return { columns: [{ name: 'active_alerts', type: 'long' }], values: [[7]] };
       }
+      if (query.includes('grouping.kubernetes.pod.uid')) {
+        return { columns: [], values: [['e1', 'u2']] };
+      }
+      if (query.includes('grouping.kubernetes.')) {
+        return { columns: [], values: [] };
+      }
       return query.includes('grouping.k8s.pod.uid')
         ? { columns: [], values: [[multiValue('a1', 'a2'), 'u1']] }
         : {
@@ -85,40 +91,41 @@ describe('createClassicAlertMatcher', () => {
     return esClient;
   };
 
-  it('attributes alerts through every key of the type and reports the total', async () => {
+  it('attributes alerts through every key and every spelling of it, and reports the total', async () => {
     const result = await createClassicAlertMatcher({
       esClient: createClient(),
       spaceId: 'default',
     }).match({
-      type: 'k8s.pod',
+      keys: [uidKey, nameKey],
       entities,
     });
 
     expect(result.source).toBe('classic');
     expect(result.activeAlerts).toBe(7);
     expect(result.alertIdsByEntity.get('k8s.pod:u1')).toEqual(new Set(['a1', 'a2', 'a3']));
-    expect(result.alertIdsByEntity.get('k8s.pod:u2')).toEqual(new Set(['a2']));
+    expect(result.alertIdsByEntity.get('k8s.pod:u2')).toEqual(new Set(['a2', 'e1']));
   });
 
   it('scopes every query to the space', async () => {
     const esClient = createClient();
 
     await createClassicAlertMatcher({ esClient, spaceId: 'default' }).match({
-      type: 'k8s.pod',
+      keys: [uidKey, nameKey],
       entities,
     });
 
-    expect(esClient.esql.query).toHaveBeenCalledTimes(3);
+    // Two keys, each in its own and its ECS spelling, and the total.
+    expect(esClient.esql.query).toHaveBeenCalledTimes(5);
     esClient.esql.query.mock.calls.forEach(([request]) =>
       expect(request.params).toEqual([{ spaceId: 'default' }])
     );
   });
 
-  it('only counts the total for a type without keys', async () => {
+  it('only counts the total when there are no keys', async () => {
     const esClient = createClient();
 
     const result = await createClassicAlertMatcher({ esClient, spaceId: 'default' }).match({
-      type: 'not.a.type',
+      keys: [],
       entities,
     });
 

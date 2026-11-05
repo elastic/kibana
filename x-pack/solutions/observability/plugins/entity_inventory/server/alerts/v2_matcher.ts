@@ -8,16 +8,14 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { GeneratedQuery, NamedParams } from '../inventory/generator';
 import { attributeAlertsToEntities } from './attribute_alerts';
-import { toAlertGroups } from './esql_rows';
-import { getV2MatchKeys } from './match_keys';
+import { assertLiteralField, toAlertGroups } from './esql_rows';
+import { aliasVariants } from './field_aliases';
 import type { AlertMatcher, KeyedAlertGroups, MatchKey } from './types';
 
 export const V2_ALERT_INDEX = '.rule-events';
 
 /** The most value tuples one key reads back; a PoC bound, since the join runs in memory. */
 const MAX_GROUPS = 10000;
-
-const LITERAL_FIELD = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)*$/;
 
 export interface V2Scope {
   /** ISO lower bound on event time. An alert counts when it has an event at or after this. */
@@ -41,13 +39,9 @@ const activeAlertsPipeline = (extraEval: string[] = []): string[] => [
  * of its events. An alert's later events can carry an empty payload, so each key value is the
  * last non-null one, while the status comes from the newest event of any kind.
  */
-export const buildV2GroupQuery = (key: MatchKey, scope: V2Scope): GeneratedQuery => {
-  key.forEach(({ alertField }) => {
-    if (!LITERAL_FIELD.test(alertField)) {
-      throw new Error(`"${alertField}" is not a literal field path`);
-    }
-  });
-  const columns = key.map(({ alertField }, index) => ({ alertField, column: `key_${index}` }));
+export const buildV2GroupQuery = (variant: MatchKey, scope: V2Scope): GeneratedQuery => {
+  variant.forEach(assertLiteralField);
+  const columns = variant.map((alertField, index) => ({ alertField, column: `key_${index}` }));
 
   return {
     esql: [
@@ -92,14 +86,16 @@ export const createV2AlertMatcher = ({
   scope: V2Scope;
 }): AlertMatcher => ({
   source: 'v2',
-  match: async ({ type, entities }) => {
+  match: async ({ keys, entities }) => {
     const [keyedGroups, activeAlerts] = await Promise.all([
       Promise.all(
-        getV2MatchKeys(type).map(async (key): Promise<KeyedAlertGroups> => {
-          const { esql, params } = buildV2GroupQuery(key, scope);
-          const { values } = await esClient.esql.query({ query: esql, params, format: 'json' });
-          return { key, groups: toAlertGroups(values) };
-        })
+        keys.flatMap((key) =>
+          aliasVariants(key).map(async (variant): Promise<KeyedAlertGroups> => {
+            const { esql, params } = buildV2GroupQuery(variant, scope);
+            const { values } = await esClient.esql.query({ query: esql, params, format: 'json' });
+            return { key, groups: toAlertGroups(values) };
+          })
+        )
       ),
       (async () => {
         const { esql, params } = buildV2TotalQuery(scope);

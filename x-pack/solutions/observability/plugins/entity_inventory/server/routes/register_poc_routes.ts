@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 import { getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import { createClassicAlertMatcher } from '../alerts/classic_matcher';
+import { getMatchKeys } from '../alerts/match_keys';
 import { alertCountsFor, runMatchers, summarizeCoverage } from '../alerts/run_matchers';
 import { createV2AlertMatcher } from '../alerts/v2_matcher';
 import { InventoryDefinitionError } from '../inventory/generator';
@@ -97,7 +98,7 @@ export const registerPocRoutes = ({
               scope: { from: window.from, spaceId: DEFAULT_SPACE_ID },
             }),
           ],
-          { type, entities }
+          { keys: getMatchKeys(definition), entities }
         );
 
         return response.ok({

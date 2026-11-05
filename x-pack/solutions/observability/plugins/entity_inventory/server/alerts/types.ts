@@ -11,14 +11,8 @@ export type EsqlValue = EsqlScalar | readonly EsqlScalar[];
 /** One entity as the generated list query returns it: `entity.id`, identity fields, attributes. */
 export type EntityRow = Readonly<Record<string, EsqlValue>>;
 
-/** A column of an entity row paired with the alert field that carries the same value. */
-export interface MatchKeyColumn {
-  entityColumn: string;
-  alertField: string;
-}
-
-/** Columns that must all equal an alert's values for the alert to belong to the entity. */
-export type MatchKey = readonly MatchKeyColumn[];
+/** Entity columns whose values must all equal an alert's group values for the alert to belong to the entity. */
+export type MatchKey = readonly string[];
 
 /** The alerts of one value tuple of a match key, as one aggregated row. */
 export interface AlertGroup {
@@ -39,7 +33,12 @@ export interface AlertMatchResult {
   activeAlerts: number;
 }
 
+export interface AlertMatchParams {
+  keys: readonly MatchKey[];
+  entities: readonly EntityRow[];
+}
+
 export interface AlertMatcher {
   source: AlertMatchResult['source'];
-  match: (params: { type: string; entities: readonly EntityRow[] }) => Promise<AlertMatchResult>;
+  match: (params: AlertMatchParams) => Promise<AlertMatchResult>;
 }

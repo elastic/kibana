@@ -5,50 +5,67 @@
  * 2.0.
  */
 
-import { getIdentityFields } from '@kbn/entity-store/common';
-import { K8S_ENTITY_DEFINITIONS } from '../inventory/definitions/k8s_definitions';
-import { ALERT_MATCH_KEYS, getMatchKeys } from './match_keys';
+import { getIdentityFields, getPresenceFilter } from '@kbn/entity-store/common';
+import { hostLikeFixture } from '../inventory/__fixtures__/definitions';
+import {
+  K8S_ENTITY_DEFINITIONS,
+  k8sDeploymentDefinition,
+  k8sNodeDefinition,
+  k8sPodDefinition,
+} from '../inventory/definitions/k8s_definitions';
+import { getMatchKeys } from './match_keys';
 
-const columnsOf = (type: string): Set<string> => {
-  const definition = K8S_ENTITY_DEFINITIONS.find((candidate) => candidate.type === type);
-  const attributes = (definition?.dynamic?.sources ?? []).flatMap(({ attributes: names = [] }) =>
-    names.map(({ name }) => name)
-  );
-  return new Set([
-    ...(definition ? getIdentityFields(definition.identityField) : []),
-    ...attributes,
-  ]);
-};
-
-describe('ALERT_MATCH_KEYS', () => {
-  it('has keys for every registered k8s type', () => {
-    expect(Object.keys(ALERT_MATCH_KEYS).sort()).toEqual(
-      K8S_ENTITY_DEFINITIONS.map(({ type }) => type).sort()
-    );
+describe('getMatchKeys', () => {
+  it('uses a single identity field as the key', () => {
+    expect(getMatchKeys(k8sNodeDefinition)).toEqual([['k8s.node.name']]);
   });
 
-  it.each(Object.entries(ALERT_MATCH_KEYS))(
-    '%s reads only columns its definition lists as identity or attributes',
-    (type, keys) => {
-      const available = columnsOf(type);
+  it('uses the fields of a composed identity as one key, without the separator', () => {
+    expect(getMatchKeys(k8sDeploymentDefinition)).toEqual([
+      ['k8s.namespace.name', 'k8s.deployment.name'],
+    ]);
+  });
 
-      keys.flat().forEach(({ entityColumn }) => expect(available).toContain(entityColumn));
+  it('gives a ranked identity one key per ranking, so an alert grouped by any of them matches', () => {
+    expect(getMatchKeys(hostLikeFixture)).toEqual([['host.id'], ['host.name']]);
+  });
+
+  it('adds the extra keys of a type to the ones its identity gives', () => {
+    expect(getMatchKeys(k8sPodDefinition)).toEqual([
+      ['k8s.pod.uid'],
+      ['k8s.pod.name', 'k8s.namespace.name'],
+    ]);
+  });
+
+  it('lists a key once when an extra key repeats an identity key', () => {
+    const definition = {
+      type: 'k8s.pod',
+      identityField: {
+        euidRanking: {
+          branches: [
+            {
+              ranking: [[{ field: 'k8s.pod.name' }, { sep: '/' }, { field: 'k8s.namespace.name' }]],
+            },
+          ],
+        },
+        documentsFilter: getPresenceFilter([['k8s.pod.name', 'k8s.namespace.name']]),
+      },
+    };
+
+    expect(getMatchKeys(definition)).toEqual([['k8s.pod.name', 'k8s.namespace.name']]);
+  });
+
+  it.each(K8S_ENTITY_DEFINITIONS.map((definition) => [definition.type, definition] as const))(
+    '%s has keys, and every column of them is an identity field or an attribute of the type',
+    (_type, definition) => {
+      const attributes = (definition.dynamic?.sources ?? []).flatMap(({ attributes: names = [] }) =>
+        names.map(({ name }) => name)
+      );
+      const available = new Set([...getIdentityFields(definition.identityField), ...attributes]);
+      const keys = getMatchKeys(definition);
+
+      expect(keys.length).toBeGreaterThan(0);
+      keys.flat().forEach((column) => expect(available).toContain(column));
     }
   );
-
-  it.each(Object.entries(ALERT_MATCH_KEYS))('%s keys read the grouping object', (_type, keys) => {
-    keys.flat().forEach(({ entityColumn, alertField }) => {
-      expect(alertField).toBe(`kibana.alert.grouping.${entityColumn}`);
-    });
-  });
-
-  it('offers a pod both a uid key and a name and namespace key', () => {
-    expect(
-      getMatchKeys('k8s.pod').map((key) => key.map(({ entityColumn }) => entityColumn))
-    ).toEqual([['k8s.pod.uid'], ['k8s.pod.name', 'k8s.namespace.name']]);
-  });
-
-  it('has no keys for an unknown type', () => {
-    expect(getMatchKeys('not.a.type')).toEqual([]);
-  });
 });

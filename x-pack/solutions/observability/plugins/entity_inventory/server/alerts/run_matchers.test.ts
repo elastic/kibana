@@ -36,7 +36,7 @@ describe('runMatchers', () => {
         matcherReturning('classic', [['e1', ['a1']]], 4),
         failingMatcher('v2', 'index_not_found_exception: no such index [.rule-events]'),
       ],
-      { type: 'k8s.pod', entities: [] }
+      { keys: [], entities: [] }
     );
 
     expect(outcomes[0].result?.activeAlerts).toBe(4);
@@ -48,7 +48,7 @@ describe('runMatchers', () => {
 
   it('shortens a long error message', async () => {
     const [outcome] = await runMatchers([failingMatcher('v2', 'x'.repeat(1000))], {
-      type: 'k8s.pod',
+      keys: [],
       entities: [],
     });
 

@@ -20,3 +20,19 @@ export const toAlertGroups = (rows: ReadonlyArray<readonly EsqlValue[]>): AlertG
     alertIds: toList(alertIds),
     values: values.map(String),
   }));
+
+const isNameCharacter = (character: string): boolean =>
+  (character >= 'a' && character <= 'z') ||
+  (character >= 'A' && character <= 'Z') ||
+  (character >= '0' && character <= '9') ||
+  '_@-'.includes(character);
+
+/** Dotted segments of letters, digits, `_`, `@` and `-`: safe to put inside ES|QL text as a field. */
+export const isLiteralField = (field: string): boolean =>
+  field.split('.').every((segment) => segment.length > 0 && [...segment].every(isNameCharacter));
+
+export const assertLiteralField = (field: string): void => {
+  if (!isLiteralField(field)) {
+    throw new Error(`"${field}" is not a literal field path`);
+  }
+};

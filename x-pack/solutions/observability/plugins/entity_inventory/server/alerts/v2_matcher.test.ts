@@ -6,7 +6,6 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getV2MatchKeys } from './match_keys';
 import {
   buildV2GroupQuery,
   buildV2TotalQuery,
@@ -15,7 +14,8 @@ import {
 } from './v2_matcher';
 import type { EntityRow, MatchKey } from './types';
 
-const [uidKey, nameKey] = getV2MatchKeys('k8s.pod');
+const uidKey = ['k8s.pod.uid'];
+const nameKey = ['k8s.pod.name', 'k8s.namespace.name'];
 const scope = { from: '2026-11-03T10:00:00.000Z', spaceId: 'default' };
 
 /** The client types a cell as a scalar, though ES|QL returns an array for a multi-value cell. */
@@ -48,7 +48,7 @@ describe('v2 alert queries', () => {
   });
 
   it('refuses a field that is not a literal path', () => {
-    const key: MatchKey = [{ entityColumn: 'x', alertField: 'a"), DROP data //' }];
+    const key: MatchKey = ['a"), DROP data //'];
 
     expect(() => buildV2GroupQuery(key, scope)).toThrow('is not a literal field path');
   });
@@ -83,6 +83,12 @@ describe('createV2AlertMatcher', () => {
       if (query.includes('COUNT(*)')) {
         return { columns: [{ name: 'active_alerts', type: 'long' }], values: [[5]] };
       }
+      if (query.includes('"kubernetes.pod.uid"')) {
+        return { columns: [], values: [['v4', 'u2']] };
+      }
+      if (query.includes('"kubernetes.')) {
+        return { columns: [], values: [] };
+      }
       return query.includes('"k8s.pod.uid"')
         ? { columns: [], values: [[multiValue('v1', 'v2'), 'u1']] }
         : { columns: [], values: [['v3', 'cart-2', 'checkout']] };
@@ -90,24 +96,15 @@ describe('createV2AlertMatcher', () => {
     return esClient;
   };
 
-  it('attributes alerts through every key of the type and reports the total', async () => {
+  it('attributes alerts through every key and every spelling of it, and reports the total', async () => {
     const result = await createV2AlertMatcher({ esClient: createClient(), scope }).match({
-      type: 'k8s.pod',
+      keys: [uidKey, nameKey],
       entities,
     });
 
     expect(result.source).toBe('v2');
     expect(result.activeAlerts).toBe(5);
     expect(result.alertIdsByEntity.get('k8s.pod:u1')).toEqual(new Set(['v1', 'v2']));
-    expect(result.alertIdsByEntity.get('k8s.pod:u2')).toEqual(new Set(['v3']));
-  });
-
-  it('reads the keys under the column names of the entity', () => {
-    expect(getV2MatchKeys('k8s.pod').flat()).toEqual(
-      expect.arrayContaining([
-        { entityColumn: 'k8s.pod.uid', alertField: 'k8s.pod.uid' },
-        { entityColumn: 'k8s.namespace.name', alertField: 'k8s.namespace.name' },
-      ])
-    );
+    expect(result.alertIdsByEntity.get('k8s.pod:u2')).toEqual(new Set(['v3', 'v4']));
   });
 });
