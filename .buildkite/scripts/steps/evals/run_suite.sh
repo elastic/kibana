@@ -178,7 +178,7 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    # One JSON object per line: { connectorId, shardId, specFiles }. Read below with `jq`.
+    # One JSON object per line: { connectorId, shardId, specFiles, judge? }. Read below with `jq`.
     # Weekly runs apply specModelGroups[] so a connector only gets the specs in a shard that asked for it.
     FANOUT_MATRIX="$(
       EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
@@ -265,12 +265,10 @@ EOF
         fi
         fanout_step_keys+=("$step_key")
 
-        step_judge_connector="${EVAL_CONNECTOR_ID:-}"
-        if [[ "$shard_id" == "orcabench" ]]; then
-          # Same id as ORCA_JUDGE_CONNECTOR_ID in evals/investigation/orca_judge.ts.
-          # The agent model stays EVAL_PROJECT. Customer-0 is unchanged.
-          step_judge_connector="eis-openai-gpt-5-4"
-        fi
+        # A shard's `judge` in evals.suites.json pins its evaluation connector. The agent model
+        # stays EVAL_PROJECT, and shards without one keep the suite-wide judge.
+        row_judge="$(jq -r '.judge // ""' <<<"$row")"
+        step_judge_connector="${row_judge:-${EVAL_CONNECTOR_ID:-}}"
 
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"

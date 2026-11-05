@@ -8,7 +8,7 @@
 import type { EvalConnector, InferenceEndpointDefinition } from '@kbn/evals';
 import { isInferenceEndpointDefinition, loadInferenceEndpoints } from '@kbn/evals';
 
-/** EIS connector id for openai-gpt-5.4, also set for the orcabench shard in run_suite.sh. */
+/** EIS connector id for openai-gpt-5.4, also the orcabench shard's `judge` in evals.suites.json. */
 export const ORCA_JUDGE_CONNECTOR_ID = 'eis-openai-gpt-5-4';
 
 const ORCA_JUDGE_MODEL_ID = 'openai-gpt-5.4';
