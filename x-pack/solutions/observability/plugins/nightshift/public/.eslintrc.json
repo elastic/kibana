@@ -1,0 +1,120 @@
+{
+  "settings": {
+    "import/resolver": { "node": { "extensions": [".ts", ".tsx", ".js", ".json"] } }
+  },
+  "rules": {
+    "import/no-restricted-paths": [
+      "error",
+      {
+        "zones": [
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/pages/automations",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "except": ["./automations"],
+            "message": "A page never imports another page. Move shared code to components/ or data/ first."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/pages/detection",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "except": ["./detection"],
+            "message": "A page never imports another page. Move shared code to components/ or data/ first."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/pages/knowledge",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "except": ["./knowledge"],
+            "message": "A page never imports another page. Move shared code to components/ or data/ first."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/pages/landing",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "except": ["./landing"],
+            "message": "A page never imports another page. Move shared code to components/ or data/ first."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/pages/settings",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "except": ["./settings"],
+            "message": "A page never imports another page. Move shared code to components/ or data/ first."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/pages/sources",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "except": ["./sources"],
+            "message": "A page never imports another page. Move shared code to components/ or data/ first."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/data",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/components",
+            "message": "data/ must not import components/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/data",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "message": "data/ must not import pages/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/data",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/application",
+            "message": "data/ must not import application/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/hooks",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/components",
+            "message": "hooks/ must not import components/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/hooks",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "message": "hooks/ must not import pages/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/hooks",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/application",
+            "message": "hooks/ must not import application/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/common",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/components",
+            "message": "common/ must not import components/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/common",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "message": "common/ must not import pages/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/common",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/application",
+            "message": "common/ must not import application/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/components",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "message": "components/ must not import pages/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/components",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/application",
+            "message": "components/ must not import application/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/chat",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/pages",
+            "message": "chat/ must not import pages/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/chat",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/application",
+            "message": "chat/ must not import application/."
+          },
+          {
+            "target": "./x-pack/solutions/observability/plugins/nightshift/public/components/ui",
+            "from": "./x-pack/solutions/observability/plugins/nightshift/public/components/entities",
+            "message": "components/ui is presentational and must not import entity widgets."
+          }
+        ]
+      }
+    ]
+  }
+}
