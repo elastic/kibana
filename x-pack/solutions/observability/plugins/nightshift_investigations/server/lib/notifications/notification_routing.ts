@@ -5,72 +5,95 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { types } from '@kbn/storage-adapter';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { defineInvestigationAttachment } from '@kbn/agentic-investigations-plugin/server';
 import { investigationNotificationDestinationSchema } from '../../../common';
 
 export const NOTIFICATION_ROUTING_ATTACHMENT_TYPE = 'nightshift.notification_routing';
-export const notificationPhaseSchema = z.enum(['started', 'completed', 'failed']);
+export const notificationPhaseSchema = lazySchema(() =>
+  z.enum(['started', 'completed', 'failed', 'timed_out'])
+);
 const identifier = z.string().min(1).max(500);
 const messageId = z.string().min(1).max(100);
 const timestamp = z.string().min(1).max(64);
+const storedPhase = lazySchema(() => z.string().min(1).max(100));
+const outcomeStatusSchema = lazySchema(() => z.enum(['sent', 'failed', 'unconfirmed']));
 
-export const notificationAttemptSchema = z.strictObject({
-  execution_id: identifier,
-  destination_id: identifier,
-  phase: notificationPhaseSchema,
-  attempt_id: z.string().min(1).max(100),
-  status: z.enum(['sent', 'failed', 'unconfirmed']),
-  attempted_at: timestamp,
-  creates_root: z.boolean(),
-  message_ts: messageId.optional(),
-  external_conversation_id: identifier.optional(),
-  sent_at: timestamp.optional(),
-  error: z.string().max(MAX_TEXT_LENGTH).optional(),
-});
-
-export const notificationRoutingSchema = z.strictObject({
-  id: identifier,
-  spaceId: identifier,
-  conversationId: identifier,
-  investigationId: identifier,
-  destinations: z.array(
-    investigationNotificationDestinationSchema
-      .omit({ automation_id: true, automation_name: true })
-      .extend({
-        id: identifier,
-        automations: z.array(
-          z.strictObject({
-            id: z.string().max(500).optional(),
-            name: z.string().max(500).optional(),
-          })
-        ),
-        thread: z.strictObject({ channel: identifier, thread_ts: messageId }).optional(),
-      })
-  ),
-  executions: z.array(
-    z.strictObject({
-      id: identifier,
-      workflow_id: identifier,
-      destination_ids: z.array(identifier),
-      terminal_phase: z.enum(['completed', 'failed']).optional(),
+export const notificationAttemptSchema = lazySchema(() =>
+  z
+    .object({
+      execution_id: identifier,
+      destination_id: identifier,
+      phase: storedPhase,
+      attempt_id: z.string().min(1).max(100),
+      status: z.string().min(1).max(100),
+      attempted_at: timestamp,
+      creates_root: z.boolean(),
+      message_ts: messageId.optional(),
+      external_conversation_id: identifier.optional(),
+      sent_at: timestamp.optional(),
+      error: z.string().max(MAX_TEXT_LENGTH).optional(),
     })
-  ),
-  attempts: z.array(notificationAttemptSchema),
-});
+    .loose()
+);
+
+// Preserve additive fields at every level when an older instance updates a newer document.
+const storedNotificationRoutingSchema = lazySchema(() =>
+  z
+    .object({
+      spaceId: identifier,
+      conversationId: identifier,
+      investigationId: identifier,
+      destinations: z.array(
+        investigationNotificationDestinationSchema
+          .omit({ automation_id: true, automation_name: true })
+          .extend({
+            id: identifier,
+            automations: z.array(
+              z
+                .object({
+                  id: z.string().max(500).optional(),
+                  name: z.string().max(500).optional(),
+                })
+                .loose()
+            ),
+            thread: z.object({ channel: identifier, thread_ts: messageId }).loose().optional(),
+          })
+          .loose()
+      ),
+      executions: z.array(
+        z
+          .object({
+            id: identifier,
+            workflow_id: identifier,
+            destination_ids: z.array(identifier),
+            terminal_phase: storedPhase.optional(),
+            lifecycle_claim_id: z.string().max(100).optional(),
+          })
+          .loose()
+      ),
+      attempts: z.array(notificationAttemptSchema),
+    })
+    .loose()
+);
+
+export const notificationRoutingSchema = lazySchema(() =>
+  storedNotificationRoutingSchema.extend({ id: identifier })
+);
 
 export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
 export type NotificationOutcome = Pick<
   NotificationAttempt,
-  'status' | 'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
+  'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
 > & {
+  status: z.infer<typeof outcomeStatusSchema>;
   channel?: string;
 };
 export type NotificationRouting = z.infer<typeof notificationRoutingSchema>;
-export type StoredNotificationRouting = Omit<NotificationRouting, 'id'>;
+export type StoredNotificationRouting = z.infer<typeof storedNotificationRoutingSchema>;
 export type NotificationDestination = NotificationRouting['destinations'][number];
 
 /**
