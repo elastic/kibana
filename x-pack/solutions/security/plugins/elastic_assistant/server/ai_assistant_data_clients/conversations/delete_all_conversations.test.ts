@@ -64,15 +64,6 @@ describe('deleteAllConversations', () => {
                       must: [
                         { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
                         {
-                          script: {
-                            script: {
-                              lang: 'painless',
-                              source:
-                                "def users = params._source['users']; return users instanceof List && users.size() == 1;",
-                            },
-                          },
-                        },
-                        {
                           nested: {
                             path: 'users',
                             query: {
@@ -82,6 +73,21 @@ describe('deleteAllConversations', () => {
                                   { term: { 'users.name': authenticatedUser.username } },
                                 ],
                                 minimum_should_match: 1,
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      must_not: [
+                        {
+                          nested: {
+                            path: 'users',
+                            query: {
+                              bool: {
+                                must_not: [
+                                  { term: { 'users.id': authenticatedUser.profile_uid } },
+                                  { term: { 'users.name': authenticatedUser.username } },
+                                ],
                               },
                             },
                           },

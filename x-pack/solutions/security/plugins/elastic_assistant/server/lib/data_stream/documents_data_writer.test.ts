@@ -91,15 +91,6 @@ describe('DocumentsDataWriter', () => {
                 },
               },
               {
-                script: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "def users = params._source['users']; return users instanceof List && users.size() == 1;",
-                  },
-                },
-              },
-              {
                 nested: {
                   path: 'users',
                   query: {
@@ -109,6 +100,21 @@ describe('DocumentsDataWriter', () => {
                         { term: { 'users.name': 'elastic' } },
                       ],
                       minimum_should_match: 1,
+                    },
+                  },
+                },
+              },
+            ],
+            must_not: [
+              {
+                nested: {
+                  path: 'users',
+                  query: {
+                    bool: {
+                      must_not: [
+                        { term: { 'users.id': 'my_profile_uid' } },
+                        { term: { 'users.name': 'elastic' } },
+                      ],
                     },
                   },
                 },
