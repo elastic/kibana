@@ -31,6 +31,8 @@ export const retry = {
   },
 } satisfies Record<string, Retry>;
 
+export const pdBalanced = { diskType: 'pd-balanced' } as const;
+
 export const spotAgent = (machineType: MachineType, zones: readonly SpotZone[]): AgentConfig => ({
   machineType,
   preemptible: true,

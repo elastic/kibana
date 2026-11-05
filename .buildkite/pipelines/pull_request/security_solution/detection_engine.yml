@@ -6,6 +6,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
@@ -25,6 +26,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
@@ -43,6 +45,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
@@ -61,6 +64,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
