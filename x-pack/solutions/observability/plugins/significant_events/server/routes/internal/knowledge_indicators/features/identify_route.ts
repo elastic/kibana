@@ -185,6 +185,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       body: z.object({
         connectorId: z.string().max(MAX_ID_LENGTH).optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
+        parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
         iteration: z.number().optional(),
         documents: inferenceDocumentsSchema,
         samplingTelemetry: z.object({
@@ -226,6 +227,13 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
     const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
+    const parentWorkflowExecutionId = params.body.parentWorkflowExecutionId?.trim();
+    const workflowProvenance = {
+      ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+      ...(parentWorkflowExecutionId
+        ? { parent_workflow_execution_id: parentWorkflowExecutionId }
+        : {}),
+    };
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
@@ -275,7 +283,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         trackFeaturesIdentified: (data) =>
           telemetry.trackFeaturesIdentified({
             ...data,
-            ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+            ...workflowProvenance,
           }),
       });
 
@@ -297,7 +305,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       telemetry.trackFeaturesIdentified(
         buildTelemetry(
           {
-            ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+            ...workflowProvenance,
             run_id: resolvedRunId,
             connector_id: connectorId,
             iteration: iteration ?? 1,

@@ -18,6 +18,7 @@ export interface GenerateKIQueriesParams {
   connectorId?: string;
   runId: string;
   workflowExecutionId?: string;
+  parentWorkflowExecutionId?: string;
   maxExistingQueriesForContext: number;
 }
 
@@ -40,6 +41,7 @@ export async function generateKIQueries(
     connectorId: connectorIdOverride,
     runId,
     workflowExecutionId,
+    parentWorkflowExecutionId,
     maxExistingQueriesForContext,
   } = params;
   const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
@@ -74,6 +76,9 @@ export async function generateKIQueries(
 
   telemetry.trackSignificantEventsQueriesGenerated({
     ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+    ...(parentWorkflowExecutionId
+      ? { parent_workflow_execution_id: parentWorkflowExecutionId }
+      : {}),
     count: queries.length,
     connector_id: connectorId,
     source_id: source.id,

@@ -497,6 +497,7 @@ const generateQueriesRoute = createServerRoute({
             'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
           ),
         runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
+        parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
         maxExistingQueriesForContext: z
           .number()
           .int()
@@ -536,6 +537,7 @@ const generateQueriesRoute = createServerRoute({
     const {
       connectorId,
       runId,
+      parentWorkflowExecutionId,
       maxExistingQueriesForContext = MAX_EXISTING_QUERIES_FOR_CONTEXT,
     } = params.body ?? {};
     const resolvedRunId = runId?.trim() || uuidv4();
@@ -563,6 +565,7 @@ const generateQueriesRoute = createServerRoute({
         connectorId,
         runId: resolvedRunId,
         workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
+        parentWorkflowExecutionId: parentWorkflowExecutionId?.trim() || undefined,
         maxExistingQueriesForContext,
       },
       {

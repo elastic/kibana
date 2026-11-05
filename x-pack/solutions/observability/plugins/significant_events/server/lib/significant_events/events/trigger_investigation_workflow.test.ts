@@ -117,8 +117,8 @@ describe('triggerInvestigationWorkflow', () => {
     expect(options).toEqual({ entryPoint: 'start_api' });
   });
 
-  it('passes the alert-producing workflow execution id into investigation context', async () => {
-    const event = createEvent({ workflow_execution_id: 'discovery-run-1' });
+  it('omits source_workflow_execution_id, which may name an attached investigation', async () => {
+    const event = createEvent({ workflow_execution_id: 'attached-investigation-1' });
     const nightshiftInvestigations = createNightshiftInvestigations();
 
     await triggerInvestigationWorkflow({
@@ -129,7 +129,7 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
-    expect(request.context.source_workflow_execution_id).toBe('discovery-run-1');
+    expect(request.context).not.toHaveProperty('source_workflow_execution_id');
   });
 
   it('passes the event source_ids through', async () => {

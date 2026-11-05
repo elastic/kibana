@@ -13,7 +13,10 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
 } from '.';
-import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import {
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
+} from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowJsonSchema {
@@ -77,6 +80,9 @@ const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWor
 const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as ParsedWorkflow;
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
+) as ParsedWorkflow;
+const featuresIdentification = parse(
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
 const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
   | ParsedWorkflow & {
@@ -154,9 +160,7 @@ describe('significant events persistence workflow contracts', () => {
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
     expect(triggerStep.with?.source_ids).toContain('source_ids');
-    expect(triggerStep.with?.context?.source_workflow_execution_id).toContain(
-      'workflow_execution_id'
-    );
+    expect(triggerStep.with?.context?.source_workflow_execution_id).toBe('{{ execution.id }}');
     // Open investigations are matched by subject; the start step takes no concurrency key.
     expect(triggerStep.with).not.toHaveProperty('concurrency_key');
   });
@@ -202,6 +206,15 @@ describe('significant events persistence workflow contracts', () => {
     expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
       '${{ execution.id }}'
     );
+  });
+
+  it('sends the parent execution id to the KI child routes', () => {
+    expect(
+      requireStep(queriesGeneration, 'generate_queries').with?.body?.parentWorkflowExecutionId
+    ).toBe('${{ parent.executionId }}');
+    expect(
+      requireStep(featuresIdentification, 'identify_inferred').with?.body?.parentWorkflowExecutionId
+    ).toBe('${{ parent.executionId }}');
   });
 
   it('stamps discovery detections only from reported completed outcomes', () => {

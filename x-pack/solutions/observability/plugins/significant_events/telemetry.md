@@ -18,17 +18,25 @@ invoked the tool and `investigation_workflow_execution_id` identifies the attach
 
 ## Joining a pipeline
 
-Join a Significant Events row's `workflow_execution_id` to the Workflow Engine terminal event's
-`workflowExecutionId`. For child workflows, the terminal event's `executionChain` contains every
-ancestor execution ID, root first and direct parent last. This reconstructs an onboarding run and
-its feature/query children, or an orchestrator run and its detection/discovery children, without a
+`features-identified` and `queries-generated` also carry `parent_workflow_execution_id`: the
+onboarding execution that started their child workflow, taken from the engine-provided
+`parent.executionId` template context. An onboarding run and its children join on
+`onboarding-scheduled.workflow_execution_id = parent_workflow_execution_id` with Nightshift events
+alone. The field is absent when a child workflow runs on its own.
+
+For the orchestrator tree, join a Significant Events row's `workflow_execution_id` to the Workflow
+Engine terminal event's `workflowExecutionId`. For child workflows, the terminal event's
+`executionChain` contains every ancestor execution ID, root first and direct parent last. This
+reconstructs an orchestrator run and its detection/discovery children without a
 stream-and-time-window join.
 
 Onboarding and the orchestrator are independent root runs, not one execution tree. Link the exact
 artifacts between them by `source_id`/`source_ids`: onboarding produces source-scoped KIs and
 detection/discovery consume those source-scoped KIs. Link discovery to a triggered investigation by
-the event's stable `event_id`; the investigation context also carries
-`source_workflow_execution_id`, copied from the alert version that triggered it.
+the event's stable `event_id`. An automatic trigger from discovery also puts the discovery
+execution ID in the investigation context as `source_workflow_execution_id`. A manual trigger
+sends none: the alert's latest version may name an attached investigation rather than the run
+that produced it.
 
 `detection-scan` belongs to the detection workflow. Detection and discovery can share an
 orchestrator ancestor through `executionChain`, but their immediate execution IDs remain distinct.

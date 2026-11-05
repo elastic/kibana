@@ -16,7 +16,13 @@ interface OptionalWorkflowExecutionTelemetryProps {
   workflow_execution_id?: string;
 }
 
-interface KnowledgeIndicatorQueriesGeneratedProps extends OptionalWorkflowExecutionTelemetryProps {
+interface ParentWorkflowExecutionTelemetryProps {
+  parent_workflow_execution_id?: string;
+}
+
+interface KnowledgeIndicatorQueriesGeneratedProps
+  extends OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
   count: number;
   connector_id: string;
   input_tokens_used: number;
@@ -29,7 +35,8 @@ interface KnowledgeIndicatorQueriesGeneratedProps extends OptionalWorkflowExecut
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps
-  extends OptionalWorkflowExecutionTelemetryProps {
+  extends OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
   /** @deprecated Use `workflow_execution_id`. */
   run_id: string;
   connector_id: string;
@@ -182,5 +189,6 @@ export {
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,
   type OptionalWorkflowExecutionTelemetryProps,
+  type ParentWorkflowExecutionTelemetryProps,
   type WorkflowExecutionTelemetryProps,
 };

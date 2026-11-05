@@ -20,6 +20,7 @@ import type {
   AgentToolEventWriteProps,
   AgentToolEventSearchProps,
   OptionalWorkflowExecutionTelemetryProps,
+  ParentWorkflowExecutionTelemetryProps,
   WorkflowExecutionTelemetryProps,
 } from './types';
 
@@ -45,9 +46,21 @@ const optionalWorkflowExecutionTelemetrySchema: RootSchema<OptionalWorkflowExecu
     },
   };
 
+const parentWorkflowExecutionTelemetrySchema: RootSchema<ParentWorkflowExecutionTelemetryProps> = {
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Execution ID of the workflow that started the producing workflow via workflow.execute (the onboarding run for KI children); joins to onboarding-scheduled workflow_execution_id; absent for top-level or standalone runs',
+      optional: true,
+    },
+  },
+};
+
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
     ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
     count: {
       type: 'long',
       _meta: {
@@ -155,6 +168,7 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
 const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorFeaturesIdentifiedProps> =
   {
     ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
     run_id: {
       type: 'keyword',
       _meta: {

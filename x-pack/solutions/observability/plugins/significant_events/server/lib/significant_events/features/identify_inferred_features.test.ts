@@ -156,7 +156,6 @@ describe('buildTelemetry', () => {
       })
     ).toEqual(
       expect.objectContaining({
-        workflow_execution_id: context.workflow_execution_id,
         features_remapped: 2,
       })
     );

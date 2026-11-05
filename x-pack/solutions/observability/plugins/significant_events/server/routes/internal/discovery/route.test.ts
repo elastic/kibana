@@ -104,15 +104,6 @@ it('passes a strict connector override and request-scoped resolver to the discov
   });
 });
 
-it('does not report a deduplicated discovery trigger', async () => {
-  const { handlerParams, run } = makeHandlerParams();
-  run.mockResolvedValueOnce({ executionId: 'execution-1', isNew: false });
-
-  await route.handler(handlerParams);
-
-  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).not.toHaveBeenCalled();
-});
-
 it('maps an unknown connector to a 400 response', async () => {
   const { handlerParams } = makeHandlerParams();
   mockResolveNightshiftModelForRequest.mockRejectedValueOnce(

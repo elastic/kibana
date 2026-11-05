@@ -62,6 +62,7 @@ steps:
       body:
         connectorId: "${{ inputs.connectorId }}"
         runId: "${{ execution.id }}"
+        parentWorkflowExecutionId: "${{ parent.executionId }}"
         maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
     on-failure:
       retry:

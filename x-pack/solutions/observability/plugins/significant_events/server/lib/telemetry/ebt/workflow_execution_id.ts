@@ -8,8 +8,6 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
 
-/**
- * Returns the execution ID injected by a Workflow Engine `kibana.request` step.
- */
+/** Returns the execution ID a Workflow Engine `kibana.request` step injects. */
 export const getWorkflowExecutionIdFromRequest = (request: KibanaRequest): string | undefined =>
   request.isInternalApiRequest ? getEmitterWorkflowExecutionIdFromRequest(request) : undefined;

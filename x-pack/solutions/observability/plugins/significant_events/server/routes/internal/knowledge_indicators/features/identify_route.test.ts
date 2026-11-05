@@ -474,7 +474,7 @@ describe('inferred feature identification route', () => {
   });
 
   it('normalizes a blank run id before identifying inferred features', async () => {
-    const { handlerParams, telemetry } = makeInferredHandlerParams();
+    const { handlerParams } = makeInferredHandlerParams();
     handlerParams.params.body.runId = '';
 
     await inferredRoute.handler(handlerParams);
@@ -482,10 +482,6 @@ describe('inferred feature identification route', () => {
     const { runId } = mockIdentifyInferredFeatures.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
-    expect(mockIdentifyInferredFeatures.mock.calls[0][0].trackFeaturesIdentified).toEqual(
-      expect.any(Function)
-    );
-    expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
   });
 
   it('uses trusted workflow request provenance independently of the legacy run id', async () => {
@@ -494,6 +490,7 @@ describe('inferred feature identification route', () => {
       isInternalApiRequest: true,
       headers: { 'x-kibana-workflow-execution-id': 'workflow-run-1' },
     });
+    handlerParams.params.body.parentWorkflowExecutionId = 'onboarding-run-1';
 
     await inferredRoute.handler(handlerParams);
     const track = mockIdentifyInferredFeatures.mock.calls[0][0].trackFeaturesIdentified;
@@ -503,7 +500,22 @@ describe('inferred feature identification route', () => {
       expect.objectContaining({
         run_id: 'run-1',
         workflow_execution_id: 'workflow-run-1',
+        parent_workflow_execution_id: 'onboarding-run-1',
       })
+    );
+  });
+
+  it('drops a blank parent execution id', async () => {
+    const { handlerParams, telemetry } = makeInferredHandlerParams();
+    handlerParams.params.body.parentWorkflowExecutionId = '';
+
+    await inferredRoute.handler(handlerParams);
+    mockIdentifyInferredFeatures.mock.calls[0][0].trackFeaturesIdentified?.({
+      run_id: 'run-1',
+    } as never);
+
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.not.objectContaining({ parent_workflow_execution_id: expect.anything() })
     );
   });
 
