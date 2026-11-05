@@ -26,7 +26,6 @@ import { readAnomalies } from './read_anomalies';
 import { readWatchlistNames } from './read_watchlist_names';
 import { getCandidateRisk, readEntities, toAttachmentIdentifier } from './read_entities';
 import type { BriefPriority } from './prompts';
-import { renderBriefHtml } from './render_brief_html';
 import { verifyDraft } from './verify_draft';
 import type { BriefRiskHistory } from './view_model';
 import { buildViewModel } from './view_model';
@@ -55,7 +54,7 @@ export const generateBrief = async ({
   const { candidates } = entities;
   if (candidates.length === 0) {
     const viewModel = buildViewModel({ scope, spaceId, entities, facts: [] });
-    return { ...renderBriefHtml(viewModel), viewModel, priorityCount: 0 };
+    return { viewModel, priorityCount: 0 };
   }
 
   const [
@@ -112,7 +111,6 @@ export const generateBrief = async ({
       `${verified.droppedPriorityCount} dropped, ${Date.now() - started}ms`
   );
   return {
-    ...renderBriefHtml(viewModel),
     viewModel,
     entityTableTag,
     priorityCount: verified.priorities.length,

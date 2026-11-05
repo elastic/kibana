@@ -26,6 +26,7 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import type { EntityAnalyticsAiBriefResult } from '../../../common/entity_analytics/ai_brief/result';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -101,6 +102,40 @@ export const registerAttachmentUiDefinitions = ({
     },
     getIcon: () => 'bell',
   });
+};
+
+export const registerEntityAnalyticsAiBriefResultAttachment = ({
+  attachments,
+  application,
+  agentBuilder,
+  chrome,
+  experimentalFeatures,
+  searchSession,
+  uiSettings,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
+  searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
+}): void => {
+  void import('./entity_analytics_ai_brief_result').then(
+    ({ createEntityAnalyticsAiBriefResultAttachmentDefinition }) => {
+      attachments.addAttachmentType<EntityAnalyticsAiBriefResult>(
+        SecurityAgentBuilderAttachments.entityAnalyticsAiBriefResult,
+        createEntityAnalyticsAiBriefResultAttachmentDefinition({
+          application,
+          agentBuilder,
+          chrome,
+          experimentalFeatures,
+          searchSession,
+          uiSettings,
+        })
+      );
+    }
+  );
 };
 
 /**

@@ -16,7 +16,7 @@
  * 4. `draft_brief`: the model writes the summary, priorities and recommendation.
  * 5. `verify_draft`: keeps the draft to the flagged entities.
  * 6. `view_model`: the brief as plain data, with its notes, counts, priorities and risk history.
- * 7. `render_brief_html`: the HTML for an inline visualization, and the height of its card.
+ * 7. `render_brief_html`: the previous HTML renderer, retained as a comparison reference.
  *
  * `prompts` holds everything sent to a model: the drafting prompt and schema, and what the agent is told.
  * `describe_scope` holds the wording the steps share, and `types` the types.
