@@ -469,9 +469,9 @@ Good (spread, no isolating scope):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*)
 
 Good (dimensions, isolating; one set of f_, a_ and present_ columns per candidate field):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS rows = COUNT(*) WHERE {failure}, `f_{field1}` = COUNT_DISTINCT(`{field1}`) WHERE {failure}, `a_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(`{field1}`) WHERE {failure}, `f_{field2}` = COUNT_DISTINCT(`{field2}`) WHERE {failure}, `a_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(`{field2}`) WHERE {failure}
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS rows = COUNT(*) WHERE {failure}, `f_{field1}` = COUNT_DISTINCT(`{field1}`) WHERE {failure}, `a_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE ({failure}) AND `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`) WHERE {failure}, `a_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE ({failure}) AND `{field2}` IS NOT NULL
 Good (dimensions, no isolating scope; one set of f_ and present_ columns per candidate field):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS rows = COUNT(*), `f_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(`{field1}`), `f_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(`{field2}`)
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS rows = COUNT(*), `f_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE `{field2}` IS NOT NULL
 
 Good (baseline, isolating):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day) | EVAL share = ROUND(count * 100.0 / lines, 1) | SORT day ASC
@@ -487,7 +487,7 @@ Good (breakdown):
 
 Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets
 Avoid: a backtick you add before or around {failure}   -- parse error; paste {failure} unchanged
-Avoid: `present_` = COUNT(*) WHERE ({failure}) AND `{field}` IS NOT NULL   -- repeats {failure} and invites a stray backtick; use the COUNT(`{field}`) forms in Good (dimensions)
+Avoid: `present_` = COUNT(`{field}`)   -- counts values, not rows, when the field is multivalued
 Avoid: an aggregate after BY (BY day = ..., earliest = MIN(@timestamp) WHERE {failure})   -- parse error; write the aggregate before BY
 ```
 
