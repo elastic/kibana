@@ -10,7 +10,7 @@
  * fields a replay reads. Used to pin the replay planner against the schema the
  * suite actually writes -- synthetic fixtures cannot catch that drift.
  */
-import type { EvaluationScoreDocument } from '@kbn/evals-common/impl/schemas/common_attributes.gen';
+import type { EvaluationScoreDocument } from '@kbn/evals-common';
 
 export const GOLDEN_SCORES_SAMPLE = [
   {
