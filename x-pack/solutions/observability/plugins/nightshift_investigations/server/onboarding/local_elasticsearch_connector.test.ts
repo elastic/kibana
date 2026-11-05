@@ -102,7 +102,7 @@ describe('createLocalElasticsearchConnector', () => {
       name: 'nightshift-local-elasticsearch-connector-1',
       role_descriptors: {
         nightshift_local_read: {
-          cluster: [],
+          cluster: ['cluster:monitor/main'],
           indices: [
             {
               names: ['logs-*', 'metrics-*', 'traces-*'],
