@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ErrorCallout } from '@kbn/discover-utils';
+import { ErrorCallout } from '@kbn/discover-utils/components';
 import { normalizeChartSectionSearchError } from '../../common/errors/normalize_chart_section_search_error';
 import { useExternalServices } from '../../context/external_services';
 

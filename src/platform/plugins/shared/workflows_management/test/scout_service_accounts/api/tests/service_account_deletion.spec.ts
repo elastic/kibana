@@ -34,9 +34,13 @@ apiTest.describe(
 
     apiTest.afterAll(teardown);
 
-    for (const bound of [false, true]) {
+    for (const { bound, force } of [
+      { bound: false, force: true },
+      { bound: true, force: true },
+      { bound: true, force: false },
+    ]) {
       apiTest(
-        `returns conflict when force-deleting ${
+        `returns conflict when ${force ? 'force-deleting' : 'deleting'} ${
           bound ? 'a bound' : 'an unbound'
         } workflow with a paused execution`,
         async ({ apiClient }) => {
@@ -62,10 +66,10 @@ apiTest.describe(
           try {
             const pausedExecution = await wait(apiClient, executionId, 'waiting_for_input');
             await expectPausedExecutionSearchable(apiClient, id, executionId);
-            const response = await apiClient.delete(`api/workflows/workflow/${id}?force=true`, {
-              headers,
-              responseType: 'json',
-            });
+            const response = await apiClient.delete(
+              `api/workflows/workflow/${id}${force ? '?force=true' : ''}`,
+              { headers, responseType: 'json' }
+            );
             expect(response, JSON.stringify(response.body)).toHaveStatusCode(409);
             const workflow = await apiClient.get(`api/workflows/workflow/${id}`, {
               headers,

@@ -55,13 +55,17 @@ export const sendUpdateAgentlessPolicy = async (
   policyId: string,
   body: UpdateAgentlessPolicyRequest['body'],
   // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
-  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+  {
+    onIacPersistError,
+    query,
+  }: CloudConnectorIacPersistOptions & { query?: UpdateAgentlessPolicyRequest['query'] } = {}
 ) => {
   const result = await sendRequestForRq<UpdateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getUpdatePath(policyId),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
+    query,
   });
   await persistPendingCloudConnectorIac({
     policyName: body.name,

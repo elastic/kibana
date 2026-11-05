@@ -280,8 +280,6 @@ steps:
         investigation_started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
         investigation_ended_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
         investigation_execution_id: '{{ execution.id }}'
-        # The investigation's own model judges it until a fixed judge model is configured.
-        judge_connector_id: '{{ steps.resolve_model.output.connector_id }}'
         # `${{ }}` passes a missing optional value as undefined; `{{ }}` would pass an empty string.
         entry_point: '${{ inputs.context.entry_point }}'
         alert_rule_type: '${{ inputs.context.alerts[0].rule_type_id }}'
