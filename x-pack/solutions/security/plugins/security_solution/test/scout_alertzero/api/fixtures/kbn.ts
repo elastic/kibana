@@ -114,9 +114,19 @@ interface ActionsConnector {
 }
 
 /**
- * Preconfigured chat-completion inference connectors on this stack, via the public Actions
- * list route. Empty on a stack booted without a connector source (plain CI): the e2e specs
- * use this to skip their LLM-dependent flow with an explicit reason instead of failing.
+ * Connector types the inference plugin accepts for LLM calls (`InferenceConnectorType` in
+ * `@kbn/inference-common`, inlined: the barrel is not loadable by Playwright's transform).
+ * `.inference` additionally has to be a `chat_completion` endpoint.
+ */
+const LLM_CONNECTOR_TYPES: readonly string[] = ['.gen-ai', '.bedrock', '.gemini'];
+
+/**
+ * Preconfigured connectors on this stack that the Attack Discovery / AlertZero workflows can
+ * call for chat completion, via the public Actions list route. Mirrors the server's
+ * `isSupportedConnector`: `.gen-ai`, `.bedrock` and `.gemini` (what CI's
+ * `KIBANA_TESTING_AI_CONNECTORS` supplies), plus `.inference` limited to `chat_completion`.
+ * Empty on a stack booted without a connector source (plain CI): the e2e specs use this to
+ * skip their LLM-dependent flow with an explicit reason instead of failing.
  */
 export const listChatCompletionConnectors = async (
   api: AlertZeroApi
@@ -127,7 +137,8 @@ export const listChatCompletionConnectors = async (
   }
   return result.body.filter(
     (connector) =>
-      connector.connector_type_id === '.inference' &&
-      connector.config?.taskType === 'chat_completion'
+      LLM_CONNECTOR_TYPES.includes(connector.connector_type_id) ||
+      (connector.connector_type_id === '.inference' &&
+        connector.config?.taskType === 'chat_completion')
   );
 };

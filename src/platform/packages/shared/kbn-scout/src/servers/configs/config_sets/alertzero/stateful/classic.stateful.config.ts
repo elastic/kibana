@@ -18,7 +18,8 @@ import { buildEisServerConfig } from '../shared';
  * Kibana accepts at runtime are not set here: the suites' global setup writes them through
  * `internal/kibana/settings` and the global teardown restores the values it found, so a stack
  * started from this config set is not left with settings the tests changed (see
- * `setUpAlertZeroSettings` in `@kbn/scout-security`-based suites' `tests/global.setup.ts`).
+ * `applyRuntimeSettings` in the security_solution suite's `api/tests/global.setup.ts` and
+ * `applyAlertAnalysisSetting` in the alertzero suite's).
  *
  * Base flags — `alertzero` plus `agenticInvestigations` and `proposals`, which alertzero
  * requires and which default off; without them Kibana cascade-disables alertzero. On top of

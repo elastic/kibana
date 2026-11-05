@@ -37,6 +37,15 @@ export const FLOOR_ATTACK_DISCOVERY_WORKER_ID = 'system-security-floor-attack-di
 export const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-endpoint-analysis';
 export const ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
+/**
+ * The workflows an Attack Discovery Worker run executes besides its own: the shared runner it
+ * calls and the per-attack reviews the runner dispatches. Teardown has to drain these too, or
+ * they can still be mid-model-call when the service account is deleted.
+ */
+export const ATTACK_DISCOVERY_RUN_WORKFLOW_IDS = [
+  ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
+] as const;
 export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
   'system-security-forensics-run-endpoint-analysis';
 export const FORENSICS_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-forensics-proposal-gate';

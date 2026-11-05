@@ -72,8 +72,9 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     api: Awaited<ReturnType<typeof getAdminApi>>
   ): Promise<void> => {
     await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
-    await snapshotBeforeEnable(api, testData.ATTACK_DISCOVERY_WORKER_WORKFLOW_ID);
-    await snapshotBeforeEnable(api, testData.ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID);
+    for (const workflowId of testData.ATTACK_DISCOVERY_RUN_WORKFLOW_IDS) {
+      await snapshotBeforeEnable(api, workflowId);
+    }
   };
 
   // The settings write installs the managed workflow, but the catalog surfaces it through the
@@ -183,7 +184,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // with that reason instead of asserting whatever 4xx comes back first.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion inference connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
+        'no preconfigured chat-completion AI connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
       );
       // Do not trust spec order: another spec may have left an account bound to this worker.
       await resetWorker(api, WORKER_ID);
@@ -207,7 +208,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // stack booted without a preconfigured inference connector.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion inference connector on this stack; enabling a worker requires an AI model'
+        'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
       );
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
@@ -240,7 +241,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // stack booted without a preconfigured inference connector.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion inference connector on this stack; enabling a worker requires an AI model'
+        'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
       );
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);

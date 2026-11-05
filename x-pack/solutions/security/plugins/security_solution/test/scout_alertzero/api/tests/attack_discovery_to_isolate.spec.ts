@@ -212,7 +212,7 @@ apiTest.describe(
       skippedBeforeSetup = chatConnectors.length === 0;
       apiTest.skip(
         skippedBeforeSetup,
-        'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero attack-discovery flow requires one (agent_builder_smoke-style EIS connector source)'
+        'no preconfigured chat-completion AI connector on this stack; the LLM-dependent AlertZero attack-discovery flow requires one (agent_builder_smoke-style EIS connector source)'
       );
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       restoreAlertZero = await withAlertZeroEnabledInSpace({
@@ -414,12 +414,12 @@ apiTest.describe(
         // this enable starts — the AD workflow's scheduled run, the review it dispatches, and
         // any handoff children — never another suite's.
         executionBaselines.set(workerWorkflowId, knownExecutionIds);
-        // Fixed-id workflows the AD run and the two approvals start: the review the AD workflow
-        // dispatches, and the handoff and isolate action workflows the approvals run. A failure
-        // between the approval and the end of the action otherwise leaves them running as the
-        // service account teardown deletes next.
+        // Fixed-id workflows the AD run and the two approvals start: the shared runner the AD
+        // workflow executes, the review the runner dispatches, and the handoff and isolate
+        // action workflows the approvals run. A failure between the approval and the end of the
+        // action otherwise leaves them running as the service account teardown deletes next.
         await baselineWorkflowExecutions(api, [
-          testData.ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
+          ...testData.ATTACK_DISCOVERY_RUN_WORKFLOW_IDS,
           testData.HANDOFF_TO_FORENSICS_ACTION_ID,
           testData.ISOLATE_HOST_ACTION_ID,
         ]);
