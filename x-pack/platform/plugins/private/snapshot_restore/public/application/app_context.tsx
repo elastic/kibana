@@ -10,6 +10,7 @@ import type { i18n } from '@kbn/i18n';
 
 import type { CoreStart, ScopedHistory, IUiSettingsClient } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { HousekeepingPublicStart } from '@kbn/housekeeping-plugin/public';
 import type { ClientConfigType } from '../types';
 import type { HttpService, UiMetricService } from './services';
 
@@ -26,6 +27,7 @@ export interface AppDependencies {
     history: ScopedHistory;
   };
   config: ClientConfigType;
+  housekeeping?: HousekeepingPublicStart;
 }
 
 export const AppContextProvider = ({
@@ -53,6 +55,8 @@ export const useServices = () => useAppContext().services;
 export const useCore = () => useAppContext().core;
 
 export const useConfig = () => useAppContext().config;
+
+export const useHousekeeping = () => useAppContext().housekeeping;
 
 export const useToastNotifications = () => {
   const {

@@ -20,6 +20,8 @@ export const PLUGIN = {
   },
 };
 
+export const SNAPSHOT_RESTORE_LOCATOR_ID = 'SNAPSHOT_RESTORE_LOCATOR';
+
 export const MAJOR_VERSION = '8.0.0';
 
 export const API_BASE_PATH = '/api/snapshot_restore/';
