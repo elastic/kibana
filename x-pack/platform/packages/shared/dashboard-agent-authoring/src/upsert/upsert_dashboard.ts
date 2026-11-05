@@ -10,7 +10,11 @@ import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-comm
 import { reportUnderPlannedIdentifiers } from '../controls';
 import { indexDashboard } from '../dashboard_state';
 import type { ResolvePanelContent } from '../panels';
-import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
+import type {
+  ResolveAttachmentPanel,
+  ResolveControlFieldCapabilities,
+  ResolveEsqlControlColumnType,
+} from '../types';
 import type { PanelAuthoringNote } from '../resolve_panel';
 import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type DashboardValidator } from '../validate_dashboard';
@@ -27,6 +31,7 @@ interface ExecuteDashboardUpsertParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  resolveEsqlControlColumnType?: ResolveEsqlControlColumnType;
   validator?: DashboardValidator;
 }
 
@@ -59,6 +64,7 @@ export const executeDashboardUpsert = async ({
     'Attachment panel resolver is required for attachment-source panels.'
   ),
   resolveControlFieldCapabilities,
+  resolveEsqlControlColumnType,
   validator,
 }: ExecuteDashboardUpsertParams): Promise<DashboardUpsertResult> => {
   const originalDashboardData = structuredClone(
@@ -70,10 +76,17 @@ export const executeDashboardUpsert = async ({
     panels: plan.panels,
     controls: plan.controls,
     existingControls: originalDashboardData.pinned_panels ?? [],
-    removedControlIds: plan.removals.controlIds,
+    existingPanels: originalDashboardData.panels,
+    timeRange: plan.metadata.time_range ?? originalDashboardData.time_range,
+    removals: plan.removals,
     takenIds: plan.reservedIds,
     projectRouting: originalDashboardData.project_routing,
-    resolvers: { resolvePanelContent, resolveAttachmentPanel, resolveControlFieldCapabilities },
+    resolvers: {
+      resolvePanelContent,
+      resolveAttachmentPanel,
+      resolveControlFieldCapabilities,
+      resolveEsqlControlColumnType,
+    },
     logger,
   });
   const nextDashboardData = applyPlan({

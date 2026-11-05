@@ -533,6 +533,20 @@
         "evals:siem-readiness"
       ],
       "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "automatic-import",
+      "name": "Automatic Import",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-automatic-import/playwright.config.ts",
+      "tags": [
+        "platform",
+        "automatic-import"
+      ],
+      "ciLabels": [
+        "evals:automatic-import"
+      ],
+      "stepTimeoutInMinutes": 240,
+      "serverConfigSet": "evals_automatic_import"
     }
   ]
 }

@@ -27,14 +27,14 @@ jest.mock('../components/rules_table_columns/integrations', () => ({
 describe('useMigrationRulesTableColumns', () => {
   const mockOpenMigrationRuleDetails = jest.fn();
   const mockInstallMigrationRule = jest.fn();
-  const mockGetMigrationRuleData = jest.fn();
+  const mockGetRuleIntegrations = jest.fn();
 
   it('should call all create column functions with the correct arguments', () => {
     const { result } = renderHook(() =>
       useMigrationRulesTableColumns({
         openMigrationRuleDetails: mockOpenMigrationRuleDetails,
         installMigrationRule: mockInstallMigrationRule,
-        getMigrationRuleData: mockGetMigrationRuleData,
+        getRuleIntegrations: mockGetRuleIntegrations,
       })
     );
 
@@ -47,7 +47,7 @@ describe('useMigrationRulesTableColumns', () => {
     expect(columns.createSeverityColumn).toHaveBeenCalled();
     expect(columns.createAuthorColumn).toHaveBeenCalled();
     expect(createIntegrationsColumn).toHaveBeenCalledWith({
-      getMigrationRuleData: mockGetMigrationRuleData,
+      getRuleIntegrations: mockGetRuleIntegrations,
     });
     expect(columns.createActionsColumn).toHaveBeenCalledWith({
       disableActions: undefined,
@@ -64,7 +64,7 @@ describe('useMigrationRulesTableColumns', () => {
         disableActions: true,
         openMigrationRuleDetails: mockOpenMigrationRuleDetails,
         installMigrationRule: mockInstallMigrationRule,
-        getMigrationRuleData: mockGetMigrationRuleData,
+        getRuleIntegrations: mockGetRuleIntegrations,
       })
     );
 

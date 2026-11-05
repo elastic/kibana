@@ -158,8 +158,10 @@ describe('agent_images', () => {
       expect(config.diskSizeGb).toBe(200);
     });
 
-    it('omits disk size when not provided so the image default applies', () => {
-      expect(expandAgentQueue('n2-4-spot', undefined).diskSizeGb).toBeUndefined();
+    it('falls back to the default disk size when not provided', () => {
+      expect(expandAgentQueue('n2-4-spot', undefined).diskSizeGb).toBe(
+        DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb
+      );
     });
 
     it('returns base config for queue without spot or virt suffix', () => {

@@ -201,7 +201,7 @@ apiTest.describe(
     apiTest(
       'trace documents match snapshot after conversation with tool call',
       async ({ apiClient, esClient }) => {
-        const EXPECTED_SPAN_COUNT = 7;
+        const EXPECTED_SPAN_COUNT = 8;
         let hits: Array<{ _source?: unknown }> = [];
 
         // Mock the conversation and tool call

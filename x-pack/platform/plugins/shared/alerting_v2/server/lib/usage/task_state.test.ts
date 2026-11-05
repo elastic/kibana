@@ -168,4 +168,129 @@ describe('alerting v2 telemetry task state', () => {
       expect(() => v5.schema.validate(v4State)).toThrow();
     });
   });
+
+  describe('v6', () => {
+    const v6 = stateSchemaByVersion[6];
+
+    const v5State = {
+      has_errors: false,
+      runs: 5,
+      action_policies_count: 7,
+    };
+
+    const newFields = {
+      action_policies_count_by_status: { enabled: 5, disabled: 1, snoozed: 1 },
+      action_policies_count_by_grouping_mode: { per_alert: 6, all: 1 },
+      action_policies_count_by_throttle_strategy: { none: 4, every_time: 3 },
+      action_policies_workflows_per_policy: { p50: 1, p99: 3, avg: 1.4 },
+      action_policies_count_with_multiple_workflows: 2,
+    };
+
+    it('adds the action policy configuration counters as undefined', () => {
+      const result = v6.up(cloneDeep(v5State));
+
+      expect(result).toMatchObject({
+        action_policies_count_by_status: undefined,
+        action_policies_count_by_grouping_mode: undefined,
+        action_policies_count_by_throttle_strategy: undefined,
+        action_policies_workflows_per_policy: undefined,
+        action_policies_count_with_multiple_workflows: undefined,
+      });
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v6.up(cloneDeep(v5State))).toMatchObject(v5State);
+    });
+
+    it('produces a state the v6 schema accepts', () => {
+      expect(() => v6.schema.validate(v6.up(cloneDeep(v5State)))).not.toThrow();
+    });
+
+    it('accepts the new counters, including null percentiles', () => {
+      expect(() =>
+        v6.schema.validate({
+          ...v5State,
+          ...newFields,
+          action_policies_workflows_per_policy: { p50: null, p99: null, avg: null },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a count_by value outside the known vocabulary', () => {
+      expect(() =>
+        v6.schema.validate({
+          ...v5State,
+          action_policies_count_by_throttle_strategy: { burst: 1 },
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('v7', () => {
+    const v7 = stateSchemaByVersion[7];
+
+    const v6State = {
+      has_errors: false,
+      runs: 6,
+      action_policies_count: 7,
+      action_policies_count_by_status: { enabled: 5, disabled: 2 },
+    };
+
+    const newFields = {
+      dispatcher_alerts_count_by_outcome_24hr: { dispatched: 2, throttled: 3, unmatched: 2 },
+      dispatcher_action_groups_count_by_outcome_24hr: { dispatched: 2, throttled: 3 },
+      dispatcher_unique_alerts_dispatched_count_24hr: 2,
+      dispatcher_workflow_executions_count_24hr: 2,
+      dispatcher_unique_workflows_triggered_count_24hr: 1,
+      dispatcher_notifying_executions_count_24hr: 2,
+      dispatcher_notifying_spaces_count_24hr: 1,
+      dispatcher_policies_count_by_activity_24hr: {
+        dispatched: 2,
+        throttled: 2,
+        failing: 1,
+        broken: 1,
+      },
+      dispatcher_action_groups_dispatched_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
+      dispatcher_alerts_dispatched_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
+      dispatcher_workflow_executions_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
+      dispatcher_throttle_ratio_per_policy_24hr: { p50: 0.5, p99: 1, avg: 0.5 },
+      dispatcher_uncovered_rules_count_24hr: 1,
+      dispatcher_dispatch_failures_count_by_reason_24hr: { workflow_disabled: 2 },
+    };
+
+    it('adds the dispatcher activity counters as undefined', () => {
+      const result = v7.up(cloneDeep(v6State));
+
+      expect(result).toMatchObject(
+        Object.fromEntries(Object.keys(newFields).map((key) => [key, undefined]))
+      );
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v7.up(cloneDeep(v6State))).toMatchObject(v6State);
+    });
+
+    it('produces a state the v7 schema accepts', () => {
+      expect(() => v7.schema.validate(v7.up(cloneDeep(v6State)))).not.toThrow();
+    });
+
+    it('accepts the new counters, including null distributions', () => {
+      expect(() =>
+        v7.schema.validate({
+          ...v6State,
+          ...newFields,
+          dispatcher_throttle_ratio_per_policy_24hr: { p50: null, p99: null, avg: null },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a count_by value outside the known vocabulary', () => {
+      expect(() =>
+        v7.schema.validate({
+          ...v6State,
+          dispatcher_dispatch_failures_count_by_reason_24hr: { timeout: 1 },
+        })
+      ).toThrow();
+    });
+  });
 });

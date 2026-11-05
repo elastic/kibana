@@ -1941,6 +1941,82 @@ describe('WorkflowStepExecutionTree', () => {
       expect(selectedNode?.querySelector('[data-step-id="log"]')).not.toBeNull();
     });
 
+    it('expands the iteration that contains the waiting step without selecting it', () => {
+      isTerminalStatus.mockReturnValue(false);
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: 'foreach-exec',
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          children: [
+            makeIteration(0, 'step-0'),
+            makeIteration(1, 'step-1'),
+            makeIteration(2, 'step-2'),
+          ],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              stepExecutions: [
+                createMockStepExecution({
+                  id: 'foreach-exec',
+                  stepId: 'loop',
+                  stepType: 'foreach',
+                  status: ExecutionStatus.WAITING_FOR_INPUT,
+                }),
+                createMockStepExecution({
+                  id: 'step-0',
+                  stepId: 'log',
+                  stepType: 'console',
+                  status: ExecutionStatus.COMPLETED,
+                }),
+                createMockStepExecution({
+                  id: 'step-1',
+                  stepId: 'approve',
+                  stepType: 'waitForInput',
+                  status: ExecutionStatus.WAITING_FOR_INPUT,
+                }),
+                createMockStepExecution({
+                  id: 'step-2',
+                  stepId: 'log',
+                  stepType: 'console',
+                  status: ExecutionStatus.PENDING,
+                }),
+              ],
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+            waitingAction={{
+              stepExecutionId: 'step-1',
+              executionId: 'exec-1',
+            }}
+          />
+        </TestWrapper>
+      );
+
+      const waitingIteration = screen
+        .getByText('Iteration #1')
+        .closest('[data-test-subj="step-execution-tree-item-label"]');
+      expect(waitingIteration).toHaveAttribute('data-is-expanded', 'true');
+
+      const peer = screen
+        .getByText('Iteration #0')
+        .closest('[data-test-subj="step-execution-tree-item-label"]');
+      expect(peer).toHaveAttribute('data-is-expanded', 'false');
+
+      const waitingNode = screen
+        .getByText('Iteration #1')
+        .closest('[data-test-subj="workflowStepTreeNode"]');
+      expect(waitingNode?.querySelector('[data-step-id="approve"]')).not.toBeNull();
+    });
+
     it('lets the selected iteration chevron collapse until the selection changes', async () => {
       const user = userEvent.setup();
       isTerminalStatus.mockReturnValue(true);
