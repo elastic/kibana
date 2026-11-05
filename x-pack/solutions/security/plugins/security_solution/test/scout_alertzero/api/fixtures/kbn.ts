@@ -62,6 +62,22 @@ export const ok = <T>(result: ApiResult<T>, label: string): T => {
   return result.body;
 };
 
+const isIndexNotFoundResponse = (result: ApiResult<unknown>): boolean => {
+  const { statusCode, body } = result;
+  if (statusCode !== 404 || typeof body !== 'object' || body === null || !('message' in body)) {
+    return false;
+  }
+  return typeof body.message === 'string' && body.message.includes('index_not_found_exception');
+};
+
+/**
+ * Like `ok`, but exactly Kibana's `404 {"message": "...index_not_found_exception..."}` answer
+ * resolves with `whenIndexMissing`: a store that was never written to has no index yet, which is
+ * an empty list rather than a failure. Any other non-2xx still fails through `ok`.
+ */
+export const okOrIndexMissing = <T>(result: ApiResult<T>, label: string, whenIndexMissing: T): T =>
+  isIndexNotFoundResponse(result) ? whenIndexMissing : ok(result, label);
+
 /**
  * Bounded polling. Resolves with the first non-undefined value `read` returns; a timeout throws,
  * so a flow that never gets there is a failure, never a skip.

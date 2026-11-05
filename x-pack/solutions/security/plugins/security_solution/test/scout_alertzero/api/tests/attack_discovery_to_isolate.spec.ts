@@ -28,6 +28,7 @@ import {
   getWorker,
   listExecutionIds,
   ok,
+  okOrIndexMissing,
   pollForRunProposal,
   pollUntil,
   resetWorker,
@@ -416,14 +417,16 @@ apiTest.describe(
         // need not agree.
         const seededAgentId = hosts.hosts[0].agentId;
         const listIsolateActions = async (): Promise<ActionDetails[]> =>
-          ok(
+          okOrIndexMissing(
             await api.public<{ data: ActionDetails[] }>(
               'GET',
               `/api/endpoint/action?commands=isolate&pageSize=100&agentIds=${encodeURIComponent(
                 seededAgentId
               )}`
             ),
-            'list endpoint actions'
+            'list endpoint actions',
+            // Fresh stacks have no endpoint actions index yet, and the route 404s: no prior actions.
+            { data: [] }
           ).data;
         const knownActionIds = (await listIsolateActions()).map(({ id }) => id);
         expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
