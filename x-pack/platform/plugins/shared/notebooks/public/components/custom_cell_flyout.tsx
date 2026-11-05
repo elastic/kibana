@@ -177,7 +177,7 @@ export const CustomCellFlyout = ({
   onGenerateWithChat,
 }: CustomCellFlyoutProps) => {
   const { core } = useNotebookServices();
-  const { store, scheduler } = useNotebook();
+  const { store, scheduler, revealCell } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
@@ -450,6 +450,22 @@ export const CustomCellFlyout = ({
               data-test-subj="notebookCustomSource"
             />
           </EuiFormRow>
+          {source && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiButtonEmpty
+                size="xs"
+                iconType="eye"
+                flush="left"
+                onClick={() => revealCell(source.id)}
+                data-test-subj="notebookCustomRevealSource"
+              >
+                {i18n.translate('xpack.notebook.customCell.flyout.revealSource', {
+                  defaultMessage: 'Reveal query in notebook',
+                })}
+              </EuiButtonEmpty>
+            </>
+          )}
           {isQuery && (
             <EuiFormRow
               fullWidth

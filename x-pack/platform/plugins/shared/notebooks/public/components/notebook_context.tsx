@@ -17,6 +17,8 @@ export interface NotebookContextValue {
   openFlyouts$: BehaviorSubject<number>;
   /** The cell selected in the dependency graph or revealed from an app, highlighted in the notebook. */
   focusedCell$: BehaviorSubject<string | undefined>;
+  /** Scrolls the notebook to the cell and flashes it. */
+  revealCell: (cellId: string) => void;
   /** Cells the user just added; each flashes once when it first renders, then leaves the set. */
   addedCellIds: Set<string>;
   /** What the panel beside the notebook shows, if it is open. */

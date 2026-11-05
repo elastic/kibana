@@ -82,11 +82,18 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     const scheduler = new NotebookScheduler(store, {
       runQuery: createRunQuery(plugins.data.search),
     });
+    const focusedCell$ = new BehaviorSubject<string | undefined>(undefined);
     return {
       store,
       scheduler,
       openFlyouts$: new BehaviorSubject(0),
-      focusedCell$: new BehaviorSubject<string | undefined>(undefined),
+      focusedCell$,
+      revealCell: (cellId) => {
+        focusedCell$.next(cellId);
+        document
+          .getElementById(getCellElementId(cellId))
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
       addedCellIds: new Set(),
       sidePanel$: new BehaviorSubject<SidePanel | undefined>(undefined),
       activeAppId$: new BehaviorSubject<string | undefined>(undefined),
@@ -111,11 +118,8 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   const closeSidePanel = useCallback(() => notebook.sidePanel$.next(undefined), [notebook]);
   const focusCell = useCallback(
     (cellId: string | undefined) => {
-      notebook.focusedCell$.next(cellId);
-      if (!cellId) return;
-      document
-        .getElementById(getCellElementId(cellId))
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (cellId) notebook.revealCell(cellId);
+      else notebook.focusedCell$.next(undefined);
     },
     [notebook]
   );
