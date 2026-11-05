@@ -129,14 +129,15 @@ export const applyRuntimeSettings = async ({
   const file = stateFile(suiteKey);
   if (existsSync(file)) {
     const existing = readCaptureFile(file);
+    let capture: RuntimeSettingsCapture;
     if (isCapture(existing)) {
       log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${file}`);
+      capture = existing;
     } else if (isLegacyCapture(existing)) {
       log.warning(
         `[setup] converting a flat-map prior-value capture left by an older run: ${file}`
       );
-      const capture: RuntimeSettingsCapture = { prior: existing, applied: changes };
-      writeFileSync(file, JSON.stringify(capture, null, 2));
+      capture = { prior: existing, applied: changes };
     } else {
       // Neither writing over it nor applying without a baseline is safe: leave both alone.
       log.warning(
@@ -144,6 +145,26 @@ export const applyRuntimeSettings = async ({
       );
       return;
     }
+    // A setting the interrupted run did not write has no baseline in the capture yet, and its
+    // live value is still the user's own, so capture it now or teardown would never revert it.
+    const uncaptured = Object.keys(changes).filter((key) => !(key in capture.prior));
+    if (uncaptured.length > 0) {
+      const current = await readUserValues(kbnClient);
+      capture = {
+        prior: {
+          ...capture.prior,
+          ...Object.fromEntries(uncaptured.map((key) => [key, current[key] ?? null])),
+        },
+        applied: {
+          ...capture.applied,
+          ...Object.fromEntries(uncaptured.map((key) => [key, changes[key]])),
+        },
+      };
+      log.warning(
+        `[setup] captured settings missing from the kept capture: ${uncaptured.join(', ')}`
+      );
+    }
+    writeFileSync(file, JSON.stringify(capture, null, 2));
   } else {
     const current = await readUserValues(kbnClient);
     const capture: RuntimeSettingsCapture = {

@@ -87,6 +87,15 @@ export const DRAIN_BUDGET_MS = DRAIN_TIMEOUT_MS + 30_000;
  */
 export const TEARDOWN_CLEANUP_BUDGET_MS = 3 * 60_000;
 
+/**
+ * Request timeout for the first direct write into a `semantic_text` index. On a cold stack that
+ * write triggers the ELSER model import and deployment (~40s observed), past the Scout ES
+ * client's 30s default.
+ */
+export const COLD_ELSER_REQUEST_TIMEOUT_MS = 3 * 60_000;
+/** A `beforeAll` that makes such a write: the request ceiling plus the rest of its setup. */
+export const SEMANTIC_SEED_HOOK_TIMEOUT_MS = COLD_ELSER_REQUEST_TIMEOUT_MS + 2 * 60_000;
+
 /** Managed AI index the AlertZero producers write knowledge indicators into. */
 export const SECURITY_INVESTIGATIONS_AI_INDEX_ID = 'security-investigations';
 export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS_AI_INDEX_ID}`;

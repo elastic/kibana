@@ -234,21 +234,37 @@ export const waitForExecutionStatus = async (
   status: string,
   { timeoutMs }: { timeoutMs: number }
 ): Promise<WorkflowExecution> => {
+  // `pollUntil` retries on a thrown error, so a wrong terminal status is returned as a value
+  // and thrown below, instead of burning the whole timeout.
+  let outcome: { execution: WorkflowExecution; reached: boolean };
   try {
-    return await pollUntil(
+    outcome = await pollUntil(
       label,
       async () => {
         const current = ok(
           await api.public<WorkflowExecution>('GET', `${EXECUTIONS_URL}/${executionId}`),
           `read execution ${executionId}`
         );
-        return current.status === status ? current : undefined;
+        if (current.status === status) {
+          return { execution: current, reached: true };
+        }
+        return TERMINAL_EXECUTION_STATUSES.includes(current.status)
+          ? { execution: current, reached: false }
+          : undefined;
       },
       { timeoutMs }
     );
   } catch (error) {
     throw new Error(`${(error as Error).message}\n${await describeExecution(api, executionId)}`);
   }
+  if (!outcome.reached) {
+    throw new Error(
+      `${label}: execution ${executionId} ended as '${
+        outcome.execution.status
+      }' instead of '${status}'\n${await describeExecution(api, executionId)}`
+    );
+  }
+  return outcome.execution;
 };
 
 const formatStep = (step: ExecutionStep) =>

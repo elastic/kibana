@@ -20,7 +20,12 @@ import {
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import { HUNT_WORKER_URL, INTERNAL_HEADERS, TI_HEADERS } from './constants';
+import {
+  COLD_ELSER_REQUEST_TIMEOUT_MS,
+  HUNT_WORKER_URL,
+  INTERNAL_HEADERS,
+  TI_HEADERS,
+} from './constants';
 import { SUPPLY_WORKFLOW_IDS, type SupplyWorkflowKey } from './supply_workflow_ids';
 
 /** Minimal ES client surface these tests rely on. */
@@ -32,12 +37,15 @@ interface EsLike {
     ignore_unavailable?: boolean;
     conflicts?: 'proceed' | 'abort';
   }): Promise<unknown>;
-  index(args: {
-    index: string;
-    id: string;
-    document: Record<string, unknown>;
-    refresh?: boolean;
-  }): Promise<unknown>;
+  index(
+    args: {
+      index: string;
+      id: string;
+      document: Record<string, unknown>;
+      refresh?: boolean;
+    },
+    options?: { requestTimeout?: number }
+  ): Promise<unknown>;
 }
 
 /**
@@ -560,31 +568,35 @@ export const seedSharedReportWithEvidence = async ({
   spaceA: string;
   spaceB: string;
 }): Promise<void> => {
-  await esClient.index({
-    index: THREAT_REPORTS_INDEX,
-    id: reportId,
-    refresh: true,
-    document: {
-      space_id: '*',
-      source: { name: sourceName },
-      content: {
-        title: `Scout isolation ${reportId}`,
-        body_text: `Shared report for evidence projection ${reportId}`,
+  // `content.*` is `semantic_text`: on a cold stack this write waits for the ELSER deployment.
+  await esClient.index(
+    {
+      index: THREAT_REPORTS_INDEX,
+      id: reportId,
+      refresh: true,
+      document: {
+        space_id: '*',
+        source: { name: sourceName },
+        content: {
+          title: `Scout isolation ${reportId}`,
+          body_text: `Shared report for evidence projection ${reportId}`,
+        },
+        evidence: [
+          {
+            space_id: spaceA,
+            alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
+            alert_hits_total: 1,
+          },
+          {
+            space_id: spaceB,
+            alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
+            alert_hits_total: 10,
+          },
+        ],
       },
-      evidence: [
-        {
-          space_id: spaceA,
-          alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
-          alert_hits_total: 1,
-        },
-        {
-          space_id: spaceB,
-          alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
-          alert_hits_total: 10,
-        },
-      ],
     },
-  });
+    { requestTimeout: COLD_ELSER_REQUEST_TIMEOUT_MS }
+  );
 };
 
 /** Headers for hunt/TI internal calls as a given cookie session. */
