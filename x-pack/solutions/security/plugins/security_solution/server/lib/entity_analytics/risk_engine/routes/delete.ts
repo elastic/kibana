@@ -15,6 +15,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
 import { deleteSavedObjects } from '../utils/saved_object_configuration';
 import { getIndexPatternLookup } from '../../risk_score/configurations';
+import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
 
 const isMissingResourceError = (error: unknown): boolean => {
   if (typeof error !== 'object' || error == null) {
@@ -56,8 +57,8 @@ export const riskEngineCleanupRoute = (
           const core = await context.core;
           const namespace = securitySolution.getSpaceId();
           const currentUserEsClient = core.elasticsearch.client.asCurrentUser;
-          const internalEsClient = core.elasticsearch.client.asInternalUser;
           const lookupIndex = getIndexPatternLookup(namespace);
+          const [, plugins] = await getStartServices();
           const errors: Error[] = [];
           const addError = (error: unknown) => {
             if (isMissingResourceError(error)) {
@@ -86,16 +87,17 @@ export const riskEngineCleanupRoute = (
             errors.push(...riskScoreErrors);
 
             const alias = `risk-score.risk-score-${namespace}`;
-            await internalEsClient
-              .delete(
-                {
-                  index: '.kibana_task_manager',
-                  id: `task:risk-score:${namespace}`,
-                  refresh: true,
-                },
-                { ignore: [404] }
-              )
-              .catch(addError);
+            if (!plugins.taskManager) {
+              addError(
+                new Error(
+                  'Task Manager is unavailable; the risk score maintainer task was not removed'
+                )
+              );
+            } else {
+              await plugins.taskManager
+                .removeIfExists(`${RISK_SCORE_MAINTAINER_ID}:${namespace}`)
+                .catch(addError);
+            }
             // The privilege check grants read/write, not delete_index. Delete the caller's
             // risk-score index and lookup index as that user so a missing delete privilege fails closed.
             await currentUserEsClient.indices
@@ -106,12 +108,6 @@ export const riskEngineCleanupRoute = (
               .catch(addError);
             await currentUserEsClient.indices
               .deleteIndexTemplate({ name: lookupIndex.template }, { ignore: [404] })
-              .catch(addError);
-            await internalEsClient.ingest
-              .deletePipeline(
-                { id: `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}` },
-                { ignore: [404] }
-              )
               .catch(addError);
 
             if (errors.length > 0) {

@@ -24,6 +24,7 @@ describe('riskEngineCleanupRoute', () => {
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let clients: ReturnType<typeof requestContextMock.createMockClients>;
   let getStartServicesMock: jest.Mock;
+  let removeIfExists: jest.Mock;
 
   const buildRequest = () =>
     requestMock.create({
@@ -39,10 +40,12 @@ describe('riskEngineCleanupRoute', () => {
     context = requestContextMock.convertContext(tools.context);
     clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
     (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
+    removeIfExists = jest.fn().mockResolvedValue(undefined);
     getStartServicesMock = jest.fn().mockResolvedValue([
       {},
       {
         security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        taskManager: { removeIfExists },
       },
     ]);
     riskEngineCleanupRoute(server.router, getStartServicesMock);
@@ -77,6 +80,11 @@ describe('riskEngineCleanupRoute', () => {
       { ignore: [404] }
     );
     expect(clients.core.elasticsearch.client.asInternalUser.indices.delete).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+    expect(
+      clients.core.elasticsearch.client.asInternalUser.ingest.deletePipeline
+    ).not.toHaveBeenCalled();
+    expect(removeIfExists).toHaveBeenCalledWith('risk-score:default');
   });
 
   it('returns 500 when cleanup reports a real error', async () => {
