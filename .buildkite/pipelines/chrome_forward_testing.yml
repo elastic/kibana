@@ -91,6 +91,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -105,6 +106,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -120,6 +122,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -135,6 +138,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -149,6 +153,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -163,6 +168,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -177,6 +183,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -191,6 +198,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -207,6 +215,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -221,6 +230,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -235,6 +245,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -249,6 +260,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -263,6 +275,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -277,6 +290,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -291,6 +305,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -305,6 +320,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -319,6 +335,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -333,6 +350,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -347,6 +365,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -361,6 +380,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -375,6 +395,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -390,6 +411,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -405,6 +427,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -420,6 +443,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
     depends_on:
       - build
     timeout_in_minutes: 60
