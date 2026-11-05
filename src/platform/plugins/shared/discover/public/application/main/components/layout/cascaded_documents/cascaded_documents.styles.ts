@@ -19,10 +19,22 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
     width: '100%',
     padding: `0 ${euiTheme.size.s} ${euiTheme.size.s}`,
 
-    '& [role="row"] [data-test-subj="dataCascadeInlineStickyHeader"]:has([data-test-subj="discoverCascadeToolbarPortalNode"])':
-      {
-        paddingBottom: 0,
-      },
+    // The inline sticky header only renders for expanded rows, and the grid toolbar is
+    // portaled into it once the leaf mounts. Keying the padding on the toolbar being present
+    // (`:has(...)`) made the header padding change after the row had already expanded, shifting
+    // the row title down and then back up. The padding is therefore set for every expanded row
+    // from the first frame, so it never changes when the toolbar mounts.
+    '& [role="row"] [data-test-subj="dataCascadeInlineStickyHeader"]': {
+      paddingBottom: 0,
+    },
+
+    // While the header is pinned it needs a gap above the title. The row's own top padding already
+    // provides that gap while the header is in its natural position, so the negative margin cancels
+    // the added padding to keep the header's footprint unchanged. This avoids shifting the title and the
+    // content below it by `size.s` when a row is expanded at the top of the list or starts to stick.
+    '& [role="row"][data-active-sticky="true"] [data-test-subj="dataCascadeInlineStickyHeader"]': {
+      marginTop: `calc(${euiTheme.size.s} * -1)`,
+    },
 
     '& [role="row"] [data-test-subj="sticky-header-extension-point"]': {
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
