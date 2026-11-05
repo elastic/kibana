@@ -43,7 +43,7 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 $$$kibana-291514$$$
 ::::{dropdown} Stop using the Playground app, which {{kib}} no longer includes
-**Details**<br> {{kib}} no longer includes the Playground app (`searchPlayground`), which was deprecated for several releases. When you upgrade, {{kib}} deletes the saved playgrounds. The `xpack.searchPlayground` settings are no longer valid. If you leave an `xpack.searchPlayground.*` key in `kibana.yml`, {{kib}} ignores it, logs a deprecation warning, and keeps starting.
+**Details**<br> {{kib}} no longer includes the Playground app (`searchPlayground`), which was deprecated for several releases. When you upgrade, {{kib}} deletes the saved playgrounds. The `xpack.searchPlayground` settings are no longer valid. If you leave an `xpack.searchPlayground.*` key in `kibana.yml`, {{kib}} ignores it, logs a deprecation warning, and starts normally.
 
 **Impact**<br> Saved playgrounds, including their prompts, queries, index selections, and connector settings, are inaccessible after the upgrade and you can't export them.
 
@@ -84,7 +84,7 @@ View [#283150]({{kib-pull}}283150).
 
 $$$kibana-282404$$$
 ::::{dropdown} Update `additional_datastreams_permissions` values to the `<type>-<suffix>` format
-**Details**<br> {{fleet}} now validates the `additional_datastreams_permissions` field of a package policy against the documented `<type>-<suffix>` data stream format, for example `logs-nginx-*`. Before, the validation accepted values that only started with, contained, or ended with a valid type.
+**Details**<br> {{fleet}} now validates the `additional_datastreams_permissions` field of a package policy against the documented `<type>-<suffix>` data stream format, for example `logs-nginx-*`. Previously, the validation accepted any values that started with, contained, or ended with a valid type.
 
 **Impact**<br> {{fleet}} rejects values that don't start with a valid data stream type followed by a hyphen and a non-empty suffix, for example `logs*`.
 

@@ -41,9 +41,9 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 
 $$$kibana-292914$$$
 ::::{dropdown} Migrate from Cases `customFields` and legacy templates to `extended_fields`
-**Details**<br> The Cases `customFields` fields and the `templates` setting in the case configuration are deprecated in favor of `extended_fields`. The case APIs now document `extended_fields` and return `extended_fields_labels`, a read-only map from each storage key to a readable label.
+**Details**<br> The Cases `customFields` and the case configuration `templates` setting are deprecated in favor of `extended_fields`. The case APIs now document `extended_fields` and return `extended_fields_labels`, a read-only map from each storage key to a readable label.
 
-**Impact**<br> `customFields` and legacy `templates` keep working as before. The API reference marks them as deprecated.
+**Impact**<br> `customFields` and legacy templates keep working as before. The API reference marks them as deprecated.
 
 **Action**<br> Use `extended_fields` in new integrations, and migrate existing clients and workflows that use `customFields` or legacy templates.
 

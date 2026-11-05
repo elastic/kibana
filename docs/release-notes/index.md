@@ -179,8 +179,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show lifecycle information in Index Management for hidden and system indices [#282137]({{kib-pull}}282137).
 
 #### Developer tools [kibana-9.6.0-features-developer-tools]
-* Add request body autocomplete suggestions in Console for more {{es}} endpoints, generated from the {{es}} specification [#278510]({{kib-pull}}278510).
-* Support auto-indenting requests that contain comments in Console [#284527]({{kib-pull}}284527).
+* Add request body autocomplete suggestions in Console for more {{es}} endpoints, using the {{es}} specification [#278510]({{kib-pull}}278510).
+* Automatically indent requests that contain comments in Console [#284527]({{kib-pull}}284527).
 * Raise the limit for a string in a request body from `10000` to `100000` characters when you copy a request as a curl command in Console [#287526]({{kib-pull}}287526).
 
 #### Discover [kibana-9.6.0-features-discover]
