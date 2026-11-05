@@ -508,14 +508,15 @@ const trackingIssueBody = (month) =>
   [
     `Findings recorded by the [Flaky Fix Retrospective](https://github.com/${OWNER}/${REPO}/blob/main/.github/workflows/flaky-fix-retrospective.md) workflow during ${month}, one comment per finding.`,
     '',
-    'A finding compares what the Flaky Test Fixer proposed with what developers did instead, or with the failure that came back:',
-    '',
-    '- `revised-before-merge`: developers changed the patch before merging it',
-    '- `replaced`: the fix PR was closed and another PR fixed the failure',
-    '- `closed`: a developer closed the fix PR without a replacement',
-    '- `did-not-hold`: the fix merged, but the same failure was reported again',
-    '',
-    'Each finding ends with a `flaky-fix-finding` block that the weekly curator reads to propose guideline updates. Fix PRs also carry a `flaky-fix-outcome:*` label for metrics.',
+    '> [!NOTE]',
+    '> A finding compares what the Flaky Test Fixer proposed with what developers did instead, or with the failure that came back:',
+    '>',
+    '> - **Revised before merge**: developers changed the patch before merging it',
+    '> - **Replaced**: the fix PR was closed and another PR fixed the failure',
+    '> - **Closed**: a developer closed the fix PR without a replacement',
+    '> - **Did not hold**: the fix merged, but the same failure was reported again',
+    '>',
+    '> Each finding ends with a collapsed `flaky-fix-finding` block that the weekly curator reads to propose guideline updates. Fix PRs also carry a `flaky-fix-outcome:*` label for metrics.',
   ].join('\n');
 
 /** The monthly tracking issue the agent comments on, created on the first finding of the month. */

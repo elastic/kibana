@@ -280,23 +280,24 @@ A lesson must be something the automation can do differently next time. "Be more
 
 Post exactly one comment on the tracking issue with the `add_comment` tool, passing `item_number: ${{ needs.classify.outputs.tracking_issue }}`. Never comment on the fix PR, the replacement PR, or the `failed-test` issue. Never `@`-mention anyone, and refer to developers by role ("the reviewer", "the owning team"), not by name.
 
-Write for a reader skimming the month's findings in two minutes. Follow this format exactly:
+Write for a reader skimming the month's findings in two minutes: plain sentences, no jargon or taxonomy codes in the prose. Follow this format exactly:
 
 ```markdown
-### {emoji} {case}: {one-line lesson or "nothing to learn"}
+### {emoji} {Case}: {one-line lesson or "nothing to learn"}
 
-{Fix PR link} · {replacement or recurrence link when there is one} · {framework} · {fixer approach} → {final approach} · divergence: {level}
+{One or two short sentences: what the fixer proposed and what developers did instead, or what the recurrence showed. Link the fix PR and, when there is one, the replacement PR or the recurrence.}
 
 <details>
-<summary>What happened</summary>
+<summary>Why it diverged</summary>
 
-- **Fixer proposed:** {one sentence}
-- **Developers did / recurrence showed:** {one sentence, with a link to the decisive commit, comment or failure}
-- **Why it diverged:** {one or two sentences anchored to evidence}
-- **Guideline:** {quoted bullet phrase, or "none covers this"} ({followed / not followed})
-- **Could the verifier have caught it:** {one sentence, did-not-hold only}
+- {One or two sentences on why, anchored to evidence, with a link to the decisive commit, comment or failure.}
+- **Guideline:** {quoted bullet phrase, or "none covers this"} ({followed / not followed}).
+- **Could the verifier have caught it:** {one sentence; did-not-hold only, omit the bullet otherwise.}
 
 </details>
+
+<details>
+<summary>Machine-readable finding</summary>
 
 ```yaml flaky-fix-finding
 case: {revised-before-merge | replaced | closed | did-not-hold}
@@ -314,9 +315,11 @@ lesson: {one sentence, at most 40 words, or null}
 lesson_target: {guidelines | fixer | verifier | investigator | null}
 confidence: {high | medium | low}
 ```
+
+</details>
 ```
 
-Emoji: `🔧` for `revised-before-merge`, `🔁` for `replaced`, `🚫` for `closed`, `🔙` for `did-not-hold`. Keep the `flaky-fix-finding` block machine-readable: the keys and allowed values above, nothing else, `null` where there is no value. The weekly curator parses it.
+`{Case}` is written in words: `Revised before merge`, `Replaced`, `Closed`, `Did not hold`. Emoji: `🔧` for revised, `🔁` for replaced, `🚫` for closed, `🔙` for did not hold. The framework, approach taxonomy and divergence level go only in the machine-readable block, never in the prose. Each bullet earns its place: drop one rather than pad it. Keep the `flaky-fix-finding` block machine-readable: the keys and allowed values above, nothing else, `null` where there is no value. The weekly curator parses it.
 
 ## When to call `noop` instead
 
