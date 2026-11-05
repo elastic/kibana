@@ -69,7 +69,6 @@ overrides:
   '@babel/runtime': '7.29.7'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
-  '@elastic/eui-theme-common': 'file:./eui_theme_common_10.1.0_pr_10237_01.tgz'
   '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '18.0.1'
