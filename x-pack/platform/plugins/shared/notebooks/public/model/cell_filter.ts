@@ -8,15 +8,15 @@
 import type { CellDefinition, CellType, NotebookApp } from '../../common/types';
 import { getCellOutputs } from './references';
 
-/** Which cells the notebook shows; each empty field matches every cell. */
+/** Which cells the notebook shows; the empty filter shows every cell. */
 export interface CellFilter {
   search: string;
-  types: readonly CellType[];
-  /** Apps whose cells to keep; `null` keeps the cells that aren't in any app. */
-  appIds: ReadonlyArray<string | null>;
+  hiddenTypes: readonly CellType[];
+  /** Apps whose cells to hide; `null` stands for the cells that aren't in any app. */
+  hiddenAppIds: ReadonlyArray<string | null>;
 }
 
-export const EMPTY_CELL_FILTER: CellFilter = { search: '', types: [], appIds: [] };
+export const EMPTY_CELL_FILTER: CellFilter = { search: '', hiddenTypes: [], hiddenAppIds: [] };
 
 const getSearchableText = (cell: CellDefinition): string[] => {
   const common = [cell.label ?? '', cell.name, ...getCellOutputs(cell).map(({ name }) => name)];
@@ -36,29 +36,40 @@ const getSearchableText = (cell: CellDefinition): string[] => {
   }
 };
 
-const isInApps = (
-  cellId: string,
-  appIds: CellFilter['appIds'],
-  apps: readonly NotebookApp[]
-): boolean => {
-  const containing = apps.filter(({ panels }) => panels.some((panel) => panel.cellId === cellId));
-  return appIds.some((appId) =>
-    appId === null ? containing.length === 0 : containing.some(({ id }) => id === appId)
-  );
+/** The apps showing the cell, or `[null]` when no app does. */
+const getCellAppIds = (cellId: string, apps: readonly NotebookApp[]): Array<string | null> => {
+  const appIds = apps
+    .filter(({ panels }) => panels.some((panel) => panel.cellId === cellId))
+    .map(({ id }) => id);
+  return appIds.length > 0 ? appIds : [null];
 };
 
-/** Whether the cell passes every filter that is set. */
+/** Whether the cell passes the filter; a cell in several apps stays until all of them are hidden. */
 export const matchesCellFilter = (
   cell: CellDefinition,
-  { search, types, appIds }: CellFilter,
+  { search, hiddenTypes, hiddenAppIds }: CellFilter,
   apps: readonly NotebookApp[]
 ): boolean => {
-  if (types.length > 0 && !types.includes(cell.type)) return false;
-  if (appIds.length > 0 && !isInApps(cell.id, appIds, apps)) return false;
+  if (hiddenTypes.includes(cell.type)) return false;
+  if (
+    hiddenAppIds.length > 0 &&
+    getCellAppIds(cell.id, apps).every((appId) => hiddenAppIds.includes(appId))
+  ) {
+    return false;
+  }
   const term = search.trim().toLowerCase();
   return !term || getSearchableText(cell).some((text) => text.toLowerCase().includes(term));
 };
 
-/** The number of filter values set, for a badge: the search counts as one. */
-export const countActiveFilters = ({ search, types, appIds }: CellFilter): number =>
-  (search.trim() ? 1 : 0) + types.length + appIds.length;
+/** The hidden app ids that still name an app, or the cells outside any app. */
+export const getActiveHiddenAppIds = (
+  { hiddenAppIds }: CellFilter,
+  apps: readonly NotebookApp[]
+): Array<string | null> =>
+  hiddenAppIds.filter((appId) => appId === null || apps.some(({ id }) => id === appId));
+
+/** Whether the filter can hide any cell. */
+export const isCellFilterActive = (filter: CellFilter, apps: readonly NotebookApp[]): boolean =>
+  Boolean(filter.search.trim()) ||
+  filter.hiddenTypes.length > 0 ||
+  getActiveHiddenAppIds(filter, apps).length > 0;

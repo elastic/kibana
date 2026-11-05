@@ -8,7 +8,8 @@
 import type { CellDefinition, NotebookApp } from '../../common/types';
 import {
   EMPTY_CELL_FILTER,
-  countActiveFilters,
+  getActiveHiddenAppIds,
+  isCellFilterActive,
   matchesCellFilter,
   type CellFilter,
 } from './cell_filter';
@@ -59,19 +60,24 @@ const dropdown: CellDefinition = {
   },
 };
 
+const panel = (cellId: string) => ({
+  id: `panel_${cellId}`,
+  cellId,
+  x: 0,
+  y: 0,
+  width: 6,
+  height: 4,
+});
 const apps: NotebookApp[] = [
-  {
-    id: 'a1',
-    title: 'Overview',
-    panels: [{ id: 'panel', cellId: 'c1', x: 0, y: 0, width: 6, height: 4 }],
-  },
+  { id: 'a1', title: 'Overview', panels: [panel('c1'), panel('p1')] },
+  { id: 'a2', title: 'Details', panels: [panel('p1')] },
 ];
 
 const matches = (cell: CellDefinition, filter: Partial<CellFilter>) =>
   matchesCellFilter(cell, { ...EMPTY_CELL_FILTER, ...filter }, apps);
 
 describe('matchesCellFilter', () => {
-  it('matches every cell when no filter is set', () => {
+  it('shows every cell when nothing is filtered', () => {
     [esql, chart, notes, custom, dropdown].forEach((cell) => expect(matches(cell, {})).toBe(true));
   });
 
@@ -89,29 +95,43 @@ describe('matchesCellFilter', () => {
     expect(matches(cell, { search: `${search} nowhere` })).toBe(false);
   });
 
-  it('keeps only the chosen types', () => {
-    expect(matches(esql, { types: ['esql', 'markdown'] })).toBe(true);
-    expect(matches(notes, { types: ['esql', 'markdown'] })).toBe(true);
-    expect(matches(chart, { types: ['esql', 'markdown'] })).toBe(false);
+  it('hides the unchecked types', () => {
+    expect(matches(esql, { hiddenTypes: ['chart'] })).toBe(true);
+    expect(matches(chart, { hiddenTypes: ['chart'] })).toBe(false);
   });
 
-  it('keeps cells shown in a chosen app, or in no app at all', () => {
-    expect(matches(chart, { appIds: ['a1'] })).toBe(true);
-    expect(matches(esql, { appIds: ['a1'] })).toBe(false);
-    expect(matches(esql, { appIds: [null] })).toBe(true);
-    expect(matches(chart, { appIds: [null] })).toBe(false);
+  it('hides cells only in hidden apps, or in no app when that is hidden', () => {
+    expect(matches(chart, { hiddenAppIds: ['a1'] })).toBe(false);
+    expect(matches(custom, { hiddenAppIds: ['a1'] })).toBe(true);
+    expect(matches(custom, { hiddenAppIds: ['a1', 'a2'] })).toBe(false);
+    expect(matches(esql, { hiddenAppIds: ['a1'] })).toBe(true);
+    expect(matches(esql, { hiddenAppIds: [null] })).toBe(false);
+    expect(matches(chart, { hiddenAppIds: [null] })).toBe(true);
   });
 
-  it('requires every set filter to match', () => {
-    expect(matches(chart, { types: ['chart'], appIds: ['a1'], search: 'chart' })).toBe(true);
-    expect(matches(chart, { types: ['chart'], appIds: ['a1'], search: 'traffic' })).toBe(false);
+  it('requires the cell to pass every filter', () => {
+    expect(matches(chart, { hiddenTypes: ['esql'], search: 'chart' })).toBe(true);
+    expect(matches(chart, { hiddenTypes: ['esql'], search: 'traffic' })).toBe(false);
   });
 });
 
-describe('countActiveFilters', () => {
-  it('counts the search, each type and each app', () => {
-    expect(countActiveFilters(EMPTY_CELL_FILTER)).toBe(0);
-    expect(countActiveFilters({ search: '   ', types: [], appIds: [] })).toBe(0);
-    expect(countActiveFilters({ search: 'x', types: ['esql', 'chart'], appIds: [null] })).toBe(4);
+describe('isCellFilterActive', () => {
+  it('ignores a blank search and hidden apps that were deleted', () => {
+    expect(isCellFilterActive(EMPTY_CELL_FILTER, apps)).toBe(false);
+    expect(isCellFilterActive({ ...EMPTY_CELL_FILTER, search: '  ' }, apps)).toBe(false);
+    expect(isCellFilterActive({ ...EMPTY_CELL_FILTER, hiddenAppIds: ['gone'] }, apps)).toBe(false);
+  });
+
+  it('is active for a search, a hidden type or a hidden app', () => {
+    expect(isCellFilterActive({ ...EMPTY_CELL_FILTER, search: 'x' }, apps)).toBe(true);
+    expect(isCellFilterActive({ ...EMPTY_CELL_FILTER, hiddenTypes: ['esql'] }, apps)).toBe(true);
+    expect(isCellFilterActive({ ...EMPTY_CELL_FILTER, hiddenAppIds: [null] }, apps)).toBe(true);
+  });
+});
+
+describe('getActiveHiddenAppIds', () => {
+  it('drops apps that no longer exist', () => {
+    const filter = { ...EMPTY_CELL_FILTER, hiddenAppIds: ['a2', 'gone', null] };
+    expect(getActiveHiddenAppIds(filter, apps)).toEqual(['a2', null]);
   });
 });

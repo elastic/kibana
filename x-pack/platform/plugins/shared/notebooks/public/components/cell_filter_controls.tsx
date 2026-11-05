@@ -9,6 +9,7 @@ import React, { useState, type ReactNode } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -19,18 +20,17 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiSelectable,
   EuiText,
   EuiToolTip,
   useEuiTheme,
-  type EuiSelectableOption,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellType } from '../../common/types';
-import { EMPTY_CELL_FILTER, type CellFilter } from '../model/cell_filter';
+import { EMPTY_CELL_FILTER, getActiveHiddenAppIds } from '../model/cell_filter';
 import { TYPE_ICONS } from './cell_display';
 import { useNotebook } from './notebook_context';
 
@@ -66,10 +66,10 @@ const FILTER_LABEL = i18n.translate('xpack.notebook.cellFilter.open', {
   defaultMessage: 'Filter cells',
 });
 const TYPE_GROUP_LABEL = i18n.translate('xpack.notebook.cellFilter.typeGroup', {
-  defaultMessage: 'Type',
+  defaultMessage: 'All types',
 });
 const APP_GROUP_LABEL = i18n.translate('xpack.notebook.cellFilter.appGroup', {
-  defaultMessage: 'App',
+  defaultMessage: 'All apps',
 });
 const NO_APP_LABEL = i18n.translate('xpack.notebook.cellFilter.noApp', {
   defaultMessage: 'Not in an app',
@@ -77,16 +77,12 @@ const NO_APP_LABEL = i18n.translate('xpack.notebook.cellFilter.noApp', {
 const CLEAR_LABEL = i18n.translate('xpack.notebook.cellFilter.clear', {
   defaultMessage: 'Clear filters',
 });
-
-type FilterChoice = { kind: 'type'; type: CellType } | { kind: 'app'; appId: string | null };
+const SHOW_ALL_LABEL = i18n.translate('xpack.notebook.cellFilter.showAll', {
+  defaultMessage: 'Show all',
+});
 
 const toggle = <T,>(values: readonly T[], value: T): T[] =>
   values.includes(value) ? values.filter((current) => current !== value) : [...values, value];
-
-const toggleChoice = (filter: CellFilter, choice: FilterChoice): Partial<CellFilter> =>
-  choice.kind === 'type'
-    ? { types: toggle(filter.types, choice.type) }
-    : { appIds: toggle(filter.appIds, choice.appId) };
 
 /** A floating icon button that opens a popover, with a badge while its filter is set. */
 const FloatingPopoverButton = ({
@@ -98,7 +94,7 @@ const FloatingPopoverButton = ({
 }: {
   iconType: string;
   label: string;
-  badge?: number;
+  badge: number;
   dataTestSubj: string;
   children: ReactNode;
 }) => {
@@ -109,7 +105,7 @@ const FloatingPopoverButton = ({
     <EuiPopover
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      anchorPosition="upRight"
+      anchorPosition="leftUp"
       panelPaddingSize="none"
       aria-label={label}
       button={
@@ -119,7 +115,7 @@ const FloatingPopoverButton = ({
           `}
         >
           <EuiPanel hasShadow paddingSize="none" grow={false}>
-            <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiToolTip content={label} position="left" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType={iconType}
                 color="text"
@@ -131,7 +127,7 @@ const FloatingPopoverButton = ({
               />
             </EuiToolTip>
           </EuiPanel>
-          {badge !== undefined && badge > 0 && (
+          {badge > 0 && (
             <EuiNotificationBadge
               css={css`
                 position: absolute;
@@ -179,97 +175,141 @@ const SearchPanel = () => {
   );
 };
 
+interface CheckboxItem<T> {
+  value: T;
+  label: string;
+  icon?: string;
+}
+
+/** A group checkbox that checks or clears all its items, which are listed indented below it. */
+const CheckboxGroup = <T,>({
+  label,
+  items,
+  hidden,
+  onChange,
+  dataTestSubj,
+}: {
+  label: string;
+  items: ReadonlyArray<CheckboxItem<T>>;
+  hidden: readonly T[];
+  onChange: (hidden: T[]) => void;
+  dataTestSubj: string;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const groupId = useGeneratedHtmlId({ prefix: dataTestSubj });
+  const hiddenCount = items.filter(({ value }) => hidden.includes(value)).length;
+  const values = items.map(({ value }) => value);
+
+  return (
+    <div data-test-subj={dataTestSubj}>
+      <EuiCheckbox
+        id={groupId}
+        label={<strong>{label}</strong>}
+        checked={hiddenCount === 0}
+        indeterminate={hiddenCount > 0 && hiddenCount < items.length}
+        onChange={() => onChange(hiddenCount === 0 ? values : [])}
+      />
+      <div
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      >
+        {items.map(({ value, label: itemLabel, icon }, index) => (
+          <EuiCheckbox
+            key={`${groupId}-${index}`}
+            id={`${groupId}-${index}`}
+            label={
+              icon ? (
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={icon} size="s" aria-hidden={true} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{itemLabel}</EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                itemLabel
+              )
+            }
+            checked={!hidden.includes(value)}
+            onChange={() => onChange(toggle(hidden, value))}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const FilterPanel = () => {
+  const { euiTheme } = useEuiTheme();
   const { store, cellFilter$ } = useNotebook();
   const filter = useStateFromPublishingSubject(cellFilter$);
   const apps = useStateFromPublishingSubject(store.apps$);
-
-  const choices: Array<{ choice: FilterChoice; label: string; prepend?: ReactNode }> = [
-    ...FILTER_TYPES.map(({ type, label }) => ({
-      choice: { kind: 'type' as const, type },
-      label,
-      prepend: <EuiIcon type={TYPE_ICONS[type]} aria-hidden={true} />,
-    })),
-    ...(apps.length > 0
-      ? [
-          { choice: { kind: 'app' as const, appId: null }, label: NO_APP_LABEL },
-          ...apps.map(({ id, title }) => ({
-            choice: { kind: 'app' as const, appId: id },
-            label: title,
-          })),
-        ]
-      : []),
-  ];
-
-  const isChecked = (choice: FilterChoice) =>
-    choice.kind === 'type'
-      ? filter.types.includes(choice.type)
-      : filter.appIds.includes(choice.appId);
-
-  const toOption = (
-    { choice, label, prepend }: (typeof choices)[number],
-    index: number
-  ): EuiSelectableOption<{ index: number }> => ({
-    index,
-    label,
-    prepend,
-    checked: isChecked(choice) ? 'on' : undefined,
-  });
-
-  const typeOptions = choices.flatMap((entry, index) =>
-    entry.choice.kind === 'type' ? [toOption(entry, index)] : []
-  );
-  const appOptions = choices.flatMap((entry, index) =>
-    entry.choice.kind === 'app' ? [toOption(entry, index)] : []
-  );
-  const options: Array<EuiSelectableOption<{ index: number }>> = [
-    { index: -1, label: TYPE_GROUP_LABEL, isGroupLabel: true },
-    ...typeOptions,
-    ...(appOptions.length > 0
-      ? [{ index: -1, label: APP_GROUP_LABEL, isGroupLabel: true }, ...appOptions]
-      : []),
-  ];
-  const isFiltered = filter.types.length + filter.appIds.length > 0;
+  const hiddenAppIds = getActiveHiddenAppIds(filter, apps);
+  const isFiltered = filter.hiddenTypes.length + hiddenAppIds.length > 0;
 
   return (
     <div
       css={css`
-        width: 260px;
+        width: 240px;
       `}
     >
       <EuiPopoverTitle paddingSize="s">{FILTER_LABEL}</EuiPopoverTitle>
-      <EuiSelectable
-        aria-label={FILTER_LABEL}
-        options={options}
-        onChange={(_options, _event, changed) => {
-          const entry = choices[changed.index];
-          if (entry) cellFilter$.next({ ...filter, ...toggleChoice(filter, entry.choice) });
-        }}
-        listProps={{ bordered: false }}
-        height="full"
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        css={css`
+          padding: ${euiTheme.size.s};
+        `}
       >
-        {(list) => list}
-      </EuiSelectable>
+        <EuiFlexItem>
+          <CheckboxGroup
+            label={TYPE_GROUP_LABEL}
+            items={FILTER_TYPES.map(({ type, label }) => ({
+              value: type,
+              label,
+              icon: TYPE_ICONS[type],
+            }))}
+            hidden={filter.hiddenTypes}
+            onChange={(hiddenTypes) => cellFilter$.next({ ...filter, hiddenTypes })}
+            dataTestSubj="notebookCellFilterTypes"
+          />
+        </EuiFlexItem>
+        {apps.length > 0 && (
+          <EuiFlexItem>
+            <CheckboxGroup<string | null>
+              label={APP_GROUP_LABEL}
+              items={[
+                ...apps.map(({ id, title }) => ({ value: id, label: title })),
+                { value: null, label: NO_APP_LABEL },
+              ]}
+              hidden={hiddenAppIds}
+              onChange={(next) => cellFilter$.next({ ...filter, hiddenAppIds: next })}
+              dataTestSubj="notebookCellFilterApps"
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiPopoverFooter paddingSize="s">
         <EuiButtonEmpty
           size="xs"
           flush="left"
           isDisabled={!isFiltered}
-          onClick={() => cellFilter$.next({ ...filter, types: [], appIds: [] })}
-          data-test-subj="notebookCellFilterClear"
+          onClick={() => cellFilter$.next({ ...filter, hiddenTypes: [], hiddenAppIds: [] })}
+          data-test-subj="notebookCellFilterShowAll"
         >
-          {CLEAR_LABEL}
+          {SHOW_ALL_LABEL}
         </EuiButtonEmpty>
       </EuiPopoverFooter>
     </div>
   );
 };
 
-/** Search and filter buttons floating at the bottom right of the notebook page. */
+/** Search and filter buttons stacked at the bottom right of the notebook page. */
 export const CellFilterControls = () => {
   const { euiTheme } = useEuiTheme();
-  const { cellFilter$ } = useNotebook();
-  const { search, types, appIds } = useStateFromPublishingSubject(cellFilter$);
+  const { store, cellFilter$ } = useNotebook();
+  const filter = useStateFromPublishingSubject(cellFilter$);
+  const apps = useStateFromPublishingSubject(store.apps$);
 
   return (
     <div
@@ -281,6 +321,7 @@ export const CellFilterControls = () => {
       `}
     >
       <EuiFlexGroup
+        direction="column"
         gutterSize="s"
         responsive={false}
         css={css`
@@ -294,7 +335,7 @@ export const CellFilterControls = () => {
           <FloatingPopoverButton
             iconType="search"
             label={SEARCH_LABEL}
-            badge={search.trim() ? 1 : 0}
+            badge={filter.search.trim() ? 1 : 0}
             dataTestSubj="notebookCellSearchButton"
           >
             <SearchPanel />
@@ -304,7 +345,7 @@ export const CellFilterControls = () => {
           <FloatingPopoverButton
             iconType="filter"
             label={FILTER_LABEL}
-            badge={types.length + appIds.length}
+            badge={filter.hiddenTypes.length + getActiveHiddenAppIds(filter, apps).length}
             dataTestSubj="notebookCellFilterButton"
           >
             <FilterPanel />

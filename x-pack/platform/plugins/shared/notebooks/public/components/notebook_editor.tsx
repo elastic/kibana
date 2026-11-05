@@ -13,7 +13,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, NotebookAttributes } from '../../common/types';
 import {
   EMPTY_CELL_FILTER,
-  countActiveFilters,
+  isCellFilterActive,
   matchesCellFilter,
   type CellFilter,
 } from '../model/cell_filter';
@@ -73,7 +73,7 @@ const CellList = () => {
   const cells = useStateFromPublishingSubject(store.cells$);
   const apps = useStateFromPublishingSubject(store.apps$);
   const filter = useStateFromPublishingSubject(cellFilter$);
-  const isFiltering = countActiveFilters(filter) > 0;
+  const isFiltering = isCellFilterActive(filter, apps);
 
   const listed = cellOrder.flatMap((id, index) => {
     const cell = cells[id];
