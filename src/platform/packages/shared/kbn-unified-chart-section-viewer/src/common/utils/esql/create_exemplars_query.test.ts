@@ -173,5 +173,17 @@ TS ${indexName}
         })
       ).toBe('');
     });
+
+    it('when the metric field type is unsigned_long', () => {
+      expect(
+        createExemplarsQuery({
+          metricItem: {
+            ...mockMetric,
+            metricTypes: ['counter'],
+            fieldTypes: [ES_FIELD_TYPES.UNSIGNED_LONG],
+          },
+        })
+      ).toBe('');
+    });
   });
 });
