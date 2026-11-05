@@ -71,6 +71,7 @@ export const registerWriteHuntEvidenceRoute = ({
             searchedTechniqueIds,
             pendingTechniqueIds,
             replayedWholeReport,
+            retryableReasons,
           } = request.body;
 
           const visible = await isReportVisibleToSpace(reportsEsClient, { spaceId, reportId });
@@ -90,6 +91,7 @@ export const registerWriteHuntEvidenceRoute = ({
               searchedTechniqueIds,
               pendingTechniqueIds,
               replayedWholeReport,
+              retryableReasons,
             },
             logger
           );

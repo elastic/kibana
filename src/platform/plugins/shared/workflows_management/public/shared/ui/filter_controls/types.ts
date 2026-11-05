@@ -77,4 +77,9 @@ export interface FilterGroupProps {
   Storage: typeof Storage;
   storageKey?: string;
   disableLocalStorageSync?: boolean;
+  /**
+   * Rewrites the controls chosen from the URL, local storage, or defaults before they are created.
+   * Runs on every source, so a stored control can be migrated or removed without changing the storage key.
+   */
+  transformControls?: (controls: FilterControlConfig[]) => FilterControlConfig[];
 }

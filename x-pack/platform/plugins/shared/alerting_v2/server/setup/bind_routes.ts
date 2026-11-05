@@ -10,7 +10,7 @@ import { Route } from '@kbn/core-di-server';
 import { CreateRuleRoute } from '../routes/rules/create_rule_route';
 import { UpdateRuleRoute } from '../routes/rules/update_rule_route';
 import { GetRulesRoute } from '../routes/rules/get_rules_route';
-import { BulkGetRulesRoute } from '../routes/rules/get_rules_bulk_route';
+import { BulkGetRulesRoute } from '../routes/rules/bulk_get_rules_route';
 import { GetRuleRoute } from '../routes/rules/get_rule_route';
 import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { RunRuleRoute } from '../routes/rules/run_rule_route';

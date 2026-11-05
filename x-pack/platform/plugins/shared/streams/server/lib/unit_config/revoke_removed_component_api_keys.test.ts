@@ -7,10 +7,17 @@
 
 import { revokeRemovedComponentApiKeys } from './revoke_removed_component_api_keys';
 
-const unit = (sources: Array<{ id: string }>, destinations: Array<{ id: string }>) => ({
+const unit = (
+  sources: Array<{ id: string }>,
+  destinations: Array<{ id: string; type?: string }>
+) => ({
   sources,
-  destinations,
+  destinations: destinations.map((destination) => ({ type: 'elasticsearch', ...destination })),
 });
+
+// Any type but 'elasticsearch'. The remote type name lives in streams_app.
+const REMOTE_DESTINATION = { id: 'remote-1', type: 'remote' };
+const S3_DESTINATION = { id: 's3-1', type: 's3' };
 
 const createClient = ({
   manageAll = true,
@@ -191,5 +198,71 @@ describe('revokeRemovedComponentApiKeys', () => {
     expect(result).toEqual({ apiKeysMayRemain: false });
     expect(hasPrivileges).not.toHaveBeenCalled();
     expect(invalidateApiKey).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['remote', [REMOTE_DESTINATION]],
+    ['S3', [S3_DESTINATION]],
+  ])(
+    'does not touch API keys when only non-elasticsearch destinations are removed (%s)',
+    async (_, removedDestinations) => {
+      const { client, hasPrivileges, queryApiKeys, invalidateApiKey } = createClient({
+        manageAll: false,
+        manageOwn: true,
+      });
+
+      const result = await revokeRemovedComponentApiKeys({
+        client: client as never,
+        logger: { error: jest.fn() } as never,
+        isSecurityEnabled: true,
+        previousUnit: unit([], removedDestinations),
+        nextUnit: unit([], []),
+      });
+
+      expect(result).toEqual({ apiKeysMayRemain: false });
+      expect(hasPrivileges).not.toHaveBeenCalled();
+      expect(queryApiKeys).not.toHaveBeenCalled();
+      expect(invalidateApiKey).not.toHaveBeenCalled();
+    }
+  );
+
+  it('revokes only the local destination key in a mixed delete', async () => {
+    const { client, queryApiKeys, invalidateApiKey } = createClient();
+    queryApiKeys.mockResolvedValueOnce({ api_keys: [{ id: 'es-1-key' }] });
+
+    const result = await revokeRemovedComponentApiKeys({
+      client: client as never,
+      logger: { error: jest.fn() } as never,
+      isSecurityEnabled: true,
+      previousUnit: unit([], [{ id: 'es-1' }, REMOTE_DESTINATION]),
+      nextUnit: unit([], []),
+    });
+
+    expect(queryApiKeys).toHaveBeenCalledTimes(1);
+    expect(queryApiKeys.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'metadata.streams_destination_id': 'es-1' } }])
+    );
+    expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['es-1-key'] });
+    expect(result).toEqual({ apiKeysMayRemain: false });
+  });
+
+  it('revokes the local key when a destination keeps its id but stops being local', async () => {
+    const { client, queryApiKeys, invalidateApiKey } = createClient();
+    queryApiKeys.mockResolvedValueOnce({ api_keys: [{ id: 'es-1-key' }] });
+
+    const result = await revokeRemovedComponentApiKeys({
+      client: client as never,
+      logger: { error: jest.fn() } as never,
+      isSecurityEnabled: true,
+      previousUnit: unit([], [{ id: 'es-1' }]),
+      nextUnit: unit([], [{ id: 'es-1', type: S3_DESTINATION.type }]),
+    });
+
+    expect(queryApiKeys).toHaveBeenCalledTimes(1);
+    expect(queryApiKeys.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'metadata.streams_destination_id': 'es-1' } }])
+    );
+    expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['es-1-key'] });
+    expect(result).toEqual({ apiKeysMayRemain: false });
   });
 });

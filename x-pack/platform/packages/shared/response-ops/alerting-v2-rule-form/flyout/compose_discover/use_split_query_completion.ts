@@ -11,6 +11,8 @@ import { getEsqlColumns } from '@kbn/esql-utils';
 import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 
 interface UseSplitQueryCompletionParams {
   /**
@@ -21,6 +23,7 @@ interface UseSplitQueryCompletionParams {
    */
   baseQuery: string;
   search: DataPublicPluginStart['search']['search'];
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -37,14 +40,16 @@ interface UseSplitQueryCompletionParams {
  * Swap strategy: replace this hook with a different implementation if ES|QL ever adds a
  * native "query context" parameter to its autocomplete API.
  */
-export function useSplitQueryCompletion({ baseQuery, search }: UseSplitQueryCompletionParams) {
+export function useSplitQueryCompletion({ baseQuery, search, cps }: UseSplitQueryCompletionParams) {
   // Assign refs directly during render — no useEffect needed. Refs are mutable
   // and reading/writing them during render is safe. Using useEffect here would
   // add two unnecessary effect invocations per render with no benefit.
   const baseQueryRef = useRef(baseQuery);
   const searchRef = useRef(search);
+  const cpsRef = useRef(cps);
   baseQueryRef.current = baseQuery;
   searchRef.current = search;
+  cpsRef.current = cps;
 
   // Store the disposable for cleanup on unmount.
   const disposableRef = useRef<monaco.IDisposable | null>(null);
@@ -52,7 +57,11 @@ export function useSplitQueryCompletion({ baseQuery, search }: UseSplitQueryComp
   const onEditorMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     const callbacks: ESQLCallbacks = {
       getColumnsFor: async (ctx) =>
-        getEsqlColumns({ esqlQuery: ctx?.query ?? '', search: searchRef.current }),
+        getEsqlColumns({
+          esqlQuery: ctx?.query ?? '',
+          search: searchRef.current,
+          projectRouting: getRuleProjectRouting(baseQueryRef.current, cpsRef.current),
+        }),
     };
 
     disposableRef.current = monaco.languages.registerCompletionItemProvider(ESQL_LANG_ID, {

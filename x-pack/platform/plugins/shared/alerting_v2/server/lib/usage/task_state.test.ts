@@ -225,4 +225,72 @@ describe('alerting v2 telemetry task state', () => {
       ).toThrow();
     });
   });
+
+  describe('v7', () => {
+    const v7 = stateSchemaByVersion[7];
+
+    const v6State = {
+      has_errors: false,
+      runs: 6,
+      action_policies_count: 7,
+      action_policies_count_by_status: { enabled: 5, disabled: 2 },
+    };
+
+    const newFields = {
+      dispatcher_alerts_count_by_outcome_24hr: { dispatched: 2, throttled: 3, unmatched: 2 },
+      dispatcher_action_groups_count_by_outcome_24hr: { dispatched: 2, throttled: 3 },
+      dispatcher_unique_alerts_dispatched_count_24hr: 2,
+      dispatcher_workflow_executions_count_24hr: 2,
+      dispatcher_unique_workflows_triggered_count_24hr: 1,
+      dispatcher_notifying_executions_count_24hr: 2,
+      dispatcher_notifying_spaces_count_24hr: 1,
+      dispatcher_policies_count_by_activity_24hr: {
+        dispatched: 2,
+        throttled: 2,
+        failing: 1,
+        broken: 1,
+      },
+      dispatcher_action_groups_dispatched_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
+      dispatcher_alerts_dispatched_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
+      dispatcher_workflow_executions_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
+      dispatcher_throttle_ratio_per_policy_24hr: { p50: 0.5, p99: 1, avg: 0.5 },
+      dispatcher_uncovered_rules_count_24hr: 1,
+      dispatcher_dispatch_failures_count_by_reason_24hr: { workflow_disabled: 2 },
+    };
+
+    it('adds the dispatcher activity counters as undefined', () => {
+      const result = v7.up(cloneDeep(v6State));
+
+      expect(result).toMatchObject(
+        Object.fromEntries(Object.keys(newFields).map((key) => [key, undefined]))
+      );
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v7.up(cloneDeep(v6State))).toMatchObject(v6State);
+    });
+
+    it('produces a state the v7 schema accepts', () => {
+      expect(() => v7.schema.validate(v7.up(cloneDeep(v6State)))).not.toThrow();
+    });
+
+    it('accepts the new counters, including null distributions', () => {
+      expect(() =>
+        v7.schema.validate({
+          ...v6State,
+          ...newFields,
+          dispatcher_throttle_ratio_per_policy_24hr: { p50: null, p99: null, avg: null },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a count_by value outside the known vocabulary', () => {
+      expect(() =>
+        v7.schema.validate({
+          ...v6State,
+          dispatcher_dispatch_failures_count_by_reason_24hr: { timeout: 1 },
+        })
+      ).toThrow();
+    });
+  });
 });
