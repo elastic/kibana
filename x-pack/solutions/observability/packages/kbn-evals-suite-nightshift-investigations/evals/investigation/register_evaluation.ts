@@ -24,6 +24,7 @@ import { createInvestigationJudges, createOrcaEvaluators } from './judges';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
+import { assertScoresWithinQueryLimit } from './score_budget';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import { createAdminSessionRequest } from './admin_session_request';
 import type { AdminSessionRequestOptions } from './admin_session_request';
@@ -99,6 +100,11 @@ export const registerInvestigationEvaluation = ({
           ...efficiencyEvaluators,
         ];
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
+        assertScoresWithinQueryLimit({
+          examples: dataset.examples.length,
+          repetitions,
+          evaluators: evaluators.length,
+        });
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         evaluate.setTimeout(

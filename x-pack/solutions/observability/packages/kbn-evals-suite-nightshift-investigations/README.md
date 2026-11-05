@@ -679,7 +679,9 @@ holds ORCA's last snapshot.
 
 The 755 is a periodic baseline, not a CI shard. The `orcabench` shard budgets 240 minutes for 50
 tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
-eight investigations at a time the 755 needs tens of hours, so run it in slices.
+eight investigations at a time the 755 needs tens of hours, so run it in slices. The score API
+returns at most 10,000 scores per experiment, so a run that would write more (the unsliced 755
+writes about 13,600) fails before any investigation starts.
 `NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
 runs one contiguous part of it in `case_id` order. Each run validates the whole release before
 slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v1/slice-<index>-of-<count>`,
