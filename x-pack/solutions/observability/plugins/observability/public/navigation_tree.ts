@@ -23,6 +23,9 @@ import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/publi
 import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
+const CONNECTORS_MANAGEMENT_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
+const CONNECTOR_TYPE_BUILDER_PATH = `${CONNECTORS_MANAGEMENT_PATH}/connectors/build`;
+
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -605,6 +608,14 @@ function createNavTree({
                 : []),
               {
                 link: 'management:triggersActionsConnectors',
+                getIsActive: ({ pathNameSerialized, prepend }) =>
+                  pathNameSerialized.startsWith(prepend(CONNECTORS_MANAGEMENT_PATH)) &&
+                  !pathNameSerialized.startsWith(prepend(CONNECTOR_TYPE_BUILDER_PATH)),
+              },
+              {
+                link: 'management:triggersActionsConnectorTypeBuilder',
+                getIsActive: ({ pathNameSerialized, prepend }) =>
+                  pathNameSerialized.startsWith(prepend(CONNECTOR_TYPE_BUILDER_PATH)),
               },
               {
                 link: 'management:reporting',

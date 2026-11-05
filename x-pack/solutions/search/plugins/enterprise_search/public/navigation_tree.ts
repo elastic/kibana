@@ -10,7 +10,7 @@ import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
@@ -283,29 +283,11 @@ export const getNavigationTreeDefinition = ({
                         isAtOrBelowPath(pathNameSerialized, prepend(connectorsManagementPath)) &&
                         !isAtOrBelowPath(pathNameSerialized, prepend(connectorTypeBuilderPath)),
                     },
-                    ...(core.application.capabilities.actions?.save
-                      ? [
-                          {
-                            id: 'connector_type_builder',
-                            title: i18n.translate(
-                              'xpack.enterpriseSearch.searchNav.management.connectorTypeBuilder',
-                              { defaultMessage: 'Connector type builder' }
-                            ),
-                            href: core.application.getUrlForApp('management', {
-                              path: 'insightsAndAlerting/triggersActionsConnectors/connectors/build',
-                              absolute: true,
-                            }),
-                            getIsActive: ({
-                              pathNameSerialized,
-                              prepend,
-                            }: Parameters<NonNullable<NodeDefinition['getIsActive']>>[0]) =>
-                              isAtOrBelowPath(
-                                pathNameSerialized,
-                                prepend(connectorTypeBuilderPath)
-                              ),
-                          },
-                        ]
-                      : []),
+                    {
+                      link: 'management:triggersActionsConnectorTypeBuilder',
+                      getIsActive: ({ pathNameSerialized, prepend }) =>
+                        isAtOrBelowPath(pathNameSerialized, prepend(connectorTypeBuilderPath)),
+                    },
                     { link: 'management:reporting' },
                     { link: 'management:jobsListLink' },
                     { link: 'management:watcher' },
