@@ -9,6 +9,12 @@ import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '@kbn/ftr-llm-proxy';
 
 const TITLE_GENERATION_PROMPT = 'You are a title-generation utility';
+const TEMPLATE_GENERATION_PROMPT = 'Generate a reusable HTML template using Liquid template syntax';
+
+const isTemplateGenerationRequest = (messages: Array<{ role: string; content?: unknown }>) =>
+  String(messages.find((m) => m.role === 'system')?.content ?? '').includes(
+    TEMPLATE_GENERATION_PROMPT
+  );
 
 /** Whether the model request is the conversation title generation, not the agent's own turn. */
 export const isTitleGenerationRequest = (messages: Array<{ role: string; content?: unknown }>) =>
@@ -22,6 +28,17 @@ export const mockTitleGeneration = (proxy: LlmProxy, title: string) => {
       name: 'set_title',
       when: ({ messages }) => isTitleGenerationRequest(messages),
       responseMock: createToolCallMessage('set_title', { title }),
+    })
+    .completeAfterIntercept();
+};
+
+/** Scripts the template the server writes for a panel whose query is new or has changed. */
+export const mockTemplateGeneration = (proxy: LlmProxy, template: string) => {
+  void proxy
+    .intercept({
+      name: 'custom_content:template',
+      when: ({ messages }) => isTemplateGenerationRequest(messages),
+      responseMock: template,
     })
     .completeAfterIntercept();
 };

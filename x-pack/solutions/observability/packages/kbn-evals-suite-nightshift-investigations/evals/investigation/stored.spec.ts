@@ -24,6 +24,7 @@ for (const storedDataset of selectStoredDatasets(
       loadStoredInvestigationDataset(client, await resolveStoredDatasetName(client, storedDataset)),
     // Like NIGHTSHIFT_DATASET_NAME: run the upstream copy, keeping its example ids and labels.
     trustUpstreamDataset: true,
-    requireSandboxCommand: false,
+    // Live investigations: they get the stack's connectors and need no sandbox calculation.
+    bundledSynthetic: false,
   });
 }

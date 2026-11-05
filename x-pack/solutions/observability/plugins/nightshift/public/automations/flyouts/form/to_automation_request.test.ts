@@ -12,7 +12,7 @@ import {
   toPresetSchedule,
   type TriggerFormValues,
 } from './automation_form_values';
-import type { Automation } from '../../hooks/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
 import { toAutomationRequestBody, toAutomationUpdateBody } from './to_automation_request';
 
 const buildAutomation = (overrides: Partial<Automation>): Automation => ({

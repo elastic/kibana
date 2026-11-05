@@ -19,6 +19,7 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
+import { saveConnectorSetOnInvestigator } from './connector_sets';
 import { createInvestigationJudges } from './judges';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
@@ -40,8 +41,8 @@ export const registerInvestigationEvaluation = ({
   loadDataset = loadInvestigationDataset,
   trustUpstreamDataset = Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
   orca = false,
-  // The bundled synthetic questions ask for a sandbox calculation; other datasets may not.
-  requireSandboxCommand = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
+  // Only the default loader can return the bundled synthetic examples.
+  bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
     !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
 }: {
@@ -51,7 +52,7 @@ export const registerInvestigationEvaluation = ({
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;
-  requireSandboxCommand?: boolean;
+  bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -78,6 +79,8 @@ export const registerInvestigationEvaluation = ({
           await assertOrcaSource();
         }
         const dataset = await loadDataset(evalsClient);
+        // The bundled synthetic examples supply their own evidence and must not query a cluster.
+        const bundledSynthetic = !orca && bundledSyntheticDataset;
         // The judges score with the evaluation connector, not the model under test.
         const judges = createInvestigationJudges({
           inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
@@ -156,6 +159,7 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
+        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
@@ -218,7 +222,7 @@ export const registerInvestigationEvaluation = ({
               if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
                 casesWithOrcaTelemetry.push(output.case_id);
               }
-              if (!orca && requireSandboxCommand) {
+              if (bundledSynthetic) {
                 assertSuccessfulSandboxCommand(conversation.rounds);
               }
               expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

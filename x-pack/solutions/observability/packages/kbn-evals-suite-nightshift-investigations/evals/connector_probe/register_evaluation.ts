@@ -8,8 +8,12 @@
 import { expect } from '@playwright/test';
 import { selectEvaluators, tags } from '@kbn/evals';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
-import { NIGHTSHIFT_ASSISTANT_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { evaluate } from '../../src/evaluate';
+import { saveConnectorSetOnInvestigator } from '../investigation/connector_sets';
 import { createConnectorProbeEvaluators } from './evaluators';
 import { runConnectorProbe } from './task';
 import type { ConnectorProbeExample, ConnectorProbeTaskOutput } from './types';
@@ -53,19 +57,23 @@ export const registerConnectorProbeEvaluation = ({
           Math.ceil((dataset.examples.length * repetitions) / concurrency) * PROBE_BUDGET_MS +
             5 * 60_000
         );
-        // The agent is installed in the background at Kibana start.
+        // The agents are installed in the background at Kibana start.
         await expect
           .poll(
             async () =>
-              fetch(`/api/agent_builder/agents/${NIGHTSHIFT_ASSISTANT_AGENT_ID}`, {
-                version: '2023-10-31',
-              }).then(
+              Promise.all(
+                [NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID].map((agentId) =>
+                  fetch(`/api/agent_builder/agents/${agentId}`, { version: '2023-10-31' })
+                )
+              ).then(
                 () => true,
                 () => false
               ),
             { timeout: 60_000 }
           )
           .toBe(true);
+        // The assistant uses the connectors saved on the investigator.
+        await saveConnectorSetOnInvestigator(fetch);
 
         const [experiment] = await executorClient.runExperiment(
           {
