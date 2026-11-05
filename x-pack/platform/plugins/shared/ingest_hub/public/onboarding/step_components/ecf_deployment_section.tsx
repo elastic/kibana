@@ -46,7 +46,7 @@ import {
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
 } from '../ecf_cloudformation';
-import type { EcfServiceConfig } from '../ecf_cloudformation';
+import type { EcfServiceConfig, EcfTemplateFamily } from '../ecf_cloudformation';
 import { getOnboardingSessionKey } from '../core/onboarding_session_storage';
 import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
 import { useEcfTemplateVersion } from '../use_ecf_template_version';
@@ -65,8 +65,6 @@ export const ECF_LAUNCH_STEP_SESSION_KEY = 'ecfLaunchStep' as const;
 const STACK_NAME_REGEX = new RegExp(`^[a-zA-Z][-a-zA-Z0-9]{0,${ECF_STACK_NAME_MAX_LENGTH - 1}}$`);
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-
-type EcfTemplateFamily = 'unified' | 'otel' | 'crowdstrike';
 
 /** Why a launched family's stack no longer matches the current wizard state. */
 type EcfStaleReason = 'services' | 'settings';
@@ -128,6 +126,8 @@ interface UseEcfDeploymentOpts {
   globalRegion: string;
   otlpEndpoint: string | undefined;
   dataFormat: DataFormat;
+  /** Global data stream namespace, which the unified stack takes as `DataStreamNamespace`. */
+  namespace?: string;
 }
 
 interface UseEcfDeploymentResult {
@@ -158,6 +158,7 @@ export const useEcfDeployment = ({
   globalRegion,
   otlpEndpoint,
   dataFormat,
+  namespace,
 }: UseEcfDeploymentOpts): UseEcfDeploymentResult => {
   const [persistedLaunchStep, setPersistedLaunchStep] = useSessionStorage<PersistedEcfLaunchStep>(
     getOnboardingSessionKey('aws', ECF_LAUNCH_STEP_SESSION_KEY),
@@ -331,6 +332,7 @@ export const useEcfDeployment = ({
             version: stackVersions.unified ?? templateVersion,
             // || (not ??) so an empty string (user cleared the field) falls back to default.
             stackName: stackNames.unified || ECF_UNIFIED_STACK_NAME,
+            namespace,
           })
         : undefined,
 
@@ -339,6 +341,7 @@ export const useEcfDeployment = ({
       ecfUnifiedConfigs,
       globalRegion,
       otlpEndpoint,
+      namespace,
       templateVersion,
       stackVersions.unified,
       stackNames.unified,

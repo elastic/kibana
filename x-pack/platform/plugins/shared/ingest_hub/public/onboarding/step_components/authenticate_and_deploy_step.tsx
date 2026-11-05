@@ -371,6 +371,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     globalRegion,
     otlpEndpoint,
     dataFormat,
+    namespace: serviceSettings.namespace,
   });
 
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
