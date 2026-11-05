@@ -44,6 +44,15 @@ const renderActions = (
 };
 
 describe('SourceActionsColumn', () => {
+  it('offers onboarding but no delete when the user cannot change sources', () => {
+    renderActions({ onDelete: undefined });
+
+    expect(screen.getByTestId('significantEventsAppSourcesTableOnboardButton')).toBeEnabled();
+    expect(
+      screen.queryByTestId('significantEventsAppSourcesTableDeleteButton')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows a disabled stop while a run is expected but not reported yet', () => {
     renderActions({
       isOnboardPending: true,

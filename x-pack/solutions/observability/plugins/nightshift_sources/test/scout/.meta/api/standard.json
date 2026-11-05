@@ -1,5 +1,5 @@
 {
-  "sha1": "4ae190f15ba12c48d2e0d584533ef8bb1883aa5d",
+  "sha1": "7b0205eb94845a4a8fbf1a885697e25f3010339a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 52
+      }
+    },
+    {
+      "id": "6395ba18a958586-e55976c90eca97f",
+      "title": "Nightshift sources authorization lets a user with manage but not configure read sources and refuses every change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
+        "line": 83,
+        "column": 14
       }
     },
     {
@@ -32,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 82,
-        "column": 14
+        "line": 102,
+        "column": 25
       }
     },
     {
@@ -48,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 92,
-        "column": 14
+        "line": 109,
+        "column": 28
       }
     },
     {
@@ -64,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 101,
-        "column": 42
+        "line": 121,
+        "column": 6
       }
     },
     {
