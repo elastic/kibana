@@ -1,3 +1,9 @@
+# Keep in sync with DEFAULT_AGENT_IMAGE_CONFIG in .buildkite/pipeline-utils/agent_images.ts
+agents:
+  provider: gcp
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  diskSizeGb: 85
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
@@ -41,19 +47,6 @@ steps:
 
   - wait: ~
     depends_on: pre_build
-
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    depends_on:
-      - terrazzo-initial-pipeline-upload
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-highcpu-8
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution

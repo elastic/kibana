@@ -10,7 +10,7 @@ import {
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
   parsePresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
+import { MAX_DAILY_LIMIT, UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   isSlackTrigger,
   toPresetSchedule,
@@ -49,6 +49,7 @@ export const validationLabels = {
 };
 
 export const isValidDailyLimit = (value: string): boolean => {
+  if (value === UNLIMITED_DAILY_LIMIT) return true;
   const limit = Number(value);
   return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= MAX_DAILY_LIMIT;
 };
@@ -61,13 +62,23 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   return true;
 };
 
+export const getInstructionsError = (
+  instructions: string,
+  trigger: TriggerFormValues
+): string | undefined => {
+  if (instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+    return validationLabels.instructionsTooLong;
+  }
+  if (trigger.kind === 'every' && !instructions.trim()) {
+    return validationLabels.instructionsRequired;
+  }
+  return undefined;
+};
+
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
-  if (values.trigger.kind === 'every') {
-    if (!values.instructions.trim()) return validationLabels.instructionsRequired;
-    if (values.instructions.trim().length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
-      return validationLabels.instructionsTooLong;
-    }
+  if (values.instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+    return validationLabels.instructionsTooLong;
   }
   if (values.trigger && isSlackTrigger(values.trigger) && !values.trigger.channels.length) {
     return validationLabels.slackChannelsRequired;
