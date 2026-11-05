@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/index-explorer-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Explorer for Elasticsearch indices: browse, filter, facet, query with ES|QL, and export.",
+  "plugin": {
+    "id": "indexExplorer",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "indexExplorer"
+    ],
+    "requiredPlugins": [
+      "dataViews",
+      "lens"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}
