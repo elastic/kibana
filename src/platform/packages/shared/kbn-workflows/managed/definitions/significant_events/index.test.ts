@@ -42,6 +42,7 @@ interface WorkflowStep {
     trigger_type?: string;
     message?: string;
     source_ids?: string;
+    context?: Record<string, string>;
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
@@ -153,6 +154,9 @@ describe('significant events persistence workflow contracts', () => {
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
     expect(triggerStep.with?.source_ids).toContain('source_ids');
+    expect(triggerStep.with?.context?.source_workflow_execution_id).toContain(
+      'workflow_execution_id'
+    );
     // Open investigations are matched by subject; the start step takes no concurrency key.
     expect(triggerStep.with).not.toHaveProperty('concurrency_key');
   });

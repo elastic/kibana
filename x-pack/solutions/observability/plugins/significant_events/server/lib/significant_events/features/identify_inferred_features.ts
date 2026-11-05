@@ -154,6 +154,7 @@ interface IterationTuningParams {
 // ---------------------------------------------------------------------------
 
 export interface FeaturesIdentifiedTelemetry {
+  workflow_execution_id?: string;
   run_id: string;
   connector_id: string;
   iteration: number;

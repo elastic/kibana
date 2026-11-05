@@ -128,9 +128,12 @@ export const createEventInvestigationAttachTool = ({
         });
 
         telemetry.trackAgentToolEventInvestigationAttach({
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
           success: true,
           event_id: toolParams.event_id,
-          workflow_execution_id: toolParams.workflow_execution_id,
+          investigation_workflow_execution_id: toolParams.workflow_execution_id,
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
@@ -138,9 +141,12 @@ export const createEventInvestigationAttachTool = ({
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_investigation_attach: ${message}`);
         telemetry.trackAgentToolEventInvestigationAttach({
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
           success: false,
           event_id: toolParams.event_id,
-          workflow_execution_id: toolParams.workflow_execution_id,
+          investigation_workflow_execution_id: toolParams.workflow_execution_id,
           error_message: message,
         });
         return {

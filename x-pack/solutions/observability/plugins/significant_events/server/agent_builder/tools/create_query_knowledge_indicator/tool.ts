@@ -156,6 +156,9 @@ export function createQueryKnowledgeIndicatorTool({
         });
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
           ki_kind: 'query',
           tool_id: 'ki_query_create',
           success: true,
@@ -186,6 +189,9 @@ export function createQueryKnowledgeIndicatorTool({
         }
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
           ki_kind: 'query',
           tool_id: 'ki_query_create',
           success: false,

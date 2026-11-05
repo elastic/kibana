@@ -97,6 +97,20 @@ it('passes a strict connector override and request-scoped resolver to the discov
     step: 'discovery',
     requestedId: 'model-alias',
   });
+  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith({
+    workflow_execution_id: 'execution-1',
+    execution_id: 'execution-1',
+    space_id: 'space-a',
+  });
+});
+
+it('does not report a deduplicated discovery trigger', async () => {
+  const { handlerParams, run } = makeHandlerParams();
+  run.mockResolvedValueOnce({ executionId: 'execution-1', isNew: false });
+
+  await route.handler(handlerParams);
+
+  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).not.toHaveBeenCalled();
 });
 
 it('maps an unknown connector to a 400 response', async () => {

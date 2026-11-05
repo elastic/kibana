@@ -117,6 +117,21 @@ describe('triggerInvestigationWorkflow', () => {
     expect(options).toEqual({ entryPoint: 'start_api' });
   });
 
+  it('passes the alert-producing workflow execution id into investigation context', async () => {
+    const event = createEvent({ workflow_execution_id: 'discovery-run-1' });
+    const nightshiftInvestigations = createNightshiftInvestigations();
+
+    await triggerInvestigationWorkflow({
+      nightshiftInvestigations,
+      request: createRequest(),
+      logger: createLogger(),
+      event,
+    });
+
+    const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
+    expect(request.context.source_workflow_execution_id).toBe('discovery-run-1');
+  });
+
   it('passes the event source_ids through', async () => {
     const event = createEvent({ source_ids: ['logs.checkout'] });
     const nightshiftInvestigations = createNightshiftInvestigations();

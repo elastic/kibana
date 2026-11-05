@@ -41,6 +41,7 @@ export const triggerInvestigationWorkflow = async ({
     confidence,
     causal_features,
     blast_radius,
+    workflow_execution_id,
   } = event;
 
   const client = nightshiftInvestigations.getInvestigationsClient(request);
@@ -56,6 +57,7 @@ export const triggerInvestigationWorkflow = async ({
         source_ids: source_ids ?? [],
         context: {
           event_id,
+          ...(workflow_execution_id ? { source_workflow_execution_id: workflow_execution_id } : {}),
           status,
           severity,
           confidence,

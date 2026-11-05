@@ -164,7 +164,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('fetches the workflow definition and runs it and returns executionId', async () => {
-      const { client, managementApi } = createClient();
+      const { client, managementApi, telemetry } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
       const result = await client.run({
@@ -177,6 +177,12 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       });
 
       expect(result).toEqual({ executionId: 'execution-id' });
+      expect(telemetry.trackOnboardingScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflow_execution_id: 'execution-id',
+          execution_id: 'execution-id',
+        })
+      );
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
         '*'

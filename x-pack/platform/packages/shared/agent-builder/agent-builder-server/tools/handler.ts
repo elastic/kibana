@@ -178,6 +178,8 @@ export interface ToolHandlerContext {
    * Undefined for top-level executions or direct tool runs.
    */
   parentExecutionId?: string;
+  /** Workflow Engine execution ID that started this agent run. */
+  workflowExecutionId?: string;
   /**
    * The experimental features enabled for the current run.
    */

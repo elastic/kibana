@@ -33,6 +33,7 @@ import type { SignificantEventsMaintenanceService } from '../../../../lib/mainte
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
+import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
@@ -224,6 +225,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
@@ -270,7 +272,11 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
-        trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        trackFeaturesIdentified: (data) =>
+          telemetry.trackFeaturesIdentified({
+            ...data,
+            ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+          }),
       });
 
       await bootstrapSyncWorkflow({
@@ -291,6 +297,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       telemetry.trackFeaturesIdentified(
         buildTelemetry(
           {
+            ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
             run_id: resolvedRunId,
             connector_id: connectorId,
             iteration: iteration ?? 1,

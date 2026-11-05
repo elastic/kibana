@@ -65,6 +65,7 @@ import type {
 import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_events/validate_esql_query';
+import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 
 // Id lookups are for deep links into the discovery table, not bulk reads.
 const MAX_DISCOVERY_QUERY_IDS = 100;
@@ -561,6 +562,7 @@ const generateQueriesRoute = createServerRoute({
         source,
         connectorId,
         runId: resolvedRunId,
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
         maxExistingQueriesForContext,
       },
       {

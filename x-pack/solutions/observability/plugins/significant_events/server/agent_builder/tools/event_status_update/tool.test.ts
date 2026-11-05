@@ -73,13 +73,18 @@ describe('event_status_update tool', () => {
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    context.workflowExecutionId = 'workflow-run-1';
     const result = await invokeHandler(
       tool as never,
       { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },
-      createMockToolContext()
+      context
     );
     expect(updateEventStatusToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ assessmentNote: 'Recovered after rollback' })
+      expect.objectContaining({
+        assessmentNote: 'Recovered after rollback',
+        workflowExecutionId: 'workflow-run-1',
+      })
     );
 
     if ('results' in result) {
@@ -87,6 +92,9 @@ describe('event_status_update tool', () => {
     }
     expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
       expect.objectContaining({ request: expect.anything() })
+    );
+    expect(telemetry.trackAgentToolEventStatusUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
     );
   });
 });

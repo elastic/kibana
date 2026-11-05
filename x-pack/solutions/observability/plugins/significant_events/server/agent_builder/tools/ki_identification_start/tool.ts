@@ -80,7 +80,7 @@ export const createKiIdentificationStartTool = ({
     - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
-  handler: async ({ slug, steps, connectors }, { request }) => {
+  handler: async ({ slug, steps, connectors }, { request, workflowExecutionId }) => {
     let sourceId = '';
     try {
       await assertCanManageSignificantEvents({ request, server });
@@ -101,6 +101,7 @@ export const createKiIdentificationStartTool = ({
       });
 
       telemetry.trackAgentToolKiIdentificationStarted({
+        ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
         success: true,
         source_id: source.id,
       });
@@ -117,6 +118,7 @@ export const createKiIdentificationStartTool = ({
       const message = err instanceof Error ? err.message : String(err);
 
       telemetry.trackAgentToolKiIdentificationStarted({
+        ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
         success: false,
         source_id: sourceId,
         error_message: message,
