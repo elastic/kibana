@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { SCS_AGENT_BUILDER_TOOL_IDS } from '../../../lib/semantic_code_search_grounding/semantic_code_search_tools';
 import { KI_QUERY_GENERATION_SKILL_ID } from '../../skills/ki_query_generation';
-import {
-  createKIQueryGenerationAgentType,
-  kiQueryGenerationAgentType,
-} from './ki_query_generation_agent';
+import { registerSignificantEventsKIQueryGenerationAgentTypes } from '.';
+import { kiQueryGenerationAgentType } from './ki_query_generation_agent';
 
 describe('kiQueryGenerationAgentType', () => {
   it('keeps stable registry tools on the agent type', () => {
@@ -22,30 +20,12 @@ describe('kiQueryGenerationAgentType', () => {
     expect(isAllowedBuiltinSkill(KI_QUERY_GENERATION_SKILL_ID)).toBe(true);
   });
 
-  it('feature-gates every registered SCS tool', async () => {
-    const enabledAgentType = createKIQueryGenerationAgentType({
-      isSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(true),
-    });
-    const disabledAgentType = createKIQueryGenerationAgentType({
-      isSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(false),
-    });
-    if (
-      typeof enabledAgentType.baseConfiguration !== 'function' ||
-      typeof disabledAgentType.baseConfiguration !== 'function'
-    ) {
-      throw new Error('Expected dynamic KI query generation agent configuration');
-    }
+  it('registers the static agent type', () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
 
-    const context = {
-      request: {} as never,
-      spaceId: 'default',
-    };
+    registerSignificantEventsKIQueryGenerationAgentTypes({ agentBuilder });
 
-    await expect(enabledAgentType.baseConfiguration(context)).resolves.toMatchObject({
-      tools: [{ tool_ids: [...SCS_AGENT_BUILDER_TOOL_IDS] }],
-    });
-    await expect(disabledAgentType.baseConfiguration(context)).resolves.toMatchObject({
-      tools: [],
-    });
+    expect(agentBuilder.agents.registerType).toHaveBeenCalledTimes(1);
+    expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(kiQueryGenerationAgentType);
   });
 });

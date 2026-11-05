@@ -10,32 +10,71 @@
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 jest.mock('./rspack_runtime', () => ({ rspack: jest.fn() }));
-jest.mock('./config/create_single_compile_config', () => ({
-  createSingleCompileConfig: jest.fn(),
+jest.mock('./config/create_multi_compile_config', () => ({
+  createMultiCompileConfig: jest.fn(),
+  KIBANA_COMPILER: 'kibana',
+}));
+jest.mock('./hmr/hmr_server', () => ({
+  HmrServer: jest.fn().mockImplementation(() => mockHmrServer),
 }));
 
 import { rspack } from './rspack_runtime';
-import { createSingleCompileConfig } from './config/create_single_compile_config';
+import { createMultiCompileConfig } from './config/create_multi_compile_config';
 import { runBuild } from './run_build';
 
-import type { Compiler } from '@rspack/core';
+import type { MultiCompiler } from '@rspack/core';
+
+const mockHmrServer = {
+  start: jest.fn().mockResolvedValue(1234),
+  close: jest.fn().mockResolvedValue(undefined),
+  broadcast: jest.fn(),
+  broadcastBuilding: jest.fn(),
+  broadcastReload: jest.fn(),
+  broadcastErrors: jest.fn(),
+};
 
 const nextTick = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 type WatchCallback = (err: Error | null, stats?: unknown) => void;
 
-const createStats = ({ errors }: { errors: string[] }) => ({
-  hash: `hash-${errors.length}`,
-  hasErrors: () => errors.length > 0,
-  hasWarnings: () => false,
-  toString: () => errors.join('\n'),
-  toJson: () => ({
-    errors: errors.map((message) => ({ message })),
-    entrypoints: { kibana: {} },
-    assets: [{ name: 'kibana.bundle.js', size: 10 }],
-    time: 100,
-  }),
-});
+const createStats = ({
+  errors,
+  kibanaHash = `hash-${errors.length}`,
+  sharedHash,
+}: {
+  errors: string[];
+  kibanaHash?: string;
+  sharedHash?: string;
+}) => {
+  const child = {
+    compilation: { name: 'kibana' },
+    hash: kibanaHash,
+    hasErrors: () => errors.length > 0,
+    hasWarnings: () => false,
+    toString: () => errors.join('\n'),
+    toJson: () => ({
+      errors: errors.map((message) => ({ message })),
+      entrypoints: { kibana: {} },
+      assets: [{ name: 'kibana.bundle.js', size: 10 }],
+      time: 100,
+    }),
+  };
+  const shared = sharedHash
+    ? [
+        {
+          compilation: { name: 'shared-src' },
+          hash: sharedHash,
+          hasErrors: () => false,
+          hasWarnings: () => false,
+          toJson: () => ({ errors: [] }),
+        },
+      ]
+    : [];
+  return {
+    hasErrors: () => errors.length > 0,
+    stats: [...shared, child],
+  };
+};
 
 describe('runBuild in watch mode', () => {
   let watchCallback: WatchCallback;
@@ -47,16 +86,22 @@ describe('runBuild in watch mode', () => {
   beforeEach(() => {
     writer.messages.length = 0;
     close.mockClear();
-    jest.mocked(createSingleCompileConfig).mockResolvedValue({ config: {}, bundleCount: 3 });
-    // fake compiler exposes only what runWatchBuild touches
+    Object.values(mockHmrServer).forEach((fn) => fn.mockClear());
+    jest.mocked(createMultiCompileConfig).mockResolvedValue({ configs: [{}], bundleCount: 3 });
     const compiler = {
-      outputPath: '/out',
-      hooks: { compile: { tap: jest.fn() } },
+      compilers: [
+        {
+          name: 'kibana',
+          outputPath: '/out',
+          options: {},
+        },
+      ],
+      hooks: { invalid: { tap: jest.fn() } },
       watch: jest.fn((_opts: unknown, cb: WatchCallback) => {
         watchCallback = cb;
         return { close };
       }),
-    } as unknown as Compiler;
+    } as unknown as MultiCompiler;
     jest.mocked(rspack).mockReturnValue(compiler);
   });
 
@@ -90,6 +135,28 @@ describe('runBuild in watch mode', () => {
     const result = await pending;
     expect(result.success).toBe(true);
     expect(result.bundleCount).toBe(3);
+
+    await result.close!();
+    await result.done;
+  });
+
+  it('reloads the page when a shared compiler rebuilds, and hot-updates otherwise', async () => {
+    const pending = runBuild({ repoRoot: '/repo', watch: true, hmr: true, log });
+    await nextTick();
+    watchCallback(null, createStats({ errors: [], kibanaHash: 'k1', sharedHash: 's1' }));
+    const result = await pending;
+
+    watchCallback(null, createStats({ errors: [], kibanaHash: 'k2', sharedHash: 's1' }));
+    expect(mockHmrServer.broadcast).toHaveBeenLastCalledWith('k2', '0.1', []);
+    expect(mockHmrServer.broadcastReload).not.toHaveBeenCalled();
+
+    watchCallback(null, createStats({ errors: [], kibanaHash: 'k3', sharedHash: 's2' }));
+    expect(mockHmrServer.broadcastReload).toHaveBeenCalledTimes(1);
+    expect(mockHmrServer.broadcast).not.toHaveBeenCalledWith(
+      'k3',
+      expect.anything(),
+      expect.anything()
+    );
 
     await result.close!();
     await result.done;

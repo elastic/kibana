@@ -7,18 +7,29 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { resolveControls, type IdentifiedControl, type PlannedControl } from '../controls';
+import {
+  createEsqlVariablesResolver,
+  resolveControls,
+  type IdentifiedControl,
+  type PlannedControl,
+} from '../controls';
 import type { PanelContentSource, ResolvePanelContent } from '../panels';
-import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
-import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
+import type { PanelContent, PanelContentAttempt, ResolveEsqlVariables } from '../resolve_panel';
+import type {
+  ResolveAttachmentPanel,
+  ResolveControlFieldCapabilities,
+  ResolveEsqlControlColumnType,
+} from '../types';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
+import { getSectionIdByPanelId } from '../dashboard_state';
 import type { DashboardFailure } from '../utils';
-import type { PanelChange, PlannedPanel } from './plan';
+import type { PanelChange, PlannedPanel, PlannedRemovals } from './plan';
 
 interface PanelResolvers {
   resolvePanelContent: ResolvePanelContent;
   resolveAttachmentPanel: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  resolveEsqlControlColumnType?: ResolveEsqlControlColumnType;
 }
 
 export type ResolvedPanel = PanelChange<PanelContent> & { authoringNote?: string };
@@ -33,7 +44,8 @@ export interface ResolvedChanges {
 
 const resolveContent = (
   content: PanelContentSource,
-  { resolvePanelContent, resolveAttachmentPanel }: PanelResolvers
+  { resolvePanelContent, resolveAttachmentPanel }: PanelResolvers,
+  resolveEsqlVariables: ResolveEsqlVariables
 ): PanelContentAttempt | Promise<PanelContentAttempt> => {
   switch (content.source) {
     case 'config':
@@ -41,7 +53,7 @@ const resolveContent = (
     case 'attachment':
       return resolveAttachmentPanel(content.attachmentId);
     case 'request':
-      return resolvePanelContent(content.request);
+      return resolvePanelContent({ ...content.request, resolveEsqlVariables });
   }
 };
 
@@ -53,7 +65,9 @@ export const resolvePlan = async ({
   panels,
   controls,
   existingControls,
-  removedControlIds,
+  existingPanels,
+  timeRange,
+  removals,
   takenIds,
   projectRouting,
   resolvers,
@@ -63,19 +77,46 @@ export const resolvePlan = async ({
   controls: PlannedControl[];
   /** The controls of the original dashboard. */
   existingControls: NonNullable<DashboardAttachmentData['pinned_panels']>;
-  removedControlIds: ReadonlySet<string>;
+  /** The panels of the original dashboard, where an unpinned ES|QL control is. */
+  existingPanels: DashboardAttachmentData['panels'];
+  /** The time range of the dashboard once the call is applied. */
+  timeRange?: DashboardAttachmentData['time_range'];
+  /** What the call removes: ES|QL controls that are removed publish no variable. */
+  removals: PlannedRemovals;
   /** Ids of the panels, sections, and controls the dashboard has or the call names. */
   takenIds: Iterable<string>;
   projectRouting?: string;
   resolvers: PanelResolvers;
   logger: Logger;
 }): Promise<ResolvedChanges> => {
+  // Where a panel, or a control in the grid, is once the call is applied.
+  const sectionIdByPanelId = getSectionIdByPanelId({ panels: existingPanels });
+  for (const { id, target } of panels) {
+    if (target !== undefined) sectionIdByPanelId.set(id, target);
+  }
+  const getEsqlVariablesResolver = createEsqlVariablesResolver({
+    pinnedPanels: existingControls,
+    panels: existingPanels,
+    sectionIdByPanelId,
+    removedIds: new Set([...removals.controlIds, ...removals.panelIds]),
+    timeRange,
+    resolveColumnType: resolvers.resolveEsqlControlColumnType,
+  });
   const [attempts, resolvedControls] = await Promise.all([
-    Promise.all(panels.map(({ content }) => content && resolveContent(content, resolvers))),
+    Promise.all(
+      panels.map(({ id, content }) => {
+        if (!content) return undefined;
+        return resolveContent(
+          content,
+          resolvers,
+          getEsqlVariablesResolver(sectionIdByPanelId.get(id))
+        );
+      })
+    ),
     resolveControls({
       controls,
       existingControls,
-      removedIds: removedControlIds,
+      removedIds: removals.controlIds,
       takenIds,
       resolveControlFieldCapabilities: resolvers.resolveControlFieldCapabilities,
       projectRouting,

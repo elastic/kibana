@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -829,6 +829,8 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /** The run lock held by the conversation's current execution. */
+  active_execution?: ActiveExecution;
   /**
    * Identifier of the bash/VFS workspace for this conversation.
    */

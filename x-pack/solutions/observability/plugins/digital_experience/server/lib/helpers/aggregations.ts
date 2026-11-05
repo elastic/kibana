@@ -23,6 +23,13 @@ export const p75Of = (field: string) => ({
   percentiles: { field, percents: [75], keyed: false },
 });
 
+export interface ValueCountAggregation {
+  value: number;
+}
+
+/** The documents of a bucket that have a value for `field`, e.g. the samples of a percentile. */
+export const countOf = (field: string) => ({ value_count: { field } });
+
 /** The latest document of a bucket. */
 export const LAST_SEEN_AGGREGATION = { max: { field: '@timestamp' } } as const;
 

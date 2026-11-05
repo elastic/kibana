@@ -8,9 +8,8 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetOnboardingResponse } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../data/query_keys';
 import { useKibana } from '../hooks/use_kibana';
-
-export const NIGHTSHIFT_ONBOARDING_QUERY_KEY = ['nightshift.onboarding'] as const;
 
 const POLL_INTERVAL_MS = 3_000;
 
@@ -31,39 +30,6 @@ export const useOnboarding = () => {
       });
     },
     refetchInterval: (data) => (data?.execution?.status === 'running' ? POLL_INTERVAL_MS : false),
-  });
-};
-
-/** The first onboarding step: installs the investigation agent in the space. */
-export const useEnableNightshift = () => {
-  const { nightshiftInvestigations, notifications } = useKibana().services;
-  const investigationsClient = nightshiftInvestigations?.investigationsClient;
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!investigationsClient) {
-        throw new Error('Nightshift investigations plugin is unavailable');
-      }
-      return investigationsClient.fetch('POST /internal/nightshift/onboarding/enable', {
-        signal: null,
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.nightshift.onboarding.enabledToastTitle', {
-          defaultMessage: 'Elastic Nightshift enabled',
-        }),
-      });
-    },
-    onError: (error: Error) => {
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.nightshift.onboarding.enableErrorToastTitle', {
-          defaultMessage: 'Could not enable Elastic Nightshift',
-        }),
-      });
-    },
   });
 };
 

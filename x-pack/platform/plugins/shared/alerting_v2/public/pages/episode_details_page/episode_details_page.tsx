@@ -58,20 +58,20 @@ import { useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
 import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import {
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
+import {
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '@kbn/alerting-v2-episodes-ui/utils/filter_alert_actions_by_privilege';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import {
-  canOpenDiscover,
-  getDiscoverHrefForAlertEventsHistory,
-  getDiscoverHrefForRuleAndAlertTimestamp,
-} from '../../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_alert_actions_by_privilege';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {

@@ -115,6 +115,12 @@ describe('events_write tool', () => {
     ).toBe(false);
   });
 
+  it('exposes reopen_deactivated to the agent', () => {
+    expect(
+      eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: true }] }).success
+    ).toBe(true);
+  });
+
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });

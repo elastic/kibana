@@ -16,6 +16,7 @@ import type { LinkInfo } from '../../links';
 import { useLinkInfo } from '../../links';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { SecurityAppHeader } from '../app_header';
 
 jest.mock('../../links');
 jest.mock('../../hooks/use_upselling');
@@ -82,6 +83,23 @@ describe('SecurityRoutePageWrapper', () => {
     );
 
     expect(getByTestId(TEST_UPSELL_SUBJ)).toBeInTheDocument();
+  });
+
+  it('should pass the Security app header to the upselling page', () => {
+    const MockUpsellPage = jest.fn(() => null);
+    mockUseUpsellingPage.mockReturnValue(MockUpsellPage);
+
+    render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(MockUpsellPage).toHaveBeenCalledWith(
+      expect.objectContaining({ appHeader: SecurityAppHeader }),
+      expect.anything()
+    );
   });
 
   it('should redirect to landing when link is missing', () => {
