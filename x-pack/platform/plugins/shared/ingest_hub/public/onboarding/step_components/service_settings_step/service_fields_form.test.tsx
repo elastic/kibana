@@ -459,6 +459,9 @@ describe('ServiceFieldsForm — stream-level var_groups', () => {
     expect(screen.getByTestId('serviceSettingsFlyout-requiredHint')).toBeInTheDocument();
     const [props] = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls[0];
     expect(props.errors).toEqual(['This field is required.']);
+    // Fleet's field drops its "Optional" label for this flag; the manifest still says optional.
+    expect(props.isRequiredByVarGroup).toBe(true);
+    expect(props.varDef.required).toBe(false);
   });
 
   it('reports a selection change to the parent', () => {

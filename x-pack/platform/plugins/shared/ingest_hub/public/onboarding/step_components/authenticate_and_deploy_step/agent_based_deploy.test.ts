@@ -774,6 +774,49 @@ describe('deployNewAgentPolicy', () => {
         expect(stream.vars).not.toHaveProperty('log_group_arn');
       });
 
+      it('applies each stream its own groups rather than the service-wide union', async () => {
+        // A second data stream on the same input declares no group: it must not inherit the
+        // first stream's requirement, or an empty-but-valid stream would prune the whole input.
+        const twoStreams = {
+          ...mqService,
+          dataStreams: ['activemq_audit_logs', 'plain_logs'],
+          varDefsByDataStream: {
+            ...(mqService as unknown as { varDefsByDataStream: object }).varDefsByDataStream,
+            plain_logs: { inputs: ['aws-cloudwatch'], optionalConfig, varDefsByInput },
+          },
+        } as unknown as AwsServiceMatrixEntry;
+        const groups = buildAgentBasedTargets(
+          [],
+          ['amazon_mq'],
+          new Map([['amazon_mq', twoStreams]])
+        );
+        await deployNewAgentPolicy(groups, {
+          ...BASE_OPTS,
+          storedServiceVars: {
+            amazon_mq: {
+              enabledDataStreams: ['activemq_audit_logs', 'plain_logs'],
+              varsByDataStream: {
+                activemq_audit_logs: {
+                  enabledInputs: ['aws-cloudwatch'],
+                  varsByInput: { 'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:x' } },
+                },
+                plain_logs: { enabledInputs: ['aws-cloudwatch'], varsByInput: {} },
+              },
+            },
+          } as never,
+          agentPolicyName: 'AWS Agent Policy 1',
+        });
+        const streams =
+          mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs[
+            'amazon_mq-aws-cloudwatch'
+          ].streams;
+        expect(streams['aws_mq.activemq_audit_logs'].var_group_selections).toEqual({
+          log_group_source: 'log_group_arn',
+        });
+        expect(streams['aws_mq.plain_logs']).toBeDefined();
+        expect(streams['aws_mq.plain_logs']).not.toHaveProperty('var_group_selections');
+      });
+
       it('refuses to deploy when the selected option is unsatisfied', async () => {
         // The ARN option is selected by default, so a value typed under another option does not
         // count. With its only input pruned the service has nothing to deploy.

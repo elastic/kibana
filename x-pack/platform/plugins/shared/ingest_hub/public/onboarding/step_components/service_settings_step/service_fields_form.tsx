@@ -131,10 +131,10 @@ function VarField({
     );
   }
 
+  const isRequiredByVarGroup =
+    !meta.isBool && isRequiredBySelectedOption(service, activeInput, fieldName, varGroupSelections);
   const isRequired =
-    !meta.isBool &&
-    ((service.requiredConfig ?? []).includes(fieldName) ||
-      isRequiredBySelectedOption(service, activeInput, fieldName, varGroupSelections));
+    (!meta.isBool && (service.requiredConfig ?? []).includes(fieldName)) || isRequiredByVarGroup;
   const isEmpty = Array.isArray(value)
     ? value.length === 0
     : typeof value === 'string' && !value.trim();
@@ -183,6 +183,9 @@ function VarField({
             }}
             errors={errors}
             forceShowErrors={forceShowErrors}
+            // The manifest says `required: false`; the selected var_group option is what makes
+            // the field mandatory, and Fleet's field drops its "Optional" label for this flag.
+            isRequiredByVarGroup={isRequiredByVarGroup}
             packageName={service.packageName}
             datastreams={datastreams}
           />
