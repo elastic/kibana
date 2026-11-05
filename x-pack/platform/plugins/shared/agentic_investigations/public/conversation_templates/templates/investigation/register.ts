@@ -198,10 +198,27 @@ export const investigationTemplate: TemplateDefinition = {
         return GatedCloseInvestigationModal;
       });
 
+    // Footer Close/Delete: no Suspense spinner under the Actions button (null fallback), and
+    // warm the same chunks `makeLazyWithProviders` needs as soon as Actions is on screen.
+    let footerActionChunksPreloaded = false;
+    const preloadFooterActionChunks = () => {
+      if (footerActionChunksPreloaded) {
+        return;
+      }
+      footerActionChunksPreloaded = true;
+      void Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('../../shared/connected_status/connected_close_investigation_modal'),
+        import('../../shared/connected_status/connected_delete_investigation_modal'),
+        import('../../shared/privileges/privilege_gate'),
+      ]);
+    };
+
     const renderCloseInvestigationModal = (props: CloseInvestigationModalRenderProps) =>
       React.createElement(
         EscalationModalBoundary,
-        null,
+        { fallback: null },
         React.createElement(LazyConnectedCloseInvestigationModal, props)
       );
 
@@ -234,7 +251,7 @@ export const investigationTemplate: TemplateDefinition = {
     const renderDeleteInvestigationModal = (props: DeleteInvestigationModalRenderProps) =>
       React.createElement(
         EscalationModalBoundary,
-        null,
+        { fallback: null },
         React.createElement(LazyConnectedDeleteInvestigationModal, props)
       );
 
@@ -270,12 +287,14 @@ export const investigationTemplate: TemplateDefinition = {
       renderCloseInvestigationModal,
       onReopenInvestigation,
       renderDeleteInvestigationModal,
-      wrapActionsMenu: (menu) =>
-        React.createElement(
+      wrapActionsMenu: (menu) => {
+        preloadFooterActionChunks();
+        return React.createElement(
           React.Suspense,
           { fallback: null },
           React.createElement(LazyManageInvestigationsGate, null, menu)
-        ),
+        );
+      },
       renderOverview: (props) =>
         React.createElement(
           EscalationModalBoundary,
