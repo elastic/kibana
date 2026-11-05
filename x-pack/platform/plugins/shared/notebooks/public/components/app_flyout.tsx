@@ -341,6 +341,9 @@ const AppHeader = ({ app }: { app: NotebookApp }) => {
   );
 };
 
+/** Set when a drag or resize starts, so the grid can stretch to the bottom of the scroll area. */
+const GRID_FILL_HEIGHT_VAR = '--notebookAppGridFillHeight';
+
 /** Whether Shift is held down, tracked only while `enabled`. */
 const useIsShiftHeld = (enabled: boolean): boolean => {
   const [isShiftHeld, setIsShiftHeld] = useState(false);
@@ -373,19 +376,22 @@ const getGridStyles = (
   const dot = (position: string) =>
     `radial-gradient(circle at ${position}, ${euiTheme.colors.accentSecondary} 1px, transparent 1px)`;
   const dots = css`
-    .kbnGridSection--targeted {
-      background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-        calc((var(--kbnGridGutterSize) / 2) * -1px);
-      background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * ${dotStep}px)
-        calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * ${dotStep}px);
-      background-image: ${dot('top left')}, ${dot('top right')}, ${dot('bottom left')},
-        ${dot('bottom right')};
-      background-origin: content-box;
-    }
+    background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+      calc((var(--kbnGridGutterSize) / 2) * -1px);
+    background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * ${dotStep}px)
+      calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * ${dotStep}px);
+    background-image: ${dot('top left')}, ${dot('top right')}, ${dot('bottom left')},
+      ${dot('bottom right')};
+    background-origin: content-box;
+    background-clip: content-box;
   `;
   return css`
     padding-top: ${euiTheme.size.l};
-    ${dotStep !== undefined && dots}
+
+    &:has(.kbnGridPanel--active) {
+      min-height: var(${GRID_FILL_HEIGHT_VAR}, auto);
+      ${dotStep !== undefined && dots}
+    }
 
     .kbnGridPanel--dragPreview {
       margin: ${inset}px;
@@ -473,6 +479,17 @@ const AppGrid = ({
     [app, onRevealCell, panelInset]
   );
 
+  const measureFillHeight = useCallback(
+    ({ currentTarget }: React.SyntheticEvent<HTMLDivElement>) => {
+      if (!scrollContainer) return;
+      const { bottom } = scrollContainer.getBoundingClientRect();
+      const paddingBottom = parseFloat(getComputedStyle(scrollContainer).paddingBottom) || 0;
+      const fillHeight = bottom - paddingBottom - currentTarget.getBoundingClientRect().top;
+      currentTarget.style.setProperty(GRID_FILL_HEIGHT_VAR, `${Math.max(0, fillHeight)}px`);
+    },
+    [scrollContainer]
+  );
+
   if (app.panels.length === 0) {
     return (
       <EuiEmptyPrompt
@@ -485,7 +502,12 @@ const AppGrid = ({
     );
   }
   return (
-    <div data-test-subj="notebookAppGrid">
+    <div
+      data-test-subj="notebookAppGrid"
+      onMouseDownCapture={measureFillHeight}
+      onTouchStartCapture={measureFillHeight}
+      onKeyDownCapture={measureFillHeight}
+    >
       <GridLayout
         key={`${app.freePlacement ? 'free' : 'compact'}-${snapToGrid ? 'snap' : 'fine'}-${columns}`}
         layout={layout}
