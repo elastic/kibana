@@ -18,7 +18,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -37,6 +36,7 @@ import {
 } from '../charts/lens_helpers';
 import { useNotebookServices } from '../services';
 import { CellFrame } from './cell_frame';
+import { ResizableCellBody } from './resizable_cell_body';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 
@@ -65,17 +65,8 @@ interface ChartEditor {
   revision: number;
 }
 
-const chartContainerCss = css`
-  height: 300px;
-  min-height: 300px;
-  resize: vertical;
-  overflow: hidden;
-`;
-
-const metricContainerCss = css`
-  height: 160px;
-  min-height: 160px;
-`;
+const CHART_HEIGHT = 300;
+const METRIC_HEIGHT = 160;
 
 /** The rendered chart, or a prompt explaining why there is none yet. */
 export const ChartCanvas = ({
@@ -385,8 +376,8 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
           <EuiSpacer size="s" />
         </>
       )}
-      <div
-        css={[chartContainerCss, currentType === ChartType.Metric && metricContainerCss]}
+      <ResizableCellBody
+        defaultHeight={currentType === ChartType.Metric ? METRIC_HEIGHT : CHART_HEIGHT}
         data-test-subj="notebookChartContainer"
       >
         <ChartCanvas
@@ -394,7 +385,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
           attributes={attributes}
           hasSource={sourceCell !== null}
         />
-      </div>
+      </ResizableCellBody>
       {editFlyout}
     </CellFrame>
   );

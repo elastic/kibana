@@ -31,17 +31,13 @@ import {
   type TemplatePreview,
 } from './custom_cell_flyout';
 import { useNotebook } from './notebook_context';
+import { ResizableCellBody } from './resizable_cell_body';
 
 const IFRAME_TITLE = i18n.translate('xpack.notebook.customCell.iframeTitle', {
   defaultMessage: 'Custom panel',
 });
 
-const cellContainerCss = css`
-  height: 300px;
-  min-height: 300px;
-  resize: vertical;
-  overflow: hidden;
-`;
+const CELL_HEIGHT = 300;
 
 const iframeCss = css`
   display: block;
@@ -242,13 +238,13 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
         </EuiFlexItem>
       }
     >
-      <div css={cellContainerCss} data-test-subj="notebookCustomContainer">
+      <ResizableCellBody defaultHeight={CELL_HEIGHT} data-test-subj="notebookCustomContainer">
         <CustomCanvas
           cell={cell}
           preview={preview}
           onGenerateWithChat={panelChat ? () => generateWithChat(toDraft(cell)) : undefined}
         />
-      </div>
+      </ResizableCellBody>
       {isEditing && (
         <CustomCellFlyout
           cell={cell}
