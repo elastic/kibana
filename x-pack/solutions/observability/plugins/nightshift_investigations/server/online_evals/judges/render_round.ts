@@ -100,7 +100,8 @@ export const renderTraceMessages = (
       omittedToolCalls++;
       return;
     }
-    const toolCallId = step.tool_call_id ?? `call_${index + 1}`;
+    // Ids only pair a call with its result. Providers restrict their characters, so don't reuse the agent's.
+    const toolCallId = `call_${index + 1}`;
     const name = step.tool_id ?? 'unknown_tool';
     const args = toToolCallArguments(step.arguments);
     const response = truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS) || '(empty)';
@@ -112,7 +113,7 @@ export const renderTraceMessages = (
         content: note,
         toolCalls: [{ toolCallId, function: { name, arguments: args } }],
       },
-      { role: MessageRole.Tool, name, toolCallId, response }
+      { role: MessageRole.Tool, name, toolCallId, response: { result: response } }
     );
   });
 

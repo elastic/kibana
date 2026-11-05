@@ -106,7 +106,7 @@ describe('cortex page judges', () => {
         role: 'tool',
         name: 'nightshift_sandbox_view_file',
         toolCallId: 'call_2',
-        response: expect.stringContaining('Checkout depends on the payments service.'),
+        response: { result: expect.stringContaining('Checkout depends on the payments service.') },
       });
       expect(messages[13]).toEqual({ role: 'assistant', content: 'Payments was slow.' });
       const closing = messages[14];

@@ -91,7 +91,7 @@ describe('renderTraceMessages', () => {
       input: { message: 'Why is checkout slow?' },
       steps: [
         {
-          tool_call_id: 't1',
+          tool_call_id: 'toolu_01/with:odd chars',
           tool_id: 'search',
           reasoning: 'Searching the checkout logs.',
           arguments: { q: 'x' },
@@ -108,9 +108,9 @@ describe('renderTraceMessages', () => {
       {
         role: 'assistant',
         content: 'Searching the checkout logs.',
-        toolCalls: [{ toolCallId: 't1', function: { name: 'search', arguments: { q: 'x' } } }],
+        toolCalls: [{ toolCallId: 'call_1', function: { name: 'search', arguments: { q: 'x' } } }],
       },
-      { role: 'tool', name: 'search', toolCallId: 't1', response: '{"hits":2}' },
+      { role: 'tool', name: 'search', toolCallId: 'call_1', response: { result: '{"hits":2}' } },
       {
         role: 'assistant',
         content: null,
@@ -118,7 +118,7 @@ describe('renderTraceMessages', () => {
           { toolCallId: 'call_2', function: { name: 'other', arguments: { value: 'raw' } } },
         ],
       },
-      { role: 'tool', name: 'other', toolCallId: 'call_2', response: '(empty)' },
+      { role: 'tool', name: 'other', toolCallId: 'call_2', response: { result: '(empty)' } },
       { role: 'assistant', content: 'The deploy.' },
     ]);
   });
@@ -136,9 +136,12 @@ describe('renderTraceMessages', () => {
       response: { message: 'a' },
     });
 
-    const [, call, result] = messages as Array<{ toolCalls?: any[]; response?: string }>;
+    const [, call, result] = messages as Array<{
+      toolCalls?: any[];
+      response?: { result: string };
+    }>;
     expect(call.toolCalls![0].function.arguments.arguments).toContain('[truncated');
-    expect(result.response).toContain('[truncated 50 characters]');
+    expect(result.response!.result).toContain('[truncated 50 characters]');
   });
 
   it('counts the tool calls left out once the budget is spent', () => {
