@@ -181,8 +181,9 @@ export const applyDreamChangesStepCommonDefinition: CommonStepDefinition<
       {
         defaultMessage:
           'Checks the change set against the dreaming config of the AI index, resolves new keys ' +
-          'like "new:1" to stable ids, and writes each fact and entity as a KI of type ' +
-          'fact.<type> or entity.<type>. Every item must cite the memories it is based on. ' +
+          'like "new:1" to stable ids, and writes each fact and entity as a KI typed by its ' +
+          'configured type, such as fact.preference or entity.customer. Every item must cite ' +
+          'the memories it is based on. ' +
           'An item that breaks a rule is rejected and the rest still apply. Access patterns ' +
           'whose example query does not run are dropped.',
       }
