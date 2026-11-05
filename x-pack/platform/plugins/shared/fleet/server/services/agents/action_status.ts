@@ -266,7 +266,7 @@ async function getActions(
   }
 
   return Object.values(
-    hits.reduce((acc, hit) => {
+    hits.slice(0, limit).reduce((acc, hit) => {
       if (!hit._source || !hit._source.action_id) {
         return acc;
       }
