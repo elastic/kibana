@@ -88,12 +88,16 @@ function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
       };
     }
 
+    // A dataset where every run errored has no scores, and its stats default to 0. Pooling it
+    // would pull min/max to a 0 no run produced.
+    const scoredStats = evaluatorStats.filter((s) => s.stats.count > 0);
+
     const weightedMean =
-      evaluatorStats.reduce((sum, s) => sum + s.stats.mean * s.stats.count, 0) / totalCount;
+      scoredStats.reduce((sum, s) => sum + s.stats.mean * s.stats.count, 0) / totalCount;
 
     const pooledVariance =
       totalCount > 1
-        ? evaluatorStats.reduce((sum, s) => {
+        ? scoredStats.reduce((sum, s) => {
             return (
               sum +
               (s.stats.count - 1) * s.stats.stdDev ** 2 +
@@ -111,8 +115,8 @@ function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
         mean: weightedMean,
         median: weightedMean,
         stdDev: Math.sqrt(pooledVariance),
-        min: Math.min(...evaluatorStats.map((s) => s.stats.min)),
-        max: Math.max(...evaluatorStats.map((s) => s.stats.max)),
+        min: Math.min(...scoredStats.map((s) => s.stats.min)),
+        max: Math.max(...scoredStats.map((s) => s.stats.max)),
         count: totalCount,
         errorCount: totalErrorCount,
       },

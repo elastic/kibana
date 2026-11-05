@@ -266,6 +266,46 @@ describe('report_table', () => {
       expect(result).not.toContain('errors:');
     });
 
+    it('ignores fully errored datasets when computing the overall min and max', () => {
+      const scored: EvaluatorStats = {
+        datasetId: 'ds-scored',
+        datasetName: 'scored',
+        evaluatorName: 'Factuality',
+        stats: { mean: 0.6, median: 0.6, stdDev: 0.1, min: 0.4, max: 0.8, count: 5 },
+      };
+      const allErrored: EvaluatorStats = {
+        datasetId: 'ds-errored',
+        datasetName: 'errored',
+        evaluatorName: 'Factuality',
+        stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0, errorCount: 3 },
+      };
+
+      const result = createTable([scored, allErrored], 1);
+      const countOf = (text: string) => result.split(text).length - 1;
+
+      // Once in the scored dataset's row and once in the overall row.
+      expect(countOf('min: 0.40')).toBe(2);
+      expect(countOf('max: 0.80')).toBe(2);
+      expect(countOf('mean: 0.60')).toBe(2);
+      expect(result).not.toMatch(/min: 0(?![.\d])/);
+      expect(result).not.toMatch(/max: 0(?![.\d])/);
+    });
+
+    it('shows only errors in the overall row when every dataset was fully errored', () => {
+      const result = createTable(
+        [
+          ...withErrors(2, 0),
+          ...withErrors(3, 0).map((s) => ({ ...s, datasetId: 'ds-2', datasetName: 'ds2' })),
+        ],
+        1
+      );
+
+      expect(result).toContain('errors: 5');
+      expect(result).not.toContain('NaN');
+      expect(result).not.toContain('Infinity');
+      expect(result).not.toContain('mean:');
+    });
+
     it('sums unscored runs across datasets in the overall row', () => {
       const result = createTable(
         [
