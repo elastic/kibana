@@ -5,10 +5,25 @@
  * 2.0.
  */
 
-const SLACK_RESPONSE_URL_PREFIX = 'https://hooks.slack.com/';
+import { request as httpsRequest } from 'node:https';
+import { getCustomAgents } from '@kbn/actions-utils';
+import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
+import type { Logger } from '@kbn/core/server';
+
+const SLACK_RESPONSE_URL_PREFIXES = ['https://hooks.slack.com/', 'https://hooks.slack-gov.com/'];
+
+/** Stay inside Slack's 3s interactivity window after the resume has already been committed. */
+const SLACK_HITL_RESPONSE_TIMEOUT_MS = 2000;
+
+export interface SlackHitlResponseHttpConfig {
+  isUriAllowed: (uri: string) => boolean;
+  getProxySettings: () => ProxySettings | undefined;
+  getSSLSettings: () => SSLSettings;
+  getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
+}
 
 export function isSlackResponseUrl(url: string): boolean {
-  return url.startsWith(SLACK_RESPONSE_URL_PREFIX);
+  return SLACK_RESPONSE_URL_PREFIXES.some((prefix) => url.startsWith(prefix));
 }
 
 export function buildHitlSlackConfirmationText(params: {
@@ -39,29 +54,75 @@ export function buildHitlSlackConfirmationText(params: {
 
 /**
  * Replaces the interactive Slack message via response_url so buttons cannot be reused.
- * Failures are swallowed — resume already committed.
+ * Egress uses Actions proxy, CA, and allowedHosts settings. Failures are swallowed — resume already committed.
  */
 export async function replaceSlackHitlMessage(params: {
   responseUrl: string;
   text: string;
   /** Visible only to the clicker. Leaves the original controls in place. */
   ephemeral?: boolean;
+  configurationUtilities: SlackHitlResponseHttpConfig;
+  logger: Logger;
 }): Promise<void> {
   if (!isSlackResponseUrl(params.responseUrl)) {
     return;
   }
 
-  const body = params.ephemeral
-    ? { response_type: 'ephemeral', replace_original: false, text: params.text }
-    : { replace_original: true, text: params.text };
-
   try {
-    await fetch(params.responseUrl, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(body),
+    if (!params.configurationUtilities.isUriAllowed(params.responseUrl)) {
+      return;
+    }
+
+    const { httpsAgent } = getCustomAgents({
+      customHostSettings: params.configurationUtilities.getCustomHostSettings(params.responseUrl),
+      logger: params.logger,
+      proxySettings: params.configurationUtilities.getProxySettings(),
+      sslSettings: params.configurationUtilities.getSSLSettings(),
+      url: params.responseUrl,
+    });
+
+    const body = params.ephemeral
+      ? { response_type: 'ephemeral', replace_original: false, text: params.text }
+      : { replace_original: true, text: params.text };
+    const payload = JSON.stringify(body);
+
+    // fetch() cannot use the Actions https.Agent (proxy and custom CA).
+    await new Promise<void>((resolve, reject) => {
+      const controller = new AbortController();
+      const deadline = setTimeout(() => {
+        controller.abort();
+      }, SLACK_HITL_RESPONSE_TIMEOUT_MS);
+      const finish = (error?: Error) => {
+        clearTimeout(deadline);
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      };
+
+      const req = httpsRequest(
+        params.responseUrl,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'content-length': Buffer.byteLength(payload),
+          },
+          agent: httpsAgent,
+          signal: controller.signal,
+        },
+        (res) => {
+          res.resume();
+          res.on('error', (error) => finish(error));
+          res.on('end', () => finish());
+        }
+      );
+      req.on('error', (error) => finish(error));
+      req.end(payload);
     });
   } catch {
-    // Best-effort UX only.
+    // The response_url embeds a secret. Keep the log free of the URL and the request error.
+    params.logger.warn('Failed to replace the Slack HITL message');
   }
 }

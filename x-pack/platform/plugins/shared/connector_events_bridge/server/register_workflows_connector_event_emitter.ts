@@ -9,12 +9,14 @@ import type {
   ConnectorEventEmitter,
   PluginSetupContract as ActionsPluginSetupContract,
 } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
   buildHitlSlackConfirmationText,
   replaceSlackHitlMessage,
+  type SlackHitlResponseHttpConfig,
 } from './replace_slack_hitl_message';
 
 let emitFailureCount = 0;
@@ -68,7 +70,11 @@ async function resumeHitlFromSlackAction(
       input: Record<string, unknown>;
     }) => Promise<void>;
   },
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
+  responseHttp: {
+    configurationUtilities: SlackHitlResponseHttpConfig;
+    logger: Logger;
+  }
 ): Promise<void> {
   const token = typeof payload.token === 'string' ? payload.token : undefined;
   const executionId = typeof payload.executionId === 'string' ? payload.executionId : undefined;
@@ -93,6 +99,8 @@ async function resumeHitlFromSlackAction(
         slackUserId: payload.slackUserId,
         alreadyResponded,
       }),
+      configurationUtilities: responseHttp.configurationUtilities,
+      logger: responseHttp.logger,
     });
   };
 
@@ -143,6 +151,8 @@ async function resumeHitlFromSlackAction(
         responseUrl,
         text: validationMessage,
         ephemeral: true,
+        configurationUtilities: responseHttp.configurationUtilities,
+        logger: responseHttp.logger,
       });
     }
     throw error;
@@ -155,11 +165,14 @@ async function resumeHitlFromSlackAction(
  */
 export function registerWorkflowsConnectorEventEmitter({
   actions,
+  logger,
   getWorkflowsExtensionsStart,
 }: {
   actions: ActionsPluginSetupContract;
+  logger: Logger;
   getWorkflowsExtensionsStart: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>;
 }): void {
+  const configurationUtilities = actions.getActionsConfigurationUtilities();
   const emitter: ConnectorEventEmitter = {
     emit: async ({
       eventId,
@@ -197,7 +210,7 @@ export function registerWorkflowsConnectorEventEmitter({
       try {
         const client = await workflowsExtensions.getClient(request);
         if (eventId === HITL_SLACK_ACTION_EVENT_ID) {
-          await resumeHitlFromSlackAction(client, enriched);
+          await resumeHitlFromSlackAction(client, enriched, { configurationUtilities, logger });
           return;
         }
         if (authenticatedUser) {
