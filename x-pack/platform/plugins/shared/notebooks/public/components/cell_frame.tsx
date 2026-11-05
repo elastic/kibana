@@ -40,6 +40,27 @@ const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
 const FOCUS_FADE_DURATION_MS = 1500;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
+const IN_VIEW_THRESHOLDS = [0.25, 0.5, 0.75, 1];
+
+/**
+ * Calls `onInView` once the element shows at least half of itself, or fills half the viewport
+ * when it is taller than that; returns a function that stops waiting.
+ */
+const whenInView = (element: Element, onInView: () => void): (() => void) => {
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      const isInView =
+        entry.intersectionRatio >= 0.5 || entry.intersectionRect.height >= window.innerHeight / 2;
+      if (!isInView) return;
+      observer.disconnect();
+      onInView();
+    },
+    { threshold: IN_VIEW_THRESHOLDS }
+  );
+  observer.observe(element);
+  return () => observer.disconnect();
+};
+
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
 });
@@ -66,19 +87,28 @@ export const CellFrame = ({
   const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
   const frameRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const flashColorsRef = useRef({ border: '', glow: '' });
+  flashColorsRef.current = {
+    border: `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`,
+    glow: transparentize(euiTheme.colors.primary, 0.6),
+  };
 
   useEffect(() => {
-    const border = `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`;
-    const glowColor = transparentize(euiTheme.colors.primary, 0.6);
+    let stopWaiting: (() => void) | undefined;
     const flash = () => {
-      if (window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
-      panelRef.current?.animate(
-        [
-          { boxShadow: `${border}, 0 0 16px 4px ${glowColor}` },
-          { boxShadow: `${border}, 0 0 16px 4px transparent` },
-        ],
-        { duration: FOCUS_FADE_DURATION_MS, easing: 'ease-out' }
-      );
+      const panel = panelRef.current;
+      if (!panel || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+      stopWaiting?.();
+      stopWaiting = whenInView(panel, () => {
+        const { border, glow } = flashColorsRef.current;
+        panel.animate(
+          [
+            { boxShadow: `${border}, 0 0 16px 4px ${glow}` },
+            { boxShadow: `${border}, 0 0 16px 4px transparent` },
+          ],
+          { duration: FOCUS_FADE_DURATION_MS, easing: 'ease-out' }
+        );
+      });
     };
     if (addedCellIds.delete(cell.id)) flash();
     // Skip the current value so a re-subscription doesn't replay an old focus.
@@ -91,8 +121,11 @@ export const CellFrame = ({
         frameRef.current?.focus({ preventScroll: true });
         flash();
       });
-    return () => subscription.unsubscribe();
-  }, [focusedCell$, addedCellIds, cell.id, borderColor, euiTheme]);
+    return () => {
+      subscription.unsubscribe();
+      stopWaiting?.();
+    };
+  }, [focusedCell$, addedCellIds, cell.id]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
