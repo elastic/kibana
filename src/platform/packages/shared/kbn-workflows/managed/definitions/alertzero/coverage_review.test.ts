@@ -139,6 +139,7 @@ const evaluateMarkProcessed = ({
   verdict = 'no_coverage',
   created = false,
   reviewed,
+  noRule,
   error = null,
   approved = false,
   dismissed = false,
@@ -146,6 +147,7 @@ const evaluateMarkProcessed = ({
   verdict?: string | null;
   created?: boolean;
   reviewed?: boolean;
+  noRule?: boolean;
   error?: unknown;
   approved?: boolean;
   dismissed?: boolean;
@@ -154,7 +156,7 @@ const evaluateMarkProcessed = ({
   const childContext = {
     steps: {
       coverage_check: { output: { structured_output: { verdict } } },
-      run_rule_creation: { error, output: { created, reviewed } },
+      run_rule_creation: { error, output: { created, reviewed, no_rule: noRule } },
       record_decision: { output: { approved, dismissed } },
     },
   };
@@ -509,6 +511,16 @@ describe('Detection Coverage review', () => {
         'close_investigation_dismissed',
         'report_investigation_closed_dismissed',
       ]);
+      expect(caseSteps('no_rule')).toEqual([
+        'note_no_rule',
+        'close_investigation_no_rule',
+        'report_investigation_closed_no_rule',
+      ]);
+      expect(caseSteps('retry')).toEqual([
+        'note_retry',
+        'close_investigation_retry',
+        'report_investigation_closed_retry',
+      ]);
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
@@ -517,6 +529,63 @@ describe('Detection Coverage review', () => {
       expect(dismissed).not.toHaveProperty('if');
       expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
       expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    // A retryable draft was not proposed, so the note says why and that the gap comes
+    // back.
+    it('notes why no usable rule was drafted this time, within the journal limit', () => {
+      const note = stepByName('note_retry');
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+
+      const render = (skipReason: string) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(inputsOf(note).message as string, {
+          steps: { run_rule_creation: { output: { skip_reason: skipReason } } },
+        });
+      expect(render('The interval was a placeholder.')).toBe(
+        '**No usable rule was drafted this time.** The interval was a placeholder.\n\n' +
+          'Nothing was proposed. The gap stays pending, and the next sweep tries again.'
+      );
+      expect(render('x'.repeat(10000)).length).toBeLessThanOrEqual(8000);
+    });
+
+    // Only a completed rule-creation run that proposed nothing and may pass next time
+    // closes for a retry. A crash, a permanent rejection and an expired proposal do not.
+    it.each([
+      ['an unproposed draft that may pass next time', {}, { proposed: false }, true],
+      ['an expired proposal', {}, { proposed: true }, false],
+      ['a permanent rejection', {}, { proposed: false, no_rule: true }, false],
+      ['a crashed run', { error: { message: 'boom' } }, {}, false],
+    ])('flags %s for a retry close', (_scenario, run, output, expected) => {
+      expect(
+        evaluateExpression(withOf('resolve_outcome')?.creation_retry ?? '', {
+          steps: {
+            coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+            run_rule_creation: { error: null, ...run, output },
+          },
+        })
+      ).toBe(expected);
+    });
+
+    // Nothing was proposed, so the note is the only message in the chat saying why.
+    it('notes why no rule was drafted, within the journal limit', () => {
+      const note = stepByName('note_no_rule');
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(inputsOf(note).conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+
+      const render = (skipReason: string) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(inputsOf(note).message as string, {
+          steps: { run_rule_creation: { output: { skip_reason: skipReason } } },
+        });
+      expect(render('No data source exists for the gap.')).toBe(
+        '**No rule could be drafted for this gap.** No data source exists for the gap.\n\n' +
+          'Nothing was proposed. The investigation is closed and the gap will not be checked again.'
+      );
+      // `system-alertzero-journal-note` rejects a message over 8000 characters.
+      expect(render('x'.repeat(10000)).length).toBeLessThanOrEqual(8000);
     });
 
     // An approved report applied nothing and confirmed nothing, so the gap is not
@@ -557,6 +626,18 @@ describe('Detection Coverage review', () => {
       ],
       ['a dismissal', { approved: false, dismissed: true }, {}, 'dismissed'],
       ['an expired proposal', { approved: false, dismissed: false }, {}, ''],
+      [
+        'a gap no rule can be drafted for',
+        { approved: false, dismissed: false },
+        { creation_no_rule: true },
+        'no_rule',
+      ],
+      [
+        'a draft that was not proposed but may pass next time',
+        { approved: false, dismissed: false },
+        { creation_retry: true },
+        'retry',
+      ],
     ])('routes %s to the matching close', (_scenario, decision, outcome, expected) => {
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
         String(stepByName('close_investigation')?.expression),
@@ -982,9 +1063,26 @@ describe('Detection Coverage review', () => {
     });
 
     // The child can complete with `created: false` without asking anyone when the draft
-    // is incomplete or could not be attached. That must not drop the indicator.
+    // could not be attached. That must not drop the indicator.
     it('leaves the indicator pending when rule creation completes with created: false and no review', () => {
-      expect(evaluateMarkProcessed({ created: false, reviewed: false })).toBe(false);
+      expect(evaluateMarkProcessed({ created: false, reviewed: false, noRule: false })).toBe(false);
+    });
+
+    // No rule can be drafted, for example because no data source exists for the gap. A
+    // retry fails the same way, so the gap must not come back on every sweep.
+    it('marks the indicator processed when rule creation builds no rule', () => {
+      expect(evaluateMarkProcessed({ created: false, reviewed: false, noRule: true })).toBe(true);
+    });
+
+    it('leaves the indicator pending when a failed child run reports no rule', () => {
+      expect(
+        evaluateMarkProcessed({
+          created: false,
+          reviewed: false,
+          noRule: true,
+          error: { message: 'boom' },
+        })
+      ).toBe(false);
     });
 
     it.each([

@@ -1,5 +1,5 @@
 {
-  "sha1": "02adeb942631ef2e812532bd3417ff07b91f3f5c",
+  "sha1": "bcd0a4d433293ca25f4c74ee5bc899a15715e727",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1104,8 +1104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 40,
-        "column": 46
+        "line": 51,
+        "column": 23
       }
     },
     {
@@ -1120,8 +1120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 57,
-        "column": 16
+        "line": 65,
+        "column": 24
       }
     },
     {
@@ -1136,8 +1136,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 66,
-        "column": 30
+        "line": 74,
+        "column": 4
       }
     },
     {
@@ -1152,8 +1152,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 85,
-        "column": 26
+        "line": 92,
+        "column": 13
       }
     },
     {

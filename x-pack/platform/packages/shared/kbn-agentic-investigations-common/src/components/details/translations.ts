@@ -90,6 +90,13 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
       defaultMessage: 'Needs review',
     }),
+    noTypeCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.noType', {
+      defaultMessage: 'No action type',
+    }),
+    /** An expired proposal that saved no reason: true whether it timed out or ended early. */
+    expiredCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.expiredCaption', {
+      defaultMessage: 'Can no longer be applied',
+    }),
     reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
       defaultMessage: 'Reversible',
     }),

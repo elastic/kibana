@@ -332,6 +332,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
+      {
+        profile: this.config.entityAnalytics.riskEngine.esqlProfiling,
+        profileInterval: this.config.entityAnalytics.riskEngine.esqlProfilingInterval,
+      },
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAttachments(

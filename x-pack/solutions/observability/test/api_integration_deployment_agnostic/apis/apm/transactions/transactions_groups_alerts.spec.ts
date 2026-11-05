@@ -27,6 +27,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
+  const retry = getService('retry');
 
   const serviceName = 'synth-go';
   const dayInMs = 24 * 60 * 60 * 1000;
@@ -35,21 +36,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   type Alerts = Awaited<ReturnType<typeof alertingApi.waitForAlertInIndex>>;
 
+  interface TransactionGroupsQuery {
+    start?: string;
+    end?: string;
+    transactionType?: string;
+    environment?: string;
+    kuery?: string;
+    latencyAggregationType?: LatencyAggregationType;
+    documentType?: ApmTransactionDocumentType;
+    rollupInterval?: RollupInterval;
+    useDurationSummary?: boolean;
+  }
+
   async function getTransactionGroups(overrides?: {
     path?: {
       serviceName?: string;
     };
-    query?: {
-      start?: string;
-      end?: string;
-      transactionType?: string;
-      environment?: string;
-      kuery?: string;
-      latencyAggregationType?: LatencyAggregationType;
-      documentType?: ApmTransactionDocumentType;
-      rollupInterval?: RollupInterval;
-      useDurationSummary?: boolean;
-    };
+    query?: TransactionGroupsQuery;
   }) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
@@ -72,6 +75,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     expect(response.status).to.be(200);
 
     return response.body as TransactionsGroupsMainStatistics;
+  }
+
+  // Alert counts come from the alerts index. Both the previous block's deletions and
+  // the newly written alert only become visible after a refresh, so poll instead of
+  // asserting once.
+  async function expectAlertsCountByName(
+    query: TransactionGroupsQuery,
+    expected: { hasActiveAlerts: boolean; counts: Record<string, number> }
+  ) {
+    await retry.tryForTime(10000, async () => {
+      const txGroups = await getTransactionGroups({ query });
+      expect(txGroups.hasActiveAlerts).to.be(expected.hasActiveAlerts);
+      expect(alertsCountByName(txGroups)).to.eql(expected.counts);
+    });
   }
 
   describe('Transaction groups alerts', function () {
@@ -217,17 +234,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('returns the correct number of alert counts', async () => {
-          const txGroupsTypeRequest = await getTransactionGroups({
-            query: { transactionType: 'request' },
-          });
-
-          expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-          expect(alertsCountByName(txGroupsTypeRequest)).to.eql({
-            'GET /api/failed/request': 0,
-            'GET /api/request/avg': 1,
-            'GET /api/request/p95': 0,
-            'GET /api/request/p99': 0,
-          });
+          await expectAlertsCountByName(
+            { transactionType: 'request' },
+            {
+              hasActiveAlerts: true,
+              counts: {
+                'GET /api/failed/request': 0,
+                'GET /api/request/avg': 1,
+                'GET /api/request/p95': 0,
+                'GET /api/request/p99': 0,
+              },
+            }
+          );
         });
       });
 
@@ -236,6 +254,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let alerts: Alerts;
 
         before(async () => {
+          // Remove any rule or alert left over from the previous block. Alert counts are no
+          // longer filtered by latency aggregation type, so a leftover avg alert would be counted here.
+          await alertingApi.cleanUpAlerts({
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
+
           const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {
@@ -295,20 +322,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('returns the correct number of alert counts', async () => {
-          const txGroupsTypeRequest = await getTransactionGroups({
-            query: {
+          await expectAlertsCountByName(
+            {
               transactionType: 'request',
               latencyAggregationType: LatencyAggregationType.p99,
             },
-          });
-
-          expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-          expect(alertsCountByName(txGroupsTypeRequest)).to.eql({
-            'GET /api/failed/request': 0,
-            'GET /api/request/avg': 0,
-            'GET /api/request/p95': 0,
-            'GET /api/request/p99': 1,
-          });
+            {
+              hasActiveAlerts: true,
+              counts: {
+                'GET /api/failed/request': 0,
+                'GET /api/request/avg': 0,
+                'GET /api/request/p95': 0,
+                'GET /api/request/p99': 1,
+              },
+            }
+          );
         });
       });
 
@@ -317,6 +345,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let alerts: Alerts;
 
         before(async () => {
+          await alertingApi.cleanUpAlerts({
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
+
           const createdRule = await alertingApi.createRule({
             name: `Error rate | ${serviceName}`,
             params: {
@@ -375,33 +410,30 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('returns the correct number of alert counts', async () => {
-          const txGroupsTypeRequest = await getTransactionGroups({
-            query: {
+          await expectAlertsCountByName(
+            {
               transactionType: 'request',
               latencyAggregationType: LatencyAggregationType.p95,
             },
-          });
-
-          expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-          expect(alertsCountByName(txGroupsTypeRequest)).to.eql({
-            'GET /api/failed/request': 1,
-            'GET /api/request/avg': 0,
-            'GET /api/request/p95': 0,
-            'GET /api/request/p99': 0,
-          });
+            {
+              hasActiveAlerts: true,
+              counts: {
+                'GET /api/failed/request': 1,
+                'GET /api/request/avg': 0,
+                'GET /api/request/p95': 0,
+                'GET /api/request/p99': 0,
+              },
+            }
+          );
         });
       });
 
       describe('without alerts', () => {
         it('returns the correct number of alert counts', async () => {
-          const txGroupsTypeTask = await getTransactionGroups({
-            query: { transactionType: 'task' },
-          });
-
-          expect(txGroupsTypeTask.hasActiveAlerts).to.be.equal(false);
-          expect(alertsCountByName(txGroupsTypeTask)).to.eql({
-            'GET /api/task/avg': 0,
-          });
+          await expectAlertsCountByName(
+            { transactionType: 'task' },
+            { hasActiveAlerts: false, counts: { 'GET /api/task/avg': 0 } }
+          );
         });
       });
     });

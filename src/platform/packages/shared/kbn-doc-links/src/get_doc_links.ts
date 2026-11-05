@@ -562,6 +562,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
+      alertZero: {
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+      },
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,

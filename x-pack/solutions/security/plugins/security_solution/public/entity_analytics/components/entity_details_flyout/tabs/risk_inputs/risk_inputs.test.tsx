@@ -42,6 +42,8 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
 jest.mock('../../../risk_score_timeline', () => ({
   RiskScoreTimeline: (props: {
     entityId: string;
+    from: string;
+    to: string;
     scoreType?: string;
     onPointSelect: (timestamp: string | undefined) => void;
     onRangeChange: (range: { from: string; to: string }) => void;
@@ -50,6 +52,8 @@ jest.mock('../../../risk_score_timeline', () => ({
       data-test-subj="mockRiskScoreTimeline"
       data-entity-id={props.entityId}
       data-score-type={props.scoreType}
+      data-from={props.from}
+      data-to={props.to}
     >
       <button
         type="button"
@@ -1603,7 +1607,9 @@ describe('RiskInputsTab', () => {
         (flag: string) => flag === 'riskScoreHistoryEnabled'
       );
 
-    const renderTab = () =>
+    const renderTab = (
+      props: Partial<React.ComponentProps<typeof RiskInputsTab<EntityType.user>>> = {}
+    ) =>
       render(
         <TestProviders>
           <RiskInputsTab
@@ -1611,6 +1617,7 @@ describe('RiskInputsTab', () => {
             entityName="elastic"
             entityId="user:elastic"
             onShowAlert={mockOnShowAlert}
+            {...props}
           />
         </TestProviders>
       );
@@ -1635,6 +1642,26 @@ describe('RiskInputsTab', () => {
       );
 
       expect(queryByTestId('mockRiskScoreTimeline')).not.toBeInTheDocument();
+    });
+
+    it('opens the timeline over the last 90 days by default', () => {
+      enableHistoryFlag();
+
+      const { getByTestId } = renderTab();
+
+      const timeline = getByTestId('mockRiskScoreTimeline');
+      expect(timeline).toHaveAttribute('data-from', 'now-90d');
+      expect(timeline).toHaveAttribute('data-to', 'now');
+    });
+
+    it('opens the timeline over the given history range', () => {
+      enableHistoryFlag();
+
+      const { getByTestId } = renderTab({ historyDefaultRange: { from: 'now-7d', to: 'now' } });
+
+      const timeline = getByTestId('mockRiskScoreTimeline');
+      expect(timeline).toHaveAttribute('data-from', 'now-7d');
+      expect(timeline).toHaveAttribute('data-to', 'now');
     });
 
     it('renders the timeline without a PiT indicator when no point is selected', () => {

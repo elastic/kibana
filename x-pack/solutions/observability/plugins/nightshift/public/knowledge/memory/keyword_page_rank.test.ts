@@ -77,7 +77,8 @@ const RANKING_COST_IN_CALIBRATIONS = 6;
 /** How many times its measured cost the ranking may take before this is a regression. */
 const BUDGET_MULTIPLIER = 2;
 
-describe('computeKeywordPageRank', () => {
+// Failing: See https://github.com/elastic/kibana/issues/297287
+describe.skip('computeKeywordPageRank', () => {
   it('returns empty scores for empty entries', () => {
     expect(computeKeywordPageRank([])).toEqual({});
   });

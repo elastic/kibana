@@ -14,6 +14,7 @@ import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../../common/utils/execution_context';
+import { GET_WATCHLISTS_QUERY_KEY } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getApiErrorMessage } from '../utils';
 
 const WATCHLIST_CREATE_CONTEXT = buildExecutionContext(
@@ -62,6 +63,7 @@ export const useCreateWatchlist = ({
       } else {
         await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
       }
+      await queryClient.invalidateQueries({ queryKey: GET_WATCHLISTS_QUERY_KEY });
       onSuccess?.();
     },
     onError: (error: Error) => {

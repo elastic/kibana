@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, once } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -20,7 +20,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
-import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
 /**
  * Elasticsearch caps a request body at 100MB; this is a courtesy bound well under it. It has to be
@@ -37,47 +41,69 @@ const getTimeRangeNotAppliedWarning = (query: string): string => {
   return `The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. ${example}`;
 };
 
+const createExecuteEsqlToolSchemaShape = () => ({
+  query: z.string().describe('The ES|QL query to execute'),
+  params: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+    .optional()
+    .describe('(Optional) The parameter values to use for the query'),
+  time_range: z
+    .object({
+      from: z
+        .string()
+        .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
+      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+    })
+    .optional()
+    .describe(
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend, e.g. `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`, or `PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>)`; otherwise the query runs without it and a warning is returned.'
+    ),
+  limit: z
+    .number()
+    .optional()
+    .default(100)
+    .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
+  filter: z
+    .record(z.string().max(MAX_FILTER_LENGTH), z.unknown())
+    .refine((filter) => JSON.stringify(filter).length <= MAX_FILTER_LENGTH, {
+      message: `Filters must be at most ${MAX_FILTER_LENGTH} characters once serialized for agent input`,
+    })
+    .optional()
+    .describe(
+      '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
+    ),
+});
+
 const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
-    query: z.string().describe('The ES|QL query to execute'),
-    params: z
-      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-      .optional()
-      .describe('(Optional) The parameter values to use for the query'),
-    time_range: z
-      .object({
-        from: z
-          .string()
-          .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
-        to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
-      })
-      .optional()
-      .describe(
-        '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend, e.g. `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`, or `PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>)`; otherwise the query runs without it and a warning is returned.'
-      ),
-    limit: z
-      .number()
-      .optional()
-      .default(100)
-      .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
-    filter: z
-      .record(z.string().max(MAX_FILTER_LENGTH), z.unknown())
-      .refine((filter) => JSON.stringify(filter).length <= MAX_FILTER_LENGTH, {
-        message: `Filters must be at most ${MAX_FILTER_LENGTH} characters once serialized for agent input`,
-      })
-      .optional()
-      .describe(
-        '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
-      ),
+    ...createExecuteEsqlToolSchemaShape(),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
   })
 );
 
-type ExecuteEsqlToolSchema = ReturnType<typeof createExecuteEsqlToolSchema>;
+const createServerlessExecuteEsqlToolSchema = once(() =>
+  z.object(createExecuteEsqlToolSchemaShape())
+);
+
+type ExecuteEsqlToolSchema =
+  | ReturnType<typeof createExecuteEsqlToolSchema>
+  | ReturnType<typeof createServerlessExecuteEsqlToolSchema>;
 
 const generateEsqlTool = sanitizeToolId(platformCoreTools.generateEsql);
 
-export const executeEsqlTool = (): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
+const dataTiersSection = `### Data tiers
+
+The \`include_frozen\` parameter controls whether indices on the frozen tier are queried; its description states the default.
+Querying the frozen tier requires recovering searchable snapshots from object storage and can take several minutes, so expect such queries to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and frozen tier data was excluded, tell the user that frozen tier data was not searched.
+
+`;
+
+export const executeEsqlTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
     type: ToolType.builtin,
@@ -112,13 +138,7 @@ Use it only when something outside the query itself requires the results to be n
 It is parsed separately from the query text, so it cannot reference \`?named\` parameters.
 Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.
 
-### Data tiers
-
-The \`include_frozen\` parameter controls whether indices on the frozen tier are queried; its description states the default.
-Querying the frozen tier requires recovering searchable snapshots from object storage and can take several minutes, so expect such queries to be slow or to time out.
-If results look incomplete for a time range that reaches far into the past and frozen tier data was excluded, tell the user that frozen tier data was not searched.
-
-## API documentation
+${isServerless ? '' : dataTiersSection}## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
 - Query DSL reference (for the filter parameter): https://www.elastic.co/docs/reference/query-languages/querydsl`,
     annotations: {
@@ -129,18 +149,17 @@ If results look incomplete for a time range that reaches far into the past and f
       openWorldHint: false,
     },
     getSchema: async (schemaContext) =>
-      createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
-    handler: async (
-      {
+      isServerless
+        ? createServerlessExecuteEsqlToolSchema()
+        : createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (toolParams, { esClient, attachments }) => {
+      const {
         query: esqlQuery,
         params: esqlParams = {},
         time_range: explicitTimeRange,
         limit = 100,
         filter: esqlFilter,
-        include_frozen: includeFrozen,
-      },
-      { esClient, attachments }
-    ) => {
+      } = toolParams;
       const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
       const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
@@ -158,7 +177,7 @@ If results look incomplete for a time range that reaches far into the past and f
         esClient: esClient.asCurrentUser,
         limit,
         filter: esqlFilter as QueryDslQueryContainer | undefined,
-        includeFrozen,
+        includeFrozen: getIncludeFrozenParam(toolParams),
       });
 
       // need the interpolated query to return in the results / to display in the UI

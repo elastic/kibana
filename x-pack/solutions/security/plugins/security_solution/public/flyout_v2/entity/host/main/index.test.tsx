@@ -451,6 +451,20 @@ describe('<Host />', () => {
         );
       };
 
+      it('passes the scope to the risk inputs tool', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord);
+        const { getByTestId } = render(
+          <TestProviders>
+            <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+          </TestProviders>
+        );
+        fireEvent.click(getByTestId('entityRiskInputsTitleLink'));
+        expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
+          expect.objectContaining({ entityName: 'test', scopeId: 'test-scope-id' })
+        );
+      });
+
       it('passes the panel mode and scope to the anomaly insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
         expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(

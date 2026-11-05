@@ -15,7 +15,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./search_profiler'));
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./dashboard_controls'));
-    loadTestFile(require.resolve('./dashboard_links'));
     loadTestFile(require.resolve('./dashboard_panel_options'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./roles'));

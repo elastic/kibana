@@ -1,5 +1,5 @@
 {
-  "sha1": "42b1fc5b9cb7e05afa75a9e19b032195faeaedfb",
+  "sha1": "c96bfe5c3dae8e9352a1caa06a6de18e6267d24f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2546,6 +2546,32 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
         "line": 266,
         "column": 23
+      }
+    },
+    {
+      "id": "fe0dc58aa8ace83-bdae7937f58824c",
+      "title": "Episodes query when the latest events of an episode share a timestamp the list query returns one row for the episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/episodes_query_timestamp_ties.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "fe0dc58aa8ace83-4aea202557cff8e",
+      "title": "Episodes query when the latest events of an episode share a timestamp the single episode query returns one row for the episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/episodes_query_timestamp_ties.spec.ts",
+        "line": 80,
+        "column": 26
       }
     },
     {

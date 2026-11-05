@@ -689,6 +689,25 @@ describe('WorkflowTaskManager', () => {
       });
     });
 
+    it('asks ensureScheduled to replace the parked runner key on approval', async () => {
+      const executionId = 'exec-and-run-rekey';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
+
+      await workflowTaskManager.scheduleAndRunImmediateResume({
+        executionId,
+        spaceId: 'default',
+        fakeRequest,
+        isUserInteractive: true,
+        regenerateApiKey: true,
+      });
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ id: stableId }),
+        { request: fakeRequest, cloneApiKey: true, regenerateApiKey: true }
+      );
+    });
+
     it('should propagate errors from scheduleImmediateResume', async () => {
       mockTaskManager.ensureScheduled.mockRejectedValue(new Error('TM unavailable'));
 

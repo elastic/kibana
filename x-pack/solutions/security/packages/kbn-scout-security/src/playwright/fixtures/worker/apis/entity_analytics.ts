@@ -22,13 +22,22 @@ const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
 const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
 
-export type IndexEntityStoreEntryOptions =
+export interface EntityStoreEntryRisk {
+  score: number;
+  level: 'Low' | 'Moderate' | 'High' | 'Critical';
+}
+
+export type IndexEntityStoreEntryOptions = (
   | { entityType?: 'host' }
   | {
       entityType: 'user';
       hostId: string;
       namespace: 'local';
-    };
+    }
+) & {
+  /** Writes a risk score and a first seen time of now, as risk scoring and extraction would. */
+  risk?: EntityStoreEntryRisk;
+};
 
 export interface EntityAnalyticsApiService {
   installEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
@@ -38,6 +47,8 @@ export interface EntityAnalyticsApiService {
     entityName: string,
     options?: IndexEntityStoreEntryOptions
   ) => Promise<void>;
+  /** Removes entries from the space's latest entities index, by entity id. */
+  deleteEntityStoreEntries: (entityIds: string[]) => Promise<void>;
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
   initRiskEngine: () => Promise<void>;
@@ -149,13 +160,27 @@ export const getEntityAnalyticsApiService = ({
               : { host: { name: entityName } };
           const entityNamespace =
             options.entityType === 'user' ? { namespace: options.namespace } : {};
+          const now = new Date().toISOString();
+          const { risk } = options;
+          const entityRisk = risk
+            ? {
+                lifecycle: { first_seen: now },
+                risk: {
+                  calculated_score: risk.score,
+                  calculated_score_norm: risk.score,
+                  calculated_level: risk.level,
+                },
+              }
+            : {};
           await esClient.index({
             index: alias,
             document: {
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': now,
               entity: {
                 id: entityId,
+                name: entityName,
                 ...entityNamespace,
+                ...entityRisk,
                 EngineMetadata: { Type: entityType },
               },
               ...entityFields,
@@ -164,6 +189,17 @@ export const getEntityAnalyticsApiService = ({
           });
         }
       );
+    },
+
+    deleteEntityStoreEntries: async (entityIds: string[]) => {
+      if (!esClient) {
+        throw new Error('esClient is required to delete entity store entries');
+      }
+      await esClient.deleteByQuery({
+        index: `entities-latest-${spaceId}`,
+        query: { terms: { 'entity.id': entityIds } },
+        refresh: true,
+      });
     },
 
     deleteEntityStoreEngines: async () => {

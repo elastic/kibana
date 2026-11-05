@@ -24,6 +24,14 @@ const phraseFilter = (key: string, query: string, negate = false): Filter => ({
   meta: { type: 'phrase', key, negate, disabled: false, params: { query } },
 });
 
+const existsFilter = (key: string): Filter => ({
+  meta: { type: 'exists', key, negate: false, disabled: false },
+});
+
+const rangeFilter = (key: string, params: { gte?: string; lt?: string }): Filter => ({
+  meta: { type: 'range', key, negate: false, disabled: false, params },
+});
+
 describe('useWorkflowExecutionsSearch', () => {
   let mockWorkflowApi: MockWorkflowApi;
 
@@ -89,5 +97,48 @@ describe('useWorkflowExecutionsSearch', () => {
 
     expect(params?.executedBy).toBeUndefined();
     expect(params?.kql).toBe('(NOT executedBy: elastic)');
+  });
+
+  it('sends a status exists filter as KQL and not as structured statuses', async () => {
+    const params = await renderSearchHook([existsFilter('status')]);
+
+    expect(params?.statuses).toBeUndefined();
+    expect(params?.kql).toBe('(status: *)');
+  });
+
+  it('sends an executedBy exists filter as KQL and not as structured executedBy', async () => {
+    const params = await renderSearchHook([existsFilter('executedBy')]);
+
+    expect(params?.executedBy).toBeUndefined();
+    expect(params?.kql).toBe('(executedBy: *)');
+  });
+
+  it('sends a status range filter as KQL and not as structured statuses', async () => {
+    const params = await renderSearchHook([
+      rangeFilter('status', { gte: '2020-01-01', lt: '2020-01-02' }),
+    ]);
+
+    expect(params?.statuses).toBeUndefined();
+    expect(params?.kql).toBe('(status >= 2020-01-01 and status < 2020-01-02)');
+  });
+
+  it('sends an executedBy range filter as KQL and not as structured executedBy', async () => {
+    const params = await renderSearchHook([
+      rangeFilter('executedBy', { gte: '2020-01-01', lt: '2020-01-02' }),
+    ]);
+
+    expect(params?.executedBy).toBeUndefined();
+    expect(params?.kql).toBe('(executedBy >= 2020-01-01 and executedBy < 2020-01-02)');
+  });
+
+  it('sends an options-list status filter without meta.type as structured statuses', async () => {
+    const filter = {
+      meta: { key: 'status', negate: false, disabled: false },
+      query: { match_phrase: { status: 'failed' } },
+    } as Filter;
+    const params = await renderSearchHook([filter]);
+
+    expect(params?.statuses).toEqual(['failed']);
+    expect(params?.kql).toBeUndefined();
   });
 });
