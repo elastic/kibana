@@ -67,6 +67,8 @@ export interface TestEndpointToolCheck {
   passed: boolean;
   toolName: string;
   arguments?: unknown;
+  toolResult?: string;
+  followUpError?: string;
 }
 
 export interface TestEndpointResponse {

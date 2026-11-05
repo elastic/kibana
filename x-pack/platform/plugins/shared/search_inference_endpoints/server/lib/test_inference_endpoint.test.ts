@@ -71,15 +71,21 @@ describe('testInferenceEndpoint', () => {
         esClient,
         taskType: 'chat_completion',
         inferenceId: 'my-endpoint',
-        message: 'hi',
+        message: 'What is the weather in Paris?',
         checkToolCalling: true,
       } as unknown as Parameters<typeof testInferenceEndpoint>[0]);
+
+    const weatherCall = {
+      toolCallId: 'call-1',
+      function: { name: 'get_weather', arguments: { city: 'Paris' } },
+    };
 
     it('sends a made-up tool and forces the model to call a tool', async () => {
       chatComplete.mockResolvedValue({ content: '', toolCalls: [] });
 
       await runToolCheck();
 
+      expect(chatComplete).toHaveBeenCalledTimes(1);
       expect(chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({
           tools: { get_weather: expect.objectContaining({ description: expect.any(String) }) },
@@ -88,34 +94,83 @@ describe('testInferenceEndpoint', () => {
       );
     });
 
-    it('passes when the model called the tool', async () => {
-      chatComplete.mockResolvedValue({
-        content: '',
-        toolCalls: [
-          { toolCallId: '1', function: { name: 'get_weather', arguments: { city: 'Paris' } } },
-        ],
-      });
+    it('returns Sunny as the tool result and lets the model answer', async () => {
+      chatComplete
+        .mockResolvedValueOnce({ content: '', toolCalls: [weatherCall] })
+        .mockResolvedValueOnce({ content: 'It is sunny in Paris.', toolCalls: [] });
+
+      await runToolCheck();
+
+      expect(chatComplete).toHaveBeenCalledTimes(2);
+      expect(chatComplete.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          toolChoice: 'auto',
+          tools: expect.any(Object),
+          messages: [
+            { role: 'user', content: 'What is the weather in Paris?' },
+            { role: 'assistant', content: null, toolCalls: [weatherCall] },
+            { role: 'tool', name: 'get_weather', toolCallId: 'call-1', response: 'Sunny' },
+          ],
+        })
+      );
+    });
+
+    it('answers every tool call the model made', async () => {
+      const secondCall = { ...weatherCall, toolCallId: 'call-2' };
+      chatComplete
+        .mockResolvedValueOnce({ content: '', toolCalls: [weatherCall, secondCall] })
+        .mockResolvedValueOnce({ content: 'Sunny.', toolCalls: [] });
+
+      await runToolCheck();
+
+      expect(chatComplete.mock.calls[1][0].messages.slice(2)).toEqual([
+        { role: 'tool', name: 'get_weather', toolCallId: 'call-1', response: 'Sunny' },
+        { role: 'tool', name: 'get_weather', toolCallId: 'call-2', response: 'Sunny' },
+      ]);
+    });
+
+    it('passes and returns the final answer when the model used the tool result', async () => {
+      const first = { content: '', toolCalls: [weatherCall] };
+      const followUp = { content: 'It is sunny in Paris.', toolCalls: [] };
+      chatComplete.mockResolvedValueOnce(first).mockResolvedValueOnce(followUp);
 
       const result = await runToolCheck();
 
+      expect(result.result).toEqual({ type: 'text', content: 'It is sunny in Paris.' });
       expect(result.toolCheck).toEqual({
         passed: true,
         toolName: 'get_weather',
         arguments: { city: 'Paris' },
+        toolResult: 'Sunny',
       });
+      expect(result.raw).toEqual({ toolCall: first, followUp });
     });
 
-    it('does not pass when the model answered without calling the tool', async () => {
-      chatComplete.mockResolvedValue({ content: 'It is sunny.', toolCalls: [] });
+    it('still passes when the follow-up request fails, and says why', async () => {
+      chatComplete
+        .mockResolvedValueOnce({ content: '', toolCalls: [weatherCall] })
+        .mockRejectedValueOnce(new Error('tool result rejected'));
 
       const result = await runToolCheck();
 
       expect(result.ok).toBe(true);
       expect(result.toolCheck).toEqual({
-        passed: false,
+        passed: true,
         toolName: 'get_weather',
-        arguments: undefined,
+        arguments: { city: 'Paris' },
+        toolResult: 'Sunny',
+        followUpError: 'tool result rejected',
       });
+    });
+
+    it('does not make a follow-up request when the model answered without the tool', async () => {
+      chatComplete.mockResolvedValue({ content: 'It is sunny.', toolCalls: [] });
+
+      const result = await runToolCheck();
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(result.ok).toBe(true);
+      expect(result.toolCheck).toEqual({ passed: false, toolName: 'get_weather' });
     });
 
     it('does not pass when the model called a different tool', async () => {
@@ -126,6 +181,7 @@ describe('testInferenceEndpoint', () => {
 
       const result = await runToolCheck();
 
+      expect(chatComplete).toHaveBeenCalledTimes(1);
       expect(result.toolCheck?.passed).toBe(false);
     });
 
@@ -147,6 +203,33 @@ describe('testInferenceEndpoint', () => {
       const result = await runTest('chat_completion');
 
       expect(result).not.toHaveProperty('toolCheck');
+    });
+
+    describe('when the follow-up request does not answer in time', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('reports a timeout and not a passed check', async () => {
+        chatComplete.mockResolvedValueOnce({ content: '', toolCalls: [weatherCall] });
+        chatComplete.mockImplementationOnce(
+          ({ abortSignal }: { abortSignal: AbortSignal }) =>
+            new Promise((_, reject) => {
+              abortSignal.addEventListener('abort', () => reject(new Error('Request was aborted')));
+            })
+        );
+
+        const resultPromise = runToolCheck();
+        await jest.advanceTimersByTimeAsync(TEST_TIMEOUT_MS);
+        const result = await resultPromise;
+
+        expect(result.ok).toBe(false);
+        expect(result.error).toEqual(expect.objectContaining({ cause: 'timeout' }));
+      });
     });
   });
 

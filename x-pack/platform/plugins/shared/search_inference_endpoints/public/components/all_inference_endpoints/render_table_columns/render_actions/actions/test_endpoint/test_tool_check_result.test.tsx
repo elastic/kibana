@@ -21,15 +21,38 @@ const renderResult = (toolCheck: TestEndpointToolCheck) =>
 
 describe('TestToolCheckResult', () => {
   it('shows the tool call the model made when the check passes', () => {
-    renderResult({ passed: true, toolName: 'get_weather', arguments: { city: 'Paris' } });
+    renderResult({
+      passed: true,
+      toolName: 'get_weather',
+      arguments: { city: 'Paris' },
+      toolResult: 'Sunny',
+    });
 
     expect(screen.getByTestId('testEndpointToolCheckPassed')).toHaveTextContent(
       'The model called the tool.'
     );
     expect(screen.getByTestId('testEndpointToolCheckPassed')).toHaveTextContent(
-      'get_weather({"city":"Paris"})'
+      'get_weather({"city":"Paris"}) returned "Sunny"'
     );
     expect(screen.queryByTestId('testEndpointToolCheckFailed')).not.toBeInTheDocument();
+  });
+
+  it('warns when the model called the tool but the follow-up request failed', () => {
+    renderResult({
+      passed: true,
+      toolName: 'get_weather',
+      arguments: { city: 'Paris' },
+      toolResult: 'Sunny',
+      followUpError: 'tool result rejected',
+    });
+
+    expect(screen.getByTestId('testEndpointToolCheckFollowUpFailed')).toHaveTextContent(
+      'The model called the tool, but the follow-up request failed.'
+    );
+    expect(screen.getByTestId('testEndpointToolCheckFollowUpFailed')).toHaveTextContent(
+      'tool result rejected'
+    );
+    expect(screen.queryByTestId('testEndpointToolCheckPassed')).not.toBeInTheDocument();
   });
 
   it('warns when the model answered without calling the tool', () => {

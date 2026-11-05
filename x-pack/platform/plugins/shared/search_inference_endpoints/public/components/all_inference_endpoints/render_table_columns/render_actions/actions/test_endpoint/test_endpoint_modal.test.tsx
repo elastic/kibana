@@ -16,11 +16,13 @@ jest.mock('../../../../../../hooks/use_test_endpoint');
 
 const mockUseTestEndpoint = useTestEndpoint as jest.Mock;
 const mockMutate = jest.fn();
+const mockReset = jest.fn();
 const onClose = jest.fn();
 
 const mockHookState = (state: Record<string, unknown> = {}) =>
   mockUseTestEndpoint.mockReturnValue({
     mutate: mockMutate,
+    reset: mockReset,
     data: undefined,
     error: null,
     isLoading: false,
@@ -206,9 +208,47 @@ describe('TestEndpointModal', () => {
       fireEvent.click(screen.getByTestId('testEndpointRunButton'));
       expect(mockMutate).toHaveBeenLastCalledWith({
         inferenceId: 'my-endpoint',
-        message: 'Reply "Hello world"',
+        message: 'What is the weather in Paris?',
         checkToolCalling: true,
       });
+    });
+
+    it('clears the previous result when the box is ticked or unticked', () => {
+      mockHookState();
+      renderModal('chat_completion');
+
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      expect(mockReset).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      expect(mockReset).toHaveBeenCalledTimes(2);
+    });
+
+    it('switches the default message to one with a city while it is ticked', () => {
+      mockHookState();
+      renderModal('chat_completion');
+
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      expect(screen.getByTestId('testEndpointMessageInput')).toHaveValue(
+        'What is the weather in Paris?'
+      );
+
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      expect(screen.getByTestId('testEndpointMessageInput')).toHaveValue('Reply "Hello world"');
+    });
+
+    it('keeps a message the user has changed', () => {
+      mockHookState();
+      renderModal('chat_completion');
+
+      fireEvent.change(screen.getByTestId('testEndpointMessageInput'), {
+        target: { value: 'Is it raining in Rome?' },
+      });
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      expect(screen.getByTestId('testEndpointMessageInput')).toHaveValue('Is it raining in Rome?');
+
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      expect(screen.getByTestId('testEndpointMessageInput')).toHaveValue('Is it raining in Rome?');
     });
 
     it('shows the tool check result next to the answer', () => {
@@ -222,6 +262,48 @@ describe('TestEndpointModal', () => {
       });
       renderModal('chat_completion');
 
+      expect(screen.getByTestId('testEndpointToolCheckPassed')).toBeInTheDocument();
+    });
+
+    it('does not show an empty answer box when the model only called the tool', () => {
+      mockHookState({
+        data: {
+          ok: true,
+          latencyMs: 245,
+          result: { type: 'text', content: '' },
+          toolCheck: { passed: true, toolName: 'get_weather', arguments: { city: 'Paris' } },
+        },
+      });
+      renderModal('chat_completion');
+
+      expect(screen.queryByTestId('testEndpointResponse')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('testEndpointNoText')).not.toBeInTheDocument();
+    });
+
+    it('says so when the model returned no text and no tool was checked', () => {
+      mockHookState({
+        data: { ok: true, latencyMs: 245, result: { type: 'text', content: '' } },
+      });
+      renderModal('chat_completion');
+
+      expect(screen.queryByTestId('testEndpointResponse')).not.toBeInTheDocument();
+      expect(screen.getByTestId('testEndpointNoText')).toHaveTextContent(
+        'The model returned no text.'
+      );
+    });
+
+    it('still shows the answer next to the tool result when the model returned text', () => {
+      mockHookState({
+        data: {
+          ok: true,
+          latencyMs: 245,
+          result: { type: 'text', content: 'Calling the tool now.' },
+          toolCheck: { passed: true, toolName: 'get_weather', arguments: { city: 'Paris' } },
+        },
+      });
+      renderModal('chat_completion');
+
+      expect(screen.getByTestId('testEndpointResponse')).toHaveTextContent('Calling the tool now.');
       expect(screen.getByTestId('testEndpointToolCheckPassed')).toBeInTheDocument();
     });
 

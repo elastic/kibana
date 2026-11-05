@@ -49,7 +49,7 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
   const isRerank = taskType === 'rerank';
   const isEmbedding = taskType.endsWith('embedding');
   const modalTitleId = useGeneratedHtmlId();
-  const [message, setMessage] = useState(() => {
+  const [defaultMessage] = useState(() => {
     if (isRerank) {
       return 'what capital of canada?';
     }
@@ -62,11 +62,16 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
       defaultMessage: 'Reply "Hello world"',
     });
   });
+  const [message, setMessage] = useState(defaultMessage);
+  const toolCheckMessage = i18n.translate(
+    'xpack.searchInferenceEndpoints.testEndpoint.toolCheckMessage',
+    { defaultMessage: 'What is the weather in Paris?' }
+  );
   const [documents, setDocuments] = useState(() => ['toronto', 'ottawa', 'calgary'].join('\n'));
   const [showRaw, setShowRaw] = useState(false);
   const [checkToolCalling, setCheckToolCalling] = useState(false);
   const toolCheckId = useGeneratedHtmlId();
-  const { mutate: testEndpoint, data, error, isLoading } = useTestEndpoint();
+  const { mutate: testEndpoint, reset, data, error, isLoading } = useTestEndpoint();
 
   const documentList = documents
     .split('\n')
@@ -74,6 +79,7 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
     .filter(Boolean);
   const isMissingInput = message.trim() === '' || (isRerank && documentList.length === 0);
 
+  const isEmptyText = data?.result?.type === 'text' && data.result.content === '';
   const failure = data?.error;
   const requestFailureReason = error ? error.body?.message ?? error.message : undefined;
 
@@ -121,7 +127,17 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
                 }
               )}
               checked={checkToolCalling}
-              onChange={(event) => setCheckToolCalling(event.target.checked)}
+              onChange={(event) => {
+                const { checked } = event.target;
+                setCheckToolCalling(checked);
+                reset();
+                if (checked && message === defaultMessage) {
+                  setMessage(toolCheckMessage);
+                }
+                if (!checked && message === toolCheckMessage) {
+                  setMessage(defaultMessage);
+                }
+              }}
               data-test-subj="testEndpointToolCheckbox"
             />
           </>
@@ -157,7 +173,14 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
         )}
         {data?.ok && (
           <>
-            {data.result && <TestEndpointResultView result={data.result} />}
+            {data.result && !isEmptyText && <TestEndpointResultView result={data.result} />}
+            {isEmptyText && !data.toolCheck && (
+              <EuiText size="s" color="subdued" data-test-subj="testEndpointNoText">
+                {i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.noText', {
+                  defaultMessage: 'The model returned no text.',
+                })}
+              </EuiText>
+            )}
             {data.toolCheck && (
               <>
                 <EuiSpacer size="s" />

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { InferenceServerClient } from '@kbn/inference-plugin/server';
+import type { Message } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType, isInferenceError } from '@kbn/inference-common';
 import type {
   TestEndpointFailureCause,
@@ -23,6 +24,7 @@ const EMBEDDING_PREVIEW_SIZE = 8;
 const SPARSE_TOP_TOKENS_SIZE = 5;
 
 const TEST_TOOL_NAME = 'get_weather';
+const TEST_TOOL_RESULT = 'Sunny';
 
 const TEST_TOOLS = {
   [TEST_TOOL_NAME]: {
@@ -95,37 +97,87 @@ const runChat = async ({
   checkToolCalling,
   signal,
 }: RunChatOptions): Promise<TestOutput> => {
-  const response =
+  const callModel = async (messages: Message[], toolChoice: ToolChoiceType | undefined) =>
     'featureId' in target
       ? await inferenceClient.chatComplete({
           featureId: target.featureId,
-          messages: [{ role: MessageRole.User, content: message }],
+          messages,
           tools: checkToolCalling ? TEST_TOOLS : undefined,
-          toolChoice: checkToolCalling ? ToolChoiceType.required : undefined,
+          toolChoice,
           maxRetries: 0,
           abortSignal: signal,
         })
       : await inferenceClient.chatComplete({
           connectorId: target.connectorId,
-          messages: [{ role: MessageRole.User, content: message }],
+          messages,
           tools: checkToolCalling ? TEST_TOOLS : undefined,
-          toolChoice: checkToolCalling ? ToolChoiceType.required : undefined,
+          toolChoice,
           maxRetries: 0,
           abortSignal: signal,
         });
-  const toolCall = response.toolCalls.find(({ function: { name } }) => name === TEST_TOOL_NAME);
 
-  return {
-    result: { type: 'text', content: response.content },
-    raw: response,
-    ...(checkToolCalling && {
-      toolCheck: {
-        passed: toolCall !== undefined,
-        toolName: TEST_TOOL_NAME,
-        arguments: toolCall?.function.arguments,
-      },
-    }),
+  const messages: Message[] = [{ role: MessageRole.User, content: message }];
+  const response = await callModel(
+    messages,
+    checkToolCalling ? ToolChoiceType.required : undefined
+  );
+
+  if (!checkToolCalling) {
+    return { result: { type: 'text', content: response.content }, raw: response };
+  }
+
+  const toolCall = response.toolCalls.find(({ function: { name } }) => name === TEST_TOOL_NAME);
+  if (!toolCall) {
+    return {
+      result: { type: 'text', content: response.content },
+      raw: response,
+      toolCheck: { passed: false, toolName: TEST_TOOL_NAME },
+    };
+  }
+
+  const toolCheck = {
+    passed: true,
+    toolName: TEST_TOOL_NAME,
+    arguments: toolCall.function.arguments,
+    toolResult: TEST_TOOL_RESULT,
   };
+
+  try {
+    const followUp = await callModel(
+      [
+        ...messages,
+        {
+          role: MessageRole.Assistant,
+          content: response.content || null,
+          toolCalls: response.toolCalls,
+        },
+        ...response.toolCalls.map(({ toolCallId }) => ({
+          role: MessageRole.Tool as const,
+          name: TEST_TOOL_NAME,
+          toolCallId,
+          response: TEST_TOOL_RESULT,
+        })),
+      ],
+      ToolChoiceType.auto
+    );
+    return {
+      result: { type: 'text', content: followUp.content },
+      raw: { toolCall: response, followUp },
+      toolCheck,
+    };
+  } catch (error) {
+    if (signal.aborted) {
+      throw error;
+    }
+    return {
+      result: { type: 'text', content: response.content },
+      raw: response,
+      toolCheck: {
+        ...toolCheck,
+        followUpError: error instanceof Error ? error.message : String(error),
+      },
+    };
+  }
 };
 
 interface TestInferenceEndpointOptions {
