@@ -48,7 +48,7 @@ interface EnabledSource {
   attributes: Pick<NightshiftSourceAttributes, 'esql' | 'type'>;
 }
 
-// Hidden type: the repository must be created with it included; `namespaces: ['*']` spans every space.
+// Hidden type: the repository must be created with it included.
 const listEnabledSources = async (
   soRepository: ISavedObjectsRepository,
   signal: AbortSignal

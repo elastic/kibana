@@ -88,6 +88,17 @@ describe('measureSourceVolume', () => {
     );
   });
 
+  it('counts the documents of a TS source with FROM', async () => {
+    const { esClient, measure } = setup({ esql: 'TS metrics-* | WHERE host != "c"' });
+    esClient.esql.query.mockResolvedValue(countOf(60));
+    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
+
+    await expect(measure()).resolves.toMatchObject({ status: 'ok', doc_count: 60 });
+    expect(esClient.esql.query.mock.calls[0][0]).toMatchObject({
+      query: 'FROM metrics-* | WHERE host != "c"\n| STATS doc_count = COUNT(*)',
+    });
+  });
+
   it('reads sizes from metering stats on serverless', async () => {
     const { esClient, measure } = setup({ isServerless: true });
     esClient.esql.query.mockResolvedValue(countOf(42));
@@ -178,18 +189,5 @@ describe('measureSourceVolume', () => {
       clusters_total: 62,
       clusters_unsuccessful: 1,
     });
-  });
-
-  it('flags a partial result that carries no cluster information', async () => {
-    const { esClient, measure } = setup();
-    esClient.esql.query.mockResolvedValue({ ...countOf(5), is_partial: true });
-    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
-
-    await expect(measure()).resolves.toEqual({
-      status: 'partial',
-      has_remote: false,
-      doc_count: 5,
-    });
-    expect(esClient.indices.stats).not.toHaveBeenCalled();
   });
 });

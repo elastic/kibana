@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
-import { getSourceReadTargets } from '@kbn/nightshift-shared';
+import { getSourceDocumentQuery, getSourceReadTargets } from '@kbn/nightshift-shared';
 import type { SourceVolume } from './source_volume_event';
 
 const COUNT_TIMEOUT_MS = 60_000;
@@ -24,7 +24,8 @@ interface MeteringStatsResponse {
 }
 
 // Trailing `--` / `//` on the stored query would swallow the pipe if it sat on the same line.
-const appendCount = (esql: string): string => `${esql}\n| STATS doc_count = COUNT(*)`;
+const appendCount = (esql: string): string =>
+  `${getSourceDocumentQuery(esql)}\n| STATS doc_count = COUNT(*)`;
 
 const esErrorType = (error: errors.ResponseError): string | undefined =>
   (error.body as ElasticsearchErrorDetails | undefined)?.error?.type;
@@ -87,7 +88,6 @@ const countDocuments = async ({
   return { docCount: Number(values[0]?.[0] ?? 0), isPartial, clusters };
 };
 
-// `_metering/stats` is the serverless size source; stateful lacks it.
 const averageDocumentBytes = async ({
   esClient,
   indexPatterns,

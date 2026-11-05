@@ -8,6 +8,7 @@
 import {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceDocumentQuery,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
@@ -307,5 +308,13 @@ describe('getSourceReadTargets', () => {
 
   it('throws on a query that does not parse', () => {
     expect(() => getSourceReadTargets('FROM')).toThrow('Invalid ES|QL query');
+  });
+});
+
+describe('getSourceDocumentQuery', () => {
+  it('swaps only the TS keyword for FROM', () => {
+    expect(getSourceDocumentQuery('// note\n  ts metrics-* | WHERE host != "ts"')).toBe(
+      '// note\n  FROM metrics-* | WHERE host != "ts"'
+    );
   });
 });
