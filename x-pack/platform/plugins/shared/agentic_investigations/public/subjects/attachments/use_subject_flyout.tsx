@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isModifiedClick } from './subject_link';
 import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
@@ -45,7 +45,17 @@ export const useSubjectFlyout = (
   const { services } = useKibana<SubjectServices>();
   const [isOpen, setIsOpen] = useState(false);
   const source = subject?.snapshot?.source;
-  const close = useCallback(() => setIsOpen(false), []);
+  const opener = useRef<HTMLElement | null>(null);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+    // These flyouts open without taking focus from the page (`ownFocus={false}`), and closing one
+    // leaves focus on the page body rather than on what opened it (checked in a browser), so hand
+    // it back. It covers a flyout a solution registered, too.
+    const element = opener.current;
+    opener.current = null;
+    window.requestAnimationFrame(() => element?.focus());
+  }, []);
 
   const onClick = useCallback(
     (event: React.MouseEvent) => {
@@ -62,6 +72,7 @@ export const useSubjectFlyout = (
         return;
       }
       event.preventDefault();
+      opener.current = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
       setIsOpen(true);
     },
     [subject, source, services, onlyRegistered, onLinkClick]

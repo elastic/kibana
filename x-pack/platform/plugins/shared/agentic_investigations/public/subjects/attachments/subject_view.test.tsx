@@ -20,9 +20,20 @@ import { SubjectList, SubjectView } from './subject_view';
 // The flyout itself is covered by `subject_details_flyout.test.tsx`; here only the row's choice
 // between opening it and following its link matters.
 jest.mock('./subject_details_flyout', () => ({
-  SubjectDetailsFlyout: ({ alertId, detailsHref }: { alertId: string; detailsHref?: string }) => (
+  SubjectDetailsFlyout: ({
+    alertId,
+    detailsHref,
+    onClose,
+  }: {
+    alertId: string;
+    detailsHref?: string;
+    onClose: () => void;
+  }) => (
     <div data-test-subj="subjectFlyoutStub" data-href={detailsHref}>
       {alertId}
+      <button type="button" data-test-subj="subjectFlyoutStubClose" onClick={onClose}>
+        close
+      </button>
     </div>
   ),
 }));
@@ -254,6 +265,20 @@ describe('SubjectView alert flyout', () => {
     subjectId: 'alert-1',
     snapshot: { rule_name: 'High latency', url: '/app/observability/alerts/alert-1' },
   };
+
+  it('gives focus back to the row when the flyout closes', async () => {
+    renderView(alert, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    row.focus();
+    fireEvent.click(row);
+    fireEvent.click(await screen.findByTestId('subjectFlyoutStubClose'));
+    // The browser leaves focus on the page body when a flyout without its own focus trap unmounts.
+    (document.activeElement as HTMLElement | null)?.blur();
+
+    await waitFor(() => expect(row).toHaveFocus());
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
 
   it('opens the alert in a flyout instead of navigating, and keeps the href', async () => {
     renderView(alert, { http: {} as never });

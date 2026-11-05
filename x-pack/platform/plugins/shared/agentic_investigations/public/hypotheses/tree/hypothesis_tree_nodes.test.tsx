@@ -29,8 +29,13 @@ jest.mock('@kbn/proposals-plugin/public');
 // The flyout itself is covered by `subject_details_flyout.test.tsx`; here only the link's choice
 // between opening it and following its href matters.
 jest.mock('../../subjects/attachments/subject_details_flyout', () => ({
-  SubjectDetailsFlyout: ({ alertId }: { alertId: string }) => (
-    <div data-test-subj="subjectFlyoutStub">{alertId}</div>
+  SubjectDetailsFlyout: ({ alertId, onClose }: { alertId: string; onClose: () => void }) => (
+    <div data-test-subj="subjectFlyoutStub">
+      {alertId}
+      <button type="button" data-test-subj="subjectFlyoutStubClose" onClick={onClose}>
+        close
+      </button>
+    </div>
   ),
 }));
 
@@ -178,6 +183,18 @@ describe('HypothesisTreeNode', () => {
 
       expect(click.defaultPrevented).toBe(true);
       expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    });
+
+    it('gives focus back to the link when the flyout closes', async () => {
+      renderNode(trigger, undefined, { getAlertFlyout: () => () => null });
+
+      const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+      link.focus();
+      fireEvent.click(link);
+      fireEvent.click(await screen.findByTestId('subjectFlyoutStubClose'));
+      (document.activeElement as HTMLElement | null)?.blur();
+
+      await waitFor(() => expect(link).toHaveFocus());
     });
 
     it('keeps following the link for a new-tab click', () => {
