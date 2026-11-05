@@ -583,13 +583,16 @@ applied in code. They do not use the paper's incident judge prompt (`JUDGE_PROMP
 plus its scoring footer).
 Control passes an empty report and fails when a report places an incident inside
 `metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'
-`check_prediction.py`, word for word except that it answers through the `score` tool. It gets
+`check_prediction.py`, word for word except that it answers through the `score` tool. Like ORCA's
+judge reading the agent's report file, it sees the whole report: the answer, the evidence, the
+impact summary and the proposed actions. It gets
 `current_time` and the quiet window moved ten minutes inward on each defined side, with an
 open-ended bound shown as `null`, as ORCA does. Past incidents and timeline lines that only record
 when the issue was reported are not false positives. A run that crashed, timed out, or ended without recording anything has
 no answer, so all three scores are `unscored` (null) instead of reading it as an empty report,
 as ORCA leaves unscored trials out. A run whose last agent round failed or was aborted counts
-as crashed even when it recorded a verdict first. `execution_success` still counts those runs, so quote it next
+as crashed even when it recorded a verdict first. A report too large to persist keeps only its
+summary and conclusion, so it is unscored too. `execution_success` still counts those runs, so quote it next
 to any ORCA rate. A run that ended without a verdict but recorded hypotheses is scored on them.
 A control is `metadata.control`, `metadata.task_type === "control"`,
 `metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination

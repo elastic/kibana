@@ -38,6 +38,7 @@ import {
   buildJudgeInputs,
   clampUnitScore,
   composeAnswerText,
+  composeEvidenceText,
   goalScorePassed,
   normalizeDecisionTreeHelpfulnessScore,
   normalizeGoalScore,
@@ -611,11 +612,21 @@ const reportHasFindings = (
 const orcaUnscoredReason = ({
   execution_error: executionError,
   structured_report: report,
+  report_truncated: reportTruncated,
 }: InvestigationTaskOutput): string | undefined => {
+  // An oversized report keeps only its summary and conclusion, so a recorded cause may be missing.
+  if (reportTruncated) return 'the report was too large to keep its hypotheses';
   if (!executionError) return undefined;
   if (executionError === NO_CONCLUSION_ERROR && reportHasFindings(report)) return undefined;
   return executionError;
 };
+
+/**
+ * The whole report, as ORCA's control judge reads the agent's report file: the answer plus its
+ * evidence, impact summary and proposals, so a claim of active impact anywhere in it is seen.
+ */
+const composeOrcaControlReport = (report: InvestigationTaskOutput['structured_report']): string =>
+  [composeAnswerText(report), composeEvidenceText(report)].filter(Boolean).join('\n\nEvidence:\n');
 
 const unscored = (reason: string) => ({
   score: null,
@@ -794,7 +805,7 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
           currentTime,
           quietWindowStart: quietWindow.start,
           quietWindowEnd: quietWindow.end,
-          answer: composeAnswerText(output.structured_report),
+          answer: composeOrcaControlReport(output.structured_report),
         });
         const claims = result.claims_incident_in_quiet_window;
         if (typeof claims !== 'boolean') {

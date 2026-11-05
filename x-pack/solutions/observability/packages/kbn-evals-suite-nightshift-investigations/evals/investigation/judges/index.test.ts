@@ -304,6 +304,41 @@ describe('ORCA scores', () => {
     expect(result).toMatchObject({ score: 1, label: 'pass' });
   });
 
+  it('shows the control judge the whole report, including impact and evidence', async () => {
+    const { deps, prompt } = judgeReturning({
+      claims_incident_in_quiet_window: true,
+      reasoning: 'The impact summary says users are affected now.',
+    });
+    const structuredReport = {
+      conclusion: 'A past checkout incident was resolved.',
+      hypotheses: [
+        {
+          candidate: 'Bad deploy',
+          confidence: 0.6,
+          status: 'confirmed',
+          evidence: [{ description: 'Error rate still at 12% at 16:40' }],
+        },
+      ],
+      impact: { summary: 'Checkout is failing for users right now.' },
+    } as unknown as InvestigationTaskOutput['structured_report'];
+
+    await evaluator(deps, ORCA_CONTROL_EVALUATOR).evaluate({
+      ...example,
+      metadata: {
+        case_id: 'checkout',
+        control: true,
+        current_time: '2026-04-19T16:45:00.000Z',
+        quiet_window: { start: '2026-04-19T16:00:00.000Z', end: '2026-04-19T17:00:00.000Z' },
+      },
+      output: output({ structured_report: structuredReport }),
+    });
+
+    const { answer } = prompt.mock.calls[0][0].input;
+    expect(answer).toContain('A past checkout incident was resolved.');
+    expect(answer).toContain('Error rate still at 12% at 16:40');
+    expect(answer).toContain('impact: Checkout is failing for users right now.');
+  });
+
   it('does not score a hallucination when a true flag is named alongside an extra cause', async () => {
     const { deps } = judgeReturning({
       named_flags: ['productCatalogFailure'],
@@ -376,6 +411,13 @@ describe('ORCA scores', () => {
     [
       'a run that ended with nothing recorded',
       { execution_error: NO_CONCLUSION_ERROR, structured_report: undefined },
+    ],
+    [
+      'a report too large to keep its hypotheses',
+      {
+        report_truncated: true,
+        structured_report: { summary: 'Kept.', conclusion: 'Kept.' },
+      },
     ],
   ])('leaves every ORCA score unscored after %s', async (_, overrides) => {
     const { deps, prompt } = judgeReturning({
