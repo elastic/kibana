@@ -27,7 +27,8 @@ const view = (node: CodeNode) => validate({ type: 'view', body: [node] });
 describe('code', () => {
   it('takes code of any length and a lowercase language', () => {
     expect(view(codeOf('x'.repeat(20000))).valid).toBe(true);
-    expect(view(codeOf(' \n ')).valid).toBe(false);
+    expect(view(codeOf(' \n ')).valid).toBe(true);
+    expect(surfaces.slack.renderNode(codeOf(' \n ')).blocks).toEqual([]);
     expect(view(codeOf('FROM logs', 'esql')).valid).toBe(true);
     expect(view(codeOf('FROM logs', 'ES|QL')).valid).toBe(false);
     expect(view(codeOf('FROM logs', 'js onload=alert(1)')).valid).toBe(false);

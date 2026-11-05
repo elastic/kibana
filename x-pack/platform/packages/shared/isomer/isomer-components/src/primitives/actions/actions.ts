@@ -8,7 +8,7 @@
 import { navigationHref, z, type PrimitiveNode } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
 
 import { actionsReactRenderer } from './actions_react';
 import { actionsSlackRenderer } from './actions_slack';
@@ -54,6 +54,10 @@ export type ActionsNode = z.infer<typeof actionsSchema> & PrimitiveNode;
 export const actions = definePrimitive<ActionsNode, typeof actionsSchema>({
   type: 'actions',
   schema: actionsSchema,
+  sanitize: (node) => {
+    const buttons = node.buttons.filter(({ label }) => hasText(label));
+    return buttons.length > 0 ? { ...node, buttons } : null;
+  },
   catalog: {
     type: 'actions',
     purpose: 'Links the reader can follow, shown as buttons where the surface has them.',

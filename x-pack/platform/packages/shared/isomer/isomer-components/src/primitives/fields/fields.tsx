@@ -13,7 +13,7 @@ import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, hasText, plainText } from '../../lib';
 import { fieldEntries } from './field_entries';
 import { fieldsSlackRenderer } from './fields_slack';
 
@@ -86,6 +86,12 @@ const { handles } = isomerDistillery.createStyleModule(
 export const fields = definePrimitive<FieldsNode, typeof fieldsSchema>({
   type: 'fields',
   schema: fieldsSchema,
+  sanitize: (node) => {
+    const items = node.items.filter(
+      ({ label, value }) => hasText(label) && (typeof value !== 'string' || hasText(value))
+    );
+    return items.length > 0 ? { ...node, items } : null;
+  },
   catalog: {
     type: 'fields',
     purpose: 'Short labeled values, shown as pairs, such as an app, a URL, or a time range.',

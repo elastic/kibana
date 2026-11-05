@@ -27,7 +27,8 @@ describe('actions', () => {
     expect(view(links()).valid).toBe(false);
     expect(view(links(...Array(6).fill({ label: 'a', url: URL }))).valid).toBe(false);
     expect(view(links({ label: 'Run', url: 'data:text/html,<b>hi</b>' })).valid).toBe(false);
-    expect(view(links({ label: ' ', url: URL })).valid).toBe(false);
+    expect(view(links({ label: ' ', url: URL })).valid).toBe(true);
+    expect(surfaces.slack.renderNode(links({ label: ' ', url: URL })).blocks).toEqual([]);
     expect(view(links({ label: 'Open', url: '/app/discover' })).valid).toBe(true);
   });
 

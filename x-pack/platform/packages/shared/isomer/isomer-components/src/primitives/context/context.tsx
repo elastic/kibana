@@ -12,7 +12,7 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
 import { contextSlackRenderer } from './context_slack';
 
 const itemSchema = z
@@ -68,6 +68,10 @@ const { handles } = isomerDistillery.createStyleModule(
 export const context = definePrimitive<ContextNode, typeof contextSchema>({
   type: 'context',
   schema: contextSchema,
+  sanitize: (node) => {
+    const items = node.items.filter(({ text }) => hasText(text));
+    return items.length > 0 ? { ...node, items } : null;
+  },
   catalog: {
     type: 'context',
     purpose: 'A line of small, secondary facts under a heading or a section.',

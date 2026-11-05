@@ -19,10 +19,10 @@ const { Composition, Quote, toComposition } = buildJsxShim(componentsPrimitives)
 const quoted = (text: string): QuoteNode => ({ type: 'quote', text });
 
 describe('quote', () => {
-  it('takes text of any length, but not a blank one', () => {
+  it('takes text of any length, and leaves out a blank one', () => {
     expect(validate({ type: 'view', body: [quoted('x'.repeat(20000))] }).valid).toBe(true);
-    expect(validate({ type: 'view', body: [quoted('')] }).valid).toBe(false);
-    expect(validate({ type: 'view', body: [quoted(' \n ')] }).valid).toBe(false);
+    expect(validate({ type: 'view', body: [quoted(' \n ')] }).valid).toBe(true);
+    expect(surfaces.slack.renderNode(quoted(' \n ')).blocks).toEqual([]);
   });
 
   it('renders one Slack rich_text quote, with the text unescaped and its lines kept', () => {
