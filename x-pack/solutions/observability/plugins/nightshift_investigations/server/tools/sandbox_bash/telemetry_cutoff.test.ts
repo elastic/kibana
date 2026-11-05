@@ -23,7 +23,8 @@ const BOUND = { range: { '@timestamp': { lte: NOT_AFTER } } };
 const send = (
   url: string,
   method: string,
-  body: string
+  body: string,
+  chunked = false
 ): Promise<{ status: number; body: string }> =>
   new Promise((resolve, reject) => {
     const target = new URL(url);
@@ -31,7 +32,9 @@ const send = (
       target,
       {
         method,
-        headers: body
+        headers: chunked
+          ? { 'content-type': 'application/json', 'transfer-encoding': 'chunked' }
+          : body
           ? { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body) }
           : {},
       },
@@ -47,7 +50,14 @@ const send = (
       }
     );
     request.on('error', reject);
-    request.end(body);
+    if (chunked) {
+      // Two chunks, so the proxy has to join them.
+      const middle = Math.floor(body.length / 2);
+      request.write(body.slice(0, middle));
+      request.end(body.slice(middle));
+    } else {
+      request.end(body);
+    }
   });
 
 /** Starts the sandbox proxy against a local upstream. */
@@ -57,12 +67,14 @@ const enforceTelemetryCutoff = async ({
   path,
   body = '',
   method = 'POST',
+  chunked = false,
 }: {
   upstreamUrl: string;
   notAfter?: string;
   path: string;
   body?: string;
   method?: string;
+  chunked?: boolean;
 }): Promise<{ status: number; body: string }> => {
   const directory = await mkdtemp(join(tmpdir(), 'nightshift-cutoff-'));
   const script = join(directory, 'proxy.py');
@@ -92,7 +104,7 @@ const enforceTelemetryCutoff = async ({
     }
     if (!port)
       throw new Error(`telemetry cutoff proxy did not start${stderr ? `: ${stderr}` : ''}`);
-    return await send(`http://127.0.0.1:${port}${path}`, method, body);
+    return await send(`http://127.0.0.1:${port}${path}`, method, body, chunked);
   } finally {
     child.kill('SIGKILL');
     await rm(directory, { recursive: true, force: true });
@@ -242,6 +254,33 @@ describe('telemetry cutoff proxy', () => {
       });
     }));
 
+  it('bounds a search whose body is sent chunked, without Content-Length', () =>
+    withUpstream(async (upstream) => {
+      const lowerBound = { range: { '@timestamp': { gte: '2026-04-19T18:00:00.000Z' } } };
+      const result = await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/logs-*/_search',
+        body: JSON.stringify({ query: lowerBound }),
+        chunked: true,
+      });
+      expect(result.status).toBe(200);
+      expect(JSON.parse(upstream.seen[0]).query).toEqual({
+        bool: { must: [lowerBound], filter: [BOUND] },
+      });
+    }));
+
+  it('refuses a chunked search body that is not JSON', () =>
+    withUpstream(async (upstream) => {
+      const result = await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/logs-*/_search',
+        body: 'not json at all',
+        chunked: true,
+      });
+      expect(result.status).toBe(403);
+      expect(upstream.seen).toEqual([]);
+    }));
+
   it('forwards the bounded body of a GET search', () =>
     withUpstream(async (upstream) => {
       await enforceTelemetryCutoff({
@@ -325,6 +364,12 @@ describe('telemetry cutoff proxy', () => {
     ['an aggregation with two types', '/logs-*/_search', '{"aggs":{"t":{"terms":{},"avg":{}}}}'],
     ['an aggregation that is not an object', '/logs-*/_search', '{"aggs":{"t":1}}'],
     ['the q parameter', '/logs-*/_search?q=*', '{"query":{"match_all":{}}}'],
+    [
+      'the source parameter',
+      '/logs-*/_search?source=%7B%7D&source_content_type=application/json',
+      '',
+    ],
+    ['the source parameter on a count', '/logs-*/_count?source=%7B%7D', ''],
     ['a body that is not JSON', '/logs-*/_search', 'not json'],
     ['a body that is not an object', '/logs-*/_search', '[]'],
     ['a query that is not an object', '/logs-*/_search', '{"query":"x"}'],

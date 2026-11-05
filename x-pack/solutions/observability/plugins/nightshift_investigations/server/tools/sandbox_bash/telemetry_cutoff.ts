@@ -143,8 +143,11 @@ def bound_dsl(parsed, allowed_keys):
 
 
 def rewrite_search(pathname, query_string, body):
-    if "q" in parse_qs(query_string, keep_blank_values=True):
+    params = parse_qs(query_string, keep_blank_values=True)
+    if "q" in params:
         raise Refused("the q parameter replaces the body query; put the query in the body")
+    if "source" in params:
+        raise Refused("the source parameter replaces the body; send the query as the request body")
     try:
         parsed = json.loads(body) if body else {}
     except ValueError:
@@ -172,12 +175,42 @@ class Handler(BaseHTTPRequestHandler):
     def _send_error_body(self, status, error_type, reason):
         self._send(status, json.dumps({"error": {"type": error_type, "reason": reason}}))
 
-    def _handle(self, method):
+    def _read_chunked(self):
+        chunks = []
+        total = 0
+        while True:
+            size = int(self.rfile.readline(65537).split(b";", 1)[0].strip(), 16)
+            if size == 0:
+                # Skip any trailers up to the blank line that ends the body.
+                while self.rfile.readline(65537).strip():
+                    pass
+                return b"".join(chunks)
+            total += size
+            if total > MAX_BODY:
+                return None
+            chunks.append(self.rfile.read(size))
+            self.rfile.readline(65537)
+
+    def _read_body(self):
+        # A chunked body (curl -T -, streaming clients) carries no Content-Length.
+        if "chunked" in (self.headers.get("Transfer-Encoding") or "").lower():
+            return self._read_chunked()
         length = int(self.headers.get("Content-Length", "0") or "0")
         if length > MAX_BODY:
+            return None
+        return self.rfile.read(length) if length else b""
+
+    def _handle(self, method):
+        try:
+            body = self._read_body()
+        except ValueError:
+            self.close_connection = True
+            self._send_error_body(400, "telemetry_cutoff", "the request body is not valid chunked encoding")
+            return
+        if body is None:
+            self.close_connection = True
             self._send(413, b"")
             return
-        body = self.rfile.read(length) if length else b""
         pathname, query_string = split_path(self.path)
         forward = None
         if pathname.endswith(SEARCH_SUFFIXES):
