@@ -315,6 +315,12 @@ describe('buildFanoutMatrix - shard selection', () => {
       'Available: <none, the suite has no shards>'
     );
   });
+
+  it('throws when combined with a grep override, which runs no shard', () => {
+    expect(() => select({ grepOverride: true, requestedShardIds: ['daily'] })).toThrow(
+      'EVAL_SHARD_IDS cannot be combined with EVAL_GREP / EVAL_GREP_INVERT'
+    );
+  });
 });
 
 describe('parseShardIds', () => {

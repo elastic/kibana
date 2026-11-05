@@ -19,7 +19,7 @@ spec:
       description: 'Runs the latest golden, ORCA and connector datasets of the Nightshift investigations suite every weekday'
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#nightshift-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kbn-evals-notifications'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         KBN_EVALS: '1'
       allow_rebuilds: true

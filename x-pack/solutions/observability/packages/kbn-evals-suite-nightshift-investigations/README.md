@@ -276,15 +276,20 @@ restarting a shared local stack.
 [daily pipeline](#ci) runs. Each entry names a dataset on the evaluations cluster, either exactly
 (`name`) or as the newest match of a pattern (`latest`), and the eval that scores it:
 
-| Id                  | Eval            | Dataset                                                    |
-| ------------------- | --------------- | ---------------------------------------------------------- |
-| `golden`            | investigation   | newest `ns-investigation-golden-MMDD`, at most 90 days old |
-| `connector-elastic` | connector-probe | `nightshift/ns-connector-elastic`                          |
+| Id                  | Eval            | Dataset                                                                       |
+| ------------------- | --------------- | ----------------------------------------------------------------------------- |
+| `golden`            | investigation   | newest `ns-investigation-golden-DDMM` tagged `customer0`, at most 90 days old |
+| `connector-elastic` | connector-probe | `nightshift/ns-connector-elastic`                                             |
+
+The suffix is the cut date as DDMM: `2710` is 27 October.
 
 `latest` picks the most recently created dataset whose name matches, so a new cut runs from the
 next build without a code change, and the date in its name is never parsed. The run fails when
-nothing matches or the newest match is older than `maxAgeDays`. Scores stay attributed to the
-resolved name, so each cut is its own series in the dashboards.
+nothing matches, or when the newest match is older than `maxAgeDays` or lacks one of
+`requiredTags`. Golden cuts need the `customer0` tag, which applies the Customer-0 custom context
+and the retrospective guardrail; an untagged new cut fails the run rather than being skipped for
+an older one. Scores stay attributed to the resolved name, so each cut is its own series in the
+dashboards.
 
 To add a dataset to the daily run, add an entry. Its eval's CI shard (`stored-investigations` or
 `stored-connector-probes`) runs every entry of that eval. Each id is also a `NIGHTSHIFT_DATASETS`

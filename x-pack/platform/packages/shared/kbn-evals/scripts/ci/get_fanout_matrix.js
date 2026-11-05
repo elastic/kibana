@@ -155,6 +155,12 @@ function buildFanoutMatrix({
   grepOverride,
   requestedShardIds = [],
 }) {
+  // A grep run is one whole-suite step with no shard, so the requested shards would never run.
+  if (grepOverride && requestedShardIds.length > 0) {
+    throw new Error(
+      'EVAL_SHARD_IDS cannot be combined with EVAL_GREP / EVAL_GREP_INVERT: a grep run ignores shards'
+    );
+  }
   const specModelGroups = Array.isArray(suiteInfo.specModelGroups) ? suiteInfo.specModelGroups : [];
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DatasetSummary } from '@kbn/evals-common';
 import {
   STORED_DATASETS,
   STORED_DATASET_SHARDS,
@@ -22,19 +23,25 @@ const GOLDEN: StoredDataset = {
     namePattern: /^ns-investigation-golden-\d{4}$/,
     search: 'ns-investigation-golden',
     maxAgeDays: 90,
+    requiredTags: ['customer0'],
   },
 };
 
-const summary = (name: string, createdAt: string) => ({
+const summary = (
+  name: string,
+  createdAt: string,
+  tags: string[] = ['nightshift', 'customer0']
+): DatasetSummary => ({
   id: `${name}-id`,
   name,
   description: '',
+  tags,
   examples_count: 1,
   created_at: createdAt,
   updated_at: createdAt,
 });
 
-const listing = (...pages: Array<Array<ReturnType<typeof summary>>>) => {
+const listing = (...pages: DatasetSummary[][]) => {
   const total = pages.flat().length;
   const listDatasets = jest.fn();
   for (const datasets of pages) listDatasets.mockResolvedValueOnce({ datasets, total });
@@ -51,14 +58,15 @@ describe('resolveStoredDatasetName', () => {
   });
 
   it('picks the most recently created exact match, whatever its date suffix says', async () => {
-    // Loose search hits come first; a cut created in January sorts above December's by date.
+    // Loose search hits come first. The suffix is DDMM, so 0111 (1 November) is newer than
+    // 2710 (27 October) although it sorts lower by name.
     const client = listing([
-      summary('nightshift/ns-investigation-golden-0105-sub', '2026-11-02T00:00:00.000Z'),
-      summary('ns-investigation-golden-0105', '2026-11-01T00:00:00.000Z'),
+      summary('nightshift/ns-investigation-golden-0111-sub', '2026-11-02T00:00:00.000Z'),
+      summary('ns-investigation-golden-0111', '2026-11-01T00:00:00.000Z'),
       summary('ns-investigation-golden-2710', '2026-10-27T00:00:00.000Z'),
     ]);
     await expect(resolveStoredDatasetName(client, GOLDEN, NOW)).resolves.toBe(
-      'ns-investigation-golden-0105'
+      'ns-investigation-golden-0111'
     );
     expect(client.listDatasets).toHaveBeenCalledWith({
       search: 'ns-investigation-golden',
@@ -98,6 +106,23 @@ describe('resolveStoredDatasetName', () => {
     const client = listing([summary('ns-investigation-golden-2710', 'not a date')]);
     await expect(resolveStoredDatasetName(client, GOLDEN, NOW)).rejects.toThrow('90-day limit');
   });
+
+  it.each([
+    ['without the tag', ['nightshift']],
+    ['without tags', undefined],
+  ])(
+    'fails when the newest match is %s instead of falling back to an older tagged cut',
+    async (_label, tags) => {
+      const newest = summary('ns-investigation-golden-0111', '2026-11-01T00:00:00.000Z');
+      const client = listing([
+        { ...newest, tags },
+        summary('ns-investigation-golden-2710', '2026-10-27T00:00:00.000Z'),
+      ]);
+      await expect(resolveStoredDatasetName(client, GOLDEN, NOW)).rejects.toThrow(
+        '"ns-investigation-golden-0111", is missing the required tag(s) customer0'
+      );
+    }
+  );
 });
 
 describe('stored dataset config', () => {
@@ -113,5 +138,10 @@ describe('stored dataset config', () => {
       selectStoredDatasets('investigation', ['connector-elastic', 'golden']).map(({ id }) => id)
     ).toEqual(['golden']);
     expect(selectStoredDatasets('connector-probe', ['golden'])).toEqual([]);
+  });
+
+  it('requires the customer0 tag on golden cuts, so the retrospective guardrail applies', () => {
+    const golden = STORED_DATASETS.find(({ id }) => id === 'golden');
+    expect(golden && 'latest' in golden && golden.latest.requiredTags).toEqual(['customer0']);
   });
 });

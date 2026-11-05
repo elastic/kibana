@@ -18,6 +18,11 @@ export interface LatestStoredDataset {
   search: string;
   /** Fails the run when the newest match is older than this many days. */
   maxAgeDays: number;
+  /**
+   * Fails the run when the newest match lacks one of these tags. Checked after picking the newest
+   * match, not used to filter, so an untagged new cut is reported instead of skipped.
+   */
+  requiredTags?: readonly string[];
 }
 
 /**
@@ -43,6 +48,8 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
       // Provisional. Alternatives under discussion: the cut's `refresh-by:YYYY-MM-DD` tag, or a
       // limit derived from the ~6-month retention of the incidents' live telemetry.
       maxAgeDays: 90,
+      // getDatasetCustomContext applies the Customer-0 context and retrospective guardrail by tag.
+      requiredTags: ['customer0'],
     },
   },
   { id: 'connector-elastic', eval: 'connector-probe', name: 'nightshift/ns-connector-elastic' },
@@ -67,7 +74,8 @@ const LIST_PAGE_SIZE = 100;
 
 /**
  * Resolves the stored dataset name to load: a fixed name as is, or the most recently created
- * dataset matching `latest`. Throws when nothing matches or the newest match is too old.
+ * dataset matching `latest`. Throws when nothing matches, or the newest match is too old or lacks
+ * a required tag.
  */
 export const resolveStoredDatasetName = async (
   client: Pick<EvalsClient, 'listDatasets'>,
@@ -76,7 +84,7 @@ export const resolveStoredDatasetName = async (
 ): Promise<string> => {
   if ('name' in dataset) return dataset.name;
 
-  const { namePattern, search, maxAgeDays } = dataset.latest;
+  const { namePattern, search, maxAgeDays, requiredTags = [] } = dataset.latest;
   // Newest first, so the first match on the earliest page is the newest match overall.
   for (let page = 1; ; page++) {
     const { datasets, total } = await client.listDatasets({
@@ -95,6 +103,16 @@ export const resolveStoredDatasetName = async (
           `Stored dataset "${dataset.id}": the newest match for ${namePattern}, "${newest.name}", ` +
             `was created ${ageDays} days ago, over the ${maxAgeDays}-day limit. ` +
             'Publish a new cut, or change maxAgeDays in src/datasets/stored_datasets.ts.'
+        );
+      }
+      const { tags = [] } = newest;
+      const missingTags = requiredTags.filter((tag) => !tags.includes(tag));
+      if (missingTags.length > 0) {
+        throw new Error(
+          `Stored dataset "${dataset.id}": the newest match for ${namePattern}, "${newest.name}", ` +
+            `is missing the required tag(s) ${missingTags.join(
+              ', '
+            )}. Tag the dataset, then re-run.`
         );
       }
       return newest.name;
