@@ -22,7 +22,11 @@ jest.mock('@kbn/unified-data-table', () => ({
 jest.mock('../../context_awareness', () => ({
   useProfileAccessor: jest.fn((key: string) => {
     if (key === 'getRowIndicatorProvider') return () => () => () => undefined;
-    if (key === 'getRowAdditionalLeadingControls') return () => (controls: unknown) => controls;
+    // Compose like the real accessor: respect the base impl, then append a profile-provided control
+    // so DiscoverGrid's ordering (profile controls first, caller controls after) can be asserted.
+    if (key === 'getRowAdditionalLeadingControls')
+      return (baseImpl: (params: unknown) => unknown[] | undefined) => (params: unknown) =>
+        [...(baseImpl(params) ?? []), { id: 'profileControl', render: () => null }];
     if (key === 'getPaginationConfig') return () => () => ({ paginationMode: 'multiPage' });
     if (key === 'getColumnsConfiguration') return () => () => ({});
     return () => () => undefined;
@@ -110,6 +114,29 @@ describe('DiscoverGrid renderMode', () => {
     render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.renderMode).toBeUndefined();
+  });
+});
+
+describe('DiscoverGrid rowAdditionalLeadingControls', () => {
+  beforeEach(() => {
+    mockUnifiedDataTable.mockClear();
+  });
+
+  it('appends caller-provided controls after profile-provided controls', () => {
+    const customControl = { id: 'customControl', render: () => <span /> };
+
+    render(
+      <DiscoverGrid
+        {...(baseProps as unknown as DiscoverGridProps)}
+        rowAdditionalLeadingControls={[customControl]}
+      />
+    );
+
+    const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(lastProps?.rowAdditionalLeadingControls).toEqual([
+      { id: 'profileControl', render: expect.any(Function) },
+      { id: 'customControl', render: customControl.render },
+    ]);
   });
 });
 

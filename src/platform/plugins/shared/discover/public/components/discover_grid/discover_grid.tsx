@@ -60,10 +60,17 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       'getRowAdditionalLeadingControls'
     );
     const rowAdditionalLeadingControls = useMemo(() => {
-      return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-        dataView,
-        query,
-      });
+      const profileControls =
+        getRowAdditionalLeadingControlsAccessor(() => undefined)({
+          dataView,
+          query,
+        }) ?? [];
+      // Caller-provided controls (e.g. the Edit-document pencil) render after profile controls so
+      // data-source profiles (like logs) keep their leading inline positions.
+      const controls = customRowAdditionalLeadingControls
+        ? [...profileControls, ...customRowAdditionalLeadingControls]
+        : profileControls;
+      return controls.length ? controls : undefined;
     }, [
       customRowAdditionalLeadingControls,
       dataView,

@@ -86,6 +86,7 @@ export async function bulkUpdate(
   for (const chunkOperations of chunks) {
     const body = JSON.stringify({
       operations: chunkOperations.flat(),
+      refresh: 'wait_for',
     });
 
     const response = await http.post<BulkResponse>(

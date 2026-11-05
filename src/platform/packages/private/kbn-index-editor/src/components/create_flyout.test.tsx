@@ -53,6 +53,7 @@ describe('createFlyout', () => {
   const indexUpdateService = {
     setIndexName: jest.fn(),
     setIndexCreated: jest.fn(),
+    setFilterQuery: jest.fn(),
     exit: jest.fn(),
     completed$: of(),
     totalHits$,
@@ -114,5 +115,30 @@ describe('createFlyout', () => {
       docCount: 0,
       fieldCount: 0,
     });
+  });
+
+  it('applies the initial filter so the editor opens scoped to it', () => {
+    const initialFilter = { language: 'kuery', query: '_id: "doc1"' } as const;
+
+    createFlyout(deps, {
+      doesIndexExist: true,
+      indexName: 'test-index',
+      canEditIndex: true,
+      triggerSource: 'test-source',
+      initialFilter,
+    });
+
+    expect(indexUpdateService.setFilterQuery).toHaveBeenCalledWith(initialFilter);
+  });
+
+  it('does not set a filter when none is provided', () => {
+    createFlyout(deps, {
+      doesIndexExist: true,
+      indexName: 'test-index',
+      canEditIndex: true,
+      triggerSource: 'test-source',
+    });
+
+    expect(indexUpdateService.setFilterQuery).not.toHaveBeenCalled();
   });
 });

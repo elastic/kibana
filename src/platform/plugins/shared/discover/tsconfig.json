@@ -114,6 +114,7 @@
     "@kbn/restorable-state",
     "@kbn/esql-editor",
     "@kbn/esql-types",
+    "@kbn/index-editor",
     "@kbn/controls-constants",
     "@kbn/core-application-browser",
     "@kbn/file-upload-plugin",

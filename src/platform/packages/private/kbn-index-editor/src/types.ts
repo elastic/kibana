@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Query } from '@kbn/es-query';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
@@ -32,6 +33,11 @@ export interface EditIndexContentContext {
   triggerSource: string;
   /** Index mode used when creating/recreating the index. Defaults to `standard`. */
   indexMode?: IndexEditorIndexMode;
+  /**
+   * Filter applied when the editor opens, e.g. to scope it to a single document (`_id: "..."`).
+   * Surfaced in the editor's KQL bar so the user can see and clear it.
+   */
+  initialFilter?: Query;
   onClose?: (result: {
     indexName: string | null;
     /** Indicates if the index was created */

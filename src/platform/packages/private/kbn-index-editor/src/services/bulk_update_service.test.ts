@@ -71,6 +71,21 @@ describe('Bulk update', () => {
     expect(doc).toEqual({ b: 2, c: 3 });
   });
 
+  it('requests a `wait_for` refresh so a read-after-write refetch sees the change', async () => {
+    const updates = [
+      {
+        type: 'add-doc' as const,
+        payload: { id: 'abc123', value: { a: 1 } },
+      },
+    ];
+
+    await bulkUpdate(INDEX_NAME, updates, http);
+
+    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const { refresh } = JSON.parse(options.body);
+    expect(refresh).toBe('wait_for');
+  });
+
   it('un-flattens dotted field names into nested objects', async () => {
     const updates = [
       {

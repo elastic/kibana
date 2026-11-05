@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -42,6 +42,10 @@ export const QueryBar = ({
   const indexName = useObservable(indexUpdateService.indexName$, null);
 
   const [kqlQuery, setKqlQuery] = useState<Query>({ query: '', language: 'kuery' });
+
+  useEffect(() => {
+    setKqlQuery(filterQuery);
+  }, [filterQuery]);
 
   const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 

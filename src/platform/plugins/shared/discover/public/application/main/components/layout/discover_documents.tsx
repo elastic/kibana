@@ -92,6 +92,7 @@ import {
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
+import { createEditDocumentRowControl, isDocumentEditable } from './edit_document_row_control';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 // export needs for testing
@@ -159,6 +160,7 @@ function DiscoverDocumentsComponent({
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const currentDataSource = useCurrentDataSource();
+
   const isWarningCalloutDismissed = useCurrentTabSelector(
     (state) => state.isWarningCalloutDismissed
   );
@@ -185,6 +187,28 @@ function DiscoverDocumentsComponent({
     useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
+
+  // A leading pencil control that opens the index editor scoped to the clicked document. Renders
+  // after profile-provided controls (see DiscoverGrid) so data-source actions keep their positions.
+  // Registered only when at least one loaded row is editable; otherwise the control would reserve an
+  // empty leading column for results that can never be edited (e.g. ES|QL without `_id`/`_index`).
+  const editDocumentRowControls = useMemo(
+    () =>
+      rows.some(isDocumentEditable)
+        ? [
+            createEditDocumentRowControl({
+              isEsqlMode,
+              http: services.http,
+              notifications: services.notifications,
+              uiActions,
+              onEdited: () => {
+                dataStateContainer.fetch();
+              },
+            }),
+          ]
+        : undefined,
+    [rows, isEsqlMode, services.http, services.notifications, uiActions, dataStateContainer]
+  );
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords();
 
@@ -621,6 +645,7 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
+            rowAdditionalLeadingControls={editDocumentRowControls}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             dataSource={currentDataSource}

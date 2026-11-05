@@ -27,6 +27,10 @@ export function createFlyout(deps: FlyoutDeps, props: EditIndexContentContext) {
   }
   indexUpdateService.setIndexCreated(props.doesIndexExist);
 
+  if (props.initialFilter) {
+    indexUpdateService.setFilterQuery(props.initialFilter);
+  }
+
   // Track telemetry event when flyout is opened
   if (props.doesIndexExist) {
     combineLatest([
