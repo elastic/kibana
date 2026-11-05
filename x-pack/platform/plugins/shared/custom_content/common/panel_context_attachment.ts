@@ -32,6 +32,11 @@ export const MAX_FETCH_CONTEXT_BYTES = 10_000;
 export const customContentContextAttachmentDataSchema = z.object({
   panel_template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH),
   esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
+  /**
+   * Names what the panel reads `esql_query` from when the panel doesn't own it. Changing the query
+   * detaches the panel from that source, so the update tool asks the user first.
+   */
+  esql_query_source: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
   panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
   embeddable_id: z.string().max(MAX_SHORT_FIELD_LENGTH),
   time_range: z

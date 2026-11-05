@@ -18,6 +18,11 @@ const formatPanelContext = (data: CustomContentContextAttachmentData): string =>
   if (data.esql_query) {
     parts.push(`\nES|QL Query:\n\`\`\`esql\n${data.esql_query}\n\`\`\``);
   }
+  if (data.esql_query && data.esql_query_source) {
+    parts.push(
+      `\nThe panel reads this query from ${data.esql_query_source}. Changing it detaches the panel from that source, so the user is asked to approve any query change.`
+    );
+  }
 
   const templateDisplay = data.panel_template
     ? `\`\`\`html\n${data.panel_template}\n\`\`\``

@@ -11,6 +11,7 @@ import {
   type ToolResult,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 import { CUSTOM_CONTENT_UPDATED_UI_EVENT } from '../../common/ui_events';
 import { createUpdateCustomContentTool } from './update_custom_content_tool';
@@ -184,6 +185,79 @@ describe('createUpdateCustomContentTool handler', () => {
         }),
         ATTACHMENT_REF_ACTOR.agent
       );
+    });
+  });
+
+  describe('query read from another source', () => {
+    const borrowed = {
+      panel_template: '<p>old</p>',
+      esql_query: 'FROM logs',
+      esql_query_source: 'the notebook cell "Logs"',
+      panel_title: 'My Panel',
+      embeddable_id: 'p1',
+    };
+
+    const callWithConfirmation = async (
+      params: { prompt?: string; esqlQuery?: string | null },
+      status: ConfirmationStatus
+    ) => {
+      const tool = createUpdateCustomContentTool();
+      type HandlerParams = Parameters<typeof tool.handler>[0];
+      type HandlerCtx = Parameters<typeof tool.handler>[1];
+      const ctx = makeContext(borrowed);
+      const askForConfirmation = jest.fn().mockReturnValue({ prompt: { type: 'confirmation' } });
+      const ret = await tool.handler(
+        { embeddable_id: 'p1', ...params } as HandlerParams,
+        {
+          ...ctx,
+          prompts: { checkConfirmationStatus: () => ({ status }), askForConfirmation },
+          callContext: { toolCallId: 'call-1' },
+        } as unknown as HandlerCtx
+      );
+      return { ret, ctx, askForConfirmation };
+    };
+
+    it('asks before changing the query, without generating anything', async () => {
+      const { ret, ctx, askForConfirmation } = await callWithConfirmation(
+        { prompt: 'Show errors', esqlQuery: 'FROM errors' },
+        ConfirmationStatus.unprompted
+      );
+      expect(ret).not.toHaveProperty('results');
+      expect(askForConfirmation).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.stringContaining('FROM errors') })
+      );
+      expect(mockResolver).not.toHaveBeenCalled();
+      expect(ctx.update).not.toHaveBeenCalled();
+    });
+
+    it('applies the query once approved, and the panel then owns it', async () => {
+      const { ctx } = await callWithConfirmation(
+        { esqlQuery: 'FROM errors' },
+        ConfirmationStatus.accepted
+      );
+      const [, { data }] = ctx.update.mock.calls[0];
+      expect(data.esql_query).toBe('FROM errors');
+      expect(data).not.toHaveProperty('esql_query_source');
+    });
+
+    it('leaves the panel unchanged when the user keeps the source', async () => {
+      const { ret, ctx } = await callWithConfirmation(
+        { esqlQuery: 'FROM errors' },
+        ConfirmationStatus.rejected
+      );
+      if (!('results' in ret)) throw new Error('Expected a tool result');
+      expect(ret.results[0].type).toBe(ToolResultType.error);
+      expect(ctx.update).not.toHaveBeenCalled();
+    });
+
+    it('changes the template without asking, keeping the source', async () => {
+      const { ctx, askForConfirmation } = await callWithConfirmation(
+        { prompt: 'Make it darker' },
+        ConfirmationStatus.unprompted
+      );
+      expect(askForConfirmation).not.toHaveBeenCalled();
+      const [, { data }] = ctx.update.mock.calls[0];
+      expect(data.esql_query_source).toBe(borrowed.esql_query_source);
     });
   });
 

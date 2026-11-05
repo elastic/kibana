@@ -225,11 +225,14 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
       const { cells$ } = store;
       const source = data.sourceCell ? cells$.getValue()[data.sourceCell] : undefined;
       const sourceQuery = source?.type === 'esql' ? source.query : undefined;
+      const isOwnQuery = data.dataSource === 'query';
       panelChat.open({
         panelId: id,
         title: getCellDisplayName(cell),
         template,
-        esqlQuery: data.dataSource === 'query' ? data.query : sourceQuery,
+        esqlQuery: isOwnQuery ? data.query : sourceQuery,
+        esqlQuerySource:
+          !isOwnQuery && source ? `the notebook cell "${getCellDisplayName(source)}"` : undefined,
         ...toQueryContext(runtime.runParams),
       });
     },

@@ -7,6 +7,7 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
@@ -62,6 +63,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - When \`esqlQuery\` is also changing, the server samples the new schema before generating so the template matches the data.
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query sampling, preserving layout and design.
 - Pass \`esqlQuery: null\` to remove the query entirely.
+- When the panel reads its query from another source, a query change asks the user to approve it first.
 
 This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
 
@@ -69,7 +71,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
   schema: updateCustomContentSchema,
   handler: async (
     { embeddable_id, prompt, esqlQuery },
-    { attachments, events, logger, esClient, modelProvider }
+    { attachments, events, logger, esClient, modelProvider, prompts, callContext }
   ) => {
     const panelAttachments = attachments
       .getAll()
@@ -109,6 +111,38 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       currentData?.esql_query
     );
 
+    const querySource = currentData?.esql_query_source;
+    if (isQueryChanging && querySource) {
+      const promptId = `custom_content_update_panel.detach_query.${callContext.toolCallId}`;
+      const { status } = prompts.checkConfirmationStatus(promptId);
+      if (status === ConfirmationStatus.unprompted) {
+        return prompts.askForConfirmation({
+          id: promptId,
+          title: 'Change the panel query',
+          message: `**${
+            currentData?.panel_title ?? 'This panel'
+          }** reads its query from ${querySource}. Changing the query gives the panel its own query, and ${querySource} stays as it is.${
+            resolvedQuery ? `\n\n\`\`\`esql\n${resolvedQuery}\n\`\`\`` : ''
+          }`,
+          confirm_text: 'Change query',
+          cancel_text: 'Keep source',
+        });
+      }
+      if (status === ConfirmationStatus.rejected) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message: `The user kept the query from ${querySource}. Work within its columns, or explain what data is missing.`,
+              },
+            },
+          ],
+        };
+      }
+    }
+
     let resolvedTemplate: string = currentData?.panel_template ?? '';
     if (prompt !== undefined) {
       try {
@@ -140,6 +174,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     const newData: CustomContentContextAttachmentData = {
       panel_template: resolvedTemplate,
       esql_query: resolvedQuery,
+      ...(querySource && !isQueryChanging ? { esql_query_source: querySource } : {}),
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
       // Carried over so a refined version still previews against the range the panel was

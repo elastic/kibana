@@ -44,6 +44,8 @@ export interface BuildCustomContentContextAttachmentParams {
   template: string;
   embeddableId: string;
   esqlQuery?: string;
+  /** Names what `esqlQuery` is read from, when the panel doesn't own it. */
+  esqlQuerySource?: string;
   panelTitle?: string;
   /** The panel's rendered height, so the preview starts at the size it had on the dashboard. */
   panelHeight?: number;
@@ -78,6 +80,7 @@ export const buildCustomContentContextAttachment = ({
   template,
   embeddableId,
   esqlQuery,
+  esqlQuerySource,
   panelTitle,
   panelHeight,
   fetchContext,
@@ -91,6 +94,9 @@ export const buildCustomContentContextAttachment = ({
     panel_template: template,
     esql_query: esqlQuery,
     // Truncated rather than left to fail validation
+    ...(esqlQuery !== undefined && esqlQuerySource
+      ? { esql_query_source: esqlQuerySource.slice(0, MAX_SHORT_FIELD_LENGTH) }
+      : {}),
     panel_title: panelTitle?.slice(0, MAX_SHORT_FIELD_LENGTH),
     embeddable_id: embeddableId,
     ...(panelHeight ? { panel_height: panelHeight } : {}),

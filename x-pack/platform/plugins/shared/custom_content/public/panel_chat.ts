@@ -22,6 +22,11 @@ export interface CustomContentPanelChatParams {
   title?: string;
   template: string;
   esqlQuery?: string;
+  /**
+   * Names what `esqlQuery` is read from when the panel doesn't own it, such as another cell. The
+   * agent then asks the user before changing the query.
+   */
+  esqlQuerySource?: string;
   timeRange?: TimeRange;
   esqlVariables?: ESQLControlVariable[];
 }
@@ -54,13 +59,14 @@ type PanelChatAgent = Pick<AgentBuilderPluginStart, 'openChat'> & {
 };
 
 export const createPanelChat = (agentBuilder: PanelChatAgent): CustomContentPanelChat => ({
-  open: ({ panelId, title, template, esqlQuery, timeRange, esqlVariables }) => {
+  open: ({ panelId, title, template, esqlQuery, esqlQuerySource, timeRange, esqlVariables }) => {
     agentBuilder.openChat({
       newConversation: true,
       attachments: [
         buildCustomContentContextAttachment({
           template,
           esqlQuery,
+          esqlQuerySource,
           embeddableId: panelId,
           panelTitle: title,
           fetchContext: { timeRange, esqlVariables },
