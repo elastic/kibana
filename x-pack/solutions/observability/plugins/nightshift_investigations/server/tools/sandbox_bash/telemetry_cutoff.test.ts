@@ -20,12 +20,13 @@ import {
 const NOT_AFTER = '2026-04-19T16:27:00.000Z';
 const BOUND = { range: { '@timestamp': { lte: NOT_AFTER } } };
 
-const send = (
-  url: string,
-  method: string,
-  body: string,
-  chunked = false
-): Promise<{ status: number; body: string }> =>
+interface ProxyResponse {
+  status: number;
+  body: string;
+  product?: string;
+}
+
+const send = (url: string, method: string, body: string, chunked = false): Promise<ProxyResponse> =>
   new Promise((resolve, reject) => {
     const target = new URL(url);
     const request = httpRequest(
@@ -45,6 +46,7 @@ const send = (
           resolve({
             status: response.statusCode ?? 0,
             body: Buffer.concat(chunks).toString('utf8'),
+            product: response.headers['x-elastic-product'] as string | undefined,
           })
         );
       }
@@ -75,7 +77,7 @@ const enforceTelemetryCutoff = async ({
   body?: string;
   method?: string;
   chunked?: boolean;
-}): Promise<{ status: number; body: string }> => {
+}): Promise<ProxyResponse> => {
   const directory = await mkdtemp(join(tmpdir(), 'nightshift-cutoff-'));
   const script = join(directory, 'proxy.py');
   const portFile = join(directory, 'port');
@@ -128,6 +130,7 @@ const listen = async (): Promise<Upstream> => {
       seen.push(Buffer.concat(chunks).toString('utf8'));
       seenPaths.push(request.url ?? '');
       response.setHeader('content-type', 'application/json');
+      response.setHeader('x-elastic-product', 'Elasticsearch');
       response.end(
         JSON.stringify({ columns: [{ name: 'documents', type: 'long' }], values: [[3]] })
       );
@@ -379,6 +382,12 @@ describe('telemetry cutoff proxy', () => {
     ['an ES|QL block comment', '/_query', '{"query":"FROM logs-* /* | a */ | LIMIT 1"}'],
     ['a comment before FROM', '/_query', '{"query":"// FROM a | b\\nFROM logs-*"}'],
     ['an ES|QL subquery', '/_query', '{"query":"FROM a, (FROM b | LIMIT 1) | LIMIT 1"}'],
+    [
+      'an ES|QL subquery after the first command',
+      '/_query',
+      '{"query":"FROM logs-* | WHERE trace.id IN (FROM traces-* | KEEP trace.id)"}',
+    ],
+    ['a second FROM later in the query', '/_query', '{"query":"FROM logs-* | from traces-*"}'],
     ['an unterminated ES|QL string', '/_query', '{"query":"FROM \\"logs-* | LIMIT 1"}'],
     ['an ES|QL body without a query', '/_query', '{}'],
   ])('refuses %s without reading upstream', (_name, path, body) =>
@@ -419,6 +428,43 @@ describe('telemetry cutoff proxy', () => {
         ...body,
         query: { bool: { must: [body.query], filter: [BOUND] } },
       });
+    }));
+
+  it.each([
+    ['inside a string', 'FROM logs-* | WHERE message == "read from cache" | LIMIT 1'],
+    ['as a quoted column name', 'FROM logs-* | KEEP `from`, message | LIMIT 1'],
+  ])('bounds an ES|QL query that mentions FROM %s', (_name, query) =>
+    withUpstream(async (upstream) => {
+      const result = await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/_query',
+        body: JSON.stringify({ query }),
+      });
+      expect(result.status).toBe(200);
+      expect(JSON.parse(upstream.seen[0]).query).toContain('@timestamp <= ');
+    })
+  );
+
+  it("passes the cluster's X-Elastic-Product through, so official clients accept the response", () =>
+    withUpstream(async (upstream) => {
+      const result = await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/logs-*/_search',
+        body: JSON.stringify({ query: { match_all: {} } }),
+      });
+      expect(result.status).toBe(200);
+      expect(result.product).toBe('Elasticsearch');
+    }));
+
+  it('marks its own refusals as Elasticsearch responses, so clients surface the reason', () =>
+    withUpstream(async (upstream) => {
+      const result = await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/_sql',
+        body: '{}',
+      });
+      expect(result.status).toBe(403);
+      expect(result.product).toBe('Elasticsearch');
     }));
 
   it('does not treat an aggregation named global as a global aggregation', () =>

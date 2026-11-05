@@ -43,6 +43,8 @@ METADATA_PATH = re.compile(
     r"|^(/[^/]+)?/_mapping(/.*)?$"
 )
 ESQL_STRING = re.compile(r'"""[\\s\\S]*?"""|"(?:[^"\\\\]|\\\\.)*"')
+# A backtick-quoted identifier, such as a column named \`from\`, is never a command.
+ESQL_QUOTED_IDENTIFIER = re.compile(r"\`[^\`]*\`")
 # Search options that only shape, page or narrow what the bounded query matched. Anything else, such
 # as knn, retriever, suggest or runtime_mappings, can select or redefine documents past the bound.
 SEARCH_KEYS = frozenset((
@@ -79,7 +81,8 @@ def split_path(path):
 
 
 def blank_strings(query):
-    return ESQL_STRING.sub(lambda match: " " * len(match.group(0)), query)
+    blank = lambda match: " " * len(match.group(0))
+    return ESQL_QUOTED_IDENTIFIER.sub(blank, ESQL_STRING.sub(blank, query))
 
 
 def bound_esql(query):
@@ -97,6 +100,10 @@ def bound_esql(query):
         end = len(query)
     if "(" in code[:end]:
         raise Refused("the cutoff cannot be added to an ES|QL subquery")
+    # The bound goes after the first FROM only, so a FROM anywhere later (a subquery inside WHERE
+    # or another command) would read past it.
+    if len(re.findall(r"\\bFROM\\b", code, re.IGNORECASE)) > 1:
+        raise Refused("the cutoff can only bound a query with one FROM; run nested reads separately")
     predicate = '| WHERE @timestamp <= "%s"' % NOT_AFTER
     tail = query[end:]
     if tail.startswith("|"):
@@ -164,10 +171,14 @@ def rewrite_search(pathname, query_string, body):
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
-    def _send(self, status, payload, content_type="application/json"):
+    # Official Elasticsearch clients reject a response without this header as another product, so
+    # the proxy passes the cluster's through and marks its own refusals the same way.
+    def _send(self, status, payload, content_type="application/json", product="Elasticsearch"):
         data = payload if isinstance(payload, bytes) else payload.encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", content_type)
+        if product:
+            self.send_header("X-Elastic-Product", product)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -238,13 +249,20 @@ class Handler(BaseHTTPRequestHandler):
                 status = response.status
                 payload = response.read()
                 content_type = response.headers.get("Content-Type", "application/json")
+                product = response.headers.get("X-Elastic-Product")
         except HTTPError as error:
-            self._send(error.code, error.read() or b"")
+            upstream_headers = error.headers or {}
+            self._send(
+                error.code,
+                error.read() or b"",
+                upstream_headers.get("Content-Type", "application/json"),
+                upstream_headers.get("X-Elastic-Product"),
+            )
             return
         except (OSError, HTTPException):
             self._send_error_body(502, "telemetry_unavailable", "the telemetry cluster could not be read")
             return
-        self._send(status, payload, content_type)
+        self._send(status, payload, content_type, product)
 
     def do_POST(self):
         self._handle("POST")
