@@ -356,7 +356,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       agentBuilder,
       experimentalFeatures,
       getStartServices: core.getStartServices,
-      kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
       options: { endpointAppContextService },

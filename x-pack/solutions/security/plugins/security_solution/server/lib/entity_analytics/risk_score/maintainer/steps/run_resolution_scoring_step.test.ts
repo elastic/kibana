@@ -96,7 +96,6 @@ describe('runResolutionScoringStep', () => {
       calculationRunId: 'run-1',
       abortSignal: abortController.signal,
       watchlistConfigs: new Map(),
-      idBasedRiskScoringEnabled: true,
       writer: {} as unknown as RiskEngineDataWriter,
       alertFilters: [],
     });
@@ -133,7 +132,6 @@ describe('runResolutionScoringStep', () => {
       now: '2026-01-01T00:00:00.000Z',
       calculationRunId: 'run-1',
       watchlistConfigs: new Map(),
-      idBasedRiskScoringEnabled: true,
       writer: {} as unknown as RiskEngineDataWriter,
       alertFilters: [],
     });
@@ -163,7 +161,6 @@ describe('runResolutionScoringStep', () => {
         now: '2026-01-01T00:00:00.000Z',
         calculationRunId: 'run-1',
         watchlistConfigs: new Map(),
-        idBasedRiskScoringEnabled: true,
         writer: {} as unknown as RiskEngineDataWriter,
         alertFilters: [],
         ...(entityStoreRefresh === undefined ? {} : { entityStoreRefresh }),
@@ -214,7 +211,6 @@ describe('runResolutionScoringStep', () => {
         now: '2026-01-01T00:00:00.000Z',
         calculationRunId: 'run-1',
         watchlistConfigs: new Map(),
-        idBasedRiskScoringEnabled: true,
         writer: new RiskEngineDataWriter({
           esClient,
           index: 'risk-score.risk-score-default',
@@ -248,7 +244,7 @@ describe('runResolutionScoringStep', () => {
         expect.objectContaining({ scores: [zeroScore], refresh: 'wait_for' })
       );
       expect(persistScoresToEntityStore).toHaveBeenCalledWith(
-        expect.objectContaining({ scores: [zeroScore], enabled: true })
+        expect.objectContaining({ scores: [zeroScore] })
       );
       // The zero has no related entities, so the API reports no resolution score, as before.
       expect(result).toEqual(expect.objectContaining({ scoresWrittenRiskIndex: 1, scores: {} }));

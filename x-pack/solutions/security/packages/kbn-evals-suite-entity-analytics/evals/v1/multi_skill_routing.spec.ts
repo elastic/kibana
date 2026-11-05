@@ -52,8 +52,7 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics (risk score or asset criticality) to identify or enrich privileged users.',
                     ],
@@ -82,8 +81,7 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics to identify or rank privileged accounts by risk or criticality.',
                     ],
@@ -103,7 +101,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics risk scoring to identify or filter high-risk users.',
                     ],
@@ -129,15 +127,15 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.asset_criticality',
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses asset criticality to identify business-critical assets.',
                     ],
                   },
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.get_entity_risk_score_history',
                     criteria: [
-                      'The response uses risk scoring to detect risk score increases or changes over time.',
+                      'The response uses risk score history to detect risk score increases or changes over time.',
                     ],
                   },
                 ],
