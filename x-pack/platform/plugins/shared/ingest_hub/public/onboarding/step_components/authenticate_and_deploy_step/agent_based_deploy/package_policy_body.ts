@@ -132,6 +132,34 @@ function getRequiredVarNamesForInput(service: AwsServiceMatrixEntry, inputType: 
     .map(([name]) => name);
 }
 
+/**
+ * Required var names for one stream: the input's required vars plus the vars of the option
+ * selected for each required stream-level var_group (region vars are backfilled by
+ * buildStreamVars, so they never block). Streams are per data stream, and Fleet validates each
+ * one independently.
+ */
+function getRequiredVarNamesForStream(
+  service: AwsServiceMatrixEntry,
+  inputType: string,
+  stream: PackageInputEntry['streams'][string]
+): string[] {
+  const selectedOptionVars = (service.varGroupsByInput?.[inputType] ?? [])
+    .filter((group) => group.required)
+    .flatMap((group) => {
+      const selected = stream.var_group_selections?.[group.name];
+      const option = group.options.find((o) => o.name === selected) ?? group.options[0];
+      return (option?.vars ?? []).filter((name) => !REGION_FIELD_NAMES.has(name));
+    });
+  return [...getRequiredVarNamesForInput(service, inputType), ...selectedOptionVars];
+}
+
+function hasRequiredVars(service: AwsServiceMatrixEntry, inputType: string): boolean {
+  return (
+    getRequiredVarNamesForInput(service, inputType).length > 0 ||
+    (service.varGroupsByInput?.[inputType] ?? []).some((group) => group.required)
+  );
+}
+
 function isVarSatisfied(value: string | boolean | string[] | undefined): boolean {
   if (value === undefined || value === null) return false;
   if (typeof value === 'string') return value.trim() !== '';
@@ -146,17 +174,18 @@ function pruneUnsatisfiedInputs(
   const kept: Record<string, PackageInputEntry> = {};
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
-    const requiredVarNames = getRequiredVarNamesForInput(service, getInputType(inputKey, service));
+    const inputType = getInputType(inputKey, service);
 
-    if (requiredVarNames.length === 0) {
+    if (!hasRequiredVars(service, inputType)) {
       kept[inputKey] = entry;
       continue;
     }
 
-    // Every stream of the input must satisfy every required var. Streams are per data stream,
-    // and Fleet validates each one independently.
+    // Every stream of the input must satisfy every required var.
     const allStreamsSatisfied = Object.values(entry.streams).every((stream) =>
-      requiredVarNames.every((name) => isVarSatisfied(stream.vars?.[name]))
+      getRequiredVarNamesForStream(service, inputType, stream).every((name) =>
+        isVarSatisfied(stream.vars?.[name])
+      )
     );
 
     if (allStreamsSatisfied) {
@@ -179,11 +208,10 @@ function describeMissingRequiredVars(
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
     const inputType = getInputType(inputKey, service);
-    const requiredVarNames = getRequiredVarNamesForInput(service, inputType);
     const missing = new Set<string>();
 
     for (const stream of Object.values(entry.streams)) {
-      for (const name of requiredVarNames) {
+      for (const name of getRequiredVarNamesForStream(service, inputType, stream)) {
         if (!isVarSatisfied(stream.vars?.[name])) missing.add(name);
       }
     }
