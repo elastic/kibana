@@ -51,7 +51,7 @@ describe('createSlackTurnAdmissionCheck', () => {
       expect(isBoom(error) && error.output.statusCode).toBe(429);
       expect(error.output.headers[USER_FACING_ERROR_HEADER]).toBe('true');
       expect(error.message).toBe(
-        `${reached}. An admin can raise it in Nightshift settings: https://kibana.example/s/default/app/nightshift/settings`
+        `${reached}. An admin can raise it in [Nightshift settings](https://kibana.example/s/default/app/nightshift/settings).`
       );
     }
   );

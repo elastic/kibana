@@ -25,14 +25,17 @@ const SLACK_AGENT_IDS: ReadonlySet<string> = new Set([
  */
 export const USER_FACING_ERROR_HEADER = 'x-elastic-user-facing-error';
 
-/** Readers may lack the privilege to change settings, so the text addresses an admin. */
+/**
+ * Markdown, which Relay renders in the Slack thread. Readers may lack the privilege to change
+ * settings, so the text addresses an admin.
+ */
 export const getLimitReachedMessage = (
   deniedBy: InvestigationQuotaLimit,
   settingsUrl?: string
 ): string => {
   const reached = new InvestigationQuotaDeniedError(deniedBy).message;
   return settingsUrl
-    ? `${reached}. An admin can raise it in Nightshift settings: ${settingsUrl}`
+    ? `${reached}. An admin can raise it in [Nightshift settings](${settingsUrl}).`
     : `${reached}. An admin can raise it in the Nightshift settings.`;
 };
 
