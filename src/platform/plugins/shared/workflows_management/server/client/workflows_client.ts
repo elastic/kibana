@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Subscription } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type {
   ManagedWorkflowsSystemApiProvider,
   WorkflowsClientProvider,
@@ -92,25 +94,25 @@ export const createWorkflowsClientProvider = (
  */
 export const createManagedWorkflowsSystemApiProvider = (
   workflowsService: WorkflowsService,
-  config: WorkflowsManagementConfig,
+  availabilityTracker: WorkflowsAvailabilityTracker,
   logger: Logger
 ): ManagedWorkflowsSystemApiProvider => {
   return async (pluginId: string) => {
-    const { isWorkflowsAvailable } = await getWorkflowsAvailabilityContext(
-      workflowsService,
-      config
-    );
+    const getIsWorkflowsAvailable = await availabilityTracker.getIsWorkflowsAvailable();
 
     return {
+      get isWorkflowsAvailable() {
+        return getIsWorkflowsAvailable();
+      },
       install: async (id, options) => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug('Workflows is not available in this environment. Managed install ignored.');
           return;
         }
         await workflowsService.installManagedWorkflow(id, options, pluginId);
       },
       uninstall: async (id, options) => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug(
             'Workflows is not available in this environment. Managed uninstall ignored.'
           );
@@ -119,21 +121,21 @@ export const createManagedWorkflowsSystemApiProvider = (
         await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
       },
       disable: async (id, options) => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug('Workflows is not available in this environment. Managed disable ignored.');
           return false;
         }
         return workflowsService.disableManagedWorkflow(id, options, pluginId);
       },
       getWorkflowStatus: async (id, options) => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug('Workflows is not available in this environment. Managed status rejected.');
           throw new Error('Workflows is not available in this environment');
         }
         return workflowsService.getManagedWorkflowStatus(id, options, pluginId);
       },
       getInstalledWorkflowState: async (workflowId, spaceId) => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug(
             'Workflows is not available in this environment. Managed state read rejected.'
           );
@@ -142,7 +144,7 @@ export const createManagedWorkflowsSystemApiProvider = (
         return workflowsService.getInstalledManagedWorkflowState(workflowId, spaceId, pluginId);
       },
       listInstalledWorkflowStates: async () => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug(
             'Workflows is not available in this environment. Managed state list rejected.'
           );
@@ -151,13 +153,60 @@ export const createManagedWorkflowsSystemApiProvider = (
         return workflowsService.listInstalledManagedWorkflowStates(pluginId);
       },
       ready: async () => {
-        if (!isWorkflowsAvailable) {
+        if (!getIsWorkflowsAvailable()) {
           logger.debug('Workflows is not available in this environment. Managed ready() ignored.');
           return;
         }
         await workflowsService.pluginReady(pluginId);
       },
     };
+  };
+};
+
+export interface WorkflowsAvailabilityTracker {
+  getIsWorkflowsAvailable: () => Promise<() => boolean>;
+  stop: () => void;
+}
+
+/**
+ * Tracks availability with a single `license$` subscription shared by all managed clients, so a
+ * client created once stays accurate when the license is upgraded or downgraded.
+ */
+export const createWorkflowsAvailabilityTracker = (
+  workflowsService: WorkflowsService,
+  config: WorkflowsManagementConfig
+): WorkflowsAvailabilityTracker => {
+  let tracking: Promise<() => boolean> | undefined;
+  let subscription: Subscription | undefined;
+  let stopped = false;
+
+  const track = async (): Promise<() => boolean> => {
+    const { licensing } = await workflowsService.getPluginsStart();
+    const isAvailable = (license: ILicense) =>
+      license.hasAtLeast(REQUIRED_LICENSE_TYPE) && config.available;
+
+    let available = isAvailable(await licensing.getLicense());
+    if (!stopped) {
+      subscription = licensing.license$.subscribe((license) => {
+        available = isAvailable(license);
+      });
+    }
+    return () => available;
+  };
+
+  return {
+    getIsWorkflowsAvailable: () => {
+      tracking ??= track().catch((error) => {
+        tracking = undefined;
+        throw error;
+      });
+      return tracking;
+    },
+    stop: () => {
+      stopped = true;
+      subscription?.unsubscribe();
+      subscription = undefined;
+    },
   };
 };
 

@@ -11,6 +11,7 @@ import { KibanaAssetType } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { traverseArchiveEntries } from '../archive';
+import { getWorkflowAssetsClient } from '../kibana/workflows/availability';
 
 import {
   checkUploadPackageAssetPrivileges,
@@ -30,6 +31,10 @@ jest.mock('../../app_context', () => ({
 jest.mock('../archive', () => ({
   getPathParts: jest.requireActual('../archive').getPathParts,
   traverseArchiveEntries: jest.fn(),
+}));
+
+jest.mock('../kibana/workflows/availability', () => ({
+  getWorkflowAssetsClient: jest.fn(),
 }));
 
 jest.mock('./streaming_packages', () => ({
@@ -167,6 +172,15 @@ describe('collectArchiveSignals', () => {
     expect(readBufferFn('mypackage-1.0.0/kibana/security_rule/my-rule.json')).toBe(true);
   });
 
+  it('detects workflow as gated type', async () => {
+    mockTraverseEntries([{ path: 'mypackage-1.0.0/kibana/workflow/mypackage-hello.yml' }]);
+
+    const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
+
+    expect(signals.gatedTypesFound.has(KibanaAssetType.workflow)).toBe(true);
+    expect(signals.hasMlSecurityRules).toBe(false);
+  });
+
   it('does not gate other kibana asset types (osquery, ml_module, csp, slo, alerting)', async () => {
     mockTraverseEntries([
       { path: 'mypackage-1.0.0/kibana/osquery_saved_query/my-query.json' },
@@ -285,6 +299,19 @@ describe('buildRequiredActions', () => {
     expect(buildRequiredActions(signals, security as any)).toContain('api:elasticAssistant');
   });
 
+  it('returns create, update and managed update actions for workflow', () => {
+    const signals = {
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.workflow]),
+      hasMlSecurityRules: false,
+    };
+
+    expect(buildRequiredActions(signals, security as any).sort()).toEqual([
+      'api:workflowsManagement:create',
+      'api:workflowsManagement:managed:update',
+      'api:workflowsManagement:update',
+    ]);
+  });
+
   it('accumulates actions for both gated types', () => {
     const signals = {
       gatedTypesFound: new Set<KibanaAssetType>([
@@ -305,6 +332,9 @@ describe('checkUploadPackageAssetPrivileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+    jest
+      .mocked(getWorkflowAssetsClient)
+      .mockResolvedValue({} as Awaited<ReturnType<typeof getWorkflowAssetsClient>>);
   });
 
   it('allows upload when archive contains no gated asset types', async () => {
@@ -320,7 +350,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
         installation: undefined,
         savedObjectsClient: mockSavedObjectsClient,
       })
-    ).resolves.toEqual([]);
+    ).resolves.toEqual({ destinationSpaces: [], workflowAssetsAuthorized: false });
 
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
@@ -436,6 +466,171 @@ describe('checkUploadPackageAssetPrivileges', () => {
       [mockSpaceId],
       expect.objectContaining({ kibana: expect.arrayContaining(['api:elasticAssistant']) })
     );
+  });
+
+  it('checks workflows privileges in every destination space for a workflow package upgrade', async () => {
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [],
+        additional_spaces_installed_kibana: { 'space-a': [] },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.workflow]),
+        hasMlSecurityRules: false,
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      expect.arrayContaining([mockSpaceId, 'space-a']),
+      expect.objectContaining({
+        kibana: expect.arrayContaining([
+          'api:workflowsManagement:create',
+          'api:workflowsManagement:update',
+          'api:workflowsManagement:managed:update',
+        ]),
+      })
+    );
+    expect(result).toEqual({
+      destinationSpaces: [mockSpaceId, 'space-a'],
+      workflowAssetsAuthorized: true,
+    });
+  });
+
+  it('throws FleetUnauthorizedError when caller lacks the managed workflow update privilege', async () => {
+    const security = makeSecurity(false, ['api:workflowsManagement:managed:update']);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    await expect(
+      checkUploadPackageAssetPrivileges({
+        request: mockRequest,
+        archiveSignals: {
+          gatedTypesFound: new Set([KibanaAssetType.workflow]),
+          hasMlSecurityRules: false,
+        },
+        spaceId: mockSpaceId,
+        pkgName: 'mypackage',
+        installation: undefined,
+        savedObjectsClient: mockSavedObjectsClient,
+      })
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('checks workflows privileges when archive has no workflows but an additional Space has workflow refs', async () => {
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'mypackage-hello', type: 'workflow' }],
+        },
+      },
+    } as any;
+
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledTimes(1);
+    expect(atSpaces).toHaveBeenCalledWith(
+      ['space-a'],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:workflowsManagement:managed:update']),
+      })
+    );
+  });
+
+  it('does not require workflows privileges when workflow assets cannot be installed', async () => {
+    jest.mocked(getWorkflowAssetsClient).mockResolvedValue(undefined);
+    const security = makeSecurity(false);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'mypackage-hello', type: 'workflow' }],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'mypackage-hello', type: 'workflow' }],
+        },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.workflow]),
+        hasMlSecurityRules: false,
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    expect(result).toEqual({ destinationSpaces: [], workflowAssetsAuthorized: false });
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
+
+  it('keeps other gated types when workflow assets cannot be installed', async () => {
+    jest.mocked(getWorkflowAssetsClient).mockResolvedValue(undefined);
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.workflow, KibanaAssetType.securityAIPrompt]),
+        hasMlSecurityRules: false,
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith([mockSpaceId], { kibana: ['api:elasticAssistant'] });
+  });
+
+  it('does not check workflow availability when no workflows are involved', async () => {
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const { workflowAssetsAuthorized } = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityAIPrompt]),
+        hasMlSecurityRules: false,
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    expect(getWorkflowAssetsClient).not.toHaveBeenCalled();
+    expect(workflowAssetsAuthorized).toBe(false);
   });
 
   it('accumulates union of required actions for mixed gated types', async () => {
@@ -557,7 +752,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: {
         gatedTypesFound: new Set([KibanaAssetType.securityRule]),
@@ -584,7 +779,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: {
         gatedTypesFound: new Set([KibanaAssetType.securityRule]),
@@ -611,7 +806,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -665,7 +860,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -698,7 +893,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: 'request-space',
@@ -730,7 +925,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: {
         gatedTypesFound: new Set([KibanaAssetType.securityRule]),
@@ -773,7 +968,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -854,7 +1049,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -894,7 +1089,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       ],
     });
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -928,7 +1123,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     mockSavedObjectsClient.bulkGet.mockRejectedValue(new Error('SO read failed'));
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -970,7 +1165,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
@@ -1008,7 +1203,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges({
+    const { destinationSpaces: result } = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,

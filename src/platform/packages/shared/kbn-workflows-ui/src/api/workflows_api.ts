@@ -192,9 +192,13 @@ export class WorkflowApi {
     });
   }
 
-  async getAggs({ fields, managed }: GetAggsParams): Promise<WorkflowAggsDto> {
+  async getAggs({ fields, managed, visibilityContext }: GetAggsParams): Promise<WorkflowAggsDto> {
     return this.http.get(`${BASE}/aggs`, {
-      query: { fields, ...(managed ? { managed } : {}) },
+      query: {
+        fields,
+        ...(managed ? { managed } : {}),
+        ...(visibilityContext ? { visibilityContext } : {}),
+      },
       version: API_VERSION,
     });
   }

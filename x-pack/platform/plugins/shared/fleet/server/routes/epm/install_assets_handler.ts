@@ -24,8 +24,10 @@ import type {
   FleetRequestHandler,
   InstallKibanaAssetsRequestSchema,
   InstallRuleAssetsRequestSchema,
+  InstallWorkflowAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
+import { stepInstallWorkflows } from '../../services/epm/packages/install_state_machine/steps/step_install_workflows';
 import { stepCreateAlertingAssets } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
@@ -102,6 +104,16 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
       packageInstallContext,
+    });
+
+    await stepInstallWorkflows({
+      logger,
+      savedObjectsClient: spaceScopedClient,
+      packageInstallContext,
+      spaceId: spaceToInstallId,
+      installedPkg: installation,
+      installAsAdditionalSpace,
+      upgradeAdditionalSpaces: false,
     });
 
     await stepCreateAlertingAssets({
@@ -218,6 +230,65 @@ export const installRuleAssetsHandler: FleetRequestHandler<
     spaceId,
     request,
     installAsAdditionalSpace,
+  });
+
+  return response.ok({ body: { success: true } });
+};
+
+export const installWorkflowAssetsHandler: FleetRequestHandler<
+  TypeOf<typeof InstallWorkflowAssetsRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallWorkflowAssetsRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const logger = appContextService.getLogger();
+  const spaceId = fleetContext.spaceId;
+  const { pkgName, pkgVersion } = request.params;
+
+  const installedPkgWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName,
+    logger,
+  });
+
+  const installation = await getInstallationObject({
+    pkgName,
+    savedObjectsClient,
+  });
+
+  if (
+    !installation ||
+    !installedPkgWithAssets ||
+    installedPkgWithAssets?.installation.version !== pkgVersion
+  ) {
+    throw new FleetNotFoundError('Requested version is not installed');
+  }
+
+  const { packageInfo } = installedPkgWithAssets;
+
+  const installAsAdditionalSpace =
+    (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId;
+
+  const spaceScopedClient = installAsAdditionalSpace
+    ? appContextService.getInternalUserSOClientForSpaceId(spaceId)
+    : savedObjectsClient;
+
+  const packageInstallContext = {
+    packageInfo,
+    paths: installedPkgWithAssets.paths,
+    archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+  };
+
+  await stepInstallWorkflows({
+    logger,
+    savedObjectsClient: spaceScopedClient,
+    packageInstallContext,
+    spaceId,
+    installedPkg: installation,
+    installAsAdditionalSpace,
+    throwIfUnavailable: true,
+    upgradeAdditionalSpaces: false,
   });
 
   return response.ok({ body: { success: true } });

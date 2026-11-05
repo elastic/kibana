@@ -17,6 +17,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
 import type { Installation } from '../../../../../common';
+import { INSTALL_STATES } from '../../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
@@ -47,6 +48,7 @@ import {
   streamingStatesDefinition,
 } from './_state_machine_package_install';
 import { cleanupLatestExecutedState } from './steps';
+import { stepInstallWorkflows } from './steps/step_install_workflows';
 
 jest.mock('./state_machine');
 jest.mock('../install');
@@ -357,6 +359,7 @@ describe('State machine parity', () => {
     const commonStates = [
       'create_restart_installation',
       'install_kibana_assets',
+      'install_workflows',
       'save_archive_entries_from_assets_map',
       'save_knowledge_base',
       'update_so',
@@ -370,5 +373,17 @@ describe('State machine parity', () => {
         expect(regularState.isAsync).toEqual(streamingState.isAsync);
       }
     });
+  });
+
+  it('should run install_workflows in the streaming definition between install_kibana_assets and save_archive_entries_from_assets_map', () => {
+    [regularStatesDefinition, streamingStatesDefinition].forEach((definition) => {
+      expect(definition.install_workflows.onTransition).toBe(stepInstallWorkflows);
+    });
+    expect(streamingStatesDefinition.install_kibana_assets.nextState).toEqual(
+      INSTALL_STATES.INSTALL_WORKFLOWS
+    );
+    expect(streamingStatesDefinition.install_workflows.nextState).toEqual(
+      INSTALL_STATES.SAVE_ARCHIVE_ENTRIES
+    );
   });
 });

@@ -259,6 +259,7 @@ export const item: GetInfoResponse['item'] = {
       tag: [],
       osquery_pack_asset: [],
       osquery_saved_query: [],
+      workflow: [],
     },
     elasticsearch: {
       ingest_pipeline: [
