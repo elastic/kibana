@@ -2,7 +2,7 @@
 
 This document is the logging standard for `alerting_v2` server code and the
 reference for `LoggerService`, the only logging entry point the plugin uses.
-Read the [rules](#rules) before adding or changing a log line; read the
+Read the [rules](#rules) before adding or changing a log line. Read the
 [API reference](#loggerservice-api) when you need the exact call shape.
 
 The standard exists so that an operator reading logs from a Serverless project
@@ -47,16 +47,16 @@ level is off.
 
 | Level   | Use when                                                                                                                      | Examples in this plugin                                                                                                                                                                                                                                                                                                                  |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`); a saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`); a background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`); a new rule's task failed and the compensating delete failed too, leaving an orphan (`RULE_CREATE_ROLLBACK_FAILED`). |
-| `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`); a name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`); a KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`); the dispatcher kill switch is on (`DISPATCHER_PAUSED`, once per start).                                      |
+| `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`). A saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`). A background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`). A new rule's task failed and the compensating delete failed too, leaving an orphan (`RULE_CREATE_ROLLBACK_FAILED`). |
+| `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`). A name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`). A KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`). The dispatcher kill switch is on (`DISPATCHER_PAUSED`, once per start).                                      |
 | `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window (once, on cold start).                                                                                                                                                                                                                               |
-| `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish; episode transitions; dispatch decisions; a route returning a client error.                                                                                                                                                                                                                                          |
+| `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish. Episode transitions. Dispatch decisions. A route returning a client error.                                                                                                                                                                                                                                          |
 
 Rules:
 
 - If an operator cannot take an action from the line, it is `debug`, not `info`.
-  Kibana's HTTP API guideline is explicit: default to `debug`; `info` generates
-  noise.
+  Kibana's HTTP API guideline is explicit: default to `debug`, because `info`
+  generates noise.
 - Retried-and-succeeded operations are never `error`. Silent, or `debug`. Retry
   counts belong in metrics.
 - Code paths that are _expected_ to fail sometimes ("another Kibana node did
@@ -96,7 +96,7 @@ Lazy vs eager messages:
 - Use `() => string` for `debug` in hot paths (per-alert loops, per-step
   yields, per-row batches). It costs nothing when the level is disabled.
 - Use a plain `string` for `info` / `warn` / `error` and for low-frequency
-  `debug`. A lazy message is still correct there; it just buys nothing.
+  `debug`. A lazy message is still correct there. It just buys nothing.
 
 Before / after:
 
@@ -151,7 +151,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                 | `lib/dispatcher/dispatcher.ts`                                                   |
 | `executionHistory`   | Rule and action policy execution-history read paths.                       | `lib/action_policy_execution_history_client/`, `lib/services/event_log_service/` |
 | `resources`          | Datastream, index template and ES\|QL view bootstrap.                      | `lib/services/resource_service/resource_manager.ts`                              |
-| `tasks`              | Background tasks other than the two engine tasks; boot-time scheduling.    | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                             |
+| `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.    | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                             |
 | `savedObjects`       | Saved object type registration and model-version migrations.               | `setup/bind_on_setup.ts`                                                         |
 | `agentBuilder`       | Agent Builder tools, skills and attachments.                               | `setup/bind_agent_builder.ts`                                                    |
 | `events`             | Internal domain event bus, publishers and subscribers.                     | `lib/events/`                                                                    |
@@ -160,7 +160,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 The tree is split along **failure-domain** boundaries, not directory
 boundaries: 15 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
-is reasoned about independently; the `events` bus is one logger even though
+is reasoned about independently. The `events` bus is one logger even though
 publishers and subscribers live in several directories.
 
 Discover cheat sheet:
@@ -185,7 +185,7 @@ trace.id: "<id from the customer's report>"
 ### 4. Labels
 
 `labels.*` is the second axis an operator filters on. The vocabulary is closed
-and typed (`AlertingLabels` in [`types.ts`](./types.ts)); adding a key is a
+and typed (`AlertingLabels` in [`types.ts`](./types.ts)). Adding a key is a
 deliberate one-line change, not something a call site does ad hoc.
 
 Rules:
@@ -194,9 +194,9 @@ Rules:
   `Record<string, unknown>` escape hatch, by design: it prevents `rule_id` /
   `ruleId` / `ruleID` drift that silently breaks dashboards.
 - **snake_case keys.** ECS convention.
-- **Present when known, omitted when not.** No `"unknown"` sentinels; they
+- **Present when known, omitted when not.** No `"unknown"` sentinels. They
   break filter queries.
-- **IDs, not names.** `rule_id`, never `rule_name`. IDs are stable; names are
+- **IDs, not names.** `rule_id`, never `rule_name`. IDs are stable. Names are
   mutable and often PII. The only non-ID labels are closed enums the plugin
   itself defines (`rule_kind`, `step`, `resource`, `error_source`, ...).
 - **Low cardinality, never PII or secrets.** Values are keyword-indexed and
@@ -230,7 +230,7 @@ to fix.
 
 Not a label:
 
-- **Errors.** Pass the exception as `error`; the service emits ECS
+- **Errors.** Pass the exception as `error`. The service emits ECS
   `error.{message,type,stack_trace}`. Never `labels.error_*`.
 - **Trace / span IDs.** Set automatically by core when logging under an
   OpenTelemetry span (`ApmMiddleware`, `withDispatcherSpan`). Do not set them.
@@ -260,7 +260,7 @@ Naming (the JSDoc above `ALERTING_LOG_CODES` is the source of truth):
   `_SKIPPED`, `_TIMED_OUT`, `_NOT_FOUND`, `_LOOKUP_FAILED`, `_DEGRADED`,
   `_INVALID`, `_UNMAPPED`. Errors (could not complete): `_FAILED`,
   `_UNAVAILABLE`, `_INVALID`, `_UNRECOVERABLE`. A few codes that predate the
-  standard use other suffixes; they keep their names because renaming is
+  standard use other suffixes. They keep their names because renaming is
   breaking, but new codes pick from this list.
 
 Rules:
@@ -270,7 +270,7 @@ Rules:
   adding. When one code covers several sites, carry the discriminator in a
   label: `RULE_EXECUTION_STEP_FAILED` + `labels.step`,
   `TASKS_SCHEDULE_FAILED` + `labels.task_id`.
-- **One code per call site.** Do not compute `code = a || b`; split into two
+- **One code per call site.** Do not compute `code = a || b`. Split into two
   log lines.
 - **Every code has a JSDoc** saying when it fires and what degraded. That JSDoc
   is the operator-facing runbook entry.
@@ -283,9 +283,9 @@ Rules:
 ### 6. Redaction
 
 Kibana's guideline: **do not log sensitive information, regardless of level.**
-Enforcement in this plugin is an allow list plus PR review; there is no
+Enforcement in this plugin is an allow list plus PR review. There is no
 rewrite appender. The rule applies to _values_, not field names:
-`labels.rule_id: "abc-123"` is fine; `labels.matcher: "user.email: sre@..."`
+`labels.rule_id: "abc-123"` is fine. `labels.matcher: "user.email: sre@..."`
 is not.
 
 #### Allow list — safe at every level
@@ -295,7 +295,7 @@ is not.
 | Opaque IDs                              | `rule_id`, `policy_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`, `task_id`, `execution_id`, `space_id` |
 | Enum values                             | `rule.kind`, `episode.status`, `event.outcome`, `error_source`, log codes, step names, task types, resource names  |
 | Counts, cardinalities, durations        | batch size, matched-rule count, dispatch latency, retry attempt (in messages or metrics, not labels)               |
-| Error class, code, stack trace          | Ours by construction; see downstream errors below                                                                  |
+| Error class, code, stack trace          | Ours by construction. See downstream errors below                                                                  |
 | Kibana / plugin / feature-flag versions | `plugin.version`, `alerting:v2:enabled`                                                                            |
 
 #### Deny list — never log at any level
@@ -308,7 +308,7 @@ is not.
 | Rule / policy names and text    | `rule.name`, `rule.description`, `actionPolicy.name`, `actionPolicy.description`, `tags` — user-authored free text              |
 | User identity                   | `user.username`, `user.email`, `user.full_name`, `user.roles` beyond what core emits at request scope. Use the audit logger.    |
 | URLs from user input            | Webhook and connector URLs — they often carry tokens                                                                            |
-| The dispatcher's fake request   | `dispatch_step.ts` builds a `KibanaRequest` carrying `authorization: ApiKey ...`. Never log it; log `labels.policy_id` instead. |
+| The dispatcher's fake request   | `dispatch_step.ts` builds a `KibanaRequest` carrying `authorization: ApiKey ...`. Never log it. Log `labels.policy_id` instead. |
 
 #### Downstream error messages
 
@@ -319,7 +319,7 @@ sometimes echo user input.
 - `error.stack_trace`: safe (code paths, not user data).
 - `error.message`: safe **unless** the code path is known to echo user input.
   KQL / ES|QL parse errors quote the offending fragment. Where that can
-  happen, override `message` with a synthetic one; the service writes it to
+  happen, override `message` with a synthetic one. The service writes it to
   both the log line and ECS `error.message`:
 
 ```ts
@@ -357,7 +357,7 @@ Author rules of thumb:
   events.
 - **Codes beat messages.** `labels.code: "POLICY_MATCHER_KQL_INVALID"` is a
   better signal than the KQL parser's raw text.
-- **Bind beats repeat.** Attach execution context once with `withLabels`; do
+- **Bind beats repeat.** Attach execution context once with `withLabels`. Do
   not re-pass `rule_id` on every call.
 
 ### 8. Testing
@@ -383,7 +383,7 @@ expect(mockLogger.warn).toHaveBeenCalledWith(
 Assert on `code` and `labels`: those are the values dashboards key on. Message
 text may be asserted too, but a test that only pins message text does not
 protect what operators depend on. Lazy messages arrive at the mock as a
-function; use `expect.any(Function)` for the first argument.
+function. Use `expect.any(Function)` for the first argument.
 
 ## LoggerService API
 
@@ -405,7 +405,7 @@ logger.withLabels(labels); // → LoggerServiceContract
 
 | Param     | Notes                                                                                                                                                                                                                  |
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `message` | `string` or `() => string`. Use the lazy form for `debug` in hot paths; it costs nothing when the level is disabled. Optional on `error`, where it defaults to the error's own message.                                |
+| `message` | `string` or `() => string`. Use the lazy form for `debug` in hot paths. It costs nothing when the level is disabled. Optional on `error`, where it defaults to the error's own message.                                |
 | `code`    | Required on `warn` / `error`. Must come from `ALERTING_LOG_CODES` (`../../errors/error_codes.ts`). Emitted as ECS `labels.code`.                                                                                       |
 | `labels`  | Optional entity identifiers from `AlertingLabels`. IDs or closed enum values only — never names, user input, counts, or durations.                                                                                     |
 | `error`   | `unknown`. Non-`Error` values are wrapped internally, so `catch (err)` blocks pass `err` straight through. Emitted as ECS `error.{message,type,stack_trace}`, with `type` taken from the exception's constructor name. |
@@ -452,8 +452,8 @@ per-call labels are both emitted under ECS `labels.*`.
 
 | Subsystem      | Where bound                                                                                                                                                   | Typical labels                                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `ruleExecutor` | `RuleExecutorTaskRunner` once per task; `rule_kind` re-bound after `fetch_rule`; `step` on pipeline/middleware; `error_source` in `error_handling_middleware` | `rule_id`, `space_id`, `task_id`, `execution_id`, `rule_kind`, `step`, `error_source`                                 |
-| `dispatcher`   | `DispatcherService.run` once per tick; `step` in `execution_pipeline.ts`; entity labels on concrete log calls                                                 | `task_id`, `step`, plus `rule_id` / `space_id` / `policy_id` / `group_id` / `workflow_id` / `execution_id` when known |
+| `ruleExecutor` | `RuleExecutorTaskRunner` once per task. `rule_kind` re-bound after `fetch_rule`. `step` on pipeline/middleware. `error_source` in `error_handling_middleware` | `rule_id`, `space_id`, `task_id`, `execution_id`, `rule_kind`, `step`, `error_source`                                 |
+| `dispatcher`   | `DispatcherService.run` once per tick. `step` in `execution_pipeline.ts`. Entity labels on concrete log calls                                                 | `task_id`, `step`, plus `rule_id` / `space_id` / `policy_id` / `group_id` / `workflow_id` / `execution_id` when known |
 | `director`     | `DirectorService.run` once per run                                                                                                                            | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `alert_id` on transition debug)                                |
 
 Pass the bound logger through pipeline `input` / `state` (or a local `const`
@@ -465,8 +465,8 @@ const logger = state.logger.withLabels({ step: this.name });
 logger.debug({ message: 'Starting fetch rule step' });
 ```
 
-Prefer `log.logger` via `forSubsystem` over a `labels.subsystem` meta field;
-set `subsystem` only if a call site needs meta-filter parity without logger-name
+Prefer `log.logger` via `forSubsystem` over a `labels.subsystem` meta field.
+Set `subsystem` only if a call site needs meta-filter parity without logger-name
 filters.
 
 ### Operator filters (`kibana.yml`)
@@ -516,7 +516,7 @@ Adding a code, a label, or a subsystem is a deliberate one-line type change:
   JSDoc. Renaming or removing a code is a breaking change for log-based
   monitoring.
 - **Label** — add a key to `AlertingLabels` (`types.ts`) and to the list in
-  [labels](#4-labels). Keys are snake_case; values must be low-cardinality
+  [labels](#4-labels). Keys are snake_case. Values must be low-cardinality
   identifiers or closed enum values.
 - **Subsystem** — add a name to `AlertingSubsystemName` (`types.ts`) and a row
   to the table in [logger names](#3-logger-names-subsystems). A subsystem is a
@@ -525,8 +525,8 @@ Adding a code, a label, or a subsystem is a deliberate one-line type change:
 
 ### What the API deliberately does not include
 
-- No `warn(message: string)` overload; every call takes the params object.
-- No `child(anyString)` escape hatch; only `AlertingSubsystemName` values.
+- No `warn(message: string)` overload. Every call takes the params object.
+- No `child(anyString)` escape hatch. Only `AlertingSubsystemName` values.
 - No free-form `meta` for arbitrary ECS fields. If a call site needs something
   the catalog does not cover, this document and `types.ts` are amended, not
   the call site.
