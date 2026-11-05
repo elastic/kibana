@@ -1515,29 +1515,52 @@ describe('Agent policy', () => {
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
 
-    it('should keep stored version conditions without reading package policies when they are unchanged', async () => {
-      const soClient = getSavedObjectMock({
-        revision: 1,
-        monitoring_enabled: [],
-        has_agent_version_conditions: false,
-        min_agent_version: null,
-      });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    it.each([
+      {
+        stored: 'no conditions',
+        storedFields: { has_agent_version_conditions: false, min_agent_version: null },
+      },
+      {
+        stored: 'conditions',
+        storedFields: {
+          has_agent_version_conditions: true,
+          min_agent_version: '9.3.0',
+          package_agent_version_conditions: [
+            { name: 'apache', title: 'Apache', version_condition: '>=9.3.0' },
+          ],
+        },
+      },
+    ])(
+      'should keep stored $stored without reading package policies when they are unchanged',
+      async ({ storedFields }) => {
+        const soClient = getSavedObjectMock({
+          revision: 1,
+          monitoring_enabled: [],
+          ...storedFields,
+        });
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
-        asyncDeploy: true,
-        agentVersionConditionsUnchanged: true,
-      });
+        // A recompute would find no conditions, clear the stored ones and reassign variant agents.
+        mockPackagePolicySOs(soClient, [
+          { name: 'nginx-1', package: { name: 'nginx', title: 'Nginx', version: '1.0.0' } },
+        ]);
 
-      expect(soClient.find).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
-      );
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+          asyncDeploy: true,
+          agentVersionConditionsUnchanged: true,
+        });
 
-      const [, , attributes] = soClient.update.mock.calls[0];
-      expect(attributes).toMatchObject({ revision: 2 });
-      expect(Object.keys(attributes).filter((key) => key.includes('agent_version'))).toEqual([]);
-      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
-    });
+        expect(soClient.find).not.toHaveBeenCalledWith(
+          expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+        );
+
+        const [, , attributes] = soClient.update.mock.calls[0];
+        expect(attributes).toMatchObject({ revision: 2 });
+        expect(Object.keys(attributes).filter((key) => key.includes('agent_version'))).toEqual([]);
+        expect(reassignAgentsFromVersionSpecificPolicies).not.toHaveBeenCalled();
+        expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+      }
+    );
 
     it.each([
       { stored: 'never stored', storedFields: {} },

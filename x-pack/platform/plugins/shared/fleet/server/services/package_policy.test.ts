@@ -7266,41 +7266,60 @@ describe('Package policy service', () => {
         ...overrides,
       });
 
-      const bulkUpdateAndGetUnchangedFlags = async (
-        oldOverrides: Record<string, unknown>,
-        newOverrides: Record<string, unknown>
-      ) => {
+      interface BatchPolicy {
+        old?: Record<string, unknown>;
+        next?: Record<string, unknown>;
+        notFound?: boolean;
+        saveFails?: boolean;
+      }
+
+      const bulkUpdateAndGetUnchangedFlags = async (batch: BatchPolicy[]) => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const policies = batch.map((policy, index) => ({
+          ...policy,
+          id: `package-policy-${index}`,
+        }));
         savedObjectsClient.bulkGet.mockResolvedValue({
-          saved_objects: [
-            {
-              id: 'existing-package-policy',
+          saved_objects: policies
+            .filter(({ notFound }) => !notFound)
+            .map(({ id, old }) => ({
+              id,
               type: 'ingest-package-policies',
               references: [],
               version: '1.0.0',
-              attributes: generateAttributes(oldOverrides),
-            },
-          ],
+              attributes: generateAttributes(old),
+            })),
         });
         savedObjectsClient.bulkUpdate.mockImplementation(async (objs) => ({
-          saved_objects: objs.map((obj) => ({ ...obj, references: [], version: 'test' })),
+          saved_objects: objs.map((obj) =>
+            policies.find(({ id }) => id === obj.id)?.saveFails
+              ? {
+                  id: obj.id,
+                  type: obj.type,
+                  error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
+                }
+              : { ...obj, references: [], version: 'test' }
+          ),
         }));
 
-        await packagePolicyService.bulkUpdate(
+        const { failedPolicies } = await packagePolicyService.bulkUpdate(
           savedObjectsClient,
           elasticsearchClient,
-          [{ ...generateAttributes(newOverrides), id: 'existing-package-policy' }],
+          policies.map(({ id, next }) => ({ ...generateAttributes(next), id })),
           { force: true }
         );
 
-        return [
-          ...new Set(
-            mockAgentPolicyService.bumpRevision.mock.calls.map(
-              ([, , , options]) => options?.agentVersionConditionsUnchanged
-            )
-          ),
-        ];
+        return {
+          flags: [
+            ...new Set(
+              mockAgentPolicyService.bumpRevision.mock.calls.map(
+                ([, , , options]) => options?.agentVersionConditionsUnchanged
+              )
+            ),
+          ],
+          failedIds: failedPolicies.map(({ packagePolicy }) => packagePolicy.id),
+        };
       };
 
       const mockPackageWithAgentVersionCondition = () => {
@@ -7351,7 +7370,40 @@ describe('Package policy service', () => {
         'sets agentVersionConditionsUnchanged to $expected when $when',
         async ({ old = {}, next = {}, setup, expected }) => {
           setup?.();
-          expect(await bulkUpdateAndGetUnchangedFlags(old, next)).toEqual([expected]);
+          const { flags } = await bulkUpdateAndGetUnchangedFlags([{ old, next }]);
+          expect(flags).toEqual([expected]);
+        }
+      );
+
+      const versionChange = {
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '1.0.0' },
+      };
+
+      it.each([
+        {
+          when: 'one package policy needs a recompute',
+          batch: [{}, { next: versionChange }],
+          expected: false,
+          failedIds: [],
+        },
+        {
+          // It writes nothing, so it cannot change any agent policy's conditions.
+          when: 'the one that needs a recompute fails before it is written',
+          batch: [{}, { next: versionChange, notFound: true }],
+          expected: true,
+          failedIds: ['package-policy-1'],
+        },
+        {
+          when: 'the one that needs a recompute fails to save',
+          batch: [{}, { next: versionChange, saveFails: true }],
+          expected: false,
+          failedIds: ['package-policy-1'],
+        },
+      ])(
+        'sets agentVersionConditionsUnchanged to $expected in a mixed batch when $when',
+        async ({ batch, expected, failedIds }) => {
+          const result = await bulkUpdateAndGetUnchangedFlags(batch);
+          expect(result).toEqual({ flags: [expected], failedIds });
         }
       );
     });
