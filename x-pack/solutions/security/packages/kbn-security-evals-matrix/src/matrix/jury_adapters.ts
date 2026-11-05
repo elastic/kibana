@@ -171,6 +171,73 @@ const parseUpdatedPayload = (text: string): unknown => {
   }
 };
 
+interface RenderedResult {
+  payloadKey: string | null;
+  data: Record<string, unknown>;
+  attachmentId: string;
+  stepIndex: number;
+}
+
+/** An attachment update the tool confirmed, with the version it created. */
+const confirmedUpdate = (
+  step: Record<string, unknown>,
+  attachmentId: string
+): { version: number; payload: unknown } | undefined => {
+  const params = isRecord(step.params) ? step.params : undefined;
+  const data = isRecord(params?.data) ? params?.data : undefined;
+  if (
+    typeof step.tool_id !== 'string' ||
+    !ATTACHMENT_UPDATE_TOOLS.has(step.tool_id) ||
+    params?.attachment_id !== attachmentId ||
+    typeof data?.text !== 'string'
+  ) {
+    return undefined;
+  }
+  const results = Array.isArray(step.results) ? step.results : [];
+  const confirmed = results
+    .map((result) => (isRecord(result) && result.type !== 'error' ? result.data : undefined))
+    .find(
+      (resultData): resultData is Record<string, unknown> =>
+        isRecord(resultData) &&
+        typeof resultData.version === 'number' &&
+        (resultData.attachment_id === undefined || resultData.attachment_id === attachmentId)
+    );
+  return confirmed
+    ? { version: confirmed.version as number, payload: parseUpdatedPayload(data.text) }
+    : undefined;
+};
+
+/**
+ * Every version of a rule attachment, in order: each successful rule tool
+ * result for it (a query rewrite updates the attachment in place) and each
+ * confirmed attachment update. A failed update never changed the attachment.
+ */
+const attachmentVersionHistory = (
+  rendered: readonly RenderedResult[],
+  steps: ReadonlyArray<Record<string, unknown>>,
+  attachmentId: string
+): Array<{ version: number; payload: unknown }> => {
+  const versions: Array<{ version: number; payload: unknown }> = [];
+  const nextVersion = () => (versions.length ? versions[versions.length - 1].version + 1 : 1);
+  steps.forEach((step, stepIndex) => {
+    rendered
+      .filter((entry) => entry.stepIndex === stepIndex && entry.attachmentId === attachmentId)
+      .forEach(({ payloadKey, data }) => {
+        if (payloadKey !== null) {
+          versions.push({
+            version: typeof data.version === 'number' ? data.version : nextVersion(),
+            payload: data[payloadKey],
+          });
+        }
+      });
+    const update = confirmedUpdate(step, attachmentId);
+    if (update) {
+      versions.push(update);
+    }
+  });
+  return versions;
+};
+
 /**
  * Mirrors `renderedArtifactPayload` from the persona-matrix suite
  * (evaluate_dataset.ts), which cannot be imported from this platform package.
@@ -214,31 +281,7 @@ const renderedArtifactPayload = (output: Record<string, unknown>): unknown => {
     return deliveredWorkflowYaml(output);
   }
 
-  const versions: Array<{ version: number; payload: unknown }> = [
-    {
-      version: typeof last.data.version === 'number' ? last.data.version : 1,
-      payload: last.data[last.payloadKey],
-    },
-  ];
-  steps.slice(last.stepIndex + 1).forEach((step) => {
-    const params = isRecord(step.params) ? step.params : undefined;
-    const updated = isRecord(params?.data) ? params?.data.text : undefined;
-    if (
-      typeof step.tool_id !== 'string' ||
-      !ATTACHMENT_UPDATE_TOOLS.has(step.tool_id) ||
-      params?.attachment_id !== last.attachmentId ||
-      typeof updated !== 'string'
-    ) {
-      return;
-    }
-    const result = Array.isArray(step.results) ? step.results[0] : undefined;
-    const reported = isRecord(result) && isRecord(result.data) ? result.data.version : undefined;
-    versions.push({
-      version: typeof reported === 'number' ? reported : versions[versions.length - 1].version + 1,
-      payload: parseUpdatedPayload(updated),
-    });
-  });
-
+  const versions = attachmentVersionHistory(rendered, steps, last.attachmentId);
   const pinned = renderedVersionFor(texts, last.attachmentId);
   const visible = versions.filter(({ version }) => pinned === undefined || version <= pinned);
   return (visible[visible.length - 1] ?? versions[0]).payload;
@@ -283,7 +326,12 @@ export const personaMatrixJury: JuryAdapter = {
     }
     return {
       input: { question: cell.question },
-      output: { messages: [{ message: agentResponse }], steps: cell.steps },
+      output: {
+        messages: [{ message: agentResponse }],
+        // The live run hands its judges only the tool-call steps of a fallback
+        // run, so the narration step is not part of the submission.
+        steps: isFallback ? toolCallStepsOf({ steps: cell.steps }) : cell.steps,
+      },
       expected: { expected: cell.expected },
       metadata: {},
     };

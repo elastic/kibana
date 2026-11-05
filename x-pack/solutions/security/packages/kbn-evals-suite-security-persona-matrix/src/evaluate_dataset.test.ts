@@ -927,6 +927,69 @@ describe('task judges and the last-assistant-step fallback', () => {
     expect(judgedAnswer(pinnedSecond.correctnessEvaluate)).toContain('"severity":"high"');
   });
 
+  it('ignores a failed attachment update', async () => {
+    const failedUpdate = {
+      ...updateRuleStep('att-r'),
+      results: [{ type: 'error', data: { message: 'Attachment update failed' } }],
+    };
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Updated. <render_attachment id="att-r"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), failedUpdate],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('"severity":"low"');
+    expect(answer).not.toContain('"severity":"high"');
+  });
+
+  it('resolves a pinned version across query rewrites of the same attachment', async () => {
+    const rewrite = (version: number, query: string) => ({
+      type: 'tool_call',
+      tool_id: 'security.create_detection_rule',
+      params: { attachment_id: 'att-r' },
+      results: [
+        {
+          data: {
+            success: true,
+            attachment_id: 'att-r',
+            version,
+            rule: { name: 'chrysalis-beacon', query },
+          },
+        },
+      ],
+    });
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'First draft. <render_attachment id="att-r" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [rewrite(1, 'first-query'), rewrite(2, 'rewritten-query')],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('first-query');
+    expect(answer).not.toContain('rewritten-query');
+  });
+
+  it('sends the criteria judge no fallback narration anywhere in its payload', async () => {
+    const { criteriaEvaluate } = await runTask({
+      messages: [{ message: 'I will now preview the detection rule.' }],
+      messageSource: 'last_assistant_step',
+      workflowAttachments: [{ id: 'wf-x', version: 1, yaml: 'name: leftover-draft' }],
+      steps: [
+        { type: 'reasoning', reasoning: 'I will now preview the detection rule.' },
+        {
+          type: 'tool_call',
+          tool_id: 'security.run_rule_preview',
+          params: {},
+          results: [{ data: { hits: 3 } }],
+        },
+      ],
+    });
+    const payload = JSON.stringify(criteriaEvaluate.mock.calls[0][0].output);
+    expect(payload).not.toContain('preview the detection rule');
+    expect(payload).not.toContain('leftover-draft');
+    expect(payload).not.toContain('last_assistant_step');
+    expect(payload).toContain('security.run_rule_preview');
+  });
+
   it('still judges a real closing answer', async () => {
     const { correctnessEvaluate, groundednessEvaluate } = await runTask({
       messages: [{ message: 'the real answer' }],

@@ -228,15 +228,81 @@ const parseUpdatedPayload = (text: string): unknown => {
   }
 };
 
+interface RenderedResult {
+  payloadKey: string | null;
+  data: Record<string, unknown>;
+  attachmentId: string;
+  stepIndex: number;
+}
+
+/** An attachment update the tool confirmed, with the version it created. */
+const confirmedUpdate = (
+  step: Record<string, unknown>,
+  attachmentId: string
+): { version: number; payload: unknown } | undefined => {
+  const params = isRecord(step.params) ? step.params : undefined;
+  const data = isRecord(params?.data) ? params?.data : undefined;
+  if (
+    typeof step.tool_id !== 'string' ||
+    !ATTACHMENT_UPDATE_TOOLS.has(step.tool_id) ||
+    params?.attachment_id !== attachmentId ||
+    typeof data?.text !== 'string'
+  ) {
+    return undefined;
+  }
+  const results = Array.isArray(step.results) ? step.results : [];
+  const confirmed = results
+    .map((result) => (isRecord(result) && result.type !== 'error' ? result.data : undefined))
+    .find(
+      (resultData): resultData is Record<string, unknown> =>
+        isRecord(resultData) &&
+        typeof resultData.version === 'number' &&
+        (resultData.attachment_id === undefined || resultData.attachment_id === attachmentId)
+    );
+  return confirmed
+    ? { version: confirmed.version as number, payload: parseUpdatedPayload(data.text) }
+    : undefined;
+};
+
+/**
+ * Every version of a rule attachment, in order: each successful rule tool
+ * result for it (a query rewrite updates the attachment in place) and each
+ * confirmed attachment update. A failed update never changed the attachment.
+ */
+const attachmentVersionHistory = (
+  rendered: readonly RenderedResult[],
+  steps: ReadonlyArray<Record<string, unknown>>,
+  attachmentId: string
+): Array<{ version: number; payload: unknown }> => {
+  const versions: Array<{ version: number; payload: unknown }> = [];
+  const nextVersion = () => (versions.length ? versions[versions.length - 1].version + 1 : 1);
+  steps.forEach((step, stepIndex) => {
+    rendered
+      .filter((entry) => entry.stepIndex === stepIndex && entry.attachmentId === attachmentId)
+      .forEach(({ payloadKey, data }) => {
+        if (payloadKey !== null) {
+          versions.push({
+            version: typeof data.version === 'number' ? data.version : nextVersion(),
+            payload: data[payloadKey],
+          });
+        }
+      });
+    const update = confirmedUpdate(step, attachmentId);
+    if (update) {
+      versions.push(update);
+    }
+  });
+  return versions;
+};
+
 /**
  * The rendered artifact's own payload, when the run rendered one — the rule
  * object or the workflow YAML the user actually saw. Used as the judged answer
  * for fallback runs that end on a rendered artifact.
  *
- * A rule attachment can be changed after creation (the skill raises the
- * default severity via `attachment_update`), so the payload is the version the
- * render tag pinned, else the latest: the creation payload plus any later
- * updates to that attachment, in order.
+ * A rule attachment can be changed after creation (a query rewrite, or the
+ * skill raising the default severity via `attachment_update`), so the payload
+ * is the version the render tag pinned, else the latest.
  */
 const renderedArtifactPayload = (output: TaskOutput): unknown => {
   const texts = messageTexts(output);
@@ -273,31 +339,7 @@ const renderedArtifactPayload = (output: TaskOutput): unknown => {
     return collectDeliveredArtifact(output);
   }
 
-  const versions: Array<{ version: number; payload: unknown }> = [
-    {
-      version: typeof last.data.version === 'number' ? last.data.version : 1,
-      payload: last.data[last.payloadKey],
-    },
-  ];
-  steps.slice(last.stepIndex + 1).forEach((step) => {
-    const params = isRecord(step.params) ? step.params : undefined;
-    const updated = isRecord(params?.data) ? params?.data.text : undefined;
-    if (
-      typeof step.tool_id !== 'string' ||
-      !ATTACHMENT_UPDATE_TOOLS.has(step.tool_id) ||
-      params?.attachment_id !== last.attachmentId ||
-      typeof updated !== 'string'
-    ) {
-      return;
-    }
-    const result = Array.isArray(step.results) ? step.results[0] : undefined;
-    const reported = isRecord(result) && isRecord(result.data) ? result.data.version : undefined;
-    versions.push({
-      version: typeof reported === 'number' ? reported : versions[versions.length - 1].version + 1,
-      payload: parseUpdatedPayload(updated),
-    });
-  });
-
+  const versions = attachmentVersionHistory(rendered, steps, last.attachmentId);
   const pinned = renderedVersionFor(texts, last.attachmentId);
   const visible = versions.filter(({ version }) => pinned === undefined || version <= pinned);
   return (visible[visible.length - 1] ?? versions[0]).payload;
@@ -725,12 +767,17 @@ export function createEvaluatePersonaMatrixDataset({
           // that never answered. Judge the same submission FinalAnswerPresent
           // accepts: the delivered artifact's YAML/payload when the run ends
           // on one (hasRenderedArtifact), else an empty answer. The narration
-          // stays on the stored output for the trace card.
+          // stays on the stored output for the trace card. The Criteria judge
+          // serializes the whole output, so the submission keeps only the
+          // answer and the tool-call steps: the narration step, messageSource
+          // and workflowAttachments would otherwise reach it.
           const fallbackAnswer = renderedArtifactPayload(taskOutput) ?? '';
           const judgedOutput: TaskOutput =
             taskOutput.messageSource === 'last_assistant_step'
               ? {
-                  ...taskOutput,
+                  steps: (Array.isArray(taskOutput.steps) ? taskOutput.steps : []).filter(
+                    (step: unknown) => isRecord(step) && step.type === 'tool_call'
+                  ),
                   messages: [
                     {
                       message:

@@ -217,6 +217,48 @@ describe('personaMatrixJury.toArgs', () => {
     expect(answer).toContain('"severity":"low"');
   });
 
+  it('ignores a failed attachment update', () => {
+    const answer = fallbackAnswer({
+      messages: [{ message: '<render_attachment id="att-r"/>' }],
+      steps: [
+        createRuleStep,
+        { ...updateRuleStep, results: [{ type: 'error', data: { message: 'update failed' } }] },
+      ],
+    });
+    expect(answer).toContain('"severity":"low"');
+  });
+
+  it('resolves a pinned version across query rewrites of the same attachment', () => {
+    const rewrite = (version: number, query: string) => ({
+      type: 'tool_call',
+      tool_id: 'security.create_detection_rule',
+      params: { attachment_id: 'att-r' },
+      results: [{ data: { success: true, attachment_id: 'att-r', version, rule: { query } } }],
+    });
+    const answer = fallbackAnswer({
+      messages: [{ message: '<render_attachment id="att-r" version="1"/>' }],
+      steps: [rewrite(1, 'first-query'), rewrite(2, 'rewritten-query')],
+    });
+    expect(answer).toContain('first-query');
+    expect(answer).not.toContain('rewritten-query');
+  });
+
+  it('drops the narration step from a fallback cell, keeping tool calls', () => {
+    const args = personaMatrixJury.toArgs(
+      cell({
+        agentResponse: 'narration',
+        taskOutput: { messageSource: 'last_assistant_step' },
+        steps: [
+          { type: 'reasoning', reasoning: 'narration' },
+          { type: 'tool_call', tool_id: 'security.run_rule_preview', results: [] },
+        ],
+      })
+    );
+    expect(args!.output.steps).toEqual([
+      { type: 'tool_call', tool_id: 'security.run_rule_preview', results: [] },
+    ]);
+  });
+
   it('still grades a normal closing answer in full', () => {
     const args = personaMatrixJury.toArgs(cell({ taskOutput: { messageSource: 'response' } }));
     expect(args!.output.messages).toEqual([{ message: 'An agent answer.' }]);
