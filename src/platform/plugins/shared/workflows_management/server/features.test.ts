@@ -9,7 +9,9 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './pages/page_saved_object';
 
 const getSubFeaturePrivilege = (id: string) =>
   WorkflowsManagementFeatureConfig.subFeatures!.flatMap((subFeature) =>
@@ -37,5 +39,39 @@ describe('WorkflowsManagementFeatureConfig', () => {
     const subPrivilege = getSubFeaturePrivilege('workflow_read_managed')!;
 
     expect(subPrivilege.aiIndex).toBeUndefined();
+  });
+
+  describe('workflow pages', () => {
+    it('lets page managers write pages without workflow update', () => {
+      const subPrivilege = getSubFeaturePrivilege('workflow_page_manage')!;
+
+      expect(subPrivilege.api).toEqual([WorkflowsManagementApiActions.managePages]);
+      expect(subPrivilege.savedObject).toEqual({
+        all: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
+        read: [],
+      });
+      expect(subPrivilege.includeIn).toBe('all');
+    });
+
+    it('lets workflow runners read pages, to copy the link', () => {
+      const subPrivilege = getSubFeaturePrivilege('workflow_execute')!;
+
+      expect(subPrivilege.savedObject).toEqual({
+        all: [],
+        read: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
+      });
+    });
+
+    it('gives no other privilege access to pages', () => {
+      const others = WorkflowsManagementFeatureConfig.subFeatures!.flatMap((subFeature) =>
+        subFeature.privilegeGroups.flatMap((group) => group.privileges)
+      ).filter(({ id }) => id !== 'workflow_page_manage' && id !== 'workflow_execute');
+
+      others.forEach(({ savedObject }) => {
+        expect([...savedObject.all, ...savedObject.read]).not.toContain(
+          WORKFLOW_PAGE_SAVED_OBJECT_TYPE
+        );
+      });
+    });
   });
 });
