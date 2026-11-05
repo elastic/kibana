@@ -68,6 +68,14 @@ describe('JsErrorFlyout', () => {
     expect(screen.queryByText('Last seen')).not.toBeInTheDocument();
   });
 
+  it('names a group without a type', () => {
+    renderFlyout({ ...ERROR, type: null });
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Unknown error type' })
+    ).toBeInTheDocument();
+  });
+
   it('closes', () => {
     const onClose = renderFlyout();
 

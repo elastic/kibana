@@ -37,7 +37,12 @@ describe('resourcesSearch', () => {
     const { urls } = resourcesSearch(PARAMS).aggs.inEnvironment.aggs.resources.aggs;
 
     // 50, for the table to page through and filter on the render-blocking ones.
-    expect(urls.terms).toEqual({ field: 'url.full', size: 50, order: { 'duration.75': 'desc' } });
+    expect(urls.terms).toEqual({
+      field: 'url.full',
+      size: 50,
+      shard_size: 200,
+      order: { 'duration.75': 'desc' },
+    });
     expect(urls.aggs.duration.percentiles.field).toBe('browser.resource_timing.duration');
     expect(urls.aggs.transferSize.percentiles.field).toBe('browser.resource_timing.transfer_size');
     expect(urls.aggs.renderBlocking.filter.bool.filter).toEqual([
@@ -63,6 +68,7 @@ describe('httpRequestsSearch', () => {
     expect(requests.multi_terms).toEqual({
       terms: [{ field: 'url.full' }, { field: 'http.request.method' }],
       size: 10,
+      collect_mode: 'breadth_first',
     });
     expect(Object.keys(requests.aggs)).toEqual(['withOutcome', 'failed', 'duration']);
     expect(requests.aggs.duration.percentiles).toMatchObject({ field: 'duration', percents: [95] });

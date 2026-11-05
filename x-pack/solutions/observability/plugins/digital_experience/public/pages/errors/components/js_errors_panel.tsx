@@ -17,7 +17,7 @@ import type { JsErrorGroup } from '../../../../common/types/errors';
 import { DataPanel } from '../../../components/data_panel';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { useFormatters } from '../../../hooks/use_formatters';
-import { LAST_SEEN_LABEL, OCCURRENCES_LABEL } from '../../../labels';
+import { LAST_SEEN_LABEL, OCCURRENCES_LABEL, UNKNOWN_ERROR_TYPE_LABEL } from '../../../labels';
 import { metricColumnPreset, timeColumnPreset } from '../../../utils/column_presets';
 import { JsErrorFlyout } from './js_error_flyout';
 
@@ -100,7 +100,7 @@ export function JsErrorsPanel({
     {
       field: 'type',
       name: ERROR_LABEL,
-      render: (type: string, error) => {
+      render: (type: string | null, error) => {
         return (
           <div className="eui-textTruncate">
             <EuiLink
@@ -113,7 +113,7 @@ export function JsErrorsPanel({
                 element: ERRORS_EBT_ELEMENTS.ERROR,
               })}
             >
-              {type}
+              {type ?? UNKNOWN_ERROR_TYPE_LABEL}
             </EuiLink>
             {error.message && (
               <EuiText size="xs" color="subdued" className="eui-textTruncate" title={error.message}>

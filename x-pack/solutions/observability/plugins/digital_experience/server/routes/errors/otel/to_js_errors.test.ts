@@ -10,7 +10,7 @@ import {
   termsAggregate,
   topHitsAggregate,
 } from '../../../lib/helpers/aggregate_fixtures.test_helpers';
-import { NO_STACKTRACE } from './search_request';
+import { NO_STACKTRACE, NO_TYPE } from './search_request';
 import type { ErrorGroupBucket, ErrorsAggregations } from './search_response';
 import { toHasMoreErrors, toJsErrors } from './to_js_errors';
 
@@ -51,6 +51,7 @@ describe('toJsErrors', () => {
         group('TypeError', NO_STACKTRACE, 4, 'no stack', 7000),
         group('RangeError', 'RangeError\n at b.js', 3, null, null),
         group('TypeError', 'TypeError: x\n at a.js', 2, 'x is undefined', 5000),
+        group(NO_TYPE, NO_STACKTRACE, 1, 'only a message', 3000),
       ])
     );
 
@@ -75,6 +76,13 @@ describe('toJsErrors', () => {
         message: 'x is undefined',
         count: 2,
         lastSeen: new Date(5000).toISOString(),
+      },
+      {
+        type: null,
+        stacktrace: null,
+        message: 'only a message',
+        count: 1,
+        lastSeen: new Date(3000).toISOString(),
       },
     ]);
   });

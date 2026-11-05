@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NO_STACKTRACE, errorsSearch } from './search_request';
+import { NO_STACKTRACE, NO_TYPE, errorsSearch } from './search_request';
 
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
@@ -36,7 +36,7 @@ describe('errorsSearch', () => {
 
     expect(groups.multi_terms).toEqual({
       terms: [
-        { field: 'exception.type' },
+        { field: 'exception.type', missing: NO_TYPE },
         { field: 'exception.stacktrace', missing: NO_STACKTRACE },
       ],
       size: 100,

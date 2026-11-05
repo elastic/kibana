@@ -7,7 +7,8 @@
 
 /** The JS errors of one type and stack trace. */
 export interface JsErrorGroup {
-  type: string;
+  /** `null` when the errors have no type. */
+  type: string | null;
   /** `null` when the errors have no stack trace. */
   stacktrace: string | null;
   /** The message of the latest error, `null` without one. */

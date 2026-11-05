@@ -35,6 +35,8 @@ const API_CALL_INITIATOR_TYPES = ['fetch', 'xmlhttprequest'];
 /** The resources the Network tab lists, slowest first, for its table to page and filter. */
 export const SLOWEST_RESOURCES_ROWS = 50;
 
+const RESOURCES_SHARD_SIZE = 200;
+
 // API calls are left out: the HTTP requests list them from the traces.
 const listedResources = {
   bool: {
@@ -60,7 +62,9 @@ export const resourcesSearch = ({ environment, ...application }: ApplicationSear
             terms: {
               field: URL_FULL,
               size: SLOWEST_RESOURCES_ROWS,
-              // Approximate: shards prune URLs before their percentiles are merged.
+              // Approximate: shards prune URLs before their percentiles are merged. A larger
+              // `shard_size` keeps more candidates per shard, for a little more latency.
+              shard_size: RESOURCES_SHARD_SIZE,
               order: byP75Descending('duration'),
             },
             aggs: {
@@ -99,6 +103,8 @@ export const httpRequestsSearch = ({ environment, ...application }: ApplicationS
         multi_terms: {
           terms: [{ field: URL_FULL }, { field: HTTP_REQUEST_METHOD }],
           size: TOP_ROWS,
+          // Runs the percentiles only for the top rows, not for every URL and method.
+          collect_mode: 'breadth_first' as const,
         },
         aggs: {
           withOutcome: requestsWithOutcome(),

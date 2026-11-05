@@ -124,6 +124,12 @@ describe('JsErrorsPanel', () => {
     expect(screen.queryByTestId('digitalExperienceErrorStacktrace')).not.toBeInTheDocument();
   });
 
+  it('names a group without a type', () => {
+    renderPanel([{ ...ERRORS[0], type: null }]);
+
+    expect(screen.getByTestId('digitalExperienceError')).toHaveTextContent('Unknown error type');
+  });
+
   it('lists only the first groups and links to all of them when compact', () => {
     renderPanel(ERRORS, false, { maxRows: 1, viewAllHref: '/errors' });
 

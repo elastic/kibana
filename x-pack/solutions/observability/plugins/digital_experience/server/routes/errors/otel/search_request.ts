@@ -21,6 +21,9 @@ import {
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
+/** The group key of a missing type, shared with empty ones. */
+export const NO_TYPE = '';
+
 /** The group key of a missing stack trace, shared with empty ones. */
 export const NO_STACKTRACE = '';
 
@@ -40,7 +43,7 @@ const ERROR_GROUP_AGGS = {
  * One application's JS errors by type and stack trace, and its environments with browser data.
  *
  * The message is never a group: it often holds ids or values that would split one error into many.
- * A stack trace over the field's `ignore_above` is not indexed and falls in no group.
+ * A stack trace over the index's `ignore_above` is not indexed, so it counts as missing.
  */
 export const errorsSearch = ({ environment, ...application }: ApplicationSearchParams) => {
   return {
@@ -57,7 +60,8 @@ export const errorsSearch = ({ environment, ...application }: ApplicationSearchP
           groups: {
             multi_terms: {
               terms: [
-                { field: EXCEPTION_TYPE },
+                // OTel allows an exception with only a message.
+                { field: EXCEPTION_TYPE, missing: NO_TYPE },
                 { field: EXCEPTION_STACKTRACE, missing: NO_STACKTRACE },
               ],
               size: ERROR_GROUPS_ROWS,

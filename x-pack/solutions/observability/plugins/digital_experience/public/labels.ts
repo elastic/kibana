@@ -32,6 +32,11 @@ export const OCCURRENCES_LABEL = i18n.translate('xpack.digitalExperience.occurre
   defaultMessage: 'Occurrences',
 });
 
+export const UNKNOWN_ERROR_TYPE_LABEL = i18n.translate(
+  'xpack.digitalExperience.unknownErrorType.label',
+  { defaultMessage: 'Unknown error type' }
+);
+
 export const BROWSER_LABEL = i18n.translate('xpack.digitalExperience.browser.label', {
   defaultMessage: 'Browser',
 });

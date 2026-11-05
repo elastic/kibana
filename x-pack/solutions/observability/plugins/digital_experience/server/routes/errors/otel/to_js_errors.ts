@@ -8,7 +8,7 @@
 import { EXCEPTION_MESSAGE } from '@kbn/apm-types';
 import type { JsErrorGroup } from '../../../../common/types/errors';
 import { toLastSeen } from '../../../lib/helpers/aggregations';
-import { NO_STACKTRACE } from './search_request';
+import { NO_STACKTRACE, NO_TYPE } from './search_request';
 import type { ErrorsAggregations, MessageAggregation } from './search_response';
 
 const toMessage = ({ hits }: MessageAggregation): string | null => {
@@ -26,7 +26,7 @@ export const toJsErrors = (aggregations?: ErrorsAggregations): JsErrorGroup[] =>
   const buckets = aggregations?.inEnvironment.exceptions.groups.buckets ?? [];
   return buckets.map(({ key: [type, stacktrace], doc_count: count, message, lastSeen }) => {
     return {
-      type,
+      type: type === NO_TYPE ? null : type,
       stacktrace: stacktrace === NO_STACKTRACE ? null : stacktrace,
       message: toMessage(message),
       count,

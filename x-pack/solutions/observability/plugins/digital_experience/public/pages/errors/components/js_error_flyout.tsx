@@ -20,7 +20,7 @@ import { PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { JsErrorGroup } from '../../../../common/types/errors';
 import { useFormatters } from '../../../hooks/use_formatters';
-import { LAST_SEEN_LABEL, OCCURRENCES_LABEL } from '../../../labels';
+import { LAST_SEEN_LABEL, OCCURRENCES_LABEL, UNKNOWN_ERROR_TYPE_LABEL } from '../../../labels';
 
 const NO_STACKTRACE_TITLE = i18n.translate('xpack.digitalExperience.errors.flyout.noStacktrace', {
   defaultMessage: 'These errors have no stack trace',
@@ -38,7 +38,11 @@ function ErrorStacktrace({ type, message, stacktrace }: JsErrorGroup) {
   // `PlaintextStacktrace` takes no `data-test-subj`.
   return (
     <div data-test-subj="digitalExperienceErrorStacktrace">
-      <PlaintextStacktrace type={type} message={message ?? undefined} stacktrace={stacktrace} />
+      <PlaintextStacktrace
+        type={type ?? undefined}
+        message={message ?? undefined}
+        stacktrace={stacktrace}
+      />
     </div>
   );
 }
@@ -62,7 +66,7 @@ export function JsErrorFlyout({ error, onClose }: { error: JsErrorGroup; onClose
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id={titleId}>{type}</h2>
+          <h2 id={titleId}>{type ?? UNKNOWN_ERROR_TYPE_LABEL}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
