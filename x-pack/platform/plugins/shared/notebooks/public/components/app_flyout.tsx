@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiButton,
@@ -341,31 +341,57 @@ const AppHeader = ({ app }: { app: NotebookApp }) => {
   );
 };
 
+/** Whether Shift is held down, tracked only while `enabled`. */
+const useIsShiftHeld = (enabled: boolean): boolean => {
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
+  useEffect(() => {
+    if (!enabled) return;
+    const onKey = ({ shiftKey }: KeyboardEvent) => setIsShiftHeld(shiftKey);
+    const onBlur = () => setIsShiftHeld(false);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', onKey);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onKey);
+      window.removeEventListener('blur', onBlur);
+      setIsShiftHeld(false);
+    };
+  }, [enabled]);
+  return isShiftHeld;
+};
+
 /**
  * Styles for the grid engine's drag preview, resize handle and drop target, matching Dashboard.
- * Without snapping, the grid dots and drop preview are left out since panels land where they're dropped.
+ * `dotStep` is how many engine cells apart the drop target's dots are, or undefined for none.
+ * The drop preview only shows when snapping, since otherwise panels land where they're dropped.
  */
-const getGridStyles = (euiTheme: UseEuiTheme['euiTheme'], snapToGrid: boolean) => {
+const getGridStyles = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  { snapToGrid, dotStep }: { snapToGrid: boolean; dotStep?: number }
+) => {
   const dot = (position: string) =>
     `radial-gradient(circle at ${position}, ${euiTheme.colors.accentSecondary} 1px, transparent 1px)`;
-  const snapGuides = css`
+  const dots = css`
     .kbnGridSection--targeted {
       background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
         calc((var(--kbnGridGutterSize) / 2) * -1px);
-      background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-        calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+      background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * ${dotStep}px)
+        calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * ${dotStep}px);
       background-image: ${dot('top left')}, ${dot('top right')}, ${dot('bottom left')},
         ${dot('bottom right')};
       background-origin: content-box;
     }
-
+  `;
+  const dropPreview = css`
     .kbnGridPanel--dragPreview {
       background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
     }
   `;
   return css`
     padding-top: ${euiTheme.size.l};
-    ${snapToGrid && snapGuides}
+    ${dotStep !== undefined && dots}
+    ${snapToGrid && dropPreview}
 
     .kbnGridPanel--resizeHandle:after {
       display: block;
@@ -414,7 +440,12 @@ const AppGrid = ({
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement]
   );
-  const gridStyles = useMemo(() => getGridStyles(euiTheme, snapToGrid), [euiTheme, snapToGrid]);
+  const isShiftHeld = useIsShiftHeld(!snapToGrid);
+  const dotStep = snapToGrid ? 1 : isShiftHeld ? scale : undefined;
+  const gridStyles = useMemo(
+    () => getGridStyles(euiTheme, { snapToGrid, dotStep }),
+    [euiTheme, snapToGrid, dotStep]
+  );
 
   const onLayoutChange = useCallback(
     (next: GridLayoutData) =>
