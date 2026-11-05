@@ -45,7 +45,7 @@ import { useNotebookServices } from '../services';
 import { LazyEsqlEditor } from './lazy_esql_editor';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
-import { ResultGrid } from './result_preview';
+import { ResultGrid, ResultPreview } from './result_preview';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
 
@@ -152,7 +152,11 @@ const SourceCellData = ({ cellId }: { cellId: string }) => {
 
 interface QueryRun {
   query: string;
+  /** Counts runs from the flyout; absent for the cell's applied results. */
+  runId?: number;
   table?: Datatable;
+  truncated?: boolean;
+  durationMs?: number;
   error?: string;
 }
 
@@ -184,6 +188,7 @@ export const CustomCellFlyout = ({
   const [queryRun, setQueryRun] = useState<QueryRun>();
   const [isRunning, setIsRunning] = useState(false);
   const controller = useRef<AbortController>();
+  const runCount = useRef(0);
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
   const editorHeightRef = useRef(EDITOR_DEFAULT_HEIGHT);
 
@@ -202,7 +207,12 @@ export const CustomCellFlyout = ({
     queryRun?.query === draft.query
       ? queryRun
       : saved.dataSource === 'query' && draft.query === saved.query
-      ? { query: saved.query, table: getTable(runtime) }
+      ? {
+          query: saved.query,
+          table: getTable(runtime),
+          truncated: runtime.output?.kind === 'table' && runtime.output.truncated,
+          durationMs: runtime.durationMs,
+        }
       : undefined;
 
   const runDraftQuery = async (): Promise<Datatable | undefined> => {
@@ -212,9 +222,10 @@ export const CustomCellFlyout = ({
     controller.current = current;
     setIsRunning(true);
     try {
-      const { table } = await scheduler.previewQuery(query, current.signal);
+      const { table, truncated, durationMs } = await scheduler.previewQuery(query, current.signal);
       if (current.signal.aborted) return;
-      setQueryRun({ query, table });
+      runCount.current += 1;
+      setQueryRun({ query, runId: runCount.current, table, truncated, durationMs });
       return table;
     } catch (runError) {
       if (current.signal.aborted) return;
@@ -271,16 +282,6 @@ export const CustomCellFlyout = ({
     : i18n.translate('xpack.notebook.customCell.flyout.descriptionNoSource', {
         defaultMessage: 'Present your data with HTML.',
       });
-
-  const queryData = knownQueryRun?.table ? (
-    <ResultGrid key={knownQueryRun.query} table={knownQueryRun.table} />
-  ) : (
-    <NoData
-      message={i18n.translate('xpack.notebook.customCell.flyout.noQueryData', {
-        defaultMessage: 'Run the query to see its results.',
-      })}
-    />
-  );
 
   return (
     <NotebookFlyout
@@ -507,17 +508,32 @@ export const CustomCellFlyout = ({
               />
             </>
           )}
-          <EuiSpacer size="s" />
-          {isQuery ? (
-            queryData
-          ) : draft.sourceCell ? (
-            <SourceCellData key={draft.sourceCell} cellId={draft.sourceCell} />
-          ) : (
-            <NoData
-              message={i18n.translate('xpack.notebook.customCell.flyout.pickSource', {
-                defaultMessage: 'Pick a source to see its results.',
-              })}
-            />
+          {isQuery && knownQueryRun?.table && (
+            <>
+              <EuiSpacer size="s" />
+              <ResultPreview
+                key={knownQueryRun.runId ?? 'applied'}
+                id={`${titleId}-query`}
+                table={knownQueryRun.table}
+                truncated={knownQueryRun.truncated ?? false}
+                durationMs={knownQueryRun.durationMs}
+                initialIsOpen={knownQueryRun.runId !== undefined}
+              />
+            </>
+          )}
+          {!isQuery && (
+            <>
+              <EuiSpacer size="s" />
+              {draft.sourceCell ? (
+                <SourceCellData key={draft.sourceCell} cellId={draft.sourceCell} />
+              ) : (
+                <NoData
+                  message={i18n.translate('xpack.notebook.customCell.flyout.pickSource', {
+                    defaultMessage: 'Pick a source to see its results.',
+                  })}
+                />
+              )}
+            </>
           )}
         </EuiAccordion>
       </EuiFlyoutBody>

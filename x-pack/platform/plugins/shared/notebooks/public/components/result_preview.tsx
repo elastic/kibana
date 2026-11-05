@@ -69,11 +69,13 @@ export const ResultPreview = ({
   table,
   truncated,
   durationMs,
+  initialIsOpen = false,
 }: {
   id: string;
   table: Datatable;
   truncated: boolean;
   durationMs?: number;
+  initialIsOpen?: boolean;
 }) => (
   <>
     {truncated && (
@@ -94,7 +96,7 @@ export const ResultPreview = ({
     <EuiAccordion
       id={`notebookResult-${id}`}
       buttonContent={getResultSummary(table, durationMs)}
-      initialIsOpen={false}
+      initialIsOpen={initialIsOpen}
       paddingSize="s"
       data-test-subj="notebookResultPreview"
     >
