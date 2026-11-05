@@ -69,6 +69,9 @@ describe('CreateServiceAccountFlyout errors', () => {
   jest.setTimeout(30_000);
 
   it.each([
+    ['forbidden request', httpError(403)],
+    ['not found', httpError(404)],
+    ['too many requests', httpError(429)],
     ['server error', httpError(500)],
     ['unavailable backend', httpError(503)],
     ['HTTP fetch error without a response', httpError()],
