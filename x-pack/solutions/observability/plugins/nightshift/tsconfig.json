@@ -46,6 +46,7 @@
     "@kbn/inference-plugin",
     "@kbn/investigation-output",
     "@kbn/agentic-investigations-plugin",
+    "@kbn/agentic-investigations-common",
     "@kbn/kibana-react-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
@@ -80,6 +81,8 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/unsaved-changes-prompt",
-    "@kbn/shared-ux-utility"
+    "@kbn/user-profile-components",
+    "@kbn/shared-ux-utility",
+    "@kbn/alerting-v2-constants"
   ]
 }

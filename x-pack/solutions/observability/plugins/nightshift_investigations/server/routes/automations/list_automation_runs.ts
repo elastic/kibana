@@ -93,6 +93,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         'trigger_investigation_alert',
         'trigger_investigation_slack',
         'follow_up_recovered_alert',
+        'trigger_investigation_alert_v2',
+        'follow_up_recovered_alert_v2',
       ].map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
@@ -110,10 +112,17 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         )
       )
     );
-    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps, recoveredAlertSteps] =
-      stepExecutions.map(
-        ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
-      );
+    const [
+      defaultSteps,
+      legacyAlertSteps,
+      alertSteps,
+      slackSteps,
+      recoveredAlertSteps,
+      alertV2Steps,
+      recoveredAlertV2Steps,
+    ] = stepExecutions.map(
+      ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
+    );
 
     const runs = executions.results.map((exec) => {
       const step =
@@ -121,6 +130,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           ? alertSteps.get(exec.id) ??
             legacyAlertSteps.get(exec.id) ??
             recoveredAlertSteps.get(exec.id)
+          : exec.triggeredBy === 'alerting.alertStatusChanged'
+          ? alertV2Steps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
@@ -146,7 +157,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         duration: exec.duration,
         triggeredBy: exec.triggeredBy,
         title: getString(input['title']),
-        message: getString(input['message']),
+        message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),
         skipReason: skipReason ?? null,
         dailyLimit: typeof output['daily_limit'] === 'number' ? output['daily_limit'] : undefined,
