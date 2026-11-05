@@ -8,12 +8,12 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { LabelNodeViewModel } from '../..';
+import type { EventNodeViewModel } from '../..';
 import { Graph } from '../..';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 
 export default {
-  title: 'Components/Graph Components/Label Node/Details',
+  title: 'Components/Graph Components/Event Node/Details',
   argTypes: {},
   decorators: [GlobalStylesStorybookDecorator],
 } satisfies Meta<typeof Graph>;
@@ -38,14 +38,14 @@ const useCases = {
 };
 
 const Template = () => {
-  const nodes: LabelNodeViewModel[] = useMemo(
+  const nodes: EventNodeViewModel[] = useMemo(
     () =>
       Object.entries(useCases).map(([useCaseName, { ips, countryCodes }]) => ({
         id: useCaseName,
         label: useCaseName,
         color: 'primary',
         interactive: true,
-        shape: 'label',
+        kind: 'event',
         ips,
         countryCodes,
       })),

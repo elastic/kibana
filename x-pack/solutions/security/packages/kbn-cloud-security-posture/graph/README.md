@@ -34,14 +34,14 @@ const nodes: NodeViewModel[] = [
     id: 'node1',
     label: 'Node 1',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'user',
   },
   {
     id: 'node2',
     label: 'Node 2',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'question',
   },
 ];
@@ -79,14 +79,14 @@ const App: React.FC = () => {
       id: 'node1',
       label: 'Node 1',
       color: 'primary',
-      shape: 'entity',
+      kind: 'entity',
       icon: 'user',
     },
     {
       id: 'node2',
       label: 'Node 2',
       color: 'primary',
-      shape: 'entity',
+      kind: 'entity',
       icon: 'question',
     },
   ];

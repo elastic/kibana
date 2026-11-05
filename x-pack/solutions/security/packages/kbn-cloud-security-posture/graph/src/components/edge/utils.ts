@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { NodeShape } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import type { NodeKind } from '@kbn/cloud-security-posture-common/types/graph/latest';
 
-export function getShapeHandlePosition(shape?: NodeShape) {
-  switch (shape) {
+export function getHandlePositionByKind(kind?: NodeKind) {
+  switch (kind) {
     // A small inset (3 px) tucks the arrowhead tip just behind the card border so the base of
     // the arrow sits flush with the card edge instead of floating outside it.
     case 'entity':
-    case 'label':
+    case 'event':
     case 'relationship':
       return 3;
     case 'group':

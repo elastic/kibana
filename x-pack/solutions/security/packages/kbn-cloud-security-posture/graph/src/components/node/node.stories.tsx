@@ -54,7 +54,7 @@ const meta: Meta<NodeViewModel> = {
     countryCodes: ['us', 'ru', 'es', 'us', 'us'],
     count: 5,
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'aws',
     interactive: true,
     toolbarItemsFn: storybookToolbarItems,
@@ -78,7 +78,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
       nodes={[
         {
           id: args.id,
-          type: args.shape,
+          type: args.kind,
           data: pick(args, [
             'id',
             'tag',
@@ -133,7 +133,7 @@ export const Colors: StoryObj = {
         color,
         icon: 'storage',
         interactive: true,
-        shape: 'entity',
+        kind: 'entity',
       },
       position: { x: index * 200, y: 0 },
     }));
@@ -174,7 +174,7 @@ export const Details: StoryObj = {
       type: 'entity',
       data: {
         id: useCaseName,
-        shape: 'entity',
+        kind: 'entity',
         color: 'primary',
         icon: 'storage',
         interactive: true,
@@ -211,7 +211,7 @@ export const Interactivity: StoryObj = {
           color: 'primary',
           icon: 'gear',
           interactive: true,
-          shape: 'entity',
+          kind: 'entity',
           toolbarItemsFn: storybookToolbarItems,
         },
         position: { x: 0, y: 0 },
@@ -226,7 +226,7 @@ export const Interactivity: StoryObj = {
           color: 'primary',
           icon: 'gear',
           interactive: false,
-          shape: 'entity',
+          kind: 'entity',
         },
         position: { x: 200, y: 0 },
       },

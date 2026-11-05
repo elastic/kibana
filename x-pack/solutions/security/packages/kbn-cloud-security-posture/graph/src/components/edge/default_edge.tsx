@@ -8,12 +8,12 @@
 import React, { memo } from 'react';
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
 import type { EdgeProps, EdgeViewModel } from '../types';
-import { getShapeHandlePosition } from './utils';
+import { getHandlePositionByKind } from './utils';
 import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
 import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
 import { GRAPH_EDGE_ID } from '../test_ids';
-import { isConnectorShape } from '../utils';
+import { isConnectorKind } from '../utils';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -21,7 +21,7 @@ const dashedStyle = {
   strokeDasharray: '2 2',
 };
 
-const NODES_WITHOUT_MARKER = ['label', 'group', 'relationship'];
+const NODES_WITHOUT_MARKER = ['event', 'group', 'relationship'];
 
 export const DefaultEdge = memo(
   ({
@@ -36,13 +36,13 @@ export const DefaultEdge = memo(
     data,
   }: EdgeProps) => {
     const color: EdgeColor = 'subdued';
-    const entityToConnector = data?.sourceShape !== 'group' && isConnectorShape(data?.targetShape);
-    const connectorToEntity = isConnectorShape(data?.sourceShape) && data?.targetShape !== 'group';
+    const entityToConnector = data?.sourceKind !== 'group' && isConnectorKind(data?.targetKind);
+    const connectorToEntity = isConnectorKind(data?.sourceKind) && data?.targetKind !== 'group';
     const isExtraAlignment = entityToConnector || connectorToEntity;
-    const sourceMargin = getShapeHandlePosition(data?.sourceShape);
-    const targetMargin = getShapeHandlePosition(data?.targetShape);
+    const sourceMargin = getHandlePositionByKind(data?.sourceKind);
+    const targetMargin = getHandlePositionByKind(data?.targetKind);
     const markerEnd =
-      !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
+      !data?.targetKind || !NODES_WITHOUT_MARKER.includes(data?.targetKind)
         ? getMarkerEnd(color)
         : undefined;
 
@@ -60,7 +60,7 @@ export const DefaultEdge = memo(
           (isExtraAlignment ? STACK_NODE_HORIZONTAL_PADDING / 2 : 0) * (connectorToEntity ? 1 : -1);
 
     const [edgePath] = getSmoothStepPath({
-      // sourceX and targetX are adjusted to account for the shape handle position
+      // sourceX and targetX are adjusted to account for the node handle position
       sourceX: sX,
       sourceY: sY,
       sourcePosition,

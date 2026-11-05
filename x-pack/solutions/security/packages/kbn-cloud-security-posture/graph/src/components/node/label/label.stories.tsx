@@ -11,7 +11,7 @@ import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { StoryFn, StoryObj } from '@storybook/react';
 import type { NodeViewModel } from '../../types';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
-import { EntityCardNode, LabelNode } from '..';
+import { EntityCardNode, EventNode } from '..';
 
 import '@xyflow/react/dist/style.css';
 
@@ -23,8 +23,8 @@ export default {
       options: ['primary', 'danger', 'warning'],
       control: { type: 'radio' },
     },
-    shape: {
-      options: ['entity', 'label'],
+    kind: {
+      options: ['entity', 'event'],
       control: { type: 'radio' },
     },
     expandButtonClick: { action: 'expandButtonClick' },
@@ -34,7 +34,7 @@ export default {
 
 const nodeTypes = {
   entity: EntityCardNode,
-  label: LabelNode,
+  event: EventNode,
 };
 
 const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
@@ -45,7 +45,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
     nodes={[
       {
         id: args.id,
-        type: args.shape,
+        type: args.kind,
         data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
         position: { x: 0, y: 0 },
       },
@@ -63,7 +63,7 @@ export const ShortLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: '',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'okta',
     interactive: true,
   },
@@ -76,7 +76,7 @@ export const ArnLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: 'arn:aws:iam::1234567890:user/lorem-ipsumdol-sitamet-user-1234',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'okta',
     interactive: true,
   },
@@ -89,7 +89,7 @@ export const DashedLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: 'lore-ipsumdol-sitameta-consectetu-adipis342',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'okta',
     interactive: true,
   },
@@ -102,7 +102,7 @@ export const NoSpacesLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: 'LoremIpsumDolorSitAmetConsectetur123',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'okta',
     interactive: true,
   },
@@ -115,7 +115,7 @@ export const NoSpacesAllLoweredLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: 'loremipsumdolorsitametconsectetur123',
     color: 'primary',
-    shape: 'entity',
+    kind: 'entity',
     icon: 'okta',
     interactive: true,
   },

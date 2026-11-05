@@ -11,8 +11,8 @@ import type {
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
 import {
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
 } from '../../test_ids';
 import { EVENT_ACTION } from '../../../common/constants';
 
@@ -20,7 +20,7 @@ import { EVENT_ACTION } from '../../../common/constants';
  * Opt-in configuration for which items to render in the label expand popover.
  * All items default to false - consumers must explicitly enable the items they want.
  */
-export interface LabelExpandShouldRender {
+export interface EventExpandShouldRender {
   /** Show "Show events with this action" filter toggle */
   showEventsWithAction?: boolean;
   /** Show "Show event details" preview action */
@@ -30,7 +30,7 @@ export interface LabelExpandShouldRender {
 /**
  * Options for generating label expand popover items.
  */
-export interface GetLabelExpandItemsOptions {
+export interface GetEventExpandItemsOptions {
   /** The node label (action name) */
   nodeLabel: string;
   /** Callback to show event details. Called when "Show event details" is clicked. */
@@ -49,7 +49,7 @@ export interface GetLabelExpandItemsOptions {
    */
   toggleFilter?: (field: string, value: string, action: 'show' | 'hide') => void;
   /** Opt-in configuration for which items to render. All default to false. */
-  shouldRender: LabelExpandShouldRender;
+  shouldRender: EventExpandShouldRender;
   /** Whether this is a single alert node. Changes label to "Show alert details". Defaults to false. */
   isSingleAlert?: boolean;
 }
@@ -60,8 +60,8 @@ export interface GetLabelExpandItemsOptions {
  *
  * Uses opt-in pattern: consumers must explicitly enable each item type they want.
  */
-export const getLabelExpandItems = (
-  options: GetLabelExpandItemsOptions
+export const getEventExpandItems = (
+  options: GetEventExpandItemsOptions
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
   const {
     nodeLabel,
@@ -81,7 +81,7 @@ export const getLabelExpandItems = (
     items.push({
       type: 'item',
       iconType: 'analyzeEvent',
-      testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+      testSubject: GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
       label: eventsWithActionActive
         ? i18n.translate(
             'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
@@ -118,7 +118,7 @@ export const getLabelExpandItems = (
     items.push({
       type: 'item',
       iconType: 'maximize',
-      testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
+      testSubject: GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
       label: eventDetailsLabel,
       onClick: () => {
         onShowEventDetails?.();

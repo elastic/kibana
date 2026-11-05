@@ -34,7 +34,7 @@ const nodeTypes = {
 const renderNodeInFlow = (nodeData: Partial<EntityNodeViewModel> = {}) => {
   const data: Omit<EntityNodeViewModel, 'id' | 'label'> = {
     color: 'primary' as const,
-    shape: 'entity' as const,
+    kind: 'entity' as const,
     interactive: true,
     ...nodeData,
   };
@@ -47,7 +47,7 @@ const renderNodeInFlow = (nodeData: Partial<EntityNodeViewModel> = {}) => {
         nodes={[
           {
             id: nodeData.id || 'test-node-id',
-            type: nodeData.shape || 'entity',
+            type: nodeData.kind || 'entity',
             position: { x: 0, y: 0 },
             data,
           },
@@ -187,17 +187,17 @@ describe('Entity Nodes', () => {
   });
 
   describe('Stacked Cards', () => {
-    const createNodeProps = (shape: string, count?: number): NodeProps => ({
-      id: `test-${shape}-node`,
+    const createNodeProps = (kind: string, count?: number): NodeProps => ({
+      id: `test-${kind}-node`,
       data: {
-        id: `test-${shape}-node`,
-        label: `Test ${shape}`,
+        id: `test-${kind}-node`,
+        label: `Test ${kind}`,
         color: 'primary',
-        shape,
+        kind,
         interactive: true,
         count,
       } as EntityNodeViewModel,
-      type: shape,
+      type: kind,
       selected: false,
       dragging: false,
       dragHandle: '',

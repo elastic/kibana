@@ -6,6 +6,6 @@
  */
 
 export { EntityCardNode } from './entity_card_node';
-export { LabelNode } from './label_node/label_node';
+export { EventNode } from './event_node/event_node';
 export { EdgeGroupNode } from './edge_group_node';
 export { RelationshipNode } from './relationship_node/relationship_node';

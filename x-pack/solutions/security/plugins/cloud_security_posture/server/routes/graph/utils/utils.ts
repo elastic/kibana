@@ -20,19 +20,19 @@ export const getEntityTypeIcon = (entityGroupType: string): string | undefined =
 };
 
 /**
- * Comparator for sorting connector nodes: relationship nodes first, then label nodes,
+ * Comparator for sorting connector nodes: relationship nodes first, then event nodes,
  * then alphabetically by label within each group.
- * Accepts objects with at least { shape?: string; label?: string }.
+ * Accepts objects with at least { kind?: string; label?: string }.
  */
 export const compareConnectorNodes = (
-  a?: { shape?: string; label?: string },
-  b?: { shape?: string; label?: string }
+  a?: { kind?: string; label?: string },
+  b?: { kind?: string; label?: string }
 ): number => {
-  const shapeA = a?.shape;
-  const shapeB = b?.shape;
+  const kindA = a?.kind;
+  const kindB = b?.kind;
 
-  if (shapeA === 'relationship' && shapeB === 'label') return -1;
-  if (shapeA === 'label' && shapeB === 'relationship') return 1;
+  if (kindA === 'relationship' && kindB === 'event') return -1;
+  if (kindA === 'event' && kindB === 'relationship') return 1;
 
   const labelA = a?.label ?? '';
   const labelB = b?.label ?? '';

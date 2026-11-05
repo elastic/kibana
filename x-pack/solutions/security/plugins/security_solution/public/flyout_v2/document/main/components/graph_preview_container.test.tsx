@@ -78,7 +78,7 @@ describe('<GraphPreviewContainer />', () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: { nodes: [{ id: '1', color: 'primary', shape: 'entity' }], edges: [] },
+      data: { nodes: [{ id: '1', color: 'primary', kind: 'entity' }], edges: [] },
     });
   });
 

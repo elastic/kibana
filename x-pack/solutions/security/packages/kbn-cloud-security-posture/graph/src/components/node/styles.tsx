@@ -16,7 +16,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { LabelNodeViewModel } from '..';
+import type { EventNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
@@ -73,7 +73,7 @@ export const NODE_LABEL_WIDTH = 220;
 export const ENTITY_NODE_LABEL_WIDTH = 160;
 
 /**
- * The total height of a label node including the shape and details below, in pixels.
+ * The total height of a event node including the shape and details below, in pixels.
  * Required in layout_graph.ts
  */
 export const NODE_LABEL_TOTAL_HEIGHT = 72;
@@ -85,7 +85,7 @@ export const NODE_LABEL_TOTAL_HEIGHT = 72;
 export const NODE_LABEL_HEIGHT = 20;
 
 /**
- * The height of the details below a label node shape, in pixels.
+ * The height of the details below a event node shape, in pixels.
  * Required in layout_graph.ts
  */
 export const NODE_LABEL_DETAILS = NODE_LABEL_TOTAL_HEIGHT - NODE_LABEL_HEIGHT;
@@ -96,7 +96,7 @@ export const LABEL_PADDING_X = 8;
 
 export const LABEL_BORDER_RADIUS = 9999;
 
-export const LabelNodeContainer = styled.div`
+export const EventNodeContainer = styled.div`
   position: relative;
   top: ${(NODE_LABEL_HEIGHT - ACTUAL_LABEL_HEIGHT) / 2}px;
   text-wrap: nowrap;
@@ -135,7 +135,7 @@ export const LabelShape = styled(EuiText, {
   transition: border-color 0.2s ease;
 
   /* Change border colour on hover/focus for interactive nodes */
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+  .react-flow__node:not(.non-interactive) ${EventNodeContainer}:hover & {
     border-color: ${HOVER_BORDER_COLOR};
   }
 
@@ -183,10 +183,10 @@ export const NodeContainer = styled.div`
 `;
 
 /**
- * Gets the background, border and text colors for label nodes based on color prop
+ * Gets the background, border and text colors for event nodes based on color prop
  */
 export const getLabelColors = (
-  color: LabelNodeViewModel['color'],
+  color: EventNodeViewModel['color'],
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
@@ -206,7 +206,7 @@ export const getLabelColors = (
 
 /**
  * Gets the background, border and text colors for relationship nodes.
- * Uses the same colors as event/label nodes for visual consistency.
+ * Uses the same colors as event nodes for visual consistency.
  */
 export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
@@ -277,7 +277,7 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
 
   /* Only show hover effects for interactive nodes */
   .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+  .react-flow__node:not(.non-interactive) ${EventNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 

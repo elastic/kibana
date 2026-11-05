@@ -20,7 +20,7 @@ export interface DocumentAnalysisOutput {
 }
 
 /**
- * Analyzes the documents data to categorize the label node type
+ * Analyzes the documents data to categorize the event node type
  */
 export const analyzeDocuments = ({
   uniqueEventsCount,

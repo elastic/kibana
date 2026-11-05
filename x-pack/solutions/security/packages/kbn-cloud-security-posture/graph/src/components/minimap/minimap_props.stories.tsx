@@ -21,7 +21,7 @@ import { Minimap as MinimapComp, type MinimapProps as MinimapPropsType } from '.
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { SvgDefsMarker } from '../edge/markers';
 import { layoutGraph } from '../graph/layout_graph';
-import { EdgeGroupNode, EntityCardNode, LabelNode } from '../node';
+import { EdgeGroupNode, EntityCardNode, EventNode } from '../node';
 import { DefaultEdge } from '../edge';
 import { basicSample } from '../mock/graph_sample';
 import { buildGraphFromViewModels } from '../utils';
@@ -29,7 +29,7 @@ import type { NodeViewModel, EdgeViewModel } from '../types';
 
 const nodeTypes = {
   entity: EntityCardNode,
-  label: LabelNode,
+  event: EventNode,
   group: EdgeGroupNode,
 };
 

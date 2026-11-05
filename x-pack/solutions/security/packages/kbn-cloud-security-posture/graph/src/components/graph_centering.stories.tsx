@@ -92,7 +92,7 @@ const createEntityNode = ({
     id,
     label: `Entity ${id}`,
     color,
-    shape: 'entity',
+    kind: 'entity',
     isOrigin,
     isOriginAlert: false,
     icon: 'user',
@@ -110,12 +110,12 @@ const createRelationshipStoryNode = ({
 }): NodeViewModel =>
   ({
     id,
-    shape: 'relationship',
+    kind: 'relationship',
     label,
     isOrigin,
   } as NodeViewModel);
 
-const createLabelNode = ({
+const createEventNode = ({
   id,
   isOrigin = false,
   isOriginAlert = false,
@@ -126,7 +126,7 @@ const createLabelNode = ({
 }): NodeViewModel => {
   return {
     id,
-    shape: 'label',
+    kind: 'event',
     label: id,
     color: isOriginAlert ? 'danger' : 'primary',
     isOrigin,
@@ -155,14 +155,14 @@ export const NoOriginNodes: Story = {
   args: {
     title: 'No Origin Nodes',
     description:
-      'Graph with no origin / origin alert label nodes. The center control is hidden since there are no origin nodes.',
+      'Graph with no origin / origin alert event nodes. The center control is hidden since there are no origin nodes.',
     nodes: [
       createEntityNode({ id: 'node1' }),
       createEntityNode({ id: 'node2' }),
       createEntityNode({ id: 'node3' }),
 
-      createLabelNode({ id: 'noOriginEvent' }),
-      createLabelNode({ id: 'noOriginAlert' }),
+      createEventNode({ id: 'noOriginEvent' }),
+      createEventNode({ id: 'noOriginAlert' }),
     ],
     edges: [
       createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
@@ -184,9 +184,9 @@ export const SingleOriginEvent: Story = {
       createEntityNode({ id: 'node3' }),
       createEntityNode({ id: 'node4' }),
 
-      createLabelNode({ id: 'noOriginEvent' }),
-      createLabelNode({ id: 'noOriginAlert' }),
-      createLabelNode({ id: 'originEvent', isOrigin: true }),
+      createEventNode({ id: 'noOriginEvent' }),
+      createEventNode({ id: 'noOriginAlert' }),
+      createEventNode({ id: 'originEvent', isOrigin: true }),
     ],
     edges: [
       createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
@@ -260,9 +260,9 @@ export const SingleOriginAlert: Story = {
       createEntityNode({ id: 'node3' }),
       createEntityNode({ id: 'node4' }),
 
-      createLabelNode({ id: 'noOriginEvent' }),
-      createLabelNode({ id: 'noOriginAlert' }),
-      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
+      createEventNode({ id: 'noOriginEvent' }),
+      createEventNode({ id: 'noOriginAlert' }),
+      createEventNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
       createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
@@ -288,10 +288,10 @@ export const MultipleOriginNodes: Story = {
       createEntityNode({ id: 'node4' }),
       createEntityNode({ id: 'node5' }),
 
-      createLabelNode({ id: 'noOriginEvent' }),
-      createLabelNode({ id: 'noOriginAlert' }),
-      createLabelNode({ id: 'originEvent', isOrigin: true }),
-      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
+      createEventNode({ id: 'noOriginEvent' }),
+      createEventNode({ id: 'noOriginAlert' }),
+      createEventNode({ id: 'originEvent', isOrigin: true }),
+      createEventNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
       createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
@@ -313,7 +313,7 @@ export const NonInteractiveGraph: Story = {
   args: {
     title: 'Non-Interactive Graph',
     description:
-      'Graph in non-interactive mode. Controls are hidden since the user cannot interact; also no origin label nodes are present.',
+      'Graph in non-interactive mode. Controls are hidden since the user cannot interact; also no origin event nodes are present.',
     interactive: false,
     nodes: [
       createEntityNode({ id: 'node1' }),
@@ -322,10 +322,10 @@ export const NonInteractiveGraph: Story = {
       createEntityNode({ id: 'node4' }),
       createEntityNode({ id: 'node5' }),
 
-      createLabelNode({ id: 'noOriginEvent' }),
-      createLabelNode({ id: 'noOriginAlert' }),
-      createLabelNode({ id: 'originEvent', isOrigin: true }),
-      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
+      createEventNode({ id: 'noOriginEvent' }),
+      createEventNode({ id: 'noOriginAlert' }),
+      createEventNode({ id: 'originEvent', isOrigin: true }),
+      createEventNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
       createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
@@ -357,10 +357,10 @@ export const LockedGraph: Story = {
       createEntityNode({ id: 'node4' }),
       createEntityNode({ id: 'node5' }),
 
-      createLabelNode({ id: 'noOriginEvent' }),
-      createLabelNode({ id: 'noOriginAlert' }),
-      createLabelNode({ id: 'originEvent', isOrigin: true }),
-      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
+      createEventNode({ id: 'noOriginEvent' }),
+      createEventNode({ id: 'noOriginAlert' }),
+      createEventNode({ id: 'originEvent', isOrigin: true }),
+      createEventNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
       createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),

@@ -8,33 +8,33 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { LabelNodeDetails } from './label_node_details';
+import { EventNodeDetails } from './event_node_details';
 import { GRAPH_IPS_TEXT_ID, GRAPH_IPS_PLUS_COUNT_ID, GRAPH_FLAGS_BADGE_ID } from '../../test_ids';
 
-describe('LabelNodeDetails', () => {
+describe('EventNodeDetails', () => {
   test('renders empty div when no props are provided', () => {
-    const { container } = render(<LabelNodeDetails />);
+    const { container } = render(<EventNodeDetails />);
     expect(container.firstChild).toBeNull();
   });
 
   test('renders empty div when empty arrays are provided', () => {
-    const { container } = render(<LabelNodeDetails ips={[]} countryCodes={[]} />);
+    const { container } = render(<EventNodeDetails ips={[]} countryCodes={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
   test('keeps the default spacing when there is no origin highlight', () => {
-    const { container } = render(<LabelNodeDetails ips={['10.0.0.1']} />);
+    const { container } = render(<EventNodeDetails ips={['10.0.0.1']} />);
     expect(container.firstChild).toHaveStyleRule('margin-top', '4px');
   });
 
   test('adds extra spacing to clear the origin highlight ring', () => {
-    const { container } = render(<LabelNodeDetails ips={['10.0.0.1']} hasOriginHighlight />);
+    const { container } = render(<EventNodeDetails ips={['10.0.0.1']} hasOriginHighlight />);
     expect(container.firstChild).toHaveStyleRule('margin-top', '12px');
   });
 
   test('renders Ips component when ips are provided', () => {
     const ips = ['192.168.1.1', '10.0.0.1'];
-    const { container } = render(<LabelNodeDetails ips={ips} />);
+    const { container } = render(<EventNodeDetails ips={ips} />);
 
     // Check that the IPs label is shown
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
@@ -51,7 +51,7 @@ describe('LabelNodeDetails', () => {
 
   test('renders CountryFlags component when countryCodes are provided', () => {
     const countryCodes = ['US', 'CA'];
-    const { container } = render(<LabelNodeDetails countryCodes={countryCodes} />);
+    const { container } = render(<EventNodeDetails countryCodes={countryCodes} />);
 
     // Check that the country flags badge is shown
     const flagsElement = screen.getByTestId(GRAPH_FLAGS_BADGE_ID);
@@ -68,7 +68,7 @@ describe('LabelNodeDetails', () => {
   test('renders both components when both props are provided', () => {
     const ips = ['192.168.1.1', '10.0.0.1'];
     const countryCodes = ['US', 'CA'];
-    render(<LabelNodeDetails ips={ips} countryCodes={countryCodes} />);
+    render(<EventNodeDetails ips={ips} countryCodes={countryCodes} />);
 
     // Check that the IPs label is shown; multiple IPs show only the +N badge, not the first value
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);

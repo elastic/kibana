@@ -101,7 +101,7 @@ export const UnknownNodesGraph: StoryObj = {
     nodes: [
       {
         id: 'unknown',
-        shape: 'unknown' as unknown as NodeViewModel['shape'],
+        kind: 'unknown' as unknown as NodeViewModel['kind'],
         color: 'primary',
       },
     ] as NodeViewModel[],
