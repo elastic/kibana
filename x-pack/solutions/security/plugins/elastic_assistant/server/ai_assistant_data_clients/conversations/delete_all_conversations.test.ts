@@ -36,14 +36,71 @@ describe('deleteAllConversations', () => {
     expect(deletedConversations).toEqual(mockResponse);
     expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: expect.objectContaining({
-          bool: expect.objectContaining({
-            filter: expect.objectContaining({
-              bool: expect.objectContaining({ minimum_should_match: 1 }),
-            }),
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { exists: { field: 'created_by' } },
+                        {
+                          bool: {
+                            should: [
+                              { term: { 'created_by.id': authenticatedUser.profile_uid } },
+                              { term: { 'created_by.name': authenticatedUser.username } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
+                        {
+                          nested: {
+                            path: 'users',
+                            query: {
+                              bool: {
+                                should: [
+                                  { term: { 'users.id': authenticatedUser.profile_uid } },
+                                  { term: { 'users.name': authenticatedUser.username } },
+                                ],
+                                minimum_should_match: 1,
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      must_not: [
+                        {
+                          nested: {
+                            path: 'users',
+                            query: {
+                              bool: {
+                                must_not: [
+                                  { term: { 'users.id': authenticatedUser.profile_uid } },
+                                  { term: { 'users.name': authenticatedUser.username } },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
             must_not: { ids: { values: ['test'] } },
-          }),
-        }),
+          },
+        },
       })
     );
   });
