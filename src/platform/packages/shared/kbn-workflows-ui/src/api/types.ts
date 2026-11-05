@@ -210,6 +210,17 @@ export interface SearchTriggerEventLogResult {
   size: number;
 }
 
+export interface LinkedRule {
+  id: string;
+  name: string;
+  ruleTypeId: string;
+}
+
+export interface GetLinkedRulesResponse {
+  total: number;
+  rules: LinkedRule[];
+}
+
 export interface RestoreWorkflowVersionParams {
   signal?: AbortSignal;
 }
