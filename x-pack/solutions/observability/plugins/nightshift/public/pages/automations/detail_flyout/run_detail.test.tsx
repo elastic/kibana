@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RunDetail } from './run_detail';
 import type { Run } from './run_history';
 
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: { getUrlForApp: () => '/app/nightshift' } } }),
 }));
 
