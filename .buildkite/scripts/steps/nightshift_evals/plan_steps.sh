@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Clones nightshift-evals, reads its ci/tasks.yaml and uploads one step per task and model.
 # Selection comes from GITHUB_PR_LABELS (PR) or NIGHTSHIFT_EVAL_TASK + EVAL_MODEL_GROUPS
-# (on-demand and weekly builds). See plan_steps.ts.
+# (on-demand builds). See plan_steps.ts.
 
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/nightshift_evals/common.sh

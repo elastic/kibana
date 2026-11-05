@@ -21,7 +21,6 @@ const TASK_CONFIGS = {
     timeoutMinutes: 120,
     downloads: [{ src: 'gs://bucket/data', dest: 'snapshots/x', recursive: true }],
     pr: { args: ['--dataset', 'otel-demo'] },
-    weekly: { args: ['--dataset', 'orca-bench'] },
   },
   other_task: {},
 };
@@ -110,7 +109,6 @@ describe('nightshift_evals_pipeline', () => {
         tasks: ['ki_feature_extraction'],
         connectorIds: ['model-a', 'model-b'],
         taskConfigs: TASK_CONFIGS,
-        mode: 'pr',
         preemptible: false,
         ...overrides,
       });
@@ -124,14 +122,11 @@ describe('nightshift_evals_pipeline', () => {
       expect(steps[0].key).toBe('nightshift-evals-ki_feature_extraction-model-a');
     });
 
-    it('takes args and timeout from the task config for the mode', () => {
+    it('takes args, timeout and downloads from the task config', () => {
       const [pr] = taskSteps(build());
       expect(pr.env.NIGHTSHIFT_EVAL_ARGS).toBe('--dataset otel-demo');
       expect(pr.timeout_in_minutes).toBe(120);
       expect(JSON.parse(pr.env.NIGHTSHIFT_EVAL_DOWNLOADS)).toHaveLength(1);
-
-      const [weekly] = taskSteps(build({ mode: 'weekly' }));
-      expect(weekly.env.NIGHTSHIFT_EVAL_ARGS).toBe('--dataset orca-bench');
     });
 
     it('appends extra args and defaults the timeout', () => {
@@ -152,7 +147,7 @@ describe('nightshift_evals_pipeline', () => {
       expect(taskSteps(build({ preemptible: true }))[0].agents.preemptible).toBe(true);
     });
 
-    it('adds the PR comment step after every task step, in pr mode only', () => {
+    it('adds the PR comment step after every task step', () => {
       const parsed = yamlParse(build()) as { steps: Array<{ steps: Step[] }> };
       const comment = parsed.steps[0].steps.find((step) => step.key === 'nightshift-evals-pr-comment');
       expect(comment?.depends_on).toEqual([
@@ -160,7 +155,6 @@ describe('nightshift_evals_pipeline', () => {
         'nightshift-evals-ki_feature_extraction-model-b',
       ]);
       expect(comment?.allow_dependency_failure).toBe(true);
-      expect(build({ mode: 'weekly' })).not.toContain('nightshift-evals-pr-comment');
     });
 
     it('fails for an unknown task', () => {
