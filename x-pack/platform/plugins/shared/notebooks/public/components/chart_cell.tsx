@@ -11,9 +11,14 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -62,7 +67,23 @@ const CHART_TYPE_LABELS: Record<NotebookChartType, string> = {
   [ChartType.Pie]: i18n.translate('xpack.notebook.chartCell.type.pie', { defaultMessage: 'Pie' }),
 };
 
+const PICK_SOURCE_MESSAGE = i18n.translate('xpack.notebook.chartCell.pickSource', {
+  defaultMessage: 'Pick an ES|QL cell as the source.',
+});
+
 type EditLensConfigPanelComponent = Awaited<ReturnType<LensPublicStart['EditLensConfigPanelApi']>>;
+
+/** The edit flyout's draft: a source and the chart for its results, applied together. */
+interface ChartEditor {
+  EditPanel: EditLensConfigPanelComponent;
+  sourceCell: string | null;
+  /** Absent until the draft source has results that a chart fits. */
+  chart?: { attributes: LensAttributes; table: Datatable };
+  isSuggesting?: boolean;
+  error?: string;
+  /** Remounts the Lens panel whenever the draft chart is replaced. */
+  revision: number;
+}
 
 const chartContainerCss = css`
   height: 300px;
@@ -104,8 +125,8 @@ export const ChartCanvas = ({
           ? i18n.translate('xpack.notebook.chartCell.waiting', {
               defaultMessage: 'Waiting for the source cell to produce results.',
             })
-          : i18n.translate('xpack.notebook.chartCell.pickSource', {
-              defaultMessage: 'Pick an ES|QL cell as the source.',
+          : i18n.translate('xpack.notebook.chartCell.editToPickSource', {
+              defaultMessage: 'Edit the chart to pick an ES|QL cell as its source.',
             })
       }
     />
@@ -135,12 +156,10 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
   const [regenerated, setRegenerated] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string>();
   const [unavailableType, setUnavailableType] = useState<NotebookChartType>();
-  const [editor, setEditor] = useState<{
-    EditPanel: EditLensConfigPanelComponent;
-    attributes: LensAttributes;
-  }>();
+  const [editor, setEditor] = useState<ChartEditor>();
   const [preview, setPreview] = useState<LensAttributes>();
   const latestSuggestion = useRef<object>();
+  const latestDraftSuggestion = useRef<object>();
 
   const { id, sourceCell, lensAttributes } = cell;
   const source = sourceCell ? cells[sourceCell] : undefined;
@@ -196,54 +215,163 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     }
   }, [table, lensAttributes, suggest]);
 
-  const attributes = useChartAttributes(cell, preview);
+  const cellAttributes = useChartAttributes(cell);
+  const attributes = preview ?? cellAttributes;
+  const currentType = lensAttributes ? getChartType(lensAttributes) : undefined;
 
   const openEditor = async () => {
-    if (!attributes) return;
     const EditPanel = await plugins.lens.EditLensConfigPanelApi();
-    setEditor({ EditPanel, attributes });
+    setEditor({
+      EditPanel,
+      sourceCell,
+      chart: cellAttributes && table ? { attributes: cellAttributes, table } : undefined,
+      revision: 0,
+    });
   };
 
   const closeEditor = useCallback(() => {
+    latestDraftSuggestion.current = undefined;
     setEditor(undefined);
     setPreview(undefined);
   }, []);
 
+  const selectDraftSource = async (draftSource: string) => {
+    const token = {};
+    latestDraftSuggestion.current = token;
+    setPreview(undefined);
+    const draftCell = cells[draftSource];
+    const draftOutput = store.getRuntime(draftSource).output;
+    const draftTable = draftOutput?.kind === 'table' ? draftOutput.table : undefined;
+    const update = (patch: Partial<ChartEditor>) =>
+      setEditor((current) =>
+        current && latestDraftSuggestion.current === token
+          ? { ...current, sourceCell: draftSource, revision: current.revision + 1, ...patch }
+          : current
+      );
+    if (draftSource === sourceCell && cellAttributes && table) {
+      update({
+        chart: { attributes: cellAttributes, table },
+        isSuggesting: false,
+        error: undefined,
+      });
+      return;
+    }
+    update({ chart: undefined, isSuggesting: Boolean(draftTable), error: undefined });
+    if (!draftTable || draftCell?.type !== 'esql') return;
+    try {
+      const suggested = await suggestChart({
+        lens: plugins.lens,
+        dataViews: plugins.data.dataViews,
+        query: draftCell.query,
+        table: draftTable,
+        chartType: currentType,
+      });
+      update({
+        chart: suggested
+          ? { attributes: injectTable(suggested, draftTable), table: draftTable }
+          : undefined,
+        isSuggesting: false,
+      });
+    } catch (error) {
+      update({ isSuggesting: false, error: error.message });
+    }
+  };
+
   // The Lens panel rebuilds its store on every render, so it must not re-render on preview updates.
   const editPanel = useMemo(() => {
-    if (!editor) return null;
-    const { EditPanel, attributes: initial } = editor;
+    if (!editor?.chart) return null;
+    const {
+      EditPanel,
+      sourceCell: draftSource,
+      chart: { attributes: initial, table: draftTable },
+      revision,
+    } = editor;
     return (
-      <NotebookFlyout
-        type="push"
-        ownFocus
-        paddingSize="m"
-        hideCloseButton
-        onClose={closeEditor}
-        aria-label={EDIT_CHART_LABEL}
-        data-test-subj="notebookChartEditFlyout"
-      >
-        <EditPanel
-          attributes={initial}
-          updatePanelState={(datasourceState, visualizationState, visualizationId) =>
-            setPreview(
-              applyEditorState(initial, datasourceState, visualizationState, visualizationId)
+      <EditPanel
+        key={revision}
+        attributes={initial}
+        updatePanelState={(datasourceState, visualizationState, visualizationId) =>
+          setPreview(
+            injectTable(
+              applyEditorState(initial, datasourceState, visualizationState, visualizationId),
+              draftTable
             )
-          }
-          onApply={(applied) => {
-            setAttributes(stripTables(applied));
-            closeEditor();
-          }}
-          onCancel={closeEditor}
-          closeFlyout={closeEditor}
-          hideTextBasedEditor
-          displayFlyoutHeader
-        />
-      </NotebookFlyout>
+          )
+        }
+        onApply={(applied) => {
+          store.updateCell(id, (current) =>
+            current.type === 'chart'
+              ? { ...current, sourceCell: draftSource, lensAttributes: stripTables(applied) }
+              : current
+          );
+          closeEditor();
+        }}
+        onCancel={closeEditor}
+        closeFlyout={closeEditor}
+        hideTextBasedEditor
+        displayFlyoutHeader
+      />
     );
-  }, [editor, setAttributes, closeEditor]);
+  }, [editor, store, id, closeEditor]);
 
-  const currentType = lensAttributes ? getChartType(lensAttributes) : undefined;
+  const getDraftMessage = ({ sourceCell: draftSource }: ChartEditor): string => {
+    if (!draftSource) return PICK_SOURCE_MESSAGE;
+    const output = store.getRuntime(draftSource).output;
+    return output?.kind === 'table'
+      ? i18n.translate('xpack.notebook.chartCell.noSuggestion', {
+          defaultMessage: 'No chart fits the results of this source.',
+        })
+      : i18n.translate('xpack.notebook.chartCell.runSource', {
+          defaultMessage: 'Run the source cell to chart its results.',
+        });
+  };
+
+  const editFlyout = editor && (
+    <NotebookFlyout
+      type="push"
+      ownFocus
+      paddingSize="m"
+      hideCloseButton={Boolean(editPanel)}
+      onClose={closeEditor}
+      aria-label={EDIT_CHART_LABEL}
+      data-test-subj="notebookChartEditFlyout"
+    >
+      <EuiFlyoutHeader>
+        <EuiSelect
+          compressed
+          fullWidth
+          prepend={SOURCE_LABEL}
+          aria-label={SOURCE_LABEL}
+          hasNoInitialSelection={!editor.sourceCell}
+          value={editor.sourceCell ?? ''}
+          options={esqlCells.map((esqlCell) => ({
+            value: esqlCell.id,
+            text: getCellDisplayName(esqlCell),
+          }))}
+          onChange={(event) => selectDraftSource(event.target.value)}
+          data-test-subj="notebookChartSource"
+        />
+      </EuiFlyoutHeader>
+      {editPanel ?? (
+        <>
+          <EuiFlyoutBody>
+            {editor.error ? (
+              <KbnDangerCallout announceOnMount size="s" title={editor.error} />
+            ) : editor.isSuggesting ? (
+              <EuiLoadingSpinner size="l" />
+            ) : (
+              <EuiEmptyPrompt titleSize="xs" body={getDraftMessage(editor)} />
+            )}
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiButtonEmpty flush="left" onClick={closeEditor} data-test-subj="notebookChartCancel">
+              {i18n.translate('xpack.notebook.chartCell.cancel', { defaultMessage: 'Cancel' })}
+            </EuiButtonEmpty>
+          </EuiFlyoutFooter>
+        </>
+      )}
+    </NotebookFlyout>
+  );
 
   return (
     <CellFrame
@@ -256,7 +384,6 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
             size="xs"
             iconType="pencil"
             onClick={openEditor}
-            isDisabled={!attributes}
             data-test-subj="notebookChartEdit"
           >
             {i18n.translate('xpack.notebook.chartCell.edit', { defaultMessage: 'Edit' })}
@@ -265,27 +392,6 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
       }
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
-          <EuiSelect
-            compressed
-            prepend={SOURCE_LABEL}
-            aria-label={SOURCE_LABEL}
-            hasNoInitialSelection={!sourceCell}
-            value={sourceCell ?? ''}
-            options={esqlCells.map((esqlCell) => ({
-              value: esqlCell.id,
-              text: getCellDisplayName(esqlCell),
-            }))}
-            onChange={(event) =>
-              store.updateCell(id, (current) =>
-                current.type === 'chart'
-                  ? { ...current, sourceCell: event.target.value, lensAttributes: null }
-                  : current
-              )
-            }
-            data-test-subj="notebookChartSource"
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
           <EuiSelect
             compressed
@@ -351,7 +457,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
           hasSource={sourceCell !== null}
         />
       </div>
-      {editPanel}
+      {editFlyout}
     </CellFrame>
   );
 };
