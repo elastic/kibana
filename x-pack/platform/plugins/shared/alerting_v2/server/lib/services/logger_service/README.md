@@ -36,7 +36,7 @@ Every log line in this plugin:
    never in the message.
 5. If `warn` or `error`, carries a `code` from `ALERTING_LOG_CODES`.
 6. Logs nothing from the [deny list](#deny-list--never-log-at-any-level).
-7. Is asserted in a unit test on `code` and `labels`. Do not test free-form log messages.
+7. Is asserted in a unit test on `code` and `labels`, never on message text.
 
 ### 1. Log levels
 
@@ -46,7 +46,7 @@ Every log line in this plugin:
 | ------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`). A saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`). A background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`). A new rule's task failed and the compensating delete failed too, leaving an orphan (`RULE_CREATE_ROLLBACK_FAILED`). |
 | `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`). A name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`). A KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`). The dispatcher kill switch is on (`DISPATCHER_PAUSED`, once per start).                                      |
-| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window.                                                                                                                                                                                                                               |
+| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window.                                                                                                                                                                                                                                                     |
 | `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish. Episode transitions. Dispatch decisions. A route returning a client error.                                                                                                                                                                                                                                          |
 
 Rules:
@@ -343,7 +343,7 @@ For any PR that adds or changes a log line, the reviewer asks, in order:
    user input? Override it if so.
 6. Is the log inside a hot loop that would emit one line per user document?
    Aggregate or drop.
-7. Does a unit test assert `code` and `labels`?
+7. Does a unit test assert `code` and `labels`, and not the message text?
 8. Novel value type, label key, or subsystem? Amend `types.ts` and this document
    before merging.
 
@@ -367,7 +367,7 @@ loggers from `forSubsystem` / `withLabels` all write to the same mock:
 const { loggerService, mockLogger } = createLoggerService();
 
 expect(mockLogger.warn).toHaveBeenCalledWith(
-  'Policy matcher failed to evaluate; treating as no-match',
+  expect.any(String),
   expect.objectContaining({
     labels: expect.objectContaining({
       code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
@@ -377,9 +377,16 @@ expect(mockLogger.warn).toHaveBeenCalledWith(
 );
 ```
 
-Assert on `code` and `labels`: those are the values dashboards key on. Message
-text should not be asserted. Lazy messages arrive at the mock as a
-function. Use `expect.any(Function)` for the first argument.
+Assert on `code` and `labels`. They are the contract: dashboards and log-based
+alerts key on them, and renaming one is a breaking change. Do not assert
+message text. It is human-facing, changes freely, and a test that pins it fails
+on every wording tweak without protecting anything an operator depends on. Use
+`expect.any(String)` for the first argument, or `expect.any(Function)` for a
+lazy message.
+
+The one exception is redaction. When a call site overrides `message` to keep
+user input out of the log, assert that the raw text is absent with
+`expect.not.stringContaining(...)`, not what the replacement says.
 
 ## LoggerService API
 
