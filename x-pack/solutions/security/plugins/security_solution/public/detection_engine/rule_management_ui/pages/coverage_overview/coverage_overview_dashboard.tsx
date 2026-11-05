@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
 
+import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import * as i18n from './translations';
 import { CoverageOverviewMatrix } from './coverage_overview_matrix';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
@@ -28,7 +29,11 @@ const CoverageOverviewDashboardComponent = () => {
 
   return (
     <>
-      <EuiSpacer size="s" />
+      <EuiText color="subdued" size="s">
+        <span>{i18n.CoverageOverviewDashboardInformation(frameworkLabel)}</span>{' '}
+        <CoverageOverviewLink />
+      </EuiText>
+      <EuiSpacer size="m" />
       {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />

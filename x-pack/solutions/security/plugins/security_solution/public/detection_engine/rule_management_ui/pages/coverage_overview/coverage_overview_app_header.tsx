@@ -15,7 +15,7 @@ import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboa
 import * as i18n from './translations';
 
 /**
- * App header of the MITRE coverage page: title, description of the selected framework, and framework tabs.
+ * App header of the MITRE coverage page: title, framework tabs, and the documentation link in the app menu.
  * Must render inside `CoverageOverviewDashboardContextProvider`.
  */
 export const CoverageOverviewAppHeader = React.memo(() => {
@@ -25,14 +25,6 @@ export const CoverageOverviewAppHeader = React.memo(() => {
   } = useCoverageOverviewDashboardContext();
   const { docLinks } = useKibana().services;
   const availableFrameworks = useAvailableMitreFrameworks();
-
-  const description = useMemo(
-    () => ({
-      text: i18n.CoverageOverviewDashboardInformation(THREAT_FRAMEWORK_DISPLAY_NAME[framework]),
-      learnMoreUrl: docLinks.links.siem.mitreCoverage,
-    }),
-    [docLinks.links.siem.mitreCoverage, framework]
-  );
 
   const tabs = useMemo<AppHeaderTab[] | undefined>(() => {
     if (availableFrameworks.length <= 1) {
@@ -51,7 +43,7 @@ export const CoverageOverviewAppHeader = React.memo(() => {
   return (
     <SecurityAppHeader
       title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
-      description={description}
+      docLink={docLinks.links.siem.mitreCoverage}
       tabs={tabs}
       spacing="largeBleed"
     />

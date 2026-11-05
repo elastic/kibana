@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { TestProviders } from '../../../../common/mock';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewAppHeader } from './coverage_overview_app_header';
@@ -70,28 +71,21 @@ describe('CoverageOverviewAppHeader', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
   });
 
-  it.each([
-    ['enterprise', 'MITRE ATT&CK®'],
-    ['atlas', 'MITRE ATLAS™'],
-  ])('describes the coverage of the selected %s framework', (framework, frameworkLabel) => {
-    mockContext(framework);
+  it('links the app menu documentation entry to the MITRE coverage documentation', async () => {
     renderHeader();
 
-    expect(
-      screen.getByText(
-        `Your current coverage of ${frameworkLabel} tactics and techniques, based on installed rules.`,
-        { exact: false }
-      )
-    ).toBeInTheDocument();
-  });
+    await openAppMenuOverflow();
 
-  it('links the description to the MITRE coverage documentation', () => {
-    renderHeader();
-
-    expect(screen.getByRole('link', { name: /learn more/i })).toHaveAttribute(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
       'href',
       expect.stringContaining('mitre-attack-coverage')
     );
+  });
+
+  it('does not render the description in the header', () => {
+    renderHeader();
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.description)).not.toBeInTheDocument();
   });
 
   it('renders a tab per available framework with the selected framework selected', () => {

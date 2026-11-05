@@ -68,6 +68,33 @@ describe('CoverageOverviewDashboard', () => {
     });
   });
 
+  test.each([
+    ['enterprise', 'MITRE ATT&CK®'],
+    ['atlas', 'MITRE ATLAS™'],
+  ])('describes the coverage of the %s framework below the tabs', async (framework, label) => {
+    const user = userEvent.setup();
+    renderCoverageOverviewDashboard();
+    await user.click(screen.getByTestId(`coverageOverviewFrameworkTab-${framework}`));
+
+    expect(
+      screen.getByText(
+        `Your current coverage of ${label} tactics and techniques, based on installed rules.`,
+        {
+          exact: false,
+        }
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('links the description to the MITRE coverage documentation', () => {
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByRole('link', { name: /learn more/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('mitre-attack-coverage')
+    );
+  });
+
   test('hides the framework tabs but still renders the matrix when the managed source is off', () => {
     mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise']);
     renderCoverageOverviewDashboard();
