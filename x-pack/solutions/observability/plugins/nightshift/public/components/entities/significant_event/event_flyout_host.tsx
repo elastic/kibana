@@ -10,19 +10,16 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSkeletonTitle,
 } from '@elastic/eui';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { getEbtProps } from '@kbn/ebt-click';
 import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { FocusedSignificantEventService } from '../../../chat/focused_significant_event_service';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useFetchEventById } from '../../../data/significant_events/use_fetch_event_by_id';
 import type { NightshiftStartDependencies } from '../../../types';
 
@@ -52,12 +49,10 @@ const UNAVAILABLE_BODY = i18n.translate('xpack.nightshift.flyout.eventUnavailabl
 const EventFlyoutStatus = ({
   isError,
   size,
-  detailsHref,
   onClose,
 }: {
   isError: boolean;
   size: number;
-  detailsHref?: string;
   onClose: () => void;
 }) => {
   return (
@@ -83,25 +78,7 @@ const EventFlyoutStatus = ({
             iconType="warning"
             color="danger"
             title={<h3>{UNAVAILABLE_TITLE}</h3>}
-            body={
-              <>
-                <p>{UNAVAILABLE_BODY}</p>
-                {detailsHref ? (
-                  <EuiLink
-                    href={detailsHref}
-                    data-test-subj="nightshiftEventAlertFlyoutViewAlert"
-                    {...getEbtProps({
-                      action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SIGNIFICANT_EVENT,
-                      element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
-                    })}
-                  >
-                    {i18n.translate('xpack.nightshift.flyout.viewAlertLink', {
-                      defaultMessage: 'View alert',
-                    })}
-                  </EuiLink>
-                ) : null}
-              </>
-            }
+            body={<p>{UNAVAILABLE_BODY}</p>}
             data-test-subj="nightshiftEventAlertFlyoutError"
           />
         ) : (
@@ -118,12 +95,10 @@ const EventFlyoutStatus = ({
 
 const EventFlyoutById = ({
   eventId,
-  detailsHref,
   isReady,
   onClose,
 }: {
   eventId?: string;
-  detailsHref?: string;
   /** The event types are registered, which the flyout's investigation card reports against. */
   isReady: boolean;
   onClose: () => void;
@@ -133,14 +108,7 @@ const EventFlyoutById = ({
   const { data: event, isError } = useFetchEventById(eventId);
   // No event id, no such event, or a failed lookup: say so in the flyout, like the alert flyouts.
   const isUnavailable = eventId === undefined || isError || event === null;
-  const status = (
-    <EventFlyoutStatus
-      isError={isUnavailable}
-      size={width}
-      detailsHref={detailsHref}
-      onClose={onClose}
-    />
-  );
+  const status = <EventFlyoutStatus isError={isUnavailable} size={width} onClose={onClose} />;
 
   return event && isReady ? (
     <React.Suspense fallback={status}>
@@ -153,7 +121,6 @@ const EventFlyoutById = ({
 
 export interface EventFlyoutHostProps {
   eventId?: string;
-  detailsHref?: string;
   onClose: () => void;
   coreStart: CoreStart;
   pluginsStart: NightshiftStartDependencies;
@@ -169,7 +136,6 @@ export interface EventFlyoutHostProps {
  */
 export const EventFlyoutHost = ({
   eventId,
-  detailsHref,
   onClose,
   coreStart,
   pluginsStart,
@@ -200,12 +166,7 @@ export const EventFlyoutHost = ({
   return (
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <EventFlyoutById
-          eventId={eventId}
-          detailsHref={detailsHref}
-          isReady={isReady}
-          onClose={onClose}
-        />
+        <EventFlyoutById eventId={eventId} isReady={isReady} onClose={onClose} />
       </QueryClientProvider>
     </KibanaContextProvider>
   );

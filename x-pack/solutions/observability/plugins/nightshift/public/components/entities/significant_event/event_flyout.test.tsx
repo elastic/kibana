@@ -293,7 +293,7 @@ describe('EventFlyout', () => {
     expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
   });
 
-  it('does not clear a replacement overlay event after New chat stages the original event', async () => {
+  it('keeps a staged overlay event when it refetches after New chat', async () => {
     const { rerender, unmount } = renderFlyout({
       type: 'overlay',
       event: {
@@ -312,17 +312,15 @@ describe('EventFlyout', () => {
     await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
     rerender(
       <EventFlyout
-        event={{ ...mockEvent, event_id: 'evt-002' }}
+        event={{ ...mockEvent, summary: 'Updated after refetch' }}
         onClose={jest.fn()}
         type="overlay"
       />
     );
-    unmount();
 
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).not.toHaveBeenCalled();
+    unmount();
     expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
-    expect(mockFocusedSignificantEventService.clearFocusedEvent).not.toHaveBeenCalledWith(
-      'evt-002'
-    );
   });
 
   it('offers a new chat instead of the investigation chat while it is running', async () => {

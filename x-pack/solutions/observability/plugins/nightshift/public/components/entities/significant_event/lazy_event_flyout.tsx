@@ -49,10 +49,9 @@ export const createLazyEventFlyout = ({
   /** Whether Significant Events is available to the current user. */
   canOpen: () => boolean;
 }): AlertFlyoutRegistration => {
-  const EventFlyoutForAlert = ({ snapshot, detailsHref, onClose }: AlertFlyoutProps) => (
+  const EventFlyoutForAlert = ({ snapshot, onClose }: AlertFlyoutProps) => (
     <LazyEventFlyoutHost
       eventId={getEventId(snapshot)}
-      detailsHref={detailsHref}
       onClose={onClose}
       coreStart={coreStart}
       pluginsStart={pluginsStart}

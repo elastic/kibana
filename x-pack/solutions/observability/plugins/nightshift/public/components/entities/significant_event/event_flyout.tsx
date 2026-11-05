@@ -194,16 +194,24 @@ export function EventFlyout({
   useEffect(() => {
     // The focused event belongs to Nightshift's own chat; an overlay over another page, such as an
     // investigation, must not take it over unless its New chat action explicitly stages the event.
-    if (type !== 'overlay') {
-      focusedSignificantEventService.setFocusedEvent(event);
+    if (type === 'overlay') {
+      return;
     }
+    focusedSignificantEventService.setFocusedEvent(event);
     return () => {
-      if (type !== 'overlay' || stagedOverlayEventId.current === event.event_id) {
-        focusedSignificantEventService.clearFocusedEvent(event.event_id);
+      focusedSignificantEventService.clearFocusedEvent(event.event_id);
+    };
+  }, [event, focusedSignificantEventService, type]);
+
+  useEffect(() => {
+    return () => {
+      const stagedEventId = stagedOverlayEventId.current;
+      if (stagedEventId) {
+        focusedSignificantEventService.clearFocusedEvent(stagedEventId);
         stagedOverlayEventId.current = undefined;
       }
     };
-  }, [event, focusedSignificantEventService, type]);
+  }, [focusedSignificantEventService]);
 
   useEffect(() => {
     if (

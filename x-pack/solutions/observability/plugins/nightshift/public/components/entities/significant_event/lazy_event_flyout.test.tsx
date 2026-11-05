@@ -80,20 +80,14 @@ const registration = (
 const renderFlyout = (
   data: Record<string, unknown> | undefined,
   onClose = jest.fn(),
-  ensureEbtEvents?: () => Promise<void>,
-  detailsHref?: string
+  ensureEbtEvents?: () => Promise<void>
 ) => {
   const { Component } = registration(ensureEbtEvents);
   render(
     <EuiProvider>
       <I18nProvider>
         <React.Suspense fallback={null}>
-          <Component
-            alertId="episode-1"
-            snapshot={data ? { data } : undefined}
-            detailsHref={detailsHref}
-            onClose={onClose}
-          />
+          <Component alertId="episode-1" snapshot={data ? { data } : undefined} onClose={onClose} />
         </React.Suspense>
       </I18nProvider>
     </EuiProvider>
@@ -118,7 +112,9 @@ describe('getEventId', () => {
 });
 
 describe('createLazyEventFlyout', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('can open only an alert that carries an event id', () => {
     const { canOpen } = registration();
@@ -173,21 +169,6 @@ describe('createLazyEventFlyout', () => {
 
     fireEvent.click(screen.getByTestId('flyoutClose'));
     expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('links to the alert when the event cannot be loaded', async () => {
-    useFetch.mockReturnValue(result({ data: null, isError: false }));
-    renderFlyout(
-      { event_id: 'event-1' },
-      jest.fn(),
-      undefined,
-      '/app/observability/alerts/episode-1'
-    );
-
-    expect(await screen.findByRole('link', { name: 'View alert' })).toHaveAttribute(
-      'href',
-      '/app/observability/alerts/episode-1'
-    );
   });
 
   it('keeps the loading state until the analytics event types are registered', async () => {
