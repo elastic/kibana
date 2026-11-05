@@ -40,16 +40,24 @@ describe('buildEventEnrichmentQuery', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
     expect(query.query?.bool?.must_not).toEqual([
-      { term: { 'labels.is_ioc_transform_source': 'true' } },
+      {
+        bool: {
+          should: [
+            { term: { 'labels.is_ioc_transform_source': 'true' } },
+            { term: { 'labels.is_transform_source': 'true' } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     ]);
   });
 
-  it('does not require the transform label, so unlabeled indicators still match', () => {
+  it('does not require a transform label, so unlabeled indicators still match', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(JSON.stringify(query.query?.bool?.filter)).not.toContain(
-      'labels.is_ioc_transform_source'
-    );
+    const requiredClauses = JSON.stringify([query.query?.bool?.filter, query.query?.bool?.should]);
+    expect(requiredClauses).not.toContain('labels.is_ioc_transform_source');
+    expect(requiredClauses).not.toContain('labels.is_transform_source');
   });
 
   it('includes the specified timerange', () => {

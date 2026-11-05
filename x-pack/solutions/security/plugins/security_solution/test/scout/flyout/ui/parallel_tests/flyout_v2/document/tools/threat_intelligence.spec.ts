@@ -21,8 +21,13 @@ const indexNames = (spaceId: string) => {
     unlabeled: `endgame-scout-ti-flyout-unlabeled-${suffix}`,
     raw: `endgame-scout-ti-flyout-raw-${suffix}`,
     latest: `endgame-scout-ti-flyout-latest-${suffix}`,
+    altLabelRaw: `endgame-scout-ti-flyout-alt-raw-${suffix}`,
+    altLabelLatest: `endgame-scout-ti-flyout-alt-latest-${suffix}`,
   } as const;
 };
+
+/** The two labels integrations use to mark raw copies (`"true"`) and latest copies (`"false"`). */
+type TransformSourceLabel = 'is_ioc_transform_source' | 'is_transform_source';
 
 const indicatorProperties: Record<string, estypes.MappingProperty> = {
   '@timestamp': { type: 'date' },
@@ -44,14 +49,14 @@ const indicator = (feedName: string, eventId: string, timestamp: string) => ({
 const createIndicatorIndex = async (
   esClient: EsClient,
   index: string,
-  transformSourceLabel: 'true' | 'false' | undefined,
+  transformSource: { label: TransformSourceLabel; value: 'true' | 'false' } | undefined,
   documents: Array<Record<string, unknown>>
 ): Promise<void> => {
-  const labels: Record<string, estypes.MappingProperty> = transformSourceLabel
+  const labels: Record<string, estypes.MappingProperty> = transformSource
     ? {
         labels: {
           properties: {
-            is_ioc_transform_source: { type: 'constant_keyword', value: transformSourceLabel },
+            [transformSource.label]: { type: 'constant_keyword', value: transformSource.value },
           },
         },
       }
@@ -69,21 +74,38 @@ const createIndicatorIndex = async (
   });
 };
 
-// One indicator from an integration with a latest transform (two raw versions plus the latest
-// copy) and one indicator from a feed without the transform label.
+// One indicator from each of two integrations with a latest transform (two raw versions plus the
+// latest copy), one per transform label, and one indicator from a feed without a transform label.
 const createThreatIntelFixture = async (esClient: EsClient, spaceId: string): Promise<void> => {
-  const { source, unlabeled, raw, latest } = indexNames(spaceId);
+  const { source, unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(spaceId);
   const now = Date.now();
   const earlier = new Date(now - 60 * 60 * 1000).toISOString();
   const latestTimestamp = new Date(now - 60 * 1000).toISOString();
 
-  await createIndicatorIndex(esClient, raw, 'true', [
-    indicator('Transform feed', 'transform-indicator', earlier),
-    indicator('Transform feed', 'transform-indicator', latestTimestamp),
-  ]);
-  await createIndicatorIndex(esClient, latest, 'false', [
-    indicator('Transform feed', 'transform-indicator', latestTimestamp),
-  ]);
+  const transformFeeds = [
+    {
+      label: 'is_ioc_transform_source',
+      feedName: 'Transform feed',
+      rawIndex: raw,
+      latestIndex: latest,
+    },
+    {
+      label: 'is_transform_source',
+      feedName: 'Alternate label transform feed',
+      rawIndex: altLabelRaw,
+      latestIndex: altLabelLatest,
+    },
+  ] as const;
+  for (const { label, feedName, rawIndex, latestIndex } of transformFeeds) {
+    const eventId = `${label}-indicator`;
+    await createIndicatorIndex(esClient, rawIndex, { label, value: 'true' }, [
+      indicator(feedName, eventId, earlier),
+      indicator(feedName, eventId, latestTimestamp),
+    ]);
+    await createIndicatorIndex(esClient, latestIndex, { label, value: 'false' }, [
+      indicator(feedName, eventId, latestTimestamp),
+    ]);
+  }
   await createIndicatorIndex(esClient, unlabeled, undefined, [
     indicator('Custom feed', 'custom-indicator', latestTimestamp),
   ]);
@@ -109,8 +131,10 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       // A per-space threat index keeps parallel workers from reading each other's indicators.
-      const { unlabeled, raw, latest } = indexNames(scoutSpace.id);
-      await scoutSpace.uiSettings.set({ [THREAT_INDEX_SETTING]: [unlabeled, raw, latest] });
+      const { unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(scoutSpace.id);
+      await scoutSpace.uiSettings.set({
+        [THREAT_INDEX_SETTING]: [unlabeled, raw, latest, altLabelRaw, altLabelLatest],
+      });
     });
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, esClient, scoutSpace }) => {
@@ -128,9 +152,11 @@ spaceTest.describe(
     spaceTest.afterEach(async ({ apiServices, esClient, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
-      const { source, unlabeled, raw, latest } = indexNames(scoutSpace.id);
+      const { source, unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(
+        scoutSpace.id
+      );
       await esClient.indices.delete({
-        index: [source, unlabeled, raw, latest],
+        index: [source, unlabeled, raw, latest, altLabelRaw, altLabelLatest],
         ignore_unavailable: true,
       });
     });
@@ -145,11 +171,11 @@ spaceTest.describe(
         const { documentFlyout, threatIntelligenceTool } = pageObjects;
         await documentFlyout.openForRule(ruleName);
 
-        await expect(threatIntelligenceTool.enrichedWithThreatIntelligenceCount).toHaveText('2');
+        await expect(threatIntelligenceTool.enrichedWithThreatIntelligenceCount).toHaveText('3');
 
         await threatIntelligenceTool.titleLink.click();
         await expect(threatIntelligenceTool.investigationEnrichmentsSection).toBeVisible();
-        await expect(threatIntelligenceTool.investigationEnrichments).toHaveCount(2);
+        await expect(threatIntelligenceTool.investigationEnrichments).toHaveCount(3);
       }
     );
   }

@@ -50,7 +50,17 @@ describe('useIndicatorsTotalCount()', () => {
                   { term: { 'event.category': { value: 'threat' } } },
                   { term: { 'event.type': { value: 'indicator' } } },
                 ],
-                must_not: [{ term: { 'labels.is_ioc_transform_source': 'true' } }],
+                must_not: [
+                  {
+                    bool: {
+                      should: [
+                        { term: { 'labels.is_ioc_transform_source': 'true' } },
+                        { term: { 'labels.is_transform_source': 'true' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
               },
             },
           }),

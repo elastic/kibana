@@ -8,7 +8,15 @@
 import type { Filter } from '@kbn/es-query';
 import { getIndicatorQueryParams } from './get_indicator_query_params';
 
-const transformSourceExclusion = { term: { 'labels.is_ioc_transform_source': 'true' } };
+const transformSourceExclusion = {
+  bool: {
+    should: [
+      { term: { 'labels.is_ioc_transform_source': 'true' } },
+      { term: { 'labels.is_transform_source': 'true' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
 
 describe('getIndicatorQueryParams()', () => {
   const timeRange = { from: '2022-06-01T00:00:00.000Z', to: '2022-06-30T00:00:00.000Z' };
@@ -23,16 +31,16 @@ describe('getIndicatorQueryParams()', () => {
     expect(query.bool.must_not).toEqual([transformSourceExclusion]);
   });
 
-  it('does not require the transform label, so unlabeled indicators still match', () => {
+  it('does not require a transform label, so unlabeled indicators still match', () => {
     const { query } = getIndicatorQueryParams({
       filters: [],
       filterQuery: { language: 'kuery', query: '' },
       timeRange,
     });
 
-    expect(JSON.stringify([query.bool.must, query.bool.filter, query.bool.should])).not.toContain(
-      'labels.is_ioc_transform_source'
-    );
+    const requiredClauses = JSON.stringify([query.bool.must, query.bool.filter, query.bool.should]);
+    expect(requiredClauses).not.toContain('labels.is_ioc_transform_source');
+    expect(requiredClauses).not.toContain('labels.is_transform_source');
   });
 
   it('keeps user filters and the time range alongside the exclusion', () => {

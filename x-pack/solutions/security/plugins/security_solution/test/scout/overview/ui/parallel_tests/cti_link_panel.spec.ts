@@ -12,6 +12,8 @@ import { spaceTest, tags } from '../fixtures';
 
 const THREAT_INDEX_SETTING = 'securitySolution:defaultThreatIndex';
 const FEED_NAME = 'AbuseCH malware';
+// Flashpoint labels its raw copies with `labels.is_transform_source`, not `labels.is_ioc_transform_source`.
+const ALT_LABEL_FEED_NAME = 'Flashpoint';
 const INDICATOR_TIMESTAMP = '2021-03-10T14:51:05.766Z';
 const RANGE_WITH_INDICATOR = {
   from: '2021-03-01T00:00:00.000Z',
@@ -30,6 +32,8 @@ const indexNames = (spaceId: string) => {
     threat: `endgame-scout-cti-threat-${suffix}`,
     threatRaw: `endgame-scout-cti-threat-raw-${suffix}`,
     threatLatest: `endgame-scout-cti-threat-latest-${suffix}`,
+    threatAltLabelRaw: `endgame-scout-cti-threat-alt-raw-${suffix}`,
+    threatAltLabelLatest: `endgame-scout-cti-threat-alt-latest-${suffix}`,
   } as const;
 };
 
@@ -63,28 +67,39 @@ const createThreatIndex = (esClient: EsClient, spaceId: string): Promise<void> =
     },
   ]);
 
+interface TransformFeed {
+  /** The label the integration uses to mark raw copies (`"true"`) and latest copies (`"false"`). */
+  label: 'is_ioc_transform_source' | 'is_transform_source';
+  dataset: string;
+  feedName: string;
+  rawIndex: string;
+  latestIndex: string;
+}
+
 // Mirrors an integration with a latest transform: every ingested version lands in the raw index
 // and the transform keeps one copy per indicator in the latest index.
-const createTransformThreatIndices = async (esClient: EsClient, spaceId: string): Promise<void> => {
-  const { threatRaw, threatLatest } = indexNames(spaceId);
+const createTransformThreatIndices = async (
+  esClient: EsClient,
+  { label, dataset, feedName, rawIndex, latestIndex }: TransformFeed
+): Promise<void> => {
   const transformIndicator = (isTransformSource: 'true' | 'false', timestamp: string) => ({
     '@timestamp': timestamp,
-    event: { dataset: 'ti_abusech.malware', id: 'scout-transform-indicator' },
-    threat: { feed: { name: FEED_NAME } },
-    labels: { is_ioc_transform_source: isTransformSource },
+    event: { dataset, id: `scout-${dataset}-indicator` },
+    threat: { feed: { name: feedName } },
+    labels: { [label]: isTransformSource },
   });
   const labelProperties = (value: 'true' | 'false') => ({
     ...threatIndexProperties,
     labels: {
-      properties: { is_ioc_transform_source: { type: 'constant_keyword', value } },
+      properties: { [label]: { type: 'constant_keyword', value } },
     },
   });
 
-  await createIndexWithDocuments(esClient, threatRaw, labelProperties('true'), [
+  await createIndexWithDocuments(esClient, rawIndex, labelProperties('true'), [
     transformIndicator('true', '2021-03-09T10:00:00.000Z'),
     transformIndicator('true', INDICATOR_TIMESTAMP),
   ]);
-  await createIndexWithDocuments(esClient, threatLatest, labelProperties('false'), [
+  await createIndexWithDocuments(esClient, latestIndex, labelProperties('false'), [
     transformIndicator('false', INDICATOR_TIMESTAMP),
   ]);
 };
@@ -99,9 +114,16 @@ spaceTest.describe(
         await scoutSpace.setSolutionView('security');
       }
       // A per-space threat index keeps parallel workers from reading each other's indicators.
-      const { threat, threatRaw, threatLatest } = indexNames(scoutSpace.id);
+      const { threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } =
+        indexNames(scoutSpace.id);
       await scoutSpace.uiSettings.set({
-        [THREAT_INDEX_SETTING]: [threat, threatRaw, threatLatest],
+        [THREAT_INDEX_SETTING]: [
+          threat,
+          threatRaw,
+          threatLatest,
+          threatAltLabelRaw,
+          threatAltLabelLatest,
+        ],
       });
     });
 
@@ -110,9 +132,10 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
-      const { events, threat, threatRaw, threatLatest } = indexNames(scoutSpace.id);
+      const { events, threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } =
+        indexNames(scoutSpace.id);
       await esClient.indices.delete({
-        index: [events, threat, threatRaw, threatLatest],
+        index: [events, threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest],
         ignore_unavailable: true,
       });
     });
@@ -185,18 +208,40 @@ spaceTest.describe(
     spaceTest(
       'counts each transform indicator once alongside indicators without the transform label',
       async ({ esClient, scoutSpace, pageObjects }) => {
-        await createTransformThreatIndices(esClient, scoutSpace.id);
+        const { threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } = indexNames(
+          scoutSpace.id
+        );
+        await createTransformThreatIndices(esClient, {
+          label: 'is_ioc_transform_source',
+          dataset: 'ti_abusech.malware',
+          feedName: FEED_NAME,
+          rawIndex: threatRaw,
+          latestIndex: threatLatest,
+        });
+        await createTransformThreatIndices(esClient, {
+          label: 'is_transform_source',
+          dataset: 'ti_flashpoint.indicator',
+          feedName: ALT_LABEL_FEED_NAME,
+          rawIndex: threatAltLabelRaw,
+          latestIndex: threatAltLabelLatest,
+        });
         await createThreatIndex(esClient, scoutSpace.id);
 
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
 
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(ALT_LABEL_FEED_NAME, {
+          timeout: DATA_LOAD_TIMEOUT_MS,
+        });
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
-          'Showing: 2 indicators'
+          'Showing: 3 indicators'
         );
-        // The feed's indicator count is the only number in its row.
+        // Each feed's indicator count is the only number in its row.
         await expect(securityOverviewPage.threatIntelFeedRow(FEED_NAME)).toHaveText(
           new RegExp(`^${FEED_NAME}\\D*2\\D*$`)
+        );
+        await expect(securityOverviewPage.threatIntelFeedRow(ALT_LABEL_FEED_NAME)).toHaveText(
+          new RegExp(`^${ALT_LABEL_FEED_NAME}\\D*1\\D*$`)
         );
       }
     );

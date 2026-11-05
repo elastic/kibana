@@ -128,3 +128,93 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alt-label-indicator-raw-1",
+    "index": "logs-ti_alt_label_test.indicator",
+    "source": {
+      "@timestamp": "2022-06-01T12:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_alt_label_test.indicator",
+        "id": "alt-label-indicator",
+        "type": "indicator"
+      },
+      "labels": {
+        "is_transform_source": "true"
+      },
+      "threat": {
+        "feed": {
+          "name": "Alternate Label Test Feed"
+        },
+        "indicator": {
+          "first_seen": "2022-06-01T11:00:00.000Z",
+          "ip": "198.51.100.23",
+          "type": "ipv4-addr"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alt-label-indicator-raw-2",
+    "index": "logs-ti_alt_label_test.indicator",
+    "source": {
+      "@timestamp": "2022-06-02T12:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_alt_label_test.indicator",
+        "id": "alt-label-indicator",
+        "type": "indicator"
+      },
+      "labels": {
+        "is_transform_source": "true"
+      },
+      "threat": {
+        "feed": {
+          "name": "Alternate Label Test Feed"
+        },
+        "indicator": {
+          "first_seen": "2022-06-01T11:00:00.000Z",
+          "ip": "198.51.100.23",
+          "type": "ipv4-addr"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alt-label-indicator-latest",
+    "index": "logs-ti_alt_label_test_latest.indicator",
+    "source": {
+      "@timestamp": "2022-06-02T12:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_alt_label_test.indicator",
+        "id": "alt-label-indicator",
+        "type": "indicator"
+      },
+      "labels": {
+        "is_transform_source": "false"
+      },
+      "threat": {
+        "feed": {
+          "name": "Alternate Label Test Feed"
+        },
+        "indicator": {
+          "first_seen": "2022-06-01T11:00:00.000Z",
+          "ip": "198.51.100.23",
+          "type": "ipv4-addr"
+        }
+      }
+    }
+  }
+}

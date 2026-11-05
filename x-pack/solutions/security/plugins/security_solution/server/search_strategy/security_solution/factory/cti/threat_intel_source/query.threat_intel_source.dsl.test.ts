@@ -20,6 +20,16 @@ export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
   },
 };
 
+const transformSourceExclusion = {
+  bool: {
+    should: [
+      { term: { 'labels.is_ioc_transform_source': 'true' } },
+      { term: { 'labels.is_transform_source': 'true' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
 export const expectedDsl = {
   aggs: {
     dataset: {
@@ -53,7 +63,7 @@ export const expectedDsl = {
           },
         },
       ],
-      must_not: [{ term: { 'labels.is_ioc_transform_source': 'true' } }],
+      must_not: [transformSourceExclusion],
     },
   },
   ignore_unavailable: true,
@@ -72,7 +82,7 @@ describe('buildbuildTiDataSourceQueryQuery', () => {
     expect(buildTiDataSourceQuery({ ...mockOptions, timerange: undefined }).query).toEqual({
       bool: {
         filter: [],
-        must_not: [{ term: { 'labels.is_ioc_transform_source': 'true' } }],
+        must_not: [transformSourceExclusion],
       },
     });
   });
