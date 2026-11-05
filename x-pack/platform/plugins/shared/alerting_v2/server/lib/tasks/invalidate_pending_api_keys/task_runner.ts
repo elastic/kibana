@@ -13,7 +13,7 @@ import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { runInvalidate } from '@kbn/task-manager-plugin/server';
+import { runInvalidate } from '@kbn/response-ops-api-keys';
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
@@ -61,6 +61,7 @@ export class ApiKeyInvalidationTaskRunner {
         invalidateUiamApiKeyFn: this.securityCore.authc.apiKeys.uiam?.invalidate,
         logger: this.coreLogger,
         missingApiKeyRetries,
+        pluginTag: 'alerting-v2',
         removalDelay,
         savedObjectsClient: this.savedObjectsClient,
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,

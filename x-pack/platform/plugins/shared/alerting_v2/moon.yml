@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/react-query'
   - '@kbn/core-security-server'
+  - '@kbn/response-ops-api-keys'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'

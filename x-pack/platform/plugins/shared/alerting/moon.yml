@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/alerting-state-types'
   - '@kbn/core-security-server'
+  - '@kbn/response-ops-api-keys'
   - '@kbn/core-user-profile-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'

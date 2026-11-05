@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PAGE_SIZE } from './constants';
-import type { SavedObjectTypesToQuery } from './run_invalidate';
+import type { SavedObjectTypesToQuery } from './types';
 
 interface QueryForApiKeysInUseOpts {
   apiKeyIds: string[];

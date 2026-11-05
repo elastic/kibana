@@ -1391,6 +1391,8 @@ packages:
   - 'x-pack/platform/packages/shared/response-ops/alerts-fields-browser'
   - 'x-pack/platform/packages/shared/response-ops/alerts-filters-form'
   - 'x-pack/platform/packages/shared/response-ops/alerts-table'
+  - 'x-pack/platform/packages/shared/response-ops/api-keys'
+  - 'x-pack/platform/packages/shared/response-ops/api-keys-test-helpers'
   - 'x-pack/platform/packages/shared/response-ops/detections-close-reason'
   - 'x-pack/platform/packages/shared/response-ops/form-generator'
   - 'x-pack/platform/packages/shared/response-ops/oauth-hooks'

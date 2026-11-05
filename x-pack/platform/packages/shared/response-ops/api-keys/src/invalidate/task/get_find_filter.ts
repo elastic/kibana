@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timePeriodBeforeDate } from '../../lib/intervals';
+import { timePeriodBeforeDate } from './intervals';
 
 interface GetFindFilterOpts {
   removalDelay: string;

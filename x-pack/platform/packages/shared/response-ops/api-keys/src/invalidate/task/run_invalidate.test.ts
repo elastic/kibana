@@ -108,6 +108,7 @@ describe('runInvalidate', () => {
           removalDelay: '1h',
           invalidateApiKeyFn,
           logger,
+          pluginTag: 'test',
           savedObjectsClient: internalSavedObjectsRepository,
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
@@ -185,6 +186,7 @@ describe('runInvalidate', () => {
           removalDelay: '1h',
           invalidateApiKeyFn,
           logger,
+          pluginTag: 'test',
           savedObjectsClient: internalSavedObjectsRepository,
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
@@ -320,6 +322,7 @@ describe('runInvalidate', () => {
           removalDelay: '1h',
           invalidateApiKeyFn,
           logger,
+          pluginTag: 'test',
           savedObjectsClient: internalSavedObjectsRepository,
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
@@ -436,6 +439,7 @@ describe('runInvalidate', () => {
           removalDelay: '1h',
           invalidateApiKeyFn,
           logger,
+          pluginTag: 'test',
           savedObjectsClient: internalSavedObjectsRepository,
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
@@ -576,6 +580,7 @@ describe('runInvalidate', () => {
           removalDelay: '1h',
           invalidateApiKeyFn,
           logger,
+          pluginTag: 'test',
           savedObjectsClient: internalSavedObjectsRepository,
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
@@ -760,6 +765,7 @@ describe('runInvalidate', () => {
           removalDelay: '1h',
           invalidateApiKeyFn,
           logger,
+          pluginTag: 'test',
           savedObjectsClient: internalSavedObjectsRepository,
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
@@ -842,4 +848,55 @@ describe('runInvalidate', () => {
       });
     }
   );
+
+  test('excludes pending saved objects that were kept so the next page does not return them again', async () => {
+    const type = 'api_key_pending_invalidation';
+    const pending = (id: string, apiKeyId: string) => ({
+      id,
+      type,
+      score: 0,
+      attributes: { apiKeyId, createdAt: '2024-04-11T17:08:44.035Z' },
+      references: [],
+    });
+
+    internalSavedObjectsRepository.find.mockResolvedValueOnce({
+      saved_objects: [pending('1', 'key-1')],
+      total: 105,
+      per_page: 100,
+      page: 1,
+    });
+    invalidateApiKeyFn.mockResolvedValueOnce({
+      invalidated_api_keys: [],
+      previously_invalidated_api_keys: [],
+      error_count: 1,
+      error_details: [{ type: 'error', reason: 'boom' }],
+    });
+    internalSavedObjectsRepository.find.mockResolvedValueOnce({
+      saved_objects: [],
+      total: 0,
+      per_page: 100,
+      page: 1,
+    });
+
+    const result = await runInvalidate({
+      invalidateApiKeyFn,
+      logger,
+      pluginTag: 'test',
+      removalDelay: '1h',
+      savedObjectsClient: internalSavedObjectsRepository,
+      savedObjectType: type,
+      savedObjectTypesToQuery: [],
+    });
+
+    expect(result.totalInvalidated).toEqual(0);
+    expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
+    expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(2, {
+      type,
+      filter: `${type}.attributes.createdAt <= "2021-01-01T11:00:00.000Z" AND NOT ${type}.id: "${type}:1"`,
+      page: 1,
+      sortField: 'createdAt',
+      sortOrder: 'asc',
+      perPage: 100,
+    });
+  });
 });

@@ -11,6 +11,7 @@ import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const invalidateApiKeyFn = jest.fn();
+const logTags = ['serverless', 'test', 'uiam', 'uiam-api-key-invalidate'];
 
 describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
   beforeEach(() => {
@@ -22,6 +23,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       apiKeyIdsToInvalidate: [],
       invalidateApiKeyFn,
       logger,
+      logTags,
       missingApiKeyRetries: {},
       savedObjectsClient: internalSavedObjectsRepository,
       savedObjectType: 'api_key_pending_invalidation',
@@ -44,6 +46,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       ],
       invalidateApiKeyFn,
       logger,
+      logTags,
       missingApiKeyRetries: {},
       savedObjectsClient: internalSavedObjectsRepository,
       savedObjectType: 'api_key_to_invalidate',
@@ -79,6 +82,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       ],
       invalidateApiKeyFn,
       logger,
+      logTags,
       missingApiKeyRetries: {},
       savedObjectsClient: internalSavedObjectsRepository,
       savedObjectType: 'api_key_pending_invalidation',
@@ -89,6 +93,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
     expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(`Failed to invalidate API Keys [count=\"2\"]`);
     expect(result.totalInvalidated).toEqual(0);
+    expect(result.keptSOIds).toEqual(['1', '2']);
     expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "0"`);
   });
 
@@ -99,6 +104,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         { id: '2', apiKeyId: 'xyz!==!' },
       ],
       logger,
+      logTags,
       missingApiKeyRetries: {},
       savedObjectsClient: internalSavedObjectsRepository,
       savedObjectType: 'api_key_pending_invalidation',
@@ -128,6 +134,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       ],
       invalidateApiKeyFn,
       logger,
+      logTags,
       missingApiKeyRetries: {},
       savedObjectsClient: internalSavedObjectsRepository,
       savedObjectType: 'api_key_to_invalidate',
@@ -171,6 +178,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: {},
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -198,6 +206,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: {},
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -229,6 +238,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: {},
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -241,6 +251,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
       expect(result.totalInvalidated).toEqual(0);
       expect(result.missingApiKeyRetries).toEqual({ so_1: 1 });
+      expect(result.keptSOIds).toEqual(['so_1']);
     });
 
     test('should delete SO after APIKEY_MISSING reaches the retry threshold', async () => {
@@ -258,6 +269,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: { so_1: 4 },
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -289,6 +301,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: { so_1: 2 },
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -317,6 +330,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: inputRetries,
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -340,6 +354,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         ],
         invalidateUiamApiKeyFn,
         logger,
+        logTags,
         missingApiKeyRetries: {},
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',
@@ -347,10 +362,11 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to invalidate UIAM APIKey'),
-        expect.objectContaining({ tags: expect.arrayContaining(['uiam-api-key-invalidate']) })
+        { tags: logTags }
       );
       expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
       expect(result.totalInvalidated).toEqual(0);
+      expect(result.keptSOIds).toEqual(['so_1']);
     });
 
     test('should delete SO when UIAM security is disabled', async () => {
@@ -360,6 +376,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
           { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
         ],
         logger,
+        logTags,
         missingApiKeyRetries: {},
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_pending_invalidation',

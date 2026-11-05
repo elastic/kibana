@@ -8,12 +8,12 @@
 import type {
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '@kbn/security-plugin-types-server';
+} from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
-import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
-import { getUiamApiKeySecret } from '../../lib/api_key_utils';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from './types';
+import { getUiamApiKeySecret } from '../../store/api_keys';
 
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }

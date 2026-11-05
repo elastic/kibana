@@ -53,6 +53,7 @@
     "@kbn/core-execution-context-common",
     "@kbn/core-http-server",
     "@kbn/core-security-server",
+    "@kbn/response-ops-api-keys",
     "@kbn/core-security-common",
     "@kbn/scout",
     "@kbn/std",

@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { runInvalidate } from '@kbn/task-manager-plugin/server';
+import { runInvalidate } from '@kbn/response-ops-api-keys';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
@@ -96,6 +96,7 @@ export function taskRunner(
             invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
             logger,
             missingApiKeyRetries,
+            pluginTag: 'alerting',
             removalDelay: config.invalidateApiKeysTask.removalDelay,
             savedObjectsClient,
             savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,

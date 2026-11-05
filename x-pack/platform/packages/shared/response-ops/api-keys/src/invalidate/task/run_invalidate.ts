@@ -7,24 +7,28 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
 import { getFindFilter } from './get_find_filter';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import { PAGE_SIZE } from './constants';
 import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate_api_keys_and_delete_so';
-import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import { getUiamLogTags } from '../../log_tags';
+import type {
+  ApiKeyInvalidationFn,
+  GetIdsUsedByRunningTasks,
+  PendingApiKeyInvalidation,
+  SavedObjectTypesToQuery,
+  UiamApiKeyInvalidationFn,
+} from './types';
 
-export interface SavedObjectTypesToQuery {
-  type: string;
-  apiKeyAttributePath: string;
-}
-
-interface RunInvalidateOpts {
+export interface RunInvalidateOpts {
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
+  getIdsUsedByRunningTasks?: GetIdsUsedByRunningTasks;
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
   missingApiKeyRetries?: Record<string, number>;
+  /** Added to UIAM log tags, e.g. `alerting`. */
+  pluginTag: string;
   removalDelay: string;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
@@ -39,9 +43,11 @@ export interface RunInvalidateResult {
 export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalidateResult> {
   const {
     encryptedSavedObjectsClient,
+    getIdsUsedByRunningTasks,
     invalidateApiKeyFn,
     invalidateUiamApiKeyFn,
     logger,
+    pluginTag,
     removalDelay,
     savedObjectsClient,
     savedObjectType,
@@ -51,6 +57,8 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
   let missingApiKeyRetries = opts.missingApiKeyRetries ?? {};
   let totalInvalidated = 0;
 
+  // Pending saved objects this run already handled without deleting them. Excluding them keeps
+  // the next page from returning the same objects forever.
   const excludedSOIds = new Set<string>();
 
   do {
@@ -59,7 +67,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
       excludedSOIds: [...excludedSOIds],
       savedObjectType,
     });
-    const apiKeysToInvalidate = await savedObjectsClient.find<ApiKeyToInvalidate>({
+    const apiKeysToInvalidate = await savedObjectsClient.find<PendingApiKeyInvalidation>({
       type: savedObjectType,
       page: 1,
       sortField: 'createdAt',
@@ -73,6 +81,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
         await getApiKeyIdsToInvalidate({
           apiKeySOsPendingInvalidation: apiKeysToInvalidate,
           encryptedSavedObjectsClient,
+          getIdsUsedByRunningTasks,
           savedObjectsClient,
           savedObjectType,
           savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
@@ -85,10 +94,12 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
         invalidateApiKeyFn,
         invalidateUiamApiKeyFn,
         logger,
+        logTags: getUiamLogTags(pluginTag).invalidate,
         missingApiKeyRetries,
         savedObjectsClient,
         savedObjectType,
       });
+      result.keptSOIds.forEach((id) => excludedSOIds.add(id));
       totalInvalidated += result.totalInvalidated;
       missingApiKeyRetries = result.missingApiKeyRetries;
     }
