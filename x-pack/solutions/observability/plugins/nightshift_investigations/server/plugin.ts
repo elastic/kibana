@@ -201,6 +201,9 @@ export class NightshiftInvestigationsPlugin
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
     });
+    plugins.alertingVTwo?.enableAlertStatusChanged({
+      isEnabled: async () => isNightshiftEnabledSync(),
+    });
     // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
     const getGatedSandboxStart = createGatedSandboxStart({
@@ -658,6 +661,7 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
@@ -935,6 +939,7 @@ export class NightshiftInvestigationsPlugin
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
       getAutomationsSoClient: this.getAutomationsSoClient,
+      isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });

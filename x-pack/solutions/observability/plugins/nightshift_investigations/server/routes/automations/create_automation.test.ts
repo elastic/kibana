@@ -33,6 +33,7 @@ const call = (overrides: Record<string, unknown> = {}, user?: Record<string, str
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable: () => true,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(user),
   } as never);
@@ -92,7 +93,7 @@ it('turns the UI channel action into an investigation lifecycle destination', as
   const result = await call({ completions: [completion] });
   expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
-  expect(workflow.steps[0].with.notificationDestinations).toEqual([
+  expect(workflow.steps[0].steps[0].with.notificationDestinations).toEqual([
     {
       type: 'slack',
       connector_id: 'elastic-apps-slack',

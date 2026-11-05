@@ -66,6 +66,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
+  isUniversalAlertingAvailable: () => boolean;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;
