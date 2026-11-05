@@ -536,7 +536,7 @@ export const getExecutionSummaryAggregation = () => ({
   },
 });
 
-function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
+export function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   try {
     const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
     return filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
@@ -545,7 +545,7 @@ function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   }
 }
 
-function getProviderAndActionFilter(provider: string, action: string) {
+export function getProviderAndActionFilter(provider: string, action: string) {
   return {
     bool: {
       must: [

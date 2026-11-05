@@ -30,8 +30,6 @@ const mockRule: RuleTableItem = {
   nextRun: new Date('2020-08-20T19:23:38Z'),
 } as RuleTableItem;
 
-const onManageLicenseClickMock = jest.fn();
-
 const ComponentWithLocale = (props: RulesListTableStatusCellProps) => {
   return (
     <IntlProvider locale="en">
@@ -45,14 +43,8 @@ describe('RulesListTableStatusCell', () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
   });
 
-  afterEach(() => {
-    onManageLicenseClickMock.mockClear();
-  });
-
   it('should render successful rule outcome', async () => {
-    const { getByTestId } = render(
-      <ComponentWithLocale rule={mockRule} onManageLicenseClick={onManageLicenseClickMock} />
-    );
+    const { getByTestId } = render(<ComponentWithLocale rule={mockRule} />);
     expect(getByTestId('ruleStatus-succeeded')).not.toBe(null);
   });
 
@@ -70,7 +62,6 @@ describe('RulesListTableStatusCell', () => {
             },
           } as RuleTableItem
         }
-        onManageLicenseClick={onManageLicenseClickMock}
       />
     );
     expect(getByTestId('ruleStatus-failed')).not.toBe(null);
@@ -90,7 +81,6 @@ describe('RulesListTableStatusCell', () => {
             },
           } as RuleTableItem
         }
-        onManageLicenseClick={onManageLicenseClickMock}
       />
     );
     expect(getByTestId('ruleStatus-warning')).not.toBe(null);
@@ -111,7 +101,6 @@ describe('RulesListTableStatusCell', () => {
             },
           } as RuleTableItem
         }
-        onManageLicenseClick={onManageLicenseClickMock}
       />
     );
     expect(getByTestId('ruleStatus-warning')).not.toBe(null);
@@ -131,7 +120,6 @@ describe('RulesListTableStatusCell', () => {
             nextRun: null,
           } as RuleTableItem
         }
-        onManageLicenseClick={onManageLicenseClickMock}
       />
     );
 
@@ -150,7 +138,6 @@ describe('RulesListTableStatusCell', () => {
             lastRun: null,
           } as RuleTableItem
         }
-        onManageLicenseClick={onManageLicenseClickMock}
       />
     );
 

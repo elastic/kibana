@@ -6,16 +6,11 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 
-import type {
-  rawRuleExecutionStatusSchema,
-  rawRuleActionSchema,
-  rawRuleAlertsFilterSchema,
-  rawRuleLastRunSchema,
-} from './v3';
+import type { rawRuleActionSchema, rawRuleAlertsFilterSchema } from './v3';
 
 import type { rawRuleMonitoringSchema } from './v11';
 import type { rawRuleSnoozedInstanceSchema } from './v14';
-import type { rawRuleSchema } from './v16';
+import type { rawRuleExecutionStatusSchema, rawRuleLastRunSchema, rawRuleSchema } from './v17';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 

@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import type { KueryNode } from '@kbn/es-query';
 import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import type { RuleStatus } from '../../../types';
 
@@ -52,4 +53,5 @@ export interface LoadRuleAggregationsProps {
   tagsFilter?: string[];
   ruleTypeIds?: string[];
   consumers?: string[];
+  kueryNode?: KueryNode;
 }

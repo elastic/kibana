@@ -49,6 +49,7 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
       tagsFilter: filters.tags,
       ruleTypeIds,
       consumers,
+      kueryNode: filters.kueryNode,
     });
   };
 
@@ -73,6 +74,7 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
       filters.ruleLastRunOutcomes,
       filters.ruleStatuses,
       filters.tags,
+      filters.kueryNode,
       {
         refresh: refresh?.toISOString(),
       },

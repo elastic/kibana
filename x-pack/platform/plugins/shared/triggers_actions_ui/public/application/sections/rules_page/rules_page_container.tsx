@@ -8,10 +8,11 @@
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { routeToRules, routeToSettings } from '../../constants';
+import { routeToHealth, routeToRules, routeToSettings } from '../../constants';
 import { RulesPageActionsProvider } from './rules_page_actions';
 import { RulesListContainer } from '../rules_list/rules_list_page';
 import { LogsListContainer } from '../logs_list/logs_list_page';
+import { RulesHealthContainer } from '../rules_health/rules_health_page';
 import { RulesSettingsPageContainer } from '../rules_settings_page/rules_settings_page';
 
 /*
@@ -22,6 +23,7 @@ const RulesPage = () => {
     <RulesPageActionsProvider>
       <Routes>
         <Route exact path="/logs" component={LogsListContainer} />
+        <Route exact path={routeToHealth} component={RulesHealthContainer} />
         <Route exact path={routeToSettings} component={RulesSettingsPageContainer} />
         <Route exact path="/" component={RulesListContainer} />
         <Redirect exact from={routeToRules} to="/" />

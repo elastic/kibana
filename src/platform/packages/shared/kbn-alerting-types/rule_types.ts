@@ -161,6 +161,14 @@ export enum RuleExecutionStatusErrorReasons {
   Timeout = 'timeout',
   Disabled = 'disabled',
   Validate = 'validate',
+  /** Elasticsearch rejected the rule's API key (401). */
+  Unauthorized = 'unauthorized',
+  /** The rule's API key is valid but lacks the privileges the run needed (403). */
+  Forbidden = 'forbidden',
+  /** An index, data view or other data source the rule depends on no longer exists (404). */
+  NotFound = 'notFound',
+  /** Elasticsearch was unreachable or refused the work (connection errors, 429, 5xx, cluster blocks). */
+  Unavailable = 'unavailable',
 }
 
 export enum RuleExecutionStatusWarningReasons {

@@ -10,6 +10,10 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 
 const ALLOW_FIELDS = [
   'alert.attributes.executionStatus.status',
+  'alert.attributes.executionStatus.error.reason',
+  'alert.attributes.executionStatus.error.message',
+  'alert.attributes.executionStatus.warning.reason',
+  'alert.attributes.executionStatus.warning.message',
   'alert.attributes.lastRun.outcome',
   'alert.attributes.muteAll',
   'alert.attributes.tags',

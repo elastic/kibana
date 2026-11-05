@@ -20,6 +20,8 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_RULE_HEALTH_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULE_HEALTH_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
@@ -79,7 +81,9 @@ const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
       const { v1, v2 } = hasObservabilityAlertingCapabilities(capabilities, 'alerts');
       return v1 || v2;
     }
-    case OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID: {
+    // Health is part of the Classic rules mount, so it follows the Classic rules gate.
+    case OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID:
+    case OBSERVABILITY_ALERTING_RULE_HEALTH_DEEP_LINK_ID: {
       const { v1 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
       return v1;
     }
@@ -152,6 +156,15 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
       path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
       visibleIn: SEARCHABLE_VISIBLE_IN,
       keywords: RULES_V2_KEYWORDS,
+    },
+    {
+      id: OBSERVABILITY_ALERTING_RULE_HEALTH_DEEP_LINK_ID,
+      title: i18n.translate('xpack.observabilityAlerting.deepLinks.ruleHealthTitle', {
+        defaultMessage: 'Rules health',
+      }),
+      path: OBSERVABILITY_ALERTING_RULE_HEALTH_PATH,
+      visibleIn: SEARCHABLE_VISIBLE_IN,
+      keywords: ['alerting', 'rules', 'health', 'failures'],
     },
     {
       id: OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
