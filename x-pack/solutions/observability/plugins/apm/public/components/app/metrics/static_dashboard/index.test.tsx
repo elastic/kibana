@@ -66,6 +66,7 @@ const mockDataView = {
   id: 'test-data-view-id',
   name: 'apm-data-view',
   getIndexPattern: () => 'metrics-*',
+  getFieldByName: (name: string) => ({ name, type: 'string' } as unknown as DataViewField),
 } as unknown as DataView;
 
 const mockPanels = [{ type: 'lens', grid: { x: 0, y: 0, w: 24, h: 12 }, uid: '1', config: {} }];
