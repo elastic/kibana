@@ -9,28 +9,18 @@
 
 import { i18n } from '@kbn/i18n';
 import type { View } from 'vega';
-import type { VegaMapPosition, VegaRenderDescriptor } from './data_model/types';
+import type { VegaRenderDescriptor } from './data_model/types';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaEventHandler } from './types';
 import type { VegaInspectorAdapters } from './vega_inspector';
 import type { DebugValues } from './vega_inspector/vega_adapter';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
-import type { VegaMapView } from './vega_view/vega_map_view/view';
-import { canUpdateDataInPlace } from './vega_view/vega_map_view/can_update_data_in_place';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
 import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
-export type VegaVisType = new (
-  el: HTMLDivElement,
-  fireEvent: VegaEventHandler,
-  onMapViewChange?: (mapView: VegaMapPosition) => void
-) => {
-  render(
-    visData: VegaRenderDescriptor,
-    inspectorAdapters?: VegaInspectorAdapters,
-    mapView?: VegaMapPosition
-  ): Promise<void>;
+export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
+  render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
@@ -41,23 +31,14 @@ export const createVegaVisualization = (
 ): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
-    private vegaView: InstanceType<typeof VegaView> | InstanceType<typeof VegaMapView> | null =
-      null;
+    private vegaView: InstanceType<typeof VegaView> | null = null;
     private vegaStateRestorer = createVegaStateRestorer({
       isActive: () => Boolean(this.vegaView?._descriptor?.restoreSignalValuesOnRefresh),
     });
 
-    constructor(
-      private el: HTMLDivElement,
-      private fireEvent: VegaEventHandler,
-      private onMapViewChange?: (mapView: VegaMapPosition) => void
-    ) {}
+    constructor(private el: HTMLDivElement, private fireEvent: VegaEventHandler) {}
 
-    async render(
-      visData: VegaRenderDescriptor,
-      inspectorAdapters?: VegaInspectorAdapters,
-      mapView?: VegaMapPosition
-    ) {
+    async render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
       const { toasts } = getNotifications();
 
       if (!visData && !this.vegaView) {
@@ -70,7 +51,7 @@ export const createVegaVisualization = (
       }
 
       try {
-        await this._render(visData, inspectorAdapters, mapView);
+        await this._render(visData, inspectorAdapters);
       } catch (error) {
         if (this.vegaView) {
           this.vegaView.onError(error);
@@ -84,24 +65,9 @@ export const createVegaVisualization = (
       }
     }
 
-    async _render(
-      descriptor: VegaRenderDescriptor,
-      inspectorAdapters?: VegaInspectorAdapters,
-      mapView?: VegaMapPosition
-    ) {
+    async _render(descriptor: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
       if (descriptor) {
         inspectorAdapters?.vega.clearError();
-        if (
-          descriptor.useMap &&
-          this.vegaView &&
-          'updateData' in this.vegaView &&
-          canUpdateDataInPlace(this.vegaView._descriptor, descriptor)
-        ) {
-          // Only the data changed, keep the map as it is instead of redrawing it
-          await this.vegaView.updateData(descriptor);
-          return;
-        }
-
         // New data received, rebuild the graph
         if (this.vegaView) {
           await this.vegaView.destroy();
@@ -128,8 +94,6 @@ export const createVegaVisualization = (
           }),
           serviceSettings,
           showWarnings,
-          mapView,
-          onMapViewChange: this.onMapViewChange,
         };
 
         if (descriptor.useMap) {

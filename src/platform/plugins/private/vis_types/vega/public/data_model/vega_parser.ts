@@ -81,8 +81,6 @@ export class VegaParser {
   timeCache: TimeCache;
   theme: CoreTheme;
   esqlVariables?: ESQLControlVariable[];
-  /** Current map zoom, takes precedence over `config.kibana.zoom` for geo precision params */
-  mapZoom?: number;
 
   constructor(
     spec: VegaSpec | string,
@@ -91,8 +89,7 @@ export class VegaParser {
     filters: Bool,
     getServiceSettings: () => Promise<IServiceSettings>,
     theme: CoreTheme,
-    esqlVariables?: ESQLControlVariable[],
-    mapZoom?: number
+    esqlVariables?: ESQLControlVariable[]
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -105,7 +102,6 @@ export class VegaParser {
     this.timeCache = timeCache;
     this.theme = theme;
     this.esqlVariables = esqlVariables;
-    this.mapZoom = mapZoom;
   }
 
   async parseAsync() {
@@ -648,9 +644,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           this.searchAPI,
           this.filters,
           onWarn,
-          this.esqlVariables,
-          // Map zoom is only known for `type: map` specs
-          this.useMap ? { zoom: this.mapZoom ?? this.mapConfig?.zoom ?? 0 } : undefined
+          this.esqlVariables
         ),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),

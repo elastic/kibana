@@ -33,8 +33,6 @@ interface VegaRequestHandlerParams {
   /** Only applies to ES|QL-backed vega data sources */
   isApproximate: boolean;
   esqlVariables?: ESQLControlVariable[];
-  /** Current map zoom, used for geo precision params in ES|QL queries */
-  mapZoom?: number;
 }
 
 interface VegaRequestHandlerContext {
@@ -64,7 +62,6 @@ export function createVegaRequestHandler(
     projectRouting,
     isApproximate,
     esqlVariables,
-    mapZoom,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -105,8 +102,7 @@ export function createVegaRequestHandler(
       filtersDsl,
       getServiceSettings,
       theme.getTheme(),
-      esqlVariables,
-      mapZoom
+      esqlVariables
     );
     return (await vp.parseAsync()).toRenderDescriptor();
   };

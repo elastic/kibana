@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createVegaVisualization } from '../vega_visualization';
 import type { VegaVisualizationDependencies } from '../plugin';
-import type { VegaMapPosition, VegaRenderDescriptor } from '../data_model/types';
+import type { VegaRenderDescriptor } from '../data_model/types';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 import type { VegaEventHandler } from '../types';
 
@@ -34,10 +34,6 @@ interface VegaVisComponentProps {
   /** Whether runtime Vega warnings are surfaced in the panel. Enabled while authoring a spec. */
   showWarnings: boolean;
   visData: VegaRenderDescriptor;
-  /** Map position to render `visData` with. Only read when `visData` changes. */
-  mapView?: VegaMapPosition;
-  /** Called when the user finishes moving the map. Read on every call, so it can change freely. */
-  onMapViewChange?: (mapView: VegaMapPosition) => void;
 }
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
@@ -53,8 +49,6 @@ const vegaVisStyles = {
 
 export const VegaVisComponent = ({
   visData,
-  mapView,
-  onMapViewChange,
   fireEvent,
   inspectorAdapters,
   renderComplete,
@@ -65,17 +59,11 @@ export const VegaVisComponent = ({
   const chartDiv = useRef<HTMLDivElement>(null);
   const renderCompleted = useRef(false);
   const visController = useRef<VegaVisController | null>(null);
-  const mapViewRef = useRef(mapView);
-  mapViewRef.current = mapView;
-  const onMapViewChangeRef = useRef(onMapViewChange);
-  onMapViewChangeRef.current = onMapViewChange;
 
   useEffect(() => {
     if (chartDiv.current) {
       const VegaVis = createVegaVisualization(deps, showWarnings);
-      visController.current = new VegaVis(chartDiv.current, fireEvent, (view) =>
-        onMapViewChangeRef.current?.(view)
-      );
+      visController.current = new VegaVis(chartDiv.current, fireEvent);
     }
     return () => {
       visController.current?.destroy();
@@ -85,7 +73,7 @@ export const VegaVisComponent = ({
 
   useEffect(() => {
     const asyncRender = async (visCtrl: VegaVisController) => {
-      await visCtrl.render(visData, inspectorAdapters, mapViewRef.current);
+      await visCtrl.render(visData, inspectorAdapters);
       renderCompleted.current = true;
       renderComplete();
     };

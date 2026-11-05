@@ -69,7 +69,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { getGeoPrecisionsForZoom } from '../data_model/geo_precisions';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -78,7 +77,7 @@ import {
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import type { VegaMapPosition, VegaRenderDescriptor } from '../data_model/types';
+import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
@@ -95,14 +94,6 @@ const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
 
-const GEO_PRECISION_PARAM_REGEX = /\?_geo(tile|hex|hash)_precision\b/i;
-
-const specUsesGeoPrecisionParam = (spec: unknown) =>
-  GEO_PRECISION_PARAM_REGEX.test(typeof spec === 'string' ? spec : JSON.stringify(spec) ?? '');
-
-const isSameGeoPrecisions = (zoomA: number, zoomB: number) =>
-  JSON.stringify(getGeoPrecisionsForZoom(zoomA)) === JSON.stringify(getGeoPrecisionsForZoom(zoomB));
-
 /**
  * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
  * only change alongside a new `visData` identity. The component rebuilds its Vega view when
@@ -111,8 +102,6 @@ const isSameGeoPrecisions = (zoomA: number, zoomB: number) =>
 interface VegaRenderInput {
   showWarnings: boolean;
   visData: VegaRenderDescriptor;
-  /** Map position at the time of the fetch, so the map stays put when `visData` is replaced. */
-  mapView?: VegaMapPosition;
 }
 
 /**
@@ -216,11 +205,6 @@ export const vegaEmbeddableFactory = (
       .subscribe((dataViews) => dataSources$.next(dataViews));
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
-    // Latest position reported by the Vega map view. A report refetches (`mapViewChange$`) only
-    // when it changes the geo precisions of ES|QL queries compared to the last fetch.
-    let mapView: VegaMapPosition | undefined;
-    let fetchedZoom: number | undefined;
-    const mapViewChange$ = new BehaviorSubject<void>(undefined);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const rendered$ = new BehaviorSubject(false);
@@ -375,34 +359,14 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    let lastSpec = spec$.getValue();
-
-    const onMapViewChange = (view: VegaMapPosition) => {
-      mapView = view;
-      const visData = renderInput$.getValue()?.visData;
-      if (!visData?.useMap || !specUsesGeoPrecisionParam(spec$.getValue().value)) return;
-      const zoomOfFetch = fetchedZoom ?? visData.mapConfig?.zoom ?? 0;
-      if (!isSameGeoPrecisions(zoomOfFetch, view.zoom)) {
-        mapViewChange$.next();
-      }
-    };
-
     const fetchSubscription = combineLatest([
       spec$,
-      mapViewChange$,
       fetch$(api),
       panelSearchStateManager.api.query$,
       panelSearchStateManager.api.filters$,
     ])
       .pipe(
-        switchMap(async ([spec, , data, panelQuery, panelFilters]) => {
-          // A new spec starts from its own map position and zoom.
-          if (spec !== lastSpec) {
-            lastSpec = spec;
-            mapView = undefined;
-          }
-
-          fetchedZoom = mapView?.zoom;
+        switchMap(async ([spec, data, panelQuery, panelFilters]) => {
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -451,7 +415,6 @@ export const vegaEmbeddableFactory = (
               projectRouting: data.projectRouting,
               isApproximate: data.isApproximate,
               esqlVariables: data.esqlVariables,
-              mapZoom: mapView?.zoom,
             });
 
             if (!isCurrentFetch()) {
@@ -462,7 +425,6 @@ export const vegaEmbeddableFactory = (
             renderInput$.next({
               showWarnings: getInheritedViewMode(api) === 'edit',
               visData,
-              mapView,
             });
           } catch (error) {
             if (signal.aborted) {
@@ -517,8 +479,6 @@ export const vegaEmbeddableFactory = (
                   renderComplete={onRenderComplete}
                   showWarnings={renderInput.showWarnings}
                   visData={renderInput.visData}
-                  mapView={renderInput.mapView}
-                  onMapViewChange={onMapViewChange}
                 />
               </Suspense>
             ) : null}
