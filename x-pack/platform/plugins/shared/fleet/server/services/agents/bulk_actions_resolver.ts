@@ -342,13 +342,16 @@ const runCheckTask = async (
 
   // getRetryParams is applied last so action types that must restart from scratch (update tags,
   // whose kuery excludes already-tagged agents) still have the checkpoint stripped.
+  const params = taskInstance.params as BulkActionTaskParams;
   const retryParams = getRetryParams(taskInstance.taskType, {
-    ...(taskInstance.params as BulkActionTaskParams).retryParams,
-    searchAfter: state.searchAfter,
+    ...params.retryParams,
+    // A check task scheduled before this change kept its checkpoint in params rather than state.
+    searchAfter: state.searchAfter ?? params.retryParams?.searchAfter,
+    nbAgentsProcessed: state.nbAgentsProcessed ?? params.retryParams?.nbAgentsProcessed,
     // The params still carry the point in time the API handler opened when the action started.
-    // We only get here after at least one interval without progress, and getAgentsByKuery renews
-    // the PIT with a 1m keep alive, so it is long expired and searching with it would 404.
-    // searchAfter alone pages the live index.
+    // We only get here after at least one interval without progress, and every search renews it
+    // for pitKeepAlive only, so it is long gone. Clearing it makes the runner open a fresh one,
+    // which keeps the sort shape compatible with the saved cursor.
     pitId: undefined,
   });
 

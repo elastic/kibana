@@ -421,6 +421,58 @@ describe('createRetryTask', () => {
       expect(doRetry).not.toHaveBeenCalled();
     });
 
+    it('falls back to the params checkpoint for a legacy check task', async () => {
+      // tasks scheduled before this change kept the checkpoint in params and have empty state
+      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
+
+      await createRetryTask(
+        createTaskInstance({
+          params: {
+            actionParams: { kuery: '', actionId: 'action1', total: 100000, batchSize: 10000 },
+            retryParams: { retryCount: 1, searchAfter: ['legacy'], nbAgentsProcessed: 30000 },
+          },
+          state: {},
+        }),
+        getDeps,
+        doRetry
+      ).run();
+
+      expect(doRetry).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.anything(),
+        expect.objectContaining({
+          searchAfter: ['legacy'],
+          nbAgentsProcessed: 30000,
+          pitId: undefined,
+        })
+      );
+    });
+
+    it('prefers the state checkpoint over the params one', async () => {
+      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
+
+      await createRetryTask(
+        createTaskInstance({
+          params: {
+            actionParams: { kuery: '', actionId: 'action1', total: 100000, batchSize: 10000 },
+            retryParams: { retryCount: 1, searchAfter: ['legacy'] },
+            isCheckTask: true,
+          },
+          state: { searchAfter: ['current'] },
+        }),
+        getDeps,
+        doRetry
+      ).run();
+
+      expect(doRetry).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.anything(),
+        expect.objectContaining({ searchAfter: ['current'] })
+      );
+    });
+
     it('stops resuming after MAX_CHECK_TASK_RESUMES attempts', async () => {
       const doRetry = jest.fn();
 

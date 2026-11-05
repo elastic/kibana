@@ -14,7 +14,7 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner, PIT_KEEP_ALIVE } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
-import { getAgentsByKuery } from './crud';
+import { getAgentsByKuery, openPointInTime } from './crud';
 import { CHECK_TASK_INTERVAL_MINUTES, MAX_RETRY_COUNT } from './retry_helper';
 
 jest.mock('./crud');
@@ -25,6 +25,7 @@ jest.mock('../spaces/agent_namespaces', () => ({
 }));
 
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+const mockedOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
 
 const logger = loggerMock.create();
 
@@ -94,6 +95,7 @@ describe('ActionRunner', () => {
       updateCheckTaskState: jest.fn(),
     };
     jest.spyOn(appContextService, 'getBulkActionsResolver').mockReturnValue(resolver as any);
+    mockedOpenPointInTime.mockResolvedValue('fresh-pit');
   });
 
   const createRunner = (actionParams = {}, retryParams = {}) =>
@@ -129,10 +131,12 @@ describe('ActionRunner', () => {
 
       await runner.runActionAsyncWithRetry();
 
-      expect(resolver.updateCheckTaskState).toHaveBeenCalledWith(CHECK_TASK_ID, {
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(CHECK_TASK_ID, {
         searchAfter: ['agent-1'],
         nbAgentsProcessed: 4,
       });
+      // the first batch is checkpointed too
+      expect(resolver.updateCheckTaskState).toHaveBeenCalledTimes(2);
       // the check task is only removed once, on success
       expect(resolver.removeIfExists).toHaveBeenCalledTimes(1);
       expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
@@ -327,6 +331,61 @@ describe('ActionRunner', () => {
   });
 
   describe('resuming from a checkpoint', () => {
+    it('opens a fresh point in time when it was cleared, keeping the cursor shape valid', async () => {
+      mockAgentPages(1, 2);
+      // a checkpoint taken under a PIT carries the implicit _shard_doc tiebreaker
+      const runner = createRunner(
+        { total: 2 },
+        { pitId: undefined, searchAfter: ['2026-01-01', 'host-a', 12345] }
+      );
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(mockedOpenPointInTime).toHaveBeenCalledWith(esClient, PIT_KEEP_ALIVE);
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.objectContaining({
+          pitId: 'fresh-pit',
+          searchAfter: ['2026-01-01', 'host-a', 12345],
+        })
+      );
+    });
+
+    it('does not open a point in time when it already has one', async () => {
+      mockAgentPages(1, 2);
+
+      await createRunner({ total: 2 }).runActionAsyncWithRetry();
+
+      expect(mockedOpenPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('carries the cumulative processed count onto a retry', async () => {
+      mockAgentPages(2, 2);
+      const runner = createRunner({}, { nbAgentsProcessed: 40 });
+      runner.processAgentsError = new Error('batch failed');
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ nbAgentsProcessed: 40 }),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
+    it('checkpoints the cumulative count, not just this run', async () => {
+      mockAgentPages(2, 2);
+
+      await createRunner({}, { nbAgentsProcessed: 40 }).runActionAsyncWithRetry();
+
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ nbAgentsProcessed: 44 })
+      );
+    });
+
     it('continues from the searchAfter it was given', async () => {
       mockAgentPages(1, 2);
       const runner = createRunner({ total: 2 }, { searchAfter: ['agent-41'] });

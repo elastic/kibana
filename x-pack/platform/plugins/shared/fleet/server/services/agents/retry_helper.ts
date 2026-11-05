@@ -25,6 +25,8 @@ export interface RetryParams {
   searchAfter?: SortResults;
   retryCount?: number;
   taskId?: string;
+  /** Agents processed by earlier runs of this action, so the count stays cumulative. */
+  nbAgentsProcessed?: number;
 }
 
 /**

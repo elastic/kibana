@@ -19,7 +19,7 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { getAgentActions } from './actions';
-import { closePointInTime, getAgentsByKuery } from './crud';
+import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { RetryParams } from './retry_helper';
 import { CHECK_TASK_INTERVAL_MINUTES, getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
@@ -51,6 +51,8 @@ export abstract class ActionRunner {
 
   private bulkActionsResolver?: BulkActionsResolver;
   private checkTaskId?: string;
+  /** Agents processed across every run of this action, not just the current one. */
+  private nbAgentsProcessed = 0;
 
   constructor(
     esClient: ElasticsearchClient,
@@ -62,6 +64,7 @@ export abstract class ActionRunner {
     this.soClient = soClient;
     this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
+    this.nbAgentsProcessed = retryParams.nbAgentsProcessed ?? 0;
   }
 
   protected abstract getActionType(): string;
@@ -180,6 +183,7 @@ export abstract class ActionRunner {
               {
                 ...this.retryParams,
                 retryCount: (this.retryParams.retryCount ?? 0) + 1,
+                nbAgentsProcessed: this.nbAgentsProcessed,
               },
               this.getTaskType(),
               taskId
@@ -233,14 +237,14 @@ export abstract class ActionRunner {
    * A failed checkpoint only costs re-processing one batch on resume, which processBatch already
    * guards against, so it must never abort the action.
    */
-  private async updateCheckpoint(nbAgentsProcessed: number) {
+  private async updateCheckpoint() {
     if (!this.checkTaskId) {
       return;
     }
     try {
       await this.bulkActionsResolver!.updateCheckTaskState(this.checkTaskId, {
         searchAfter: this.retryParams.searchAfter,
-        nbAgentsProcessed,
+        nbAgentsProcessed: this.nbAgentsProcessed,
       });
     } catch (error) {
       appContextService
@@ -281,6 +285,18 @@ export abstract class ActionRunner {
     const start = Date.now();
     let pitId = this.retryParams.pitId;
 
+    // A resumed run has had its expired point in time cleared. Open a fresh one rather than
+    // paging without one: a checkpoint saved under a point in time carries Elasticsearch's
+    // implicit `_shard_doc` tiebreaker, so it has one more value than the plain sort has
+    // clauses, and a non-PIT search would reject it with a 400.
+    if (!pitId) {
+      pitId = await openPointInTime(this.esClient, PIT_KEEP_ALIVE);
+      this.retryParams.pitId = pitId;
+      appContextService
+        .getLogger()
+        .debug(`Opened a new point in time to resume action ${this.actionParams.actionId}`);
+    }
+
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
     appContextService.getLogger().debug('kuery: ' + this.actionParams.kuery);
@@ -317,6 +333,8 @@ export abstract class ActionRunner {
 
     await this.processBatch(currentAgents);
     let allAgentsProcessed = currentAgents.length;
+    this.nbAgentsProcessed += currentAgents.length;
+    await this.updateCheckpoint();
 
     while (allAgentsProcessed < res.total) {
       const lastAgent = currentAgents[currentAgents.length - 1];
@@ -335,8 +353,9 @@ export abstract class ActionRunner {
       }
       await this.processBatch(currentAgents);
       allAgentsProcessed += currentAgents.length;
+      this.nbAgentsProcessed += currentAgents.length;
       // updating check task with latest checkpoint (this.retryParams.searchAfter)
-      await this.updateCheckpoint(allAgentsProcessed);
+      await this.updateCheckpoint();
     }
 
     if (pitId) {
