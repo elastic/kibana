@@ -94,6 +94,69 @@ describe('getTopDependencySpans', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  describe('transaction hits', () => {
+    function validTransactionHit(overrides: Record<string, unknown[]> = {}) {
+      return {
+        _id: 'tx-1',
+        _index: 'apm-transaction',
+        fields: {
+          'trace.id': ['trace-1'],
+          'transaction.id': ['tx-1'],
+          'transaction.type': ['request'],
+          'transaction.name': ['GET /api'],
+          ...overrides,
+        },
+      };
+    }
+
+    it('enriches spans with metadata from the matching transaction', async () => {
+      const apmEventClient = createApmEventClientMock([validSpanHit()], [validTransactionHit()]);
+      const logger = loggingSystemMock.createLogger();
+
+      const spans = await getTopDependencySpans({ apmEventClient, logger, ...baseParams });
+
+      expect(spans).toHaveLength(1);
+      expect(spans[0]).toEqual(
+        expect.objectContaining({
+          transactionId: 'tx-1',
+          transactionType: 'request',
+          transactionName: 'GET /api',
+        })
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('skips malformed transaction hits and keeps valid transaction metadata', async () => {
+      const malformedTransactionHit = {
+        _id: 'tx-2',
+        _index: 'logs-generic.otel-default',
+        fields: {
+          'trace.id': ['trace-2'],
+          'transaction.id': ['tx-2'],
+          'transaction.type': ['request'],
+          // `transaction.name` is missing on this partial document.
+        },
+      };
+
+      const apmEventClient = createApmEventClientMock(
+        [validSpanHit(), validSpanHit({ 'span.id': ['span-2'], 'trace.id': ['trace-2'] })],
+        [malformedTransactionHit, validTransactionHit()]
+      );
+      const logger = loggingSystemMock.createLogger();
+
+      const spans = await getTopDependencySpans({ apmEventClient, logger, ...baseParams });
+
+      expect(spans).toHaveLength(2);
+      expect(spans.find((span) => span.traceId === 'trace-1')?.transactionId).toBe('tx-1');
+
+      const spanWithMalformedTransaction = spans.find((span) => span.traceId === 'trace-2');
+      expect(spanWithMalformedTransaction).toBeDefined();
+      expect(spanWithMalformedTransaction?.transactionId).toBeUndefined();
+      expect(spanWithMalformedTransaction?.transactionName).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('tx-2'));
+    });
+  });
+
   it('returns all spans when they are all well-formed', async () => {
     const apmEventClient = createApmEventClientMock([
       validSpanHit(),
