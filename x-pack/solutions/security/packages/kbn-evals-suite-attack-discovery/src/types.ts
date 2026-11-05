@@ -22,6 +22,8 @@ export interface AnonymizedAlert {
 export interface AttackDiscoveryBundledAlertsInput extends Record<string, unknown> {
   mode: 'bundledAlerts';
   anonymizedAlerts: ReadonlyArray<AnonymizedAlert>;
+  /** Appended to the prompt as "Additional context", as the product does. */
+  additionalContext?: string;
 }
 
 export interface AttackDiscoverySearchAlertsInput extends Record<string, unknown> {
