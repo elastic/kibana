@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { RUNNER_WORKFLOW_ID } from './constants';
 import {
   enableFloorWorker,
   ensureFloorServiceAccount,
@@ -36,7 +37,7 @@ const usable = { id: 'sa-1', name: NAME, enabled: true, assumable: true };
 
 interface CallOptions {
   method?: string;
-  query?: { statuses?: string[] };
+  query?: { statuses?: string[]; omitStepRuns?: boolean; size?: number };
 }
 type Handler = (path: string, options?: CallOptions) => unknown;
 const fetchWith = (handler: Handler) =>
@@ -208,10 +209,37 @@ describe('settleEnableTimeRun', () => {
     expect(cancels(fetch)).toHaveLength(1);
   });
 
+  it('lists with step runs omitted and a page sized to the concurrency slot', async () => {
+    const fetch = scripted([['tick-1'], []]);
+    await settle(fetch);
+    const [, listOptions] = fetch.mock.calls[0] as [string, CallOptions];
+    expect(listOptions.query).toMatchObject({ omitStepRuns: true, size: 2 });
+  });
+
+  it('cancels with a POST', async () => {
+    const fetch = scripted([['tick-1'], []]);
+    await settle(fetch);
+    expect((cancels(fetch)[0][1] as CallOptions).method).toBe('POST');
+  });
+
   it('does not cancel anything when no tick appears within the wait', async () => {
     const fetch = scripted([[]]);
     await expect(settle(fetch, { waitMs: 0 })).resolves.toBe(false);
     expect(cancels(fetch)).toHaveLength(0);
+  });
+
+  it('warns that a late tick can still cancel the first row when none appeared', async () => {
+    (log.warning as jest.Mock).mockClear();
+    await settle(scripted([[]]), { waitMs: 0 });
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringMatching(/late scheduled tick can still cancel the first row/)
+    );
+  });
+
+  it('does not warn when a tick was found and cancelled', async () => {
+    (log.warning as jest.Mock).mockClear();
+    await settle(scripted([['tick-1'], []]));
+    expect(log.warning).not.toHaveBeenCalled();
   });
 
   it('fails when the cancelled run never leaves its slot', async () => {
@@ -219,6 +247,52 @@ describe('settleEnableTimeRun', () => {
     await expect(settle(fetch, { cancelTimeoutMs: 0 })).rejects.toThrow(
       /still active .* \(tick-1\); a row would race it/
     );
+  });
+
+  describe('runner child of the cancelled run', () => {
+    /** The floor workflow is idle after the cancel; the runner lists `runnerListings` in turn. */
+    const withRunner = (runnerListings: string[][]) => {
+      let runnerIndex = 0;
+      let floorIndex = 0;
+      const floorListings = [['tick-1'], []];
+      return fetchWith((path) => {
+        if (isCancel(path)) return {};
+        if (path.includes(`/workflow/${RUNNER_WORKFLOW_ID}/executions`)) {
+          const ids = runnerListings[Math.min(runnerIndex, runnerListings.length - 1)];
+          runnerIndex += 1;
+          return { results: ids.map((id) => ({ id })) };
+        }
+        const ids = floorListings[Math.min(floorIndex, floorListings.length - 1)];
+        floorIndex += 1;
+        return { results: ids.map((id) => ({ id })) };
+      });
+    };
+
+    it('waits until the runner has no active execution', async () => {
+      const fetch = withRunner([['runner-1'], ['runner-1'], []]);
+      await expect(settle(fetch)).resolves.toBe(true);
+      const runnerListsCount = fetch.mock.calls.filter(([path]) =>
+        path.includes(`/workflow/${RUNNER_WORKFLOW_ID}/executions`)
+      ).length;
+      expect(runnerListsCount).toBe(3);
+    });
+
+    it('fails when the runner never leaves its slot', async () => {
+      const fetch = withRunner([['runner-1']]);
+      await expect(settle(fetch, { cancelTimeoutMs: 0 })).rejects.toThrow(
+        new RegExp(`"${RUNNER_WORKFLOW_ID}" is still active .* \\(runner-1\\); a row would race it`)
+      );
+    });
+  });
+
+  it('fails with a clear message, not as idle, when the listing request errors', async () => {
+    const fetch = fetchWith(() => {
+      throw Object.assign(new Error('Service Unavailable'), { status: 503 });
+    });
+    await expect(settle(fetch)).rejects.toThrow(
+      new RegExp(`Could not list the active executions of "${WF}" .*Service Unavailable`)
+    );
+    expect(cancels(fetch)).toHaveLength(0);
   });
 });
 

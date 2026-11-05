@@ -26,6 +26,7 @@ import {
   FLOOR_TICK_POLL_INTERVAL_MS,
   FLOOR_TICK_WAIT_MS,
   PUBLIC_API_VERSION,
+  RUNNER_WORKFLOW_ID,
 } from './constants';
 import { apiVersion, errorMessage, httpStatus, sleep, spacePath } from './kibana_api';
 
@@ -156,20 +157,68 @@ export interface EnabledFloorWorker {
   restore: () => Promise<void>;
 }
 
+/** `settings.concurrency.max` of the floor and runner workflows (both `cancel-in-progress`). */
+const WORKFLOW_CONCURRENCY_MAX = 1;
+/**
+ * The running execution plus the one it is cancelling. Only emptiness and a few ids for the log
+ * matter here (cancelling is workflow-wide), so a single page is enough and nothing paginates.
+ */
+const ACTIVE_LIST_SIZE = WORKFLOW_CONCURRENCY_MAX * 2;
+
 const listActiveExecutionIds = async (
   fetch: HttpHandler,
   spaceId: string,
   workflowId: string
 ): Promise<string[]> => {
+  // A failed listing must not read as "idle": a row would then start while a run still holds the
+  // concurrency slot, so surface it instead of continuing.
   const { results } = await fetch<{ results: Array<{ id: string }> }>(
     spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions`),
     {
       method: 'GET',
       headers: apiVersion(PUBLIC_API_VERSION),
-      query: { statuses: [...NonTerminalExecutionStatuses], omitStepRuns: true, size: 50 },
+      query: {
+        statuses: [...NonTerminalExecutionStatuses],
+        omitStepRuns: true,
+        size: ACTIVE_LIST_SIZE,
+      },
     }
-  );
+  ).catch((error) => {
+    throw new Error(
+      `Could not list the active executions of "${workflowId}" in space "${spaceId}" (${errorMessage(
+        error
+      )}).`
+    );
+  });
   return results.map(({ id }) => id);
+};
+
+/** Polls until the workflow holds no active execution; throws if one outlives `timeoutMs`. */
+const waitUntilIdle = async ({
+  fetch,
+  spaceId,
+  workflowId,
+  timeoutMs,
+  describeRace,
+}: {
+  fetch: HttpHandler;
+  spaceId: string;
+  workflowId: string;
+  timeoutMs: number;
+  describeRace: string;
+}): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  let active: string[];
+  while ((active = await listActiveExecutionIds(fetch, spaceId, workflowId)).length > 0) {
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `${describeRace} "${workflowId}" is still active ${timeoutMs}ms after it was cancelled (${active.join(
+          ', '
+        )}); a row would race it.`
+      );
+    }
+    await sleep(FLOOR_TICK_POLL_INTERVAL_MS);
+  }
 };
 
 /**
@@ -177,7 +226,7 @@ const listActiveExecutionIds = async (
  * execution whatever the interval. Its concurrency cancels in progress, so left alone it
  * cancels the manual run (or the manual run cancels it half way, leaving a runner with no
  * steps). Waits a bounded time for that execution, cancels it, and returns once the
- * workflow holds no active execution. Returns whether a tick was found.
+ * workflow and the runner it started hold no active execution. Returns whether a tick was found.
  */
 export const settleEnableTimeRun = async ({
   fetch,
@@ -201,7 +250,11 @@ export const settleEnableTimeRun = async ({
     active = await listActiveExecutionIds(fetch, spaceId, workflowId);
   }
   if (active.length === 0) {
-    log.info('[ad-worker] no enable-time scheduled run appeared; starting rows');
+    log.warning(
+      `[ad-worker] no enable-time scheduled run appeared within ${waitMs}ms; starting rows. A late ` +
+        "scheduled tick can still cancel the first row's manual run (the floor workflow cancels " +
+        'in progress, max 1), so a first row that is cancelled for no visible reason is that tick.'
+    );
     return false;
   }
   log.info(`[ad-worker] cancelling the enable-time scheduled run (${active.join(', ')})`);
@@ -212,17 +265,22 @@ export const settleEnableTimeRun = async ({
     ),
     { method: 'POST', headers: apiVersion(PUBLIC_API_VERSION) }
   );
-  const cancelDeadline = Date.now() + cancelTimeoutMs;
-  while ((active = await listActiveExecutionIds(fetch, spaceId, workflowId)).length > 0) {
-    if (Date.now() >= cancelDeadline) {
-      throw new Error(
-        `The enable-time scheduled run of "${workflowId}" is still active ${cancelTimeoutMs}ms after it was cancelled (${active.join(
-          ', '
-        )}); a row would race it.`
-      );
-    }
-    await sleep(FLOOR_TICK_POLL_INTERVAL_MS);
-  }
+  await waitUntilIdle({
+    fetch,
+    spaceId,
+    workflowId,
+    timeoutMs: cancelTimeoutMs,
+    describeRace: 'The enable-time scheduled run of',
+  });
+  // The tick had started the runner as a child. Cancelling the parent does not by itself prove the
+  // child has left its own cancel-in-progress slot, and a row's runner would race it there.
+  await waitUntilIdle({
+    fetch,
+    spaceId,
+    workflowId: RUNNER_WORKFLOW_ID,
+    timeoutMs: cancelTimeoutMs,
+    describeRace: 'The runner started by the enable-time scheduled run,',
+  });
   return true;
 };
 
