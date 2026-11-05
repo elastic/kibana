@@ -23,7 +23,7 @@ import { createRunQuery } from '../model/run_query';
 import { NotebookScheduler } from '../model/scheduler';
 import { useNotebookServices } from '../services';
 import { AddCellBar } from './add_cell_bar';
-import { CellFilterBar, CellFilterSummary } from './cell_filter_bar';
+import { CellFilterControls, CellFilterSummary } from './cell_filter_controls';
 import { ChartCell } from './chart_cell';
 import { CustomCell } from './custom_cell';
 import { EsqlCell } from './esql_cell';
@@ -82,13 +82,10 @@ const CellList = () => {
   const shown = isFiltering
     ? listed.filter(({ cell }) => matchesCellFilter(cell, filter, apps))
     : listed;
-  const clearFilter = () => cellFilter$.next(EMPTY_CELL_FILTER);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {isFiltering && (
-        <CellFilterSummary shown={shown.length} total={listed.length} onClear={clearFilter} />
-      )}
+      {isFiltering && <CellFilterSummary shown={shown.length} total={listed.length} />}
       {shown.map(({ cell, index }) => (
         <Fragment key={cell.id}>
           {isFiltering ? <EuiSpacer size="s" /> : <AddCellBar index={index} />}
@@ -187,8 +184,8 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section paddingSize="m">
           <CellList />
-          <CellFilterBar />
         </EuiPageTemplate.Section>
+        <CellFilterControls />
       </EuiPageTemplate>
     </NotebookContext.Provider>
   );
