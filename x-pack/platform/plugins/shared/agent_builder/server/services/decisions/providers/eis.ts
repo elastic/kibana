@@ -17,43 +17,6 @@ interface DecisionEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
 }
 
-/** Errors that need a config or cluster change to go away: a missing endpoint or task type. */
-const isPermanentEsError = (error: unknown): boolean => {
-  if (!(error instanceof errors.ResponseError)) {
-    return false;
-  }
-
-  const { statusCode, body } = error.meta;
-
-  return statusCode === 404 || (statusCode === 400 && JSON.stringify(body).includes('task_type'));
-};
-
-const resolveInferenceId = async ({
-  esClient,
-  inferenceId,
-  signal,
-}: {
-  esClient: ElasticsearchClient;
-  inferenceId?: string;
-  signal: AbortSignal;
-}): Promise<string> => {
-  if (inferenceId) {
-    return inferenceId;
-  }
-
-  const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
-    { method: 'GET', path: '/_inference/decision/_all' },
-    { signal }
-  );
-  const [first] = endpoints;
-
-  if (!first) {
-    throw new DecisionProviderUnavailableError('No decision inference endpoint on the cluster');
-  }
-
-  return first.inference_id;
-};
-
 /**
  * Answers through the Elasticsearch `decision` inference task, as the requesting user. Uses
  * `inferenceId` when configured, else the first `decision` endpoint the cluster lists.
@@ -86,11 +49,7 @@ export class EisDecisionProvider extends BaseDecisionProvider {
     const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
 
     try {
-      const inferenceId = await resolveInferenceId({
-        esClient,
-        inferenceId: this.inferenceId,
-        signal,
-      });
+      const inferenceId = await this.resolveInferenceId(esClient, signal);
 
       const body = await esClient.transport.request(
         {
@@ -103,11 +62,44 @@ export class EisDecisionProvider extends BaseDecisionProvider {
 
       return { inferenceId, answers: parseDecisionResponse(body, Object.keys(questions)) };
     } catch (error) {
-      if (isPermanentEsError(error)) {
+      if (this.isPermanentEsError(error)) {
         throw new DecisionProviderUnavailableError(error.message);
       }
 
       throw error;
     }
+  }
+
+  /** The configured inference id, else the first `decision` endpoint the cluster lists. */
+  private async resolveInferenceId(
+    esClient: ElasticsearchClient,
+    signal: AbortSignal
+  ): Promise<string> {
+    if (this.inferenceId) {
+      return this.inferenceId;
+    }
+
+    const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
+      { method: 'GET', path: '/_inference/decision/_all' },
+      { signal }
+    );
+    const [first] = endpoints;
+
+    if (!first) {
+      throw new DecisionProviderUnavailableError('No decision inference endpoint on the cluster');
+    }
+
+    return first.inference_id;
+  }
+
+  /** Errors that need a config or cluster change to go away: a missing endpoint or task type. */
+  private isPermanentEsError(error: unknown): boolean {
+    if (!(error instanceof errors.ResponseError)) {
+      return false;
+    }
+
+    const { statusCode, body } = error.meta;
+
+    return statusCode === 404 || (statusCode === 400 && JSON.stringify(body).includes('task_type'));
   }
 }
