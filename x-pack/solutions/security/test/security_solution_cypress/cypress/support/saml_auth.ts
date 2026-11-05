@@ -151,6 +151,13 @@ export const samlAuthentication = async (
       const { full_name: fullName, email, username } = await sessionManager.getUserData(role);
       return fullName || email || username;
     },
+    // Assistant message headers render `full_name ?? username` and never the email.
+    getMessageAuthorName: async (
+      role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
+    ): Promise<string> => {
+      const { full_name: fullName, username } = await sessionManager.getUserData(role);
+      return fullName ?? username;
+    },
     getUsername: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {

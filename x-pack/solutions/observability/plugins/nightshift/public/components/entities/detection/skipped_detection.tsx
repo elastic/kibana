@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { describeSkip, type DetectionSkip } from '@kbn/significant-events-schema';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 
 export const SKIPPED_DETECTION_LABEL = i18n.translate('xpack.nightshift.skippedDetection.badge', {
   defaultMessage: 'Skipped',

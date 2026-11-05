@@ -28,6 +28,7 @@ import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
+import type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
 import type { ActionPolicyEvent } from '../action_policy_event_publisher/events';
 
 export type {
@@ -90,6 +91,9 @@ export {
   RULE_EXECUTION_FAILED_EVENT_TYPE,
 } from '../rule_executor_event_publisher/events';
 
+export type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
+export { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../alert_status_changed_event_publisher/events';
+
 export type {
   ActionPolicyCreatedEvent,
   ActionPolicyDeletedEvent,
@@ -120,6 +124,7 @@ export type AlertingDomainEvent =
   | AlertActionEvent
   | RuleEvent
   | RuleExecutorEvent
+  | AlertStatusChangedEvent
   | ActionPolicyEvent;
 
 /**

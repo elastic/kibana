@@ -12,7 +12,10 @@ import { createEditEvaluator } from './edit';
 import { createQueryContentsEvaluator } from './query_contents';
 import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
-import { createTemplateColumnsEvaluator, readColumnReferences } from './template_columns';
+import { createTemplateColumnsEvaluator } from './template_columns';
+import { readColumnReferences } from './template_column_references';
+import { createDataEditAppliedEvaluator, findMeasureColumns } from './edit_applied';
+import { createStyleEditJudge } from './style_edit_judge';
 import { createTemplateValidityEvaluator } from './template_validity';
 
 const outputWith = (
@@ -287,6 +290,38 @@ describe('Custom Content Template Columns', () => {
     ).toEqual(['Request Count', 'Error Rate']);
   });
 
+  it('reads columns with dot access and any loop variable name, never a cell property', () => {
+    expect(
+      readColumnReferences(
+        '{% for r in rows %}{{ r.requests.value }} {{ r.avg_bytes.pct }}{% endfor %}'
+      )
+    ).toEqual(['requests', 'avg_bytes']);
+    expect(
+      readColumnReferences('{% for row in rows %}{{ row.requests.value }}{% endfor %}')
+    ).not.toContain('value');
+  });
+
+  it('does not take loop counters or assigned cells for columns', () => {
+    expect(
+      readColumnReferences(
+        '{% for r in rows %}#{{ forloop.index }} {{ r["host"].value }}{% assign cell = r["bytes"] %}{{ cell.value }}{% endfor %}'
+      )
+    ).toEqual(['host', 'bytes']);
+  });
+
+  it('reads columns of an indexed row', () => {
+    expect(
+      readColumnReferences(
+        '{{ rows[0]["host"].value }} {{ rows.first.bytes.value }} {{ rows.size }}'
+      )
+    ).toEqual(['host', 'bytes']);
+  });
+
+  it('reads nothing from a template that does not parse or does not loop over rows', () => {
+    expect(readColumnReferences('<div>{% if true %}x</div>')).toEqual([]);
+    expect(readColumnReferences('<p>{{ rows.size }}</p>')).toEqual([]);
+  });
+
   const withColumns = (names: string[]) =>
     createTemplateColumnsEvaluator({
       runQuery: jest
@@ -311,13 +346,14 @@ describe('Custom Content Template Columns', () => {
     expect(result.metadata).toMatchObject({ missing: ['Error Rate'] });
   });
 
-  it('says when a template reads columns by dot access, which it does not check', async () => {
-    const result = await run(
-      withColumns(['host']),
-      outputWith({ esql: 'FROM logs', template: '<p>{{ row.host.value }}</p>' })
-    );
-    expect(result.score).toBeNull();
-    expect(result.explanation).toContain('dot access');
+  it('checks columns read with dot access too', async () => {
+    const template = '{% for r in rows %}<p>{{ r.host.value }}</p>{% endfor %}';
+    expect(
+      (await run(withColumns(['host']), outputWith({ esql: 'FROM logs', template }))).score
+    ).toBe(1);
+    expect(
+      (await run(withColumns(['other']), outputWith({ esql: 'FROM logs', template }))).score
+    ).toBe(0);
   });
 
   it('skips a static panel and a template that reads no columns', async () => {
@@ -452,6 +488,20 @@ describe('Custom Content Edit', () => {
     expect(result).toMatchObject({ score: 0, label: 'no-follow-up-tool-call' });
   });
 
+  it('puts what the follow-up passed to the tools in the failure metadata', async () => {
+    const result = await run(
+      evaluator,
+      editOutput(before, {
+        followUpToolIds: ['platform.dashboard.generate_dashboard'],
+        followUpToolArgs: ['generate_dashboard panel p1: hasData=unset'],
+      }),
+      data
+    );
+    expect(result.metadata).toMatchObject({
+      followUpToolArgs: ['generate_dashboard panel p1: hasData=unset'],
+    });
+  });
+
   it('judges the edit itself when the follow-up called a tool', async () => {
     const result = await run(
       evaluator,
@@ -499,5 +549,201 @@ describe('Custom Content Edit', () => {
       data
     );
     expect(unchanged).toMatchObject({ score: 0, label: 'data-edit-failed' });
+  });
+});
+
+describe('Custom Content Data Edit Applied', () => {
+  const columnsByQuery: Record<string, string[]> = {
+    'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host': [
+      'requests',
+      'avg_bytes',
+      'host',
+    ],
+    'FROM logs | STATS total = COUNT(*)': ['total'],
+    'FROM logs | STATS AVG(bytes) BY host': ['AVG(bytes)', 'host'],
+    'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host | KEEP host, requests': [
+      'host',
+      'requests',
+    ],
+    'FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host': ['Avg Bytes', 'host'],
+  };
+  const runQuery = jest.fn(async (query: string) => {
+    if (!(query in columnsByQuery)) throw new Error('unknown query');
+    return { columns: columnsByQuery[query].map((name) => ({ name, type: 'long' })), values: [] };
+  });
+  const evaluator = createDataEditAppliedEvaluator({ runQuery: runQuery as never });
+  const gold = { data: 'query' as const, edit: 'data' as const, addsMeasure: 'AVG(bytes)' };
+  const AFTER = 'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host';
+  const inLoop = (body: string) => `{% for row in rows %}${body}{% endfor %}`;
+  const after = (template: string, esql = AFTER) =>
+    outputWith({ esql, template: template.includes('{% for') ? template : inLoop(template) });
+
+  it('finds the column of a measure however the query spells it', () => {
+    const find = (query: string, measure: string) =>
+      findMeasureColumns(query, measure, columnsByQuery[query] ?? []);
+    expect(find(AFTER, 'AVG(bytes)')).toEqual({ computed: true, returned: ['avg_bytes'] });
+    expect(find('FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host', 'AVG(bytes)')).toEqual({
+      computed: true,
+      returned: ['Avg Bytes'],
+    });
+    expect(find('FROM logs | STATS total = COUNT(*)', 'COUNT(')).toEqual({
+      computed: true,
+      returned: ['total'],
+    });
+    expect(find(AFTER, 'MAX(bytes)')).toEqual({ computed: false, returned: [] });
+  });
+
+  it('finds a measure that has no name, by the expression the column is called', () => {
+    expect(
+      findMeasureColumns('FROM logs | STATS AVG(bytes) BY host', 'AVG(bytes)', [
+        'AVG(bytes)',
+        'host',
+      ])
+    ).toEqual({ computed: true, returned: ['AVG(bytes)'] });
+    expect(
+      findMeasureColumns('FROM logs | STATS AVG(bytes) BY host | KEEP host', 'AVG(bytes)', ['host'])
+    ).toEqual({ computed: true, returned: [] });
+  });
+
+  it('skips examples that are not a data edit that names a measure', async () => {
+    expect((await run(evaluator, after('<p/>'), { data: 'query', edit: 'data' })).score).toBeNull();
+    expect(
+      (await run(evaluator, after('<p/>'), { ...gold, edit: 'style' as const })).score
+    ).toBeNull();
+  });
+
+  it('passes when the template shows the added measure', async () => {
+    const result = await run(evaluator, after('<b>{{ row["avg_bytes"].value }}</b>'), gold);
+    expect(result).toMatchObject({ score: 1, label: 'new-measure-shown' });
+  });
+
+  it('passes when the template reads the measure with dot access', async () => {
+    const result = await run(evaluator, after('<b>{{ row.avg_bytes.value }}</b>'), gold);
+    expect(result.score).toBe(1);
+  });
+
+  it('fails when the template still shows only the measure the query already had', async () => {
+    const result = await run(evaluator, after('<b>{{ row["requests"].value }}</b>'), gold);
+    expect(result).toMatchObject({ score: 0, label: 'new-measure-not-shown' });
+  });
+
+  it('is not fooled by a cell property named like the measure', async () => {
+    const query = 'FROM logs | STATS requests = COUNT(*), value = AVG(bytes) BY host';
+    columnsByQuery[query] = ['requests', 'value', 'host'];
+    const result = await run(
+      evaluator,
+      after('{% for row in rows %}{{ row.requests.value }}{% endfor %}', query),
+      gold
+    );
+    expect(result).toMatchObject({ score: 0, label: 'new-measure-not-shown' });
+  });
+
+  it('is not fooled by a column the edit renamed', async () => {
+    const result = await run(
+      evaluator,
+      after('<b>{{ row["requests"].value }} {{ row["host"].value }}</b>'),
+      gold
+    );
+    expect(result.score).toBe(0);
+  });
+
+  it('finds a measure whose name has spaces and backticks', async () => {
+    const query = 'FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host';
+    expect((await run(evaluator, after('{{ row["Avg Bytes"].value }}', query), gold)).score).toBe(
+      1
+    );
+    expect((await run(evaluator, after('{{ row["host"].value }}', query), gold)).score).toBe(0);
+  });
+
+  it('works on a panel that was static before the edit', async () => {
+    const result = await run(
+      evaluator,
+      after('<b>{{ row["total"].value }}</b>', 'FROM logs | STATS total = COUNT(*)'),
+      { data: 'query', edit: 'data', addsMeasure: 'COUNT(' }
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('passes a measure the query does not name, when the template reads it by its expression', async () => {
+    const result = await run(
+      evaluator,
+      after('{{ row["AVG(bytes)"].value }}', 'FROM logs | STATS AVG(bytes) BY host'),
+      gold
+    );
+    expect(result).toMatchObject({ score: 1, label: 'new-measure-shown' });
+  });
+
+  it('fails when the query never computes the measure', async () => {
+    const result = await run(evaluator, after('<p/>', 'FROM logs | STATS total = COUNT(*)'), gold);
+    expect(result).toMatchObject({ score: 0, label: 'measure-not-in-query' });
+  });
+
+  it('fails when the query computes the measure and then drops it', async () => {
+    const result = await run(
+      evaluator,
+      after(
+        '<b>{{ row["requests"].value }}</b>',
+        'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host | KEEP host, requests'
+      ),
+      gold
+    );
+    expect(result).toMatchObject({ score: 0, label: 'measure-not-returned' });
+  });
+
+  it('skips when the query does not run', async () => {
+    expect((await run(evaluator, after('<p/>', 'FROM nowhere'), gold)).score).toBeNull();
+  });
+});
+
+describe('Custom Content Style Edit', () => {
+  const judge = { evaluate: jest.fn(), kind: 'LLM' as const, direction: 'maximize' as const };
+  const criteria = jest.fn(() => judge as never);
+  const evaluator = createStyleEditJudge({ criteria });
+  const styleGold = { data: 'query' as const, edit: 'style' as const };
+  const withTemplates = outputWith(
+    { esql: QUERY, template: '<b class="blue">x</b>' },
+    {
+      baseline: {
+        attachmentId: 'att-1',
+        content: { esql: QUERY, template: '<b>x</b>' },
+        versionCount: 1,
+      },
+    }
+  );
+
+  beforeEach(() => judge.evaluate.mockReset());
+
+  it('gives the judge the instruction and both templates, and returns its verdict', async () => {
+    judge.evaluate.mockResolvedValue({ score: 1, explanation: 'ok' });
+
+    const result = await evaluator.evaluate({
+      input: { question: 'q', followUp: 'Make the badges blue.' },
+      output: withTemplates,
+      expected: styleGold,
+      metadata: {},
+    });
+
+    expect(result.score).toBe(1);
+    expect(judge.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: { instruction: 'Make the badges blue.' },
+        output: { templateBefore: '<b>x</b>', templateAfter: '<b class="blue">x</b>' },
+      })
+    );
+  });
+
+  it('skips data edits, single-turn examples and runs without a template to compare', async () => {
+    const skip = async (
+      input: { question: string; followUp?: string },
+      output = withTemplates,
+      expected: typeof styleGold | { data: 'query'; edit: 'data' } = styleGold
+    ) => (await evaluator.evaluate({ input, output, expected, metadata: {} })).score;
+
+    expect(
+      await skip({ question: 'q', followUp: 'x' }, withTemplates, { data: 'query', edit: 'data' })
+    ).toBeNull();
+    expect(await skip({ question: 'q' })).toBeNull();
+    expect(await skip({ question: 'q', followUp: 'x' }, outputWith(undefined))).toBeNull();
+    expect(judge.evaluate).not.toHaveBeenCalled();
   });
 });

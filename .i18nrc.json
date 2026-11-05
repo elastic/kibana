@@ -186,6 +186,7 @@
     "timelion": [
       "src/platform/plugins/private/vis_types/timelion"
     ],
+    "traceLatencyMap": "src/platform/packages/shared/kbn-trace-latency-map",
     "tryInConsole": "src/platform/packages/shared/kbn-try-in-console/",
     "uiActions": [
       "src/platform/plugins/shared/ui_actions",
