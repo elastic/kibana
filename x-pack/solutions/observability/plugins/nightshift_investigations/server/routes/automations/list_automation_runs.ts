@@ -15,6 +15,7 @@ import type { NightshiftAutomationAttributes } from '../../lib/automations/types
 import { readAutomationUsage } from '../../lib/automations/automation_budget';
 
 const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
+const MAX_ERROR_LENGTH = 200;
 
 const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
   if (status === ExecutionStatus.COMPLETED) return 'succeeded';
@@ -146,9 +147,11 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
 
       const skipReason = SKIP_REASONS.find((reason) => reason === output['skip_reason']);
 
+      const status = skipReason ? ('skipped' as const) : mapRunStatus(exec.status);
+
       return {
         id: exec.id,
-        status: skipReason ? ('skipped' as const) : mapRunStatus(exec.status),
+        status,
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt,
         duration: exec.duration,
@@ -158,6 +161,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         investigationId: getString(output['investigation_id']),
         skipReason: skipReason ?? null,
         dailyLimit: typeof output['daily_limit'] === 'number' ? output['daily_limit'] : undefined,
+        error: status === 'failed' ? exec.error?.message.slice(0, MAX_ERROR_LENGTH) : undefined,
       };
     });
 
