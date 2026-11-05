@@ -20,6 +20,8 @@ import type { WaitForTaskOptions } from './wait_for_task';
 export interface ReindexOptions {
   source: { index: Names; query?: QueryDslQueryContainer };
   dest: { index: IndexName; op_type?: OpType };
+  /** Painless script applied to each document before it is written to `dest`. */
+  script?: { source: string; params?: Record<string, unknown> };
   signal?: AbortSignal;
   waitForTask?: Omit<WaitForTaskOptions, 'esClient' | 'taskId' | 'signal'>;
 }
@@ -65,11 +67,12 @@ export const assertReindexSucceeded = (result: ReindexResult, context: string): 
 };
 
 const buildReindexRequest = (
-  { source, dest }: Pick<ReindexOptions, 'source' | 'dest'>,
+  { source, dest, script }: Pick<ReindexOptions, 'source' | 'dest' | 'script'>,
   waitForCompletion: boolean
 ): ReindexRequest => ({
   source: { index: source.index, query: source.query },
   dest: { index: dest.index, op_type: dest.op_type },
+  ...(script && { script: { ...script, lang: 'painless' } }),
   wait_for_completion: waitForCompletion,
   refresh: true,
   conflicts: 'proceed',

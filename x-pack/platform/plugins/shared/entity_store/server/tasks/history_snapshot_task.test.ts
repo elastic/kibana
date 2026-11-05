@@ -193,7 +193,6 @@ describe('runHistorySnapshotTask — schedule reconciliation', () => {
         ok: true,
         historySnapshotIndex: run.historySnapshotIndex,
         docCount: 1,
-        resetCount: 1,
       });
 
       const result = await buildRunner({

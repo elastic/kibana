@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import type { ReindexResponse, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import {
@@ -16,7 +16,6 @@ import {
   createIndex,
   pollTaskUntil,
   startReindex,
-  startUpdateByQueryWithScript,
   toReindexResult,
 } from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
@@ -31,11 +30,12 @@ import { parseDurationToMs } from '../../infra/time';
 import { getHistorySnapshotTaskId, TasksConfig } from '../../tasks/config';
 import { EntityStoreTaskType } from '../../tasks/constants';
 import type { HistorySnapshotState } from '../saved_objects';
-import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
+import { HISTORY_SNAPSHOT_STAMP_SCRIPT } from './constants';
 import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
 
 /** An unfinished snapshot cycle, kept in task state so the next run can resume it. */
 export interface HistorySnapshotRun {
+  /** `reset` only appears in runs saved by a version that still reset the latest index. */
   phase: 'reindex' | 'reset';
   esTaskId: string;
   latestIndex: string;
@@ -47,7 +47,7 @@ export interface HistorySnapshotRun {
 }
 
 export type RunHistorySnapshotResult =
-  | { ok: true; historySnapshotIndex: string; docCount: number; resetCount: number }
+  | { ok: true; historySnapshotIndex: string; docCount: number }
   | { ok: true; skipped: true }
   | { ok: true; inProgress: true; run: HistorySnapshotRun }
   | { ok: false; error: Error };
@@ -60,7 +60,7 @@ export interface RunHistorySnapshotOptions {
   deadline?: number;
 }
 
-export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
+export { HISTORY_SNAPSHOT_STAMP_SCRIPT } from './constants';
 
 const POLL_INTERVAL_MS = 30 * 1000;
 
@@ -285,7 +285,8 @@ export class HistorySnapshotClient {
   }
 
   /**
-   * Advances the snapshot cycle: copy latest into a dated history index, then reset latest.
+   * Advances the snapshot cycle: copy latest into a dated history index, stamping each copy with
+   * the snapshot time. The latest index is not modified.
    *
    * Pass `deadline` to stop waiting at that time. The result is then `inProgress` with the
    * Elasticsearch task to resume from, and the caller passes it back as `run` on the next call.
@@ -371,7 +372,7 @@ export class HistorySnapshotClient {
 
     await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
 
-    return this.startPhase(
+    return this.startCopy(
       {
         phase: 'reindex',
         latestIndex,
@@ -383,25 +384,20 @@ export class HistorySnapshotClient {
     );
   }
 
-  private async startPhase(
+  private async startCopy(
     run: Omit<HistorySnapshotRun, 'esTaskId' | 'phaseStartedAt'>,
     abortSignal?: AbortSignal
   ): Promise<HistorySnapshotRun> {
-    const esTaskId =
-      run.phase === 'reindex'
-        ? await startReindex(this.esClient, {
-            source: { index: run.latestIndex },
-            dest: { index: run.historySnapshotIndex },
-            signal: abortSignal,
-          })
-        : await startUpdateByQueryWithScript(this.esClient, {
-            index: run.latestIndex,
-            query: { match_all: {} },
-            script: HISTORY_SNAPSHOT_RESET_SCRIPT,
-            params: { timestampNow: run.timestampNow },
-            signal: abortSignal,
-          });
-    this.logger.debug(`Started history snapshot ${run.phase} task ${esTaskId}`);
+    const esTaskId = await startReindex(this.esClient, {
+      source: { index: run.latestIndex },
+      dest: { index: run.historySnapshotIndex },
+      script: {
+        source: HISTORY_SNAPSHOT_STAMP_SCRIPT,
+        params: { snapshotTimestamp: run.timestampNow },
+      },
+      signal: abortSignal,
+    });
+    this.logger.debug(`Started history snapshot reindex task ${esTaskId}`);
     return { ...run, esTaskId, phaseStartedAt: moment.utc().toISOString() };
   }
 
@@ -412,13 +408,15 @@ export class HistorySnapshotClient {
     abortSignal: AbortSignal | undefined
   ): Promise<RunHistorySnapshotResult> {
     let run = initialRun;
-    const setRun = (next: HistorySnapshotRun) => {
-      run = next;
-      onRunChange(next);
-    };
+
+    if (run.phase === 'reset') {
+      // Saved by a version that still reset the latest index. The copy already finished.
+      await this.cancelRun(run);
+      return this.completeCycle(run.historySnapshotIndex, run.docCount ?? 0);
+    }
 
     while (true) {
-      const poll = await pollTaskUntil<ReindexResponse | UpdateByQueryResponse>({
+      const poll = await pollTaskUntil<ReindexResponse>({
         esClient: this.esClient,
         taskId: run.esTaskId,
         deadline,
@@ -433,53 +431,34 @@ export class HistorySnapshotClient {
 
       if (poll.status === 'missing') {
         this.logger.warn(
-          `History snapshot ${run.phase} task ${run.esTaskId} no longer exists; starting it again`
+          `History snapshot reindex task ${run.esTaskId} no longer exists; starting it again`
         );
-        setRun(await this.startPhase(run, abortSignal));
+        run = await this.startCopy(run, abortSignal);
+        onRunChange(run);
         continue;
       }
 
       const { canceled } = poll.response as { canceled?: string };
       if (canceled) {
-        throw new Error(
-          `History snapshot ${run.phase} task ${run.esTaskId} was cancelled: ${canceled}`
-        );
+        throw new Error(`History snapshot reindex task ${run.esTaskId} was cancelled: ${canceled}`);
       }
 
-      const phaseDurationMs = Date.now() - Date.parse(run.phaseStartedAt);
-
-      if (run.phase === 'reindex') {
-        entityStoreMetrics.historySnapshotReindexDurationMs.record(phaseDurationMs, {
-          namespace: this.namespace,
-        });
-        const docCount = toReindexResult(poll.response as ReindexResponse).total;
-        if (docCount === 0) {
-          return this.completeCycle(run.historySnapshotIndex, 0, 0);
-        }
-        setRun(await this.startPhase({ ...run, phase: 'reset', docCount }, abortSignal));
-        continue;
-      }
-
-      entityStoreMetrics.historySnapshotResetDurationMs.record(phaseDurationMs, {
-        namespace: this.namespace,
-      });
-      return this.completeCycle(
-        run.historySnapshotIndex,
-        run.docCount ?? 0,
-        (poll.response as UpdateByQueryResponse).updated ?? 0
+      entityStoreMetrics.historySnapshotReindexDurationMs.record(
+        Date.now() - Date.parse(run.phaseStartedAt),
+        { namespace: this.namespace }
       );
+      return this.completeCycle(run.historySnapshotIndex, toReindexResult(poll.response).total);
     }
   }
 
   private async completeCycle(
     historySnapshotIndex: string,
-    docCount: number,
-    resetCount: number
+    docCount: number
   ): Promise<RunHistorySnapshotResult> {
     await this.updateGlobalStateOnSuccess();
     entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
     entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
-    return { ok: true, historySnapshotIndex, docCount, resetCount };
+    return { ok: true, historySnapshotIndex, docCount };
   }
 
   private async updateGlobalStateOnSuccess(): Promise<void> {
