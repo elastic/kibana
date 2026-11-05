@@ -13,9 +13,8 @@ properties:
       When omitted on create, the space configuration default is used. Falls back to the owner's default
       when no space configuration exists: `true` for Security, `false` for Stack and Observability.
       Precedence: explicit value > template setting > space config > owner default.
-      For owners that cannot store `true` (Stack and Observability), a value that is not sent
-      resolves to `false` regardless of the template or the space configuration.
-      Only Security can store `true`. For Stack and Observability, a request that sends `true`
-      fails with a 400 error. An update that keeps an already stored `true` is accepted.
+      Observable extraction is available only for Security cases. For Stack and Observability cases,
+      this setting is always `false`, and sending `true` returns a 400 error.
+      An update that keeps an already stored `true` is accepted.
     type: boolean
     example: true
