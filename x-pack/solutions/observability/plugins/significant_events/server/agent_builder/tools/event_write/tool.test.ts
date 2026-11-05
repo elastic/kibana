@@ -383,13 +383,6 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
-  it('accepts only discovery as the optional caller source', () => {
-    expect(eventsWriteSchema.safeParse({ source: 'discovery', items: [input] }).success).toBe(true);
-    expect(eventsWriteSchema.safeParse({ source: 'investigation', items: [input] }).success).toBe(
-      false
-    );
-  });
-
   it.each<{
     label: string;
     stack: RunContextStackEntry[];
@@ -423,12 +416,12 @@ describe('events_write tool', () => {
 
       await invokeHandler(
         createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
-        { source: 'discovery', items: [input] },
+        { items: [input] },
         context
       );
 
       expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ source: 'discovery', rejectUnknownEventIds: expected })
+        expect.objectContaining({ rejectUnknownEventIds: expected })
       );
     }
   );
@@ -470,7 +463,6 @@ describe('events_write tool', () => {
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       {
-        source: 'discovery',
         items: [
           {
             ...input,
@@ -508,7 +500,6 @@ describe('events_write tool', () => {
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         eventSearchClient: {},
-        source: 'discovery',
         inputs: [
           expect.objectContaining({
             causal_features: [

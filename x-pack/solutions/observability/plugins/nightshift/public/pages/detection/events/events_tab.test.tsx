@@ -34,15 +34,9 @@ jest.mock('../../../components/ui/time_range_picker', () => ({
 }));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
+let mockFacets: Record<string, unknown> = {};
 jest.mock('../../../data/significant_events/use_significant_events_facets', () => ({
-  useSignificantEventsFacets: () => ({
-    data: {
-      severity: { critical: 0, high: 1, medium: 0, low: 0 },
-      status: { active: 1, recovering: 0, inactive: 0 },
-      investigation: { not_started: 1, in_progress: 0, completed: 0 },
-    },
-    refetch: jest.fn(),
-  }),
+  useSignificantEventsFacets: () => ({ data: mockFacets, refetch: jest.fn() }),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -55,6 +49,12 @@ jest.mock('../../../hooks/use_kibana', () => ({
     },
   }),
 }));
+
+const defaultFacets = {
+  severity: { critical: 0, high: 1, medium: 0, low: 0 },
+  status: { active: 1, recovering: 0, inactive: 0 },
+  investigation: { not_started: 1, in_progress: 0, completed: 0 },
+};
 
 const mockUseFetchEventById = useFetchEventById as jest.Mock;
 const mockUseSignificantEventsList = useSignificantEventsList as jest.Mock;
@@ -93,6 +93,7 @@ const renderTab = (initialPath = '/detections/events') => {
 
 describe('EventsTab', () => {
   beforeEach(() => {
+    mockFacets = defaultFacets;
     jest.clearAllMocks();
     mockUseSignificantEventsList.mockReturnValue({
       data: { hits: [event], page: 1, perPage: 25, total: 1 },
@@ -112,7 +113,7 @@ describe('EventsTab', () => {
       ...event,
       event_id: 'event-2',
       title: 'Payment errors',
-      investigations: [{ workflow_execution_id: 'run-1', started_at: '2026-10-20T10:31:00.000Z' }],
+      investigation_state: 'in_progress',
     } as SignificantEventResponse;
     mockUseSignificantEventsList.mockReturnValue({
       data: { hits: [event, investigatedEvent], page: 1, perPage: 25, total: 2 },
@@ -209,6 +210,46 @@ describe('EventsTab', () => {
     expect(params.getAll('investigation')).toEqual(['not_started']);
   });
 
+  it('labels an event whose investigation state could not be read as unknown', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: {
+        hits: [{ ...event, investigation_state: 'unknown' }],
+        page: 1,
+        perPage: 25,
+        total: 1,
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab();
+
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
+  });
+
+  it('notes in the investigation filter that older investigations may be missing when the window is full', async () => {
+    mockFacets = { ...defaultFacets, investigation_window_truncated: true };
+    renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsInvestigationFilterButton'));
+
+    expect(
+      await screen.findByTestId('nightshiftDetectionEventsInvestigationFilterNote')
+    ).toBeInTheDocument();
+  });
+
+  it('shows no filter note when the investigation window was not full', async () => {
+    renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsInvestigationFilterButton'));
+    await screen.findByTestId('nightshiftDetectionEventsInvestigationFilterOption-not_started');
+
+    expect(
+      screen.queryByTestId('nightshiftDetectionEventsInvestigationFilterNote')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows an error with a retry when the list fails to load', () => {
     mockUseSignificantEventsList.mockReturnValue({
       data: undefined,
@@ -224,6 +265,22 @@ describe('EventsTab', () => {
     expect(screen.queryByTestId('nightshiftDetectionEventsTable')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftDetectionEventsRetryButton'));
     expect(mockRefreshEvents).toHaveBeenCalled();
+  });
+
+  it('shows the error, not the previous rows, when a new filter fails to load', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: { hits: [event], page: 1, perPage: 25, total: 1 },
+      isError: true,
+      isPreviousData: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab();
+
+    expect(screen.getByTestId('nightshiftDetectionEventsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionEventsTable')).not.toBeInTheDocument();
   });
 
   it('fetches a deep-linked event that is not on the current page', () => {

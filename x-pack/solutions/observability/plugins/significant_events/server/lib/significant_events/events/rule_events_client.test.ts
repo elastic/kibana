@@ -329,6 +329,23 @@ describe('RuleEventsClient', () => {
       ]);
     });
 
+    it('ignores the legacy investigations field of a stored row', async () => {
+      const row: MockRow = {
+        source: ruleEventSource(),
+        dataJson: JSON.stringify({
+          ...dataDoc,
+          investigations: [
+            { workflow_execution_id: 'wf-1', started_at: '2026-01-01T00:00:00.000Z' },
+          ],
+        }),
+      };
+      const { client } = createClient(async () => sourceResponse([row]));
+
+      const { hits } = await client.findLatest({});
+
+      expect(hits[0]).not.toHaveProperty('investigations');
+    });
+
     it('normalizes a scalar source_ids string to a 1-element array', async () => {
       const scalarDataDoc = { ...dataDoc, source_ids: 'logs.bridge.only' };
       const row: MockRow = {
@@ -604,22 +621,50 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('filters on the investigation state derived from the investigations entries', async () => {
-      const { client, query } = createClient(async (request) =>
-        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
-      );
+    describe('investigation state filter', () => {
+      const filterQuery = async (episodes: { inProgress: string[]; completed: string[] }) => {
+        const { client, query } = createClient(async (request) =>
+          request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+        );
+        await client.findLatestByCurrentStatePaginated({
+          investigation: { states: ['in_progress'], episodes },
+        });
+        return lastQuery(query, (query_) => !query_.includes('STATS total'));
+      };
 
-      await client.findLatestByCurrentStatePaginated({ investigationStates: ['in_progress'] });
+      it('derives the state from the episode id of the current revision', async () => {
+        const q = await filterQuery({ inProgress: ['ep-1'], completed: ['ep-2', 'ep-3'] });
 
-      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'EVAL investigation_state = CASE(COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.workflow_execution_id")), 0) == 0, "not_started", COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.completed_at")), 0) < COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.workflow_execution_id")), 0), "in_progress", "completed")'
-      );
-      expect(q).toContain('WHERE investigation_state IN ("in_progress")');
+        expect(q).toContain(
+          'EVAL investigation_state = CASE(`alert.id` IN ("ep-1"), "in_progress", `alert.id` IN ("ep-2", "ep-3"), "completed", "not_started")'
+        );
+        expect(q).toContain('WHERE investigation_state IN ("in_progress")');
+      });
+
+      it.each([
+        {
+          name: 'only running episodes',
+          episodes: { inProgress: ['ep-1'], completed: [] },
+          expected: 'CASE(`alert.id` IN ("ep-1"), "in_progress", "not_started")',
+        },
+        {
+          name: 'only finished episodes',
+          episodes: { inProgress: [], completed: ['ep-2'] },
+          expected: 'CASE(`alert.id` IN ("ep-2"), "completed", "not_started")',
+        },
+        {
+          name: 'no episodes at all',
+          episodes: { inProgress: [], completed: [] },
+          expected: 'EVAL investigation_state = "not_started"',
+        },
+      ])('builds valid ES|QL for $name', async ({ episodes, expected }) => {
+        const q = await filterQuery(episodes);
+
+        expect(q).toContain(expected);
+        expect(q).not.toContain('IN ()');
+      });
     });
-  });
 
-  describe('countFacets', () => {
     it('counts each dimension without its own filter and fills missing options with zero', async () => {
       const { client, query } = createClient(async (request) => {
         if (request.query.includes('BY severity')) {
@@ -634,11 +679,17 @@ describe('RuleEventsClient', () => {
         return { columns: [], values: [] } as unknown as ESQLSearchResponse;
       });
 
-      const facets = await client.countFacets({
-        severity: ['critical'],
-        status: ['active'],
-        investigationStates: ['completed'],
-      });
+      const facets = await client.countFacets(
+        {
+          severity: ['critical'],
+          status: ['active'],
+          investigation: {
+            states: ['completed'],
+            episodes: { inProgress: ['ep-1'], completed: ['ep-2'] },
+          },
+        },
+        { inProgress: ['ep-1'], completed: ['ep-2'] }
+      );
 
       expect(facets.severity).toEqual({ critical: 0, high: 3, medium: 0, low: 0 });
       expect(facets.status).toEqual({ active: 0, recovering: 0, inactive: 0 });
@@ -650,7 +701,23 @@ describe('RuleEventsClient', () => {
       expect(severityQuery).toContain('COALESCE(`alert.status`, "active") IN ("active")');
       expect(statusQuery).not.toContain('`alert.status` IN');
       expect(investigationQuery).not.toContain('investigation_state IN');
+      expect(investigationQuery).toContain(
+        'CASE(`alert.id` IN ("ep-1"), "in_progress", `alert.id` IN ("ep-2"), "completed", "not_started")'
+      );
       expect(investigationQuery).toContain('severity IN ("critical")');
+    });
+
+    it('leaves the investigation counts out, and runs no query for them, when the episodes could not be read', async () => {
+      const { client, query } = createClient(
+        async () => ({ columns: [], values: [] } as unknown as ESQLSearchResponse)
+      );
+
+      const facets = await client.countFacets({}, null);
+
+      expect(facets.investigation).toBeUndefined();
+      expect(
+        query.mock.calls.some(([request]) => request.query.includes('BY investigation_state'))
+      ).toBe(false);
     });
   });
 

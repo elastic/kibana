@@ -53,7 +53,11 @@ import {
   type SignificantEventsSortOrder,
 } from '../../../../common/events_list';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
-import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
+import type {
+  EventsFilterOptions,
+  EventsPaginatedSearchOptions,
+  InvestigationEpisodes,
+} from './types';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   decideStatusChange,
@@ -187,10 +191,12 @@ const normalizeSourceIds = (value: unknown): string[] => {
  * Decodes a `.rule-events` row into a `SignificantEvent`.
  */
 const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
-  const data = JSON.parse(row.data_json || '{}') as Omit<
-    SignificantEvent,
-    '@timestamp' | 'status' | 'severity'
-  >;
+  // Legacy rows still carry `investigations`; it is no longer read.
+  const { investigations: _legacyInvestigations, ...data } = JSON.parse(
+    row.data_json || '{}'
+  ) as Omit<SignificantEvent, '@timestamp' | 'status' | 'severity'> & {
+    investigations?: unknown;
+  };
   const alertStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
   const severity = row.severity ?? 'medium';
   return {
@@ -480,10 +486,10 @@ export class RuleEventsClient {
     if (entityFilter && options.unassignedEntityIds?.length !== 0) {
       query = query.where`${entityFilter}`;
     }
-    if (options.investigationStates?.length) {
-      query = withInvestigationState(query).where`${esql.col(
+    if (options.investigation?.states.length) {
+      query = withInvestigationState(query, options.investigation.episodes).where`${esql.col(
         INVESTIGATION_STATE_COLUMN
-      )} IN (${options.investigationStates.map((state) => esql.str(state))})`;
+      )} IN (${options.investigation.states.map((state) => esql.str(state))})`;
     }
 
     return query;
@@ -548,9 +554,10 @@ export class RuleEventsClient {
     };
   }
 
-  /** Counts the latest revisions per severity, status and investigation state. */
+  /** Counts the latest revisions per severity, status and investigation state (left out when `investigationEpisodes` is null). */
   async countFacets(
-    options: RuleEventsCurrentStateSearchOptions
+    options: RuleEventsCurrentStateSearchOptions,
+    investigationEpisodes: InvestigationEpisodes | null
   ): Promise<SignificantEventsFacets> {
     const { esClient } = this.clients;
     const [severity, status, investigation] = await Promise.all([
@@ -567,17 +574,20 @@ export class RuleEventsClient {
         column: 'event_status',
         keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
       }),
-      countBy({
-        esClient,
-        query: withInvestigationState(
-          this.buildLatestByCurrentStateQuery({ ...options, investigationStates: undefined })
-        ),
-        column: INVESTIGATION_STATE_COLUMN,
-        keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
-      }),
+      investigationEpisodes
+        ? countBy({
+            esClient,
+            query: withInvestigationState(
+              this.buildLatestByCurrentStateQuery({ ...options, investigation: undefined }),
+              investigationEpisodes
+            ),
+            column: INVESTIGATION_STATE_COLUMN,
+            keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+          })
+        : undefined,
     ]);
 
-    return { severity, status, investigation };
+    return { severity, status, ...(investigation ? { investigation } : {}) };
   }
 
   async countActiveEventsByEntity(

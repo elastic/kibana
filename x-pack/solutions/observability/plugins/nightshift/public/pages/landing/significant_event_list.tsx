@@ -20,37 +20,24 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
+import type { NightshiftSignificantEvent } from '../data/significant_events/use_fetch_significant_events';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../../common/ebt_constants';
-import { getLatestInvestigation } from '../../components/entities/significant_event/significant_event_status';
+} from '../common/ebt_constants';
 import { SignificantEventItem } from './significant_event_item';
-
-const getEventInvestigationRunStatus = (
-  event: SignificantEvent,
-  investigationStatuses: Record<string, InvestigationRunStatus> | undefined
-): InvestigationRunStatus | null | undefined => {
-  const workflowExecutionId = getLatestInvestigation(event)?.workflow_execution_id;
-  if (!workflowExecutionId || !investigationStatuses) {
-    return undefined;
-  }
-  return investigationStatuses[workflowExecutionId] ?? null;
-};
 
 export interface SignificantEventListProps {
   title: string;
-  events: SignificantEvent[];
-  investigationStatuses?: Record<string, InvestigationRunStatus>;
+  events: NightshiftSignificantEvent[];
   selectedEventUuid?: string;
   statusColor: 'danger' | 'success';
   filterActive?: boolean;
   onClearFilter?: () => void;
-  onEventClick?: (event: SignificantEvent) => void;
-  onChatClick?: (event: SignificantEvent) => void;
-  onCloseClick?: (event: SignificantEvent) => void;
+  onEventClick?: (event: NightshiftSignificantEvent) => void;
+  onChatClick?: (event: NightshiftSignificantEvent) => void;
+  onCloseClick?: (event: NightshiftSignificantEvent) => void;
   closingEventId?: string;
   sectionRef?: React.Ref<HTMLElement>;
 }
@@ -58,7 +45,6 @@ export interface SignificantEventListProps {
 export function SignificantEventList({
   title,
   events,
-  investigationStatuses,
   selectedEventUuid,
   statusColor,
   filterActive = false,
@@ -176,10 +162,6 @@ export function SignificantEventList({
             >
               <SignificantEventItem
                 event={event}
-                investigationRunStatus={getEventInvestigationRunStatus(
-                  event,
-                  investigationStatuses
-                )}
                 isSelected={event.event_id === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
