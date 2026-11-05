@@ -7,19 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compareLevels, lowestAllowed, maxLevel } from './levels';
+import type { AclState, StoredAcl } from './acl';
 import {
-  PRINCIPAL_TYPES,
-  type AccessPolicy,
-  type AclDecision,
+  compareLevels,
+  lowestAllowed,
+  maxLevel,
   type AclLevel,
-  type AclObjectDecision,
-  type AclState,
-  type StoredAcl,
   type GeneralAccessLevel,
-  type Principal,
-  type PrincipalType,
-} from './types';
+} from './levels';
+import type { AccessPolicy } from './policy';
+import { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './principals';
+
+/**
+ * What the caller can do with one object.
+ */
+export interface AclDecision {
+  state: AclState;
+  /** Highest ordinary grant the caller has from general access, entries, or ownership. */
+  level: AclLevel;
+  isOwner: boolean;
+  /** Valid ACL whose general access is below the type default, or that has named entries. */
+  restricted: boolean;
+  /** Operations the caller can perform, including those allowed only by recovery. */
+  operations: ReadonlySet<string>;
+  /** Operations allowed only by recovery. */
+  operationsViaRecovery: ReadonlySet<string>;
+}
+
+/**
+ * Outcome of one operation on one object.
+ */
+export type AclObjectDecision =
+  | { status: 'allowed' }
+  | { status: 'not_found' }
+  | { status: 'forbidden'; operation: string };
 
 /**
  * Operations recovery administrators get on objects with a stored ACL. Recovery never permits use,
@@ -45,7 +66,7 @@ export const evaluateAcl = ({
   principal,
   recovery = false,
 }: EvaluateAclParams): AclDecision => {
-  const state = getAclState(acl);
+  const state = getAclState(policy, acl);
 
   let level: AclLevel = 'none';
   let isOwner = false;
@@ -116,7 +137,7 @@ export const generalAccessPermits = (
     return false;
   }
 
-  const state = getAclState(acl);
+  const state = getAclState(policy, acl);
   if (state === 'invalid') {
     return false;
   }
@@ -131,16 +152,24 @@ export const generalAccessPermits = (
  * or named entries.
  */
 export const isRestricted = (policy: AccessPolicy, acl: StoredAcl | undefined) =>
-  getAclState(acl) === 'valid' && !!acl && isRestrictedAcl(policy, acl);
+  getAclState(policy, acl) === 'valid' && !!acl && isRestrictedAcl(policy, acl);
 
-export const getAclState = (acl: StoredAcl | undefined): AclState => {
+/**
+ * Returns the state of a stored ACL. Kibana always writes the version, the owner, and general
+ * access, so the ACL is valid only when all three are complete: every version value is `1`, the
+ * owner has exactly one known kind and at least one ID, and general access has a value the type
+ * allows. Anything else is damaged data, which never falls back to a public default.
+ */
+export const getAclState = (policy: AccessPolicy, acl: StoredAcl | undefined): AclState => {
   if (!acl) {
     return 'absent';
   }
 
-  // Only version 1 exists. A missing, mixed, or unknown version is damaged data and never falls back
-  // to a public default.
-  return acl.version.length > 0 && acl.version.every((value) => value === 1) ? 'valid' : 'invalid';
+  const hasVersion = acl.version.length > 0 && acl.version.every((value) => value === 1);
+  const hasOwner = getPrincipalKind(acl.owner.type) !== undefined && acl.owner.id.length > 0;
+  const hasGeneralAccess =
+    lowestAllowed(acl.general_access, policy.generalAccess.allowed) !== undefined;
+  return hasVersion && hasOwner && hasGeneralAccess ? 'valid' : 'invalid';
 };
 
 /**
@@ -148,11 +177,13 @@ export const getAclState = (acl: StoredAcl | undefined): AclState => {
  * Unknown kinds are ignored, so that a future kind does not invalidate today's grants.
  */
 export const getPrincipalKind = (types: readonly string[]): PrincipalType | undefined => {
-  const kinds = new Set(
-    types.filter((type): type is PrincipalType => PRINCIPAL_TYPES.includes(type as PrincipalType))
-  );
+  const kinds = new Set(types.filter(isPrincipalType));
   return kinds.size === 1 ? [...kinds][0] : undefined;
 };
+
+const KNOWN_PRINCIPAL_TYPES: ReadonlySet<string> = new Set(PRINCIPAL_TYPES);
+
+const isPrincipalType = (value: string): value is PrincipalType => KNOWN_PRINCIPAL_TYPES.has(value);
 
 const getGeneralAccess = (policy: AccessPolicy, acl: StoredAcl): GeneralAccessLevel =>
   lowestAllowed(acl.general_access, policy.generalAccess.allowed) ?? 'none';

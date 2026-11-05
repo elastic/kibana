@@ -17,7 +17,8 @@ jest.mock('./utils/find_shared_origin_objects', () => ({
 
 import type { estypes } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
-import { FIXTURE_POLICY, buildAclReadFilter, normalizeAclSource, type AclDocument } from '@kbn/ols';
+import { buildAclReadFilter, normalizeAclSource, type Acl } from '@kbn/ols';
+import { FIXTURE_POLICY } from '@kbn/ols/src/__fixtures__';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
@@ -57,8 +58,7 @@ const RUN_ONLY_ACL = { version: 1, owner: OWNER, general_access: 'use', entries:
 const PUBLIC_ACL = { version: 1, owner: OWNER, general_access: 'edit', entries: [] };
 
 /** The stored form of an ACL, which has no `entries` when there are none. */
-const toStored = ({ entries, ...acl }: AclDocument) =>
-  entries?.length ? { ...acl, entries } : acl;
+const toStored = ({ entries, ...acl }: Acl) => (entries?.length ? { ...acl, entries } : acl);
 
 const createRawDoc = (
   type: string,
@@ -371,7 +371,7 @@ describe('object-level security in the repository', () => {
     });
 
     it('stores the initial ACL for a new object and never replaces a concurrent one', async () => {
-      const initialAcl: AclDocument = {
+      const initialAcl: Acl = {
         version: 1,
         owner: { type: 'user', id: 'u_creator' },
         general_access: 'none',
@@ -533,7 +533,7 @@ describe('object-level security in the repository', () => {
 
   describe('#changeAcl', () => {
     const change = { kind: 'replace' as const, general_access: 'none' as const, entries: [] };
-    const next: AclDocument = {
+    const next: Acl = {
       version: 1,
       owner: { type: 'user', id: 'u_owner' },
       general_access: 'none',
@@ -686,7 +686,7 @@ describe('object-level security in the repository', () => {
   });
 
   describe('#bulkCreate', () => {
-    const initialAcl: AclDocument = {
+    const initialAcl: Acl = {
       version: 1,
       owner: { type: 'user', id: 'u_creator' },
       general_access: 'none',
@@ -875,7 +875,7 @@ describe('object-level security in the repository', () => {
 
   describe('#update with upsert', () => {
     it('stores the initial ACL when the object does not exist', async () => {
-      const initialAcl: AclDocument = {
+      const initialAcl: Acl = {
         version: 1,
         owner: { type: 'user', id: 'u_creator' },
         general_access: 'edit',

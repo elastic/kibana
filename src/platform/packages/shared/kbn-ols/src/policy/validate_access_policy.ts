@@ -7,25 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ACL_LEVELS,
-  REQUIRED_OPERATIONS,
-  RESERVED_OPERATIONS,
-  type AccessPolicy,
-  type EntryLevel,
-} from './types';
+import { isEntryLevel, isGeneralAccessLevel } from '../levels';
+import { isReservedOperation, REQUIRED_OPERATIONS, type AccessPolicy } from './types';
 
 /**
- * Throws when a policy cannot be enforced consistently. Types call it once, at registration.
+ * Validates a type's access policy. Types call it once, at registration.
+ *
+ * @param policy The policy to validate.
+ * @throws When the policy cannot be enforced consistently, for example when it allows `manage` as
+ * general access, misses a {@link REQUIRED_OPERATIONS} entry, or defines a reserved operation.
  */
-export const validateAccessPolicy = (policy: AccessPolicy) => {
+export const validateAccessPolicy = (policy: AccessPolicy): void => {
   const { generalAccess, entryLevels, operations } = policy;
 
   if (
     generalAccess.allowed.length === 0 ||
-    generalAccess.allowed.some(
-      (level) => !ACL_LEVELS.includes(level) || (level as string) === 'manage'
-    )
+    generalAccess.allowed.some((level) => !isGeneralAccessLevel(level))
   ) {
     throw new Error(
       `General access must allow one or more levels below "manage", got [${generalAccess.allowed}].`
@@ -53,7 +50,7 @@ export const validateAccessPolicy = (policy: AccessPolicy) => {
   }
 
   for (const [name, operation] of Object.entries(operations)) {
-    if ((RESERVED_OPERATIONS as readonly string[]).includes(name)) {
+    if (isReservedOperation(name)) {
       throw new Error(`Operation "${name}" is reserved by the platform.`);
     }
 
@@ -62,6 +59,3 @@ export const validateAccessPolicy = (policy: AccessPolicy) => {
     }
   }
 };
-
-const isEntryLevel = (level: string): level is EntryLevel =>
-  level !== 'none' && (ACL_LEVELS as readonly string[]).includes(level);

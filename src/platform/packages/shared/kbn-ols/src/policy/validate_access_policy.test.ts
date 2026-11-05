@@ -7,13 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FIXTURE_POLICY } from './contract/shapes';
-import { validateAccessPolicy } from './policy';
 import type { AccessPolicy } from './types';
+import { validateAccessPolicy } from './validate_access_policy';
+
+const POLICY: AccessPolicy = {
+  generalAccess: { default: 'edit', allowed: ['none', 'use', 'edit'] },
+  entryLevels: ['use'],
+  operations: {
+    view: { level: 'view', privileges: {} },
+    use: { level: 'use', privileges: { api: ['some_feature'] } },
+    edit: { level: 'edit', privileges: {} },
+    delete: { level: 'edit', privileges: {} },
+  },
+};
 
 describe('validateAccessPolicy', () => {
-  it('accepts the connector policy', () => {
-    expect(() => validateAccessPolicy(FIXTURE_POLICY)).not.toThrow();
+  it('accepts a valid policy', () => {
+    expect(() => validateAccessPolicy(POLICY)).not.toThrow();
   });
 
   it.each<[string, Partial<AccessPolicy>]>([
@@ -21,6 +31,7 @@ describe('validateAccessPolicy', () => {
       'manage general access',
       { generalAccess: { default: 'edit', allowed: ['edit', 'manage' as 'edit'] } },
     ],
+    ['no general access values', { generalAccess: { default: 'edit', allowed: [] } }],
     [
       'a default outside the allowed levels',
       { generalAccess: { default: 'use', allowed: ['none'] } },
@@ -29,19 +40,21 @@ describe('validateAccessPolicy', () => {
     ['an entry level of none', { entryLevels: ['none' as 'use'] }],
     [
       'a missing delete operation',
-      {
-        operations: { view: FIXTURE_POLICY.operations.view, edit: FIXTURE_POLICY.operations.edit },
-      },
+      { operations: { view: POLICY.operations.view, edit: POLICY.operations.edit } },
     ],
     [
       'a view operation above view',
-      { operations: { ...FIXTURE_POLICY.operations, view: { level: 'use', privileges: {} } } },
+      { operations: { ...POLICY.operations, view: { level: 'use', privileges: {} } } },
+    ],
+    [
+      'an operation with an unknown level',
+      { operations: { ...POLICY.operations, run: { level: 'owner' as 'use', privileges: {} } } },
     ],
     [
       'a reserved operation',
-      { operations: { ...FIXTURE_POLICY.operations, transfer: { level: 'edit', privileges: {} } } },
+      { operations: { ...POLICY.operations, transfer: { level: 'edit', privileges: {} } } },
     ],
   ])('rejects %s', (_, overrides) => {
-    expect(() => validateAccessPolicy({ ...FIXTURE_POLICY, ...overrides })).toThrow();
+    expect(() => validateAccessPolicy({ ...POLICY, ...overrides })).toThrow();
   });
 });

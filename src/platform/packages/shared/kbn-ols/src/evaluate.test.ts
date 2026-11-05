@@ -8,9 +8,9 @@
  */
 
 import { evaluateAcl, generalAccessPermits, isRestricted } from './evaluate';
-import { ACL_SHAPE_FIXTURES, FIXTURE_POLICY, FIXTURE_PROBES } from './contract/shapes';
+import { ACL_SHAPE_FIXTURES, FIXTURE_POLICY, FIXTURE_PROBES } from './__fixtures__';
 import { normalizeAclSource } from './normalize';
-import type { StoredAcl } from './types';
+import type { StoredAcl } from './acl';
 
 const OWNER = FIXTURE_PROBES.owner;
 const GRANTEE = FIXTURE_PROBES.grantee;

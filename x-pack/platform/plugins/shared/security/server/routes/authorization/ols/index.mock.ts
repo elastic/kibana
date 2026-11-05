@@ -8,7 +8,7 @@
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { FIXTURE_POLICY } from '@kbn/ols';
+import { FIXTURE_POLICY } from '@kbn/ols/src/__fixtures__';
 
 import type { OlsService } from '../../../authorization/ols/ols_service';
 import { scopedOlsServiceMock } from '../../../authorization/ols/scoped_ols_service.mock';

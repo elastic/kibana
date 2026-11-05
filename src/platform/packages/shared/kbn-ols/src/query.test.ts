@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FIXTURE_POLICY as policy, FIXTURE_PROBES } from './contract/shapes';
+import { FIXTURE_POLICY as policy, FIXTURE_PROBES } from './__fixtures__';
 import { buildAclReadFilter } from './query';
 
 // The read filter is asserted against every stored shape with a real Elasticsearch in the Saved

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FIXTURE_POLICY, type AclObjectDecision } from '@kbn/ols';
+import type { AclObjectDecision } from '@kbn/ols';
+import { FIXTURE_POLICY } from '@kbn/ols/src/__fixtures__';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsErrorHelpers, getAclObjectKey } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
@@ -234,7 +235,12 @@ describe('OlsHelper', () => {
   describe('#authorizeChange', () => {
     it('passes the normalized ACL to the extension', async () => {
       const result = {
-        next: { version: 1 as const, general_access: 'edit' as const, entries: [] },
+        next: {
+          version: 1 as const,
+          owner: { type: 'user' as const, id: 'u_owner' },
+          general_access: 'edit' as const,
+          entries: [],
+        },
         warnings: [],
       };
       olsExtension.authorizeAclChange.mockResolvedValue(result);

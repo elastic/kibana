@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AccessPolicy, AclState, Principal } from '../types';
+import type { AclState } from '../acl';
+import type { AccessPolicy } from '../policy';
+import type { Principal } from '../principals';
 
 /**
- * Same as the connector policy: public by default, private or run-only on request, `use` grants.
+ * Policy the fixtures are evaluated under: public by default, restrictable to `none` or `use`, and
+ * entries that grant `use`.
  */
 export const FIXTURE_POLICY: AccessPolicy = {
   generalAccess: { default: 'edit', allowed: ['none', 'use', 'edit'] },
@@ -23,6 +26,9 @@ export const FIXTURE_POLICY: AccessPolicy = {
   },
 };
 
+/**
+ * Principals whose access each fixture states. `anonymous` stands for a request with no principal.
+ */
 export const FIXTURE_PROBES = {
   owner: { type: 'user', id: 'u_owner' },
   grantee: { type: 'user', id: 'u_grantee' },
@@ -32,14 +38,22 @@ export const FIXTURE_PROBES = {
   anonymous: undefined,
 } satisfies Record<string, Principal | undefined>;
 
+/**
+ * Name of one of the {@link FIXTURE_PROBES}.
+ */
 export type FixtureProbe = keyof typeof FIXTURE_PROBES;
 
+/**
+ * Stored ACL shape with the access it must grant.
+ */
 export interface AclShapeFixture {
+  /** Unique, human-readable name of the shape. */
   name: string;
   /** Raw document source, without the type attributes. */
   source: Record<string, unknown>;
   /** Whether Elasticsearch accepts the document with the platform `acl` mapping. */
   indexable: boolean;
+  /** The state the stored ACL is in. */
   state: AclState;
   /** Probes that can view and use the object under `FIXTURE_POLICY`, without recovery. */
   access: FixtureProbe[];
@@ -63,8 +77,8 @@ const EVERYONE: FixtureProbe[] = [
 ];
 
 /**
- * Stored shapes and the access they grant. Expectations are written by hand: they define the
- * contract that the evaluator and the read filter must both meet.
+ * Stored ACL shapes and the access each one grants. Expectations are written by hand: they are the
+ * contract that both the evaluation of a single object and the filtering of a search must meet.
  */
 export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   { name: 'no acl', source: {}, indexable: true, state: 'absent', access: EVERYONE },
@@ -113,10 +127,24 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     access: EVERYONE,
   },
   {
-    name: 'no general access and no owner',
+    name: 'no general access and no owner is damaged',
     source: { acl: { ...VERSION } },
     indexable: true,
-    state: 'valid',
+    state: 'invalid',
+    access: [],
+  },
+  {
+    name: 'no owner is damaged',
+    source: { acl: { ...VERSION, general_access: 'edit' } },
+    indexable: true,
+    state: 'invalid',
+    access: [],
+  },
+  {
+    name: 'owner without an ID is damaged',
+    source: { acl: { ...VERSION, owner: { type: 'user' }, general_access: 'edit' } },
+    indexable: true,
+    state: 'invalid',
     access: [],
   },
   {
@@ -127,18 +155,18 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     access: ['owner'],
   },
   {
-    name: 'unknown general access means none',
+    name: 'unknown general access is damaged',
     source: { acl: { ...VERSION, ...OWNER, general_access: 'everyone' } },
     indexable: true,
-    state: 'valid',
-    access: ['owner'],
+    state: 'invalid',
+    access: [],
   },
   {
-    name: 'general access manage is not allowed',
+    name: 'general access manage is damaged',
     source: { acl: { ...VERSION, ...OWNER, general_access: 'manage' } },
     indexable: true,
-    state: 'valid',
-    access: ['owner'],
+    state: 'invalid',
+    access: [],
   },
   {
     name: 'unknown values are ignored when an allowed one exists',
@@ -176,10 +204,10 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     access: [],
   },
   {
-    name: 'owner with two known kinds owns nothing',
+    name: 'owner with two known kinds is damaged',
     source: { acl: { ...PRIVATE, owner: { type: ['user', 'service_account'], id: 'u_owner' } } },
     indexable: true,
-    state: 'valid',
+    state: 'invalid',
     access: [],
   },
   {
@@ -307,10 +335,17 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     access: ['owner', 'grantee'],
   },
   {
-    name: 'numeric and boolean keyword leaves never grant',
-    source: { acl: { ...VERSION, owner: { type: 'user', id: 1 }, general_access: true } },
+    name: 'numeric owner ID is read as text',
+    source: { acl: { ...VERSION, owner: { type: 'user', id: 1 }, general_access: 'none' } },
     indexable: true,
     state: 'valid',
+    access: [],
+  },
+  {
+    name: 'boolean general access is damaged',
+    source: { acl: { ...VERSION, ...OWNER, general_access: true } },
+    indexable: true,
+    state: 'invalid',
     access: [],
   },
 ];

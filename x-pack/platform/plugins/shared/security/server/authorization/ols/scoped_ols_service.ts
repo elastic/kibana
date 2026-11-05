@@ -11,10 +11,10 @@ import type { CoreScopedOlsService, KibanaRequest } from '@kbn/core/server';
 import {
   type AccessOperation,
   type AccessPolicy,
+  type Acl,
   type AclChange,
   AclChangeError,
   type AclDecision,
-  type AclDocument,
   type AclInput,
   type AclObjectDecision,
   type AclWarning,
@@ -326,7 +326,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
     type: string;
     spaceId: string;
     requested?: AclInput;
-  }): Promise<AclDocument | undefined> {
+  }): Promise<Acl | undefined> {
     const prepared = prepareInitialAcl({
       policy: this.requirePolicy(type),
       principal: this.isEnabled() ? await this.getPrincipal() : undefined,
@@ -356,7 +356,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
     spaceId: string;
     acl?: StoredAcl;
     change: AclChange;
-  }): Promise<{ next: AclDocument; warnings: AclWarning[] }> {
+  }): Promise<{ next: Acl; warnings: AclWarning[] }> {
     const policy = this.requirePolicy(type);
     if (!this.isEnabled()) {
       throw new AclChangeError('bad_request', 'Object-level security (OLS) is disabled.');
@@ -445,7 +445,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
   private async getRecipientWarnings(
     policy: AccessPolicy,
     spaceId: string,
-    acl: AclDocument
+    acl: Acl
   ): Promise<AclWarning[]> {
     const warnings: AclWarning[] = [];
     for (const level of policy.entryLevels) {
@@ -562,8 +562,8 @@ const describePrincipal = (owner?: StoredAcl['owner']) =>
 /**
  * Summarizes an access change for audit: general access and named entries, before and after.
  */
-const describeAccess = (before: StoredAcl | undefined, after: AclDocument) => {
-  const entries = (acl: AclDocument['entries']) =>
+const describeAccess = (before: StoredAcl | undefined, after: Acl) => {
+  const entries = (acl: Acl['entries']) =>
     acl.map(({ type, id, access }) => `${type}:${id}=${access}`).join(',') || 'none';
   const beforeEntries = before
     ? before.entries

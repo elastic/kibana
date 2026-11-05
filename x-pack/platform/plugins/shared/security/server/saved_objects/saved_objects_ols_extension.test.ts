@@ -115,7 +115,12 @@ describe('SavedObjectsOlsExtension', () => {
 
   describe('#getInitialAcl', () => {
     it('returns the ACL from the service for the space', async () => {
-      const acl = { version: 1 as const, general_access: 'none' as const, entries: [] };
+      const acl = {
+        version: 1 as const,
+        owner: { type: 'user' as const, id: 'u_owner' },
+        general_access: 'none' as const,
+        entries: [],
+      };
       olsService.getInitialAcl.mockResolvedValue(acl);
 
       await expect(
@@ -150,7 +155,12 @@ describe('SavedObjectsOlsExtension', () => {
 
     it('authorizes the change in the object space', async () => {
       const result = {
-        next: { version: 1 as const, general_access: 'none' as const, entries: [] },
+        next: {
+          version: 1 as const,
+          owner: { type: 'user' as const, id: 'u_owner' },
+          general_access: 'none' as const,
+          entries: [],
+        },
         warnings: [],
       };
       olsService.authorizeChange.mockResolvedValue(result);

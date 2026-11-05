@@ -7,7 +7,8 @@
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { type AccessPolicy, FIXTURE_POLICY } from '@kbn/ols';
+import type { AccessPolicy } from '@kbn/ols';
+import { FIXTURE_POLICY } from '@kbn/ols/src/__fixtures__';
 
 import { olsRoutesMock } from './index.mock';
 import { defineSuggestPrincipalsRoute } from './suggest_principals';

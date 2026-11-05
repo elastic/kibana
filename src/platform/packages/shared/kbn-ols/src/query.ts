@@ -8,8 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { compareLevels, partitionLevels } from './levels';
-import { PRINCIPAL_TYPES, type AccessPolicy, type EntryLevel, type Principal } from './types';
+import { compareLevels, type AclLevel, type EntryLevel } from './levels';
+import type { AccessPolicy } from './policy';
+import { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './principals';
 
 const ALL_SPACES = '*';
 
@@ -47,7 +48,7 @@ export const buildAclReadFilter = ({
     }
 
     const ordinary: estypes.QueryDslQueryContainer[] = [
-      { bool: { filter: [VALID_CLAUSE], should: grants, minimum_should_match: 1 } },
+      { bool: { filter: [validClause(policy)], should: grants, minimum_should_match: 1 } },
     ];
     if (compareLevels(policy.generalAccess.default, level) >= 0) {
       ordinary.push(ABSENT_CLAUSE);
@@ -94,14 +95,27 @@ const ABSENT_CLAUSE: estypes.QueryDslQueryContainer = {
 };
 
 /**
- * Every indexed version value is exactly `1`.
+ * The ACL core is complete: every indexed version value is exactly `1`, the owner has exactly one
+ * known kind and at least one ID, and general access has a value the type allows. It matches
+ * `getAclState` returning `valid`.
  */
-const VALID_CLAUSE: estypes.QueryDslQueryContainer = {
+const validClause = (policy: AccessPolicy): estypes.QueryDslQueryContainer => ({
   bool: {
-    filter: [{ term: { 'acl.version': 1 } }],
+    filter: [
+      { term: { 'acl.version': 1 } },
+      { exists: { field: 'acl.owner.id' } },
+      { terms: { 'acl.general_access': [...policy.generalAccess.allowed] } },
+    ],
     must_not: [{ range: { 'acl.version': { lt: 1 } } }, { range: { 'acl.version': { gt: 1 } } }],
+    should: PRINCIPAL_TYPES.map((kind) => ({
+      bool: {
+        filter: [{ term: { 'acl.owner.type': kind } }],
+        must_not: [{ terms: { 'acl.owner.type': otherKinds(kind) } }],
+      },
+    })),
+    minimum_should_match: 1,
   },
-};
+});
 
 /**
  * General access is the lowest allowed stored value, so it reaches `level` only when some allowed
@@ -125,7 +139,7 @@ const ownerClause = (principal: Principal): estypes.QueryDslQueryContainer => ({
       { term: { 'acl.owner.type': principal.type } },
       { term: { 'acl.owner.id': principal.id } },
     ],
-    must_not: [{ terms: { 'acl.owner.type': otherKinds(principal) } }],
+    must_not: [{ terms: { 'acl.owner.type': otherKinds(principal.type) } }],
   },
 });
 
@@ -154,7 +168,7 @@ const entryClause = (
             { terms: { 'acl.entries.access': atLeast } },
           ],
           must_not: [
-            { terms: { 'acl.entries.type': otherKinds(principal) } },
+            { terms: { 'acl.entries.type': otherKinds(principal.type) } },
             { terms: { 'acl.entries.access': below } },
           ],
         },
@@ -167,5 +181,12 @@ const spacesClause = (spaces: readonly string[]): estypes.QueryDslQueryContainer
   // The repository has already limited a search across all spaces to the spaces the caller can see.
   spaces.includes(ALL_SPACES) ? { match_all: {} } : { terms: { namespaces: [...spaces] } };
 
-const otherKinds = (principal: Principal) =>
-  PRINCIPAL_TYPES.filter((kind) => kind !== principal.type);
+const otherKinds = (kind: PrincipalType) => PRINCIPAL_TYPES.filter((other) => other !== kind);
+
+/**
+ * Splits the allowed levels into those that reach `level` and those that do not.
+ */
+const partitionLevels = <T extends AclLevel>(allowed: readonly T[], level: AclLevel) => ({
+  atLeast: allowed.filter((value) => compareLevels(value, level) >= 0),
+  below: allowed.filter((value) => compareLevels(value, level) < 0),
+});

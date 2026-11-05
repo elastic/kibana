@@ -73,7 +73,9 @@ export const resolveConnectorName = async ({
   const isAmbiguous =
     candidates.length > 1 &&
     candidates.some(
-      ({ acl }) => isRestricted(CONNECTOR_ACCESS_POLICY, acl) || getAclState(acl) === 'invalid'
+      ({ acl }) =>
+        isRestricted(CONNECTOR_ACCESS_POLICY, acl) ||
+        getAclState(CONNECTOR_ACCESS_POLICY, acl) === 'invalid'
     );
   if (isAmbiguous) {
     throw Boom.badRequest(

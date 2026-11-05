@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
-import { toAclDocument, type AclWarning, type StoredAcl, type Principal } from '@kbn/ols';
+import { readAclParts, type AclWarning, type StoredAcl, type Principal } from '@kbn/ols';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { AccessDraftEditor } from './access_draft_editor';
@@ -136,7 +136,7 @@ export const ObjectAccessPanel = ({
   const canManage = state.permissions.includes('manage_access');
   const canTransfer = state.permissions.includes('transfer');
   const isDirty = !!draft && !isEqual(draft, savedDraft);
-  const owner = state.acl ? toAclDocument(toModelPolicy(policy.data), state.acl).owner : undefined;
+  const owner = state.acl ? readAclParts(toModelPolicy(policy.data), state.acl).owner : undefined;
 
   return (
     <div data-test-subj="accessPanel">
@@ -152,11 +152,19 @@ export const ObjectAccessPanel = ({
           <KbnDangerCallout
             announceOnMount
             data-test-subj="accessPanelInvalidAcl"
-            title={i18n.translate('olsUi.panel.invalidAcl', {
-              defaultMessage:
-                "This {objectNoun}'s access data is damaged. Replace it or transfer ownership to repair it.",
-              values: { objectNoun: copy.objectNoun },
-            })}
+            title={
+              owner
+                ? i18n.translate('olsUi.panel.invalidAcl', {
+                    defaultMessage:
+                      "This {objectNoun}'s access data is damaged. Replace it or transfer ownership to repair it.",
+                    values: { objectNoun: copy.objectNoun },
+                  })
+                : i18n.translate('olsUi.panel.invalidAclWithoutOwner', {
+                    defaultMessage:
+                      "This {objectNoun}'s access data is damaged and has no single owner. Transfer ownership to repair it.",
+                    values: { objectNoun: copy.objectNoun },
+                  })
+            }
           />
           <EuiSpacer size="m" />
         </>
@@ -252,7 +260,8 @@ export const ObjectAccessPanel = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isDisabled={!isDirty}
+                // A replacement keeps the owner, so an ACL without a single owner needs a transfer.
+                isDisabled={!isDirty || !owner}
                 isLoading={isSaving}
                 data-test-subj="accessPanelSave"
                 onClick={() =>
@@ -356,7 +365,7 @@ const toModelPolicy = (policy: AccessPolicyResponse) => ({
  * Returns the editable part of a stored ACL: general access and named entries, without the owner.
  */
 export const toAccessDraft = (policy: AccessPolicyResponse, acl: StoredAcl): AccessDraft => {
-  const { general_access: generalAccess, entries } = toAclDocument(toModelPolicy(policy), acl);
+  const { general_access: generalAccess, entries } = readAclParts(toModelPolicy(policy), acl);
   return {
     general_access: generalAccess,
     entries: entries.map(({ type, id, access }) => ({ type, id, access })),

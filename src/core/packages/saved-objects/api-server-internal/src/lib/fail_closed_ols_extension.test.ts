@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FIXTURE_POLICY, buildAclReadFilter, normalizeAclSource } from '@kbn/ols';
+import { buildAclReadFilter, normalizeAclSource } from '@kbn/ols';
+import { FIXTURE_POLICY } from '@kbn/ols/src/__fixtures__';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { getAclObjectKey } from '@kbn/core-saved-objects-server';
 import { createFailClosedOlsExtension } from './fail_closed_ols_extension';

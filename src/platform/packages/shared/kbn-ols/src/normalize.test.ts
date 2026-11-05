@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ACL_SHAPE_FIXTURES } from './contract/shapes';
+import { ACL_SHAPE_FIXTURES } from './__fixtures__';
 import { normalizeAclSource, toStoredAcl } from './normalize';
 
 describe('normalizeAclSource', () => {

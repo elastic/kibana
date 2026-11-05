@@ -7,19 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPrincipalKind } from './evaluate';
-import { compareLevels, lowestAllowed } from './levels';
-import type {
-  AccessPolicy,
-  AclChange,
-  AclDecision,
-  AclDocument,
-  AclDocumentEntry,
-  AclInput,
-  StoredAcl,
-  GeneralAccessLevel,
-  Principal,
-} from './types';
+import type { Acl, AclEntry, StoredAcl } from './acl';
+import { getPrincipalKind, type AclDecision } from './evaluate';
+import { compareLevels, lowestAllowed, type EntryLevel, type GeneralAccessLevel } from './levels';
+import type { AccessPolicy } from './policy';
+import type { Principal } from './principals';
+
+/**
+ * Caller input for an initial ACL or a replacement.
+ */
+export interface AclInput {
+  general_access?: GeneralAccessLevel;
+  entries?: Array<Principal & { access: EntryLevel }>;
+}
+
+/**
+ * Change a caller requests to an existing object's ACL.
+ */
+export type AclChange =
+  | {
+      kind: 'replace';
+      general_access: GeneralAccessLevel;
+      entries: NonNullable<AclInput['entries']>;
+    }
+  | { kind: 'claim'; general_access?: GeneralAccessLevel }
+  | { kind: 'transfer'; owner: Principal };
+
+/**
+ * Grant that is stored but that the recipient cannot use yet.
+ */
+export interface AclWarning {
+  principal: Principal;
+  level: EntryLevel;
+  reason: 'missing_feature_privileges';
+}
+
+/**
+ * Parts of a stored ACL that grant something, in the shapes Kibana writes. The owner is missing
+ * when the stored owner is damaged or lists several IDs.
+ */
+export interface AclParts {
+  owner?: Principal;
+  general_access: GeneralAccessLevel;
+  entries: AclEntry[];
+}
 
 /**
  * Maximum number of named entries, excluding the owner.
@@ -36,7 +67,7 @@ export class AclChangeError extends Error {
 }
 
 export interface PreparedAclChange {
-  next: AclDocument;
+  next: Acl;
   /** Recipients whose grant is new or higher. They must exist before the change is stored. */
   grantsToCheck: Principal[];
 }
@@ -142,7 +173,16 @@ const prepareReplace = (
     throw new AclChangeError('bad_request', 'The object has no owner yet. Claim it first.');
   }
 
-  const { owner, entries: currentEntries } = toAclDocument(policy, current);
+  // Every ACL Kibana writes has one owner. When the stored one is damaged or lists several IDs, a
+  // replacement would have to pick one, so only a transfer can repair it.
+  const { owner, entries: currentEntries } = readAclParts(policy, current);
+  if (!owner) {
+    throw new AclChangeError(
+      'bad_request',
+      'The object has no single owner. Transfer ownership to repair its ACL.'
+    );
+  }
+
   const currentGrants = new Map(currentEntries.map((entry) => [principalKey(entry), entry]));
   const generalAccess = validateGeneralAccess(policy, change.general_access);
 
@@ -158,7 +198,7 @@ const prepareReplace = (
   });
 
   return {
-    next: { version: 1, ...(owner && { owner }), general_access: generalAccess, entries },
+    next: { version: 1, owner, general_access: generalAccess, entries },
     grantsToCheck,
   };
 };
@@ -202,7 +242,7 @@ const prepareTransfer = (
 
   // The former owner keeps nothing, and the new owner needs no separate entry. A damaged ACL is
   // repaired on the way: only its valid components are kept.
-  const { general_access: generalAccess, entries } = toAclDocument(policy, current);
+  const { general_access: generalAccess, entries } = readAclParts(policy, current);
   return {
     next: {
       version: 1,
@@ -215,15 +255,15 @@ const prepareTransfer = (
 };
 
 /**
- * Keeps the components of a stored ACL that grant something, in the shape Kibana writes. An entry
- * listing several IDs becomes one entry per ID; a component with an ambiguous kind is dropped.
+ * Keeps the parts of a stored ACL that grant something, in the shapes Kibana writes. An entry
+ * listing several IDs becomes one entry per ID; a part with an ambiguous kind is dropped.
  */
-export const toAclDocument = (policy: AccessPolicy, acl: StoredAcl): AclDocument => {
+export const readAclParts = (policy: AccessPolicy, acl: StoredAcl): AclParts => {
   const ownerKind = getPrincipalKind(acl.owner.type);
   const owner =
     ownerKind && acl.owner.id.length === 1 ? { type: ownerKind, id: acl.owner.id[0] } : undefined;
 
-  const entries = new Map<string, AclDocumentEntry>();
+  const entries = new Map<string, AclEntry>();
   for (const entry of acl.entries) {
     const kind = getPrincipalKind(entry.type);
     const access = lowestAllowed(entry.access, policy.entryLevels);
@@ -241,7 +281,6 @@ export const toAclDocument = (policy: AccessPolicy, acl: StoredAcl): AclDocument
   }
 
   return {
-    version: 1,
     ...(owner && { owner }),
     general_access: lowestAllowed(acl.general_access, policy.generalAccess.allowed) ?? 'none',
     entries: [...entries.values()],

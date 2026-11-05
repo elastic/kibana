@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { FIXTURE_POLICY } from '@kbn/ols';
+import { FIXTURE_POLICY } from '@kbn/ols/src/__fixtures__';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({

@@ -8,14 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  AclChange,
-  AclDocument,
-  AclInput,
-  AclObjectDecision,
-  AclWarning,
-  StoredAcl,
-} from '@kbn/ols';
+import type { AclChange, Acl, AclInput, AclObjectDecision, AclWarning, StoredAcl } from '@kbn/ols';
 
 /**
  * Repository operations that check object-level access. Consumer operations such as connector
@@ -65,7 +58,7 @@ export interface ISavedObjectsOlsExtension {
     type: string;
     namespace?: string;
     requested?: AclInput;
-  }): Promise<AclDocument | undefined>;
+  }): Promise<Acl | undefined>;
 
   /**
    * Authorizes an access change on a visible object and returns the ACL to store. Throws a Saved
@@ -75,7 +68,7 @@ export interface ISavedObjectsOlsExtension {
     namespace?: string;
     object: AclObject;
     change: AclChange;
-  }): Promise<{ next: AclDocument; warnings: AclWarning[] }>;
+  }): Promise<{ next: Acl; warnings: AclWarning[] }>;
 
   /**
    * Runs a repository operation with audit events held until it completes. Events that other

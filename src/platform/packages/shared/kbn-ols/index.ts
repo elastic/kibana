@@ -9,30 +9,27 @@
 
 export {
   ACL_LEVELS,
-  PRINCIPAL_TYPES,
-  REQUIRED_OPERATIONS,
-  RESERVED_OPERATIONS,
-  type AccessOperation,
-  type AccessPolicy,
-  type AclChange,
-  type AclDecision,
-  type AclDocument,
-  type AclDocumentEntry,
-  type AclInput,
+  compareLevels,
+  isAclLevel,
+  isEntryLevel,
+  isGeneralAccessLevel,
+  lowestAllowed,
+  maxLevel,
   type AclLevel,
-  type AclObjectDecision,
-  type AclState,
-  type AclWarning,
-  type StoredAcl,
-  type StoredAclEntry,
   type EntryLevel,
   type GeneralAccessLevel,
-  type Principal,
-  type PrincipalType,
+} from './src/levels';
+export { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './src/principals';
+export {
+  isReservedOperation,
+  REQUIRED_OPERATIONS,
+  RESERVED_OPERATIONS,
+  validateAccessPolicy,
+  type AccessOperation,
+  type AccessPolicy,
   type ReservedOperation,
-} from './src/types';
-export { compareLevels, lowestAllowed, maxLevel } from './src/levels';
-export { validateAccessPolicy } from './src/policy';
+} from './src/policy';
+export type { Acl, AclEntry, AclState, StoredAcl, StoredAclEntry } from './src/acl';
 export { ACL_FIELD, normalizeAclSource, toStoredAcl } from './src/normalize';
 export {
   evaluateAcl,
@@ -41,6 +38,8 @@ export {
   getPrincipalKind,
   isRestricted,
   toObjectDecision,
+  type AclDecision,
+  type AclObjectDecision,
   type EvaluateAclParams,
 } from './src/evaluate';
 export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/query';
@@ -49,16 +48,13 @@ export {
   MAX_ACL_ENTRIES,
   prepareAclChange,
   prepareInitialAcl,
-  toAclDocument,
+  readAclParts,
+  type AclChange,
   type AclChangeErrorCode,
+  type AclInput,
+  type AclParts,
+  type AclWarning,
   type PrepareAclChangeParams,
   type PrepareInitialAclParams,
   type PreparedAclChange,
 } from './src/change';
-export {
-  ACL_SHAPE_FIXTURES,
-  FIXTURE_POLICY,
-  FIXTURE_PROBES,
-  type AclShapeFixture,
-  type FixtureProbe,
-} from './src/contract/shapes';

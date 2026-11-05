@@ -8,15 +8,13 @@
  */
 
 import { URL } from 'url';
+import { buildAclReadFilter, evaluateAcl, normalizeAclSource } from '@kbn/ols';
 import {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
   FIXTURE_PROBES,
-  buildAclReadFilter,
-  evaluateAcl,
-  normalizeAclSource,
   type FixtureProbe,
-} from '@kbn/ols';
+} from '@kbn/ols/src/__fixtures__';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';

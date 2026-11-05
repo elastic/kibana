@@ -9,8 +9,10 @@
 
 import { AclChangeError, MAX_ACL_ENTRIES, prepareAclChange, prepareInitialAcl } from './change';
 import { evaluateAcl } from './evaluate';
-import { FIXTURE_POLICY as policy, FIXTURE_PROBES } from './contract/shapes';
-import type { AclChange, StoredAcl, Principal } from './types';
+import { FIXTURE_POLICY as policy, FIXTURE_PROBES } from './__fixtures__';
+import type { StoredAcl } from './acl';
+import type { AclChange } from './change';
+import type { Principal } from './principals';
 
 const NOW = '2026-10-30T00:00:00.000Z';
 const EARLIER = '2026-10-01T00:00:00.000Z';
@@ -194,6 +196,22 @@ describe('prepareAclChange', () => {
         general_access: 'none',
         entries: [],
       });
+    });
+
+    it.each([
+      ['no owner', { type: [], id: [] }],
+      ['an owner with several IDs', { type: ['user'], id: [OWNER.id, GRANTEE.id] }],
+    ])('leaves an ACL with %s to a transfer', (_, owner) => {
+      expectError(
+        () =>
+          change(
+            { ...stored, owner },
+            STRANGER,
+            { kind: 'replace', general_access: 'none', entries: [] },
+            { recovery: true }
+          ),
+        'bad_request'
+      );
     });
   });
 

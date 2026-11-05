@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AclDocument, StoredAcl, StoredAclEntry } from './types';
+import type { Acl, StoredAcl, StoredAclEntry } from './acl';
 
 /**
  * Root field that stores the ACL in a document source.
@@ -65,7 +65,7 @@ export const normalizeAclSource = (
  * rewrite preserves is turned back into a source value that indexes to the same values, while dotted
  * keys and empty leaves disappear.
  */
-export const toStoredAcl = (acl: AclDocument | StoredAcl): Record<string, unknown> => {
+export const toStoredAcl = (acl: Acl | StoredAcl): Record<string, unknown> => {
   if (!isStoredAcl(acl)) {
     return { ...acl };
   }
@@ -177,7 +177,7 @@ const setLeaf = (target: Record<string, unknown>, leaf: string, values: unknown[
   }
 };
 
-const isStoredAcl = (acl: AclDocument | StoredAcl): acl is StoredAcl => Array.isArray(acl.version);
+const isStoredAcl = (acl: Acl | StoredAcl): acl is StoredAcl => Array.isArray(acl.version);
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
