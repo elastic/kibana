@@ -12,7 +12,7 @@ import Path from 'path';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { testTargets } from '@kbn/scout-info';
-import { testableModules } from '@kbn/scout-reporting/src/registry';
+import { testableModules } from '@kbn/scout-reporting';
 import { validateAndProcessTestFiles } from '../../common/utils';
 
 export interface PickableConfig {
@@ -25,6 +25,8 @@ export interface PickableConfig {
   category: string;
   /** Local test target tags, e.g. local-stateful-classic */
   targets: string[];
+  /** Whether a committed test manifest records this config's tests and their tags */
+  hasManifest: boolean;
 }
 
 const getLocalTargets = (tags: string[]): string[] => {
@@ -44,6 +46,7 @@ export const getConfigs = (): PickableConfig[] =>
       configSet: config.server.configSet,
       category: config.category,
       targets: getLocalTargets(config.manifest.tests.flatMap(({ tags }) => tags)),
+      hasManifest: config.manifest.exists,
     }))
   );
 
@@ -69,7 +72,7 @@ const git = async (args: string[]) => {
   return stdout.split('\n').filter(Boolean);
 };
 
-const getMergeBase = async () => {
+const findMergeBase = async () => {
   for (const ref of ['upstream/main', 'origin/main', 'main']) {
     const [base] = await git(['merge-base', 'HEAD', ref]).catch(() => []);
     if (base) return base;
@@ -77,12 +80,14 @@ const getMergeBase = async () => {
   return 'HEAD';
 };
 
-/** TypeScript files changed on this branch or not committed yet */
-export const getChangedFiles = async (): Promise<string[]> => {
+let mergeBase: Promise<string> | undefined;
+const getMergeBase = () => (mergeBase ??= findMergeBase());
+
+const getChanged = async (pathspec: string[]): Promise<string[]> => {
   const [changed, untracked] = await Promise.all([
-    getMergeBase().then((base) => git(['diff', '--name-only', base, '--', '*.ts'])),
+    getMergeBase().then((base) => git(['diff', '--name-only', base, '--', ...pathspec])),
     // `git status` finds untracked files faster than `git ls-files --others`
-    git(['status', '--porcelain', '--untracked-files=all', '--', '*.ts']).then((lines) =>
+    git(['status', '--porcelain', '--untracked-files=all', '--', ...pathspec]).then((lines) =>
       lines.filter((line) => line.startsWith('??')).map((line) => line.slice(3))
     ),
   ]);
@@ -90,6 +95,15 @@ export const getChangedFiles = async (): Promise<string[]> => {
     Fs.existsSync(Path.resolve(REPO_ROOT, file))
   );
 };
+
+/** Everything changed on this branch or not committed yet */
+export const getChangedFiles = (): Promise<string[]> =>
+  // fixtures, es_archives and other test data decide what a run does, so only docs are left out
+  getChanged([':!*.md']);
+
+/** Of the given files, the ones changed on this branch or not committed yet */
+export const getChangedSince = async (files: string[]): Promise<string[]> =>
+  files.length ? getChanged(files) : [];
 
 export interface ChangedConfig {
   config: PickableConfig;

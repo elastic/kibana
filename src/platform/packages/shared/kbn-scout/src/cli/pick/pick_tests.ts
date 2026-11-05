@@ -13,12 +13,13 @@ import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChangedConfig, PickableConfig } from './configs';
 import { getChangedConfigs, getChangedFiles, getConfigs, getSpecs } from './configs';
-import { describeRun, describeServerSet, formatConfig, plural } from './labels';
+import { describeRun, describeServerSet, describeTarget, formatConfig, plural } from './labels';
 import type { PinnedConfig } from './pins';
 import { readState, toPinned, updateState } from './pins';
 import { getShownPrompts, GoBack, multiSelect, select } from './prompt';
 import type { RunningServers } from './servers';
 import { getRunningServers, isServingConfig } from './servers';
+import { getTargetCoverage } from './targets';
 
 export interface Selection {
   config: PinnedConfig;
@@ -30,15 +31,29 @@ export interface Selection {
 
 const unique = (values: string[]) => [...new Set(values)].sort();
 
+/** Picks one value of a config field, hinting how many configs share it */
+const pickFacet = (message: string, configs: PickableConfig[], field: 'group' | 'module') =>
+  select(
+    message,
+    unique(configs.map((item) => item[field])).map((value) => ({
+      label: value,
+      value,
+      hint: plural(configs.filter((item) => item[field] === value).length, 'config'),
+    }))
+  );
+
 /** The servers a config needs, marked when they already run for one of its targets */
 const serversHint = (config: PinnedConfig, running: RunningServers[]) => {
   const servers = describeServerSet(config.configSet);
   const isRunning = running.some((server) =>
     config.targets.some((tag) => isServingConfig(server, config, ScoutTestTarget.fromTag(tag)))
   );
-  return `${config.configSet === 'default' ? servers : chalk.yellow(servers)}${
-    isRunning ? `  ${chalk.green('● running')}` : ''
-  }`;
+  return [
+    config.configSet === 'default' ? servers : chalk.yellow(servers),
+    // without one, the targets each spec runs on cost a Playwright listing to find out
+    ...(config.hasManifest ? [] : [chalk.yellow('no manifest yet')]),
+    ...(isRunning ? [chalk.green('● running')] : []),
+  ].join('  ');
 };
 
 const byServerSet = (a: PickableConfig, b: PickableConfig) =>
@@ -131,27 +146,12 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
 
   const steps: Record<Step, () => Promise<Step | undefined>> = {
     group: async () => {
-      const all = loadConfigs();
-      group = await select(
-        'Where are the tests?',
-        unique(all.map((item) => item.group)).map((value) => ({
-          label: value,
-          value,
-          hint: plural(all.filter((item) => item.group === value).length, 'config'),
-        }))
-      );
+      group = await pickFacet('Where are the tests?', loadConfigs(), 'group');
       return 'module';
     },
     module: async () => {
       const inGroup = loadConfigs().filter((item) => item.group === group);
-      module = await select(
-        'Module',
-        unique(inGroup.map((item) => item.module)).map((value) => ({
-          label: value,
-          value,
-          hint: plural(inGroup.filter((item) => item.module === value).length, 'config'),
-        }))
-      );
+      module = await pickFacet('Module', inGroup, 'module');
       return 'config';
     },
     config: async () => {
@@ -207,8 +207,11 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         runLast = true;
         return undefined;
       }
-      if (choice === 'find' || choice === 'edit' || choice === 'changed') {
-        return choice === 'find' ? 'group' : choice;
+      if (choice === 'find') {
+        return 'group';
+      }
+      if (choice === 'edit' || choice === 'changed') {
+        return choice;
       }
       config = pins.find(({ path }) => path === choice);
       return 'scope';
@@ -223,7 +226,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
     },
     changed: async () => {
       log.write(chalk.dim('Looking for changed tests…'));
-      // git runs while all configs load
+      // deliberately not awaited yet, so git and the config loading overlap
       const files = getChangedFiles();
       const changed = getChangedConfigs(await files, loadConfigs());
       if (!changed.length) {
@@ -263,7 +266,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
           helpers.length ? ` · uses changed ${names(helpers)}` : ''
         }`,
       };
-      // page objects and fixtures may be used by any spec, so the whole config comes first then
+      // page objects and fixtures may be used by any spec, so then the whole config comes first
       const scope = await select('Run', [
         ...(helpers.length ? [wholeChoice, ...changedChoices] : [...changedChoices, wholeChoice]),
         { label: 'Pick specs', value: 'pick' },
@@ -280,9 +283,21 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return 'target';
     },
     target: async () => {
-      const choices = getConfig().targets.map((tag) => {
+      const { tags, counts, total, known } = await getTargetCoverage(log, getConfig(), specs);
+      if (!known) {
+        log.write(
+          chalk.yellow("Can't tell which targets these tests declare, showing all of the config")
+        );
+      }
+      const choices = tags.map((tag) => {
         const value = ScoutTestTarget.fromTag(tag);
-        return { label: `${value.arch} · ${value.domain}`, value };
+        const count = counts.get(tag) ?? 0;
+        const partial = known && count < total;
+        return {
+          label: describeTarget(value),
+          value,
+          ...(partial ? { hint: chalk.yellow(`only ${count} of ${total} specs`) } : {}),
+        };
       });
       target = await select('Target', choices);
       return 'output';

@@ -19,10 +19,13 @@ import { prepareServers } from './servers';
 
 type Next = 'again' | 'failed' | 'settings' | 'pick' | 'exit';
 
+const browserHint = (headed: boolean) => (headed ? 'shown' : 'headless');
+const outputHint = (verbose: boolean) => (verbose ? 'all logs' : 'test results only');
+
 const describeSettings = ({ config, headed, verbose }: Selection) =>
   [
-    ...(config.category === 'api' ? [] : [headed ? 'browser shown' : 'headless']),
-    verbose ? 'all logs' : 'test results only',
+    ...(config.category === 'api' ? [] : [`browser ${browserHint(headed)}`]),
+    outputHint(verbose),
   ].join(' · ');
 
 const editSettings = async (selection: Selection) => {
@@ -35,13 +38,13 @@ const editSettings = async (selection: Selection) => {
               {
                 label: 'Browser',
                 value: 'headed' as const,
-                hint: selection.headed ? 'shown' : 'headless',
+                hint: browserHint(selection.headed),
               },
             ]),
         {
           label: 'Output',
           value: 'verbose',
-          hint: selection.verbose ? 'all logs' : 'test results only',
+          hint: outputHint(selection.verbose),
         },
         { label: 'Done', value: 'done' },
       ]),

@@ -87,7 +87,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       const visible = filtered();
       cursor = Math.min(cursor, Math.max(visible.length - 1, 0));
       const start = Math.max(0, cursor - PAGE_SIZE + 1);
-      const width = (stdout.columns || 100) - (multiple ? 8 : 6);
+      const columns = stdout.columns || 100;
+      const width = columns - (multiple ? 8 : 6);
       const page = visible.slice(start, start + PAGE_SIZE);
       // hints line up in one column; labels are cut first, down to half of the width
       const hintWidth = Math.max(0, ...page.map(({ hint }) => plain(hint ?? '').length));
@@ -119,7 +120,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       ];
 
       clear();
-      stdout.write(lines.join('\n'));
+      // a line that wraps counts twice on screen but once here, which would break clear()
+      stdout.write(lines.map((line) => truncate(line, columns)).join('\n'));
       renderedLines = lines.length;
     };
 
@@ -128,12 +130,12 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       stdin.setRawMode(false);
       stdin.pause();
       clear();
+      stdout.write('\x1b[?25h');
     };
 
     const finish = (picked: Array<Choice<T>>) => {
       close();
       printAnswer(message, picked);
-      stdout.write('\x1b[?25h');
       resolve(picked.map(({ value }) => value));
     };
 
@@ -142,12 +144,10 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       const current = visible[cursor];
 
       if (key.ctrl && key.name === 'c') {
-        clear();
-        stdout.write('\x1b[?25h');
+        close();
         process.exit(130);
       } else if (key.name === 'escape') {
         close();
-        stdout.write('\x1b[?25h');
         reject(new GoBack());
         return;
       } else if (key.name === 'return') {

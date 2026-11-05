@@ -17,7 +17,7 @@ const STATE_FILE = Path.resolve(REPO_ROOT, '.scout/pins.json');
 /** What the picker needs to run a config without loading all Scout configs */
 export type PinnedConfig = Pick<
   PickableConfig,
-  'path' | 'module' | 'file' | 'configSet' | 'category' | 'targets'
+  'path' | 'module' | 'file' | 'configSet' | 'category' | 'targets' | 'hasManifest'
 >;
 
 export interface LastRun {
@@ -33,20 +33,18 @@ export interface PickState {
   headed?: boolean;
 }
 
-export const toPinned = ({
-  path,
-  module,
-  file,
-  configSet,
-  category,
-  targets,
-}: PinnedConfig): PinnedConfig => ({ path, module, file, configSet, category, targets });
+/** Drops the fields only a freshly loaded config has, so the pin file stays small */
+export const toPinned = (config: PinnedConfig): PinnedConfig => {
+  const { path, module, file, configSet, category, targets, hasManifest } = config;
+  return { path, module, file, configSet, category, targets, hasManifest };
+};
 
 /** A missing or broken state file, or one from an older version, starts from scratch */
 export const readState = (): PickState => {
   try {
     const state: PickState = JSON.parse(Fs.readFileSync(STATE_FILE, 'utf8'));
-    const isValid = (config?: PinnedConfig) => Boolean(config?.file && config.targets);
+    const isValid = (config?: PinnedConfig) =>
+      Boolean(config?.file && config.targets && 'hasManifest' in config);
     const { pins = [], last } = state;
     return pins.every(isValid) && (!last || isValid(last.config)) ? state : {};
   } catch {

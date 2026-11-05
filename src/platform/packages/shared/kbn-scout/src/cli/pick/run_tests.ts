@@ -15,10 +15,15 @@ import chalk from 'chalk';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getPlaywrightLimitOptions } from '../../playwright/tags';
 import type { Selection } from './pick_tests';
 import type { ServersMode } from './servers';
 
 const LOG_FILE = '.scout/logs/scout_pick.log';
+
+// `run-tests` adds this for us; calling Playwright directly has to skip the same tests, or a
+// local run would pick up tests that need attributes a local target doesn't declare, e.g. fips
+const { grepInvert } = getPlaywrightLimitOptions([]);
 
 const getCommand = (
   { config, specs, target, verbose, headed }: Selection,
@@ -34,6 +39,7 @@ const getCommand = (
         `--config=${config.path}`,
         '--project=local',
         `--grep=${target.playwrightTag}`,
+        ...(grepInvert ? [`--grep-invert=${grepInvert}`] : []),
         ...(headed ? ['--headed'] : []),
         ...(onlyFailed ? ['--last-failed'] : []),
       ]

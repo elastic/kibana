@@ -13,12 +13,14 @@ import type { PinnedConfig } from './pins';
 
 export const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
+const SHARED_PARTS = new Set(['test', 'scout', 'playwright.config.ts']);
+
 /** Dims the parts of a config path that all configs share */
 const highlightPath = (path: string) =>
   path
     .split('/')
     .map((part) => {
-      if (part === 'test' || part === 'scout' || part === 'playwright.config.ts') {
+      if (SHARED_PARTS.has(part)) {
         return chalk.dim(part);
       }
       if (part === 'parallel.playwright.config.ts') {
@@ -34,8 +36,9 @@ export const formatConfig = ({ module, file }: PinnedConfig, withModule = true) 
 export const describeServerSet = (configSet: string) =>
   configSet === 'default' ? 'default servers' : `custom servers: ${configSet}`;
 
+/** Falls back to what is known: `ps` may not show the flags a server was started with */
 export const describeTarget = ({ arch, domain }: { arch?: string; domain?: string }) =>
-  `${arch} · ${domain}`;
+  [arch, domain].filter(Boolean).join(' · ') || 'unknown target';
 
 export const describeRun = ({
   config,
