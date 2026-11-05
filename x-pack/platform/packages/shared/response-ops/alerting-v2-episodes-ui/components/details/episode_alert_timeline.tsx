@@ -6,10 +6,17 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AlertTimelineChart,
@@ -17,10 +24,13 @@ import {
   deriveEpisodeSeverityTimelineData,
   EpisodeSeverityTimelineRow,
   formatTimestamp,
+  type AlertTimelineEventRow,
+  type EpisodeSeverityTimelineSourceRow,
   type EpisodeSeverityTimelineTransition,
 } from '../../alert_timeline';
 import { getEpisodeSeverityLabel } from '../severity/severity_utils';
 import { SeverityHeatmapDetailPanel } from './severity_heatmap_detail_panel';
+import { AlertEpisodeCollapsedEventsWarning } from './collapsed_events_warning';
 import { getPanelTitleSize } from './panel_title_sizes';
 import * as i18n from './translations';
 
@@ -30,12 +40,19 @@ interface AlertEpisodeAlertTimelineServices {
 }
 
 export interface AlertEpisodeAlertTimelineProps {
-  eventRows: EpisodeEventRow[];
+  /** Rows drawn in the lifecycle lane. */
+  statusRows: AlertTimelineEventRow[];
+  /** Rows drawn in the severity lane. */
+  severityRows: EpisodeSeverityTimelineSourceRow[];
+  /** When set, the rows are collapsed phases and a warning names this event limit. */
+  collapsedEventLimit?: number;
   compressed?: boolean;
 }
 
 export const AlertEpisodeAlertTimeline = ({
-  eventRows,
+  statusRows,
+  severityRows,
+  collapsedEventLimit,
   compressed,
 }: AlertEpisodeAlertTimelineProps) => {
   const { services } = useKibana<AlertEpisodeAlertTimelineServices>();
@@ -45,22 +62,31 @@ export const AlertEpisodeAlertTimeline = ({
   const baseTheme = services.charts.theme.useChartsBaseTheme();
   const timeZone = services.uiSettings.get<string>('dateFormat:tz', 'Browser');
   const timelineData = useMemo(
-    () => deriveEpisodeAlertTimelineData(eventRows, Date.now()),
-    [eventRows]
+    () => deriveEpisodeAlertTimelineData(statusRows, Date.now()),
+    [statusRows]
   );
   const severityTimelineData = useMemo(
     () =>
       timelineData
-        ? deriveEpisodeSeverityTimelineData(eventRows, timelineData.windowEndMs)
+        ? deriveEpisodeSeverityTimelineData(severityRows, timelineData.windowEndMs)
         : { segments: [], transitions: [] },
-    [eventRows, timelineData]
+    [severityRows, timelineData]
   );
 
   return (
     <div data-test-subj="alertingV2EpisodeAlertTimeline">
-      <EuiTitle size={getPanelTitleSize(compressed)}>
-        <h2>{i18n.ALERT_TIMELINE_TITLE}</h2>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size={getPanelTitleSize(compressed)}>
+            <h2>{i18n.ALERT_TIMELINE_TITLE}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {collapsedEventLimit !== undefined && (
+          <EuiFlexItem grow={false}>
+            <AlertEpisodeCollapsedEventsWarning eventLimit={collapsedEventLimit} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       {timelineData ? (
         <AlertTimelineChart

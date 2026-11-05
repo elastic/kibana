@@ -18,6 +18,8 @@ import * as i18n from './translations';
 export interface AlertEpisodeTimelineProps {
   entries: TimelineEntry[];
   profilesMap: Map<string, UserProfileWithAvatar>;
+  /** When set, status and severity changes are collapsed and warn about this event limit. */
+  collapsedEventLimit?: number;
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
@@ -29,6 +31,7 @@ const LOAD_MORE_ITEM_CLASS_NAME = 'alertingV2TimelineLoadMoreItem';
 export const AlertEpisodeTimeline = ({
   entries,
   profilesMap,
+  collapsedEventLimit,
   onLoadMore,
   hasMore,
   isLoadingMore,
@@ -57,10 +60,22 @@ export const AlertEpisodeTimeline = ({
     }
 
     if (item.kind === 'severity_change') {
-      return <AlertEpisodeTimelineSeverityComment key={`severity-${idx}`} entry={item} />;
+      return (
+        <AlertEpisodeTimelineSeverityComment
+          key={`severity-${idx}`}
+          entry={item}
+          collapsedEventLimit={collapsedEventLimit}
+        />
+      );
     }
 
-    return <AlertEpisodeTimelineStateComment key={`state-${idx}`} entry={item} />;
+    return (
+      <AlertEpisodeTimelineStateComment
+        key={`state-${idx}`}
+        entry={item}
+        collapsedEventLimit={collapsedEventLimit}
+      />
+    );
   });
 
   if (hasMore) {

@@ -24,6 +24,7 @@ export type { EpisodeAlertTimelineData } from './derive_episode_alert_timeline_d
 export { deriveEpisodeSeverityTimelineData } from './derive_episode_severity_timeline_data';
 export type {
   EpisodeSeverityTimelineData,
+  EpisodeSeverityTimelineSourceRow,
   EpisodeSeverityTimelineSegment,
   EpisodeSeverityTimelineTransition,
 } from './derive_episode_severity_timeline_data';

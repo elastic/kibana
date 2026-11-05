@@ -72,10 +72,14 @@ const createEventRow = (overrides: Partial<EpisodeEventRow> = {}): EpisodeEventR
   ...overrides,
 });
 
-const renderTimeline = (eventRows: EpisodeEventRow[]) =>
+const renderTimeline = (eventRows: EpisodeEventRow[], collapsedEventLimit?: number) =>
   render(
     <I18nProvider>
-      <AlertEpisodeAlertTimeline eventRows={eventRows} />
+      <AlertEpisodeAlertTimeline
+        statusRows={eventRows}
+        severityRows={eventRows}
+        collapsedEventLimit={collapsedEventLimit}
+      />
     </I18nProvider>
   );
 
@@ -102,5 +106,23 @@ describe('AlertEpisodeAlertTimeline', () => {
     renderTimeline([createEventRow()]);
 
     expect(screen.queryByText('Severity')).not.toBeInTheDocument();
+  });
+
+  it('does not show the collapsed warning when the rows are not collapsed', () => {
+    renderTimeline([createEventRow()]);
+
+    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
+  });
+
+  it('shows a collapsed warning naming the event limit', async () => {
+    renderTimeline([createEventRow()], 1000);
+
+    fireEvent.mouseOver(screen.getByTestId('alertingV2EpisodeCollapsedEventsWarning'));
+
+    expect(
+      await screen.findByText(
+        'Severity and status changes are collapsed for alerts with over 1000 events'
+      )
+    ).toBeInTheDocument();
   });
 });

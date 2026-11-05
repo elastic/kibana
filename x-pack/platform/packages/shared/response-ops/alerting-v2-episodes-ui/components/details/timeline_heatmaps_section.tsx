@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonTitle, EuiSpacer, EuiText } from '@elastic/eui';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useEpisodeTimelineSourceRows } from '../../hooks/use_episode_timeline_source_rows';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
@@ -40,11 +40,8 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
   services,
   compressed,
 }: AlertEpisodeTimelineHeatmapsSectionProps) => {
-  const {
-    data: eventRows,
-    isLoading,
-    isError,
-  } = useFetchEpisodeEventsQuery({ episodeId, services });
+  const { statusRows, severityRows, collapsedEventLimit, isLoading, isError } =
+    useEpisodeTimelineSourceRows({ episodeId, services });
 
   if (isLoading) {
     return (
@@ -73,7 +70,12 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTimelineHeatmapsSection">
       <React.Suspense fallback={<HeatmapSkeleton />}>
-        <AlertEpisodeAlertTimeline eventRows={eventRows ?? []} compressed={compressed} />
+        <AlertEpisodeAlertTimeline
+          statusRows={statusRows}
+          severityRows={severityRows}
+          collapsedEventLimit={collapsedEventLimit}
+          compressed={compressed}
+        />
       </React.Suspense>
     </EuiPanel>
   );

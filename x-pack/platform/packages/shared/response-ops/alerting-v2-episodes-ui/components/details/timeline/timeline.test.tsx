@@ -10,7 +10,8 @@ import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
-import type { ActionEntry, StateChangeEntry, TimelineEntry } from './entries';
+import { EpisodeSeverity } from '../../severity/severity_utils';
+import type { ActionEntry, SeverityChangeEntry, StateChangeEntry, TimelineEntry } from './entries';
 import { AlertEpisodeTimeline } from './timeline';
 
 const makeAction = (id: string, ts: string): ActionEntry => ({
@@ -86,6 +87,42 @@ describe('AlertEpisodeTimeline', () => {
     expect(listItems[1]).toHaveAttribute('data-test-subj', 'alertingV2TimelineEntry');
     expect(listItems[1]).toHaveAttribute('data-timestamp', '2024-01-01T00:00:00.000Z');
     expect(screen.queryByTestId('alertingV2TimelineLoadMore')).not.toBeInTheDocument();
+  });
+
+  describe('collapsed events warning', () => {
+    const changedStatus: StateChangeEntry = {
+      kind: 'state_change',
+      timestamp: '2024-01-01T00:02:00.000Z',
+      newStatus: ALERT_EPISODE_STATUS.RECOVERING,
+      prevStatus: ALERT_EPISODE_STATUS.ACTIVE,
+      prevEventCount: 4000,
+    };
+    const changedSeverity: SeverityChangeEntry = {
+      kind: 'severity_change',
+      timestamp: '2024-01-01T00:01:00.000Z',
+      newSeverity: EpisodeSeverity.Critical,
+      prevSeverity: EpisodeSeverity.High,
+      prevEventCount: 1000,
+    };
+    const entries: TimelineEntry[] = [
+      changedStatus,
+      changedSeverity,
+      makeStateChange('2024-01-01T00:00:00.000Z'),
+    ];
+
+    it('shows the warning on each status and severity change when events are collapsed', () => {
+      renderTimeline(entries, { collapsedEventLimit: 1000 });
+
+      expect(screen.getAllByTestId('alertingV2EpisodeCollapsedEventsWarning')).toHaveLength(2);
+    });
+
+    it('does not show the warning when events are not collapsed', () => {
+      renderTimeline(entries);
+
+      expect(
+        screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('hides everything but the load-more control when no actions have loaded yet', () => {

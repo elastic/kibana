@@ -8,16 +8,20 @@
 import React from 'react';
 import { EuiAvatar, EuiComment, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertEpisodeStatusBadge } from '../../status/status_badge';
+import { AlertEpisodeCollapsedEventsWarning } from '../collapsed_events_warning';
 import type { StateChangeEntry } from './entries';
 import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineStateCommentProps {
   entry: StateChangeEntry;
+  /** When set, the change is between collapsed phases and a warning names this event limit. */
+  collapsedEventLimit?: number;
 }
 
 export const AlertEpisodeTimelineStateComment = ({
   entry,
+  collapsedEventLimit,
 }: AlertEpisodeTimelineStateCommentProps) => {
   const isInitial = entry.prevStatus === undefined;
   const verb = isInitial ? i18n.STARTED_EPISODE_AS : i18n.CHANGED_STATUS_TO;
@@ -48,6 +52,11 @@ export const AlertEpisodeTimelineStateComment = ({
                 entry.prevEventCount,
                 i18n.STATUS_LABELS[entry.prevStatus] ?? entry.prevStatus
               )}
+            </EuiFlexItem>
+          )}
+          {entry.prevStatus !== undefined && collapsedEventLimit !== undefined && (
+            <EuiFlexItem grow={false}>
+              <AlertEpisodeCollapsedEventsWarning eventLimit={collapsedEventLimit} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

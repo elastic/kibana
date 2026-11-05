@@ -12,12 +12,20 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { StateChangeEntry } from './entries';
 import { AlertEpisodeTimelineStateComment } from './timeline_state_comment';
 
-const renderComment = (entry: StateChangeEntry) =>
+const renderComment = (entry: StateChangeEntry, collapsedEventLimit?: number) =>
   render(
     <I18nProvider>
-      <AlertEpisodeTimelineStateComment entry={entry} />
+      <AlertEpisodeTimelineStateComment entry={entry} collapsedEventLimit={collapsedEventLimit} />
     </I18nProvider>
   );
+
+const changedEntry: StateChangeEntry = {
+  kind: 'state_change',
+  timestamp: '2026-07-02T10:00:00.000Z',
+  newStatus: ALERT_EPISODE_STATUS.ACTIVE,
+  prevStatus: ALERT_EPISODE_STATUS.PENDING,
+  prevEventCount: 5,
+};
 
 describe('AlertEpisodeTimelineStateComment', () => {
   it('renders the initial-status sentence with the new status badge', () => {
@@ -34,16 +42,23 @@ describe('AlertEpisodeTimelineStateComment', () => {
   });
 
   it('renders the changed-status sentence with the after-N-events label', () => {
-    renderComment({
-      kind: 'state_change',
-      timestamp: '2026-07-02T10:00:00.000Z',
-      newStatus: ALERT_EPISODE_STATUS.ACTIVE,
-      prevStatus: ALERT_EPISODE_STATUS.PENDING,
-      prevEventCount: 5,
-    });
+    renderComment(changedEntry);
 
     expect(screen.getByText('changed the status to')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText(/after 5 pending events/i)).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
+  });
+
+  it('shows the collapsed warning on a status change when events are collapsed', () => {
+    renderComment(changedEntry, 1000);
+
+    expect(screen.getByTestId('alertingV2EpisodeCollapsedEventsWarning')).toBeInTheDocument();
+  });
+
+  it('does not show the collapsed warning on the initial status', () => {
+    renderComment({ ...changedEntry, prevStatus: undefined, prevEventCount: 0 }, 1000);
+
+    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 });
