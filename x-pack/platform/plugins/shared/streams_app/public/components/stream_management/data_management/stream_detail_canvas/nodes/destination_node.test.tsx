@@ -50,7 +50,7 @@ describe('DestinationNode', () => {
         eventsRate: 3700,
         eventsTotal: null,
         failedRate: null,
-        latencyAverage: null,
+        latencyAverage: 0.175,
         series: { bucketMs: 300000, points: [] },
       },
     });
@@ -60,6 +60,7 @@ describe('DestinationNode', () => {
     expect(mockUseDestinationStats).toHaveBeenCalledWith('es-prod');
     expect(isShown('streamsCanvasDestinationStats')).toBe(true);
     expect(screen.getByTestId('streamsCanvasDestinationRate').textContent).toBe('3.7k/s');
+    expect(screen.getByTestId('streamsCanvasDestinationLatency').textContent).toBe('175ms');
     expect(screen.getByTestId('streamsCanvasDestinationIndexCount').textContent).toBe('3 indices');
   });
 
