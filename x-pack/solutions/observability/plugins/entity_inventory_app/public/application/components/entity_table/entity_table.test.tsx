@@ -20,6 +20,7 @@ import { EntityTable } from './entity_table';
 import {
   NAME_COLUMN_ID,
   NAMESPACE_COLUMN_ID,
+  CLUSTER_COLUMN_ID,
   getDefaultVisibleColumns,
 } from './entity_type_config';
 import { NO_VALUE_LABEL, RESET_TO_DEFAULT_LABEL } from './translations';
@@ -159,7 +160,7 @@ describe('EntityTable', () => {
     expect(screen.getByRole('button', { name: 'Rows per page: 10' })).toBeInTheDocument();
   });
 
-  it('renders the cluster of a deployment as a badge and leaves an empty cluster as a placeholder', () => {
+  it('renders the cluster of a deployment as a badge under either naming convention and leaves an empty cluster as a placeholder', () => {
     const k8sList = buildListResponseFixture('k8s.deployment', 'normal');
     if (!k8sList) {
       throw new Error('Missing k8s.deployment fixture');
@@ -176,10 +177,14 @@ describe('EntityTable', () => {
             list={{
               ...k8sList,
               rows: [
-                row({ 'k8s.deployment.name': 'frontend', cluster: 'prod-cluster-0' }),
-                row({ 'kubernetes.deployment.name': 'cart', cluster: null }),
+                row({ 'k8s.deployment.name': 'frontend', 'k8s.cluster.name': 'prod-cluster-0' }),
+                row({
+                  'kubernetes.deployment.name': 'cart',
+                  'orchestrator.cluster.name': 'prod-cluster-1',
+                }),
+                row({ 'kubernetes.deployment.name': 'scheduler' }),
               ],
-              total: 2,
+              total: 3,
               truncated: false,
             }}
           />
@@ -188,12 +193,17 @@ describe('EntityTable', () => {
     );
 
     expect(
-      within(getCell(0, 'cluster') as HTMLElement).getByTestId('entityInventoryCellBadge')
+      within(getCell(0, CLUSTER_COLUMN_ID) as HTMLElement).getByTestId('entityInventoryCellBadge')
     ).toHaveTextContent('prod-cluster-0');
     expect(
-      within(getCell(1, 'cluster') as HTMLElement).queryByTestId('entityInventoryCellBadge')
+      within(getCell(1, CLUSTER_COLUMN_ID) as HTMLElement).getByTestId('entityInventoryCellBadge')
+    ).toHaveTextContent('prod-cluster-1');
+    expect(
+      within(getCell(2, CLUSTER_COLUMN_ID) as HTMLElement).queryByTestId('entityInventoryCellBadge')
     ).not.toBeInTheDocument();
-    expect(within(getCell(1, 'cluster') as HTMLElement).getByText(NO_VALUE_LABEL)).toBeTruthy();
+    expect(
+      within(getCell(2, CLUSTER_COLUMN_ID) as HTMLElement).getByText(NO_VALUE_LABEL)
+    ).toBeTruthy();
   });
 
   it('shows the deployment name and namespace reported under either naming convention', () => {

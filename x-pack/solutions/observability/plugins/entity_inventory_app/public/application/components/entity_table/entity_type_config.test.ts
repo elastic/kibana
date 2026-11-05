@@ -14,6 +14,7 @@ import {
   ENTITY_TYPE_BY_CATEGORY,
   NAME_COLUMN_ID,
   NAMESPACE_COLUMN_ID,
+  CLUSTER_COLUMN_ID,
   getColumnValue,
   getDefaultVisibleColumns,
   getDisplayConfig,
@@ -76,7 +77,13 @@ describe('entity type config', () => {
         'k8s.deployment',
         K8S_DEPLOYMENT_TYPE_FIXTURE.columns.map(({ name, kind }) => ({ name, kind, type: null }))
       )
-    ).toEqual([NAME_COLUMN_ID, NAMESPACE_COLUMN_ID, 'cluster', 'available_replicas', 'last_seen']);
+    ).toEqual([
+      NAME_COLUMN_ID,
+      NAMESPACE_COLUMN_ID,
+      CLUSTER_COLUMN_ID,
+      'available_replicas',
+      'last_seen',
+    ]);
   });
 
   describe('getColumnValue for a deployment', () => {
@@ -88,7 +95,9 @@ describe('entity type config', () => {
       'kubernetes.deployment.name': 'frontend-ea',
       'k8s.namespace.name': 'payments',
       'kubernetes.namespace': 'payments-ea',
-      cluster: 'prod',
+      'k8s.cluster.name': 'prod',
+      'orchestrator.cluster.name': 'prod-ea',
+      available_replicas: 3,
     };
 
     it('names the deployment from the OpenTelemetry field first, then the Elastic Agent one', () => {
@@ -106,9 +115,23 @@ describe('entity type config', () => {
       expect(getColumnValue({}, NAMESPACE_COLUMN_ID, config)).toBeNull();
     });
 
-    it('returns any other column as it is', () => {
-      expect(getColumnValue(row, 'cluster', config)).toBe('prod');
+    it('merges the cluster reported under either naming convention', () => {
+      expect(getColumnValue(row, CLUSTER_COLUMN_ID, config)).toBe('prod');
+      expect(getColumnValue({ ...row, 'k8s.cluster.name': null }, CLUSTER_COLUMN_ID, config)).toBe(
+        'prod-ea'
+      );
+      expect(getColumnValue({}, CLUSTER_COLUMN_ID, config)).toBeNull();
     });
+
+    it('returns any other column as it is', () => {
+      expect(getColumnValue(row, 'available_replicas', config)).toBe(3);
+    });
+  });
+
+  it('shows the Cluster column even when the response has no cluster attribute', () => {
+    const columns = toListColumns(['k8s.cluster.name', 'available_replicas']);
+
+    expect(getDefaultVisibleColumns('k8s.deployment', columns)).toContain(CLUSTER_COLUMN_ID);
   });
 
   it('has no merged columns for types that do not configure any', () => {

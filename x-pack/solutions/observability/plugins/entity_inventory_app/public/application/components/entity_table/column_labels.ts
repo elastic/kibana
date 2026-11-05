@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NAME_COLUMN_ID, NAMESPACE_COLUMN_ID } from './entity_type_config';
+import { CLUSTER_COLUMN_ID, NAME_COLUMN_ID, NAMESPACE_COLUMN_ID } from './entity_type_config';
 
 /** Display labels of the output columns, keyed by column name. */
 export const COLUMN_LABELS: Readonly<Record<string, string>> = {
@@ -99,7 +99,7 @@ export const COLUMN_LABELS: Readonly<Record<string, string>> = {
   resource_id: i18n.translate('xpack.entityInventoryApp.entityTable.columns.resourceId', {
     defaultMessage: 'Resource ID',
   }),
-  cluster: i18n.translate('xpack.entityInventoryApp.entityTable.columns.cluster', {
+  [CLUSTER_COLUMN_ID]: i18n.translate('xpack.entityInventoryApp.entityTable.columns.cluster', {
     defaultMessage: 'Cluster',
   }),
   paused: i18n.translate('xpack.entityInventoryApp.entityTable.columns.paused', {

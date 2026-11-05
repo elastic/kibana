@@ -31,6 +31,12 @@ export const NAME_COLUMN_ID = 'entityInventory.name';
 /** Id of the app-side Namespace column, which merges the namespace of both naming conventions. */
 export const NAMESPACE_COLUMN_ID = 'entityInventory.namespace';
 
+/**
+ * Id of the app-side Cluster column, which merges the cluster of both naming conventions. The
+ * cluster is an identity field of the type, so no attribute can stand in for it.
+ */
+export const CLUSTER_COLUMN_ID = 'entityInventory.cluster';
+
 export interface EntityTypeDisplayConfig {
   iconType: IconType;
   /** Columns tried in order for the Name column. */
@@ -57,16 +63,19 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisp
   'k8s.deployment': {
     iconType: 'logoKubernetes',
     nameFields: ['k8s.deployment.name', 'kubernetes.deployment.name', 'entity.id'],
-    mergedColumns: { [NAMESPACE_COLUMN_ID]: ['k8s.namespace.name', 'kubernetes.namespace'] },
+    mergedColumns: {
+      [NAMESPACE_COLUMN_ID]: ['k8s.namespace.name', 'kubernetes.namespace'],
+      [CLUSTER_COLUMN_ID]: ['k8s.cluster.name', 'orchestrator.cluster.name'],
+    },
     // Last seen stands in for Restarts and Up time until the metrics exist (#6272).
     defaultVisibleColumns: [
       NAME_COLUMN_ID,
       NAMESPACE_COLUMN_ID,
-      'cluster',
+      CLUSTER_COLUMN_ID,
       'available_replicas',
       'last_seen',
     ],
-    badgeColumns: ['cluster'],
+    badgeColumns: [CLUSTER_COLUMN_ID],
   },
 };
 
