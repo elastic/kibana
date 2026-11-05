@@ -863,6 +863,7 @@ src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-signals-metrics-team
 src/platform/plugins/private/advanced_settings @elastic/kibana-management
+src/platform/plugins/private/data_search_test @elastic/kibana-discover
 src/platform/plugins/private/dev_comments @elastic/appex-sharedux
 src/platform/plugins/private/event_annotation @elastic/kibana-dashboards
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-dashboards
@@ -978,7 +979,6 @@ src/platform/test/plugin_functional/plugins/core_plugin_execution_context @elast
 src/platform/test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-discover
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
@@ -1639,7 +1639,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/page_objects/context_page.ts @elastic/kibana-discover
 /src/platform/test/functional/services/data_views.ts @elastic/kibana-discover
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/kibana-discover
-/src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-discover
+/src/platform/plugins/private/data_search_test @elastic/kibana-discover
 /src/platform/test/functional/page_objects/discover_page.ts @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-discover

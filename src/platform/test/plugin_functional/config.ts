@@ -64,6 +64,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.full_story.enabled=true',
         '--xpack.cloud_integrations.full_story.org_id=a_string',
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        `--plugin-path=${path.resolve(__dirname, '../../plugins/private/data_search_test')}`,
       ],
     },
   };

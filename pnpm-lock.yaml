@@ -1838,7 +1838,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/data_quality
       '@kbn/data-search-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/data_search
+        version: link:src/platform/plugins/private/data_search_test
       '@kbn/data-service':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service
@@ -8625,6 +8625,8 @@ importers:
 
   src/platform/plugins/private/advanced_settings: {}
 
+  src/platform/plugins/private/data_search_test: {}
+
   src/platform/plugins/private/dev_comments: {}
 
   src/platform/plugins/private/event_annotation: {}
@@ -8854,8 +8856,6 @@ importers:
   src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts: {}
 
   src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/data_search: {}
 
   src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
 
