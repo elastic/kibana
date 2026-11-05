@@ -64,15 +64,18 @@ tags:
     x-displayName: Agent Builder
   - name: alerting
     description: |
-      Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      Kibana Classic Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
-      description: Alerting documentation
-      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
-    x-displayName: Alerting
+      description: Kibana Classic Alerting documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerting/alerts
+    x-displayName: Kibana Classic Alerting
   - name: alerting-v2
     description: |
-      Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
-    x-displayName: Universal Alerting
+      Kibana Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
+    externalDocs:
+      description: Kibana Universal Alerting documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerting/esql/system-overview
+    x-displayName: Kibana Universal Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -9219,7 +9222,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9379,7 +9382,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9502,7 +9505,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9625,7 +9628,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9758,7 +9761,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9882,7 +9885,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10005,7 +10008,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10128,7 +10131,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10253,7 +10256,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10398,7 +10401,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10591,7 +10594,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10805,7 +10808,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10973,7 +10976,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11151,7 +11154,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11330,7 +11333,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11498,7 +11501,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11666,7 +11669,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11790,7 +11793,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11910,7 +11913,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12032,7 +12035,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12152,7 +12155,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12276,7 +12279,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12396,7 +12399,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12543,7 +12546,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12690,7 +12693,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12838,7 +12841,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12985,7 +12988,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13135,7 +13138,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13282,7 +13285,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13500,7 +13503,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13700,7 +13703,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13895,7 +13898,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14076,7 +14079,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14330,7 +14333,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14450,7 +14453,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14570,7 +14573,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14690,7 +14693,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14854,7 +14857,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14974,7 +14977,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15096,7 +15099,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15218,7 +15221,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15340,7 +15343,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15462,7 +15465,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15587,7 +15590,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15750,7 +15753,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15945,7 +15948,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16198,7 +16201,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16384,7 +16387,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16566,7 +16569,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16701,7 +16704,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -175383,11 +175386,11 @@ components:
       properties:
         alerting:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
+          description: Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              description: Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
@@ -175402,18 +175405,18 @@ components:
             - query
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
+          description: Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.
           type: object
           properties:
             enabled:
-              description: Whether the maintenance window applies to Alerting V2 alerts. If omitted, is treated as `true`.
+              description: Whether the maintenance window applies to Kibana Universal Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alerts.
+                  description: A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Kibana Universal Alerting alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -175427,36 +175430,36 @@ components:
       properties:
         alerting:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
+          description: Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              description: Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V1 alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
+                  description: A KQL filter that limits which Kibana Classic Alerting alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
                   maxLength: 10000
                   type: string
               required:
                 - kql
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
+          description: Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window affects Alerting V2 alerts. Defaults to `true`.
+              description: Whether this maintenance window affects Kibana Universal Alerting alerts. Defaults to `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alerts.
+                  description: A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Kibana Universal Alerting alerts.
                   maxLength: 4096
                   type: string
               required:
