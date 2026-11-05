@@ -66,15 +66,24 @@ export const getGeoPrecisionSystemParam = (functionName: string, paramName?: str
 export const GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS: Record<string, string> = {
   [GEOTILE_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geotilePrecisionSystemParam',
-    { defaultMessage: 'The geotile precision for the current map zoom level. Only supported in Maps.' }
+    {
+      defaultMessage:
+        'The geotile precision for the current map zoom level. Only supported in Maps.',
+    }
   ),
   [GEOHEX_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geohexPrecisionSystemParam',
-    { defaultMessage: 'The geohex (H3) resolution for the current map zoom level. Only supported in Maps.' }
+    {
+      defaultMessage:
+        'The geohex (H3) resolution for the current map zoom level. Only supported in Maps.',
+    }
   ),
   [GEOHASH_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geohashPrecisionSystemParam',
-    { defaultMessage: 'The geohash precision for the current map zoom level. Only supported in Maps.' }
+    {
+      defaultMessage:
+        'The geohash precision for the current map zoom level. Only supported in Maps.',
+    }
   ),
 };
 
