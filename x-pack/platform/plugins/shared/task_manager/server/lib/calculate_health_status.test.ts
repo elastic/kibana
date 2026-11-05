@@ -407,9 +407,10 @@ describe('calculateHealthStatus', () => {
       ).toEqual({ status: HealthStatus.OK, reason: backpressureReason });
     });
 
-    test('should return ok without a reason if stats are fresh', () => {
+    test('should return ok with the backpressure reason if stats are fresh', () => {
       expect(calculateHealthStatus(getStatsWithTimestamp(), config, true, logger, true)).toEqual({
         status: HealthStatus.OK,
+        reason: backpressureReason,
       });
     });
 

@@ -332,6 +332,42 @@ describe('logHealthMetrics', () => {
     expect(secondMessage).toMatchObject(health);
   });
 
+  it('should log drift as debug if it exceeds the threshold while Elasticsearch-driven backpressure is active', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        level: 'debug',
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth({
+      stats: {
+        runtime: {
+          value: {
+            drift_by_type: {
+              'taskType:test': {
+                p99: 60000,
+              },
+            },
+            drift: {
+              p99: 60000,
+            },
+          },
+        },
+      },
+    });
+
+    logHealthMetrics(health, logger, config, true, docLinks, true);
+
+    const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls;
+    expect(debugCalls[0][0] as string).toBe(
+      `Detected delay task start of 60s for task(s) \"taskType:test\" (which exceeds configured value of 60s)`
+    );
+    expect(debugCalls[1][0] as string).toMatch(/^Latest Monitored Stats: \{.*\}$/);
+    expect((logger as jest.Mocked<Logger>).warn).not.toHaveBeenCalled();
+  });
+
   it('should log as debug if there are no stats', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({

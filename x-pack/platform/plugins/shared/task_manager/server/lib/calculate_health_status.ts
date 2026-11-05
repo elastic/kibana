@@ -58,9 +58,6 @@ export function calculateHealthStatus(
   );
 
   // Backpressure slows polling and stats collection on purpose, so stale stats are expected
-  const staleStatsCausedByBackpressure =
-    esBackpressureActive && (hotTimestampsExpired || coldTimestampsExpired);
-
   if (hotTimestampsExpired && !esBackpressureActive) {
     const reason = 'setting HealthStatus.Error because of expired hot timestamps';
     logger.debug(reason);
@@ -80,7 +77,7 @@ export function calculateHealthStatus(
     };
   }
 
-  if (staleStatsCausedByBackpressure) {
+  if (esBackpressureActive) {
     return { status: HealthStatus.OK, reason: ES_BACKPRESSURE_REASON };
   }
 
