@@ -388,14 +388,14 @@ export const Settings = lazySchema(() =>
      */
     syncAlerts: z.boolean().describe('Turns alert syncing on or off.'),
     /**
-      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, this setting is always `false`, and sending `true` returns a 400 error. An update that keeps an already stored `true` is accepted.
+      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, this setting is always `false`, and sending `true` returns a 400 error. An update that keeps an already stored `true` is accepted.\n"
+        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.\n"
       ),
   })
 );
@@ -1342,14 +1342,14 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
         'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
       ),
     /**
-      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, this setting is always `false`, and setting it to `true` returns a 400 error.
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, this setting is always `false`, and setting it to `true` returns a 400 error.\n"
+        "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.\n"
       ),
     owner: Owner,
     templates: Templates.optional(),
@@ -1465,14 +1465,14 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
         'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
       ),
     /**
-      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, this setting is always `false`, and changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, this setting is always `false`, and changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.\n'
+        'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.\n'
       ),
     templates: Templates.optional(),
     /**

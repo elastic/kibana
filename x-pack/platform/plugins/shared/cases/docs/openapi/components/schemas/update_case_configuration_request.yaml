@@ -38,8 +38,7 @@ properties:
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
       Observable extraction is available only for Security cases. For Stack and Observability cases,
-      this setting is always `false`, and changing it to `true` returns a 400 error.
-      A request that keeps an already stored `true` is accepted.
+      changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
   templates:
     $ref: 'templates.yaml'
   workflowTags:
