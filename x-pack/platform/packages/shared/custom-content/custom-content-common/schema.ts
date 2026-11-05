@@ -10,8 +10,16 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
+
+/** Whether the queries of a panel are short enough together, since each one can be long. */
+export const fitsEsqlQueriesTotalLength = (queries: readonly string[]): boolean =>
+  queries.reduce((total, query) => total + query.length, 0) <=
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH;
+
+export const ESQL_QUERIES_TOTAL_LENGTH_MESSAGE = `The queries of a panel can have at most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH} characters together.`;
 
 /**
  * Persisted content of a custom content panel. No `prompt`: on an edit the prompt is a delta
@@ -28,6 +36,7 @@ export const customContentStateSchema = lazySchema(() =>
     esql_query: z
       .array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH))
       .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
+      .refine(fitsEsqlQueriesTotalLength, { message: ESQL_QUERIES_TOTAL_LENGTH_MESSAGE })
       .optional(),
     template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
   })

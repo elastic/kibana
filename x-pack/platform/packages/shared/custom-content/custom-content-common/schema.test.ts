@@ -9,6 +9,7 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 import {
@@ -69,6 +70,19 @@ describe('customContentStateSchema', () => {
       (_, i) => `FROM a${i}`
     );
     expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(false);
+  });
+
+  it('rejects queries that are each within the limit but too long together', () => {
+    const half = CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH / 2;
+
+    expect(
+      customContentStateSchema.safeParse({ esql_query: ['a'.repeat(half), 'b'.repeat(half)] })
+        .success
+    ).toBe(true);
+    expect(
+      customContentStateSchema.safeParse({ esql_query: ['a'.repeat(half), 'b'.repeat(half + 1)] })
+        .success
+    ).toBe(false);
   });
 
   it('accepts an empty esql_query array', () => {

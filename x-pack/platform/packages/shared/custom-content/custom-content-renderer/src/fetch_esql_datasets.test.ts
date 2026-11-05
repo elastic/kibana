@@ -106,6 +106,18 @@ describe('fetchEsqlDatasets', () => {
     await expect(fetched).rejects.toMatchObject({ name: 'AbortError' });
   });
 
+  it('titles the requests by query when there are several, and leaves a single one as it is', async () => {
+    const titles = () =>
+      mockFetchEsqlData.mock.calls.map(([, , , , , options]) => options?.requestTitle);
+
+    await fetchAll(['FROM a', 'FROM b']);
+    expect(titles()).toEqual(['Data (query 1)', 'Data (query 2)']);
+
+    mockFetchEsqlData.mockClear();
+    await fetchAll(['FROM a']);
+    expect(titles()).toEqual([undefined]);
+  });
+
   it('clears the request adapter once, so the queries keep each other entries', async () => {
     const requestAdapter = { reset: jest.fn() } as unknown as RequestAdapter;
 

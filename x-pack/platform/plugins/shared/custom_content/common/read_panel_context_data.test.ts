@@ -6,6 +6,7 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from './panel_context_attachment';
 import { readPanelContextData } from './read_panel_context_data';
 
@@ -36,6 +37,22 @@ describe('readPanelContextData', () => {
     expect(
       readPanelContextData(makeAttachment([{ version: 1, data: { title: 'A dashboard' } }]))
     ).toBeUndefined();
+  });
+
+  it('returns undefined when the additional queries are too long together', () => {
+    const half = CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH / 2;
+    const read = (lengths: number[]) =>
+      readPanelContextData(
+        makeAttachment([
+          {
+            version: 1,
+            data: { ...validData, additional_esql_queries: lengths.map((n) => 'a'.repeat(n)) },
+          },
+        ])
+      );
+
+    expect(read([half, half])).toBeDefined();
+    expect(read([half, half + 1])).toBeUndefined();
   });
 
   it('returns undefined when the attachment has no matching version', () => {

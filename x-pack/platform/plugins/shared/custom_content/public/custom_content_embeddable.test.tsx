@@ -719,6 +719,24 @@ describe('customContentEmbeddableFactory', () => {
       expect(embeddable.api.serializeState().esql_query).toEqual(['FROM c']);
     });
 
+    it('hands the flyout the same list of additional queries when an update leaves them as they were', async () => {
+      const state = { ...baseState, esql_query: ['FROM a', 'FROM b'] };
+      const { embeddable } = await buildEmbeddable(state);
+      await act(async () => render(<embeddable.Component />));
+      const openedWith = async () => {
+        await act(async () => embeddable.api.onEdit());
+        await renderFlyoutContent();
+        return capturedFlyoutProps?.additionalEsqlQueries;
+      };
+
+      const before = await openedWith();
+      act(() => embeddable.api.applySerializedState({ ...state }));
+      const after = await openedWith();
+
+      expect(before).toEqual(['FROM b']);
+      expect(after).toBe(before);
+    });
+
     it('sends the additional queries of the panel to the chat', async () => {
       const openChat = jest.fn();
       mockAgentBuilder = {
@@ -854,6 +872,24 @@ describe('customContentEmbeddableFactory', () => {
       );
 
       expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a', 'FROM b']);
+    });
+
+    it('ignores additional queries that come without a main query, and does not keep them for later', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
+
+      await emit(
+        buildUpdateEvent('test-uuid', '<p>static</p>', CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+          additional_esql_queries: ['FROM b'],
+        })
+      );
+      expect(embeddable.api.serializeState().esql_query).toBeUndefined();
+
+      // A query added later in the editor must not bring the ignored ones back.
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave('FROM a', '<div>dynamic</div>'));
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a']);
     });
 
     it('clears the additional queries when the update carries none', async () => {

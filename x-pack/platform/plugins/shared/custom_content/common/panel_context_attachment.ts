@@ -8,6 +8,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ESQLVariableType } from '@kbn/esql-types';
 import {
+  ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
+  fitsEsqlQueriesTotalLength,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
@@ -38,6 +40,7 @@ export const customContentContextAttachmentDataSchema = lazySchema(() =>
     additional_esql_queries: z
       .array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH))
       .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES - 1)
+      .refine(fitsEsqlQueriesTotalLength, { message: ESQL_QUERIES_TOTAL_LENGTH_MESSAGE })
       .optional(),
     panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
     embeddable_id: z.string().max(MAX_SHORT_FIELD_LENGTH),

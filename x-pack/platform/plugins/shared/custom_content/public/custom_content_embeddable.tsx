@@ -157,6 +157,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const additionalEsqlQueries$ = new BehaviorSubject<string[]>(
       readAdditionalEsqlQueries(initialState)
     );
+    // Sets the queries only when they change, so an update that leaves them as they are neither fires
+    // a state change nor hands subscribers a new list.
+    const setAdditionalEsqlQueries = (queries: string[]) => {
+      const current = additionalEsqlQueries$.getValue();
+      const isSame =
+        current.length === queries.length &&
+        current.every((query, index) => query === queries[index]);
+      if (!isSame) additionalEsqlQueries$.next(queries);
+    };
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -201,11 +210,22 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       template: template$.getValue(),
     });
 
+    // The additional queries extend the main one, so data without it carries none.
+    const applyAttachmentData = (data: {
+      panel_template: string;
+      esql_query?: string;
+      additional_esql_queries?: string[];
+    }) => {
+      template$.next(data.panel_template);
+      esqlQuery$.next(data.esql_query);
+      setAdditionalEsqlQueries(data.esql_query ? data.additional_esql_queries ?? [] : []);
+    };
+
     const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
       if ('esqlQuery' in update) {
         esqlQuery$.next(update.esqlQuery);
         // The additional queries extend the main one, so there is nothing for them to extend once it is removed.
-        if (!update.esqlQuery) additionalEsqlQueries$.next([]);
+        if (!update.esqlQuery) setAdditionalEsqlQueries([]);
       }
       if ('template' in update) template$.next(update.template);
     };
@@ -240,7 +260,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});
         esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
-        additionalEsqlQueries$.next(lastSaved ? readAdditionalEsqlQueries(lastSaved) : []);
+        setAdditionalEsqlQueries(lastSaved ? readAdditionalEsqlQueries(lastSaved) : []);
         template$.next(lastSaved?.template);
       },
     });
@@ -508,15 +528,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
-        useEffect(
-          () =>
-            registerPanelPreviewHandler(uuid, (data) => {
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
-              additionalEsqlQueries$.next(data.additional_esql_queries ?? []);
-            }),
-          []
-        );
+        useEffect(() => registerPanelPreviewHandler(uuid, applyAttachmentData), []);
 
         useEffect(() => {
           if (!agentBuilder) return;
@@ -556,9 +568,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               } = event.data;
               if (data.embeddable_id !== uuid) return;
 
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
-              additionalEsqlQueries$.next(data.additional_esql_queries ?? []);
+              applyAttachmentData(data);
               if (isGenerating$.getValue()) isGenerating$.next(false);
               getTelemetry().trackAgentUpdateApplied({
                 hasEsqlQuery: Boolean(data.esql_query),

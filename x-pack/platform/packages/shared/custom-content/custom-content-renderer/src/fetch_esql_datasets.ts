@@ -50,6 +50,13 @@ export const fetchEsqlDatasets = async (
         fetchEsqlData(search, http, query, timeRange, batch.signal, {
           ...options,
           keepRequests: true,
+          // Several requests would otherwise all be named alike in the Inspect action.
+          ...(queries.length > 1 && {
+            requestTitle: i18n.translate('xpack.customContent.inspector.queryRequestTitle', {
+              defaultMessage: 'Data (query {position})',
+              values: { position: index + 1 },
+            }),
+          }),
         }).catch((error: unknown) => {
           batch.abort();
           if (queries.length === 1 || isAbortError(error)) throw error;
