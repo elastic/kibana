@@ -14,7 +14,7 @@ type ActionsButton = ActionsNode['buttons'][number];
 
 const slackButton = ({ label, url, primary }: ActionsButton): SlackButtonElement[] => {
   const href = slackLinkUrl(url);
-  if (!href) {
+  if (!href || href.length > SLACK_LIMITS.urlChars) {
     return [];
   }
   return [
