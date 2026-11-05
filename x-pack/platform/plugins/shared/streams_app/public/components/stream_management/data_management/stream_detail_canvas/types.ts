@@ -40,12 +40,14 @@ export interface DestinationNodeData extends Record<string, unknown> {
   subtitle?: string;
   streamName?: string;
   bucket?: string;
+  endpoint?: string;
   destinationId?: string;
   /** Decides whether the node shows stats. A node without it shows none. */
   destinationType?: DestinationViewModel['type'];
   signals?: DestinationSignal[];
   indexCount?: number;
   targetedIndexNames?: string[];
+  remoteIndexNames?: string[];
 }
 
 export interface RoutingNodeRule {
