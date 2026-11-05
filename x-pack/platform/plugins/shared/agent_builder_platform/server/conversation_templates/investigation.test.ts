@@ -8,10 +8,7 @@
 import { investigationTemplate } from './investigation';
 
 describe('investigation conversation template', () => {
-  it.each(['telemetry_target', 'telemetry_not_after'])(
-    'marks %s immutable, so metadata writes cannot change it',
-    (field) => {
-      expect(investigationTemplate.fields[field].immutable).toBe(true);
-    }
-  );
+  it('marks telemetry_not_after immutable, so metadata writes cannot change it', () => {
+    expect(investigationTemplate.fields.telemetry_not_after.immutable).toBe(true);
+  });
 });

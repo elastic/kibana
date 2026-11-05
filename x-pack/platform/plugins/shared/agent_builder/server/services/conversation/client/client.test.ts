@@ -2367,14 +2367,14 @@ describe('ConversationClient', () => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
       getTemplateMock.mockReturnValue(
         makeTemplate('investigation', {
-          telemetry_target: { input_type: 'TEXT', immutable: true },
+          locked_field: { input_type: 'TEXT', immutable: true },
           summary: { input_type: 'TEXT' },
         })
       );
       mockGetDocumentResponse(
         createConversationDocumentWithTemplate({
           templateId: 'investigation',
-          metadata: { telemetry_target: 'orca' },
+          metadata: { locked_field: 'orca' },
         })
       );
     });
@@ -2383,10 +2383,10 @@ describe('ConversationClient', () => {
       await expect(
         client.patchMetadata(
           'conversation-1',
-          { telemetry_target: target, summary: 'must not be written' },
+          { locked_field: target, summary: 'must not be written' },
           { source: 'http_api' }
         )
-      ).rejects.toThrow('field "telemetry_target" is immutable');
+      ).rejects.toThrow('field "locked_field" is immutable');
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
@@ -2395,18 +2395,18 @@ describe('ConversationClient', () => {
         createConversationDocumentWithTemplate({ templateId: 'investigation' })
       );
       await expect(
-        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'workflow' })
-      ).rejects.toThrow('field "telemetry_target" is immutable');
+        client.patchMetadata('conversation-1', { locked_field: 'orca' }, { source: 'workflow' })
+      ).rejects.toThrow('field "locked_field" is immutable');
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('allows trusted writers to replace metadata without template validation', async () => {
       await client.update(
-        { id: 'conversation-1', metadata: { telemetry_target: 'c0' } },
+        { id: 'conversation-1', metadata: { locked_field: 'c0' } },
         { source: 'workflow' }
       );
       expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
-        telemetry_target: 'c0',
+        locked_field: 'c0',
       });
     });
 
@@ -2414,37 +2414,37 @@ describe('ConversationClient', () => {
       mockGetDocumentResponseOnce(
         createConversationDocumentWithTemplate({
           templateId: 'investigation',
-          metadata: { telemetry_target: 'orca' },
+          metadata: { locked_field: 'orca' },
         })
       );
       mockGetDocumentResponse(
         createConversationDocumentWithTemplate({
           templateId: 'investigation',
-          metadata: { telemetry_target: 'c0' },
+          metadata: { locked_field: 'c0' },
         })
       );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
 
       await expect(
-        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'http_api' })
-      ).rejects.toThrow('field "telemetry_target" is immutable');
+        client.patchMetadata('conversation-1', { locked_field: 'orca' }, { source: 'http_api' })
+      ).rejects.toThrow('field "locked_field" is immutable');
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('allows the same target alongside unrelated metadata updates', async () => {
       const { changedFields } = await client.patchMetadata(
         'conversation-1',
-        { telemetry_target: 'orca', summary: 'Updated summary' },
+        { locked_field: 'orca', summary: 'Updated summary' },
         { source: 'http_api' }
       );
       expect(changedFields).toEqual(['summary']);
       expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
-        telemetry_target: 'orca',
+        locked_field: 'orca',
         summary: 'Updated summary',
       });
     });
 
-    it.each<Record<string, SerializedMetadataValue>>([{ telemetry_target: 'orca' }, {}])(
+    it.each<Record<string, SerializedMetadataValue>>([{ locked_field: 'orca' }, {}])(
       'preserves the target binding when reapplying the template: %p',
       async (metadata) => {
         mockGetDocumentResponse(
@@ -2461,12 +2461,12 @@ describe('ConversationClient', () => {
       );
       getTemplateMock.mockReturnValue(
         makeTemplate('investigation', {
-          telemetry_target: { input_type: 'TEXT', immutable: true, default_value: 'orca' },
+          locked_field: { input_type: 'TEXT', immutable: true, default_value: 'orca' },
         })
       );
       await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
       expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
-        telemetry_target: 'orca',
+        locked_field: 'orca',
       });
     });
 

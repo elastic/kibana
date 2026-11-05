@@ -53,7 +53,6 @@ const setup = ({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
-    telemetryConnectorIds: new Set(['nightshift-evals-telemetry']),
     readTelemetryNotAfter,
     sandboxAllowlistClient,
     logger,
@@ -352,6 +351,7 @@ describe('sandbox bash tool — output size', () => {
 describe('sandbox bash tool — telemetry cutoff', () => {
   const telemetryCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
     env: {
+      CONNECTOR_TYPE: '.elasticsearch',
       CONNECTOR_CONFIG_URL: 'https://telemetry.example',
       CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc',
     },
@@ -369,7 +369,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     });
 
     await run({
-      connector_id: 'nightshift-evals-telemetry',
+      connector_id: 'orcabench-es',
       command: 'curl "$CONNECTOR_CONFIG_URL"',
     });
 
@@ -380,7 +380,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
 
   it('does not proxy a connector that has no telemetry URL', async () => {
     const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { CONNECTOR_CONFIG_APIURL: 'https://api.github.com' },
+      env: { CONNECTOR_TYPE: '.github', CONNECTOR_CONFIG_APIURL: 'https://api.github.com' },
       secretValues: [],
       secretEnvKeys: [],
     });
@@ -396,7 +396,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
 
   it('does not run the command when the telemetry connector has no URL to bound', async () => {
     const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc' },
+      env: { CONNECTOR_TYPE: '.elasticsearch', CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc' },
       secretValues: ['ApiKey abc'],
       secretEnvKeys: [],
     });
@@ -406,7 +406,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     });
 
     const { results } = await run({
-      connector_id: 'nightshift-evals-telemetry',
+      connector_id: 'orcabench-es',
       command: 'curl https://telemetry.example/_search',
     });
 
@@ -422,10 +422,14 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     ]);
   });
 
-  it('does not proxy another connector that has a URL', async () => {
+  it('does not proxy a connector of another type that has a URL', async () => {
     const readTelemetryNotAfter = jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z');
     const { run, runCommand } = setup({
-      resolveConnectorCredentials: telemetryCredentials,
+      resolveConnectorCredentials: jest.fn().mockResolvedValue({
+        env: { CONNECTOR_TYPE: '.http', CONNECTOR_CONFIG_URL: 'https://telemetry.example' },
+        secretValues: [],
+        secretEnvKeys: [],
+      }),
       readTelemetryNotAfter,
     });
 
@@ -444,7 +448,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     });
 
     await run({
-      connector_id: 'nightshift-evals-telemetry',
+      connector_id: 'orcabench-es',
       command: 'curl "$CONNECTOR_CONFIG_URL"',
     });
 
@@ -467,7 +471,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     });
 
     const { results } = await run({
-      connector_id: 'nightshift-evals-telemetry',
+      connector_id: 'orcabench-es',
       command: 'curl "$CONNECTOR_CONFIG_URL"',
     });
 
@@ -487,7 +491,7 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     });
     writeFiles.mockResolvedValue([{ success: false }]);
 
-    const { results } = await run({ connector_id: 'nightshift-evals-telemetry' });
+    const { results } = await run({ connector_id: 'orcabench-es' });
 
     expect(runCommand).not.toHaveBeenCalled();
     expect(results).toEqual([

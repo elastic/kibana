@@ -214,9 +214,6 @@ export const runInvestigation = async (
           subject: { type: 'manual' },
           message: example.input.question,
           connector_id: connector.id,
-          ...(example.input.telemetry_target
-            ? { telemetry_target: example.input.telemetry_target }
-            : {}),
           ...(notAfter ? { telemetry_not_after: notAfter } : {}),
         }),
       }

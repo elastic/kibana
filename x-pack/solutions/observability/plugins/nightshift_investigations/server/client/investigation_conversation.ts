@@ -14,7 +14,6 @@ import {
 import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
-import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { InvestigationNotFoundError } from './errors';
 
@@ -22,7 +21,6 @@ import { InvestigationNotFoundError } from './errors';
 export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
-  telemetryTarget?: string;
   /** `metadata.telemetry_not_after`: the investigation's telemetry cutoff, when it has one. */
   telemetryNotAfter?: string;
   /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
@@ -54,9 +52,6 @@ const toInvestigationConversation = (
   }
   return {
     id: conversation.id,
-    telemetryTarget: telemetryTargetNameSchema
-      .optional()
-      .parse(conversation.metadata?.telemetry_target),
     ...(typeof conversation.metadata?.telemetry_not_after === 'string'
       ? { telemetryNotAfter: conversation.metadata.telemetry_not_after }
       : {}),
@@ -128,7 +123,6 @@ export const getOrCreateInvestigationConversation = async ({
   workflowExecutionId,
   telemetryNotAfter,
   beforeCreate,
-  telemetryTarget,
 }: {
   conversations: ConversationPublicClient;
   id: string;
@@ -144,7 +138,6 @@ export const getOrCreateInvestigationConversation = async ({
    */
   telemetryNotAfter?: string;
   beforeCreate?: () => Promise<void>;
-  telemetryTarget?: string;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -166,7 +159,6 @@ export const getOrCreateInvestigationConversation = async ({
           // the agent re-rates it from its findings when it concludes.
           severity: INITIAL_INVESTIGATION_SEVERITY,
           ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
-          ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
           ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
         },
         accessControl: { access_mode: ConversationAccessControlMode.Public },

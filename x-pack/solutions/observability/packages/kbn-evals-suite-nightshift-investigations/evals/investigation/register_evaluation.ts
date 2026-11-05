@@ -19,6 +19,7 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
+import { saveConnectorSetOnInvestigator } from './connector_sets';
 import { createInvestigationJudges, createOrcaEvaluators } from './judges';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
@@ -79,6 +80,9 @@ export const registerInvestigationEvaluation = ({
           await assertOrcaSource();
         }
         const dataset = await loadDataset(evalsClient);
+        // The bundled synthetic examples supply their own evidence and must not query a cluster.
+        const bundledSynthetic =
+          !orca && !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
         // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
         // not the agent under test.
         const judgeConnector = orca ? orcaJudgeConnector(evaluationConnector) : evaluationConnector;
@@ -173,6 +177,7 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
+        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
@@ -235,11 +240,7 @@ export const registerInvestigationEvaluation = ({
               if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
                 casesWithOrcaTelemetry.push(output.case_id);
               }
-              if (
-                !orca &&
-                !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
-                !process.env.NIGHTSHIFT_DATASET_NAME
-              ) {
+              if (bundledSynthetic) {
                 assertSuccessfulSandboxCommand(conversation.rounds);
               }
               expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

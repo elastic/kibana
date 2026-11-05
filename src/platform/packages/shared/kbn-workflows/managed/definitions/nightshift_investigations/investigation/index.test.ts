@@ -379,14 +379,3 @@ it('accepts the telemetry cutoff the start API forwards and still rejects unknow
   ).toBe(true);
   expect(validator.safeParse({ ...inputs, not_declared: 'x' }).success).toBe(false);
 });
-
-it('accepts a telemetry target independently of the model and keeps the single investigator', () => {
-  expect(investigation.triggers[0].inputs.properties.telemetry_target).toMatchObject({
-    type: 'string',
-    maxLength: 64,
-  });
-  expect(requireStep('investigate')).toMatchObject({
-    'agent-id': 'nightshift.investigation',
-    'connector-id': '{{ steps.resolve_model.output.connector_id }}',
-  });
-});

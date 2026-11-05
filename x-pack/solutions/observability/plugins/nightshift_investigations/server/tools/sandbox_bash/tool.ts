@@ -13,7 +13,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
-import { redactSecrets } from './connector_credentials';
+import { CONNECTOR_ENV_PREFIX, redactSecrets } from './connector_credentials';
 import {
   TELEMETRY_CUTOFF_DIR,
   TELEMETRY_CUTOFF_PROXY_PATH,
@@ -27,6 +27,9 @@ import { isTelemetryNotAfter } from '../../../common';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
+
+/** Connector type whose reads the telemetry cutoff bounds. */
+const ELASTICSEARCH_CONNECTOR_TYPE = '.elasticsearch';
 
 /**
  * Upper bound (and default) for a sandbox command's own timeout. The sandbox client adds a 10s
@@ -101,7 +104,6 @@ export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
-  telemetryConnectorIds,
   readTelemetryNotAfter,
   sandboxAllowlistClient,
   logger,
@@ -109,11 +111,9 @@ export const createSandboxBashTool = ({
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
-  /** Connectors the telemetry cutoff applies to. Any other connector is not Elasticsearch telemetry. */
-  telemetryConnectorIds?: ReadonlySet<string>;
   /**
-   * Latest inclusive `@timestamp` this conversation's telemetry queries may return. Unset for
-   * investigations that do not bound telemetry. A thrown read does not run the command: the
+   * Latest inclusive `@timestamp` this conversation's Elasticsearch connector reads may return.
+   * Unset for investigations that do not bound telemetry. A thrown read does not run the command: the
    * caller cannot tell a missing cutoff from a cutoff that failed to load.
    */
   readTelemetryNotAfter?: (
@@ -240,7 +240,12 @@ export const createSandboxBashTool = ({
       };
 
       let commandToRun = command;
-      if (readTelemetryNotAfter && connector_id && telemetryConnectorIds?.has(connector_id)) {
+      // The cutoff bounds Elasticsearch connectors only; other connectors are not telemetry reads.
+      if (
+        readTelemetryNotAfter &&
+        connector_id &&
+        credentialEnv[`${CONNECTOR_ENV_PREFIX}TYPE`] === ELASTICSEARCH_CONNECTOR_TYPE
+      ) {
         let notAfter: string | undefined;
         try {
           notAfter = await readTelemetryNotAfter(context.request, rawConversationId);
