@@ -6,19 +6,22 @@
  */
 
 import type { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { ToastsStart } from '@kbn/core/public';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
+import { stopPropagationAndPreventDefault } from '../../../utils/accessibility';
 import type { HoverActionComponentProps } from './types';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { COPY_TO_CLIPBOARD, SUCCESS_TOAST_TITLE } from './translations';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 
-export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
-  defaultMessage: 'Field',
-});
+export const FIELD = i18n.translate(
+  'securitySolutionPackages.timelineComponents.hoverActions.fieldLabel',
+  {
+    defaultMessage: 'Field',
+  }
+);
 
 export const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
 export const COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME = 'copy-to-clipboard';
@@ -27,11 +30,15 @@ export interface CopyProps extends HoverActionComponentProps {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   isHoverAction?: boolean;
+  /**
+   * Displays a confirmation toast once the value is copied to the clipboard. Injected by the consumer so
+   * this package stays free of Kibana service dependencies.
+   */
+  addSuccess: ToastsStart['addSuccess'];
 }
 
 const CopyButton: React.FC<CopyProps> = React.memo(
-  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }) => {
-    const { addSuccess } = useAppToasts();
+  ({ Component, addSuccess, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }) => {
     const panelRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
       if (!ownFocus) {
@@ -78,6 +85,7 @@ const CopyButton: React.FC<CopyProps> = React.memo(
     ) : (
       <div ref={panelRef}>
         <WithCopyToClipboard
+          addSuccess={addSuccess}
           data-test-subj="copy-to-clipboard"
           isHoverAction={isHoverAction}
           keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}

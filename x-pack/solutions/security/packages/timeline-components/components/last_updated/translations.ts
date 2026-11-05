@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPDATING = i18n.translate('xpack.timelines.updating', {
+export const UPDATING = i18n.translate('securitySolutionPackages.timelineComponents.updating', {
   defaultMessage: 'Updating...',
 });
 
-export const UPDATED = i18n.translate('xpack.timelines.updated', {
+export const UPDATED = i18n.translate('securitySolutionPackages.timelineComponents.updated', {
   defaultMessage: 'Updated',
 });

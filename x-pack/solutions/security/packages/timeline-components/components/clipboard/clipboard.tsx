@@ -6,10 +6,10 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { ToastsStart } from '@kbn/core/public';
 import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import React from 'react';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 
 import * as i18n from './translations';
 
@@ -24,6 +24,7 @@ export type OnCopy = ({
 }) => void;
 
 interface Props {
+  addSuccess: ToastsStart['addSuccess'];
   children?: JSX.Element;
   content: string | number;
   isHoverAction?: boolean;
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export const Clipboard = ({
+  addSuccess,
   children,
   content,
   isHoverAction,
@@ -40,7 +42,6 @@ export const Clipboard = ({
   titleSummary,
   toastLifeTimeMs,
 }: Props) => {
-  const { addSuccess } = useAppToasts();
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
