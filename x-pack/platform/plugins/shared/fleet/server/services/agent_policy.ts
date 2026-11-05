@@ -1228,9 +1228,14 @@ class AgentPolicyService {
     );
 
     if (baseAgentPolicy.package_policies) {
+      // Package policies managed by a cloud onboarding instance can only be changed from the
+      // onboarding flow, so linking a shared one would lock the new agent policy too. Copy it
+      // instead: the copy is not managed.
+      const isSharedAndLinked = (packagePolicy: PackagePolicy) =>
+        packagePolicy.policy_ids.length > 1 && !packagePolicy.onboarding_deployment_id;
       // Copy non-shared package policies and append (copy n) to their names.
       const basePackagePolicies = baseAgentPolicy.package_policies.filter(
-        (packagePolicy) => packagePolicy.policy_ids.length < 2
+        (packagePolicy) => !isSharedAndLinked(packagePolicy)
       );
       if (basePackagePolicies.length > 0) {
         const newPackagePolicies = await pMap(
@@ -1257,9 +1262,7 @@ class AgentPolicyService {
         );
       }
       // Link shared package policies to new agent policy.
-      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(
-        (packagePolicy) => packagePolicy.policy_ids.length > 1
-      );
+      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(isSharedAndLinked);
       if (sharedBasePackagePolicies.length > 0) {
         const updatedSharedPackagePolicies = sharedBasePackagePolicies.map((packagePolicy) => ({
           ...packagePolicy,
