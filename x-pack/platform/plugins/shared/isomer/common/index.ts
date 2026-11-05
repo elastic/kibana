@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export {
-  MATERIALIZE_API_PATH,
-  MATERIALIZE_API_VERSION,
-  MATERIALIZE_FEATURE_FLAG,
-} from './constants';
-export { isMaterializeByReference } from './materialize_types';
+/** Public materialization request and context types. */
 export type {
   MaterializeByReference,
   MaterializeByValue,

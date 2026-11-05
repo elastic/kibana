@@ -7,41 +7,28 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
+/** Initializes the server-only Isomer plugin. */
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { IsomerPlugin } = await import('./plugin');
   return new IsomerPlugin(initializerContext);
 };
 
+/** Isomer plugin setup and start contracts. */
 export type { AsScopedOptions, IsomerPluginSetup, IsomerPluginStart } from './plugin';
+/** Runtime type returned by the lazy `getRuntime` contract. */
 export type { KibanaIsomerRuntime } from '@kbn/isomer';
+/** Materialization input and context types shared with the public API. */
+export type { MaterializeContext, MaterializeInput } from '../common';
+/** Node and event types exposed by the materialization client. */
+export type { ChartEvent, MaterializedNode, UnsupportedNode } from './materialize/nodes';
+/** Types required to implement and consume a materializer. */
 export type {
-  MaterializeByReference,
-  MaterializeByValue,
-  MaterializeContext,
-  MaterializeInput,
-} from '../common';
-export type {
-  ChartCell,
-  ChartEvent,
-  MaterializedChartNode,
-  MaterializedComponentNode,
-  MaterializedNode,
-  MaterializedNodeSource,
-  MaterializeLoss,
-  UnsupportedNode,
-} from './materialize/nodes';
-export type {
-  AggsDataRequest,
   DataRequest,
-  EsqlDataRequest,
-  EsqlParamValue,
   MaterializeContextOverride,
-  MaterializeDataRequest,
   MaterializeDescription,
   MaterializeKit,
   MaterializeResults,
   MaterializeScope,
   Materializer,
   ScopedMaterializeClient,
-  SearchDataRequest,
 } from './materialize/types';

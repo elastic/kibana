@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+/** Kibana's shared primitive pack for rendering Isomer content. */
 export { type ComponentsNode, componentsPack, componentsPrimitives } from './src/pack';
+/** Context values available to component renderers. */
 export type { ComponentsRenderContext } from './src/lib';
+/** Enhancement identifiers used by component renderers. */
 export { CODE_COPY_ENHANCEMENT } from './src/primitives/code';
 export { TABLE_SORT_ENHANCEMENT } from './src/primitives/table';
+/** Component primitives and their node types. */
 export {
   type ActionsNode,
   type CodeNode,
@@ -21,6 +25,7 @@ export {
   type QuoteNode,
   type SectionNode,
   type TableNode,
+  type UnsupportedNode,
   actions,
   code,
   context,
@@ -32,4 +37,5 @@ export {
   quote,
   section,
   table,
+  unsupported,
 } from './src/primitives';

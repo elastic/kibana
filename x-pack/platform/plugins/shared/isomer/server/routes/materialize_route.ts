@@ -12,15 +12,18 @@ import {
   MATERIALIZE_API_PATH,
   MATERIALIZE_API_VERSION,
   MATERIALIZE_FEATURE_FLAG,
-} from '../../common';
+} from '../../common/constants';
 import { abortSignalFor } from '../materialize/abort_signal';
 import type { MaterializedNode } from '../materialize/nodes';
 import type { MaterializeScope, ScopedMaterializeClient } from '../materialize/types';
 import type { MaterializeRequestBody } from './schemas';
 import { materializeRequestBodySchema, materializeResponseBodySchema } from './schemas';
 
-export interface MaterializeRouteDeps {
+/** Dependencies required to register the materialize API route. */
+interface MaterializeRouteDeps {
+  /** Router that registers the versioned public endpoint. */
   router: IRouter;
+  /** Creates a client scoped to the current request. */
   createClient: (scope: MaterializeScope) => ScopedMaterializeClient;
 }
 
@@ -41,13 +44,14 @@ const toContext = ({
 });
 
 /** Wraps a node in the composition the route returns. */
-export const toComposition = (node: MaterializedNode): Composition<MaterializedNode> => ({
+const toComposition = (node: MaterializedNode): Composition<MaterializedNode> => ({
   type: 'view',
   ...('title' in node && typeof node.title === 'string' ? { title: node.title } : {}),
   body: [node],
   meta: { source: 'kibana', generatedAt: new Date().toISOString() },
 });
 
+/** Registers the versioned public route that returns a one-node Isomer composition. */
 export const registerMaterializeRoute = ({ router, createClient }: MaterializeRouteDeps) => {
   router.versioned
     .post({
@@ -55,7 +59,7 @@ export const registerMaterializeRoute = ({ router, createClient }: MaterializeRo
       access: 'public',
       summary: 'Materialize a saved object as an Isomer composition',
       description:
-        'Loads a saved object by ID, or takes its as-code config, runs its queries as the requesting user, and returns an Isomer composition holding one node. Anything that cannot be materialized returns an `unsupported` node that says why.',
+        'Loads a saved object by ID, or takes its as-code config, and returns an Isomer composition holding one node. Content that needs data requests the current pipeline cannot run returns an `unsupported` node that says why.',
       security: {
         authz: {
           enabled: false,

@@ -38,7 +38,12 @@ const createNoteMaterializer = (
 const setup = ({
   materializer = createNoteMaterializer(),
   enabled = true,
-}: { materializer?: Materializer<NoteConfig>; enabled?: boolean } = {}) => {
+  validateNode = async () => {},
+}: {
+  materializer?: Materializer<NoteConfig>;
+  enabled?: boolean;
+  validateNode?: (node: MaterializedNode) => Promise<void>;
+} = {}) => {
   const registry = new MaterializerRegistry();
   registry.register('note', materializer);
   const scope: MaterializeScope = {
@@ -51,6 +56,7 @@ const setup = ({
     registry,
     scope,
     isEnabled: async () => enabled,
+    validateNode,
     logger,
   });
   return { client, scope, logger };
@@ -177,6 +183,73 @@ describe('createScopedMaterializeClient', () => {
         reason: 'Materializing this note failed: no columns',
       });
       expect(logger.warn).toHaveBeenCalledWith('Materializing a note config failed: no columns');
+    });
+
+    it('does not reject when describing a failed mapping throws', async () => {
+      const materializer = createNoteMaterializer({
+        map: jest.fn(() => {
+          throw new Error('mapping failed');
+        }),
+        describe: jest.fn(() => {
+          throw new Error('description failed');
+        }),
+      });
+      const { client, logger } = setup({ materializer });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        type: 'unsupported',
+        reason: 'Materializing this note failed: mapping failed',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Describing a note config failed: description failed'
+      );
+    });
+
+    it('omits an invalid description from the unsupported fallback', async () => {
+      const validateNode = jest.fn(async (node: MaterializedNode) => {
+        if (
+          node.type === 'unsupported' &&
+          'title' in node &&
+          typeof node.title === 'string' &&
+          node.title.length > 500
+        ) {
+          throw new Error('body[0].title: is too long');
+        }
+      });
+      const materializer = createNoteMaterializer({
+        describe: jest.fn(() => ({ title: 'x'.repeat(501) })),
+        map: jest.fn(() => {
+          throw new Error('mapping failed');
+        }),
+      });
+      const { client, logger } = setup({ materializer, validateNode });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        type: 'unsupported',
+        reason: 'Materializing this note failed: mapping failed',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Validating the note unsupported description failed: body[0].title: is too long'
+      );
+    });
+
+    it('returns unsupported when output validation rejects the mapped node', async () => {
+      const validateNode = jest.fn(async (node: MaterializedNode) => {
+        if (node.type === 'markdown' && 'text' in node && node.text === '') {
+          throw new Error('body[0].text: is too small');
+        }
+      });
+      const materializer = createNoteMaterializer({
+        map: jest.fn((): MaterializedNode => ({ type: 'markdown', text: '' })),
+      });
+      const { client } = setup({ materializer, validateNode });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        type: 'unsupported',
+        title: 'Open alerts',
+        reason: 'Materializing this note failed: body[0].text: is too small',
+      });
+      expect(validateNode).toHaveBeenCalledTimes(2);
     });
   });
 

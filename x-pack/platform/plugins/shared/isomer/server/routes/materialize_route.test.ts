@@ -11,7 +11,7 @@ import {
   MATERIALIZE_API_PATH,
   MATERIALIZE_API_VERSION,
   MATERIALIZE_FEATURE_FLAG,
-} from '../../common';
+} from '../../common/constants';
 import { isomerPluginMock } from '../mocks';
 import { registerMaterializeRoute } from './materialize_route';
 import { materializeRequestBodySchema } from './schemas';
@@ -132,5 +132,50 @@ describe('materializeRequestBodySchema', () => {
     for (const body of refused) {
       expect(materializeRequestBodySchema.safeParse(body).success).toBe(false);
     }
+  });
+
+  it('accepts ES|QL controls with Kibana control metadata', () => {
+    expect(
+      materializeRequestBodySchema.safeParse({
+        input: { type: 'lens', id: 'abc' },
+        context: {
+          esql_variables: [
+            {
+              key: 'host',
+              value: 'web-01',
+              type: 'values',
+              meta: { controlledBy: 'control-1', group: 'section-1' },
+            },
+          ],
+        },
+      }).success
+    ).toBe(true);
+  });
+
+  it('bounds by-value config depth, size, keys, and strings', () => {
+    let deepConfig: unknown = 'value';
+    for (let depth = 0; depth <= 20; depth++) {
+      deepConfig = { nested: deepConfig };
+    }
+    const wideConfig = Object.fromEntries(
+      Array.from({ length: 10_001 }, (_, index) => [`key-${index}`, index])
+    );
+    const longKey = { ['k'.repeat(257)]: 'value' };
+    const longString = { text: 'x'.repeat(100_001) };
+
+    for (const config of [deepConfig, wideConfig, longKey, longString]) {
+      expect(
+        materializeRequestBodySchema.safeParse({ input: { type: 'lens', config } }).success
+      ).toBe(false);
+    }
+
+    expect(
+      materializeRequestBodySchema.safeParse({
+        input: {
+          type: 'lens',
+          config: { panel: { type: 'metric', layers: [{ field: 'host.name' }] } },
+        },
+      }).success
+    ).toBe(true);
   });
 });

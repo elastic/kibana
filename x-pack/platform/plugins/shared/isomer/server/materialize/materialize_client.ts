@@ -8,10 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { MaterializeContext, MaterializeInput } from '../../common';
-import { isMaterializeByReference } from '../../common';
 import type { MaterializedNode } from './nodes';
 import type { MaterializerRegistry } from './registry';
 import type {
+  MaterializeDescription,
   MaterializeScope,
   Materializer,
   MaterializeResults,
@@ -19,22 +19,30 @@ import type {
 } from './types';
 import { createUnsupportedNode } from './unsupported';
 
-export interface ScopedMaterializeClientDeps {
+interface ScopedMaterializeClientDeps {
   registry: MaterializerRegistry;
   scope: MaterializeScope;
   isEnabled: () => Promise<boolean>;
+  validateNode: (node: MaterializedNode) => Promise<void>;
   logger: Logger;
 }
 
+const MAX_UNSUPPORTED_REASON_LENGTH = 10_000;
+
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+const isByReference = (
+  input: MaterializeInput
+): input is Extract<MaterializeInput, { id: string }> =>
+  'id' in input && typeof input.id === 'string';
 
 const loadConfig = async (
   materializer: Materializer,
   input: MaterializeInput,
   scope: MaterializeScope
 ): Promise<unknown> => {
-  if (!isMaterializeByReference(input)) {
+  if (!isByReference(input)) {
     return input.config;
   }
   if (!materializer.load) {
@@ -48,27 +56,34 @@ const loadConfig = async (
   return materializer.load(input.id, scope);
 };
 
-const run = (
+const run = async (
   materializer: Materializer,
   config: unknown,
-  context: MaterializeContext
-): MaterializedNode => {
+  context: MaterializeContext,
+  describe: () => MaterializeDescription | undefined,
+  unsupported: (reason: string, description?: MaterializeDescription) => Promise<MaterializedNode>,
+  validateNode: (node: MaterializedNode) => Promise<void>
+): Promise<MaterializedNode> => {
   const plan = materializer.plan(config, context);
+  let node: MaterializedNode;
   if (!Array.isArray(plan)) {
-    return plan;
+    node = plan;
+  } else {
+    const [request] = plan;
+    if (request) {
+      return unsupported(
+        i18n.translate('xpack.isomer.materialize.noExecutor', {
+          defaultMessage: 'Kibana cannot run "{kind}" data requests for materialization.',
+          values: { kind: request.kind },
+        }),
+        describe()
+      );
+    }
+    const results: MaterializeResults = { tables: [], nodes: [] };
+    node = materializer.map(config, results, { context });
   }
-  const [request] = plan;
-  if (request) {
-    return createUnsupportedNode(
-      i18n.translate('xpack.isomer.materialize.noExecutor', {
-        defaultMessage: 'Kibana cannot run "{kind}" data requests for materialization.',
-        values: { kind: request.kind },
-      }),
-      materializer.describe?.(config)
-    );
-  }
-  const results: MaterializeResults = { tables: [], nodes: [] };
-  return materializer.map(config, results, { context });
+  await validateNode(node);
+  return node;
 };
 
 /** Materializes saved objects as the user `scope` belongs to. */
@@ -76,25 +91,61 @@ export const createScopedMaterializeClient = ({
   registry,
   scope,
   isEnabled,
+  validateNode,
   logger,
 }: ScopedMaterializeClientDeps): ScopedMaterializeClient => ({
+  /** Creates and validates a node, using an `unsupported` primitive for failures. */
   materialize: async (input, context = {}) => {
     if (!(await isEnabled())) {
-      return createUnsupportedNode(
+      const node = createUnsupportedNode(
         i18n.translate('xpack.isomer.materialize.disabled', {
           defaultMessage: 'Materialization is not enabled in this Kibana.',
         })
       );
+      await validateNode(node);
+      return node;
     }
     const materializer = registry.get(input.type);
     if (!materializer) {
-      return createUnsupportedNode(
+      const node = createUnsupportedNode(
         i18n.translate('xpack.isomer.materialize.noMaterializer', {
           defaultMessage: 'Kibana cannot materialize saved objects of type "{type}".',
           values: { type: input.type },
         })
       );
+      await validateNode(node);
+      return node;
     }
+
+    const describe = (): MaterializeDescription | undefined => {
+      try {
+        return materializer.describe?.(config);
+      } catch (error) {
+        logger.warn(`Describing a ${input.type} config failed: ${errorMessage(error)}`);
+        return undefined;
+      }
+    };
+    const unsupported = async (
+      reason: string,
+      description?: MaterializeDescription
+    ): Promise<MaterializedNode> => {
+      const boundedReason = reason.slice(0, MAX_UNSUPPORTED_REASON_LENGTH);
+      const node = createUnsupportedNode(boundedReason, description);
+      try {
+        await validateNode(node);
+        return node;
+      } catch (error) {
+        if (!description) {
+          throw error;
+        }
+        logger.warn(
+          `Validating the ${input.type} unsupported description failed: ${errorMessage(error)}`
+        );
+        const fallback = createUnsupportedNode(boundedReason);
+        await validateNode(fallback);
+        return fallback;
+      }
+    };
 
     let config: unknown;
     try {
@@ -103,7 +154,7 @@ export const createScopedMaterializeClient = ({
       logger.debug(
         `Could not load the ${input.type} config to materialize: ${errorMessage(error)}`
       );
-      return createUnsupportedNode(
+      return unsupported(
         i18n.translate('xpack.isomer.materialize.invalidConfig', {
           defaultMessage: 'The {type} config could not be read: {message}',
           values: { type: input.type, message: errorMessage(error) },
@@ -112,19 +163,20 @@ export const createScopedMaterializeClient = ({
     }
 
     try {
-      return run(materializer, config, context);
+      return await run(materializer, config, context, describe, unsupported, validateNode);
     } catch (error) {
       logger.warn(`Materializing a ${input.type} config failed: ${errorMessage(error)}`);
-      return createUnsupportedNode(
+      return unsupported(
         i18n.translate('xpack.isomer.materialize.failed', {
           defaultMessage: 'Materializing this {type} failed: {message}',
           values: { type: input.type, message: errorMessage(error) },
         }),
-        materializer.describe?.(config)
+        describe()
       );
     }
   },
 
+  /** Rejects until the materialization pipeline implements selection conversion. */
   filtersForSelection: async ({ node }) => {
     throw new Error(
       i18n.translate('xpack.isomer.materialize.selectionUnsupported', {

@@ -14,8 +14,8 @@ import type { MaterializeContext, MaterializeInput } from '../../common';
 import type { ChartEvent, MaterializedNode, UnsupportedNode } from './nodes';
 
 /**
- * Context a parent passes down for one request: a dashboard's panel overrides, or a materializer's
- * own. Fields replace the parent's, except `filters`, which are added to the parent's.
+ * Intended overrides for one data request: fields replace the parent's, except `filters`, which
+ * are added to the parent's. The current pipeline does not execute data requests.
  */
 export interface MaterializeContextOverride extends MaterializeContext {
   /** Drops the parent's filters and query, as a panel's "ignore global filters" does. */
@@ -23,47 +23,68 @@ export interface MaterializeContextOverride extends MaterializeContext {
 }
 
 /** A named ES|QL param's value, as Kibana's ES|QL search takes it. */
-export type EsqlParamValue = string | number | Array<string | number>;
+type EsqlParamValue = string | number | Array<string | number>;
 
-/** An ES|QL query, run as the user with the context's time range, filters, query and controls. */
-export interface EsqlDataRequest {
+/** An ES|QL query request, planned with the context's time range, filters, query, and controls. */
+interface EsqlDataRequest {
+  /** Request kind discriminator. */
   kind: 'esql';
+  /** ES|QL query to run. */
   query: string;
+  /** Named ES|QL parameter values. */
   params?: Record<string, EsqlParamValue>;
   /** The date field the time range filters on. Without one, only `?_tstart` and `?_tend` apply. */
   timeField?: string;
   /** At most this many rows, below the pipeline's own cap. */
   maxRows?: number;
+  /** Optional context that overrides or extends the parent's context. */
   context?: MaterializeContextOverride;
 }
 
-/** Aggregations over a data view, run through the server aggs service. */
-export interface AggsDataRequest {
+/** An aggregation request for a data view. */
+interface AggsDataRequest {
+  /** Request kind discriminator. */
   kind: 'aggs';
+  /** Data view ID or title. */
   dataView: string;
+  /** Serialized aggregations to execute. */
   aggs: AggConfigSerialized[];
+  /** Optional aggregation time shift. */
   timeShift?: string;
+  /** Optional context that overrides or extends the parent's context. */
   context?: MaterializeContextOverride;
 }
 
-/** Documents from a data view. */
-export interface SearchDataRequest {
+/** A document search request for a data view. */
+interface SearchDataRequest {
+  /** Request kind discriminator. */
   kind: 'search';
+  /** Data view ID or title. */
   dataView: string;
+  /** Fields to return for each document. */
   columns: string[];
+  /** Elasticsearch sort definition. */
   sort?: estypes.Sort;
+  /** Maximum number of documents to return. */
   size: number;
+  /** Optional context that overrides or extends the parent's context. */
   context?: MaterializeContextOverride;
 }
 
 /** Another saved object, materialized with this one's context: a dashboard's panels. */
-export interface MaterializeDataRequest {
+interface MaterializeDataRequest {
+  /** Request kind discriminator. */
   kind: 'materialize';
+  /** Saved object reference or by-value config to materialize. */
   input: MaterializeInput;
+  /** Optional context that overrides or extends the parent's context. */
   context?: MaterializeContextOverride;
 }
 
-/** The requests a materializer plans. The pipeline runs them; materializers never query. */
+/**
+ * The requests a materializer plans. The current pipeline rejects non-empty plans; materializers
+ * never query directly.
+ */
 export type DataRequest =
   | EsqlDataRequest
   | AggsDataRequest
@@ -78,26 +99,36 @@ export interface MaterializeResults {
   nodes: MaterializedNode[];
 }
 
-/** Helpers a materializer maps with. */
+/** Context a materializer maps with. */
 export interface MaterializeKit {
-  /** The context the plan ran in, after merging. */
+  /** The context supplied to `plan`. */
   context: MaterializeContext;
 }
 
 /** The user-scoped services a by-reference load runs with. */
 export interface MaterializeScope {
+  /** Authenticated request that scopes all saved-object access. */
   request: KibanaRequest;
+  /** Saved objects client scoped to `request`. */
   savedObjectsClient: SavedObjectsClientContract;
+  /** Aborts when the request or caller cancels the work. */
   abortSignal: AbortSignal;
 }
 
 /** How a placeholder for a config describes it, when materializing it fails. */
 export interface MaterializeDescription {
+  /** Human-readable title for the placeholder. */
   title?: string;
+  /** Optional link back to the source object. */
   link?: { href: string; label: string };
 }
 
-/** Materializes one saved object type's as-code config into a known Isomer node. */
+/**
+ * Materializes one saved object type's as-code config into a known Isomer node.
+ *
+ * `parse` and `map` must be deterministic and must not perform data access. The pipeline validates
+ * the mapped node before returning it.
+ */
 export interface Materializer<TConfig = unknown> {
   /** Recorded in provenance. Bump it when the nodes it produces change. */
   version: number;
@@ -115,8 +146,19 @@ export interface Materializer<TConfig = unknown> {
 
 /** Materialization as one user, for one request. */
 export interface ScopedMaterializeClient {
-  /** A node for `input` that always renders: `unsupported` with a reason when materializing fails. */
+  /**
+   * Materializes `input`; failures return a validated `unsupported` node with a reason.
+   *
+   * @param input Saved object reference or by-value config.
+   * @param context Optional query, filters, time range, controls, time zone, and locale.
+   */
   materialize(input: MaterializeInput, context?: MaterializeContext): Promise<MaterializedNode>;
-  /** The Kibana filters a selection on `node` stands for, for a host to keep and pass back in `context.filters`. */
+  /**
+   * Resolves the Kibana filters represented by a chart selection.
+   *
+   * @param event Selection event referring to a chart node.
+   * @param node Materialized node that produced the event.
+   * @throws Until selection conversion is implemented.
+   */
   filtersForSelection(event: ChartEvent, node: MaterializedNode): Promise<Filter[]>;
 }

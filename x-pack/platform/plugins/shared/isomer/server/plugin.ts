@@ -14,30 +14,43 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
-import type { Subscription } from 'rxjs';
-import { MATERIALIZE_FEATURE_FLAG } from '../common';
+import { firstValueFrom } from 'rxjs';
+import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
 import { MaterializerRegistry } from './materialize/registry';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
 import { abortSignalFor } from './materialize/abort_signal';
 import { registerMaterializeRoute } from './routes/materialize_route';
 
+/** Setup contract for registering materializers before the plugin starts. */
 export interface IsomerPluginSetup {
-  /** Registers the materializer for one saved object type. Each type has at most one. */
+  /**
+   * Registers a materializer for one saved object type. Each type can be registered only once.
+   *
+   * @param type Saved object type handled by the materializer.
+   * @param materializer Parser, planner, and mapper for that type's as-code config.
+   */
   registerMaterializer: <TConfig>(type: string, materializer: Materializer<TConfig>) => void;
 }
 
+/** Options for creating a request-scoped materialization client. */
 export interface AsScopedOptions {
-  /** Cancels the user's queries. Defaults to the request's own abort. */
+  /** Cancels materializer work. Defaults to the abort signal for the request. */
   abortSignal?: AbortSignal;
 }
 
+/** Start contract for the Isomer runtime and user-scoped materialization. */
 export interface IsomerPluginStart {
   /** Loads the shared runtime and primitive packs on first use. */
   getRuntime: () => Promise<KibanaIsomerRuntime>;
-  /** Whether materialization is turned on. */
+  /** Resolves whether materialization is enabled by the current feature-flag evaluation. */
   isMaterializeEnabled: () => Promise<boolean>;
-  /** Materialization as the user who made `request`. */
+  /**
+   * Creates a client that loads saved objects and materializes them as the user who made `request`.
+   *
+   * @param request Authenticated Kibana request that scopes saved-object access.
+   * @param options Optional abort signal for work started by the client.
+   */
   asScoped: (request: KibanaRequest, options?: AsScopedOptions) => ScopedMaterializeClient;
 }
 
@@ -49,12 +62,12 @@ const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
   return createKibanaIsomerRuntime({ packs: [componentsPack] });
 };
 
+/** Registers the materialization API and exposes the shared Isomer runtime. */
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
   private readonly logger: Logger;
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
-  private materializeEnabled = false;
-  private materializeEnabledSubscription?: Subscription;
+  private featureFlags?: CoreStart['featureFlags'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -71,11 +84,7 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   }
 
   start(core: CoreStart): IsomerPluginStart {
-    this.materializeEnabledSubscription = core.featureFlags
-      .getBooleanValue$(MATERIALIZE_FEATURE_FLAG, false)
-      .subscribe((enabled) => {
-        this.materializeEnabled = enabled;
-      });
+    this.featureFlags = core.featureFlags;
     return {
       getRuntime: this.getRuntime,
       isMaterializeEnabled: this.isMaterializeEnabled,
@@ -88,17 +97,25 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
     };
   }
 
-  stop() {
-    this.materializeEnabledSubscription?.unsubscribe();
-  }
-
-  private readonly isMaterializeEnabled = async (): Promise<boolean> => this.materializeEnabled;
+  private readonly isMaterializeEnabled = async (): Promise<boolean> => {
+    if (!this.featureFlags) {
+      return false;
+    }
+    // oxlint-disable-next-line @kbn/eslint/no_feature_flag_snapshot -- evaluated per materialization action
+    return firstValueFrom(this.featureFlags.getBooleanValue$(MATERIALIZE_FEATURE_FLAG, false));
+  };
 
   private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient =>
     createScopedMaterializeClient({
       registry: this.registry,
       scope,
       isEnabled: this.isMaterializeEnabled,
+      validateNode: async (node) => {
+        const { errors } = (await this.getRuntime()).validate({ type: 'view', body: [node] });
+        if (errors.length > 0) {
+          throw new Error(errors.map(({ path, message }) => `${path}: ${message}`).join('\n'));
+        }
+      },
       logger: this.logger.get('materialize'),
     });
 

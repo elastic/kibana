@@ -10,13 +10,17 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 
 /** A saved object to load by `id` and materialize from its as-code config. */
 export interface MaterializeByReference {
+  /** Saved object type with a registered materializer. */
   type: string;
+  /** ID within that saved object type. */
   id: string;
 }
 
 /** An as-code config to materialize as is: a dashboard panel, or a config an agent wrote. */
 export interface MaterializeByValue {
+  /** Saved object type with a registered materializer. */
   type: string;
+  /** Type-specific config; the materializer validates its shape. */
   config: unknown;
 }
 
@@ -28,16 +32,16 @@ export type MaterializeInput = MaterializeByReference | MaterializeByValue;
  * the ones `filtersForSelection` returns, and pass them back to materialize again.
  */
 export interface MaterializeContext {
+  /** Time range for data requested by the materializer. */
   timeRange?: TimeRange;
+  /** Kibana query applied to data requested by the materializer. */
   query?: Query;
+  /** Kibana filters applied to data requested by the materializer. */
   filters?: Filter[];
   /** ES|QL control values, bound as named params where a query uses them. */
   esqlVariables?: ESQLControlVariable[];
-  /** Defaults to the `dateFormat:tz` advanced setting. */
+  /** Optional time zone for date formatting; this API does not supply a default yet. */
   timeZone?: string;
+  /** Optional locale for formatting. */
   locale?: string;
 }
-
-export const isMaterializeByReference = (
-  input: MaterializeInput
-): input is MaterializeByReference => 'id' in input && typeof input.id === 'string';

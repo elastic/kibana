@@ -7,9 +7,10 @@
 
 import type { MaterializeDescription } from './types';
 import type { UnsupportedNode } from './nodes';
-import { UNSUPPORTED_NODE_TYPE } from './nodes';
 
-/** A placeholder carrying why something wasn't materialized, and what it was when that's known. */
+const UNSUPPORTED_NODE_TYPE = 'unsupported';
+
+/** A renderable explanation for a materialization result that could not be produced. */
 export const createUnsupportedNode = (
   reason: string,
   { title, link }: MaterializeDescription = {}
