@@ -240,10 +240,11 @@ x-forwarded-host:           0000000000000000000000000000beef.mtkb.eu-west-1.aws.
 <section>
   <h2>Repeat it or demo it</h2>
   <p>The scripts live in <code>mt_kibana/m3/</code> on the hackathon branch. Run everything from the repo root. A fresh setup takes about 2 hours, almost all of it waiting for the devenv; once it exists, the clusters and Kibana take about 15 minutes.</p>
-  <div class="note">The M3 scripts are committed locally but not pushed yet. Teammates need them on the upstream branch before they can follow these steps.</div>
   <ol class="steps">
     <li><div>
-      <strong>Prerequisites.</strong> VPN on, <code>tsh login</code> done, and <code>devctl</code>, <code>kubectl</code>, <code>jq</code>, <code>yq</code> installed. <code>mt_kibana/m3/preflight.sh</code> checks all of them.
+      <strong>Prerequisites.</strong> <code>devctl</code> installed and logged in to <code>docker.elastic.co</code>. Connect the Aviatrix VPN, then log in to Teleport. <code>preflight.sh</code> checks every tool and login and says how to fix anything missing.
+      <pre class="term">tsh login --proxy=teleport-proxy.staging.getin.cloud --auth=okta
+mt_kibana/m3/preflight.sh</pre>
     </div></li>
     <li><div>
       <strong>Get a devenv.</strong> Use a direct one: a pooled devenv came with a broken CosmosDB account. It only needs the Cloud Proxy and the ECK operator, not working serverless projects.

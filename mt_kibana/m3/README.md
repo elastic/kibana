@@ -18,6 +18,40 @@ Read from `elastic/proxy` (`provider/kubernetes/controllers/routeserver/`, `http
 - **Host.** The proxy routes on the `Host` header, not SNI, then rewrites `Host` to `<pod-ip>:<port>`. The original hostname is only in `X-Forwarded-Host`.
 - **Unknown projects.** A hostname with no route gets `404 {"ok":false,"message":"Unknown resource."}` from the proxy and never reaches Kibana. So Kibana's 400 guard for unknown projects only catches config drift between the Ingresses and `tenants.yml`.
 
+## First-time setup
+
+Assumes `devctl` is installed and you're logged in to `docker.elastic.co` (`docker login docker.elastic.co`).
+
+1. Connect the Aviatrix VPN, then log in to Teleport:
+
+   ```bash
+   tsh login --proxy=teleport-proxy.staging.getin.cloud --auth=okta
+   ```
+
+2. Check every prerequisite (tools, logins, VPN). Fix anything it flags:
+
+   ```bash
+   mt_kibana/m3/preflight.sh
+   ```
+
+3. Create a direct devenv. Pooled ones can come with a broken control-plane database. This takes about 1.5 hours:
+
+   ```bash
+   devctl create --direct --cosmos-rbac --follow
+   ```
+
+4. Point kubectl at it. `devctl list` shows the name, and `update-kubeconfig` prints the context to use:
+
+   ```bash
+   devctl update-kubeconfig <name>
+   ```
+
+   ```bash
+   kubectl config use-context <context>
+   ```
+
+The devenv auto-hibernates. Before a demo, run `devctl wake <name>`.
+
 ## Run it
 
 1. Build the image: draft PR [#302955](https://github.com/elastic/kibana/pull/302955) has `ci:build-serverless-image`. Comment `/ci` to rebuild after pushing. PR images go to `kibana-ci/kibana-serverless-pr` (not `kibana-serverless`), tagged `pr-302955-<first 12 chars of the commit>`. It's the regular Kibana build; `deploy.sh` runs it without `serverless: es`, so it's a stateful Kibana.
