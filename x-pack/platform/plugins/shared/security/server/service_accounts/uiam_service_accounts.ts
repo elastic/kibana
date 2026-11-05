@@ -68,7 +68,7 @@ import {
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
  * the id maps straight onto the binder's `username`. That id is all the binder can say, which is
  * why the creator's own name comes along as `displayName`: nothing downstream could resolve it
- * from the id.
+ * from the id. UIAM names an API key by its description, and does not say who owns it.
  */
 const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirectoryCreator => {
   if (creator.type === 'user') {
@@ -80,7 +80,7 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
     type: 'api_key',
     apiKeyId: creator.id,
     variant: 'uiam',
-    ...(creator.description ? { displayName: creator.description } : {}),
+    ...(creator.description ? { apiKeyName: creator.description } : {}),
   };
 };
 
