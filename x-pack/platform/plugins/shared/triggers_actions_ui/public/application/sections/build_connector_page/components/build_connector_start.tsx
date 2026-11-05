@@ -235,29 +235,33 @@ export const BuildConnectorStart: React.FC<Props> = ({
                   </EuiButton>
                 </>
               ) : (
-                dynamicConnectorTypes.map((connectorType) => (
-                  <EuiFlexGroup key={connectorType.id} alignItems="center" responsive={false}>
-                    <EuiFlexItem>
-                      <EuiText>
-                        <strong>{connectorType.name}</strong> <span>({connectorType.id})</span>
-                      </EuiText>
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  {dynamicConnectorTypes.map((connectorType) => (
+                    <EuiFlexItem key={connectorType.id}>
+                      <EuiFlexGroup alignItems="center" responsive={false}>
+                        <EuiFlexItem>
+                          <EuiText>
+                            <strong>{connectorType.name}</strong> <span>({connectorType.id})</span>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            isLoading={editingDefinitionLoading}
+                            isDisabled={editingDefinitionLoading}
+                            onClick={() => onEdit(connectorType)}
+                            data-test-subj={`edit-dynamic-connector-${connectorType.id}`}
+                          >
+                            {i18n.translate(
+                              'xpack.triggersActionsUI.sections.buildConnectorPage.editType',
+                              { defaultMessage: 'Edit' }
+                            )}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        isLoading={editingDefinitionLoading}
-                        isDisabled={editingDefinitionLoading}
-                        onClick={() => onEdit(connectorType)}
-                        data-test-subj={`edit-dynamic-connector-${connectorType.id}`}
-                      >
-                        {i18n.translate(
-                          'xpack.triggersActionsUI.sections.buildConnectorPage.editType',
-                          { defaultMessage: 'Edit' }
-                        )}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))
+                  ))}
+                </EuiFlexGroup>
               )}
             </EuiPanel>
           </section>
