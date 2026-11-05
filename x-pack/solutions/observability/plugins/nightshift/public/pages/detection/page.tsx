@@ -17,9 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
-import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -80,16 +78,14 @@ const SignalsTab = lazy(() =>
 
 export type DetectionPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
-  | 'onSourcesClick'
-  | 'sourcesHref'
-  | 'onKnowledgeClick'
-  | 'knowledgeHref'
-  | 'onSettingsClick'
-  | 'settingsHref'
->;
+  'onSourcesClick' | 'sourcesHref' | 'onSettingsClick' | 'settingsHref'
+> & {
+  onKnowledgeClick?: () => void | Promise<void>;
+  knowledgeHref?: string;
+};
 
 export const DetectionPage = ({
-  headerProps,
+  headerProps: { onKnowledgeClick, knowledgeHref, ...appHeaderProps },
   tab,
 }: {
   headerProps: DetectionPageHeaderProps;
@@ -176,15 +172,9 @@ export const DetectionPage = ({
       data-test-subj="nightshiftDetectionPage"
     >
       <NightshiftAppHeader
-        {...headerProps}
+        {...appHeaderProps}
         hideMenu={view.type !== 'workspace'}
         page="detection"
-        back={{
-          href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-          label: i18n.translate('xpack.nightshift.detectionPage.backToNightshiftLabel', {
-            defaultMessage: 'Nightshift',
-          }),
-        }}
       />
       <EuiPageTemplate.Section
         component="div"
@@ -299,8 +289,8 @@ export const DetectionPage = ({
                     <EntitiesPanel
                       timeRange={timeRange}
                       selection={selection}
-                      knowledgeHref={headerProps.knowledgeHref}
-                      onKnowledgeClick={headerProps.onKnowledgeClick}
+                      knowledgeHref={knowledgeHref}
+                      onKnowledgeClick={onKnowledgeClick}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem

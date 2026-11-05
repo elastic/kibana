@@ -19,8 +19,8 @@ import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { Location } from 'history';
-import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
 import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
+import { getNightshiftNavPanel } from './nav/get_nightshift_nav_panel';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -67,14 +67,7 @@ function createNavTree({
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
-      ...(significantEventsAvailable
-        ? [
-            {
-              link: 'nightshift' as const,
-              icon: NightshiftNavigationIcon,
-            },
-          ]
-        : []),
+      ...(significantEventsAvailable ? [getNightshiftNavPanel()] : []),
       {
         link: 'observability-overview',
         title: i18n.translate('xpack.observability.obltNav.overview', {

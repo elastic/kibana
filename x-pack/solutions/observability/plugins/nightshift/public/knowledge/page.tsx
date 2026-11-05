@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
-import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 import { NightshiftAppHeader } from '../components/app_header';
 import { useKibana } from '../hooks/use_kibana';
@@ -33,10 +32,6 @@ const MemoryTab = React.lazy(() =>
 const DecisionTreesTab = React.lazy(() =>
   import('./decision_trees/tab').then((module) => ({ default: module.DecisionTreesTab }))
 );
-
-const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
-  defaultMessage: 'Nightshift',
-});
 
 export type KnowledgePageHeaderProps = Record<string, never>;
 
@@ -92,15 +87,7 @@ export function KnowledgePage({
 
   return (
     <>
-      <NightshiftAppHeader
-        {...headerProps}
-        page="knowledge"
-        back={{
-          href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-          label: nightshiftLabel,
-        }}
-        tabs={tabs}
-      />
+      <NightshiftAppHeader {...headerProps} page="knowledge" tabs={tabs} />
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
         <React.Suspense fallback={<KnowledgeLoadingSpinner />}>
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
