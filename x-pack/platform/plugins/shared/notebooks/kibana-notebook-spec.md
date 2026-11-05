@@ -134,6 +134,9 @@ A plain class over the store, injected with `runQuery` so it is unit-testable wi
    - `runMode: 'manual'` (and not explicitly run) → `stale`, keeps last output; its descendants also become `stale` and keep their output.
    - Otherwise resolve params, compute `memoKey = objectHash({ query, params })` (`object-hash` is a root dep). If equal to the current `memoKey` and not forced → keep status `done`, publish nothing new. Else run.
 3. Each run gets an `AbortController`; starting a new run of a cell, or re-triggering any of its upstreams, aborts in-flight runs of that cell.
+4. While a cell runs, its Run button becomes **Stop**: the run is aborted, the cell keeps its last output and goes `stale` (reason `stopped`), and its descendants go `stale` rather than running on that output.
+
+POC testing aid: an ES|QL cell whose name has a `long` segment (`long`, `long_errors`) or whose label contains `LONG` waits 10 s (abortable) before querying, to exercise long runs.
 
 **Run triggers:**
 

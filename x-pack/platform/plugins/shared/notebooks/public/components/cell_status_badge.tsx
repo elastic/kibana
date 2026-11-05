@@ -48,6 +48,10 @@ const EDITED_TOOLTIP = i18n.translate('xpack.notebook.status.staleEditedTooltip'
   defaultMessage: 'The query was edited but not run. Run the cell to update its results.',
 });
 
+const STOPPED_TOOLTIP = i18n.translate('xpack.notebook.status.staleStoppedTooltip', {
+  defaultMessage: 'The run was stopped, so this cell shows its last results. Run it to update.',
+});
+
 const MANUAL_TOOLTIP = i18n.translate('xpack.notebook.status.staleManualTooltip', {
   defaultMessage: 'This cell is in manual run mode and has not run yet. Run it to see results.',
 });
@@ -88,6 +92,7 @@ const getStaleTooltip = (
   changedParams: readonly string[]
 ): string => {
   if (reason === 'edited') return EDITED_TOOLTIP;
+  if (reason === 'stopped') return STOPPED_TOOLTIP;
   if (reason === 'upstream') {
     return changedParams.length > 0
       ? getChangedUpstreamTooltip(changedParams, parentNames)

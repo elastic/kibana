@@ -82,7 +82,8 @@ export const CellFrame = ({
   resizeHandle,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
-  const { store, openFlyouts$, focusedCell$, addedCellIds } = useNotebook();
+  const { store, scheduler, openFlyouts$, focusedCell$, addedCellIds } = useNotebook();
+  const isRunning = runtime?.status === 'running';
   const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
   const { euiTheme } = useEuiTheme();
   const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
@@ -283,7 +284,7 @@ export const CellFrame = ({
             top: 0;
             left: 100%;
             padding-left: ${euiTheme.size.s};
-            opacity: ${isRunMenuOpen || cell.runMode === 'manual' ? 1 : 0};
+            opacity: ${isRunMenuOpen || isRunning || cell.runMode === 'manual' ? 1 : 0};
             transition: opacity ${euiTheme.animation.fast};
           `}
         >
@@ -292,6 +293,8 @@ export const CellFrame = ({
             isMenuOpen={isRunMenuOpen}
             onMenuOpenChange={setIsRunMenuOpen}
             onRun={onRun}
+            isRunning={isRunning}
+            onStop={() => scheduler.stopCell(cell.id)}
             onRunModeChange={(runMode) =>
               store.updateCell(cell.id, (current) =>
                 'runMode' in current ? { ...current, runMode } : current

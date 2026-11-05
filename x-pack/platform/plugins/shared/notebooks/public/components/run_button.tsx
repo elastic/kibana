@@ -19,6 +19,10 @@ import { i18n } from '@kbn/i18n';
 import type { RunMode } from '../../common/types';
 
 const RUN_LABEL = i18n.translate('xpack.notebook.runButton.run', { defaultMessage: 'Run' });
+const STOP_LABEL = i18n.translate('xpack.notebook.runButton.stop', { defaultMessage: 'Stop' });
+const STOP_DESCRIPTION = i18n.translate('xpack.notebook.runButton.stopDescription', {
+  defaultMessage: 'Cancels this run and keeps the last results',
+});
 
 const MODES: Record<RunMode, { title: string; description: string }> = {
   auto: {
@@ -42,9 +46,13 @@ export const RunButton = ({
   isMenuOpen: isOpen,
   onMenuOpenChange: setIsOpen,
   onRun,
+  isRunning,
+  onStop,
   onRunModeChange,
 }: {
   runMode: RunMode;
+  isRunning: boolean;
+  onStop: () => void;
   isMenuOpen: boolean;
   onMenuOpenChange: (isOpen: boolean) => void;
   onRun: () => void;
@@ -54,14 +62,25 @@ export const RunButton = ({
 
   return (
     <EuiSplitButton size="s" color={runMode === 'auto' ? 'primary' : 'text'}>
-      <EuiSplitButton.ActionPrimary
-        isIconOnly
-        iconType={runMode === 'auto' ? 'refresh' : 'play'}
-        aria-label={RUN_LABEL}
-        onClick={onRun}
-        tooltipProps={{ title, content: description }}
-        data-test-subj="notebookCellRun"
-      />
+      {isRunning ? (
+        <EuiSplitButton.ActionPrimary
+          isIconOnly
+          iconType="stop"
+          aria-label={STOP_LABEL}
+          onClick={onStop}
+          tooltipProps={{ title: STOP_LABEL, content: STOP_DESCRIPTION }}
+          data-test-subj="notebookCellStop"
+        />
+      ) : (
+        <EuiSplitButton.ActionPrimary
+          isIconOnly
+          iconType={runMode === 'auto' ? 'refresh' : 'play'}
+          aria-label={RUN_LABEL}
+          onClick={onRun}
+          tooltipProps={{ title, content: description }}
+          data-test-subj="notebookCellRun"
+        />
+      )}
       <EuiSplitButton.ActionSecondary
         iconType="chevronSingleDown"
         aria-label={i18n.translate('xpack.notebook.runButton.modeAriaLabel', {

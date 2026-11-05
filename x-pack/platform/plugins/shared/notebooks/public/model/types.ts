@@ -11,8 +11,8 @@ import type { CodeLogEntry } from './code_cell';
 
 export type CellStatus = 'idle' | 'stale' | 'running' | 'done' | 'error' | 'blocked';
 
-/** Why a cell is `stale`: an unrun edit, manual run mode, or a stale parent. */
-export type StaleReason = 'edited' | 'manual' | 'upstream';
+/** Why a cell is `stale`: an unrun edit, manual run mode, a stale parent, or a run the user stopped. */
+export type StaleReason = 'edited' | 'manual' | 'upstream' | 'stopped';
 
 /** A value bound to a named ES|QL param; `null` marks an empty input and is sent as JSON null. */
 export type ParamValue = string | number | null;

@@ -386,6 +386,54 @@ describe('NotebookScheduler', () => {
       expect(env.runtime('q').status).toBe('done');
     });
 
+    it('stops a running cell, keeping its last output, and its descendants go stale', async () => {
+      const env = track(setup([esql('q', 'FROM logs'), chart('c', 'q')]));
+      await env.open();
+      const previous = env.output('q');
+
+      env.fake.setDeferred(true);
+      void env.scheduler.runCell('q');
+      await flush();
+      expect(env.runtime('q').status).toBe('running');
+
+      env.scheduler.stopCell('q');
+      await env.scheduler.whenIdle();
+      expect(env.fake.calls[env.fake.calls.length - 1].signal.aborted).toBe(true);
+      expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'stopped' });
+      expect(env.output('q')).toBe(previous);
+      expect(env.runtime('c')).toMatchObject({ status: 'stale', staleReason: 'upstream' });
+    });
+
+    it('ignores stopping a cell that is not running', async () => {
+      const env = track(setup([esql('q', 'FROM logs')]));
+      await env.open();
+      env.scheduler.stopCell('q');
+      expect(env.runtime('q').status).toBe('done');
+    });
+
+    it('waits before querying a cell with a long segment in its name, and the wait can be stopped', async () => {
+      jest.useFakeTimers();
+      try {
+        const env = track(setup([esql('q', 'FROM logs', { name: 'long_q' })]));
+        env.scheduler.start();
+        await jest.advanceTimersByTimeAsync(9_000);
+        expect(env.fake.calls).toHaveLength(0);
+        expect(env.runtime('q').status).toBe('running');
+
+        await jest.advanceTimersByTimeAsync(1_000);
+        expect(env.fake.calls).toHaveLength(1);
+
+        void env.scheduler.runCell('q');
+        await jest.advanceTimersByTimeAsync(0);
+        env.scheduler.stopCell('q');
+        await jest.advanceTimersByTimeAsync(10_000);
+        expect(env.fake.calls).toHaveLength(1);
+        expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'stopped' });
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('aborts the run of a removed cell', async () => {
       const env = track(setup([esql('q', 'FROM logs')]));
       env.fake.setDeferred(true);
