@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useSelector } from '@xstate/react';
 import {
   useEdgesState,
@@ -56,6 +57,7 @@ import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
 import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
@@ -128,6 +130,8 @@ import {
 import { GRAPH_ENDPOINT_KIND, LINE_TARGET_KIND } from '../../../../services/unit_graph';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
+import { STATS_POLL_INTERVAL_MS } from '../../../unit_stats/state_management/constants';
+import { StatsManagerProvider } from '../../../unit_stats/state_management/use_stats_manager';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 const NO_DESTINATION_INDICES: ResolvedDestinationIndex[] = [];
@@ -184,12 +188,18 @@ export function StreamsCanvas() {
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
     >
-      <StreamsCanvasInner />
+      <StatsManagerProvider
+        unitId={STREAMS_DEFAULT_UNIT_ID}
+        pollIntervalMs={STATS_POLL_INTERVAL_MS}
+      >
+        <StreamsCanvasInner />
+      </StatsManagerProvider>
     </CanvasStateContextProvider>
   );
 }
 
 function StreamsCanvasInner() {
+  useSyncStatsWithSavedUnit();
   const { euiTheme } = useEuiTheme();
   const { flyoutName, flyoutKind, flyoutTab, query } = useCanvasUrlRef();
   const {
@@ -959,6 +969,14 @@ const getDestinationSubtitle = (destination: ElasticsearchDestinationViewModel):
   });
 };
 
+const getEndpointHost = (endpoint: string): string => {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
+};
+
 export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
@@ -969,29 +987,43 @@ export const buildConfiguredDestinationNode = (
     'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
     { defaultMessage: 'No source' }
   );
-  if (destination.type === 's3') {
+  if (destination.type !== 'elasticsearch') {
+    const location =
+      destination.type === 's3'
+        ? { bucket: destination.bucket }
+        : {
+            endpoint: destination.endpoint,
+            remoteIndexNames: [...new Set(Object.values(destination.indexBySignal))],
+          };
     return {
       id: configuredDestinationNodeId(destination.id),
       type: DESTINATION_NODE_TYPE,
       position: { x: 0, y: 0 },
       deletable: true,
       ariaLabel: hasConnectedSource
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3AriaLabel', {
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.nonLocalAriaLabel', {
             defaultMessage: 'Destination: {name}, {signal}',
             values: { name: destination.name, signal },
           })
-        : i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3NoSourceAriaLabel', {
-            defaultMessage: 'Destination: {name}, {signal}, no source',
-            values: { name: destination.name, signal },
-          }),
+        : i18n.translate(
+            'xpack.streams.canvas.configuredDestinationNode.nonLocalNoSourceAriaLabel',
+            {
+              defaultMessage: 'Destination: {name}, {signal}, no source',
+              values: { name: destination.name, signal },
+            }
+          ),
       data: {
         destinationId: destination.id,
+        destinationType: destination.type,
         signals: destination.signals,
-        bucket: destination.bucket,
+        ...location,
         title: destination.name,
         subtitle: !hasConnectedSource
           ? noSourceLabel
-          : destination.description || destination.bucket,
+          : destination.description ||
+            (destination.type === 's3'
+              ? destination.bucket
+              : getEndpointHost(destination.endpoint)),
       },
     };
   }
@@ -1021,6 +1053,7 @@ export const buildConfiguredDestinationNode = (
         }),
     data: {
       destinationId: destination.id,
+      destinationType: destination.type,
       signals: destination.signals,
       streamName: getDestinationIndices(destination).join(' ') || undefined,
       indexCount: targetedIndexNames.length,

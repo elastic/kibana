@@ -24,8 +24,8 @@ const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
-jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [],
     isLoading: false,
@@ -45,11 +45,14 @@ const onTriggerChange = jest.fn();
 
 const TriggerSection = ({ initialTrigger }: { initialTrigger?: TriggerFormValues }) => {
   const [trigger, setTrigger] = useState(initialTrigger);
+  const [instructions, setInstructions] = useState('');
   const [dailyDispatchLimit, setDailyDispatchLimit] = useState('20');
   return (
     <I18nProvider>
       <AutomationTriggerSection
         trigger={trigger}
+        instructions={instructions}
+        onInstructionsChange={setInstructions}
         dailyDispatchLimit={dailyDispatchLimit}
         onTriggerChange={(next) => {
           onTriggerChange(next);
@@ -74,6 +77,59 @@ describe('AutomationTriggerSection', () => {
   });
 
   beforeEach(() => onTriggerChange.mockClear());
+
+  it('reveals instructions with the selected trigger and preserves them when changing or removing it', async () => {
+    render(<TriggerSection />);
+    expect(screen.queryByTestId('automationInstructions')).not.toBeInTheDocument();
+    await selectTrigger('automationAddTrigger', 'Alert triggered');
+    const instructions = screen.getByRole('textbox', { name: 'Additional Instructions' });
+    expect(screen.getByTestId('automationDailyLimit')).toAppearBefore(instructions);
+    expect(instructions).toHaveAttribute('placeholder', expect.stringContaining('Optionally'));
+    expect(instructions).toHaveAttribute('maxlength', '5000');
+    fireEvent.change(instructions, { target: { value: 'Focus on checkout' } });
+    await selectTrigger('automationChangeTrigger', 'Every…');
+    expect(screen.getByRole('textbox', { name: 'Instructions' })).toHaveValue('Focus on checkout');
+    expect(screen.getByRole('textbox', { name: 'Instructions' })).toBeRequired();
+    fireEvent.click(screen.getByTestId('automationRemoveTrigger'));
+    expect(screen.queryByTestId('automationInstructions')).not.toBeInTheDocument();
+    await selectTrigger('automationAddTrigger', 'Alert triggered');
+    expect(screen.getByRole('textbox', { name: 'Additional Instructions' })).toHaveValue(
+      'Focus on checkout'
+    );
+    expect(screen.queryByTestId('automationInstructionMode')).not.toBeInTheDocument();
+  });
+
+  it('waits until instructions are blurred to show required errors after changing triggers', async () => {
+    render(<TriggerSection initialTrigger={legacyPatternTrigger} />);
+    fireEvent.blur(screen.getByRole('textbox', { name: 'Additional Instructions' }));
+    await selectTrigger('automationChangeTrigger', 'Every…');
+
+    const instructions = screen.getByRole('textbox', { name: 'Instructions' });
+    expect(instructions).toBeRequired();
+    expect(instructions).toBeValid();
+    expect(
+      screen.queryByText(
+        'Add instructions describing what this scheduled automation should investigate.'
+      )
+    ).not.toBeInTheDocument();
+
+    fireEvent.blur(instructions);
+    expect(instructions).toBeInvalid();
+    expect(
+      screen.getByText(
+        'Add instructions describing what this scheduled automation should investigate.'
+      )
+    ).toBeInTheDocument();
+    fireEvent.change(instructions, { target: { value: 'Review checkout errors' } });
+    expect(instructions).toBeValid();
+    fireEvent.change(instructions, { target: { value: '' } });
+    expect(instructions).toBeInvalid();
+
+    await selectTrigger('automationChangeTrigger', 'Alert triggered');
+    expect(screen.getByRole('textbox', { name: 'Additional Instructions' })).toBeValid();
+    await selectTrigger('automationChangeTrigger', 'Every…');
+    expect(screen.getByRole('textbox', { name: 'Instructions' })).toBeValid();
+  });
 
   it('removes the trigger', async () => {
     render(<TriggerSection />);

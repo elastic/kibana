@@ -10,7 +10,7 @@
 import type { CSSObject } from '@emotion/react';
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table/src/types';
-import { LogLevelBadge } from '@kbn/discover-utils';
+import { LogLevelBadge } from '@kbn/discover-utils/components';
 
 const dataTestSubj = 'logLevelBadgeCell';
 const badgeCss: CSSObject = { marginTop: '-4px' };
