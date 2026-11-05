@@ -88,7 +88,7 @@ export const UnifiedAttachmentRt = rt.intersection([
     version: rt.string,
   }),
 ]);
-export const UnifiedAttachmentsSchema = lazySchema(() => z.array(UnifiedAttachmentSchema));
+export const UnifiedAttachmentsRt = rt.array(UnifiedAttachmentRt);
 
 /**
  * Partial payload props for patch (reference and value). We define these explicitly because
@@ -167,7 +167,7 @@ export const DocumentAttachmentAttributesRtV2 = rt.union([
   UnifiedDocumentAttachmentAttributesRt,
 ]);
 export type DocumentAttachmentAttributesV2 = rt.TypeOf<typeof DocumentAttachmentAttributesRtV2>;
-export type UnifiedAttachments = z.infer<typeof UnifiedAttachmentsSchema>;
+export type UnifiedAttachments = rt.TypeOf<typeof UnifiedAttachmentsRt>;
 
 /**
  * Combined v1 legacy and v2 unified attachment types
