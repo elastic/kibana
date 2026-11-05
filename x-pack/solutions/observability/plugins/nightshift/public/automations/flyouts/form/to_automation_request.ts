@@ -10,7 +10,7 @@ import type {
   Automation,
   CreateAutomationBody,
   UpdateAutomationBody,
-} from '../../hooks/use_automations';
+} from '../../../data/automations/use_automations';
 import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   SLACK_TRIGGER_EVENTS,
@@ -64,7 +64,6 @@ export const toAutomationRequestBody = (
     trigger: { rows: [toTriggerRow(values.trigger)] },
     execution: {
       ...(instructions ? { promptTemplate: instructions } : {}),
-      reasoningMode: values.mode === 'investigate' ? 'investigate' : 'observe',
     },
     completions: !values.slackAction
       ? []

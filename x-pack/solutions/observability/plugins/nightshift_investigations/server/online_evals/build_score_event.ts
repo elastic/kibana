@@ -62,7 +62,7 @@ const toErrors = (results: EvaluateResult[]): OnlineEvalError[] =>
     .map(({ evaluator, error }) => ({
       evaluator_name: evaluator.name,
       evaluator_version: evaluator.version,
-      code: error?.code === 'evidence_unmet' ? 'evidence_unmet' : 'evaluator_error',
+      code: error?.code ?? 'evaluator_error',
     }));
 
 const withDropCounts = (
@@ -129,7 +129,9 @@ export const buildOnlineEvalScoreEvent = ({
       code: 'evaluation_failed' as const,
     })),
   ];
-  const skippedCount = errors.filter(({ code }) => code === 'evidence_unmet').length;
+  const skippedCount = errors.filter(
+    ({ code }) => code === 'evidence_unmet' || code === 'not_applicable'
+  ).length;
   // Online evals run every judge on one fixed model, so one value covers the event.
   const judgeModel = results.find(({ evaluator }) => evaluator.model)?.evaluator.model?.id;
 
