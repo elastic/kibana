@@ -15,6 +15,7 @@ jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
 import type { HttpStart } from '@kbn/core/public';
 import {
   fetchEsqlData,
+  fetchEsqlDatasets,
   getLinkBasePath,
   fillTemplateDatasets,
   sanitizeHtml,
@@ -24,6 +25,8 @@ import { getServices } from '../services';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
+const mockFetchEsqlDatasets = fetchEsqlDatasets as jest.MockedFunction<typeof fetchEsqlDatasets>;
+const noData = { datasets: [{ columns: [], rows: [] }], approximationApplied: undefined };
 const mockFillTemplate = fillTemplateDatasets as jest.MockedFunction<typeof fillTemplateDatasets>;
 const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
 const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
@@ -40,6 +43,7 @@ beforeEach(() => {
     agentBuilder: undefined,
   });
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
+  mockFetchEsqlDatasets.mockResolvedValue(noData);
   mockFillTemplate.mockResolvedValue('<p>filled</p>');
   (getLinkBasePath as jest.Mock).mockReturnValue(mockLinkBasePath);
   mockSanitizeHtml.mockImplementation((h) => h);
@@ -177,7 +181,7 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).toHaveBeenCalled();
+      expect(mockFetchEsqlDatasets).toHaveBeenCalled();
       expect(mockFillTemplate).toHaveBeenCalled();
       expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
@@ -188,9 +192,14 @@ describe('useEditFlyoutState', () => {
     // sections that read `queries[1]`, which an unchanged first-query-only preview would blank.
     it('fetches every query of the panel and fills the template with one dataset per query', async () => {
       const columns = [{ name: 'n', type: 'long' }];
-      mockFetchEsqlData
-        .mockResolvedValueOnce({ columns, values: [[1]], all_columns: columns })
-        .mockResolvedValueOnce({ columns, values: [[2]], all_columns: columns });
+      const datasets = [
+        { columns, rows: [[1]] },
+        { columns, rows: [[2]] },
+      ];
+      mockFetchEsqlDatasets.mockResolvedValueOnce({
+        datasets,
+        approximationApplied: undefined,
+      });
 
       const { result } = renderHook(() =>
         useEditFlyoutState({ ...baseParams, additionalEsqlQueries: ['FROM metrics | LIMIT 5'] })
@@ -200,20 +209,15 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).toHaveBeenCalledTimes(2);
-      expect(mockFetchEsqlData).toHaveBeenNthCalledWith(
-        2,
+      expect(mockFetchEsqlDatasets).toHaveBeenCalledWith(
         mockSearch,
         mockHttp,
-        'FROM metrics | LIMIT 5',
+        ['FROM logs | LIMIT 10', 'FROM metrics | LIMIT 5'],
         undefined,
         expect.any(AbortSignal),
         expect.anything()
       );
-      expect(mockFillTemplate).toHaveBeenCalledWith('hello', [
-        { columns, rows: [[1]] },
-        { columns, rows: [[2]] },
-      ]);
+      expect(mockFillTemplate).toHaveBeenCalledWith('hello', datasets);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
@@ -224,7 +228,14 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+      expect(mockFetchEsqlDatasets).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        ['FROM logs | LIMIT 10'],
+        undefined,
+        expect.any(AbortSignal),
+        expect.anything()
+      );
       expect(mockFillTemplate).toHaveBeenCalledWith('hello', [{ columns: [], rows: [] }]);
     });
 
@@ -241,24 +252,8 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+      expect(mockFetchEsqlDatasets).not.toHaveBeenCalled();
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
-    });
-
-    it('says which query failed when the panel has several', async () => {
-      mockFetchEsqlData
-        .mockResolvedValueOnce({ columns: [], values: [], all_columns: [] })
-        .mockRejectedValueOnce(new Error('bad index'));
-      const { result } = renderHook(() =>
-        useEditFlyoutState({ ...baseParams, additionalEsqlQueries: ['FROM bad'] })
-      );
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-
-      expect(result.current.esqlDataError).toBe('Query 2 failed: bad index');
-      expect(mockOnRunPreview).not.toHaveBeenCalled();
     });
 
     it('skips fetch and uses draft template directly when no esql query', async () => {
@@ -270,7 +265,7 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+      expect(mockFetchEsqlDatasets).not.toHaveBeenCalled();
       expect(mockFillTemplate).not.toHaveBeenCalled();
       expect(mockSanitizeHtml).toHaveBeenCalledWith('hello', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('hello', 'LIGHT', mockEuiTheme);
@@ -278,7 +273,7 @@ describe('useEditFlyoutState', () => {
     });
 
     it('sets esqlDataError and does not call onRunPreview on fetch failure', async () => {
-      mockFetchEsqlData.mockRejectedValue(new Error('fetch failed'));
+      mockFetchEsqlDatasets.mockRejectedValue(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
@@ -290,7 +285,7 @@ describe('useEditFlyoutState', () => {
     });
 
     it('clears a stale esqlDataError when a subsequent render succeeds', async () => {
-      mockFetchEsqlData.mockRejectedValueOnce(new Error('fetch failed'));
+      mockFetchEsqlDatasets.mockRejectedValueOnce(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
@@ -298,7 +293,7 @@ describe('useEditFlyoutState', () => {
       });
       expect(result.current.esqlDataError).toBe('fetch failed');
 
-      mockFetchEsqlData.mockResolvedValueOnce({ columns: [], values: [], all_columns: [] });
+      mockFetchEsqlDatasets.mockResolvedValueOnce(noData);
 
       await act(async () => {
         await result.current.handleRender();
@@ -310,9 +305,9 @@ describe('useEditFlyoutState', () => {
 
     it('does not call onRunPreview when the draft changed mid-flight', async () => {
       let resolveRender!: () => void;
-      mockFetchEsqlData.mockReturnValue(
+      mockFetchEsqlDatasets.mockReturnValue(
         new Promise((resolve) => {
-          resolveRender = () => resolve({ columns: [], values: [], all_columns: [] });
+          resolveRender = () => resolve(noData);
         })
       );
 
@@ -337,9 +332,9 @@ describe('useEditFlyoutState', () => {
 
     it('shows loading state while rendering', async () => {
       let resolvePromise!: () => void;
-      mockFetchEsqlData.mockReturnValue(
+      mockFetchEsqlDatasets.mockReturnValue(
         new Promise((resolve) => {
-          resolvePromise = () => resolve({ columns: [], values: [], all_columns: [] });
+          resolvePromise = () => resolve(noData);
         })
       );
 

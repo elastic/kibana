@@ -10,10 +10,10 @@ import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import {
   getLinkBasePath,
   fetchEsqlData,
+  fetchEsqlDatasets,
   fillTemplateDatasets,
   sanitizeHtml,
   applyHtmlTheme,
@@ -178,32 +178,16 @@ export const useEditFlyoutState = ({
       // fetched, not only the one the editor changes.
       const queries = state.draftEsqlQuery ? [state.draftEsqlQuery, ...additionalEsqlQueries] : [];
       if (queries.length > 0) {
-        const results = await Promise.all(
-          queries.map((queryToFetch, index) =>
-            fetchEsqlData(
-              search,
-              core.http,
-              queryToFetch,
-              timeRange,
-              controller.signal,
-              fetchOptions
-            ).catch((err: Error) => {
-              // Say which query failed, but leave a single-query panel's message as it is.
-              if (queries.length === 1 || err.name === 'AbortError') throw err;
-              throw new Error(
-                i18n.translate('xpack.customContent.editFlyout.queryFailed', {
-                  defaultMessage: 'Query {position} failed: {message}',
-                  values: { position: index + 1, message: err.message },
-                })
-              );
-            })
-          )
+        const { datasets } = await fetchEsqlDatasets(
+          search,
+          core.http,
+          queries,
+          timeRange,
+          controller.signal,
+          fetchOptions
         );
         if (controller.signal.aborted) return;
-        rawHtml = await fillTemplateDatasets(
-          state.draftTemplate,
-          results.map(({ columns, values }) => ({ columns, rows: values ?? [] }))
-        );
+        rawHtml = await fillTemplateDatasets(state.draftTemplate, datasets);
       } else {
         rawHtml = state.draftTemplate;
       }

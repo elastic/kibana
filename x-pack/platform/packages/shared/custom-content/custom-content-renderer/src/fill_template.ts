@@ -89,9 +89,3 @@ export async function fillTemplateDatasets(
     queries,
   });
 }
-
-export const fillTemplate = (
-  template: string,
-  columns: ESQLColumn[],
-  rows: unknown[][]
-): Promise<string> => fillTemplateDatasets(template, [{ columns, rows }]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -13,7 +13,7 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { i18n } from '@kbn/i18n';
-import { fetchEsqlData } from './fetch_esql_data';
+import { fetchEsqlDatasets } from './fetch_esql_datasets';
 import { fillTemplateDatasets } from './fill_template';
 import { sanitizeHtml, applyHtmlTheme } from './prepare_html';
 import type { CustomContentRendererServices } from './types';
@@ -52,6 +52,18 @@ export interface UseCustomContentHtmlResult {
   noContent: boolean;
 }
 
+const NO_QUERIES: readonly string[] = [];
+
+/** Keeps the same array while its items are the same, for callers that build the list inline. */
+const useStableList = (list: readonly string[] = NO_QUERIES): readonly string[] => {
+  const stable = useRef(list);
+  const isSame =
+    stable.current.length === list.length &&
+    stable.current.every((item, index) => item === list[index]);
+  if (!isSame) stable.current = list;
+  return stable.current;
+};
+
 export function useCustomContentHtml({
   services,
   embeddableId,
@@ -78,7 +90,7 @@ export function useCustomContentHtml({
   const trimmedTemplate = savedTemplate?.trim() || undefined;
   const { http, uiSettings, search } = services;
   // Callers build the list inline, so compare it by value to keep it from refetching on every render.
-  const additionalQueriesKey = JSON.stringify(additionalEsqlQueries ?? []);
+  const stableAdditionalQueries = useStableList(additionalEsqlQueries);
 
   useEffect(() => {
     if (trimmedTemplate && !esqlQuery) {
@@ -90,65 +102,41 @@ export function useCustomContentHtml({
 
     if (trimmedTemplate && esqlQuery) {
       const controller = new AbortController();
-      const fetchOptions = {
-        isApproximate,
-        projectRouting,
-        query,
-        filters,
-        esQueryConfig: getEsQueryConfig(uiSettings),
-        esqlVariables,
-        requestAdapter,
-        // The requests are cleared once below, so the queries don't wipe each other's entries.
-        keepRequests: true,
-      };
       const template = stripMarkdownFences(trimmedTemplate);
-      const queries = [esqlQuery, ...(JSON.parse(additionalQueriesKey) as string[])];
 
-      requestAdapter?.reset();
       setIsLoading(true);
       setError(undefined);
-      Promise.all(
-        queries.map((queryToFetch, index) =>
-          fetchEsqlData(
-            search,
-            http,
-            queryToFetch,
-            timeRange,
-            controller.signal,
-            fetchOptions
-          ).catch((err: Error) => {
-            // Say which query failed, but leave a single-query panel's message as it is.
-            if (queries.length === 1 || err.name === 'AbortError') throw err;
-            throw new Error(
-              i18n.translate('xpack.customContent.queryFailed', {
-                defaultMessage: 'Query {position} failed: {message}',
-                values: { position: index + 1, message: err.message },
-              })
-            );
-          })
-        )
+      fetchEsqlDatasets(
+        search,
+        http,
+        [esqlQuery, ...stableAdditionalQueries],
+        timeRange,
+        controller.signal,
+        {
+          isApproximate,
+          projectRouting,
+          query,
+          filters,
+          esQueryConfig: getEsQueryConfig(uiSettings),
+          esqlVariables,
+          requestAdapter,
+        }
       )
-        .then((responses) => {
-          if (!controller.signal.aborted) {
-            const flags = responses.map(({ approximation_applied: applied }) => applied);
-            setApproximationApplied?.(
-              flags.some(Boolean) ? true : flags.includes(false) ? false : undefined
-            );
-          }
-          return fillTemplateDatasets(
-            template,
-            responses.map(({ columns, values }) => ({ columns, rows: values ?? [] }))
-          );
+        .then(({ datasets, approximationApplied }) => {
+          if (!controller.signal.aborted) setApproximationApplied?.(approximationApplied);
+          return fillTemplateDatasets(template, datasets);
         })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
           setFilledHtml(rawHtml);
           setIsLoading(false);
         })
-        .catch((err: Error) => {
-          if (controller.signal.aborted || err.name === 'AbortError') return;
+        .catch((err: unknown) => {
+          if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
+            return;
+          }
           setApproximationApplied?.(undefined);
-          setError(err.message || RENDER_ERROR_MESSAGE);
+          setError((err instanceof Error && err.message) || RENDER_ERROR_MESSAGE);
           setIsLoading(false);
         });
 
@@ -162,7 +150,7 @@ export function useCustomContentHtml({
   }, [
     embeddableId,
     esqlQuery,
-    additionalQueriesKey,
+    stableAdditionalQueries,
     generationVersion,
     trimmedTemplate,
     timeRange,

@@ -229,6 +229,21 @@ describe('useCustomContentHtml', () => {
       ]);
     });
 
+    it('refetches only when the additional queries change, not when the list is rebuilt', async () => {
+      const { result, rerender } = renderHook(
+        ({ queries }) => useCustomContentHtml({ ...esqlParams, additionalEsqlQueries: queries }),
+        { initialProps: { queries: ['FROM metrics'] } }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      const fetches = mockFetchEsqlData.mock.calls.length;
+
+      rerender({ queries: ['FROM metrics'] });
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(fetches);
+
+      rerender({ queries: ['FROM other'] });
+      await waitFor(() => expect(mockFetchEsqlData.mock.calls.length).toBeGreaterThan(fetches));
+    });
+
     it('fails the whole panel when one of the queries fails', async () => {
       mockFetchEsqlData
         .mockResolvedValueOnce({ columns: [], values: [], all_columns: [] })
