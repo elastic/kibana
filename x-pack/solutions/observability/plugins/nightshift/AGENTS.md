@@ -74,7 +74,7 @@ These rules apply to every new file and to any file you move. Older folders don'
 
 ## Legacy folders
 
-These folders predate the layout and will move under `pages/`, `components/` or `data/` over time: `app/`, `automations/`, `custom_context/`, `knowledge/`, `landing/`, `onboarding/`, `sandbox_allowlist/`, `sandbox_connectors/`, `service_account/`, `settings/`, `sources/`, and `nightshift_page.tsx`.
+These folders predate the layout and will move under `pages/`, `components/` or `data/` over time: `app/`, `automations/`, `custom_context/`, `knowledge/`, `landing/`, `onboarding/`, `settings/`, `sources/`, and `nightshift_page.tsx`.
 
 - Edit files in place. Don't move a legacy folder as a side effect of a feature change.
 - A new file that only that legacy page uses can go inside its folder.

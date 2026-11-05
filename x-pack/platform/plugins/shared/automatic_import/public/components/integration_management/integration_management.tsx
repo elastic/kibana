@@ -21,6 +21,7 @@ import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { ManagementContents } from './management_contents/management_contents';
 import { ButtonsFooter } from '../../common/components/button_footer';
 import { ConnectorSelector } from '../../common/components/connector_selector';
+import { useAiConnectors } from '../../common/hooks/use_ai_connectors';
 import { IntegrationFormProvider, useIntegrationForm } from './forms/integration_form';
 import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
@@ -215,6 +216,7 @@ export const IntegrationManagement = React.memo(() => {
 
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
+  const { data: connectors, isLoading: isLoadingConnectors } = useAiConnectors();
   const { reportCancelButtonClicked, sessionId } = useTelemetry();
   const { telemetry } = services;
   const { canCreateIntegration, canEditIntegration } = useAuthorization();
@@ -254,14 +256,18 @@ export const IntegrationManagement = React.memo(() => {
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;
 
+    const { connectorId = '' } = integration;
+    const isConnectorMissing =
+      connectors !== undefined && !connectors.some(({ id }) => id === connectorId);
+
     return {
       integrationId: integration.integrationId,
       title: integration.title,
       description: integration.description,
       logo: integration.logo,
-      connectorId: integration.connectorId ?? '',
+      connectorId: isConnectorMissing ? '' : connectorId,
     };
-  }, [integration]);
+  }, [integration, connectors]);
 
   const handleSubmit = useCallback(
     async (data: IntegrationFormData) => {
@@ -320,7 +326,7 @@ export const IntegrationManagement = React.memo(() => {
   }
 
   // Loading state when fetching existing integration
-  if (integrationId && isLoading) {
+  if (integrationId && (isLoading || isLoadingConnectors)) {
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
   }
 
