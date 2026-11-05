@@ -54,16 +54,8 @@ describe('decisionTreePrepareStepDefinition', () => {
       stepType: 'nightshift.decisionTreePrepare',
     } as never);
 
-  const run = (
-    input: Record<string, unknown>,
-    {
-      getTelemetryConnectorId = () => undefined,
-    }: {
-      getTelemetryConnectorId?: () => string | undefined | Promise<string | undefined>;
-    } = {}
-  ) =>
+  const run = (input: Record<string, unknown>) =>
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId,
       getAgentBuilder: () => agentBuilder as never,
       logger,
     }).handler(createContext(input));
@@ -110,14 +102,6 @@ describe('decisionTreePrepareStepDefinition', () => {
     await expect(run(input)).resolves.toEqual(skipped);
     expect(conversationsGet).not.toHaveBeenCalled();
     expect(prepareReinforcementTurn).not.toHaveBeenCalled();
-  });
-
-  it('resolves reinforcement connectors from the investigation conversation', async () => {
-    const getTelemetryConnectorId = jest.fn().mockResolvedValue('orca');
-    await run(investigatorRound, { getTelemetryConnectorId });
-
-    expect(getTelemetryConnectorId).toHaveBeenCalledWith(request, 'inv-1');
-    expect(preparedWith()).toMatchObject({ connectorNames: ['orca'], spaceId: 'space-1' });
   });
 
   describe('a first round', () => {

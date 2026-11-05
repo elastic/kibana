@@ -53,7 +53,6 @@ const inputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_ONLINE_EVALS_EVALUATORS)
       .describe('The evaluators to run.'),
-    judge_connector_id: z.string().min(1).max(256).describe('The connector every judge calls.'),
     investigation_started_at: z
       .string()
       .max(100)
@@ -159,6 +158,18 @@ const readRound = async ({
   };
 };
 
+/** Resolves the judge model. Throws a coded error, reported as a step failure, when it can't. */
+const resolveJudge = async (
+  resolveJudgeConnectorId: (request: KibanaRequest) => Promise<string>,
+  request: KibanaRequest
+): Promise<string> => {
+  try {
+    return await resolveJudgeConnectorId(request);
+  } catch (error) {
+    throw new OnlineEvalsStepError('judge_model_unavailable', getErrorMessage(error));
+  }
+};
+
 /**
  * Runs the judges on the evidence. An `evaluate()` that throws is reported in the score event as
  * every evaluator failing, rather than as a failed step.
@@ -166,6 +177,7 @@ const readRound = async ({
 const runJudges = async ({
   input,
   evidence,
+  judgeConnectorId,
   evaluate,
   request,
   spaceId,
@@ -173,6 +185,7 @@ const runJudges = async ({
 }: {
   input: ScoreInput;
   evidence: EvaluateEvidence;
+  judgeConnectorId: string;
   evaluate: EvaluateFn;
   request: KibanaRequest;
   spaceId: string;
@@ -185,7 +198,7 @@ const runJudges = async ({
       evidence,
       evaluators: input.evaluators.map((evaluator) => ({
         ...evaluator,
-        connector_id: input.judge_connector_id,
+        connector_id: judgeConnectorId,
       })),
     });
     return { results, failedEvaluators: [] };
@@ -202,6 +215,7 @@ const runJudges = async ({
 export const scoreOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder,
   getEvaluate,
+  resolveJudgeConnectorId,
   isPaused,
   shouldIncludeExplanations,
   telemetry,
@@ -209,6 +223,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** The evals plugin's `evaluate()`; absent when the evals plugin isn't loaded. */
   getEvaluate: () => EvaluateFn | undefined;
+  /** The connector every judge calls, resolved through Nightshift's model config. */
+  resolveJudgeConnectorId: (request: KibanaRequest) => Promise<string>;
   /** The `nightshift.onlineEvals.paused` kill switch. */
   isPaused: () => boolean;
   /** The `nightshift.onlineEvals.includeExplanations` flag. */
@@ -254,6 +270,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           request,
         });
         const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
         const { results, failedEvaluators } = await runJudges({
           input,
           evidence: buildOnlineEvalsEvidence({
@@ -261,6 +278,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
             alertOutcome:
               input.round_kind === 'alert_recovery' ? round.response.message : undefined,
           }),
+          judgeConnectorId,
           evaluate,
           request,
           spaceId: workflow.spaceId,
@@ -283,7 +301,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
             graded_report: input.graded_report,
             ...(input.entry_point ? { entry_point: input.entry_point } : {}),
             ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
-            judge_connector_id: input.judge_connector_id,
+            judge_connector_id: judgeConnectorId,
             investigation_started_at: input.investigation_started_at,
             ...(input.investigation_ended_at
               ? { investigation_ended_at: input.investigation_ended_at }
