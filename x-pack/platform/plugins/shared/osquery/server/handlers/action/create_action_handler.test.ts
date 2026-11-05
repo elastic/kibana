@@ -91,7 +91,11 @@ describe('createActionHandler', () => {
           maxAgents: 1,
         }
       )
-    ).rejects.toThrow(/above the limit of 1/);
+    ).rejects.toMatchObject({
+      message: expect.stringMatching(/above the limit of 1/),
+      statusCode: 400,
+      code: 'AGENT_LIMIT_EXCEEDED',
+    });
 
     expect(bulkCreate).not.toHaveBeenCalled();
   });
@@ -234,7 +238,11 @@ describe('createActionHandler', () => {
           dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
         }
       )
-    ).rejects.toThrow('No agents found for selection');
+    ).rejects.toMatchObject({
+      message: 'No agents found for selection',
+      statusCode: 400,
+      code: 'NO_AGENTS_FOUND',
+    });
 
     expect(bulkCreate).not.toHaveBeenCalled();
   });

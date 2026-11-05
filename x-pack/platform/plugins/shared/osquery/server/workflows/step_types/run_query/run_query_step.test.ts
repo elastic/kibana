@@ -244,14 +244,17 @@ describe('osquery.runQuery step', () => {
 
     it('maps the route agent ceiling to TARGET_LIMIT_EXCEEDED', async () => {
       const { result } = start({
-        [POST]: () => apiError(400, agentLimitMessage(1001, 1000), RouteErrorCode.AGENT_LIMIT_EXCEEDED),
+        [POST]: () =>
+          apiError(400, agentLimitMessage(1001, 1000), RouteErrorCode.AGENT_LIMIT_EXCEEDED),
       });
 
       await expect(result).rejects.toMatchObject({ details: { code: 'TARGET_LIMIT_EXCEEDED' } });
     });
 
     it('maps the route 400 "No agents found" to AGENTS_NOT_IN_SPACE naming both causes', async () => {
-      const { result } = start({ [POST]: () => apiError(400, NO_AGENTS_FOUND_MESSAGE, RouteErrorCode.NO_AGENTS_FOUND) });
+      const { result } = start({
+        [POST]: () => apiError(400, NO_AGENTS_FOUND_MESSAGE, RouteErrorCode.NO_AGENTS_FOUND),
+      });
 
       const error = (await result.catch((e) => e)) as ExecutionError;
 

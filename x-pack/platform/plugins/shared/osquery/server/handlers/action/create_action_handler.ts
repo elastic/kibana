@@ -97,11 +97,7 @@ export const createActionHandler = async (
   );
 
   if (!selectedAgents.length) {
-    throw new CustomHttpRequestError(
-      NO_AGENTS_FOUND_MESSAGE,
-      400,
-      RouteErrorCode.NO_AGENTS_FOUND
-    );
+    throw new CustomHttpRequestError(NO_AGENTS_FOUND_MESSAGE, 400, RouteErrorCode.NO_AGENTS_FOUND);
   }
 
   if (options.maxAgents !== undefined && selectedAgents.length > options.maxAgents) {

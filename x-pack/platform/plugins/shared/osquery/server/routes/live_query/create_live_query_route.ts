@@ -21,6 +21,7 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
+import { CustomHttpRequestError } from '../../common/error';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { AuthorizeOsqueryResponseActionResult } from '../../lib/check_response_action_authz';
@@ -253,9 +254,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         } catch (error) {
           if (error.statusCode === 400) {
             return response.badRequest({
-              body: error.code
-                ? { message: error.message, attributes: { code: error.code } }
-                : error,
+              body:
+                error instanceof CustomHttpRequestError && error.code
+                  ? { message: error.message, attributes: { code: error.code } }
+                  : error,
             });
           }
 

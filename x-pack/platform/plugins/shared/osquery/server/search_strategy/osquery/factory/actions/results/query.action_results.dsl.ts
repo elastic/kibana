@@ -150,7 +150,10 @@ export const buildActionResultsQuery = ({
               // to the targeted agents is exact, which `cardinality` is not (it estimated wrong in
               // about 1 of 2 runs at 10k agents and left answered queries `running`). Fleets past
               // the bucket limit fall back to `cardinality`.
-              ...(agentsCount && agentsCount > 0 && agentsCount <= EXACT_RESPONDING_AGENTS_LIMIT
+              ...(agentsCount &&
+              Number.isInteger(agentsCount) &&
+              agentsCount > 0 &&
+              agentsCount <= EXACT_RESPONDING_AGENTS_LIMIT
                 ? {
                     responding_agent_ids: {
                       terms: { field: 'agent_id', size: agentsCount },

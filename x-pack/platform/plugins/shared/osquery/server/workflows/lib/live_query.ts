@@ -213,8 +213,8 @@ export const readLiveQuery = async ({
     const detail = details.find((query) => query.action_id === spec.action_id);
     const counters = {
       responded: detail?.responded ?? 0,
-      // Counted on distinct agents, so only a response from a non-targeted agent can make it
-      // negative.
+      // `pending` counts distinct agents; it goes negative only if a non-targeted agent answered
+      // (or the route fell back to an approximate count).
       pending: Math.max(0, detail?.pending ?? state.agents_total),
       failed: detail?.failed ?? 0,
       successful: detail?.successful ?? 0,

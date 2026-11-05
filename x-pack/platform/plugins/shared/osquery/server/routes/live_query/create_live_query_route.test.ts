@@ -14,6 +14,7 @@ import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createLiveQueryRoute, maxAgentsFromHeader } from './create_live_query_route';
 import { createActionHandler } from '../../handlers';
+import { CustomHttpRequestError } from '../../common/error';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
 jest.mock('../../handlers', () => ({
@@ -546,6 +547,34 @@ describe('createLiveQueryRoute', () => {
         }),
       })
     );
+  });
+
+  describe('handler 400s', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
+
+    it('returns the machine-readable code in attributes for a coded handler 400', async () => {
+      mockedCreateActionHandler.mockRejectedValue(
+        new CustomHttpRequestError('No agents found for selection', 400, 'NO_AGENTS_FOUND')
+      );
+
+      const response = await invokeRoute(body);
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'No agents found for selection',
+          attributes: { code: 'NO_AGENTS_FOUND' },
+        },
+      });
+    });
+
+    it('returns an uncoded handler 400 unchanged', async () => {
+      const error = new CustomHttpRequestError('bad pack', 400);
+      mockedCreateActionHandler.mockRejectedValue(error);
+
+      const response = await invokeRoute(body);
+
+      expect(response.badRequest).toHaveBeenCalledWith({ body: error });
+    });
   });
 
   it('returns 400 PARAMETER_NOT_FOUND when the handler created no Fleet actions', async () => {
