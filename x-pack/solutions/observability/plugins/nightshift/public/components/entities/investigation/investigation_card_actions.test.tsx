@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { copyToClipboard } from '@elastic/eui';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationCardActions } from './investigation_card_actions';
 
@@ -17,15 +18,21 @@ const getChatHref = jest.fn(
   (id: string, agentId?: string) => `/mock/chat/${agentId ?? 'none'}/${id}`
 );
 const addSuccess = jest.fn();
+const addError = jest.fn();
+const httpDelete = jest.fn();
+const httpPut = jest.fn();
+let canManage = true;
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useOpenInChat: () => ({ getChatHref, openChat }),
+  useCanManageInvestigations: () => canManage,
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      notifications: { toasts: { addSuccess } },
+      http: { delete: httpDelete, put: httpPut },
+      notifications: { toasts: { addSuccess, addError } },
     },
   }),
 }));
@@ -50,18 +57,30 @@ const investigation: InvestigationSummary = {
   subjects: [],
 };
 
-const renderActions = (assignees?: React.ReactNode) =>
+let queryClient: QueryClient;
+
+const renderActions = (
+  assignees?: React.ReactNode,
+  nextInvestigation: InvestigationSummary = investigation
+) =>
   render(
-    <I18nProvider>
-      <InvestigationCardActions investigation={investigation} assignees={assignees} />
-    </I18nProvider>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <InvestigationCardActions investigation={nextInvestigation} assignees={assignees} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
 describe('InvestigationCardActions', () => {
   beforeEach(() => {
+    queryClient = new QueryClient();
     openChat.mockReset();
     getChatHref.mockClear();
     addSuccess.mockReset();
+    addError.mockReset();
+    httpDelete.mockReset().mockResolvedValue({ success: true });
+    httpPut.mockReset().mockResolvedValue({ status: 'closed' });
+    canManage = true;
     (copyToClipboard as jest.Mock).mockReturnValue(true);
   });
 
@@ -108,5 +127,78 @@ describe('InvestigationCardActions', () => {
     expect(addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Copied link to clipboard' })
     );
+  });
+
+  it('deletes the investigation conversation after confirmation and refreshes the lists', async () => {
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    renderActions();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardDelete'));
+    expect(httpDelete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Investigation deleted' })
+      )
+    );
+    expect(httpDelete).toHaveBeenCalledWith('/api/agent_builder/conversations/investigation-1', {
+      version: '2023-10-31',
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['nightshift.investigations'] });
+  });
+
+  it('closes an open investigation from the overflow menu', async () => {
+    renderActions();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardClose'));
+
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Investigation closed' })
+      )
+    );
+    expect(httpPut).toHaveBeenCalledWith(
+      expect.stringContaining('/investigations/investigation-1/status'),
+      expect.objectContaining({
+        body: JSON.stringify({ status: 'closed' }),
+      })
+    );
+  });
+
+  it('reopens a closed investigation from the overflow menu', async () => {
+    renderActions(undefined, {
+      ...investigation,
+      metadata: { ...investigation.metadata, status: 'closed' },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpen'));
+
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Investigation reopened' })
+      )
+    );
+    expect(httpPut).toHaveBeenCalledWith(
+      expect.stringContaining('/investigations/investigation-1/status'),
+      expect.objectContaining({
+        body: JSON.stringify({ status: 'open' }),
+      })
+    );
+  });
+
+  it('hides Delete, Close and Open from users who cannot manage investigations', () => {
+    canManage = false;
+    renderActions();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
+
+    expect(screen.getByTestId('nightshiftInvestigationCardCopyLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationCardDelete')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationCardClose')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationCardOpen')).not.toBeInTheDocument();
   });
 });
