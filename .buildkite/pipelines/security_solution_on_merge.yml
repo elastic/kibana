@@ -9,6 +9,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 3
@@ -29,6 +30,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 3
@@ -49,6 +51,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 11
@@ -69,6 +72,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 6
@@ -89,6 +93,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
@@ -109,6 +114,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -129,6 +135,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
@@ -149,6 +156,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -168,6 +176,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 5
@@ -187,6 +196,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -206,6 +216,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -225,6 +236,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -244,6 +256,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -264,6 +277,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 7
@@ -284,6 +298,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 4
@@ -303,6 +318,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 8
@@ -322,6 +338,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 3
@@ -342,6 +359,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -361,6 +379,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
@@ -380,6 +399,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
@@ -399,6 +419,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 5
@@ -418,6 +439,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 9
@@ -437,6 +459,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 8
@@ -457,6 +480,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 8
@@ -479,6 +503,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 24
@@ -502,6 +527,7 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     parallelism: 16
