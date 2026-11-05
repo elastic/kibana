@@ -142,8 +142,6 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     metadata: {
       pathContract: 'probe',
       expectedSkill: 'alert-analysis',
-      // entity_risk_score is unavailable under the skills flag (see above);
-      // disposition risk context comes from the get_entity profile.
       expectedTools: ['security.alerts', 'security.get_entity'],
       severity: 'high',
       tags: ['triage', 'host-queue'],
@@ -168,8 +166,6 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     metadata: {
       pathContract: 'probe',
       expectedSkill: 'alert-analysis',
-      // entity_risk_score is unavailable under the skills flag (see above);
-      // the baseline-vs-pattern risk check comes from the get_entity profile.
       expectedTools: ['security.alerts', 'security.security_labs_search', 'security.get_entity'],
       severity: 'medium',
       tags: ['triage', 'noise'],
@@ -278,10 +274,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     metadata: {
       pathContract: 'probe',
       expectedSkill: 'entity-analytics',
-      // security.entity_risk_score is force-disabled whenever
-      // agentBuilder:experimentalFeatures (skills) is on — which the persona
-      // matrix always runs with — so risk data comes from get_entity. The
-      // history tool is for risk-over-time questions, not this point-in-time profile.
+      // Risk data comes from get_entity (see alert-analysis-a); the history tool
+      // is for risk-over-time questions, not this point-in-time profile.
       expectedTools: ['security.get_entity'],
       severity: 'medium',
       tags: ['entity', 'host-profile'],
@@ -328,9 +322,6 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     metadata: {
       pathContract: 'probe',
       expectedSkill: 'entity-analytics',
-      // Same skills-precedence constraint as entity-analytics-a: risk history
-      // comes from get_entity_risk_score_history, which stays available under
-      // the experimental-features flag that the suite needs for skills.
       expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
       severity: 'medium',
       tags: ['entity', 'history'],
@@ -540,7 +531,6 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     metadata: {
       expectedSkill: 'workflow-authoring',
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
-      // The prompt names this connector id explicitly.
       expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
       expectedStepType: 'http',
       severity: 'medium',
@@ -575,7 +565,6 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // `workflow-authoring` documents that it is NOT required for creating or
       // editing a workflow — call `platform.core.generate_workflow` directly.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
-      // Prompt names the connector id explicitly, so both are assertable.
       expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
       expectedStepType: 'http',
       severity: 'low',
@@ -607,7 +596,6 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask
       // for the skill and generate_workflow is the documented direct path.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
-      // Prompt names the connector id explicitly, so both are assertable.
       expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
       expectedStepType: 'http',
       severity: 'medium',
