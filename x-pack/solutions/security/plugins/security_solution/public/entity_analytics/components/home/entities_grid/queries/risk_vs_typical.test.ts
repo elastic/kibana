@@ -14,7 +14,10 @@ import {
   RISK_VS_TYPICAL_FIELD,
   riskVsTypicalQuerySpec,
 } from './risk_vs_typical';
-import { setBaselineDataMode } from '../../../../baseline_prototype/baseline_prototype_state';
+import {
+  setBaselineDataMode,
+  setBaselineVersion,
+} from '../../../../baseline_prototype/baseline_prototype_state';
 import { getMockTypicalScore } from '../../../../baseline_prototype/prototype_data';
 
 const args: QueryArgs = {
@@ -77,8 +80,11 @@ describe('buildTypicalScoreQuery', () => {
 });
 
 describe('riskVsTypicalQuerySpec', () => {
-  // The prototype defaults to mock data; these tests name the mode they use.
-  beforeEach(() => setBaselineDataMode('live'));
+  // The prototype defaults to mock data once it is on; these tests name the version and mode.
+  beforeEach(() => {
+    setBaselineVersion('off');
+    setBaselineDataMode('live');
+  });
 
   it('is not sortable: sorting would read every entity over the whole range', () => {
     expect(riskVsTypicalQuerySpec.fetchSortPage).toBeUndefined();
@@ -131,7 +137,17 @@ describe('riskVsTypicalQuerySpec', () => {
     await expect(fetchValues(runQuery)).rejects.toThrow('parsing_exception');
   });
 
+  it('reads the real history when the prototype is off, even if the data mode is mock', async () => {
+    setBaselineDataMode('mock');
+    const runQuery = jest.fn().mockResolvedValue([{ entity_id: 'user:a', typical_score: 60 }]);
+
+    await fetchValues(runQuery);
+
+    expect(runQuery).toHaveBeenCalledTimes(1);
+  });
+
   it('runs no query in mock mode and returns the made-up typical score', async () => {
+    setBaselineVersion('v0');
     setBaselineDataMode('mock');
     const runQuery = jest.fn();
 

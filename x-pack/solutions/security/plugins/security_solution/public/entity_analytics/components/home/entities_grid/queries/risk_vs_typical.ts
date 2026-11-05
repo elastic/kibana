@@ -16,7 +16,10 @@ import {
 } from './esql';
 import type { ColumnQuerySpec, EnrichedFields, RunContext } from './types';
 import { isMissingIndexError } from '../../is_missing_index_error';
-import { getBaselineDataMode } from '../../../../baseline_prototype/baseline_prototype_state';
+import {
+  getBaselineDataMode,
+  getBaselineVersion,
+} from '../../../../baseline_prototype/baseline_prototype_state';
 import { getMockTypicalScore } from '../../../../baseline_prototype/prototype_data';
 
 /** The current score minus the typical score: positive means higher than usual. */
@@ -103,10 +106,11 @@ const fetchRiskVsTypical = async (
   const entityIds = getEntityIds(rows);
   if (!entityIds.length) return new Map();
 
-  const typicalById =
-    getBaselineDataMode() === 'mock'
-      ? getMockTypicalScores(rows)
-      : await fetchLiveTypicalScores(entityIds, args, ctx);
+  // Mock data applies only while the prototype is on, so Off always reads the real history.
+  const isMock = getBaselineVersion() !== 'off' && getBaselineDataMode() === 'mock';
+  const typicalById = isMock
+    ? getMockTypicalScores(rows)
+    : await fetchLiveTypicalScores(entityIds, args, ctx);
 
   return new Map(
     rows.flatMap((row) => {
