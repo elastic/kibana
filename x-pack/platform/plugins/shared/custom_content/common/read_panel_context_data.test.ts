@@ -39,20 +39,25 @@ describe('readPanelContextData', () => {
     ).toBeUndefined();
   });
 
-  it('returns undefined when the additional queries are too long together', () => {
+  it('returns undefined when the main and the additional queries are too long together', () => {
     const half = CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH / 2;
-    const read = (lengths: number[]) =>
+    const read = (mainLength: number, additionalLength: number) =>
       readPanelContextData(
         makeAttachment([
           {
             version: 1,
-            data: { ...validData, additional_esql_queries: lengths.map((n) => 'a'.repeat(n)) },
+            data: {
+              ...validData,
+              esql_query: 'a'.repeat(mainLength),
+              additional_esql_queries: ['b'.repeat(additionalLength)],
+            },
           },
         ])
       );
 
-    expect(read([half, half])).toBeDefined();
-    expect(read([half, half + 1])).toBeUndefined();
+    expect(read(half, half)).toBeDefined();
+    expect(read(half, half + 1)).toBeUndefined();
+    expect(read(half + 1, half)).toBeUndefined();
   });
 
   it('returns undefined when the attachment has no matching version', () => {

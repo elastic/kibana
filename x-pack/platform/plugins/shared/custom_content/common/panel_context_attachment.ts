@@ -33,42 +33,51 @@ export const MAX_SHORT_FIELD_LENGTH = 256;
 export const MAX_FETCH_CONTEXT_BYTES = 10_000;
 
 export const customContentContextAttachmentDataSchema = lazySchema(() =>
-  z.object({
-    panel_template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH),
-    esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
-    /** The panel's queries after `esql_query`, read by its template as `queries[1]`, `queries[2]`, ... */
-    additional_esql_queries: z
-      .array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH))
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES - 1)
-      .refine(fitsEsqlQueriesTotalLength, { message: ESQL_QUERIES_TOTAL_LENGTH_MESSAGE })
-      .optional(),
-    panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
-    embeddable_id: z.string().max(MAX_SHORT_FIELD_LENGTH),
-    time_range: z
-      .object({
-        from: z.string().max(MAX_SHORT_FIELD_LENGTH),
-        to: z.string().max(MAX_SHORT_FIELD_LENGTH),
-      })
-      .optional(),
-    panel_height: z.number().int().min(1).max(MAX_PREVIEW_HEIGHT).optional(),
-    esql_variables: z
-      .array(
-        z.object({
-          key: z.string().max(MAX_SHORT_FIELD_LENGTH),
-          value: z.union([
-            z.string().max(4096),
-            z.number(),
-            z.array(z.union([z.string().max(4096), z.number()])),
-          ]),
-          type: z.nativeEnum(ESQLVariableType),
+  z
+    .object({
+      panel_template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH),
+      esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
+      /** The panel's queries after `esql_query`, read by its template as `queries[1]`, `queries[2]`, ... */
+      additional_esql_queries: z
+        .array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH))
+        .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES - 1)
+        .optional(),
+      panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
+      embeddable_id: z.string().max(MAX_SHORT_FIELD_LENGTH),
+      time_range: z
+        .object({
+          from: z.string().max(MAX_SHORT_FIELD_LENGTH),
+          to: z.string().max(MAX_SHORT_FIELD_LENGTH),
         })
-      )
-      .optional(),
-    filters: z.array(z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown())).optional(),
-    query: z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown()).optional(),
-    is_approximate: z.boolean().optional(),
-    project_routing: z.string().max(1024).optional(),
-  })
+        .optional(),
+      panel_height: z.number().int().min(1).max(MAX_PREVIEW_HEIGHT).optional(),
+      esql_variables: z
+        .array(
+          z.object({
+            key: z.string().max(MAX_SHORT_FIELD_LENGTH),
+            value: z.union([
+              z.string().max(4096),
+              z.number(),
+              z.array(z.union([z.string().max(4096), z.number()])),
+            ]),
+            type: z.nativeEnum(ESQLVariableType),
+          })
+        )
+        .optional(),
+      filters: z.array(z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown())).optional(),
+      query: z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown()).optional(),
+      is_approximate: z.boolean().optional(),
+      project_routing: z.string().max(1024).optional(),
+    })
+    // The same limit the persisted panel has, so an update that passes here can be saved.
+    .refine(
+      ({ esql_query: esqlQuery, additional_esql_queries: additionalQueries }) =>
+        fitsEsqlQueriesTotalLength([
+          ...(esqlQuery ? [esqlQuery] : []),
+          ...(additionalQueries ?? []),
+        ]),
+      { message: ESQL_QUERIES_TOTAL_LENGTH_MESSAGE }
+    )
 );
 
 export type CustomContentContextAttachmentData = z.infer<
