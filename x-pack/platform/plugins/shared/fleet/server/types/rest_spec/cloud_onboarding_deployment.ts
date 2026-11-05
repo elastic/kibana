@@ -96,8 +96,13 @@ const RequestServiceVarsSchema = schema.recordOf(
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
+// The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
+const POLICY_SETTINGS_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
+
 const PolicySettingsSchema = (description: string) =>
-  schema.recordOf(schema.string({ maxLength: 256 }), schema.any(), { meta: { description } });
+  schema.recordOf(schema.string({ maxLength: 256 }), schema.any(), {
+    meta: { description, availability: POLICY_SETTINGS_AVAILABILITY },
+  });
 
 const InstanceSchema = schema.object({
   instanceId: schema.string({
