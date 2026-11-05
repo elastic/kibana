@@ -6,6 +6,7 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
+import { chooseApiKeySource } from '@kbn/response-ops-api-keys';
 import type { RulesClientContext, CreateAPIKeyResult } from '../types';
 
 export interface ResolvedAPIKey {
@@ -57,24 +58,25 @@ export const resolveRuleAPIKey = async (
   // end up storing the borrowed (and later revoked) key as user-owned. Without API-key
   // authentication there is no key to clone (cloneAsInternalUser would throw), so the declaration
   // is a no-op and the rule is granted a framework key as usual below.
-  const callerKeyIsBorrowed =
-    (Boolean(cloneApiKey) || Boolean(context.cloneApiKeysOnCreate)) && isApiKeyAuth;
-  const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
+  // A framework-managed rule keeps a framework-managed key, so the caller's key is cloned too.
+  const source = chooseApiKeySource({
+    apiKeyAuthenticated: isApiKeyAuth,
+    clone:
+      Boolean(cloneApiKey) ||
+      Boolean(context.cloneApiKeysOnCreate) ||
+      apiKeyOwnership?.apiKeyCreatedByUser === false,
+    reuse: true,
+  });
 
-  if (callerKeyIsBorrowed) {
-    return cloneKey(context, name);
+  switch (source) {
+    case 'clone':
+      return cloneKey(context, name);
+    case 'reuse':
+      return {
+        createdAPIKey: context.getAuthenticationAPIKey(`${name}-user-created`),
+        isAuthTypeApiKey: true,
+      };
+    case 'grant':
+      return grantKey(context, name, refresh);
   }
-
-  if (frameworkManaged) {
-    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name, refresh);
-  }
-
-  if (isApiKeyAuth) {
-    return {
-      createdAPIKey: context.getAuthenticationAPIKey(`${name}-user-created`),
-      isAuthTypeApiKey: true,
-    };
-  }
-
-  return grantKey(context, name, refresh);
 };

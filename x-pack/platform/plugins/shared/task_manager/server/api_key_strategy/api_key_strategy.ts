@@ -11,7 +11,10 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { InvalidationTarget } from '@kbn/response-ops-api-keys';
+import { getInvalidationTargets, queueInvalidationTargets } from '@kbn/response-ops-api-keys';
 import type { ApiKeyType } from '../config';
+import { taskApiKeyStorage } from '../api_keys/storage';
 import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../task';
 import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
 import {
@@ -21,6 +24,7 @@ import {
 } from '../otel/uiam_telemetry';
 
 export type { ApiKeyType } from '../config';
+export type { InvalidationTarget };
 
 export interface ApiKeySOFields {
   apiKey?: string;
@@ -46,13 +50,6 @@ export interface GrantApiKeysOpts {
   onApiKeyCreated?: (target: InvalidationTarget) => void;
 }
 
-export interface InvalidationTarget {
-  apiKeyId: string;
-  uiamApiKey?: string;
-  taskId?: string;
-  taskStartedAt?: string;
-}
-
 /**
  * The credential fields {@link ApiKeyStrategy.getApiKeyIdsForInvalidation} needs, so that both a
  * stored task and a freshly granted key set that was never persisted can be passed to it.
@@ -63,7 +60,6 @@ export type ApiKeyInvalidationSource = Pick<
 >;
 
 export interface ApiKeyStrategy {
-  readonly shouldGrantUiam: boolean;
   readonly typeToUse: ApiKeyType;
 
   grantApiKeys(
@@ -106,25 +102,15 @@ export const markApiKeysForInvalidation = async (
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  if (targets.length === 0) {
-    return;
-  }
-
-  try {
-    await savedObjectsClient.bulkCreate(
-      targets.map((target) => ({
-        attributes: {
-          apiKeyId: target.apiKeyId,
-          createdAt: new Date().toISOString(),
-          ...(target.uiamApiKey ? { uiamApiKey: target.uiamApiKey } : {}),
-          ...(target.taskId && target.taskStartedAt
-            ? { taskId: target.taskId, taskStartedAt: target.taskStartedAt }
-            : {}),
-        },
-        type: INVALIDATE_API_KEY_SO_NAME,
-      }))
-    );
-  } catch (e) {
-    logger.error(`Failed to bulk mark ${targets.length} API keys for invalidation: ${e.message}`);
-  }
+  await queueInvalidationTargets(targets, {
+    type: INVALIDATE_API_KEY_SO_NAME,
+    savedObjectsClient,
+    logger,
+  });
 };
+
+/** Returns the keys Task Manager owns on a task. Tasks without a user scope own none. */
+export const getTaskInvalidationTargets = (
+  source: ApiKeyInvalidationSource
+): InvalidationTarget[] =>
+  source.userScope ? getInvalidationTargets(taskApiKeyStorage.read(source)) : [];

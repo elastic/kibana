@@ -7,81 +7,79 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { InvalidationRunnerOptions } from '@kbn/response-ops-api-keys';
+import { createInvalidationRunner } from '@kbn/response-ops-api-keys';
 import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
-import { runInvalidate } from './lib';
 import { taskRunner } from './invalidate_api_keys_task';
 
-jest.mock('./lib', () => ({
-  runInvalidate: jest.fn(),
+jest.mock('@kbn/response-ops-api-keys', () => ({
+  ...jest.requireActual('@kbn/response-ops-api-keys'),
+  createInvalidationRunner: jest.fn(),
 }));
 
-const runInvalidateMock = runInvalidate as jest.Mock;
+const createInvalidationRunnerMock = createInvalidationRunner as jest.Mock;
+const runMock = jest.fn();
+
+const setup = () => {
+  const coreStart = coreMock.createStart();
+  const coreStartServices = jest
+    .fn()
+    .mockResolvedValue([
+      coreStart as CoreStart,
+      {} as TaskManagerPluginsStart,
+      {} as TaskManagerStartContract,
+    ]);
+
+  const runner = taskRunner({
+    logger: loggingSystemMock.createLogger(),
+    configInterval: '5m',
+    coreStartServices,
+    getEncryptedSavedObjectsClient: () => undefined,
+    invalidateApiKeyFn: jest.fn(),
+    invalidateUiamApiKeyFn: () => undefined,
+    removalDelay: '1h',
+  })({ taskInstance: { state: { runs: 2 } } });
+
+  const [[runnerOptions]] = createInvalidationRunnerMock.mock.calls as [
+    [InvalidationRunnerOptions]
+  ];
+  return { coreStart, runner, runnerOptions };
+};
 
 describe('invalidate api keys task runner', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    runInvalidateMock.mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} });
+    runMock.mockResolvedValue({ runs: 3, total_invalidated: 0, missing_api_key_retries: {} });
+    createInvalidationRunnerMock.mockReturnValue({ run: runMock });
   });
 
   it('builds the saved objects client with the hidden `task` type so the in-use guard works', async () => {
-    const coreStart = coreMock.createStart();
-    const coreStartServices = jest
-      .fn()
-      .mockResolvedValue([
-        coreStart as CoreStart,
-        {} as TaskManagerPluginsStart,
-        {} as TaskManagerStartContract,
-      ]);
+    const { coreStart, runnerOptions } = setup();
 
-    const runner = taskRunner({
-      logger: loggingSystemMock.createLogger(),
-      configInterval: '5m',
-      coreStartServices,
-      getEncryptedSavedObjectsClient: () => undefined,
-      invalidateApiKeyFn: jest.fn(),
-      invalidateUiamApiKeyFn: () => undefined,
-      removalDelay: '1h',
-    })({ taskInstance: { state: {} } });
-
-    await runner.run();
+    const dependencies = await runnerOptions.getRunDependencies();
 
     expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith(
       expect.arrayContaining([INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME])
     );
-
     const expectedClient = (coreStart.savedObjects.createInternalRepository as jest.Mock).mock
       .results[0].value;
-    expect(runInvalidateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ savedObjectsClient: expectedClient })
+    expect(runnerOptions.pluginTag).toBe('task-manager');
+    expect(dependencies).toEqual(
+      expect.objectContaining({
+        getIdsUsedByRunningTasks: expect.any(Function),
+        savedObjectsClient: expectedClient,
+        savedObjectType: INVALIDATE_API_KEY_SO_NAME,
+      })
     );
   });
 
   it('guards against invalidating both ES and UIAM keys that are still referenced by a task', async () => {
-    const coreStart = coreMock.createStart();
-    const coreStartServices = jest
-      .fn()
-      .mockResolvedValue([
-        coreStart as CoreStart,
-        {} as TaskManagerPluginsStart,
-        {} as TaskManagerStartContract,
-      ]);
-
-    const runner = taskRunner({
-      logger: loggingSystemMock.createLogger(),
-      configInterval: '5m',
-      coreStartServices,
-      getEncryptedSavedObjectsClient: () => undefined,
-      invalidateApiKeyFn: jest.fn(),
-      invalidateUiamApiKeyFn: () => undefined,
-      removalDelay: '1h',
-    })({ taskInstance: { state: {} } });
-
-    await runner.run();
+    const { runnerOptions } = setup();
 
     // UIAM key ids live in their own attribute, so querying only `apiKeyId` would never find a
     // UIAM key in use and would revoke it out from under a live task.
-    expect(runInvalidateMock).toHaveBeenCalledWith(
+    expect(await runnerOptions.getRunDependencies()).toEqual(
       expect.objectContaining({
         savedObjectTypesToQuery: [
           {
@@ -95,5 +93,15 @@ describe('invalidate api keys task runner', () => {
         ],
       })
     );
+  });
+
+  it('runs with the stored state and reschedules at the configured interval', async () => {
+    const { runner } = setup();
+
+    expect(await runner.run()).toEqual({
+      state: { runs: 3, total_invalidated: 0, missing_api_key_retries: {} },
+      schedule: { interval: '5m' },
+    });
+    expect(runMock).toHaveBeenCalledWith({ runs: 2 });
   });
 });

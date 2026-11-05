@@ -46,7 +46,6 @@ import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
 import { asSpaceId } from '@kbn/core-spaces-common';
-import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -71,7 +70,6 @@ let scopedChangeTrackingService: {
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
 
 describe('RulesClientFactory', () => {
   beforeEach(() => {
@@ -1072,7 +1070,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"UIAM API keys should only be used in serverless environments"`
+      `"Cannot use a Cloud API key to create or enable rule \\"test\\". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
     );
   });
 
@@ -1434,7 +1432,7 @@ describe('RulesClientFactory', () => {
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
     await expect(constructorCall.cloneAPIKey('test')).rejects.toThrow(
-      'Failed to grant UIAM API key for cloned alerting rule'
+      'Failed to grant UIAM API key for alerting rule : test'
     );
     expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
@@ -1606,11 +1604,14 @@ describe('RulesClientFactory', () => {
 
       await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
 
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-        { apiKeys: [esApiKey] },
-        expect.anything(),
-        rulesClientFactoryParams.internalSavedObjectsRepository
-      );
+      expect(
+        rulesClientFactoryParams.internalSavedObjectsRepository.bulkCreate
+      ).toHaveBeenCalledWith([
+        {
+          type: API_KEY_PENDING_INVALIDATION_TYPE,
+          attributes: { apiKeyId: 'es-id', createdAt: expect.any(String) },
+        },
+      ]);
     });
 
     test('does not queue when ES invalidate succeeds', async () => {
@@ -1623,7 +1624,9 @@ describe('RulesClientFactory', () => {
 
       await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
 
-      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(
+        rulesClientFactoryParams.internalSavedObjectsRepository.bulkCreate
+      ).not.toHaveBeenCalled();
     });
   });
 });

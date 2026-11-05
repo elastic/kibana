@@ -18,8 +18,7 @@ import {
 } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { isUnauthorizedError } from '@kbn/es-errors';
-
-import { getUiamApiKeySecret } from './event_identity/encode_api_key';
+import { decodeApiKey, getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
 
 const MAX_API_KEY_CREDENTIAL_LENGTH = 8192;
 
@@ -51,7 +50,7 @@ const readApiKeyCredential = (credentials: string): string | undefined => {
   if (isUiamCredential(credential)) {
     return credential;
   }
-  const [id, secret] = Buffer.from(credential, 'base64').toString('utf8').split(':');
+  const { id, secret } = decodeApiKey(credential);
   if (!id || !secret) {
     return undefined;
   }

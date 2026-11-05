@@ -41,7 +41,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk, isOk } from './lib/result_type';
 import { MsearchError } from './lib/errors';
 import { getBackpressureReason } from './lib/backpressure_reason';
-import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { getApiKeyAndUserScope } from './api_keys/api_key_utils';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
@@ -53,9 +53,15 @@ import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
 
-jest.mock('./lib/api_key_utils', () => ({
+jest.mock('./api_keys/api_key_utils', () => ({
   getApiKeyAndUserScope: jest.fn(),
 }));
+
+const esOnlyApiKeysOptions = {
+  logger: expect.anything(),
+  uiamEnabled: false,
+  uiamRequired: false,
+};
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
@@ -165,7 +171,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -292,7 +298,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -404,6 +410,7 @@ describe('TaskStore', () => {
         [task],
         request,
         coreStart.security,
+        esOnlyApiKeysOptions,
         expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
@@ -479,7 +486,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       const task = {
@@ -773,7 +780,7 @@ describe('TaskStore', () => {
           canEncryptSavedObjects: false,
           getIsSecurityEnabled: () => true,
           executionContext: mockExecutionContextStart,
-          apiKeyStrategy: new EsApiKeyStrategy(),
+          apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
         });
 
         await expect(store.schedule(task)).rejects.toThrow(
@@ -804,7 +811,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -929,7 +936,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -1181,7 +1188,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -1307,7 +1314,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -1617,7 +1624,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
       store.registerEncryptedSavedObjectsClient(esoClient);
     });
@@ -1963,6 +1970,7 @@ describe('TaskStore', () => {
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
         coreStart.security,
+        esOnlyApiKeysOptions,
         expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
@@ -2119,6 +2127,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
+        esOnlyApiKeysOptions,
         expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
@@ -2234,6 +2243,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
+        esOnlyApiKeysOptions,
         expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
@@ -2589,7 +2599,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => false,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
@@ -2929,7 +2939,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -3695,7 +3705,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -3840,7 +3850,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -3962,7 +3972,6 @@ describe('TaskStore', () => {
         .mockReturnValue([{ apiKeyId: 'uiamApiKeyId', uiamApiKey: 'essu_uiam-api-key' }]);
       const markForInvalidation = jest.fn().mockResolvedValue(undefined);
       const spyStrategy = {
-        shouldGrantUiam: true,
         typeToUse: 'uiam',
         grantApiKeys: jest.fn(),
         getApiKeyForFakeRequest: jest.fn(),
@@ -4065,7 +4074,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -4130,7 +4139,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -4186,7 +4195,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -4254,7 +4263,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
     let store: TaskStore;
@@ -4392,7 +4401,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -4518,7 +4527,7 @@ describe('TaskStore', () => {
           canEncryptSavedObjects: true,
           getIsSecurityEnabled: () => true,
           executionContext: mockExecutionContextStart,
-          apiKeyStrategy: new EsApiKeyStrategy(),
+          apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
         });
         decryptingStore.registerEncryptedSavedObjectsClient(esoClient);
 
@@ -4693,7 +4702,7 @@ describe('TaskStore', () => {
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
             executionContext: mockExecutionContextStart,
-            apiKeyStrategy: new EsApiKeyStrategy(),
+            apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -4720,7 +4729,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -4745,7 +4754,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -4772,7 +4781,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -4991,6 +5000,7 @@ describe('TaskStore', () => {
         [task1, task2],
         request,
         coreStart.security,
+        esOnlyApiKeysOptions,
         expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
@@ -5075,7 +5085,7 @@ describe('TaskStore', () => {
       const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
       const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
       (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(
-        async (_tasks, _request, _security, options) => {
+        async (_tasks, _request, _security, _apiKeysOptions, options) => {
           options.onApiKeyCreated({ apiKeyId: 'partially-granted-key-id' });
           throw new Error('second grant failed');
         }
@@ -5371,7 +5381,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       const task1 = {
@@ -5404,7 +5414,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -5689,6 +5699,7 @@ describe('TaskStore', () => {
           [apiKeyTask],
           request,
           coreStart.security,
+          esOnlyApiKeysOptions,
           expect.anything()
         );
         expect(serviceAccountSoClient.bulkCreate).toHaveBeenCalledWith(
@@ -5798,6 +5809,7 @@ describe('TaskStore', () => {
             [newTask],
             request,
             coreStart.security,
+            esOnlyApiKeysOptions,
             expect.anything()
           );
           expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -5926,7 +5938,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -5976,7 +5988,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -6022,7 +6034,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 
@@ -6137,7 +6149,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       });
     });
 

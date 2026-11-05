@@ -66,8 +66,6 @@ export {
 } from './queries/mark_available_tasks_as_claimed';
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
-export { runInvalidate } from './invalidate_api_keys/lib';
-export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './lib/api_key_utils';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
