@@ -25,7 +25,10 @@ import type {
   PersonaMatrixExampleInput,
 } from './datasets/persona_matrix_prompts';
 import { selectShard } from './datasets/select_shard';
-import { createConnectorInvokedEvaluator } from './evaluators/connector_invoked_evaluator';
+import {
+  collectDeliveredArtifact,
+  createConnectorInvokedEvaluator,
+} from './evaluators/connector_invoked_evaluator';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import {
   createPersonaMatrixInputTokensEvaluator,
@@ -187,6 +190,41 @@ const hasRenderedArtifact = (output: TaskOutput): boolean => {
       );
     });
   });
+};
+
+/**
+ * The rendered artifact's own payload, when the run rendered one — the rule
+ * object or the workflow YAML the user actually saw. Used as the judged answer
+ * for fallback runs that end on a rendered artifact.
+ */
+const renderedArtifactPayload = (output: TaskOutput): unknown => {
+  const texts = messageTexts(output);
+  const renderedResult = getToolCallSteps(output).flatMap((step) => {
+    const payloadKey = step.tool_id ? ARTIFACT_PRODUCING_TOOLS.get(step.tool_id) : undefined;
+    if (payloadKey === undefined) {
+      return [];
+    }
+    const results = Array.isArray(step.results) ? step.results : [];
+    return results.flatMap((result) => {
+      const data = (result as { data?: Record<string, unknown> } | undefined)?.data;
+      const attachmentId = data?.attachment_id;
+      if (
+        data?.success !== true ||
+        typeof attachmentId !== 'string' ||
+        !texts.some((text) => isRenderTagFor(text, attachmentId))
+      ) {
+        return [];
+      }
+      return [{ payloadKey, data }];
+    });
+  });
+  const first = renderedResult[0];
+  if (!first) {
+    return undefined;
+  }
+  return first.payloadKey === null
+    ? collectDeliveredArtifact(output)
+    : first.data[first.payloadKey];
 };
 
 /**
@@ -586,12 +624,25 @@ export function createEvaluatePersonaMatrixDataset({
 
           // The judges read the last message as the agent's answer. A
           // 'last_assistant_step' message is interior narration, not a closing
-          // answer (FinalAnswerPresent scores it 0), so grading it would let
-          // Factuality/Relevance credit a run that never answered. Judge an
-          // empty answer instead; the narration stays on the stored output.
+          // answer, so grading it would let Factuality/Relevance credit a run
+          // that never answered. Judge the same submission FinalAnswerPresent
+          // accepts: the delivered artifact's YAML/payload when the run ends
+          // on one (hasRenderedArtifact), else an empty answer. The narration
+          // stays on the stored output for the trace card.
+          const fallbackAnswer = renderedArtifactPayload(taskOutput) ?? '';
           const judgedOutput: TaskOutput =
             taskOutput.messageSource === 'last_assistant_step'
-              ? { ...taskOutput, messages: [{ message: '' }] }
+              ? {
+                  ...taskOutput,
+                  messages: [
+                    {
+                      message:
+                        typeof fallbackAnswer === 'string'
+                          ? fallbackAnswer
+                          : JSON.stringify(fallbackAnswer),
+                    },
+                  ],
+                }
               : taskOutput;
 
           // The judges already retry internally; if they still fail, degrade this

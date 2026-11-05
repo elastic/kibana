@@ -32,6 +32,20 @@ const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
+const messagePartsOf = (output: unknown): string[] => {
+  const messages = (output ?? {}) as { messages?: unknown } | null;
+  const parts: string[] = [];
+  if (Array.isArray(messages?.messages)) {
+    messages.messages.forEach((entry) => {
+      const message = isRecord(entry) ? entry.message : undefined;
+      if (typeof message === 'string') {
+        parts.push(message);
+      }
+    });
+  }
+  return parts;
+};
+
 const RENDER_ATTACHMENT_ID_PATTERN = /<render_attachment\s+id="([^"]+)"/g;
 
 /**
@@ -59,21 +73,12 @@ const RENDER_ATTACHMENT_ID_PATTERN = /<render_attachment\s+id="([^"]+)"/g;
  * correctness/groundedness analyses. An echo in any of those is not an
  * authored workflow targeting the connector.
  */
-export const collectProducedText = (output: unknown): string => {
-  const messageParts: string[] = [];
-  const { messages, steps, workflowAttachments } = (output ?? {}) as {
-    messages?: unknown;
+export const collectDeliveredArtifact = (output: unknown): string | undefined => {
+  const messageParts = messagePartsOf(output);
+  const { steps, workflowAttachments } = (output ?? {}) as {
     steps?: unknown;
     workflowAttachments?: unknown;
   };
-  if (Array.isArray(messages)) {
-    messages.forEach((entry) => {
-      const message = isRecord(entry) ? entry.message : undefined;
-      if (typeof message === 'string') {
-        messageParts.push(message);
-      }
-    });
-  }
 
   const attachments: Array<{ id?: string; yaml: string }> = [];
   if (Array.isArray(workflowAttachments)) {
@@ -118,8 +123,11 @@ export const collectProducedText = (output: unknown): string => {
   if (delivered.length === 0 && lastValidatedYaml !== undefined) {
     delivered.push(lastValidatedYaml);
   }
-  return (delivered.length > 0 ? delivered : messageParts).join('\n');
+  return delivered.length > 0 ? delivered.join('\n') : undefined;
 };
+
+export const collectProducedText = (output: unknown): string =>
+  collectDeliveredArtifact(output) ?? messagePartsOf(output).join('\n');
 
 export const createConnectorInvokedEvaluator = (): Evaluator => ({
   name: CONNECTOR_INVOKED_EVALUATOR_NAME,

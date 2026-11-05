@@ -62,6 +62,25 @@ describe('personaMatrixJury.toArgs', () => {
   it('rejects a cell with no prose reference', () => {
     expect(personaMatrixJury.toArgs(cell({ expected: '' }))).toBeNull();
   });
+
+  // The live run does not grade `last_assistant_step` narration as the final
+  // answer (evaluate_dataset.ts); the replay must grade the same submission
+  // rather than restore credit for the narration.
+  it('blanks a last_assistant_step cell instead of grading its narration', () => {
+    const args = personaMatrixJury.toArgs(
+      cell({
+        agentResponse: 'I will now preview the detection rule.',
+        taskOutput: { messageSource: 'last_assistant_step' },
+      })
+    );
+    expect(args).not.toBeNull();
+    expect(args!.output.messages).toEqual([{ message: '' }]);
+  });
+
+  it('still grades a normal closing answer in full', () => {
+    const args = personaMatrixJury.toArgs(cell({ taskOutput: { messageSource: 'response' } }));
+    expect(args!.output.messages).toEqual([{ message: 'An agent answer.' }]);
+  });
 });
 
 describe('attackDiscoveryJury.toArgs', () => {

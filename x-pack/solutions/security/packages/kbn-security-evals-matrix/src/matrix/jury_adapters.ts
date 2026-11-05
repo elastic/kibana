@@ -87,12 +87,20 @@ export const personaMatrixJury: JuryAdapter = {
     // judge grades one against the other, and replaying with either missing
     // manufactures a MAJOR_INACCURACIES verdict from absent data rather than
     // from a weak answer.
-    if (!cell.agentResponse || !cell.expected) {
+    //
+    // A `last_assistant_step` cell is interior narration, not a closing
+    // answer; the live run blanks/blanks-to-artifact such answers before
+    // judging (evaluate_dataset.ts), so the replay must grade the same
+    // submission rather than restore credit for the narration.
+    const isFallback =
+      isRecord(cell.taskOutput) && cell.taskOutput.messageSource === 'last_assistant_step';
+    const agentResponse = isFallback ? '' : cell.agentResponse;
+    if (!cell.expected || (!agentResponse && !isFallback)) {
       return null;
     }
     return {
       input: { question: cell.question },
-      output: { messages: [{ message: cell.agentResponse }], steps: cell.steps },
+      output: { messages: [{ message: agentResponse }], steps: cell.steps },
       expected: { expected: cell.expected },
       metadata: {},
     };

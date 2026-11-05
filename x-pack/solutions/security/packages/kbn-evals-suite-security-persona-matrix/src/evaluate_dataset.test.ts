@@ -760,6 +760,31 @@ describe('task judges and the last-assistant-step fallback', () => {
     );
   });
 
+  it('judges the rendered artifact when a fallback run ends on one', async () => {
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Created it. <render_attachment id="att-9" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.create_detection_rule',
+          results: [
+            {
+              data: {
+                success: true,
+                attachment_id: 'att-9',
+                rule: { name: 'chrysalis-beacon', query: 'process.name: curl' },
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('chrysalis-beacon');
+    expect(answer).not.toContain('preview');
+  });
+
   it('still judges a real closing answer', async () => {
     const { correctnessEvaluate, groundednessEvaluate } = await runTask({
       messages: [{ message: 'the real answer' }],
