@@ -8,8 +8,8 @@
  */
 
 import SLACK_THREAD_WORKFLOW_YAML from './slack_thread_workflow.yaml';
+import { renderRunAs } from '../../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
-import { renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID = 'system-nightshift-slack-thread-bound';
 

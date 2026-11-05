@@ -8,15 +8,46 @@
 import { isBoom } from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { getNightshiftRoleName } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { DetectionEngineServiceAccountStatus } from '../../../common';
 import { StatusError } from '../errors/status_error';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
 import {
   DETECTION_ENGINE_WORKLOAD_ID,
   DETECTION_ENGINE_WORKLOAD_TYPE,
   canManageSecurity,
   getDetectionEngineAccountId,
 } from './detection_engine_account';
+
+/**
+ * The bound workflows every set-up space gets, installed per space with the space id as suffix.
+ * The investigation-completed workflow, continuous onboarding and the scheduled discovery pair
+ * arrive with the switch-on, which installs them from their settings.
+ */
+export const SETUP_WORKFLOW_IDS = [
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
+] as const;
+
+// Boom errors, which the workflows plugin throws, keep their status in `output.statusCode`.
+const getStatusCode = (error: unknown): number | undefined =>
+  isBoom(error)
+    ? error.output.statusCode
+    : typeof error === 'object' && error !== null && 'statusCode' in error
+    ? (error as { statusCode?: number }).statusCode
+    : undefined;
 
 /** Sets a space up to run the detection engine as the deployment's `nightshift_detection` account. */
 export interface DetectionEngineSetupService {
@@ -41,10 +72,14 @@ export interface DetectionEngineSetupService {
 export function createDetectionEngineSetupService({
   core,
   spaces,
+  workflowsExtensions,
+  workflowsManagement,
   isServerless,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  workflowsManagement: WorkflowsServerPluginSetup | undefined;
   isServerless: boolean;
 }): DetectionEngineSetupService {
   const role = getNightshiftRoleName('detection', { isServerless });
@@ -85,29 +120,92 @@ export function createDetectionEngineSetupService({
     }
   };
 
+  const enable: DetectionEngineSetupService['enable'] = async ({
+    request,
+    spaceId,
+    serviceAccountId,
+  }) => {
+    if (!core.security.serviceAccounts.isEnabled()) {
+      throw new StatusError(
+        'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.',
+        400
+      );
+    }
+    if (!(await canManageSecurity({ core, request }))) {
+      throw new StatusError(
+        'Setting up the detection engine service account requires the manage_security cluster privilege.',
+        403
+      );
+    }
+    if (!workflowsExtensions || !workflowsManagement) {
+      throw new StatusError('Workflows are not available', 400);
+    }
+    await assertSpaceExists({ request, spaceId });
+    await assertRoleExists(request);
+    // Bound first, so what the engine does outside workflow runs is tied to the account before
+    // any workflow is. Binding again with another account rebinds the space.
+    await core.security.serviceAccounts.bindWorkload(request, {
+      serviceAccountId,
+      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    });
+    // Installed with the caller's request: binding a workflow to an account needs the caller's
+    // `manage_security`, which the workflows plugin enforces. Installing again with another
+    // account rebinds an installed workflow and keeps its enabled state.
+    const client = await workflowsExtensions.getClient(request);
+    for (const workflowId of SETUP_WORKFLOW_IDS) {
+      try {
+        await client.managedWorkflows.install(
+          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+          workflowId,
+          { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
+        );
+      } catch (error) {
+        // Keep the status of the workflows plugin: a 403 or 400 is not fixed by calling again.
+        const statusCode = getStatusCode(error) ?? 500;
+        const retry = statusCode >= 500 ? ' The space is bound; call _enable again to retry.' : '';
+        throw new StatusError(
+          `Installing workflow [${workflowId}] failed: ${
+            error instanceof Error ? error.message : String(error)
+          }.${retry}`,
+          statusCode
+        );
+      }
+    }
+    // Installing is best-effort in the workflows plugin, so check that every workflow ended up
+    // bound to the account instead of answering with ids that were never installed.
+    const unbound: string[] = [];
+    for (const workflowId of SETUP_WORKFLOW_IDS) {
+      const document = await workflowsManagement.management.getWorkflow(
+        `${workflowId}-${spaceId}`,
+        spaceId,
+        request
+      );
+      if (document?.definition?.settings?.run_as !== serviceAccountId) {
+        unbound.push(workflowId);
+      }
+    }
+    // A concurrent call for another account may have rebound the space after this one bound it.
+    const currentAccountId = await getDetectionEngineAccountId({ core, spaceId });
+    if (currentAccountId !== serviceAccountId) {
+      throw new StatusError(
+        `The detection engine of space [${spaceId}] is now bound to [${currentAccountId}] instead of [${serviceAccountId}], so a concurrent _enable replaced this one. Call _enable again with the account you want.`,
+        409
+      );
+    }
+    if (unbound.length > 0) {
+      throw new StatusError(
+        `Setting up space [${spaceId}] did not bind ${unbound
+          .map((id) => `[${id}]`)
+          .join(', ')} to [${serviceAccountId}]. The space is bound; call _enable again to retry.`,
+        500
+      );
+    }
+    return { spaceId, serviceAccountId };
+  };
+
   return {
-    async enable({ request, spaceId, serviceAccountId }) {
-      if (!core.security.serviceAccounts.isEnabled()) {
-        throw new StatusError(
-          'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.',
-          400
-        );
-      }
-      if (!(await canManageSecurity({ core, request }))) {
-        throw new StatusError(
-          'Setting up the detection engine service account requires the manage_security cluster privilege.',
-          403
-        );
-      }
-      await assertSpaceExists({ request, spaceId });
-      await assertRoleExists(request);
-      await core.security.serviceAccounts.bindWorkload(request, {
-        serviceAccountId,
-        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-      });
-      return { spaceId, serviceAccountId };
-    },
+    enable,
 
     async getStatus({ request, spaceId }) {
       const serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
