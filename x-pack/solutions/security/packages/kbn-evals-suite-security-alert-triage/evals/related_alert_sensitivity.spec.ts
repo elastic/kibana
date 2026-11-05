@@ -10,7 +10,7 @@
  * default agent (natural skill routing, no forced skill or agent ids). Each case indexes a target
  * alert plus its related alerts, attaches the target as a `security.alerts` attachment and grades
  * the final `Verdict:` line. Cases and documents come from the workflow-path suite, so both paths
- * are scored against the same labels.
+ * are scored against the same labels, minus cases the name-based tool cannot correlate.
  *
  * Host and user names carry per-run suffixes (6 hex / 6 decimal digits), so leftovers from a
  * failed cleanup collide with a later run with probability ~1e-6 per pair of runs; examples
