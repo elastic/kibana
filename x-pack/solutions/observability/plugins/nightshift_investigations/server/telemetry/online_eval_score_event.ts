@@ -7,7 +7,7 @@
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 import type { InvestigationEntryPoint } from '../client/investigations_client';
-import type { OnlineEvalsRoundKind } from '../online_evals/classify_round';
+import type { InvestigationRoundKind } from '../investigation_round';
 
 export const NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT = 'nightshift-investigation-eval-score';
 
@@ -61,7 +61,7 @@ export interface OnlineEvalScoreEvent {
   space_id: string;
   agent_id?: string;
   evaluator_set: string;
-  round_kind: OnlineEvalsRoundKind;
+  round_kind: InvestigationRoundKind;
   graded_report: OnlineEvalGradedReport;
   entry_point?: OnlineEvalEntryPoint;
   alert_rule_type?: string;
@@ -128,7 +128,9 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   },
   evaluator_set: {
     type: 'keyword',
-    _meta: { description: 'Set of evaluators that ran, such as reference_free or alert_outcome.' },
+    _meta: {
+      description: 'Set of evaluators that ran, such as reference_free or reference_based.',
+    },
   },
   round_kind: {
     type: 'keyword',
