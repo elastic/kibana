@@ -72,9 +72,12 @@ describe('useFetchInvestigations', () => {
   });
 
   it('asks for the newest running investigations only', async () => {
-    const { result } = renderHook(() => useFetchInvestigations({ inProgress: true }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useFetchInvestigations({ inProgress: true, status: 'open' }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() =>
       expect(result.current.investigations.map(({ id }) => id)).toEqual(['running', 'done'])
@@ -96,9 +99,10 @@ describe('useFetchInvestigations', () => {
     );
   });
 
-  it('leaves running investigations out of the severity sections', async () => {
+  it('leaves running investigations out of the severity sections and keeps them open-only', async () => {
     const { result } = renderHook(
-      () => useFetchInvestigations({ inProgress: false, severities: ['high'] }),
+      () =>
+        useFetchInvestigations({ inProgress: false, severities: ['high'], status: 'open' }),
       { wrapper: createWrapper() }
     );
 
@@ -115,7 +119,30 @@ describe('useFetchInvestigations', () => {
           in_progress: false,
           page: 1,
           per_page: INVESTIGATIONS_PAGE_SIZE,
+          status: 'open',
           severity: ['high'],
+        },
+      })
+    );
+  });
+
+  it('loads closed investigations for the Closed accordion', async () => {
+    const { result } = renderHook(
+      () => useFetchInvestigations({ inProgress: false, status: 'closed' }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.total).toBe(12));
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/investigations/investigations',
+      expect.objectContaining({
+        query: {
+          sort_field: 'created_at',
+          sort_order: 'desc',
+          in_progress: false,
+          page: 1,
+          per_page: INVESTIGATIONS_PAGE_SIZE,
+          status: 'closed',
         },
       })
     );
