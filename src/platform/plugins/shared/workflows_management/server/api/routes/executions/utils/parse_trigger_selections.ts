@@ -9,9 +9,11 @@
 
 import { isRecord } from '@kbn/workflows-yaml';
 import { assertWithinRunLimit } from './fetch_by_ids';
-import type { TriggerSelectionKind } from './preprocess_trigger_inputs';
 import type { DocumentSelection } from '../../../../../common/types/document_types';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
+
+/** The compact selections the server knows how to expand, named after their `event` key. */
+export type TriggerSelectionKind = 'alertIds' | 'documentIds';
 
 /** Elasticsearch rejects document ids longer than 512 bytes. */
 const MAX_DOCUMENT_ID_BYTES = 512;
@@ -35,9 +37,8 @@ const isMultiTargetExpression = (index: string): boolean =>
   index === '_all' || index.startsWith('-') || index.includes('*') || index.includes(',');
 
 /**
- * Validates a compact `event.alertIds` or `event.documentIds` selection before anything reaches
- * Elasticsearch. The run routes accept `inputs` as an open record, so this is the only place the
- * selection's shape is checked.
+ * Validates a compact `event.alertIds` or `event.documentIds` selection, the only check on its
+ * shape before it reaches Elasticsearch since the run routes accept `inputs` as an open record.
  */
 export const parseTriggerSelections = ({
   value,

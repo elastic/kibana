@@ -33,7 +33,11 @@ export const assertWithinRunLimit = (count: number, plural: string): void => {
   }
 };
 
-const isClientErrorStatus = (status: number): boolean => status >= 400 && status < 500;
+/** A timeout (408) or a rejection under load (429) is transient, not a problem with the selection. */
+const TRANSIENT_CLIENT_ERROR_STATUSES: ReadonlySet<number> = new Set([408, 429]);
+
+const isSelectionRejectedStatus = (status: number): boolean =>
+  status >= 400 && status < 500 && !TRANSIENT_CLIENT_ERROR_STATUSES.has(status);
 
 const selectionKey = ({ _id, _index }: DocumentSelection) => `${_index}\u0000${_id}`;
 
@@ -140,13 +144,14 @@ export const fetchDocumentFieldsByIds = async ({
 
     const documents: FetchedFields[] = [];
     const found = new Set<string>();
-    const failures: string[] = [];
-    const failureStatuses: number[] = [];
+    const failures: Array<{ description: string; status: number }> = [];
     responses.forEach((response, position) => {
       const [requestedIndex, requestedIds] = requestedIndices[position];
       if ('error' in response) {
-        failures.push(`${requestedIndex}: ${response.error.reason ?? response.error.type}`);
-        failureStatuses.push(response.status);
+        failures.push({
+          description: `${requestedIndex}: ${response.error.reason ?? response.error.type}`,
+          status: response.status,
+        });
         return;
       }
       // `_id` is optional on the client's hit type even though a concrete search hit always has one.
@@ -165,17 +170,19 @@ export const fetchDocumentFieldsByIds = async ({
       }
     });
 
-    // With every sub-search failed this is not an empty selection. A 4xx from every one of them
-    // means the selection itself is unusable (a missing remote cluster, no read privilege);
-    // anything else is an Elasticsearch problem the caller cannot fix.
+    // With every sub-search failed this is not an empty selection. A non-transient 4xx from every
+    // one of them means the selection itself is unusable (a missing remote cluster, no read
+    // privilege); anything else is an Elasticsearch problem the caller cannot fix.
     if (failures.length === requestedIndices.length) {
-      const message = `Every index search failed (${failures.join('; ')})`;
-      throw failureStatuses.every(isClientErrorStatus)
+      const message = `Every index search failed (${failures
+        .map(({ description }) => description)
+        .join('; ')})`;
+      throw failures.every(({ status }) => isSelectionRejectedStatus(status))
         ? new WorkflowTriggerInputError(message)
         : new Error(message);
     }
-    for (const failure of failures) {
-      logger.warn(`Failed to search index ${failure}`);
+    for (const { description } of failures) {
+      logger.warn(`Failed to search index ${description}`);
     }
 
     for (const selection of selections) {

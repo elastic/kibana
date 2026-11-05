@@ -85,11 +85,15 @@ describe('preprocessAlertInputs', () => {
       expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
 
-    it('should return inputs unchanged when alertIds is empty', async () => {
+    it.each([
+      ['empty', { alertIds: [] }],
+      ['null', { alertIds: null }],
+      ['missing', {}],
+    ])('should return inputs unchanged when alertIds is %s', async (_name, selection) => {
       const inputs = {
         event: {
           triggerType: 'alert',
-          alertIds: [],
+          ...selection,
         },
       };
 
@@ -279,6 +283,7 @@ describe('preprocessAlertInputs', () => {
 
     it.each([
       ['a non-array', 'alert-1', 'inputs.event.alertIds must be an array.'],
+      ['an empty string', '', 'inputs.event.alertIds must be an array.'],
       ['a null entry', [null], 'non-empty string "_id" and "_index"'],
       [
         'an object _id',

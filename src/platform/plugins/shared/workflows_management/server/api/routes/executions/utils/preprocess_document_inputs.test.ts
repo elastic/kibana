@@ -248,27 +248,43 @@ describe('preprocessDocumentInputs', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith('Document not found: doc-2 in index logs-b');
     });
 
-    // A 4xx from every sub-search means the selection is unusable, so the caller gets a 400. A
-    // 5xx is an Elasticsearch problem the caller cannot fix and must not read as bad input.
+    // A 4xx from every sub-search means the selection is unusable, so the caller gets a 400.
+    it('surfaces a 4xx rejection of every index search as an input error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('no such remote cluster', 404)],
+      });
+
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow('no such remote cluster');
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    // A 5xx, a timeout or a rejection under load is an Elasticsearch problem the caller cannot fix
+    // and must not read as bad input.
     it.each([
-      ['an input error when every search is rejected with a 4xx', 404, true],
-      ['a server error when every search fails with a 5xx', 500, false],
-    ])('surfaces a failure of every index search as %s', async (_name, status, isInputError) => {
+      ['a 5xx', 500],
+      ['a 408 timeout', 408],
+      ['a 429 rejection under load', 429],
+    ])('surfaces %s from every index search as a server error', async (_name, status) => {
       mockEsClient.msearch.mockResolvedValue({
         responses: [msearchError('cluster unavailable', status)],
       });
 
-      const error = await preprocessDocumentInputs(
+      const result = preprocessDocumentInputs(
         { event: { triggerType: 'document', documentIds } },
         mockContext,
         mockLogger
-      ).catch((caught) => caught);
-
-      expect(error).toEqual(
-        expect.objectContaining({ message: expect.stringContaining('cluster unavailable') })
       );
-      expect(error instanceof WorkflowTriggerInputError).toBe(isInputError);
-      expect(mockLogger.error).toHaveBeenCalledTimes(isInputError ? 0 : 1);
+
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow('cluster unavailable');
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('treats a mix of 4xx and 5xx sub-search failures as a server error', async () => {
