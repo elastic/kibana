@@ -316,7 +316,6 @@ export const createNightshiftWorkflowFixture = ({
       telemetry,
     }),
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId: () => undefined,
       getAgentBuilder: () => conversationsAgentBuilder as unknown as AgentBuilderPluginStart,
       logger,
       isEnabled: () => decisionTreesEnabled,

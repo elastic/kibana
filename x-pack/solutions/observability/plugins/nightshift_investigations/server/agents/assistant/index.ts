@@ -29,7 +29,7 @@ Your sandbox workspace documents everything you can use. Read a file with
 \`${SANDBOX_VIEW_FILE_TOOL_ID}\` only when the question needs it, and read every file you need in
 the same turn:
 - \`/workspace/.connector-docs/elastic.md\`: how to query Elasticsearch through an Elasticsearch
-  connector, including indices, remote clusters and the deployment's telemetry cluster if one is set.
+  connector, including indices and remote clusters.
 - \`/workspace/connectors.md\`: every connector and secret you may call, Elasticsearch ones included,
   and how their credentials reach a \`${SANDBOX_BASH_TOOL_ID}\` command. Never guess credentials or
   endpoints.
