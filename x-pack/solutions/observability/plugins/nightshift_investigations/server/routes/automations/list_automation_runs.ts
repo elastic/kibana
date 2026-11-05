@@ -92,6 +92,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         'trigger_investigation_alert',
         'trigger_investigation_slack',
         'follow_up_recovered_alert',
+        'trigger_investigation_alert_v2',
+        'follow_up_recovered_alert_v2',
       ].map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
@@ -109,19 +111,28 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         )
       )
     );
-    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps, recoveredAlertSteps] =
-      stepExecutions.map(
-        ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
-      );
+    const [
+      defaultSteps,
+      legacyAlertSteps,
+      alertSteps,
+      slackSteps,
+      recoveredAlertSteps,
+      alertV2Steps,
+      recoveredAlertV2Steps,
+    ] = stepExecutions.map(
+      ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
+    );
 
     const runs = executions.results.map((exec) => {
       const startedStep =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
           ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          : exec.triggeredBy === 'alerting.alertStatusChanged'
+          ? alertV2Steps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
-      const recoveredStep = recoveredAlertSteps.get(exec.id);
+      const recoveredStep = recoveredAlertSteps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id);
       const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
       const step = startedStep ?? recoveredStep;
       const input =

@@ -250,6 +250,7 @@ it('links the executed alert branch of a mixed workflow', async () => {
 
 it.each([
   ['alerting.v1.alertStatusChanged', 'trigger_investigation_alert'],
+  ['alerting.alertStatusChanged', 'trigger_investigation_alert_v2'],
   ['slack2.message', 'trigger_investigation_slack'],
   ['scheduled', 'trigger_investigation'],
 ])('links the %s branch of a workflow with all trigger kinds', async (triggeredBy, stepId) => {
@@ -380,6 +381,32 @@ it('titles a webhook recovery run after its alert, marked as recovered', async (
     'Disk almost full on web-1',
     'Recovered: Disk almost full on web-1',
   ]);
+});
+
+it('titles a v2 alert recovery run after its rule, marked as recovered', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'alerting.alertStatusChanged' }],
+    total: 1,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+    results:
+      stepId === 'follow_up_recovered_alert_v2'
+        ? [
+            {
+              workflowRunId: 'exec-1',
+              input: { rule_name: 'High CPU on api-3' },
+              output: { investigation_id: 'inv-1' },
+            },
+          ]
+        : [],
+  }));
+
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({
+    title: 'Recovered: High CPU on api-3',
+    investigationId: 'inv-1',
+  });
 });
 
 it('reports a recovery follow-up that failed as failed, not skipped', async () => {

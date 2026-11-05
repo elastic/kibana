@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from '../../service_account/use_investigator_service_account';
+} from '../../data/service_accounts/use_investigator_service_account';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { SettingsSectionRow } from './settings_section';
 
