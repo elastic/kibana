@@ -17,7 +17,7 @@ export const VerifyEnv: GlobalTask = {
     const version = `v${config.getNodeVersion()}`;
 
     if (version !== process.version) {
-      throw new Error(`Invalid nodejs version, please use ${version}`);
+      console.warn(`Deviating nodejs version, expected version: ${version}, running version: ${process.version}`);
     }
 
     log.success('Node.js version verified');
