@@ -83,7 +83,7 @@ export const DocsWritePatternsField = ({
   const entryErrors = Array.isArray(error) ? error : [];
   const invalidPatterns = new Set(entryErrors.map(({ pattern }) => pattern));
   const errorLines =
-    error === 'required'
+    error === 'required' || error === 'tooMany'
       ? [writeTargetErrorText('docs', error, true)]
       : entryErrors.map(({ pattern, error: entryError }) =>
           i18n.translate('xpack.streams.destinations.docsWritePatternEntryErrorMessage', {

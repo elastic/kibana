@@ -104,6 +104,21 @@ describe('CreateDestinationModal', () => {
       expect(screen.queryByText('logs-a-*:', { exact: false })).not.toBeInTheDocument();
     });
 
+    it('says how many write patterns a destination can have', async () => {
+      renderModal();
+      const input = await docsPatternsInput();
+
+      await userEvent.click(input);
+      await userEvent.paste(
+        Array.from({ length: 33 }, (_, index) => `logs-orders${index}-*`).join(',')
+      );
+      await userEvent.keyboard('{Enter}');
+
+      expect(
+        screen.getByText('A destination can have at most 32 write patterns across all signals.')
+      ).toBeInTheDocument();
+    });
+
     it('adds each docs write pattern once, keeping the lowercase fix of an uppercase one', async () => {
       renderModal();
       const input = await docsPatternsInput();

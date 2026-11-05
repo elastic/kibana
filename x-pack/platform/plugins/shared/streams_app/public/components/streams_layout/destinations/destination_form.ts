@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { collectUnitComponentIds } from '@kbn/streams-schema';
+import { collectUnitComponentIds, getSignalTargetsWritePatterns } from '@kbn/streams-schema';
+import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
 import { createDestinationId, getDestinationNameValidationError } from './destination_helpers';
 import {
   DESTINATION_SIGNALS,
+  getDestinationCreateSpec,
   getFormDestinationSignals,
   PREFIXED_DESTINATION_SIGNALS,
   SIGNAL_INDEX_FIELDS,
   validateAutoWritePattern,
   validateDocsWritePattern,
   validateFreeFormIndexName,
-  validateRemoteIndex,
   validateStaticSignalIndex,
 } from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
@@ -171,7 +172,7 @@ const getRemoteElasticsearchErrors = (
   }
   for (const signal of PREFIXED_DESTINATION_SIGNALS) {
     const field = SIGNAL_INDEX_FIELDS[signal];
-    const error = validateRemoteIndex(remoteElasticsearch[field]);
+    const error = validateFreeFormIndexName(remoteElasticsearch[field]);
     if (error) {
       errors[field] = error;
     }
@@ -201,7 +202,12 @@ const getDocsWritePatternsError = (
     const error = validateDocsWritePattern(pattern);
     return error ? [{ pattern, error }] : [];
   });
-  return entryErrors.length ? entryErrors : undefined;
+  if (entryErrors.length > 0) {
+    return entryErrors;
+  }
+  // Only docs can overflow the API key route's pattern cap (OTel adds at most three).
+  const keyScope = getSignalTargetsWritePatterns(getDestinationCreateSpec(elasticsearch));
+  return keyScope.length > MAX_RESOLVE_INDEX_PATTERNS ? 'tooMany' : undefined;
 };
 
 const getLocalElasticsearchErrors = (

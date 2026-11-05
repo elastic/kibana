@@ -39,12 +39,14 @@ export type FreeFormIndexValidationError = Exclude<StaticIndexValidationError, '
 
 export type DocsWritePatternValidationError =
   | 'template'
+  | 'tooLong'
   | 'uppercase'
   | 'invalidCharacter'
   | 'docsPrefix';
 
 export type AutoWritePatternValidationError =
   | 'required'
+  | 'tooLong'
   | 'uppercase'
   | 'invalidCharacter'
   | 'signalPattern';
@@ -152,7 +154,7 @@ export interface DestinationCreationFormErrors {
   tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   docsIndex?: FreeFormIndexValidationError;
   /** Undefined when no entry fails, never an empty list. */
-  docsWritePatterns?: 'required' | DocsWritePatternEntryError[];
+  docsWritePatterns?: 'required' | 'tooMany' | DocsWritePatternEntryError[];
   endpoint?: 'required' | 'invalid';
   apiKey?: 'required';
   region?: 'required';

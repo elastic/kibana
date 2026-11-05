@@ -15,6 +15,7 @@ import {
   readUnitDestinationSignals,
 } from '@kbn/streams-schema';
 import type { UnitDestination } from '@kbn/streams-schema';
+import { MAX_RESOLVE_INDEX_PATTERN_LENGTH } from '@kbn/streams-plugin/common';
 import type { Unit } from '../../../services/unit_repository';
 import {
   REMOTE_ELASTICSEARCH_TYPE,
@@ -297,6 +298,9 @@ export const validateAutoWritePattern = (
   if (!value) {
     return undefined;
   }
+  if (value.length > MAX_RESOLVE_INDEX_PATTERN_LENGTH) {
+    return 'tooLong';
+  }
   if (value !== value.toLowerCase()) {
     return 'uppercase';
   }
@@ -309,44 +313,9 @@ export const validateAutoWritePattern = (
   return undefined;
 };
 
-/** Name rules the transpiler applies to every static index (`isValidStaticIndexName`). */
-const getIndexNameError = (
-  value: string
-): Exclude<FreeFormIndexValidationError, 'template'> | undefined => {
-  if (
-    INVALID_STREAM_NAME_CHARACTERS.some((char) => value.includes(char)) ||
-    WHITESPACE_OR_CONTROL_CHARS.test(value)
-  ) {
-    return 'invalidCharacter';
-  }
-  if (value !== value.toLowerCase()) {
-    return 'uppercase';
-  }
-  if (
-    RESERVED_STREAM_NAMES.includes(value) ||
-    INVALID_STREAM_NAME_PREFIXES.some((prefix) => value.startsWith(prefix)) ||
-    new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES
-  ) {
-    return 'invalidName';
-  }
-  return undefined;
-};
-
-/** A remote index is a full name, so no signal prefix is required. */
-export const validateRemoteIndex = (index: string): FreeFormIndexValidationError | undefined => {
-  const value = index.trim();
-  if (!value) {
-    return undefined;
-  }
-  if (indexUsesTemplate(value)) {
-    return 'template';
-  }
-  return getIndexNameError(value);
-};
-
 /**
- * A local index with no shape rule. A leading dot is rejected too, as Elasticsearch reserves
- * those names for hidden and system indices.
+ * A full index name with no signal prefix, as remote indices and the docs index take.
+ * A leading dot is rejected too, as Elasticsearch reserves those names for hidden and system indices.
  */
 export const validateFreeFormIndexName = (
   index: string
@@ -358,7 +327,24 @@ export const validateFreeFormIndexName = (
   if (indexUsesTemplate(value)) {
     return 'template';
   }
-  return getIndexNameError(value) ?? (value.startsWith('.') ? 'invalidName' : undefined);
+  if (
+    INVALID_STREAM_NAME_CHARACTERS.some((char) => value.includes(char)) ||
+    WHITESPACE_OR_CONTROL_CHARS.test(value)
+  ) {
+    return 'invalidCharacter';
+  }
+  if (value !== value.toLowerCase()) {
+    return 'uppercase';
+  }
+  if (
+    RESERVED_STREAM_NAMES.includes(value) ||
+    value.startsWith('.') ||
+    INVALID_STREAM_NAME_PREFIXES.some((prefix) => value.startsWith(prefix)) ||
+    new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES
+  ) {
+    return 'invalidName';
+  }
+  return undefined;
 };
 
 export const validateStaticSignalIndex = (
@@ -381,6 +367,9 @@ export const validateDocsWritePattern = (
   const value = pattern.trim();
   if (!value) {
     return undefined;
+  }
+  if (value.length > MAX_RESOLVE_INDEX_PATTERN_LENGTH) {
+    return 'tooLong';
   }
   if (indexUsesTemplate(value)) {
     return 'template';

@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+} from '@kbn/streams-plugin/common';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import type {
   AutoWritePatternValidationError,
@@ -18,6 +22,7 @@ export type WriteTargetError =
   | StaticIndexValidationError
   | AutoWritePatternValidationError
   | DocsWritePatternValidationError
+  | 'tooMany'
   | undefined;
 
 export const writeTargetErrorText = (
@@ -68,6 +73,18 @@ export const writeTargetErrorText = (
       : i18n.translate('xpack.streams.destinations.indexInvalidNameErrorMessage', {
           defaultMessage: 'Enter a valid data stream name.',
         });
+  }
+  if (error === 'tooLong') {
+    return i18n.translate('xpack.streams.destinations.writePatternTooLongErrorMessage', {
+      defaultMessage: 'Write patterns can be at most {max} characters.',
+      values: { max: MAX_RESOLVE_INDEX_PATTERN_LENGTH },
+    });
+  }
+  if (error === 'tooMany') {
+    return i18n.translate('xpack.streams.destinations.writePatternsTooManyErrorMessage', {
+      defaultMessage: 'A destination can have at most {max} write patterns across all signals.',
+      values: { max: MAX_RESOLVE_INDEX_PATTERNS },
+    });
   }
   if (error === 'docsPrefix') {
     return i18n.translate('xpack.streams.destinations.docsWritePatternPrefixErrorMessage', {
