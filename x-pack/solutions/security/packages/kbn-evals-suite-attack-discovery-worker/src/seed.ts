@@ -648,11 +648,53 @@ const removeWorldDocs = async ({
   );
 };
 
+const DATA_STREAMS_ONLY = /creates data streams only/;
+const ALREADY_EXISTS = /resource_already_exists_exception/;
+
+/**
+ * Creates `index` with keyword host and user fields. On a stack where the `logs` template is present
+ * but the endpoint package is not, the endpoint event names match a template that creates data
+ * streams only, and a plain create is refused. No template simulation response reports `data_stream`,
+ * so that refusal is the signal: the name is created as a data stream instead, whose `ecs@mappings`
+ * dynamic templates map the strings to `keyword` (`assertWorldSearchable` proves that after the bulk).
+ */
+const createWorldIndex = async ({
+  esClient,
+  log,
+  index,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  index: string;
+}): Promise<void> => {
+  log.info(`[ad-worker] creating world index ${index} with keyword host and user fields`);
+  try {
+    await esClient.indices.create({
+      index,
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          'host.id': { type: 'keyword' },
+          'host.name': { type: 'keyword' },
+          'user.name': { type: 'keyword' },
+        },
+      },
+    });
+  } catch (error) {
+    if (!DATA_STREAMS_ONLY.test(errorMessage(error))) throw error;
+    log.info(`[ad-worker] ${index} matches a data stream template; creating a data stream`);
+    await esClient.indices.createDataStream({ name: index }).catch((createError) => {
+      // A concurrent seed may have created it between the refusal and this call.
+      if (!ALREADY_EXISTS.test(errorMessage(createError))) throw createError;
+    });
+  }
+};
+
 /**
  * The review filters the world with `terms` on `host.id` and `user.name`. A plain index that the bulk
  * auto-creates maps those strings as analysed `text`, where a `terms` query for `ws-fin-214-id` never
  * matches its tokens, so the world would be written yet invisible. An index that already exists (the
- * endpoint data stream or the entity store alias) keeps its own mapping.
+ * entity store alias, or a data stream the endpoint package installed) keeps its own mapping.
  */
 const ensureWorldIndices = async ({
   esClient,
@@ -665,18 +707,7 @@ const ensureWorldIndices = async ({
 }): Promise<void> => {
   for (const index of new Set(worldDocs.map((doc) => doc.index))) {
     if (!(await esClient.indices.exists({ index }))) {
-      log.info(`[ad-worker] creating world index ${index} with keyword host and user fields`);
-      await esClient.indices.create({
-        index,
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            'host.id': { type: 'keyword' },
-            'host.name': { type: 'keyword' },
-            'user.name': { type: 'keyword' },
-          },
-        },
-      });
+      await createWorldIndex({ esClient, log, index });
     }
   }
 };

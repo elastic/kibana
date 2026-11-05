@@ -801,4 +801,126 @@ describe('seedScenario world indices', () => {
       '"host.id":{"type":"keyword"}'
     );
   });
+
+  // Host entities only: a scenario with user entities is covered by the mixed-index tests below.
+  const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'benign-batch');
+
+  /** An ES that finds every id it is asked for and applies the `terms` filter against the bulked bodies. */
+  const searchableEs = ({
+    exists,
+    indices,
+    bodiesById,
+  }: {
+    exists: jest.Mock;
+    indices: Record<string, jest.Mock>;
+    bodiesById: Map<string, Record<string, unknown>>;
+  }) => {
+    const bulk = jest.fn(async ({ operations }: { operations: Array<Record<string, unknown>> }) => {
+      operations.forEach((op, index) => {
+        const meta = Object.values(op)[0] as { _id?: string };
+        if (index % 2 === 0 && meta._id) bodiesById.set(meta._id, operations[index + 1]);
+      });
+      return { errors: false, items: [] };
+    });
+    const count = jest.fn(
+      async ({
+        index,
+        query,
+      }: {
+        index: string;
+        query?: {
+          ids?: { values: string[] };
+          bool?: {
+            filter: Array<{ ids?: { values: string[] }; terms?: Record<string, string[]> }>;
+          };
+        };
+      }) => {
+        if (index.startsWith('.alerts') || index.startsWith('ai-index')) return { count: 0 };
+        if (query?.ids) return { count: query.ids.values.length };
+        const [{ ids }, { terms }] = query?.bool?.filter ?? [{}, {}];
+        const [[key, allowed]] = Object.entries(terms ?? {});
+        return {
+          count: (ids?.values ?? []).filter((id) =>
+            allowed.includes(String(bodiesById.get(id)?.[key]))
+          ).length,
+        };
+      }
+    );
+    return esWith({
+      indices: { exists, ...indices },
+      bulk,
+      count,
+      search: jest.fn(async () => ({ hits: { hits: [] } })),
+    });
+  };
+
+  it('creates a data stream, not a plain index, for a name that only a data stream template accepts', async () => {
+    if (!scenario) throw new Error('no scenario');
+    const create = jest.fn(async ({ index }: { index: string }) => {
+      if (index.startsWith('logs-endpoint.events.')) {
+        throw new Error(
+          `illegal_argument_exception: cannot create index with name [${index}], because it matches with template [logs] that creates data streams only, use create data stream api instead`
+        );
+      }
+      return {};
+    });
+    const createDataStream = jest.fn(async (_args: { name: string }) => ({}));
+    const exists = jest.fn(async ({ index }: { index: string }) =>
+      index.startsWith('entities-latest-')
+    );
+    await seedScenario({
+      esClient: searchableEs({
+        exists,
+        indices: { create, createDataStream },
+        bodiesById: new Map(),
+      }),
+      log: { info: jest.fn() } as unknown as ToolingLog,
+      scenario,
+      spaceId: 's',
+    });
+    expect(createDataStream.mock.calls.map(([{ name }]) => name).sort()).toEqual([
+      'logs-endpoint.events.network-s',
+      'logs-endpoint.events.process-s',
+    ]);
+  });
+
+  it('rethrows a create failure that is not about data streams', async () => {
+    if (!scenario) throw new Error('no scenario');
+    const create = jest.fn(async () => {
+      throw new Error('cluster_block_exception');
+    });
+    const createDataStream = jest.fn(async () => ({}));
+    await expect(
+      seedScenario({
+        esClient: searchableEs({
+          exists: jest.fn(async () => false),
+          indices: { create, createDataStream },
+          bodiesById: new Map(),
+        }),
+        log: { info: jest.fn() } as unknown as ToolingLog,
+        scenario,
+        spaceId: 's',
+        wait: async () => {},
+      })
+    ).rejects.toThrow(/cluster_block_exception/);
+    expect(createDataStream).not.toHaveBeenCalled();
+  });
+
+  it('creates nothing when every world index already exists', async () => {
+    if (!scenario) throw new Error('no scenario');
+    const create = jest.fn(async () => ({}));
+    const createDataStream = jest.fn(async () => ({}));
+    await seedScenario({
+      esClient: searchableEs({
+        exists: jest.fn(async () => true),
+        indices: { create, createDataStream },
+        bodiesById: new Map(),
+      }),
+      log: { info: jest.fn() } as unknown as ToolingLog,
+      scenario,
+      spaceId: 's',
+    });
+    expect(create).not.toHaveBeenCalled();
+    expect(createDataStream).not.toHaveBeenCalled();
+  });
 });
