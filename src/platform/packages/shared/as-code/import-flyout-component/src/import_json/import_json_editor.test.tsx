@@ -9,7 +9,7 @@
 
 import '@kbn/code-editor-mock/jest_helper';
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -169,6 +169,16 @@ describe('ImportJsonEditor', () => {
 
     expect(screen.queryByTestId('testEmptyPrompt')).not.toBeInTheDocument();
     expect(screen.getByTestId('testClear')).toBeInTheDocument();
+  });
+
+  it('hides the empty prompt while the editor has focus', async () => {
+    render(<Harness sanitizeImportJson={jest.fn()} />);
+
+    await userEvent.click(getTextarea());
+    expect(screen.getByTestId('testEmptyPrompt')).toHaveStyle({ opacity: '0' });
+
+    act(() => getTextarea().blur());
+    expect(screen.getByTestId('testEmptyPrompt')).toHaveStyle({ opacity: '1' });
   });
 
   it('opens the file browser from the upload link', async () => {
