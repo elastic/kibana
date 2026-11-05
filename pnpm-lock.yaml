@@ -581,7 +581,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/agent_builder_sml
       '@kbn/agent-builder-sml-test-types-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
+        version: link:x-pack/platform/plugins/private/agent_builder_sml_test_types
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
@@ -9307,6 +9307,8 @@ importers:
 
   x-pack/platform/packages/shared/security/plugin_types_server: {}
 
+  x-pack/platform/plugins/private/agent_builder_sml_test_types: {}
+
   x-pack/platform/plugins/private/ai_anonymization_settings: {}
 
   x-pack/platform/plugins/private/banners: {}
@@ -9564,8 +9566,6 @@ importers:
   x-pack/platform/plugins/shared/usage_api: {}
 
   x-pack/platform/test: {}
-
-  x-pack/platform/test/agent_builder_sml/plugins/sml_test_types: {}
 
   x-pack/platform/test/alerting_api_integration/common/plugins/aad: {}
 
