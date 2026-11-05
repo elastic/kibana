@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/user-profile-components'
   - '@kbn/shared-ux-utility'
+  - '@kbn/alerting-v2-constants'
 tags:
   - plugin
   - prod
