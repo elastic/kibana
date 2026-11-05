@@ -29,7 +29,7 @@ alert2
 `);
   });
 
-  it('returns the initial query combined with a continuation prompt and partial results', () => {
+  it('returns the initial query combined with a continuation prompt and partial results, without re-sending the alerts', () => {
     const result = getCombinedAttackDiscoveryPrompt({
       anonymizedDocs: ['alert1', 'alert2'],
       prompt: 'attackDiscoveryPrompt',
@@ -39,36 +39,17 @@ alert2
 
     expect(result).toBe(`attackDiscoveryPrompt
 
-Use context from the following alerts to provide insights:
-
-"""
-alert1
-
-alert2
-"""
-
-
-Continue your JSON analysis from exactly where you left off. Generate only the additional content needed to complete the response.
-
-FORMAT REQUIREMENTS:
-1. Maintain strict JSON validity:
-   - Use double quotes for all strings
-   - Properly escape special characters (\\" for quotes, \\\\ for backslashes, \\n for newlines)
-   - Avoid all control characters (ASCII 0-31)
-   - Keep text fields under 500 characters
-
-2. Output rules:
-   - Do not repeat any previously generated content
-   - Do not include explanatory text outside the JSON
-   - Do not restart from the beginning
-   - Conform exactly to the JSON schema defined earlier
-
-Your continuation should seamlessly connect with the previous output to form a complete, valid JSON document.
+${ATTACK_DISCOVERY_CONTINUE}
 
 """
 partialResults
 """
 
 `);
+    // the alert context is intentionally omitted on continuation calls: re-sending it
+    // with a partial attack narrative trips the input-side content filter on some
+    // models (e.g. claude-5.5-opus); see the generate node for details
+    expect(result).not.toContain('alert1');
+    expect(result).not.toContain('Use context from the following alerts');
   });
 });
