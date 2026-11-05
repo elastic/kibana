@@ -567,5 +567,40 @@ describe('System Action Scheduler', () => {
 
       expect(results).toHaveLength(0);
     });
+
+    test('should pass alert.getContext() to the connector adapter keyed by uuid and instance id', async () => {
+      const context = { message: 'cpu high', value: 90 };
+      const alertWithContext = generateAlert({ id: 1, context });
+      const uuid = alertWithContext[1].getUuid();
+      const aadHit = {
+        ...mockAAD,
+        kibana: {
+          ...mockAAD.kibana,
+          alert: {
+            ...mockAAD.kibana.alert,
+            uuid,
+          },
+        },
+      };
+      alertsClient.getProcessedAlerts.mockReturnValue(alertWithContext);
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
+        new: { count: 1, data: [aadHit] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+
+      buildActionParams.mockClear();
+      const scheduler = new SystemActionScheduler(getSchedulerContext());
+      await scheduler.getActionsToSchedule({ activeAlerts: alertWithContext });
+
+      expect(buildActionParams).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contextByAlertUuid: {
+            [uuid]: context,
+            [alertWithContext[1].getId()]: context,
+          },
+        })
+      );
+    });
   });
 });
