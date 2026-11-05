@@ -159,7 +159,7 @@ const ConversationsPageContent: React.FC = () => {
   });
 
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
-  useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
+  useAlertZeroDocTitle();
   useAppHeadingTitle(QUEUE_PAGE_INFO.pageTitle);
   const { reportEvent } = useAlertZeroTelemetry();
 
