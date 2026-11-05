@@ -148,6 +148,7 @@ const setup = ({
     listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
     removeSourceVolumeTask,
+    isUniversalAlertingAvailable: () => true,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });

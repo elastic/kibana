@@ -66,6 +66,7 @@ interface Deps {
   listInstalledWorkflowStates: PluginScopedManagedWorkflows['listInstalledWorkflowStates'];
   scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
   removeSourceVolumeTask: () => Promise<void>;
+  isUniversalAlertingAvailable: () => boolean;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
@@ -112,6 +113,7 @@ export const createInvestigatorServiceAccountService = ({
   listInstalledWorkflowStates,
   scheduleSourceVolumeTask,
   removeSourceVolumeTask,
+  isUniversalAlertingAvailable,
   isServerless,
   logger,
 }: Deps) => {
@@ -291,6 +293,7 @@ export const createInvestigatorServiceAccountService = ({
                   automationId: id,
                   automation: attributes,
                   serviceAccountId: automationsServiceAccountId,
+                  universalAlerts: isUniversalAlertingAvailable(),
                 }),
               },
               spaceId,
