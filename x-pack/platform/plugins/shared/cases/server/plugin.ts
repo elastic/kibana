@@ -64,6 +64,7 @@ import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
+import { ObservablesMigrationTaskManager } from './tasks/observables_migration/observables_migration_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import {
@@ -100,6 +101,7 @@ export class CasePlugin
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
+  private observablesMigrationTaskManager?: ObservablesMigrationTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private casesEventBus?: CasesEventBus;
@@ -207,6 +209,11 @@ export class CasePlugin
           plugins.usageCollection
         );
       }
+
+      this.observablesMigrationTaskManager = new ObservablesMigrationTaskManager(
+        plugins.taskManager,
+        this.logger
+      );
 
       if (this.caseConfig.templates.enabled) {
         this.templatesMigrationTaskManager = new TemplatesMigrationTaskManager(
@@ -366,6 +373,8 @@ export class CasePlugin
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
+
+      void this.observablesMigrationTaskManager?.scheduleTask(plugins.taskManager, core);
 
       if (this.caseConfig.templates.enabled && this.templatesMigrationTaskManager) {
         void this.templatesMigrationTaskManager
