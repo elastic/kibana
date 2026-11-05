@@ -22,12 +22,18 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CodeCellDefinition } from '../../common/types';
 import type { CodeLogEntry, CodeLogLevel } from '../model/code_cell';
 import { CellFrame } from './cell_frame';
+import { useResizeHandle } from './cell_resize';
 import { useNotebook } from './notebook_context';
 
 const PLACEHOLDER = i18n.translate('xpack.notebook.codeCell.placeholder', {
   defaultMessage:
     "JavaScript. Read other cells' outputs by name, and export values to share them, e.g. export const total = rows.length;",
 });
+const RESIZE_EDITOR_LABEL = i18n.translate('xpack.notebook.codeCell.resizeEditor', {
+  defaultMessage: 'Resize editor',
+});
+const FIT_TO_CONTENT = { minLines: 3, maxLines: 30 };
+const EDITOR_MIN_HEIGHT = 60;
 const CONSOLE_TITLE = i18n.translate('xpack.notebook.codeCell.console', {
   defaultMessage: 'Console',
 });
@@ -208,32 +214,47 @@ export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
   const runRef = useRef(run);
   runRef.current = run;
 
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [editorHeight, setEditorHeight] = useState<number>();
+  const resizeHandle = useResizeHandle({
+    getHeight: () => editorHeight ?? editorRef.current?.offsetHeight ?? EDITOR_MIN_HEIGHT,
+    minHeight: EDITOR_MIN_HEIGHT,
+    onResize: (height) => setEditorHeight(height),
+    onReset: () => setEditorHeight(undefined),
+    ariaLabel: RESIZE_EDITOR_LABEL,
+    dataTestSubj: 'notebookCodeEditorResizeHandle',
+  });
+
   const { output } = runtime;
 
   return (
     <CellFrame cell={cell} runtime={runtime} onRun={() => run(draft)}>
-      <CodeEditor
-        languageId="javascript"
-        value={draft}
-        onChange={setDraft}
-        placeholder={PLACEHOLDER}
-        fitToContent={{ minLines: 3, maxLines: 30 }}
-        editorDidMount={(editor) => {
-          editor.onKeyDown((event) => {
-            if (!(event.metaKey || event.ctrlKey) || event.browserEvent.key !== 'Enter') return;
-            event.preventDefault();
-            void runRef.current(draftRef.current);
-          });
-        }}
-        options={{
-          fontSize: 12,
-          lineNumbers: 'on',
-          wordWrap: 'on',
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-        }}
-        dataTestSubj={`notebookCodeEditor-${cell.name}`}
-      />
+      <div ref={editorRef}>
+        <CodeEditor
+          languageId="javascript"
+          value={draft}
+          onChange={setDraft}
+          placeholder={PLACEHOLDER}
+          height={editorHeight}
+          fitToContent={editorHeight === undefined ? FIT_TO_CONTENT : undefined}
+          editorDidMount={(editor) => {
+            editor.onKeyDown((event) => {
+              if (!(event.metaKey || event.ctrlKey) || event.browserEvent.key !== 'Enter') return;
+              event.preventDefault();
+              void runRef.current(draftRef.current);
+            });
+          }}
+          options={{
+            fontSize: 12,
+            lineNumbers: 'on',
+            wordWrap: 'on',
+            automaticLayout: true,
+            scrollBeyondLastLine: false,
+          }}
+          dataTestSubj={`notebookCodeEditor-${cell.name}`}
+        />
+      </div>
+      {resizeHandle}
       {output?.kind === 'code' && output.logs.length > 0 && (
         <>
           <EuiSpacer size="s" />
