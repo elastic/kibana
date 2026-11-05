@@ -24,7 +24,7 @@ import {
   useEuiMemoizedStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { InfoBlocks } from '@kbn/flyout-info-blocks';
@@ -148,14 +148,8 @@ const badgeGroupStyles = () => ({
 });
 
 /** Overflow badge that reveals the collapsed badges in a popover. */
-const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: boolean }) => {
+const BadgeOverflow = ({ badges }: { badges: ReactNode[] }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // The panel is portalled, so a collapse hides the anchor without touching it, leaving the badges
-  // floating over a control the user can no longer see or return focus to.
-  useEffect(() => {
-    if (isHidden) setIsOpen(false);
-  }, [isHidden]);
   const label = i18n.translate('sharedUXPackages.flyoutTemplate.header.badgeOverflowLabel', {
     defaultMessage: '+{count} more',
     values: { count: badges.length },
@@ -373,9 +367,7 @@ export const HeaderZone = ({
                   <EuiSpacer size="s" />
                   <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
                     {visibleBadges}
-                    {overflowBadges.length > 0 && (
-                      <BadgeOverflow badges={overflowBadges} isHidden={isCollapsed} />
-                    )}
+                    {overflowBadges.length > 0 && <BadgeOverflow badges={overflowBadges} />}
                   </EuiBadgeGroup>
                 </>
               )}
