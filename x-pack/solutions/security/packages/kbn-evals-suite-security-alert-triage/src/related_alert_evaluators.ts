@@ -39,11 +39,18 @@ export const parseVerdict = (message: string): Classification | undefined => {
 /** Same scoring as the workflow suite's `ClassificationAccuracy`, fed with the parsed reply. */
 export const verdictAccuracy: Evaluator = {
   ...classificationAccuracy,
-  evaluate: (params) =>
-    classificationAccuracy.evaluate({
+  evaluate: async (params) => {
+    const { score, label, explanation, metadata } = await classificationAccuracy.evaluate({
       ...params,
       output: { classification: parseVerdict(getFinalAssistantMessage(params.output)) },
-    }),
+    });
+    return {
+      score,
+      label,
+      explanation,
+      metadata: { predicted: metadata?.predicted, expected: metadata?.expected },
+    };
+  },
 };
 
 export const verdictParsed: Evaluator = {
@@ -86,5 +93,28 @@ export const relatedAlertsRetrieved: Evaluator = {
       label,
       metadata: { toolCalls: calls.length, relatedCount },
     };
+  },
+};
+
+/**
+ * Headline metric: the verdict is only credited when the related alerts reached the model, so a
+ * correct verdict reached without the premise of the eval does not count.
+ */
+export const verdictAccuracyWithRelated: Evaluator = {
+  name: 'VerdictAccuracyWithRelated',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async (params) => {
+    const related = await relatedAlertsRetrieved.evaluate(params);
+    if (related.score !== 1) {
+      return {
+        score: 0,
+        label: 'premise_unmet',
+        explanation: `get-related-alerts ${related.label}; verdict not credited`,
+        metadata: related.metadata,
+      };
+    }
+    const verdict = await verdictAccuracy.evaluate(params);
+    return { score: verdict.score, label: verdict.label, explanation: verdict.explanation };
   },
 };

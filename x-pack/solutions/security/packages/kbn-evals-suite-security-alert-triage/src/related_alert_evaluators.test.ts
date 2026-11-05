@@ -10,6 +10,7 @@ import {
   parseVerdict,
   relatedAlertsRetrieved,
   verdictAccuracy,
+  verdictAccuracyWithRelated,
   verdictParsed,
 } from './related_alert_evaluators';
 
@@ -114,5 +115,56 @@ describe('relatedAlertsRetrieved', () => {
     expect((await run(relatedAlertsRetrieved, converseOutput('x', [other]))).label).toBe(
       'not_called'
     );
+  });
+});
+
+describe('verdictAccuracyWithRelated', () => {
+  const found = [relatedAlertsStep([{ _id: 'a' }])];
+
+  it('scores 0 premise_unmet when a correct verdict was reached without the tool', async () => {
+    const result = await run(
+      verdictAccuracyWithRelated,
+      converseOutput('Verdict: true_positive'),
+      'true_positive'
+    );
+    expect(result).toMatchObject({ score: 0, label: 'premise_unmet' });
+  });
+
+  it('scores 0 premise_unmet when the tool returned no related alerts', async () => {
+    const result = await run(
+      verdictAccuracyWithRelated,
+      converseOutput('Verdict: true_positive', [relatedAlertsStep([])]),
+      'true_positive'
+    );
+    expect(result).toMatchObject({ score: 0, label: 'premise_unmet' });
+  });
+
+  it('scores 1 for a correct verdict with related alerts retrieved', async () => {
+    const result = await run(
+      verdictAccuracyWithRelated,
+      converseOutput('Verdict: true_positive', found),
+      'true_positive'
+    );
+    expect(result).toMatchObject({ score: 1, label: 'true_positive' });
+  });
+
+  it('scores 0 for a wrong verdict with related alerts retrieved', async () => {
+    const result = await run(
+      verdictAccuracyWithRelated,
+      converseOutput('Verdict: false_positive', found),
+      'true_positive'
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('false_positive');
+  });
+
+  it('keeps raw VerdictAccuracy independent of the tool call and free of workflow-only metadata', async () => {
+    const result = await run(
+      verdictAccuracy,
+      converseOutput('Verdict: true_positive'),
+      'true_positive'
+    );
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual({ predicted: 'true_positive', expected: 'true_positive' });
   });
 });

@@ -53,4 +53,51 @@ describe('buildCaseDocs', () => {
       expect((doc.process as { command_line?: string }).command_line).toEqual(expect.any(String))
     );
   });
+
+  describe('per-run identity', () => {
+    const names = (docs: ReturnType<typeof buildCaseDocs>) => ({
+      hosts: new Set(docs.map(({ doc }) => (doc.host as { name: string }).name)),
+      users: new Set(docs.map(({ doc }) => (doc.user as { name: string }).name)),
+    });
+
+    it.each(RELATED_ALERT_CASES.map((testCase) => [testCase.id, testCase] as const))(
+      '%s: different run ids give different host.name and user.name, shared within a run',
+      (_id, testCase) => {
+        const first = names(buildCaseDocs(testCase, 'run-1', NOW));
+        const second = names(buildCaseDocs(testCase, 'run-2', NOW));
+        expect(first.hosts.size).toBe(1);
+        expect(first.users.size).toBe(1);
+        expect(second.hosts.size).toBe(1);
+        expect(second.users.size).toBe(1);
+        expect([...first.hosts][0]).not.toBe([...second.hosts][0]);
+        expect([...first.users][0]).not.toBe([...second.users][0]);
+      }
+    );
+
+    it('keeps realistic names and rewrites the user name embedded in paths and command lines', () => {
+      const malicious = RELATED_ALERT_CASES.find(({ id }) => id === 'related-malicious-control')!;
+      const docs = buildCaseDocs(malicious, 'run-1', NOW);
+      const { hosts, users } = names(docs);
+      const [host] = [...hosts];
+      const [user] = [...users];
+      expect(host).toMatch(/^jdoe-mbp-[0-9a-f]{6}$/);
+      expect(user).toMatch(/^jdoe[0-9a-f]{6}$/);
+
+      const serialised = JSON.stringify(docs.map(({ doc }) => doc));
+      expect(serialised).toContain(`/Users/${user}/`);
+      expect(serialised).not.toContain('/Users/jdoe/');
+      docs.forEach(({ doc }) => {
+        expect((doc.host as { hostname: string }).hostname).toBe(host);
+      });
+    });
+
+    it('does not let a run match the alerts of another run of the same case', () => {
+      const benign = RELATED_ALERT_CASES[0];
+      const control = RELATED_ALERT_CASES[1];
+      const leaked = names(buildCaseDocs(control, 'run-1', NOW));
+      const next = names(buildCaseDocs(benign, 'run-2', NOW));
+      expect([...next.hosts][0]).not.toBe([...leaked.hosts][0]);
+      expect([...next.users][0]).not.toBe([...leaked.users][0]);
+    });
+  });
 });

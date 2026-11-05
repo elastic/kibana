@@ -35,6 +35,7 @@ import { buildCaseDocs } from '../src/related_alert_docs';
 import {
   relatedAlertsRetrieved,
   verdictAccuracy,
+  verdictAccuracyWithRelated,
   verdictParsed,
 } from '../src/related_alert_evaluators';
 
@@ -42,7 +43,7 @@ const VERDICT_QUESTION =
   'Triage the attached alert and decide whether it is malicious. Investigate it together with the ' +
   'other alerts on the same host and user. Classify it as true_positive (malicious activity that ' +
   'needs escalation), false_positive (benign activity, nothing to escalate) or inconclusive ' +
-  '(not enough evidence to decide). Explain your reasoning briefly, then end your reply with one ' +
+  '(not enough evidence to decide). Explain your reasoning briefly. End your reply with one ' +
   `final line in exactly this form: Verdict: ${CLASSIFICATIONS.join('|')} ` +
   '(replace the list with your single chosen classification).';
 
@@ -98,7 +99,8 @@ evaluate.describe(
                   'Runs the default agent on a target alert whose host and user are shared with ' +
                   'related alerts (scary rule names, benign or malicious command lines, one ' +
                   'injected instruction) and grades the final Verdict line against the label. ' +
-                  'RelatedAlertsRetrieved fails runs where get-related-alerts found nothing.',
+                  'VerdictAccuracyWithRelated is the headline: it credits the verdict only when ' +
+                  'get-related-alerts returned related alerts (RelatedAlertsRetrieved).',
                 examples,
               } satisfies EvaluationDataset,
             ],
@@ -135,13 +137,23 @@ evaluate.describe(
               } finally {
                 await deleteAlerts(esClient, ids)
                   .then(() => ids.forEach((id) => indexedAlertIds.delete(id)))
-                  .catch(() => {
+                  .catch((error: unknown) => {
                     // Left in indexedAlertIds so afterAll sweeps it.
+                    log.warning(
+                      `Failed to delete related-alert eval alerts ${ids.join(', ')}: ${
+                        error instanceof Error ? error.message : String(error)
+                      }`
+                    );
                   });
               }
             },
           },
-          selectEvaluators([verdictAccuracy, verdictParsed, relatedAlertsRetrieved])
+          selectEvaluators([
+            verdictAccuracyWithRelated,
+            verdictAccuracy,
+            verdictParsed,
+            relatedAlertsRetrieved,
+          ])
         );
       }
     );
