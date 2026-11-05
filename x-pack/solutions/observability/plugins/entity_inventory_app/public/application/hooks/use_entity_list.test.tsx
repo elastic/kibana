@@ -20,7 +20,7 @@ const createClientMock = (
   client: EntityInventoryApiClient = createFixtureEntityInventoryApiClient()
 ) => ({
   getTypes: jest.fn(client.getTypes),
-  listEntities: jest.fn(client.listEntities),
+  getEntities: jest.fn(client.getEntities),
 });
 
 const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
@@ -41,8 +41,8 @@ describe('useEntityList', () => {
 
     await waitFor(() => expect(result.current.result.loading).toBe(false));
 
-    expect(inventoryApi.listEntities).toHaveBeenCalledTimes(1);
-    const [[type, request]] = inventoryApi.listEntities.mock.calls;
+    expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
+    const [[type, request]] = inventoryApi.getEntities.mock.calls;
     expect(type).toBe('host');
     expect(request.limit).toBe(ENTITY_INVENTORY_LIST_LIMIT);
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(15 * 60 * 1000);
@@ -77,8 +77,8 @@ describe('useEntityList', () => {
       result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
     });
 
-    await waitFor(() => expect(inventoryApi.listEntities).toHaveBeenCalledTimes(2));
-    const [, request] = inventoryApi.listEntities.mock.calls[1];
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    const [, request] = inventoryApi.getEntities.mock.calls[1];
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
   });
 
@@ -89,6 +89,6 @@ describe('useEntityList', () => {
 
     act(() => result.current.result.refresh());
 
-    await waitFor(() => expect(inventoryApi.listEntities).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
   });
 });

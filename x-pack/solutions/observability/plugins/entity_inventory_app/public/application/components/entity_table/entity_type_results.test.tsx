@@ -127,10 +127,10 @@ describe('EntityTypeResults', () => {
 
   it('shows the error with a retry that lists again', async () => {
     const fixtureClient = createFixtureEntityInventoryApiClient();
-    const listEntities = jest
-      .fn(fixtureClient.listEntities)
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
       .mockRejectedValueOnce(new Error('Request failed'));
-    renderResults({ ...fixtureClient, listEntities });
+    renderResults({ ...fixtureClient, getEntities });
 
     const error = await screen.findByTestId('entityInventoryTableError');
     expect(error).toHaveTextContent(LOAD_ERROR_TITLE);
@@ -139,7 +139,7 @@ describe('EntityTypeResults', () => {
     fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
 
     expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-    expect(listEntities).toHaveBeenCalledTimes(2);
+    expect(getEntities).toHaveBeenCalledTimes(2);
   });
 
   it('says the type is not available when it is not registered, without a retry', async () => {
@@ -173,16 +173,16 @@ describe('EntityTypeResults', () => {
   it('keeps the rows up with a progress bar while a new range loads', async () => {
     const fixtureClient = createFixtureEntityInventoryApiClient();
     let finishReload: () => void = () => {};
-    const listEntities = jest
-      .fn(fixtureClient.listEntities)
-      .mockImplementationOnce(fixtureClient.listEntities)
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockImplementationOnce(fixtureClient.getEntities)
       .mockImplementationOnce(
         (...args) =>
           new Promise((resolve) => {
-            finishReload = () => resolve(fixtureClient.listEntities(...args));
+            finishReload = () => resolve(fixtureClient.getEntities(...args));
           })
       );
-    renderResults({ ...fixtureClient, listEntities });
+    renderResults({ ...fixtureClient, getEntities });
     expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument();
 
@@ -215,13 +215,13 @@ describe('EntityTypeResults', () => {
     it('survive a range with no entities and a failed reload of the same type', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       const emptyClient = createScenarioEntityInventoryApiClient({ scenario: 'empty' });
-      const listEntities = jest
-        .fn(fixtureClient.listEntities)
-        .mockImplementationOnce(fixtureClient.listEntities)
-        .mockImplementationOnce(emptyClient.listEntities)
+      const getEntities = jest
+        .fn(fixtureClient.getEntities)
+        .mockImplementationOnce(fixtureClient.getEntities)
+        .mockImplementationOnce(emptyClient.getEntities)
         .mockRejectedValueOnce(new Error('Request failed'))
-        .mockImplementation(fixtureClient.listEntities);
-      renderResults({ ...fixtureClient, listEntities });
+        .mockImplementation(fixtureClient.getEntities);
+      renderResults({ ...fixtureClient, getEntities });
       expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
       hideColumn('cloud.account.id');
       await waitFor(() =>
@@ -260,11 +260,11 @@ describe('EntityTypeResults', () => {
 
   it('shows the error, not the previous results, when a later load fails', async () => {
     const fixtureClient = createFixtureEntityInventoryApiClient();
-    const listEntities = jest
-      .fn(fixtureClient.listEntities)
-      .mockImplementationOnce(fixtureClient.listEntities)
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockImplementationOnce(fixtureClient.getEntities)
       .mockRejectedValueOnce(new Error('Request failed'));
-    renderResults({ ...fixtureClient, listEntities });
+    renderResults({ ...fixtureClient, getEntities });
     expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));

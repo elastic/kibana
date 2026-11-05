@@ -18,7 +18,7 @@ describe('createScenarioEntityInventoryApiClient', () => {
   it('returns fewer rows than the total for the truncated scenario', async () => {
     const list = await createScenarioEntityInventoryApiClient({
       scenario: 'truncated',
-    }).listEntities('host', REQUEST, {});
+    }).getEntities('host', REQUEST, {});
 
     expect(list.truncated).toBe(true);
     expect(list.total).toBeGreaterThan(list.rows.length);
@@ -27,7 +27,7 @@ describe('createScenarioEntityInventoryApiClient', () => {
   it('returns an unknown total for the countFailed scenario', async () => {
     const list = await createScenarioEntityInventoryApiClient({
       scenario: 'countFailed',
-    }).listEntities('host', REQUEST, {});
+    }).getEntities('host', REQUEST, {});
 
     expect(list.truncated).toBe(true);
     expect(list.total).toBeNull();
@@ -37,14 +37,14 @@ describe('createScenarioEntityInventoryApiClient', () => {
   it('returns source errors and unavailable columns for the withDiagnostics scenario', async () => {
     const list = await createScenarioEntityInventoryApiClient({
       scenario: 'withDiagnostics',
-    }).listEntities('host', REQUEST, {});
+    }).getEntities('host', REQUEST, {});
 
     expect(list.errors.length).toBeGreaterThan(0);
     expect(list.unavailableColumns.length).toBeGreaterThan(0);
   });
 
   it('returns no rows for the empty scenario', async () => {
-    const list = await createScenarioEntityInventoryApiClient({ scenario: 'empty' }).listEntities(
+    const list = await createScenarioEntityInventoryApiClient({ scenario: 'empty' }).getEntities(
       'host',
       REQUEST,
       {}
@@ -58,7 +58,7 @@ describe('createScenarioEntityInventoryApiClient', () => {
   it('returns no rows and several errors for the allSourcesFailed scenario', async () => {
     const list = await createScenarioEntityInventoryApiClient({
       scenario: 'allSourcesFailed',
-    }).listEntities('host', REQUEST, {});
+    }).getEntities('host', REQUEST, {});
 
     expect(list.rows).toEqual([]);
     expect(list.total).toBeNull();
@@ -69,13 +69,13 @@ describe('createScenarioEntityInventoryApiClient', () => {
     const failWith = new Error('Request failed');
 
     await expect(
-      createScenarioEntityInventoryApiClient({ failWith }).listEntities('host', REQUEST, {})
+      createScenarioEntityInventoryApiClient({ failWith }).getEntities('host', REQUEST, {})
     ).rejects.toBe(failWith);
   });
 
   it('rejects for an unknown type in any scenario', async () => {
     await expect(
-      createScenarioEntityInventoryApiClient({ scenario: 'truncated' }).listEntities(
+      createScenarioEntityInventoryApiClient({ scenario: 'truncated' }).getEntities(
         'service',
         REQUEST,
         {}

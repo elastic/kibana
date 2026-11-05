@@ -105,7 +105,7 @@ export const createScenarioEntityInventoryApiClient = ({
   failWith,
 }: ScenarioEntityInventoryApiClientOptions = {}): EntityInventoryApiClient => ({
   ...createFixtureEntityInventoryApiClient(),
-  listEntities: async (type, _request, { signal }) => {
+  getEntities: async (type, _request, { signal }) => {
     throwIfAborted(signal);
     if (failWith) {
       throw failWith;

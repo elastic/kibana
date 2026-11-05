@@ -21,7 +21,7 @@ export interface EntityInventoryRequestOptions {
 /** Data access for the entity inventory routes. */
 export interface EntityInventoryApiClient {
   getTypes(options: EntityInventoryRequestOptions): Promise<InventoryTypesResponse>;
-  listEntities(
+  getEntities(
     type: string,
     request: InventoryListRequest,
     options: EntityInventoryRequestOptions

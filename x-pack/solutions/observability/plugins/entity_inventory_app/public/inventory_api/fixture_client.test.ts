@@ -28,7 +28,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
   it.each(['host', 'k8s.deployment'])(
     'lists every %s entity in last seen order with every column',
     async (type) => {
-      const list = await createFixtureEntityInventoryApiClient().listEntities(type, REQUEST, {});
+      const list = await createFixtureEntityInventoryApiClient().getEntities(type, REQUEST, {});
       const columnNames = list.columns.map(({ name }) => name);
       const lastSeen = list.rows.map((row) => String(row.last_seen));
 
@@ -41,11 +41,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
   );
 
   it('includes rows with null, multi-value and fallback-name host values', async () => {
-    const { rows } = await createFixtureEntityInventoryApiClient().listEntities(
-      'host',
-      REQUEST,
-      {}
-    );
+    const { rows } = await createFixtureEntityInventoryApiClient().getEntities('host', REQUEST, {});
 
     expect(rows.some((row) => row['cloud.provider'] === null)).toBe(true);
     expect(rows.some((row) => Array.isArray(row['host.ip']))).toBe(true);
@@ -53,7 +49,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
   });
 
   it('reports deployments under the OpenTelemetry names, the Elastic Agent names, or both', async () => {
-    const { rows } = await createFixtureEntityInventoryApiClient().listEntities(
+    const { rows } = await createFixtureEntityInventoryApiClient().getEntities(
       'k8s.deployment',
       REQUEST,
       {}
@@ -69,7 +65,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
   });
 
   it('includes a paused deployment', async () => {
-    const { rows } = await createFixtureEntityInventoryApiClient().listEntities(
+    const { rows } = await createFixtureEntityInventoryApiClient().getEntities(
       'k8s.deployment',
       REQUEST,
       {}
@@ -80,7 +76,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
 
   it('rejects for an unknown type', async () => {
     await expect(
-      createFixtureEntityInventoryApiClient().listEntities('service', REQUEST, {})
+      createFixtureEntityInventoryApiClient().getEntities('service', REQUEST, {})
     ).rejects.toThrow('service');
   });
 
@@ -89,7 +85,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
     controller.abort();
 
     await expect(
-      createFixtureEntityInventoryApiClient().listEntities('host', REQUEST, {
+      createFixtureEntityInventoryApiClient().getEntities('host', REQUEST, {
         signal: controller.signal,
       })
     ).rejects.toMatchObject({ name: 'AbortError' });

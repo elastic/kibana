@@ -48,7 +48,7 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       // reported even when the list request failed as well.
       const [typesResult, listResult] = await Promise.allSettled([
         inventoryApi.getTypes({ signal }),
-        inventoryApi.listEntities(
+        inventoryApi.getEntities(
           entityType,
           { ...range, limit: ENTITY_INVENTORY_LIST_LIMIT },
           { signal }

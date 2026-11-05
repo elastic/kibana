@@ -26,7 +26,7 @@ export const createFixtureEntityInventoryApiClient = (): EntityInventoryApiClien
     throwIfAborted(signal);
     return TYPES_RESPONSE_FIXTURE;
   },
-  listEntities: async (type, _request, { signal }) => {
+  getEntities: async (type, _request, { signal }) => {
     throwIfAborted(signal);
     const response = buildListResponseFixture(type);
     if (!response) {
