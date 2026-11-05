@@ -15,6 +15,8 @@ import {
   cortexPageInfluenceOutputSchema,
   cortexPageInfluenceTool,
   buildScoringRequest,
+  INFLUENCE_LEVELS,
+  MISSED_INFLUENCE_LEVELS,
 } from './prompt';
 
 export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
@@ -69,15 +71,24 @@ export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
           metadata: { page_ids: usedIds, pages_read: pages.length },
         },
         {
+          name: 'cortex_pages_referenced_ratio',
+          score: Math.round((usedIds.length / pages.length) * 1000) / 1000,
+          label: `${usedIds.length}/${pages.length} pages`,
+          explanation: 'Share of the pages read that the answer relies on',
+          metadata: { page_ids: usedIds, pages_read: pages.length },
+        },
+        {
           name: 'cortex_page_influence',
           score: gradeToScore(output.influence),
-          label: `${output.influence}/3`,
+          label: `${INFLUENCE_LEVELS[output.influence]} (${output.influence}/3)`,
           explanation: capExplanation(output.influence_reasoning),
         },
         {
           name: 'cortex_page_missed_influence',
           score: gradeToScore(output.missed_influence),
-          label: `${output.missed_influence}/3`,
+          label: `${MISSED_INFLUENCE_LEVELS[output.missed_influence]} (${
+            output.missed_influence
+          }/3)`,
           explanation: capExplanation(output.missed_influence_reasoning),
           direction: 'minimize',
         },

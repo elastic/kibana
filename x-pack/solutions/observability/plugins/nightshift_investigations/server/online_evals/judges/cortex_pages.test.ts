@@ -123,19 +123,59 @@ describe('cortex page judges', () => {
           metadata: { page_ids: ['cortex_service_checkout'], pages_read: 2 },
         },
         {
+          name: 'cortex_pages_referenced_ratio',
+          score: 0.5,
+          label: '1/2 pages',
+          explanation: 'Share of the pages read that the answer relies on',
+          metadata: { page_ids: ['cortex_service_checkout'], pages_read: 2 },
+        },
+        {
           name: 'cortex_page_influence',
           score: 0.667,
-          label: '2/3',
+          label: 'supporting (2/3)',
           explanation: 'The dependency note framed the search.',
         },
         {
           name: 'cortex_page_missed_influence',
           score: 0.333,
-          label: '1/3',
+          label: 'minor (1/3)',
           explanation: 'The pool-size advice went unused.',
           direction: 'minimize',
         },
       ]);
+    });
+
+    it('tells 2 of 2 pages from 2 of 20 apart with the ratio', async () => {
+      const pageIds = Array.from({ length: 20 }, (_, index) => `page-${index}`);
+      const chatComplete = jest.fn().mockResolvedValue({
+        toolCalls: [
+          {
+            function: {
+              arguments: {
+                ...judgeOutput,
+                pages_used: ['cortex_service_page-0', 'cortex_service_page-1'],
+              },
+            },
+          },
+        ],
+      });
+
+      const { scores } = await cortexPageInfluenceJudge.evaluate({
+        round: round(
+          'answer',
+          pageIds.map((slug) => view(`/workspace/cortex/services/${slug}.md`, 'content'))
+        ),
+        inferenceClient: { chatComplete } as unknown as BoundInferenceClient,
+        log,
+      });
+
+      const byName = Object.fromEntries(scores.map((score) => [score.name, score]));
+      expect(byName.cortex_pages_referenced).toEqual(
+        expect.objectContaining({ score: 2, label: '2/20 pages' })
+      );
+      expect(byName.cortex_pages_referenced_ratio).toEqual(
+        expect.objectContaining({ score: 0.1, label: '2/20 pages' })
+      );
     });
 
     it('is not applicable, and skips the model, when no page was read', async () => {

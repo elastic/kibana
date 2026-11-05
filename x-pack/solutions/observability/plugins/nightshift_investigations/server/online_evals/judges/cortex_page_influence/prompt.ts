@@ -15,6 +15,10 @@ export const CORTEX_PAGE_INFLUENCE_TOOL_NAME = 'score_cortex_page_influence';
 /** Generous bound on judge text; explanations are capped separately before persisting. */
 const MAX_JUDGE_TEXT_LENGTH = 100_000;
 
+/** The names the system prompt gives each 0-3 level, in grade order. */
+export const INFLUENCE_LEVELS = ['none', 'incidental', 'supporting', 'decisive'] as const;
+export const MISSED_INFLUENCE_LEVELS = ['none', 'minor', 'significant', 'critical'] as const;
+
 export const CORTEX_PAGE_INFLUENCE_SYSTEM_PROMPT: string = systemPromptText;
 
 export const cortexPageInfluenceOutputSchema = lazySchema(() =>
