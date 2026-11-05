@@ -27,11 +27,11 @@ import {
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CustomCellDefinition } from '../../common/types';
-import { toTemplateData } from '../model/custom_template';
+import { toQueryContext, toTemplateData } from '../model/custom_template';
 import { getCellDisplayName } from '../model/references';
 import { useNotebookServices } from '../services';
 import { CellFrame } from './cell_frame';
-import { CustomCellFlyout } from './custom_cell_flyout';
+import { CustomCellFlyout, GenerateWithChatButton } from './custom_cell_flyout';
 import { useNotebook } from './notebook_context';
 
 const SOURCE_LABEL = i18n.translate('xpack.notebook.customCell.source', {
@@ -96,9 +96,12 @@ const useCustomHtml = (template: string, table: Datatable | undefined): Rendered
 export const CustomCanvas = ({
   cell,
   previewTemplate,
+  onGenerateWithChat,
 }: {
   cell: CustomCellDefinition;
   previewTemplate?: string;
+  /** Offered in the prompt while there is no template. */
+  onGenerateWithChat?: () => void;
 }) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
@@ -133,6 +136,11 @@ export const CustomCanvas = ({
                 defaultMessage: 'Edit the panel to write an HTML template for the results.',
               })
         }
+        actions={
+          !isWaiting && onGenerateWithChat ? (
+            <GenerateWithChatButton hasTemplate={false} onClick={onGenerateWithChat} />
+          ) : undefined
+        }
       />
     );
   }
@@ -140,16 +148,32 @@ export const CustomCanvas = ({
 };
 
 export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
+  const { plugins } = useNotebookServices();
   const { store, scheduler } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const cells = useStateFromPublishingSubject(store.cells$);
   const [isEditing, setIsEditing] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<string>();
+  const panelChat = plugins.customContent?.panelChat;
 
   const { id, sourceCell, template } = cell;
   const source = sourceCell ? cells[sourceCell] : undefined;
   const table = runtime.output?.kind === 'table' ? runtime.output.table : undefined;
   const esqlCells = Object.values(cells).filter((candidate) => candidate.type === 'esql');
+
+  const setTemplate = useCallback(
+    (next: string) =>
+      store.updateCell(id, (current) =>
+        current.type === 'custom' ? { ...current, template: next } : current
+      ),
+    [store, id]
+  );
+
+  // The cell's data comes from its source cell, so a query the agent proposes is not applied.
+  useEffect(
+    () => panelChat?.watch(id, ({ template: generated }) => setTemplate(generated)),
+    [panelChat, id, setTemplate]
+  );
 
   const closeEditor = useCallback(() => {
     setIsEditing(false);
@@ -158,12 +182,25 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
 
   const applyTemplate = useCallback(
     (next: string) => {
-      store.updateCell(id, (current) =>
-        current.type === 'custom' ? { ...current, template: next } : current
-      );
+      setTemplate(next);
       closeEditor();
     },
-    [store, id, closeEditor]
+    [setTemplate, closeEditor]
+  );
+
+  const generateWithChat = useCallback(
+    (draft: string) => {
+      if (!panelChat) return;
+      closeEditor();
+      panelChat.open({
+        panelId: id,
+        title: getCellDisplayName(cell),
+        template: draft,
+        esqlQuery: source?.type === 'esql' ? source.query : undefined,
+        ...toQueryContext(runtime.runParams),
+      });
+    },
+    [panelChat, closeEditor, id, cell, source, runtime.runParams]
   );
 
   return (
@@ -207,7 +244,11 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <div css={cellContainerCss} data-test-subj="notebookCustomContainer">
-        <CustomCanvas cell={cell} previewTemplate={previewTemplate} />
+        <CustomCanvas
+          cell={cell}
+          previewTemplate={previewTemplate}
+          onGenerateWithChat={panelChat ? () => generateWithChat('') : undefined}
+        />
       </div>
       {isEditing && (
         <CustomCellFlyout
@@ -217,6 +258,7 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
           onPreview={setPreviewTemplate}
           onApply={applyTemplate}
           onClose={closeEditor}
+          onGenerateWithChat={panelChat ? generateWithChat : undefined}
         />
       )}
     </CellFrame>

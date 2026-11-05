@@ -7,6 +7,7 @@
 
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { CustomContentPublicStart } from '@kbn/custom-content-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { APP_ID, APP_ROUTE, PLUGIN_NAME } from '../common/constants';
@@ -14,6 +15,7 @@ import { APP_ID, APP_ROUTE, PLUGIN_NAME } from '../common/constants';
 export interface NotebookStartDependencies {
   data: DataPublicPluginStart;
   lens: LensPublicStart;
+  customContent?: CustomContentPublicStart;
 }
 
 export class NotebookPlugin implements Plugin<void, void, {}, NotebookStartDependencies> {

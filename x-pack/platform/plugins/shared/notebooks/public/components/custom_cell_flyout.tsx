@@ -30,6 +30,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useNotebookServices } from '../services';
 import { NotebookFlyout } from './notebook_flyout';
@@ -41,6 +42,30 @@ const COPY_TEMPLATE_LABEL = i18n.translate('xpack.notebook.customCell.flyout.cop
   defaultMessage: 'Copy template',
 });
 
+/** Hands the panel to Agent Builder, worded for whether there is a template to refine. */
+export const GenerateWithChatButton = ({
+  hasTemplate,
+  onClick,
+}: {
+  hasTemplate: boolean;
+  onClick: () => void;
+}) => (
+  <AiButton
+    size="s"
+    iconType="sparkles"
+    onClick={onClick}
+    data-test-subj="notebookCustomGenerateWithChat"
+  >
+    {hasTemplate
+      ? i18n.translate('xpack.notebook.customCell.refineWithChat', {
+          defaultMessage: 'Refine with chat',
+        })
+      : i18n.translate('xpack.notebook.customCell.generateWithChat', {
+          defaultMessage: 'Generate with chat',
+        })}
+  </AiButton>
+);
+
 interface CustomCellFlyoutProps {
   template: string;
   sourceName: string | undefined;
@@ -48,6 +73,8 @@ interface CustomCellFlyoutProps {
   onPreview: (template: string) => void;
   onApply: (template: string) => void;
   onClose: () => void;
+  /** Omitted when Agent Builder is unavailable. */
+  onGenerateWithChat?: (template: string) => void;
 }
 
 /** Edits a custom cell's Liquid template, previewing drafts in the cell before applying them. */
@@ -58,6 +85,7 @@ export const CustomCellFlyout = ({
   onPreview,
   onApply,
   onClose,
+  onGenerateWithChat,
 }: CustomCellFlyoutProps) => {
   const { core } = useNotebookServices();
   const { euiTheme } = useEuiTheme();
@@ -152,6 +180,14 @@ export const CustomCellFlyout = ({
           label={i18n.translate('xpack.notebook.customCell.flyout.templateLabel', {
             defaultMessage: 'Template (HTML)',
           })}
+          labelAppend={
+            onGenerateWithChat && (
+              <GenerateWithChatButton
+                hasTemplate={Boolean(draft.trim())}
+                onClick={() => onGenerateWithChat(draft)}
+              />
+            )
+          }
           helpText={i18n.translate('xpack.notebook.customCell.flyout.templateHelpText', {
             defaultMessage:
               'HTML and CSS, with Liquid tags to insert the source results. For each row, row["column"].value is the value and row["column"].pct is its percentage of the column\'s highest value, useful for bar widths.',
@@ -165,9 +201,16 @@ export const CustomCellFlyout = ({
                   value={draft}
                   onChange={setDraft}
                   height={editorHeight}
-                  placeholder={i18n.translate('xpack.notebook.customCell.flyout.placeholder', {
-                    defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
-                  })}
+                  placeholder={
+                    onGenerateWithChat
+                      ? i18n.translate('xpack.notebook.customCell.flyout.placeholderAi', {
+                          defaultMessage:
+                            '<!-- Write your HTML, CSS, and Liquid here, or select Generate with chat. -->',
+                        })
+                      : i18n.translate('xpack.notebook.customCell.flyout.placeholder', {
+                          defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
+                        })
+                  }
                   options={{
                     fontSize: 12,
                     minimap: { enabled: false },
