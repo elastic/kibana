@@ -21,8 +21,11 @@ import {
 } from '../fixtures';
 import type { SharedInvestigation } from '../fixtures';
 
+// An automation's workflow is bound to the Nightshift automations service account, and the
+// workflows plugin requires the cluster privilege `manage_security` to write a bound workflow.
+// Creating, changing and deleting automations therefore needs more than Nightshift privileges.
 const ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
+  elasticsearch: { cluster: ['manage_security'], indices: [] },
   kibana: [
     {
       base: [],
@@ -175,7 +178,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
       expect(execution.data.workflowDefinition.settings?.timeout).toBe('60m');
       expect(execution.data.context).toMatchObject({
         inputs: {
-          message: body.execution.promptTemplate,
+          message: `Instructions:\n${body.execution.promptTemplate}`,
           timeout_seconds: body.runtime.timeoutSeconds,
           context: { scope_query: schedule.scopeQuery, source: 'manual' },
         },

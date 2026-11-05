@@ -73,7 +73,7 @@ const customContentPanelContentSchema = lazySchema(() =>
       .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
       .optional()
       .describe(
-        'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible.'
+        'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible. On an edit, omit it only when the edit just replaces or removes the ES|QL query.'
       ),
     esql: z
       .string()
@@ -93,7 +93,7 @@ const customContentPanelContentSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe(
-        'Existing panel only. Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "query".'
+        'Existing panel only. Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "query"; cannot be combined with hasData: false.'
       ),
     index: z
       .string()

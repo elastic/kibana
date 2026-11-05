@@ -101,7 +101,13 @@ export const TopFailingMonitors = ({
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+        wrap
+      >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -118,13 +124,20 @@ export const TopFailingMonitors = ({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            min-width: 0;
+            max-width: 100%;
+          `}
+        >
           <EuiButtonGroup
             legend={SORT_LEGEND}
             options={SORT_OPTIONS}
             idSelected={sortMode}
             onChange={(id) => setSortMode(id as SortMode)}
             buttonSize="compressed"
+            isFullWidth
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -132,7 +145,7 @@ export const TopFailingMonitors = ({
       <div
         css={css`
           display: grid;
-          grid-template-columns: minmax(120px, auto) 1fr 50px;
+          grid-template-columns: minmax(0, max-content) minmax(80px, 1fr) 50px;
           gap: ${euiTheme.size.xs} ${euiTheme.size.s};
           align-items: center;
           max-height: 320px;
@@ -205,7 +218,9 @@ export const TopFailingMonitors = ({
                     size="xs"
                     css={css`
                       position: absolute;
-                      left: ${euiTheme.size.xs};
+                      left: ${barWidthPct > 30
+                        ? euiTheme.size.xs
+                        : `calc(${barWidthPct}% + ${euiTheme.size.xs})`};
                       top: 50%;
                       transform: translateY(-50%);
                       font-weight: ${euiTheme.font.weight.medium};

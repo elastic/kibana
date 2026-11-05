@@ -295,7 +295,13 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'inspect',
-          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
+          disabled: !authz.integrations.readIntegrationPolicies || !agent.policy_id,
+          toolTipContent: !authz.integrations.readIntegrationPolicies ? (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentPolicyDisabledTooltip"
+              defaultMessage="Agent policies and Integrations 'Read' privileges are required to view the policy."
+            />
+          ) : undefined,
           onClick: () => {
             callbacks.onViewAgentPolicyClick();
           },
@@ -445,7 +451,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
-    authz.fleet.readAgentPolicies,
+    authz.integrations.readIntegrationPolicies,
     isRestartAgentActionEnabled,
   ]);
 

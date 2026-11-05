@@ -14,14 +14,6 @@ export const ADD_DATA_STREAM_BUTTON = i18n.translate(
   }
 );
 
-export const ADD_DATA_STREAM_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.automaticImport.dataStreams.addDataStreamDisabledTooltip',
-  {
-    defaultMessage:
-      'Enter a unique integration name (at least 2 characters) and description before adding a data stream.',
-  }
-);
-
 export const DATA_STREAMS_TITLE = i18n.translate(
   'xpack.automaticImport.dataStreams.dataStreamsTitle',
   {
@@ -133,10 +125,10 @@ export const ANALYZE_LOGS_BUTTON = i18n.translate(
   }
 );
 
-export const ANALYZE_LOGS_DISABLED_LOADING = i18n.translate(
-  'xpack.automaticImport.dataStreams.analyzeLogsDisabledLoading',
+export const INTEGRATION_DETAILS_INVALID_CALLOUT_TITLE = i18n.translate(
+  'xpack.automaticImport.dataStreams.integrationDetailsInvalidCalloutTitle',
   {
-    defaultMessage: 'Please wait for the current operation to finish.',
+    defaultMessage: 'Close this flyout and fix the integration details before analyzing logs',
   }
 );
 
