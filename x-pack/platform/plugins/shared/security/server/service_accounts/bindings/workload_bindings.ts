@@ -623,7 +623,6 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     });
   }
 
-  // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.
   /** Runs a binding change and counts it on the service account operation metric. */
   private async recordWorkloadOperation<T>(
     operation: 'workload_bind' | 'workload_unbind',
@@ -646,6 +645,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return result;
   }
 
+  // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.
   private toCoordinates(
     pluginId: string,
     { workloadType, workloadId, spaceId }: ServiceAccountWorkloadCoordinates
