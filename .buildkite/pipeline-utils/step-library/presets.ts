@@ -35,6 +35,7 @@ export type Zone =
 
 // Add a machine type here when a ported step first uses it.
 export type MachineType =
+  | 'c4d-standard-2'
   | 'c4d-standard-16'
   | 'n2-highcpu-8'
   | 'n2-highmem-4'
@@ -102,10 +103,21 @@ export const retry = {
 
 export const hyperdiskBalanced = { diskType: 'hyperdisk-balanced' } as const;
 
+export const pdBalanced = { diskType: 'pd-balanced' } as const;
+
 export const k8sMinimalAgent = (): AgentConfig => ({
   provider: 'k8s',
   image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
   imageUID: 1000,
+});
+
+// Add a family here when a ported step first uses it.
+export type ImageFamily = 'kibana-minimal-ubuntu-2604' | 'kibana-ubuntu-2404';
+
+export const gcpImageAgent = (family: ImageFamily): AgentConfig => ({
+  provider: 'gcp',
+  image: `family/${family}`,
+  imageProject: 'elastic-images-prod',
 });
 
 export const onDemandAgent = (machineType: MachineType): AgentConfig => ({ machineType });
@@ -128,7 +140,7 @@ export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): Age
 export const mainTargetBranchOnly = "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'";
 
 export const securitySolutionCypressDefaults = {
-  agents: spotAgent('n2-standard-4', spotZones.n2),
+  agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
   depends_on: ['build'],
   timeout_in_minutes: 60,
   retry: retry.agentLossOrAnyOnce,
@@ -136,5 +148,5 @@ export const securitySolutionCypressDefaults = {
 
 export const securitySolutionHighMemoryCypressDefaults = {
   ...securitySolutionCypressDefaults,
-  agents: spotAgent('n2-highmem-4', spotZones.n2),
+  agents: { ...spotAgent('n2-highmem-4', spotZones.n2), ...pdBalanced },
 };

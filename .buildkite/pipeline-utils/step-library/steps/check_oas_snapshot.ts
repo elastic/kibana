@@ -17,7 +17,6 @@ export const checkOasSnapshot = (): readonly Step[] => [
     label: 'Check OAS Snapshot',
     agents: spotAgent('n2-standard-2', spotZones.n2),
     key: 'check_oas_snapshot',
-    depends_on: ['build'],
     timeout_in_minutes: 60,
     retry: retry.agentLoss,
   }),

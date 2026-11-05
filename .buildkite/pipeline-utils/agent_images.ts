@@ -11,7 +11,7 @@ import { stringify } from 'yaml';
 import type { BuildkiteAgentTargetingRule } from './buildkite/index.ts';
 import { BuildkiteClient } from './buildkite/index.ts';
 import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels.ts';
-import { spotZones } from './step-library/presets.ts';
+import { pdBalanced, spotZones } from './step-library/presets.ts';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
@@ -90,7 +90,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) 
   const zonesToUse = spotZones.n2.join(',');
   const additionalProps =
     {
-      spot: { preemptible: true, spotZones: zonesToUse },
+      spot: { preemptible: true, spotZones: zonesToUse, ...pdBalanced },
       virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
     }[addition] || {};
 
