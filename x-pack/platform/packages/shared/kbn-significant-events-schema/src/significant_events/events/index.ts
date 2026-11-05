@@ -12,7 +12,6 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
-  MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
@@ -81,38 +80,6 @@ export const SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.RECOVERING,
 ] as const;
 
-/**
- * One investigation run attached to this significant event.
- * `workflow_execution_id` holds the investigation id, which is its Agent Builder conversation id;
- * the shared investigations API (`GET /internal/investigations/investigations/{id}`) is the
- * single source of truth for the investigation's content; this entry records the run's timestamps
- * and terminal outcome. Entries written before investigations were conversations hold a workflow
- * execution id, which that API does not know. The field keeps its name so stored events stay
- * valid.
- */
-export const significantEventInvestigationSchema = lazySchema(() =>
-  z.object({
-    workflow_execution_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('ID of the investigation (its Agent Builder conversation id).'),
-    started_at: isoDateTime({ offset: true }).describe('When this investigation run started.'),
-    completed_at: isoDateTime({ offset: true })
-      .optional()
-      .describe(
-        'When this investigation run finished. Absent while the investigation is still running.'
-      ),
-    outcome: z
-      .enum(['completed', 'failed'])
-      .optional()
-      .describe('Terminal outcome of this run. Absent while running or on older attachments.'),
-  })
-);
-export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
-
-/** Status of a significant event's investigation, as the significant events API reports it. */
-export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
-
 export const significantEventSchema = lazySchema(() =>
   significantEventBaseSchema.extend({
     '@timestamp': isoDateTime({ offset: true }),
@@ -130,7 +97,6 @@ export const significantEventSchema = lazySchema(() =>
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
       ),
-    investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
   })
 );
 
@@ -145,4 +111,11 @@ export interface SignificantEventResponse extends SignificantEvent {
   created_at: string;
   /** The `alert.id` of the series' latest version: the episode an operator deactivation addresses. */
   episode_id?: string;
+  /**
+   * Where the investigation of this event's alert stands, set by the events list. `unknown` means
+   * the lookup failed, not that there is no investigation.
+   */
+  investigation_state?: 'not_started' | 'in_progress' | 'completed' | 'unknown';
+  /** The investigation `investigation_state` refers to, when the list resolved one. */
+  investigation_id?: string;
 }

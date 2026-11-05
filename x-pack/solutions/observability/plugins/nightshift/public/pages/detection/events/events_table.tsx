@@ -35,6 +35,7 @@ import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import {
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATE_UNKNOWN_TOOLTIP,
   SIGNIFICANT_EVENT_STATUS_ICONS,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../../../components/entities/significant_event/significant_event_status';
@@ -174,6 +175,15 @@ export const EventsTable = ({
         render: (event: SignificantEventResponse) => {
           const state = getInvestigationState(event);
           const label = SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[state];
+          if (state === 'unknown') {
+            return (
+              <EuiToolTip content={SIGNIFICANT_EVENT_INVESTIGATION_STATE_UNKNOWN_TOOLTIP}>
+                <EuiText size="s" color="subdued" tabIndex={0}>
+                  {label}
+                </EuiText>
+              </EuiToolTip>
+            );
+          }
           if (state === 'in_progress') {
             return (
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
@@ -201,7 +211,9 @@ export const EventsTable = ({
         align: 'right',
         render: (event: SignificantEventResponse) => {
           // Both open the event; the flyout runs, restarts and reviews investigations.
-          const hasInvestigation = getInvestigationState(event) !== 'not_started';
+          const investigationState = getInvestigationState(event);
+          const hasInvestigation =
+            investigationState === 'in_progress' || investigationState === 'completed';
           const label = hasInvestigation ? VIEW_INVESTIGATION_LABEL : INVESTIGATE_LABEL;
           return (
             <EuiToolTip content={label} disableScreenReaderOutput>

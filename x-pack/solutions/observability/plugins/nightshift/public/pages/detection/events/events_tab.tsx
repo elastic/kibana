@@ -22,6 +22,7 @@ import {
   EMPTY_BODY,
   EMPTY_TITLE,
   EVENT_NOT_FOUND_TOAST_TITLE,
+  INVESTIGATION_FILTER_ERROR_MESSAGE,
   LIST_ERROR_MESSAGE,
   LIST_ERROR_TITLE,
   RETRY_LABEL,
@@ -161,11 +162,11 @@ export const EventsTab = ({
         onSeverityChange={setSeverity}
       />
       <EuiSpacer size="m" />
-      {eventsQuery.isError && !eventsQuery.data ? (
+      {eventsQuery.isError && (!eventsQuery.data || eventsQuery.isPreviousData) ? (
         <KbnDangerCallout
           announceOnMount
           title={LIST_ERROR_TITLE}
-          text={LIST_ERROR_MESSAGE}
+          text={investigation.length ? INVESTIGATION_FILTER_ERROR_MESSAGE : LIST_ERROR_MESSAGE}
           size="s"
           data-test-subj="nightshiftDetectionEventsError"
           actionProps={{

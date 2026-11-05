@@ -47,13 +47,10 @@ export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
   type SignificantEventResponse,
-  type SignificantEventInvestigation,
-  type InvestigationRunStatus,
   type SignificantEventStatus,
   type SignificantEventManualStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
-  significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventManualStatusSchema,
