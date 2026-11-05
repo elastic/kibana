@@ -179050,7 +179050,52 @@ components:
         type:
           type: string
         value:
-          type: string
+          anyOf:
+            - type: string
+            - additionalProperties: false
+              type: object
+              properties:
+                format:
+                  maxLength: 1024
+                  type: string
+                from:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                gt:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                gte:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                lt:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                lte:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                to:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+            - items:
+                anyOf:
+                  - maxLength: 1024
+                    type: string
+                  - type: number
+                  - type: boolean
+              maxItems: 1000
+              type: array
     Kibana_HTTP_APIs_SLOGroupBy:
       anyOf:
         - anyOf:
