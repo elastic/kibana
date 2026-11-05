@@ -151,7 +151,15 @@ export const createOnboardingClient = ({
     },
 
     enable: async (request) => {
-      const { agentBuilder, agentAvailability, assistantEnabled, actions, elasticsearch, cloud, esHosts } = getDeps();
+      const {
+        agentBuilder,
+        agentAvailability,
+        assistantEnabled,
+        actions,
+        elasticsearch,
+        cloud,
+        esHosts,
+      } = getDeps();
       if (!agentBuilder || !agentAvailability) {
         throw new OnboardingUnavailableError('Agent Builder is not available');
       }
