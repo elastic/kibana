@@ -89,6 +89,13 @@ describe('PositiveControlRecall evaluator', () => {
     it('scores 0 when neither group is cited', async () => {
       expect(await run([[]], anyOf)).toMatchObject({ score: 0, label: 'missed' });
     });
+
+    it('credits one discovery merging both groups when the gold forbids no pair', async () => {
+      expect(await run([['p1', 'p2', 'p3', 's1', 's2', 's3']], anyOf)).toMatchObject({
+        score: 1,
+        label: 'recalled',
+      });
+    });
   });
 
   describe('forbidden merges', () => {

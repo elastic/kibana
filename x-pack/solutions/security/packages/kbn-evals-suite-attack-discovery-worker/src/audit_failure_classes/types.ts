@@ -22,6 +22,10 @@ export interface AuditAlert {
   fields: Readonly<Record<string, string | number>>;
 }
 
+export type AuditGoldVariantOverride = Partial<
+  Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf' | 'forbiddenCoCitation'>
+>;
+
 /** Gold labels, declared as data per scenario and read by the code evaluators. */
 export interface AuditGold {
   /** Named sets of alert ids that belong to one real-world story or principal. */
@@ -37,13 +41,12 @@ export interface AuditGold {
    */
   requiredAnyOf?: readonly string[];
   /**
-   * Per-variant replacement of the recall target, for scenarios where the input of one variant
-   * cannot support the gold of another. An override replaces both `requiredGroup` and
-   * `requiredAnyOf`.
+   * Per-variant replacement of the recall target and the forbidden pairs, for scenarios where the
+   * input of one variant cannot support the gold of another. An override replaces both
+   * `requiredGroup` and `requiredAnyOf`; `forbiddenCoCitation` is replaced only when the override
+   * sets it (`[]` means no pair is forbidden in that variant).
    */
-  variantOverrides?: Partial<
-    Record<AuditInputVariant, Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf'>>
-  >;
+  variantOverrides?: Partial<Record<AuditInputVariant, AuditGoldVariantOverride>>;
   /**
    * Groups whose alerts alone establish malicious activity. Containment advice that cites only
    * these groups is not scored by `ConditionalRemediation`; advice that cites anything else is.

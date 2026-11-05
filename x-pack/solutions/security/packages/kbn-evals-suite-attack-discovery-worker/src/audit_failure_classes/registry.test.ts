@@ -168,6 +168,30 @@ describe('audit failure class registry', () => {
         /must declare a recall target/,
       ],
       [
+        'a variant override forbidding a pair of unknown groups',
+        {
+          variantOverrides: {
+            baseline: {
+              requiredAnyOf: [firstGroup],
+              forbiddenCoCitation: [['no-such-group', secondGroup]] as Array<[string, string]>,
+            },
+          },
+        },
+        /unknown group/,
+      ],
+      [
+        'a variant override forbidding a pair of one group',
+        {
+          variantOverrides: {
+            baseline: {
+              requiredAnyOf: [firstGroup],
+              forbiddenCoCitation: [[firstGroup, firstGroup]] as Array<[string, string]>,
+            },
+          },
+        },
+        /two distinct groups/,
+      ],
+      [
         'both requiredGroup and requiredAnyOf',
         { requiredAnyOf: [firstGroup] },
         /both requiredGroup and requiredAnyOf/,
@@ -235,20 +259,55 @@ describe('audit failure class registry', () => {
       ).toEqual(gold);
     });
 
-    it('requires the production group in both enriched variants', () => {
+    it('forbids no pair in baseline, where the input cannot separate the groups', () => {
+      expect(getGoldForVariant(scenario.gold, 'baseline').forbiddenCoCitation).toEqual([]);
+      expect(
+        resolveAuditReference({ scenarioId: scenario.id, inputVariant: 'baseline' })?.gold
+          .forbiddenCoCitation
+      ).toEqual([]);
+    });
+
+    it('requires the production group and keeps the pair apart in both enriched variants', () => {
       for (const variant of ['enriched', 'enriched_context'] as const) {
         expect(getGoldForVariant(scenario.gold, variant)).toMatchObject({
           requiredGroup: 'prod-deploy-bot',
+          forbiddenCoCitation: [['sandbox-deploy-bot', 'prod-deploy-bot']],
         });
       }
     });
+
+    it('keeps the scenario-level pairs for a variant whose override does not set them', () => {
+      const gold = {
+        ...scenario.gold,
+        variantOverrides: { baseline: { requiredAnyOf: [left] } },
+      };
+      expect(getGoldForVariant(gold, 'baseline').forbiddenCoCitation).toEqual(
+        scenario.gold.forbiddenCoCitation
+      );
+    });
+
+    it.each(AUDIT_SCENARIOS.map((candidate) => [candidate.id, candidate] as const))(
+      '%s: no variant forbids a pair the input of that variant cannot separate',
+      (_id, candidate) => {
+        const unseparable = AUDIT_INPUT_VARIANTS.flatMap((variant) =>
+          getGoldForVariant(candidate.gold, variant).forbiddenCoCitation.flatMap(([a, b]) =>
+            separatingFields(candidate, variant, a, b).filter(
+              (field) => !NON_IDENTIFYING_BASELINE_FIELDS.includes(field)
+            ).length === 0 && candidate.gold.expectedDiscoveries === 'atLeastOne'
+              ? [{ variant, pair: [a, b] }]
+              : []
+          )
+        );
+        expect(unseparable).toEqual([]);
+      }
+    );
 
     it.each(AUDIT_SCENARIOS.map((candidate) => [candidate.id, candidate] as const))(
       '%s: a single required group is separable from its forbidden partner in that variant',
       (_id, candidate) => {
         const checks = AUDIT_INPUT_VARIANTS.flatMap((variant) => {
-          const { requiredGroup } = getGoldForVariant(candidate.gold, variant);
-          const partners = candidate.gold.forbiddenCoCitation.flatMap(([a, b]) =>
+          const { requiredGroup, forbiddenCoCitation } = getGoldForVariant(candidate.gold, variant);
+          const partners = forbiddenCoCitation.flatMap(([a, b]) =>
             a === requiredGroup ? [b] : b === requiredGroup ? [a] : []
           );
           return requiredGroup === undefined

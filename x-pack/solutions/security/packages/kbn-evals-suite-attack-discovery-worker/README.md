@@ -135,6 +135,10 @@ Per-scenario gold:
 | `positive-chain-with-noise`           | TP                                       |
 | `same-display-name-cross-account`     | inconclusive (TP also accepted)          |
 
+`same-display-name-cross-account` forbids no co-citation pair in its baseline run (the baseline only
+checks that a story is reported). The two groups are separated in the enriched variants, which keep
+the forbidden pair (`AuditGoldVariantOverride` in `types.ts`).
+
 The suite runs the worker with `autonomy: 'manual'` so that TP and inconclusive verdicts stop at the
 escalation gate instead of proceeding.
 
