@@ -74,7 +74,7 @@ export const AiSummary: FC<Props> = ({ jobId, timestamp, endTimestamp }) => {
       paddingSize="m"
     >
       {summary?.isLoading ? (
-        <EuiSkeletonText lines={2} data-test-subj="mlDiscoverADAnomalyAiSummaryLoading" />
+        <EuiSkeletonText lines={3} data-test-subj="mlDiscoverADAnomalyAiSummaryLoading" />
       ) : null}
       {summary?.text ? (
         <EuiText size="s" data-test-subj="mlDiscoverADAnomalyAiSummaryText">
