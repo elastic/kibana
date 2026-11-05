@@ -667,7 +667,6 @@ const createWorldIndex = async ({
   log: ToolingLog;
   index: string;
 }): Promise<void> => {
-  log.info(`[ad-worker] creating world index ${index} with keyword host and user fields`);
   try {
     await esClient.indices.create({
       index,
@@ -680,11 +679,14 @@ const createWorldIndex = async ({
         },
       },
     });
+    log.info(`[ad-worker] created world index ${index} with keyword host and user fields`);
   } catch (error) {
-    if (!DATA_STREAMS_ONLY.test(errorMessage(error))) throw error;
+    const message = errorMessage(error);
+    // A concurrent seed may have created it between the existence check and this call.
+    if (ALREADY_EXISTS.test(message)) return;
+    if (!DATA_STREAMS_ONLY.test(message)) throw error;
     log.info(`[ad-worker] ${index} matches a data stream template; creating a data stream`);
     await esClient.indices.createDataStream({ name: index }).catch((createError) => {
-      // A concurrent seed may have created it between the refusal and this call.
       if (!ALREADY_EXISTS.test(errorMessage(createError))) throw createError;
     });
   }

@@ -158,7 +158,7 @@ export interface EnabledFloorWorker {
 }
 
 /** `settings.concurrency.max` of the floor and runner workflows (both `cancel-in-progress`). */
-const WORKFLOW_CONCURRENCY_MAX = 1;
+export const WORKFLOW_CONCURRENCY_MAX = 1;
 /**
  * The running execution plus the one it is cancelling. Only emptiness and a few ids for the log
  * matter here (cancelling is workflow-wide), so a single page is enough and nothing paginates.
@@ -325,18 +325,20 @@ export const enableFloorWorker = async ({
       `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
     );
   };
-  await patchFloorWorker(fetch, spaceId, {
-    enabled: true,
-    settingsRevision: before.settingsRevision ?? null,
-    settings: {
-      serviceAccountId,
-      autonomy: 'manual',
-      scheduleInterval: FLOOR_SCHEDULE_INTERVAL,
-    },
-  });
-  // The caller only receives `restore` when this resolves, so a failure after the PATCH must put the
-  // worker back itself or it stays enabled in the eval space.
+  // The caller only receives `restore` when this resolves, so a failure from the PATCH onward must
+  // put the worker back itself or it stays enabled in the eval space. The PATCH is inside the try
+  // because one that times out may still have been applied; restoring a worker that never got
+  // enabled is harmless.
   try {
+    await patchFloorWorker(fetch, spaceId, {
+      enabled: true,
+      settingsRevision: before.settingsRevision ?? null,
+      settings: {
+        serviceAccountId,
+        autonomy: 'manual',
+        scheduleInterval: FLOOR_SCHEDULE_INTERVAL,
+      },
+    });
     const after = await readFloorWorker(fetch, spaceId);
     if (!after.enabled || !after.workflowId) {
       throw new Error(

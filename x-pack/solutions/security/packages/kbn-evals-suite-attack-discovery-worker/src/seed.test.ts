@@ -884,6 +884,95 @@ describe('seedScenario world indices', () => {
     ]);
   });
 
+  describe('data stream fallback', () => {
+    const dataStreamsOnly = (index: string) =>
+      new Error(
+        `illegal_argument_exception: cannot create index with name [${index}], because it matches with template [logs] that creates data streams only, use create data stream api instead`
+      );
+    const seedWith = async ({
+      create,
+      createDataStream,
+      info = jest.fn(),
+    }: {
+      create: jest.Mock;
+      createDataStream: jest.Mock;
+      info?: jest.Mock;
+    }) => {
+      if (!scenario) throw new Error('no scenario');
+      await seedScenario({
+        esClient: searchableEs({
+          exists: jest.fn(async ({ index }: { index: string }) =>
+            index.startsWith('entities-latest-')
+          ),
+          indices: { create, createDataStream },
+          bodiesById: new Map(),
+        }),
+        log: { info } as unknown as ToolingLog,
+        scenario,
+        spaceId: 's',
+        wait: async () => {},
+      });
+    };
+    const refuseEndpointEvents = jest.fn(async ({ index }: { index: string }) => {
+      if (index.startsWith('logs-endpoint.events.')) throw dataStreamsOnly(index);
+      return {};
+    });
+
+    it('logs the data stream, not a keyword-mapped index, for the path it took', async () => {
+      const info = jest.fn();
+      await seedWith({
+        create: refuseEndpointEvents,
+        createDataStream: jest.fn(async () => ({})),
+        info,
+      });
+      const messages = info.mock.calls.map(([message]) => String(message));
+      expect(messages).toContainEqual(expect.stringContaining('creating a data stream'));
+      expect(
+        messages.some((message) => message.includes('logs-endpoint.events.process-s with keyword'))
+      ).toBe(false);
+    });
+
+    it('logs the keyword-mapped index when a plain create succeeds', async () => {
+      const info = jest.fn();
+      await seedWith({
+        create: jest.fn(async () => ({})),
+        createDataStream: jest.fn(async () => ({})),
+        info,
+      });
+      expect(info.mock.calls.map(([message]) => String(message))).toContainEqual(
+        expect.stringContaining('with keyword host and user fields')
+      );
+    });
+
+    it('accepts a data stream that a concurrent seed created first', async () => {
+      const createDataStream = jest.fn(async () => {
+        throw new Error('resource_already_exists_exception: data_stream already exists');
+      });
+      await expect(
+        seedWith({ create: refuseEndpointEvents, createDataStream })
+      ).resolves.toBeUndefined();
+      expect(createDataStream).toHaveBeenCalled();
+    });
+
+    it('rethrows any other data stream create failure', async () => {
+      const createDataStream = jest.fn(async () => {
+        throw new Error('security_exception: not allowed');
+      });
+      await expect(seedWith({ create: refuseEndpointEvents, createDataStream })).rejects.toThrow(
+        /security_exception/
+      );
+    });
+
+    it('accepts a plain index that a concurrent seed created first, without a data stream', async () => {
+      const create = jest.fn(async () => {
+        throw new Error('resource_already_exists_exception: index already exists');
+      });
+      const createDataStream = jest.fn(async () => ({}));
+      await expect(seedWith({ create, createDataStream })).resolves.toBeUndefined();
+      expect(createDataStream).not.toHaveBeenCalled();
+    });
+  });
+
   it('rethrows a create failure that is not about data streams', async () => {
     if (!scenario) throw new Error('no scenario');
     const create = jest.fn(async () => {

@@ -189,6 +189,52 @@ describe('enableFloorWorker', () => {
     expect(patches(fetch)[1]).toEqual({ enabled: false });
   });
 
+  it('puts back the previous settings, with no enabled key, when a worker that was already enabled fails to settle', async () => {
+    const previous = {
+      serviceAccountId: 'sa-old',
+      autonomy: 'supervised',
+      scheduleInterval: '30m',
+    };
+    let reads = 0;
+    const fetch = fetchWith((path, o) => {
+      if (o?.method === 'PATCH') return {};
+      if (path.includes('/executions')) throw new Error('listing failed');
+      reads += 1;
+      return {
+        workers: [
+          reads === 1
+            ? worker({ enabled: true, settings: previous })
+            : worker({ enabled: true, workflowId: 'wf-1', settingsRevision: 4 }),
+        ],
+      };
+    });
+    await expect(
+      enableFloorWorker({ fetch: fetch as unknown as HttpHandler, log, serviceAccountId: 'sa-1' })
+    ).rejects.toThrow(/listing failed/);
+    const [, restored] = patches(fetch);
+    expect(restored).toEqual({ settingsRevision: 4, settings: previous });
+    expect(restored.enabled).toBeUndefined();
+  });
+
+  it('attempts a restore and rethrows the original error when the enabling PATCH itself rejects', async () => {
+    let reads = 0;
+    const attempted: unknown[] = [];
+    const fetch = fetchWith((path, o) => {
+      if (o?.method === 'PATCH') {
+        const body = JSON.parse((o as { body: string }).body);
+        attempted.push(body);
+        if (body.enabled === true) throw new Error('request timed out');
+        return {};
+      }
+      reads += 1;
+      return { workers: [worker({ settingsRevision: reads })] };
+    });
+    await expect(
+      enableFloorWorker({ fetch: fetch as unknown as HttpHandler, log, serviceAccountId: 'sa-1' })
+    ).rejects.toThrow(/request timed out/);
+    expect(attempted[1]).toEqual({ enabled: false });
+  });
+
   it('puts the worker back when the read-back says it did not enable', async () => {
     const { fetch, promise } = run({}, { enabled: false });
     await expect(promise).rejects.toThrow(/did not enable/);
