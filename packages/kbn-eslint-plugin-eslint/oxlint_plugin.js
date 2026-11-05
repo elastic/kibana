@@ -17,6 +17,7 @@ module.exports = eslintCompatPlugin({
     module_migration: require('./rules/module_migration'),
     no_export_all: require('./rules/no_export_all'),
     no_async_promise_body: require('./rules/no_async_promise_body'),
+    no_uncleared_race_timeout: require('./rules/no_uncleared_race_timeout'),
     no_async_foreach: require('./rules/no_async_foreach'),
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),

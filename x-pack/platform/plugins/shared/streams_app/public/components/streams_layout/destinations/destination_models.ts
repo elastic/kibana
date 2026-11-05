@@ -16,17 +16,19 @@ import {
 } from '@kbn/streams-schema';
 import type { UnitDestination } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
-import type {
-  AutoWritePatternValidationError,
-  DestinationSignal,
-  DestinationSignalTargets,
-  DestinationViewModel,
-  DocsWritePatternValidationError,
-  ElasticsearchDestinationFormData,
-  FreeFormIndexValidationError,
-  PrefixedDestinationSignal,
-  S3DestinationViewModel,
-  StaticIndexValidationError,
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type AutoWritePatternValidationError,
+  type DestinationSignal,
+  type DestinationSignalTargets,
+  type DestinationViewModel,
+  type DocsWritePatternValidationError,
+  type ElasticsearchDestinationFormData,
+  type FreeFormIndexValidationError,
+  type PrefixedDestinationSignal,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
+  type StaticIndexValidationError,
 } from './types';
 
 /** An index containing `{{` or `${` is a template, which the transpiler rejects (E035). */
@@ -44,7 +46,8 @@ export const PREFIXED_DESTINATION_SIGNALS: PrefixedDestinationSignal[] = [
 ];
 
 const AUTO_WRITE_PATTERN_INVALID_CHARS = /[\\/?"<>|,#:\s]/;
-const WHITESPACE_OR_CONTROL_CHARS = /[\s\p{Cc}]/u;
+/** streams-transpiler#311 rejects Unicode whitespace or control characters in an index. */
+const WHITESPACE_OR_CONTROL_CHARS = /[\p{White_Space}\p{Cc}]/u;
 /** The managed bulk receiver only accepts an `_index` under these prefixes. */
 const DOCS_INDEX_PREFIX = /^(logs|metrics|traces)-/;
 
@@ -171,11 +174,37 @@ export const toS3DestinationViewModel = (destination: UnitDestination): S3Destin
   prefix: readConfigString(destination, 'prefix'),
 });
 
+export const toRemoteElasticsearchDestinationViewModel = (
+  destination: UnitDestination
+): RemoteElasticsearchDestinationViewModel => {
+  const signals = readUnitDestinationSignals(destination);
+  const indexBySignal: Partial<Record<DestinationSignal, string>> = {};
+  for (const signal of signals) {
+    const index = readUnitDestinationConfigValue(destination, 'index', signal);
+    if (typeof index === 'string' && index.trim()) {
+      indexBySignal[signal] = index;
+    }
+  }
+  return {
+    id: destination.id,
+    name: destination.name ?? destination.id,
+    description: destination.description?.trim() || undefined,
+    type: REMOTE_ELASTICSEARCH_TYPE,
+    signals,
+    endpoint: readConfigString(destination, 'endpoint') ?? '',
+    mode: Object.keys(indexBySignal).length > 0 ? 'static' : 'auto',
+    indexBySignal,
+  };
+};
+
 export const toDestinationViewModel = (
   destination: UnitDestination
 ): DestinationViewModel | undefined => {
   if (destination.type === 's3') {
     return toS3DestinationViewModel(destination);
+  }
+  if (destination.type === REMOTE_ELASTICSEARCH_TYPE) {
+    return toRemoteElasticsearchDestinationViewModel(destination);
   }
   if (destination.type !== LOCAL_ELASTICSEARCH_TYPE) {
     return undefined;
@@ -280,20 +309,10 @@ export const validateAutoWritePattern = (
   return undefined;
 };
 
-/**
- * A static index name the transpiler accepts (`isValidStaticIndexName`), with no shape rule.
- * A leading dot is rejected too, as Elasticsearch reserves those names for hidden and system indices.
- */
-export const validateFreeFormIndexName = (
-  index: string
-): FreeFormIndexValidationError | undefined => {
-  const value = index.trim();
-  if (!value) {
-    return undefined;
-  }
-  if (indexUsesTemplate(value)) {
-    return 'template';
-  }
+/** Name rules the transpiler applies to every static index (`isValidStaticIndexName`). */
+const getIndexNameError = (
+  value: string
+): Exclude<FreeFormIndexValidationError, 'template'> | undefined => {
   if (
     INVALID_STREAM_NAME_CHARACTERS.some((char) => value.includes(char)) ||
     WHITESPACE_OR_CONTROL_CHARS.test(value)
@@ -305,13 +324,41 @@ export const validateFreeFormIndexName = (
   }
   if (
     RESERVED_STREAM_NAMES.includes(value) ||
-    value.startsWith('.') ||
     INVALID_STREAM_NAME_PREFIXES.some((prefix) => value.startsWith(prefix)) ||
     new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES
   ) {
     return 'invalidName';
   }
   return undefined;
+};
+
+/** A remote index is a full name, so no signal prefix is required. */
+export const validateRemoteIndex = (index: string): FreeFormIndexValidationError | undefined => {
+  const value = index.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (indexUsesTemplate(value)) {
+    return 'template';
+  }
+  return getIndexNameError(value);
+};
+
+/**
+ * A local index with no shape rule. A leading dot is rejected too, as Elasticsearch reserves
+ * those names for hidden and system indices.
+ */
+export const validateFreeFormIndexName = (
+  index: string
+): FreeFormIndexValidationError | undefined => {
+  const value = index.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (indexUsesTemplate(value)) {
+    return 'template';
+  }
+  return getIndexNameError(value) ?? (value.startsWith('.') ? 'invalidName' : undefined);
 };
 
 export const validateStaticSignalIndex = (
