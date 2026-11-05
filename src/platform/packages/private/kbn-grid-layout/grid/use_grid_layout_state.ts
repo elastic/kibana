@@ -100,6 +100,7 @@ export const useGridLayoutState = ({
           'columnCount',
           'allowGaps',
           'shiftSnapSize',
+          'showResizeGauge',
         ])
       )
     )

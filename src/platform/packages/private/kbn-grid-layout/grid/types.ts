@@ -36,6 +36,8 @@ export interface GridSettings {
    * this many columns and rows instead of one.
    */
   shiftSnapSize?: number;
+  /** Whether a panel shows its size in columns and rows while it is resized. Defaults to true. */
+  showResizeGauge?: boolean;
 }
 
 /** The grid settings that change how a layout is resolved. */

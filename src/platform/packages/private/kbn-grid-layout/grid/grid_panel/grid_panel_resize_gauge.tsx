@@ -30,7 +30,8 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     ])
       .pipe(skip(1))
       .subscribe(([activePanel, currentPanel]) => {
-        if (!currentPanel) {
+        const { showResizeGauge = true } = gridLayoutStateManager.runtimeSettings$.getValue();
+        if (!currentPanel || !showResizeGauge) {
           setIsResizing(false);
           return;
         }

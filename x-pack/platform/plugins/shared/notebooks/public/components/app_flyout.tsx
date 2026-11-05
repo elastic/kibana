@@ -443,6 +443,7 @@ const AppGrid = ({
       keyboardDragTopLimit: 0,
       allowGaps: app.freePlacement ?? false,
       shiftSnapSize: snapToGrid ? undefined : scale,
+      showResizeGauge: snapToGrid,
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement]
   );
