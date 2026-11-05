@@ -42,6 +42,7 @@ module.exports = eslintCompatPlugin({
     scout_no_cross_boundary_imports: require('./rules/scout_no_cross_boundary_imports'),
     scout_no_at_in_test_titles: require('./rules/scout_no_at_in_test_titles'),
     scout_no_locators: require('./rules/scout_no_locators'),
+    scout_no_raw_locators: require('./rules/scout_no_raw_locators'),
     scout_no_raw_eui_selectors: require('./rules/scout_no_raw_eui_selectors'),
     scout_no_promise_all_with_playwright_apis: require('./rules/scout_no_promise_all_with_playwright_apis'),
     security_imports_restriction: require('./rules/security_imports_restriction'),
