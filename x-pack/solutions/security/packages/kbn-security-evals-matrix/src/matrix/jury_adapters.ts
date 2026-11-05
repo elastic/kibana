@@ -8,14 +8,9 @@
 /**
  * Per-suite jury adapters for judge replay.
  *
- * `ext rejudge` originally hardcoded the persona-matrix jury: it always built
- * the correctness/groundedness evaluators and always emitted Factuality,
- * Relevance, Groundedness and Sequence Accuracy. Pointing it at another suite
- * therefore produced a confident, exit-0 result that measured the wrong thing --
- * an Attack Discovery replay came back MAJOR_INACCURACIES on 244/253 cells
- * because a prose-comparison judge was grading structured discoveries against a
- * reference it had never been given. The scores looked like model quality and
- * were really an instrument mismatch.
+ * Replaying a suite with another suite's jury exits 0 but measures the wrong
+ * thing: a prose-comparison judge grading structured Attack Discovery output
+ * looks like model quality and is really an instrument mismatch.
  *
  * A jury adapter answers two questions per suite:
  *   1. which evaluator names the suite's judged column consists of, and

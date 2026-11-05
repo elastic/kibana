@@ -39,10 +39,6 @@ function joinValue(doc: unknown, path: string): string {
  * looks like a model or judge regression but is a harness defect. When adding a
  * judge here, forward the whole trajectory, not just the part today's judges
  * happen to use.
- *
- * Re-running the full sweep to change a judge cost ~68min of wall clock and 25
- * VMs on 2026-09-06, of which ~83% was VM provisioning and stack boot. Replay
- * reduces that to the judge's own latency.
  */
 
 /**
@@ -50,7 +46,7 @@ function joinValue(doc: unknown, path: string): string {
  * dataset.
  *
  * Golden score documents do NOT carry the reference answer: `example.output`
- * is empty on every stored document (verified across the whole index). The
+ * is empty on every stored document. The
  * suite mirrors its dataset's `output.reference` into `expected.expected` at
  * run time, so a replay must re-join the dataset by example id. Grading
  * against a missing reference would score every answer as inaccurate.

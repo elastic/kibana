@@ -96,15 +96,8 @@ export const personaMatrixAdapter: ReferenceAdapter = {
 /**
  * attack-discovery: criteria[] + expected discoveries, joined by scenario key.
  *
- * Golden does NOT store a positional `example.id` for this suite: every AD score
- * document carries `example.id = '0'` regardless of scenario, because each AD
- * scenario is registered as its own single-example dataset. Joining on the array
- * index therefore matches only index 0 and -- worse -- applies scenario 0's
- * ground truth to every other scenario, manufacturing confident wrong verdicts.
- *
- * `example.metadata.scenarioKey` is the field golden actually varies per
- * scenario, so it is the join key. Verified 2026-09-08 against 351 golden docs:
- * example.id was '0' for 351/351 across 9 distinct dataset names.
+ * Joining on the array index would apply scenario 0's ground truth to every
+ * other scenario (see the file header), manufacturing confident wrong verdicts.
  */
 export const attackDiscoveryAdapter: ReferenceAdapter = {
   name: 'attack-discovery',
@@ -291,17 +284,14 @@ function exampleKey(example: DatasetExample, index: number): string {
 /**
  * Build the STRUCTURED ground truth, keyed the same way as the prose reference.
  *
- * `build()` renders truth as prose because the correctness judge compares text.
- * Suite-native evaluators do not: Attack Discovery's Criteria evaluator wants
- * the `criteria[]` array and its Rubric evaluator wants the `attackDiscoveries`
- * objects. Re-deriving those from the rendered prose would mean parsing back out
- * of a lossy format, so the raw `output` is exposed under the same key the
- * prose lookup uses.
+ * Attack Discovery's Criteria evaluator wants the `criteria[]` array and its
+ * Rubric evaluator wants the `attackDiscoveries` objects; parsing those back out
+ * of the lossy prose from `build()` is not an option, so the raw `output` is
+ * exposed under the same key.
  *
- * Both maps MUST derive their key identically. Keying this by index while
- * `build()` keys by scenario key returns `undefined` for every lookup, and a
- * jury that requires structured truth then reports the cell as ungradable --
- * which reads as missing model output rather than as a key mismatch.
+ * Both maps MUST derive their key identically. A mismatch returns `undefined`
+ * for every lookup, and the cell then reads as ungradable (missing model output)
+ * rather than as a key mismatch.
  */
 export function buildStructuredReferences(
   examples: DatasetExample[]
