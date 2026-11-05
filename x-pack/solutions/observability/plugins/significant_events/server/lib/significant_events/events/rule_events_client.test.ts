@@ -575,6 +575,20 @@ describe('RuleEventsClient', () => {
       expect(commands).toContainEqual('SORT sort_rank DESC, created_at DESC, _id ASC');
     });
 
+    it('sorts by the latest update timestamp', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      });
+
+      const { commands } = getPageRequest(query);
+      expect(commands).toContainEqual('SORT @timestamp DESC, created_at DESC, _id ASC');
+    });
+
     it('sorts missing alert statuses as active', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])

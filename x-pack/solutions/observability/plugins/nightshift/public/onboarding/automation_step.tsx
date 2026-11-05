@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -24,8 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
-import { useAgentConnectors } from '../sandbox_connectors/use_agent_connectors';
-import { useFetchSandboxConnectors } from '../sandbox_connectors/use_fetch_sandbox_connectors';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { InvestigationCardActions } from '../components/entities/investigation/investigation_card_actions';
+import { useInvestigationAssignees } from '../components/entities/investigation/use_investigation_assignees';
+import { useAgentConnectors } from '../data/sandbox_connectors/use_agent_connectors';
+import { useFetchSandboxConnectors } from '../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
   id: string;
@@ -154,6 +157,8 @@ function TrialInvestigationCard({
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
   const { in_progress: isActive } = investigation;
+  const investigations = useMemo(() => [investigation], [investigation]);
+  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <EuiPanel
@@ -164,7 +169,19 @@ function TrialInvestigationCard({
         overflow: hidden;
       `}
     >
-      {InvestigationCard && <InvestigationCard investigation={investigation} onClick={onClick} />}
+      {InvestigationCard && (
+        <InvestigationCard
+          investigation={investigation}
+          onClick={onClick}
+          actions={
+            <InvestigationCardActions
+              investigation={investigation}
+              assignees={renderAssignees(investigation)}
+              ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION}
+            />
+          }
+        />
+      )}
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
