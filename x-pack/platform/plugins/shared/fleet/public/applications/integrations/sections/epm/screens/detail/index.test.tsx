@@ -425,16 +425,20 @@ describe('When on integration detail', () => {
       });
 
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
     afterEach(() => {
       // @ts-ignore
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "custom" tab in navigation', () => {
-      expect(renderResult.getByTestId('tab-custom'));
-    });
+    it(
+      'should display "custom" tab in navigation',
+      async () => {
+        expect(await renderResult.findByTestId('tab-custom')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
     it('should display custom content when tab is clicked', async () => {
       act(() => {
