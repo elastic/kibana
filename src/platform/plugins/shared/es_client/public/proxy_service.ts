@@ -20,6 +20,7 @@ export const proxyService = (http: HttpSetup): EsClientPluginSetup => {
   const proxyFetch: ProxyFetch = ({ path, body, ...options }, rawResponse) =>
     // `no_unsafe_dynamic_http_path` warns here because it can't see that elasticsearch-js
     // already URI-encodes every path param, so `path` is safe to append as-is.
+    // codeql[js/kibana/unsafe-dynamic-http-path] elasticsearch-js URI-encodes every path param; the transport rejects "." and ".." segments
     http.fetch(`${ES_CLIENT_BASE_PATH}${path}`, {
       ...options,
       body: typeof body === 'object' ? JSON.stringify(body) : body,
