@@ -1127,6 +1127,9 @@ export const registerAiIndexRoutes = ({
             },
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_dreaming_get.yaml'),
+        },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const { aiIndexId } = request.params;
@@ -1182,6 +1185,9 @@ export const registerAiIndexRoutes = ({
               description: 'The write conflicted with a concurrent update.',
             },
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_dreaming_put.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
