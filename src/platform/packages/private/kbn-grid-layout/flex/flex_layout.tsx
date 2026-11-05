@@ -140,6 +140,7 @@ const styles = {
   layout: css({
     display: 'flex',
     flexWrap: 'wrap',
+    justifyContent: 'left',
     gap: 'calc(var(--kbnFlexGutterSize) * 1px)',
     padding: 'calc(var(--kbnFlexGutterSize) * 1px)',
     minHeight: 'calc(var(--kbnFlexRowHeight) * 1px)',
