@@ -1,0 +1,32 @@
+overlay: 1.0.0
+info:
+  title: Google Threat Intelligence API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/collections/{id}/mitre_tree'].get.parameters
+    description: >-
+      https://gtidocs.virustotal.com/reference/get-report-mitre-tree documents a `filter` query
+      parameter ("Filter MITRE TTPs by different properties") taking `mitre_namespace:` and
+      `ttp_source:` modifiers, e.g. `?filter=ttp_source:operational ttp_source:seen_in_iocs`.
+      This spec leaves it out.
+    update:
+      - name: filter
+        in: query
+        schema:
+          type: string
+  - target: $.paths['/files/{id}/behaviours'].get.parameters
+    description: >-
+      `behaviours` is a one-to-many relationship of File objects
+      (https://docs.virustotal.com/reference/files#relationships), and relationship URLs are
+      iterated as collections (https://docs.virustotal.com/reference/relationships), which take
+      `limit` and `cursor` (https://docs.virustotal.com/reference/collections). The spec gives
+      /files/{id}/{relationship} both, but leaves them out of this dedicated path.
+    update:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+      - name: cursor
+        in: query
+        schema:
+          type: string
