@@ -14,5 +14,7 @@
     "@kbn/scout",
     "@kbn/inference-common",
     "@kbn/test",
+    "@kbn/kbn-client",
+    "@kbn/agent-builder-server",
   ]
 }
