@@ -101,15 +101,14 @@ describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
     ).toBe(false);
   });
 
-  it('seeds the node list with the seed entity at hop 0', () => {
+  it('resolves the seed as hop 0 together with the traversed nodes, once, after the loop', () => {
     const engine = createWorkflowLiquidEngine();
     const init = findStepByName(parsed.steps, 'init') as Step;
-    const [seedNode] = (init.with as { nodes: Array<Record<string, unknown>> }).nodes;
+    const seedNode = (init.with as { seed_node: Record<string, unknown> }).seed_node;
     const context = {
       inputs: { seed_id: 'user:john.doe@acme.com@okta' },
       steps: { load_scenario: { output: { seed: { type: 'user' } } } },
     };
-
     expect(seedNode).toEqual({
       id: expect.any(String),
       hop: 0,
@@ -118,9 +117,42 @@ describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
     });
     expect(evaluate(engine, seedNode.id as string, context)).toBe('user:john.doe@acme.com@okta');
     expect(evaluate(engine, seedNode.type as string, context)).toBe('user');
+
+    const resolve = findStepByName(parsed.steps, 'resolve_nodes') as Step;
+    expect(resolve.type).toBe('entityStore.resolveEntityGraphTraversalNodes');
+    const seed = { id: 'user:john.doe@acme.com@okta', hop: 0, via: 'seed', type: 'user' };
+    const nodes = [{ id: 'group-1', hop: 1, via: 'member_of', type: 'group' }];
+    expect(
+      evaluate(engine, (resolve.with as { nodes: string }).nodes, {
+        consts: { empty: [] },
+        variables: { seed_node: seed, nodes },
+      })
+    ).toEqual([seed, ...nodes]);
   });
 
-  it('wires the two Security traversal steps around a bounded while loop', () => {
+  it('keeps a small loop state: no frontier, no visited list and no concatenation', () => {
+    const init = findStepByName(parsed.steps, 'init') as Step;
+    expect(Object.keys(init.with as object).sort()).toEqual([
+      'edges',
+      'hops_executed',
+      'nodes',
+      'seed_node',
+      'stop_reason',
+      'truncated',
+      'until_matches',
+    ]);
+    const advance = findStepByName(parsed.steps, 'advance') as Step;
+    expect(advance.with).toEqual({
+      edges: '${{ steps.run_hop.output.edges }}',
+      nodes: '${{ steps.run_hop.output.nodes }}',
+      hops_executed: '${{ steps.run_hop.output.hop_number }}',
+      truncated: '${{ steps.run_hop.output.truncated }}',
+      stop_reason: '{{ steps.run_hop.output.stop_reason }}',
+      until_matches: '${{ steps.run_hop.output.until_matches }}',
+    });
+  });
+
+  it('wires the traversal steps around a bounded while loop over variables', () => {
     const load = findStepByName(parsed.steps, 'load_scenario');
     expect(load?.type).toBe('entityStore.loadEntityGraphTraversalScenario');
 
@@ -130,14 +162,18 @@ describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
 
     const runHop = findStepByName(parsed.steps, 'run_hop');
     expect(runHop?.type).toBe('entityStore.runEntityGraphTraversalHop');
-    expect((runHop?.with as Record<string, string>).exclusions).toBe('${{ inputs.exclusions }}');
-    expect((runHop?.with as Record<string, string>).until).toBe(
-      '${{ steps.load_scenario.output.until }}'
-    );
+    expect(runHop?.with).toMatchObject({
+      hop: '${{ steps.load_scenario.output.hops[variables.hops_executed] }}',
+      hops_executed: '${{ variables.hops_executed }}',
+      seed_id: '{{ inputs.seed_id }}',
+      edges: '${{ variables.edges }}',
+      nodes: '${{ variables.nodes }}',
+      until_matches: '${{ variables.until_matches }}',
+      exclusions: '${{ inputs.exclusions }}',
+      until: '${{ steps.load_scenario.output.until }}',
+    });
 
-    const resolve = findStepByName(parsed.steps, 'resolve_nodes');
-    expect(resolve?.type).toBe('entityStore.resolveEntityGraphTraversalNodes');
-    expect((resolve?.with as Record<string, string>).nodes).toBe('${{ variables.nodes }}');
+    expect(runHop?.with).not.toHaveProperty('frontier');
 
     const emit = findStepByName(parsed.steps, 'emit');
     expect(emit?.type).toBe('workflow.output');
@@ -157,8 +193,9 @@ describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
     ];
     const context = (overrides: Record<string, unknown>) => ({
       steps: { load_scenario: { output: { hops } } },
-      variables: { stop_reason: '', hops_executed: 0, ...overrides },
+      variables: { stop_reason: '', hops_executed: 0, edges: [], ...overrides },
     });
+    const withTemplate = (key: string) => (runHop.with as Record<string, string>)[key];
 
     it('continues while no stop reason is set and hops remain', () => {
       expect(evaluate(engine, condition, context({}))).toBe(true);
@@ -175,9 +212,14 @@ describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
       expect(evaluate(engine, condition, context({ hops_executed: 2 }))).toBe(false);
     });
 
-    it('selects the hop for the current iteration', () => {
-      const hopTemplate = (runHop.with as Record<string, string>).hop;
-      expect(evaluate(engine, hopTemplate, context({ hops_executed: 1 }))).toEqual(hops[1]);
+    it('hands the hop its plan entry and the carried state from variables', () => {
+      const edges = [{ hop: 1 }];
+      expect(evaluate(engine, withTemplate('hop'), context({}))).toEqual(hops[0]);
+      expect(evaluate(engine, withTemplate('hop'), context({ hops_executed: 1 }))).toEqual(hops[1]);
+      expect(evaluate(engine, withTemplate('hops_executed'), context({ hops_executed: 1 }))).toBe(
+        1
+      );
+      expect(evaluate(engine, withTemplate('edges'), context({ edges }))).toEqual(edges);
     });
   });
 

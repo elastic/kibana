@@ -6,31 +6,23 @@
  */
 
 import type {
-  EntityGraphTraversalEuidType,
   ResolvedTraversalNode,
-  TraversalEntity,
   TraversalNode,
 } from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
-import { ENTITY_GRAPH_TRAVERSAL_EUID_TYPES } from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 import { HOP_QUERY_PREAMBLE } from './build_hop_query';
+import {
+  firstString,
+  readTraversalEntity,
+  TRAVERSAL_ENTITY_FIELDS,
+  type StoredTraversalEntity,
+} from './read_traversal_entity';
 import type { EsqlResult } from './run_hop';
 
 export const ENTITY_ID_FIELD = 'entity.id';
 export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
 /** Columns read from the entity store for each resolved node, in `KEEP` order. */
-export const RESOLVE_QUERY_COLUMNS = [
-  ENTITY_ID_FIELD,
-  'entity.name',
-  'entity.type',
-  'entity.sub_type',
-  'entity.EngineMetadata.Type',
-  'entity.source',
-  'asset.criticality',
-  'entity.risk.calculated_level',
-  'entity.risk.calculated_score_norm',
-  RESOLVED_TO_FIELD,
-] as const;
+export const RESOLVE_QUERY_COLUMNS = [ENTITY_ID_FIELD, ...TRAVERSAL_ENTITY_FIELDS] as const;
 
 export const DEFAULT_RESOLVE_CHUNK_SIZE = 500;
 
@@ -129,10 +121,8 @@ export const resolveNodes = async (
   };
 };
 
-interface StoredEntity {
+interface StoredEntity extends StoredTraversalEntity {
   id: string;
-  resolvedTo?: string;
-  entity: TraversalEntity;
 }
 
 const parseStoredEntities = (result: EsqlResult): StoredEntity[] => {
@@ -141,66 +131,22 @@ const parseStoredEntities = (result: EsqlResult): StoredEntity[] => {
   if (idIndex < 0) {
     throw new Error(`Resolve query result lacks the ${ENTITY_ID_FIELD} column`);
   }
-  const indexes = {
-    name: column('entity.name'),
-    type: column('entity.type'),
-    subType: column('entity.sub_type'),
-    engineType: column('entity.EngineMetadata.Type'),
-    sources: column('entity.source'),
-    criticality: column('asset.criticality'),
-    riskLevel: column('entity.risk.calculated_level'),
-    riskScore: column('entity.risk.calculated_score_norm'),
-    resolvedTo: column(RESOLVED_TO_FIELD),
-  };
-  const cell = (row: unknown[], index: number): unknown => (index >= 0 ? row[index] : undefined);
+  const indexes = new Map(RESOLVE_QUERY_COLUMNS.map((name) => [name, column(name)] as const));
 
   const entities: StoredEntity[] = [];
   for (const row of result.values) {
-    const id = firstString(cell(row, idIndex));
+    const id = firstString(row[idIndex]);
     if (id !== undefined) {
-      const engineType = firstString(cell(row, indexes.engineType));
-      const riskScore = cell(row, indexes.riskScore);
-      const sources = allStrings(cell(row, indexes.sources));
-      const entity: TraversalEntity = {
-        ...(firstString(cell(row, indexes.name)) !== undefined && {
-          name: firstString(cell(row, indexes.name)),
-        }),
-        ...(firstString(cell(row, indexes.type)) !== undefined && {
-          type: firstString(cell(row, indexes.type)),
-        }),
-        ...(firstString(cell(row, indexes.subType)) !== undefined && {
-          sub_type: firstString(cell(row, indexes.subType)),
-        }),
-        ...(isEuidType(engineType) && { engine_type: engineType }),
-        ...(sources.length > 0 && { sources }),
-        ...(firstString(cell(row, indexes.criticality)) !== undefined && {
-          criticality: firstString(cell(row, indexes.criticality)),
-        }),
-        ...(firstString(cell(row, indexes.riskLevel)) !== undefined && {
-          risk_level: firstString(cell(row, indexes.riskLevel)),
-        }),
-        ...(typeof riskScore === 'number' &&
-          Number.isFinite(riskScore) && {
-            risk_score: riskScore,
-          }),
-      };
-      const resolvedTo = firstString(cell(row, indexes.resolvedTo));
-      entities.push({ id, entity, ...(resolvedTo !== undefined && { resolvedTo }) });
+      const stored = readTraversalEntity((field) => {
+        const idx = indexes.get(field) ?? -1;
+        return idx >= 0 ? row[idx] : undefined;
+      });
+      entities.push({
+        id,
+        entity: stored?.entity ?? {},
+        ...(stored?.resolvedTo !== undefined && { resolvedTo: stored.resolvedTo }),
+      });
     }
   }
   return entities;
-};
-
-const isEuidType = (value: string | undefined): value is EntityGraphTraversalEuidType =>
-  value !== undefined && (ENTITY_GRAPH_TRAVERSAL_EUID_TYPES as readonly string[]).includes(value);
-
-/** ES|QL multi-values arrive as arrays; take the first string, ignore anything else. */
-const firstString = (value: unknown): string | undefined => {
-  const first = Array.isArray(value) ? value[0] : value;
-  return typeof first === 'string' && first.length > 0 ? first : undefined;
-};
-
-const allStrings = (value: unknown): string[] => {
-  const values = Array.isArray(value) ? value : [value];
-  return values.filter((v): v is string => typeof v === 'string' && v.length > 0);
 };

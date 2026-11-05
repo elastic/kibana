@@ -10,11 +10,7 @@ import {
   listEntityGraphTraversalScenarioIds,
   loadEntityGraphTraversalPlan,
 } from '@kbn/workflows/managed';
-import {
-  ENTITY_LATEST,
-  getEntitiesAlias,
-  getLatestEntityIndexPattern,
-} from '../../../../common/domain/entity_index';
+import { getLatestEntityIndexPattern } from '../../../../common/domain/entity_index';
 import type {
   GraphTraversalExclusion,
   GraphTraversalNode,
@@ -22,6 +18,7 @@ import type {
   RunGraphTraversalResponse,
 } from '../../../../common/graph_traversal';
 import { GraphTraversalError } from '../graph_traversal_error';
+import { resolveLatestEntityIndex } from '../resolve_latest_entity_index';
 import { buildEntityLookupQuery, buildGraphExpandStatement } from './build_graph_expand';
 import { mapGraphExpandResult, readEntity, type EsqlResult } from './map_graph_expand_result';
 
@@ -131,15 +128,13 @@ export class EsqlGraphTraversalClient {
    * Without one (the store is not installed) the walk still runs; nodes come back unresolved.
    */
   private async resolveLookupIndex(): Promise<string | undefined> {
-    const alias = getEntitiesAlias(ENTITY_LATEST, this.namespace);
     try {
-      const indices = Object.keys(await this.esClient.indices.getAlias({ name: alias }));
-      return indices.length > 0 ? indices.sort()[indices.length - 1] : undefined;
+      return await resolveLatestEntityIndex(this.esClient, this.namespace);
     } catch (error) {
       this.logger.debug(
-        `entity graph traversal (ES|QL) found no latest entity index behind ${alias}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+        `entity graph traversal (ES|QL) found no latest entity index in space "${
+          this.namespace
+        }": ${error instanceof Error ? error.message : String(error)}`
       );
       return undefined;
     }

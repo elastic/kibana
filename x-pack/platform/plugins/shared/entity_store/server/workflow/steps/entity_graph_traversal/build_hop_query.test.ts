@@ -9,7 +9,7 @@ import type { TraversalHop } from '../../../../common/workflow/steps/entity_grap
 import { buildHopQuery, HOP_QUERY_PREAMBLE, lookbackToEsqlSpan } from './build_hop_query';
 
 const INDEX = '.entities.v2.latest.default-*';
-
+const LOOKUP = '.entities.v2.latest.default-00001';
 const hop: TraversalHop = {
   hop_number: 2,
   name: 'aws_asset_relationships',
@@ -61,6 +61,45 @@ describe('buildHopQuery', () => {
       );
     });
 
+    it('joins each reached id to the lookup index so the payload describes the reached node', () => {
+      const { query, params } = buildHopQuery({
+        hop: { ...hop, filter: undefined },
+        index: INDEX,
+        lookupIndex: LOOKUP,
+        targetField: hop.target_fields[0].field,
+        frontier: ['x'],
+        limit: 500,
+        exclusions: [{ field: hop.target_fields[0].field, values: ['skip'] }],
+      });
+      expect(params).toEqual(['x', 'skip']);
+      expect(query).toBe(
+        [
+          HOP_QUERY_PREAMBLE,
+          `FROM ${INDEX}`,
+          '| WHERE `entity.id` IN (?) AND `entity.relationships.can_assume.ids` IS NOT NULL',
+          '| MV_EXPAND `entity.relationships.can_assume.ids`',
+          '| WHERE NOT `entity.relationships.can_assume.ids` IN (?)',
+          '| EVAL __source = `entity.id`',
+          '| RENAME `entity.relationships.can_assume.ids` AS `entity.id`',
+          '| KEEP __source, `entity.id`',
+          `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
+          `| STATS __count = COUNT(*), __payload_0 = VALUES(\`entity.name\`), __payload_1 = VALUES(\`entity.sub_type\`) BY __source, __target = \`entity.id\``,
+          '| LIMIT 500',
+        ].join('\n')
+      );
+    });
+
+    it('reads the payload off the frontier document when there is no lookup index to join', () => {
+      const { query } = buildHopQuery({
+        hop,
+        index: INDEX,
+        targetField: hop.target_fields[0].field,
+        frontier: ['x'],
+        limit: 500,
+      });
+      expect(query).not.toContain('LOOKUP JOIN');
+    });
+
     it('omits the filter and the lookback when the hop and the run set none', () => {
       const { query } = buildHopQuery({
         hop: { ...hop, filter: undefined },
@@ -77,7 +116,7 @@ describe('buildHopQuery', () => {
   });
 
   describe('inbound', () => {
-    it('explodes the pointer field first and matches it against the frontier', () => {
+    it('explodes the pointer field first and matches it against the frontier, reading the document it reaches', () => {
       const { query, params } = buildHopQuery({
         hop,
         index: INDEX,
@@ -95,7 +134,7 @@ describe('buildHopQuery', () => {
           '| WHERE (entity.source == "cloud_asset_inventory.asset_inventory")',
           '| MV_EXPAND `entity.relationships.can_assume.ids`',
           '| WHERE `entity.relationships.can_assume.ids` IN (?, ?)',
-          '| STATS __count = COUNT(*), __payload_0 = VALUES(`entity.name`), __payload_1 = VALUES(`entity.sub_type`) BY __source = `entity.id`, __target = `entity.relationships.can_assume.ids`',
+          `| STATS __count = COUNT(*), __payload_0 = VALUES(\`entity.name\`), __payload_1 = VALUES(\`entity.sub_type\`) BY __source = \`entity.id\`, __target = \`entity.relationships.can_assume.ids\``,
           '| LIMIT 500',
         ].join('\n')
       );

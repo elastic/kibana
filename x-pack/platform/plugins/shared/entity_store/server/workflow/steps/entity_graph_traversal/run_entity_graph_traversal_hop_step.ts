@@ -8,6 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getLatestEntityIndexPattern } from '../../../../common';
 import { runEntityGraphTraversalHopStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/run_entity_graph_traversal_hop_step_common';
+import { resolveLatestEntityIndex } from '../../../domain/graph_traversal/resolve_latest_entity_index';
 import { resolveSpaceId } from './resolve_space_id';
 import { runHop, type EsqlResult, type ExecuteHopQuery } from './run_hop';
 
@@ -16,9 +17,8 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
   handler: async (context) => {
     const {
       hop,
-      frontier,
-      visited,
-      edges_so_far,
+      hops_executed: hopsExecuted = 0,
+      seed_id: seedId,
       truncated_so_far,
       direction,
       limits,
@@ -26,6 +26,20 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
       exclusions,
       until,
     } = context.input;
+    // Everything carried from the previous hop is empty on the first one, which starts from
+    // the seed.
+    const edgesSoFar = context.input.edges ?? [];
+    const nodesSoFar = context.input.nodes ?? [];
+    // The frontier is the seed on the first hop, then the nodes the previous hop admitted,
+    // and the visited set is the seed plus every node admitted so far; the loop need not
+    // carry either, and an explicit list wins when one is given.
+    const frontier =
+      context.input.frontier ??
+      (hopsExecuted === 0
+        ? [seedId]
+        : nodesSoFar.filter((node) => node.hop === hopsExecuted).map((node) => node.id));
+    const visited = context.input.visited ?? [seedId, ...nodesSoFar.map((node) => node.id)];
+    const untilMatchesSoFar = context.input.until_matches ?? [];
     const esClient = context.contextManager.getScopedEsClient();
     const { logger, abortSignal } = context;
     // The graph is the entity store of the execution space: nodes are its entities and edges
@@ -33,15 +47,29 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
     const spaceId = await resolveSpaceId(context.contextManager);
     const index = getLatestEntityIndexPattern(spaceId);
 
-    const execute: ExecuteHopQuery = async ({ query, params }) => {
+    // Reached ids are joined to the concrete lookup-mode index so the payload fields describe
+    // the reached node.
+    let lookupIndex: string | undefined;
+    try {
+      lookupIndex = await resolveLatestEntityIndex(esClient, spaceId);
+    } catch (error) {
       logger.debug(
+        `entity graph traversal hop ${
+          hop.hop_number
+        }: no latest entity index to join in space "${spaceId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    const execute: ExecuteHopQuery = async ({ query, params }) => {
+      logger.info(
         `entity graph traversal hop ${hop.hop_number} (${hop.name}): ${params.length} frontier ids, query:\n${query}`
       );
       const response = await esClient.esql.query(
         { query, params, drop_null_columns: false },
         { signal: abortSignal }
       );
-      // The client types ES|QL responses loosely; guard the shape before parsing.
       const typed = response as unknown as Partial<EsqlResult>;
       if (!Array.isArray(typed.columns) || !Array.isArray(typed.values)) {
         throw new Error(
@@ -56,10 +84,11 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
         {
           hop,
           index,
+          lookupIndex,
           direction,
           frontier,
           visited,
-          edgesSoFar: edges_so_far,
+          edgesSoFar: edgesSoFar.length,
           truncatedSoFar: truncated_so_far,
           limits,
           lookback,
@@ -68,10 +97,20 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
         },
         execute
       );
-      logger.debug(
+      logger.info(
         `entity graph traversal hop ${hop.hop_number} (${hop.name}): ${output.stats.edges_added} edges, ${output.stats.new_nodes} new nodes, stop_reason="${output.stop_reason}"`
       );
-      return { output };
+      // Edge payloads were only needed to evaluate stop conditions inside the hop, so they
+      // are not returned, which keeps the loop state the workflow retains small.
+      const edges = output.edges.map(({ payload, ...edge }) => edge);
+      return {
+        output: {
+          ...output,
+          edges: [...edgesSoFar, ...edges],
+          nodes: [...nodesSoFar, ...output.nodes],
+          until_matches: [...untilMatchesSoFar, ...output.until_matches],
+        },
+      };
     } catch (error) {
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }

@@ -15,6 +15,9 @@ export const HOP_TARGET_COLUMN = '__target';
 export const HOP_COUNT_COLUMN = '__count';
 export const hopPayloadColumn = (index: number): string => `__payload_${index}`;
 
+/** The entity store's id field, which the latest index is joined on. */
+export const HOP_ENTITY_ID_FIELD = 'entity.id';
+
 /**
  * Unmapped fields are loaded from `_source` instead of failing the query: a relationship key
  * a scenario names may not be mapped yet in an older entity index.
@@ -47,6 +50,12 @@ export interface BuildHopQueryParams {
   hop: TraversalHop;
   /** The entity store's latest index pattern for the execution space. */
   index: string;
+  /**
+   * The concrete latest entity index (lookup mode) of the execution space. When given, an
+   * outbound query joins each reached id to its entity document so the payload fields
+   * describe the reached node; without it, they are read off the frontier document.
+   */
+  lookupIndex?: string;
   /** One of the hop's target fields, an `entity.relationships.<key>.ids` array. */
   targetField: string;
   frontier: string[];
@@ -70,13 +79,21 @@ export interface BuildHopQueryParams {
  * trusted (it ships inside Kibana) but is wrapped in parentheses and rejected if it contains
  * a pipe, so it can only ever narrow the hop's `WHERE`.
  *
- * Outbound, the frontier is matched on `entity.id` (pushed down to Lucene) and the target
- * field is exploded into one row per pointed id. Inbound, the target field is exploded first
- * and then matched against the frontier, so a multi-valued pointer still finds the entity.
+ * Outbound, the frontier is matched on `entity.id` (pushed down to Lucene), the target field
+ * is exploded into one row per pointed id, and, given a lookup index, each pointed id is
+ * joined to its entity document. Inbound, the target field is exploded first and then matched
+ * against the frontier, so a multi-valued pointer still finds the entity; the document read
+ * is the node reached, so no join is needed.
+ *
+ * The payload columns describe the node the edge reaches, never the frontier entity, so
+ * stop conditions on payload fields test the node being admitted. Only the walk columns and
+ * the payload come back: the node's entity document is read once, after the traversal, by
+ * the resolve step, so the rows a hop holds stay small.
  */
 export const buildHopQuery = ({
   hop,
   index,
+  lookupIndex,
   targetField,
   frontier,
   limit,
@@ -138,12 +155,23 @@ export const buildHopQuery = ({
   for (const { values } of targetExclusions) {
     lines.push(`| WHERE NOT ${target} IN (${placeholders(values)})`);
   }
-  lines.push(
-    `| STATS ${[`${HOP_COUNT_COLUMN} = COUNT(*)`, ...payloadStats].join(
-      ', '
-    )} BY ${HOP_SOURCE_COLUMN} = ${match}, ${HOP_TARGET_COLUMN} = ${target}`,
-    `| LIMIT ${limit}`
-  );
+
+  const stats = `| STATS ${[`${HOP_COUNT_COLUMN} = COUNT(*)`, ...payloadStats].join(', ')}`;
+  if (!inbound && lookupIndex !== undefined) {
+    // Keep the frontier id aside, make the pointed id the join key, and drop the frontier
+    // document's own columns so the joined ones are unambiguously the reached entity's.
+    const entityId = quoteField(HOP_ENTITY_ID_FIELD);
+    lines.push(
+      `| EVAL ${HOP_SOURCE_COLUMN} = ${match}`,
+      `| RENAME ${target} AS ${entityId}`,
+      `| KEEP ${HOP_SOURCE_COLUMN}, ${entityId}`,
+      `| LOOKUP JOIN ${lookupIndex} ON ${entityId}`,
+      `${stats} BY ${HOP_SOURCE_COLUMN}, ${HOP_TARGET_COLUMN} = ${entityId}`
+    );
+  } else {
+    lines.push(`${stats} BY ${HOP_SOURCE_COLUMN} = ${match}, ${HOP_TARGET_COLUMN} = ${target}`);
+  }
+  lines.push(`| LIMIT ${limit}`);
 
   return { query: lines.join('\n'), params };
 };

@@ -36,6 +36,11 @@ export interface RunHopInput {
   hop: TraversalHop;
   /** The entity store's latest index pattern for the execution space. */
   index: string;
+  /**
+   * The concrete latest entity index of the space, joined in an outbound query so the
+   * payload fields describe the reached node. Without it, they describe the frontier node.
+   */
+  lookupIndex?: string;
   direction: TraversalDirection;
   frontier: string[];
   visited: string[];
@@ -52,6 +57,8 @@ export interface RunHopStats {
   frontier_expanded: number;
   dropped_frontier: number;
   queries: number;
+  /** Queries not issued because the edges already collected filled the run's edge budget. */
+  queries_skipped: number;
   rows_returned: number;
   edges_added: number;
   dropped_edges: number;
@@ -70,6 +77,7 @@ export interface RunHopResult {
   hop_number: number;
   hop_name: string;
   edges: TraversalEdge[];
+  /** The nodes this hop admitted, unresolved: the loop carries them, so they stay small. */
   nodes: TraversalNode[];
   next_frontier: string[];
   visited: string[];
@@ -213,20 +221,34 @@ const dedupeEdges = (edges: CollectedEdge[], hubs: Set<string>): CollectedEdge[]
  * 1. Frontier beyond `max_frontier` is dropped before any query.
  * 2. Remaining node and edge capacity is checked before any query; none left means stop.
  * 3. One query per relationship field, outbound; with direction `both`, one more per field
- *    inbound. Each is capped by `LIMIT max_edges_per_hop`.
+ *    inbound. Each is capped by `LIMIT` at the smaller of `max_edges_per_hop` and the edge
+ *    capacity the edges collected so far leave unfilled, and no further query is issued once
+ *    that capacity is full, since nothing more could be admitted. So a hop never holds more
+ *    rows than it can admit, plus the repeats a `both` walk reads from each side.
  * 4. Frontier nodes reaching more distinct nodes than `hub_degree` are dropped (hubs).
  * 5. Edges are deduplicated and capped by the remaining edge capacity.
  * 6. New nodes are capped by the remaining node capacity; nodes already visited only
  *    produce closing edges.
  *
  * Edges keep the stored orientation: the source is the entity whose relationship field holds
- * the edge, whichever end the hop reached it from.
+ * the edge, whichever end the hop reached it from. Nodes come back unresolved (id, hop, via,
+ * type): the loop carries them from hop to hop, so they stay small, and the workflow resolves
+ * them once after the traversal.
  */
 export const runHop = async (
   input: RunHopInput,
   execute: ExecuteHopQuery
 ): Promise<RunHopResult> => {
-  const { hop, index, direction, limits, lookback, exclusions = [], until = [] } = input;
+  const {
+    hop,
+    index,
+    lookupIndex,
+    direction,
+    limits,
+    lookback,
+    exclusions = [],
+    until = [],
+  } = input;
   const visitedSet = new Set(input.visited);
   const excludedIds = new Set(
     exclusions.filter((e) => e.field === TRAVERSAL_NODE_ID_FIELD).flatMap((e) => e.values)
@@ -241,6 +263,7 @@ export const runHop = async (
     frontier_expanded: 0,
     dropped_frontier: 0,
     queries: 0,
+    queries_skipped: 0,
     rows_returned: 0,
     edges_added: 0,
     dropped_edges: 0,
@@ -292,26 +315,42 @@ export const runHop = async (
     return finish([], []);
   }
 
-  // 3. One query per relationship field and leg
+  // 3. One query per relationship field and leg, until the edge budget is already full
   const collected: CollectedEdge[] = [];
+  const collectedKeys = new Set<string>();
   const legs = direction === 'both' ? [false, true] : [false];
   for (const inbound of legs) {
     for (const { field, relation } of hop.target_fields) {
-      const query = buildHopQuery({
-        hop,
-        index,
-        targetField: field,
-        frontier,
-        limit: limits.max_edges_per_hop,
-        lookback,
-        exclusions,
-        inbound,
-      });
-      const result = await execute(query);
-      stats.queries += 1;
-      stats.rows_returned += result.values.length;
-      if (result.values.length >= limits.max_edges_per_hop) truncated = true;
-      collected.push(...parseRows({ result, hop, relation, frontier: frontierSet, inbound }));
+      if (collectedKeys.size >= edgeCapacity) {
+        // Whatever this query returned would be cut by the edge cap below, so it is not
+        // issued; the hop reports the same truncation the cap would have.
+        stats.queries_skipped += 1;
+        truncated = true;
+        stopReason = 'max_edges_total';
+      } else {
+        // Rows past the unfilled edge capacity could never be admitted, so they are not read.
+        const limit = Math.min(limits.max_edges_per_hop, edgeCapacity - collectedKeys.size);
+        const query = buildHopQuery({
+          hop,
+          index,
+          lookupIndex,
+          targetField: field,
+          frontier,
+          limit,
+          lookback,
+          exclusions,
+          inbound,
+        });
+        const result = await execute(query);
+        stats.queries += 1;
+        stats.rows_returned += result.values.length;
+        if (result.values.length >= limit) truncated = true;
+        const parsed = parseRows({ result, hop, relation, frontier: frontierSet, inbound });
+        for (const { edge } of parsed) {
+          collectedKeys.add(`${edge.relation}\u0000${edge.source}\u0000${edge.target}`);
+        }
+        collected.push(...parsed);
+      }
     }
   }
 
@@ -359,12 +398,7 @@ export const runHop = async (
         // Reached on the pointed side, the node is the hop's target type; reached as the
         // holder of the relationship (inbound), it is the source type.
         const type = inbound ? hop.source_type : hop.target_type;
-        nodes.push({
-          id: reached,
-          hop: hop.hop_number,
-          via: edge.relation,
-          ...(type && { type }),
-        });
+        nodes.push({ id: reached, hop: hop.hop_number, via: edge.relation, ...(type && { type }) });
         if (until.length > 0 && matchesStopCondition(collectedEdge, until)) {
           untilMatches.push(reached);
         }

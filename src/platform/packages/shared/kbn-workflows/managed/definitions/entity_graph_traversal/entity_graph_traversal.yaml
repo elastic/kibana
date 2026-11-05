@@ -8,8 +8,9 @@ version: '1'
 # be bounded in code: `entityStore.loadEntityGraphTraversalScenario` clamps every limit to a
 # hard ceiling, and `entityStore.runEntityGraphTraversalHop` binds the frontier as ES|QL
 # parameters, caps the rows it reads, skips hub nodes, and refuses to grow the visited set or
-# the edge list past the limits. The loop state kept here is ids and compact edges only, and
-# `stop_reason` is what ends the loop: an exhausted frontier, the hop budget, or a cap.
+# the edge list past the limits. The loop state kept in variables is the frontier, the
+# accumulated edges and nodes, and a few scalars; `stop_reason` is what ends the loop: an
+# exhausted frontier, the hop budget, or a cap.
 name: Security - Entity graph traversal
 description: >
   Walk the entity graph from a seed entity according to a named scenario and return the
@@ -143,18 +144,23 @@ steps:
         max_edges_total: '${{ inputs.max_edges_total }}'
         hub_degree: '${{ inputs.hub_degree }}'
 
+  # The loop state lives in variables, the only thing the engine carries across iterations: a
+  # step cannot read its own previous iteration. Each data.set snapshot is retained for the
+  # whole run, so the snapshot is kept small: the frontier, the accumulated edges without
+  # payload, the accumulated nodes as id, hop, via and type, and a few scalars. The frontier
+  # and the visited set are derived by the hop from the seed and the nodes, so neither is
+  # stored, and nodes are resolved once after the loop rather than carried resolved.
+  # The seed is hop 0 of the result so consumers can draw it and the hop-1 edges from it.
   - name: init
     type: data.set
     with:
-      frontier: '${{ consts.empty | push: inputs.seed_id }}'
-      visited: '${{ consts.empty | push: inputs.seed_id }}'
+      seed_node:
+        id: '{{ inputs.seed_id }}'
+        hop: 0
+        via: seed
+        type: '{{ steps.load_scenario.output.seed.type }}'
       edges: '${{ consts.empty }}'
-      # The seed is hop 0 of the result so consumers can draw it and the hop-1 edges from it.
-      nodes:
-        - id: '{{ inputs.seed_id }}'
-          hop: 0
-          via: seed
-          type: '{{ steps.load_scenario.output.seed.type }}'
+      nodes: '${{ consts.empty }}'
       hops_executed: 0
       truncated: false
       stop_reason: ''
@@ -174,9 +180,11 @@ steps:
         type: entityStore.runEntityGraphTraversalHop
         with:
           hop: '${{ steps.load_scenario.output.hops[variables.hops_executed] }}'
-          frontier: '${{ variables.frontier }}'
-          visited: '${{ variables.visited }}'
-          edges_so_far: '${{ variables.edges.size }}'
+          hops_executed: '${{ variables.hops_executed }}'
+          seed_id: '{{ inputs.seed_id }}'
+          edges: '${{ variables.edges }}'
+          nodes: '${{ variables.nodes }}'
+          until_matches: '${{ variables.until_matches }}'
           truncated_so_far: '${{ variables.truncated }}'
           direction: '{{ steps.load_scenario.output.direction }}'
           limits: '${{ steps.load_scenario.output.limits }}'
@@ -184,25 +192,24 @@ steps:
           exclusions: '${{ inputs.exclusions }}'
           until: '${{ steps.load_scenario.output.until }}'
 
+      # The hop output is already cumulative, so the snapshot replaces, never concatenates.
       - name: advance
         type: data.set
         with:
-          frontier: '${{ steps.run_hop.output.next_frontier }}'
-          visited: '${{ steps.run_hop.output.visited }}'
-          edges: '${{ variables.edges | concat: steps.run_hop.output.edges }}'
-          nodes: '${{ variables.nodes | concat: steps.run_hop.output.nodes }}'
-          hops_executed: '${{ variables.hops_executed | plus: 1 }}'
+          edges: '${{ steps.run_hop.output.edges }}'
+          nodes: '${{ steps.run_hop.output.nodes }}'
+          hops_executed: '${{ steps.run_hop.output.hop_number }}'
           truncated: '${{ steps.run_hop.output.truncated }}'
           stop_reason: '{{ steps.run_hop.output.stop_reason }}'
-          until_matches: '${{ variables.until_matches | concat: steps.run_hop.output.until_matches }}'
+          until_matches: '${{ steps.run_hop.output.until_matches }}'
 
-  # Annotate every admitted node with what the entity store of the execution space knows
-  # about it: its EUID, whether the store has it, the canonical entity for aliases, and the
-  # stored name, type, criticality and risk.
+  # Every node, seed first, is resolved once against the entity store of the execution space:
+  # its EUID, whether the store has it, the canonical entity for aliases, and the stored
+  # name, type, criticality and risk.
   - name: resolve_nodes
     type: entityStore.resolveEntityGraphTraversalNodes
     with:
-      nodes: '${{ variables.nodes }}'
+      nodes: '${{ consts.empty | push: variables.seed_node | concat: variables.nodes }}'
 
   # The route from the seed to every node that matched a stop condition, over the kept edges.
   - name: trace_routes
@@ -227,7 +234,7 @@ steps:
       hops_executed: '${{ variables.hops_executed }}'
       stop_reason: '{{ variables.stop_reason }}'
       truncated: '${{ variables.truncated }}'
-      node_count: '${{ variables.visited.size }}'
-      edge_count: '${{ variables.edges.size }}'
+      node_count: '${{ variables.nodes | size | plus: 1 }}'
+      edge_count: '${{ variables.edges | size }}'
       nodes: '${{ steps.resolve_nodes.output.nodes }}'
       edges: '${{ variables.edges }}'

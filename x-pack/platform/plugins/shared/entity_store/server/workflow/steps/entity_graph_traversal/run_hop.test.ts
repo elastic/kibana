@@ -30,6 +30,7 @@ const hop: TraversalHop = {
 };
 
 const INDEX = '.entities.v2.latest.default-*';
+const LOOKUP = '.entities.v2.latest.default-00001';
 
 const limits: TraversalLimits = {
   max_hops: 6,
@@ -56,15 +57,19 @@ const result = (rows: Array<[string, string, number?, unknown?]>): EsqlResult =>
   ]),
 });
 
-/** One canned result per target field, in target_fields order. */
-const executor = (perField: EsqlResult[]): ExecuteHopQuery & { calls: string[][] } => {
+/** One canned result per target field, in target_fields order; records each query's params and LIMIT. */
+const executor = (
+  perField: EsqlResult[]
+): ExecuteHopQuery & { calls: string[][]; queryLimits: number[] } => {
   const calls: string[][] = [];
+  const queryLimits: number[] = [];
   let i = 0;
-  const execute = async ({ params }: { params: string[] }) => {
+  const execute = async ({ query, params }: { query: string; params: string[] }) => {
     calls.push(params);
+    queryLimits.push(Number(query.match(/\| LIMIT (\d+)$/)?.[1]));
     return perField[i++] ?? result([]);
   };
-  return Object.assign(execute, { calls });
+  return Object.assign(execute, { calls, queryLimits });
 };
 
 describe('runHop', () => {
@@ -167,6 +172,99 @@ describe('runHop', () => {
     expect(out.truncated).toBe(false);
     expect(out.stop_reason).toBe('');
     expect(out.stats).toMatchObject({ queries: 2, rows_returned: 3, edges_added: 3, new_nodes: 3 });
+  });
+
+  it('returns nodes unresolved and the payload of the reached node when a lookup index is given', async () => {
+    const execute = executor([
+      result([
+        ['role-a', 'role-b', 1, 'Role B'],
+        ['role-a', 'ghost', 1, null],
+      ]),
+      result([]),
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        lookupIndex: LOOKUP,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    // The loop carries the nodes, so they stay id, hop, via and type; the workflow resolves
+    // them once after the traversal.
+    expect(out.nodes).toEqual([
+      { id: 'role-b', hop: 1, via: 'can_assume', type: 'asset' },
+      { id: 'ghost', hop: 1, via: 'can_assume', type: 'asset' },
+    ]);
+    // The payload describes the reached node, so a stop condition on it matches it.
+    expect(out.edges[0].payload).toEqual({ 'entity.name': ['Role B'] });
+    expect(out.edges[1].payload).toBeUndefined();
+  });
+
+  it('caps each query at the smaller of max_edges_per_hop and the edge budget still unfilled', async () => {
+    const execute = executor([
+      result([
+        ['role-a', 'role-b'],
+        ['role-a', 'role-c'],
+      ]),
+      result([['role-a', 'i-1']]),
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 95,
+        truncatedSoFar: false,
+        limits: { ...limits, max_edges_per_hop: 4 },
+      },
+      execute
+    );
+    // Five edges may still be admitted, so the first query takes the per-hop cap of four; it
+    // returns two, so the second query is limited to the three left.
+    expect(execute.queryLimits).toEqual([4, 3]);
+    expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c', 'i-1']);
+    expect(out.stats).toMatchObject({ queries: 2, queries_skipped: 0, edges_added: 3 });
+    expect(out.truncated).toBe(false);
+    expect(out.stop_reason).toBe('');
+  });
+
+  it('stops issuing queries once the collected edges fill the remaining edge budget', async () => {
+    const execute = executor([
+      result([
+        ['role-a', 'role-b'],
+        ['role-a', 'role-c'],
+        ['role-a', 'role-c'],
+      ]),
+      result([['role-a', 'i-1']]),
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 98,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    // Two distinct edges fill the budget of two, so the runs_as query is never sent.
+    expect(execute.calls).toHaveLength(1);
+    expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c']);
+    expect(out.stats).toMatchObject({ queries: 1, queries_skipped: 1, edges_added: 2 });
+    expect(out.truncated).toBe(true);
+    expect(out.stop_reason).toBe('max_edges_total');
   });
 
   it('keeps closing edges onto visited nodes without re-admitting them', async () => {

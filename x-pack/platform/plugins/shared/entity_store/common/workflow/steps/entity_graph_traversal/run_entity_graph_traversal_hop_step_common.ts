@@ -22,17 +22,41 @@ import {
   traversalStopReasonSchema,
 } from './entity_graph_traversal_common';
 
+/**
+ * A value carried from the previous hop's output. On the first hop there is no previous
+ * output, and the engine renders the reference as empty, so empty means "not yet".
+ */
+const carried = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((value) => (value === '' || value === null ? undefined : value), schema.optional());
+
 export const runEntityGraphTraversalHopInputSchema = lazySchema(() =>
   z.object({
-    hop: traversalHopSchema.describe('One expanded hop from the loaded scenario'),
-    frontier: traversalIdListSchema.describe('Ids to expand on this hop'),
-    visited: traversalIdListSchema.describe('Ids already admitted, including the seed'),
-    edges_so_far: z.coerce
-      .number()
-      .int()
-      .min(0)
-      .default(0)
-      .describe('Edges accumulated by earlier hops, for the max_edges_total limit'),
+    hop: traversalHopSchema.describe(
+      'The hop to run: the expanded hop of the loaded scenario at index hops_executed'
+    ),
+    hops_executed: carried(z.coerce.number().int().min(0)).describe(
+      "Hops already run, which is the previous hop output's hop_number; unset on the first hop"
+    ),
+    seed_id: z
+      .string()
+      .min(1)
+      .max(2048)
+      .describe('The entity the traversal starts from; the first hop expands it'),
+    frontier: carried(traversalIdListSchema).describe(
+      'Ids to expand on this hop; derived when omitted: the seed on the first hop, then the nodes the previous hop admitted'
+    ),
+    visited: carried(traversalIdListSchema).describe(
+      'Ids already admitted, including the seed; derived from seed_id and nodes when omitted'
+    ),
+    edges: carried(z.array(traversalEdgeSchema)).describe(
+      "Edges accumulated by earlier hops: the previous hop output's edges"
+    ),
+    nodes: carried(z.array(traversalNodeSchema)).describe(
+      "Nodes admitted by earlier hops: the previous hop output's nodes"
+    ),
+    until_matches: carried(traversalIdListSchema).describe(
+      "Stop-condition matches of earlier hops: the previous hop output's until_matches"
+    ),
     truncated_so_far: z.coerce
       .boolean()
       .default(false)
@@ -57,10 +81,15 @@ export const runEntityGraphTraversalHopOutputSchema = lazySchema(() =>
   z.object({
     hop_number: z.number().int().min(1),
     hop_name: z.string(),
+    /** Every edge so far: the carried edges followed by this hop's. */
     edges: z.array(traversalEdgeSchema),
+    /**
+     * Every node admitted so far, as id, hop, via and type only. The loop carries this list
+     * from hop to hop, so it stays small; the workflow resolves the nodes once at the end.
+     */
     nodes: z.array(traversalNodeSchema),
     next_frontier: z.array(z.string()),
-    /** Ids of nodes admitted this hop that matched a stop condition. */
+    /** Ids of admitted nodes that matched a stop condition, over every hop so far. */
     until_matches: z.array(z.string()),
     visited: z.array(z.string()),
     truncated: z.boolean(),
@@ -70,6 +99,7 @@ export const runEntityGraphTraversalHopOutputSchema = lazySchema(() =>
       frontier_expanded: z.number().int(),
       dropped_frontier: z.number().int(),
       queries: z.number().int(),
+      queries_skipped: z.number().int(),
       rows_returned: z.number().int(),
       edges_added: z.number().int(),
       dropped_edges: z.number().int(),
@@ -93,7 +123,7 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
   }),
   description: i18n.translate('entityStore.workflow.steps.runEntityGraphTraversalHop.description', {
     defaultMessage:
-      'Expand one hop of an entity graph traversal: query the hop index for the frontier ids, bound as ES|QL parameters, and return the edges found, the newly reached nodes, and the next frontier, within the run limits.',
+      'Expand one hop of an entity graph traversal: query the entity store for the frontier ids, bound as ES|QL parameters, and return every edge and node so far plus the next frontier, within the run limits. The loop carries the output forward through variables.',
   }),
   category: StepCategory.Kibana,
   stability: 'tech_preview',
@@ -104,9 +134,10 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
       'entityStore.workflow.steps.runEntityGraphTraversalHop.documentation.details',
       {
         defaultMessage:
-          'For each target field of the hop the step runs one ES|QL query of the form FROM index | WHERE match_field IN (frontier) | MV_EXPAND target | STATS COUNT(*), VALUES(payload) BY source, target | LIMIT max_edges_per_hop. ' +
+          'The step expands the given hop from the frontier: the seed on the first hop, then the nodes the previous hop admitted, unless a frontier is given. For each target field it runs one ES|QL query of the form FROM index | WHERE entity.id IN (frontier) | MV_EXPAND target | LOOKUP JOIN latest index | STATS COUNT(*), VALUES(payload) BY source, target | LIMIT n, where n is the smaller of max_edges_per_hop and the edge budget still unfilled, so the payload describes the reached node and no row that could not be admitted is read. ' +
           'The frontier is passed as query parameters, never interpolated. Frontier ids beyond max_frontier are dropped, a source with more distinct targets than hub_degree is not expanded, and edges or nodes beyond max_edges_total or max_nodes are dropped; every drop sets truncated. ' +
-          'stop_reason is non-empty when the traversal cannot continue: the frontier is exhausted or a total cap was reached. Targets already in visited produce closing edges but are not added to the next frontier.',
+          'stop_reason is non-empty when the traversal cannot continue: the frontier is exhausted or a total cap was reached. Targets already in visited produce closing edges but are not added to the next frontier. ' +
+          'Nodes are returned as id, hop, via and type only; resolve them once after the loop with entityStore.resolveEntityGraphTraversalNodes.',
       }
     ),
     examples: [
@@ -116,9 +147,11 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
   type: entityStore.runEntityGraphTraversalHop
   with:
     hop: "\${{ steps.load_scenario.output.hops[variables.hops_executed] }}"
-    frontier: "\${{ variables.frontier }}"
-    visited: "\${{ variables.visited }}"
-    edges_so_far: "\${{ variables.edges.size }}"
+    hops_executed: "\${{ variables.hops_executed }}"
+    seed_id: "{{ inputs.seed_id }}"
+    edges: "\${{ variables.edges }}"
+    nodes: "\${{ variables.nodes }}"
+    until_matches: "\${{ variables.until_matches }}"
     truncated_so_far: "\${{ variables.truncated }}"
     limits: "\${{ steps.load_scenario.output.limits }}"
     lookback: "{{ inputs.lookback }}"
