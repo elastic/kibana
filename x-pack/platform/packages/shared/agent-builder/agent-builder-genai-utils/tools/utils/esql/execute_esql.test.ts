@@ -128,6 +128,103 @@ describe('executeEsql', () => {
     );
   });
 
+  describe('timeoutMs', () => {
+    let controller: AbortController;
+    let timeoutSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      controller = new AbortController();
+      timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(controller.signal);
+    });
+
+    afterEach(() => {
+      timeoutSpy.mockRestore();
+    });
+
+    const requestOptions = () => esClient.esql.query.mock.calls[0][1];
+
+    it('sends exactly the standard transport options when no deadline is set', async () => {
+      await executeEsql({ query: 'FROM idx', esClient });
+
+      expect(requestOptions()).toStrictEqual({ maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES });
+      expect(timeoutSpy).not.toHaveBeenCalled();
+    });
+
+    it('sets a wall-clock deadline through a signal and disables retries', async () => {
+      await executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient });
+
+      expect(timeoutSpy).toHaveBeenCalledWith(5000);
+      expect(requestOptions()).toStrictEqual({
+        maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
+        maxRetries: 0,
+        signal: controller.signal,
+      });
+    });
+
+    it('turns a deadline abort into an error that tells the agent not to re-run the query', async () => {
+      esClient.esql.query.mockImplementation(async () => {
+        controller.abort();
+        throw new errors.RequestAbortedError('Request aborted');
+      });
+
+      const error = await executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient }).catch(
+        (e: Error) => e
+      );
+
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('Stopped waiting for the ES|QL query after 5s');
+      expect((error as Error).message).toContain('Do not re-run');
+      expect((error as Error).message).toContain('narrow the time range');
+      expect((error as Error).message).not.toContain('cancel');
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('omits the waited time when the client timeout fires before the deadline', async () => {
+      esClient.esql.query.mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+      const error = await executeEsql({ query: 'FROM idx', timeoutMs: 120_000, esClient }).catch(
+        (e: Error) => e
+      );
+
+      expect((error as Error).message).toContain('Stopped waiting for the ES|QL query.');
+      expect((error as Error).message).not.toContain(' after ');
+      expect((error as Error).message).toContain('Do not re-run');
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('rethrows a client TimeoutError unchanged when no deadline is set', async () => {
+      const error = new errors.TimeoutError('Request timed out');
+      esClient.esql.query.mockRejectedValue(error);
+
+      await expect(executeEsql({ query: 'FROM idx', esClient })).rejects.toBe(error);
+    });
+
+    it('keeps a maximum-response-size abort a size error even when the deadline has aborted', async () => {
+      esClient.esql.query.mockImplementation(async () => {
+        controller.abort();
+        throw new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        );
+      });
+
+      await expect(executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient })).rejects.toThrow(
+        /exceeded the maximum allowed size of 20MB/
+      );
+    });
+
+    it('rethrows an unrelated error unchanged even when the deadline has aborted', async () => {
+      const error = new Error('verification_exception: unknown column [missing]');
+      esClient.esql.query.mockImplementation(async () => {
+        controller.abort();
+        throw error;
+      });
+
+      await expect(executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient })).rejects.toThrow(
+        error
+      );
+    });
+  });
+
   it('rethrows any other Elasticsearch error unchanged', async () => {
     const error = new Error('verification_exception: unknown column [missing]');
     esClient.esql.query.mockRejectedValue(error);

@@ -1,0 +1,216 @@
+overlay: 1.0.0
+info:
+  title: Microsoft Graph v1.0 corrections for OneDrive
+  version: 1.0.0
+actions:
+  - target: $.components
+    description: >-
+      The components the /me/drive paths below reference, as the Graph spec declares them for
+      the /drives/{drive-id} paths they alias. The snapshot only keeps components referenced by
+      operations of the published spec.
+    update:
+      parameters:
+        top:
+          name: $top
+          in: query
+          style: form
+          explode: false
+          schema:
+            minimum: 0
+            type: integer
+        skip:
+          name: $skip
+          in: query
+          style: form
+          explode: false
+          schema:
+            minimum: 0
+            type: integer
+        count:
+          name: $count
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: boolean
+        filter:
+          name: $filter
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: string
+        search:
+          name: $search
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: string
+      schemas:
+        BaseCollectionPaginationCountResponse:
+          title: Base collection pagination and count responses
+          type: object
+          properties:
+            '@odata.count':
+              type: integer
+              format: int64
+              nullable: true
+            '@odata.nextLink':
+              type: string
+              nullable: true
+        microsoft.graph.driveItemCollectionResponse:
+          title: Collection of driveItem
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/BaseCollectionPaginationCountResponse'
+            - type: object
+              properties:
+                value:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/microsoft.graph.driveItem'
+
+  - target: $.paths
+    description: >-
+      The Graph spec only describes drive items under /drives/{drive-id}, but Graph documents
+      /me/drive as the signed-in user's drive and every operation below on it:
+      https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0 (GET /me/drive/items/{item-id}),
+      https://learn.microsoft.com/en-us/graph/api/driveitem-get-content?view=graph-rest-1.0 (GET /me/drive/items/{item-id}/content),
+      https://learn.microsoft.com/en-us/graph/api/driveitem-list-children?view=graph-rest-1.0 (GET /me/drive/items/{item-id}/children, GET /me/drive/root/children),
+      https://learn.microsoft.com/en-us/graph/api/driveitem-search?view=graph-rest-1.0 (GET /me/drive/root/search(q='{search-text}')),
+      https://learn.microsoft.com/en-us/graph/api/drive-recent?view=graph-rest-1.0 (GET /me/drive/recent) and
+      https://learn.microsoft.com/en-us/graph/api/drive-sharedwithme?view=graph-rest-1.0 (GET /me/drive/sharedWithMe).
+      Each copies its /drives/{drive-id} counterpart (items/{driveItem-id}, items/{driveItem-id}/content,
+      items/{driveItem-id}/children, search(q='{q}'), recent(), sharedWithMe()). Collections also
+      take $skiptoken, which their @odata.nextLink carries
+      (https://learn.microsoft.com/en-us/graph/paging; driveitem-list-children and driveitem-search
+      list $skipToken among their query parameters).
+    update:
+      /me/drive/items/{driveItem-id}:
+        get:
+          operationId: me.drive.GetItems
+          parameters:
+            - &select
+              name: $select
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+            - &expand
+              name: $expand
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+          responses:
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/microsoft.graph.driveItem'
+            4XX: &error
+              $ref: '#/components/responses/error'
+            5XX: *error
+        parameters:
+          - &driveItemId
+            name: driveItem-id
+            in: path
+            required: true
+            schema:
+              type: string
+      /me/drive/items/{driveItem-id}/content:
+        get:
+          operationId: me.drive.GetItemsContent
+          parameters:
+            - name: $format
+              in: query
+              schema:
+                type: string
+          responses:
+            2XX:
+              content:
+                application/octet-stream:
+                  schema:
+                    format: binary
+                    type: string
+            4XX: *error
+            5XX: *error
+        parameters:
+          - *driveItemId
+      /me/drive/items/{driveItem-id}/children:
+        get:
+          operationId: me.drive.items.ListChildren
+          parameters: &collectionParameters
+            - $ref: '#/components/parameters/top'
+            - $ref: '#/components/parameters/skip'
+            - $ref: '#/components/parameters/search'
+            - $ref: '#/components/parameters/filter'
+            - $ref: '#/components/parameters/count'
+            - name: $orderby
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+            - *select
+            - *expand
+            - name: $skiptoken
+              in: query
+              schema:
+                type: string
+          responses: &collectionResponses
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/microsoft.graph.driveItemCollectionResponse'
+            4XX: *error
+            5XX: *error
+          x-ms-pageable: &pageable
+            nextLinkName: '@odata.nextLink'
+            operationName: listMore
+        parameters:
+          - *driveItemId
+      /me/drive/root/children:
+        get:
+          operationId: me.drive.root.ListChildren
+          parameters: *collectionParameters
+          responses: *collectionResponses
+          x-ms-pageable: *pageable
+      /me/drive/root/search(q='{q}'):
+        get:
+          operationId: me.drive.root.search
+          parameters: *collectionParameters
+          responses: *collectionResponses
+          x-ms-pageable: *pageable
+        parameters:
+          - name: q
+            in: path
+            required: true
+            schema:
+              type: string
+              nullable: true
+      /me/drive/recent:
+        get:
+          operationId: me.drive.recent
+          parameters: *collectionParameters
+          responses: *collectionResponses
+          x-ms-pageable: *pageable
+      /me/drive/sharedWithMe:
+        get:
+          operationId: me.drive.sharedWithMe
+          parameters: *collectionParameters
+          responses: *collectionResponses
+          x-ms-pageable: *pageable

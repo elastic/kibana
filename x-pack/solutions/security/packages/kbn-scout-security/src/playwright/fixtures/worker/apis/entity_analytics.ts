@@ -11,11 +11,14 @@ import { PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 import type {
   GetEntityStoreStatusResponse,
   StoreStatus,
+  CreateWatchlistRequest,
+  CreateWatchlistResponse,
 } from '../../../constants/entity_analytics';
 
 const ENTITY_STORE_INSTALL_URL = '/api/security/entity_store/install';
 const ENTITY_STORE_UNINSTALL_URL = '/api/security/entity_store/uninstall';
 const ENTITY_STORE_STATUS_URL = '/api/security/entity_store/status';
+const WATCHLISTS_URL = '/api/entity_analytics/watchlists';
 
 export interface EntityStoreEntryRisk {
   score: number;
@@ -52,6 +55,10 @@ export interface EntityAnalyticsApiService {
   ) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
+  /** Creates a watchlist in the space, with its entity sources when `entitySources` is set. */
+  createWatchlist: (body: CreateWatchlistRequest) => Promise<CreateWatchlistResponse>;
+  /** Deletes a watchlist; the server also deletes its entity sources and their API keys. */
+  deleteWatchlist: (id: string) => Promise<void>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -349,6 +356,29 @@ export const getEntityAnalyticsApiService = ({
           );
         }
       );
+    },
+
+    createWatchlist: async (body: CreateWatchlistRequest) => {
+      return measurePerformanceAsync(log, 'security.entityAnalytics.createWatchlist', async () => {
+        const response = await kbnClient.request<CreateWatchlistResponse>({
+          method: 'POST',
+          path: `${basePath}${WATCHLISTS_URL}`,
+          headers: PUBLIC_API_HEADERS,
+          body,
+        });
+        return response.data;
+      });
+    },
+
+    deleteWatchlist: async (id: string) => {
+      await measurePerformanceAsync(log, 'security.entityAnalytics.deleteWatchlist', async () => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${basePath}${WATCHLISTS_URL}/${id}`,
+          headers: PUBLIC_API_HEADERS,
+          ignoreErrors: [404],
+        });
+      });
     },
   };
 
