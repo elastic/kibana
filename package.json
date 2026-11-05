@@ -76,7 +76,7 @@
   },
   "engines": {
     "node": "24.22.1",
-    "pnpm": "~12.4.2"
+    "pnpm": "~12.17.0"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -190,7 +190,7 @@
     "@formatjs/intl-utils": "3.8.4",
     "@formatjs/ts-transformer": "3.13.14",
     "@google/generative-ai": "0.24.1",
-    "@grpc/grpc-js": "1.14.5",
+    "@grpc/grpc-js": "1.14.6",
     "@hapi/accept": "6.0.3",
     "@hapi/boom": "10.0.1",
     "@hapi/cookie": "12.0.1",
@@ -1584,7 +1584,7 @@
     "markdown-it": "14.3.3",
     "memoize-one": "6.0.0",
     "mime-types": "2.1.35",
-    "minimatch": "10.2.6",
+    "minimatch": "11.0.4",
     "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.6.2",
@@ -1962,6 +1962,7 @@
     "@kbn/product-doc-artifact-builder": "workspace:*",
     "@kbn/profiler": "workspace:*",
     "@kbn/pubsub-example-topic": "workspace:*",
+    "@kbn/react-fiber": "workspace:*",
     "@kbn/relocate": "workspace:*",
     "@kbn/repo-file-maps": "workspace:*",
     "@kbn/repo-linter": "workspace:*",
@@ -2324,5 +2325,5 @@
     "xml-crypto": "6.1.2",
     "yaml-language-server": "1.23.0"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.17.0"
 }

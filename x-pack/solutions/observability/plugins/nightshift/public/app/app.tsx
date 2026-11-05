@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -50,7 +51,9 @@ import {
   setNightshiftSearchQueryParam,
   setNightshiftSeverityParam,
 } from '../common/url_params';
+import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
+import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 function isSeverity(value: string | undefined): value is Severity {
   return SEVERITY_OPTIONS.some((severity) => severity === value);
@@ -58,9 +61,13 @@ function isSeverity(value: string | undefined): value is Severity {
 
 const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
-export function NightshiftApp(): React.ReactElement {
+export function NightshiftApp({
+  hideDetectionSetupBanner = false,
+}: {
+  hideDetectionSetupBanner?: boolean;
+}): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { analytics, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
+  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
     useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
@@ -86,12 +93,10 @@ export function NightshiftApp(): React.ReactElement {
     sections,
     severityCounts,
     areSeverityCountsLoading,
-    areSeverityCountsFetching,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount,
-    matchedCount,
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
@@ -119,6 +124,15 @@ export function NightshiftApp(): React.ReactElement {
     () => getNightshiftInvestigationIdFromSearch(search),
     [search]
   );
+
+  // The detection setup banner's "Configure detection" button; the header's "Show all events"
+  // link is gone, the detections page stays reachable from here and from the header's Detections.
+  const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/detections/events',
+  });
+  const detectionSetupBanner = useDetectionSetupBanner({
+    suppressed: hideDetectionSetupBanner,
+  });
 
   const handleInvestigationClick = useCallback(
     (investigation: InvestigationSummary) => {
@@ -277,17 +291,15 @@ export function NightshiftApp(): React.ReactElement {
       reportedSearchQuery.current = undefined;
       return;
     }
-    // `matchedCount` is built from the severity counts query, so that has to have landed too.
-    if (isFetching || areSeverityCountsFetching || reportedSearchQuery.current === query) {
+    if (isFetching || reportedSearchQuery.current === query) {
       return;
     }
     reportedSearchQuery.current = query;
     reportNightshiftInvestigationsSearched(analytics, {
       queryLength: query.length,
-      // Each matching investigation once: the section totals overlap.
-      resultCount: matchedCount,
+      resultCount: totalCount,
     });
-  }, [analytics, areSeverityCountsFetching, debouncedSearchQuery, isFetching, matchedCount]);
+  }, [analytics, debouncedSearchQuery, isFetching, totalCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,
@@ -344,6 +356,16 @@ export function NightshiftApp(): React.ReactElement {
       />
 
       <EuiSpacer size="l" />
+
+      {detectionSetupBanner.isVisible && (
+        <>
+          <DetectionSetupBanner
+            detectionsHref={detectionsHref}
+            onDismiss={detectionSetupBanner.dismiss}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <EuiFieldSearch
         data-test-subj="nightshiftInvestigationsSearchInput"
