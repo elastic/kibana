@@ -29,14 +29,17 @@ export interface TokenUsage {
 const LONG_CONTEXT_ABOVE_200K = 200_000;
 const LONG_CONTEXT_ABOVE_272K = 272_000;
 
+/** Date of the price catalog snapshot below, recorded with each cost score. */
+export const PRICE_TABLE_VERSION = '2026-11-05';
+
 /**
  * EIS chat completion list prices, keyed by EIS model id with dots replaced by dashes
  * (`openai-gpt-5.6-sol` -> `openai-gpt-5-6-sol`).
  *
  * Source: Elastic Cloud price catalog, https://cloud.elastic.co/api/v1/prices/base_prices
- * (`global.inference-chat-{input,cache-read,output}_<model>` rows), snapshot taken 2026-11-05.
+ * (`global.inference-chat-{input,cache-read,output}_<model>` rows), snapshot taken on `PRICE_TABLE_VERSION`.
  * Models priced by prompt size (`<=272k` / `>272k` rows) carry the upper tier in `longContext`.
- * To update, re-read the catalog and edit the rows below. A model missing here is reported as
+ * To update, re-read the catalog, edit the rows below and bump `PRICE_TABLE_VERSION`. A model missing here is reported as
  * unpriced by the cost evaluator rather than costed at zero.
  */
 const EIS_MODEL_PRICES_USD_PER_1M_TOKENS: Readonly<Record<string, ModelPrice>> = {

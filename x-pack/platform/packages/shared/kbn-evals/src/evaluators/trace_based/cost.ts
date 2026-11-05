@@ -14,6 +14,7 @@ import {
   getModelPrice,
   getTokenRates,
   LONG_CONTEXT_THRESHOLDS,
+  PRICE_TABLE_VERSION,
   type TokenUsage,
 } from './model_prices';
 import { CACHE_READ_COLUMN_MISSING } from './tokens';
@@ -32,6 +33,7 @@ interface ModelUsage extends TokenUsage {
 }
 
 // Buckets each request by the largest tier boundary its prompt exceeds (0 below all of them).
+// A prompt of exactly the boundary stays in the lower tier, matching the catalog's `<=272K` rows.
 const promptTierExpression = `CASE(${LONG_CONTEXT_THRESHOLDS.map(
   (threshold) => `prompt_tokens > ${threshold}, ${threshold}`
 ).join(', ')}, 0)`;
@@ -132,6 +134,7 @@ export function createEstimatedCostEvaluator({
     config: {
       name: ESTIMATED_COST_EVALUATOR_NAME,
       direction: 'minimize',
+      emptyResponseIsIncomplete: true,
       buildQuery: (traceId) => buildCostQuery(traceId, { withCachedTokens: true }),
       // An unmapped cache_read column means re-query without it and price all input as uncached.
       fallbackQuery: {
@@ -157,7 +160,7 @@ export function createEstimatedCostEvaluator({
             unpriced.length > 0
               ? `Could not price ${unpriced.join(', ')}. ${breakdown}`
               : breakdown,
-          metadata: { models: usages },
+          metadata: { priceTableVersion: PRICE_TABLE_VERSION, models: usages },
         };
       },
     },

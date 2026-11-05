@@ -43,6 +43,9 @@ export interface TraceBasedEvaluatorConfig {
     matchesQueryError: (error: unknown) => boolean;
     buildQuery: (traceId: string) => string;
   };
+  // For queries grouped with BY, no rows means no matching spans yet rather than a failed query,
+  // so it ends like an ungrouped query's null row: retried, then potentially incomplete.
+  emptyResponseIsIncomplete?: boolean;
   // Context attached to a scored or unreported result, e.g. why it could not be scored.
   describeResult?: (response: EsqlResponse) => Pick<EvaluationResult, 'explanation' | 'metadata'>;
   /**
@@ -72,6 +75,7 @@ export function createTraceBasedEvaluator({
     fallbackQuery,
     describeResult,
     direction,
+    emptyResponseIsIncomplete,
   } = config;
 
   return {
@@ -163,6 +167,10 @@ export function createTraceBasedEvaluator({
         const { values } = response;
 
         if (!values || values.length === 0) {
+          if (emptyResponseIsIncomplete && lastResult === undefined) {
+            lastResult = null;
+            lastResultResponse = response;
+          }
           throw new Error(`No data found for trace`);
         }
 

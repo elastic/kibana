@@ -217,7 +217,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           ],
           [
             estimatedCost.name,
-            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+            { decimalPlaces: 4, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
           [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] }],
           [
