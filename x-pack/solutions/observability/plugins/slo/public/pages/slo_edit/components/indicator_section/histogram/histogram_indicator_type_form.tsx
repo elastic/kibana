@@ -25,6 +25,7 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { HistogramIndicator } from './histogram_indicator';
+import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
 export function HistogramIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
@@ -36,7 +37,9 @@ export function HistogramIndicatorTypeForm() {
     dataViewId,
   });
 
-  const histogramFields = dataView?.fields.filter((field) => field.type === 'histogram');
+  const histogramFields = dataView?.fields.filter((field) =>
+    HISTOGRAM_FIELD_TYPES.includes(field.type)
+  );
 
   return (
     <>
