@@ -10,6 +10,8 @@ import type { ComponentProps } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import {
@@ -113,8 +115,11 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
 const httpError = (status: number, message: string) =>
   Object.assign(new Error(message), { response: { status } });
 
+const mockAddSuccess = jest.fn();
+
 const renderPage = () => {
   jest.mocked(useKibanaServices).mockReturnValue({
+    notifications: { toasts: { addSuccess: mockAddSuccess } },
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
@@ -134,7 +139,9 @@ const renderPage = () => {
     {
       wrapper: ({ children }) => (
         <I18nProvider>
-          <EuiProvider>{children}</EuiProvider>
+          <EuiProvider>
+            <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
+          </EuiProvider>
         </I18nProvider>
       ),
     }
@@ -164,7 +171,7 @@ describe('SessionDetailPage', () => {
       { text: 'Sessions', href: SESSIONS_HREF },
       { text: 'abcdef12' },
     ]);
-    expect(screen.getByTestId('digitalExperienceSessionBack')).toHaveAttribute(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
       SESSIONS_HREF
     );
@@ -177,12 +184,23 @@ describe('SessionDetailPage', () => {
     );
   });
 
+  it('copies the session ID from the header', async () => {
+    mockFetch.mockResolvedValue(detail());
+    document.execCommand = jest.fn().mockReturnValue(true);
+    renderPage();
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceSessionIdCopy'));
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(mockAddSuccess).toHaveBeenCalledWith('Session ID copied');
+  });
+
   it('summarizes the session', async () => {
     mockFetch.mockResolvedValue(detail());
     renderPage();
 
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Session');
     expect(await screen.findByTestId('digitalExperienceSessionId')).toHaveTextContent(
-      'abcdef123456'
+      'Session ID abcdef123456'
     );
     expect(screen.getByTestId('digitalExperienceSessionStat-duration')).toHaveTextContent(
       '1 min 0 s'
