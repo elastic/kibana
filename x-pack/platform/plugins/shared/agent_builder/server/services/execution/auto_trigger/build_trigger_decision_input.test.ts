@@ -50,6 +50,19 @@ describe('shouldRespondQuestions', () => {
     expect(Object.keys(shouldRespondQuestions)).toEqual([SHOULD_RESPOND_QUESTION]);
     expect(shouldRespondQuestions[SHOULD_RESPOND_QUESTION].type).toBe('predicate');
   });
+
+  it("weighs the request against the agent's description", () => {
+    const { instructions } = shouldRespondQuestions[SHOULD_RESPOND_QUESTION];
+
+    expect(instructions).toContain('described on the first line of the input');
+    expect(instructions).toContain('according to its description, even without mentioning it');
+  });
+
+  it('replies to an @mention unless told not to', () => {
+    const { instructions } = shouldRespondQuestions[SHOULD_RESPOND_QUESTION];
+
+    expect(instructions).toContain('unless the message tells it not to reply');
+  });
 });
 
 describe('buildTriggerDecisionInput', () => {

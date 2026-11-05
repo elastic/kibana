@@ -8,11 +8,15 @@
 // Benchmark cases for decision models. Each case has one question and the answer we expect.
 
 const AGENT = 'Agent: Elastic AI Agent - Helps you investigate your data';
+const OBSERVABILITY_AGENT =
+  'Agent: Observability Assistant - Investigates logs, metrics, traces and service health';
+const HR_AGENT =
+  'Agent: HR Assistant - Answers questions about leave, benefits and company policies';
 
 /** A shared-conversation decision input, laid out like buildTriggerDecisionInput. */
-const conversation = ({ history = [], author = 'Jane Doe', message }) =>
+const conversation = ({ agent = AGENT, history = [], author = 'Jane Doe', message }) =>
   [
-    AGENT,
+    agent,
     `Participants: ${[...new Set([...history.map(([who]) => who), author])].join(', ')}`,
     'Recent messages:',
     ...history.map(([who, text]) => `[${who}]: ${text}`),
@@ -20,10 +24,22 @@ const conversation = ({ history = [], author = 'Jane Doe', message }) =>
     message,
   ].join('\n');
 
+// SHOULD_RESPOND picks the instructions; the default, scoped_mention_unless, is the one in build_trigger_decision_input.ts.
+// 'current' is the original wording, the others are the variants tried before it.
+const SHOULD_RESPOND_INSTRUCTIONS = {
+  current:
+    'This is a shared conversation between people and an AI agent. Decide whether the AI agent should respond to the new message. Answer true when the message asks the agent something, asks for its help or opinion, or is directed at it, including through an @mention of the agent. Answer false when the message is directed at other people, is a reaction or acknowledgement, or does not need the agent.',
+  scoped:
+    'This is a shared conversation between people and an AI agent, described on the first line of the input. Decide whether the AI agent should respond to the new message. Answer true when the message is directed at the agent, including through an @mention, or when it asks for something the agent can help with according to its description, even without mentioning it. Answer false when the message is directed at other people, is a reaction or acknowledgement, or asks for something outside what the agent does without being addressed to it.',
+  scoped_mention:
+    "This is a shared conversation between people and an AI agent, described on the first line of the input. Decide whether the AI agent should respond to the new message. Answer true when the message @mentions the agent: it always replies when addressed directly, even if only to say it can't help. Also answer true when the message asks for something the agent can help with according to its description, even without mentioning it. Answer false when the message is directed at other people, is a reaction or acknowledgement, or asks for something outside what the agent does without addressing it.",
+  scoped_mention_unless:
+    "This is a shared conversation between people and an AI agent, described on the first line of the input. Decide whether the AI agent should respond to the new message. Answer true when the message @mentions the agent: it replies when addressed directly, even if only to say it can't help, unless the message tells it not to reply. Also answer true when the message asks for something the agent can help with according to its description, even without mentioning it. Answer false when the message is directed at other people, is a reaction or acknowledgement, or asks for something outside what the agent does without addressing it.",
+};
+
 const SHOULD_RESPOND = {
   type: 'predicate',
-  instructions:
-    'This is a shared conversation between people and an AI agent. Decide whether the AI agent should respond to the new message. Answer true when the message asks the agent something, asks for its help or opinion, or is directed at it, including through an @mention of the agent. Answer false when the message is directed at other people, is a reaction or acknowledgement, or does not need the agent.',
+  instructions: SHOULD_RESPOND_INSTRUCTIONS[process.env.SHOULD_RESPOND ?? 'scoped_mention_unless'],
 };
 
 const PICK_SKILL = {
@@ -112,6 +128,59 @@ export const cases = [
     }),
     expected: false,
   },
+
+  // should_respond where only the agent's description decides (no mention of the agent)
+  ...[
+    [
+      'D1',
+      'In scope for observability',
+      OBSERVABILITY_AGENT,
+      'Can someone check the error rate for checkout?',
+      true,
+    ],
+    [
+      'D2',
+      'Same request, HR agent',
+      HR_AGENT,
+      'Can someone check the error rate for checkout?',
+      false,
+    ],
+    ['D3', 'In scope for HR', HR_AGENT, 'How many vacation days do I have left this year?', true],
+    [
+      'D4',
+      'Same request, observability agent',
+      OBSERVABILITY_AGENT,
+      'How many vacation days do I have left this year?',
+      false,
+    ],
+    [
+      'D5',
+      'Out of scope for both: lunch',
+      OBSERVABILITY_AGENT,
+      "Who's up for lunch at 12:30?",
+      false,
+    ],
+    [
+      'D6',
+      '@mention, but outside its scope',
+      HR_AGENT,
+      '@HR Assistant why is checkout latency spiking?',
+      true,
+    ],
+  ].map(([id, label, agent, message, expected]) => ({
+    id,
+    label,
+    question: ['should_respond', SHOULD_RESPOND],
+    input: conversation({
+      agent,
+      history: [
+        ['Bruno Farache', 'Morning all'],
+        ['Jane Doe', 'Morning!'],
+      ],
+      message,
+    }),
+    expected,
+  })),
 
   // pick_skill (choice): expected is the choice
   {

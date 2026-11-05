@@ -329,7 +329,13 @@ const models = Object.fromEntries(
 );
 const results = [];
 
-for (const testCase of cases) {
+// CASES=D1,D2 or CASES=D (an id prefix) runs a subset.
+const ONLY_CASES = process.env.CASES?.split(',');
+const selected = cases.filter(
+  ({ id }) => !ONLY_CASES || ONLY_CASES.some((wanted) => id === wanted || id.startsWith(wanted))
+);
+
+for (const testCase of selected) {
   const [name, question] = testCase.question;
 
   for (const [model, ask] of Object.entries(models)) {
