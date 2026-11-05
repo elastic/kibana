@@ -64,6 +64,15 @@ describe('deleteAllConversations', () => {
                       must: [
                         { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
                         {
+                          script: {
+                            script: {
+                              lang: 'painless',
+                              source:
+                                "def users = params._source['users']; return users instanceof List && users.size() == 1;",
+                            },
+                          },
+                        },
+                        {
                           nested: {
                             path: 'users',
                             query: {
@@ -91,14 +100,13 @@ describe('deleteAllConversations', () => {
     );
   });
 
-  test('throw error if no conversation was deleted', async () => {
-    const mockResponse = { deleted: 0 };
+  test('returns an empty result when no conversation was deleted', async () => {
+    const mockResponse = { deleted: 0, total: 0 };
     const options = getDeleteAllConversationsOptionsMock();
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue(mockResponse);
 
-    await expect(deleteAllConversations(options)).rejects.toThrow(
-      'No conversations have been deleted.'
-    );
+    await expect(deleteAllConversations(options)).resolves.toEqual(mockResponse);
+    expect(options.logger.error).not.toHaveBeenCalled();
   });
 
   test('handles error from deleteByQuery', async () => {

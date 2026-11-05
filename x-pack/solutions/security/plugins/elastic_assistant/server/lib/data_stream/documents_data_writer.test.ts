@@ -91,6 +91,15 @@ describe('DocumentsDataWriter', () => {
                 },
               },
               {
+                script: {
+                  script: {
+                    lang: 'painless',
+                    source:
+                      "def users = params._source['users']; return users instanceof List && users.size() == 1;",
+                  },
+                },
+              },
+              {
                 nested: {
                   path: 'users',
                   query: {
