@@ -38,6 +38,7 @@ import {
   getDisplayConfig,
 } from './entity_type_config';
 import { RESET_TO_DEFAULT_LABEL, getTableAriaLabel } from './translations';
+import type { EntityTablePreferences } from './use_entity_table_state';
 import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
 
 /** Row rules only and a shaded header, as in the design's list tables. */
@@ -55,10 +56,18 @@ const LAST_SEEN_COLUMN_WIDTH = 230;
 export interface EntityTableProps {
   entityType: InventoryEntityType;
   list: InventoryListResponse;
+  /** The column, sort and page size choices; the caller keeps them while the table is unmounted. */
+  preferences: EntityTablePreferences;
+  onPreferencesChange: (preferences: EntityTablePreferences) => void;
 }
 
 /** One entity type's results as a data grid. Sorting and pagination run over the loaded rows. */
-export const EntityTable = ({ entityType, list }: EntityTableProps) => {
+export const EntityTable = ({
+  entityType,
+  list,
+  preferences,
+  onPreferencesChange,
+}: EntityTableProps) => {
   const {
     services: { uiSettings },
   } = useKibana();
@@ -81,7 +90,12 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
     pageSize,
     onChangeItemsPerPage,
     reset,
-  } = useEntityTableState({ defaultVisibleColumns, rows: list.rows });
+  } = useEntityTableState({
+    defaultVisibleColumns,
+    rows: list.rows,
+    preferences,
+    onPreferencesChange,
+  });
 
   const columnKinds = useMemo(
     () => new Map(list.columns.map(({ name, kind }) => [name, kind])),
@@ -96,6 +110,11 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
         initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
       })),
     [type, list.columns, columnKinds]
+  );
+  // A kept choice can name a column that a later response of the type does not have.
+  const knownVisibleColumns = useMemo(
+    () => visibleColumns.filter((id) => columns.some((column) => column.id === id)),
+    [visibleColumns, columns]
   );
 
   const getSortValue = useCallback(
@@ -169,7 +188,7 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       <EuiDataGrid
         aria-label={getTableAriaLabel(typeName)}
         columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        columnVisibility={{ visibleColumns: knownVisibleColumns, setVisibleColumns }}
         gridStyle={GRID_STYLE}
         rowCount={sortedRows.length}
         renderCellValue={renderCellValue}

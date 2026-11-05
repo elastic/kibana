@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { EntityTypeNotFoundError, useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
+import type { EntityTablePreferences } from './use_entity_table_state';
+import { NO_PREFERENCES } from './use_entity_table_state';
 import {
   EntityTableDiagnosticsCallout,
   EntityTableTruncationCallout,
@@ -22,13 +24,41 @@ import {
 
 /**
  * The results of one entity type over the committed time range, with its loading states. Keyed by
- * type so that a type switch starts from a clean slate: no rows, no column choices of the last type.
+ * type so that a type switch starts with no rows. The column, sort and page size choices are kept
+ * here, per type, so an empty range, a failed load or a switch to another type and back does not
+ * discard them. They last as long as this component, and are not persisted (#6330).
  */
-export const EntityTypeResults = ({ entityType }: { entityType: string }) => (
-  <EntityTypeResultsOfType key={entityType} entityType={entityType} />
-);
+export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
+  const [preferencesByType, setPreferencesByType] = useState<
+    Readonly<Record<string, EntityTablePreferences>>
+  >({});
+  const onPreferencesChange = useCallback(
+    (preferences: EntityTablePreferences) =>
+      setPreferencesByType((previous) => ({ ...previous, [entityType]: preferences })),
+    [entityType]
+  );
 
-const EntityTypeResultsOfType = ({ entityType }: { entityType: string }) => {
+  return (
+    <EntityTypeResultsOfType
+      key={entityType}
+      entityType={entityType}
+      preferences={preferencesByType[entityType] ?? NO_PREFERENCES}
+      onPreferencesChange={onPreferencesChange}
+    />
+  );
+};
+
+interface EntityTypeResultsOfTypeProps {
+  entityType: string;
+  preferences: EntityTablePreferences;
+  onPreferencesChange: (preferences: EntityTablePreferences) => void;
+}
+
+const EntityTypeResultsOfType = ({
+  entityType,
+  preferences,
+  onPreferencesChange,
+}: EntityTypeResultsOfTypeProps) => {
   const { entityType: description, list, loading, error, refresh } = useEntityList(entityType);
 
   if (error instanceof EntityTypeNotFoundError) {
@@ -72,7 +102,12 @@ const EntityTypeResultsOfType = ({ entityType }: { entityType: string }) => {
             isIncomplete={errors.length > 0 || total === null}
           />
         ) : (
-          <EntityTable entityType={description} list={list} />
+          <EntityTable
+            entityType={description}
+            list={list}
+            preferences={preferences}
+            onPreferencesChange={onPreferencesChange}
+          />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

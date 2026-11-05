@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,6 +17,7 @@ import {
 import { buildScenarioListResponse } from '../../../inventory_api/fixture_scenarios';
 import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
+import type { EntityTableProps } from './entity_table';
 import { EntityTable } from './entity_table';
 import {
   NAME_COLUMN_ID,
@@ -25,10 +26,19 @@ import {
   getDefaultVisibleColumns,
 } from './entity_type_config';
 import { NO_VALUE_LABEL, RESET_TO_DEFAULT_LABEL } from './translations';
-import { DEFAULT_PAGE_SIZE } from './use_entity_table_state';
+import type { EntityTablePreferences } from './use_entity_table_state';
+import { DEFAULT_PAGE_SIZE, NO_PREFERENCES } from './use_entity_table_state';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
+
+/** The table with the preferences kept in state, as `EntityTypeResults` keeps them. */
+const StatefulEntityTable = (
+  props: Omit<EntityTableProps, 'preferences' | 'onPreferencesChange'>
+) => {
+  const [preferences, setPreferences] = useState<EntityTablePreferences>(NO_PREFERENCES);
+  return <EntityTable {...props} preferences={preferences} onPreferencesChange={setPreferences} />;
+};
 
 const getFixture = (scenario: 'normal' | 'truncated' | 'countFailed'): InventoryListResponse => {
   const list = buildScenarioListResponse('host', scenario);
@@ -58,7 +68,7 @@ const renderTable = (list: InventoryListResponse) =>
   render(
     <I18nProvider>
       <KibanaContextProvider services={createAppServicesMock()}>
-        <EntityTable entityType={HOST_TYPE_FIXTURE} list={list} />
+        <StatefulEntityTable entityType={HOST_TYPE_FIXTURE} list={list} />
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -173,7 +183,7 @@ describe('EntityTable', () => {
     render(
       <I18nProvider>
         <KibanaContextProvider services={createAppServicesMock()}>
-          <EntityTable
+          <StatefulEntityTable
             entityType={K8S_DEPLOYMENT_TYPE_FIXTURE}
             list={{
               ...k8sList,
@@ -219,7 +229,7 @@ describe('EntityTable', () => {
     render(
       <I18nProvider>
         <KibanaContextProvider services={createAppServicesMock()}>
-          <EntityTable
+          <StatefulEntityTable
             entityType={K8S_DEPLOYMENT_TYPE_FIXTURE}
             list={{
               ...k8sList,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -198,6 +198,64 @@ describe('EntityTypeResults', () => {
       expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument()
     );
     expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+  });
+
+  describe('column and sort choices', () => {
+    const hideColumn = (columnId: string) => {
+      fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${columnId}`));
+      const hide = within(screen.getByTestId(`dataGridHeaderCellActionGroup-${columnId}`))
+        .getAllByRole('button')
+        .find((button) => button.textContent === 'Hide column');
+      if (!hide) {
+        throw new Error('No hide action');
+      }
+      fireEvent.click(hide);
+    };
+
+    it('survive a range with no entities and a failed reload of the same type', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const emptyClient = createScenarioEntityInventoryApiClient({ scenario: 'empty' });
+      const listEntities = jest
+        .fn(fixtureClient.listEntities)
+        .mockImplementationOnce(fixtureClient.listEntities)
+        .mockImplementationOnce(emptyClient.listEntities)
+        .mockRejectedValueOnce(new Error('Request failed'))
+        .mockImplementation(fixtureClient.listEntities);
+      renderResults({ ...fixtureClient, listEntities });
+      expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+      hideColumn('cloud.account.id');
+      await waitFor(() =>
+        expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+      expect(await screen.findByTestId('entityInventoryTableEmpty')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+      expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(screen.getByTestId('dataGridHeaderCell-entityInventory.name')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+    });
+
+    it('survive a switch to another type and back', async () => {
+      const { showType } = renderResults(createFixtureEntityInventoryApiClient());
+      expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+      hideColumn('cloud.account.id');
+      await waitFor(() =>
+        expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+      );
+
+      showType('k8s.deployment');
+      expect(
+        await screen.findByTestId('dataGridHeaderCell-entityInventory.namespace')
+      ).toBeInTheDocument();
+      showType('host');
+
+      expect(await screen.findByTestId('dataGridHeaderCell-last_seen')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+    });
   });
 
   it('shows the error, not the previous results, when a later load fails', async () => {
