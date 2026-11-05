@@ -10,16 +10,13 @@ import { createHash, randomBytes } from 'crypto';
 import pMap from 'p-map';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ORCABENCH_ES_CONNECTOR_PREFIX, getConnectorSet } from './connector_sets';
-import { assertOrcaSource, orcaCurrentTimeMs } from './orca_dataset';
+import { assertOrcaSource } from './orca_dataset';
 import type { OrcaTelemetryVariant } from './orca_dataset';
 import type { InvestigationExample } from './types';
 
 /** The three ORCA signals, each a set of hourly data streams. */
 export const ORCA_SIGNALS = ['logs', 'traces', 'metrics'] as const;
 const ORCA_INDEX_PATTERNS = ORCA_SIGNALS.map((signal) => `${signal}-orcabench.otel-*`);
-
-/** ORCA serves each task the first telemetry snapshot taken at least this long after `current_time`. */
-export const ORCA_SNAPSHOT_LEAD_MS = 5 * 60_000;
 
 /**
  * ORCA's last telemetry snapshot. A key bounded here sees the whole window the pinned preflight
@@ -51,23 +48,15 @@ export const ORCA_FLAG_DOCUMENTS_QUERY = {
 } as const;
 
 /**
- * The last moment of telemetry an ORCA task may read: its recorded snapshot time, or else the first
- * snapshot ORCA would serve it. Always written with milliseconds, because Elasticsearch rounds a
- * `lte` date without them up to the end of that second.
+ * The last moment of telemetry an ORCA task may read: the snapshot ORCA serves it, recorded on every
+ * example. Always written with milliseconds, because Elasticsearch rounds a `lte` date without them
+ * up to the end of that second.
  */
 export const getOrcaCutoff = ({ metadata }: Pick<InvestigationExample, 'metadata'>): string => {
   const { case_id: caseId, telemetry_snapshot_time: snapshotTime } = metadata;
-  if (snapshotTime !== undefined && snapshotTime !== null) {
-    const snapshotMs = typeof snapshotTime === 'string' ? Date.parse(snapshotTime) : Number.NaN;
-    assert(
-      !Number.isNaN(snapshotMs),
-      `ORCA case ${caseId} has an unparseable telemetry_snapshot_time`
-    );
-    return new Date(snapshotMs).toISOString();
-  }
-  const currentMs = orcaCurrentTimeMs(metadata.current_time);
-  assert(currentMs !== undefined, `ORCA case ${caseId} has no parseable current_time`);
-  return new Date(currentMs + ORCA_SNAPSHOT_LEAD_MS).toISOString();
+  const snapshotMs = typeof snapshotTime === 'string' ? Date.parse(snapshotTime) : Number.NaN;
+  assert(!Number.isNaN(snapshotMs), `ORCA case ${caseId} has no parseable telemetry_snapshot_time`);
+  return new Date(snapshotMs).toISOString();
 };
 
 /** The tasks sharing one cutoff, and the Kibana space and connector that read up to it. */

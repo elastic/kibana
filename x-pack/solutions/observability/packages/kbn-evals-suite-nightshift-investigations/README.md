@@ -547,30 +547,38 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## ORCA benchmark
 
-`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v3`
+`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v4`
 against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
 controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
 time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
 its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard that
 runs the smoke and trace-only evals, so each Scout server runs one [connector set](#connector-sets).
 The ORCA shard runs the `orcabench` set: each task's investigator has one Elasticsearch connector,
-named `orcabench_es`, and no index hint, so the agent discovers the ORCA indices the way it would on
-any cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+named `orcabench_es`. The question names that connector, as ORCA's names its Grafana API, but no
+index, so the agent discovers the ORCA indices the way it would on any cluster. Each cutoff's space
+carries one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
+[`custom_context.ts`](evals/investigation/custom_context.ts)) pointing at the demo's public source,
+`github.com/open-telemetry/opentelemetry-demo` at commit `fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733`,
+the commit the paper's environment is built on. The paper's agents find that checkout at
+`/app/opentelemetry-demo`; ours clone it in the sandbox, as the customer0 space points at Elastic's
+repositories. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
-Each example records `metadata.current_time`, and the public 755 also record
-`metadata.telemetry_snapshot_time`. ORCA serves each task the first telemetry snapshot taken after
-`current_time` plus five minutes, so that snapshot time is the latest data the paper's agents can
-see. Every read here stops there too; see [telemetry cutoff](#telemetry-cutoff).
+Each example records `metadata.current_time` and `metadata.telemetry_snapshot_time`. ORCA serves
+each task the first telemetry snapshot taken after `current_time` plus five minutes, or its last
+snapshot when none is later, so that snapshot time is the latest data the paper's agents can see.
+Public tasks also carry ORCA's ground truth, the task's `tests/expected.json`, as
+`metadata.orca_expected`: each plausible event's `event_id`, `root_cause` and `event_time`, or a
+control's quiet window. Every read here stops there too; see [telemetry cutoff](#telemetry-cutoff).
 
 ### Telemetry cutoff
 
 The ORCA cluster holds all six days, so Elasticsearch, not the investigation, bounds what a task can
 read. The agent investigates unchanged and no query it writes can see past its task's cutoff.
 
-- **Cutoff.** A task's cutoff is its `telemetry_snapshot_time`, or else `current_time` plus five
-  minutes (the sampled 50 record no snapshot). The bound is inclusive, `@timestamp <= cutoff`, and
+- **Cutoff.** A task's cutoff is its `telemetry_snapshot_time`; a release without one on every task
+  fails before any investigation. The bound is inclusive, `@timestamp <= cutoff`, and
   is always written with milliseconds: Elasticsearch rounds a `lte` date without them up to the end
   of that second. The 755 has 125 distinct cutoffs, the sampled 50 has 41.
 - **Keys.** The eval signs in to the ORCA cluster as the user `nightshift-orcabench-eval`, whose
@@ -646,7 +654,7 @@ array on write, so the ten controls keep those markers and do not store `plausib
 `rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It
 does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal.
 
-`nightshift/orca-sampled50-v3` copies `plausible_flags` from the public Harbor dataset
+`nightshift/orca-sampled50-v4` copies `plausible_flags` from the public Harbor dataset
 `orca-bench/orca-bench` (`sha256:2add497ac2f93468dba1b83977c295a784c89031754e6a35520195345ad62ada`).
 A task matches when `sha256(case_id)` truncated to 16 hex characters is that task's package name
 and the task's `user_facing_issue` appears in the question. The copied value is the set of
@@ -666,7 +674,13 @@ any quoted ORCA accuracy or hallucination number:
 `d1-c1-admanualgc-on-02-medium_ttd15m_at_off+10m`,
 `d1-i1-imageslowload-on-02-medium_ttd480m_period_previous-period`,
 `d2-cc1-adfailure-on-02-medium_ttd1440m_day_same-day`.
-`nightshift/orca-sampled50-v2` is unchanged.
+v4 differs from v3 in three ways. Its questions no longer name the ORCA indices. Every task records
+`telemetry_snapshot_time`: the 40 public tasks copy their Harbor task's, and the 10 medium tasks
+take the first snapshot strictly after `current_time` plus five minutes among the 125 snapshots the
+public tasks name. That choice is exact, because each lands under 5 minutes before the next known
+snapshot and ORCA's snapshots are at least 300 s apart; the same rule reproduces all 664 public
+snapshots outside ORCA's last-snapshot fallback. The 40 public tasks carry `orca_expected`.
+`nightshift/orca-sampled50-v3` and `-v2` are unchanged.
 
 The previous run of this pinned 50 is the 28 October 2026 Sonnet 4.6 investigation
 `bk-01a184b7-e436-462e-9b4b-015d32c3ae77` on `nightshift/orca-sampled50-v2`. Its mean `goal_pass`
@@ -677,17 +691,18 @@ stored run, 21 October 2026 `bk-01a1606b-fecd-479e-b2ae-eb4eedb78385` on
 where 39 of 42 investigations touched `feature_flag.key` and mean `goal_pass` was about 0.89, is
 a correlation and is not ORCA accuracy.
 
-Do not compare these scores with the paper's published rates. This agent has ES|QL and does not
-have the Astronomy Shop source. The paper's agents have that repository and Grafana (Prometheus,
-Jaeger, OpenSearch). The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
+Do not compare these scores with the paper's published rates yet. This agent reads telemetry with
+ES|QL and reaches the Astronomy Shop source by cloning it; the paper's agents have a checkout and
+Grafana (Prometheus, Jaeger, OpenSearch), an hour per task, and a `report.md` graded by ORCA's own
+judge. The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
 against 30.9% for the same model with code. The 40 matched tasks above are the Verified view, so
 a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
 paper's 25.3% and 10.0% are not like-for-like.
 
 ### Public 755
 
-`nightshift/orca-bench-public755-v1` (`342ac04a-b9f7-59a1-9462-3503b3bd52a6`, 755 examples, sha256
-`5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb`) holds every task of the public
+`nightshift/orca-bench-public755-v2` (`7e7dd22d-83fb-54a5-9e51-dd2b67def0ef`, 755 examples, sha256
+`f6a6f74aba362adb3dfe2882422f1ea23c1fb0db4169116579b42c38d45777a1`) holds every task of the public
 Harbor dataset above: 617 incident tasks and 138 controls, with tiers easy 245, hard 264 and
 universal 246. The tiers are the question's granularity, not the paper's difficulty: the paper's
 Easy, Medium and Hard (`orca_difficulty`) are our `easy`, `hard` and `universal`, one to one. Each
@@ -696,8 +711,8 @@ example is built from its Harbor task:
 - `case_id` is the name whose `sha256` prefix is the task's package name, and `harbor_task` is
   the package. Every one of the 755 resolves to exactly one name.
 - The question uses the task's stated current time, `reported_styled` and `user_facing_issue`,
-  in the same wording as `nightshift/orca-sampled50-v3`. On the 40 tasks both releases hold, the
-  questions, flag sets and current times are identical.
+  in the same wording as `nightshift/orca-sampled50-v4`. On the 40 tasks both releases hold, the
+  questions, flag sets, current times and snapshot times are identical.
 - `plausible_flags` is the set of `events[].root_cause` keys. On 77 incident tasks it does not
   contain the flag the `qid` names, for example `d1-n1-loadGeneratorFloodHomepage-on-00-hard`,
   whose answer is `imageSlowLoad`. That set is ORCA's answer.
@@ -708,6 +723,9 @@ example is built from its Harbor task:
   task's own difficulty label. Controls carry `quiet_window` from the task. Ten of them have no
   start.
 - `telemetry_snapshot_time` is the snapshot named in the task's environment.
+- `orca_expected` is the task's `tests/expected.json`.
+- v2 differs from v1 only in that its questions no longer name the ORCA indices, and in
+  `orca_expected`. `nightshift/orca-bench-public755-v1` is unchanged.
 
 Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs, traces and
 metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
@@ -720,7 +738,7 @@ returns at most 10,000 scores per experiment, so a run that would write more (th
 writes about 13,600) fails before any investigation starts.
 `NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
 runs one contiguous part of it in `case_id` order. Each run validates the whole release before
-slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v1/slice-<index>-of-<count>`,
+slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v2/slice-<index>-of-<count>`,
 because the eval client upserts the dataset it runs, and under the release name a slice would
 remove the other tasks. The eval stores the slice first and runs it with the example ids the
 server gave it, so its scores show up in each example's history in the Evals UI. Keep one `<count>` for a baseline and join the slices on `case_id`.

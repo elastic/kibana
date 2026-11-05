@@ -18,7 +18,12 @@ import {
 import type { OrcaTelemetryVariant } from './orca_dataset';
 
 const task = (caseId: string, metadata: Record<string, string> = {}) => ({
-  metadata: { case_id: caseId, current_time: '2026-04-19T16:22:00Z', ...metadata },
+  metadata: {
+    case_id: caseId,
+    current_time: '2026-04-19T16:22:00Z',
+    telemetry_snapshot_time: '2026-04-19T16:27:11Z',
+    ...metadata,
+  },
 });
 
 describe('getOrcaCutoff', () => {
@@ -27,16 +32,13 @@ describe('getOrcaCutoff', () => {
       '2026-04-24T19:25:42.000Z'
     );
   });
-  it('bounds a task without a recorded snapshot five minutes after its current time', () => {
-    expect(getOrcaCutoff(task('a'))).toBe('2026-04-19T16:27:00.000Z');
-  });
-  it('rejects a task whose times cannot bound it', () => {
+  it('rejects a task without a parseable snapshot rather than guess one from its current time', () => {
     expect(() => getOrcaCutoff(task('a', { telemetry_snapshot_time: 'soon' }))).toThrow(
-      'ORCA case a has an unparseable telemetry_snapshot_time'
+      'ORCA case a has no parseable telemetry_snapshot_time'
     );
-    expect(() => getOrcaCutoff({ metadata: { case_id: 'b' } })).toThrow(
-      'ORCA case b has no parseable current_time'
-    );
+    expect(() =>
+      getOrcaCutoff({ metadata: { case_id: 'b', current_time: '2026-04-19T16:22:00Z' } })
+    ).toThrow('ORCA case b has no parseable telemetry_snapshot_time');
   });
 });
 
@@ -44,12 +46,12 @@ describe('groupOrcaCasesByCutoff', () => {
   const tasks = [
     task('late', { telemetry_snapshot_time: '2026-04-24T19:25:42Z' }),
     task('early-1'),
-    task('early-2', { current_time: '2026-04-19T16:22:00.000Z' }),
+    task('early-2', { telemetry_snapshot_time: '2026-04-19T16:27:11.000Z' }),
   ];
   it('puts tasks sharing a cutoff in one space with one connector, in cutoff order', () => {
     const groups = groupOrcaCasesByCutoff(tasks);
     expect(groups.map(({ cutoff, caseIds }) => [cutoff, caseIds])).toEqual([
-      ['2026-04-19T16:27:00.000Z', ['early-1', 'early-2']],
+      ['2026-04-19T16:27:11.000Z', ['early-1', 'early-2']],
       ['2026-04-24T19:25:42.000Z', ['late']],
     ]);
     expect(new Set(groups.map(({ spaceId }) => spaceId)).size).toBe(2);

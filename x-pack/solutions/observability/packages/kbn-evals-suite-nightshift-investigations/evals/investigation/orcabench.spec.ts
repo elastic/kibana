@@ -6,6 +6,7 @@
  */
 
 import { registerInvestigationEvaluation } from './register_evaluation';
+import { ORCA_DEMO_COMMIT } from './custom_context';
 import { loadOrcaDataset, resolveOrcaRun, resolveOrcaTelemetryVariant } from './orca_dataset';
 
 const run = resolveOrcaRun();
@@ -26,6 +27,8 @@ registerInvestigationEvaluation({
     // Each task reads through a key whose document-level security ends at its snapshot, so these
     // runs never mix with the proxy-bounded baseline or unbounded runs.
     telemetry_cutoff: 'dls',
+    // The agent may read the demo's source at the commit the paper pins, through custom context.
+    source_code: `opentelemetry-demo@${ORCA_DEMO_COMMIT}`,
     ...(slice ? { dataset_slice: `${slice.index}/${slice.count}` } : {}),
   },
 });

@@ -25,18 +25,18 @@ export interface OrcaRelease {
 
 /** ORCA's 50 sampled tasks, the CI shard. */
 export const ORCA_RELEASE = {
-  id: 'eeffbc6e-664b-50d1-9c5f-c195a39ed235',
-  name: 'nightshift/orca-sampled50-v3',
+  id: 'e6eb3aba-1f11-56f8-869a-ace8bdbb60a0',
+  name: 'nightshift/orca-sampled50-v4',
   examples: 50,
-  sha256: '6e47ae50da1fa0ce60f8de5dcbb90e887b74bd937711c6bc23fa997369000803',
+  sha256: '7267c32d424fbb2b34bfa759a7b71a517bee4881dd2aa0b1eaf25cf2a301acba',
 } as const;
 
 /** Every task of the public Harbor dataset `orca-bench/orca-bench`, the periodic baseline. */
 export const ORCA_PUBLIC_RELEASE = {
-  id: '342ac04a-b9f7-59a1-9462-3503b3bd52a6',
-  name: 'nightshift/orca-bench-public755-v1',
+  id: '7e7dd22d-83fb-54a5-9e51-dd2b67def0ef',
+  name: 'nightshift/orca-bench-public755-v2',
   examples: 755,
-  sha256: '5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb',
+  sha256: 'f6a6f74aba362adb3dfe2882422f1ea23c1fb0db4169116579b42c38d45777a1',
 } as const;
 
 const ORCA_RELEASES: Readonly<Record<string, OrcaRelease>> = {
@@ -132,6 +132,15 @@ export const validateOrcaDataset = (
   assert(
     examples.every((example) => orcaCurrentTimeMs(example.metadata.current_time) !== undefined),
     'ORCA dataset examples must record a parseable metadata.current_time'
+  );
+  // Reads are bounded at the snapshot ORCA serves each task, so every task must name it.
+  assert(
+    examples.every(
+      ({ metadata }) =>
+        typeof metadata.telemetry_snapshot_time === 'string' &&
+        !Number.isNaN(Date.parse(metadata.telemetry_snapshot_time))
+    ),
+    'ORCA dataset examples must record a parseable metadata.telemetry_snapshot_time'
   );
   return {
     name: dataset.name,

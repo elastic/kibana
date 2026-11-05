@@ -25,7 +25,11 @@ const example = {
   id: 'example',
   input: { question: 'Investigate the incident.' },
   output: { reference_answer: 'The cause.' },
-  metadata: { case_id: 'incident', current_time: '2026-04-19T16:22:00.000Z' },
+  metadata: {
+    case_id: 'incident',
+    current_time: '2026-04-19T16:22:00.000Z',
+    telemetry_snapshot_time: '2026-04-19T16:27:11Z',
+  },
 };
 const dataset = {
   id: 'dataset',
@@ -63,6 +67,14 @@ describe('pinned ORCA release', () => {
     expect(() => validateOrcaDataset({ ...dataset, examples: [broken] }, brokenRelease)).toThrow(
       /current_time/
     );
+  });
+  it('rejects an example without the telemetry snapshot ORCA serves it', () => {
+    const { telemetry_snapshot_time: _, ...metadata } = example.metadata;
+    const unbounded = { ...example, metadata };
+    const unboundedRelease = { ...release, sha256: getOrcaDatasetHash([unbounded]) };
+    expect(() =>
+      validateOrcaDataset({ ...dataset, examples: [unbounded] }, unboundedRelease)
+    ).toThrow(/telemetry_snapshot_time/);
   });
   it('ignores object key order while retaining all payload values', () => {
     const reordered = {
