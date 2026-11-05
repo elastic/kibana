@@ -150,7 +150,7 @@ describe('related-alert cases: fixtures', () => {
         expect(Object.keys(doc).filter((k) => /^(host|user|process)\./.test(k))).toEqual([]);
         expect(entityValues(doc, 'host.id')).toHaveLength(1);
         expect(entityValues(doc, 'user.id')).toHaveLength(1);
-        const hasProcess = !(index === 0 && RELATED_ALERT_CASES[caseIndex].target.identityOnly);
+        const hasProcess = !(index === 0 && RELATED_ALERT_CASES[caseIndex].target.esqlQuery);
         expect(entityValues(doc, 'process.entity_id')).toHaveLength(hasProcess ? 1 : 0);
       });
     }
@@ -213,6 +213,31 @@ describe('related-alert cases: fixtures', () => {
         expect(at(doc, 'host.name')).toBe('jdoe-mbp');
         expect(at(doc, 'user.name')).toBe('jdoe');
       });
+    });
+
+    it('the target is an aggregating ES|QL rule alert, not a custom-query Endpoint alert', () => {
+      const [target] = docsFor(caseIndex, 'run-a');
+      expect(target).toMatchObject({
+        'kibana.alert.rule.category': 'ES|QL Rule',
+        'kibana.alert.rule.type': 'esql',
+        'kibana.alert.rule.rule_type_id': 'siem.esqlRule',
+        'kibana.alert.rule.parameters': { type: 'esql', language: 'esql' },
+        'kibana.alert.ancestors': [{ depth: 0, index: '', id: '', type: 'event' }],
+      });
+      const { query } = target['kibana.alert.rule.parameters'] as { query: string };
+      expect(query).toMatch(/^FROM logs-endpoint\.events\.process-\*/);
+      expect(query).toContain('BY host.id, user.id');
+      expect(
+        Object.keys(target).filter((key) =>
+          /^kibana\.alert\.(original_event|original_data_stream|original_time)/.test(key)
+        )
+      ).toEqual([]);
+    });
+
+    it('only this case is marked as correlated by id', () => {
+      expect(
+        RELATED_ALERT_CASES.filter(({ correlatedBy }) => correlatedBy === 'id').map(({ id }) => id)
+      ).toEqual(['related-malicious-id-only-control']);
     });
 
     it('shares its related alerts with the malicious control', () => {
