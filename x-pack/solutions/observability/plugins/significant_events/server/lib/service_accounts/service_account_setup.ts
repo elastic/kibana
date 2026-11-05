@@ -32,6 +32,7 @@ import {
   canManageSecurity,
   getDetectionEngineAccountId,
 } from './detection_engine_account';
+import { SETUP_ENABLED_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 
 /**
  * The bound workflows every set-up space gets, installed per space with the space id as suffix.
@@ -45,12 +46,6 @@ export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-] as const;
-
-/** The scheduled ones of those, which install off and run only while the space is not paused. */
-const SCHEDULED_SETUP_WORKFLOW_IDS = [
-  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
 ] as const;
 
 /** Sets a space up to run the detection engine as the deployment's `nightshift_detection` account. */
@@ -142,7 +137,7 @@ export function createDetectionEngineSetupService({
       return;
     }
     await Promise.all(
-      SCHEDULED_SETUP_WORKFLOW_IDS.map(async (workflowId) => {
+      SETUP_ENABLED_WORKFLOW_IDS.map(async (workflowId) => {
         const documentId = `${workflowId}-${spaceId}`;
         const existing = await workflows.management
           .getClient(request)

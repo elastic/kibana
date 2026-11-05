@@ -14,6 +14,11 @@ import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
 } from '../../../../common/maintenance/types';
+import {
+  canManageSecurity,
+  getDetectionEngineAccountId,
+} from '../../../lib/service_accounts/detection_engine_account';
+import { StatusError } from '../../../lib/errors/status_error';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
@@ -69,6 +74,19 @@ const resumeRoute = createServerRoute({
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+
+    // Switching a workflow on that is bound to the space's account needs `manage_security`. Refuse
+    // up front: otherwise every bound workflow fails to come back and the space reads as enabled.
+    const spaceId = request.spaceId;
+    if (
+      (await getDetectionEngineAccountId({ core: server.core, spaceId })) !== undefined &&
+      !(await canManageSecurity({ core: server.core, request }))
+    ) {
+      throw new StatusError(
+        'Resuming a space that runs as the detection engine service account requires the manage_security cluster privilege.',
+        403
+      );
+    }
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.resume({ request, updatedBy });

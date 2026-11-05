@@ -33,7 +33,10 @@ import {
   isContinuousOnboardingWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
 } from './feature_settings';
-import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
+import {
+  buildSetupEnabledTargets,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 import { createResetRunner } from './reset_maintenance';
 import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
@@ -651,7 +654,12 @@ export const createSignificantEventsMaintenanceService = ({
         const { spaceId } = request;
         const existing = await readState(spaceId);
         const currentState = normalizeState(existing?.state);
-        const recordedWorkflows = existing?.disabledWorkflows ?? [];
+        // Space setup switches sync and cleanup on, unless the space is paused. One set up while
+        // paused has them off and unrecorded, so Resume covers them too.
+        const recordedWorkflows = mergeTargets(
+          existing?.disabledWorkflows ?? [],
+          currentState === 'paused' ? buildSetupEnabledTargets(spaceId) : []
+        );
         const recordedRules = existing?.disabledRules ?? [];
         const hasRetryInventory =
           recordedWorkflows.length > 0 ||

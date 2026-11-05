@@ -58,7 +58,17 @@ export const KNOWLEDGE_INDICATOR_SCHEDULED_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
 ] as const;
 
+/**
+ * The scheduled workflows that space setup switches on, and so that Resume must switch on even
+ * when Pause never recorded them: a space set up while paused leaves them off.
+ */
+export const SETUP_ENABLED_WORKFLOW_IDS = [
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+] as const;
+
 /** Scheduled workflows included in per-space maintenance sweeps. */
+
 export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
   ...SCHEDULED_DISCOVERY_WORKFLOW_IDS,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
@@ -121,6 +131,10 @@ export const LEGACY_DEFAULT_SPACE_SYNC_TARGET: MaintenanceWorkflowTarget = {
 /** The legacy sync document only exists in the default space, so other spaces have none to cover. */
 const legacyTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
   spaceIds.includes(DEFAULT_SPACE_ID) ? [LEGACY_DEFAULT_SPACE_SYNC_TARGET] : [];
+
+/** The per-space documents of {@link SETUP_ENABLED_WORKFLOW_IDS}. */
+export const buildSetupEnabledTargets = (spaceId: SpaceId): MaintenanceWorkflowTarget[] =>
+  SETUP_ENABLED_WORKFLOW_IDS.map((baseId) => ({ id: `${baseId}-${spaceId}`, spaceId }));
 
 /** Per-space scheduled documents are installed as `${baseId}-${spaceId}`. */
 const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
