@@ -35,7 +35,7 @@ import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { DragHandle } from './pinned_panel_drag_handle';
 import { FloatingActions } from './floating_actions';
 
-export const PinnedPanelRenderer = ({
+export const PinnedPanel = ({
   id,
   type,
   setDragHandles,

@@ -67,7 +67,7 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { useHeaderMode } from './use_header_mode';
-import { DashboardControlsRenderer } from '../pinned_panel_renderer';
+import { DashboardPinnedPanelsRenderer } from '../pinned_panel_renderer';
 import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
@@ -566,7 +566,7 @@ export function InternalDashboardTopNav({
         // do not display ControlsRenderer in reports
         style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
       >
-        <DashboardControlsRenderer />
+        <DashboardPinnedPanelsRenderer />
       </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}

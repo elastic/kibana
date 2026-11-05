@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize, UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import { transparentize, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { FlexLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
-  DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from '../dashboard_renderer/grid/constants';
-import { PinnedPanelRenderer } from './pinned_panel_renderer';
+import { PinnedPanel } from './pinned_panel';
 
 export const DashboardPinnedPanelsRenderer = () => {
   const dashboardApi = useDashboardApi();
@@ -37,7 +36,7 @@ export const DashboardPinnedPanelsRenderer = () => {
       const panels = dashboardApi.layout$.getValue().pinnedPanels;
       if (!panels[id]) return;
       const type = panels[id].type;
-      return <PinnedPanelRenderer id={id} type={type} setDragHandles={setDragHandles} />;
+      return <PinnedPanel id={id} type={type} setDragHandles={setDragHandles} />;
     },
     [dashboardApi.layout$]
   );
