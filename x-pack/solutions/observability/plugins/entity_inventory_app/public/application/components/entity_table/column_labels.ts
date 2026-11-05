@@ -8,7 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { CLUSTER_COLUMN_ID, NAME_COLUMN_ID, NAMESPACE_COLUMN_ID } from './entity_type_config';
 
-/** Display labels of the output columns, keyed by column name. */
+/**
+ * Display labels of the output columns, keyed by column name.
+ *
+ * TODO: Remove an entry once the `columns` of the response carry a display name for it. The
+ * definition thread has not settled where that name comes from, and until it does the table
+ * would show raw names such as `available_replicas`:
+ * https://github.com/elastic/kibana/pull/303101#discussion_r4477715741
+ */
 export const COLUMN_LABELS: Readonly<Record<string, string>> = {
   [NAME_COLUMN_ID]: i18n.translate('xpack.entityInventoryApp.entityTable.columns.name', {
     defaultMessage: 'Name',

@@ -58,6 +58,14 @@ export interface EntityTypeDisplayConfig {
   badgeColumns: readonly string[];
 }
 
+/**
+ * Interim display settings per entity type, bridging the response to the default views design.
+ *
+ * TODO: Delete each setting once the definition provides it. The name fields and merged columns
+ * stand in for fields that arrive once per naming convention, and the default and ordered
+ * columns come from the design, not the response. The definition thread is open:
+ * https://github.com/elastic/kibana/pull/303101#discussion_r4477715741
+ */
 const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisplayConfig>>> = {
   host: {
     iconType: 'compute',
