@@ -14,7 +14,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
-import { NightshiftPage } from '../nightshift_page';
+import { NightshiftPage } from './nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
 
 const queryClient = new QueryClient();
