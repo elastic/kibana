@@ -160,6 +160,9 @@ const deployWithNext = async (
   { namespace, dedicatedTemplates }: { namespace: string; dedicatedTemplates: boolean }
 ) => {
   await backToServiceSettings(page, ['guardduty']);
+  // The integration name is required and is prefilled once the step has loaded, so Continue stays
+  // disabled until then.
+  await expect(page.testSubj.locator('sharedSettingsIntegrationName')).not.toHaveValue('');
   await page.testSubj.locator('sharedSettingsAdvancedToggle').click();
   const namespaceInput = page.testSubj.locator('sharedSettingsNamespace').locator('input');
   await namespaceInput.fill(namespace);
@@ -202,6 +205,8 @@ test.describe(
       // The next step loads the installed package right after the opt-in. A page error from it can
       // arrive after the step is already visible, so wait until the browser has received that
       // response and then let the page render before looking at the errors.
+      // The update's own response first, or a GET from the setup would satisfy the wait below.
+      await expect.poll(() => packageResponses).toContain('PUT');
       await expect
         .poll(() => packageResponses.slice(packageResponses.lastIndexOf('PUT') + 1))
         .toContain('GET');
