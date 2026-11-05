@@ -102,6 +102,11 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   // does not pin it (an override makes it read-only), so this suite turns it on itself and puts
   // the captured baseline back in teardown.
   let restoreAlertZero: (() => Promise<void>) | undefined;
+  // The worker's pre-suite state, captured in beforeAll: `undefined` until read, `null` when the
+  // worker was already clean. Teardown restores it instead of resetting to disabled: this suite
+  // does not own the worker, and another suite (or an operator) may have deliberately left it
+  // enabled with its own account bound.
+  let workerBaseline: { enabled: boolean; serviceAccountId?: string } | undefined;
 
   apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -111,6 +116,18 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       headers: cookieHeader,
       spaceId: 'default',
     });
+    try {
+      const api = await getAdminApi(apiClient, samlAuth);
+      const before = await getWorker(api, WORKER_ID);
+      workerBaseline = {
+        enabled: before.enabled,
+        ...(before.settings.serviceAccountId !== undefined
+          ? { serviceAccountId: before.settings.serviceAccountId }
+          : {}),
+      };
+    } catch {
+      // The catalog read raced the gate enable; teardown falls back to the reset it can do.
+    }
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
@@ -151,6 +168,35 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
         if (api) await deleteServiceAccount(api, id);
       });
     }
+    // Restore the worker's pre-suite state instead of clearing it: another suite or an operator
+    // may have deliberately left it enabled with its own account bound, and only the mutating
+    // specs below would have dirtied it anyway. A baseline that read the worker already clean
+    // is satisfied by the `resetWorker` above; one that read it enabled re-binds and re-enables.
+    // Every step is attempt-wrapped: a restore must not shadow the account deletions' errors.
+    await attempt(async () => {
+      if (!api || !workerBaseline) {
+        return;
+      }
+      const baselineAccount = workerBaseline.serviceAccountId;
+      if (baselineAccount !== undefined) {
+        const current = await getWorker(api, WORKER_ID);
+        if (current.settings.serviceAccountId !== baselineAccount) {
+          await updateWorker(api, WORKER_ID, {
+            settingsRevision: current.settingsRevision ?? null,
+            settings: { serviceAccountId: baselineAccount },
+          });
+        }
+      }
+      if (workerBaseline.enabled) {
+        const current = await getWorker(api, WORKER_ID);
+        if (!current.enabled) {
+          // The baseline snapshot's drain baselines: an enable here starts a real run, but the
+          // worker was already enabled before this suite, so that run is the state we restore,
+          // not one to cancel.
+          await updateWorker(api, WORKER_ID, { enabled: true });
+        }
+      }
+    });
     await attempt(async () => {
       await restoreAlertZero?.();
     });
@@ -182,6 +228,15 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // The model gate runs before the service-account check, so on a stack without a model the
       // enable is refused as `noModel` and this spec cannot reach the guard it exists for. Skip
       // with that reason instead of asserting whatever 4xx comes back first.
+      //
+      // A test-owned placeholder connector cannot unblock it: the gate resolves endpoints
+      // through the inference plugin (`getForFeature`), which only counts an endpoint once
+      // `fetchConnectors` can read it back — either an ES inference endpoint
+      // (`esClient.inference.get`) or a real chat-completion connector. Creating a placeholder
+      // `.inference` connector via the Actions API runs the connector's pre-save hook, which
+      // `PUT`s the endpoint into ES with a real provider (`elastic` needs the EIS inference
+      // URL, `elasticsearch` needs a deployed model) — neither exists on a connector-free
+      // stack, so the create is rejected before the connector ever lists. The skip stays.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
         'no preconfigured chat-completion AI connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
