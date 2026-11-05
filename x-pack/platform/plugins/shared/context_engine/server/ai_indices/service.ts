@@ -7,9 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isResponseError } from '@kbn/es-errors';
-import pRetry from 'p-retry';
 import {
   AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
   AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
@@ -24,7 +22,6 @@ import type {
 } from '../../common/http_api/ai_indices';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import { AI_INDEX_ID_PATTERN } from '../../common/validation';
-import { createSpaceDslFilter } from '../utils/space_filter';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -33,48 +30,50 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
-import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
-import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import type { AiIndexRecord, AiIndexRecordWrite } from './registry_api';
+import {
+  deleteAiIndexRecord,
+  getAiIndexRecord,
+  listAiIndexRecords,
+  putAiIndexRecord,
+} from './registry_api';
 import { buildTraceQueries } from './trace_queries';
-import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
-/** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
-const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
-  ...source,
-  id: source.id ?? docId,
-  space: source.space ?? DEFAULT_SPACE_ID,
-});
+const resolveMemoryEnabled = (record: Pick<AiIndexRecord, 'managed' | 'memory_enabled'>): boolean =>
+  record.memory_enabled ?? !record.managed;
 
-const resolveMemoryEnabled = (
-  document: Pick<AiIndexDocument, 'managed' | 'memory_enabled'>
-): boolean => document.memory_enabled ?? !document.managed;
-
-const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
-  id: document.id,
-  ...(document.description !== undefined && { description: document.description }),
-  ...(document.feedback_analysis !== undefined && {
-    feedback_analysis: document.feedback_analysis,
+const toAiIndexItem = (record: AiIndexRecord): AiIndexHttpItem => ({
+  id: record.id,
+  ...(record.description !== undefined && { description: record.description }),
+  ...(record.feedback_analysis !== undefined && {
+    feedback_analysis: record.feedback_analysis,
   }),
-  managed: document.managed ?? false,
-  memory_enabled: resolveMemoryEnabled(document),
-  dest: document.dest,
-  automations: document.automations,
-  sources: document.sources,
-  traces: buildTraceQueries(document.traces ?? [], document.space),
-  date_created: document.date_created,
-  date_modified: document.date_modified,
+  managed: record.managed ?? false,
+  memory_enabled: resolveMemoryEnabled(record),
+  dest: record.dest,
+  automations: record.automations,
+  sources: record.sources,
+  traces: buildTraceQueries(record.traces ?? [], record.space),
+  date_created: record.date_created,
+  date_modified: record.date_modified,
 });
 
-/** Some fields need to be read from config (registration object), and some from storage. */
+/** Some fields need to be read from config (registration object), and some from the registry. */
 const mergeManagedAiIndex = (
   registration: AiIndexProperties,
-  document: AiIndexDocument
-): AiIndexDocument => ({
-  ...document,
+  record: AiIndexRecord
+): AiIndexRecord => ({
+  ...record,
   dest: registration.dest,
 });
 
-const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
+/** The writable part of a stored record, for a read-then-replace. */
+const toRecordWrite = ({
+  id: _id,
+  date_created: _dateCreated,
+  date_modified: _dateModified,
+  ...record
+}: AiIndexRecord): AiIndexRecordWrite => record;
 
 export interface AiIndexManagedBootstrap {
   isManaged: (id: string) => boolean;
@@ -83,7 +82,7 @@ export interface AiIndexManagedBootstrap {
   ensure: (id: string, spaceId: string) => Promise<boolean>;
 }
 
-type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
+type AiIndexAutomationTarget = Pick<AiIndexRecord, 'managed' | 'automations'>;
 
 const assertAiIndexAcceptsAutomation = (
   aiIndexId: string,
@@ -110,13 +109,12 @@ const assertAiIndexAcceptsAutomation = (
 };
 
 /**
- * Manages the AI index registry stored in the hidden
- * `.contextengine-ai-indices` system index. Reads and writes go through the
- * internal user; access is enforced at the API layer.
+ * Manages the AI index registry through the Elasticsearch `_context_engine/ai_index` API, which
+ * owns the `.context-engine-ai-indices` system index. Reads and writes go through the internal
+ * user; access is enforced at the API layer.
  */
 export class AiIndexService {
   private readonly esClient: ElasticsearchClient;
-  private readonly storageClient: AiIndexStorageClient;
   private readonly managedBootstrap?: AiIndexManagedBootstrap;
   private readonly logger: Logger;
 
@@ -130,7 +128,6 @@ export class AiIndexService {
     managedBootstrap?: AiIndexManagedBootstrap;
   }) {
     this.esClient = esClient;
-    this.storageClient = createAiIndexStorageClient({ esClient, logger });
     this.managedBootstrap = managedBootstrap;
     this.logger = logger;
   }
@@ -142,25 +139,22 @@ export class AiIndexService {
     }
     await this.assertValidDest(properties.dest);
 
-    const existing = await this.findDocument(aiIndexId, spaceId);
+    const existing = await this.findRecord(aiIndexId, spaceId);
     if (existing) {
       throw new AiIndexAlreadyExistsError(aiIndexId);
     }
 
-    // Uniqueness is a read-then-write check rather than `op_type: 'create'`, matching the Agent Builder persisted clients.
-    await this.writeDocument(
+    // The API's `create` flag closes the window between the read above and this write.
+    await this.writeRecord(
       aiIndexId,
-      spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
-      undefined
+      { ...properties, space: spaceId, managed: false },
+      { create: true }
     );
   }
 
   /**
-   * Creates or fully replaces an AI index, preserving `date_created` on update.
-   * Concurrent writes are guarded with optimistic concurrency control; a losing
-   * writer gets an {@link AiIndexConflictError}. Managed entries (registered
-   * by a plugin at startup) are immutable via this method.
+   * Creates or fully replaces an AI index; the API preserves `date_created` on a replace.
+   * Managed entries (registered by a plugin at startup) are immutable via this method.
    */
   async put(
     aiIndexId: string,
@@ -169,27 +163,23 @@ export class AiIndexService {
   ): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
 
-    const existing = await this.findDocument(aiIndexId, spaceId);
-    if (existing?.document.managed || (!existing && this.managedBootstrap?.isManaged(aiIndexId))) {
+    const existing = await this.findRecord(aiIndexId, spaceId);
+    if (existing?.managed || (!existing && this.managedBootstrap?.isManaged(aiIndexId))) {
       throw new AiIndexManagedError(aiIndexId);
     }
 
-    return this.writeDocument(
-      aiIndexId,
-      spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
-      existing
-    );
+    return this.writeRecord(aiIndexId, { ...properties, space: spaceId, managed: false });
   }
 
   /**
-   * Creates or fully replaces a managed AI index. Managed entries are owned by
-   * the registering plugin and cannot be mutated via the public API.
+   * Creates a managed AI index. Managed entries are owned by the registering plugin and cannot
+   * be mutated via the public API.
    *
-   * This is an idempotent upsert. It will overwrite an existing managed entry,
-   * but refuses to clobber a user-owned (unmanaged) entry that squats the same
-   * id, throwing {@link AiIndexIdConflictError} so the collision surfaces
-   * instead of silently destroying user data.
+   * This is a create-only write that tolerates an existing managed entry (which is left as it
+   * is, since its dest is resolved against the registration on read), but refuses to clobber a
+   * user-owned (unmanaged) entry that squats the same id, throwing
+   * {@link AiIndexIdConflictError} so the collision surfaces instead of silently destroying
+   * user data.
    */
   async putManaged(
     aiIndexId: string,
@@ -197,67 +187,45 @@ export class AiIndexService {
     properties: AiIndexProperties
   ): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest, { managed: true });
-    const existing = await this.findDocument(aiIndexId, spaceId);
-    if (existing && !existing.document.managed) {
-      throw new AiIndexIdConflictError(aiIndexId);
+    const existing = await this.findRecord(aiIndexId, spaceId);
+    if (existing) {
+      if (!existing.managed) {
+        throw new AiIndexIdConflictError(aiIndexId);
+      }
+      return 'updated';
     }
-    return this.writeDocument(
-      aiIndexId,
-      spaceId,
-      {
-        ...properties,
-        id: aiIndexId,
-        space: spaceId,
-        managed: true,
-        memory_enabled: properties.memory_enabled ?? false,
-      },
-      existing,
-      { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
-    );
-  }
-
-  private async writeDocument(
-    aiIndexId: string,
-    spaceId: string,
-    document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
-    existing: Awaited<ReturnType<typeof this.findDocument>>,
-    options?: { docId?: string }
-  ): Promise<'created' | 'updated'> {
-    const now = new Date().toISOString();
-    const fullDocument: AiIndexDocument = {
-      ...document,
-      memory_enabled: document.memory_enabled ?? true,
-      date_created: existing?.document.date_created ?? now,
-      date_modified: now,
-    };
-
     try {
-      if (existing) {
-        // Writing back to the existing `_id` upgrades a pre-upgrade document in place (it gains `id` and `space`) instead of duplicating it.
-        await this.storageClient.index({
-          id: existing.docId,
-          document: fullDocument,
-          if_seq_no: existing.seqNo,
-          if_primary_term: existing.primaryTerm,
-          refresh: 'wait_for',
-        });
+      return await this.writeRecord(
+        aiIndexId,
+        {
+          ...properties,
+          space: spaceId,
+          managed: true,
+          memory_enabled: properties.memory_enabled ?? false,
+        },
+        { create: true }
+      );
+    } catch (error) {
+      // A concurrent bootstrap of the same managed entry won; its record is as good as ours.
+      if (error instanceof AiIndexConflictError) {
         return 'updated';
       }
+      throw error;
+    }
+  }
 
-      if (options?.docId) {
-        await this.storageClient.index({
-          id: options.docId,
-          document: fullDocument,
-          op_type: 'create',
-          refresh: 'wait_for',
-        });
-      } else {
-        await this.storageClient.index({
-          document: fullDocument,
-          refresh: 'wait_for',
-        });
-      }
-      return 'created';
+  private async writeRecord(
+    aiIndexId: string,
+    record: AiIndexRecordWrite,
+    { create = false }: { create?: boolean } = {}
+  ): Promise<'created' | 'updated'> {
+    try {
+      const { result } = await putAiIndexRecord(this.esClient, {
+        id: aiIndexId,
+        record: { ...record, memory_enabled: record.memory_enabled ?? true },
+        create,
+      });
+      return result;
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
         throw new AiIndexConflictError(aiIndexId);
@@ -281,7 +249,7 @@ export class AiIndexService {
     spaceId: string,
     feedbackAnalysis: AiIndexFeedbackAnalysis
   ): Promise<AiIndexFeedbackAnalysis> {
-    const existing = await this.findDocument(aiIndexId, spaceId);
+    const existing = await this.findRecord(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
@@ -289,34 +257,31 @@ export class AiIndexService {
     // The dest is unchanged, so it is not re-validated here: an index whose
     // backing store was deleted after registration must still be switchable
     // off.
-    await this.writeDocument(
-      aiIndexId,
-      spaceId,
-      {
-        ...existing.document,
-        memory_enabled: resolveMemoryEnabled(existing.document),
-        feedback_analysis: feedbackAnalysis,
-      },
-      existing
-    );
+    // A read-then-replace: the registry API offers no optimistic concurrency control, so the
+    // previous seq_no/primary_term guard is gone and the last writer wins.
+    await this.writeRecord(aiIndexId, {
+      ...toRecordWrite(existing),
+      memory_enabled: resolveMemoryEnabled(existing),
+      feedback_analysis: feedbackAnalysis,
+    });
 
     return feedbackAnalysis;
   }
 
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
-    const existing = await this.findDocument(aiIndexId, spaceId);
+    const existing = await this.findRecord(aiIndexId, spaceId);
     if (existing) {
-      return this.toItem(existing.document);
+      return this.toItem(existing);
     }
     if (!this.managedBootstrap?.isManaged(aiIndexId)) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
     await this.managedBootstrap.ensure(aiIndexId, spaceId);
-    const newManagedAiIndex = await this.findDocument(aiIndexId, spaceId);
+    const newManagedAiIndex = await this.findRecord(aiIndexId, spaceId);
     if (!newManagedAiIndex) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return this.toItem(newManagedAiIndex.document);
+    return this.toItem(newManagedAiIndex);
   }
 
   /**
@@ -327,63 +292,44 @@ export class AiIndexService {
     spaceId: string,
     automation?: { type: 'workflow'; value: string }
   ): Promise<void> {
-    const existing = await this.findDocument(aiIndexId, spaceId);
+    const existing = await this.findRecord(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
 
-    assertAiIndexAcceptsAutomation(aiIndexId, existing.document, automation);
+    assertAiIndexAcceptsAutomation(aiIndexId, existing, automation);
   }
 
   /**
-   * Appends a workflow automation to an AI index, retrying on concurrent writes.
+   * Appends a workflow automation to an AI index.
    */
   async addAutomation(
     aiIndexId: string,
     spaceId: string,
     automation: { type: 'workflow'; value: string }
   ): Promise<'attached' | 'already_attached'> {
-    return pRetry(
-      async () => {
-        const existing = await this.findDocument(aiIndexId, spaceId);
-        if (!existing) {
-          throw new AiIndexNotFoundError(aiIndexId);
-        }
+    const existing = await this.findRecord(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
 
-        const { alreadyAttached } = assertAiIndexAcceptsAutomation(
-          aiIndexId,
-          existing.document,
-          automation
-        );
-        if (alreadyAttached) {
-          return 'already_attached';
-        }
+    const { alreadyAttached } = assertAiIndexAcceptsAutomation(aiIndexId, existing, automation);
+    if (alreadyAttached) {
+      return 'already_attached';
+    }
 
-        await this.writeDocument(
-          aiIndexId,
-          spaceId,
-          {
-            ...existing.document,
-            automations: [...existing.document.automations, automation],
-          },
-          existing
-        );
+    // A read-then-replace: the registry API offers no optimistic concurrency control, so the
+    // previous conflict-retry loop is gone and two concurrent appends can lose one automation.
+    await this.writeRecord(aiIndexId, {
+      ...toRecordWrite(existing),
+      automations: [...existing.automations, automation],
+    });
 
-        return 'attached';
-      },
-      {
-        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
-        onFailedAttempt: (error) => {
-          if (!(error instanceof AiIndexConflictError)) {
-            throw error;
-          }
-        },
-      }
-    );
+    return 'attached';
   }
 
   async list(spaceId: string): Promise<AiIndexHttpItem[]> {
-    const items = await this.searchSpace(spaceId);
+    const items = await this.listSpace(spaceId);
     const missingManagedIds =
       this.managedBootstrap
         ?.getManagedIds()
@@ -407,7 +353,7 @@ export class AiIndexService {
         }
       })
     );
-    return this.searchSpace(spaceId);
+    return this.listSpace(spaceId);
   }
 
   /**
@@ -415,77 +361,39 @@ export class AiIndexService {
    * Managed entries cannot be deleted via the API.
    */
   async delete(aiIndexId: string, spaceId: string): Promise<void> {
-    const existing = await this.findDocument(aiIndexId, spaceId);
+    const existing = await this.findRecord(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    if (existing.document.managed) {
+    if (existing.managed) {
       throw new AiIndexManagedError(aiIndexId);
     }
     // Re-check the delete result: the entry may have been removed concurrently
     // between the existence lookup above and this call.
-    const { result } = await this.storageClient.delete({
-      id: existing.docId,
-    });
-    if (result === 'not_found') {
+    const deleted = await deleteAiIndexRecord(this.esClient, { id: aiIndexId, space: spaceId });
+    if (!deleted) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
   }
 
-  private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
-    const response = await this.storageClient.search({
+  private async listSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
+    const records = await listAiIndexRecords(this.esClient, {
+      space: spaceId,
       size: MAX_AI_INDICES,
-      track_total_hits: false,
-      query: createSpaceDslFilter(spaceId),
-      // Pre-upgrade documents have no `id` to sort on and land at the end, where `_doc` keeps
-      // their order stable rather than leaving it undefined under the `size` cap.
-      sort: [{ id: { order: 'asc', missing: '_last' } }, { _doc: { order: 'asc' } }],
     });
-    return response.hits.hits.flatMap((hit) => {
-      if (!hit._source || hit._id === undefined) {
-        return [];
-      }
-      return [this.toItem(toAiIndexDocument(hit._source, hit._id))];
-    });
+    return records.map((record) => this.toItem(record));
   }
 
-  /** Managed documents are resolved against their registration on read; user-owned ones are returned as stored. */
-  private toItem(document: AiIndexDocument): AiIndexHttpItem {
-    const registration = document.managed
-      ? this.managedBootstrap?.getRegistration(document.id)
+  /** Managed records are resolved against their registration on read; user-owned ones are returned as stored. */
+  private toItem(record: AiIndexRecord): AiIndexHttpItem {
+    const registration = record.managed
+      ? this.managedBootstrap?.getRegistration(record.id)
       : undefined;
-    return toAiIndexItem(registration ? mergeManagedAiIndex(registration, document) : document);
+    return toAiIndexItem(registration ? mergeManagedAiIndex(registration, record) : record);
   }
 
-  private async findDocument(
-    aiIndexId: string,
-    spaceId: string
-  ): Promise<
-    | {
-        docId: string;
-        document: AiIndexDocument;
-        seqNo?: number;
-        primaryTerm?: number;
-      }
-    | undefined
-  > {
-    const response = await this.storageClient.search({
-      size: 1,
-      track_total_hits: false,
-      seq_no_primary_term: true,
-      query: createAiIndexIdentityDslFilter(aiIndexId, spaceId),
-    });
-
-    const [hit] = response.hits.hits;
-    if (!hit?._source || hit._id === undefined) {
-      return undefined;
-    }
-    return {
-      docId: hit._id,
-      document: toAiIndexDocument(hit._source, hit._id),
-      seqNo: hit._seq_no,
-      primaryTerm: hit._primary_term,
-    };
+  private findRecord(aiIndexId: string, spaceId: string): Promise<AiIndexRecord | undefined> {
+    return getAiIndexRecord(this.esClient, { id: aiIndexId, space: spaceId });
   }
 
   /**

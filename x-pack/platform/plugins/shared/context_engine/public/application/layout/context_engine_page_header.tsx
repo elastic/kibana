@@ -31,6 +31,7 @@ interface ContextEngineLandingHeaderProps {
   description: AppHeaderDescription;
   menu?: AppHeaderMenu;
   docLink?: string;
+  tabs?: AppHeaderTab[];
 }
 
 export const ContextEngineLandingHeader = ({
@@ -38,8 +39,15 @@ export const ContextEngineLandingHeader = ({
   description,
   menu,
   docLink,
+  tabs,
 }: ContextEngineLandingHeaderProps) => (
-  <AppHeader title={pageTitle} description={description} menu={menu} docLink={docLink} />
+  <AppHeader
+    title={pageTitle}
+    description={description}
+    menu={menu}
+    docLink={docLink}
+    tabs={tabs}
+  />
 );
 
 interface ContextEngineSubPageHeaderProps {

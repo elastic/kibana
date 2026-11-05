@@ -1,0 +1,345 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiCheckboxGroup,
+  EuiEmptyPrompt,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import {
+  DEFAULT_SESSION_MEMORY_SEARCH_SIZE,
+  MAX_SESSION_LIST_SIZE,
+  MAX_SESSION_MEMORY_SEARCH_SIZE,
+} from '../../../../common/constants';
+import type {
+  ListSessionMemoryRequestQuery,
+  SearchSessionMemoryRequestBody,
+  SessionMemory,
+  SessionMemoryMediaItem,
+} from '../../../../common/http_api/session_memory';
+import {
+  useListSessionMemory,
+  useSearchSessionMemory,
+} from '../../hooks/use_session_memory_mutations';
+import { MEDIA_FILE_ACCEPT } from './media_file';
+import { MediaFilePicker } from './media_file_picker';
+import { useSessionContext } from './session_context';
+import type { SessionContextValue } from './session_context';
+import { PanelHeader } from './panel_header';
+import { SessionMemoryCard } from './session_memory_card';
+
+type QueryMode = 'text' | 'file' | 'list';
+
+/** Which parts of the session context narrow the search. */
+export type SearchFilterKey = 'session' | 'aiIndex';
+export type SearchFilters = Record<SearchFilterKey, boolean>;
+
+export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
+  session: false,
+  aiIndex: false,
+};
+
+const labels = {
+  queryMode: i18n.translate('xpack.contextEngine.sessionMemory.search.queryMode', {
+    defaultMessage: 'Query',
+  }),
+  textMode: i18n.translate('xpack.contextEngine.sessionMemory.search.textMode', {
+    defaultMessage: 'Text',
+  }),
+  fileMode: i18n.translate('xpack.contextEngine.sessionMemory.search.fileMode', {
+    defaultMessage: 'Image or PDF',
+  }),
+  listMode: i18n.translate('xpack.contextEngine.sessionMemory.search.listMode', {
+    defaultMessage: 'List all',
+  }),
+  text: i18n.translate('xpack.contextEngine.sessionMemory.search.text', {
+    defaultMessage: 'Search text',
+  }),
+  textPlaceholder: i18n.translate('xpack.contextEngine.sessionMemory.search.textPlaceholder', {
+    defaultMessage: 'e.g. what does the user prefer?',
+  }),
+  file: i18n.translate('xpack.contextEngine.sessionMemory.search.file', {
+    defaultMessage: 'Search file',
+  }),
+  fileHelp: i18n.translate('xpack.contextEngine.sessionMemory.search.fileHelp', {
+    defaultMessage: 'PNG, JPEG, WebP, GIF, or PDF under 1 MB. The file is embedded as the query.',
+  }),
+  filters: i18n.translate('xpack.contextEngine.sessionMemory.search.filters', {
+    defaultMessage: 'Only memories from',
+  }),
+  filterSession: i18n.translate('xpack.contextEngine.sessionMemory.search.filterSession', {
+    defaultMessage: 'this session',
+  }),
+  filterAiIndex: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAiIndex', {
+    defaultMessage: 'this AI index',
+  }),
+  filterAiIndexMany: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAiIndexMany', {
+    defaultMessage: 'this AI index (select a single index to filter)',
+  }),
+  size: i18n.translate('xpack.contextEngine.sessionMemory.search.size', {
+    defaultMessage: 'Size',
+  }),
+  submit: i18n.translate('xpack.contextEngine.sessionMemory.search.submit', {
+    defaultMessage: 'Search',
+  }),
+  submitList: i18n.translate('xpack.contextEngine.sessionMemory.search.submitList', {
+    defaultMessage: 'List',
+  }),
+};
+
+/** The session context fields the checked filters select; shared by search and list. */
+export const buildListQuery = (
+  { sessionId, aiIndexIds }: SessionContextValue,
+  filters: SearchFilters,
+  size: number
+): ListSessionMemoryRequestQuery => ({
+  ...(filters.session && sessionId.trim() ? { session_id: sessionId.trim() } : {}),
+  // The APIs filter on a single AI index, so the filter only applies to a lone selection.
+  ...(filters.aiIndex && aiIndexIds.length === 1 ? { ai_index_ids: aiIndexIds[0] } : {}),
+  size,
+});
+
+export const buildSearchBody = (
+  session: SessionContextValue,
+  filters: SearchFilters,
+  query: string | SessionMemoryMediaItem,
+  size: number
+): SearchSessionMemoryRequestBody => ({ query, ...buildListQuery(session, filters, size) });
+
+interface ResultRow {
+  memory: SessionMemory;
+  score?: number;
+}
+
+export const SearchMemoryPanel = () => {
+  const session = useSessionContext();
+  const [mode, setMode] = useState<QueryMode>('text');
+  const [text, setText] = useState('');
+  const [file, setFile] = useState<SessionMemoryMediaItem | undefined>();
+  const [filters, setFilters] = useState<SearchFilters>(DEFAULT_SEARCH_FILTERS);
+  const [size, setSize] = useState(DEFAULT_SESSION_MEMORY_SEARCH_SIZE);
+  const search = useSearchSessionMemory();
+  const list = useListSessionMemory();
+
+  const listed = mode === 'list';
+  const isLoading = search.isLoading || list.isLoading;
+  const query = mode === 'text' ? text.trim() || undefined : file;
+  const maxSize = listed ? MAX_SESSION_LIST_SIZE : MAX_SESSION_MEMORY_SEARCH_SIZE;
+  const canSubmit = (listed || query !== undefined) && size >= 1 && size <= maxSize;
+  const results: ResultRow[] | undefined = listed
+    ? list.data?.results.map((memory) => ({ memory }))
+    : search.data?.results.map((hit) => ({ memory: hit.memory, score: hit._score }));
+  const maxScore = results ? Math.max(0, ...results.map((row) => row.score ?? 0)) : 0;
+
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!canSubmit) {
+      return;
+    }
+    if (listed) {
+      list.mutate(buildListQuery(session, filters, size));
+    } else if (query !== undefined) {
+      search.mutate(buildSearchBody(session, filters, query, size));
+    }
+  };
+
+  const filterOptions = [
+    {
+      id: 'session',
+      label: labels.filterSession,
+      'data-test-subj': 'contextSessionMemorySearch-filter-session',
+    },
+    {
+      id: 'aiIndex',
+      label: session.aiIndexIds.length > 1 ? labels.filterAiIndexMany : labels.filterAiIndex,
+      disabled: session.aiIndexIds.length !== 1,
+      'data-test-subj': 'contextSessionMemorySearch-filter-aiIndex',
+    },
+  ];
+
+  return (
+    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSessionMemorySearchPanel">
+      <PanelHeader
+        iconType="magnify"
+        title={
+          <FormattedMessage
+            id="xpack.contextEngine.sessionMemory.search.title"
+            defaultMessage="Search"
+          />
+        }
+        description={
+          <FormattedMessage
+            id="xpack.contextEngine.sessionMemory.search.description"
+            defaultMessage="Find memories by meaning with free text, an image, or a PDF, or list them newest first. Results are always the current user's memories in this space; filters narrow them further."
+          />
+        }
+      />
+      <EuiForm component="form" onSubmit={submit}>
+        <EuiFormRow label={labels.queryMode} fullWidth>
+          <EuiButtonGroup
+            legend={labels.queryMode}
+            buttonSize="compressed"
+            idSelected={mode}
+            onChange={(id) => setMode(id as QueryMode)}
+            options={[
+              {
+                id: 'text',
+                label: labels.textMode,
+                'data-test-subj': 'contextSessionMemorySearch-mode-text',
+              },
+              {
+                id: 'file',
+                label: labels.fileMode,
+                'data-test-subj': 'contextSessionMemorySearch-mode-file',
+              },
+              {
+                id: 'list',
+                label: labels.listMode,
+                'data-test-subj': 'contextSessionMemorySearch-mode-list',
+              },
+            ]}
+            isDisabled={isLoading}
+          />
+        </EuiFormRow>
+        {mode === 'list' ? null : mode === 'text' ? (
+          <EuiFormRow label={labels.text} fullWidth>
+            <EuiFieldText
+              fullWidth
+              compressed
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              placeholder={labels.textPlaceholder}
+              disabled={isLoading}
+              data-test-subj="contextSessionMemorySearch-text"
+              aria-label={labels.text}
+            />
+          </EuiFormRow>
+        ) : (
+          <MediaFilePicker
+            label={labels.file}
+            helpText={labels.fileHelp}
+            accept={MEDIA_FILE_ACCEPT}
+            onChange={setFile}
+            isDisabled={isLoading}
+            data-test-subj="contextSessionMemorySearch-file"
+          />
+        )}
+        <EuiFormRow label={labels.filters} fullWidth>
+          <EuiCheckboxGroup
+            compressed
+            options={filterOptions}
+            idToSelectedMap={filters}
+            onChange={(id) =>
+              setFilters((current) => ({
+                ...current,
+                [id]: !current[id as SearchFilterKey],
+              }))
+            }
+            disabled={isLoading}
+          />
+        </EuiFormRow>
+        <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFormRow label={labels.size}>
+              <EuiFieldNumber
+                compressed
+                min={1}
+                max={maxSize}
+                value={size}
+                onChange={(event) => setSize(Number(event.target.value))}
+                disabled={isLoading}
+                data-test-subj="contextSessionMemorySearch-size"
+                aria-label={labels.size}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiButton
+                type="submit"
+                fill
+                isLoading={isLoading}
+                isDisabled={!canSubmit}
+                data-test-subj="contextSessionMemorySearch-submit"
+              >
+                {mode === 'list' ? labels.submitList : labels.submit}
+              </EuiButton>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
+      {results && (
+        <>
+          <EuiSpacer size="m" />
+          {results.length === 0 ? (
+            <EuiEmptyPrompt
+              iconType="magnify"
+              titleSize="xs"
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.contextEngine.sessionMemory.search.noResults"
+                    defaultMessage="No matching memories"
+                  />
+                </h3>
+              }
+              data-test-subj="contextSessionMemorySearch-empty"
+            />
+          ) : (
+            <>
+              <EuiText size="s" color="subdued" data-test-subj="contextSessionMemorySearch-count">
+                {listed ? (
+                  <FormattedMessage
+                    id="xpack.contextEngine.sessionMemory.search.listCount"
+                    defaultMessage="{count, plural, one {# memory} other {# memories}}, newest first"
+                    values={{ count: results.length }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.contextEngine.sessionMemory.search.resultCount"
+                    defaultMessage="{count, plural, one {# match} other {# matches}}, best first"
+                    values={{ count: results.length }}
+                  />
+                )}
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="s"
+                data-test-subj="contextSessionMemorySearch-results"
+              >
+                {results.map(({ memory, score }) => (
+                  <EuiFlexItem key={`${memory.id}-${memory['@timestamp']}`}>
+                    <SessionMemoryCard
+                      memory={memory}
+                      score={score}
+                      maxScore={maxScore}
+                      data-test-subj="contextSessionMemoryResult"
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </>
+          )}
+        </>
+      )}
+    </EuiPanel>
+  );
+};

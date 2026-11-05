@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
+import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
+import { resolveSpaceId } from '@kbn/context-engine-plugin/server/utils/resolve_space_id';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+/**
+ * `transcript` is an unindexed `text` field, so the only size limit is Elasticsearch's request body
+ * cap (`http.max_content_length`, 100 MB by default). The cap leaves headroom for the other fields.
+ */
+export const MAX_TRANSCRIPT_BYTES = 95 * 1024 * 1024;
+
+/** The round as JSON, cut at the byte cap; a cut transcript is no longer valid JSON. */
+export const serializeRound = (round: ConversationRound): { transcript: string; cut: boolean } => {
+  const json = JSON.stringify(round);
+  if (Buffer.byteLength(json, 'utf8') <= MAX_TRANSCRIPT_BYTES) {
+    return { transcript: json, cut: false };
+  }
+  return {
+    transcript: Buffer.from(json, 'utf8').subarray(0, MAX_TRANSCRIPT_BYTES).toString('utf8'),
+    cut: true,
+  };
+};
+
+export interface SaveSessionEventForRoundParams {
+  context: AfterExecutionHookContext;
+  getCoreStart: () => Promise<CoreStart>;
+  getContextEngineStart: () => Promise<ContextEnginePluginStart>;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
+  logger: Logger;
+}
+
+/**
+ * The round's author is stamped by Agent Builder for the posting user (or external system); the
+ * request's user is the fallback for executions that carry no author.
+ */
+const resolveUserId = async ({
+  context: { round, request },
+  getCoreStart,
+}: Pick<SaveSessionEventForRoundParams, 'context' | 'getCoreStart'>): Promise<
+  string | undefined
+> => {
+  const author = round.author;
+  if (author?.username || author?.id) {
+    return author.username || author.id;
+  }
+  const coreStart = await getCoreStart();
+  return coreStart.security.authc.getCurrentUser(request)?.username;
+};
+
+/**
+ * After-execution hook body: records the completed round, serialized as-is, as a Context Engine
+ * session event. The conversation is the session and the Kibana user is the user.
+ * Skipped for runs that never join a conversation and while the memory feature is off. Failures
+ * are logged, never surfaced to the conversation.
+ */
+export const saveSessionEventForRound = async ({
+  context,
+  getCoreStart,
+  getContextEngineStart,
+  getSpaces,
+  logger,
+}: SaveSessionEventForRoundParams): Promise<void> => {
+  const { request, round, conversationId } = context;
+
+  // The round never lands in a conversation, so there is no session to attach it to.
+  if (context.conversationAccess === 'readOnly' || !conversationId) {
+    logger.debug(
+      `Skipping session event for round [${round.id}]: access [${context.conversationAccess}], conversation [${conversationId}]`
+    );
+    return;
+  }
+  if (round.status !== ConversationRoundStatus.completed) {
+    logger.debug(`Skipping session event for round [${round.id}]: status [${round.status}]`);
+    return;
+  }
+
+  try {
+    const contextEngine = await getContextEngineStart();
+    if (!(await contextEngine.isMemoryEnabled(request))) {
+      logger.debug(`Skipping session event for round [${round.id}]: memory is disabled`);
+      return;
+    }
+
+    const userId = await resolveUserId({ context, getCoreStart });
+    if (!userId) {
+      logger.warn(
+        `Skipping session event for round [${round.id}] of conversation [${conversationId}]: no author on the round and no authenticated user on the request`
+      );
+      return;
+    }
+
+    const space = resolveSpaceId(await getSpaces(), request);
+    // The round as Agent Builder produced it: no rendering, so nothing is lost or invented.
+    const { transcript, cut } = serializeRound(round);
+    if (cut) {
+      logger.warn(
+        `Transcript of round [${round.id}] of conversation [${conversationId}] exceeds ${MAX_TRANSCRIPT_BYTES} bytes and was cut`
+      );
+    }
+    const saved = await contextEngine.getSessionEventsService().save({
+      session_id: conversationId,
+      user_id: userId,
+      round_id: round.id,
+      space,
+      transcript,
+    });
+    logger.debug(
+      `Saved session event [${saved.id}] for round [${round.id}] of conversation [${conversationId}]`
+    );
+  } catch (error) {
+    logger.warn(
+      `Failed to save session event for round [${round.id}] of conversation [${conversationId}]: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
