@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTextBlockTruncate,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
 import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
@@ -128,10 +129,16 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   ) : undefined;
 
   const hasActions = actions != null;
+  const [actionsElement, setActionsElement] = useState<HTMLDivElement | null>(null);
+  const { width: actionsWidth } = useResizeObserver(actionsElement, 'width');
 
-  // Spacer matching ConversationsActionsGroup / Nightshift card actions: divider margins +
-  // two size="s" (32px) icon buttons + gutters — keeps age text from running under the icons.
-  const actionsSpacerWidth = `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
+  // The actions are positioned over the top row, so the row reserves their measured width to keep
+  // the age text from running under them. Until measured, fall back to the width of
+  // ConversationsActionsGroup: divider margins + two size="s" (32px) icon buttons + gutters.
+  const actionsSpacerWidth =
+    actionsWidth > 0
+      ? `${actionsWidth}px`
+      : `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
 
   return (
     <div
@@ -188,6 +195,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                 <EuiFlexItem
                   grow={false}
                   aria-hidden
+                  data-test-subj="investigationCardActionsSpacer"
                   css={{
                     marginBlock: `-${euiTheme.size.s}`,
                     inlineSize: actionsSpacerWidth,
@@ -247,6 +255,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       </div>
       {hasActions && (
         <div
+          ref={setActionsElement}
+          data-test-subj="investigationCardActions"
           css={css`
             position: absolute;
             inset-block-start: ${euiTheme.size.l};
