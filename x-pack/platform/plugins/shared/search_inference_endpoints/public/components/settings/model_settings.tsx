@@ -37,12 +37,16 @@ export const ModelSettings: React.FC = () => {
     isSaving: isFeatureSaving,
     isDirty: isFeatureDirty,
     assignments,
+    efforts,
     effectiveRecommendedEndpoints,
+    effectiveRecommendedEfforts,
     sections,
     invalidEndpointIds,
+    hasUnsupportedEfforts,
     hasSavedObject,
     dirtyFeatureIds,
     updateEndpoints,
+    updateEfforts,
     save: saveFeatures,
   } = useModelSettingsForm();
 
@@ -189,6 +193,8 @@ export const ModelSettings: React.FC = () => {
 
   const showFeatureSections = enableAi && featureSpecificModels;
 
+  const hasValidChanges = isDirty && defaultModelValidation.isValid;
+
   const menu = useMemo<AppHeaderMenu>(
     () => ({
       ...(canManage
@@ -201,14 +207,14 @@ export const ModelSettings: React.FC = () => {
               iconType: 'save' as const,
               run: handleSave,
               testId: 'save-settings-button',
-              disableButton: !isDirty || !defaultModelValidation.isValid,
+              disableButton: !hasValidChanges || hasUnsupportedEfforts,
               isLoading: isFeatureSaving,
             },
           }
         : {}),
       items: [],
     }),
-    [canManage, defaultModelValidation.isValid, handleSave, isDirty, isFeatureSaving]
+    [canManage, handleSave, hasValidChanges, hasUnsupportedEfforts, isFeatureSaving]
   );
 
   if (connectorsLoading || isLoading) {
@@ -376,11 +382,14 @@ export const ModelSettings: React.FC = () => {
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                       effectiveRecommendedEndpoints:
                         effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
+                      efforts: efforts[f.featureId],
+                      effectiveRecommendedEfforts: effectiveRecommendedEfforts[f.featureId],
                       feature: f,
                       hasSavedObject: hasSavedObject[f.featureId] ?? false,
                       isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
                     onEndpointsChange={updateEndpoints}
+                    onEffortsChange={updateEfforts}
                     invalidEndpointIds={invalidEndpointIds}
                     deprecatedEndpointsMap={deprecatedEndpointsMap}
                     isBeta={section.isBeta}

@@ -10,12 +10,15 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
+import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('../../hooks/use_registered_features');
 jest.mock('../../hooks/use_inference_settings');
+jest.mock('../../hooks/use_supported_effort_levels');
 
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
+const mockUseSupportedEffortLevels = useSupportedEffortLevels as jest.Mock;
 const mockUseInferenceSettings = useInferenceSettings as jest.Mock;
 const mockUseSaveInferenceSettings = useSaveInferenceSettings as jest.Mock;
 const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
@@ -53,6 +56,7 @@ describe('useModelSettingsForm', () => {
     jest.clearAllMocks();
     mockUseRegisteredFeatures.mockReturnValue({ features: allFeatures, isLoading: false });
     mockUseInferenceSettings.mockReturnValue({ data: undefined, isLoading: false });
+    mockUseSupportedEffortLevels.mockReturnValue(new Map());
     mockUseSaveInferenceSettings.mockReturnValue({
       mutateAsync: mockSaveSettings,
       isLoading: false,
@@ -251,6 +255,7 @@ describe('useModelSettingsForm', () => {
 
       act(() => {
         result.current.updateEndpoints('child_1', ['endpoint-a', 'endpoint-b']);
+        result.current.updateEfforts('child_1', {});
       });
       act(() => {
         result.current.save();
@@ -279,6 +284,239 @@ describe('useModelSettingsForm', () => {
           { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
         ],
       });
+    });
+
+    it('keeps other saved parameters when only the effort changes', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [
+                  {
+                    id: 'endpoint-a',
+                    parameters: { reasoning: { effort: 'high' }, other: { value: 1 } },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEfforts('child_1', {});
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [{ id: 'endpoint-a', parameters: { other: { value: 1 } } }],
+          },
+        ],
+      });
+    });
+
+    it('initializes efforts from saved parameters', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.efforts.child_1).toEqual({ 'endpoint-a': 'high' });
+    });
+
+    it('saves an effort set on recommended endpoints', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEfforts('child_1', { 'endpoint-b': 'none' });
+      });
+      expect(result.current.dirtyFeatureIds.has('child_1')).toBe(true);
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-a' },
+              { id: 'endpoint-b', parameters: { reasoning: { effort: 'none' } } },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('drops the override when its only saved effort is removed', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEfforts('child_1', {});
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
+    });
+  });
+
+  describe('recommended efforts', () => {
+    const featuresWithRecommendedEffort: InferenceFeatureConfig[] = [
+      parentFeature,
+      {
+        ...childFeature1,
+        recommendedEndpointParameters: {
+          'endpoint-a': { reasoning: { effort: 'low' } },
+          'endpoint-b': { reasoning: { effort: 'high' } },
+        },
+      },
+      childFeature2,
+    ];
+
+    beforeEach(() => {
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: featuresWithRecommendedEffort,
+        isLoading: false,
+      });
+      mockUseSupportedEffortLevels.mockReturnValue(
+        new Map([
+          ['endpoint-a', ['low', 'medium']],
+          ['endpoint-b', ['low']],
+        ])
+      );
+    });
+
+    it('keeps only recommended efforts the endpoint supports', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.effectiveRecommendedEfforts.child_1).toEqual({ 'endpoint-a': 'low' });
+      expect(result.current.efforts.child_1).toEqual({ 'endpoint-a': 'low' });
+      expect(result.current.isDirty).toBe(false);
+    });
+
+    it('excludes a feature from the payload when efforts match the recommended ones', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [{ feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] }],
+      });
+    });
+
+    it('includes recommended efforts when the feature endpoints are customized', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-a']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [{ id: 'endpoint-a', parameters: { reasoning: { effort: 'low' } } }],
+          },
+        ],
+      });
+    });
+
+    it('uses parent recommended efforts when the child has no recommendations', () => {
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: [
+          {
+            ...parentFeature,
+            recommendedEndpoints: ['endpoint-a'],
+            recommendedEndpointParameters: { 'endpoint-a': { reasoning: { effort: 'medium' } } },
+          },
+          { ...childFeature1, recommendedEndpoints: [] },
+        ],
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.effectiveRecommendedEfforts.child_1).toEqual({
+        'endpoint-a': 'medium',
+      });
+    });
+  });
+
+  describe('hasUnsupportedEfforts', () => {
+    it('is true when a saved effort is not supported by the endpoint', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [{ id: 'endpoint-a', parameters: { reasoning: { effort: 'xhigh' } } }],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      mockUseSupportedEffortLevels.mockReturnValue(new Map([['endpoint-a', ['low', 'high']]]));
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.hasUnsupportedEfforts).toBe(true);
+    });
+
+    it('is false when every effort is supported by its endpoint', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [{ id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } }],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      mockUseSupportedEffortLevels.mockReturnValue(new Map([['endpoint-a', ['low', 'high']]]));
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.hasUnsupportedEfforts).toBe(false);
+    });
+
+    it('is true when a saved effort belongs to a model with no effort levels', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [{ id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } }],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.hasUnsupportedEfforts).toBe(true);
     });
   });
 

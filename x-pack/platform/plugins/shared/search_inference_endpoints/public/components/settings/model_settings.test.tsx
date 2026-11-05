@@ -77,7 +77,9 @@ const defaultFormState = {
   isSaving: false,
   isDirty: false,
   assignments: { child_1: ['ep-1'] },
+  efforts: {},
   effectiveRecommendedEndpoints: { child_1: ['ep-1'] },
+  effectiveRecommendedEfforts: {},
   sections: [
     {
       featureId: 'search',
@@ -89,9 +91,11 @@ const defaultFormState = {
     },
   ],
   invalidEndpointIds: new Set<string>(),
+  hasUnsupportedEfforts: false,
   hasSavedObject: {} as Record<string, boolean>,
   dirtyFeatureIds: new Set<string>() as ReadonlySet<string>,
   updateEndpoints: jest.fn(),
+  updateEfforts: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
 };
 
@@ -229,6 +233,22 @@ describe('ModelSettings', () => {
     );
 
     expect(await screen.findByTestId('save-settings-button')).toBeEnabled();
+  });
+
+  it('save button stays disabled when an effort is not supported by its model', async () => {
+    mockUseModelSettingsForm.mockReturnValue({
+      ...defaultFormState,
+      isDirty: true,
+      hasUnsupportedEfforts: true,
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(await screen.findByTestId('save-settings-button')).toBeDisabled();
   });
 
   it('save button is enabled when only default model settings are dirty', async () => {
