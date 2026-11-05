@@ -76,8 +76,12 @@ if (Get-Service -Name QualysAgent -ErrorAction SilentlyContinue) {
 \$p = Start-Process ${REMOTE_EXE} -ArgumentList 'CustomerId={${CUSTOMER_ID}} ActivationId={${ACTIVATION_ID}} WebServiceUri=${WEB_SERVICE_URI}' -Wait -PassThru
 Write-Host \\\"[qualys] installer exit code: \$(\$p.ExitCode)\\\"
 Start-Sleep -Seconds 5
-Get-Service -Name QualysAgent | Select-Object Status
+\$svc = Get-Service -Name QualysAgent -ErrorAction Stop
+\$svc | Select-Object Status
 Remove-Item ${REMOTE_EXE} -Force -ErrorAction SilentlyContinue
+if (\$p.ExitCode -ne 0 -or \$svc.Status -ne 'Running') {
+  Write-Host '[qualys] install did not complete cleanly'; exit 1
+}
 \""
 
 echo "[qualys-gcp-win] done on ${VM_NAME}"

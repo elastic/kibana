@@ -40,7 +40,7 @@ async function resolveAgentIds(
         }
       : {};
 
-  const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200`, {
+  const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200&sort=enrolled_at:desc`, {
     ...fetchOpts,
     headers: { ...headers, ...basicAuth } as Record<string, string>,
   });
@@ -48,12 +48,25 @@ async function resolveAgentIds(
     throw new Error(`Fleet agents lookup failed: ${response.status} ${await response.text()}`);
   }
   const body = (await response.json()) as {
-    items: Array<{ id: string; local_metadata?: { host?: { hostname?: string } } }>;
+    items: Array<{
+      id: string;
+      status?: string;
+      enrolled_at?: string;
+      local_metadata?: { host?: { hostname?: string } };
+    }>;
   };
 
   const result: Record<string, string> = {};
   for (const hostname of hostnames) {
-    const match = body.items.find((item) => item.local_metadata?.host?.hostname === hostname);
+    // Prefer the current online enrollment, not the first hostname match:
+    // Fleet retains older/broken enrollments for the same hostname, and
+    // enrollment-time ordering can put those first — stamping generated
+    // telemetry with a stale agent id breaks live-query dispatch.
+    const candidates = body.items.filter(
+      (item) => item.local_metadata?.host?.hostname === hostname
+    );
+    const online = candidates.find((item) => item.status === 'online');
+    const match = online ?? candidates[0];
     if (match) {
       result[hostname] = match.id;
     }

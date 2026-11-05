@@ -280,6 +280,7 @@ export async function seedForensicTimeline(
         '@timestamp': timestamp,
         agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
         elastic: { agent: { id: agentId } },
+        labels: { seed_source: 'forensic_eval' },
         host: { name: event.host, hostname: event.host, os: os(event.host) },
         data_stream: dataset ? { type: 'logs', dataset, namespace: 'default' } : undefined,
         ...event.document,

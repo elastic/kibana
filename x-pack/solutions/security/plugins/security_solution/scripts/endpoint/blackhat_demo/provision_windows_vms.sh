@@ -71,6 +71,17 @@ for i in "${!HOSTS[@]}"; do
     --metadata sysprep-specialize-script-cmd="googet -noconfirm=true install google-compute-engine-ssh",enable-windows-ssh=TRUE
 
   echo "[provision] $vm_name created. Waiting for guest agent (WinRM/RDP) to come up..."
+  # `instances create` returns before Windows specialization and the SSH setup
+  # finish; wait for SSH readiness so the hostname-verification loop below
+  # cannot abort the whole script under `set -euo pipefail`.
+  for _ in $(seq 1 30); do
+    if gcloud compute ssh "$(whoami)@$vm_name" --project "$GCP_PROJECT" --zone "$GCP_ZONE" \
+      --command "exit 0" --tunnel-through-iap >/dev/null 2>&1; then
+      echo "[provision] $vm_name is SSH-reachable."
+      break
+    fi
+    sleep 20
+  done
 done
 
 echo ""

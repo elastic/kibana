@@ -36,6 +36,11 @@ export const servers: ScoutServerConfig = {
       ])}`,
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',
+      // Register the Osquery Agent Builder tools even though the integration
+      // is absent: `osquery.check_integration` must exist for the fallback
+      // trajectory to be exercised. The "not installed" degradation is
+      // observed through the tool's response, not by omitting the tool.
+      '--xpack.osquery.enableExperimental=["agentBuilderTools"]',
     ],
   },
 };

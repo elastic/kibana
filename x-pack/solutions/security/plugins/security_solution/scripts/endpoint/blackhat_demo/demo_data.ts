@@ -74,6 +74,7 @@ const SHARED_RUN_KEY = 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\
 const PROCESS_INDEX = 'logs-endpoint.events.process-default';
 const NETWORK_INDEX = 'logs-endpoint.events.network-default';
 const REGISTRY_INDEX = 'logs-endpoint.events.registry-default';
+const FILE_INDEX = 'logs-endpoint.events.file-default';
 const ALERTS_INDEX = 'logs-endpoint.alerts-default';
 
 interface DemoEvent {
@@ -153,6 +154,7 @@ function buildRansomwareAlert(baseTime: Date, agentIdOverrides: AgentIdOverrides
     '@timestamp': timestamp,
     agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
     elastic: { agent: { id: agentId } },
+    labels: { seed_source: 'blackhat_demo' },
     host: { name: DEMO_HOSTS.patientZero, hostname: DEMO_HOSTS.patientZero, os: WORKSTATION_OS },
     data_stream: { type: 'logs', dataset: 'endpoint.alerts', namespace: 'default' },
     event: {
@@ -201,6 +203,7 @@ export async function seedBlackhatDemoData(
         '@timestamp': timestamp,
         agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
         elastic: { agent: { id: agentId } },
+        labels: { seed_source: 'blackhat_demo' },
         host: { name: event.host, hostname: event.host, os: os(event.host) },
         data_stream: dataset ? { type: 'logs', dataset, namespace: 'default' } : undefined,
         ...event.document,
@@ -234,7 +237,7 @@ export async function seedBlackhatDemoData(
 }
 
 export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }): Promise<void> {
-  const indices = [PROCESS_INDEX, NETWORK_INDEX, REGISTRY_INDEX, ALERTS_INDEX];
+  const indices = [PROCESS_INDEX, NETWORK_INDEX, REGISTRY_INDEX, FILE_INDEX, ALERTS_INDEX];
 
   // Match on `host.hostname` / `host.name` (stable across reseeds), not just
   // the legacy `blackhat-demo-*` placeholder agent-id prefix. Once agent-id
@@ -245,13 +248,15 @@ export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }
   // generation's docs (with now-stale agent ids) behind to duplicate/conflict
   // with the fresh reseed.  Some docs carry `host.hostname` but not `host.name`
   // (the forensic kill-chain events), so we match on both.
-  const hostnames = Object.values(DEMO_HOSTS);
+  // Only delete documents created by this seeder: the marker label stamped on
+  // every seeded doc, or the legacy placeholder agent-id prefix. Real enrolled
+  // VMs share these hostnames — a hostname-only match would delete their
+  // genuine telemetry, which is exactly what the live demo needs preserved.
   const deleteQuery: Record<string, unknown> = {
     bool: {
       should: [
+        { term: { 'labels.seed_source': 'blackhat_demo' } },
         { prefix: { 'agent.id': AGENT_ID_PREFIX } },
-        { terms: { 'host.hostname': hostnames } },
-        { terms: { 'host.name': hostnames } },
       ],
     },
   };

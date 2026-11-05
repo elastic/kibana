@@ -25,7 +25,18 @@ describe('Endpoint Osquery eval isolation', () => {
 
     expect(baseConfig).toContain('--xpack.fleet.packages.0.name=endpoint');
     expect(serverArgs).not.toContain('osquery_manager');
-    expect(serverArgs).not.toContain('--xpack.osquery.enableExperimental');
+  });
+
+  it('registers the Osquery tools in the base config so the no-integration fallback is observable', () => {
+    const baseConfig = read(
+      'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint/stateful/classic.stateful.config.ts'
+    );
+    const serverArgs = baseConfig.slice(baseConfig.indexOf('serverArgs: ['));
+
+    // `osquery.check_integration` must exist to report the integration absent;
+    // registering the tools does not install `osquery_manager`.
+    expect(serverArgs).toContain('--xpack.osquery.enableExperimental=["agentBuilderTools"]');
+    expect(serverArgs).not.toContain('osquery_manager');
   });
 
   it('installs osquery_manager only in the endpoint-osquery Scout config', () => {

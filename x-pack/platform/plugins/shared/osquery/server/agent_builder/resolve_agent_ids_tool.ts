@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -22,15 +22,17 @@ import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
 
-const resolveAgentIdsSchema = z.object({
-  hostnames: z
-    .array(z.string())
-    .min(1)
-    .max(50)
-    .describe(
-      'Host names to resolve to Elastic Agent IDs (e.g. ["SRV-DC01", "WKSTN-RECV01"]). Max 50 — each hostname issues its own Fleet query.'
-    ),
-});
+const resolveAgentIdsSchema = lazySchema(() =>
+  z.object({
+    hostnames: z
+      .array(z.string())
+      .min(1)
+      .max(50)
+      .describe(
+        'Host names to resolve to Elastic Agent IDs (e.g. ["SRV-DC01", "WKSTN-RECV01"]). Max 50 — each hostname issues its own Fleet query.'
+      ),
+  })
+);
 
 interface ResolvedAgent {
   hostname: string;
@@ -72,8 +74,10 @@ export const escapeKueryValue = (value: string): string =>
  * resolved with its OWN paged query: a page shared across hostnames is ordered
  * by enrollment time before the online preference is applied client-side, so a
  * batch of newer stale enrollments can push the older online agent off the page
- * entirely. Within a hostname, prefer an `online` agent, then the most recently
- * enrolled.
+ * entirely. Within a hostname, prefer an `online` agent, then a `degraded`
+ * agent, then the most recently enrolled — Fleet's Osquery dispatch path
+ * accepts degraded agents, so excluding them would hide live-query-capable
+ * hosts.
  *
  * Resolution is additionally constrained to agents enrolled in an
  * osquery-capable agent policy, so it cannot hand back an Elastic Agent that
@@ -205,9 +209,10 @@ export const resolveAgentIdsTool = (
         );
 
         const best = [...matches].sort((a, b) => {
-          const aOnline = a.status === 'online' ? 1 : 0;
-          const bOnline = b.status === 'online' ? 1 : 0;
-          if (aOnline !== bOnline) return bOnline - aOnline;
+          const rank = (status?: string) =>
+            status === 'online' ? 2 : status === 'degraded' ? 1 : 0;
+          const rankDiff = rank(b.status) - rank(a.status);
+          if (rankDiff !== 0) return rankDiff;
 
           return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');
         })[0];

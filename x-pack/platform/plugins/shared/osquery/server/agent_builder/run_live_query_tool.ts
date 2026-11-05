@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -30,27 +30,29 @@ export const RUN_LIVE_QUERY_TOOL_ID = osqueryTool('run_live_query');
 const POLL_BUDGET_MS = 30_000;
 const MAX_RESULT_ROWS = 100;
 
-const runLiveQuerySchema = z.object({
-  query: z
-    .string()
-    .describe(
-      'Read-only Osquery SQL query (e.g. "SELECT pid, name, path FROM processes WHERE on_disk = 0"). Only tables from the osquery schema are allowed.'
-    ),
-  agent_ids: z
-    .array(z.string())
-    .min(1)
-    .max(100)
-    .describe(
-      'Specific agent IDs to run the query on (from Elastic Agent / osquerybeat enrollment). Max 100 — resolve subsets with osquery.resolve_agent_ids and batch further runs separately.'
-    ),
-  timeout: z
-    .number()
-    .int()
-    .min(1)
-    .max(86400)
-    .optional()
-    .describe('Query timeout in seconds. Default 60.'),
-});
+const runLiveQuerySchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .describe(
+        'Read-only Osquery SQL query (e.g. "SELECT pid, name, path FROM processes WHERE on_disk = 0"). Only tables from the osquery schema are allowed.'
+      ),
+    agent_ids: z
+      .array(z.string())
+      .min(1)
+      .max(100)
+      .describe(
+        'Specific agent IDs to run the query on (from Elastic Agent / osquerybeat enrollment). Max 100 — resolve subsets with osquery.resolve_agent_ids and batch further runs separately.'
+      ),
+    timeout: z
+      .number()
+      .int()
+      .min(1)
+      .max(86400)
+      .optional()
+      .describe('Query timeout in seconds. Default 60.'),
+  })
+);
 
 export const runLiveQueryTool = (
   osqueryContext: OsqueryAppContext,
@@ -67,8 +69,8 @@ export const runLiveQueryTool = (
     title: 'Run Osquery live query',
     readOnlyHint: true,
     destructiveHint: false,
-    idempotentHint: true,
-    openWorldHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
   },
   handler: async (input, { request }) => {
     const { query, agent_ids: agentIds, timeout } = input;
