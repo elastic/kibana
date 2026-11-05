@@ -1,0 +1,65 @@
+{
+  "operations": {
+    "downloadFile": [
+      {
+        "method": "head",
+        "path": "/{Bucket}/{Key}",
+        "source": "s3"
+      },
+      {
+        "method": "get",
+        "path": "/{Bucket}/{Key}?x-id=GetObject",
+        "source": "s3"
+      }
+    ],
+    "listBucketObjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 1000,
+          "end": "missing",
+          "request": {
+            "cursorParam": "continuation-token",
+            "in": "query",
+            "sizeParam": "max-keys"
+          },
+          "response": {
+            "itemsPath": "Contents",
+            "nextPath": "NextContinuationToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/{Bucket}?list-type=2",
+        "source": "s3"
+      }
+    ],
+    "listBuckets": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "continuation-token",
+            "in": "query",
+            "sizeParam": "max-buckets"
+          },
+          "response": {
+            "itemsPath": "Buckets",
+            "nextPath": "ContinuationToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/?x-id=ListBuckets",
+        "source": "s3"
+      }
+    ]
+  },
+  "sources": {
+    "s3": {
+      "apiVersion": "2006-03-01",
+      "fetchedAt": "2026-11-01T19:16:42.854Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/s3/service/2006-03-01/s3-2006-03-01.json"
+    }
+  }
+}

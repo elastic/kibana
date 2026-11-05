@@ -1,0 +1,11 @@
+{
+  "freeBusy": {
+    "queries": [
+      {
+        "source": "v3",
+        "method": "POST",
+        "path": "/freeBusy"
+      }
+    ]
+  }
+}
