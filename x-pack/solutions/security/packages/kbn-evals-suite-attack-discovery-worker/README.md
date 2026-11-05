@@ -133,7 +133,16 @@ Per-scenario gold:
 | `shared-ci-egress`                    | FP                                       |
 | `threshold-meta-alerts`               | FP                                       |
 | `positive-chain-with-noise`           | TP                                       |
+| `seeded-false-positive`               | FP (review of a seeded discovery)        |
 | `same-display-name-cross-account`     | inconclusive (TP also accepted)          |
+
+The `seeded-false-positive` row seeds an authored false-positive Attack Discovery straight into the
+space's attack discovery index, citing seeded benign SCCM alerts the world contradicts. The runner
+only reviews its own generation, so the row dispatches the review workflow itself
+(`client.runReview`) and folds the review artifact in; the seeded discovery's id rides on the
+artifacts (`seededDiscoveryId`) and is excluded from the runner's review-coverage checks, while
+`VerdictMatchesGold` and the other verdict checks score it like any other review. Generation must
+still report nothing over the benign alerts (gold `none`).
 
 `same-display-name-cross-account` forbids no co-citation pair in its baseline run (the baseline only
 checks that a story is reported). The two groups are separated in the enriched variants, which keep
@@ -181,11 +190,11 @@ AD_WORKER_EVAL_COHORT=whole \
 - Specs run with one Playwright worker: the runner's concurrency key is per space with
   cancel-in-progress.
 - Timeouts: runner 40 min, review settle 20 min, Playwright rows x (runner + review settle +
-  10 min overhead) per test (350 min for 5 rows), so the suite's own timeouts fire first. Wall time
+  10 min overhead) per test (420 min for 6 rows), so the suite's own timeouts fire first. Wall time
   per row is dominated by one generation batch plus one review per unmatched attack (review
   concurrency 2).
-- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 395
-  min, the 350 min Playwright timeout plus 45 min for bootstrap, Scout boot and report upload.
+- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 465
+  min, the 420 min Playwright timeout plus 45 min for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).

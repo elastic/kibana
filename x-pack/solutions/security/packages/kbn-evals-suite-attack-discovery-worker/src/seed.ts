@@ -32,6 +32,10 @@ import {
 import { errorMessage, sleep, spacePath } from './kibana_api';
 import { kbnErrorMessage, type KbnRequest } from './kbn_request';
 import { buildWorld, hasWorld, hostIdFor, type WorldDoc } from './worker_world';
+import {
+  buildSeededFalsePositiveDiscovery,
+  SEEDED_FALSE_POSITIVE_SCENARIO_ID,
+} from './audit_failure_classes/scenarios/seeded_false_positive';
 
 /** Index holding the fingerprints that `match_fingerprints` compares new attacks against. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
@@ -355,6 +359,11 @@ export interface SeededScenario {
    * `worker_world.ts`), by index and `_id`. Removed with the seed.
    */
   worldDocs: ReadonlyArray<Pick<WorldDoc, 'index' | 'id'>>;
+  /**
+   * The `_id` of the authored Attack Discovery the seeded-false-positive scenario seeds straight
+   * into the space's attack discovery index, next to its alerts. Unset for every other scenario.
+   */
+  seededDiscoveryId?: string;
   /**
    * Ids (mapped back to the scenario's own) of every open alert in the space right after seeding.
    * The generation step reports only how many alerts it read, so this is the id set it can read.
@@ -878,12 +887,29 @@ export const seedScenario = async ({
     { [kind === 'event' ? 'create' : 'index']: { _index: index, _id: id } },
     toNestedSource(body),
   ]);
+  // Cites the first four seeded alerts by their full `_id`s.
+  const seededDiscovery =
+    scenario.id === SEEDED_FALSE_POSITIVE_SCENARIO_ID
+      ? buildSeededFalsePositiveDiscovery({
+          runMarker,
+          spaceId,
+          seededAlertIds: [...goldIdBySeededId.keys()],
+          timestampMs: Math.max(0, ...timestamps.values(), 0),
+        })
+      : undefined;
+  const discoveryOperations = seededDiscovery
+    ? [
+        { index: { _index: attackDiscoveryIndexForSpace(spaceId), _id: seededDiscovery.id } },
+        toNestedSource(seededDiscovery.doc, isFlatAlertField),
+      ]
+    : [];
   const seeded: SeededScenario = {
     runMarker,
     spaceId,
     goldIdBySeededId,
     alertCount: scenario.alerts.length,
     worldDocs: world.map(({ index, id }) => ({ index, id })),
+    ...(seededDiscovery ? { seededDiscoveryId: seededDiscovery.id } : {}),
     openAlertIds: [],
   };
   // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
@@ -900,7 +926,7 @@ export const seedScenario = async ({
     try {
       response = await esClient.bulk({
         refresh: 'wait_for',
-        operations: [...operations, ...worldOperations],
+        operations: [...operations, ...discoveryOperations, ...worldOperations],
       });
     } catch (bulkError) {
       // A 4xx on the first attempt is Elasticsearch refusing the request before it ran anything.
@@ -929,6 +955,15 @@ export const seedScenario = async ({
     try {
       await removeSeededAlertsById({ esClient, seeded, bulkSettled, wait });
       await removeWorldDocs({ esClient, seeded });
+      // The workflow has not started, so no fingerprints or discoveries of this row exist — except
+      // the seeded discovery itself, which the same bulk wrote and a failed seed must remove.
+      if (seeded.seededDiscoveryId !== undefined) {
+        await deleteMatching({
+          esClient,
+          index: attackDiscoveryIndexForSpace(spaceId),
+          query: { ids: { values: [seeded.seededDiscoveryId] } },
+        });
+      }
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
@@ -960,7 +995,7 @@ export const assertCleanSpace = async ({
   /** Where in the run the check happens, for the error message. */
   when?: string;
 }): Promise<void> => {
-  const [alerts, fingerprints] = await Promise.all([
+  const [alerts, fingerprints, discoveries] = await Promise.all([
     esClient.count({
       index: alertsIndexForSpace(spaceId),
       query: { term: { 'kibana.alert.workflow_status': 'open' } },
@@ -971,10 +1006,15 @@ export const assertCleanSpace = async ({
       query: { term: { 'attributes.space_id': spaceId } },
       ignore_unavailable: true,
     }),
+    esClient.count({
+      index: attackDiscoveryIndexForSpace(spaceId),
+      query: { term: { 'kibana.alert.workflow_status': 'open' } },
+      ignore_unavailable: true,
+    }),
   ]);
-  if (alerts.count > 0 || fingerprints.count > 0) {
+  if (alerts.count > 0 || fingerprints.count > 0 || discoveries.count > 0) {
     throw new Error(
-      `Space "${spaceId}" is not clean ${when}: ${alerts.count} open alerts and ${fingerprints.count} attack fingerprints are left in it (leftovers of an earlier run, or writes that landed late).`
+      `Space "${spaceId}" is not clean ${when}: ${alerts.count} open alerts, ${fingerprints.count} attack fingerprints and ${discoveries.count} open attack discoveries are left in it (leftovers of an earlier run, or writes that landed late).`
     );
   }
 };

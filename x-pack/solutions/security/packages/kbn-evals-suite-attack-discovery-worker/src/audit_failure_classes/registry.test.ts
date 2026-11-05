@@ -217,11 +217,12 @@ describe('audit failure class registry', () => {
     });
   });
 
-  it('covers the five authored scenarios', () => {
+  it('covers the six authored scenarios', () => {
     expect(AUDIT_SCENARIOS.map(({ id }) => id).sort()).toEqual([
       'benign-batch',
       'positive-chain-with-noise',
       'same-display-name-cross-account',
+      'seeded-false-positive',
       'shared-ci-egress',
       'threshold-meta-alerts',
     ]);

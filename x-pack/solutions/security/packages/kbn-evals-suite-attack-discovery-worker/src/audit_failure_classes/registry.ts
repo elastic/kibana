@@ -10,6 +10,7 @@ import { getAnonymizationSeed, renderAlerts, type RenderedAlerts } from './rende
 import { benignBatchScenario } from './scenarios/benign_batch';
 import { positiveChainWithNoiseScenario } from './scenarios/positive_chain_with_noise';
 import { sameDisplayNameCrossAccountScenario } from './scenarios/same_display_name_cross_account';
+import { seededFalsePositiveScenario } from './scenarios/seeded_false_positive';
 import { sharedCiEgressScenario } from './scenarios/shared_ci_egress';
 import { thresholdMetaAlertsScenario } from './scenarios/threshold_meta_alerts';
 import type {
@@ -27,6 +28,7 @@ export const AUDIT_SCENARIOS: readonly AuditScenario[] = [
   thresholdMetaAlertsScenario,
   benignBatchScenario,
   positiveChainWithNoiseScenario,
+  seededFalsePositiveScenario,
 ];
 
 export const AUDIT_INPUT_VARIANTS: readonly AuditInputVariant[] = [

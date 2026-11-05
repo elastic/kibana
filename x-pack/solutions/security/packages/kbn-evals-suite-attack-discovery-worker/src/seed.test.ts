@@ -69,7 +69,7 @@ describe('assertCleanSpace', () => {
       count: index.startsWith('.alerts-security') ? 2 : 0,
     }));
     await expect(assertCleanSpace({ esClient: esWith({ count }), spaceId: 's' })).rejects.toThrow(
-      /2 open alerts and 0 attack fingerprints/
+      /2 open alerts, 0 attack fingerprints and 0 open attack discoveries/
     );
   });
 
@@ -78,7 +78,16 @@ describe('assertCleanSpace', () => {
       count: index.startsWith('ai-index') ? 1 : 0,
     }));
     await expect(assertCleanSpace({ esClient: esWith({ count }), spaceId: 's' })).rejects.toThrow(
-      /0 open alerts and 1 attack fingerprints/
+      /0 open alerts, 1 attack fingerprints and 0 open attack discoveries/
+    );
+  });
+
+  it('fails loudly when an open attack discovery is left over', async () => {
+    const count = jest.fn(async ({ index }: { index: string }) => ({
+      count: index.startsWith('.adhoc.alerts-security.attack.discovery') ? 1 : 0,
+    }));
+    await expect(assertCleanSpace({ esClient: esWith({ count }), spaceId: 's' })).rejects.toThrow(
+      /0 open alerts, 0 attack fingerprints and 1 open attack discoveries/
     );
   });
 });
@@ -240,6 +249,46 @@ describe('seedScenario world documents', () => {
   it('seeds no world for the cloud scenarios, which have no host', async () => {
     const { seededScenario } = await seedWith('shared-ci-egress');
     expect(seededScenario.worldDocs).toEqual([]);
+  });
+
+  it('seeds the authored discovery for seeded-false-positive, cited alerts included', async () => {
+    const { seededScenario, operations } = await seedWith('seeded-false-positive');
+    const actionsList = actions(operations) as Array<
+      Record<string, { _index: string; _id: string }>
+    >;
+    const discoveryIndex = actionsList.findIndex(({ index }) =>
+      String(index?._index ?? '').startsWith('.adhoc.alerts-security.attack.discovery')
+    );
+    expect(discoveryIndex).toBeGreaterThanOrEqual(0);
+    expect(actionsList[discoveryIndex].index._id).toBe(seededScenario.seededDiscoveryId);
+    expect(actionsList[discoveryIndex].index._id).toMatch(/^[0-9a-f]{64}$/);
+    const doc = bodies(operations)[discoveryIndex] as Record<string, unknown>;
+    // Flat kibana.* keys, like the detection engine writes them.
+    expect(doc['kibana.alert.uuid']).toBe(seededScenario.seededDiscoveryId);
+    const cited = doc['kibana.alert.attack_discovery.alert_ids'] as string[];
+    expect(cited).toHaveLength(4);
+    const seededIds = actionsList
+      .map(({ index }) => index?._id)
+      .filter(
+        (id) =>
+          String(id ?? '').startsWith('adw-') &&
+          !String(id).includes('-world-') &&
+          String(
+            actionsList[actionsList.findIndex((a) => a.index?._id === id)]?.index?._index
+          ).startsWith('.alerts-security')
+      );
+    cited.forEach((id) => expect(seededIds).toContain(id));
+    // No other scenario seeds a discovery.
+    const quiet = await seedWith('benign-batch');
+    expect(quiet.seededScenario.seededDiscoveryId).toBeUndefined();
+    const quietActions = actions(quiet.operations) as Array<
+      Record<string, { _index: string; _id: string }>
+    >;
+    expect(
+      quietActions.some(({ index }) =>
+        String(index?._index ?? '').startsWith('.adhoc.alerts-security.attack.discovery')
+      )
+    ).toBe(false);
   });
 
   it('puts the events inside the review window around the alerts', async () => {
@@ -551,6 +600,32 @@ describe('seedScenario partial failure', () => {
     expect(bulk).not.toHaveBeenCalled();
     expect(deleteByQuery).not.toHaveBeenCalled();
   });
+
+  it('removes the seeded discovery by id when the seed fails midway', async () => {
+    const seededScenario = AUDIT_SCENARIOS.find(({ id }) => id === 'seeded-false-positive');
+    if (!seededScenario) throw new Error('no seeded-false-positive scenario');
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+    const bulk = jest
+      .fn()
+      .mockResolvedValueOnce({ errors: true, items: [{ index: { error: { type: 'x' } } }] })
+      .mockResolvedValue({ errors: false, items: [] });
+    const mget = jest.fn(async ({ ids }: { ids: string[] }) => ({
+      docs: ids.map((_id) => ({ _id, found: false })),
+    }));
+    const error = await seedScenario({
+      esClient: esWith({ bulk, deleteByQuery, mget }),
+      log,
+      scenario: seededScenario,
+      spaceId: 's',
+      wait: async () => {},
+    }).catch((e: unknown) => e);
+    expect((error as Error).message).toMatch(/Seeding "seeded-false-positive" failed/);
+    const discoveryCall = deleteByQuery.mock.calls.find(
+      ([{ index }]) => index === attackDiscoveryIndexForSpace('s')
+    );
+    expect(discoveryCall?.[0].query).toBeDefined();
+    expect(JSON.stringify(discoveryCall?.[0].query)).toMatch(/[0-9a-f]{64}/);
+  });
 });
 
 describe('cleanupSeed alert delete', () => {
@@ -799,7 +874,7 @@ describe('seedScenario world indices', () => {
         };
       }) => ({
         count:
-          index.startsWith('.alerts') || index.startsWith('ai-index')
+          index.startsWith('.alerts') || index.startsWith('.adhoc') || index.startsWith('ai-index')
             ? 0
             : (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0,
       })
@@ -855,7 +930,12 @@ describe('seedScenario world indices', () => {
           };
         };
       }) => {
-        if (index.startsWith('.alerts') || index.startsWith('ai-index')) return { count: 0 };
+        if (
+          index.startsWith('.alerts') ||
+          index.startsWith('.adhoc') ||
+          index.startsWith('ai-index')
+        )
+          return { count: 0 };
         if (query?.ids) return { count: query.ids.values.length };
         const [{ ids }, { terms }] = query?.bool?.filter ?? [{}, {}];
         const [[key, allowed]] = Object.entries(terms ?? {});

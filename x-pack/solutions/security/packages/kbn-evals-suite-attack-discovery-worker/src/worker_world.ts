@@ -172,6 +172,10 @@ const WORLDS: Readonly<Record<string, ScenarioWorld>> = {
     hosts: { 'SRV-FILE-02': SCHEDULED_BACKUP_HOST, 'SRV-APP-07': SCHEDULED_BACKUP_HOST },
     users: ['svc-backup', 'm.novak'],
   },
+  'seeded-false-positive': {
+    hosts: { 'WS-MGMT-201': BENIGN_HOST, 'WS-MGMT-202': BENIGN_HOST },
+    users: [],
+  },
 };
 
 export const hasWorld = (scenarioId: string): boolean => scenarioId in WORLDS;
