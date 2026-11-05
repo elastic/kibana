@@ -246,7 +246,7 @@ export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }
   // with the fresh reseed.  Some docs carry `host.hostname` but not `host.name`
   // (the forensic kill-chain events), so we match on both.
   const hostnames = Object.values(DEMO_HOSTS);
-  const deleteQuery = {
+  const deleteQuery: Record<string, unknown> = {
     bool: {
       should: [
         { prefix: { 'agent.id': AGENT_ID_PREFIX } },
@@ -259,7 +259,12 @@ export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }
   await Promise.all(
     indices.map((index) =>
       esClient
-        .deleteByQuery({ index, query: deleteQuery, refresh: true, ignore_unavailable: true })
+        .deleteByQuery({
+          index,
+          query: deleteQuery as never,
+          refresh: true,
+          ignore_unavailable: true,
+        })
         .catch(() => {})
     )
   );

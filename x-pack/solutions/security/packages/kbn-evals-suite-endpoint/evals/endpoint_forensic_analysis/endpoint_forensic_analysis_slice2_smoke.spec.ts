@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except compliance with the Elastic License
- * 2.0.
- */
-
 import { tags } from '@kbn/scout';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { seedForensicTimeline } from '@kbn/security-solution-plugin/common/endpoint/data_generators/forensic_data';
 import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
-import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+import { cleanupForensicData } from '../../src/data_generators/cleanup';
 
 /**
  * Slice 2 Osquery tool sequences (minimum-sufficient per golden-dataset reconciliation).
@@ -34,25 +28,32 @@ const OSQUERY_GET_TABLE_SCHEMA = 'osquery.get_table_schema' as const;
 const OSQUERY_RESOLVE_AGENT_IDS = 'osquery.resolve_agent_ids' as const;
 const OSQUERY_RUN_LIVE_QUERY = 'osquery.run_live_query' as const;
 const OSQUERY_GET_LIVE_QUERY_RESULTS = 'osquery.get_live_query_results' as const;
+const PLATFORM_GENERATE_ESQL = 'platform.core.generate_esql' as const;
+const PLATFORM_EXECUTE_ESQL = 'platform.core.execute_esql' as const;
 
 evaluate.describe(
   'Endpoint Forensic Analysis — slice 2 Osquery smoke',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
-      await waitForEndpointPackage(kbnClient, esClient, log);
-      await cleanupSeededData({ esClient, internalEsClient });
-      await seedForensicTimeline({ esClient }, log);
+    evaluate.beforeAll(
+      async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
+        await waitForEndpointPackage(kbnClient, esClient, log);
+        await cleanupForensicData({ esClient, internalEsClient });
+        await seedForensicTimeline({ esClient }, log);
 
-      try {
-        await chatClient.converse({ message: 'hello' });
-      } catch (e) {
-        log.warning(`Warmup failed: ${e}`);
+        try {
+          await agentBuilderClient.converse({
+            agentId: agentBuilderDefaultAgentId,
+            input: 'hello',
+          });
+        } catch (e) {
+          log.warning(`Warmup failed: ${e}`);
+        }
       }
-    });
+    );
 
     evaluate.afterAll(async ({ esClient, internalEsClient }) => {
-      await cleanupSeededData({ esClient, internalEsClient });
+      await cleanupForensicData({ esClient, internalEsClient });
     });
 
     evaluate(

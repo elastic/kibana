@@ -7,9 +7,9 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
+import { seedForensicTimeline } from '@kbn/security-solution-plugin/common/endpoint/data_generators/forensic_data';
 import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
-import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
 import { cleanupForensicData } from '../../src/data_generators/cleanup';
 
 const FORENSIC_ESQL_TRAJECTORY = [

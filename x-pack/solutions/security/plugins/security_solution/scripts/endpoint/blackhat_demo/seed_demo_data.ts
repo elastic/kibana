@@ -9,7 +9,7 @@ import { run } from '@kbn/dev-cli-runner';
 import {
   seedForensicTimeline,
   FORENSIC_HOSTS,
-} from '@kbn/evals-suite-endpoint/src/data_generators/forensic_data';
+} from '../../../common/endpoint/data_generators/forensic_data';
 import { createEsClient } from '../common/stack_services';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { seedBlackhatDemoData, cleanupBlackhatDemoData, DEMO_HOSTS } from './demo_data';
@@ -42,7 +42,7 @@ async function resolveAgentIds(
 
   const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200`, {
     ...fetchOpts,
-    headers: { ...headers, ...basicAuth },
+    headers: { ...headers, ...basicAuth } as Record<string, string>,
   });
   if (!response.ok) {
     throw new Error(`Fleet agents lookup failed: ${response.status} ${await response.text()}`);
