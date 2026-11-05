@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -26,10 +26,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { useSelector } from '@xstate/react';
+import { SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
-import { useComponentCatalogue } from '../../services/component_catalogue';
+import { useKibana } from '../../hooks/use_kibana';
+import { createComponentChecker, useComponentCatalogue } from '../../services/component_catalogue';
+import { usedComponentIds } from '../../services/unit_pipeline';
 import { getSharedProcessorIds, type DraftProcessor } from '../../services/unit_processing';
 import type { ComponentReferenceOption } from '../component_definition_form';
 import {
@@ -59,7 +62,8 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   const headerId = useGeneratedHtmlId();
   const { closeProcessingFlyout } = useCanvasEvents();
   const unit = useCanvasUnitDefinition();
-  const { catalogue, loading, error, refresh } = useComponentCatalogue();
+  const { catalogue, editableCatalogue, unsupportedVersion, stale, loading, error, refresh } =
+    useComponentCatalogue();
 
   const { ref } = flyout;
   const steps = useSelector(ref, (state) => state.context.steps);
@@ -72,6 +76,38 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   const telemetry = useSelector(ref, (state) => state.context.telemetry);
   const diagnostics = useSelector(ref, (state) => state.context.diagnostics);
   const saveError = useSelector(ref, (state) => state.context.saveError);
+  const validationSkipped = useSelector(ref, (state) => state.context.validationSkipped);
+
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const checkComponent = useMemo(
+    () => createComponentChecker({ streamsRepositoryClient }),
+    [streamsRepositoryClient]
+  );
+  const componentIds = useMemo(() => usedComponentIds(unit), [unit]);
+
+  const isCatalogueUnsupported = unsupportedVersion !== undefined;
+  const canEdit = editable && !isCatalogueUnsupported;
+  // Steps are still listed from an unsupported catalogue, but nothing in it is interpreted, so the
+  // list falls back to raw types for display names.
+  const listCatalogue = useMemo(
+    () =>
+      editableCatalogue ??
+      (catalogue ? { ...catalogue, components: [], definitions: [] } : undefined),
+    [catalogue, editableCatalogue]
+  );
+
+  // A flyout opened to add a processor cannot add one from a catalogue this Kibana cannot read.
+  useEffect(() => {
+    if (isCatalogueUnsupported && isEditing) {
+      ref.send({ type: 'step.cancel' });
+    }
+  }, [isCatalogueUnsupported, isEditing, ref]);
 
   const componentRefs = useMemo<ComponentReferenceOption[]>(
     () => [
@@ -97,7 +133,8 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
     [ref]
   );
   const commitStep = useCallback(
-    (processor: DraftProcessor) => ref.send({ type: 'step.commit', processor }),
+    (processor: DraftProcessor, options?: { unchecked?: boolean }) =>
+      ref.send({ type: 'step.commit', processor, unchecked: options?.unchecked }),
     [ref]
   );
   const cancelStep = useCallback(() => ref.send({ type: 'step.cancel' }), [ref]);
@@ -116,10 +153,10 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   const unmatchedDiagnostics = diagnostics.filter(({ stepIndex }) => stepIndex === undefined);
 
   const renderProcessors = () => {
-    if (loading && !catalogue) {
+    if (loading && !listCatalogue) {
       return <EuiLoadingSpinner size="l" data-test-subj="streamsProcessingFlyoutLoading" />;
     }
-    if (!catalogue) {
+    if (!listCatalogue) {
       return (
         <KbnDangerCallout
           announceOnMount
@@ -139,20 +176,22 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
       );
     }
     if (steps.length === 0 && !isEditing) {
-      return <NoProcessorsPrompt canAdd={editable} onAddProcessor={createStep} />;
+      return <NoProcessorsPrompt canAdd={canEdit} onAddProcessor={createStep} />;
     }
     return (
       <ProcessorList
-        catalogue={catalogue}
+        catalogue={listCatalogue}
         steps={steps}
         editingKey={editingKey}
         isEditing={isEditing}
         newStepPosition={createPosition}
-        editable={editable && !isSaving}
+        editable={canEdit && !isSaving}
         telemetry={telemetry}
         diagnostics={diagnostics}
         sharedProcessorIds={sharedProcessorIds}
         componentRefs={componentRefs}
+        checkComponent={checkComponent}
+        componentIds={componentIds}
         onCreate={createStep}
         onEdit={editStep}
         onDelete={deleteStep}
@@ -191,7 +230,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
               </h1>
             </EuiTitle>
           </EuiFlexItem>
-          {!editable ? (
+          {!canEdit ? (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
                 {i18n.translate('xpack.streams.processingFlyout.readOnlyBadge', {
@@ -201,7 +240,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem />
-          {editable && steps.length > 0 ? (
+          {canEdit && steps.length > 0 ? (
             <EuiFlexItem grow={false}>
               <EuiToolTip content={deleteAllLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
@@ -248,6 +287,51 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
               <EuiSpacer size="m" />
             </>
           ) : null}
+          {stale && listCatalogue ? (
+            <>
+              <KbnWarningCallout
+                size="s"
+                title={i18n.translate('xpack.streams.processingFlyout.staleCatalogueTitle', {
+                  defaultMessage: 'The list of available processors may be out of date',
+                })}
+                text={i18n.translate('xpack.streams.processingFlyout.staleCatalogueText', {
+                  defaultMessage:
+                    'The configuration service could not be reached, so this is the last list Kibana received.',
+                })}
+                actionProps={{
+                  primary: {
+                    children: i18n.translate('xpack.streams.processingFlyout.staleCatalogueRetry', {
+                      defaultMessage: 'Try again',
+                    }),
+                    onClick: refresh,
+                  },
+                }}
+                data-test-subj="streamsProcessingFlyoutStaleCatalogue"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {unsupportedVersion !== undefined ? (
+            <>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.streams.processingFlyout.unsupportedCatalogueTitle', {
+                  defaultMessage: 'This version of Kibana cannot edit this processing',
+                })}
+                text={i18n.translate('xpack.streams.processingFlyout.unsupportedCatalogueText', {
+                  defaultMessage:
+                    'The configuration service describes processors in catalogue version {version}, and this Kibana supports {supported}. You can still view the processors, or edit them in the YAML configuration.',
+                  values: {
+                    version: unsupportedVersion,
+                    supported: SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS.join(', '),
+                  },
+                })}
+                data-test-subj="streamsProcessingFlyoutUnsupportedCatalogue"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           {saveError ? (
             <>
               <KbnDangerCallout
@@ -275,6 +359,23 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
               <EuiSpacer size="m" />
             </>
           ) : null}
+          {validationSkipped ? (
+            <>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.streams.processingFlyout.validationSkippedTitle', {
+                  defaultMessage: 'Some processors could not be checked',
+                })}
+                text={i18n.translate('xpack.streams.processingFlyout.validationSkippedText', {
+                  defaultMessage:
+                    'The configuration service could not be reached. Your changes are kept and will be validated when you save.',
+                })}
+                data-test-subj="streamsProcessingFlyoutValidationSkipped"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           {renderProcessors()}
         </div>
       </EuiFlyoutBody>
@@ -295,7 +396,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
             <EuiButton
               fill
               isLoading={isSaving}
-              isDisabled={!editable || !hasChanges || isEditing}
+              isDisabled={!canEdit || !hasChanges || isEditing}
               onClick={() => ref.send({ type: 'flyout.save' })}
               data-test-subj="streamsProcessingFlyoutSave"
             >

@@ -51,6 +51,58 @@ export const RULE_IDS = {
 
 export type RuleId = (typeof RULE_IDS)[keyof typeof RULE_IDS];
 
+/** Docs path of each rule, appended to the Saved Objects docs base URL. */
+export const RULE_DOCS_ANCHORS: Readonly<Record<RuleId, string>> = {
+  [RULE_IDS.EXISTING_TYPE_MUTATED_MIGRATIONS]: '/troubleshooting#existing-type-mutated-migrations',
+  [RULE_IDS.EXISTING_TYPE_DELETED_MODEL_VERSIONS]:
+    '/troubleshooting#existing-type-deleted-model-versions',
+  [RULE_IDS.EXISTING_TYPE_TOO_MANY_NEW_MODEL_VERSIONS]:
+    '/troubleshooting#existing-type-too-many-model-versions',
+  [RULE_IDS.EXISTING_TYPE_MAPPINGS_WITHOUT_NEW_MODEL_VERSION]:
+    '/troubleshooting#existing-type-mappings-without-model-version',
+  [RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION]:
+    '/troubleshooting#existing-type-mutated-model-version',
+  [RULE_IDS.EXISTING_TYPE_REMOVED_MAPPED_PROPERTIES]:
+    '/troubleshooting#existing-type-removed-mapped-properties',
+  [RULE_IDS.EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE]:
+    '/troubleshooting#existing-type-virtual-version-downgrade',
+  [RULE_IDS.EXISTING_TYPE_SCHEMA_BREAKING_CHANGES]:
+    '/troubleshooting#existing-type-schema-breaking-changes',
+  [RULE_IDS.EXISTING_TYPE_SCHEMA_UNDIFFABLE]: '/troubleshooting#existing-type-schema-undiffable',
+  [RULE_IDS.EXISTING_TYPE_NEW_MAPPINGS_NOT_IN_MODEL_VERSION]:
+    '/troubleshooting#existing-type-new-mappings-not-in-model-version',
+  [RULE_IDS.EXISTING_TYPE_KEYWORD_MISSING_IGNORE_ABOVE]:
+    '/troubleshooting#existing-type-keyword-ignore-above',
+  [RULE_IDS.EXISTING_TYPE_INVALID_NAME_TITLE_FIELD_TYPE]:
+    '/troubleshooting#existing-type-invalid-name-title',
+  [RULE_IDS.NEW_TYPE_LEGACY_MIGRATIONS]: '/troubleshooting#new-type-legacy-migrations',
+  [RULE_IDS.NEW_TYPE_MISSING_INITIAL_MODEL_VERSION]:
+    '/troubleshooting#new-type-missing-initial-model-version',
+  [RULE_IDS.NEW_TYPE_KEYWORD_MISSING_IGNORE_ABOVE]:
+    '/troubleshooting#new-type-keyword-ignore-above',
+  [RULE_IDS.NEW_TYPE_INVALID_NAME_TITLE_FIELD_TYPE]: '/troubleshooting#new-type-invalid-name-title',
+  [RULE_IDS.INITIAL_MODEL_VERSION_HAS_CHANGES]:
+    '/troubleshooting#model-version-initial-schema-only',
+  [RULE_IDS.MODEL_VERSION_NUMBERS_INVALID]: '/troubleshooting#model-version-consecutive',
+  [RULE_IDS.MODEL_VERSION_MISSING_SCHEMAS]: '/troubleshooting#model-version-missing-schemas',
+  [RULE_IDS.MODEL_VERSION_MISSING_FORWARD_COMPATIBILITY]:
+    '/troubleshooting#model-version-missing-fwd-compat',
+  [RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA]: '/troubleshooting#model-version-missing-create',
+  [RULE_IDS.MODEL_VERSION_MISSING_UPDATE_SCHEMA]: '/troubleshooting#model-version-missing-update',
+  [RULE_IDS.MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA]:
+    '/troubleshooting#model-version-mappings-not-in-schema',
+  [RULE_IDS.MODEL_VERSION_MAPPING_INDEX_FALSE]:
+    '/troubleshooting#model-version-mapping-index-false',
+  [RULE_IDS.MODEL_VERSION_MAPPING_ENABLED_FALSE]:
+    '/troubleshooting#model-version-mapping-enabled-false',
+  [RULE_IDS.MODEL_VERSION_FIXTURE_MISSING]: '/troubleshooting#model-version-fixture-missing',
+  [RULE_IDS.MODEL_VERSION_FIXTURE_INVALID]: '/troubleshooting#model-version-fixture-invalid',
+  [RULE_IDS.DOCUMENTS_FIXTURE_MISMATCH]: '/troubleshooting#documents-fixture-mismatch',
+  [RULE_IDS.REMOVED_TYPE_NAME_REUSED]: '/troubleshooting#removed-type-name-reused',
+  [RULE_IDS.REMOVED_TYPE_NEEDS_UPDATE]: '/troubleshooting#removed-type-registry-needs-update',
+  [RULE_IDS.GENERIC]: '/troubleshooting',
+};
+
 export type FindingSeverity = 'error' | 'warning';
 
 export interface SavedObjectsCheckFinding {
@@ -61,17 +113,15 @@ export interface SavedObjectsCheckFinding {
   /** Plain-text supplement (e.g. fixture diff) rendered separately in PR comments. */
   details?: string;
   fixHint?: string;
-  /**
-   * Path fragment appended to the Saved Objects docs base URL.
-   * MUST start with `#` (anchor on the same page, e.g. `#defining-model-versions`)
-   * or `/` (relative path, e.g. `/troubleshooting#existing-type-mutated-migrations`).
-   * A value without a leading `#` or `/` will produce a malformed URL.
-   */
-  docsAnchor?: string;
   /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
   baselineUrl?: string;
   /** GCS URL of the serverless baseline snapshot that triggered this finding. */
   serverlessBaselineUrl?: string;
+}
+
+export interface SavedObjectsCheckReportFinding extends SavedObjectsCheckFinding {
+  /** The {@link RULE_DOCS_ANCHORS} entry for `ruleId`. */
+  docsAnchor: string;
 }
 
 /** Per-type change details included in the report for updated SO types. */
@@ -96,7 +146,7 @@ export interface SavedObjectsCheckReport {
   newTypes: string[];
   updatedTypes: string[];
   removedTypes: string[];
-  findings: SavedObjectsCheckFinding[];
+  findings: SavedObjectsCheckReportFinding[];
   /**
    * Per-type model version change details for updated SO types.
    * Only present when both `from` and `to` snapshots are available.

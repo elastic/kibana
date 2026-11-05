@@ -54,6 +54,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
     "@kbn/actions-types",
+    "@kbn/connector-specs",
     "@kbn/alerting-plugin",
     "@kbn/sandbox-plugin",
     "@kbn/context-engine-plugin",
@@ -71,6 +72,7 @@
     "@kbn/proposals-common",
     "@kbn/core-security-common",
     "@kbn/eval-kql",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/inference-tracing"
   ]
 }

@@ -30,6 +30,7 @@ import { DispatcherServiceInternalToken, KibanaBaseUrlToken } from '../lib/dispa
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import { ActionPolicyTestService } from '../lib/action_policy_test/action_policy_test_service';
 import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
@@ -153,6 +154,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ActionPolicyTestService).toSelf().inRequestScope();
   bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
