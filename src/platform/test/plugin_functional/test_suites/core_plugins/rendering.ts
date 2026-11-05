@@ -217,6 +217,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.storageExplorerAvailable (boolean?|true?)',
         // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean?)',
+        'xpack.apm.featureFlags.managedTailSamplingAvailable (boolean?)',
         'xpack.apm.serverless.enabled (true?|never)',
         'xpack.observability_onboarding.serverless.enabled (true?|never)',
         'xpack.cases.files.allowedMimeTypes (array?)',

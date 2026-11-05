@@ -54,6 +54,7 @@ const mockConfig: ConfigSchema = {
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: false,
     ruleFormV2Enabled: false,
+    managedTailSamplingAvailable: false,
   },
   serverless: { enabled: false },
 };
