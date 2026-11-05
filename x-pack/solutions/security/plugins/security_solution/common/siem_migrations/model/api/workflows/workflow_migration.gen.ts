@@ -18,196 +18,20 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { MigrationTaskStats, MigrationTranslationStats, LangSmithOptions } from '../../common.gen';
 import {
-  MigrationTaskStats,
-  MigrationTranslationStats,
-  LangSmithOptions,
-  MigrationLastExecution,
-  MigrationTranslationResult,
-  MigrationStatus,
-  MigrationComments,
-} from '../../common.gen';
+  WorkflowMigration,
+  WorkflowMigrationWorkflow,
+  UpdateWorkflowMigrationWorkflow,
+} from '../../workflow_migration.gen';
 import { TinesStoryExport } from '../../vendor/workflows/tines.gen';
-
-/**
- * A workflow migration document.
- */
-export const WorkflowMigration = lazySchema(() =>
-  z.object({
-    /**
-     * The workflow migration id.
-     */
-    id: z.string().min(1).max(256).describe('The workflow migration id.'),
-    /**
-     * The workflow migration name.
-     */
-    name: z.string().min(1).max(1024).describe('The workflow migration name.'),
-    /**
-     * The user who created the migration.
-     */
-    created_by: z.string().min(1).max(256).describe('The user who created the migration.'),
-    /**
-     * The moment the migration was created.
-     */
-    created_at: z.string().min(1).max(64).describe('The moment the migration was created.'),
-    /**
-     * The last execution of the migration task.
-     */
-    last_execution: MigrationLastExecution.optional().describe(
-      'The last execution of the migration task.'
-    ),
-  })
-);
-export type WorkflowMigration = z.infer<typeof WorkflowMigration>;
-
-/**
- * The original Tines workflow to migrate.
- */
-export const OriginalWorkflow = lazySchema(() =>
-  z.object({
-    /**
-     * The original workflow id.
-     */
-    id: z.string().max(256).describe('The original workflow id.'),
-    /**
-     * The original workflow vendor identifier.
-     */
-    vendor: z.literal('tines').describe('The original workflow vendor identifier.'),
-    /**
-     * The original workflow title.
-     */
-    title: z.string().min(1).max(1024).describe('The original workflow title.'),
-    /**
-     * The original workflow description.
-     */
-    description: z.string().max(10000).optional().describe('The original workflow description.'),
-    /**
-     * Raw Tines story export JSON.
-     */
-    data: TinesStoryExport.describe('Raw Tines story export JSON.'),
-  })
-);
-export type OriginalWorkflow = z.infer<typeof OriginalWorkflow>;
-
-/**
- * The translated Elastic workflow.
- */
-export const ElasticWorkflow = lazySchema(() =>
-  z.object({
-    /**
-     * The Elastic workflow id.
-     */
-    id: z.string().min(1).max(256).optional().describe('The Elastic workflow id.'),
-    /**
-     * The Elastic workflow title.
-     */
-    title: z.string().min(1).max(1024).describe('The Elastic workflow title.'),
-    /**
-     * The Elastic workflow description.
-     */
-    description: z.string().max(10000).optional().describe('The Elastic workflow description.'),
-    /**
-     * Translated Elastic Workflow YAML.
-     */
-    yaml: z.string().max(1000000).optional().describe('Translated Elastic Workflow YAML.'),
-  })
-);
-export type ElasticWorkflow = z.infer<typeof ElasticWorkflow>;
-
-/**
- * A workflow item stored for a workflow migration.
- */
-export const WorkflowMigrationWorkflow = lazySchema(() =>
-  z.object({
-    /**
-     * The workflow migration item id.
-     */
-    id: z.string().min(1).max(256).describe('The workflow migration item id.'),
-    /**
-     * The moment the workflow item was created.
-     */
-    '@timestamp': z.string().min(1).max(64).describe('The moment the workflow item was created.'),
-    /**
-     * The migration id.
-     */
-    migration_id: z.string().min(1).max(256).describe('The migration id.'),
-    /**
-     * The user who created the workflow item.
-     */
-    created_by: z.string().min(1).max(256).describe('The user who created the workflow item.'),
-    /**
-     * The original Tines workflow.
-     */
-    original_workflow: OriginalWorkflow.describe('The original Tines workflow.'),
-    /**
-     * The translated Elastic workflow.
-     */
-    elastic_workflow: ElasticWorkflow.optional().describe('The translated Elastic workflow.'),
-    /**
-     * The workflow translation result.
-     */
-    translation_result: MigrationTranslationResult.optional().describe(
-      'The workflow translation result.'
-    ),
-    /**
-     * The status of the workflow migration item.
-     */
-    status: MigrationStatus.optional()
-      .default('pending')
-      .describe('The status of the workflow migration item.'),
-    /**
-     * The comments for the migration including a summary from the LLM in markdown.
-     */
-    comments: MigrationComments.optional().describe(
-      'The comments for the migration including a summary from the LLM in markdown.'
-    ),
-    /**
-     * The moment of the last update.
-     */
-    updated_at: z.string().max(64).optional().describe('The moment of the last update.'),
-    /**
-     * The user who last updated the workflow item.
-     */
-    updated_by: z
-      .string()
-      .max(256)
-      .optional()
-      .describe('The user who last updated the workflow item.'),
-  })
-);
-export type WorkflowMigrationWorkflow = z.infer<typeof WorkflowMigrationWorkflow>;
-
-/**
- * A workflow migration item update.
- */
-export const UpdateWorkflowMigrationWorkflow = lazySchema(() =>
-  z.object({
-    /**
-     * The workflow migration item id.
-     */
-    id: z.string().min(1).max(256).describe('The workflow migration item id.'),
-    /**
-     * The translated Elastic workflow attributes to update.
-     */
-    elastic_workflow: ElasticWorkflow.optional().describe(
-      'The translated Elastic workflow attributes to update.'
-    ),
-    /**
-     * The comments for the migration including a summary from the LLM in markdown.
-     */
-    comments: MigrationComments.optional().describe(
-      'The comments for the migration including a summary from the LLM in markdown.'
-    ),
-  })
-);
-export type UpdateWorkflowMigrationWorkflow = z.infer<typeof UpdateWorkflowMigrationWorkflow>;
 
 export const CreateWorkflowMigrationRequestBody = lazySchema(() =>
   z.object({
     /**
      * The workflow migration name
      */
-    name: z.string().min(1).max(1024).describe('The workflow migration name'),
+    name: NonEmptyString.describe('The workflow migration name'),
   })
 );
 export type CreateWorkflowMigrationRequestBody = z.infer<typeof CreateWorkflowMigrationRequestBody>;
@@ -467,7 +291,7 @@ export const UpdateWorkflowMigrationRequestBody = lazySchema(() =>
       /**
        * The workflow migration name
        */
-      name: z.string().min(1).max(1024).optional().describe('The workflow migration name'),
+      name: NonEmptyString.optional().describe('The workflow migration name'),
     })
     .strict()
 );

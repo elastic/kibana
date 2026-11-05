@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
-import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/workflows/types';
+import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import { SiemMigrationsDataItemClient } from '../../common/data/siem_migrations_data_item_client';
 import type { SiemMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { SiemMigrationSort } from '../../common/data/types';

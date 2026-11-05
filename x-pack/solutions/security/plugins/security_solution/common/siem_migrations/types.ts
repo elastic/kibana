@@ -20,7 +20,7 @@ import type {
   OriginalWorkflowVendor,
   WorkflowMigration,
   WorkflowMigrationWorkflow,
-} from './workflows/types';
+} from './model/workflow_migration.gen';
 
 export interface SiemMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];

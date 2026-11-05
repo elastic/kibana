@@ -22,10 +22,8 @@ paths:
                 - name
               properties:
                 name:
-                  type: string
-                  minLength: 1
-                  maxLength: 1024
                   description: The workflow migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: The migration was created successfully and migration_id is returned
@@ -81,7 +79,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkflowMigration'
+                $ref: '../../workflow_migration.schema.yaml#/components/schemas/WorkflowMigration'
         404:
           description: Indicates the migration id was not found.
     patch:
@@ -107,10 +105,8 @@ paths:
               type: object
               properties:
                 name:
-                  type: string
-                  minLength: 1
-                  maxLength: 1024
                   description: The workflow migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
               additionalProperties: false
       responses:
         200:
@@ -268,7 +264,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/WorkflowMigrationWorkflow'
+                      $ref: '../../workflow_migration.schema.yaml#/components/schemas/WorkflowMigrationWorkflow'
     patch:
       summary: Updates workflows of a migration
       operationId: UpdateWorkflowMigrationWorkflows
@@ -292,7 +288,7 @@ paths:
               type: array
               maxItems: 1000
               items:
-                $ref: '#/components/schemas/UpdateWorkflowMigrationWorkflow'
+                $ref: '../../workflow_migration.schema.yaml#/components/schemas/UpdateWorkflowMigrationWorkflow'
       responses:
         200:
           description: Indicates workflow migration items have been updated correctly.
@@ -455,168 +451,3 @@ paths:
                   stopped:
                     type: boolean
                     description: Indicates the migration has been stopped.
-
-components:
-  x-codegen-enabled: true
-  schemas:
-    WorkflowMigration:
-      type: object
-      description: A workflow migration document.
-      required:
-        - id
-        - name
-        - created_by
-        - created_at
-      properties:
-        id:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The workflow migration id.
-        name:
-          type: string
-          minLength: 1
-          maxLength: 1024
-          description: The workflow migration name.
-        created_by:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The user who created the migration.
-        created_at:
-          type: string
-          minLength: 1
-          maxLength: 64
-          description: The moment the migration was created.
-        last_execution:
-          description: The last execution of the migration task.
-          $ref: '../../common.schema.yaml#/components/schemas/MigrationLastExecution'
-
-    OriginalWorkflow:
-      type: object
-      description: The original Tines workflow to migrate.
-      required:
-        - id
-        - vendor
-        - title
-        - data
-      properties:
-        id:
-          type: string
-          maxLength: 256
-          description: The original workflow id.
-        vendor:
-          type: string
-          description: The original workflow vendor identifier.
-          enum:
-            - tines
-        title:
-          type: string
-          minLength: 1
-          maxLength: 1024
-          description: The original workflow title.
-        description:
-          type: string
-          maxLength: 10000
-          description: The original workflow description.
-        data:
-          description: Raw Tines story export JSON.
-          $ref: '../../vendor/workflows/tines.schema.yaml#/components/schemas/TinesStoryExport'
-
-    ElasticWorkflow:
-      type: object
-      description: The translated Elastic workflow.
-      required:
-        - title
-      properties:
-        id:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The Elastic workflow id.
-        title:
-          type: string
-          minLength: 1
-          maxLength: 1024
-          description: The Elastic workflow title.
-        description:
-          type: string
-          maxLength: 10000
-          description: The Elastic workflow description.
-        yaml:
-          type: string
-          maxLength: 1000000
-          description: Translated Elastic Workflow YAML.
-
-    WorkflowMigrationWorkflow:
-      type: object
-      description: A workflow item stored for a workflow migration.
-      required:
-        - id
-        - '@timestamp'
-        - migration_id
-        - created_by
-        - original_workflow
-      properties:
-        id:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The workflow migration item id.
-        '@timestamp':
-          type: string
-          minLength: 1
-          maxLength: 64
-          description: The moment the workflow item was created.
-        migration_id:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The migration id.
-        created_by:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The user who created the workflow item.
-        original_workflow:
-          description: The original Tines workflow.
-          $ref: '#/components/schemas/OriginalWorkflow'
-        elastic_workflow:
-          description: The translated Elastic workflow.
-          $ref: '#/components/schemas/ElasticWorkflow'
-        translation_result:
-          description: The workflow translation result.
-          $ref: '../../common.schema.yaml#/components/schemas/MigrationTranslationResult'
-        status:
-          description: The status of the workflow migration item.
-          $ref: '../../common.schema.yaml#/components/schemas/MigrationStatus'
-          default: pending
-        comments:
-          description: The comments for the migration including a summary from the LLM in markdown.
-          $ref: '../../common.schema.yaml#/components/schemas/MigrationComments'
-        updated_at:
-          type: string
-          maxLength: 64
-          description: The moment of the last update.
-        updated_by:
-          type: string
-          maxLength: 256
-          description: The user who last updated the workflow item.
-
-    UpdateWorkflowMigrationWorkflow:
-      type: object
-      description: A workflow migration item update.
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: The workflow migration item id.
-        elastic_workflow:
-          description: The translated Elastic workflow attributes to update.
-          $ref: '#/components/schemas/ElasticWorkflow'
-        comments:
-          description: The comments for the migration including a summary from the LLM in markdown.
-          $ref: '../../common.schema.yaml#/components/schemas/MigrationComments'

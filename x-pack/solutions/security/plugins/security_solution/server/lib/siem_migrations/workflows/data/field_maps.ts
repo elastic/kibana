@@ -9,16 +9,16 @@ import type { FieldMap, SchemaFieldMapKeys } from '@kbn/index-adapter';
 import type {
   OriginalWorkflow,
   WorkflowMigration,
-  WorkflowMigrationWorkflowData,
-} from '../../../../../common/siem_migrations/workflows/types';
+  WorkflowMigrationWorkflow,
+} from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 
 /**
  * The stored story is an unindexed object. Typing it as a string here keeps the
  * field-map keys from expanding into the arbitrary Tines export.
  */
 type WorkflowMigrationWorkflowFieldDocument = Omit<
-  WorkflowMigrationWorkflowData,
-  'original_workflow'
+  WorkflowMigrationWorkflow,
+  'id' | 'original_workflow'
 > & {
   original_workflow: Omit<OriginalWorkflow, 'data'> & { data: string };
 };

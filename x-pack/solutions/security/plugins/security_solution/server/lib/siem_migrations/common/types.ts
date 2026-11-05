@@ -26,7 +26,7 @@ import type {
 import type {
   WorkflowMigration,
   WorkflowMigrationWorkflow,
-} from '../../../../common/siem_migrations/workflows/types';
+} from '../../../../common/siem_migrations/model/workflow_migration.gen';
 
 export interface SiemMigrationsClientDependencies {
   inferenceService: InferenceServerStart;

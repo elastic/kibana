@@ -9,7 +9,7 @@ import type { IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
   WorkflowMigration,
   WorkflowMigrationWorkflow,
-} from '../../../../common/siem_migrations/workflows/types';
+} from '../../../../common/siem_migrations/model/workflow_migration.gen';
 import type { Stored } from '../types';
 
 export interface WorkflowMigrationAdapters {

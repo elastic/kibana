@@ -7,25 +7,28 @@
 
 import type { Logger } from '@kbn/logging';
 import type { AuthenticatedUser, IScopedClusterClient } from '@kbn/core/server';
-import type { WorkflowMigration } from '../../../../../common/siem_migrations/workflows/types';
+import type { WorkflowMigration } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
+import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
 import { SiemMigrationsDataMigrationClient } from '../../common/data/siem_migrations_data_migration_client';
-import { WorkflowMigrationsDataWorkflowsClient } from './workflow_migrations_data_workflows_client';
-import type { WorkflowMigrationIndexNameProviders } from '../types';
+import type { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { WorkflowMigrationIndexNameProviders } from '../types';
+import { WorkflowMigrationsDataWorkflowsClient } from './workflow_migrations_data_workflows_client';
 
-export class WorkflowMigrationsDataClient {
+export class WorkflowMigrationsDataClient extends SiemMigrationsDataClient<WorkflowMigration> {
   public readonly migrations: SiemMigrationsDataMigrationClient<WorkflowMigration>;
   public readonly items: WorkflowMigrationsDataWorkflowsClient;
-  private readonly esClient: IScopedClusterClient['asInternalUser'];
+  public readonly resources?: SiemMigrationsDataResourcesClient;
 
   constructor(
     indexNameProviders: WorkflowMigrationIndexNameProviders,
     currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
-    private readonly logger: Logger,
+    logger: Logger,
     dependencies: SiemMigrationsClientDependencies
   ) {
-    this.esClient = esScopedClient.asInternalUser;
+    super(esScopedClient, logger);
+
     this.migrations = new SiemMigrationsDataMigrationClient<WorkflowMigration>(
       indexNameProviders.migrations,
       currentUser,
@@ -40,29 +43,5 @@ export class WorkflowMigrationsDataClient {
       logger,
       dependencies
     );
-  }
-
-  /** Deletes a migration and its stored workflows. */
-  public async deleteMigration(migrationId: string): Promise<void> {
-    const [migrationDeleteOperations, migrationItemsDeleteOperations] = await Promise.all([
-      this.migrations.prepareDelete(migrationId),
-      this.items.prepareDelete(migrationId),
-    ]);
-
-    await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: [...migrationDeleteOperations, ...migrationItemsDeleteOperations],
-      })
-      .then((response) => {
-        if (response.errors) {
-          const reason = response.items.find((item) => item.delete?.error)?.delete?.error?.reason;
-          throw new Error(reason ?? 'Unknown error');
-        }
-      })
-      .catch((error) => {
-        this.logger.error(`Error deleting workflow migration ${migrationId}: ${error}`);
-        throw error;
-      });
   }
 }

@@ -89,7 +89,7 @@ describe('WorkflowMigrationsDataClient', () => {
 
       await expect(dataClient.deleteMigration(migrationId)).rejects.toThrow('index write blocked');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Error deleting workflow migration testId: Error: index write blocked'
+        'Error deleting migration testId: Error: index write blocked'
       );
     });
   });
