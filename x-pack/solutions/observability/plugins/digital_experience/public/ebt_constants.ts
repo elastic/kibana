@@ -65,7 +65,6 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
 export const ERRORS_EBT_ELEMENTS = {
   RETRY: 'errorsRetry',
   ERROR: 'errorsError',
-  SESSIONS_LINK: 'errorsSessionsLink',
   VIEW_ALL: 'errorsViewAll',
 } as const;
 

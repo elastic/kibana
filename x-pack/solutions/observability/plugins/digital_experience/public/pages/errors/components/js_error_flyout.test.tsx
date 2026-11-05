@@ -33,7 +33,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const renderFlyout = (error: JsErrorGroup = ERROR, onClose = jest.fn()) => {
-  render(<JsErrorFlyout error={error} sessionsWithErrorsHref="/sessions" onClose={onClose} />, {
+  render(<JsErrorFlyout error={error} onClose={onClose} />, {
     wrapper: Wrapper,
   });
   return onClose;
@@ -68,13 +68,9 @@ describe('JsErrorFlyout', () => {
     expect(screen.queryByText('Last seen')).not.toBeInTheDocument();
   });
 
-  it('links to the sessions with errors and closes', () => {
+  it('closes', () => {
     const onClose = renderFlyout();
 
-    expect(screen.getByTestId('digitalExperienceErrorSessionsLink')).toHaveAttribute(
-      'href',
-      '/sessions'
-    );
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });

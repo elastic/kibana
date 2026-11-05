@@ -66,15 +66,12 @@ const VIEW_ALL_LABEL = i18n.translate('xpack.digitalExperience.errors.table.view
 export function JsErrorsPanel({
   errors,
   isLoading,
-  sessionsWithErrorsHref,
   maxRows,
   viewAllHref,
   hasMoreErrors = false,
 }: {
   errors: JsErrorGroup[];
   isLoading: boolean;
-  /** The sessions of the application that had an error. */
-  sessionsWithErrorsHref: string;
   /** Only the most frequent groups; all of them when left out. */
   maxRows?: number;
   /** The Errors tab, linked from the panel's header. */
@@ -186,7 +183,6 @@ export function JsErrorsPanel({
       {selected && (
         <JsErrorFlyout
           error={selected}
-          sessionsWithErrorsHref={sessionsWithErrorsHref}
           onClose={() => {
             return setSelectedKey(undefined);
           }}

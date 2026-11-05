@@ -8,11 +8,9 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
 import { ApplicationTabToolbar } from '../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { ERRORS_EBT_ELEMENTS } from '../../ebt_constants';
-import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useLastEnvironments } from '../../hooks/use_last_environments';
 import { JsErrorsPanel } from './components/js_errors_panel';
 import { useApplicationErrors } from './hooks/use_application_errors';
@@ -25,7 +23,6 @@ export const ERRORS_FETCH_ERROR_TITLE = i18n.translate(
 
 /** The JS errors of one EDOT Browser application, grouped, with their stack trace. */
 export function ErrorsTab({ serviceName }: { serviceName: string }) {
-  const { sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
   const { response, isLoading, error, refresh } = useApplicationErrors(serviceName);
   const environments = useLastEnvironments(serviceName, response);
 
@@ -52,7 +49,6 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
           errors={response?.errors ?? []}
           hasMoreErrors={response?.hasMoreErrors}
           isLoading={isLoading}
-          sessionsWithErrorsHref={sessionsHref({ hasErrors: true })}
         />
       )}
     </>

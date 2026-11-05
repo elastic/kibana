@@ -20,17 +20,6 @@ import { ErrorsTab } from './errors_tab';
 jest.mock('@kbn/server-route-repository-client');
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_environment');
-jest.mock('../../hooks/use_application_links', () => {
-  return {
-    useApplicationLinks: () => {
-      return {
-        sessionsHref: () => {
-          return '/sessions';
-        },
-      };
-    },
-  };
-});
 jest.mock('../../hooks/use_time_range', () => {
   return {
     ...jest.requireActual('../../hooks/use_time_range'),

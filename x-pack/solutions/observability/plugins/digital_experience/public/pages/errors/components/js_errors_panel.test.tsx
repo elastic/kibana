@@ -46,15 +46,9 @@ const renderPanel = (
   isLoading = false,
   compact: { maxRows?: number; viewAllHref?: string } = {}
 ) => {
-  return render(
-    <JsErrorsPanel
-      errors={errors}
-      isLoading={isLoading}
-      sessionsWithErrorsHref="/sessions"
-      {...compact}
-    />,
-    { wrapper: Wrapper }
-  );
+  return render(<JsErrorsPanel errors={errors} isLoading={isLoading} {...compact} />, {
+    wrapper: Wrapper,
+  });
 };
 
 const openError = (type: string) => {
@@ -86,17 +80,11 @@ describe('JsErrorsPanel', () => {
     expect(screen.getByTestId('digitalExperienceErrorStacktrace')).toHaveTextContent(
       'at app.js:1:1'
     );
-    expect(screen.getByTestId('digitalExperienceErrorSessionsLink')).toHaveAttribute(
-      'href',
-      '/sessions'
-    );
   });
 
   it('shows the current counts of the open group and closes when a new response lacks it', () => {
     const panel = (errors: JsErrorGroup[], isLoading = false) => {
-      return (
-        <JsErrorsPanel errors={errors} isLoading={isLoading} sessionsWithErrorsHref="/sessions" />
-      );
+      return <JsErrorsPanel errors={errors} isLoading={isLoading} />;
     };
     const flyout = () => {
       return screen.queryByTestId('digitalExperienceErrorFlyout');
@@ -121,15 +109,7 @@ describe('JsErrorsPanel', () => {
     const groups = Array.from({ length: 12 }, (_, index) => {
       return { ...ERRORS[0], type: `Error${index}`, count: 12 - index };
     });
-    render(
-      <JsErrorsPanel
-        errors={groups}
-        hasMoreErrors
-        isLoading={false}
-        sessionsWithErrorsHref="/sessions"
-      />,
-      { wrapper: Wrapper }
-    );
+    render(<JsErrorsPanel errors={groups} hasMoreErrors isLoading={false} />, { wrapper: Wrapper });
 
     expect(screen.getAllByTestId('digitalExperienceError')).toHaveLength(10);
     expect(screen.getByText(/The 100 most frequent groups/)).toBeInTheDocument();

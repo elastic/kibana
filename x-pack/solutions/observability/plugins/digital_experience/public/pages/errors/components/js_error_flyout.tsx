@@ -7,34 +7,24 @@
 
 import React from 'react';
 import {
-  EuiButton,
   EuiDescriptionList,
-  EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
 import { PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { JsErrorGroup } from '../../../../common/types/errors';
-import { ERRORS_EBT_ELEMENTS, DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../../ebt_constants';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { LAST_SEEN_LABEL, OCCURRENCES_LABEL } from '../../../labels';
 
 const NO_STACKTRACE_TITLE = i18n.translate('xpack.digitalExperience.errors.flyout.noStacktrace', {
   defaultMessage: 'These errors have no stack trace',
 });
-
-const SESSIONS_WITH_ERRORS_LABEL = i18n.translate(
-  'xpack.digitalExperience.errors.flyout.sessionsWithErrors',
-  { defaultMessage: 'View sessions with errors' }
-);
 
 /** The stack trace of an error group, or its message under a note when it has none. */
 function ErrorStacktrace({ type, message, stacktrace }: JsErrorGroup) {
@@ -53,16 +43,8 @@ function ErrorStacktrace({ type, message, stacktrace }: JsErrorGroup) {
   );
 }
 
-/** One error group: its counts and its stack trace, with a way to the sessions with errors. */
-export function JsErrorFlyout({
-  error,
-  sessionsWithErrorsHref,
-  onClose,
-}: {
-  error: JsErrorGroup;
-  sessionsWithErrorsHref: string;
-  onClose: () => void;
-}) {
+/** One error group: its counts and its stack trace. */
+export function JsErrorFlyout({ error, onClose }: { error: JsErrorGroup; onClose: () => void }) {
   const { formatNumber, formatDate } = useFormatters();
   const titleId = useGeneratedHtmlId({ prefix: 'digitalExperienceJsErrorFlyoutTitle' });
   const { type, count, lastSeen } = error;
@@ -88,21 +70,6 @@ export function JsErrorFlyout({
         <EuiSpacer size="l" />
         <ErrorStacktrace {...error} />
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiButton
-            href={sessionsWithErrorsHref}
-            iconType="table"
-            data-test-subj="digitalExperienceErrorSessionsLink"
-            {...getEbtProps({
-              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSIONS,
-              element: ERRORS_EBT_ELEMENTS.SESSIONS_LINK,
-            })}
-          >
-            {SESSIONS_WITH_ERRORS_LABEL}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

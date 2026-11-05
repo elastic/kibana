@@ -167,7 +167,6 @@ function UsageAndErrorsPanels({
             <JsErrorsPanel
               errors={topErrors.response?.errors ?? []}
               isLoading={topErrors.isLoading}
-              sessionsWithErrorsHref={sessionsHref({ hasErrors: true })}
               maxRows={TOP_ERRORS_ROWS}
               viewAllHref={errorsHref}
             />
