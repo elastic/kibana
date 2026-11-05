@@ -1,5 +1,5 @@
 {
-  "sha1": "809af2cdb7041cb9eb5671acf7bc7bfbe2223384",
+  "sha1": "5154f6e5cc85c40d920587f7362ed2596687c196",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -345,7 +345,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 70,
+        "line": 74,
         "column": 27
       }
     },
@@ -359,7 +359,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 86,
+        "line": 90,
         "column": 74
       }
     },
