@@ -94,6 +94,8 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/app-menu'
 tags:
   - plugin
   - prod

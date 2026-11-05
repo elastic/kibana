@@ -11,7 +11,7 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -33,7 +33,6 @@ const options: NightshiftAgentTypeOptions = {
   memoryEnabled: true,
   investigationToolsEnabled: true,
   proposalsEnabled: true,
-  telemetryConnectorId: 'telemetry',
 };
 
 const configurationFor = async (
@@ -62,7 +61,7 @@ describe('Nightshift assistant agent type', () => {
     );
   });
 
-  it('shares the investigator configuration except for its instructions', async () => {
+  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', async () => {
     const { instructions, ...assistant } = await configurationFor(getAssistantAgentType(options));
     const { instructions: investigatorInstructions, ...investigator } = await configurationFor(
       getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
@@ -70,9 +69,8 @@ describe('Nightshift assistant agent type', () => {
 
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
-    expect(assistant).toEqual(investigator);
     expect(assistant).toMatchObject({
-      connector_ids: ['telemetry'],
+      connector_ids: [],
       workflow_ids: [
         getNightshiftBoundHookWorkflowId(
           NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -83,6 +81,45 @@ describe('Nightshift assistant agent type', () => {
         getNightshiftBoundHookWorkflowId(NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID, 'default'),
       ],
     });
+    expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+    expect(assistant.workflow_ids).toEqual(investigator.workflow_ids);
+    expect(assistant.post_execution_workflow_ids).toEqual(investigator.post_execution_workflow_ids);
+    expect(assistant.tools?.[0]?.tool_ids).toContain('proposals.create');
+    expect(investigator.tools?.[0]?.tool_ids).not.toContain('proposals.create');
+  });
+
+  it('inherits the investigator saved connectors, deduplicated', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const getInheritedConnectorIds = jest.fn(async () => ['github', 'github', 'pagerduty']);
+    const { baseConfiguration } = getAssistantAgentType({ ...options, getInheritedConnectorIds });
+    if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
+
+    const { connector_ids: connectorIds } = await baseConfiguration({ request, spaceId: 'ops' });
+
+    expect(connectorIds).toEqual(['github', 'pagerduty']);
+    expect(getInheritedConnectorIds).toHaveBeenCalledWith({ request, spaceId: 'ops' });
+  });
+
+  it('keeps no connectors when the inherited connectors cannot be read', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { baseConfiguration } = getAssistantAgentType({
+      ...options,
+      getInheritedConnectorIds: async () => {
+        throw new Error('registry down');
+      },
+      logger,
+    });
+    if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
+
+    const { connector_ids: connectorIds } = await configurationFor({
+      ...getAssistantAgentType(options),
+      baseConfiguration,
+    });
+
+    expect(connectorIds).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to resolve inherited connectors for space "default": registry down'
+    );
   });
 
   it('points to the workspace files instead of embedding their guidance', () => {

@@ -28,7 +28,6 @@ import {
   prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
@@ -115,16 +114,16 @@ const prepareInferredSamplingRoute = createServerRoute({
         runId: z.string().max(MAX_ID_LENGTH).optional(),
         iteration: z.number().int().min(1).optional(),
         sampleSize: z.number().int().min(1).max(100),
-        entityFilteredRatio: z.number().min(0).max(1).optional(),
-        diverseRatio: z.number().min(0).max(1).optional(),
-        maxEntityFilters: z.number().int().min(1).max(50).optional(),
-        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
+        entityFilteredRatio: z.number().min(0).max(1),
+        diverseRatio: z.number().min(0).max(1),
+        maxEntityFilters: z.number().int().min(1).max(50),
+        samplingTimeoutMs: z.number().int().min(1_000).max(240_000),
       }),
     })
   ),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, sourcesClient, tuningConfig, licensing } = scopedClients;
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -138,10 +137,10 @@ const prepareInferredSamplingRoute = createServerRoute({
       runId,
       iteration = 1,
       sampleSize,
-      entityFilteredRatio = tuningConfig.entity_filtered_ratio,
-      diverseRatio = tuningConfig.diverse_ratio,
-      maxEntityFilters = tuningConfig.max_entity_filters,
-      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
+      entityFilteredRatio,
+      diverseRatio,
+      maxEntityFilters,
+      samplingTimeoutMs,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
 
@@ -179,22 +178,24 @@ const identifyInferredFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      connectorId: z.string().max(MAX_ID_LENGTH).optional(),
-      runId: z.string().max(MAX_ID_LENGTH).optional(),
-      iteration: z.number().optional(),
-      documents: inferenceDocumentsSchema,
-      samplingTelemetry: z.object({
-        totalFilters: z.number().int().min(0),
-        filtersCapped: z.boolean(),
-        hasFilteredDocuments: z.boolean(),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        connectorId: z.string().max(MAX_ID_LENGTH).optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
+        iteration: z.number().optional(),
+        documents: inferenceDocumentsSchema,
+        samplingTelemetry: z.object({
+          totalFilters: z.number().int().min(0),
+          filtersCapped: z.boolean(),
+          hasFilteredDocuments: z.boolean(),
+        }),
+        maxExcludedFeaturesInPrompt: z.number().int().min(0).max(50),
+        maxPreviouslyIdentifiedFeatures: z.number().optional(),
       }),
-      maxExcludedFeaturesInPrompt: z.number().optional(),
-      maxPreviouslyIdentifiedFeatures: z.number().optional(),
-    }),
-  }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -206,8 +207,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, sourcesClient, inferenceClient, tuningConfig, licensing } =
-      scopedClients;
+    const { scopedClusterClient, sourcesClient, inferenceClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -221,7 +221,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       iteration,
       documents,
       samplingTelemetry,
-      maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
+      maxExcludedFeaturesInPrompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
@@ -267,7 +267,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         hasFilteredDocuments,
         iteration,
         tuning: {
-          max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
+          maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
@@ -332,29 +332,20 @@ const identifyComputedFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z
-      .object({
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
-        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
-      })
-      .nullable()
-      .optional(),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-    telemetry,
-    maintenanceService,
-  }) => {
+        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000),
+      }),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, sourcesClient, licensing, tuningConfig } = scopedClients;
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -366,18 +357,11 @@ const identifyComputedFeaturesRoute = createServerRoute({
       start = now - MS_PER_DAY,
       end = now,
       runId = uuidv4(),
-      computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
-    } = params.body ?? {};
+      computedFeaturesTimeoutMs,
+    } = params.body;
 
     const { source } = await sourcesClient.get(sourceId);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
-
-    // Enable code_analysis grounding only when the feature flag is on and Agent
-    // Builder is available; otherwise the provider is omitted and the computed
-    // feature is skipped.
-    const codeGroundingEnabled =
-      Boolean(server.agentBuilder?.tools) &&
-      (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
 
     try {
       const { features: computedFeatures, errors } = await identifyComputedFeatures({
@@ -391,9 +375,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
         runId,
         signal: getRequestAbortSignal(request),
         timeoutMs: computedFeaturesTimeoutMs,
-        ...(codeGroundingEnabled
-          ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
-          : {}),
       });
 
       return {
