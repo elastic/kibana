@@ -21,11 +21,7 @@ import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import {
-  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-  LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  LEGACY_KI_SYNC_WORKFLOW_ID,
-} from '../../../common/constants';
+import { LEGACY_KI_SYNC_WORKFLOW_ID } from '../../../common/constants';
 
 /**
  * The shared workflows installed once at the global scope by `install_workflows`. They have no
@@ -69,18 +65,6 @@ export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Pre-per-space continuous onboarding workflows of the default space. Removed at startup and
- * dropped from recorded maintenance state.
- *
- * TODO: remove with the legacy default-space cleanup.
- * https://github.com/elastic/kibana/issues/294271
- */
-export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
-  LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-];
-
-/**
  * Every workflow id that installers may create. Used by the drift test so a
  * new install target cannot land without also joining the maintenance sweep.
  */
@@ -90,6 +74,16 @@ export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 ] as const;
+
+/**
+ * Whether a recorded target id still names a workflow this version installs, as the bare id or as
+ * a per-space `${id}-${spaceId}` document. Targets recorded for the pre-bound workflows (the old
+ * per-space sync, cleanup, continuous onboarding and scheduled documents) are not migrated: they
+ * have no definition any more, so the sweep would only fail on them.
+ */
+export const isInstalledWorkflowDocumentId = (id: string): boolean =>
+  id === LEGACY_KI_SYNC_WORKFLOW_ID ||
+  ALL_INSTALLABLE_WORKFLOW_IDS.some((baseId) => id === baseId || id.startsWith(`${baseId}-`));
 
 export interface MaintenanceWorkflowTarget {
   /** Workflow saved-object document id (matches the persisted `disabledWorkflows[].id`). */

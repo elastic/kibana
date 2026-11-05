@@ -20,6 +20,7 @@ import {
   buildCancelTargets,
   buildDisableTargets,
   GLOBAL_CORE_WORKFLOW_IDS,
+  isInstalledWorkflowDocumentId,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
 
@@ -80,5 +81,16 @@ describe('managed_workflow_targets registry', () => {
     expect(buildCancelTargets([asSpaceId('default')])).toContainEqual(legacySync);
     expect(buildDisableTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
     expect(buildCancelTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
+  });
+
+  it('recognises per-space documents of installed workflows and drops ids of removed ones', () => {
+    expect(
+      isInstalledWorkflowDocumentId(`${NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID}-space-a`)
+    ).toBe(true);
+    expect(isInstalledWorkflowDocumentId(GLOBAL_CORE_WORKFLOW_IDS[0])).toBe(true);
+    expect(isInstalledWorkflowDocumentId('system-streams-ki-sync-space-a')).toBe(false);
+    expect(isInstalledWorkflowDocumentId('system-nightshift-scheduled-detection-space-a')).toBe(
+      false
+    );
   });
 });
