@@ -283,17 +283,34 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       }
       // The SDK dropped its transport: pending requests fail with ConnectionClosed and later
       // requests with "Not connected". Nothing reconnects a pooled client, so drop it.
+      // RequestTimeout leaves the transport open but the session is dead, so drop it too.
       if (current instanceof McpNotConnectedError) {
         return true;
       }
       if (current instanceof McpError) {
-        return current.code === McpErrorCode.ConnectionClosed;
+        return (
+          current.code === McpErrorCode.ConnectionClosed ||
+          current.code === McpErrorCode.RequestTimeout
+        );
       }
       if (current instanceof Error && current.message === SDK_NOT_CONNECTED_MESSAGE) {
         return true;
       }
       if (current instanceof StreamableHTTPError) {
-        return current.code === 401 || current.code === 403 || current.code === 404;
+        return (
+          current.code === 401 ||
+          current.code === 403 ||
+          current.code === 404 ||
+          (current.code !== undefined && current.code >= 500)
+        );
+      }
+      // Connect-phase wrappers. Failed builds are never cached, but callers still use this
+      // predicate to classify a connection failure.
+      if (current instanceof McpConnectionHttpError) {
+        return current.httpStatus >= 500;
+      }
+      if (current instanceof McpConnectionTransportError) {
+        return true;
       }
       const code = getErrorCode(current);
       return code !== undefined && TERMINAL_UNDICI_CODES.has(code);

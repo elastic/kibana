@@ -689,9 +689,16 @@ describe('createMcpClientType', () => {
       [new McpError(McpErrorCode.ConnectionClosed, 'Connection closed'), true],
       [new McpNotConnectedError('kibana-mcp', '1.0.0'), true],
       [new Error('Not connected'), true],
-      [new McpError(McpErrorCode.RequestTimeout, 'Request timed out'), false],
+      [new McpError(McpErrorCode.RequestTimeout, 'Request timed out'), true],
       [new McpError(McpErrorCode.InvalidParams, 'bad params'), false],
-      [new StreamableHTTPError(500, 'boom'), false],
+      [new StreamableHTTPError(500, 'boom'), true],
+      [new StreamableHTTPError(502, 'bad gateway'), true],
+      [new StreamableHTTPError(503, 'unavailable'), true],
+      [new StreamableHTTPError(504, 'gateway timeout'), true],
+      [new StreamableHTTPError(400, 'bad request'), false],
+      [new McpConnectionHttpError(503, new Error('bad gateway')), true],
+      [new McpConnectionHttpError(401, new Error('nope')), false],
+      [new McpConnectionTransportError('UND_ERR_CONNECT_TIMEOUT', new Error('timeout')), true],
       [new Error('boom'), false],
     ])('classifies terminal errors', (error, expected) => {
       expect(createMcpClientType().shouldInvalidateOnError?.(error)).toBe(expected);
