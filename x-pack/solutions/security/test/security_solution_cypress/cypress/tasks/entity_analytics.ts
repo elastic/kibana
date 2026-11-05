@@ -5,28 +5,12 @@
  * 2.0.
  */
 
-import {
-  RISK_ENGINE_STATUS_URL,
-  RISK_ENGINE_PRIVILEGES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
+import { RISK_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { OPEN_RISK_INFORMATION_FLYOUT_BUTTON } from '../screens/entity_analytics';
 
-/**
- * The entity maintainers endpoint is called instead of RISK_ENGINE_STATUS_URL when
- * the `entityAnalyticsEntityStoreV2` experimental feature flag is enabled (default: true
- * on main). Both URLs must be mocked so the risk tables resolve out of loading state
- * regardless of which code path is active.
- */
 const ENTITY_MAINTAINERS_URL = '/internal/security/entity_store/entity_maintainers*';
 
 export const mockRiskEngineEnabled = () => {
-  cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
-    statusCode: 200,
-    body: {
-      risk_engine_status: 'ENABLED',
-    },
-  }).as('riskEngineStatus');
-
   cy.intercept('GET', ENTITY_MAINTAINERS_URL, {
     statusCode: 200,
     body: {

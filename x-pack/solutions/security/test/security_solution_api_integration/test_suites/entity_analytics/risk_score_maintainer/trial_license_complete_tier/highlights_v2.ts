@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // if a stray task manager run wrote to the index after the template was deleted, ES
       // auto-creates it as a plain index. We explicitly delete that too.
       await entityStoreUtils.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
       await es.indices
         .delete({ index: RISK_SCORE_DATA_STREAM, ignore_unavailable: true })
         .catch(() => {});
@@ -347,7 +347,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     after(async () => {
       await entityStoreUtils.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
       await es.ml.deleteJob({ job_id: ML_JOB_ID, wait_for_completion: true }).catch(() => {});
       await deleteAllDocuments(es, VULNERABILITIES_LATEST_INDEX).catch(() => {});
       await es.indices
