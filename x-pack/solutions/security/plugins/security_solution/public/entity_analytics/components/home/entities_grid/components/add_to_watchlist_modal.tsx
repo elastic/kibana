@@ -264,11 +264,15 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
 
   const columns = useMemo<Array<EuiBasicTableColumn<WatchlistTableItemType>>>(
     () => [
-      ...buildWatchlistsDataColumns().map((column) => ({
-        ...column,
-        sortable: true,
-        ...COLUMN_OVERRIDES[(column as { field: string }).field],
-      })),
+      // Every data column is a field column; the overrides only set width, truncation and the like.
+      ...buildWatchlistsDataColumns().map(
+        (column) =>
+          ({
+            ...column,
+            sortable: true,
+            ...COLUMN_OVERRIDES[(column as { field: string }).field],
+          } as EuiBasicTableColumn<WatchlistTableItemType>)
+      ),
       {
         align: RIGHT_ALIGNMENT,
         width: '7em',
