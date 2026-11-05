@@ -40,10 +40,10 @@ export const getTruncationTotalUnknownTitle = ({ returned }: { returned: number 
   });
 
 export const TRUNCATION_BODY = i18n.translate(
-  'xpack.entityInventoryApp.entityTable.truncation.body',
+  'xpack.entityInventoryApp.entityTable.truncation.narrowTimeRangeBody',
   {
     defaultMessage:
-      'Only the returned entities are listed, and sorting covers only them. Narrow the time range or filter down to see the rest.',
+      'Only the returned entities are listed, and sorting covers only them. Narrow the time range to see the rest.',
   }
 );
 
