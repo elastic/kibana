@@ -287,7 +287,7 @@ export class WorkflowCrudService {
         ...(options?.ifSeqNo != null && options?.ifPrimaryTerm != null
           ? { if_seq_no: options.ifSeqNo, if_primary_term: options.ifPrimaryTerm }
           : {}),
-        refresh: true,
+        refresh: options?.refresh ?? true,
       });
 
       if (response._seq_no == null || response._primary_term == null) {
@@ -399,10 +399,11 @@ export class WorkflowCrudService {
     id: string,
     spaceId: string,
     document: WorkflowProperties,
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    refresh?: IndexWorkflowDocumentOptions['refresh']
   ): Promise<WorkflowProperties> {
     return this.runOccWrite(id, async () => {
-      const { document: created } = await this.getIndexOccWriter({ request }).create({
+      const { document: created } = await this.getIndexOccWriter({ request, refresh }).create({
         id,
         document,
       });

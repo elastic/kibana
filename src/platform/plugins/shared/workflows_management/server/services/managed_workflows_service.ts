@@ -42,6 +42,9 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
 const ORPHAN_DELETE_CONCURRENCY = 10;
+// Not `true`: a forced refresh holds an Elasticsearch `system_write` thread until the shard
+// refreshes, and Kibana sessions and saved objects share that pool, so install bursts stall them.
+const MANAGED_INSTALL_REFRESH = 'wait_for';
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -263,7 +266,8 @@ export class ManagedWorkflowsService {
         workflowDocumentId,
         spaceId,
         documentWithVersion,
-        request
+        request,
+        MANAGED_INSTALL_REFRESH
       );
       await this.deps.crudService.logWorkflowChangesAfterWrite({
         workflows: [{ id: workflowDocumentId, document: savedDocument }],
@@ -342,6 +346,7 @@ export class ManagedWorkflowsService {
           : {}),
         ifSeqNo: existingDocument.seqNo,
         ifPrimaryTerm: existingDocument.primaryTerm,
+        refresh: MANAGED_INSTALL_REFRESH,
       }
     );
     if (savedDocument.version !== existing.version) {

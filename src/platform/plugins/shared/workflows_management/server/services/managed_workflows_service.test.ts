@@ -633,7 +633,8 @@ describe('ManagedWorkflowsService', () => {
         WORKFLOW_ID,
         SPACE_ID,
         expect.any(Object),
-        request
+        request,
+        'wait_for'
       );
       expect(audit.logWorkflowCreated).toHaveBeenCalledWith(request, expect.any(Object));
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
@@ -679,7 +680,8 @@ describe('ManagedWorkflowsService', () => {
         WORKFLOW_ID,
         SPACE_ID,
         expect.any(Object),
-        undefined
+        undefined,
+        'wait_for'
       );
       const indexedDocument = getIndexedDocument(crudService);
       expect(indexedDocument).toEqual(
@@ -746,7 +748,8 @@ describe('ManagedWorkflowsService', () => {
         WORKFLOW_ID,
         SPACE_ID,
         expect.objectContaining({ version: INITIAL_WORKFLOW_VERSION }),
-        undefined
+        undefined,
+        'wait_for'
       );
     });
 
@@ -778,6 +781,7 @@ describe('ManagedWorkflowsService', () => {
           document: expect.objectContaining({ version: 6 }),
           ifSeqNo: 7,
           ifPrimaryTerm: 13,
+          refresh: 'wait_for',
         })
       );
 
@@ -1757,7 +1761,8 @@ describe('ManagedWorkflowsService', () => {
           WORKFLOW_ID,
           SPACE_ID,
           expect.any(Object),
-          installer
+          installer,
+          'wait_for'
         );
         const v1Document = crudService.createWorkflowDocument.mock.calls[0][2];
         crudService.createWorkflowDocument.mockClear();

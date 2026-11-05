@@ -296,6 +296,35 @@ describe('WorkflowCrudService', () => {
     expect(client.search).not.toHaveBeenCalled();
   });
 
+  it('waits for the next refresh when a create asks for it', async () => {
+    const { deps, client } = makeDeps();
+    const service = new WorkflowCrudService(deps);
+
+    await service.createWorkflowDocument('wf-1', 'default', makeSource(), undefined, 'wait_for');
+
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-1', op_type: 'create', refresh: 'wait_for' })
+    );
+  });
+
+  it('waits for the next refresh when a conditional write asks for it', async () => {
+    const { deps, client } = makeDeps();
+    const service = new WorkflowCrudService(deps);
+    const document = makeSource();
+
+    await service.writeWorkflowDocumentWithOcc('wf-1', 'default', {
+      document,
+      previousDocument: document,
+      ifSeqNo: 5,
+      ifPrimaryTerm: 1,
+      refresh: 'wait_for',
+    });
+
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({ if_seq_no: 5, if_primary_term: 1, refresh: 'wait_for' })
+    );
+  });
+
   describe('getWorkflowsByIds', () => {
     it.each([
       { timed_out: true, failed: 0 },

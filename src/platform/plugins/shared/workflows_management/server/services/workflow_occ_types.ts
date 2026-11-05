@@ -41,6 +41,8 @@ export interface IndexWorkflowDocumentOptions {
   create?: boolean;
   ifPrimaryTerm?: number;
   ifSeqNo?: number;
+  /** Defaults to `true`. Never `false`: callers search for the workflow right after writing it. */
+  refresh?: true | 'wait_for';
 }
 
 export interface WriteWorkflowDocumentWithOccParams {
@@ -50,6 +52,7 @@ export interface WriteWorkflowDocumentWithOccParams {
   document: WorkflowProperties;
   ifSeqNo: number;
   ifPrimaryTerm: number;
+  refresh?: IndexWorkflowDocumentOptions['refresh'];
 }
 
 export interface ReadModifyWriteWorkflowDocumentParams {
