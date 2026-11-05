@@ -679,17 +679,26 @@ const severityRank = (conversation: ConversationSummary): number => {
 const optionalText = (value: MetadataFieldValue | undefined): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
+const optionalTextList = (value: MetadataFieldValue | undefined): string[] | undefined => {
+  const items = Array.isArray(value)
+    ? value.filter((item) => typeof item === 'string' && item.length > 0)
+    : [];
+  return items.length > 0 ? items : undefined;
+};
+
 export const toMetadata = (
   metadata: Record<string, MetadataFieldValue> | undefined
 ): InvestigationMetadata => {
   const severity = metadata?.severity;
   const summary = optionalText(metadata?.summary);
   const verdict = optionalText(metadata?.verdict);
+  const assignees = optionalTextList(metadata?.assignees);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
     ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
+    ...(assignees !== undefined && { assignees }),
   };
 };
 
