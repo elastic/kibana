@@ -58,6 +58,10 @@ The mouse wheel scrolls the body from anywhere in the header. Scrolling over the
 
 The behavior is always on and needs no configuration. It turns itself off when the body does not overflow by more than the collapse budget plus the 4px expansion threshold. The budget is the height of the collapsible content, the expanded title row, and the expanded spacer, so short flyouts are unaffected. A header with no secondary content still collapses, because the title row and spacer shrink on their own.
 
+### Open popovers keep the header expanded
+
+The header does not collapse while a control in the collapsible region has `aria-expanded="true"`, such as an info block value whose popover is open. The popover panel renders in a portal, outside the region, so collapsing would leave it floating over a hidden trigger that focus could not return to. EUI sets `aria-expanded` on a button-like `EuiPopover` trigger, so EUI popovers get this without extra work. A custom trigger needs to set `aria-expanded` itself. Once the popover closes, the next scroll collapses the header as usual. An expanded control does not stop an already collapsed header from expanding.
+
 ### Starting collapsed
 
 Set `collapsed` on the header to render the compact row immediately, independent of scroll position:
