@@ -45,6 +45,8 @@ export const startMouseInteraction = ({
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
   e.stopPropagation();
+  // Keep the handle from taking focus, or a later key press (such as Shift) shows its focus ring.
+  e.preventDefault();
   startAutoScroll(scrollContainer);
 
   const handleMouseMove = (ev: UserMouseEvent) => {
