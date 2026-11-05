@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -65,19 +65,26 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_fly
 const useFetch = useFetchEventById as jest.MockedFunction<typeof useFetchEventById>;
 const result = (value: object) => value as ReturnType<typeof useFetchEventById>;
 
-const registration = () =>
+const registration = (ensureEbtEvents: () => Promise<void> = () => Promise.resolve()) =>
   createLazyEventFlyout({
     coreStart: {} as CoreStart,
     pluginsStart: {} as NightshiftStartDependencies,
     focusedSignificantEventService: {} as FocusedSignificantEventService,
+    ensureEbtEvents,
   });
 
-const renderFlyout = (data: Record<string, unknown> | undefined, onClose = jest.fn()) => {
-  const { Component } = registration();
+const renderFlyout = (
+  data: Record<string, unknown> | undefined,
+  onClose = jest.fn(),
+  ensureEbtEvents?: () => Promise<void>
+) => {
+  const { Component } = registration(ensureEbtEvents);
   render(
     <EuiProvider>
       <I18nProvider>
-        <Component alertId="episode-1" snapshot={data ? { data } : undefined} onClose={onClose} />
+        <React.Suspense fallback={null}>
+          <Component alertId="episode-1" snapshot={data ? { data } : undefined} onClose={onClose} />
+        </React.Suspense>
       </I18nProvider>
     </EuiProvider>
   );
@@ -111,7 +118,7 @@ describe('createLazyEventFlyout', () => {
     expect(canOpen?.(undefined)).toBe(false);
   });
 
-  it('shows the event as an overlay at the alert flyout width, with focus inside it for Esc', async () => {
+  it('shows the event as an overlay at the alert flyout width', async () => {
     useFetch.mockReturnValue(
       result({ data: { title: 'Checkout errors' } as SignificantEventResponse })
     );
@@ -122,19 +129,17 @@ describe('createLazyEventFlyout', () => {
     expect(flyout).toHaveAttribute('data-type', 'overlay');
     expect(flyout).toHaveAttribute('data-size', '592');
     expect(useFetch).toHaveBeenCalledWith('event-1');
-    await waitFor(() => expect(flyout).toHaveFocus());
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('opens at once with a loading state while the event loads, with focus inside it', async () => {
+  it('opens with a loading state while the event loads', async () => {
     useFetch.mockReturnValue(result({ data: undefined, isError: false }));
     const onClose = renderFlyout({ event_id: 'event-1' });
 
-    const flyout = screen.getByTestId('nightshiftEventAlertFlyoutStatus');
+    const flyout = await screen.findByTestId('nightshiftEventAlertFlyoutStatus');
     expect(flyout).toHaveAttribute('data-type', 'overlay');
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftEventAlertFlyoutError')).not.toBeInTheDocument();
-    await waitFor(() => expect(flyout).toHaveFocus());
     expect(onClose).not.toHaveBeenCalled();
   });
 
@@ -142,15 +147,33 @@ describe('createLazyEventFlyout', () => {
     ['there is no event id', undefined, { data: undefined, isError: false }],
     ['the event does not exist', { event_id: 'event-1' }, { data: null, isError: false }],
     ['the lookup fails', { event_id: 'event-1' }, { data: undefined, isError: true }],
-  ])('says so in the flyout when %s, and stays open until closed', (_case, data, query) => {
+  ])('says so in the flyout when %s, and stays open until closed', async (_case, data, query) => {
     useFetch.mockReturnValue(result(query));
     const onClose = renderFlyout(data);
 
-    expect(screen.getByTestId('nightshiftEventAlertFlyoutError')).toBeInTheDocument();
+    expect(await screen.findByTestId('nightshiftEventAlertFlyoutError')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftEventFlyout')).not.toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByTestId('flyoutClose'));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the loading state until the analytics event types are registered', async () => {
+    useFetch.mockReturnValue(
+      result({ data: { title: 'Checkout errors' } as SignificantEventResponse })
+    );
+    let register: () => void = () => undefined;
+    renderFlyout(
+      { event_id: 'event-1' },
+      jest.fn(),
+      () => new Promise<void>((resolve) => (register = resolve))
+    );
+
+    expect(await screen.findByTestId('nightshiftEventAlertFlyoutStatus')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftEventFlyout')).not.toBeInTheDocument();
+
+    register();
+    expect(await screen.findByTestId('nightshiftEventFlyout')).toHaveTextContent('Checkout errors');
   });
 });

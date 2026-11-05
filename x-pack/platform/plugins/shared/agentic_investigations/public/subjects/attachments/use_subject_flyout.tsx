@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isModifiedClick } from './subject_link';
 import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
@@ -44,15 +44,7 @@ export const useSubjectFlyout = (
     (onlyRegistered
       ? services.getAlertFlyout?.(source, subject.snapshot) !== undefined
       : canOpenSubjectFlyout(services, source, subject.snapshot));
-  const opener = useRef<HTMLElement | null>(null);
-
-  const close = useCallback(() => {
-    setIsOpen(false);
-    // The flyout does not take focus from the page, so hand it back to what opened it.
-    const element = opener.current;
-    opener.current = null;
-    window.requestAnimationFrame(() => element?.focus());
-  }, []);
+  const close = useCallback(() => setIsOpen(false), []);
 
   const onClick = useCallback(
     (event: React.MouseEvent) => {
@@ -60,7 +52,6 @@ export const useSubjectFlyout = (
         return;
       }
       event.preventDefault();
-      opener.current = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
       setIsOpen(true);
     },
     [opensFlyout]

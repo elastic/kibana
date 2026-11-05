@@ -16,10 +16,8 @@ import {
 import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
-import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftSettingsLocatorDefinition } from '../common/locators';
-import { createLazyEventFlyout } from './components/entities/significant_event/lazy_event_flyout';
 import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type {
   NightshiftPublicSetup,
@@ -41,7 +39,8 @@ export class NightshiftPlugin
   private readonly focusedSignificantEventService = new FocusedSignificantEventService();
   private servicesSubscription?: Subscription;
   private stopped = false;
-  private ebtEventsRegistered = false;
+  private ensureEbtEvents: () => Promise<void> = () => Promise.resolve();
+  private ebtEventsRegistration?: Promise<void>;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -50,6 +49,16 @@ export class NightshiftPlugin
     pluginsSetup: NightshiftSetupDependencies
   ): NightshiftPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
+    // Registered when first needed rather than in setup, so the event schemas stay out of the page
+    // load bundle. One promise, because the app and the event flyout in an investigation both
+    // report events and must not do so before registration.
+    const ensureEbtEvents = (): Promise<void> => {
+      this.ebtEventsRegistration ??= import('./common/ebt_events').then(
+        ({ registerNightshiftEbtEvents }) => registerNightshiftEbtEvents(coreSetup.analytics)
+      );
+      return this.ebtEventsRegistration;
+    };
+    this.ensureEbtEvents = ensureEbtEvents;
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
 
@@ -108,19 +117,12 @@ export class NightshiftPlugin
       ],
       updater$: this.appUpdater$,
       mount: async (appMountParameters: AppMountParameters) => {
-        // Registered here rather than in setup so the event schemas stay out of the page load
-        // bundle: only the app reports them, and it cannot render before this resolves.
-        const [[coreStart, pluginsStart], { renderApp }, { registerNightshiftEbtEvents }] =
-          await Promise.all([
-            startServicesPromise,
-            import('./application/render_app'),
-            import('./common/ebt_events'),
-          ]);
-
-        if (!this.ebtEventsRegistered) {
-          this.ebtEventsRegistered = true;
-          registerNightshiftEbtEvents(coreSetup.analytics);
-        }
+        // The app cannot render before the event types are registered.
+        const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
+          startServicesPromise,
+          import('./application/render_app'),
+          ensureEbtEvents(),
+        ]);
 
         return renderApp({
           appMountParameters,
@@ -137,14 +139,7 @@ export class NightshiftPlugin
 
   start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
     this.stopped = false;
-    pluginsStart.agenticInvestigations?.registerAlertFlyout(
-      SIGNIFICANT_EVENTS_ALERT_SOURCE,
-      createLazyEventFlyout({
-        coreStart,
-        pluginsStart,
-        focusedSignificantEventService: this.focusedSignificantEventService,
-      })
-    );
+    this.registerSignificantEventFlyout(coreStart, pluginsStart);
     void import('./start_services')
       .then(({ startNightshiftServices }) => {
         if (this.stopped) {
@@ -163,6 +158,38 @@ export class NightshiftPlugin
       });
 
     return {};
+  }
+
+  /**
+   * Loaded with `import()` because the plugin entry is on every page's load path and the flyout is
+   * rarely opened; an investigation reads the registration when it renders, so a short delay is
+   * harmless.
+   */
+  private registerSignificantEventFlyout(
+    coreStart: CoreStart,
+    pluginsStart: NightshiftStartDependencies
+  ) {
+    const { agenticInvestigations } = pluginsStart;
+    if (!agenticInvestigations) {
+      return;
+    }
+    import('./components/entities/significant_event/lazy_event_flyout')
+      .then(({ registerEventFlyout }) => {
+        if (!this.stopped) {
+          registerEventFlyout({
+            agenticInvestigations,
+            coreStart,
+            pluginsStart,
+            focusedSignificantEventService: this.focusedSignificantEventService,
+            ensureEbtEvents: this.ensureEbtEvents,
+          });
+        }
+      })
+      .catch((error) => {
+        this.context.logger
+          .get()
+          .error(`Failed to register the significant event flyout: ${error}`);
+      });
   }
 
   stop() {

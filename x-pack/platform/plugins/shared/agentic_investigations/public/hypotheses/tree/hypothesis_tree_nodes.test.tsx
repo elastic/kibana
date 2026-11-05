@@ -39,7 +39,8 @@ const flags = { isSelected: false, isDimmed: false, isRunning: false, selectedAc
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
   actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() },
-  services: SubjectServices = {}
+  services: SubjectServices = {},
+  onParentClick?: () => void
 ) => {
   render(
     <EuiProvider>
@@ -47,9 +48,12 @@ const renderNode = (
         <ReactFlowProvider>
           <KibanaContextProvider services={services}>
             <HypothesisTreeActionsContext.Provider value={actions}>
-              <HypothesisTreeNode
-                {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
-              />
+              {/* React Flow selects a node from a click that bubbles up to it. */}
+              <div role="presentation" onClick={onParentClick}>
+                <HypothesisTreeNode
+                  {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
+                />
+              </div>
             </HypothesisTreeActionsContext.Provider>
           </KibanaContextProvider>
         </ReactFlowProvider>
@@ -151,13 +155,16 @@ describe('HypothesisTreeNode', () => {
       expect(actions.onSelectNode).not.toHaveBeenCalled();
     });
 
-    it('does not select the node when the flyout is clicked', async () => {
-      const actions = renderNode(trigger, undefined, { getAlertFlyout: () => () => null });
+    it('keeps a click inside the flyout from reaching the node, as React bubbles it through the portal', async () => {
+      const onParentClick = jest.fn();
+      renderNode(trigger, undefined, { getAlertFlyout: () => () => null }, onParentClick);
 
       fireEvent.click(screen.getByTestId('investigationHypothesisTreeTriggerLink'));
-      fireEvent.click(await screen.findByTestId('subjectFlyoutStub'));
+      const flyout = await screen.findByTestId('subjectFlyoutStub');
+      onParentClick.mockClear();
+      fireEvent.click(flyout);
 
-      expect(actions.onSelectNode).not.toHaveBeenCalled();
+      expect(onParentClick).not.toHaveBeenCalled();
     });
 
     it('keeps following the link for a new-tab click', () => {

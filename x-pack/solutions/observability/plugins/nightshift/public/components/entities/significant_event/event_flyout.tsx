@@ -24,7 +24,10 @@ import { EventTimeline } from './event_timeline';
 import { TruncatableSummary } from '../../ui/truncatable_summary';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
 import { useFlyoutShareUrlCustomAction } from '../../ui/flyout_share_url_button';
-import { buildNightshiftEventFlyoutShareUrl } from '../../../common/url_params';
+import {
+  buildNightshiftEventFlyoutShareUrl,
+  buildNightshiftEventsPageUrl,
+} from '../../../common/url_params';
 import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
@@ -232,8 +235,13 @@ export function EventFlyout({
   }, []);
 
   const getShareUrl = useCallback(
-    () => buildNightshiftEventFlyoutShareUrl(event.event_id),
-    [event.event_id]
+    () =>
+      // Outside Nightshift the page behind the flyout cannot reopen the event, so the link goes to
+      // the events page, which can.
+      type === 'overlay'
+        ? buildNightshiftEventsPageUrl(application.getUrlForApp, event.event_id)
+        : buildNightshiftEventFlyoutShareUrl(event.event_id),
+    [application.getUrlForApp, event.event_id, type]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
   const flyoutMenuProps = useMemo(
