@@ -44,9 +44,6 @@ jest.mock('./time_range', () => ({
         : { ...dashboardData, time_range: { from: 'now-7d', to: 'now' } }
   ),
 }));
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(),
-}));
 
 const mockRetrieveLatestVersion = retrieveLatestVersion as jest.MockedFunction<
   typeof retrieveLatestVersion
