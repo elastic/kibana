@@ -149,7 +149,7 @@ export const CustomCanvas = ({
 };
 
 export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
-  const { plugins } = useNotebookServices();
+  const { core, plugins } = useNotebookServices();
   const { store, scheduler } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const [isEditing, setIsEditing] = useState(false);
@@ -157,31 +157,59 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
   const panelChat = plugins.customContent?.panelChat;
   const { id } = cell;
 
-  /** Applies the edited fields; a changed own query is run, since editing a query alone runs nothing. */
+  /** Applies the edited fields; switching source re-runs the cell, but editing its own query alone does not. */
   const applyDraft = useCallback(
     (draft: Partial<CustomCellDraft>) => {
       const current = store.cells$.getValue()[id];
       if (current?.type !== 'custom') return;
       const next = { ...current, ...draft };
       store.updateCell(id, () => next);
+      const currentQuery = getOwnQuery(current);
       const nextQuery = getOwnQuery(next);
-      if (nextQuery !== undefined && nextQuery !== getOwnQuery(current)) {
+      if (currentQuery !== undefined && nextQuery !== undefined && nextQuery !== currentQuery) {
         void scheduler.runCell(id);
       }
     },
     [store, scheduler, id]
   );
 
-  // A query the agent proposes only applies to a cell with its own; a source cell's is left alone.
+  // The source cell may feed other cells, so a query the agent proposes for it moves to the panel instead.
   useEffect(
     () =>
       panelChat?.watch(id, ({ template, esqlQuery }) => {
         const current = store.cells$.getValue()[id];
         if (current?.type !== 'custom') return;
-        const takesQuery = getOwnQuery(current) !== undefined && esqlQuery !== undefined;
-        applyDraft(takesQuery ? { template, query: esqlQuery } : { template });
+        if (esqlQuery === undefined) {
+          applyDraft({ template });
+          return;
+        }
+        if (getOwnQuery(current) !== undefined) {
+          applyDraft({ template, query: esqlQuery });
+          return;
+        }
+        const source = current.sourceCell ? store.cells$.getValue()[current.sourceCell] : undefined;
+        if (source?.type === 'esql' && source.query === esqlQuery) {
+          applyDraft({ template });
+          return;
+        }
+        applyDraft({ template, dataSource: 'query', query: esqlQuery });
+        core.notifications.toasts.addInfo({
+          title: i18n.translate('xpack.notebook.customCell.switchedToOwnQuery.title', {
+            defaultMessage: '{panel} now uses its own query',
+            values: { panel: getCellDisplayName(current) },
+          }),
+          text: source
+            ? i18n.translate('xpack.notebook.customCell.switchedToOwnQuery.text', {
+                defaultMessage:
+                  'The agent changed the query, so the panel no longer reads from {source}, which is unchanged. To switch back, edit the panel and pick {source} as its source.',
+                values: { source: getCellDisplayName(source) },
+              })
+            : i18n.translate('xpack.notebook.customCell.switchedToOwnQuery.textNoSource', {
+                defaultMessage: 'The agent wrote an ES|QL query for the panel.',
+              }),
+        });
       }),
-    [panelChat, id, store, applyDraft]
+    [panelChat, id, store, applyDraft, core.notifications.toasts]
   );
 
   const closeEditor = useCallback(() => {
