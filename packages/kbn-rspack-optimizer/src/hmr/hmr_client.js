@@ -17,7 +17,7 @@ var lastErrors = null;
 
 function upToDate(hash) {
   if (hash) lastHash = hash;
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line @kbn/compat/eslint-camelcase
   return lastHash === __webpack_hash__;
 }
 
