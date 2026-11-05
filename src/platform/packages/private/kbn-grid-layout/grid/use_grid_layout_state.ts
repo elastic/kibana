@@ -102,6 +102,7 @@ export const useGridLayoutState = ({
           'shiftSnapSize',
           'showResizeGauge',
           'resizeGaugeScale',
+          'lockActivePanelToGrid',
         ])
       )
     )

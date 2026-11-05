@@ -26,7 +26,6 @@ import {
   EuiTitle,
   EuiToolTip,
   euiShadow,
-  transparentize,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -365,7 +364,8 @@ const useIsShiftHeld = (enabled: boolean): boolean => {
 };
 
 /**
- * Styles for the grid engine's drag preview, resize handle and drop target, matching Dashboard.
+ * Styles for the grid engine's resize handle and drop target, matching Dashboard. Dragged panels
+ * stay locked to the grid, so there is no separate drop preview to style.
  * `dotStep` is how many engine cells apart the drop target's dots are, or undefined for none, and
  * `inset` matches the space panels keep clear around themselves.
  */
@@ -391,12 +391,6 @@ const getGridStyles = (
     &:has(.kbnGridPanel--active) {
       min-height: var(${GRID_FILL_HEIGHT_VAR}, auto);
       ${dotStep !== undefined && dots}
-    }
-
-    .kbnGridPanel--dragPreview {
-      margin: ${inset}px;
-      border-radius: ${euiTheme.border.radius.small};
-      background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
     }
 
     .kbnGridPanel--resizeHandle:after {
@@ -446,6 +440,7 @@ const AppGrid = ({
       shiftSnapSize: snapToGrid ? undefined : scale,
       showResizeGauge: snapToGrid || isShiftHeld,
       resizeGaugeScale: scale,
+      lockActivePanelToGrid: true,
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement, isShiftHeld]
   );

@@ -40,6 +40,11 @@ export interface GridSettings {
   showResizeGauge?: boolean;
   /** How many columns and rows make up one unit in the resize gauge. Defaults to 1. */
   resizeGaugeScale?: number;
+  /**
+   * When true, the panel being dragged or resized jumps between the cells it will land on instead
+   * of following the pointer. Defaults to false.
+   */
+  lockActivePanelToGrid?: boolean;
 }
 
 /** The grid settings that change how a layout is resolved. */

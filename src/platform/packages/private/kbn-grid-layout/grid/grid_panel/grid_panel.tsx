@@ -82,16 +82,33 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
         if (!ref) return;
 
+        const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+        const lockToGrid = () => {
+          ref.style.position = '';
+          ref.style.left = ``;
+          ref.style.top = ``;
+          ref.style.width = ``;
+          // setting the height is necessary for mobile mode
+          ref.style.height = `calc(1px * (${currentPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
+
+          ref.style.gridColumnStart = `${currentPanel.column + 1}`;
+          ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
+          ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
+          ref.style.gridRowEnd = `span ${currentPanel.height}`;
+        };
+
         if (isPanelActive) {
           // allow click events through before triggering active status
           ref.classList.add('kbnGridPanel--active');
 
           // if the current panel is active, give it fixed positioning depending on the interaction event
           const { position: draggingPosition } = activePanel;
-          const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
           ref.style.zIndex = `${euiTheme.levels.modal}`;
-          if (activePanel.type === 'resize') {
+          if (runtimeSettings.lockActivePanelToGrid) {
+            // the panel moves between the cells it will land on instead of following the pointer
+            lockToGrid();
+          } else if (activePanel.type === 'resize') {
             // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
             ref.style.width = `${Math.max(
               draggingPosition.right - draggingPosition.left,
@@ -123,18 +140,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           ref.style.zIndex = `auto`;
 
           // if the panel is not being dragged and/or resized, undo any fixed position styles
-          ref.style.position = '';
-          ref.style.left = ``;
-          ref.style.top = ``;
-          ref.style.width = ``;
-          // setting the height is necessary for mobile mode
-          ref.style.height = `calc(1px * (${currentPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
-
           // and render the panel locked to the grid
-          ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-          ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
-          ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
-          ref.style.gridRowEnd = `span ${currentPanel.height}`;
+          lockToGrid();
         }
       });
 
