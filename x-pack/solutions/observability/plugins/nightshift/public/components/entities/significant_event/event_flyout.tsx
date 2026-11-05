@@ -154,7 +154,7 @@ export function EventFlyout({
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
-  const hasStagedOverlayEvent = useRef(false);
+  const stagedOverlayEventId = useRef<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
     onTriggered: () => {
@@ -198,8 +198,9 @@ export function EventFlyout({
       focusedSignificantEventService.setFocusedEvent(event);
     }
     return () => {
-      if (type !== 'overlay' || hasStagedOverlayEvent.current) {
+      if (type !== 'overlay' || stagedOverlayEventId.current === event.event_id) {
         focusedSignificantEventService.clearFocusedEvent(event.event_id);
+        stagedOverlayEventId.current = undefined;
       }
     };
   }, [event, focusedSignificantEventService, type]);
@@ -256,7 +257,7 @@ export function EventFlyout({
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
     // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
     focusedSignificantEventService.setFocusedEvent(event);
-    hasStagedOverlayEvent.current = type === 'overlay';
+    stagedOverlayEventId.current = type === 'overlay' ? event.event_id : undefined;
   }, [agentBuilder, event, focusedSignificantEventService, type]);
   const openInvestigationChat = useCallback(() => {
     if (conversationId) {
