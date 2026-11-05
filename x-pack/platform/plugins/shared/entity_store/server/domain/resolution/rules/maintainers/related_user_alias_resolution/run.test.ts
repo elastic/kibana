@@ -343,8 +343,27 @@ describe('runRelatedUserAliasResolution', () => {
     );
   });
 
-  it('counts a value whose candidate search hits the size cap', async () => {
+  it('does not count a value with exactly as many candidates as the size cap', async () => {
     const candidates = Array.from({ length: 100 }, (_, index) =>
+      createCandidate(`user:ad-${index}`)
+    );
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(createSearchResponse(candidates) as never);
+
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
+
+    expect(esClient.search).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ size: 101 }),
+      expect.anything()
+    );
+    expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, truncatedValues: 0 });
+  });
+
+  it('counts a value whose candidate search goes over the size cap', async () => {
+    const candidates = Array.from({ length: 101 }, (_, index) =>
       createCandidate(`user:ad-${index}`)
     );
     esClient.search
