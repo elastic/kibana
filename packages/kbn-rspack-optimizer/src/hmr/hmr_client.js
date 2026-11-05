@@ -17,7 +17,7 @@ var lastErrors = null;
 
 function upToDate(hash) {
   if (hash) lastHash = hash;
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line @kbn/compat/eslint-camelcase
   return lastHash === __webpack_hash__;
 }
 
@@ -360,9 +360,10 @@ if (window.__kbnHmrActive__ && module.hot) {
   }
 
   function connect() {
-    // TODO: as a follow up to support docker or vm development this should use window.location.hostname
-    // plus making the server bind address configurable via KBN_HMR_HOST env var
-    source = new EventSource('http://localhost:' + __KBN_HMR_PORT__ + '/');
+    // The host serving Kibana, not a hardcoded localhost, so HMR also works when the browser
+    // reaches the dev server over a LAN, VPN or VM address. The server binds to loopback unless
+    // KBN_HMR_HOST says otherwise.
+    source = new EventSource('http://' + window.location.hostname + ':' + __KBN_HMR_PORT__ + '/');
 
     source.onmessage = function (event) {
       reconnectDelay = RECONNECT_INITIAL;

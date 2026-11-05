@@ -325,6 +325,8 @@ const applySort = (
   switch (sortField) {
     case 'created_at':
       return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'updated_at':
+      return query.sort(['@timestamp', direction], ['created_at', 'DESC'], ['_id', 'ASC']);
     case 'severity':
       return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
         'severity'

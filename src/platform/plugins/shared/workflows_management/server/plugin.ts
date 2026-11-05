@@ -106,7 +106,7 @@ export class WorkflowsPlugin
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger, api)
     );
     const availabilityTracker = createWorkflowsAvailabilityTracker(workflowsService, this.config);
     this.availabilityTracker = availabilityTracker;
