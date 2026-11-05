@@ -24,6 +24,7 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
   closeFlyout,
   getExportJson,
   isByReference,
+  panelCount = 1,
   sanitizeState,
   titleId,
 }: {
@@ -31,7 +32,9 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
   objectType: string;
   closeFlyout: () => void;
   getExportJson: (forceExportByValue?: boolean) => State;
+  /** Whether at least one of the exported panels is linked to the library */
   isByReference: boolean;
+  panelCount?: number;
   sanitizeState: (state: State) => Promise<{
     data: PreparedState | undefined;
     warnings: NonNullable<DashboardSanitizeResponseBody['warnings']>;
@@ -85,8 +88,9 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
             <p>
               <FormattedMessage
                 id="dashboard.exportJson.importHint"
-                defaultMessage="To add this panel to another dashboard, copy this JSON and paste it in {addLabel} > {fromJsonLabel}."
+                defaultMessage="To add {panelCount, plural, one {this panel} other {these panels}} to another dashboard, copy this JSON and paste it in {addLabel} > {fromJsonLabel}."
                 values={{
+                  panelCount,
                   addLabel: (
                     <strong>
                       {i18n.translate('dashboard.exportJson.importHint.addLabel', {
@@ -114,13 +118,23 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
                   defaultMessage: 'Linked to library',
                 })}
                 text={
-                  <FormattedMessage
-                    id="dashboard.exportJson.showFullConfigCallout"
-                    defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
-                    values={{
-                      buttonLabel: <i>{showFullConfigurationLabel}</i>,
-                    }}
-                  />
+                  panelCount > 1 ? (
+                    <FormattedMessage
+                      id="dashboard.exportJson.showFullConfigCalloutForPanels"
+                      defaultMessage="Some of these panels are linked to the library, so this dashboard stores only references to them. Select {buttonLabel} to see their complete definitions."
+                      values={{
+                        buttonLabel: <i>{showFullConfigurationLabel}</i>,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="dashboard.exportJson.showFullConfigCallout"
+                      defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
+                      values={{
+                        buttonLabel: <i>{showFullConfigurationLabel}</i>,
+                      }}
+                    />
+                  )
                 }
               />
             </>

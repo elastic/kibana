@@ -24,6 +24,13 @@ export interface DashboardLayoutPanel {
   type: DashboardPanel['type'];
 }
 
+/** A panel to add as part of a group; its grid is relative to the other panels of the group. */
+export interface DashboardPanelToAdd {
+  type: DashboardPanel['type'];
+  serializedState: object;
+  grid: DashboardPanel['grid'];
+}
+
 export const isDashboardLayoutPanel = (panel: unknown): panel is DashboardLayoutPanel =>
   Boolean((panel as DashboardLayoutPanel).type) && Boolean((panel as DashboardLayoutPanel).grid);
 

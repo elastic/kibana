@@ -208,14 +208,19 @@ describe('usePanelSelectionGestures', () => {
       expect(getSelection()).toEqual([]);
     });
 
-    it('keeps the selection on clicks inside portals and on the toolbar', () => {
+    it('keeps the selection on clicks inside portals, panel flyouts and the toolbar', () => {
       const toolbar = createElement(document.body, 'div', {
         'data-test-subj': 'dashboardSelectedPanelsToolbar',
       });
+      const pushFlyoutButton = createElement(
+        createElement(document.body, 'div', { class: 'kbnPresentationLazyFlyout' }),
+        'button'
+      );
       renderGestures();
 
       click(portal);
       click(toolbar);
+      click(pushFlyoutButton);
 
       expect(getSelection()).toEqual(['panel1']);
     });

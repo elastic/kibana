@@ -51,9 +51,16 @@ const SELECTION_MODE_IGNORED_TARGET_SELECTOR = [
   '[data-euiportal]',
 ].join(', ');
 
+/**
+ * Panel flyouts opened with `openLazyFlyout`. Push flyouts are rendered next to the page rather than
+ * in a portal, so they need their own entry to act on the selection without clearing it.
+ */
+const PANEL_FLYOUT_SELECTOR = '.kbnPresentationLazyFlyout';
+
 /** Clicks on these elements never clear the current selection */
 const KEEP_SELECTION_SELECTOR = [
   '[data-euiportal]',
+  PANEL_FLYOUT_SELECTOR,
   '[data-test-subj="dashboardSelectedPanelsToolbar"]',
   '.embPanel__selectPanel',
 ].join(', ');
@@ -89,6 +96,7 @@ export const MARQUEE_PREVIEW_CLASS = 'dshDashboardGrid__item--marqueePreview';
 /** Escape pressed while focus is here belongs to that element (close a menu / flyout, leave an input) */
 const ESCAPE_OWNED_BY_TARGET_SELECTOR = [
   '[data-euiportal]',
+  PANEL_FLYOUT_SELECTOR,
   'input',
   'textarea',
   'select',

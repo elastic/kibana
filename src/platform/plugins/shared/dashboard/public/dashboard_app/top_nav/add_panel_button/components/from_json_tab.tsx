@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import {
   EuiButton,
@@ -29,7 +29,6 @@ import {
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import { panelJsonStrings } from '../../../../panel_json/_panel_json_strings';
 import { addImportedPanels, sanitizeImportedPanels } from '../../../../panel_json/import_panels';
-import { MAX_IMPORTED_PANELS } from '../../../../panel_json/normalize_imported_panels';
 import type { ImportedPanels } from '../../../../panel_json/types';
 import { coreServices } from '../../../../services/kibana_services';
 import { getPanelAddedSuccessString } from '../../../_dashboard_app_strings';
@@ -51,16 +50,23 @@ const getFooterStatus = ({
   return undefined;
 };
 
-/** Content of the "From JSON" tab of the add panel flyout, which adds a panel from pasted or uploaded JSON. */
+/** Content of the "From JSON" tab of the add panel flyout, which adds panels from pasted or uploaded JSON. */
 export const FromJsonTab = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
+  const addedPanelCount = useRef(0);
   const closeFlyout = useCallback(() => dashboardApi.clearOverlays(), [dashboardApi]);
   const createFromJson = useCallback(
-    async (data: ImportedPanels) => addImportedPanels(dashboardApi, data),
+    async (data: ImportedPanels) => {
+      addedPanelCount.current = data.panels.length;
+      return addImportedPanels(dashboardApi, data);
+    },
     [dashboardApi]
   );
   const onImportSuccess = useCallback((_id: string, title: string) => {
     coreServices.notifications.toasts.addSuccess({
-      title: getPanelAddedSuccessString(title),
+      title:
+        addedPanelCount.current > 1
+          ? panelJsonStrings.getPanelsAddedSuccess(addedPanelCount.current)
+          : getPanelAddedSuccessString(title),
       'data-test-subj': 'addEmbeddableToDashboardSuccess',
     });
   }, []);
@@ -105,7 +111,6 @@ export const FromJsonTab = ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
         <ImportJsonEditor
           dataTestSubjPrefix={DATA_TEST_SUBJ_PREFIX}
           label={panelJsonStrings.getEditorLabel()}
-          labelAppend={panelJsonStrings.getPanelCountHint(MAX_IMPORTED_PANELS)}
           value={jsonText}
           error={inputError}
           isValidating={isValidating}
@@ -162,7 +167,7 @@ export const FromJsonTab = ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
                   onClick={onImport}
                   data-test-subj={`${DATA_TEST_SUBJ_PREFIX}AddButton`}
                 >
-                  {panelJsonStrings.getAddButtonLabel()}
+                  {panelJsonStrings.getAddButtonLabel(sanitizedState?.panels.length ?? 1)}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

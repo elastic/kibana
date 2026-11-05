@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useState, type DragEvent, type ReactNode } from 'react';
+import React, { useRef, useState, type DragEvent } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -31,8 +31,6 @@ export interface ImportJsonEditorProps {
   dataTestSubjPrefix: string;
   value: string;
   label?: string;
-  /** Shown on the right of the label, for example a hint about what the JSON can contain. */
-  labelAppend?: ReactNode;
   error?: string | null;
   isValidating?: boolean;
   onTextChange: (text: string) => void;
@@ -49,7 +47,6 @@ export const ImportJsonEditor = ({
   dataTestSubjPrefix,
   value,
   label = importJsonFlyoutStrings.getEditorLabel(),
-  labelAppend,
   error,
   isValidating,
   onTextChange,
@@ -133,7 +130,9 @@ export const ImportJsonEditor = ({
     <EuiForm fullWidth>
       <EuiFormRow
         fullWidth
-        label={`${label}` + (labelAppend ? ` (${labelAppend})` : '')}
+        // The row holds a drop area rather than a single input, so a `<label for>` would only add a pointer cursor
+        labelType="legend"
+        label={label}
         labelAppend={
           <EuiFlexGroup
             gutterSize="s"
@@ -218,6 +217,8 @@ export const ImportJsonEditor = ({
                   enabled: false,
                 },
                 folding: true,
+                glyphMargin: false,
+                lineDecorationsWidth: 0,
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',

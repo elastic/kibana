@@ -43,7 +43,7 @@ can compose the same pieces:
 - `useImportJsonFlyoutState` holds the validation and import state. `onFileChange` validates a file
   right away and `onTextChange` validates pasted text once the user pauses typing.
 - `ImportJsonEditor` accepts pasted or typed JSON, a dropped file, or a file chosen with its upload link;
-  a file is loaded into the editor. Use `label` and `labelAppend` to describe what the JSON can contain.
+  a file is loaded into the editor. Use `label` to describe what the JSON contains.
 - `ImportJsonServerErrorCallout` and `ImportJsonWarningsCallout` show sanitization results.
 
 `sanitizeImportJson` can throw `ImportJsonValidationError` to show a message next to the input instead of 

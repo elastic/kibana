@@ -16,7 +16,7 @@ import { panelJsonStrings } from './_panel_json_strings';
 import type { PanelJsonEntry } from './types';
 
 /** How many panels can be added from one JSON input. */
-export const MAX_IMPORTED_PANELS = 1;
+export const MAX_IMPORTED_PANELS = 100;
 
 type JsonObject = Record<string, unknown>;
 
@@ -29,16 +29,25 @@ const isFiniteNumber = (value: unknown): value is number =>
 const isSection = (item: unknown): item is JsonObject & { panels: unknown[] } =>
   isJsonObject(item) && Array.isArray(item.panels) && !('config' in item);
 
+const getSectionRow = ({ grid }: JsonObject) =>
+  isJsonObject(grid) && isFiniteNumber(grid.y) ? grid.y : Number.MAX_SAFE_INTEGER;
+
 /**
- * A panel entry, an array of entries, or anything with a `panels` array, such as a dashboard
- * export. Panels inside sections are included.
+ * Groups of panels whose positions share one coordinate space. A panel entry or an array of entries
+ * is one group. Anything with a `panels` array, such as a dashboard export, has a group for its
+ * top-level panels and one for each section, in the order the sections appear on the dashboard.
  */
-const getPanelCandidates = (raw: unknown): unknown[] => {
-  if (Array.isArray(raw)) return raw;
-  if (isJsonObject(raw) && Array.isArray(raw.panels)) {
-    return raw.panels.flatMap((item) => (isSection(item) ? item.panels : [item]));
-  }
-  return [raw];
+const getPanelGroups = (raw: unknown): unknown[][] => {
+  if (Array.isArray(raw)) return [raw];
+  if (!isJsonObject(raw) || !Array.isArray(raw.panels)) return [[raw]];
+
+  const topLevelPanels = raw.panels.filter((item) => !isSection(item));
+  const sections = raw.panels
+    .filter(isSection)
+    .sort((sectionA, sectionB) => getSectionRow(sectionA) - getSectionRow(sectionB));
+  return [topLevelPanels, ...sections.map(({ panels }) => panels)].filter(
+    (group) => group.length > 0
+  );
 };
 
 const toGridData = (grid: unknown): GridData => {
@@ -74,14 +83,34 @@ export const alignPanelsToTop = (panels: PanelJsonEntry[]): PanelJsonEntry[] => 
   return panels.map((panel) => ({ ...panel, grid: { ...panel.grid, y: panel.grid.y - top } }));
 };
 
+/**
+ * Places groups of panels one below the other, each keeping its own arrangement, so panels from
+ * different sections of a dashboard don't overlap.
+ */
+const stackPanelGroups = (groups: PanelJsonEntry[][]): PanelJsonEntry[] => {
+  let groupTop = 0;
+  return groups.flatMap((group) => {
+    const alignedGroup = alignPanelsToTop(group);
+    const placedGroup = alignedGroup.map((panel) => ({
+      ...panel,
+      grid: { ...panel.grid, y: panel.grid.y + groupTop },
+    }));
+    groupTop += Math.max(...alignedGroup.map(({ grid }) => grid.y + grid.h));
+    return placedGroup;
+  });
+};
+
 /** Reads untrusted JSON into panel entries, or throws an error that explains what is wrong. */
 export const normalizeImportedPanels = (raw: unknown): PanelJsonEntry[] => {
-  const candidates = getPanelCandidates(raw);
-  if (candidates.length === 0) {
+  const groups = getPanelGroups(raw);
+  const panelCount = groups.reduce((count, group) => count + group.length, 0);
+  if (panelCount === 0) {
     throw new ImportJsonValidationError(panelJsonStrings.getNoPanelsError());
   }
-  if (candidates.length > MAX_IMPORTED_PANELS) {
-    throw new ImportJsonValidationError(panelJsonStrings.getTooManyPanelsError(candidates.length));
+  if (panelCount > MAX_IMPORTED_PANELS) {
+    throw new ImportJsonValidationError(
+      panelJsonStrings.getTooManyPanelsError(panelCount, MAX_IMPORTED_PANELS)
+    );
   }
-  return alignPanelsToTop(candidates.map(toPanelJsonEntry));
+  return stackPanelGroups(groups.map((group) => group.map(toPanelJsonEntry)));
 };

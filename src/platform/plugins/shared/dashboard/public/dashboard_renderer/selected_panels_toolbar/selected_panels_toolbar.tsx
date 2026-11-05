@@ -29,6 +29,10 @@ import {
   userCanCopyToDashboard,
   openCopyToDashboardModal,
 } from '../../dashboard_actions/copy_to_dashboard_action';
+import {
+  apiCanExportJson,
+  openPanelsExportJsonFlyout,
+} from '../../dashboard_actions/export_json_action';
 
 const clearSelectionLabel = i18n.translate('dashboard.selectedPanelsToolbar.clearSelectionLabel', {
   defaultMessage: 'Clear selection (Esc)',
@@ -41,14 +45,22 @@ const copyToDashboardDisabledLabel = i18n.translate(
   }
 );
 
+const exportJsonDisabledLabel = i18n.translate(
+  'dashboard.selectedPanelsToolbar.exportJsonDisabledLabel',
+  {
+    defaultMessage: 'Some of the selected panels cannot be exported as JSON',
+  }
+);
+
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
 export const SelectedPanelsToolbar = () => {
   const dashboardApi = useDashboardApi();
   const styles = useMemoCss(selectedPanelsToolbarStyles);
-  const [selectedPanelIds, viewMode, children] = useBatchedPublishingSubjects(
+  const [selectedPanelIds, viewMode, children, hasOverlays] = useBatchedPublishingSubjects(
     dashboardApi.selectedPanelIds$,
     dashboardApi.viewMode$,
-    dashboardApi.children$
+    dashboardApi.children$,
+    dashboardApi.hasOverlays$
   );
 
   const onRemove = useCallback(() => {
@@ -61,11 +73,24 @@ export const SelectedPanelsToolbar = () => {
     openCopyToDashboardModal(dashboardApi, dashboardApi.selectedPanelIds$.value);
   }, [dashboardApi]);
 
-  if (viewMode !== 'edit' || selectedPanelIds.length === 0) return null;
+  const onExportJson = useCallback(() => {
+    const currentChildren = dashboardApi.children$.value;
+    openPanelsExportJsonFlyout(
+      dashboardApi.selectedPanelIds$.value
+        .map((panelId) => currentChildren[panelId])
+        .filter(apiCanExportJson)
+    );
+  }, [dashboardApi]);
+
+  // Hidden while a flyout is open, such as the Export JSON flyout, so the toolbar doesn't cover it
+  if (viewMode !== 'edit' || selectedPanelIds.length === 0 || hasOverlays) return null;
 
   const showCopyToDashboard = userCanCopyToDashboard();
   const canCopySelection = selectedPanelIds.every((panelId) =>
     apiCanBeDuplicated(children[panelId])
+  );
+  const canExportSelection = selectedPanelIds.every((panelId) =>
+    apiCanExportJson(children[panelId])
   );
 
   return (
@@ -127,6 +152,24 @@ export const SelectedPanelsToolbar = () => {
                 </EuiToolTip>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={canExportSelection ? undefined : exportJsonDisabledLabel}>
+                <EuiButtonEmpty
+                  iconType="code"
+                  color="text"
+                  size="s"
+                  isDisabled={!canExportSelection}
+                  hasAriaDisabled
+                  onClick={onExportJson}
+                  data-test-subj="dashboardSelectedPanelsExportJson"
+                >
+                  <FormattedMessage
+                    id="dashboard.selectedPanelsToolbar.exportJsonButtonLabel"
+                    defaultMessage="Export JSON"
+                  />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="trash"

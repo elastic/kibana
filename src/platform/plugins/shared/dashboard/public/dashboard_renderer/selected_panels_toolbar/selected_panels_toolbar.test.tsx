@@ -23,6 +23,7 @@ const mockDashboardApi = {
   selectedPanelIds$: new BehaviorSubject<string[]>([]),
   viewMode$: new BehaviorSubject<ViewMode>('edit'),
   children$: new BehaviorSubject<Record<string, { isDuplicable: boolean }>>({}),
+  hasOverlays$: new BehaviorSubject<boolean>(false),
   canRemovePanels: jest.fn(() => true),
   removePanels: jest.fn(),
   clearSelectedPanels: jest.fn(),

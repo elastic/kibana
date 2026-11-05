@@ -105,12 +105,9 @@ describe('normalizeImportedPanels', () => {
     ]);
   });
 
-  it('rejects more than one panel', () => {
-    expect(
-      getValidationError({
-        title: 'Source dashboard',
-        panels: [lensPanel, { title: 'Section', grid: { y: 10 }, panels: [lensPanel] }],
-      })
-    ).toBe('The JSON contains 2 panels. Add one panel at a time.');
+  it('rejects more panels than can be added at a time', () => {
+    expect(getValidationError(Array.from({ length: 101 }, () => lensPanel))).toBe(
+      'The JSON contains 101 panels. You can add up to 100 panels at a time.'
+    );
   });
 });

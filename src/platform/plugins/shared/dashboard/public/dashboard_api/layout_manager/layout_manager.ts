@@ -82,6 +82,7 @@ import {
   type DashboardChildren,
   type DashboardLayout,
   type DashboardLayoutPanel,
+  type DashboardPanelToAdd,
   type DashboardPinnablePanel,
 } from './types';
 
@@ -288,6 +289,36 @@ export function initializeLayoutManager(
     }
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
+  };
+
+  /**
+   * Adds panels in a single layout update, below the panels that aren't in a section, keeping the
+   * arrangement of the group. Returns the IDs of the new panels.
+   */
+  const addPanelGroup = (panels: DashboardPanelToAdd[]): string[] => {
+    if (!panels.length) return [];
+    const currentLayout = layout$.value;
+    const groupTop = Math.min(...panels.map(({ grid }) => grid.y));
+    const firstOpenRow = Object.values(currentLayout.panels).reduce(
+      (bottom, { grid }) => (grid.sectionId ? bottom : Math.max(bottom, grid.y + grid.h)),
+      0
+    );
+
+    const newPanels: DashboardLayout['panels'] = {};
+    const panelIds = panels.map(({ type, serializedState, grid }) => {
+      const uuid = v4();
+      currentChildState[uuid] = serializedState;
+      newPanels[uuid] = {
+        type,
+        grid: { x: grid.x, y: grid.y - groupTop + firstOpenRow, w: grid.w, h: grid.h },
+      };
+      return uuid;
+    });
+
+    layout$.next({ ...currentLayout, panels: { ...currentLayout.panels, ...newPanels } });
+    trackPanel.setScrollToPanelId(panelIds[0]);
+    trackPanel.setHighlightPanelId(panelIds[0]);
+    return panelIds;
   };
 
   // --------------------------------------------------------------------------------------
@@ -623,6 +654,7 @@ export function initializeLayoutManager(
       getChildApi,
       addNewPanel,
       addIncomingEmbeddables,
+      addPanelGroup,
       removePanel,
       removePanels,
       replacePanel,

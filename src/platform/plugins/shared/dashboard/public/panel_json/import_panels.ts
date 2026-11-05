@@ -52,7 +52,8 @@ export const sanitizeImportedPanels: SanitizeImportJson<ImportedPanels> = async 
     signal
   );
   const sanitizedPanels = panels.filter((panel): panel is PanelJsonEntry => panel !== undefined);
-  if (sanitizedPanels.length < entries.length) {
+  // When only some panels are dropped, the others are still added and the warnings list the dropped ones
+  if (sanitizedPanels.length === 0) {
     const droppedPanelWarning = warnings.find(({ type }) => type === 'dropped_panel');
     throw new ImportJsonValidationError(
       panelJsonStrings.getPanelNotSupportedError(droppedPanelWarning?.message)
@@ -67,11 +68,33 @@ export const sanitizeImportedPanels: SanitizeImportJson<ImportedPanels> = async 
   };
 };
 
-/** Adds the imported panels to the dashboard at their original size, in the first open space. */
+const panelsOverlap = ({ grid: first }: PanelJsonEntry, { grid: second }: PanelJsonEntry) =>
+  first.x < second.x + second.w &&
+  second.x < first.x + first.w &&
+  first.y < second.y + second.h &&
+  second.y < first.y + first.h;
+
+const hasOverlappingPanels = (panels: PanelJsonEntry[]) =>
+  panels.some((panel, index) =>
+    panels.slice(index + 1).some((other) => panelsOverlap(panel, other))
+  );
+
+/**
+ * Adds the imported panels to the dashboard at their original size. Several panels keep their
+ * arrangement below the existing panels. A single panel, or panels whose positions overlap, are
+ * placed in the first open space instead.
+ */
 export const addImportedPanels = (
-  dashboardApi: Pick<DashboardApi, 'addIncomingEmbeddables'>,
+  dashboardApi: Pick<DashboardApi, 'addIncomingEmbeddables' | 'addPanelGroup'>,
   { panels }: ImportedPanels
 ): CreateFromJsonResult => {
+  if (panels.length > 1 && !hasOverlappingPanels(panels)) {
+    const [firstPanelId] = dashboardApi.addPanelGroup(
+      panels.map(({ type, grid, config }) => ({ type, grid, serializedState: config }))
+    );
+    return { id: firstPanelId, title: getPanelTitle(panels[0]) };
+  }
+
   const panelIds = panels.map(() => v4());
   const packages: EmbeddablePackageState[] = panels.map(({ type, grid, config }, index) => ({
     embeddableId: panelIds[index],

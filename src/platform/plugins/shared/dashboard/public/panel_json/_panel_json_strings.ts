@@ -19,10 +19,11 @@ export const panelJsonStrings = {
     i18n.translate('dashboard.panelJson.noPanelsError', {
       defaultMessage: 'The JSON doesn’t contain any panels.',
     }),
-  getTooManyPanelsError: (count: number) =>
+  getTooManyPanelsError: (count: number, maxPanels: number) =>
     i18n.translate('dashboard.panelJson.tooManyPanelsError', {
-      defaultMessage: 'The JSON contains {count} panels. Add one panel at a time.',
-      values: { count },
+      defaultMessage:
+        'The JSON contains {count} panels. You can add up to {maxPanels} panels at a time.',
+      values: { count, maxPanels },
     }),
   getPanelTypeNotAvailableError: (type: string) =>
     i18n.translate('dashboard.panelJson.panelTypeNotAvailableError', {
@@ -40,20 +41,22 @@ export const panelJsonStrings = {
         }),
   getTabDescription: () =>
     i18n.translate('dashboard.panelJson.tabDescription', {
-      defaultMessage: 'Use the JSON from the Export JSON option in any dashboard panel’s menu.',
+      defaultMessage:
+        'Use the JSON from Export JSON, available in a panel’s menu and when you select several panels.',
     }),
   getEditorLabel: () =>
     i18n.translate('dashboard.panelJson.editorLabel', {
       defaultMessage: 'Panel JSON',
     }),
-  getPanelCountHint: (maxPanels: number) =>
-    i18n.translate('dashboard.panelJson.panelCountHint', {
-      defaultMessage: '{maxPanels, plural, one {Accepts one panel} other {Accepts up to # panels}}',
-      values: { maxPanels },
-    }),
-  getAddButtonLabel: () =>
+  getAddButtonLabel: (count: number) =>
     i18n.translate('dashboard.panelJson.addButtonLabel', {
-      defaultMessage: 'Add panel',
+      defaultMessage: '{count, plural, one {Add panel} other {Add # panels}}',
+      values: { count },
+    }),
+  getPanelsAddedSuccess: (count: number) =>
+    i18n.translate('dashboard.panelJson.panelsAddedSuccess', {
+      defaultMessage: '{count} panels were added',
+      values: { count },
     }),
   getCancelButtonLabel: () =>
     i18n.translate('dashboard.panelJson.cancelButtonLabel', {
