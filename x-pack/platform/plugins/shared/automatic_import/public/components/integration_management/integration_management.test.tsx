@@ -434,6 +434,33 @@ describe('IntegrationManagement privilege gating', () => {
     expect(screen.queryByTestId('automaticImportInsufficientPrivileges')).not.toBeInTheDocument();
   });
 
+  it('does not report a page load when the create capability is missing', () => {
+    mockAutomaticImportCapabilities.create = false;
+
+    renderComponent('/create');
+
+    expect(mockReportEvent).not.toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded,
+      expect.anything()
+    );
+  });
+
+  it('does not report a page load when the edit capability is missing', () => {
+    mockAutomaticImportCapabilities.edit = false;
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: existingIntegration,
+      isLoading: false,
+      isError: false,
+    });
+
+    renderComponent('/edit/int-1');
+
+    expect(mockReportEvent).not.toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.EditIntegrationPageLoaded,
+      expect.anything()
+    );
+  });
+
   it('shows an insufficient privileges prompt on create without the create capability', () => {
     mockAutomaticImportCapabilities.create = false;
 

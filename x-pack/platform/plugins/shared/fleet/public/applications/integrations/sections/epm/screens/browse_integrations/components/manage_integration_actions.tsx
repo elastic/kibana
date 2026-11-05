@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useAutomaticImportAuthz, useStartServices } from '../../../../../hooks';
+import { useAuthz, useAutomaticImportAuthz, useStartServices } from '../../../../../hooks';
 
 import type {
   AutomaticImportTelemetry,
@@ -71,6 +71,7 @@ export const ManageIntegrationActions: React.FC<{
   const { euiTheme } = useEuiTheme();
   const { automaticImport } = useStartServices();
   const { canEdit, canDelete, canApprove } = useAutomaticImportAuthz();
+  const canInstallPackages = useAuthz().integrations.installPackages;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -155,6 +156,12 @@ export const ManageIntegrationActions: React.FC<{
     installedVersion !== undefined && installedVersion === integration.version;
 
   const getInstallToClusterTooltip = () => {
+    if (!canInstallPackages) {
+      return i18n.translate(
+        'xpack.fleet.epmList.manageIntegrations.actions.installMissingPrivilegeHelp',
+        { defaultMessage: 'You do not have permission to install integrations.' }
+      );
+    }
     if (isSameVersionInstalled) {
       return i18n.translate(
         'xpack.fleet.epmList.manageIntegrations.actions.installAlreadyInstalledHelp',
@@ -295,7 +302,9 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="installToCluster"
                 icon="upload"
-                disabled={!isApproved || isInstalling || isSameVersionInstalled}
+                disabled={
+                  !canInstallPackages || !isApproved || isInstalling || isSameVersionInstalled
+                }
                 data-test-subj="manageIntegrationInstallMenuItem"
                 toolTipContent={getInstallToClusterTooltip()}
                 onClick={handleInstallToCluster}

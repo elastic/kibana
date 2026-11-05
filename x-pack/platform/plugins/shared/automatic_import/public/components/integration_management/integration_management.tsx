@@ -217,8 +217,13 @@ export const IntegrationManagement = React.memo(() => {
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
   const { reportCancelButtonClicked, sessionId } = useTelemetry();
   const { telemetry } = services;
+  const { canCreateIntegration, canEditIntegration } = useAuthorization();
+  const hasRequiredPrivilege = integrationId ? canEditIntegration : canCreateIntegration;
 
   useEffect(() => {
+    if (!hasRequiredPrivilege) {
+      return;
+    }
     if (integrationId) {
       telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditIntegrationPageLoaded, {
         sessionId,
@@ -229,10 +234,8 @@ export const IntegrationManagement = React.memo(() => {
         sessionId,
       });
     }
-  }, [telemetry, sessionId, integrationId]);
+  }, [telemetry, sessionId, integrationId, hasRequiredPrivilege]);
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
-  const { canCreateIntegration, canEditIntegration } = useAuthorization();
-  const hasRequiredPrivilege = integrationId ? canEditIntegration : canCreateIntegration;
 
   const integrationsHomeHref = useMemo(
     () => application.getUrlForApp(INTEGRATIONS_APP_ID),

@@ -10,9 +10,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 const mockUseAutomaticImportAuthz = jest.fn();
+const mockUseAuthz = jest.fn();
 jest.mock('../../../../../hooks', () => ({
   useStartServices: () => ({ automaticImport: undefined }),
   useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
+  useAuthz: () => mockUseAuthz(),
 }));
 
 jest.mock('./review_approve_modal', () => ({
@@ -67,6 +69,34 @@ const renderActions = (
   );
 
 const openMenu = () => fireEvent.click(screen.getByTestId('manageIntegrationActionsBtn'));
+
+beforeEach(() => {
+  mockUseAuthz.mockReturnValue({ integrations: { installPackages: true } });
+});
+
+describe('ManageIntegrationActions install privilege', () => {
+  const approvedIntegration: CreatedIntegrationRow = { ...integration, status: 'approved' };
+
+  beforeEach(() => {
+    mockUseAutomaticImportAuthz.mockReturnValue(ALL_AUTHZ);
+  });
+
+  it('enables Install for an approved integration when the user can install packages', () => {
+    renderActions({ integration: approvedIntegration });
+    openMenu();
+
+    expect(screen.getByTestId('manageIntegrationInstallMenuItem')).toBeEnabled();
+  });
+
+  it('disables Install when the user cannot install packages', () => {
+    mockUseAuthz.mockReturnValue({ integrations: { installPackages: false } });
+
+    renderActions({ integration: approvedIntegration });
+    openMenu();
+
+    expect(screen.getByTestId('manageIntegrationInstallMenuItem')).toBeDisabled();
+  });
+});
 
 describe('ManageIntegrationActions privilege gating', () => {
   beforeEach(() => {
