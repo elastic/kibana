@@ -429,7 +429,6 @@ export class RiskScoreDataClient {
 
     return errors;
   }
-
 }
 
 // --- types and helpers for getRiskScoreHistory ---
