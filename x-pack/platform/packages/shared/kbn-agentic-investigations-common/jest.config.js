@@ -14,4 +14,9 @@ module.exports = {
     '<rootDir>/x-pack/platform/packages/shared/kbn-agentic-investigations-common/**/*.{js,ts,tsx}',
   ],
   coverageReporters: ['html'],
+  moduleNameMapper: {
+    // Static EUI icon assets are ESM; Jest needs a CJS stub.
+    '^@elastic/eui/es/components/icon/assets/(.*)$':
+      '<rootDir>/x-pack/platform/packages/shared/kbn-agentic-investigations-common/__mocks__/eui_icon_assets.js',
+  },
 };

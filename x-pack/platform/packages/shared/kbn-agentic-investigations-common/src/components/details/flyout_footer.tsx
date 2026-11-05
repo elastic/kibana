@@ -12,9 +12,14 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
+import { icon as checkIcon } from '@elastic/eui/es/components/icon/assets/check';
+import { icon as chevronSingleDownIcon } from '@elastic/eui/es/components/icon/assets/chevron_single_down';
+import { icon as refreshIcon } from '@elastic/eui/es/components/icon/assets/refresh';
+import { icon as trashIcon } from '@elastic/eui/es/components/icon/assets/trash';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import type { Investigation } from '../../types';
 import { type CardActionType } from '../actions';
@@ -25,6 +30,11 @@ import {
 } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { ACTIONS_TRANSLATIONS } from '../actions/translations';
+
+/** Instant icon: string `type` names load async and leave the Actions menu blank first. */
+const menuIcon = (type: typeof trashIcon) => (
+  <EuiIcon type={type} size="m" className="euiContextMenu__icon" color="inherit" aria-hidden />
+);
 
 export type { CloseInvestigationModalRenderProps };
 
@@ -136,7 +146,7 @@ export const ConversationDetailsFlyoutFooter = ({
         <EuiContextMenuItem
           key="delete"
           css={itemCss}
-          icon="trash"
+          icon={menuIcon(trashIcon)}
           color="danger"
           onClick={() => {
             closeActions();
@@ -155,7 +165,7 @@ export const ConversationDetailsFlyoutFooter = ({
           <EuiContextMenuItem
             key="open"
             css={itemCss}
-            icon="refresh"
+            icon={menuIcon(refreshIcon)}
             onClick={() => {
               closeActions();
               void onReopenInvestigation(investigation);
@@ -170,7 +180,7 @@ export const ConversationDetailsFlyoutFooter = ({
           <EuiContextMenuItem
             key="close"
             css={itemCss}
-            icon="check"
+            icon={menuIcon(checkIcon)}
             onClick={() => {
               closeActions();
               setModalAction('close');
@@ -206,7 +216,7 @@ export const ConversationDetailsFlyoutFooter = ({
             size="s"
             color="primary"
             fill
-            iconType="chevronSingleDown"
+            iconType={chevronSingleDownIcon}
             iconSide="right"
             onClick={() => setIsActionsOpen((open) => !open)}
             data-test-subj="investigationFlyoutActionsButton"
