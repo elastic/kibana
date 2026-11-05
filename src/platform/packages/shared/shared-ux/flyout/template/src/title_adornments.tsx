@@ -32,9 +32,15 @@ export const renderTitleIcon = (
     <EuiIcon type={icon} aria-hidden data-test-subj={TITLE_ICON_TEST_SUBJ} />
   ) : null;
 
-/** Renders the title loading spinner when `isLoading` is set. */
-export const renderTitleLoading = (isLoading: boolean): ReactNode =>
-  isLoading ? <EuiLoadingSpinner size="m" data-test-subj={TITLE_LOADING_TEST_SUBJ} /> : null;
+/** Renders the title loading spinner when `isLoading` is set, named by `loadingLabel` if given. */
+export const renderTitleLoading = (isLoading: boolean, loadingLabel?: string): ReactNode =>
+  isLoading ? (
+    <EuiLoadingSpinner
+      size="m"
+      data-test-subj={TITLE_LOADING_TEST_SUBJ}
+      {...(loadingLabel !== undefined && { 'aria-label': loadingLabel })}
+    />
+  ) : null;
 
 /** Renders a title node with an optional trailing icon and loading spinner. */
 export const renderTitleWithAdornments = (
