@@ -860,6 +860,18 @@ export const PackagePolicySchema = schema.object(
     updated_by: schema.string(),
     created_at: schema.string(),
     created_by: schema.string(),
+    onboarding_deployment_id: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 256,
+          meta: {
+            description:
+              'ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.',
+            availability: { since: '9.7.0', stability: 'experimental' },
+          },
+        })
+      )
+    ),
     elasticsearch: schema
       .maybe(
         schema.object({
@@ -949,8 +961,36 @@ export const PackagePolicySchemaV25 = PackagePolicySchema.extends(
     bump_agent_policy_revision: schema.maybe(schema.boolean()),
     // May be absent in SOs created before the field was introduced.
     latest_revision: schema.maybe(schema.boolean()),
+    // Added to PackagePolicySchema after this snapshot; excluded to preserve its hash.
+    onboarding_deployment_id: undefined,
   },
   { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.26.0 (legacy type) and
+ * 12 (space-aware type). Adds `onboarding_deployment_id`. Do not modify.
+ */
+export const PackagePolicySchemaV26 = PackagePolicySchemaV25.extends(
+  {
+    onboarding_deployment_id: PackagePolicySchema.getPropSchemas().onboarding_deployment_id,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Query parameter of the routes that change package policies. Package policies managed by a cloud
+ * onboarding deployment can only be changed when it matches their `onboarding_deployment_id`.
+ */
+export const OnboardingDeploymentIdQuerySchema = schema.maybe(
+  schema.string({
+    maxLength: 256,
+    meta: {
+      description:
+        'ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.',
+      availability: { since: '9.7.0', stability: 'experimental' },
+    },
+  })
 );
 
 export const PackagePolicyResponseSchema = PackagePolicySchema.extends(
