@@ -9,10 +9,8 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { PanelContent } from '../resolve_panel';
 import {
   buildConfigPanelContent,
-  findConfigPanelType,
   findPanelKind,
-  findPanelRenderer,
-  getEditableEmbeddableTypes,
+  isConfigPanelContent,
   type PanelRequestContent,
   type PanelResolutionRequest,
   type UpsertPanelContent,
@@ -36,32 +34,27 @@ const getPanelEditError = (
       kind.uneditableDescription ?? `${kind.label} panel`
     }, so it cannot be edited. ${confirmReplaceHint}`;
   }
-  const renderer = findPanelRenderer(type);
-  const configPanelType = findConfigPanelType(type);
-  if (!renderer && !configPanelType) {
+  if (!kind) {
     return `Panel "${id}" with type "${type}" cannot be edited. ${confirmReplaceHint}`;
   }
-  if (content.source === 'attachment') {
+  if (content.type === 'attachment') {
     return `Panel "${id}" already exists, and attachments only add new panels. To replace it with the attachment, remove "${id}" and add the attachment with a new id in the same call.`;
   }
-  if (getEditableEmbeddableTypes(content).includes(type)) {
+  if (content.type === kind.type) {
     return undefined;
   }
-  if (configPanelType) {
-    return `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}". ${replaceHint}`;
-  }
-  return `Panel "${id}" is a ${renderer} panel. Edit it with source: "request", renderer: "${renderer}". ${replaceHint}`;
+  return `Panel "${id}" is a ${kind.label} panel. Edit it with type: "${kind.type}". ${replaceHint}`;
 };
 
 type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
 
-/** Maps request content for a new panel onto the resolution request for its renderer. */
+/** Maps request content for a new panel onto the resolution request of its kind. */
 const toCreationResolutionRequest = (
   content: PanelRequestContent,
   id: string
 ): ResolutionRequestResult => {
-  if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
+  if (content.type === 'custom_content') {
+    const { type, query, esql, hasData, regenerateESQL, index } = content;
     if (query === undefined || hasData === undefined) {
       const missing = [
         ...(query === undefined ? ['`query`'] : []),
@@ -77,33 +70,28 @@ const toCreationResolutionRequest = (
       };
     }
     return {
-      request: { renderer, nlQuery: query, esql: esql ?? undefined, hasData, index },
+      request: { type, nlQuery: query, esql: esql ?? undefined, hasData, index },
     };
   }
 
-  const { renderer, query, index, esql, chartType } = content;
-  if (renderer !== 'vega' && chartType === undefined) {
+  const { type, query, index, esql, chartType } = content;
+  if (type === 'vis' && chartType === undefined) {
     return {
       error: `Panel "${id}" is new. Provide \`chartType\` to create a Lens panel.`,
     };
   }
-  return { request: { renderer, nlQuery: query, index, esql, chartType } };
+  return { request: { type, nlQuery: query, index, esql, chartType } };
 };
 
-/**
- * Builds the resolution request for request content that edits a panel of the same kind (see
- * `getPanelEditError`). Lens and Vega edits may omit the renderer, which the existing panel then
- * decides. This is the only place an edit's renderer is decided; the resolvers trust the one on
- * the request.
- */
+/** Builds the resolution request for request content that edits a panel of the same kind (see `getPanelEditError`). */
 const toEditResolutionRequest = (
   content: PanelRequestContent,
   existingPanel: AttachmentPanel
 ): ResolutionRequestResult => {
   const base = { existingPanel };
 
-  if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
+  if (content.type === 'custom_content') {
+    const { type, query, esql, hasData, regenerateESQL, index } = content;
     if (regenerateESQL && hasData === false) {
       return {
         error: `Panel "${existingPanel.id}" cannot combine \`regenerateESQL\` with \`hasData\`: false, which removes the query.`,
@@ -124,29 +112,21 @@ const toEditResolutionRequest = (
       };
     }
     return {
-      request: { ...base, renderer, nlQuery: query, esql, hasData, regenerateESQL, index },
+      request: { ...base, type, nlQuery: query, esql, hasData, regenerateESQL, index },
     };
   }
 
-  const renderer = findPanelRenderer(existingPanel.type);
-  if (renderer !== 'lens' && renderer !== 'vega') {
-    return {
-      error: `Panel "${existingPanel.id}" cannot be edited with a Lens or Vega request.`,
-    };
-  }
-  const { query, index, esql, chartType, preserveESQL } = content;
+  const { type, query, index, esql, chartType, preserveESQL } = content;
   return {
     request: {
       ...base,
-      renderer,
+      type,
       nlQuery: query,
       index,
       esql,
       chartType,
       preserveESQL,
-      // Chart rules are Lens-only, so a Vega panel edited with `renderer` omitted ignores them.
-      applyChartRules:
-        renderer === 'vega' || content.renderer === 'vega' ? undefined : content.applyChartRules,
+      applyChartRules: content.type === 'vis' ? content.applyChartRules : undefined,
     },
   };
 };
@@ -175,7 +155,7 @@ export const planPanelContent = ({
     return { error: editError };
   }
 
-  if (content.source === 'config') {
+  if (isConfigPanelContent(content)) {
     const { type, config } = content;
     const panelContent = buildConfigPanelContent(type, config);
     return 'error' in panelContent
@@ -183,7 +163,7 @@ export const planPanelContent = ({
       : { source: 'config', panelContent };
   }
 
-  if (content.source === 'attachment') {
+  if (content.type === 'attachment') {
     return { source: 'attachment', attachmentId: content.attachment_id };
   }
 

@@ -27,7 +27,6 @@ export {
   getConfigPanelReferences,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
-  getRendererEmbeddableType,
   requiresRegisteredSchema,
 } from './src/panels';
 export type {

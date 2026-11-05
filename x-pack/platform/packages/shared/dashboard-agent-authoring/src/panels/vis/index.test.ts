@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { lensPanelContentSchema, vegaPanelContentSchema } from '.';
 
 const baseRequest = {
-  source: 'request' as const,
+  type: 'vis' as const,
   query: 'show total requests',
 };
 
@@ -22,15 +22,13 @@ describe('visualization panel content schemas', () => {
   });
 
   it('allows Vega content without a chartType hint', () => {
-    expect(vegaPanelContentSchema.safeParse({ ...baseRequest, renderer: 'vega' }).success).toBe(
-      true
-    );
+    expect(vegaPanelContentSchema.safeParse({ ...baseRequest, type: 'vega' }).success).toBe(true);
   });
 
   it('does not accept applyChartRules on Vega content', () => {
     const result = vegaPanelContentSchema.safeParse({
       ...baseRequest,
-      renderer: 'vega',
+      type: 'vega',
       applyChartRules: true,
     });
 

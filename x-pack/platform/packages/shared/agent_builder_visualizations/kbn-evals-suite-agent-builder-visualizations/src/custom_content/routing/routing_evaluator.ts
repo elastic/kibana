@@ -10,7 +10,7 @@ import type { RoutingEvaluator } from './types';
 export const CUSTOM_CONTENT_ROUTING_EVALUATOR_NAME = 'Custom Content Routing';
 
 /**
- * Scores the choice of renderer: custom content when the request needs an HTML layout, a chart
+ * Scores the choice of panel type: custom content when the request needs an HTML layout, a chart
  * (Lens or Vega) when a chart can express it. Without the words "custom panel" in the prompt, the
  * agent has to make that choice itself.
  */
@@ -19,8 +19,8 @@ export const createRoutingEvaluator = (): RoutingEvaluator => ({
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const { renderers } = output;
-    if (renderers.length === 0) {
+    const { panelTypes } = output;
+    if (panelTypes.length === 0) {
       return {
         score: 0,
         label: 'no-panel',
@@ -30,14 +30,14 @@ export const createRoutingEvaluator = (): RoutingEvaluator => ({
       };
     }
 
-    const choseCustomContent = renderers.includes('custom_content');
-    if (expected?.renderer === 'custom_content') {
+    const choseCustomContent = panelTypes.includes('custom_content');
+    if (expected?.panelType === 'custom_content') {
       return choseCustomContent
         ? { score: 1, label: 'custom-content', explanation: 'The agent chose custom content.' }
         : {
             score: 0,
             label: 'chose-chart',
-            explanation: `The request needs an HTML layout but the agent chose: ${renderers.join(
+            explanation: `The request needs an HTML layout but the agent chose: ${panelTypes.join(
               ', '
             )}.`,
           };
@@ -52,7 +52,7 @@ export const createRoutingEvaluator = (): RoutingEvaluator => ({
       : {
           score: 1,
           label: 'chart',
-          explanation: `The agent chose a chart: ${renderers.join(', ')}.`,
+          explanation: `The agent chose a chart: ${panelTypes.join(', ')}.`,
         };
   },
 });

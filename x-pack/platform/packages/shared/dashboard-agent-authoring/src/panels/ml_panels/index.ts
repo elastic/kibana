@@ -22,8 +22,8 @@ import { defineReferencedConfigPanelKind } from '../panel_kind';
  *
  * Three panel types are supported: anomaly charts (`ml_anomaly_charts`),
  * anomaly swim lane (`ml_anomaly_swimlane`), and single metric viewer
- * (`ml_single_metric_viewer`). All use `source: 'config'` — the agent supplies
- * the embeddable state directly. There is no `source: 'request'` resolver for
+ * (`ml_single_metric_viewer`). All are config kinds — the agent supplies
+ * the embeddable state directly. There is no server-side resolver for
  * ML panels; the agent derives job IDs and parameters from prior tool calls or
  * conversation context. Their config schemas stay out of the tool schema: the
  * agent reads them from a skill reference, and planning validates the config.
