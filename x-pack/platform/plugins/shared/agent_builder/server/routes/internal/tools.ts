@@ -42,6 +42,7 @@ import { OAUTH_STATUS } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
+import { listMcpTools } from '../../services/tools/tool_types/mcp';
 import { toConnectorItem } from '../utils';
 
 const PER_USER_AUTH_MODE = 'per-user';
@@ -722,17 +723,21 @@ export function registerInternalToolsRoutes({
       const connectorResults = await Promise.allSettled(
         connectorIds.map(async (connectorId) => {
           const connector = await actionsClient.get({ id: connectorId });
-          const executeResult = (await actionsClient.execute({
-            actionId: connectorId,
-            params: { subAction: 'listTools' },
-          })) as ActionTypeExecutorResult<ListToolsResponse>;
-
-          return {
-            connectorId,
-            connector,
-            mcpServerTools: executeResult.status === 'ok' ? executeResult.data?.tools ?? [] : [],
-            listToolsError: executeResult.status === 'error' ? executeResult.message : undefined,
-          };
+          try {
+            const { tools: mcpServerTools } = await listMcpTools({
+              actions: pluginsStart.actions,
+              request,
+              connectorId,
+            });
+            return { connectorId, connector, mcpServerTools, listToolsError: undefined };
+          } catch (error) {
+            return {
+              connectorId,
+              connector,
+              mcpServerTools: [],
+              listToolsError: error instanceof Error ? error.message : String(error),
+            };
+          }
         })
       );
 

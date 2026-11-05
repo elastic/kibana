@@ -154,6 +154,22 @@ describe('MCP validate_configuration', () => {
       });
     });
 
+    it('should pass validation when the connector returns a bare tools array', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse.tools,
+      });
+
+      await expect(
+        validateToolName({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+          toolName: 'tool_two',
+        })
+      ).resolves.toBeUndefined();
+    });
+
     it('should throw error when tool is not found on connector', async () => {
       mockActionsClient.execute.mockResolvedValue({
         status: 'ok',

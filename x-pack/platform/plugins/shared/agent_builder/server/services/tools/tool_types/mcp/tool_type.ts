@@ -10,15 +10,27 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ListToolsResponse } from '@kbn/mcp-client';
+import type { ListToolsResponse, Tool } from '@kbn/mcp-client';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { Logger } from '@kbn/core/server';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
 
+const isMcpServerTool = (value: unknown): value is Tool =>
+  typeof value === 'object' && value !== null && 'name' in value && typeof value.name === 'string';
+
+const isListToolsResponse = (value: unknown): value is ListToolsResponse =>
+  typeof value === 'object' &&
+  value !== null &&
+  'tools' in value &&
+  Array.isArray(value.tools) &&
+  value.tools.every(isMcpServerTool);
+
 /**
  * Lists available tools from an MCP connector by calling the listTools subAction.
+ *
+ * @throws {Error} when the sub-action fails or returns neither shape.
  */
 export async function listMcpTools({
   actions,
@@ -42,7 +54,16 @@ export async function listMcpTools({
     throw new Error(result.serviceMessage ?? result.message ?? 'Failed to list MCP tools');
   }
 
-  return result.data as ListToolsResponse;
+  // `.mcp` returns `{ tools }`, connector-spec MCP connectors return the bare array.
+  const { data } = result;
+  if (Array.isArray(data) && data.every(isMcpServerTool)) {
+    return { tools: data };
+  }
+  if (isListToolsResponse(data)) {
+    return data;
+  }
+
+  throw new Error(`Unexpected listTools response from connector '${connectorId}'`);
 }
 
 /**
@@ -223,13 +244,21 @@ export const getMcpToolType = ({
         },
 
         getSchema: async () => {
-          const result = await getToolsOnce();
-          const inputSchema = result?.tools.find((t) => t.name === config.tool_name)?.inputSchema;
-          if (inputSchema) {
-            const zodSchema = fromJSONSchema(inputSchema as Record<string, unknown>);
-            return (zodSchema ?? z.object({})) as z.ZodObject<any>;
+          // A single unresolvable schema must not fail every agent round or MCP server
+          // response that includes this tool, so any failure falls back to an empty schema.
+          try {
+            const result = await getToolsOnce();
+            const inputSchema = result?.tools.find(
+              (tool) => tool.name === config.tool_name
+            )?.inputSchema;
+            if (inputSchema) {
+              const zodSchema = fromJSONSchema(inputSchema as Record<string, unknown>);
+              return (zodSchema ?? z.object({})) as z.ZodObject<any>;
+            }
+            return z.object({});
+          } catch {
+            return z.object({});
           }
-          return z.object({});
         },
 
         getLlmDescription: ({ description }) => {

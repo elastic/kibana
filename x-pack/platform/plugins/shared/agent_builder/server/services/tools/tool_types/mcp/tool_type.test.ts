@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -95,6 +96,37 @@ describe('MCP tool_type', () => {
       expect(result).toEqual(mockToolsResponse);
     });
 
+    it('should normalize a bare tools array returned by connector-spec MCP connectors', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse.tools,
+      });
+
+      const result = await listMcpTools({
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'test-connector-id',
+      });
+
+      expect(result).toEqual(mockToolsResponse);
+    });
+
+    it.each([
+      ['undefined', undefined],
+      ['an object without tools', {}],
+      ['an array of non-tool values', ['test_tool']],
+    ])('should throw when the connector returns %s', async (_label, data) => {
+      mockActionsClient.execute.mockResolvedValue({ status: 'ok', data });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow("Unexpected listTools response from connector 'test-connector-id'");
+    });
+
     it('should throw error when listTools fails', async () => {
       mockActionsClient.execute.mockResolvedValue({
         status: 'error',
@@ -146,6 +178,23 @@ describe('MCP tool_type', () => {
       mockActionsClient.execute.mockResolvedValue({
         status: 'ok',
         data: mockToolsResponse,
+      });
+
+      const result = await getNamedMcpTools({
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'test-connector-id',
+        toolNames: ['test_tool'],
+        logger: mockLogger,
+      });
+
+      expect(result).toEqual([{ name: 'test_tool', description: 'Test tool description' }]);
+    });
+
+    it('should return filtered tools when the connector returns a bare tools array', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse.tools,
       });
 
       const result = await getNamedMcpTools({
@@ -415,6 +464,48 @@ describe('MCP tool_type', () => {
         });
         expect(mockFromJSONSchema).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
         expect(schema).toBe(mockZodSchema);
+      });
+
+      it('should retrieve the input schema when the connector returns a bare tools array', async () => {
+        const toolType = getMcpToolType({ actions: mockActions });
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
+          request: mockRequest,
+          spaceId: 'default',
+        });
+
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'ok',
+          data: mockToolsResponse.tools,
+        });
+
+        const zodSchema = z.object({ query: z.string() });
+        mockFromJSONSchema.mockReturnValue(zodSchema);
+
+        const schema = await dynamicProps.getSchema();
+
+        expect(mockFromJSONSchema).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
+        expect(schema).toBe(zodSchema);
+      });
+
+      it('should return empty schema when fromJSONSchema throws', async () => {
+        const toolType = getMcpToolType({ actions: mockActions });
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
+          request: mockRequest,
+          spaceId: 'default',
+        });
+
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'ok',
+          data: mockToolsResponse,
+        });
+
+        mockFromJSONSchema.mockImplementationOnce(() => {
+          throw new Error('Unsupported JSON schema');
+        });
+
+        const schema = await dynamicProps.getSchema();
+
+        expect(schema.shape).toEqual({});
       });
 
       it('should return empty schema when listTools fails', async () => {
