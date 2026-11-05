@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
@@ -35,6 +35,8 @@ const destinationIdSchema = z
   .string()
   .max(256)
   .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/);
+
+const apiKeyIdSchema = lazySchema(() => z.string().min(1).max(256));
 
 const patternsSchema = z
   .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
@@ -145,7 +147,8 @@ const createDestinationApiKeyRoute = createServerRoute({
 });
 
 /**
- * Invalidates every recorded API key minted for a destination, whichever user created it.
+ * Invalidates one recorded API key of a destination, whichever user created it. A key that is no
+ * longer recorded has already been revoked, so that is not an error.
  */
 const deleteDestinationApiKeysRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/destinations/api_key',
@@ -157,37 +160,39 @@ const deleteDestinationApiKeysRoute = createServerRoute({
       requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      destinationId: destinationIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        destinationId: destinationIdSchema,
+        apiKeyId: apiKeyIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params, logger }) => {
     const clients = await getScopedClients({ request });
     const {
-      body: { destinationId, unitId = STREAMS_DEFAULT_UNIT_ID },
+      body: { destinationId, apiKeyId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
 
     await assertStreamsCanvasEnabled(clients.uiSettingsClient);
 
-    const isDestinationApiKey = ({
+    // Only the requested key: another key of the same destination id may be live on the stored unit.
+    const isRequestedKey = ({
+      key_id: keyId,
       component_type: componentType,
       component_id: componentId,
-    }: UnitApiKey) => componentType === 'destination' && componentId === destinationId;
+    }: UnitApiKey) =>
+      keyId === apiKeyId && componentType === 'destination' && componentId === destinationId;
 
-    const unitApiKeyService = createUnitApiKeyService({ clients, logger });
-    const selectedCount = (await unitApiKeyService.listApiKeys(unitId)).filter(
-      isDestinationApiKey
-    ).length;
-    const { revoked } = await unitApiKeyService.revokeApiKeys(unitId, isDestinationApiKey);
-    const errorCount = selectedCount - revoked.length;
-    if (errorCount > 0) {
+    const { revoked, apiKeysMayRemain } = await createUnitApiKeyService({
+      clients,
+      logger,
+    }).revokeApiKeys(unitId, isRequestedKey);
+    if (apiKeysMayRemain) {
       throw new StatusError(
-        i18n.translate('xpack.streams.destinations.invalidateApiKeysErrorMessage', {
-          defaultMessage:
-            '{errorCount, plural, one {# API key} other {# API keys}} for this destination could not be deleted.',
-          values: { errorCount },
+        i18n.translate('xpack.streams.destinations.invalidateApiKeyErrorMessage', {
+          defaultMessage: 'The API key for this destination could not be deleted.',
         }),
         500
       );

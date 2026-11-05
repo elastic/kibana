@@ -358,6 +358,7 @@ apiTest.describe('Streams V2 privileges', { tag: tags.serverless.observability.c
 
       const revoke = await request(apiClient, 'delete', DESTINATION_API_KEY_PATH, cookieHeader, {
         destinationId: DESTINATION_ID,
+        apiKeyId: keyId,
       });
       expect(revoke).toHaveStatusCode(200);
       expect(revoke.body).toStrictEqual({ invalidatedApiKeys: [keyId] });

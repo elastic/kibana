@@ -407,6 +407,33 @@ describe('destinationsStateMachine', () => {
     );
   });
 
+  it('revokes only the minted key when a local Elasticsearch create fails to save', async () => {
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+    const [[{ destinationIds }]] = parentSend.mock.calls;
+    actor.send({
+      type: 'unit.persistenceFailed',
+      destinationIds,
+      unitDefinition,
+      message: 'nope',
+      intent: 'create',
+    });
+
+    const deletes = apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'));
+    expect(deletes).toEqual([
+      [
+        'DELETE /internal/streams/destinations/api_key',
+        expect.objectContaining({
+          params: { body: { destinationId: destinationIds[0], apiKeyId: 'k', unitId: 'default' } },
+        }),
+      ],
+    ]);
+  });
+
   describe('remote Elasticsearch', () => {
     const createRemoteDestination = (formData = remoteFormData()) => {
       actor.send({ type: 'modal.openCreate' });

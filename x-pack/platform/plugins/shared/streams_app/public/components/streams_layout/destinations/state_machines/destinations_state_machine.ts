@@ -101,6 +101,8 @@ export interface PendingDestination extends DestinationSignalTargets {
 export interface DestinationCreationContext {
   formData: DestinationCreationFormData;
   pendingDestination?: PendingDestination;
+  /** Id of the key minted for the pending destination, revoked if the save fails. */
+  pendingApiKeyId?: string;
   createdDestination?: DestinationViewModel;
 }
 
@@ -505,7 +507,11 @@ export const destinationsStateMachine = setup({
         unitDestination,
       ]);
       return {
-        creationContext: { ...context.creationContext, createdDestination },
+        creationContext: {
+          ...context.creationContext,
+          pendingApiKeyId: event.output.id,
+          createdDestination,
+        },
         unitDefinition,
         persistenceError: undefined,
         apiKeyError: undefined,
@@ -949,13 +955,15 @@ const revokeDestinationApiKey = async ({
   services,
   toasts,
   destinationId,
+  apiKeyId,
 }: {
   services: DestinationApiKeyServices;
   toasts: Toasts;
   destinationId: string;
+  apiKeyId: string;
 }): Promise<void> => {
   try {
-    await services.delete(destinationId);
+    await services.delete(destinationId, apiKeyId);
   } catch {
     toasts.addWarning({
       title: i18n.translate('xpack.streams.destinations.unusedApiKeyRevokeFailedTitle', {
@@ -989,8 +997,9 @@ function createRevokePendingDestinationApiKeyAction({
 }) {
   return ({ context }: { context: DestinationsStateContext }) => {
     const destinationId = context.creationContext?.pendingDestination?.id;
-    if (destinationId) {
-      void revokeDestinationApiKey({ services, toasts, destinationId });
+    const apiKeyId = context.creationContext?.pendingApiKeyId;
+    if (destinationId && apiKeyId) {
+      void revokeDestinationApiKey({ services, toasts, destinationId, apiKeyId });
     }
   };
 }
