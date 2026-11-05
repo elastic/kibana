@@ -1,5 +1,5 @@
 {
-  "sha1": "9342a2d2d4a06a47c654dbb75c987bd6e3fab736",
+  "sha1": "e5bc4275d926c553ea8d0d033b4c543a9417bd8c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1101,7 +1101,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 145,
+        "line": 149,
         "column": 5
       }
     },
@@ -1114,7 +1114,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 158,
+        "line": 162,
         "column": 25
       }
     },
