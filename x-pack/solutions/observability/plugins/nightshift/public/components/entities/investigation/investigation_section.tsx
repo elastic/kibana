@@ -38,6 +38,7 @@ import type {
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
@@ -303,6 +304,7 @@ const SectionRows = ({
 >): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
+  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <SectionBlock paddingSize="none">
@@ -337,7 +339,12 @@ const SectionRows = ({
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
-                actions={<InvestigationCardActions investigation={investigation} />}
+                actions={
+                  <InvestigationCardActions
+                    investigation={investigation}
+                    assignees={renderAssignees(investigation)}
+                  />
+                }
               />
             )}
           </EuiFlexItem>
