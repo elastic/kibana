@@ -53,9 +53,7 @@ const setup = (
       runQuery={runQuery}
       setValue={setValue}
       source={undefined}
-      sources={{}}
       esqlVariables={undefined}
-      accentColor={undefined}
       runActions={jest.fn()}
       retry={jest.fn()}
       {...overrides}

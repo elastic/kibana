@@ -27,8 +27,6 @@ export {
   THEME_SHAPES,
   MAX_LIST_ITEMS,
   MAX_QUERY_OPTIONS,
-  ANNOTATIONS_SOURCE_SUFFIX,
-  MAX_CHART_ANNOTATIONS,
   OPTIONS_SOURCE_SUFFIX,
   MAX_HEADING_LENGTH,
   MAX_PROMPT_LENGTH,
@@ -93,7 +91,6 @@ export {
   getBindingType,
   getNodeBindings,
   getNodeChildren,
-  getAnnotationsSourceId,
   getNodeQuery,
   isEmptyDocument,
 } from './document/node_tree';
@@ -102,12 +99,10 @@ export { getDocumentIssues, type DocumentIssue } from './document/document_issue
 
 export { actionsSchema, listValueSchema, stateValueSchema } from './document/action_schemas';
 export {
-  annotationsVisibleSchema,
   badgeColorSchema,
   betterWhenSchema,
   calloutColorSchema,
   cardIconSchema,
-  chartTypeSchema,
   columnsCountSchema,
   progressColorSchema,
   progressMaxSchema,

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { readEsqlQuery, type CustomContentState } from '@kbn/custom-content-common';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  type CustomContentState,
+} from '@kbn/custom-content-common';
 import type { GenericNode } from '@kbn/custom-app-registry';
 
 /** An app as it is sent to be saved, which checks it against the components it knows. */
@@ -18,8 +22,8 @@ export interface NewAppDocument {
 const USES_PERIOD = /\?_t(?:start|end)\b/;
 
 /**
- * The app that a custom content panel is: its template and its query, as the content of an app
- * whose one component is the same. A query that uses the period gets the control of the period, as
+ * The app that a custom content panel is: its template and its query, as the state of the one
+ * embeddable of an app, which is the same panel. A query that uses the period gets the control of the period, as
  * the panel got it from the dashboard. It throws, with what is wrong, when the panel has no
  * template yet or what it holds is not something an app can.
  */
@@ -45,10 +49,13 @@ export const customContentToDocument = (state: CustomContentState): NewAppDocume
             ]
           : []),
         {
-          type: 'custom_content',
+          type: 'embeddable',
           id: 'content',
-          ...(query === undefined ? {} : { query }),
-          template: state.template,
+          embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          state: {
+            ...(state.esql_query === undefined ? {} : { esql_query: state.esql_query }),
+            template: state.template,
+          },
         },
       ],
     },

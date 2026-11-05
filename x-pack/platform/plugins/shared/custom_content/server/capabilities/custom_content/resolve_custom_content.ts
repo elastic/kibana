@@ -8,18 +8,32 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { DocumentResolution, GenericNode, ResolvableDocument } from '@kbn/custom-app-registry';
 import type { StateDeclaration } from '@kbn/custom-app-common';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  CUSTOM_CONTENT_SCRIPT_PATTERN,
+  readEsqlQuery,
+} from '@kbn/custom-content-common';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
-import type { CustomContentNode } from '../../../common/capabilities/custom_content/manifest';
 
 /** Each template is a call to a model, so one tool call can only ask for a few. */
 export const MAX_TEMPLATES_PER_CALL = 4;
 
 type Params = Array<Record<string, string | number | boolean>>;
 
-const isPrompted = (node: GenericNode): node is CustomContentNode =>
-  node.type === 'custom_content' && Boolean(node.prompt);
+interface State {
+  esql_query?: string[];
+  template?: string;
+  prompt?: string;
+  [key: string]: unknown;
+}
 
-const collectPrompted = (node: GenericNode): CustomContentNode[] => [
+/** An embeddable of custom content whose state asks for its template to be written. */
+const isPrompted = (node: GenericNode): boolean =>
+  node.type === 'embeddable' &&
+  node.embeddableType === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
+  typeof (node.state as State | undefined)?.prompt === 'string';
+
+const collectPrompted = (node: GenericNode): GenericNode[] => [
   ...(isPrompted(node) ? [node] : []),
   ...(node.children ?? []).flatMap(collectPrompted),
 ];
@@ -43,7 +57,7 @@ const replaceNodes = (
 ): GenericNode => {
   const replacement = replacements.get(node.id);
   if (replacement) return replacement;
-  // Any component that holds others: a template may be inside tabs, a card or columns as well.
+  // Any component that holds others: a panel may be inside tabs, a card or columns as well.
   if (node.children) {
     return { ...node, children: node.children.map((child) => replaceNodes(child, replacements)) };
   }
@@ -51,9 +65,9 @@ const replaceNodes = (
 };
 
 /**
- * Turns the `prompt` of each custom content component into its template, and drops the prompt.
- * The model only says what it wants; the HTML is written by the same resolver a custom content
- * panel uses, which also gives it the real columns of the query to write against. A component
+ * Turns the `prompt` in the state of each custom content panel into its template, and drops the
+ * prompt. The model only says what it wants; the HTML is written by the same resolver a custom
+ * content panel uses, which also gives it the real columns of the query to write against. A panel
  * with no prompt keeps the template it came with.
  */
 export const resolveCustomContent = async (
@@ -70,20 +84,23 @@ export const resolveCustomContent = async (
 
   const replacements = new Map<string, GenericNode>();
   for (const node of prompted) {
+    const { prompt, ...state } = node.state as State;
     try {
-      const esqlParams = getSampleParams(
-        node.query,
-        document.state as Record<string, StateDeclaration>
-      );
+      const query = readEsqlQuery(state);
+      const esqlParams = getSampleParams(query, document.state as Record<string, StateDeclaration>);
       const { template, height } = await resolver({
-        prompt: node.prompt as string,
-        esqlQuery: node.query,
-        existingTemplate: node.template?.trim() ? node.template : undefined,
+        prompt: prompt as string,
+        esqlQuery: query,
+        existingTemplate: state.template?.trim() ? state.template : undefined,
         hasExistingQuery: false,
         ...(esqlParams.length > 0 ? { esqlParams } : {}),
       });
-      const { prompt: _prompt, ...rest } = node;
-      replacements.set(node.id, { ...rest, template, height });
+      if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
+        return {
+          error: `The template of "${node.id}" has a script in it; it is shown with scripting off, so it must be plain HTML`,
+        };
+      }
+      replacements.set(node.id, { ...node, height, state: { ...state, template } });
     } catch (err) {
       return {
         error: `Could not write the template of "${node.id}": ${

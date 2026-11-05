@@ -11,6 +11,7 @@ import type { DocumentResolver } from './document_resolver';
 import type { ActionManifest } from './define_action';
 import type { ActionHandler } from './action_handler';
 import type { ActionUiProvider } from './action_ui';
+import type { CapabilityDoc } from './define_capability';
 
 export type AnyCapability = CapabilityManifest<string, z.ZodRawShape>;
 
@@ -24,6 +25,7 @@ interface Store {
   actions: Map<string, AnyAction>;
   actionHandlers: Map<string, ActionHandler>;
   actionUiProviders: Map<string, ActionUiProvider>;
+  embeddableDocs: Map<string, CapabilityDoc>;
   /** A React context, made by the first that needs it. */
   actionUiContext?: unknown;
   views: Map<string, CapabilityViewLoader>;
@@ -47,6 +49,7 @@ export const getStore = (): Store => {
     actions: new Map(),
     actionHandlers: new Map(),
     actionUiProviders: new Map(),
+    embeddableDocs: new Map(),
     views: new Map(),
     documentResolvers: [],
   };

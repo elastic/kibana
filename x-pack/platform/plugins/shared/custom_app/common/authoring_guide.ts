@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { describeCapability, listCapabilities } from '@kbn/custom-app-registry';
+import { describeCapability, listCapabilities, listEmbeddableDocs } from '@kbn/custom-app-registry';
 
 /**
  * A small app that uses every idea an agent needs: a filter that sets a value, a time range, a table whose
@@ -66,6 +66,18 @@ export const AUTHORING_GUIDE_EXAMPLE = {
   },
 } as const;
 
+/** What to know about the types of panel that plugins say something about, under the components. */
+const describeEmbeddables = (): string => {
+  const docs = listEmbeddableDocs();
+  if (docs.length === 0) return '';
+  return `\nPanels you can hold in an "embeddable" component, by "embeddableType":\n${docs
+    .map(
+      ([type, { summary, whenToUse, example }]) =>
+        `- ${type}: ${summary} ${whenToUse} Example: ${JSON.stringify(example)}`
+    )
+    .join('\n')}\n`;
+};
+
 /**
  * What an agent needs to know to build or change a custom app. It is made when it is asked for, so
  * that it says what the registry has by then, including what other plugins registered.
@@ -77,6 +89,7 @@ Look: "theme" is optional and changes every component of the app at once: { "acc
 
 Components:
 ${listCapabilities().map(describeCapability).join('\n')}
+${describeEmbeddables()}
 
 Connecting components: a value of the app ("state") is set by an input (select, button_group, switch, search, list_input, a form, a click) and read wherever a component needs it. Every component reads values in the same three ways, so any input can drive anything:
 - In a query, as ?name.
@@ -85,11 +98,13 @@ Connecting components: a value of the app ("state") is set by an input (select, 
 - Every component, of any type, can have "visibleWhen": { "$state": "name" }, which shows it only while that boolean value is true, or "visibleWhen": { "$state": "name", "equals": "details" }, which shows it only while the value is that text, number or boolean. Use it with a switch to reveal details, or with a button_group or select to show one panel at a time. A component that is not shown does not run its query.
 Examples: a switch bound to "show_details" and a card with "visibleWhen": { "$state": "show_details" }; a select "severity" with options success, warning and danger, and a badge with "color": { "$state": "severity" }.
 
-Data: each stat, chart, table and key_value carries its OWN ES|QL "query"; there is no shared data source. Choose columns and rename them inside the query (KEEP, EVAL, RENAME, STATS ... AS). Do not set sizes, spacing, colours or number formats: the app decides how it looks. Use the ES|QL tools available to you to check a query before you use it. Queries may use ?_tstart and ?_tend for the dashboard's time range.
+Data: each stat, table and key_value carries its OWN ES|QL "query"; there is no shared data source. Choose columns and rename them inside the query (KEEP, EVAL, RENAME, STATS ... AS). Do not set sizes, spacing, colours or number formats: the app decides how it looks. Use the ES|QL tools available to you to check a query before you use it. Queries may use ?_tstart and ?_tend for the dashboard's time range.
 
 Values: "state" declares the values that change as people use the app: { "name": { "type": "string" | "number" | "boolean" | "list", "default": ... } }, where a list is a list of texts, such as ["alice", "bob"], with a default of []. A name is letters, digits and underscores. A query uses a value as ?name, for example WHERE service.name == ?service, and text may show it as {{state.name}}. An input's "bind" is the name of a declared STRING value (a list_input and a select with "multiple" bind a list); for a select or button group its default must be one of its option values. A value that nothing sets is pointless, so declare only what an input binds to or a row click sets.
 
 Row click: a table's "onRowClick" is a list of actions, run in order. { "type": "setState", "key": "<value>", "value": { "fromColumn": "<column of the clicked row>" } } remembers that column in a string value; { "type": "openFlyout", "flyout": "<id of a flyout component>" } opens a flyout; { "type": "closeFlyout" } closes it. The flyout's components can use the remembered value in their queries.
+
+Charts and other panels: a chart is an "embeddable" component of type "vis", whose "state" is a Lens visualization as code, with its own ES|QL data source (for example { "type": "xy", "layers": [{ "type": "line", "data_source": { "type": "esql", "query": "..." }, "x": { "column": "bucket" }, "y": [{ "column": "requests" }] }] }); use the visualization tools you have to get that state, and do not make one up. Any other panel that a dashboard can hold (a map, markdown, a saved Discover session, custom content) is an "embeddable" with its own "embeddableType" and the state that panel has on a dashboard. A panel follows the time range and filters of the app, and an ES|QL panel can use the values of the app as ?name in its query, so a select can change a chart. To let a click on a chart set a value of the app, give the embeddable an "onClick": clicking a bar, a point or a slice runs the actions with the row of the chart behind it, so { "type": "setState", "key": "service", "value": { "fromColumn": "host" } } makes the other components follow it, as a table row click does. Keep a way to clear the value (an "All" option of a select that sets the same value). Only a Lens chart sends a click for now.
 
 Lists: a list_input is a box where people write or paste one value per line, for example the usernames of an incident; the value it binds is a list of those lines, without empty lines and repeats, at most 1000. A select with "multiple": true binds a list too. Declare the bound value with type "list" and default []. A list works in a query as one parameter that holds many values: ... | WHERE user.name IN (?users). Nothing written or chosen is an empty list, so decide what that means in the query (for example, show everything) and try it before you finish. A list is shown in text, {{state.users}}, as its values separated by commas, and a workflow takes it as a list of texts with { "fromState": "users" }. An action that sets a list from a column of a clicked row or from a bar of a chart makes a list of that one value, so a click on a bar can filter by it: use { "type": "setState", "key": "ips", "value": { "fromColumn": "client_ip" } }. A list is not kept in the address of the page, and it cannot filter cases.
 

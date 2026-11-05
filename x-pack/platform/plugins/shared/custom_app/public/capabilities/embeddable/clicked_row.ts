@@ -6,7 +6,7 @@
  */
 
 /** What Lens says was clicked: the table it drew, and where in it. */
-interface ClickedDatum {
+export interface ClickedDatum {
   table: {
     columns: ReadonlyArray<{ id: string; name: string }>;
     rows: ReadonlyArray<Record<string, unknown>>;

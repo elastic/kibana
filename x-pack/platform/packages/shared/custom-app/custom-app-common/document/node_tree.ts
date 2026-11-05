@@ -6,7 +6,7 @@
  */
 
 import { getCapability } from '@kbn/custom-app-registry';
-import { ANNOTATIONS_SOURCE_SUFFIX, OPTIONS_SOURCE_SUFFIX } from './constants';
+import { OPTIONS_SOURCE_SUFFIX } from './constants';
 import { isContainerNode, type Action, type AppNode, type DataSource } from './document_schema';
 
 /** Returns the direct children of a node, empty for leaf nodes. */
@@ -59,10 +59,6 @@ export const getNodeSource = (node: AppNode): DataSource | undefined => {
 
 /** The id the source of the options of a select is known by, which is not that of a component. */
 export const getOptionsSourceId = (nodeId: string): string => `${nodeId}${OPTIONS_SOURCE_SUFFIX}`;
-
-/** The id the source of the annotations of a chart is known by. */
-export const getAnnotationsSourceId = (nodeId: string): string =>
-  `${nodeId}${ANNOTATIONS_SOURCE_SUFFIX}`;
 
 /** Every source in the tree, by the id of the node that shows it, and of the options of a select. */
 export const collectSources = (root: AppNode): Record<string, DataSource> => {

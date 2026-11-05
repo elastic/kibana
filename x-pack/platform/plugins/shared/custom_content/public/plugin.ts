@@ -13,12 +13,10 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import { registerCapability } from '@kbn/custom-app-registry';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
-import { customContentCapability } from '../common/capabilities/custom_content/manifest';
 import { SAVE_AS_CUSTOM_APP_ACTION_ID } from '../common/capabilities/custom_content/constants';
 import { setAnalyticsSetup } from './telemetry/analytics_setup';
 
@@ -35,11 +33,6 @@ interface StartDeps {
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup, { embeddable }: SetupDeps) {
     setAnalyticsSetup(core.analytics);
-    registerCapability(customContentCapability, () =>
-      import('./capabilities/custom_content/view').then(({ CustomContentView }) => ({
-        default: CustomContentView,
-      }))
-    );
     embeddable.registerEmbeddablePublicDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, async () => {
       const { customContentEmbeddableFactory } = await import('./async_services');
       return customContentEmbeddableFactory;

@@ -42,10 +42,6 @@ export const MAX_INPUT_OPTIONS = 50;
 export const MAX_QUERY_OPTIONS = 500;
 /** What is added to the id of a select to name the source of its options, which is not a component. */
 export const OPTIONS_SOURCE_SUFFIX = ':options';
-/** The source of the annotations of a chart, which is not the one of the chart itself. */
-export const ANNOTATIONS_SOURCE_SUFFIX = ':annotations';
-/** The most annotations a chart draws; more than that is not a chart anyone can read. */
-export const MAX_CHART_ANNOTATIONS = 100;
 
 /** What a filter of the cases a component shows can hold: a search text, a tag. */
 export const MAX_CASES_FILTER_LENGTH = 256;

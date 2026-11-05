@@ -9,8 +9,7 @@ export type { CustomContentRendererServices } from './src/types';
 export type { CustomContentComponentProps } from './src/custom_content_component';
 export { CustomContentComponent } from './src/custom_content_component';
 export { CustomContentFrame } from './src/custom_content_frame';
-export type { FillingFrameProps, AutoHeightFrameProps } from './src/custom_content_frame';
-export { useTemplateHtml } from './src/use_template_html';
+export type { CustomContentFrameProps } from './src/custom_content_frame';
 export { CustomContentEmptyPrompt } from './src/custom_content_empty_prompt';
 export { useCustomContentHtml } from './src/use_custom_content_html';
 export type {

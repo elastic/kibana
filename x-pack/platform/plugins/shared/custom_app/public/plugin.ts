@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerCapability } from '@kbn/custom-app-registry';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -17,6 +18,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
+import { embeddableCapability } from '../common/capabilities/embeddable/manifest';
 import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
 import type { CustomAppByReferenceState } from '../server';
 import {
@@ -84,6 +86,11 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     });
 
     registerBuiltinCapabilities();
+    registerCapability(embeddableCapability, () =>
+      import('./capabilities/embeddable/view').then(({ EmbeddableView }) => ({
+        default: EmbeddableView,
+      }))
+    );
   }
 
   start(

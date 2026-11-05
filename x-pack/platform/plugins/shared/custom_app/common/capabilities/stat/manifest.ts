@@ -31,7 +31,8 @@ export const statCapability = defineCapability({
   doc: {
     summary:
       'One number: the FIRST column of the FIRST row of its query. With a cases source and "count": true it shows how many cases match. It needs a query or a source, and one of them only.',
-    whenToUse: 'For a single figure such as a total. For a number over time use chart.',
+    whenToUse:
+      'For a single figure such as a total. For a number over time use a chart, an embeddable of type vis.',
     example: {
       type: 'stat',
       id: 'errors',

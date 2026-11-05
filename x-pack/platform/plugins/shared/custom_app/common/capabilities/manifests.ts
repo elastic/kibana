@@ -32,6 +32,7 @@ import { metricCapability } from './metric/manifest';
 import { progressCapability } from './progress/manifest';
 import { textCapability } from './text/manifest';
 import { statCapability } from './stat/manifest';
+import { embeddableCapability } from './embeddable/manifest';
 
 /**
  * The capabilities that ship with custom apps. A new one is a folder of its own and a line here: the
@@ -56,6 +57,7 @@ export const BUILTIN_CAPABILITIES = [
   switchCapability,
   listInputCapability,
   timeRangeCapability,
+  embeddableCapability,
 ] as const;
 
 /** The capabilities that hold other components. */

@@ -51,10 +51,6 @@ export const stateRef = <T>(key: string): T => ({ $state: key } as unknown as T)
 export const calloutColorSchema = lazySchema(() =>
   z.enum(['primary', 'success', 'warning', 'danger']).default('primary')
 );
-export const chartTypeSchema = lazySchema(() =>
-  z.enum(['bar', 'line', 'area', 'donut']).optional()
-);
-export const annotationsVisibleSchema = lazySchema(() => z.boolean().default(true));
 export const betterWhenSchema = lazySchema(() => z.enum(['higher', 'lower']).default('higher'));
 export const progressMaxSchema = lazySchema(() => z.number().finite().positive().default(100));
 export const progressColorSchema = lazySchema(() => z.enum(PROGRESS_COLORS).default('primary'));

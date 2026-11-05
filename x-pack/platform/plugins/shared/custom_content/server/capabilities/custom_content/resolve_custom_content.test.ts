@@ -7,9 +7,20 @@
 
 import type { ResolvableDocument } from '@kbn/custom-app-registry';
 import { MAX_TEMPLATES_PER_CALL, resolveCustomContent } from './resolve_custom_content';
+
 const resolver = jest.fn();
 
-const asDocument = (document: unknown) => document as ResolvableDocument;
+const panel = (
+  id: string,
+  state: Record<string, unknown>,
+  extra: Record<string, unknown> = {}
+) => ({
+  type: 'embeddable',
+  id,
+  embeddableType: 'custom_content',
+  state,
+  ...extra,
+});
 
 const documentOf = (children: unknown[], state: Record<string, unknown> = {}) =>
   ({ state, root: { type: 'stack', id: 'root', children } } as ResolvableDocument);
@@ -24,28 +35,28 @@ describe('resolveCustomContent', () => {
     resolver.mockReset().mockResolvedValue({ template: '<p>written</p>', height: 360 });
   });
 
-  it('writes the template of a component that has a prompt, and drops the prompt', async () => {
+  it('writes the template of a panel that has a prompt, and drops the prompt', async () => {
     const document = documentOf([
-      { type: 'custom_content', id: 'board', query: 'FROM status', prompt: 'A status board' },
+      panel('board', { esql_query: ['FROM status'], prompt: 'A status board' }),
     ]);
 
     const [node] = childrenOf(await resolveCustomContent(document, resolver));
 
     expect(node).toEqual({
-      type: 'custom_content',
+      type: 'embeddable',
       id: 'board',
-      query: 'FROM status',
-      template: '<p>written</p>',
+      embeddableType: 'custom_content',
       height: 360,
+      state: { esql_query: ['FROM status'], template: '<p>written</p>' },
     });
     expect(resolver).toHaveBeenCalledWith(
       expect.objectContaining({ prompt: 'A status board', esqlQuery: 'FROM status' })
     );
   });
 
-  it('refines the template a component already has, instead of starting again', async () => {
+  it('refines the template a panel already has, instead of starting again', async () => {
     const document = documentOf([
-      { type: 'custom_content', id: 'board', template: '<b>old</b>', prompt: 'Make it blue' },
+      panel('board', { template: '<b>old</b>', prompt: 'Make it blue' }),
     ]);
 
     await resolveCustomContent(document, resolver);
@@ -55,46 +66,51 @@ describe('resolveCustomContent', () => {
     );
   });
 
-  it('leaves a component with no prompt as it is, and asks nobody anything', async () => {
+  it('leaves a panel with no prompt, and anything that is not custom content, as it is', async () => {
     const document = documentOf([
-      { type: 'custom_content', id: 'board', template: '<b>keep</b>' },
+      panel('board', { template: '<b>keep</b>' }),
+      { type: 'embeddable', id: 'notes', embeddableType: 'markdown', state: { prompt: 'x' } },
       { type: 'heading', id: 'title', text: 'Hi' },
     ]);
 
     const result = await resolveCustomContent(document, resolver);
 
     expect(resolver).not.toHaveBeenCalled();
-    expect(childrenOf(result)).toEqual(
-      document.root && (document.root as { children: unknown[] }).children
-    );
+    expect(childrenOf(result)).toEqual((document.root as { children: unknown[] }).children);
   });
 
-  it('finds components inside others, such as a flyout', async () => {
+  it('finds panels inside others, such as a flyout or the tab of a page', async () => {
     const document = documentOf([
       {
-        type: 'flyout',
-        id: 'detail',
-        title: 'Detail',
-        children: [{ type: 'custom_content', id: 'inner', prompt: 'A note' }],
+        type: 'tabs',
+        id: 'tabs',
+        children: [
+          {
+            type: 'section',
+            id: 'tab',
+            label: 'Board',
+            children: [
+              { type: 'card', id: 'card', children: [panel('inner', { prompt: 'A note' })] },
+            ],
+          },
+        ],
       },
     ]);
 
-    const [flyout] = childrenOf(await resolveCustomContent(document, resolver));
+    const result = await resolveCustomContent(document, resolver);
 
-    expect((flyout as { children: unknown[] }).children).toEqual([
-      expect.objectContaining({ id: 'inner', template: '<p>written</p>' }),
-    ]);
+    if ('error' in result) throw new Error(result.error);
+    expect(JSON.stringify(result.document.root)).toContain('<p>written</p>');
+    expect(JSON.stringify(result.document.root)).not.toContain('"prompt"');
   });
 
   it('tries a query that has parameters with the defaults of the values it uses', async () => {
     const document = documentOf(
       [
-        {
-          type: 'custom_content',
-          id: 'board',
-          query: 'FROM logs | WHERE service == ?service AND x == ?other',
+        panel('board', {
+          esql_query: ['FROM logs | WHERE service == ?service AND x == ?other'],
           prompt: 'Board',
-        },
+        }),
       ],
       { service: { type: 'string', default: 'cart' } }
     );
@@ -111,12 +127,10 @@ describe('resolveCustomContent', () => {
     const withList = (users: string[]) =>
       documentOf(
         [
-          {
-            type: 'custom_content',
-            id: 'board',
-            query: 'FROM logs | WHERE user.name IN (?users)',
+          panel('board', {
+            esql_query: ['FROM logs | WHERE user.name IN (?users)'],
             prompt: 'Board',
-          },
+          }),
         ],
         { users: { type: 'list', default: users } }
       );
@@ -132,11 +146,9 @@ describe('resolveCustomContent', () => {
     );
   });
 
-  it('names the component whose template could not be written', async () => {
+  it('names the panel whose template could not be written', async () => {
     resolver.mockRejectedValue(new Error('ES|QL query is invalid: Unknown column [x]'));
-    const document = documentOf([
-      { type: 'custom_content', id: 'board', query: 'FROM x', prompt: 'Board' },
-    ]);
+    const document = documentOf([panel('board', { esql_query: ['FROM x'], prompt: 'Board' })]);
 
     const result = await resolveCustomContent(document, resolver);
 
@@ -145,56 +157,25 @@ describe('resolveCustomContent', () => {
     });
   });
 
+  it('refuses a template with a script in it, which would never run in the frame it is shown in', async () => {
+    resolver.mockResolvedValue({ template: '<script>alert(1)</script>', height: 200 });
+    const document = documentOf([panel('board', { prompt: 'Board' })]);
+
+    const result = await resolveCustomContent(document, resolver);
+
+    expect(result).toEqual({ error: expect.stringContaining('has a script in it') });
+  });
+
   it('refuses to write more templates in one call than it allows', async () => {
     const document = documentOf(
-      Array.from({ length: MAX_TEMPLATES_PER_CALL + 1 }, (_unused, index) => ({
-        type: 'custom_content',
-        id: `board-${index}`,
-        prompt: 'A board',
-      }))
+      Array.from({ length: MAX_TEMPLATES_PER_CALL + 1 }, (_unused, index) =>
+        panel(`board-${index}`, { prompt: 'A board' })
+      )
     );
 
     const result = await resolveCustomContent(document, resolver);
 
     expect(result).toEqual({ error: expect.stringContaining(`Only ${MAX_TEMPLATES_PER_CALL}`) });
     expect(resolver).not.toHaveBeenCalled();
-  });
-
-  it('writes the template of a component inside any container, such as the tab of a page', async () => {
-    const document = asDocument({
-      state: {},
-      root: {
-        type: 'stack',
-        id: 'root',
-        children: [
-          {
-            type: 'tabs',
-            id: 'tabs',
-            children: [
-              {
-                type: 'section',
-                id: 'board-tab',
-                label: 'Board',
-                children: [
-                  {
-                    type: 'card',
-                    id: 'card',
-                    children: [
-                      { type: 'custom_content', id: 'board', query: 'FROM s', prompt: 'A board' },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    });
-
-    const result = await resolveCustomContent(document, resolver);
-
-    if ('error' in result) throw new Error(result.error);
-    expect(JSON.stringify(result.document.root)).toContain('<p>written</p>');
-    expect(JSON.stringify(result.document.root)).not.toContain('"prompt"');
   });
 });

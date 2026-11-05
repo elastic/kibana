@@ -16,6 +16,7 @@ import {
 import type { ActionManifest } from './define_action';
 import type { ActionHandler } from './action_handler';
 import type { ActionUiProvider } from './action_ui';
+import type { CapabilityDoc } from './define_capability';
 import type { DocumentResolver } from './document_resolver';
 
 export type { AnyAction, AnyCapability, CapabilityViewLoader };
@@ -89,3 +90,15 @@ export const getActionHandler = (id: string): ActionHandler | undefined =>
 /** The parts of actions that are drawn, for the app to put around what it shows. */
 export const listActionUiProviders = (): ReadonlyArray<readonly [string, ActionUiProvider]> =>
   Array.from(getStore().actionUiProviders.entries());
+
+/**
+ * Tells an agent what to do with a type of panel that an app can hold as an embeddable: when to use
+ * it, the state it takes and an example. The plugin that owns the panel registers it, and the
+ * panel works without it, for a person who copies its state from a dashboard.
+ */
+export const registerEmbeddableDoc = (embeddableType: string, doc: CapabilityDoc): void => {
+  getStore().embeddableDocs.set(embeddableType, doc);
+};
+
+export const listEmbeddableDocs = (): ReadonlyArray<readonly [string, CapabilityDoc]> =>
+  Array.from(getStore().embeddableDocs.entries());

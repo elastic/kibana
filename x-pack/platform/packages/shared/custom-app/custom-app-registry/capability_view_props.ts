@@ -40,12 +40,8 @@ export interface CapabilityViewProps<Node> {
   setValue: (key: string, value: string) => void;
   /** The data of the component's own query or source, which the app fetches. Absent when it has none. */
   source: CapabilitySourceState | undefined;
-  /** The data of the other sources the manifest declares for the component, by their suffix. */
-  sources: Readonly<Record<string, CapabilitySourceState>>;
   /** Fetches the data of the app again. */
   retry: () => void;
-  /** The colour the page gives to what the component draws in one colour, for the mode it is in. */
-  accentColor: string | undefined;
   /**
    * Runs the actions of the component, with the row that caused them if there is one. What cannot
    * be done is told to the person by the app, and a workflow is put to them first.

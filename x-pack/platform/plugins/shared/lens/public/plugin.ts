@@ -131,8 +131,6 @@ import { LensAppLocatorDefinition } from '../common/locator/locator';
 import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
-import { registerLensChart } from './custom_app/chart/register';
-import { setCustomAppServices } from './custom_app/chart/services';
 import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,
@@ -336,7 +334,6 @@ export class LensPlugin {
       contentManagement,
     }: LensPluginSetupDependencies
   ) {
-    registerLensChart();
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
@@ -753,7 +750,7 @@ export class LensPlugin {
       );
     }
 
-    const contract: LensPublicStart = {
+    return {
       EmbeddableComponent: LensRenderer,
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
@@ -832,9 +829,6 @@ export class LensPlugin {
         return Component;
       },
     };
-
-    setCustomAppServices({ lens: contract, dataViews: startDependencies.dataViews });
-    return contract;
   }
 
   stop() {}

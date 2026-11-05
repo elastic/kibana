@@ -11,7 +11,7 @@ const children = (state: Parameters<typeof customContentToDocument>[0]) =>
   (customContentToDocument(state).root as { children: Array<Record<string, unknown>> }).children;
 
 describe('customContentToDocument', () => {
-  it('makes an app whose one component is the content, with its query and template', () => {
+  it('makes an app whose one component is the content panel, with its query and template', () => {
     const document = customContentToDocument({
       esql_query: ['FROM status | LIMIT 5'],
       template: '<b>{{ rows.size }}</b>',
@@ -20,9 +20,9 @@ describe('customContentToDocument', () => {
     expect(document.root).toMatchObject({ type: 'stack', id: 'root' });
     expect(children({ esql_query: ['FROM status'], template: '<p>x</p>' })).toEqual([
       expect.objectContaining({
-        type: 'custom_content',
-        query: 'FROM status',
-        template: '<p>x</p>',
+        type: 'embeddable',
+        embeddableType: 'custom_content',
+        state: { esql_query: ['FROM status'], template: '<p>x</p>' },
       }),
     ]);
   });
@@ -30,8 +30,11 @@ describe('customContentToDocument', () => {
   it('keeps a panel with no query as it is, a template that is shown as written', () => {
     const [content] = children({ template: '<p>static</p>' });
 
-    expect(content).toMatchObject({ type: 'custom_content', template: '<p>static</p>' });
-    expect(content).not.toHaveProperty('query');
+    expect(content).toMatchObject({
+      type: 'embeddable',
+      state: { template: '<p>static</p>' },
+    });
+    expect(JSON.stringify(content)).not.toContain('esql_query');
   });
 
   it('gives the app the control of the period when the query uses the period of the dashboard', () => {
@@ -40,7 +43,7 @@ describe('customContentToDocument', () => {
       template: '<p>x</p>',
     });
 
-    expect(nodes.map(({ type }) => type)).toEqual(['stack', 'custom_content']);
+    expect(nodes.map(({ type }) => type)).toEqual(['stack', 'embeddable']);
     expect(JSON.stringify(nodes[0])).toContain('time_range');
   });
 

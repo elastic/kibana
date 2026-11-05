@@ -22,9 +22,11 @@ export {
   listActionUiProviders,
   listCapabilities,
   listDocumentResolvers,
+  listEmbeddableDocs,
   registerAction,
   registerCapability,
   registerDocumentResolver,
+  registerEmbeddableDoc,
 } from './capability_registry';
 export type { AnyAction, AnyCapability, CapabilityViewLoader } from './capability_registry';
 export { defineAction } from './define_action';
