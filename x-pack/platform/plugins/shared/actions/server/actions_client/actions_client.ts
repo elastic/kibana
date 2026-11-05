@@ -120,7 +120,8 @@ export interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
   connectorTypeRegistration?: {
     registerType: (
-      actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
+      actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>,
+      request: CreateConnectorTypeRequest
     ) => void;
     createTypeFromSpec: (
       spec: ConnectorSpec

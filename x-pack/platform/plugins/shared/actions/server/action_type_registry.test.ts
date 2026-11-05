@@ -73,6 +73,37 @@ describe('actionTypeRegistry', () => {
     };
   });
 
+  describe('dynamic connector type replacement', () => {
+    test('replaces the registered dynamic type without registering its task type again', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const original = getConnectorType({ id: '.dynamic', name: 'Dynamic' });
+      actionTypeRegistry.register(original);
+      actionTypeRegistry.registerDynamicConnectorType('.dynamic', {
+        id: 'dynamic',
+        displayName: 'Dynamic',
+        description: '',
+        auth: { type: 'none' },
+        config: [],
+        actions: {},
+      });
+      const replacement = { ...original, isTestable: true };
+
+      actionTypeRegistry.replaceDynamicConnectorType(replacement, {
+        id: 'dynamic',
+        displayName: 'Dynamic',
+        description: '',
+        auth: { type: 'none' },
+        config: [],
+        actions: {},
+        test: { description: 'Check', request: { method: 'GET', url: 'https://example.com' } },
+      });
+
+      expect(actionTypeRegistry.get('.dynamic').isTestable).toBe(true);
+      expect(actionTypeRegistry.getDynamicConnectorTypeDefinition('.dynamic').test).toBeDefined();
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('register()', () => {
     test('able to register connector types', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);

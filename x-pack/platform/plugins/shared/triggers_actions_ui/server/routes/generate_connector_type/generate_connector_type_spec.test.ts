@@ -9,7 +9,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createInferenceProviderError, createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerClient } from '@kbn/inference-plugin/server';
 import { GenerateConnectorTypeError } from './types';
-import { MAX_DOCUMENT_CHARS, generateConnectorTypeSpec } from './generate_connector_type_spec';
+import {
+  MAX_DOCUMENT_CHARS,
+  buildSystemPrompt,
+  generateConnectorTypeSpec,
+} from './generate_connector_type_spec';
 
 const logger = loggingSystemMock.create().get();
 
@@ -47,6 +51,15 @@ const generate = (chatComplete: jest.Mock, text = document.text) =>
   });
 
 describe('generateConnectorTypeSpec', () => {
+  it('asks for a safe test call that checks the URL and credentials when documented', () => {
+    const prompt = buildSystemPrompt();
+
+    expect(prompt).toContain('actions, test');
+    expect(prompt).toContain('authenticated, read-only GET');
+    expect(prompt).toContain('configured base URL and the selected auth method');
+    expect(prompt).toContain('omit test rather than inventing one');
+  });
+
   it('returns a spec parsed from valid JSON', async () => {
     const chatComplete = jest.fn().mockResolvedValue({ content: JSON.stringify(validSpec) });
 
@@ -55,6 +68,19 @@ describe('generateConnectorTypeSpec', () => {
     expect(chatComplete).toHaveBeenCalledWith(
       expect.objectContaining({ featureId: 'connector_builder', stream: false })
     );
+  });
+
+  it('accepts a documented lightweight connection test in the generated draft', async () => {
+    const specWithTest = {
+      ...validSpec,
+      test: {
+        description: 'Check the configured API URL and token.',
+        request: { method: 'GET', url: '{{config.baseUrl}}/me' },
+      },
+    };
+    const chatComplete = jest.fn().mockResolvedValue({ content: JSON.stringify(specWithTest) });
+
+    await expect(generate(chatComplete)).resolves.toEqual(specWithTest);
   });
 
   it('accepts JSON wrapped in a code fence', async () => {

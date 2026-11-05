@@ -42,6 +42,7 @@ interface Props {
   id: string;
   isOpen: boolean;
   onOpenChange: (id: string, isOpen: boolean) => void;
+  readOnly?: boolean;
 }
 
 const scopeOptions: Array<{ value: ConnectorTypeActionScope; text: string }> = [
@@ -196,7 +197,14 @@ const ActionSummary: React.FC<{ index: number; hasErrors: boolean; isOpen: boole
 };
 
 /** Editor for one action: identity, params, and the HTTP request it performs. */
-const ActionEditorComponent: React.FC<Props> = ({ index, onRemove, id, isOpen, onOpenChange }) => {
+const ActionEditorComponent: React.FC<Props> = ({
+  index,
+  onRemove,
+  id,
+  isOpen,
+  onOpenChange,
+  readOnly = false,
+}) => {
   const { control } = useFormContext<BuildConnectorFormData>();
   const { errors } = useFormState({ control, name: `actions.${index}` });
   const actionErrors = errors.actions?.[index];
@@ -225,141 +233,148 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove, id, isOpen, o
         buttonElement="div"
         buttonContent={<ActionSummary index={index} hasErrors={hasErrors} isOpen={isOpen} />}
         extraAction={
-          <EuiToolTip content={REMOVE_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={REMOVE_LABEL}
-              data-test-subj={`${testSubj}-remove`}
-              onClick={onRemove}
-            />
-          </EuiToolTip>
+          readOnly ? undefined : (
+            <EuiToolTip content={REMOVE_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={REMOVE_LABEL}
+                data-test-subj={`${testSubj}-remove`}
+                onClick={onRemove}
+              />
+            </EuiToolTip>
+          )
         }
         paddingSize="none"
       >
-        <EuiSpacer size="m" />
-        {actionErrors?.root?.message && (
-          <EuiFormErrorText data-test-subj={`${testSubj}-error`}>
-            {actionErrors.root.message}
-          </EuiFormErrorText>
-        )}
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem>
-            <Controller
-              name={`actions.${index}.name`}
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.buildConnectorPage.actionNameLabel',
-                    { defaultMessage: 'Name' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.triggersActionsUI.sections.buildConnectorPage.actionNameHelpText',
-                    { defaultMessage: 'Identifier a rule uses to pick this action.' }
-                  )}
-                  fullWidth
-                  isInvalid={!!error}
-                  error={error?.message}
-                >
-                  <EuiFieldText
+        <fieldset disabled={readOnly} css={{ border: 0, padding: 0, margin: 0 }}>
+          <EuiSpacer size="m" />
+          {actionErrors?.root?.message && (
+            <EuiFormErrorText data-test-subj={`${testSubj}-error`}>
+              {actionErrors.root.message}
+            </EuiFormErrorText>
+          )}
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem>
+              <Controller
+                name={`actions.${index}.name`}
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.buildConnectorPage.actionNameLabel',
+                      { defaultMessage: 'Name' }
+                    )}
+                    helpText={i18n.translate(
+                      'xpack.triggersActionsUI.sections.buildConnectorPage.actionNameHelpText',
+                      { defaultMessage: 'Identifier a rule uses to pick this action.' }
+                    )}
                     fullWidth
                     isInvalid={!!error}
-                    placeholder="create_item"
-                    data-test-subj={`${testSubj}-name`}
-                    value={field.value ?? ''}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                  />
-                </EuiFormRow>
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={scopeCellCss}>
-            <Controller
-              name={`actions.${index}.scope`}
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.buildConnectorPage.actionScopeLabel',
-                    { defaultMessage: 'Scope' }
-                  )}
-                  fullWidth
-                  isInvalid={!!error}
-                  error={error?.message}
-                >
-                  <EuiSelect
+                    error={error?.message}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      isInvalid={!!error}
+                      placeholder="create_item"
+                      data-test-subj={`${testSubj}-name`}
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      inputRef={field.ref}
+                    />
+                  </EuiFormRow>
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={scopeCellCss}>
+              <Controller
+                name={`actions.${index}.scope`}
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.buildConnectorPage.actionScopeLabel',
+                      { defaultMessage: 'Scope' }
+                    )}
                     fullWidth
                     isInvalid={!!error}
-                    options={scopeOptions}
-                    data-test-subj={`${testSubj}-scope`}
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                  />
-                </EuiFormRow>
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <Controller
-          name={`actions.${index}.description`}
-          control={control}
-          render={({ field, fieldState: { error } }) => (
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.triggersActionsUI.sections.buildConnectorPage.actionDescriptionLabel',
-                { defaultMessage: 'Description' }
-              )}
-              fullWidth
-              isInvalid={!!error}
-              error={error?.message}
-            >
-              <EuiFieldText
+                    error={error?.message}
+                  >
+                    <EuiSelect
+                      fullWidth
+                      isInvalid={!!error}
+                      options={scopeOptions}
+                      data-test-subj={`${testSubj}-scope`}
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      inputRef={field.ref}
+                    />
+                  </EuiFormRow>
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <Controller
+            name={`actions.${index}.description`}
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.actionDescriptionLabel',
+                  { defaultMessage: 'Description' }
+                )}
                 fullWidth
                 isInvalid={!!error}
-                data-test-subj={`${testSubj}-description`}
-                value={field.value ?? ''}
-                onChange={(e) => field.onChange(e.target.value)}
-                onBlur={field.onBlur}
-                inputRef={field.ref}
+                error={error?.message}
+              >
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={!!error}
+                  data-test-subj={`${testSubj}-description`}
+                  value={field.value ?? ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  inputRef={field.ref}
+                />
+              </EuiFormRow>
+            )}
+          />
+          <EuiSpacer size="xl" />
+          <FieldListEditor
+            name={`actions.${index}.input`}
+            title={i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.paramsTitle',
+              {
+                defaultMessage: 'Params',
+              }
+            )}
+            description={PARAMS_DESCRIPTION}
+            tooltipContent={PARAMS_TOOLTIP}
+            addButtonLabel={i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.addParamButtonLabel',
+              { defaultMessage: 'Add param' }
+            )}
+            testSubjPrefix={`${testSubj}-input`}
+          />
+          <EuiSpacer size="xl" />
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.buildConnectorPage.requestTitle"
+                defaultMessage="Request"
               />
-            </EuiFormRow>
-          )}
-        />
-        <EuiSpacer size="xl" />
-        <FieldListEditor
-          name={`actions.${index}.input`}
-          title={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.paramsTitle', {
-            defaultMessage: 'Params',
-          })}
-          description={PARAMS_DESCRIPTION}
-          tooltipContent={PARAMS_TOOLTIP}
-          addButtonLabel={i18n.translate(
-            'xpack.triggersActionsUI.sections.buildConnectorPage.addParamButtonLabel',
-            { defaultMessage: 'Add param' }
-          )}
-          testSubjPrefix={`${testSubj}-input`}
-        />
-        <EuiSpacer size="xl" />
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.buildConnectorPage.requestTitle"
-              defaultMessage="Request"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <RequestEditor
-          requestPath={`actions.${index}.request`}
-          testSubj={testSubj}
-          actionIndex={index}
-        />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <RequestEditor
+            requestPath={`actions.${index}.request`}
+            testSubj={testSubj}
+            actionIndex={index}
+          />
+        </fieldset>
       </EuiAccordion>
     </EuiPanel>
   );

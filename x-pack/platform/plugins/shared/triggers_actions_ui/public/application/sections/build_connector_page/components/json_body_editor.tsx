@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useContext, useMemo } from 'react';
 import { EuiButtonIcon, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CodeEditorProps } from '@kbn/code-editor';
@@ -13,6 +13,7 @@ import { useController, useFormContext } from 'react-hook-form';
 import type { BuildConnectorFormData, RequestPath } from '../types';
 import { formatJson, parseJsonObject } from '../lib/json_body';
 import { ResizableCodeEditor } from './resizable_code_editor';
+import { ConnectorTypeReadOnlyContext } from './connector_type_read_only_context';
 
 interface Props {
   requestPath: RequestPath;
@@ -47,6 +48,7 @@ const JsonBodyEditorComponent: React.FC<Props> = ({
     fieldState: { error },
   } = useController({ control, name: `${requestPath}.body` });
   const value = field.value ?? '';
+  const isReadOnly = useContext(ConnectorTypeReadOnlyContext);
   const syntaxError = useMemo(() => parseJsonObject(value).error, [value]);
   const message = syntaxError ?? error?.message;
 
@@ -61,7 +63,7 @@ const JsonBodyEditorComponent: React.FC<Props> = ({
             iconType="brush"
             size="xs"
             aria-label={BEAUTIFY_LABEL}
-            isDisabled={!value.trim() || !!syntaxError}
+            isDisabled={isReadOnly || !value.trim() || !!syntaxError}
             onClick={() => field.onChange(formatJson(value))}
             data-test-subj={`${testSubj}-beautify`}
           />
@@ -100,7 +102,7 @@ const JsonBodyEditorComponent: React.FC<Props> = ({
         onChange={field.onChange}
         defaultHeight={160}
         minHeight={100}
-        options={EDITOR_OPTIONS}
+        options={isReadOnly ? { ...EDITOR_OPTIONS, readOnly: true } : EDITOR_OPTIONS}
         onBlur={field.onBlur}
         dataTestSubj={`${testSubj}-editor`}
       />

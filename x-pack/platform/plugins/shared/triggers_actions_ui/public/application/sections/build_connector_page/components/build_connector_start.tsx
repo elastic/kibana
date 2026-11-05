@@ -8,10 +8,12 @@
 import React, { useState } from 'react';
 import {
   EuiBadge,
+  EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -21,16 +23,33 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
+import type { DynamicConnectorType } from '../../../lib/action_connector_api/dynamic_connector_types';
 import { AiAssistantPanel } from './ai_assistant_panel';
 import { YamlImportPanel } from './yaml_import_panel';
 
 interface Props {
   onApply: (definition: Partial<CreateConnectorTypeRequest>) => void;
   onStartFromScratch: () => void;
+  dynamicConnectorTypes: DynamicConnectorType[];
+  dynamicConnectorTypesLoading: boolean;
+  dynamicConnectorTypesError?: string;
+  onRetryDynamicConnectorTypes: () => void;
+  onEdit: (connectorType: DynamicConnectorType) => void;
+  editingDefinitionLoading?: boolean;
 }
 
-export const BuildConnectorStart: React.FC<Props> = ({ onApply, onStartFromScratch }) => {
+export const BuildConnectorStart: React.FC<Props> = ({
+  onApply,
+  onStartFromScratch,
+  dynamicConnectorTypes,
+  dynamicConnectorTypesLoading,
+  dynamicConnectorTypesError,
+  onRetryDynamicConnectorTypes,
+  onEdit,
+  editingDefinitionLoading = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [showYamlImport, setShowYamlImport] = useState(false);
 
@@ -167,6 +186,81 @@ export const BuildConnectorStart: React.FC<Props> = ({ onApply, onStartFromScrat
             <EuiSpacer size="m" />
             <YamlImportPanel onApply={onApply} />
           </EuiPanel>
+        </>
+      )}
+      {(dynamicConnectorTypesLoading ||
+        dynamicConnectorTypesError ||
+        dynamicConnectorTypes.length > 0) && (
+        <>
+          <EuiSpacer size="xl" />
+          <section data-test-subj="created-types-section">
+            <EuiTitle size="s">
+              <h2>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.createdTypesTitle',
+                  { defaultMessage: 'Created connector types' }
+                )}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiPanel hasBorder paddingSize="m">
+              {dynamicConnectorTypesLoading ? (
+                <EuiLoadingSpinner
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.buildConnectorPage.loadingTypes',
+                    { defaultMessage: 'Loading connector types' }
+                  )}
+                />
+              ) : dynamicConnectorTypesError ? (
+                <>
+                  <KbnDangerCallout
+                    announceOnMount
+                    size="s"
+                    title={dynamicConnectorTypesError}
+                    data-test-subj="created-types-error"
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    size="s"
+                    onClick={onRetryDynamicConnectorTypes}
+                    data-test-subj="created-types-retry"
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.buildConnectorPage.retryTypes',
+                      {
+                        defaultMessage: 'Retry',
+                      }
+                    )}
+                  </EuiButton>
+                </>
+              ) : (
+                dynamicConnectorTypes.map((connectorType) => (
+                  <EuiFlexGroup key={connectorType.id} alignItems="center" responsive={false}>
+                    <EuiFlexItem>
+                      <EuiText>
+                        <strong>{connectorType.name}</strong> <span>({connectorType.id})</span>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        isLoading={editingDefinitionLoading}
+                        isDisabled={editingDefinitionLoading}
+                        onClick={() => onEdit(connectorType)}
+                        data-test-subj={`edit-dynamic-connector-${connectorType.id}`}
+                      >
+                        {i18n.translate(
+                          'xpack.triggersActionsUI.sections.buildConnectorPage.editType',
+                          { defaultMessage: 'Edit' }
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))
+              )}
+            </EuiPanel>
+          </section>
         </>
       )}
     </EuiPageTemplate.Section>

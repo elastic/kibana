@@ -25,7 +25,7 @@ import { createEmptyAction } from '../lib/form_serializers';
 const MAX_INITIALLY_OPEN_ACTIONS = 3;
 
 /** The list of actions a connector type offers; one is shown by default. Its step names it. */
-const ActionListEditorComponent: React.FC = () => {
+const ActionListEditorComponent: React.FC<{ readOnly?: boolean }> = ({ readOnly = false }) => {
   const { control } = useFormContext<BuildConnectorFormData>();
   const { fields, append, remove } = useFieldArray({ control, name: 'actions' });
   const { errors } = useFormState({ control, name: 'actions' });
@@ -92,6 +92,7 @@ const ActionListEditorComponent: React.FC = () => {
             id={item.id}
             isOpen={!collapsedIds.has(item.id)}
             onOpenChange={setOpen}
+            readOnly={readOnly}
           />
         </React.Fragment>
       ))}
@@ -101,19 +102,21 @@ const ActionListEditorComponent: React.FC = () => {
         </EuiFormErrorText>
       )}
       <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        size="s"
-        iconType="plusCircle"
-        onClick={() => append(createEmptyAction())}
-        data-test-subj="buildConnectorActions-add"
-      >
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorPage.addActionButtonLabel',
-          {
-            defaultMessage: 'Add action',
-          }
-        )}
-      </EuiButtonEmpty>
+      {!readOnly && (
+        <EuiButtonEmpty
+          size="s"
+          iconType="plusCircle"
+          onClick={() => append(createEmptyAction())}
+          data-test-subj="buildConnectorActions-add"
+        >
+          {i18n.translate(
+            'xpack.triggersActionsUI.sections.buildConnectorPage.addActionButtonLabel',
+            {
+              defaultMessage: 'Add action',
+            }
+          )}
+        </EuiButtonEmpty>
+      )}
     </div>
   );
 };

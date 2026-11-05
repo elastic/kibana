@@ -26,7 +26,7 @@ export const buildSystemPrompt = (): string =>
   [
     'You draft a Kibana HTTP connector type from API documentation.',
     'Return only a JSON object. No prose and no markdown fences.',
-    'Use these keys only: id, displayName, description, config, auth, actions.',
+    'Use these keys only: id, displayName, description, config, auth, actions, test.',
     'id is a bare identifier: lowercase letters, digits, "_" and "-", max 127, no leading dot.',
     'displayName is 1 to 512 characters. description is at most 1000 characters.',
     'config is an array of at most 50 fields with unique names.',
@@ -49,6 +49,11 @@ export const buildSystemPrompt = (): string =>
     'When request.path contains the API path, the baseUrl default should be the URL origin only, without that path.',
     'Secrets: basic uses username and password, bearer uses token, api_key_header uses apiKey.',
     'Describe only endpoints that the documentation describes. Do not invent actions.',
+    'When the documentation supports it, include test: { description?, request }. Use the same request shape as an action, but no input fields.',
+    'The test checks that the configured URL and credentials work. Prefer a documented, authenticated, read-only GET such as a current-user, account, or status endpoint that requires authentication.',
+    'Keep the test light: avoid writes, deletes, costly searches, and calls that need a resource ID. If using a documented list endpoint, use a documented small page size.',
+    'Use the configured base URL and the selected auth method. Do not put credential values in the test request or invent an auth header.',
+    'If the documentation has no safe, light read-only call, omit test rather than inventing one. A public health check alone cannot verify credentials.',
   ].join('\n');
 
 /** Places truncated documentation in the user message, never in the system prompt. */

@@ -76,7 +76,9 @@ const nestedFieldCss = css({ paddingLeft: 24, paddingBottom: 4 });
 const authListCss = css({ display: 'flex', flexDirection: 'column', gap: 8 });
 
 /** Name, ID, description and authentication of the connector type. */
-const ConnectorDetailsFieldsComponent: React.FC = () => {
+const ConnectorDetailsFieldsComponent: React.FC<{ metadataOnly?: boolean }> = ({
+  metadataOnly = false,
+}) => {
   const { control, setValue } = useFormContext<BuildConnectorFormData>();
   const { isSubmitted } = useFormState({ control });
   const [displayName, id] = useWatch({
@@ -87,6 +89,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
 
   // Keep the ID in sync with the name until the user customizes it, mirroring the connector form.
   useEffect(() => {
+    if (metadataOnly) return;
     const expectedId = toConnectorTypeId(previousDisplayName.current);
     previousDisplayName.current = displayName ?? '';
 
@@ -99,7 +102,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
     if (nextId !== (id ?? '')) {
       setValue('id', nextId, { shouldDirty: true, shouldValidate: isSubmitted });
     }
-  }, [displayName, id, isSubmitted, setValue]);
+  }, [displayName, id, isSubmitted, metadataOnly, setValue]);
 
   return (
     <>
@@ -157,6 +160,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
                   isInvalid={!!error}
                   data-test-subj="buildConnectorIdInput"
                   value={field.value}
+                  disabled={metadataOnly}
                   onChange={(e) => field.onChange(e.target.value)}
                   onBlur={field.onBlur}
                   inputRef={field.ref}
@@ -242,6 +246,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
                           </>
                         }
                         checked={isChecked}
+                        disabled={metadataOnly}
                         onChange={() => toggle(value)}
                         onBlur={field.onBlur}
                         data-test-subj={`buildConnectorAuthType-${value}`}
@@ -270,6 +275,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
                                   placeholder="X-API-Key"
                                   data-test-subj="buildConnectorAuthHeaderNameInput"
                                   value={headerField.value ?? ''}
+                                  disabled={metadataOnly}
                                   onChange={(e) => headerField.onChange(e.target.value)}
                                   onBlur={headerField.onBlur}
                                   inputRef={headerField.ref}

@@ -33,6 +33,7 @@ import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { connectorPublicKeysRoutes } from './connector_public_keys';
 import { inboundEventsRoute } from './inbound_events';
 import { createConnectorTypeRoute } from './connector/create_connector_type';
+import { dynamicConnectorTypesRoutes } from './connector/dynamic_types';
 
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
@@ -86,6 +87,7 @@ export function defineRoutes(opts: RouteOptions) {
   getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
 
   createConnectorTypeRoute(router, licenseState);
+  dynamicConnectorTypesRoutes(router, licenseState);
 
   // Only register when `xpack.actions.inboundEvents.enabled` — absent when off (not 403).
   if (inboundEvents) {

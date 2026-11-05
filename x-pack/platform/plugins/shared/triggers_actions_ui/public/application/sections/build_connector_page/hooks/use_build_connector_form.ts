@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useForm } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
@@ -34,6 +35,8 @@ export interface UseBuildConnectorFormReturnValue {
   onApplyDefinition: (connectorType: Partial<CreateConnectorTypeRequest>) => void;
   /** Validates the form and, if it passes, registers the connector type. */
   submit: () => Promise<void>;
+  /** Loads a pending logo URL. Validation can be skipped when saving metadata only. */
+  loadPendingLogo: (validateOnError?: boolean) => Promise<boolean>;
 }
 
 /** Form state and submit flow of the connector type builder page. */
@@ -57,6 +60,7 @@ export const useBuildConnectorForm = ({
     formState: { isSubmitting: isSubmittingForm },
   } = methods;
   const [isLoadingLogo, setIsLoadingLogo] = useState(false);
+  const logoRequestId = useRef(0);
   const {
     isLoading: isSaving,
     createConnectorType,
@@ -83,23 +87,62 @@ export const useBuildConnectorForm = ({
   );
 
   // A logo URL that the field has not loaded yet is read here, so saving never needs a separate step.
-  const loadPendingLogo = useCallback(async (): Promise<boolean> => {
-    const [logoUrl, icon] = getValues(['logoUrl', 'icon']);
-    const url = logoUrl.trim();
-    if (icon || !isHttpUrl(url)) return true;
-    setIsLoadingLogo(true);
-    try {
-      const { icon: loadedIcon } = await fetchConnectorTypeLogo({ http, url });
-      setValue('icon', loadedIcon, { shouldDirty: true });
-      return true;
-    } catch (error) {
-      await trigger();
-      setError('logoUrl', { type: 'manual', message: getLogoErrorMessage(error) });
-      return false;
-    } finally {
-      setIsLoadingLogo(false);
-    }
-  }, [getValues, http, setError, setValue, trigger]);
+  const loadPendingLogo = useCallback(
+    async (validateOnError = true): Promise<boolean> => {
+      const [logoUrl, icon] = getValues(['logoUrl', 'icon']);
+      const url = logoUrl.trim();
+      if (icon || !url) return true;
+      if (!isHttpUrl(url)) {
+        if (!validateOnError) {
+          setError('logoUrl', {
+            type: 'manual',
+            message: i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.logo.invalidUrl',
+              { defaultMessage: 'Enter a valid public image URL.' }
+            ),
+          });
+          return false;
+        }
+        return true;
+      }
+      const requestId = ++logoRequestId.current;
+      setIsLoadingLogo(true);
+      try {
+        const { icon: loadedIcon } = await fetchConnectorTypeLogo({ http, url });
+        if (requestId !== logoRequestId.current) return false;
+        if (getValues('logoUrl').trim() !== url) {
+          setError('logoUrl', {
+            type: 'manual',
+            message: i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.logo.changedWhileLoading',
+              { defaultMessage: 'The logo URL changed while it was loading. Save again.' }
+            ),
+          });
+          return false;
+        }
+        setValue('icon', loadedIcon, { shouldDirty: true });
+        return true;
+      } catch (error) {
+        if (requestId !== logoRequestId.current) return false;
+        if (getValues('logoUrl').trim() !== url) {
+          setError('logoUrl', {
+            type: 'manual',
+            message: i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.logo.changedWhileLoading',
+              { defaultMessage: 'The logo URL changed while it was loading. Save again.' }
+            ),
+          });
+          return false;
+        }
+        setError('logoUrl', { type: 'manual', message: getLogoErrorMessage(error) });
+        if (validateOnError) await trigger('logoUrl');
+        return false;
+      } finally {
+        if (requestId === logoRequestId.current) setIsLoadingLogo(false);
+      }
+    },
+    [getValues, http, setError, setValue, trigger]
+  );
 
   const submit = useCallback(async () => {
     if (await loadPendingLogo()) {
@@ -116,5 +159,6 @@ export const useBuildConnectorForm = ({
     createConnectorTypeError,
     onApplyDefinition,
     submit,
+    loadPendingLogo,
   };
 };

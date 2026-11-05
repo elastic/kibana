@@ -66,7 +66,8 @@ describe('createConnectorType with real spec conversion', () => {
       })
     ).toEqual({ id: '.acme' });
     expect(registerType).toHaveBeenCalledWith(
-      expect.objectContaining({ id: '.acme', minimumLicenseRequired: 'enterprise' })
+      expect.objectContaining({ id: '.acme', minimumLicenseRequired: 'enterprise' }),
+      expect.objectContaining({ id: 'acme', displayName: 'Acme' })
     );
     const registeredSpec = registerType.mock.calls[0][0].spec;
     expect(getMeta(registeredSpec.schema.shape.baseUrl)).toMatchObject({ label: 'Base URL' });

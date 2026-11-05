@@ -91,7 +91,7 @@ describe('createConnectorType', () => {
         actions: expect.objectContaining({ getItem: expect.any(Object) }),
       })
     );
-    expect(registerType).toHaveBeenCalledWith({ id: '.dynamic_type' });
+    expect(registerType).toHaveBeenCalledWith({ id: '.dynamic_type' }, request);
   });
 
   it('rejects duplicate connector type ids', () => {

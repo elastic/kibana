@@ -100,7 +100,7 @@ const appendPath = (baseUrl: string, path: string): string => {
   return `${url.origin}${url.pathname.replace(/\/+$/, '')}${path}`;
 };
 
-const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
+export const toDynamicConnectorTypeSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
   const configShape = Object.fromEntries(
     request.config.map((field) => [field.name, fieldToZodSchema(field)])
   );
@@ -175,11 +175,12 @@ export const createConnectorType = ({
     spec: ConnectorSpec
   ) => ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>;
   registerType: (
-    actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
+    actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>,
+    request: CreateConnectorTypeRequest
   ) => void;
   request: CreateConnectorTypeRequest;
 }): { id: string } => {
-  const spec = toSpec({
+  const spec = toDynamicConnectorTypeSpec({
     ...request,
     id: `.${request.id}`,
   });
@@ -187,6 +188,6 @@ export const createConnectorType = ({
     throw Boom.conflict(`Connector type "${spec.metadata.id}" is already registered.`);
   }
   const actionType = createTypeFromSpec(spec);
-  registerType(actionType);
+  registerType(actionType, request);
   return { id: spec.metadata.id };
 };

@@ -27,6 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AppHeader } from '@kbn/app-header';
 import { FormProvider } from 'react-hook-form';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
+import type { DynamicConnectorType } from '../../../lib/action_connector_api/dynamic_connector_types';
+import {
+  fetchDynamicConnectorTypeDefinition,
+  fetchDynamicConnectorTypes,
+  updateDynamicConnectorTypeEditable,
+} from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { routeToConnectors } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
@@ -37,8 +43,9 @@ import { ConfigFieldListEditor } from './config_field_list_editor';
 import { ConnectionTestEditor } from './connection_test_editor';
 import { ConnectorDetailsFields } from './connector_details_fields';
 import { BuildConnectorStart } from './build_connector_start';
+import { ConnectorTypeReadOnlyContext } from './connector_type_read_only_context';
 import { useBuildConnectorForm } from '../hooks/use_build_connector_form';
-import { getEmptyFormData } from '../lib/form_serializers';
+import { formDataToRequest, getEmptyFormData, requestToFormData } from '../lib/form_serializers';
 
 /** Router state the connectors list passes along when a draft was handed off from chat. */
 export interface BuildConnectorPageLocationState {
@@ -73,6 +80,35 @@ export const BuildConnectorPage: React.FC = () => {
   const [hasPrefilledDefinition, setHasPrefilledDefinition] = useState(
     Boolean(state?.initialDefinition)
   );
+  const [dynamicConnectorTypes, setDynamicConnectorTypes] = useState<DynamicConnectorType[]>([]);
+  const [dynamicConnectorTypesLoading, setDynamicConnectorTypesLoading] = useState(true);
+  const [dynamicConnectorTypesError, setDynamicConnectorTypesError] = useState<string>();
+  const [editingConnectorType, setEditingConnectorType] = useState<DynamicConnectorType>();
+  const [metadataSaving, setMetadataSaving] = useState(false);
+  const [metadataError, setMetadataError] = useState<string>();
+  const [editingDefinitionLoading, setEditingDefinitionLoading] = useState(false);
+  const { http } = useKibana().services;
+
+  const refreshDynamicTypes = useCallback(async () => {
+    setDynamicConnectorTypesLoading(true);
+    setDynamicConnectorTypesError(undefined);
+    try {
+      const connectorTypes = await fetchDynamicConnectorTypes({ http });
+      setDynamicConnectorTypes(Array.isArray(connectorTypes) ? connectorTypes : []);
+    } catch {
+      setDynamicConnectorTypesError(
+        i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.loadTypesError', {
+          defaultMessage: 'Unable to load created connector types.',
+        })
+      );
+    } finally {
+      setDynamicConnectorTypesLoading(false);
+    }
+  }, [http]);
+
+  useEffect(() => {
+    void refreshDynamicTypes();
+  }, [refreshDynamicTypes]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -83,12 +119,23 @@ export const BuildConnectorPage: React.FC = () => {
   }, [chrome, setBreadcrumbs]);
 
   const goToConnectors = useCallback(() => history.push(routeToConnectors), [history]);
-  const { methods, isSaving, isSubmitting, createConnectorTypeError, onApplyDefinition, submit } =
-    useBuildConnectorForm({
-      onCreated: goToConnectors,
-      initialDefinition: state?.initialDefinition,
-    });
+  const {
+    methods,
+    isSaving,
+    isSubmitting,
+    createConnectorTypeError,
+    onApplyDefinition,
+    submit,
+    loadPendingLogo,
+  } = useBuildConnectorForm({
+    onCreated: async () => {
+      await refreshDynamicTypes();
+      goToConnectors();
+    },
+    initialDefinition: state?.initialDefinition,
+  });
   const { errors, isSubmitted } = methods.formState;
+  const isEditMode = Boolean(editingConnectorType);
 
   const openEditorWithDefinition = useCallback(
     (definition: Partial<CreateConnectorTypeRequest>) => {
@@ -98,6 +145,83 @@ export const BuildConnectorPage: React.FC = () => {
     },
     [onApplyDefinition]
   );
+
+  const openMetadataEditor = useCallback(
+    async (connectorType: DynamicConnectorType) => {
+      setEditingDefinitionLoading(true);
+      setMetadataError(undefined);
+      try {
+        const definition = await fetchDynamicConnectorTypeDefinition({
+          http,
+          id: connectorType.id,
+        });
+        methods.reset(requestToFormData(definition));
+        setEditingConnectorType(connectorType);
+        setHasPrefilledDefinition(true);
+        setShowEditor(true);
+      } catch {
+        setDynamicConnectorTypesError(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.buildConnectorPage.loadDefinitionError',
+            {
+              defaultMessage: 'Unable to load this connector type definition.',
+            }
+          )
+        );
+      } finally {
+        setEditingDefinitionLoading(false);
+      }
+    },
+    [http, methods]
+  );
+
+  const saveMetadata = useCallback(async () => {
+    if (!editingConnectorType) return;
+    setMetadataSaving(true);
+    setMetadataError(undefined);
+    try {
+      if (!(await loadPendingLogo(false))) return;
+      const { displayName, description, icon } = methods.getValues();
+      if (!displayName.trim() || displayName.length > 512 || description.length > 1000) {
+        setMetadataError(
+          i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.invalidMetadata', {
+            defaultMessage:
+              'Name is required and must be at most 512 characters. Description must be at most 1000 characters.',
+          })
+        );
+        return;
+      }
+      await updateDynamicConnectorTypeEditable({
+        http,
+        id: editingConnectorType.id,
+        displayName,
+        description,
+        icon: icon || undefined,
+        test: formDataToRequest(methods.getValues()).test,
+      });
+      setEditingConnectorType(undefined);
+      await refreshDynamicTypes();
+      goToConnectors();
+    } catch (error) {
+      setMetadataError(
+        typeof error === 'object' && error !== null && 'body' in error
+          ? String(
+              (error as { body?: { message?: string } }).body?.message ??
+                'Unable to update connector type metadata.'
+            )
+          : 'Unable to update connector type metadata.'
+      );
+    } finally {
+      setMetadataSaving(false);
+    }
+  }, [editingConnectorType, http, goToConnectors, loadPendingLogo, methods, refreshDynamicTypes]);
+
+  const backFromEdit = useCallback(() => {
+    setEditingConnectorType(undefined);
+    setShowEditor(false);
+    setHasPrefilledDefinition(false);
+    setMetadataError(undefined);
+  }, []);
 
   const startFromScratch = useCallback(() => {
     methods.reset(getEmptyFormData());
@@ -163,7 +287,7 @@ export const BuildConnectorPage: React.FC = () => {
               {errors.root.message}
             </EuiFormErrorText>
           )}
-          <ConnectorDetailsFields />
+          <ConnectorDetailsFields metadataOnly={isEditMode} />
         </>
       ),
     },
@@ -171,19 +295,29 @@ export const BuildConnectorPage: React.FC = () => {
       title: STEP_TITLES.config,
       status: stepStatus(stepErrors[1]),
       'data-test-subj': 'build-connector-page-step-config',
-      children: <ConfigFieldListEditor />,
+      children: (
+        <fieldset disabled={isEditMode} css={{ border: 0, padding: 0, margin: 0 }}>
+          <ConfigFieldListEditor />
+        </fieldset>
+      ),
     },
     {
       title: STEP_TITLES.actions,
       status: stepStatus(stepErrors[2]),
       'data-test-subj': 'build-connector-page-step-actions',
-      children: <ActionListEditor />,
+      children: <ActionListEditor readOnly={isEditMode} />,
     },
     {
       title: STEP_TITLES.test,
       status: stepStatus(stepErrors[3]),
       'data-test-subj': 'build-connector-page-step-test',
-      children: <ConnectionTestEditor />,
+      children: (
+        <ConnectorTypeReadOnlyContext.Provider value={false}>
+          <fieldset css={{ border: 0, padding: 0, margin: 0 }}>
+            <ConnectionTestEditor />
+          </fieldset>
+        </ConnectorTypeReadOnlyContext.Provider>
+      ),
     },
   ];
 
@@ -200,10 +334,26 @@ export const BuildConnectorPage: React.FC = () => {
             : undefined
         }
         back={{
-          href: history.createHref({ pathname: routeToConnectors }),
-          label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.backLabel', {
-            defaultMessage: 'Connectors',
+          href: history.createHref({
+            pathname: showEditor ? history.location.pathname : routeToConnectors,
           }),
+          label: showEditor
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.buildConnectorPage.backToBuilderStartLabel',
+                { defaultMessage: 'Connector type builder' }
+              )
+            : i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.backLabel', {
+                defaultMessage: 'Connectors',
+              }),
+          ...(showEditor
+            ? {
+                onClick: (event) => {
+                  event.preventDefault();
+                  if (isEditMode) backFromEdit();
+                  else void backToStart();
+                },
+              }
+            : {}),
         }}
         spacing="bleed"
       />
@@ -212,7 +362,7 @@ export const BuildConnectorPage: React.FC = () => {
         <>
           <EuiPageTemplate.Section grow={false} paddingSize="none" restrictWidth>
             <EuiButtonEmpty
-              onClick={backToStart}
+              onClick={isEditMode ? backFromEdit : backToStart}
               isDisabled={isSaving}
               data-test-subj="build-connector-page-back-to-start"
             >
@@ -233,9 +383,25 @@ export const BuildConnectorPage: React.FC = () => {
               data-test-subj="build-connector-page-api-error"
             />
             <FormProvider {...methods}>
-              <EuiForm data-test-subj="build-connector-form">
-                <EuiSteps headingElement="h2" steps={steps} />
-              </EuiForm>
+              <ConnectorTypeReadOnlyContext.Provider value={isEditMode}>
+                <EuiForm data-test-subj="build-connector-form">
+                  {metadataError && <EuiFormErrorText>{metadataError}</EuiFormErrorText>}
+                  {isEditMode && (
+                    <EuiText size="s" color="subdued">
+                      <p>
+                        {i18n.translate(
+                          'xpack.triggersActionsUI.sections.buildConnectorPage.readOnlyDefinitionMessage',
+                          {
+                            defaultMessage:
+                              'The connector ID, authentication, configuration fields and actions cannot be changed after creation.',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  )}
+                  <EuiSteps headingElement="h2" steps={steps} />
+                </EuiForm>
+              </ConnectorTypeReadOnlyContext.Provider>
             </FormProvider>
           </EuiPageTemplate.Section>
           <EuiPageTemplate.Section
@@ -251,7 +417,7 @@ export const BuildConnectorPage: React.FC = () => {
               gutterSize="s"
               responsive={false}
             >
-              {invalidStepCount > 0 && (
+              {!isEditMode && invalidStepCount > 0 && (
                 <EuiFlexItem>
                   <EuiText
                     size="s"
@@ -268,7 +434,7 @@ export const BuildConnectorPage: React.FC = () => {
               )}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  onClick={goToConnectors}
+                  onClick={isEditMode ? backFromEdit : goToConnectors}
                   isDisabled={isSaving}
                   data-test-subj="build-connector-page-cancel-btn"
                 >
@@ -282,13 +448,14 @@ export const BuildConnectorPage: React.FC = () => {
                 <EuiButton
                   fill
                   color="primary"
-                  isLoading={isSaving || isSubmitting}
-                  onClick={submit}
+                  isLoading={isEditMode ? metadataSaving || isSubmitting : isSaving || isSubmitting}
+                  onClick={isEditMode ? saveMetadata : submit}
                   data-test-subj="build-connector-page-save-btn"
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.buildConnectorPage.saveButtonLabel"
-                    defaultMessage="Save"
+                    defaultMessage="{isEditMode, select, true {Save changes} other {Save}}"
+                    values={{ isEditMode: isEditMode ? 'true' : 'false' }}
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -299,6 +466,12 @@ export const BuildConnectorPage: React.FC = () => {
         <BuildConnectorStart
           onApply={openEditorWithDefinition}
           onStartFromScratch={startFromScratch}
+          dynamicConnectorTypes={dynamicConnectorTypes}
+          dynamicConnectorTypesLoading={dynamicConnectorTypesLoading}
+          dynamicConnectorTypesError={dynamicConnectorTypesError}
+          onRetryDynamicConnectorTypes={refreshDynamicTypes}
+          onEdit={openMetadataEditor}
+          editingDefinitionLoading={editingDefinitionLoading}
         />
       )}
     </>

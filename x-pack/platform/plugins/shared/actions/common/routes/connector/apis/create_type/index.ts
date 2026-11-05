@@ -13,6 +13,8 @@ export {
   CONNECTOR_TYPE_ICON_MAX_BYTES,
   CONNECTOR_TYPE_ICON_MAX_LENGTH,
   CONNECTOR_TYPE_ICON_MIME_TYPES,
+  connectorTypeIconSchema,
+  requestTemplateSchema,
 } from './schemas/latest';
 export type { CreateConnectorTypeRequest } from './types/latest';
 export { createConnectorTypeRequestSchema as createConnectorTypeRequestSchemaV1 } from './schemas/v1';

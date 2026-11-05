@@ -23,6 +23,9 @@ jest.mock('../../../lib/action_connector_api', () => ({
   createConnectorType: jest.fn(),
   generateConnectorType: jest.fn(),
   fetchConnectorTypeLogo: jest.fn(),
+  fetchDynamicConnectorTypes: jest.fn(),
+  fetchDynamicConnectorTypeDefinition: jest.fn(),
+  updateDynamicConnectorTypeEditable: jest.fn(),
 }));
 const mockCodeEditor = jest.fn();
 jest.mock('@kbn/code-editor', () => ({
@@ -32,9 +35,14 @@ jest.mock('@kbn/code-editor', () => ({
     return <MockedCodeEditor {...props} />;
   },
 }));
-const { createConnectorType, generateConnectorType, fetchConnectorTypeLogo } = jest.requireMock(
-  '../../../lib/action_connector_api'
-);
+const {
+  createConnectorType,
+  generateConnectorType,
+  fetchConnectorTypeLogo,
+  fetchDynamicConnectorTypes,
+  fetchDynamicConnectorTypeDefinition,
+  updateDynamicConnectorTypeEditable,
+} = jest.requireMock('../../../lib/action_connector_api');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const minimalYamlDefinition = `
@@ -135,6 +143,23 @@ describe('BuildConnectorPage', () => {
     history.push('/connectors/build');
     appMockRenderer = createAppMockRenderer();
     createConnectorType.mockResolvedValue({ id: 'acme' });
+    fetchDynamicConnectorTypes.mockResolvedValue([]);
+    fetchDynamicConnectorTypeDefinition.mockResolvedValue({
+      id: 'acme',
+      displayName: 'Acme',
+      description: 'Acme API',
+      icon: 'data:image/png;base64,abc',
+      auth: { type: 'api_key_header', headerName: 'X-Api-Key' },
+      config: [{ name: 'baseUrl', type: 'string', required: true }],
+      actions: {
+        ping: {
+          description: 'Ping',
+          scope: 'read',
+          input: [],
+          request: { method: 'GET', url: 'https://acme.example.com/ping' },
+        },
+      },
+    });
   });
 
   it('shows AI first, with YAML and scratch as secondary paths', async () => {
@@ -148,8 +173,135 @@ describe('BuildConnectorPage', () => {
     );
     expect(screen.getByTestId('build-connector-start-import-yaml')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-start-scratch')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByTestId('created-types-section')).not.toBeInTheDocument()
+    );
     expect(screen.queryByTestId('build-connector-form')).not.toBeInTheDocument();
     expect(screen.queryByTestId('build-connector-page-save-btn')).not.toBeInTheDocument();
+  });
+
+  it('shows a load error and retries the created types list', async () => {
+    fetchDynamicConnectorTypes
+      .mockRejectedValueOnce(new Error('request failed'))
+      .mockResolvedValueOnce([{ id: '.acme', name: 'Acme' }]);
+    renderStartPage();
+
+    expect(await screen.findByTestId('created-types-error')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('created-types-retry'));
+
+    expect(await screen.findByTestId('edit-dynamic-connector-.acme')).toBeInTheDocument();
+  });
+
+  it('edits connector metadata and connection test while keeping auth, config and actions read-only', async () => {
+    fetchDynamicConnectorTypes.mockResolvedValue([
+      { id: '.acme', name: 'Acme', description: 'Acme API', icon: 'data:image/png;base64,abc' },
+    ]);
+    renderStartPage();
+
+    await userEvent.click(await screen.findByTestId('edit-dynamic-connector-.acme'));
+    expect(fetchDynamicConnectorTypeDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '.acme' })
+    );
+    expect(await screen.findByTestId('build-connector-form')).toBeInTheDocument();
+    expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
+    expect(screen.getByTestId('buildConnectorIdInput')).toBeDisabled();
+    expect(
+      screen.getByText(
+        /connector ID, authentication, configuration fields and actions cannot be changed/
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme');
+    expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toBeInTheDocument();
+    expect(authCheckbox('API key header')).toBeDisabled();
+    expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toBeDisabled();
+    expect(screen.getByTestId('buildConnectorConfigFields-add')).toBeDisabled();
+    expect(screen.getByTestId('buildConnectorTest-url')).toBeEnabled();
+    const actionName = screen.getByTestId('buildConnectorAction-0-name');
+    expect(actionName).toBeDisabled();
+    const actionToggle = screen.getByTestId('buildConnectorAction-0-toggle');
+    expect(actionName).toBeVisible();
+    await userEvent.click(actionToggle);
+    await waitFor(() => expect(actionName).not.toBeVisible());
+    await userEvent.click(actionToggle);
+    await waitFor(() => expect(actionName).toBeVisible());
+    expect(mockCodeEditor).toHaveBeenCalledWith(
+      expect.objectContaining({ options: expect.objectContaining({ readOnly: true }) })
+    );
+    expect(
+      mockCodeEditor.mock.calls.find(
+        ([props]) => props?.dataTestSubj === 'buildConnectorTest-body-editor'
+      )?.[0].options
+    ).not.toHaveProperty('readOnly', true);
+
+    await userEvent.clear(screen.getByTestId('buildConnectorNameInput'));
+    await userEvent.type(screen.getByTestId('buildConnectorNameInput'), 'Acme Search');
+    const logoDataUri = 'data:image/png;base64,aGVsbG8=';
+    fireEvent.change(screen.getByTestId('buildConnectorTest-url'), {
+      target: { value: 'https://acme.example.com/ping' },
+    });
+    fetchConnectorTypeLogo.mockResolvedValue({ icon: logoDataUri });
+    fireEvent.change(screen.getByTestId('buildConnectorLogoUrlInput'), {
+      target: { value: 'https://acme.example.com/logo.png' },
+    });
+    updateDynamicConnectorTypeEditable.mockResolvedValue({ id: '.acme' });
+    await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+    expect(updateDynamicConnectorTypeEditable).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '.acme', displayName: 'Acme Search', icon: logoDataUri })
+    );
+    expect(updateDynamicConnectorTypeEditable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        test: expect.objectContaining({
+          request: expect.objectContaining({ url: 'https://acme.example.com/ping' }),
+        }),
+      })
+    );
+    expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://acme.example.com/logo.png' })
+    );
+    expect(createConnectorType).not.toHaveBeenCalled();
+  });
+
+  it('does not save edit metadata when the pending logo fetch fails', async () => {
+    fetchDynamicConnectorTypes.mockResolvedValue([{ id: '.acme', name: 'Acme' }]);
+    fetchConnectorTypeLogo.mockRejectedValueOnce({ body: { message: 'Not an image.' } });
+    renderStartPage();
+
+    await userEvent.click(await screen.findByTestId('edit-dynamic-connector-.acme'));
+    fireEvent.change(await screen.findByTestId('buildConnectorLogoUrlInput'), {
+      target: { value: 'https://acme.example.com/logo.png' },
+    });
+    fireEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+    expect(await screen.findByText('Not an image.')).toBeInTheDocument();
+    expect(updateDynamicConnectorTypeEditable).not.toHaveBeenCalled();
+  });
+
+  it('does not apply a logo response after its URL changes', async () => {
+    fetchDynamicConnectorTypes.mockResolvedValue([{ id: '.acme', name: 'Acme' }]);
+    let resolveLogo: (value: { icon: string }) => void = () => {};
+    fetchConnectorTypeLogo.mockReturnValueOnce(
+      new Promise<{ icon: string }>((resolve) => {
+        resolveLogo = resolve;
+      })
+    );
+    renderStartPage();
+
+    await userEvent.click(await screen.findByTestId('edit-dynamic-connector-.acme'));
+    const logoUrlInput = await screen.findByTestId('buildConnectorLogoUrlInput');
+    fireEvent.change(logoUrlInput, {
+      target: { value: 'https://acme.example.com/old-logo.png' },
+    });
+    fireEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+    fireEvent.change(logoUrlInput, {
+      target: { value: 'https://acme.example.com/new-logo.png' },
+    });
+    resolveLogo({ icon: 'data:image/png;base64,aGVsbG8=' });
+
+    expect(
+      await screen.findByText('The logo URL changed while it was loading. Save again.')
+    ).toBeInTheDocument();
+    expect(updateDynamicConnectorTypeEditable).not.toHaveBeenCalled();
   });
 
   it('opens the empty form from Start from scratch', async () => {
@@ -197,6 +349,14 @@ describe('BuildConnectorPage', () => {
 
     expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
     expect(useKibanaMock().services.overlays.openConfirm).not.toHaveBeenCalled();
+  });
+
+  it('returns to the builder start from the header back arrow while editing', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('link', { name: /Connector type builder/ }));
+
+    expect(await screen.findByTestId('build-connector-start')).toBeInTheDocument();
   });
 
   it('confirms before discarding edits when returning to the start screen', async () => {
