@@ -158,6 +158,20 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
+The ORCA grader port in @kbn/evals-suite-nightshift-investigations (`orca/check_prediction.ts`)
+and its report instructions (`orca/report_prompt/orca_instructions.text`) are adapted from the
+ORCA benchmark's public Harbor dataset `orca-bench/orca-bench`
+(https://hub.harborframework.com/datasets/orca-bench/orca-bench): the verifier
+`tests/check_prediction.py` and the task instructions `instruction.md`, from "ORCA: How Ready Are
+Language Model Agents for Oncall?" by Albert Gong, Kyuseong Choi, Abhineet Agarwal, Jason
+Schechner, Ryan Huang, Raj Agrawal, Anish Agarwal and Raaz Dwivedi (arXiv:2607.28545).
+Licensed under the Creative Commons Attribution 4.0 International License,
+https://creativecommons.org/licenses/by/4.0/
+Changes: the verifier is ported from Python to TypeScript with its prompts, schemas and scoring
+unchanged; the instructions ask for the report to be returned rather than written to
+/app/report.md.
+
+---
 This code includes a copy of the `normalize-path`
 https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/index.js
 
