@@ -298,8 +298,10 @@ export const hashCandidates = (
  * applies to another rule, another revision or a neighbouring file.
  *
  * - A dismissal wins over an approval of the same pattern: the later human act is the safe one.
- * - A false positive match only counts when the alert's severity may be auto-closed. An alert with
- *   no known severity stays with a human: closing without a model needs a severity to vouch for.
+ * - A match only counts when the alert's severity may be auto-closed, for a dismissal as well as an
+ *   approval. A dismissal means "do not propose closing this", not "this is fine", so a high alert
+ *   of a dismissed pattern still goes to analysis. An alert with no known severity stays with a
+ *   human: acting without a model needs a severity to vouch for.
  */
 export const matchDecisions = ({
   candidates,
@@ -328,15 +330,13 @@ export const matchDecisions = ({
     const decisions = hash === undefined ? undefined : decisionsByHash.get(hash);
     if (decisions === undefined || decisions.length === 0) continue;
     const dismissal = decisions.find(({ kind }) => kind === 'do_not_propose');
-    if (dismissal !== undefined) {
-      add(matches.wouldSkip, dismissal.id, id);
-      continue;
-    }
     const approval = decisions.find(({ kind }) => kind === 'false_positive');
-    if (approval === undefined) continue;
+    if (dismissal === undefined && approval === undefined) continue;
     if (severity === undefined || !severities.includes(severity)) {
       matches.excludedBySeverity++;
-    } else {
+    } else if (dismissal !== undefined) {
+      add(matches.wouldSkip, dismissal.id, id);
+    } else if (approval !== undefined) {
       add(matches.wouldClose, approval.id, id);
     }
   }
