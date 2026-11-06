@@ -103,6 +103,11 @@ export const registerCreateRoute = (
               body: error.message,
             });
           }
+          if (error.code === 'INVALID_SLUG') {
+            return res.badRequest({
+              body: error.message,
+            });
+          }
         }
         throw error;
       }
