@@ -116,7 +116,7 @@ export const test = baseWithSynthtrace.extend<
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
       storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
       serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
-      generalSettingsPage: createLazyPageObject(GeneralSettingsPage, page, kbnUrl),
+      generalSettingsPage: createLazyPageObject(GeneralSettingsPage, page),
       agentConfigurationsPage: createLazyPageObject(AgentConfigurationsPage, page, kbnUrl),
       customLinksPage: createLazyPageObject(CustomLinksPage, page, kbnUrl),
       indicesPage: createLazyPageObject(IndicesPage, page, kbnUrl),

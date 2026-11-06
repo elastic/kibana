@@ -1,5 +1,5 @@
 {
-  "sha1": "17f1a837cc8c04f1ec0cc0e0dcc5e6ab1bd803a1",
+  "sha1": "f6e28de89ef95dff75995a85963faf3f01a38901",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -430,7 +430,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 75,
+        "line": 83,
         "column": 44
       }
     },
@@ -446,7 +446,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 101,
+        "line": 109,
         "column": 14
       }
     },
@@ -462,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 115,
+        "line": 123,
         "column": 29
       }
     },
@@ -478,7 +478,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 139,
+        "line": 147,
         "column": 8
       }
     },
@@ -494,7 +494,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 151,
+        "line": 159,
         "column": 26
       }
     },
@@ -510,7 +510,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 169,
+        "line": 177,
         "column": 21
       }
     },
@@ -526,7 +526,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 183,
+        "line": 191,
         "column": 28
       }
     },
@@ -542,7 +542,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 232,
+        "line": 240,
         "column": 8
       }
     },
@@ -558,7 +558,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 281,
+        "line": 289,
         "column": 28
       }
     },
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 295,
+        "line": 303,
         "column": 9
       }
     },
@@ -590,7 +590,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 338,
+        "line": 346,
         "column": 30
       }
     },
@@ -606,7 +606,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 352,
+        "line": 360,
         "column": 9
       }
     },
@@ -622,7 +622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 364,
+        "line": 372,
         "column": 24
       }
     },
@@ -638,7 +638,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 373,
+        "line": 381,
         "column": 16
       }
     },
@@ -654,13 +654,45 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 386,
+        "line": 394,
         "column": 13
       }
     },
     {
-      "id": "f10b583306dc58a-69dccf9a88e32b3",
-      "title": "Agent Builder — concurrent conversation writes API keeps both rounds when two clients converse with the same conversation at once",
+      "id": "d032a6105294199-b5ace60af807d47",
+      "title": "Agent Builder — conversations API forces the set_title tool for a model that supports it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 455,
+        "column": 14
+      }
+    },
+    {
+      "id": "d032a6105294199-028e57395a709ff",
+      "title": "Agent Builder — conversations API sends tool_choice auto for a Claude model that rejects forced tool choice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 467,
+        "column": 55
+      }
+    },
+    {
+      "id": "f10b583306dc58a-0c64009e4dee94f",
+      "title": "Agent Builder — concurrent conversation writes API refuses a second converse while a run is active on the same conversation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -670,8 +702,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_concurrency_api.spec.ts",
-        "line": 35,
-        "column": 38
+        "line": 58,
+        "column": 18
+      }
+    },
+    {
+      "id": "f10b583306dc58a-80645fc13469537",
+      "title": "Agent Builder — concurrent conversation writes API reports active_execution on GET while a run is active and omits it after",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_concurrency_api.spec.ts",
+        "line": 102,
+        "column": 10
       }
     },
     {

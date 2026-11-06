@@ -61,6 +61,6 @@ export class DiagnosticsPage {
     const root = containerTestSubj
       ? this.page.getByTestId(containerTestSubj)
       : this.page.getByTestId('apmDiagnosticsTemplate');
-    await expect(root.locator('.euiTable')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(root.getByRole('table')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
   }
 }

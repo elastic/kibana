@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { PostEnrollmentAPIKeyRequestSchema } from './enrollment_api_key';
+import {
+  GetEnrollmentAPIKeysRequestSchema,
+  PostEnrollmentAPIKeyRequestSchema,
+} from './enrollment_api_key';
 
 describe('PostEnrollmentAPIKeyRequestSchema', () => {
   const validate = (expiration: unknown) =>
@@ -68,5 +71,24 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
     it('rejects values exceeding maxLength of 20 characters', () => {
       expect(() => validate('1'.repeat(20) + 'd')).toThrow();
     });
+  });
+});
+
+describe('reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
+  it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
+    expect(() =>
+      GetEnrollmentAPIKeysRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
+    ).not.toThrow();
+  });
+
+  it('accepts an overlong name and policy_id', () => {
+    expect(() =>
+      PostEnrollmentAPIKeyRequestSchema.body.validate({
+        name: 'a'.repeat(1000),
+        policy_id: 'a'.repeat(1000),
+      })
+    ).not.toThrow();
   });
 });
