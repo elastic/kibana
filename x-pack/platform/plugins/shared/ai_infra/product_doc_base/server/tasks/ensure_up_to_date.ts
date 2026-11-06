@@ -14,8 +14,11 @@ import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
   INSTALL_TASK_TIMEOUT,
+  anySupersededForced,
   deferForRepositoryVersion,
   isStaleRepositoryRequest,
+  isTaskSuperseded,
+  requestTaskStateSchemaByVersion,
   runTaskUnderInstallLock,
   scheduleRequestTask,
   shouldDeferForRepositoryVersion,
@@ -49,7 +52,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
         const since = new Date(requestedAt);
         return {
           async run() {
-            const { packageInstaller, logger } = getServices();
+            const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
             if (
               shouldDeferForRepositoryVersion({
                 requestedVersion: repositoryVersion,
@@ -62,23 +65,34 @@ export const registerEnsureUpToDateTaskDefinition = ({
               );
               return deferForRepositoryVersion();
             }
-            if (
-              isStaleRepositoryRequest({
-                requestedVersion: repositoryVersion,
-                installedVersion: await packageInstaller.getInstalledRepositoryVersion({
-                  inferenceId,
-                }),
-              })
-            ) {
-              logger.info(
-                `Skipping product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], older than the installed one`
-              );
-              return { state: {} };
-            }
             return runTaskUnderInstallLock({
               lockManager,
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
               run: async () => {
+                // Checked under the lock: a newer request may have completed or superseded this
+                // one while it waited, and forced updates are the documented repair path
+                if (
+                  await isTaskSuperseded({ taskManager: taskManagerStart, taskId: taskInstance.id })
+                ) {
+                  logger.info(
+                    `Skipping product documentation update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                  );
+                  return;
+                }
+                if (
+                  !forceUpdate &&
+                  isStaleRepositoryRequest({
+                    requestedVersion: repositoryVersion,
+                    installedVersion: await packageInstaller.getInstalledRepositoryVersion({
+                      inferenceId,
+                    }),
+                  })
+                ) {
+                  logger.info(
+                    `Skipping product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], older than the installed one`
+                  );
+                  return;
+                }
                 const superseded = async (
                   resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec
                 ) => {
@@ -122,7 +136,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: requestTaskStateSchemaByVersion,
     },
   });
 };
@@ -130,7 +144,8 @@ export const registerEnsureUpToDateTaskDefinition = ({
 /**
  * Schedules an update task for this request. A pending update with the same `forceUpdate` and
  * repository version for the inference ID is reused, so e.g. every node's startup does not queue its
- * own update.
+ * own update. A forced update superseded by this request is carried over, so a requested repair
+ * still runs.
  */
 export const scheduleEnsureUpToDateTask = ({
   taskManager,
@@ -158,5 +173,7 @@ export const scheduleEnsureUpToDateTask = ({
     params,
     reusePending: true,
     matches: (task) => Boolean(task.params.forceUpdate) === Boolean(forceUpdate),
+    mergeSuperseded: (requestParams, superseded) =>
+      anySupersededForced(superseded) ? { ...requestParams, forceUpdate: true } : requestParams,
   });
 };

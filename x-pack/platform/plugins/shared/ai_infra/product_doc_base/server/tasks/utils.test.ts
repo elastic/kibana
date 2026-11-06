@@ -11,11 +11,45 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   REPOSITORY_VERSION_DEFER_MAX_MS,
+  anySupersededForced,
   isStaleRepositoryRequest,
-  removeSupersededTasks,
+  isTaskSuperseded,
+  markSupersededTasks,
   shouldDeferForRepositoryVersion,
   waitUntilTaskCompleted,
 } from './utils';
+
+describe('isTaskSuperseded', () => {
+  it('reads the superseded marker from the task state', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue(task({ state: { superseded: true } }));
+    await expect(isTaskSuperseded({ taskManager, taskId: 't1' })).resolves.toBe(true);
+
+    taskManager.get.mockResolvedValue(task({ state: {} }));
+    await expect(isTaskSuperseded({ taskManager, taskId: 't1' })).resolves.toBe(false);
+  });
+
+  it('treats a task that no longer exists as not superseded and propagates other errors', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 't1')
+    );
+    await expect(isTaskSuperseded({ taskManager, taskId: 't1' })).resolves.toBe(false);
+
+    taskManager.get.mockRejectedValue(new Error('es unavailable'));
+    await expect(isTaskSuperseded({ taskManager, taskId: 't1' })).rejects.toThrow('es unavailable');
+  });
+});
+
+describe('anySupersededForced', () => {
+  it('is true when any superseded task carried a forced update', () => {
+    expect(
+      anySupersededForced([task({ params: {} }), task({ params: { forceUpdate: true } })])
+    ).toBe(true);
+    expect(anySupersededForced([task({ params: { forceUpdate: false } }), task({})])).toBe(false);
+    expect(anySupersededForced([])).toBe(false);
+  });
+});
 
 const task = (fields: Partial<ConcreteTaskInstance>) => fields as ConcreteTaskInstance;
 
@@ -44,9 +78,9 @@ describe('isStaleRepositoryRequest', () => {
   });
 });
 
-describe('removeSupersededTasks', () => {
+describe('markSupersededTasks', () => {
   const schedule = (repositoryVersion?: string) =>
-    removeSupersededTasks({
+    markSupersededTasks({
       taskManager,
       logger: loggerMock.create(),
       taskType: 'ProductDocBase:EnsureUpToDate',
@@ -68,8 +102,8 @@ describe('removeSupersededTasks', () => {
     });
   });
 
-  it('removes only waiting tasks requested against an older repository version', async () => {
-    await schedule('2026-10-12T00:00:00.000Z');
+  it('marks only waiting tasks requested against an older repository version and returns them', async () => {
+    const superseded = await schedule('2026-10-12T00:00:00.000Z');
 
     expect(taskManager.fetch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -84,14 +118,18 @@ describe('removeSupersededTasks', () => {
         },
       })
     );
-    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['older']);
+    expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(['older'], expect.any(Function));
+    const [, mapState] = taskManager.bulkUpdateState.mock.calls[0];
+    expect(mapState({ other: 1 }, 'older')).toEqual({ other: 1, superseded: true });
+    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+    expect(superseded.map(({ id }) => id)).toEqual(['older']);
   });
 
   it('does nothing for requests without a repository version', async () => {
-    await schedule(undefined);
+    await expect(schedule(undefined)).resolves.toEqual([]);
 
     expect(taskManager.fetch).not.toHaveBeenCalled();
-    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
   });
 });
 

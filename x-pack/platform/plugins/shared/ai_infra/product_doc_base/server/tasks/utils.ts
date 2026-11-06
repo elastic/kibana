@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
   TaskStatus,
@@ -40,6 +41,19 @@ export interface RequestTaskParams {
   /** Version of the local (bundled) artifact repository the request was made against */
   repositoryVersion?: string;
 }
+
+/**
+ * State of the request tasks. `superseded` is set on a waiting task when a request against a newer
+ * repository version is scheduled; the runner re-reads it under the install lock and stops.
+ */
+export const requestTaskStateSchemaByVersion = {
+  1: {
+    up: (state: Record<string, unknown>) => ({
+      superseded: state.superseded === true ? true : undefined,
+    }),
+    schema: schema.object({ superseded: schema.maybe(schema.boolean()) }),
+  },
+};
 
 // A request made against a newer bundle than this node's is retried until a node with that bundle
 // picks it up, unless the request is this old (rollback, node gone), when any node runs it.
@@ -124,7 +138,8 @@ export const findTasks = async ({
  * Schedules a new task instance for a request, unless `reusePending` is set and a pending task of the
  * same type for the inference ID and repository version (optionally matching `matches`) exists, in
  * which case that task is reused. Failed leftovers of earlier requests are removed so the status only
- * reflects the latest one.
+ * reflects the latest one. Waiting tasks of older repository versions are marked superseded;
+ * `mergeSuperseded` lets the new task take over what they carried (e.g. a forced update).
  */
 export const scheduleRequestTask = async <P extends RequestTaskParams>({
   taskManager,
@@ -133,6 +148,7 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   params,
   reusePending,
   matches = () => true,
+  mergeSuperseded = (requestParams) => requestParams,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
@@ -140,6 +156,7 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   params: P;
   reusePending: boolean;
   matches?: (task: ConcreteTaskInstance) => boolean;
+  mergeSuperseded?: (requestParams: P, superseded: ConcreteTaskInstance[]) => P;
 }): Promise<string> => {
   const { inferenceId } = params;
   if (reusePending) {
@@ -162,7 +179,7 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   if (failed.length > 0) {
     await taskManager.bulkRemove(failed.map(({ id }) => id));
   }
-  await removeSupersededTasks({
+  const superseded = await markSupersededTasks({
     taskManager,
     logger,
     taskType,
@@ -171,7 +188,7 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   });
   const { id } = await taskManager.schedule({
     taskType,
-    params: { ...params },
+    params: { ...(superseded.length > 0 ? mergeSuperseded(params, superseded) : params) },
     state: {},
     scope: ['productDoc', getInferenceScope(inferenceId)],
   });
@@ -180,11 +197,12 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
 };
 
 /**
- * Removes tasks of `taskType` for the inference ID that are still waiting to run and were requested
- * against an older repository version than `repositoryVersion`: run later on an older node they would
- * reinstall that older bundle. Running tasks are left alone; the runner's stale check covers them.
+ * Marks tasks of `taskType` for the inference ID that are still waiting to run and were requested
+ * against an older repository version than `repositoryVersion` as superseded: run later on an older
+ * node they would reinstall that older bundle. The tasks are not deleted, since one may already be
+ * running; its runner re-reads the marker under the install lock and stops. Returns the marked tasks.
  */
-export const removeSupersededTasks = async ({
+export const markSupersededTasks = async ({
   taskManager,
   logger,
   taskType,
@@ -196,9 +214,9 @@ export const removeSupersededTasks = async ({
   taskType: string;
   inferenceId: string;
   repositoryVersion?: string;
-}): Promise<void> => {
+}): Promise<ConcreteTaskInstance[]> => {
   if (!repositoryVersion) {
-    return;
+    return [];
   }
   const superseded = (
     await findTasks({
@@ -211,13 +229,40 @@ export const removeSupersededTasks = async ({
     ({ params }) => params?.repositoryVersion && params.repositoryVersion < repositoryVersion
   );
   if (superseded.length === 0) {
-    return;
+    return [];
   }
-  await taskManager.bulkRemove(superseded.map(({ id }) => id));
-  logger.info(
-    `Removed ${superseded.length} pending ${taskType} task(s) for [${inferenceId}] requested against an older artifact repository version than [${repositoryVersion}]`
+  await taskManager.bulkUpdateState(
+    superseded.map(({ id }) => id),
+    (state) => ({ ...state, superseded: true })
   );
+  logger.info(
+    `Marked ${superseded.length} pending ${taskType} task(s) for [${inferenceId}] as superseded: requested against an older artifact repository version than [${repositoryVersion}]`
+  );
+  return superseded;
 };
+
+/** Whether the task was marked superseded since it was claimed; a task that no longer exists is not. */
+export const isTaskSuperseded = async ({
+  taskManager,
+  taskId,
+}: {
+  taskManager: TaskManagerStartContract;
+  taskId: string;
+}): Promise<boolean> => {
+  try {
+    const task = await taskManager.get(taskId);
+    return task?.state?.superseded === true;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return false;
+    }
+    throw error;
+  }
+};
+
+/** Whether any superseded task carried a forced update, which the replacement then takes over. */
+export const anySupersededForced = (superseded: ConcreteTaskInstance[]): boolean =>
+  superseded.some(({ params }) => params?.forceUpdate === true);
 
 export type RequestTaskStatus = 'pending' | 'failed' | 'none';
 

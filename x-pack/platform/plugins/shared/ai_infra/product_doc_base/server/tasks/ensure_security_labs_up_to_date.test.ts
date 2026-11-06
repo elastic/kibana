@@ -27,6 +27,7 @@ describe('EnsureSecurityLabsUpToDate task', () => {
   let getRepositoryVersion: jest.Mock;
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
+  let taskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let runTaskWith: (params: Record<string, unknown>) => Promise<unknown>;
   let runTask: () => Promise<unknown>;
 
@@ -35,6 +36,8 @@ describe('EnsureSecurityLabsUpToDate task', () => {
     getRepositoryVersion = jest.fn().mockResolvedValue(undefined);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     logger = loggerMock.create();
+    taskManagerStart = taskManagerMock.createStart();
+    taskManagerStart.get.mockResolvedValue({ state: {} } as unknown as ConcreteTaskInstance);
     const taskManager = taskManagerMock.createSetup();
     registerEnsureSecurityLabsUpToDateTaskDefinition({
       taskManager,
@@ -42,6 +45,7 @@ describe('EnsureSecurityLabsUpToDate task', () => {
       getServices: () =>
         ({
           logger,
+          taskManager: taskManagerStart,
           packageInstaller: { ensureSecurityLabsUpToDate, getRepositoryVersion },
         } as unknown as InternalServices),
     });
@@ -51,7 +55,9 @@ describe('EnsureSecurityLabsUpToDate task', () => {
       ];
     runTaskWith = (params) =>
       definition
-        .createTaskRunner({ taskInstance: { params, state: {} } } as unknown as RunContext)
+        .createTaskRunner({
+          taskInstance: { id: 'security-labs-task', params, state: {} },
+        } as unknown as RunContext)
         .run();
     runTask = () => runTaskWith({ inferenceId: '.elser', forceUpdate: true });
   });
@@ -92,6 +98,19 @@ describe('EnsureSecurityLabsUpToDate task', () => {
     expect(withLock).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
   });
+
+  it('re-reads its task under the lock and stops when it was marked superseded', async () => {
+    taskManagerStart.get.mockResolvedValue({
+      state: { superseded: true },
+    } as unknown as ConcreteTaskInstance);
+
+    const result = await runTask();
+
+    expect(withLock).toHaveBeenCalledTimes(1);
+    expect(taskManagerStart.get).toHaveBeenCalledWith('security-labs-task');
+    expect(ensureSecurityLabsUpToDate).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {} });
+  });
 });
 
 describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
@@ -124,7 +143,7 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
     expect(taskManager.runSoon).toHaveBeenCalledWith(versionedId);
     expect(taskManager.get).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
-    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
   });
 
   it('keeps the plain singleton id for a remote repository', async () => {
@@ -140,6 +159,32 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
       expect.objectContaining({ id: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID })
     );
     expect(taskManager.fetch).not.toHaveBeenCalled();
+  });
+
+  it('carries a superseded forced update into the new task', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({
+      docs: [
+        task({
+          id: `${ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID}:2026-10-01T00:00:00.000Z`,
+          status: TaskStatus.Idle,
+          params: { repositoryVersion: '2026-10-01T00:00:00.000Z', forceUpdate: true },
+        }),
+      ],
+      versionMap: new Map(),
+    });
+
+    await scheduleEnsureSecurityLabsUpToDateTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.elser',
+      repositoryVersion: '2026-10-12T00:00:00.000Z',
+    });
+
+    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ params: expect.objectContaining({ forceUpdate: true }) })
+    );
   });
 
   it('supersedes waiting tasks of older repository versions without touching a running one', async () => {
@@ -173,7 +218,7 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
         }),
       })
     );
-    expect(taskManager.bulkRemove).toHaveBeenCalledWith([
+    expect(taskManager.bulkUpdateState.mock.calls[0][0]).toEqual([
       `${ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID}:2026-10-01T00:00:00.000Z`,
     ]);
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();

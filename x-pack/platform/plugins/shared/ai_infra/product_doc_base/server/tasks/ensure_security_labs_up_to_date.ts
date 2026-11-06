@@ -14,10 +14,13 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import {
+  anySupersededForced,
   deferForRepositoryVersion,
   getInferenceScope,
   isTaskCurrentlyRunningError,
-  removeSupersededTasks,
+  isTaskSuperseded,
+  markSupersededTasks,
+  requestTaskStateSchemaByVersion,
   runTaskUnderInstallLock,
   shouldDeferForRepositoryVersion,
   type InstallLockManager,
@@ -57,7 +60,7 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
               {}) as EnsureSecurityLabsUpToDateTaskParams;
             const inferenceId = params.inferenceId ?? defaultInferenceEndpoints.ELSER;
             const { forceUpdate, requestedAt, repositoryVersion } = params;
-            const { packageInstaller, logger } = getServices();
+            const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
             if (
               shouldDeferForRepositoryVersion({
                 requestedVersion: repositoryVersion,
@@ -72,13 +75,26 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
             }
             return runTaskUnderInstallLock({
               lockManager,
-              run: () => packageInstaller.ensureSecurityLabsUpToDate({ inferenceId, forceUpdate }),
+              run: async () => {
+                if (
+                  await isTaskSuperseded({
+                    taskManager: taskManagerStart,
+                    taskId: context.taskInstance.id,
+                  })
+                ) {
+                  logger.info(
+                    `Skipping Security Labs update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                  );
+                  return;
+                }
+                await packageInstaller.ensureSecurityLabsUpToDate({ inferenceId, forceUpdate });
+              },
               metadata: { taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE, inferenceId },
             });
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: requestTaskStateSchemaByVersion,
     },
   });
 };
@@ -112,21 +128,21 @@ export const scheduleEnsureSecurityLabsUpToDateTask = async ({
   repositoryVersion?: string;
 }) => {
   const taskId = getEnsureSecurityLabsUpToDateTaskId(inferenceId, repositoryVersion);
-  const params: EnsureSecurityLabsUpToDateTaskParams = {
-    inferenceId,
-    forceUpdate,
-    requestedAt: new Date().toISOString(),
-    repositoryVersion,
-  };
 
   try {
-    await removeSupersededTasks({
+    const superseded = await markSupersededTasks({
       taskManager,
       logger,
       taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
       inferenceId,
       repositoryVersion,
     });
+    const params: EnsureSecurityLabsUpToDateTaskParams = {
+      inferenceId,
+      forceUpdate: forceUpdate || anySupersededForced(superseded) || undefined,
+      requestedAt: new Date().toISOString(),
+      repositoryVersion,
+    };
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
