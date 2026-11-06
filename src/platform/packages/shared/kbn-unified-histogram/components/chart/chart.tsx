@@ -18,8 +18,6 @@ import {
   EuiIcon,
   EuiProgress,
   EuiSpacer,
-  EuiSwitch,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -119,8 +117,12 @@ const suggestAdJobsLabel = i18n.translate('unifiedHistogram.suggestAdJobsButtonL
   defaultMessage: 'Anomaly detection',
 });
 
-const showAnomaliesLabel = i18n.translate('unifiedHistogram.showAnomaliesSwitchLabel', {
+const showAnomaliesLabel = i18n.translate('unifiedHistogram.showAnomaliesButtonLabel', {
   defaultMessage: 'Show anomalies',
+});
+
+const hideAnomaliesLabel = i18n.translate('unifiedHistogram.hideAnomaliesButtonLabel', {
+  defaultMessage: 'Hide anomalies',
 });
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -415,40 +417,36 @@ export function UnifiedHistogramChart({
 
   // Anomaly detection has a group of its own, left of the other actions, with a switch to show the anomalies
   // of the selected job
+  const anomalyDetectionButtons: IconButtonGroupProps['buttons'] = [];
+  if (anomalyJobSelection?.jobId) {
+    const { showAnomalies, setShowAnomalies } = anomalyJobSelection;
+    const toggleLabel = showAnomalies ? hideAnomaliesLabel : showAnomaliesLabel;
+    anomalyDetectionButtons.push({
+      label: toggleLabel,
+      toolTipContent: toggleLabel,
+      iconType: showAnomalies ? 'eye' : 'eyeSlash',
+      'data-test-subj': 'unifiedHistogramShowAnomalies',
+      onClick: () => setShowAnomalies(!showAnomalies),
+    });
+  }
+  if (onSuggestAdJobs) {
+    anomalyDetectionButtons.push({
+      label: suggestAdJobsLabel,
+      toolTipContent: suggestAdJobsLabel,
+      // Light blue while the chart shows anomalies
+      iconType: anomalyOverlay?.ranges.length ? AnomaliesShownIcon : 'machineLearningApp',
+      'data-test-subj': 'unifiedHistogramSuggestAdJobs',
+      onClick: onSuggestAdJobs,
+    });
+  }
+
   const anomalyDetectionControls =
     chartVisible && onSuggestAdJobs ? (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        {anomalyJobSelection?.jobId ? (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={showAnomaliesLabel} disableScreenReaderOutput>
-              <EuiSwitch
-                compressed
-                showLabel={false}
-                label={showAnomaliesLabel}
-                checked={anomalyJobSelection.showAnomalies}
-                onChange={(e) => anomalyJobSelection.setShowAnomalies(e.target.checked)}
-                data-test-subj="unifiedHistogramShowAnomalies"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <IconButtonGroup
-            legend={suggestAdJobsLabel}
-            buttonSize="s"
-            buttons={[
-              {
-                label: suggestAdJobsLabel,
-                toolTipContent: suggestAdJobsLabel,
-                // Light blue while the chart shows anomalies
-                iconType: anomalyOverlay?.ranges.length ? AnomaliesShownIcon : 'machineLearningApp',
-                'data-test-subj': 'unifiedHistogramSuggestAdJobs',
-                onClick: onSuggestAdJobs,
-              },
-            ]}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <IconButtonGroup
+        legend={suggestAdJobsLabel}
+        buttonSize="s"
+        buttons={anomalyDetectionButtons}
+      />
     ) : null;
 
   return (
