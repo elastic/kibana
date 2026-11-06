@@ -32,10 +32,14 @@ import {
   ToolOrigin,
   ToolResultType,
   isEventsNativeVersion,
+  isLegacyTodosStep,
+  isTimelineEvent,
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
+import { TimelineEventType } from '@kbn/agent-builder-common/chat/timeline_events';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ExecutionPeek } from '../../execution/persistence';
 import type {
   ConversationPermissions,
   ConversationWithPermissions,
@@ -161,6 +165,29 @@ const migrateToolResultType = (result: ToolResult): ToolResult => {
   return result;
 };
 
+const withoutLegacySteps = <T extends { type: string }>(steps: T[]): T[] =>
+  steps.filter((step) => !isLegacyTodosStep(step));
+
+/**
+ * Drops the steps written by the removed todo tool from stored events, both as `execution_step`
+ * events and inside `execution_terminated` snapshots. Together with the same filter on `rounds`,
+ * this is the only place that knows the step type existed: readers above the converter never see
+ * it, and the document is rewritten without it on its next write.
+ */
+const dropLegacySteps = (events: ConversationEvent[]): ConversationEvent[] =>
+  events.flatMap((event) => {
+    if (!isTimelineEvent(event)) {
+      return [event];
+    }
+    if (event.type === TimelineEventType.executionStep) {
+      return isLegacyTodosStep(event.data.step) ? [] : [event];
+    }
+    if (event.type === TimelineEventType.executionTerminated && event.data.steps) {
+      return [{ ...event, data: { ...event.data, steps: withoutLegacySteps(event.data.steps) } }];
+    }
+    return [event];
+  });
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => {
     // Migration: pending_prompt (singular) -> pending_prompts (array)
@@ -181,7 +208,7 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
         input_tokens: 0,
         output_tokens: 0,
       },
-      steps: round.steps.map<ConversationRoundStep>((step) => {
+      steps: withoutLegacySteps(round.steps).map<ConversationRoundStep>((step) => {
         if (step.type === ConversationRoundStepType.toolCall) {
           return {
             ...step,
@@ -240,7 +267,11 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
+export const fromEs = (
+  document: Document,
+  user: CurrentUser,
+  execution?: ExecutionPeek
+): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
   const perUserFlags = {
     read_by: migrateReadBy(document._source),
@@ -278,11 +309,13 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
+    active_execution: document._source!.active_execution,
+    ...(execution ? { execution } : {}),
   };
 
   const events =
     isEventsNative && storedEvents != null && storedEvents.length > 0
-      ? storedEvents
+      ? dropLegacySteps(storedEvents)
       : roundsToEvents(conversation);
 
   return { ...conversation, events };
@@ -333,6 +366,7 @@ const stripInternalFields = (conversation: NormalizedConversation): Conversation
   const {
     read_by: _readBy,
     pinned_by: _pinnedBy,
+    execution: _execution,
     ...conversationWithoutInternalFields
   } = conversation;
 
@@ -430,6 +464,7 @@ export const toEs = (
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
     // Only events-native conversations persist their timeline; legacy ones keep deriving it
     // from rounds on read (see fromEs).
     ...(isEventsNative
@@ -510,7 +545,8 @@ export const createRequestToEs = ({
   creationDate,
   leadingEvents = [],
 }: {
-  conversation: ConversationCreateRequest;
+  /** `active_execution` comes from the create request's `activeExecution`, never from the request itself. */
+  conversation: ConversationCreateRequest & Pick<Conversation, 'active_execution'>;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
@@ -572,5 +608,6 @@ export const createRequestToEs = ({
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
   };
 };

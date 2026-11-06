@@ -184,12 +184,13 @@ describe('createWriteupTask', () => {
 });
 
 describe('fillCortex', () => {
-  it('fills the load step and the section as the agent type does with Cortex on', () => {
+  it('fills Cortex as the agent type does with it on, and leaves memory and decision trees out', () => {
     const prompt =
-      '1. Read the guide.{{cortex_load_step}} Then start.\n</x>\n{{knowledge_cortex_section}}{{decision_trees_section}}';
+      '1. Read the guide.{{cortex_load_step}}{{decision_trees_load_step}} Then start.\n</x>\n' +
+      '{{knowledge_cortex_section}}{{semantic_memory_section}}{{decision_trees_section}}';
     expect(fillCortex(prompt, '<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n\n')).toBe(
       '1. Read the guide. Also read the Knowledge Cortex — see <knowledge_cortex>. Then start.\n</x>\n' +
-        '\n<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n{{decision_trees_section}}'
+        '\n<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n'
     );
   });
 });

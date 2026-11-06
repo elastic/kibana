@@ -12,6 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
 import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
 import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 jest.mock('./components/header_title', () => ({
   HeaderTitle: ({ hit }: { hit: DataTableRecord }) => (
@@ -72,6 +73,10 @@ jest.mock('../../shared/components/flyout_header_actions', () => ({
   ),
 }));
 
+jest.mock('../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(),
+}));
+
 jest.mock('../../../flyout/attack_details/hooks/use_get_attack_flyout_link', () => ({
   useGetAttackFlyoutLink: jest.fn(),
 }));
@@ -89,6 +94,7 @@ const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecor
   } as DataTableRecord);
 
 const mockUseGetAttackFlyoutLink = useGetAttackFlyoutLink as jest.Mock;
+const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 
 describe('<Header />', () => {
   const mockHit = createMockHit();
@@ -97,6 +103,7 @@ describe('<Header />', () => {
 
   beforeEach(() => {
     mockUseGetAttackFlyoutLink.mockReturnValue(null);
+    mockUseIsInSecurityApp.mockReturnValue(true);
   });
 
   const renderHeader = (props?: Partial<Parameters<typeof Header>[0]>) =>
@@ -128,6 +135,14 @@ describe('<Header />', () => {
     const { getByTestId } = renderHeader();
 
     expect(getByTestId(HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not render the share button outside the Security Solution app (e.g. Discover)', () => {
+    mockUseGetAttackFlyoutLink.mockReturnValue('https://example.com/attacks/redirect/test-id');
+    mockUseIsInSecurityApp.mockReturnValue(false);
+    const { queryByTestId } = renderHeader();
+
+    expect(queryByTestId(HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('does not render the share button when link is null (e.g. missing timestamp)', () => {

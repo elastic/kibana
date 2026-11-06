@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -111,6 +112,38 @@ describe('createCustomContentTemplateResolver — output validation', () => {
     await expect(resolve({ prompt: 'Show a KPI' })).rejects.toThrow(
       `Generated template was rejected: exceeds the ${CUSTOM_CONTENT_MAX_TEMPLATE_BYTES}-byte limit.`
     );
+  });
+
+  it('asks the model once to fix a template that is not valid Liquid', async () => {
+    mockChatComplete
+      .mockResolvedValueOnce({ content: '<div>{% if true %}Hello</div>' })
+      .mockResolvedValueOnce({ content: '<div>{% if true %}Hello{% endif %}</div>' });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.template).toBe('<div>{% if true %}Hello{% endif %}</div>');
+    expect(mockChatComplete).toHaveBeenCalledTimes(2);
+    const retryMessages = mockChatComplete.mock.calls[1][0].messages;
+    expect(retryMessages).toHaveLength(3);
+    expect(retryMessages[1]).toMatchObject({ content: '<div>{% if true %}Hello</div>' });
+    expect(retryMessages[2].content).toContain('not valid Liquid');
+  });
+
+  it('throws when the corrected template is still not valid Liquid', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{% if true %}Hello</div>' });
+
+    await expect(resolve({ prompt: 'Show a KPI' })).rejects.toThrow(
+      'Generated template was rejected: invalid Liquid syntax'
+    );
+    expect(mockChatComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a template that is valid Liquid', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{% for r in rows %}x{% endfor %}</div>' });
+
+    await resolve({ prompt: 'Show a KPI' });
+
+    expect(mockChatComplete).toHaveBeenCalledTimes(1);
   });
 
   it('detects <SCRIPT> tags case-insensitively', async () => {
@@ -221,6 +254,57 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
         params: [{ _tstart: expect.any(String) }, { _tend: expect.any(String) }],
       })
     );
+  });
+
+  describe('control values', () => {
+    const usesHost = 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)';
+    const esqlVariables = [
+      { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
+    ];
+
+    it('binds the control values the query uses', async () => {
+      await resolve({ prompt: 'Show hits', esqlQuery: usesHost, esqlVariables });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ host: 'web-1' }] })
+      );
+    });
+
+    it('binds the time range and the control values together', async () => {
+      await resolve({
+        prompt: 'Show hits',
+        esqlQuery:
+          'FROM logs | WHERE @timestamp >= ?_tstart AND host.name == ?host | STATS hits = COUNT(*)',
+        esqlVariables,
+      });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ _tstart: expect.any(String) }, { host: 'web-1' }] })
+      );
+    });
+
+    it('is unchanged for a query that uses a control when no values were provided', async () => {
+      mockEsqlQuery.mockRejectedValue(new Error('Unknown query parameter [host]'));
+
+      await expect(resolve({ prompt: 'Show hits', esqlQuery: usesHost })).rejects.toThrow(
+        /Could not sample/
+      );
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.not.objectContaining({ params: expect.anything() })
+      );
+    });
+
+    it('does not run anything when the query is not changing, whatever the values', async () => {
+      await resolve({
+        prompt: 'Restyle',
+        existingTemplate: '<div/>',
+        hasExistingQuery: true,
+        esqlVariables,
+      });
+
+      expect(mockEsqlQuery).not.toHaveBeenCalled();
+    });
   });
 
   it('sends no params for a query without time parameters', async () => {

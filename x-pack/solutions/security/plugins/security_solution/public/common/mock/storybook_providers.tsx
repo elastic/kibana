@@ -165,9 +165,6 @@ const coreMock = {
   timelines: {
     getHoverActions: () => ({
       getAddToTimelineButton: () => {},
-      getCopyButton: () => {},
-      getFilterForValueButton: () => {},
-      getFilterOutValueButton: () => {},
     }),
   },
   logger: noopLogger,

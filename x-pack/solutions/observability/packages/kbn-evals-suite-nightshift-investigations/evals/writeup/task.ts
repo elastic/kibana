@@ -38,14 +38,16 @@ export const KNOWLEDGE_CORTEX_SECTION_PATH =
 export const CORTEX_LOAD_STEP = ' Also read the Knowledge Cortex — see <knowledge_cortex>.';
 
 /**
- * Fills the Cortex placeholders the way the agent type does with Cortex enabled. The recorded
- * investigations ran with it on, so their replays should too. A prompt from before the placeholders
+ * Fills the context placeholders the way the agent type does with Cortex enabled and Semantic
+ * Memory and decision trees off. The recorded investigations ran with Cortex on, so their replays
+ * should too; the other two are left out of every arm alike. A prompt from before the placeholders
  * existed has the section inline and passes through unchanged.
  */
 export const fillCortex = (prompt: string, section: string): string =>
   prompt
     .replace('{{cortex_load_step}}', CORTEX_LOAD_STEP)
-    .replace('{{knowledge_cortex_section}}', `\n${section.trimEnd()}\n`);
+    .replace('{{knowledge_cortex_section}}', `\n${section.trimEnd()}\n`)
+    .replace(/\{\{(semantic_memory|decision_trees)_(section|load_step)\}\}/g, '');
 
 /** Generations are cached here (gitignored), so a re-run with another judge only makes judge calls. */
 export const WRITEUP_DATA_DIR = join(REPO_ROOT, 'data', 'nightshift_writeup');

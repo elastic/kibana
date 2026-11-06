@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSuperSelect,
   EuiText,
+  EuiTitle,
   useEuiTheme,
-  type UseEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
@@ -45,10 +44,6 @@ const AccessModeOption: React.FC<AccessModeOptionProps> = ({ label, helpText }) 
   </EuiFlexGroup>
 );
 
-const generalAccessLabelStyle = ({ euiTheme }: UseEuiTheme) => css`
-  row-gap: ${euiTheme.size.s};
-`;
-
 const accessModeOptions = [
   {
     value: ConversationAccessControlMode.Private,
@@ -74,11 +69,16 @@ export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelect
   onAccessModeChange,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const titleId = useGeneratedHtmlId({ prefix: 'conversationShareGeneralAccess' });
 
   return (
-    <EuiFormRow label={generalAccessLabel} fullWidth css={generalAccessLabelStyle}>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="xxxs">
+        <h4 id={titleId}>{generalAccessLabel}</h4>
+      </EuiTitle>
       <EuiSuperSelect<ConversationAccessControlMode>
         fullWidth
+        aria-labelledby={titleId}
         valueOfSelected={accessMode}
         options={accessModeOptions}
         onChange={onAccessModeChange}
@@ -95,6 +95,6 @@ export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelect
         }}
         data-test-subj="agentBuilderConversationSharingAccessModeSelect"
       />
-    </EuiFormRow>
+    </EuiFlexGroup>
   );
 };
