@@ -252,6 +252,31 @@ describe('decisionTreePrepareStepDefinition', () => {
       expect(input).toContain("Investigator's answer: Accepted: the egress proxy.");
     });
 
+    it('omits the pre-follow-up hypotheses snapshot when the follow-up round is not saved yet', async () => {
+      conversationsGet.mockResolvedValue({
+        rounds: [{ ...savedRound('round-1'), started_at: '2026-11-02T10:00:00.000Z' }],
+        attachments: [
+          {
+            type: 'agentic_investigations_hypotheses',
+            versions: [
+              {
+                created_at: '2026-11-02T10:05:00.000Z',
+                data: {
+                  hypotheses: [{ candidate: 'egress proxy', status: 'confirmed', reason: 'claim' }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      await run(followUp);
+      await preparedWith().checkCausal!();
+
+      const [{ input }] = output.mock.calls[0];
+      expect(input).not.toContain('Hypotheses:');
+    });
+
     // A lost verdict must not fail the reinforcement run, nor claim a cause.
     it.each([
       ['the model call fails', () => output.mockRejectedValue(new Error('connector down'))],

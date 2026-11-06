@@ -101,6 +101,37 @@ describe('buildCausalCheckTranscript', () => {
     expect(transcript).not.toContain('"status":"confirmed"');
   });
 
+  // When the post-round hook runs before the follow-up round is saved, its start time is unknown.
+  // Falling back to `Date.now()` would attribute hypotheses written during the follow-up to the
+  // last earlier round.
+  it('omits the last earlier round hypotheses when the follow-up start time is unknown', () => {
+    const transcript = buildCausalCheckTranscript({
+      earlierRounds: [
+        round('r1', '2026-11-02T10:00:00.000Z', 'Alert', 'First answer'),
+        round('r2', '2026-11-02T10:10:00.000Z', 'Follow-up 1', 'Second answer'),
+      ],
+      attachments: [
+        {
+          type: HYPOTHESES_ATTACHMENT_TYPE,
+          versions: [
+            hypothesesVersion('2026-11-02T10:05:00.000Z', 'investigating'),
+            hypothesesVersion('2026-11-02T10:15:00.000Z', 'confirmed'),
+          ],
+        },
+      ],
+      prompt: 'p',
+      response: 'r',
+      toolCalls: [],
+    });
+
+    expect(transcript).toContain('### Round 1\nMessage: Alert\nTool calls:\n(none)\nHypotheses:');
+    expect(transcript).toContain('"status":"investigating"');
+    expect(transcript).not.toContain('"status":"confirmed"');
+    expect(transcript).toContain(
+      '### Round 2\nMessage: Follow-up 1\nTool calls:\n(none)\nAnswer: Second answer'
+    );
+  });
+
   it('drops the oldest rounds first when the investigation is long', () => {
     const long = 'x'.repeat(5_000);
     const transcript = buildCausalCheckTranscript({

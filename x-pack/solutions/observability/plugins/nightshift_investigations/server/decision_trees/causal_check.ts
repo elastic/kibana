@@ -113,12 +113,15 @@ const hypothesesBefore = (
 const renderEarlierRounds = (
   rounds: readonly EarlierRound[],
   attachments: ResolvableConversation['attachments'],
-  latestStartedAt: number
+  latestStartedAt?: number
 ): string => {
   const sections = rounds.map((round, index) => {
     const nextStartedAt =
       index + 1 < rounds.length ? Date.parse(rounds[index + 1].started_at) : latestStartedAt;
-    const hypotheses = hypothesesBefore(attachments, nextStartedAt);
+    const hypotheses =
+      nextStartedAt !== undefined && Number.isFinite(nextStartedAt)
+        ? hypothesesBefore(attachments, nextStartedAt)
+        : undefined;
     const toolCalls = renderToolCalls(toolCallsFromRoundSteps(round.steps as RawRoundStep[]));
     return [
       `### Round ${index + 1}`,
@@ -150,14 +153,18 @@ const renderEarlierRounds = (
 export const buildCausalCheckTranscript = ({
   earlierRounds,
   attachments,
-  latestStartedAt = Date.now(),
+  latestStartedAt,
   prompt,
   response,
   toolCalls,
 }: {
   earlierRounds: readonly EarlierRound[];
   attachments?: ResolvableConversation['attachments'];
-  /** When the follow-up started; hypotheses written after it belong to it, not to earlier rounds. */
+  /**
+   * When the follow-up started; hypotheses written after it belong to it, not to earlier rounds.
+   * When absent (the round is not saved yet), the last earlier round omits its hypotheses snapshot
+   * rather than risking post-follow-up hypotheses.
+   */
   latestStartedAt?: number;
   prompt: string;
   response: string;
