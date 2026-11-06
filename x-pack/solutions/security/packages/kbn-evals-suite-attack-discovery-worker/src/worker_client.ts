@@ -449,6 +449,7 @@ export class AttackDiscoveryWorkerClient {
   private forget(executionId: string): void {
     const index = this.pendingExecutions.findIndex((entry) => entry.executionId === executionId);
     if (index >= 0) this.pendingExecutions.splice(index, 1);
+    this.failedCancels.delete(executionId);
   }
 
   /** Registers an execution this client did not start (a review) so teardown cancels it. */

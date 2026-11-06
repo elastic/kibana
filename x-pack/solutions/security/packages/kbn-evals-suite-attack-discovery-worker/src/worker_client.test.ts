@@ -715,6 +715,33 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     expect(cancelled).toEqual([]);
   });
 
+  it('counts a failed cancel afresh once the execution was forgotten and tracked again', async () => {
+    let cancelFails = true;
+    const fetch = jest.fn(async (path: string) => {
+      if (path.includes('/workflow/')) return { workflowExecutionId: 'floor-1' };
+      if (path.endsWith('/children')) return [{ workflowId: RUNNER, executionId: 'run-1' }];
+      if (path.includes('/cancel')) {
+        if (cancelFails) throw Object.assign(new Error('status 500'), { status: 500 });
+        return {};
+      }
+      return { id: 'run-1', status: 'completed', stepExecutions: [] };
+    });
+    const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
+    client.track('s', 'run-1');
+    await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution run-1/);
+    await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    (log.warning as jest.Mock).mockClear();
+    fetch.mockClear();
+    await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution run-1/);
+    expect((log.warning as jest.Mock).mock.calls.map(([message]) => message)).not.toEqual(
+      expect.arrayContaining([expect.stringMatching(/Giving up/)])
+    );
+    cancelFails = false;
+    fetch.mockClear();
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+    expect(fetch.mock.calls.filter(([path]) => String(path).includes('/cancel'))).toHaveLength(1);
+  });
+
   it('ignores a 404', async () => {
     const { client, cancelled } = cancelFailing({ b: 404 });
     await expect(client.cancelPending()).resolves.toBeUndefined();

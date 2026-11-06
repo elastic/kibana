@@ -120,8 +120,9 @@ const drafts: AlertDraft[] = Array.from({ length: COUNT }, (_, index) => {
 const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
 
 /**
- * The attack id is 64 hex characters, so the review's Investigation-id slice always yields a valid
- * UUIDv8.
+ * The attack id is 64 hex characters, so the Investigation id the review derives from it (the
+ * `<a[0:8]>-<a[8:12]>-8<a[12:15]>-8<a[15:18]>-<a[18:30]>` slice, `investigationIdFor`) always
+ * yields a valid UUIDv8.
  */
 export const seededFalsePositiveAttackId = (runMarker: string): string =>
   createHash('sha256').update(`${SCENARIO_ID}:${runMarker}:attack-discovery`).digest('hex');
