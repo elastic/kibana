@@ -1195,6 +1195,34 @@ describe('authorship and recovery context', () => {
   });
 });
 
+describe('applyCortexEdits empty sections', () => {
+  it('does not write a heading that has nothing under it', async () => {
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'integration',
+          slug: 'logging-eu-west',
+          title: 'logging-eu-west',
+          content:
+            '## Overview\nA remote.\n\n## Tool failures\n\n## Common pitfalls\n- Add a time filter.',
+        },
+      ],
+    });
+
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: '## Overview\nA remote.\n\n## Common pitfalls\n- Add a time filter.',
+      })
+    );
+  });
+});
+
 describe('applyCortexEdits ontology cleanup', () => {
   const ontologyContent = [
     '## Nodes',
@@ -1507,8 +1535,10 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
     expect(system).toContain('follow_up —');
     expect(system).toContain('alert_recovery —');
+    expect(system).toContain('a rewrite alone does not confirm a page, so propose both edits');
     expect(system).toContain('## Tool failures');
     expect(system).toContain('A single typo is not a failure signature');
+    expect(system).toContain('recorded nowhere on the page');
   });
 
   it('marks the catalog pages the current investigation wrote', async () => {

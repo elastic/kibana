@@ -25,6 +25,7 @@ import {
   type AppliedWriteRecord,
   type WriteProvenance,
 } from '../investigation_round';
+import { dropEmptySections } from './drop_empty_sections';
 import { lintCortexContent } from './lint_content';
 import type { CortexPageStore } from './page_store';
 import {
@@ -295,14 +296,14 @@ What this round is:
 The transcript opens with a "## Round" line that says which kind of round it is.
 - initial — an investigation. Learn the durable structure and tool behaviour it established.
 - follow_up — the user's turn follows an earlier answer, shown under "## Previous answer". It may correct that answer or point at something it missed. A correction from a person outranks a single investigation: turn it into durable knowledge — what to check for this kind of symptom, where it lives (only streams, indices, fields or components that appear in the user's text or the tool calls), and how components relate — and put it under the right type and section. If it shows that an existing page is wrong, rewrite or archive that page.
-- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog were written by that investigation, and their content follows the catalog under "Existing page content". When the assistant's answer says the cause was confirmed, corroborate the pages that state it. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
+- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog were written by that investigation, and their content follows the catalog under "Existing page content". When the assistant's answer says the cause was confirmed, corroborate the pages that state it with a "corroborate" edit, also when you rewrite the same page to add detail the recovery established: a rewrite alone does not confirm a page, so propose both edits. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
 
 Services and integrations:
 - When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
 - The tool calls show what the investigator ran and, on the "result:" line under a call, a truncated excerpt of what it returned; a result marked "error:" failed. Use them to learn which services, indices, and integrations were queried, how, and what the data showed. A result is evidence, not a conclusion: treat a causal claim as established only when the assistant's answer confirms it.
 
 Tool failures:
-- A tool failure is a call that returned an error, timed out, or came back empty because of how the call was made. Record it only when the same failure signature recurs in the tool calls or already appears on the page. Put it on the integration page of the system the tool talks to, under ## Tool failures, as one bullet: the failure signature, its durable cause, and what works instead. A single typo is not a failure signature.
+- A tool failure is a call that returned an error, timed out, or came back empty because of how the call was made. Record it only when the same failure signature recurs in the tool calls or already appears on the page. Put it on the integration page of the system the tool talks to, under ## Tool failures, as one bullet: the failure signature, its durable cause, and what works instead. A single typo is not a failure signature: a failure that happened once and went away when the call was corrected (a misspelled function, a wrong argument) is recorded nowhere on the page, not under ## Tool failures and not as general advice under ## Common pitfalls.
 
 Relations:
 - Record how components relate on ontology pages: name each component by its page slug exactly as the catalog shows it, never a display name, and add one relation line per edge. Read "A depends_on B" as "A needs B", "A reads_from B" as "A pulls data from B", "A calls B" as "A sends requests to B" and "A publishes_to B" as "A pushes data to B"; the arrow always points from the component that acts to the one it acts on. Nodes are the system's own components, such as services, controllers, jobs and data stores; never add an integration or a telemetry connector as a node, since where a component's logs are stored is not a relation between components. State one edge per pair of components, in the direction its kind implies, and never its reverse. Also list a service's dependencies on its own page.
@@ -473,7 +474,9 @@ export const applyCortexEdits = async ({
       // are not part of it (a component "publishing to" the telemetry integration that holds its
       // logs, a component related to itself, both directions of one pair), so those lines are
       // removed here rather than trusted to the prompt.
-      let proposedContent = edit.content;
+      // A heading with nothing under it only adds noise to every page the investigator reads.
+      let proposedContent =
+        edit.content === undefined ? undefined : dropEmptySections(edit.content);
       if (edit.entity_type === 'ontology' && proposedContent !== undefined) {
         const tidied = tidyCortexOntology(proposedContent, integrationSlugs);
         if (tidied.dropped.length > 0) {
