@@ -152,10 +152,18 @@ export default function (providerContext: FtrProviderContextWithServices) {
     });
 
     it('should not duplicate status-change docs on the next run when last_known_status matches', async () => {
-      await createAgentDoc(providerContext, 'agent-status-2', policyId, '8.17.0', true, {
-        local_metadata: { host: { hostname: 'host-2' } },
-        namespaces: ['default'],
-      });
+      // On `#sentinel` already: moving the agent there would change its status to updating and write another doc
+      await createAgentDoc(
+        providerContext,
+        'agent-status-2',
+        `${policyId}#sentinel`,
+        '8.17.0',
+        true,
+        {
+          local_metadata: { host: { hostname: 'host-2' } },
+          namespaces: ['default'],
+        }
+      );
 
       // Wait for first task run to set last_known_status
       await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL_MS));

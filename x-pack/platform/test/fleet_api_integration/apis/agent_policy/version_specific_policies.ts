@@ -162,9 +162,11 @@ export default function (providerContext: FtrProviderContext) {
           index: '.fleet-policies',
           _source: ['data.inputs', 'policy_id'],
         });
+        // `#sentinel` docs are written while the policy has no version conditions yet, before the package policy is added
         const versionedPolicies = policies.hits.hits.filter(
           (hit) =>
             (hit._source as any).policy_id.includes('#') &&
+            !(hit._source as any).policy_id.endsWith('#sentinel') &&
             (hit._source as any).policy_id.startsWith(agentPolicyWithPPId)
         );
         expect(versionedPolicies.length).to.eql(3);
@@ -360,9 +362,11 @@ export default function (providerContext: FtrProviderContext) {
           index: '.fleet-policies',
           _source: ['data.inputs', 'policy_id'],
         });
+        // `#sentinel` docs are written while the policy has no version conditions yet, before the package policy is added
         const versionedPolicies = policies.hits.hits.filter(
           (hit) =>
             (hit._source as any).policy_id.includes('#') &&
+            !(hit._source as any).policy_id.endsWith('#sentinel') &&
             (hit._source as any).policy_id.startsWith(agentPolicyWithPPId)
         );
         expect(versionedPolicies.length).to.eql(3);
