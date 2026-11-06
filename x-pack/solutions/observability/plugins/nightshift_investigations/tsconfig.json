@@ -76,6 +76,7 @@
     "@kbn/rrule",
     "@kbn/cloud-plugin",
     "@kbn/connector-specs",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/core-security-server"
   ]
 }
