@@ -20,13 +20,13 @@ import {
   CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
   ChangeHistoryDiffNavigator,
 } from './change_history_diff_navigator';
-import type { ChangeHistoryDiffNavigation } from './change_history_monaco_diff';
-import { ChangeHistoryMonacoDiff } from './change_history_monaco_diff';
+import { ChangeHistoryMonacoHost } from './change_history_monaco_host';
 import {
   CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
   ChangeHistoryPreviewFooter,
 } from './change_history_preview_footer';
 import { ChangeHistoryPreviewSettingsPopover } from './change_history_preview_settings_popover';
+import { useChangeHistoryMonacoEditor } from './use_change_history_monaco_editor';
 
 const FLOATING_NAVIGATOR_BOTTOM = `calc(${CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT} - ${CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT} / 2)`;
 
@@ -127,16 +127,21 @@ export const ChangeHistoryPreview = ({
     [baseline]
   );
   const targetComparison = useMemo(() => toText(target), [target]);
-  const [editorContext, setEditorContext] = useState<ChangeHistoryPreviewEditorContext | null>(
-    null
-  );
-  const [diffNavigation, setDiffNavigation] = useState<ChangeHistoryDiffNavigation | null>(null);
   const diffModeOptions = useChangeHistoryDiffModeOptions();
   // Without a baseline there is nothing to compare, so only the lone read-only editor is shown.
   const modes = baselineComparison === undefined ? diffModeOptions.slice(0, 1) : diffModeOptions;
   const [compareMode, setCompareMode] = useState<ChangeHistoryCompareMode>('unified');
 
   const isCompareMode = baselineComparison !== undefined;
+
+  const { containerRef, editorContext, diffNavigation } = useChangeHistoryMonacoEditor({
+    baseline: baselineComparison,
+    target: targetComparison,
+    language,
+    editorOptions,
+    compareMode,
+    diffTelemetry,
+  });
 
   const handleModeChange = useCallback(
     (modeId: string) => {
@@ -169,16 +174,11 @@ export const ChangeHistoryPreview = ({
           compareMode={compareMode}
         />
 
-        <ChangeHistoryMonacoDiff
-          baseline={baselineComparison}
-          target={targetComparison}
-          language={language}
-          editorOptions={editorOptions}
+        <ChangeHistoryMonacoHost
+          containerRef={containerRef}
           data-test-subj={dataTestSubj}
           compareMode={compareMode}
-          diffTelemetry={diffTelemetry}
-          onEditorContextChange={setEditorContext}
-          onDiffNavigationChange={setDiffNavigation}
+          isCompareMode={isCompareMode}
         />
 
         <ChangeHistoryPreviewFooter
@@ -195,10 +195,10 @@ export const ChangeHistoryPreview = ({
             ) : null
           }
         >
-          {renderFooter?.(editorContext)}
+          {renderFooter?.(editorContext.isEditorMounted ? editorContext : null)}
         </ChangeHistoryPreviewFooter>
       </div>
-      {isCompareMode && diffNavigation && (
+      {isCompareMode && editorContext.isEditorMounted && (
         <div css={styles.floatingToolbar}>
           <ChangeHistoryDiffNavigator
             currentIndex={diffNavigation.currentIndex}

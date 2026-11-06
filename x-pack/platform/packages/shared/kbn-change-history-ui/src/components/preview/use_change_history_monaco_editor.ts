@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { RefObject } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { applyKbnCodeEditorChromeOverrides, monaco } from '@kbn/code-editor';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type { ChangeHistoryCompareMode } from '../../telemetry';
 import type { ChangeHistoryDiffTelemetry } from '../../types';
@@ -19,7 +17,6 @@ import type {
   ChangeHistoryMonacoLanguage,
   ChangeHistoryPreviewEditorContext,
 } from './change_history_preview';
-import { buildChangeHistoryUnifiedDiffLayoutStyles } from './change_history_unified_diff_layout';
 import {
   CHANGE_HISTORY_DIFF_GLOBAL_EDITOR_OPTIONS,
   CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS,
@@ -129,60 +126,31 @@ export interface ChangeHistoryDiffNavigation {
   onNext: () => void;
 }
 
-export interface ChangeHistoryMonacoDiffProps {
+export interface UseChangeHistoryMonacoEditorParams {
   baseline?: string;
   target: string;
-  language?: ChangeHistoryMonacoLanguage;
+  language: ChangeHistoryMonacoLanguage;
   editorOptions?: monaco.editor.IEditorOptions;
   compareMode: ChangeHistoryCompareMode;
   diffTelemetry?: ChangeHistoryDiffTelemetry;
-  /** Reports the editor handles and helpers whenever they change, e.g. for the parent's footer. */
-  onEditorContextChange: (context: ChangeHistoryPreviewEditorContext) => void;
-  onDiffNavigationChange: (navigation: ChangeHistoryDiffNavigation) => void;
-  'data-test-subj'?: string;
 }
 
-const monacoDiffPreviewStyles = {
-  monacoHost: (themeContext: UseEuiTheme) =>
-    css`
-      flex: 1 1 auto;
-      min-height: 0;
-      height: 100%;
-      padding: 0 ${themeContext.euiTheme.size.m};
-      & > div {
-        height: 100%;
-      }
+export interface UseChangeHistoryMonacoEditorResult {
+  /** Attach to the element Monaco should render into. */
+  containerRef: RefObject<HTMLDivElement>;
+  editorContext: ChangeHistoryPreviewEditorContext;
+  diffNavigation: ChangeHistoryDiffNavigation;
+}
 
-      /* Monaco draws its own scrollbars; match EUI's thin, rounded scrollbar. */
-      .monaco-scrollable-element > .scrollbar > .slider {
-        width: calc(${themeContext.euiTheme.size.s} * 0.75) !important;
-        border-radius: ${themeContext.euiTheme.border.radius.medium} !important;
-        margin-right: 2px;
-      }
-    `,
-  unifiedDiffLayout: css(buildChangeHistoryUnifiedDiffLayoutStyles()),
-  monacoHostSplit: css({
-    padding: 0,
-  }),
-  monacoHostUnified: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      paddingLeft: `calc(${euiTheme.size.m} + ${euiTheme.size.s})`,
-    }),
-};
-
-export const ChangeHistoryMonacoDiff = ({
+/** Owns the Monaco editor (single or diff) lifecycle, plus the diff navigation state. */
+export const useChangeHistoryMonacoEditor = ({
   baseline,
   target,
-  language = 'plaintext',
+  language,
   editorOptions,
   compareMode,
   diffTelemetry,
-  onEditorContextChange,
-  onDiffNavigationChange,
-  'data-test-subj': dataTestSubj = 'changeHistoryMonacoPreview',
-}: ChangeHistoryMonacoDiffProps): JSX.Element => {
-  const styles = useMemoCss(monacoDiffPreviewStyles);
-
+}: UseChangeHistoryMonacoEditorParams): UseChangeHistoryMonacoEditorResult => {
   const containerRef = useRef<HTMLDivElement>(null);
   const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -231,10 +199,6 @@ export const ChangeHistoryMonacoDiff = ({
     [isEditorMounted, getActiveEditor, stableConfigureDiffEditors]
   );
 
-  useEffect(() => {
-    onEditorContextChange(editorContext);
-  }, [editorContext, onEditorContextChange]);
-
   const updateDiffState = useCallback((editor: monaco.editor.IStandaloneDiffEditor) => {
     const changes = editor.getLineChanges() ?? [];
     setDiffTotalChanges(changes.length);
@@ -276,20 +240,15 @@ export const ChangeHistoryMonacoDiff = ({
     });
   }, [diffTelemetry]);
 
-  useEffect(() => {
-    onDiffNavigationChange({
+  const diffNavigation = useMemo<ChangeHistoryDiffNavigation>(
+    () => ({
       currentIndex: diffCurrentIndex,
       totalChanges: diffTotalChanges,
       onPrevious: handleDiffPrevious,
       onNext: handleDiffNext,
-    });
-  }, [
-    diffCurrentIndex,
-    diffTotalChanges,
-    handleDiffPrevious,
-    handleDiffNext,
-    onDiffNavigationChange,
-  ]);
+    }),
+    [diffCurrentIndex, diffTotalChanges, handleDiffPrevious, handleDiffNext]
+  );
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -407,17 +366,5 @@ export const ChangeHistoryMonacoDiff = ({
     }
   }, [editorOptions, baseline, target, language, monacoTheme]);
 
-  return (
-    <EuiText
-      component="div"
-      css={[
-        styles.monacoHost,
-        styles.unifiedDiffLayout,
-        isCompareMode && compareMode === 'split' ? styles.monacoHostSplit : undefined,
-        isCompareMode && compareMode === 'unified' ? styles.monacoHostUnified : undefined,
-      ]}
-    >
-      <div ref={containerRef} data-test-subj={`${dataTestSubj}Editor`} />
-    </EuiText>
-  );
+  return { containerRef, editorContext, diffNavigation };
 };
