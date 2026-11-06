@@ -511,7 +511,7 @@ describe('triage match decisions step in on mode', () => {
     const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
     const { run, tags, closes } = setup({
       mode: 'on',
-      alerts: [['a', source('C:\\x.exe', 'high')]],
+      alerts: [['a', source('C:\\x.exe', 'low')]],
       decisions: { [id]: stored('do_not_propose') },
     });
 
@@ -526,6 +526,26 @@ describe('triage match decisions step in on mode', () => {
       },
     });
     expect(closes()).toEqual([]);
+  });
+
+  it('sends a high alert of a dismissed pattern to analysis, because a dismissal is not a verdict that it is fine', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const { run, tags } = setup({
+      mode: 'on',
+      alerts: [
+        ['a', source('C:\\x.exe', 'high')],
+        ['b', source('C:\\x.exe', 'low')],
+      ],
+      decisions: { [id]: stored('do_not_propose') },
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(
+      expect.objectContaining({ would_skip: 1, skipped: 1, excluded_by_severity: 1 })
+    );
+    expect(tags()).toHaveLength(1);
+    expect(tags()[0].ids).toEqual(['b']);
   });
 
   it('closes nothing in shadow mode', async () => {
