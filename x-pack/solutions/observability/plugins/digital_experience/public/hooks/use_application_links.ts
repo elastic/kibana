@@ -15,6 +15,10 @@ import { useListQuery } from './use_list_query';
 
 export interface ApplicationLinks {
   overviewHref: string;
+  /** The Overview's path in the app's router, for an in-app redirect. */
+  overviewPath: string;
+  errorsHref: string;
+  networkHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
 }
@@ -35,8 +39,12 @@ export const useApplicationLinks = (
     const toHref = (path: string) =>
       application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, { path });
     const query = { ...listQuery, source };
+    const overviewPath = router.link('/{serviceName}', { path: { serviceName }, query });
     return {
-      overviewHref: toHref(router.link('/{serviceName}', { path: { serviceName }, query })),
+      overviewHref: toHref(overviewPath),
+      overviewPath,
+      errorsHref: toHref(router.link('/{serviceName}/errors', { path: { serviceName }, query })),
+      networkHref: toHref(router.link('/{serviceName}/network', { path: { serviceName }, query })),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(
           router.link('/{serviceName}/sessions', {

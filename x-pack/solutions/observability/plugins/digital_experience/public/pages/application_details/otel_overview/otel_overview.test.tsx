@@ -8,10 +8,13 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { BrushEndListener, SettingsProps } from '@elastic/charts';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
+import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
 import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
+import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -37,6 +40,18 @@ jest.mock('@elastic/charts', () => {
 jest.mock('@kbn/observability-plugin/public', () => ({ getCoreVitalsComponent: jest.fn() }));
 jest.mock('@kbn/server-route-repository-client');
 jest.mock('../../../hooks/use_kibana_services');
+jest.mock('../../../hooks/use_application_links', () => {
+  return {
+    useApplicationLinks: () => {
+      return {
+        sessionsHref: () => {
+          return '/sessions';
+        },
+        errorsHref: '/errors',
+      };
+    },
+  };
+});
 jest.mock('../../../hooks/use_environment');
 jest.mock('../../../hooks/use_time_range', () => ({
   ...jest.requireActual('../../../hooks/use_time_range'),
@@ -45,7 +60,45 @@ jest.mock('../../../hooks/use_time_range', () => ({
 
 const OVERVIEW_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/overview';
 
+const USAGE_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/usage';
+
+const ERRORS_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/errors';
+
+const ERRORS_RESPONSE: ApplicationErrorsResponse = {
+  serviceName: 'shop',
+  errors: [
+    {
+      type: 'TypeError',
+      stacktrace: 'TypeError: x is undefined\n    at app.js:1:1',
+      message: 'x is undefined',
+      count: 2,
+      lastSeen: '2021-01-18T12:30:00.000Z',
+    },
+  ],
+  hasMoreErrors: false,
+  environments: ['production'],
+};
+
+const respond = async (endpoint: string) => {
+  if (endpoint === USAGE_ENDPOINT) {
+    return USAGE_RESPONSE;
+  }
+  return endpoint === ERRORS_ENDPOINT ? ERRORS_RESPONSE : response(1533);
+};
+
 const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
+
+const USAGE_RESPONSE: ApplicationUsageResponse = {
+  topPages: [{ url: 'https://shop.example.com/', pageLoads: 9, loadTimeP75Ms: 1200 }],
+  breakdowns: {
+    pageLoads: 9,
+    browsers: [{ name: 'Chrome', pageLoads: 9 }],
+    operatingSystems: [{ name: 'macOS', pageLoads: 9 }],
+    devices: [{ name: 'desktop', pageLoads: 9 }],
+  },
+  topClicks: [{ cssSelector: '#add-to-cart', tagName: 'BUTTON', count: 5 }],
+  totalClicks: 5,
+};
 
 const response = (pageLoads: number): ApplicationOverviewResponse => ({
   overview: {
@@ -83,13 +136,22 @@ const SearchBar = ({
   </button>
 );
 
-const renderOverview = (serviceName = 'shop') =>
-  render(<OtelOverview serviceName={serviceName} />, { wrapper: EuiProvider });
+const Providers = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <I18nProvider>
+      <EuiProvider>{children}</EuiProvider>
+    </I18nProvider>
+  );
+};
+
+const renderOverview = (serviceName = 'shop') => {
+  return render(<OtelOverview serviceName={serviceName} />, { wrapper: Providers });
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockBrushEndListeners.length = 0;
-  fetch.mockResolvedValue(response(1533));
+  fetch.mockImplementation(respond);
   jest
     .mocked(createRepositoryClient)
     .mockReturnValue({ fetch } as unknown as ReturnType<typeof createRepositoryClient>);
@@ -109,13 +171,14 @@ const pageLoadsKpi = () => screen.getByTestId('digitalExperienceOverviewPageLoad
 const findPageLoads = (count: string) =>
   waitFor(() => expect(pageLoadsKpi()).toHaveTextContent(count));
 
-const expectFetchedWith = (query: Record<string, string>) =>
-  expect(fetch).toHaveBeenLastCalledWith(
-    OVERVIEW_ENDPOINT,
+const expectFetchedWith = (query: Record<string, string>, endpoint = OVERVIEW_ENDPOINT) => {
+  return expect(fetch).toHaveBeenCalledWith(
+    endpoint,
     expect.objectContaining({
       params: { path: { serviceName: 'shop' }, query },
     })
   );
+};
 
 describe('OtelOverview', () => {
   it('shows the KPIs, the vitals and the trends of the application', async () => {
@@ -185,7 +248,100 @@ describe('OtelOverview', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    // The Overview, its usage and its top errors, on mount and on Refresh.
+    await waitFor(() => {
+      return expect(fetch).toHaveBeenCalledTimes(6);
+    });
+  });
+
+  it('shows the usage panels below the trends', async () => {
+    renderOverview();
+
+    expect(await screen.findByTitle('https://shop.example.com/')).toBeInTheDocument();
+    [
+      'digitalExperienceOverviewTopPages',
+      'digitalExperienceOverviewBreakdowns',
+      'digitalExperienceOverviewTopClicks',
+    ].forEach((testId) => {
+      return expect(screen.getByTestId(testId)).toBeInTheDocument();
+    });
+    // Network requests have a tab of their own.
+    expect(screen.queryByTestId('digitalExperienceNetworkHttpRequests')).not.toBeInTheDocument();
+  });
+
+  it('shows the top errors, linked to the Errors tab', async () => {
+    renderOverview();
+
+    expect(await screen.findByText('x is undefined')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Top JS errors' })).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceErrorsViewAll')).toHaveAttribute('href', '/errors');
+  });
+
+  it('shows a retryable error in place of the top errors only', async () => {
+    fetch.mockImplementation(async (endpoint: string) => {
+      if (endpoint === ERRORS_ENDPOINT) {
+        throw new Error('Could not load the errors.');
+      }
+      return respond(endpoint);
+    });
+    renderOverview();
+
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewTopErrorsError')
+    ).toBeInTheDocument();
+    await findPageLoads('1,533');
+    expect(screen.getByTestId('digitalExperienceOverviewTopClicks')).toBeInTheDocument();
+  });
+
+  it('asks for the usage with the same query as the Overview', async () => {
+    jest.mocked(useEnvironment).mockReturnValue({ environment: 'staging', setEnvironment });
+    renderOverview();
+
+    const query = { start: timeRange.rangeFrom, end: timeRange.rangeTo, environment: 'staging' };
+    await waitFor(() => {
+      return expectFetchedWith(query);
+    });
+    await waitFor(() => {
+      return expectFetchedWith(query, USAGE_ENDPOINT);
+    });
+  });
+
+  it('shows a retryable error instead of the usage panels only, and keeps the KPIs', async () => {
+    let usageFails = true;
+    fetch.mockImplementation(async (endpoint: string) => {
+      if (endpoint !== USAGE_ENDPOINT) {
+        return response(1533);
+      }
+      if (usageFails) {
+        throw new Error('Could not load the usage.');
+      }
+      return USAGE_RESPONSE;
+    });
+    renderOverview();
+
+    expect(await screen.findByTestId('digitalExperienceOverviewUsageError')).toBeInTheDocument();
+    await findPageLoads('1,533');
+    expect(screen.queryByTestId('digitalExperienceOverviewError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceOverviewTopPages')).not.toBeInTheDocument();
+
+    usageFails = false;
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewUsageRetry'));
+
+    expect(await screen.findByTitle('https://shop.example.com/')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceOverviewUsageError')).not.toBeInTheDocument();
+  });
+
+  it('shows the usage panels when the Overview fails', async () => {
+    fetch.mockImplementation(async (endpoint: string) => {
+      if (endpoint === USAGE_ENDPOINT) {
+        return USAGE_RESPONSE;
+      }
+      throw new Error('Could not load the Overview.');
+    });
+    renderOverview();
+
+    expect(await screen.findByTestId('digitalExperienceOverviewError')).toBeInTheDocument();
+    expect(await screen.findByTitle('https://shop.example.com/')).toBeInTheDocument();
   });
 
   it('shows no metrics of the previous application while the next one loads', async () => {
