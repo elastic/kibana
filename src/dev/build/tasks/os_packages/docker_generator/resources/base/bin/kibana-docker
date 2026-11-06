@@ -143,7 +143,13 @@ kibana_vars=(
     ops.cGroupOverrides.cpuPath
     ops.eventLoopWatchdog.blockThreshold
     ops.eventLoopWatchdog.enabled
+    ops.eventLoopWatchdog.profiling.cooldown
+    ops.eventLoopWatchdog.profiling.maxDuration
+    ops.eventLoopWatchdog.profiling.startAfter
     ops.eventLoopWatchdog.startup.blockThreshold
+    ops.eventLoopWatchdog.startup.profiling.cooldown
+    ops.eventLoopWatchdog.startup.profiling.maxDuration
+    ops.eventLoopWatchdog.startup.profiling.startAfter
     ops.eventLoopWatchdog.statsInterval
     ops.interval
     path.data
