@@ -102,4 +102,30 @@ describe('POST /api/short_url', () => {
         expect(res.text).toContain('Locator not found.');
       });
   });
+
+  it('returns 400 when no request body is provided', async () => {
+    await supertest(server.listener)
+      .post('/api/short_url')
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toBe(
+          '[request body]: expected a plain object value, but found [null] instead.'
+        );
+      });
+  });
+
+  it('returns 400 when the locator ID is not provided', async () => {
+    await supertest(server.listener).post('/api/short_url').send({ params: {} }).expect(400);
+  });
+
+  it('returns 400 when the slug is too short', async () => {
+    await supertest(server.listener)
+      .post('/api/short_url')
+      .send({
+        locatorId: 'LEGACY_SHORT_URL_LOCATOR',
+        params: {},
+        slug: 'a',
+      })
+      .expect(400);
+  });
 });
