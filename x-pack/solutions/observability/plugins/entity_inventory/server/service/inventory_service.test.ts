@@ -354,7 +354,7 @@ describe('InventoryService.list', () => {
       { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
     ]);
     expect(response.rows).toHaveLength(1);
-    expect(response).toMatchObject({ total: null, truncated: true });
+    expect(response).toMatchObject({ total: null, truncated: false });
   });
 
   it('merges rows across sources, newest last_seen first, with exact total and every column on every row', async () => {
@@ -450,7 +450,7 @@ describe('InventoryService.list', () => {
       },
     ]);
     expect(JSON.stringify(response.errors)).not.toContain('at ');
-    expect(response).toMatchObject({ total: null, truncated: true });
+    expect(response).toMatchObject({ total: null, truncated: false });
   });
 
   it('drops a plan whose pattern maps no @timestamp and one whose identity is unmapped', async () => {
@@ -504,7 +504,7 @@ describe('InventoryService.list', () => {
     expect(response).toMatchObject({
       rows: [],
       total: null,
-      truncated: true,
+      truncated: false,
       errors: [
         { indexPattern: STATE_PATTERN, status: 403, reason: 'security_exception: unauthorized' },
         { indexPattern: OTEL_PATTERN, status: null, reason: 'connect ECONNREFUSED' },
@@ -565,16 +565,33 @@ describe('InventoryService.list', () => {
     expect(response).toMatchObject({ total: null, truncated: true });
   });
 
-  it('reports total null and truncated when Elasticsearch answers with a partial result', async () => {
+  it('reports a partial result in errors with total null, keeping its rows and not truncating', async () => {
     const { service, esClient } = createService([k8sDeploymentDefinition]);
     answerByPattern(esClient, {
-      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], { isPartial: true }),
+      [STATE_PATTERN]: esqlResponse(
+        STATE_COLUMNS,
+        [stateRow('payments', '2026-11-01T10:01:00.000Z')],
+        {
+          isPartial: true,
+        }
+      ),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
     });
 
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    expect(response).toMatchObject({ total: null, truncated: true });
+    expect(response.rows).toHaveLength(2);
+    expect(response).toMatchObject({
+      total: null,
+      truncated: false,
+      errors: [
+        {
+          indexPattern: STATE_PATTERN,
+          status: null,
+          reason: 'partial result: some shards or clusters did not answer, so rows may be missing',
+        },
+      ],
+    });
   });
 
   it.each([
