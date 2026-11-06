@@ -17,6 +17,10 @@ import {
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import {
+  AlertActionsRequireUserProfileToken,
+  AlertActionsStorageToken,
+} from '../lib/alert_actions_client/tokens';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
 import { DirectorService } from '../lib/director/director';
@@ -128,6 +132,10 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 import { SpaceUiSettingsClientToken } from '../settings/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
+  bind(AlertActionsStorageToken)
+    .toDynamicValue(({ get }) => get(StorageServiceScopedToken))
+    .inRequestScope();
+  bind(AlertActionsRequireUserProfileToken).toConstantValue(false);
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();

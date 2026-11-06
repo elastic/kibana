@@ -36,6 +36,7 @@ import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
+import type { AlertActionsClient } from './lib/alert_actions_client';
 import type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
@@ -56,6 +57,8 @@ export interface InternalRulesClientApi {
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
+
+export type AlertActionsClientApi = PublicMethodsOf<AlertActionsClient>;
 
 export interface AlertingServerSetup {
   /**
@@ -105,6 +108,18 @@ export interface AlertingServerStart {
    * check via PrivilegeChecker before invoking the client.
    */
   getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
+
+  /**
+   * Returns an AlertActionsClient for the request's space and user, whose `.alert-actions` and
+   * synthetic `.rule-events` writes use the internal ES user, so a caller with no write
+   * privilege on those indices can still create an action. The action's actor is still the
+   * request user (a request with no user profile is rejected with a 403).
+   * NOTE: the client can act on any episode in the request's space. Callers are responsible
+   * for enforcing write authorization before calling it AND for verifying that the episode
+   * belongs to the entity the caller is allowed to change. HTTP routes must check via their own
+   * authz; workflow steps must check via PrivilegeChecker before invoking the client.
+   */
+  getAlertActionsClientWithRequest(request: KibanaRequest): Promise<AlertActionsClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

@@ -30,6 +30,11 @@ import {
   QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { SpaceUiSettingsClientToken } from '../settings/tokens';
+import {
+  AlertActionsRequireUserProfileToken,
+  AlertActionsStorageToken,
+} from '../lib/alert_actions_client/tokens';
+import { StorageServiceInternalToken } from '../lib/services/storage_service/tokens';
 import { bindServices } from './bind_services';
 
 describe('bindServices - Elasticsearch client routing', () => {
@@ -90,6 +95,25 @@ describe('bindServices - Elasticsearch client routing', () => {
     expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
       projectRouting: 'space',
     });
+  });
+
+  it('writes alert actions as the caller by default, and a child scope can rebind them to the internal user', () => {
+    expect(container.get(AlertActionsRequireUserProfileToken)).toBe(false);
+    container.get(AlertActionsStorageToken);
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+    elasticsearch.client.asScoped.mockClear();
+
+    // The same rebinding `getAlertActionsClientWithRequest` makes in its scope.
+    const scope = new Container({ parent: container });
+    scope
+      .bind(AlertActionsStorageToken)
+      .toDynamicValue((context) => context.get(StorageServiceInternalToken))
+      .inRequestScope();
+    scope.bind(AlertActionsRequireUserProfileToken).toConstantValue(true);
+
+    scope.get(AlertActionsStorageToken);
+    expect(scope.get(AlertActionsRequireUserProfileToken)).toBe(true);
+    expect(elasticsearch.client.asScoped).not.toHaveBeenCalled();
   });
 });
 

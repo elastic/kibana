@@ -10,9 +10,25 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { AlertActionsClient } from '../lib/alert_actions_client';
+import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
+import {
+  AlertActionsRequireUserProfileToken,
+  AlertActionsStorageToken,
+} from '../lib/alert_actions_client/tokens';
+import {
+  getAlertActionStateESQLResponse,
+  getAlertEventESQLResponse,
+} from '../lib/alert_actions_client/fixtures/query_responses';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
+import { QueryServiceInternalToken } from '../lib/services/query_service/tokens';
+import { StorageServiceInternalToken } from '../lib/services/storage_service/tokens';
+import type { StorageServiceContract } from '../lib/services/storage_service/storage_service';
+import { UserService } from '../lib/services/user_service/user_service';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
@@ -32,6 +48,8 @@ describe('bindContract', () => {
   let mockRulesClient: Partial<RulesClient>;
   let mockActionPolicyClient: Partial<ActionPolicyClient>;
   let mockAlertEventsClient: Partial<AlertEventsClient>;
+  let mockAlertActionsClient: Partial<AlertActionsClient>;
+  let internalStorageService: StorageServiceContract;
   let fork: jest.Mock;
   let mockInternalRulesClient: Partial<InternalRulesClient>;
 
@@ -47,6 +65,13 @@ describe('bindContract', () => {
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
     scope.bind(ActionPolicyClient).toConstantValue(mockActionPolicyClient as ActionPolicyClient);
     scope.bind(AlertEventsClient).toConstantValue(mockAlertEventsClient as AlertEventsClient);
+    mockAlertActionsClient = { createEpisodeAction: jest.fn() };
+    scope.bind(AlertActionsClient).toConstantValue(mockAlertActionsClient as AlertActionsClient);
+    internalStorageService = {
+      bulkIndexDocs: jest.fn(),
+      bulkIndexDocsAcrossIndices: jest.fn(),
+    };
+    scope.bind(StorageServiceInternalToken).toConstantValue(internalStorageService as never);
 
     fork = jest.fn(() => scope);
     container.bind(CoreStart('injection')).toConstantValue({
@@ -94,6 +119,7 @@ describe('bindContract', () => {
       getActionPolicyClientWithRequest: expect.any(Function),
       getActionPolicyClientWithRequestInSpace: expect.any(Function),
       getAlertEventsClientWithRequest: expect.any(Function),
+      getAlertActionsClientWithRequest: expect.any(Function),
     });
   });
 
@@ -153,6 +179,70 @@ describe('bindContract', () => {
     expect(client).toBe(mockAlertEventsClient);
     expect(fork).toHaveBeenCalledTimes(1);
     expect(scope.get(Request)).toBe(fakeRequest);
+  });
+
+  it('returns the alertActionsClient resolved with the request when getAlertActionsClientWithRequest is called', async () => {
+    const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+    const start = container.get(AlertingStartToken);
+
+    const client = await start.getAlertActionsClientWithRequest(fakeRequest);
+
+    expect(client).toBe(mockAlertActionsClient);
+    expect(fork).toHaveBeenCalledTimes(1);
+    expect(scope.get(Request)).toBe(fakeRequest);
+  });
+
+  it('constructs a profile-enforcing client that writes through the internal storage service', async () => {
+    const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+    const start = container.get(AlertingStartToken);
+    scope.unbind(AlertActionsClient);
+    scope.bind(AlertActionsClient).toSelf();
+    const queryService = { executeQuery: jest.fn() };
+    const userService = { getCurrentUserProfileUid: jest.fn() };
+    const alertActionEventPublisher = { emitEpisodeActions: jest.fn() };
+    scope.bind(QueryServiceInternalToken).toConstantValue(queryService as never);
+    scope.bind(UserService).toConstantValue(userService as never);
+    scope.bind(RequestSpaceIdToken).toConstantValue('default');
+    scope.bind(AlertActionEventPublisher).toConstantValue(alertActionEventPublisher as never);
+    scope.bind(ResourceManager).toConstantValue({ ensureResourceReady: jest.fn() } as never);
+    queryService.executeQuery
+      .mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+      )
+      .mockResolvedValueOnce(getAlertActionStateESQLResponse())
+      .mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+      )
+      .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+    userService.getCurrentUserProfileUid
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce('user-1');
+    (internalStorageService.bulkIndexDocsAcrossIndices as jest.Mock).mockResolvedValue({
+      attempted: 1,
+      docs: [],
+      errors: [],
+    });
+
+    const client = await start.getAlertActionsClientWithRequest(fakeRequest);
+
+    expect(client).toBeInstanceOf(AlertActionsClient);
+    await expect(
+      client.createEpisodeAction({
+        episodeId: 'episode-1',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      })
+    ).rejects.toMatchObject({ output: { statusCode: 403 } });
+    expect(internalStorageService.bulkIndexDocsAcrossIndices).not.toHaveBeenCalled();
+
+    await client.createEpisodeAction({
+      episodeId: 'episode-1',
+      action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+    });
+
+    expect(scope.get(AlertActionsStorageToken)).toBe(internalStorageService);
+    expect(scope.get(AlertActionsRequireUserProfileToken)).toBe(true);
+    expect(internalStorageService.bulkIndexDocsAcrossIndices).toHaveBeenCalledTimes(1);
+    expect(alertActionEventPublisher.emitEpisodeActions).toHaveBeenCalledTimes(1);
   });
 
   it('returns the singleton InternalRulesClient when getUnsafeInternalRulesClient is called', async () => {
