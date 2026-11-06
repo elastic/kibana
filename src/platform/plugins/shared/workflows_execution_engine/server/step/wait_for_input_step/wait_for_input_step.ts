@@ -33,6 +33,7 @@ import {
 import {
   emitHitlWaitingAudit,
   failHitlWaitOnTimeout,
+  recordHitlResumeAs,
   resumeHitlWaitStep,
   shouldSkipHitlWaitEntry,
   tryEnterHitlWait,
@@ -82,6 +83,11 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
   }
 
   private async enterWait(): Promise<void> {
+    recordHitlResumeAs({
+      stepExecutionRuntime: this.stepExecutionRuntime,
+      workflowRuntime: this.workflowRuntime,
+      resumeAs: this.node.configuration['resume-as'],
+    });
     const dynamicTimeout = persistResolvedDynamicTimeout(
       this.stepExecutionRuntime,
       this.node.configuration.timeout,
@@ -222,6 +228,8 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
       workflowRuntime: this.workflowRuntime,
       workflowLogger: this.workflowLogger,
       stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      resumeAs: this.node.configuration['resume-as'],
       transformResumeInput: (input, respondedBy) => ({
         response: input ?? {},
         respondedBy,

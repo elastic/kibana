@@ -201,6 +201,15 @@ export class WorkflowsPlugin
               channel: 'system',
             });
             break;
+          case 'resumed_as_responder':
+            audit.logHitlResumedAsResponder(undefined, {
+              executionId: event.executionId,
+              stepExecutionId: event.stepExecutionId,
+              stepType: event.stepType,
+              responder: event.responder,
+              serviceAccountId: event.serviceAccountId,
+            });
+            break;
         }
       });
     }

@@ -44,6 +44,7 @@ import {
 import {
   emitHitlWaitingAudit,
   failHitlWaitOnTimeout,
+  recordHitlResumeAs,
   resumeHitlWaitStep,
   shouldSkipHitlWaitEntry,
   tryEnterHitlWait,
@@ -84,6 +85,11 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
   }
 
   private async enterWait(): Promise<void> {
+    recordHitlResumeAs({
+      stepExecutionRuntime: this.stepExecutionRuntime,
+      workflowRuntime: this.workflowRuntime,
+      resumeAs: this.node.configuration['resume-as'],
+    });
     const dynamicTimeout = persistResolvedDynamicTimeout(
       this.stepExecutionRuntime,
       this.node.configuration.timeout,
@@ -245,6 +251,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       workflowRuntime: this.workflowRuntime,
       workflowLogger: this.workflowLogger,
       stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      resumeAs: this.node.configuration['resume-as'],
       transformResumeInput: (input, respondedBy) => {
         const approved = input?.approved;
         return {
