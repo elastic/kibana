@@ -56,7 +56,8 @@ const replayRoundSchema = lazySchema(() =>
     /** The round's user turn: the question, a follow-up correction or the recovery message. */
     user_message: z.string().min(1).max(MAX_MESSAGE_LENGTH),
     assistant_message: z.string().max(MAX_MESSAGE_LENGTH),
-    /** The previous round's final answer, which a follow-up or recovery round refers to. */
+    /** The previous round's request and final answer, which a follow-up or recovery round refers to. */
+    previous_user_message: z.string().max(MAX_MESSAGE_LENGTH).optional(),
     previous_assistant_message: z.string().max(MAX_MESSAGE_LENGTH).optional(),
     tool_calls: z.array(replayToolCallSchema).max(500).default([]),
   })
@@ -159,7 +160,7 @@ export interface CortexPageSnapshot {
 
 export interface CortexRoundResult {
   kind: CortexReplayRound['kind'];
-  /** The transcript the optimizer's model was shown. */
+  /** A plain-text rendering of the messages the optimizer's model was shown. */
   transcript: string;
   proposed_edits: Array<{
     action: string;

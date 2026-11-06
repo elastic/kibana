@@ -292,6 +292,7 @@ describe('runCortexOptimize', () => {
     expect(optimizeCortex).toHaveBeenCalledWith(
       expect.objectContaining({
         roundKind: 'follow_up',
+        previousUserMessage: 'Why is checkout slow?',
         previousAssistantMessage: 'The gateway times out.',
       })
     );

@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
+  describeMessages,
   optimizeCortex,
   type ProposeCortexEdits,
 } from '@kbn/nightshift-investigations-plugin/server/cortex/optimize';
@@ -106,7 +107,7 @@ export const runCortexReplay = async ({
       let transcript = '';
       let proposed: CortexRoundResult['proposed_edits'] = [];
       const recordingProposeEdits: ProposeCortexEdits = async (input) => {
-        transcript = input.transcript;
+        transcript = describeMessages(input.messages);
         const result = await proposeEdits(input);
         proposed = result.edits;
         return result;
@@ -119,6 +120,7 @@ export const runCortexReplay = async ({
         assistantMessage: round.assistant_message,
         toolCalls: round.tool_calls.map(toInvestigationToolCall),
         roundKind: round.kind,
+        previousUserMessage: round.previous_user_message,
         previousAssistantMessage: round.previous_assistant_message,
         telemetry: noopTelemetry,
         provenance: {

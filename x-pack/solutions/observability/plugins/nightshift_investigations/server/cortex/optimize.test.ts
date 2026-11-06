@@ -12,6 +12,7 @@ import { CORTEX_RELATION_KINDS } from '../../common/cortex_relations';
 import type { CortexTelemetry } from '../telemetry';
 import {
   applyCortexEdits,
+  buildRoundMessages,
   createLlmProposeCortexEdits,
   optimizeCortex,
   renderToolCalls,
@@ -828,12 +829,30 @@ describe('optimizeCortex', () => {
       proposeEdits,
     });
 
-    const [{ transcript }] = proposeEdits.mock.calls[0];
-    expect(transcript).toContain(
-      '## Tool calls\n- nightshift.sandbox_bash {"command":"esql \\"FROM traces-*\\""}'
-    );
-    expect(transcript.indexOf('## User')).toBeLessThan(transcript.indexOf('## Tool calls'));
-    expect(transcript.indexOf('## Tool calls')).toBeLessThan(transcript.indexOf('## Assistant'));
+    const [{ messages }] = proposeEdits.mock.calls[0];
+    expect(messages).toEqual([
+      { role: 'user', content: 'Why is checkout slow?' },
+      {
+        role: 'assistant',
+        content: null,
+        toolCalls: [
+          {
+            toolCallId: 'call_0',
+            function: {
+              name: 'nightshift.sandbox_bash',
+              arguments: { command: 'esql "FROM traces-*"' },
+            },
+          },
+        ],
+      },
+      {
+        role: 'tool',
+        name: 'nightshift.sandbox_bash',
+        toolCallId: 'call_0',
+        response: { result: '(no result recorded)' },
+      },
+      { role: 'assistant', content: 'Redis lock contention on checkout.' },
+    ]);
   });
 
   it('skips writes when the optimizer proposes nothing', async () => {
@@ -865,26 +884,25 @@ describe('optimizeCortex', () => {
     expect(telemetry.reportEditsApplied).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['initial', 'Kind: initial'],
-    ['follow_up', 'Kind: follow_up'],
-    ['alert_recovery', 'Kind: alert_recovery'],
-  ] as const)('opens the transcript with the round kind (%s)', async (roundKind, line) => {
-    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+  it.each(['initial', 'follow_up', 'alert_recovery'] as const)(
+    'hands the round kind to the model (%s)',
+    async (roundKind) => {
+      const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
 
-    await optimizeCortex({
-      store: createStore(),
-      telemetry: createTelemetry(),
-      logger: loggerMock.create(),
-      userMessage: 'You missed the cache.',
-      assistantMessage: 'Confirmed.',
-      toolCalls: [],
-      roundKind,
-      proposeEdits,
-    });
+      await optimizeCortex({
+        store: createStore(),
+        telemetry: createTelemetry(),
+        logger: loggerMock.create(),
+        userMessage: 'You missed the cache.',
+        assistantMessage: 'Confirmed.',
+        toolCalls: [],
+        roundKind,
+        proposeEdits,
+      });
 
-    expect(proposeEdits.mock.calls[0][0].transcript.startsWith(`## Round\n${line}\n`)).toBe(true);
-  });
+      expect(proposeEdits.mock.calls[0][0].roundKind).toBe(roundKind);
+    }
+  );
 
   it('treats a round as initial when no kind is given', async () => {
     const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
@@ -899,11 +917,11 @@ describe('optimizeCortex', () => {
       proposeEdits,
     });
 
-    expect(proposeEdits.mock.calls[0][0].transcript).toContain('Kind: initial');
+    expect(proposeEdits.mock.calls[0][0].roundKind).toBe('initial');
   });
 
   it.each(['follow_up', 'alert_recovery'] as const)(
-    'shows the previous answer to a %s round',
+    'replays the earlier request and answer to a %s round as turns',
     async (roundKind) => {
       const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
 
@@ -913,15 +931,19 @@ describe('optimizeCortex', () => {
         logger: loggerMock.create(),
         userMessage: 'You missed the cache.',
         assistantMessage: 'Confirmed.',
+        previousUserMessage: 'Why do requests time out?',
         previousAssistantMessage: 'The gateway times out.',
         toolCalls: [],
         roundKind,
         proposeEdits,
       });
 
-      const { transcript } = proposeEdits.mock.calls[0][0];
-      expect(transcript).toContain('## Previous answer\nThe gateway times out.');
-      expect(transcript.indexOf('## Previous answer')).toBeLessThan(transcript.indexOf('## User'));
+      expect(proposeEdits.mock.calls[0][0].messages).toEqual([
+        { role: 'user', content: 'Why do requests time out?' },
+        { role: 'assistant', content: 'The gateway times out.' },
+        { role: 'user', content: 'You missed the cache.' },
+        { role: 'assistant', content: 'Confirmed.' },
+      ]);
     }
   );
 
@@ -940,7 +962,10 @@ describe('optimizeCortex', () => {
       proposeEdits,
     });
 
-    expect(proposeEdits.mock.calls[0][0].transcript).not.toContain('## Previous answer');
+    expect(proposeEdits.mock.calls[0][0].messages).toEqual([
+      { role: 'user', content: 'Why is checkout slow?' },
+      { role: 'assistant', content: 'Unknown.' },
+    ]);
   });
 
   it('tells the optimizer which conversation it is learning from', async () => {
@@ -1499,7 +1524,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
   };
 
   it('asks for the sections the shared list defines, for every entity type', async () => {
-    const { system } = await run({ transcript: '## Round\nKind: initial', catalog: [] });
+    const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     for (const entityType of CORTEX_ENTITY_TYPES) {
       const sections = CORTEX_SECTIONS_BY_TYPE[entityType];
@@ -1514,7 +1539,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
   });
 
   it('says what the page check rejects and what is fine to write', async () => {
-    const { system } = await run({ transcript: '', catalog: [] });
+    const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(system).toContain('"5,944 errors"');
     expect(system).toContain('number of pods, replicas, nodes or instances');
@@ -1522,7 +1547,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
   });
 
   it('describes the ontology relation format and its kinds', async () => {
-    const { system } = await run({ transcript: '', catalog: [] });
+    const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(system).toContain('`source -> target : kind`');
     for (const kind of CORTEX_RELATION_KINDS) {
@@ -1531,7 +1556,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
   });
 
   it('explains how to treat each kind of round and how to record tool failures', async () => {
-    const { system } = await run({ transcript: '', catalog: [] });
+    const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(system).toContain('follow_up —');
     expect(system).toContain('alert_recovery —');
@@ -1552,7 +1577,8 @@ describe('createLlmProposeCortexEdits prompt', () => {
     };
 
     const { input } = await run({
-      transcript: '',
+      messages: [],
+      roundKind: 'initial',
       currentConversationId: 'conversation-1',
       catalog: [
         { ...page, conversation_id: 'conversation-1', authored_by: ['conversation-1'] },
@@ -1569,7 +1595,8 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
   it('keeps the marker on a page another conversation only corroborated afterwards', async () => {
     const { input } = await run({
-      transcript: '',
+      messages: [],
+      roundKind: 'initial',
       currentConversationId: 'conversation-1',
       catalog: [
         {
@@ -1590,7 +1617,8 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
   it('does not mark a page that this conversation only corroborated', async () => {
     const { input } = await run({
-      transcript: '',
+      messages: [],
+      roundKind: 'initial',
       currentConversationId: 'conversation-1',
       catalog: [
         {
@@ -1611,7 +1639,8 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
   it('shows the content of the pages the round may rewrite', async () => {
     const { input } = await run({
-      transcript: '',
+      messages: [],
+      roundKind: 'initial',
       catalog: [],
       pageBodies: [
         {
@@ -1627,13 +1656,13 @@ describe('createLlmProposeCortexEdits prompt', () => {
   });
 
   it('leaves out the section when there are no such pages', async () => {
-    const { input } = await run({ transcript: '', catalog: [] });
+    const { input } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(input).not.toContain('Existing page content');
   });
 
   it('tells the model to start a rewrite from the existing content and not to drop knowledge', async () => {
-    const { system } = await run({ transcript: '', catalog: [] });
+    const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(system).toContain('An "upsert" replaces the whole page');
     expect(system).toContain('start from it');
@@ -1641,11 +1670,159 @@ describe('createLlmProposeCortexEdits prompt', () => {
   });
 
   it('asks for slugs as relation nodes and says which way an edge points', async () => {
-    const { system } = await run({ transcript: '', catalog: [] });
+    const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(system).toContain('page slug exactly as the catalog shows it');
     expect(system).toContain('"A reads_from B" as "A pulls data from B"');
     expect(system).toContain('never add an integration or a telemetry connector as a node');
     expect(system).toContain('State one edge per pair of components');
+  });
+});
+
+describe('buildRoundMessages', () => {
+  const base = { userMessage: 'Why is checkout slow?', assistantMessage: 'Lock contention.' };
+
+  it('turns each tool call into an assistant call and a tool result, in order', () => {
+    const messages = buildRoundMessages({
+      ...base,
+      toolCalls: [
+        {
+          tool_id: 'nightshift.sandbox_bash',
+          tool_call_id: 'abc',
+          params: { command: 'ls' },
+          results: [{ type: 'other', data: { stdout: 'a.txt' } }],
+        },
+      ],
+    });
+
+    expect(messages.map((message) => message.role)).toEqual([
+      'user',
+      'assistant',
+      'tool',
+      'assistant',
+    ]);
+    expect(messages[1]).toMatchObject({
+      toolCalls: [{ toolCallId: 'abc', function: { name: 'nightshift.sandbox_bash' } }],
+    });
+    expect(messages[2]).toMatchObject({ toolCallId: 'abc', response: { result: 'stdout: a.txt' } });
+  });
+
+  it('marks a failed result so the model can tell it from data', () => {
+    const messages = buildRoundMessages({
+      ...base,
+      toolCalls: [
+        { tool_id: 't', results: [{ type: 'error', data: { message: 'no such remote' } }] },
+      ],
+    });
+
+    expect(messages[2]).toMatchObject({ response: { result: 'error: message: no such remote' } });
+  });
+
+  it('gives every call its own id so each result pairs with one call', () => {
+    const messages = buildRoundMessages({
+      ...base,
+      toolCalls: [
+        { tool_id: 't', tool_call_id: 'same' },
+        { tool_id: 't', tool_call_id: 'same' },
+        { tool_id: 't' },
+      ],
+    });
+    const callIds = messages.flatMap((message) =>
+      message.role === 'assistant' && message.toolCalls ? [message.toolCalls[0].toolCallId] : []
+    );
+    const resultIds = messages.flatMap((message) =>
+      message.role === 'tool' ? [message.toolCallId] : []
+    );
+
+    expect(new Set(callIds).size).toBe(3);
+    expect(resultIds).toEqual(callIds);
+  });
+
+  it('keeps far more of a result than the text dump does', () => {
+    const messages = buildRoundMessages({
+      ...base,
+      toolCalls: [
+        { tool_id: 't', results: [{ type: 'other', data: { stdout: 'x'.repeat(7_000) } }] },
+      ],
+    });
+
+    expect(JSON.stringify(messages[2])).toContain('x'.repeat(5_000));
+  });
+
+  it('leaves out the content of a file Nightshift seeded itself', () => {
+    const messages = buildRoundMessages({
+      ...base,
+      toolCalls: [
+        {
+          tool_id: 'nightshift_sandbox_view_file',
+          params: { file_path: '/workspace/cortex/INDEX.md' },
+          results: [{ type: 'other', data: { stdout: 'SEEDED CONTENT' } }],
+        },
+      ],
+    });
+
+    expect(JSON.stringify(messages)).not.toContain('SEEDED CONTENT');
+  });
+
+  it('stops at the budget and says how many calls it left out, keeping calls and results paired', () => {
+    const calls = Array.from({ length: 30 }, (_, index) => ({
+      tool_id: 't',
+      tool_call_id: `c${index}`,
+      results: [{ type: 'other', data: { stdout: 'y'.repeat(7_000) } }],
+    }));
+    const messages = buildRoundMessages({ ...base, toolCalls: calls });
+    const callCount = messages.filter(
+      (message) => message.role === 'assistant' && message.toolCalls
+    ).length;
+
+    expect(callCount).toBeLessThan(30);
+    expect(callCount).toBe(messages.filter((message) => message.role === 'tool').length);
+    expect(JSON.stringify(messages)).toContain('more tool calls omitted');
+    expect(messages[messages.length - 1]).toEqual({
+      role: 'assistant',
+      content: 'Lock contention.',
+    });
+  });
+
+  it('puts a placeholder where an earlier request is unknown', () => {
+    const messages = buildRoundMessages({
+      ...base,
+      toolCalls: [],
+      roundKind: 'follow_up',
+      previousAssistantMessage: 'Earlier answer.',
+    });
+
+    expect(messages.slice(0, 2)).toEqual([
+      { role: 'user', content: '(the earlier request)' },
+      { role: 'assistant', content: 'Earlier answer.' },
+    ]);
+  });
+});
+
+describe('createLlmProposeCortexEdits messages', () => {
+  it('sends the round as previous messages and keeps the rest for the final human message', async () => {
+    const output = jest.fn().mockResolvedValue({ output: { edits: [] } });
+    const messages = buildRoundMessages({
+      userMessage: 'q',
+      assistantMessage: 'a',
+      toolCalls: [],
+    });
+
+    await createLlmProposeCortexEdits({
+      inferenceClient: { output } as unknown as BoundInferenceClient,
+    })({
+      messages,
+      roundKind: 'follow_up',
+      catalog: [],
+      pageBodies: [{ slug: 'orders-db', entity_type: 'service', content: 'body' }],
+    });
+
+    const call = output.mock.calls[0][0];
+    expect(call.previousMessages).toBe(messages);
+    expect(call.input).toContain('Round kind: follow_up');
+    expect(call.input).toContain('Existing pages:');
+    expect(call.input).toContain('### service/orders-db');
+    expect(call.input.endsWith('Propose the Cortex edits for the round above.')).toBe(true);
+    expect(call.input).not.toContain('Investigation transcript');
   });
 });

@@ -77,7 +77,7 @@ describe('runCortexReplay', () => {
       }),
     ]);
     expect(output.rounds[1].transcript).toContain('You never looked at the session cache');
-    expect(output.rounds[0].transcript).toContain('## Tool calls');
+    expect(output.rounds[0].transcript).toContain('[tool]');
     expect(output.rounds[0].proposed_edits).toHaveLength(1);
   });
 

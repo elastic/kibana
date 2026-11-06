@@ -81,7 +81,8 @@ export interface LoadedInvestigationRound {
   roundIndex?: number;
   /** Total number of rounds in `conversation.rounds` when resolved from a conversation. */
   roundCount?: number;
-  /** The final answer of the round before this one, which a follow-up message refers to. */
+  /** The request and final answer of the round before this one, which a follow-up message refers to. */
+  previousUserMessage?: string;
   previousAssistantMessage?: string;
   traceId?: string;
   startedAt?: string;
@@ -411,6 +412,8 @@ export const loadInvestigationRound = async ({
           const steps = stepsFromRound(rawRoundSteps);
           const roundToolCalls = toolCallsFromRoundSteps(rawRoundSteps);
           const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+          const previousUserMessage =
+            resolvedIndex > 0 ? conversation.rounds[resolvedIndex - 1]?.input?.message : undefined;
           const previousAssistantMessage =
             resolvedIndex > 0
               ? conversation.rounds[resolvedIndex - 1]?.response?.message
@@ -420,6 +423,7 @@ export const loadInvestigationRound = async ({
             roundId: round.id,
             roundIndex: resolvedIndex,
             roundCount,
+            ...(previousUserMessage ? { previousUserMessage } : {}),
             ...(previousAssistantMessage ? { previousAssistantMessage } : {}),
             traceId,
             startedAt: round.started_at,

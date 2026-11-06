@@ -236,6 +236,7 @@ export const runCortexOptimize = async ({
     assistantMessage,
     toolCalls: sandboxToolCalls,
     roundKind,
+    previousUserMessage: loadedRound.previousUserMessage,
     previousAssistantMessage: loadedRound.previousAssistantMessage,
     telemetry: createCortexTelemetry({
       analytics,
