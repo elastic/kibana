@@ -97,26 +97,19 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-            )) === clientId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-            )) === tenantId
-          ).to.be(true);
-          expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
         });
+
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickPolicyToBeEdited(integrationName);
+        expect(await cisIntegration.getReplaceSecretButton('client-id')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('tenant-id')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
       });
     });
 
@@ -140,30 +133,23 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-            )) === clientId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-            )) === tenantId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
-            )) === clientCertificatePath
-          ).to.be(true);
         });
+
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickPolicyToBeEdited(integrationName);
+        expect(await cisIntegration.getReplaceSecretButton('client-id')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('tenant-id')).to.not.be(null);
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
+          )) === clientCertificatePath
+        ).to.be(true);
       });
     });
 
@@ -219,25 +205,18 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-            )) === clientId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-            )) === tenantId
-          ).to.be(true);
-          expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
         });
+
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickPolicyToBeEdited(integrationName);
+        expect(await cisIntegration.getReplaceSecretButton('client-id')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('tenant-id')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
       });
     });
 
@@ -261,29 +240,22 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-            )) === clientId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-            )) === tenantId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
-            )) === clientCertificatePath
-          ).to.be(true);
         });
+
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickPolicyToBeEdited(integrationName);
+        expect(await cisIntegration.getReplaceSecretButton('client-id')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('tenant-id')).to.not.be(null);
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
+          )) === clientCertificatePath
+        ).to.be(true);
       });
     });
   });

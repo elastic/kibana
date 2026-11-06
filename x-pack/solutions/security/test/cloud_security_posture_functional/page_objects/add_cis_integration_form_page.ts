@@ -548,7 +548,9 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getReplaceSecretButton = async (secretField: string) => {
-    return await testSubjects.find(`button-replace-${secretField}`);
+    const replaceButton = `button-replace-${secretField}`;
+    await testSubjects.waitForExists(replaceButton, { timeout: 20_000 });
+    return await testSubjects.find(replaceButton);
   };
 
   const showCredentialJsonSecretPanel = async () => {
