@@ -170,18 +170,22 @@ export class SubjectClaimsService {
       seq_no_primary_term: true,
       query: { bool: { filter: [{ term: { spaceId } }, { term: { conversationId } }] } },
     });
-    for (const { _id: id, _seq_no: seqNo, _primary_term: primaryTerm } of response.hits.hits) {
-      if (id === undefined || seqNo === undefined || primaryTerm === undefined) {
-        continue;
-      }
-      try {
-        await this.deps.storage.delete({ id, if_seq_no: seqNo, if_primary_term: primaryTerm });
-      } catch (error) {
-        if (!isVersionConflict(error)) {
-          throw error;
+    // Concurrent, so the deletes share one index refresh wait; the storage adapter's bulk delete
+    // cannot carry the versions.
+    await Promise.all(
+      response.hits.hits.map(async ({ _id: id, _seq_no: seqNo, _primary_term: primaryTerm }) => {
+        if (id === undefined || seqNo === undefined || primaryTerm === undefined) {
+          return;
         }
-      }
-    }
+        try {
+          await this.deps.storage.delete({ id, if_seq_no: seqNo, if_primary_term: primaryTerm });
+        } catch (error) {
+          if (!isVersionConflict(error)) {
+            throw error;
+          }
+        }
+      })
+    );
   }
 
   /** The investigation (conversation id) holding the subject's claim in the space, open or closed. */

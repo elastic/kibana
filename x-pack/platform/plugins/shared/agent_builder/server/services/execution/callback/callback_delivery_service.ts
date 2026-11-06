@@ -53,8 +53,8 @@ export class CallbackDeliveryService {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
       },
-      registerOnBeforeNewConversation: (hook) => {
-        this.onBeforeNewConversationHooks.push(hook);
+      registerOnBeforeNewConversation: (check) => {
+        this.onBeforeNewConversationHooks.push(check);
       },
       registerTransport: (transport) => {
         this.transports.push(transport);
@@ -105,9 +105,7 @@ export class CallbackDeliveryService {
    * execution and gives back what the hooks before it took. Resolves to the release of everything
    * the hooks took, which never throws.
    */
-  async runOnBeforeNewConversation(
-    context: OnBeforeNewConversationContext
-  ): Promise<OnBeforeNewConversationRelease> {
+  async runOnBeforeNewConversation(context: OnBeforeNewConversationContext): Promise<OnBeforeNewConversationRelease> {
     const releases: OnBeforeNewConversationRelease[] = [];
     const releaseAll = async () => {
       for (const release of releases.splice(0).reverse()) {

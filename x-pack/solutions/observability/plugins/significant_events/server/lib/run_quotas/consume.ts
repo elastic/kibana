@@ -32,21 +32,13 @@ export const consumeRunQuota = async ({
     date,
     group,
     mutation: (ledger) => {
-      if (
-        isRunQuotaReached({
-          group,
-          enabled: settings.enabled,
-          investigationLimitsEnabled: settings.investigationLimitsEnabled,
-          limit,
-          count: ledger.count,
-        })
-      ) {
-        return { result: { allowed: false, limit } };
+      if (isRunQuotaReached({ group, enabled: settings.enabled, limit, count: ledger.count })) {
+        return { result: { allowed: false } };
       }
 
       return {
         attributes: { count: ledger.count + 1 },
-        result: { allowed: true, limit },
+        result: { allowed: true },
       };
     },
   });
@@ -54,7 +46,7 @@ export const consumeRunQuota = async ({
 
 export type InvestigationRunQuotaConsumeResult =
   | { allowed: true; release: () => Promise<void> }
-  | { allowed: false; deniedBy: InvestigationRunQuotaGroup; limit: number };
+  | { allowed: false; deniedBy: InvestigationRunQuotaGroup };
 
 /**
  * Charges an investigation start to its own limit (`investigation` or `manual_investigation`) and
@@ -74,7 +66,7 @@ export const consumeInvestigationRunQuota = async ({
 
   const own = await consumeRunQuota({ internalRepository, group, date });
   if (!own.allowed) {
-    return { allowed: false, deniedBy: group, limit: own.limit };
+    return { allowed: false, deniedBy: group };
   }
 
   const total = await consumeRunQuota({
@@ -87,7 +79,7 @@ export const consumeInvestigationRunQuota = async ({
   });
   if (!total.allowed) {
     await release(group);
-    return { allowed: false, deniedBy: 'total_investigation', limit: total.limit };
+    return { allowed: false, deniedBy: 'total_investigation' };
   }
 
   return {
