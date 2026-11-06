@@ -19,7 +19,7 @@
 #
 # Usage:
 #   ./scripts/es_proxy_bench.sh [--kibana-url URL] [--es-url URL] [--user U] [--password P]
-#     [--sizes "100B 1KB 10KB 100KB 1MB"]  (also supported: 5MB 10MB 21MB) [--connections "1 10 50 100"]
+#     [--sizes "100B 1KB 10KB 100KB 1MB"]  (also supported: 5MB 10MB 20MB 21MB) [--connections "1 10 50 100"]
 #     [--targets "es kibana"] [--duration 30] [--warmup 3] [--cooldown 5]
 #     [--accept-encoding "gzip, deflate, br, zstd"] [--out DIR]
 
@@ -78,6 +78,7 @@ size_bytes() {
     1MB) echo 1048576 ;;
     5MB) echo 5242880 ;;
     10MB) echo 10485760 ;;
+    20MB) echo 20971520 ;;
     21MB) echo 22020096 ;;
     *) echo "ERROR: unknown size $1" >&2; exit 1 ;;
   esac
