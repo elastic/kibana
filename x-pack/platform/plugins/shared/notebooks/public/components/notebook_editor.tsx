@@ -145,10 +145,10 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const { size } = euiTheme;
   // Keeps the cells' Run buttons (just outside each cell) and the floating controls (pinned to
-  // the page edge) clear of each other and of the cells, padding only when the page is too narrow.
+  // the page edge) clear of each other and of the cells, padding both sides only when the page is too narrow.
   const reservedEnd = `(${size.s} + ${size.xxxxl}) + (${size.m} + ${size.xxl} + ${size.m})`;
   const sectionCss = css`
-    padding-inline-end: max(
+    padding-inline: max(
       ${size.base},
       calc(${reservedEnd} - max(0px, (100% - ${PAGE_WIDTH}px) / 2))
     );
