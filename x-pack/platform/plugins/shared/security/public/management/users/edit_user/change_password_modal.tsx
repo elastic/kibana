@@ -104,6 +104,9 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
 }) => {
   const { services } = useKibana();
   const { user, isLoading } = useCurrentUser();
+  // `isLoading` also covers background profile refetches, which must not tear down a form the user
+  // is already typing into.
+  const isInitialLoading = isLoading && !user;
   const isCurrentUser = user?.username === username;
   const isSystemUser = username === 'kibana' || username === 'kibana_system';
 
@@ -153,7 +156,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
     requestAnimationFrame(() => onBlur(event));
   };
 
-  const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
+  const firstFieldRef = useInitialFocus<HTMLInputElement>([isInitialLoading]);
   const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
 
   const modalTitleId = useGeneratedHtmlId({ prefix: 'changePasswordModalTitle' });
@@ -169,7 +172,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiSkeletonText isLoading={isLoading}>
+        <EuiSkeletonText isLoading={isInitialLoading}>
           <EuiForm
             id={modalFormId}
             component="form"
@@ -317,7 +320,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
           data-test-subj="changePasswordFormSubmitButton"
           isLoading={form.isSubmitting}
           isDisabled={
-            isLoading ||
+            isInitialLoading ||
             form.isInvalid ||
             !form.values.password ||
             !form.values.confirm_password ||
