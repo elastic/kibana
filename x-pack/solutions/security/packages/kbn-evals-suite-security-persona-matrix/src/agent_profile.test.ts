@@ -6,6 +6,8 @@
  */
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { PERSONA_MATRIX_EXAMPLES } from './datasets/persona_matrix_prompts';
+import { CHRYSALIS_PARITY_AGENT } from './fixtures/chrysalis_parity_agent';
 import {
   CHRYSALIS_PARITY_AGENT_ID,
   resolveAgentId,
@@ -44,6 +46,12 @@ describe('agent_profile', () => {
         'check.on.call.schedule'
       );
       expect(resolveExpectedToolId('security.alerts', 'chrysalis-parity')).toBe('security.alerts');
+      expect(resolveExpectedToolId('platform.core.cases.manage', 'chrysalis-parity')).toBe(
+        'create.case'
+      );
+      expect(resolveExpectedToolId('platform.core.cases.manage', 'default')).toBe(
+        'platform.core.cases.manage'
+      );
       expect(resolveExpectedToolId('virustotal_lookup', 'default')).toBe('virustotal_lookup');
     });
 
@@ -56,6 +64,33 @@ describe('agent_profile', () => {
       expect(mapped[0].metadata.expectedTools).toEqual(['vt.hash.lookup', 'security.alerts']);
       expect(mapped[1]).toBe(examples[1]);
       expect(examples[0].metadata.expectedTools).toEqual(['virustotal_lookup', 'security.alerts']);
+    });
+  });
+
+  describe('dataset expectations under the parity profile', () => {
+    const parityToolIds: readonly string[] = CHRYSALIS_PARITY_AGENT.toolIds;
+    const expectedIds = (profile: 'default' | 'chrysalis-parity') =>
+      new Set(
+        withProfileExpectedTools(PERSONA_MATRIX_EXAMPLES, profile).flatMap(
+          (example) => example.metadata?.expectedTools ?? []
+        )
+      );
+
+    it('expects the parity case-creation tool instead of the cases-management tool', () => {
+      expect(expectedIds('default').has('platform.core.cases.manage')).toBe(true);
+      const parity = expectedIds('chrysalis-parity');
+      expect(parity.has('platform.core.cases.manage')).toBe(false);
+      expect(parity.has('create.case')).toBe(true);
+    });
+
+    it('leaves no seeded custom tool id that the parity agent does not carry', () => {
+      // Built-ins (platform.*, security.*, attachments.*) reach the agent through
+      // its default tools, skills or the run itself; every other id is a seeded
+      // custom tool and must be one of the agent's own.
+      const custom = [...expectedIds('chrysalis-parity')].filter(
+        (id) => !/^(platform|security|attachments)\./.test(id)
+      );
+      expect(custom.filter((id) => !parityToolIds.includes(id))).toEqual([]);
     });
   });
 });

@@ -276,22 +276,31 @@ const fixtureValueFor = (declaration: Record<string, unknown>): unknown => {
 /**
  * Run inputs for a workflow the agent authored. The engine rejects a run whose
  * required inputs are missing before any step executes, which would score the
- * evaluator's own omission as an authoring failure. Every declared input with no
- * default gets a fixture value of its declared type; declared defaults are left
- * to the engine. Handles the list form (`[{ name, type, default }]`) and the
- * JSON-schema form (`{ properties: { <name>: { type, default } } }`).
+ * evaluator's own omission as an authoring failure. Only inputs that are required
+ * and have no default get a fixture value of their declared type. Optional inputs
+ * are omitted: supplying one can break a runnable workflow (an optional array with
+ * `minItems: 1` sent as `[]` is rejected by the engine's input validator), and
+ * declared defaults are left to the engine. Handles the list form
+ * (`[{ name, type, required, default }]`) and the JSON-schema form
+ * (`{ properties: { <name>: { type, default } }, required: [<name>] }`).
  */
 export const buildRunInputs = (root: Record<string, unknown>): Record<string, unknown> => {
   const inputs: Record<string, unknown> = {};
-  const declare = (name: unknown, declaration: unknown) => {
-    if (typeof name !== 'string' || !isRecord(declaration) || 'default' in declaration) return;
+  const declare = (name: unknown, declaration: unknown, required: boolean) => {
+    if (typeof name !== 'string' || !isRecord(declaration)) return;
+    if (!required || 'default' in declaration) return;
     inputs[name] = fixtureValueFor(declaration);
   };
   const declared = root.inputs;
   if (Array.isArray(declared)) {
-    declared.forEach((entry) => isRecord(entry) && declare(entry.name, entry));
+    declared.forEach(
+      (entry) => isRecord(entry) && declare(entry.name, entry, entry.required === true)
+    );
   } else if (isRecord(declared) && isRecord(declared.properties)) {
-    Object.entries(declared.properties).forEach(([name, entry]) => declare(name, entry));
+    const required = new Set(Array.isArray(declared.required) ? declared.required : []);
+    Object.entries(declared.properties).forEach(([name, entry]) =>
+      declare(name, entry, required.has(name))
+    );
   }
   return inputs;
 };

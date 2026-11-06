@@ -31,14 +31,18 @@ export const resolveAgentId = (profile: AgentProfile): string =>
   profile === 'chrysalis-parity' ? CHRYSALIS_PARITY_AGENT_ID : agentBuilderDefaultAgentId;
 
 /**
- * The parity agent carries the external benchmark's tool ids, not the seeded
- * `virustotal_lookup` / `on_call_lookup` the dataset's `expectedTools` name. Both
- * lookups answer the same prompt, so the parity profile's expectations use the
- * parity equivalents; every other id is unchanged.
+ * The parity agent carries the external benchmark's tool ids, not the ones the
+ * dataset's `expectedTools` name: the seeded `virustotal_lookup` / `on_call_lookup`
+ * and the cases-management `platform.core.cases.manage`. Each pair answers the same
+ * prompt (the parity agent is told to "Use create.case to open a Security case",
+ * and `UnrequestedSideEffects` already treats a cases.manage create as
+ * `create.case`), so the parity profile's expectations use the parity
+ * equivalents; every other id is unchanged.
  */
 const PARITY_EXPECTED_TOOL_ALIASES: Readonly<Record<string, string>> = {
   virustotal_lookup: 'vt.hash.lookup',
   on_call_lookup: 'check.on.call.schedule',
+  'platform.core.cases.manage': 'create.case',
 };
 
 export const resolveExpectedToolId = (toolId: string, profile: AgentProfile): string =>
