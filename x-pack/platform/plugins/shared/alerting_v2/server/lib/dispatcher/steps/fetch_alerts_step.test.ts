@@ -15,7 +15,7 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import {
   createAlert,
-  createDispatcherConfigAccessor,
+  createDispatcherConfigService,
   createDispatcherPipelineState,
   createDispatcherTelemetryMock,
   createStepLogger,
@@ -49,7 +49,7 @@ describe('FetchAlertsStep', () => {
       new FetchAlertsStep(
         queryService,
         MOCK_KIBANA_BASE_URL,
-        createDispatcherConfigAccessor(),
+        createDispatcherConfigService(),
         telemetry
       ).name
     ).toBe('fetch_alerts');
@@ -60,7 +60,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -84,7 +84,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -101,7 +101,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -131,7 +131,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor({ run: { alerts: { max: 1000 } } }),
+      createDispatcherConfigService({ run: { alerts: { max: 1000 } } }),
       telemetry
     );
 
@@ -154,7 +154,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -176,7 +176,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -202,7 +202,7 @@ describe('FetchAlertsStep', () => {
       const step = new FetchAlertsStep(
         queryService,
         MOCK_KIBANA_BASE_URL,
-        createDispatcherConfigAccessor({ run: { alerts: { max: MAX } } }),
+        createDispatcherConfigService({ run: { alerts: { max: MAX } } }),
         telemetry
       );
       return { step, mockEsClient, loggerService, mockLogger };
@@ -282,7 +282,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -297,7 +297,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -315,7 +315,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
@@ -340,7 +340,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       telemetry
     );
 
