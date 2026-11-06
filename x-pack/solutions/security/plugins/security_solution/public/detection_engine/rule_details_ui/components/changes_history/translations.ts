@@ -35,6 +35,20 @@ export const NO_CHANGE_HISTORY_BODY = i18n.translate(
   }
 );
 
+export const CHANGE_HISTORY_DISABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.changeHistoryDisabledTitle',
+  {
+    defaultMessage: 'Rule changes history is unavailable.',
+  }
+);
+
+export const CHANGE_HISTORY_DISABLED_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.changeHistoryDisabledBody',
+  {
+    defaultMessage: 'This feature is currently disabled. Contact your administrator to enable it.',
+  }
+);
+
 export const CUSTOM_RULE_RESTORE_SUCCESS_TOAST = (revision: number): string =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleChangesHistory.customRuleRestoreSuccessToast',

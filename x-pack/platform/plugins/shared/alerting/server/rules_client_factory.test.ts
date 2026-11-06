@@ -10,6 +10,7 @@ import type { RulesClientFactoryOpts } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
 import { ApiKeyType } from './task_runner/types';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
+import { changeTrackingServiceMock } from './rules_client/lib/change_tracking/service.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   savedObjectsClientMock,
@@ -63,11 +64,7 @@ let alertingAuthorizationClientFactory: ReturnType<
 
 let actionsAuthorization: ActionsAuthorizationMock;
 let backfillClient: jest.Mocked<BackfillClient>;
-let scopedChangeTrackingService: {
-  log: jest.Mock;
-  logBulk: jest.Mock;
-  getHistory: jest.Mock;
-};
+let scopedChangeTrackingService: ReturnType<typeof changeTrackingServiceMock.createScoped>;
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -95,11 +92,7 @@ describe('RulesClientFactory', () => {
 
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
     backfillClient = backfillClientMock.create();
-    scopedChangeTrackingService = {
-      log: jest.fn(),
-      logBulk: jest.fn(),
-      getHistory: jest.fn(),
-    };
+    scopedChangeTrackingService = changeTrackingServiceMock.createScoped();
 
     rulesClientFactoryParams = {
       logger: loggingSystemMock.create().get(),
@@ -214,27 +207,6 @@ describe('RulesClientFactory', () => {
         backfillClient,
         uiSettings: rulesClientFactoryParams.uiSettings,
         shouldGrantUiam: false,
-      })
-    );
-  });
-
-  test('creates a rules client without changeTrackingService when omitted', async () => {
-    const factory = new RulesClientFactory();
-    const { changeTrackingService: _omit, ...paramsWithoutChangeTracking } =
-      rulesClientFactoryParams;
-    factory.initialize(paramsWithoutChangeTracking);
-    const request = mockRouter.createKibanaRequest();
-
-    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-      alertingAuthorization as unknown as AlertingAuthorization
-    );
-
-    await factory.create(request, savedObjectsService);
-
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        changeTrackingService: undefined,
       })
     );
   });

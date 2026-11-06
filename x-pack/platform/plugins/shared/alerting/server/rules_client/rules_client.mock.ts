@@ -22,6 +22,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { alertingAuthorizationMock } from '../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { changeTrackingServiceMock } from './lib/change_tracking/service.mock';
 import type { RulesClientContext } from './types';
 const create = () => {
   const kibanaVersion = 'v8.17.0';
@@ -70,6 +71,7 @@ const create = () => {
     minimumScheduleIntervalInMs: 0,
     isServerless: false,
     analytics: { reportEvent: jest.fn() },
+    changeTrackingService: changeTrackingServiceMock.createScoped(),
   };
 
   return rulesClientParams;

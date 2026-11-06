@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -20,6 +21,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import type { AlertingAuthorization } from '../../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../../../../rule_type_registry.mock';
+import { changeTrackingServiceMock } from '../../../../../rules_client/lib/change_tracking/service.mock';
 import type { SavedObject } from '@kbn/core/server';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
@@ -100,6 +102,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
 
     rulesClient = new RulesClient({
       request: httpServerMock.createKibanaRequest(),
+      changeTrackingService: changeTrackingServiceMock.createScoped(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,

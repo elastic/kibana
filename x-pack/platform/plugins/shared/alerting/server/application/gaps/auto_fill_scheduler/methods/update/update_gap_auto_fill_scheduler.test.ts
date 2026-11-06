@@ -24,6 +24,7 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import type { AlertingAuthorization } from '../../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../../../../rule_type_registry.mock';
+import { changeTrackingServiceMock } from '../../../../../rules_client/lib/change_tracking/service.mock';
 import type { ConstructorOptions } from '../../../../../rules_client';
 import { RulesClient } from '../../../../../rules_client';
 import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
@@ -47,6 +48,7 @@ const backfillClient = backfillClientMock.create();
 
 const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   request: httpServerMock.createKibanaRequest(),
+  changeTrackingService: changeTrackingServiceMock.createScoped(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,

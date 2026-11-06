@@ -21,17 +21,6 @@ import type { Rule, RuleDomain, RuleParams } from '../../application/rule/types'
 import type { RuleChangeHistorySnapshot } from '../lib/change_tracking';
 import { getRuleSo } from '../../data/rule';
 
-/**
- * Thrown by {@link RulesClient.getHistory} when rule change tracking is
- * disabled at the framework level (`xpack.alerting.ruleChangeTracking.enabled = false`).
- */
-export class RuleChangeTrackingDisabledError extends Error {
-  constructor(message = 'Rule change tracking is disabled.') {
-    super(message);
-    this.name = 'RuleChangeTrackingDisabledError';
-  }
-}
-
 export interface GetRuleHistoryParams {
   /** Solution module that owns the rule (e.g. `'security'`). */
   module: RuleTypeSolution;
@@ -71,10 +60,6 @@ export async function getRuleHistory(
   context: RulesClientContext,
   { module, ruleId, from = DEFAULT_FROM, size = DEFAULT_SIZE, sort, filters }: GetRuleHistoryParams
 ): Promise<GetRuleHistoryResult> {
-  if (!context.changeTrackingService) {
-    throw new RuleChangeTrackingDisabledError();
-  }
-
   // Resolve auth info from the rule saved object. When the rule is deleted, fall back to
   // the most recent history snapshot so we can still authorize and serve the history.
   let ruleTypeId: string | undefined;

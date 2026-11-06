@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { changeTrackingServiceMock } from './change_tracking/service.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -37,6 +38,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<RulesClientContext> = {
   request: httpServerMock.createKibanaRequest(),
+  changeTrackingService: changeTrackingServiceMock.createScoped(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
