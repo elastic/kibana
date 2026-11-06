@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './common';
+export type * from './common';
 export * from './timeline';
-export * from './index_fields';
+export type * from './index_fields';
 export * from './eql';

@@ -52,7 +52,7 @@ const fullCaseSO = (
         { typeKey: 'ipv4', value: '1.2.3.4', description: 'ip' },
       ] as never,
       customFields: [{ key: 'cf', type: 'text', value: 'x' }] as never,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       extended_fields: { riskScore_as_long: '42' },
       ...overrides,
     } as CasePersistedAttributes,
@@ -207,7 +207,7 @@ describe('buildCaseDoc', () => {
 
   it('passes extended_fields through as a plain object', () => {
     const doc = buildCaseDoc(fullCaseSO());
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     expect(doc.case.extended_fields).toEqual({ riskScore_as_long: '42' });
   });
 

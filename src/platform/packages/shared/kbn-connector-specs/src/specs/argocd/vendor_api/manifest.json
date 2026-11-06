@@ -1,0 +1,75 @@
+{
+  "operations": {
+    "getApplication": [
+      {
+        "method": "get",
+        "path": "/api/v1/applications/{name}",
+        "source": "v1"
+      }
+    ],
+    "getPodLogs": [
+      {
+        "method": "get",
+        "path": "/api/v1/applications/{name}/pods/{podName}/logs",
+        "source": "v1"
+      }
+    ],
+    "getProject": [
+      {
+        "method": "get",
+        "path": "/api/v1/projects/{name}/detailed",
+        "source": "v1"
+      }
+    ],
+    "getResourceTree": [
+      {
+        "method": "get",
+        "path": "/api/v1/applications/{applicationName}/resource-tree",
+        "source": "v1"
+      }
+    ],
+    "listApplicationEvents": [
+      {
+        "method": "get",
+        "path": "/api/v1/applications/{name}/events",
+        "source": "v1"
+      }
+    ],
+    "listApplications": [
+      {
+        "method": "get",
+        "path": "/api/v1/applications",
+        "source": "v1"
+      }
+    ],
+    "listClusters": [
+      {
+        "method": "get",
+        "path": "/api/v1/clusters",
+        "source": "v1"
+      }
+    ],
+    "request": [
+      {
+        "method": "get",
+        "path": "/api/v1/applications",
+        "source": "v1"
+      }
+    ],
+    "syncApplication": [
+      {
+        "method": "post",
+        "path": "/api/v1/applications/{name}/sync",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "version not set",
+      "fetchedAt": "2026-10-07T20:18:25.747Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/argoproj/argo-cd/master/assets/swagger.json"
+    }
+  }
+}

@@ -51,7 +51,7 @@ export const reactRules: DummyRuleMap = {
   'react/no-is-mounted': 'error',
   'react/no-unescaped-entities': 'error',
   'react/no-will-update-set-state': 'error',
-  // 'react/prefer-stateless-function': ['error', { 'ignorePureComponents': true }],
+  '@kbn/compat/react-prefer-stateless-function': ['error', { ignorePureComponents: true }],
   'react/react-in-jsx-scope': 'error',
   'react/self-closing-comp': 'error',
 };
@@ -75,6 +75,11 @@ const strictReactRules: DummyRuleMap = {
   'react/jsx-fragments': 'error',
   'react/display-name': 'error',
   'react/jsx-no-literals': 'error',
+  '@kbn/compat/react-boolean-prop-naming': 'error',
+  '@kbn/compat/react-no-deprecated': 'error',
+  '@kbn/compat/react-no-typos': 'error',
+  '@kbn/compat/react-no-unused-prop-types': 'error',
+  '@kbn/compat/react-sort-default-props': 'error',
 };
 
 export const reactOverrides: OxlintOverride[] = [
@@ -192,6 +197,7 @@ export const reactOverrides: OxlintOverride[] = [
       'react/no-string-refs': 'error',
       'react/require-render-return': 'error',
       'react/display-name': 'error',
+      '@kbn/compat/react-no-deprecated': 'error',
     },
   },
 ];

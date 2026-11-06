@@ -270,6 +270,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Tines workflows migration API (create, get, update, start, and stop).
+   */
+  tinesWorkflowsMigration: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
@@ -283,6 +288,9 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
   automaticTroubleshootingSkill: true,
+
+  /** Enables the universal Automatic Troubleshooting Agent Builder skill */
+  automaticTroubleshootingUniversalSkill: false,
 
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
@@ -404,7 +412,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
-  siemRuleMigrationsAgentBuilderEnabled: false,
+  siemRuleMigrationsAgentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

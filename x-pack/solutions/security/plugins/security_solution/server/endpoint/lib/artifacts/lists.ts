@@ -292,6 +292,9 @@ async function translateToYaraRules(
   const translatedItems: TranslatedYaraRule[] = [];
 
   for (const exception of exceptions) {
+    // libyara compiles synchronously: release the event loop between items so Kibana keeps serving requests.
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
     // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
     const translatedItem = await translateOneYaraException(exception, logger);
     if (translatedItem !== undefined) {

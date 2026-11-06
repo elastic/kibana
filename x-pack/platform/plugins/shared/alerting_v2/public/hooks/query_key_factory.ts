@@ -48,6 +48,7 @@ export const workflowKeys = {
   all: ['workflow'] as const,
   details: () => [...workflowKeys.all, 'details'] as const,
   detail: (id: string) => [...workflowKeys.details(), id] as const,
+  execution: (executionId: string) => [...workflowKeys.all, 'execution', executionId] as const,
   searches: () => [...workflowKeys.all, 'search'] as const,
   search: (params: Pick<WorkflowsSearchParams, 'query' | 'tags'>) =>
     [...workflowKeys.searches(), params] as const,
@@ -62,6 +63,7 @@ export const matcherSuggestionKeys = {
 export const actionPolicyKeys = {
   all: ['actionPolicy'] as const,
   detail: (id: string) => [...actionPolicyKeys.all, 'detail', id] as const,
+  testPreview: (id: string) => [...actionPolicyKeys.all, 'testPreview', id] as const,
   lists: () => [...actionPolicyKeys.all, 'list'] as const,
   list: (filters: {
     page: number;

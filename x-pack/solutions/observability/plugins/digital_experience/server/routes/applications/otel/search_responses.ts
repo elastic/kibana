@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import type { TermsAggregation } from '../../../lib/helpers/aggregations';
 import type { DateHistogramAggregation } from '../../../lib/helpers/time_series';
-import type { VitalAggregation } from '../../../lib/helpers/web_vitals';
+import type { WebVitalAggregations } from '../../../lib/helpers/web_vitals';
+import type {
+  ByEnvironmentAggregations,
+  EnvironmentAggregations,
+} from '../../../lib/otel/environments';
 
 // The aggregations `search_requests.ts` asks for, by the same names.
 
-export interface EnvironmentAggregations {
-  environments: TermsAggregation;
-  environmentNames: TermsAggregation;
-}
-
 /** One application in `logsSearch`. */
-export type LogsBucket = EnvironmentAggregations & {
-  key: string;
-  pageLoads: { doc_count: number };
-  jsErrors: { doc_count: number };
-  lcp: VitalAggregation;
-  inp: VitalAggregation;
-  cls: VitalAggregation;
-  fcp: VitalAggregation;
-  ttfb: VitalAggregation;
-  lastSeen: { value: number | null };
-};
+export type LogsBucket = EnvironmentAggregations &
+  WebVitalAggregations & {
+    key: string;
+    pageLoads: { doc_count: number };
+    jsErrors: { doc_count: number };
+    lastSeen: { value: number | null };
+  };
 
 /** One application in `spansSearch`. */
 export type SpansBucket = EnvironmentAggregations & {
@@ -38,13 +32,10 @@ export type SpansBucket = EnvironmentAggregations & {
 };
 
 /** `logsSearch`: the applications, the page loads over time and every environment for the picker. */
-export type LogsAggregations = EnvironmentAggregations & {
-  environmentNotDefined: { doc_count: number };
-  inEnvironment: {
-    applications: { buckets: LogsBucket[] };
-    pageLoadsOverTime: { histogram: DateHistogramAggregation };
-  };
-};
+export type LogsAggregations = ByEnvironmentAggregations<{
+  applications: { buckets: LogsBucket[] };
+  pageLoadsOverTime: { histogram: DateHistogramAggregation };
+}>;
 
 /** `spansSearch`: the applications in the selected environment only. */
 export interface SpansAggregations {

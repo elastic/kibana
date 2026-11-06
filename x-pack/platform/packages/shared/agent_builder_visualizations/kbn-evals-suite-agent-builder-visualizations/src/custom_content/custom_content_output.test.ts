@@ -11,6 +11,7 @@ import {
   getLastCustomContentAttachmentId,
   getLastWrittenDashboardId,
   findStoredPanel,
+  getCustomContentToolArgs,
   getToolErrors,
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
@@ -320,5 +321,78 @@ describe('findStoredPanel', () => {
       versionCount: 0,
       storedIn: 'none',
     });
+  });
+});
+
+describe('getCustomContentToolArgs', () => {
+  const call = (tool_id: string, params: Record<string, unknown>) => ({
+    type: 'tool_call',
+    tool_id,
+    params,
+  });
+
+  it('shows whether generate_dashboard was told the panel has data', () => {
+    const [omitted, passed] = getCustomContentToolArgs([
+      call('platform.dashboard.generate_dashboard', {
+        panels: [
+          {
+            id: 'banner',
+            content: {
+              source: 'request',
+              renderer: 'custom_content',
+              query: 'show the live total number of requests',
+            },
+          },
+          {
+            id: 'kpi',
+            content: {
+              source: 'request',
+              renderer: 'custom_content',
+              query: 'show requests',
+              hasData: true,
+              esql: 'FROM logs | STATS c = COUNT(*)',
+            },
+          },
+        ],
+      }),
+    ]);
+
+    expect(omitted).toContain('panel banner: hasData=unset');
+    expect(omitted).toContain('esql=no');
+    expect(passed).toContain('panel kpi: hasData=true');
+    expect(passed).toContain('esql=yes');
+    expect(passed).not.toContain('FROM logs');
+  });
+
+  it('reads create_visualization targets and the update tool', () => {
+    const lines = getCustomContentToolArgs([
+      call('platform.core.create_visualization', {
+        query: 'a status board',
+        target: { type: 'custom_content', has_data: false },
+      }),
+      call('custom_content_update_panel', {
+        embeddable_id: 'p1',
+        prompt: 'x'.repeat(200),
+        regenerateEsql: true,
+      }),
+    ]);
+
+    expect(lines[0]).toContain('create_visualization custom_content: has_data=false');
+    expect(lines[1]).toContain('regenerateEsql=true');
+    expect(lines[1].length).toBeLessThan(200);
+  });
+
+  it('ignores other tools, other renderers and steps without params', () => {
+    expect(
+      getCustomContentToolArgs([
+        call('platform.core.get_index_mapping', { index: 'logs' }),
+        call('platform.dashboard.generate_dashboard', {
+          panels: [{ id: 'a', content: { source: 'request', renderer: 'lens', query: 'x' } }],
+        }),
+        { type: 'tool_call', tool_id: 'platform.dashboard.generate_dashboard' },
+        { type: 'reasoning' },
+      ])
+    ).toEqual([]);
+    expect(getCustomContentToolArgs(undefined)).toEqual([]);
   });
 });
