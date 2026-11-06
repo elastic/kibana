@@ -310,7 +310,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       // Connect-phase wrappers. Failed builds are never cached, but callers still use this
       // predicate to classify a connection failure.
       if (current instanceof McpConnectionHttpError) {
-        return current.httpStatus >= 500;
+        return USER_ERROR_HTTP_STATUS_CODES.has(current.httpStatus) || current.httpStatus >= 500;
       }
       if (current instanceof McpConnectionTransportError) {
         return true;
