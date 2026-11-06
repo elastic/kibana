@@ -21,6 +21,7 @@ import {
   additionalSourcesSuggestions,
   buildViewsDefinitions,
   buildDatasetsDefinitions,
+  buildNamedSubqueriesDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -152,7 +153,7 @@ function suggestInitialSources(
   commandStart: number,
   subquerySuggestions?: ISuggestionItem[]
 ): ISuggestionItem[] {
-  let sources = context?.sources ?? [];
+  let sources = excludeNamedSubqueries(context?.sources ?? [], context);
 
   if (context?.isCursorInSubquery) {
     sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
@@ -162,9 +163,21 @@ function suggestInitialSources(
     textBeforeCursor: innerText,
     commandStart,
   });
-  const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
-  const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
-  const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
+  const viewSuggestions = buildViewsDefinitions(
+    excludeNamedSubqueries(context?.views ?? [], context),
+    []
+  );
+  const datasetSuggestions = buildDatasetsDefinitions(
+    excludeNamedSubqueries(context?.datasets ?? [], context),
+    []
+  );
+  const namedSubquerySuggestions = buildNamedSubqueriesDefinitions(getNamedSubqueryNames(context));
+  const suggestions = [
+    ...namedSubquerySuggestions,
+    ...sourceSuggestions,
+    ...viewSuggestions,
+    ...datasetSuggestions,
+  ];
 
   if (subquerySuggestions && shouldSuggestSubquery(context)) {
     suggestions.push(...subquerySuggestions);
@@ -219,7 +232,7 @@ async function suggestAdditionalSources(
 
   const canRewriteFromToTs = indexes.length === 1 && isTypingIndexName;
 
-  let sources = context?.sources ?? [];
+  let sources = excludeNamedSubqueries(context?.sources ?? [], context);
 
   if (context?.isCursorInSubquery) {
     sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
@@ -235,9 +248,10 @@ async function suggestAdditionalSources(
     sources,
     indexes.map(({ name }) => name),
     recommendedQueries,
-    context?.views ?? [],
-    context?.datasets ?? [],
-    canRewriteFromToTs ? sourceReplacementContext : undefined
+    excludeNamedSubqueries(context?.views ?? [], context),
+    excludeNamedSubqueries(context?.datasets ?? [], context),
+    canRewriteFromToTs ? sourceReplacementContext : undefined,
+    getNamedSubqueryNames(context)
   );
 
   if (subquerySuggestions && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
@@ -259,4 +273,18 @@ async function suggestAdditionalSources(
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
   return !context?.isCursorInSubquery;
+}
+
+function getNamedSubqueryNames(context: ICommandContext | undefined): string[] {
+  return context?.namedSubqueries?.map(({ name }) => name) ?? [];
+}
+
+// A LET binding shadows the sources with the same name.
+function excludeNamedSubqueries<T extends { name: string }>(
+  items: T[],
+  context: ICommandContext | undefined
+): T[] {
+  const names = getNamedSubqueryNames(context);
+
+  return items.filter(({ name }) => !names.includes(name));
 }

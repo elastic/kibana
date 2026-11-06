@@ -29,6 +29,7 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { getNamedSubqueries } from '../../commands/definitions/utils/named_subqueries';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
@@ -40,7 +41,7 @@ function isSourceCommandSuggestion({ label }: { label: string }) {
   return sourceCommands.includes(label);
 }
 function isHeaderCommandSuggestion({ label }: { label: string }) {
-  return label === 'SET';
+  return esqlCommandRegistry.getCommandByName(label.toLowerCase())?.metadata.type === 'header';
 }
 
 const orderingEngine = new SuggestionOrderingEngine();
@@ -84,6 +85,9 @@ export async function suggest(
 
     const isStartingSubquery =
       astContext.isCursorInSubquery && !astContext.astForContext.commands.length;
+    const precedingCommandNames = new Set(
+      [...(astForFields.header ?? []), ...astContext.astForContext.commands].map(({ name }) => name)
+    );
 
     const commands = esqlCommandRegistry
       .getAllCommands({
@@ -118,20 +122,9 @@ export async function suggest(
         return true;
       })
       .filter((command) => {
-        // Commands with hiddenAfterCommands are not suggested when any command in the pipeline is in that list
+        // Check completed header commands as well as commands in the current pipeline.
         const hiddenAfter = command.metadata?.hiddenAfterCommands;
-        if (hiddenAfter?.length && astContext.astForContext.commands.length > 0) {
-          const commandNamesInPipeline = new Set(
-            astContext.astForContext.commands.map((cmd) => cmd.name).filter(Boolean)
-          );
-          const hasHiddenCommandInPipeline = hiddenAfter.some((name) =>
-            commandNamesInPipeline.has(name)
-          );
-          if (hasHiddenCommandInPipeline) {
-            return false;
-          }
-        }
-        return true;
+        return !hiddenAfter?.some((name) => precedingCommandNames.has(name));
       })
       .map((command) => command.name);
 
@@ -296,6 +289,10 @@ async function getSuggestionsWithinCommandExpression(
 
   const headers = commands.filter((cmd) => isHeaderCommand(cmd));
   const unmappedFieldsStrategy = getUnmappedFieldsStrategy(headers);
+  // Only the LET bindings completed before the cursor can be referenced.
+  const namedSubqueries = getNamedSubqueries(
+    headers.filter(({ location }) => location.max < innerText.length)
+  );
 
   // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
@@ -315,6 +312,7 @@ async function getSuggestionsWithinCommandExpression(
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
     isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
+    namedSubqueries,
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;
