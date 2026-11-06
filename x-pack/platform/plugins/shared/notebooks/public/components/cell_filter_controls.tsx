@@ -22,6 +22,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiToolTip,
+  useEuiShadow,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -110,8 +111,9 @@ export const FloatingIconButton = ({
   /** Filled primary, like the header's run and refresh buttons. */
   isPrimary?: boolean;
   dataTestSubj: string;
-}) => (
-  <EuiPanel hasShadow paddingSize="none" grow={false}>
+}) => {
+  const shadow = useEuiShadow('m');
+  const button = (
     <EuiToolTip content={tooltip} position="left" disableScreenReaderOutput>
       <EuiButtonIcon
         iconType={iconType}
@@ -122,11 +124,23 @@ export const FloatingIconButton = ({
         aria-pressed={isPressed}
         isDisabled={isDisabled}
         onClick={onClick}
+        css={
+          isPrimary &&
+          css`
+            ${shadow}
+          `
+        }
         data-test-subj={dataTestSubj}
       />
     </EuiToolTip>
-  </EuiPanel>
-);
+  );
+  if (isPrimary) return button;
+  return (
+    <EuiPanel hasShadow paddingSize="none" grow={false}>
+      {button}
+    </EuiPanel>
+  );
+};
 
 /** A floating icon button that opens a popover, with a badge while its filter is set. */
 const FloatingPopoverButton = ({
