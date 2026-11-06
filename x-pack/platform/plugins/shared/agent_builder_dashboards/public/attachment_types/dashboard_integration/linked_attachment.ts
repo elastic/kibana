@@ -17,13 +17,13 @@ import type { AppliedAttachmentsStore } from './applied_attachments_store';
 export const getLinkedAttachment = ({
   api,
   store,
-  attachments = [],
+  attachments,
   dashboard,
   draftAttachmentId,
 }: {
   api: DashboardApi;
   store: AppliedAttachmentsStore;
-  attachments: DashboardAttachment[] | undefined;
+  attachments: DashboardAttachment[];
   dashboard: DashboardSnapshot;
   draftAttachmentId: string;
 }): DashboardAttachment | undefined => {

@@ -55,10 +55,7 @@ export const handlePreview = async ({
         const exists = await checkSavedDashboardExist(attachment.origin);
         return exists ? attachment.origin : undefined;
       },
-      dashboardLocatorParams: {
-        ...dashboardState,
-        viewMode: 'edit',
-      },
+      dashboardLocatorParams: dashboardState,
     });
   }
 

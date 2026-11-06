@@ -211,7 +211,6 @@ export const registerDashboardAttachmentUiDefinition = ({
   return () => {
     dashboardAppApiSubscription.unsubscribe();
     dashboardApi = undefined;
-    appliedAttachments.setShownVersions();
     updateOriginByAttachmentId.clear();
   };
 };
