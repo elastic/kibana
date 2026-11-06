@@ -15,7 +15,7 @@ import type { SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
-import { getConversationId, getSandboxCallContext, getSandboxWorkload } from './tool_utils';
+import { getConversationId, getSandboxCallContext, getSandboxCaller } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
@@ -145,7 +145,7 @@ export const createSandboxBashTool = ({
       session = sandboxStart.getSession(
         context.request,
         rawConversationId,
-        getSandboxWorkload(context)
+        getSandboxCaller(context)
       );
     } catch (err) {
       return {

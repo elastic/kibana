@@ -268,9 +268,8 @@ describe('SandboxApiClient', () => {
           http: { request: { id: 'req-1' } },
           sandbox: { conversation_id: CONVERSATION_ID },
           rpc: {
-            system: { name: 'grpc' },
             method: 'sandbox.SandboxService/StatFiles',
-            response: { status_code: 'OK' },
+            status_code: 'OK',
           },
           event: { duration: expect.any(Number) },
         }
@@ -290,7 +289,7 @@ describe('SandboxApiClient', () => {
         'Sandbox RPC sandbox.SandboxService/Mkdirs finished with gRPC status UNAVAILABLE',
         expect.objectContaining({
           http: { request: { id: 'req-2' } },
-          rpc: expect.objectContaining({ response: { status_code: 'UNAVAILABLE' } }),
+          rpc: expect.objectContaining({ status_code: 'UNAVAILABLE' }),
         })
       );
     });

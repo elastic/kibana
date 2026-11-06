@@ -16,7 +16,7 @@ import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { usesDecisionTrees } from '../agents/agent_policy';
-import { getSandboxStepWorkload } from './sandbox_workload';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox write cannot stall the reinforcement round. */
@@ -127,7 +127,7 @@ export const decisionTreeHydrateStepDefinition = ({
       const session = sandboxStart.getSessionForSpace(
         spaceId,
         conversationId,
-        getSandboxStepWorkload(context)
+        getSandboxStepCaller(context)
       );
 
       context.logger.info(`Hydrating decision trees into sandbox ${sandboxId} (space ${spaceId})`);

@@ -17,7 +17,7 @@ import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
-import { getSandboxStepWorkload } from './sandbox_workload';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
@@ -128,7 +128,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
       const session = sandboxStart.getSessionForSpace(
         spaceId,
         unscopeConversationId(spaceId, sandboxId),
-        getSandboxStepWorkload(context)
+        getSandboxStepCaller(context)
       );
 
       context.logger.info(

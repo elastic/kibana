@@ -26,7 +26,7 @@ const PLUGIN_ID = 'nightshiftInvestigations';
  * What issued a sandbox RPC. It is the context only this plugin has, and it is what lets an
  * incident responder follow one RPC from a tool call or a workflow step to the sandbox.
  */
-export type SandboxWorkload =
+export type SandboxCaller =
   | {
       type: 'tool';
       /** The Agent Builder tool, for example `nightshift_sandbox_bash`. */
@@ -74,12 +74,12 @@ export interface NightshiftSandboxStart {
   getSession(
     request: KibanaRequest,
     sessionId: string,
-    workload: SandboxWorkload
+    caller: SandboxCaller
   ): AuditedSandboxSession;
   getSessionForSpace(
     spaceId: string,
     sessionId: string,
-    workload: SandboxWorkload
+    caller: SandboxCaller
   ): AuditedSandboxSession;
 }
 
@@ -94,7 +94,7 @@ const category = (method: string): 'process' | 'file' =>
  * audit pipeline writes Kibana's own request id to `http.request.id` and would overwrite it.
  * sandbox-api logs the proxy id as `http.request.id`, so a join across the two reads both fields.
  */
-const auditEvent = (rpc: SandboxRpcInfo, workload: SandboxWorkload, spaceId?: string) => {
+const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string) => {
   const outcome: 'success' | 'failure' = rpc.statusCode === 'OK' ? 'success' : 'failure';
   return {
     message: `Sandbox RPC ${rpc.method} finished with gRPC status ${rpc.statusCode}`,
@@ -107,34 +107,31 @@ const auditEvent = (rpc: SandboxRpcInfo, workload: SandboxWorkload, spaceId?: st
     },
     kibana: {
       ...(spaceId ? { space_id: spaceId } : {}),
-      workload:
-        workload.type === 'tool'
+      sandbox_caller:
+        caller.type === 'tool'
           ? {
               plugin_id: PLUGIN_ID,
               type: 'tool',
-              id: workload.toolId,
-              execution_id: workload.toolCallId,
+              id: caller.toolId,
+              execution_id: caller.toolCallId,
             }
-          : workload.type === 'workflow_step'
+          : caller.type === 'workflow_step'
           ? {
               plugin_id: PLUGIN_ID,
               type: 'workflow_step',
-              id: workload.stepType,
-              ...(workload.workflowExecutionId
-                ? { execution_id: workload.workflowExecutionId }
-                : {}),
+              id: caller.stepType,
+              ...(caller.workflowExecutionId ? { execution_id: caller.workflowExecutionId } : {}),
             }
           : { plugin_id: PLUGIN_ID, type: 'findings_recorder', id: 'final_pass' },
     },
-    ...(workload.type === 'workflow_step' ? { labels: { step_id: workload.stepId } } : {}),
+    ...(caller.type === 'workflow_step' ? { labels: { step_id: caller.stepId } } : {}),
     sandbox: {
       conversation_id: rpc.conversationId,
       ...(rpc.requestId ? { proxy_request_id: rpc.requestId } : {}),
     },
     rpc: {
-      system: { name: 'grpc' },
       method: rpc.method,
-      response: { status_code: rpc.statusCode },
+      status_code: rpc.statusCode,
     },
   };
 };
@@ -147,13 +144,13 @@ const auditEvent = (rpc: SandboxRpcInfo, workload: SandboxWorkload, spaceId?: st
 export const auditedSandboxSession = ({
   session,
   audit,
-  workload,
+  caller,
   spaceId,
   logger,
 }: {
   session: SandboxSession;
   audit: AuditLogger;
-  workload: SandboxWorkload;
+  caller: SandboxCaller;
   spaceId?: string;
   logger: Logger;
 }): AuditedSandboxSession => {
@@ -168,7 +165,7 @@ export const auditedSandboxSession = ({
         }`
       );
     try {
-      Promise.resolve(audit.log(auditEvent(rpc, workload, spaceId))).catch(warn);
+      Promise.resolve(audit.log(auditEvent(rpc, caller, spaceId))).catch(warn);
     } catch (err) {
       warn(err);
     }
@@ -212,18 +209,18 @@ export const createAuditedSandboxStart = ({
   audit: CoreAuditService;
   logger: Logger;
 }): NightshiftSandboxStart => ({
-  getSession: (request, sessionId, workload) =>
+  getSession: (request, sessionId, caller) =>
     auditedSandboxSession({
       session: sandboxStart.getSession(request, sessionId),
       audit: audit.asScoped(request),
-      workload,
+      caller,
       logger,
     }),
-  getSessionForSpace: (spaceId, sessionId, workload) =>
+  getSessionForSpace: (spaceId, sessionId, caller) =>
     auditedSandboxSession({
       session: sandboxStart.getSessionForSpace(spaceId, sessionId),
       audit: audit.withoutRequest,
-      workload,
+      caller,
       spaceId,
       logger,
     }),

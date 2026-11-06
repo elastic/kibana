@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { SandboxWorkload } from '../sandbox_audit';
+import type { SandboxCaller } from '../sandbox_audit';
 
 /**
  * What the sandbox audit events of a workflow step say issued them: the step and this run of its
  * workflow. Every step that obtains a session passes this, since a session cannot be had without it.
  */
-export const getSandboxStepWorkload = (context: {
+export const getSandboxStepCaller = (context: {
   stepId: string;
   stepType: string;
   contextManager: { getContext: () => { execution?: { id?: string } } };
-}): SandboxWorkload => ({
+}): SandboxCaller => ({
   type: 'workflow_step',
   stepType: context.stepType,
   stepId: context.stepId,
