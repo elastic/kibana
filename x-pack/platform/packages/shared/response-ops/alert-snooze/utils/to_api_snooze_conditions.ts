@@ -17,6 +17,5 @@ const isApiSnoozeCondition = (condition: SnoozeCondition): condition is ApiSnooz
  * Narrows the panel's open ended conditions to the built-in ones the snooze API
  * accepts, dropping any type a consumer registered through its own descriptor.
  */
-export const toApiSnoozeConditions = (
-  conditions: SnoozeCondition[] = []
-): ApiSnoozeCondition[] => conditions.filter(isApiSnoozeCondition);
+export const toApiSnoozeConditions = (conditions: SnoozeCondition[] = []): ApiSnoozeCondition[] =>
+  conditions.filter(isApiSnoozeCondition);
