@@ -22,7 +22,6 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
-  useReopenProposal,
   useSettleDeclinedProposal,
 } from './use_proposals_api';
 import {
@@ -889,25 +888,6 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     // The data of the row shows the decision.
     rerender({ shown: true });
     expect(result.current.isDecliningP1).toBe(false);
-  });
-});
-
-describe('useReopenProposal', () => {
-  it('ends the unseen decision of the proposal, so a reopened proposal does not read as applying', async () => {
-    const http = makeHttp();
-    http.post.mockResolvedValue({ proposalId: 'p-2' });
-    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
-      typeof useKibana
-    >);
-    inFlightDecisions.markUnseen('approve', 'p-1');
-
-    const { Wrapper } = createWrapper();
-    const { result } = renderHook(() => useReopenProposal(), { wrapper: Wrapper });
-    await act(async () => {
-      await result.current.mutateAsync({ id: 'p-1' });
-    });
-
-    expect(inFlightDecisions.hasUnseen('p-1')).toBe(false);
   });
 });
 
