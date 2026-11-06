@@ -21,7 +21,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiProgress,
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
@@ -50,7 +49,6 @@ import {
   getSaveBlocker,
   isTriggerValid,
 } from '../flyouts/form/validation';
-import { triggerLabels } from '../flyouts/form/triggers/translations';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
@@ -59,9 +57,10 @@ import {
   useUpdateAutomation,
   type Automation,
 } from '../../../data/automations/use_automations';
-import { getDailyUsageTone } from '../utils/daily_usage';
-import { statusLabels } from '../utils/filter_automations';
+import { isAutomationRateLimited, statusLabels } from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';
+import { useGlobalLimit } from '../hooks/use_global_limit';
+import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
@@ -161,6 +160,7 @@ export const AutomationDetailFlyout = ({
     application,
     http: { basePath },
   } = useKibana().services;
+  const { isReached: isGlobalLimitReached } = useGlobalLimit();
   const { pathname, search } = useLocation();
   const statusParam = new URLSearchParams(search).get('status');
   const initialRunFilter = STATUSES.find((status) => status === statusParam);
@@ -189,9 +189,6 @@ export const AutomationDetailFlyout = ({
   const skippedRuns = runs.filter(({ status }) => status === 'skipped').length;
   const startedRuns = (runsQuery.data?.total ?? 0) - skippedRuns;
   const dailyLimit = automation.runtime.dailyDispatchLimit;
-  const isLimitHigh =
-    dailyLimit !== undefined && getDailyUsageTone(usedToday, dailyLimit) !== 'healthy';
-  const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   const currentIndex = automations.findIndex(({ id: rowId }) => rowId === automation.id);
   const isInList = currentIndex !== -1;
   const previous = isInList ? automations[currentIndex - 1] : undefined;
@@ -481,25 +478,13 @@ export const AutomationDetailFlyout = ({
                         title: labels.todayUsage,
                         gap: 'xs',
                         value: (
-                          <div
-                            css={{
-                              inlineSize: '100%',
-                              color: isLimitHigh ? euiTheme.colors.textWarning : undefined,
-                            }}
-                          >
-                            {usedToday} / {dailyLimit ?? triggerLabels.noLimit}
-                            {dailyLimit !== undefined && (
-                              <>
-                                <EuiSpacer size="xs" />
-                                <EuiProgress
-                                  size="s"
-                                  color={isLimitHigh ? limitColor : 'success'}
-                                  value={usedToday}
-                                  max={dailyLimit}
-                                />
-                              </>
-                            )}
-                          </div>
+                          <AutomationUsageCell
+                            used={usedToday}
+                            limit={dailyLimit}
+                            isRateLimited={isAutomationRateLimited(automation, usedToday)}
+                            isGlobalLimitReached={isGlobalLimitReached}
+                            align="start"
+                          />
                         ),
                       },
                     ]}

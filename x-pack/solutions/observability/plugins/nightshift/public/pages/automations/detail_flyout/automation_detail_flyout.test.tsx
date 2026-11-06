@@ -25,6 +25,9 @@ jest.mock('../../../data/automations/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../hooks/use_global_limit', () => ({
+  useGlobalLimit: () => ({ isReached: false }),
+}));
 jest.mock('../../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
