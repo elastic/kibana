@@ -86,6 +86,12 @@ describe('DiscoverSessionSaveDashboardModal', () => {
     expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
   });
 
+  it('shows the store time switch when store time starts on and isTimeBased is false', async () => {
+    renderSaveModal({ initialTimeRestore: true, isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
+  });
+
   it('passes modal state to onSave', async () => {
     const { onSave } = renderSaveModal();
 

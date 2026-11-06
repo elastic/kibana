@@ -69,6 +69,12 @@ export const DiscoverSessionSaveModalContainer = ({
 
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
   const isTimeBased = hasTimeBasedTab({ tabs: allTabs, savedDataViews, runtimeStateManager });
+  const hasUnresolvedTab = hasUnresolvedDataViewTab({
+    tabs: allTabs,
+    savedDataViews,
+    runtimeStateManager,
+  });
+  const initialTimeRestore = timeRestore && (isTimeBased || hasUnresolvedTab);
 
   const isSaveCallbackFlow = Boolean(onSaveCb);
 
@@ -218,7 +224,7 @@ export const DiscoverSessionSaveModalContainer = ({
       hasLibraryItemWithTitle={services.savedSearch.hasLibraryItemWithTitle}
       hideDashboardOptions={!showDashboardOptions}
       initialTags={persistedDiscoverSession?.tags ?? []}
-      initialTimeRestore={timeRestore}
+      initialTimeRestore={initialTimeRestore}
       isTimeBased={isTimeBased}
       hasTimeRestoreError={hasTimeRestoreError}
       managed={persistedDiscoverSession?.managed ?? false}
@@ -253,4 +259,21 @@ const hasTimeBasedTab = ({
     );
 
     return Boolean(tabDataViewDetails?.timeFieldName);
+  });
+
+const hasUnresolvedDataViewTab = ({
+  tabs,
+  savedDataViews,
+  runtimeStateManager,
+}: Parameters<typeof hasTimeBasedTab>[0]) =>
+  tabs.some((tab) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+
+    if (tabRuntimeState.currentDataSource$.getValue()) return false;
+
+    const serializedSearchSource = tab.initialInternalState?.serializedSearchSource;
+
+    if (typeof serializedSearchSource?.index !== 'string') return false;
+
+    return !getSerializedSearchSourceDataViewDetails(serializedSearchSource, savedDataViews);
   });

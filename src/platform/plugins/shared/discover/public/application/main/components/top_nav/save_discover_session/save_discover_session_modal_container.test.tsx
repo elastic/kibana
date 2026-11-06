@@ -518,7 +518,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       );
     });
 
-    it("should set initialTimeRestore to true if any tab's timeRestore is true", async () => {
+    it("should set initialTimeRestore to true if any tab's timeRestore is true and the session is time-based", async () => {
       const services = createDiscoverServicesMock();
 
       const noTimeRestoreTab = fromTabStateToSavedObjectTab({
@@ -529,7 +529,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
 
       const timeRestoreTab = fromTabStateToSavedObjectTab({
-        currentDataView: dataViewMock,
+        currentDataView: dataViewWithTimefieldMock,
         services,
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         tabType: undefined,
@@ -549,6 +549,32 @@ describe('DiscoverSessionSaveModalContainer', () => {
       }));
       expect(modalProps?.initialTimeRestore).toBe(true);
     });
+
+    it.each([
+      ['resolved', [dataViewMock], false],
+      ['unresolved', [], true],
+    ])(
+      'should keep saved store time of a non time-based tab only if its data view is %s',
+      async (_, dataViewsList, expectedTimeRestore) => {
+        const services = createDiscoverServicesMock();
+        const tab = getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } });
+        const { modalProps } = await setup({
+          additionalPersistedTabs: [
+            fromTabStateToSavedObjectTab({
+              currentDataView: dataViewMock,
+              services,
+              tab,
+              tabType: undefined,
+            }),
+          ],
+          dataViewsList,
+          isEmbedded: true,
+          services,
+        });
+
+        expect(modalProps?.initialTimeRestore).toBe(expectedTimeRestore);
+      }
+    );
   });
 
   describe('save behavior', () => {

@@ -86,7 +86,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
   ) : null;
 
   const isTimeRestoreInvalid = hasTimeRestoreError && timeRestore;
-  const showTimeSwitch = isTimeBased || hasTimeRestoreError;
+  const showTimeSwitch = isTimeBased || initialTimeRestore || hasTimeRestoreError;
   const timeSwitch = showTimeSwitch ? (
     <EuiFormRow
       isInvalid={isTimeRestoreInvalid}
