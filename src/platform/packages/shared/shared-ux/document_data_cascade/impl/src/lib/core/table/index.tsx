@@ -24,12 +24,7 @@ import {
   type CascadeTableRow,
 } from './table_features';
 
-export type {
-  CascadeTable,
-  CascadeTableCell,
-  CascadeTableCellContext,
-  CascadeTableRow,
-} from './table_features';
+export type { CascadeTable, CascadeTableCell, CascadeTableCellContext, CascadeTableRow };
 
 export interface TableProps<G extends GroupNode, L>
   extends Omit<
@@ -225,10 +220,10 @@ export function getAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
     get rowVisibleCells() {
       return rowInstance.getAllCells() as Array<CascadeTableCell<G, unknown>>;
     },
-    isRowSelected: () => rowInstance.getIsSelected(),
-    rowHasSelectedChildren: () => rowInstance.getIsSomeSelected(),
+    isRowSelected: rowInstance.getIsSelected.bind(rowInstance),
+    rowHasSelectedChildren: rowInstance.getIsSomeSelected.bind(rowInstance),
     get rowCanSelect() {
-      return () => rowInstance.getCanSelect();
+      return rowInstance.getCanSelect.bind(rowInstance);
     },
     rowSelectionFn: (...args: Parameters<typeof toggleSelectedHandler>) => {
       toggleSelectedHandler(...args);
