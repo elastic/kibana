@@ -702,30 +702,54 @@ describe('run inputs', () => {
     expect(JSON.parse(started?.body as string)).toEqual({ inputs: {} });
   });
 
-  it('leaves declared defaults to the engine and fills the rest by type', () => {
+  it('fills only required inputs without a default, by declared type (list form)', () => {
     expect(
       buildRunInputs({
         inputs: [
-          { name: 'a', type: 'string', default: 'x' },
-          { name: 'b', type: 'boolean' },
-          { name: 'c', type: 'array' },
-          { name: 'd', type: 'object' },
-          { name: 'e', type: 'choice', options: ['p', 'q'] },
-          { type: 'string' },
+          { name: 'a', type: 'string', required: true, default: 'x' },
+          { name: 'b', type: 'boolean', required: true },
+          { name: 'c', type: 'array', required: true },
+          { name: 'd', type: 'object', required: true },
+          { name: 'e', type: 'choice', required: true, options: ['p', 'q'] },
+          { name: 'f', type: 'string', required: true },
+          { type: 'string', required: true },
         ],
       })
-    ).toEqual({ b: true, c: [], d: {}, e: 'p' });
+    ).toEqual({ b: true, c: [], d: {}, e: 'p', f: 'persona-matrix-fixture' });
   });
 
-  it('reads the JSON-schema inputs form', () => {
+  it('omits optional inputs in the list form, so an optional minItems array is not sent as []', () => {
+    expect(
+      buildRunInputs({
+        inputs: [
+          { name: 'tags', type: 'array', minItems: 1 },
+          { name: 'note', type: 'string', required: false },
+          { name: 'count', type: 'number' },
+        ],
+      })
+    ).toEqual({});
+  });
+
+  it('reads the JSON-schema inputs form, filling only required properties without a default', () => {
     expect(
       buildRunInputs({
         inputs: {
-          properties: { summary: { type: 'string' }, n: { type: 'integer', default: 3 } },
-          required: ['summary'],
+          properties: {
+            summary: { type: 'string' },
+            n: { type: 'integer', default: 3 },
+            ids: { type: 'array', minItems: 1 },
+            verbose: { type: 'boolean' },
+          },
+          required: ['summary', 'n'],
         },
       })
     ).toEqual({ summary: 'persona-matrix-fixture' });
+  });
+
+  it('omits every JSON-schema property when none is listed as required', () => {
+    expect(
+      buildRunInputs({ inputs: { properties: { ids: { type: 'array', minItems: 1 } } } })
+    ).toEqual({});
   });
 
   it('ignores malformed inputs declarations', () => {
