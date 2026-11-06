@@ -107,6 +107,17 @@ import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_trigger
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 
+interface DeleteWorkflowsOptions {
+  force?: boolean;
+  acknowledgeAclLoss?: boolean;
+}
+
+interface WorkflowDeletionOptions extends DeleteWorkflowsOptions {
+  profileId?: string;
+  request?: KibanaRequest;
+  isAdmin?: boolean;
+}
+
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
@@ -1142,7 +1153,7 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean },
+    options?: DeleteWorkflowsOptions,
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = request
@@ -1160,14 +1171,8 @@ export class WorkflowCrudService {
   private async deleteWorkflowsWithBindings(
     ids: string[],
     spaceId: string,
-    options: { force?: boolean; acknowledgeAclLoss?: boolean } | undefined,
-    deletionOptions: {
-      force?: boolean;
-      acknowledgeAclLoss?: boolean;
-      profileId?: string;
-      request?: KibanaRequest;
-      isAdmin?: boolean;
-    }
+    options: DeleteWorkflowsOptions | undefined,
+    deletionOptions: WorkflowDeletionOptions
   ): Promise<DeleteWorkflowsResponse> {
     const { profileId, request, isAdmin } = deletionOptions;
     const bindings = this.deps.getServiceAccountBindings?.();
@@ -1394,13 +1399,7 @@ export class WorkflowCrudService {
   private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
-    options?: {
-      force?: boolean;
-      acknowledgeAclLoss?: boolean;
-      profileId?: string;
-      request?: KibanaRequest;
-      isAdmin?: boolean;
-    },
+    options?: WorkflowDeletionOptions,
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
     deferCleanup = false

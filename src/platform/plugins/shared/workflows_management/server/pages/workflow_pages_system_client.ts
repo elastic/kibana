@@ -31,7 +31,7 @@ const getWantedPageIds = (spaceId: string, definition: WorkflowYaml | null | und
 export interface WorkflowPagesSystemClient {
   /**
    * Makes the stored pages match the page triggers of a saved definition.
-   * Creates a page for a new trigger, offline and without an access level.
+   * Creates a page for a new trigger: enabled, but offline until it gets an access level.
    * Retires the pages of removed triggers, so a trigger added back gets a new secret.
    * Skips invalid definitions: a save with a typo must not retire a working link.
    */
@@ -130,7 +130,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
           secret,
           secretHash: computePageSecretHash(ref, secret),
           access: null,
-          offline: false,
+          enabled: true,
         },
         {
           id: getWorkflowPageSavedObjectId(ref),

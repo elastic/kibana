@@ -41,8 +41,8 @@ const workflowPageSchemaV1 = schema.object({
     minLength: SECRET_HASH_HEX_LENGTH,
     maxLength: SECRET_HASH_HEX_LENGTH,
   }),
-  access: schema.maybe(schema.nullable(workflowPageAccessSchema)),
-  offline: schema.boolean(),
+  access: schema.nullable(workflowPageAccessSchema),
+  enabled: schema.boolean(),
 });
 
 export type WorkflowPageAccess = TypeOf<typeof workflowPageAccessSchema>;
@@ -57,8 +57,8 @@ export interface WorkflowPageAttributes {
   pageId: string;
   secret: string;
   secretHash: string;
-  access?: WorkflowPageAccess | null;
-  offline: boolean;
+  access: WorkflowPageAccess | null;
+  enabled: boolean;
 }
 
 // Keep these lists in sync with the ESO registration below.
@@ -66,13 +66,9 @@ const ATTRIBUTES_TO_ENCRYPT = ['secret'] as const;
 // Only attributes that never change. Others stay out, so they change without a re-encryption.
 const ATTRIBUTES_INCLUDED_IN_AAD = ['workflowId', 'pageId'] as const;
 
-type NotPartiallyUpdatableAttribute =
-  | (typeof ATTRIBUTES_TO_ENCRYPT)[number]
-  | (typeof ATTRIBUTES_INCLUDED_IN_AAD)[number];
-
-/** The attributes a partial update may change. */
+/** The only attributes a partial update may change: neither encrypted nor in AAD. */
 export type PartiallyUpdatableWorkflowPageAttributes = Partial<
-  Omit<WorkflowPageAttributes, NotPartiallyUpdatableAttribute | 'secretHash'>
+  Pick<WorkflowPageAttributes, 'access' | 'enabled'>
 >;
 
 /** Fixed namespace, so one page of one workflow always gets the same saved object id. */
@@ -95,13 +91,13 @@ export const partiallyUpdateWorkflowPage = async (
   attributes: PartiallyUpdatableWorkflowPageAttributes,
   options: SavedObjectsUpdateOptions<WorkflowPageAttributes> = {}
 ): Promise<void> => {
-  const { access, offline } = attributes;
+  const { access, enabled } = attributes;
   await client.update<WorkflowPageAttributes>(
     WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
     id,
     {
       ...(access !== undefined ? { access } : {}),
-      ...(offline !== undefined ? { offline } : {}),
+      ...(enabled !== undefined ? { enabled } : {}),
     },
     options
   );

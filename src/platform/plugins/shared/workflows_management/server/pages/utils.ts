@@ -18,9 +18,9 @@ import { WorkflowPageNotFoundError } from './workflow_page_not_found_error';
 export const namespaceOf = (spaceId: string): string | undefined =>
   SavedObjectsUtils.namespaceStringToId(spaceId);
 
-/** A page is online with an encryption key, an access level, and no offline flag. */
+/** A page is online when it is enabled, has an access level, and Kibana has an encryption key. */
 export const isPageOnline = (attributes: WorkflowPageAttributes, canEncrypt: boolean): boolean =>
-  canEncrypt && !attributes.offline && attributes.access != null;
+  canEncrypt && attributes.enabled && attributes.access != null;
 
 /** Reads a page, or returns `undefined` when it does not exist. */
 export const getPageOrUndefined = async (
@@ -51,12 +51,12 @@ export const toPageDto = (
   }: SavedObject<WorkflowPageAttributes>,
   canEncrypt: boolean
 ): WorkflowPageDto => {
-  const { workflowId, pageId, access, offline } = attributes;
+  const { workflowId, pageId, access, enabled } = attributes;
   return {
     workflowId,
     pageId,
     access: access ?? null,
-    offline,
+    enabled,
     online: isPageOnline(attributes, canEncrypt),
     createdAt,
     createdBy,

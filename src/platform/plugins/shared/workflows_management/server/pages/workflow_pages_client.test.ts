@@ -49,7 +49,7 @@ const setup = async ({
     logPageLinkRead: jest.fn(),
     logPageSecretRotated: jest.fn(),
     logPageAccessChanged: jest.fn(),
-    logPageOfflineChanged: jest.fn(),
+    logPageEnabledChanged: jest.fn(),
   };
   const assertWorkflowAccess = jest.fn(async () => {});
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
@@ -81,7 +81,7 @@ describe('WorkflowPagesClient', () => {
     it('returns a new page as offline, without an access level', async () => {
       const { client } = await setup();
       await expect(client.get(key)).resolves.toEqual(
-        expect.objectContaining({ access: null, offline: false, online: false })
+        expect.objectContaining({ access: null, enabled: true, online: false })
       );
     });
 
@@ -135,15 +135,15 @@ describe('WorkflowPagesClient', () => {
       await expect(client.getSecret(key)).resolves.toBe(rotated);
     });
 
-    it('takes a page offline and brings it back online', async () => {
+    it('disables a page and enables it again', async () => {
       const { client, systemClient } = await setup();
       await client.setAccess(key, { level: 'secret_link' });
       const secret = await client.getSecret(key);
 
-      await client.setOffline(key, true);
+      await client.setEnabled(key, false);
       await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBe(false);
 
-      await client.setOffline(key, false);
+      await client.setEnabled(key, true);
       await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBe(true);
     });
 
@@ -156,12 +156,12 @@ describe('WorkflowPagesClient', () => {
       );
     });
 
-    it('records the acting user and audits rotation, access, and offline changes', async () => {
+    it('records the acting user and audits rotation, access, and enabled changes', async () => {
       const { client, audit, request, storedPage } = await setup();
 
       await client.rotateSecret(key);
       const page = await client.setAccess(key, { level: 'secret_link' });
-      await client.setOffline(key, true);
+      await client.setEnabled(key, false);
 
       expect(page).toEqual(
         expect.objectContaining({ access: { level: 'secret_link' }, online: true })
@@ -173,9 +173,9 @@ describe('WorkflowPagesClient', () => {
         access: { level: 'secret_link' },
         error: undefined,
       });
-      expect(audit.logPageOfflineChanged).toHaveBeenCalledWith(request, {
+      expect(audit.logPageEnabledChanged).toHaveBeenCalledWith(request, {
         ...ref,
-        offline: true,
+        enabled: false,
         error: undefined,
       });
     });
@@ -183,7 +183,7 @@ describe('WorkflowPagesClient', () => {
     it('does not create a page through an update', async () => {
       const { client, scopedClient } = await setup({ withPage: false });
 
-      await expect(client.setOffline(key, true)).rejects.toBeInstanceOf(WorkflowPageNotFoundError);
+      await expect(client.setEnabled(key, false)).rejects.toBeInstanceOf(WorkflowPageNotFoundError);
       expect(scopedClient.update).not.toHaveBeenCalled();
     });
 
@@ -196,10 +196,10 @@ describe('WorkflowPagesClient', () => {
     it('fails writes and audits the failure when saved object privileges deny the caller', async () => {
       const { client, audit, request } = await setup({ deniedScoped: true });
 
-      await expect(client.setOffline(key, true)).rejects.toThrow('forbidden');
+      await expect(client.setEnabled(key, false)).rejects.toThrow('forbidden');
       await expect(client.rotateSecret(key)).rejects.toThrow('forbidden');
 
-      expect(audit.logPageOfflineChanged).toHaveBeenCalledWith(
+      expect(audit.logPageEnabledChanged).toHaveBeenCalledWith(
         request,
         expect.objectContaining({ error: expect.any(Error) })
       );
@@ -232,7 +232,7 @@ describe('WorkflowPagesClient', () => {
       ['getSecret', 'readPage', (c) => c.getSecret(key)],
       ['rotateSecret', 'managePage', (c) => c.rotateSecret(key)],
       ['setAccess', 'managePage', (c) => c.setAccess(key, { level: 'secret_link' })],
-      ['setOffline', 'managePage', (c) => c.setOffline(key, true)],
+      ['setEnabled', 'managePage', (c) => c.setEnabled(key, false)],
     ];
 
     it.each(operations)('%s fails without %s and touches no page', async (_, operation, run) => {
