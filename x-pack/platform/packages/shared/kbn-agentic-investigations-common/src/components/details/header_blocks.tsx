@@ -46,7 +46,7 @@ const getAssigneesValue = ({
     return assigneesNode;
   }
   if (assigneeUids.length === 0) {
-    return null;
+    return TEMPLATE_UI_LABELS.noAssignees;
   }
   const profiles = assigneeUids.map((uid) => ({
     uid,

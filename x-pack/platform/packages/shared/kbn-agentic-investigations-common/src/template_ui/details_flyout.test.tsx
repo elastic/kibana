@@ -194,6 +194,12 @@ describe('useInvestigationDetailsFlyout', () => {
     expect(screen.queryByRole('button', { name: OPEN_ESCALATION })).not.toBeInTheDocument();
   });
 
+  it('shows "None" for assignees without renderAssignees or any assignee', () => {
+    renderBlocks(renderInvestigation());
+
+    expect(screen.getByTestId('block-assignees')).toHaveTextContent('None');
+  });
+
   it('falls back to a read-only status badge without renderStatus', () => {
     renderBlocks(renderInvestigation());
 
