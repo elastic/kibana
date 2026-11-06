@@ -49,18 +49,15 @@ export const renderVega = async (
 ): Promise<VegaRender> => {
   const config = getConfig(theme);
   const isLite = parsed.language === 'vega-lite';
-  const spec = isLite
-    ? compile(
-        {
-          width: 'container',
-          height: 'container',
-          autosize: { type: 'fit', contains: 'padding' },
-          ...parsed.spec,
-        },
-        { config }
-      ).spec
-    : parsed.spec;
   const hasOwnSize = 'width' in parsed.spec || 'height' in parsed.spec;
+  // Vega's default `pad` grows the view past its size to fit axes, overflowing the cell.
+  const autosize = { type: 'fit', contains: 'padding' } as const;
+  const spec = isLite
+    ? compile({ width: 'container', height: 'container', autosize, ...parsed.spec }, { config })
+        .spec
+    : hasOwnSize
+    ? parsed.spec
+    : { autosize, ...parsed.spec };
 
   const view = new View(parse(spec, isLite ? undefined : config, { ast: true }), {
     expr: expressionInterpreter,
