@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { clientTypes } from '@kbn/connector-specs/server';
-import { McpError, McpErrorCode, McpNotConnectedError, StreamableHTTPError } from '@kbn/mcp-client';
+import { McpError, McpErrorCode } from '@kbn/mcp-client';
 import {
   getErrorSource,
   isRetryableError,
@@ -46,22 +46,7 @@ const deferred = <T>() => {
   return { promise, resolve, reject };
 };
 
-const closedError = () => new McpError(McpErrorCode.ConnectionClosed, 'closed');
-
 const timeoutError = () => new McpError(McpErrorCode.RequestTimeout, 'timed out');
-
-const transportError = () => {
-  const err = new Error('transport');
-  err.name = 'McpConnectionTransportError';
-  return err;
-};
-
-const httpError = (httpStatus: number) => {
-  const err = new Error('http') as Error & { httpStatus: number };
-  err.name = 'McpConnectionHttpError';
-  err.httpStatus = httpStatus;
-  return err;
-};
 
 const tagConnectFailure = async (err: Error): Promise<Error> => {
   await markConnectFailure(Promise.reject(err)).catch((caught) => {
@@ -93,22 +78,21 @@ describe('McpCircuitBreaker', () => {
 
   describe('run', () => {
     let clock = 0;
-    const baseCoolingMs = 1000;
-    const maxCoolingMs = 4000;
+    const coolingMs = 1000;
 
     const createBreaker = () =>
-      new McpCircuitBreaker({
-        now: () => clock,
-        baseCoolingMs,
-        maxCoolingMs,
-        failureThreshold: 3,
-      });
+      new McpCircuitBreaker({ now: () => clock, coolingMs, failureThreshold: 3 });
+
+    const connectError = () => tagConnectFailure(new Error('closed'));
+
+    const failConnect = async (breaker: McpCircuitBreaker, runKey = key) => {
+      const err = await connectError();
+      await expect(breaker.run(ctx({ key: runKey }), () => Promise.reject(err))).rejects.toBe(err);
+    };
 
     const openBreaker = async (breaker: McpCircuitBreaker, runKey = key) => {
       for (let i = 0; i < 3; i++) {
-        await expect(
-          breaker.run(ctx({ key: runKey }), () => Promise.reject(closedError()))
-        ).rejects.toThrow('closed');
+        await failConnect(breaker, runKey);
       }
     };
 
@@ -152,107 +136,43 @@ describe('McpCircuitBreaker', () => {
       );
     });
 
-    it.each([
-      ['connection closed', async () => closedError()],
-      ['tagged connect error', () => tagConnectFailure(new Error('connect failed'))],
-      ['transport error name', async () => transportError()],
-      ['http 503 name', async () => httpError(503)],
-    ])('opens after connection failures shaped as %s', async (_label, buildErr) => {
-      const breaker = createBreaker();
-      for (let i = 0; i < 3; i++) {
-        const err = await buildErr();
-        await expect(breaker.run(ctx(), () => Promise.reject(err))).rejects.toBe(err);
-      }
-
-      const fn = jest.fn(() => Promise.resolve('no'));
-      await expect(breaker.run(ctx(), fn)).rejects.toThrow('is unavailable, next attempt in');
-      expect(fn).not.toHaveBeenCalled();
-    });
-
-    it('does not open on request timeouts from a connected client', async () => {
+    it('does not open on untagged errors or request timeouts', async () => {
       const breaker = createBreaker();
       for (let i = 0; i < 3; i++) {
         await expect(breaker.run(ctx(), () => Promise.reject(timeoutError()))).rejects.toThrow(
           'timed out'
+        );
+        await expect(breaker.run(ctx(), () => Promise.reject(new Error('plain')))).rejects.toThrow(
+          'plain'
         );
       }
 
       await expectClosed(breaker);
     });
 
-    it('stays open before openUntil and admits one probe at openUntil', async () => {
+    it('stays open before openUntil and runs a real call after', async () => {
       const breaker = createBreaker();
       await openBreaker(breaker);
 
-      clock = baseCoolingMs - 1;
+      clock = coolingMs - 1;
       const earlyFn = jest.fn(() => Promise.resolve('early'));
       await expect(breaker.run(ctx(), earlyFn)).rejects.toThrow('is unavailable');
       expect(earlyFn).not.toHaveBeenCalled();
 
-      clock = baseCoolingMs;
-      const probeGate = deferred<string>();
-      const probeFn = jest.fn(() => probeGate.promise);
-      const probe = breaker.run(ctx(), probeFn);
-      const secondFn = jest.fn(() => Promise.resolve('second'));
-
-      await expect(breaker.run(ctx(), secondFn)).rejects.toThrow(
-        'is unavailable, next attempt in 0s'
-      );
-      expect(secondFn).not.toHaveBeenCalled();
-      expect(probeFn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('is half-open'));
-
-      probeGate.resolve('probed');
-      await expect(probe).resolves.toBe('probed');
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('is available again'));
-
+      clock = coolingMs;
       await expectClosed(breaker);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('is available again'));
     });
 
-    it('needs a full threshold of new failures after a successful probe', async () => {
+    it('re-opens after one more failure once the cooling window ends', async () => {
       const breaker = createBreaker();
       await openBreaker(breaker);
 
-      clock = baseCoolingMs;
-      await expect(breaker.run(ctx(), () => Promise.resolve('probed'))).resolves.toBe('probed');
+      clock = coolingMs;
+      await failConnect(breaker);
 
-      const failFn = jest.fn(() => Promise.reject(closedError()));
-      await expect(breaker.run(ctx(), failFn)).rejects.toThrow('closed');
-      await expect(breaker.run(ctx(), failFn)).rejects.toThrow('closed');
-      await expect(breaker.run(ctx(), failFn)).rejects.toThrow('closed');
-      expect(failFn).toHaveBeenCalledTimes(3);
-
-      const blockedFn = jest.fn(() => Promise.resolve('no'));
-      await expect(breaker.run(ctx(), blockedFn)).rejects.toThrow('is unavailable');
-      expect(blockedFn).not.toHaveBeenCalled();
-    });
-
-    it('doubles cooling on probe failure up to the max', async () => {
-      const breaker = createBreaker();
-      await openBreaker(breaker);
-
-      clock = baseCoolingMs;
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
       await expect(breaker.run(ctx(), () => Promise.resolve('no'))).rejects.toThrow(
-        'next attempt in 2s'
-      );
-
-      clock = baseCoolingMs + 2000;
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-      await expect(breaker.run(ctx(), () => Promise.resolve('no'))).rejects.toThrow(
-        'next attempt in 4s'
-      );
-
-      clock = baseCoolingMs + 2000 + maxCoolingMs;
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-      await expect(breaker.run(ctx(), () => Promise.resolve('no'))).rejects.toThrow(
-        'next attempt in 4s'
+        'next attempt in 1s'
       );
     });
 
@@ -268,18 +188,16 @@ describe('McpCircuitBreaker', () => {
           )
       );
 
-      gates[0].reject(closedError());
-      gates[1].reject(closedError());
-      gates[2].reject(closedError());
+      for (const gate of gates.slice(0, 3)) {
+        gate.reject(await connectError());
+      }
       await Promise.all(runs.slice(0, 3));
 
-      await expect(breaker.run(ctx(), () => Promise.resolve('no'))).rejects.toThrow(
-        'next attempt in 1s'
-      );
-
-      gates[3].reject(closedError());
+      clock = 400;
+      gates[3].reject(await connectError());
       await runs[3];
 
+      clock = coolingMs - 1;
       await expect(breaker.run(ctx(), () => Promise.resolve('no'))).rejects.toThrow(
         'next attempt in 1s'
       );
@@ -287,12 +205,8 @@ describe('McpCircuitBreaker', () => {
 
     it('does not count user errors and resets an existing failure count', async () => {
       const breaker = createBreaker();
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
+      await failConnect(breaker);
+      await failConnect(breaker);
 
       mcpClientType.isUserError.mockReturnValue(true);
       await expect(
@@ -300,44 +214,20 @@ describe('McpCircuitBreaker', () => {
       ).rejects.toThrow('unauthorized');
 
       mcpClientType.isUserError.mockReturnValue(false);
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
+      await failConnect(breaker);
+      await failConnect(breaker);
 
       await expectClosed(breaker);
     });
 
-    it('does not count tool errors and resets an existing failure count', async () => {
+    it('resets an existing failure count on non-connection errors', async () => {
       const breaker = createBreaker();
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-
+      await failConnect(breaker);
       await expect(
         breaker.run(ctx(), () => Promise.reject(new Error('tool failed')))
       ).rejects.toThrow('tool failed');
-
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-      await expect(breaker.run(ctx(), () => Promise.reject(closedError()))).rejects.toThrow(
-        'closed'
-      );
-
-      await expectClosed(breaker);
-    });
-
-    it('closes when the probe fails with a tool error', async () => {
-      const breaker = createBreaker();
-      await openBreaker(breaker);
-
-      clock = baseCoolingMs;
-      await expect(
-        breaker.run(ctx(), () => Promise.reject(new Error('tool failed')))
-      ).rejects.toThrow('tool failed');
+      await failConnect(breaker);
+      await failConnect(breaker);
 
       await expectClosed(breaker);
     });
@@ -362,48 +252,20 @@ describe('McpCircuitBreaker', () => {
   });
 
   describe('isConnectionFailure', () => {
-    it.each([
-      ['connection closed', () => new McpError(McpErrorCode.ConnectionClosed, 'closed')],
-      ['not connected', () => new McpNotConnectedError('server', '1.0.0')],
-      ['sdk "Not connected" message', () => new Error('Not connected')],
-      ['transport error name', () => transportError()],
-      ['http 502 name', () => httpError(502)],
-    ])('returns true for %s', (_label, buildErr) => {
-      expect(isConnectionFailure(buildErr())).toBe(true);
-    });
-
-    it('returns true for a plain error tagged by markConnectFailure', async () => {
+    it('returns true for an error tagged by markConnectFailure', async () => {
       const err = await tagConnectFailure(new Error('connect failed'));
       expect(isConnectionFailure(err)).toBe(true);
     });
 
-    it('returns true when the cause matches', () => {
-      const err = new Error('wrapper');
-      err.cause = new McpError(McpErrorCode.ConnectionClosed, 'closed');
-      expect(isConnectionFailure(err)).toBe(true);
-
-      const transportWrapper = new Error('wrapper');
-      transportWrapper.cause = transportError();
-      expect(isConnectionFailure(transportWrapper)).toBe(true);
+    it('returns false for untagged errors and request timeouts', () => {
+      expect(isConnectionFailure(new Error('tool failed'))).toBe(false);
+      expect(isConnectionFailure(timeoutError())).toBe(false);
     });
 
-    it.each([
-      ['request timeout', () => new McpError(McpErrorCode.RequestTimeout, 'timed out')],
-      ['plain tool error', () => new Error('tool failed')],
-      ['streamable http 404', () => new StreamableHTTPError(404, 'session not found')],
-      ['streamable http 401', () => new StreamableHTTPError(401, 'unauthorized')],
-      ['streamable http 503', () => new StreamableHTTPError(503, 'unavailable')],
-      ['http 403 name', () => httpError(403)],
-    ])('returns false for %s', (_label, buildErr) => {
-      expect(isConnectionFailure(buildErr())).toBe(false);
-    });
-
-    it('returns false for any error when isUserError is true', async () => {
+    it('returns false for a tagged error when isUserError is true', async () => {
       mcpClientType.isUserError.mockReturnValue(true);
       const tagged = await tagConnectFailure(new Error('connect failed'));
       expect(isConnectionFailure(tagged)).toBe(false);
-      expect(isConnectionFailure(transportError())).toBe(false);
-      expect(isConnectionFailure(httpError(503))).toBe(false);
     });
 
     it('rethrows the same object and passes through resolved values', async () => {

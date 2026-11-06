@@ -736,34 +736,5 @@ describe('McpConnector', () => {
       expect(fakeClient.listTools).toHaveBeenCalledTimes(1);
       expect(mcpClientType.build).toHaveBeenCalledTimes(1);
     });
-
-    it('does not open the breaker on tool-level callTool errors', async () => {
-      fakeClient.callTool.mockRejectedValue(new Error('tool failed'));
-      mcpClientType.shouldInvalidateOnError.mockReturnValue(false);
-      const connector = createConnector();
-
-      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD + 1; i++) {
-        await expect(
-          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
-        ).rejects.toThrow('tool failed');
-      }
-
-      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
-      expect(mcpClientType.build).toHaveBeenCalled();
-    });
-
-    it('does not open the breaker on user errors', async () => {
-      mcpClientType.isUserError.mockReturnValue(true);
-      fakeClient.callTool.mockRejectedValue(new Error('unauthorized'));
-      const connector = createConnector();
-
-      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD + 1; i++) {
-        await expect(
-          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
-        ).rejects.toThrow('unauthorized');
-      }
-
-      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
-    });
   });
 });

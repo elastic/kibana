@@ -8,7 +8,6 @@
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import { clientTypes } from '@kbn/connector-specs/server';
-import { McpError, McpErrorCode, McpNotConnectedError } from '@kbn/mcp-client';
 import {
   createRetryableError,
   createTaskRunError,
@@ -16,18 +15,13 @@ import {
 } from '@kbn/task-manager-plugin/server/task_running';
 
 export const BREAKER_FAILURE_THRESHOLD = 3;
-export const BREAKER_BASE_COOLING_MS = 60 * 1000;
-export const BREAKER_MAX_COOLING_MS = 10 * 60 * 1000;
+export const BREAKER_COOLING_MS = 60 * 1000;
 export const BREAKER_STATE_MAX_SIZE = 1000;
-export const BREAKER_STATE_TTL_MS = 2 * BREAKER_MAX_COOLING_MS;
-
-// Thrown by the SDK protocol layer once its transport is gone.
-const SDK_NOT_CONNECTED_MESSAGE = 'Not connected';
+export const BREAKER_STATE_TTL_MS = 2 * BREAKER_COOLING_MS;
 
 export interface CircuitBreakerOptions {
   failureThreshold?: number;
-  baseCoolingMs?: number;
-  maxCoolingMs?: number;
+  coolingMs?: number;
   now?: () => number;
 }
 
@@ -39,9 +33,7 @@ export interface BreakerRun {
 
 interface BreakerEntry {
   failures: number;
-  coolingMs: number;
   openUntil?: number;
-  probing: boolean;
 }
 
 const connectFailures = new WeakSet<object>();
@@ -55,74 +47,28 @@ export const markConnectFailure = <T>(promise: Promise<T>): Promise<T> =>
     throw err;
   });
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const readCause = (err: unknown): unknown => {
-  if (!isRecord(err) || !('cause' in err)) {
-    return undefined;
-  }
-  return err.cause;
-};
-
-const matchesErrorOrCause = (err: unknown, predicate: (current: unknown) => boolean): boolean => {
-  if (predicate(err)) {
-    return true;
-  }
-  const cause = readCause(err);
-  return cause !== undefined && predicate(cause);
-};
-
 /**
- * Connect-phase failure shapes. Errors from a tool call on a connected client (request timeouts,
- * HTTP errors, tool errors) are not included: they say nothing about whether the server can be
- * reached.
+ * True for connect-phase failures only, tagged by markConnectFailure. User errors, request
+ * timeouts and tool errors from a connected client return false: they say nothing about whether
+ * the server can be reached.
  */
-const isConnectionFailureShape = (current: unknown): boolean => {
-  if (current instanceof McpError) {
-    return current.code === McpErrorCode.ConnectionClosed;
-  }
-  if (current instanceof McpNotConnectedError) {
-    return true;
-  }
-  if (current instanceof Error && current.message === SDK_NOT_CONNECTED_MESSAGE) {
-    return true;
-  }
-  if (!isRecord(current)) {
-    return false;
-  }
-  if (current.name === 'McpConnectionTransportError') {
-    return true;
-  }
-  if (current.name === 'McpConnectionHttpError') {
-    return typeof current.httpStatus === 'number' && current.httpStatus >= 500;
-  }
-  return false;
-};
-
-/** True for connect-phase failures only. User errors and tool errors return false. */
 export const isConnectionFailure = (err: unknown): boolean => {
   if (clientTypes.mcp.isUserError?.(err)) {
     return false;
   }
-  if (isRecord(err) && connectFailures.has(err)) {
-    return true;
-  }
-  return matchesErrorOrCause(err, isConnectionFailureShape);
+  return typeof err === 'object' && err !== null && connectFailures.has(err);
 };
 
 /** Opens a per-lease-key breaker after consecutive connection failures and fails fast while open. */
 export class McpCircuitBreaker {
   private readonly failureThreshold: number;
-  private readonly baseCoolingMs: number;
-  private readonly maxCoolingMs: number;
+  private readonly coolingMs: number;
   private readonly now: () => number;
   private readonly breakers: LRUCache<string, BreakerEntry>;
 
   constructor(options: CircuitBreakerOptions = {}) {
     this.failureThreshold = options.failureThreshold ?? BREAKER_FAILURE_THRESHOLD;
-    this.baseCoolingMs = options.baseCoolingMs ?? BREAKER_BASE_COOLING_MS;
-    this.maxCoolingMs = options.maxCoolingMs ?? BREAKER_MAX_COOLING_MS;
+    this.coolingMs = options.coolingMs ?? BREAKER_COOLING_MS;
     this.now = options.now ?? (() => Date.now());
     this.breakers = new LRUCache<string, BreakerEntry>({
       max: BREAKER_STATE_MAX_SIZE,
@@ -154,24 +100,10 @@ export class McpCircuitBreaker {
   }
 
   private admit(ctx: BreakerRun): void {
-    const entry = this.breakers.get(ctx.key);
-    if (entry?.openUntil === undefined) {
-      return;
+    const openUntil = this.breakers.get(ctx.key)?.openUntil;
+    if (openUntil !== undefined && this.now() < openUntil) {
+      this.throwUnavailable(ctx, openUntil);
     }
-
-    const now = this.now();
-    if (now < entry.openUntil) {
-      this.throwUnavailable(ctx, entry.openUntil);
-    }
-    if (!entry.probing) {
-      entry.probing = true;
-      this.breakers.set(ctx.key, entry);
-      ctx.logger.warn(
-        `MCP server for connector "${ctx.connectorId}" is half-open, admitting one probe`
-      );
-      return;
-    }
-    this.throwUnavailable(ctx, entry.openUntil);
   }
 
   private recordSuccess(ctx: BreakerRun): void {
@@ -180,43 +112,23 @@ export class McpCircuitBreaker {
       return;
     }
     this.breakers.delete(ctx.key);
-    if (entry.openUntil !== undefined || entry.probing) {
+    if (entry.openUntil !== undefined) {
       ctx.logger.warn(`MCP server for connector "${ctx.connectorId}" is available again`);
     }
   }
 
   private recordFailure(ctx: BreakerRun): void {
     const now = this.now();
-    const existing = this.breakers.get(ctx.key);
+    const entry = this.breakers.get(ctx.key) ?? { failures: 0 };
 
-    // Calls admitted before the breaker opened must not double the cooling period.
-    if (existing !== undefined && existing.openUntil !== undefined && !existing.probing) {
+    // Calls admitted before the breaker opened must not extend the cooling window.
+    if (entry.openUntil !== undefined && now < entry.openUntil) {
       return;
     }
 
-    if (existing?.probing) {
-      existing.coolingMs = Math.min(existing.coolingMs * 2, this.maxCoolingMs);
-      existing.openUntil = now + existing.coolingMs;
-      existing.probing = false;
-      this.breakers.set(ctx.key, existing);
-      ctx.logger.warn(
-        `MCP server for connector "${
-          ctx.connectorId
-        }" probe failed, next attempt in ${this.secondsUntil(existing.openUntil)}s`
-      );
-      return;
-    }
-
-    const entry: BreakerEntry = existing ?? {
-      failures: 0,
-      coolingMs: this.baseCoolingMs,
-      probing: false,
-    };
     entry.failures += 1;
     if (entry.failures >= this.failureThreshold) {
-      entry.coolingMs = this.baseCoolingMs;
-      entry.openUntil = now + entry.coolingMs;
-      entry.probing = false;
+      entry.openUntil = now + this.coolingMs;
       ctx.logger.warn(
         `MCP server for connector "${ctx.connectorId}" is unavailable after ${
           entry.failures
