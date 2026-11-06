@@ -95,6 +95,11 @@ const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.
   defaultMessage: 'Enable Elastic nightshift',
 });
 
+const AUTOMATE_SECTION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.automate.trialTitle',
+  { defaultMessage: 'Your first investigation' }
+);
+
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
  * investigation, create a first automation. The steps follow from the latest onboarding workflow
@@ -327,6 +332,8 @@ export function NightshiftOnboarding({
       ? CONNECT_SOURCES_TITLE
       : step === 'investigate'
       ? INVESTIGATE_SECTION_TITLE
+      : step === 'automate'
+      ? AUTOMATE_SECTION_TITLE
       : undefined;
 
   return (
@@ -351,7 +358,7 @@ export function NightshiftOnboarding({
       )}
       {sectionTitle && (
         <>
-          <EuiTitle size="s">
+          <EuiTitle size={step === 'automate' ? 'xs' : 's'}>
             <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
