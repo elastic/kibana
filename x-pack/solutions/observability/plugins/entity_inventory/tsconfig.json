@@ -7,6 +7,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-security-server",
     "@kbn/config-schema",
     "@kbn/entity-store",
     "@kbn/es-types",

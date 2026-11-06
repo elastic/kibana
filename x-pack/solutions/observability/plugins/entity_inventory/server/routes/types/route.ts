@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { AuthzDisabled } from '@kbn/core-security-server';
 import type { GetTypesResponse } from '../types';
 import { createEntityInventoryServerRoute } from '../create_server_route';
-import { INTERIM_AUTHZ } from '../interim_authz';
 
 export const typesRoute = createEntityInventoryServerRoute({
   endpoint: 'GET /internal/entity_inventory/types',
@@ -17,7 +17,7 @@ export const typesRoute = createEntityInventoryServerRoute({
     description:
       'Returns one entry per registered entity definition that has a dynamic block, with its identity fields, columns and sources.',
   },
-  security: INTERIM_AUTHZ,
+  security: { authz: AuthzDisabled.delegateToESClient },
   handler: async ({ request, getInventoryService }): Promise<GetTypesResponse> => {
     const inventoryService = await getInventoryService(request);
     return inventoryService.listTypes();

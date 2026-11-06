@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { AuthzDisabled } from '@kbn/core-security-server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ListResponse } from '../types';
 import { createEntityInventoryServerRoute } from '../create_server_route';
-import { INTERIM_AUTHZ } from '../interim_authz';
 import { instantParam, listLimitParam } from '../utils/query_params';
 import { typeNameSchema } from '../utils/type_name_schema';
 import { withTimeRangeGuardrail } from '../utils/time_range_guardrail';
@@ -36,7 +36,7 @@ export const listRoute = createEntityInventoryServerRoute({
     description:
       'Returns one row per entity of the type seen in the window, merged across its sources, newest last_seen first.',
   },
-  security: INTERIM_AUTHZ,
+  security: { authz: AuthzDisabled.delegateToESClient },
   handler: withTimeRangeGuardrail(
     async ({ request, params, getInventoryService }): Promise<ListResponse> => {
       const { path, query } = params;

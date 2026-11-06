@@ -77,18 +77,17 @@ apiTest.describe(
       expect(customSpaceResponse.body).toStrictEqual(defaultSpaceResponse.body);
     });
 
-    apiTest(
-      'rejects a viewer, which lacks the entity_inventory_read privilege',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
+    apiTest('returns the types to a viewer', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
-        const response = await apiClient.get(TYPES_PATH, {
-          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
-          responseType: 'json',
-        });
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(403);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+      expect(types.map(({ type }) => type)).toContain('k8s.deployment');
+    });
   }
 );

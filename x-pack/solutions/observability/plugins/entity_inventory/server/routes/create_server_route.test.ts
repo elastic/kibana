@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AuthzDisabled } from '@kbn/core-security-server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -18,7 +19,7 @@ const callRouteThrowing = (error: Error): Promise<unknown> => {
   const route = createEntityInventoryServerRoute({
     endpoint: 'GET /internal/entity_inventory/test',
     options: { access: 'internal' },
-    security: { authz: { requiredPrivileges: ['entity_inventory_read'] } },
+    security: { authz: AuthzDisabled.delegateToESClient },
     handler: async () => {
       throw error;
     },

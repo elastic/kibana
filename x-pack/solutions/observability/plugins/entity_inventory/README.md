@@ -60,7 +60,7 @@ No body and no parameters. It returns one entry per registered definition that h
 
 ### Access control (interim)
 
-Every inventory route requires the `entity_inventory_read` API privilege (`ENTITY_INVENTORY_API_PRIVILEGES.read` in `common/privileges.ts`). The plugin registers no Kibana feature yet, so no role grants that privilege and nothing appears in the role editor or the space feature settings: `superuser` gets through, every other role gets 403. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) will register an `entityInventory` feature that grants it.
+The inventory routes require no Kibana privilege (`AuthzDisabled.delegateToESClient`): every query runs as the current user, so Elasticsearch index privileges decide what each user reads. A user who cannot read a source pattern gets no rows from it, not a 403.
 
 Errors thrown by the inventory service reach clients through `server/routes/create_server_route.ts`: `InventoryTypeNotFoundError` becomes 404, `InventoryRequestError` and `InventoryTypeDefinitionError` become 400, each with the error message only. Any other error is rethrown unchanged.
 

@@ -342,20 +342,41 @@ apiTest.describe(
       );
     });
 
+    apiTest('returns the deployments to a viewer', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(
+        'internal/entity_inventory/entities/k8s.deployment/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
+        {
+          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      const body: ListResponse = response.body;
+      expect(body.rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
+    });
+
     apiTest(
-      'rejects a viewer, which lacks the entity_inventory_read privilege',
+      'returns no rows to a user who cannot read the source indices',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
+        const { cookieHeader: restrictedCookieHeader } = await samlAuth.asInteractiveUser({
+          kibana: [{ base: ['read'], spaces: ['*'] }],
+          elasticsearch: { cluster: [], indices: [{ names: ['logs-*'], privileges: ['read'] }] },
+        });
 
         const response = await apiClient.get(
-          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
+          'internal/entity_inventory/entities/k8s.deployment/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
           {
-            headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+            headers: { ...INTERNAL_HEADERS, ...restrictedCookieHeader },
             responseType: 'json',
           }
         );
 
-        expect(response).toHaveStatusCode(403);
+        expect(response).toHaveStatusCode(200);
+        const body: ListResponse = response.body;
+        expect(body.rows).toStrictEqual([]);
       }
     );
   }
