@@ -11,11 +11,11 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { createAppChromeMock } from '../../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { AiIndexOnboardingPanel } from './ai_index_onboarding_panel';
 
-const renderWithProviders = (core: CoreStart) =>
+const renderWithProviders = (core: CoreStart, onCreateClick: () => void = jest.fn()) =>
   render(
     <I18nProvider>
       <EuiProvider>
@@ -26,7 +26,7 @@ const renderWithProviders = (core: CoreStart) =>
             appChrome: createAppChromeMock(),
           }}
         >
-          <AiIndexOnboardingPanel />
+          <AiIndexOnboardingPanel onCreateClick={onCreateClick} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
@@ -53,5 +53,16 @@ describe('AiIndexOnboardingPanel', () => {
     const learnMoreLink = screen.getByTestId('contextAiIndexOnboardingLearnMoreLink');
     expect(learnMoreLink).toHaveTextContent('Learn what an AI index is');
     expect(learnMoreLink).toHaveAttribute('href', core.docLinks.links.contextEngine.aiIndices);
+  });
+
+  it('calls onCreateClick when the create button is clicked', () => {
+    const core = coreMock.createStart();
+    const onCreateClick = jest.fn();
+
+    renderWithProviders(core, onCreateClick);
+
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    expect(onCreateClick).toHaveBeenCalled();
   });
 });

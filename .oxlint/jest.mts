@@ -20,6 +20,7 @@ export const jestOverrides: OxlintOverride[] = [
     env: { jest: true },
     rules: {
       'jest/no-identical-title': 'error',
+      '@kbn/compat/import-order': 'off',
     },
   },
 ];

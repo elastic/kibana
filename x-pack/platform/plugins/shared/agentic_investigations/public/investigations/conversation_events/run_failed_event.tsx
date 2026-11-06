@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { ConversationEventUIDefinition } from '@kbn/agent-builder-browser';
 import {
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
   type InvestigationRunFailedEventData,
 } from '../../../common/investigations/run_failure';
 
@@ -65,4 +66,22 @@ export const investigationRunFailedEventUiDefinition: ConversationEventUIDefinit
       </dl>
     </EuiText>
   ),
+};
+
+export const investigationRunTimedOutEventUiDefinition: ConversationEventUIDefinition<
+  typeof INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
+  InvestigationRunFailedEventData
+> = {
+  render: (event, context) =>
+    investigationRunFailedEventUiDefinition.render(
+      { ...event, type: INVESTIGATION_RUN_FAILED_EVENT_TYPE },
+      context
+    ),
+  type: INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
+  getHeader: () => ({
+    icon: 'warning',
+    label: i18n.translate('xpack.agenticInvestigations.investigations.events.runTimedOutLabel', {
+      defaultMessage: 'Investigation run timed out',
+    }),
+  }),
 };

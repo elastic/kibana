@@ -8,20 +8,16 @@
 import type {
   AskUserQuestionStep,
   ConversationRoundStep,
-  TodosStep,
   ToolCallProgress,
   ToolCallStep,
   ToolResult,
 } from '@kbn/agent-builder-common';
-import { isAskUserQuestionStep, isTodosStep, isToolCallStep } from '@kbn/agent-builder-common';
+import { isAskUserQuestionStep, isToolCallStep } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { ToolRenderStateMap } from './transient_state';
 
-export type AppendableStep = Exclude<
-  ConversationRoundStep,
-  ToolCallStep | TodosStep | AskUserQuestionStep
->;
+export type AppendableStep = Exclude<ConversationRoundStep, ToolCallStep | AskUserQuestionStep>;
 
 export interface ResolveToolCallParams {
   toolCallId: string;
@@ -36,8 +32,7 @@ export type RunStepUpdate =
   | { type: 'append'; step: AppendableStep }
   | { type: 'append_tool_call'; step: ToolCallStep }
   | ({ type: 'resolve_tool_call' } & ResolveToolCallParams)
-  | { type: 'upsert_question'; step: AskUserQuestionStep }
-  | { type: 'set_todos'; step: TodosStep };
+  | { type: 'upsert_question'; step: AskUserQuestionStep };
 
 export const stepUpdates = {
   append: (step: AppendableStep): RunStepUpdate => ({ type: 'append', step }),
@@ -50,7 +45,6 @@ export const stepUpdates = {
     type: 'upsert_question',
     step,
   }),
-  setTodos: (step: TodosStep): RunStepUpdate => ({ type: 'set_todos', step }),
 };
 
 const invalidState = (message: string) =>
@@ -60,18 +54,14 @@ const findToolCallIndex = (steps: ConversationRoundStep[], toolCallId: string): 
   steps.findIndex((step) => isToolCallStep(step) && step.tool_call_id === toolCallId);
 
 /**
- * The `steps` channel reducer. Keeps the todos step as a trailing singleton (last one wins if the
- * input has several); everything else is inserted before it. Pure: never mutates `steps` or the
- * step objects it receives.
+ * The `steps` channel reducer. Steps are only appended, resolved in place, or upserted by prompt
+ * id. Pure: never mutates `steps` or the step objects it receives.
  */
 export const applyStepUpdates = (
   steps: ConversationRoundStep[],
   updates: RunStepUpdate[]
 ): ConversationRoundStep[] => {
-  let body = steps.filter((step) => !isTodosStep(step));
-  // Well-formed input has at most one todos step. Legacy merged rounds (one todos step per
-  // execution, concatenated by `mergeRounds`) can carry several: the last one is the latest.
-  let todos = steps.filter(isTodosStep).at(-1);
+  let body = steps;
 
   for (const update of updates) {
     switch (update.type) {
@@ -110,17 +100,11 @@ export const applyStepUpdates = (
             : [...body.slice(0, index), update.step, ...body.slice(index + 1)];
         break;
       }
-      case 'set_todos':
-        todos = update.step;
-        break;
     }
   }
 
-  return todos ? [...body, todos] : body;
+  return body;
 };
-
-export const countNonTodosSteps = (steps: ConversationRoundStep[]): number =>
-  steps.filter((step) => !isTodosStep(step)).length;
 
 /**
  * Browser and dedicated-lifecycle tool calls are runtime-only and never persisted. Calls with no

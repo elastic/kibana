@@ -61,40 +61,43 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.floorAlertTriage.description',
     {
-      defaultMessage: 'Reduces alert volume and routes what still needs a person.',
+      defaultMessage:
+        'Classifies new alerts and proposes closing false positives, so you can focus on the alerts that matter.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.floorAttackDiscovery.description',
     {
-      defaultMessage: 'Continues Attack Discovery findings into reviewable investigation evidence.',
+      defaultMessage:
+        'Groups related alerts into potential attacks, opens an investigation for each, and proposes forensic analysis of the hosts when an attack looks real.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.description',
     {
       defaultMessage:
-        'Reconstructs the attack timeline on affected hosts and proposes containment. Runs only on attacks handed off by the Attack Discovery Worker and needs Elastic Defend data.',
+        'Investigates the hosts involved in a potential attack and proposes response actions, such as isolating a host, so you can contain the attack faster.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.huntContinuousThreatHunt.description',
     {
-      defaultMessage: 'Hunts continuously for threats and coverage gaps nobody has reported yet.',
+      defaultMessage:
+        "Searches your data for activity that matches threat reports and opens an investigation for each match, so you can catch threats that didn't trigger an alert.",
     }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.detectionRuleTuning.description',
     {
       defaultMessage:
-        'Works on false-positive dispositions in Alerts. Without Alert Triage worker enabled it only runs the scheduled sweep on FP alerts processed manually or using other tools.',
+        'Finds rules that are too noisy or too narrow and proposes tuning changes tested against past data, so your alerts are more accurate.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.detectionRuleCoverage.description',
     {
       defaultMessage:
-        'Acts on coverage gaps from Continuous Threat Hunt. With Hunt Watch disabled it has nothing to act on.',
+        'Reviews gaps in your detection coverage and proposes rules to close them, so fewer threats go undetected.',
     }
   ),
 };
