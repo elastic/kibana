@@ -38,6 +38,7 @@ const build = ({
   message = 'Address review comments',
   authorName = 'Jane Doe',
   prNumber = PR,
+  jobs = [],
 }: {
   commit: string;
   createdAt: number;
@@ -46,11 +47,20 @@ const build = ({
   message?: string;
   authorName?: string;
   prNumber?: string;
+  jobs?: Array<{ state: string; finishedAt: number; softFailed?: boolean; retried?: boolean }>;
 }): Build =>
   ({
     commit,
     state,
     message,
+    jobs: jobs.map(
+      ({ state: jobState, finishedAt: jobFinishedAt, softFailed = false, retried = false }) => ({
+        state: jobState,
+        soft_failed: softFailed,
+        retried,
+        finished_at: minutes(jobFinishedAt),
+      })
+    ),
     author: { name: authorName, email: `${authorName}@example.com` },
     created_at: minutes(createdAt),
     started_at: minutes(createdAt),
@@ -91,6 +101,38 @@ describe('countBuildsCancelledByPushes', () => {
     ];
 
     expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
+  });
+
+  it('ignores builds that had already failed before the newer push', () => {
+    const builds = [
+      build({
+        commit: 'a',
+        createdAt: 0,
+        finishedAt: 20,
+        jobs: [{ state: 'failed', finishedAt: 15 }],
+      }),
+      build({ commit: 'b', createdAt: 20, state: 'running' }),
+    ];
+
+    expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
+  });
+
+  it('still counts builds whose only failures were soft-failed or retried', () => {
+    const builds = [
+      build({
+        commit: 'a',
+        createdAt: 0,
+        finishedAt: 20,
+        jobs: [
+          { state: 'failed', finishedAt: 10, softFailed: true },
+          { state: 'failed', finishedAt: 12, retried: true },
+          { state: 'canceled', finishedAt: 20 },
+        ],
+      }),
+      build({ commit: 'b', createdAt: 20, state: 'running' }),
+    ];
+
+    expect(countBuildsCancelledByPushes(builds, PR)).toBe(1);
   });
 
   it('ignores builds cancelled without a newer push, such as manual cancellations', () => {

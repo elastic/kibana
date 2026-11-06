@@ -31,6 +31,13 @@ const isBotFixCommit = ({ message, author }: Build): boolean =>
 const toMs = (timestamp: string | null | undefined): number | null =>
   timestamp ? Date.parse(timestamp) : null;
 
+// Pushing a fix for a failure the build already surfaced is a legitimate reason to cancel it.
+const hadFailedBefore = ({ jobs = [] }: Build, pushedAt: number): boolean =>
+  jobs.some(
+    ({ state, soft_failed: softFailed, retried, finished_at: finishedAt }) =>
+      state === 'failed' && !softFailed && !retried && (toMs(finishedAt) ?? Infinity) <= pushedAt
+  );
+
 /** Counts builds of a PR that ran for a while and were then cancelled by a newer human push. */
 export const countBuildsCancelledByPushes = (
   builds: readonly Build[],
@@ -57,7 +64,8 @@ export const countBuildsCancelledByPushes = (
       return false;
     }
 
-    return Date.parse(successor.created_at) <= finishedAt + SUPERSEDED_GRACE_MS;
+    const pushedAt = Date.parse(successor.created_at);
+    return pushedAt <= finishedAt + SUPERSEDED_GRACE_MS && !hadFailedBefore(build, pushedAt);
   }).length;
 };
 
