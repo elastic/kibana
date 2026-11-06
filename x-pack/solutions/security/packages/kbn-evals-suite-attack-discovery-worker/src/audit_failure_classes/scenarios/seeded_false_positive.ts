@@ -34,10 +34,9 @@ interface BenignPattern {
 }
 
 /**
- * Routine SCCM activity: everything runs as SYSTEM, vendor-signed, from its install path under a
- * service parent. The world (`worker_world.ts`) shows the same hosts with `CcmExec.exe` under
- * `services.exe` and one internal management destination, so every world check the review makes
- * contradicts the seeded discovery's command-and-control story.
+ * Routine SCCM activity: SYSTEM, vendor-signed, from its install path under a service parent. The
+ * world (`worker_world.ts`) shows the same hosts as `CcmExec.exe` under `services.exe`, so every
+ * world check contradicts the seeded discovery's command-and-control story.
  */
 const PATTERNS: readonly BenignPattern[] = [
   {
@@ -120,8 +119,8 @@ const drafts: AlertDraft[] = Array.from({ length: COUNT }, (_, index) => {
 const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
 
 /**
- * The attack id is 64 hex characters, so the review's `<a[0:8]>-<a[8:12]>-8<a[12:15]>-8<a[15:18]>-<a[18:30]>`
- * Investigation-id slice (and `investigationIdFor`) always yields a valid UUIDv8 shape.
+ * The attack id is 64 hex characters, so the review's Investigation-id slice always yields a valid
+ * UUIDv8.
  */
 export const seededFalsePositiveAttackId = (runMarker: string): string =>
   createHash('sha256').update(`${SCENARIO_ID}:${runMarker}:attack-discovery`).digest('hex');
@@ -129,11 +128,10 @@ export const seededFalsePositiveAttackId = (runMarker: string): string =>
 export const SEEDED_FALSE_POSITIVE_TITLE = 'Encoded PowerShell command-and-control on WS-MGMT-201';
 
 /**
- * The authored false-positive Attack Discovery, seeded straight into the space's attack discovery
- * index. Its narrative claims an encoded PowerShell C2 chain citing seeded benign alerts, while the
- * world around them shows routine SCCM management activity, so the review's evidence checks all
- * contradict it and the expected verdict is `false_positive`. The runner never reviews it (it only
- * reviews its own generation output), so the row dispatches the review itself.
+ * The authored false-positive Attack Discovery, seeded into the space's discovery index. It claims
+ * an encoded PowerShell C2 chain over seeded benign alerts while the world shows routine SCCM
+ * activity, so the expected verdict is `false_positive`. The runner never reviews it, so the row
+ * dispatches the review itself.
  */
 export const buildSeededFalsePositiveDiscovery = ({
   runMarker,
@@ -171,11 +169,10 @@ export const buildSeededFalsePositiveDiscovery = ({
     'kibana.alert.attack_discovery.details_markdown':
       'On WS-MGMT-201, powershell.exe ran with an encoded command under the management agent and established repeated connections to an external host. The pattern is consistent with a PowerShell download cradle and command-and-control beaconing.',
     'kibana.alert.attack_discovery.mitre_attack_tactics': ['Execution', 'Command and Control'],
-    // Fields the review's attachment resolver requires (`getMissingFields` in
-    // `transformSearchResponseToAlerts` skips a document without them, and the review then fails
-    // with "not found, or is not readable"). The api_config is an object, as the persisted
-    // documents carry it; the ids are placeholders no generation run shares, so the row's
-    // generation-model and persisted-count checks never pick this discovery up.
+    // Fields the review's attachment resolver requires (`getMissingFields` skips a document without
+    // them, and the review fails with "not found, or is not readable"). The ids are placeholders no
+    // generation run shares, so the row's generation-model and persisted-count checks skip this
+    // one.
     'kibana.alert.attack_discovery.api_config': {
       action_type_id: '.inference',
       connector_id: 'ad-worker-eval-seed',
@@ -187,10 +184,9 @@ export const buildSeededFalsePositiveDiscovery = ({
 };
 
 /**
- * Negative control with a seeded twist: 18 vendor-signed SCCM alerts the world confirms as routine,
- * plus an authored Attack Discovery that claims an attack over them. Generation must still report
- * nothing; the review, dispatched directly at the seeded discovery, must clear it as a false
- * positive.
+ * Negative control: 18 routine SCCM alerts plus an authored Attack Discovery claiming an attack
+ * over them. Generation must still report nothing; the review, dispatched directly at the seeded
+ * discovery, must clear it as a false positive.
  */
 export const seededFalsePositiveScenario: AuditScenario = {
   id: SCENARIO_ID,

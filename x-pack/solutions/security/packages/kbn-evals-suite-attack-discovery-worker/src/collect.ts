@@ -410,8 +410,7 @@ const buildReviewArtifact = async ({
 };
 
 /**
- * Builds the artifact of a review the row dispatched itself (not through the runner's dispatch
- * step), like the seeded-false-positive row does: same shape, no dispatch step to read.
+ * Artifact of a review the row dispatched itself (seeded-false-positive): no dispatch step to read.
  */
 export const collectReviewArtifact = async ({
   client,

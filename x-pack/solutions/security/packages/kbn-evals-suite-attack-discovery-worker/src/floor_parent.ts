@@ -26,14 +26,11 @@ const hasTemplateMarker = (value: unknown): boolean => {
 };
 
 /**
- * Returns `yaml` with its single `workflow.execute` step pointed at `targetWorkflowId` with
- * literal `inputs`. Everything else is kept as stored: `settings.run_as` (the delegated identity
- * the child inherits), the concurrency policy, the schedule and the step's `run-as-mode`.
- *
- * Throws unless the definition has exactly one `workflow.execute` step and a `settings.run_as`,
- * because rewriting anything else would not give the child a delegated identity. Inputs holding
- * Liquid markers are refused: the floor would render them, so the child would not receive what
- * the caller passed.
+ * Returns `yaml` with its single `workflow.execute` step pointed at `targetWorkflowId` with literal
+ * `inputs`; everything else stays as stored, including `settings.run_as` (the delegated identity
+ * the child inherits). Throws unless there is exactly one such step and a `settings.run_as`, since
+ * the child would otherwise get no delegated identity. Inputs holding Liquid markers are refused:
+ * the floor would render them, so the child would not receive what the caller passed.
  */
 export const rewriteFloorParentYaml = ({
   yaml,
@@ -69,7 +66,7 @@ export const rewriteFloorParentYaml = ({
 
 /**
  * The `workflow-id` the floor's single `workflow.execute` step dispatches, or undefined when the
- * YAML does not parse or does not have exactly one such step.
+ * YAML does not parse or has no such single step.
  */
 export const floorDispatchTarget = (yaml: string): string | undefined => {
   const document = parseDocument(yaml);
@@ -82,9 +79,9 @@ export const floorDispatchTarget = (yaml: string): string | undefined => {
 };
 
 /**
- * Whether the floor still dispatches the runner, as the registry renders it. A floor-parent run
- * edits that step and puts it back; one that was interrupted in between leaves the edit behind,
- * and reading it as the "original" would make the next run restore the leftover.
+ * Whether the floor still dispatches the runner, as the registry renders it. An interrupted
+ * floor-parent run leaves its edit behind, and reading that as the "original" would make the next
+ * run restore the leftover.
  */
 export const isFloorClean = (yaml: string): boolean =>
   floorDispatchTarget(yaml) === RUNNER_WORKFLOW_ID;

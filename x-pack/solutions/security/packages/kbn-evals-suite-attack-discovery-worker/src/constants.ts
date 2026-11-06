@@ -93,8 +93,8 @@ export const FLOOR_SCHEDULE_INTERVAL = '24h';
 export const FLOOR_TICK_WAIT_MS = 60_000;
 export const FLOOR_TICK_POLL_INTERVAL_MS = 2_000;
 /**
- * How long a row waits for the floor worker (or its child) to go idle. When a child ends the
- * engine only schedules the resume of its parent, so the parent is still active for a moment.
+ * How long a row waits for the floor worker (or its child) to go idle. The engine resumes a parent
+ * only after its child ends, so the parent stays active for a moment.
  */
 export const FLOOR_IDLE_WAIT_MS = 120_000;
 /** How long a cancelled scheduled tick has to leave its concurrency slot. */
@@ -111,11 +111,9 @@ export const ROW_OVERHEAD_MS = 10 * 60_000;
 
 /**
  * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
- * timeouts, plus one more review wait for the seeded false-positive row's floor-parent review.
- * Each run also lets the floor settle after its child ends, and the floor-parent run waits for
- * the floor and review to go idle first, each up to `FLOOR_IDLE_WAIT_MS`.
- * Otherwise a slow model is killed mid-dataset with no scores, and the failure reads as a generic
- * test timeout instead of the suite's labeled one.
+ * timeouts, the seeded false-positive row's extra review wait, and `FLOOR_IDLE_WAIT_MS` for each
+ * floor settle and idle wait. Otherwise a slow model is killed mid-dataset with no scores, and the
+ * failure reads as a generic test timeout instead of the suite's labeled one.
  */
 export const getPlaywrightTestTimeoutMs = (rowCount: number): number =>
   rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS + FLOOR_IDLE_WAIT_MS) +

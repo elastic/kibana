@@ -290,10 +290,9 @@ describe('a floor left rewritten by an interrupted floor-parent run', () => {
 
   /**
    * A Kibana that, like the real one (verified live), re-renders the floor from the registry only
-   * when a settings write changes the schedule interval; a disable or an enable alone leaves it.
-   * It keeps the worker's enabled state and, like Task Manager, runs the floor at once when a write
-   * leaves the worker enabled (`ticks` records what each such run dispatched). `failPatches` makes
-   * the nth PATCHes reject.
+   * when a settings write changes the schedule interval. Like Task Manager, it runs the floor at
+   * once when a write leaves the worker enabled (`ticks` records what each run dispatched).
+   * `failPatches` makes the nth PATCHes reject.
    */
   const kibana = ({
     rerenderRepairs = true,

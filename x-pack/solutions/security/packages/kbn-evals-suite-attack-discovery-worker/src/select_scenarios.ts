@@ -7,9 +7,9 @@
 
 /**
  * Narrows `rows` to the comma-separated ids in `only` (the `AD_WORKER_EVAL_SCENARIOS` value),
- * keeping the rows' own order. An empty value selects every row. An id that is no row throws
- * naming it and the valid ids: a typo that silently dropped one of two ids would score a
- * different set than the one asked for.
+ * keeping the rows' own order; an empty value selects every row. An unknown id throws naming it and
+ * the valid ids: a typo that silently dropped one id would score a different set than the one asked
+ * for.
  */
 export const selectScenarios = <Row extends { id?: string | number }>({
   rows,

@@ -46,10 +46,9 @@ export interface PolledExecution {
 }
 
 /**
- * Starts the per-space floor Attack Discovery worker and reads executions back. The runner (and
- * the review, see `runViaFloorParent`) has to be started by that worker: it dispatches them as
- * its service account, and the engine refuses a standalone start of a workflow that needs a
- * delegated identity.
+ * Starts the per-space floor Attack Discovery worker and reads executions back. The worker
+ * dispatches the runner and the review as its service account; the engine refuses a standalone
+ * start of a workflow that needs a delegated identity.
  */
 export class AttackDiscoveryWorkerClient {
   private readonly pendingExecutions: Array<{ spaceId: string; executionId: string }> = [];
@@ -133,9 +132,9 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Finds the execution of `workflowId` that `parentExecutionId` started. It is a child of the
-   * parent's `workflow.execute` step, so it appears only once that step has begun. Returns
-   * undefined when the parent ended without ever starting one (it failed or was refused first).
+   * Finds the execution of `workflowId` that `parentExecutionId` started, which appears only once
+   * the parent's `workflow.execute` step has begun. Undefined when the parent ended without
+   * starting one.
    */
   private async findChildExecution({
     spaceId,
@@ -159,13 +158,13 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Runs the floor worker through the normal route, follows it to the child it dispatches
-   * (`childWorkflowId`) and polls that child until `isDone` accepts it or it ends. Finding the
-   * child and polling it share one deadline of `maxWaitMs`; once the child has ended, the floor
-   * gets a further `FLOOR_IDLE_WAIT_MS` to settle, so a call takes at most the sum. A timeout or
-   * an execution with no steps is returned, not thrown, so the row is scored (and fails by name)
-   * instead of vanishing from the results. When the floor ends without starting the child, the
-   * floor's own execution is returned. Every execution started is pushed to `started`.
+   * Runs the floor worker, follows it to the child it dispatches (`childWorkflowId`) and polls that
+   * child until `isDone` accepts it or it ends. Finding and polling share one `maxWaitMs` deadline.
+   * Once the child has ended the floor gets a further `FLOOR_IDLE_WAIT_MS` to settle, because the
+   * engine schedules a parent's resume only after its child ends and the floor stays non-terminal
+   * for a moment. A timeout or an execution with no steps is returned, not thrown, so the row is
+   * scored instead of vanishing. When the floor ends without starting the child, the floor's own
+   * execution is returned. Every execution started is pushed to `started`.
    */
   private async runFloorToChild({
     spaceId,
@@ -253,8 +252,8 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Starts the per-space floor worker and follows it to the runner it dispatches, then polls the
-   * runner to completion within one `maxWaitMs` deadline (see `runFloorToChild`).
+   * Runs the runner through the floor worker within one `maxWaitMs` deadline (see
+   * `runFloorToChild`).
    */
   async run({
     spaceId,
@@ -276,17 +275,16 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Runs `targetWorkflowId` as a child of the floor worker and polls that child until `isDone`
-   * accepts it or it ends. A workflow that inherits its execution identity (the review) is refused
-   * with 403 when started directly, so the floor is the parent: its stored YAML is rewritten to
-   * dispatch the target with literal `inputs`, the floor is run, and the YAML is put back.
+   * Runs `targetWorkflowId` as a child of the floor worker and polls it until `isDone` accepts it
+   * or it ends. A workflow that inherits its execution identity (the review) is refused with 403
+   * when started directly, so the floor is the parent: its stored YAML is rewritten to dispatch the
+   * target with literal `inputs`, the floor is run, and the YAML is put back.
    *
-   * Only call this while no other floor run is active. The floor and the target get
-   * `FLOOR_IDLE_WAIT_MS` to go idle (nothing is cancelled for that). After this busy check, only the
-   * long schedule interval keeps a scheduled tick out (a PUT reschedules the task, it does not run it).
-   * The restore re-reads the floor first, but read and PUT are separate requests and the managed
-   * route takes no precondition, so a concurrent edit is detected best-effort, not prevented.
-   * When the floor ends without starting the target, the floor's own execution is returned.
+   * Only call this while no other floor run is active; the floor and the target get
+   * `FLOOR_IDLE_WAIT_MS` to go idle (nothing is cancelled for that); after that only the long
+   * schedule interval keeps a tick out (a PUT reschedules the task, it does not run it). The
+   * restore re-reads the floor first, but the managed route takes no precondition, so a
+   * concurrent edit is detected best-effort, not prevented.
    */
   async runViaFloorParent({
     spaceId,
@@ -415,9 +413,8 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Starts the review of one attack discovery as a child of the floor worker (see
-   * `runViaFloorParent`) and polls it until it ends or parks at the analyst gate. `isDone` is
-   * passed by the caller because importing it here would be a cycle.
+   * Reviews one attack discovery via `runViaFloorParent` until it ends or parks at the analyst
+   * gate. `isDone` is passed in because importing it here would be a cycle.
    */
   async runReview({
     spaceId,
@@ -466,9 +463,8 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Cancels those of the given executions that have not ended (an ended one has nothing to cancel
-   * and the route may refuse it), then waits a bounded time for them to end (see `cancelPending`
-   * for the failure contract).
+   * Cancels those of the given executions that have not ended (the route may refuse an ended one),
+   * then waits a bounded time for them to end. Failures follow `cancelPending`'s contract.
    */
   private async cancelExecutions(spaceId: string, executionIds: string[]): Promise<void> {
     for (const executionId of executionIds) this.forget(executionId);
@@ -537,8 +533,9 @@ export class AttackDiscoveryWorkerClient {
 /**
  * What about the floor read just before the restore is not what this run left, or undefined when
  * it is. Without the post-rewrite state (its read failed), the stored text must be the one written
- * (or the original, if the rewrite PUT never landed) and `enabled` unchanged; anything else fails closed. Text is what
- * can be compared there: the server bumps `version` only when the trimmed YAML changes.
+ * (or the original, if the rewrite PUT never landed) and `enabled` unchanged, else it fails closed.
+ * Text is what can be compared there: the server bumps `version` only when the trimmed YAML
+ * changes.
  */
 const describeConcurrentChange = ({
   current,
@@ -568,9 +565,9 @@ const describeConcurrentChange = ({
 
 /**
  * What differs between the floor as it was read before a floor-parent run and as it is after the
- * restore, or undefined when the stored definition and the managed state (the fields the server's
- * drift status is derived from) are the same. The YAML text is not compared: the server stores the
- * parsed definition, and `version` is excluded because the restore PUT itself moves it.
+ * restore, or undefined when the stored definition and the managed state (what the server's drift
+ * status derives from) match. The YAML text is not compared (the server stores the parsed
+ * definition); `version` is excluded because the restore PUT itself moves it.
  */
 export const describeFloorDrift = (
   before: FloorWorkflowState,

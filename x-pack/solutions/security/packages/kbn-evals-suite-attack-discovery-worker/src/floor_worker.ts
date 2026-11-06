@@ -161,9 +161,9 @@ const isFloorWorkflowClean = async (
   isFloorClean((await readFloorWorkflow({ fetch, spaceId, floorWorkflowId: workflowId })).yaml);
 
 /**
- * Writes the floor worker's settings with the revision read just before the write, and tries once
- * more (with a fresh revision) when the write is refused with a revision conflict (409), so a
- * concurrent write does not leave the worker half put back. Any other failure is rethrown at once.
+ * Writes the floor worker's settings with the revision read just before, retrying once with a fresh
+ * one on a 409 so a concurrent write does not leave the worker half put back. Other failures
+ * rethrow.
  */
 const patchFloorSettingsWithRetry = async (
   fetch: HttpHandler,
@@ -188,16 +188,14 @@ const patchFloorSettingsWithRetry = async (
 };
 
 /**
- * Re-renders the floor's YAML from the registry. A floor-parent run edits the stored YAML and puts
- * it back; a run that was killed in between leaves the edit, and the original cannot be rebuilt
- * from it (its `${{ consts.* }}` inputs are gone). The managed install skips a worker whose
- * settings are unchanged (a disable/enable pair leaves the leftover in place, verified live), so
- * the repair changes one setting and sets it back: each write re-renders from the registry.
+ * Re-renders the floor's YAML from the registry. A killed floor-parent run leaves its edit behind,
+ * and the original cannot be rebuilt from it (its `${{ consts.* }}` inputs are gone). The managed
+ * install skips a worker whose settings are unchanged (a disable/enable pair leaves the leftover in
+ * place, verified live), so the repair changes one setting and sets it back: each write re-renders.
  *
- * Only call this while the worker is disabled: on a live worker the nudge can put the next tick
- * in the past and fire it, running whatever the floor dispatches right then. The writes carry no
- * `enabled` key, so the worker stays disabled. If the interval cannot be put back (the second
- * write is tried twice) the error says what it was left at.
+ * Only call this while the worker is disabled: on a live worker the nudge can put the next tick in
+ * the past and fire it. The writes carry no `enabled` key. If the interval cannot be put back (the
+ * second write is tried twice) the error says what it was left at.
  */
 const reRenderFloor = async ({
   fetch,
@@ -232,10 +230,9 @@ const reRenderFloor = async ({
 };
 
 /**
- * Throws unless the floor dispatches the runner. When it does not, an earlier floor-parent run
- * was interrupted: the YAML is re-rendered (see `reRenderFloor`) and checked again, and a floor
- * that is still not clean fails loudly. The worker must be disabled, so no scheduled run exists
- * that could dispatch the leftover and none is started by the repair.
+ * Throws unless the floor dispatches the runner. A leftover from an interrupted floor-parent run is
+ * re-rendered (see `reRenderFloor`) and checked again. The worker must be disabled, so nothing can
+ * dispatch the leftover meanwhile.
  */
 const ensureFloorClean = async ({
   fetch,
@@ -304,9 +301,8 @@ export const listActiveExecutionIds = async (
 };
 
 /**
- * Cancels every active execution of a workflow in the space (the route is workflow-wide, not per
- * execution), so the eval space must be dedicated. More than one means something other than the
- * enable-time tick was running, and the count says so.
+ * Cancels every active execution of a workflow in the space (the route is workflow-wide), so the
+ * eval space must be dedicated. More than one means something besides the enable-time tick ran.
  */
 const cancelActiveExecutions = async ({
   fetch,
@@ -412,10 +408,8 @@ export const settleEnableTimeRun = async ({
     timeoutMs: cancelTimeoutMs,
     describeRace: 'The enable-time scheduled run of',
   });
-  // The tick had started the runner as a child (or, on a floor that was left rewritten, the
-  // review). Cancelling the parent does not by itself prove the child has left its own
-  // cancel-in-progress slot, and a row's run would race it there. A child that is still active is
-  // cancelled too, so it does not outlive the tick.
+  // The tick started the runner (or, on a floor left rewritten, the review) as a child. Cancelling
+  // the parent does not prove the child left its cancel-in-progress slot, so cancel it too.
   for (const childWorkflowId of [RUNNER_WORKFLOW_ID, REVIEW_WORKFLOW_ID]) {
     const childActive = await listActiveExecutionIds(fetch, spaceId, childWorkflowId);
     if (childActive.length > 0) {
@@ -472,11 +466,11 @@ export const enableFloorWorker = async ({
   /** Set once the repair has disabled an enabled worker, so a failed `restore` can say so. */
   let disabledForRepair = false;
   /**
-   * Re-renders a floor that an interrupted floor-parent run left rewritten. Only a worker that is
-   * disabled is repaired: on an enabled one the write can fire a tick that dispatches the leftover
-   * (a review of a dead run, as the service account). An enabled worker is disabled first. Returns
-   * whether the floor was repaired; the worker is then left disabled and its settings revision has
-   * moved, so the caller re-reads it and enables the worker again if it needs to be on.
+   * Re-renders a floor that an interrupted floor-parent run left rewritten, only while the worker
+   * is disabled (an enabled one is disabled first), since on a live worker the write can fire a
+   * tick that dispatches the leftover. Returns whether the floor was repaired; the worker is then
+   * left disabled and its settings revision has moved, so the caller re-reads it and re-enables it
+   * if needed.
    */
   const repairFloorWhileDisabled = async ({
     workflowId,

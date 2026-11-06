@@ -359,10 +359,7 @@ export interface SeededScenario {
    * `worker_world.ts`), by index and `_id`. Removed with the seed.
    */
   worldDocs: ReadonlyArray<Pick<WorldDoc, 'index' | 'id'>>;
-  /**
-   * The `_id` of the authored Attack Discovery the seeded-false-positive scenario seeds straight
-   * into the space's attack discovery index, next to its alerts. Unset for every other scenario.
-   */
+  /** `_id` of the authored discovery seeded next to the alerts (seeded-false-positive only). */
   seededDiscoveryId?: string;
   /**
    * Ids (mapped back to the scenario's own) of every open alert in the space right after seeding.
@@ -836,21 +833,15 @@ const assertWorldSearchable = async ({
 };
 
 /**
- * The ad-hoc discovery index of a space is installed lazily by the rule registry on the first real
- * discovery write. A bulk into a space that never had one auto-creates it with dynamic mappings,
- * and the review's `_find` read of it then fails with `all shards failed`. When it is missing, it is
- * created the way the registry would: a `-000001` backing index with the `default` namespace
- * template's mappings (the registry keeps one template per namespace, none exists for the eval
- * space yet) and the space's alias as write index.
+ * Creates the space's ad-hoc discovery index the way the rule registry would (a `-000001` backing
+ * index with the `default` namespace template's mappings, the space's alias as write index) when it
+ * is missing. The registry installs it lazily, and a bulk into a space without one auto-creates it
+ * with dynamic mappings, so the review's `_find` read fails with `all shards failed`.
  *
- * The index is left in place by cleanup, which removes only the seeded documents. Deleting it
- * could leave the rule registry's cached writer for the namespace (`require_alias: true`) pointing
- * at an alias that no longer exists, and a later product Attack Discovery persist in this space
- * would fail until Kibana restarts. An empty index is harmless to the rows: `assertCleanSpace`
- * counts open discoveries, not indices, and this function is a no-op once the alias exists.
- *
- * The backing index name mirrors the rule registry's (`.internal${baseName}` plus `-000001`, in
- * x-pack/platform/plugins/shared/rule_registry/server/rule_data_plugin_service/index_info.ts).
+ * Cleanup leaves it in place: deleting it could leave the registry's cached writer
+ * (`require_alias: true`) pointing at a missing alias, and a later product Attack Discovery persist
+ * in this space would fail until Kibana restarts. The backing index name mirrors the registry's
+ * (`.internal${baseName}` plus `-000001`, see `rule_data_plugin_service/index_info.ts`).
  */
 const ADHOC_DEFAULT_BACKING_INDEX = `.internal${attackDiscoveryIndexForSpace('default')}-000001`;
 
