@@ -21,4 +21,5 @@ export const casesSchema = casesSchemaV16.extends({
     agent: schema.maybe(schema.object({ enabled: schema.boolean() })),
   }),
   room_conversation_id: schema.maybe(schema.nullable(schema.string())),
+  room_owner_uid: schema.maybe(schema.nullable(schema.string())),
 });

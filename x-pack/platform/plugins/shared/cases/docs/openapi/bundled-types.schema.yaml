@@ -4215,6 +4215,10 @@ components:
           type: string
           nullable: true
           description: The Agent Builder conversation that is the case's room, created the first time someone opens the room.
+        room_owner_uid:
+          type: string
+          nullable: true
+          description: The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists.
         paused_at:
           type: string
           format: date-time

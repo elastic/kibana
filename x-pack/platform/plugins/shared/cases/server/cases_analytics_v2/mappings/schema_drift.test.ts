@@ -134,6 +134,7 @@ const buildFullAttributes = (): {
   // Server-owned and telemetry-only: `buildCaseDoc` does not emit it, so Layer 1 stays unaffected.
   extract_observables_source: 'rule',
   room_conversation_id: null,
+  room_owner_uid: null,
 });
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>

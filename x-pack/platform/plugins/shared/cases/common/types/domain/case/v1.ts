@@ -236,6 +236,11 @@ export const CaseAttributesSchema = lazySchema(() =>
      * The Agent Builder conversation that is the case's room; set the first time the room opens.
      */
     room_conversation_id: z.string().nullable().optional(),
+    /**
+     * Profile uid of the person who opened the room and owns its conversation. They stay assigned
+     * while the room exists, so the case's access never leaves the room's owner outside it.
+     */
+    room_owner_uid: z.string().nullable().optional(),
   })
 );
 

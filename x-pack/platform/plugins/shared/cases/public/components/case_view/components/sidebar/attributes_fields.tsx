@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CaseUI } from '../../../../../common';
@@ -24,6 +24,9 @@ import { useShouldDisableStatus } from '../../../actions/status/use_should_disab
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../../containers/user_profiles/use_get_current_user_profile';
+import { useCasesToast } from '../../../../common/use_cases_toast';
+import { ROOM_OWNER_STAYS_ASSIGNED } from '../room/translations';
+import type { Assignee } from '../../../user_profiles/types';
 
 export interface AttributesFieldsProps {
   caseData: CaseUI;
@@ -51,6 +54,22 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
     isCategoryLoading,
     isAssigneeFieldLoading,
   } = useAttributesFieldActions({ caseData });
+
+  // The room's owner stays assigned while the room exists (the server refuses otherwise), so the
+  // picker keeps them and says why rather than failing on save.
+  const { showInfoToast } = useCasesToast();
+  const roomOwnerUid = caseData.roomOwnerUid;
+  const onAssigneesChanged = useCallback(
+    (assignees: Assignee[]) => {
+      if (roomOwnerUid && !assignees.some(({ uid }) => uid === roomOwnerUid)) {
+        showInfoToast(ROOM_OWNER_STAYS_ASSIGNED);
+        onUpdateAssignees([...assignees, { uid: roomOwnerUid }]);
+        return;
+      }
+      onUpdateAssignees(assignees);
+    },
+    [onUpdateAssignees, roomOwnerUid, showInfoToast]
+  );
 
   // Status editing mirrors the header status pill: closing a case routes through the
   // close-case flow (which may open the close-reason modal), while other transitions patch
@@ -97,7 +116,7 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
             dataTestSubj="case-view-assignees-field-panel"
             caseAssignees={caseData.assignees}
             currentUserProfile={currentUserProfile}
-            onAssigneesChanged={onUpdateAssignees}
+            onAssigneesChanged={onAssigneesChanged}
             isLoading={isLoadingAssigneeData}
             userProfiles={userProfiles}
             caseId={caseData.id}

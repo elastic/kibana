@@ -1001,6 +1001,16 @@ export const CaseResponseProperties = lazySchema(() =>
         "The Agent Builder conversation that is the case's room, created the first time someone opens the room."
       ),
     /**
+     * The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists.
+     */
+    room_owner_uid: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists."
+      ),
+    /**
      * Set while the case is in a status that pauses time tracking.
      */
     paused_at: isoDateTime()

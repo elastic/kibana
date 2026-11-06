@@ -2476,6 +2476,7 @@ describe('CasesService', () => {
       'ai_verdict',
       'source',
       'room_conversation_id',
+      'room_owner_uid',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS,
       CASE_EXTENDED_FIELDS_CONTROLS

@@ -11,7 +11,8 @@ import { createSchemaOverrides } from './create_schema_overrides';
 
 /**
  * Adds `room_conversation_id` (the case's room, created on first open) and the unmapped
- * `settings.agent`. Both are absent on existing cases, which read as "no room yet" and "agent off".
+ * `settings.agent` and `room_owner_uid`. All are absent on existing cases, which read as "no room
+ * yet" and "agent off".
  */
 export const modelVersion17: SavedObjectsModelVersion = {
   changes: [

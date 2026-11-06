@@ -59,3 +59,10 @@ export const POSTED_FROM_ROOM_BY = (name: string) =>
     defaultMessage: 'Posted from the room by {name}',
     values: { name },
   });
+
+export const ROOM_OWNER_STAYS_ASSIGNED = (caseTitle: string) =>
+  i18n.translate('xpack.cases.server.room.ownerStaysAssigned', {
+    defaultMessage:
+      'The person who opened the room of case "{caseTitle}" owns the room, so they stay assigned to the case. Keep them in the assignees.',
+    values: { caseTitle },
+  });

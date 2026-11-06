@@ -111,6 +111,25 @@ export const syncRoomAccess = async (theCase: Case, clientArgs: CasesClientArgs)
 };
 
 /**
+ * The person who opened the room owns its conversation, and Agent Builder always lets an owner in.
+ * Keeping them assigned keeps that owner inside the case's own access, so a restricted case never
+ * leaves someone in its room who can't see the case.
+ */
+export const throwIfUnassigningRoomOwner = (
+  casesToUpdate: Array<{
+    updateReq: { id: string; assignees?: Array<{ uid: string }> };
+    originalCase: { attributes: { room_owner_uid?: string | null; title: string } };
+  }>
+) => {
+  for (const { updateReq, originalCase } of casesToUpdate) {
+    const owner = originalCase.attributes.room_owner_uid;
+    if (owner && updateReq.assignees && !updateReq.assignees.some(({ uid }) => uid === owner)) {
+      throw Boom.badRequest(i18n.ROOM_OWNER_STAYS_ASSIGNED(originalCase.attributes.title));
+    }
+  }
+};
+
+/**
  * Returns the case's room, creating it the first time. The room is an Agent Builder conversation
  * recorded on the case as `room_conversation_id`. Two people opening it at once both create one;
  * the case's version decides which is kept and the other is deleted.
@@ -175,7 +194,10 @@ export const ensureRoom = async (
           caseId,
           originalCase: caseSo,
           version: caseSo.version,
-          updatedAttributes: { room_conversation_id: created.id },
+          updatedAttributes: {
+            room_conversation_id: created.id,
+            room_owner_uid: clientArgs.user.profile_uid ?? null,
+          },
           refresh: 'wait_for',
         });
         return { conversation_id: created.id, created: true };

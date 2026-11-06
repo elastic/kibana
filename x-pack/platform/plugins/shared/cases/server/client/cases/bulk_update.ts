@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { throwIfClosingWithOpenRequiredTasks } from './required_tasks';
 
 import type {
   SavedObject,
@@ -19,6 +18,8 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
+import { throwIfUnassigningRoomOwner } from './room';
+import { throwIfClosingWithOpenRequiredTasks } from './required_tasks';
 
 import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
@@ -1013,6 +1014,8 @@ export const bulkUpdate = async (
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
 
     await throwIfClosingWithOpenRequiredTasks({ casesToUpdate, clientArgs, hasPlatinumLicense });
+
+    throwIfUnassigningRoomOwner(casesToUpdate);
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
     // Owners are collected for both cases that include extended_fields in the request and

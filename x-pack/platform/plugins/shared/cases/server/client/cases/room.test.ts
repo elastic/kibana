@@ -7,7 +7,12 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { ensureRoom, getRoomAccessControl, postFromRoom } from './room';
+import {
+  ensureRoom,
+  getRoomAccessControl,
+  postFromRoom,
+  throwIfUnassigningRoomOwner,
+} from './room';
 
 const restrictedCase = {
   id: 'case-1',
@@ -72,7 +77,7 @@ describe('case room', () => {
       expect.objectContaining({
         caseId: 'case-1',
         version: 'v1',
-        updatedAttributes: { room_conversation_id: 'room-1' },
+        updatedAttributes: { room_conversation_id: 'room-1', room_owner_uid: expect.anything() },
       })
     );
   });
@@ -97,7 +102,9 @@ describe('case room', () => {
 
   it('needs Cases update to create the room', async () => {
     clientArgs.authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
-    await expect(ensureRoom({ caseId: 'case-1' }, clientArgs as never, casesClient)).rejects.toThrow();
+    await expect(
+      ensureRoom({ caseId: 'case-1' }, clientArgs as never, casesClient)
+    ).rejects.toThrow();
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
@@ -196,5 +203,26 @@ describe('case room', () => {
       )
     ).rejects.toThrow();
     expect(casesClient.attachments.add).not.toHaveBeenCalled();
+  });
+
+  it("refuses to unassign the room's owner, and allows every other assignee change", () => {
+    const originalCase = {
+      attributes: { room_owner_uid: 'u-jordan', title: 'Credential dumping' },
+    };
+    expect(() =>
+      throwIfUnassigningRoomOwner([
+        { updateReq: { id: 'case-1', assignees: [{ uid: 'u-priya' }] }, originalCase },
+      ])
+    ).toThrow('owns the room');
+    expect(() =>
+      throwIfUnassigningRoomOwner([
+        { updateReq: { id: 'case-1', assignees: [{ uid: 'u-jordan' }] }, originalCase },
+        { updateReq: { id: 'case-1' }, originalCase },
+        {
+          updateReq: { id: 'case-2', assignees: [] },
+          originalCase: { attributes: { title: 'No room yet' } },
+        },
+      ])
+    ).not.toThrow();
   });
 });

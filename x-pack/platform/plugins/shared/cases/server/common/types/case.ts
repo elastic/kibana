@@ -91,6 +91,7 @@ export interface CasePersistedAttributes {
   ai_verdict?: CaseAiVerdict | null;
   source?: CaseSource | null;
   room_conversation_id?: string | null;
+  room_owner_uid?: string | null;
 }
 
 type CasePersistedCustomFields = Array<{

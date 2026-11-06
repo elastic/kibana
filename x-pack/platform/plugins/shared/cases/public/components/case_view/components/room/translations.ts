@@ -89,3 +89,7 @@ export const AGENT_WAITING = t(
   'Elastic AI Agent is waiting for you to confirm a change before it continues.'
 );
 export const ANSWER_IN_AGENT_BUILDER = t('answerInAgentBuilder', 'Confirm in Agent Builder');
+export const ROOM_OWNER_STAYS_ASSIGNED = t(
+  'ownerStaysAssigned',
+  'The person who opened the room owns it, so they stay assigned to this case.'
+);
