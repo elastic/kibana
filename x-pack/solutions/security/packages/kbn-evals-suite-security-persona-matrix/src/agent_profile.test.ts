@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  attachmentTools,
+  defaultAgentToolIds,
+} from '@kbn/agent-builder-common';
 import { PERSONA_MATRIX_EXAMPLES } from './datasets/persona_matrix_prompts';
 import { CHRYSALIS_PARITY_AGENT } from './fixtures/chrysalis_parity_agent';
 import {
@@ -81,6 +85,25 @@ describe('agent_profile', () => {
       const parity = expectedIds('chrysalis-parity');
       expect(parity.has('platform.core.cases.manage')).toBe(false);
       expect(parity.has('create.case')).toBe(true);
+    });
+
+    it('keeps the Elastic capabilities on, which is what supplies the built-in tools', () => {
+      expect(CHRYSALIS_PARITY_AGENT.enableElasticCapabilities).toBe(true);
+    });
+
+    it('expects only platform.core and attachments built-ins the agent gets by default or at run time', () => {
+      // `security.*` and `platform.workflows.*` ids come from skills defined in other
+      // plugins; checking them against `skillIds` would need those definitions (a
+      // cross-plugin dependency), so only the ids owned by `@kbn/agent-builder-common`
+      // are checked here.
+      const defaults: readonly string[] = defaultAgentToolIds;
+      const attachments: readonly string[] = Object.values(attachmentTools);
+      const uncovered = [...expectedIds('chrysalis-parity')].filter(
+        (id) =>
+          (id.startsWith('platform.core.') && !defaults.includes(id)) ||
+          (id.startsWith('attachments.') && !attachments.includes(id))
+      );
+      expect(uncovered).toEqual([]);
     });
 
     it('leaves no seeded custom tool id that the parity agent does not carry', () => {

@@ -746,6 +746,36 @@ describe('run inputs', () => {
     ).toEqual({ summary: 'persona-matrix-fixture' });
   });
 
+  it('gives a required array minItems fixture items so the engine accepts it', () => {
+    expect(
+      buildRunInputs({
+        inputs: [
+          { name: 'tags', type: 'array', required: true, minItems: 2 },
+          { name: 'any', type: 'array', required: true },
+          { name: 'zero', type: 'array', required: true, minItems: 0 },
+        ],
+      })
+    ).toEqual({
+      tags: ['persona-matrix-fixture', 'persona-matrix-fixture'],
+      any: [],
+      zero: [],
+    });
+  });
+
+  it('builds required array items of the declared item type (JSON-schema form)', () => {
+    expect(
+      buildRunInputs({
+        inputs: {
+          properties: {
+            ids: { type: 'array', minItems: 2, items: { type: 'number' } },
+            names: { type: 'array', minItems: 1 },
+          },
+          required: ['ids', 'names'],
+        },
+      })
+    ).toEqual({ ids: [1, 1], names: ['persona-matrix-fixture'] });
+  });
+
   it('omits every JSON-schema property when none is listed as required', () => {
     expect(
       buildRunInputs({ inputs: { properties: { ids: { type: 'array', minItems: 1 } } } })

@@ -52,11 +52,23 @@ const agentWith = (
   configuration: { tools },
 });
 
+interface MockCase {
+  id: string;
+  tags: string[];
+  created_at: string;
+}
+
+const BEFORE_WINDOW = '2000-01-01T00:00:00.000Z';
+const IN_WINDOW = '2999-01-01T00:00:00.000Z';
+
 interface ClientOptions {
   agent?: Record<string, unknown>;
   postBehavior?: 'ok' | 'conflict';
   skills?: string[];
+  /** Run-tagged cases created after the seed (inside the cleanup window). */
   caseIds?: string[];
+  /** Cases with explicit tags and creation time, for the window and tag filters. */
+  cases?: MockCase[];
   /** Overrides what GET on an existing workflow returns as `yaml` (default: the seeded yaml). */
   existingWorkflowYaml?: string;
   baseUrl?: string;
@@ -72,6 +84,7 @@ const createClient = ({
   postBehavior = 'ok',
   skills = [...CHRYSALIS_PARITY_AGENT.skillIds],
   caseIds = [],
+  cases = [],
   existingWorkflowYaml,
   baseUrl = 'http://elastic:changeme@localhost:5620',
   existingConnector = { connector_type_id: '.http', config: { url: 'http://127.0.0.1:38465' } },
@@ -97,10 +110,20 @@ const createClient = ({
     if (method === 'GET' && path === '/api/cases/_find') {
       const perPage = Number(query?.perPage ?? 20);
       const page = Number(query?.page ?? 1);
+      // Like the real route: `tags` and `from` (created_at >= from) narrow the result.
+      const from = typeof query?.from === 'string' ? Date.parse(query.from) : undefined;
+      const matching = [
+        ...caseIds.map((id) => ({ id, tags: ['persona-matrix-parity'], created_at: IN_WINDOW })),
+        ...cases,
+      ].filter(
+        (found) =>
+          (query?.tags === undefined || found.tags.includes(String(query.tags))) &&
+          (from === undefined || Date.parse(found.created_at) >= from)
+      );
       return {
         data: {
-          cases: caseIds.slice((page - 1) * perPage, page * perPage).map((id) => ({ id })),
-          total: caseIds.length,
+          cases: matching.slice((page - 1) * perPage, page * perPage).map(({ id }) => ({ id })),
+          total: matching.length,
         },
       };
     }
@@ -584,6 +607,29 @@ describe('persona_matrix_tools_seed', () => {
         .filter((req) => req.method === 'DELETE' && req.path.startsWith('/api/cases?'))
         .flatMap((req) => JSON.parse(decodeURIComponent(req.path.split('ids=')[1])));
       expect(deleted).toEqual(ids);
+    });
+
+    it('deletes only run-tagged cases created inside the window, not older or other-tagged ones', async () => {
+      const mod = await load('parity');
+      const client = createClient({
+        caseIds: ['run-1', 'run-2'],
+        cases: [
+          { id: 'older-run', tags: ['persona-matrix-parity'], created_at: BEFORE_WINDOW },
+          { id: 'chrysalis-case', tags: ['chrysalis'], created_at: IN_WINDOW },
+        ],
+      });
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        profile: 'chrysalis-parity',
+      });
+
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      const deleted = calls(client)
+        .filter((req) => req.method === 'DELETE' && req.path.startsWith('/api/cases?'))
+        .flatMap((req) => JSON.parse(decodeURIComponent(req.path.split('ids=')[1])));
+      expect(deleted).toEqual(['run-1', 'run-2']);
     });
 
     it('issues no case delete when no tagged cases exist', async () => {

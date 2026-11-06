@@ -683,10 +683,15 @@ export function createEvaluatePersonaMatrixDataset({
       agentProfile
     );
     // The ingest keeps per-example metadata and the dataset name but not the
-    // experiment metadata, so the profile is stamped on each example too.
+    // experiment metadata, so a non-default profile is stamped on each example
+    // too. The default profile is left untouched: example metadata is hashed into
+    // the dataset example id, so stamping it would re-add every example of the
+    // established dataset and split its score history.
     const wrappedExamples = shardedExamples.map((example) => {
       const wrapped = toDatasetExample(example);
-      return { ...wrapped, metadata: { ...wrapped.metadata, agentProfile } };
+      return agentProfile === 'default'
+        ? wrapped
+        : { ...wrapped, metadata: { ...wrapped.metadata, agentProfile } };
     });
 
     if (process.env.PERSONA_MATRIX_SHARD) {
@@ -785,7 +790,7 @@ export function createEvaluatePersonaMatrixDataset({
         ],
         metadata: {
           suite: identity(dataset.name).suite,
-          agent_profile: agentProfile,
+          ...(agentProfile === 'default' ? {} : { agent_profile: agentProfile }),
           source: 'persona-matrix-eval',
         },
         task: async (example) => {

@@ -1272,11 +1272,15 @@ describe('reporting identity per agent profile', () => {
   it('keeps the established dataset and suite names for the default agent', async () => {
     const experiment = await captureExperiment('default');
     expect(experiment.datasets[0].name).toBe('security: security-persona-matrix');
-    expect(experiment.metadata).toMatchObject({
+    // Example metadata feeds the dataset example id, so default runs must stay
+    // byte-identical to the unprofiled shape or every example is re-added.
+    expect(experiment.metadata).toEqual({
       suite: 'security-persona-matrix',
-      agent_profile: 'default',
+      source: 'persona-matrix-eval',
     });
-    expect(experiment.datasets[0].examples[0].metadata).toMatchObject({ agentProfile: 'default' });
+    const exampleMetadata = experiment.datasets[0].examples[0].metadata;
+    expect(exampleMetadata).not.toHaveProperty('agentProfile');
+    expect(exampleMetadata).toEqual(toDatasetExample(baseExample).metadata);
   });
 
   it('gives the parity agent its own dataset name, suite and per-example profile', async () => {

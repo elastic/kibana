@@ -264,8 +264,14 @@ const fixtureValueFor = (declaration: Record<string, unknown>): unknown => {
       return 1;
     case 'boolean':
       return true;
-    case 'array':
-      return [];
+    case 'array': {
+      // The engine rejects fewer than `minItems` items, so a required array
+      // gets that many fixture items of its declared item type.
+      const { minItems, items } = declaration;
+      const count = typeof minItems === 'number' && minItems > 0 ? Math.min(minItems, 10) : 0;
+      const itemDeclaration = isRecord(items) && typeof items.type === 'string' ? items : {};
+      return Array.from({ length: count }, () => fixtureValueFor(itemDeclaration));
+    }
     case 'object':
       return {};
     default:
