@@ -17,6 +17,7 @@ import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
 import type { CustomContentRendererServices } from './types';
+import { CustomContentFrame } from './custom_content_frame';
 import { CUSTOM_CONTENT_IFRAME_SANDBOX } from './constants';
 
 export interface CustomContentComponentProps {
@@ -48,26 +49,6 @@ export interface CustomContentComponentProps {
 }
 
 const DEFAULT_MIN_HEIGHT = 200;
-
-const iframeContainerCss = (minHeight: number) =>
-  css({
-    position: 'relative',
-    flex: '1 1 0%',
-    minHeight,
-  });
-
-const iframeCss = css({
-  position: 'absolute',
-  inset: 0,
-  width: '100%',
-  height: '100%',
-  border: 'none',
-  background: 'transparent',
-});
-
-const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
-  defaultMessage: 'Custom panel',
-});
 
 export const CustomContentComponent = ({
   services,
@@ -126,8 +107,6 @@ export const CustomContentComponent = ({
     [euiTheme.colors.emptyShade, minHeight]
   );
 
-  const containerCss = useMemo(() => iframeContainerCss(minHeight), [minHeight]);
-
   return (
     <div css={wrapperCss} data-shared-item data-test-subj="customContentPanel">
       {error && (
@@ -148,21 +127,16 @@ export const CustomContentComponent = ({
         />
       )}
       {previewHtml != null ? (
-        <div css={containerCss}>
-          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title={IFRAME_TITLE} />
-        </div>
+        <CustomContentFrame html={previewHtml} minHeight={minHeight} />
       ) : (
         !error &&
         !noContent &&
         html && (
-          <div css={containerCss}>
-            <iframe
-              css={iframeCss}
-              srcDoc={html}
-              sandbox={isInteractive ? CUSTOM_CONTENT_IFRAME_SANDBOX : ''}
-              title={IFRAME_TITLE}
-            />
-          </div>
+          <CustomContentFrame
+            html={html}
+            minHeight={minHeight}
+            sandbox={isInteractive ? CUSTOM_CONTENT_IFRAME_SANDBOX : ''}
+          />
         )
       )}
       {isGenerating && <CustomContentGeneratingPrompt />}

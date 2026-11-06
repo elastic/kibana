@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/custom-app-registry",
+  "owner": "@elastic/kibana-dashboards",
+  "group": "platform",
+  "visibility": "shared"
+}

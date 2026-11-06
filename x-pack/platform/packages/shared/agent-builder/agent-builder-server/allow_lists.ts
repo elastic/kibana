@@ -131,6 +131,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Custom content panels
   'custom_content_update_panel',
 
+  // Custom app panels
+  'custom_app_update_app',
+  'custom_app_create_app',
+
   // Platform – Context Engine
   contextEngineAutomationTools.installAutomationTemplate,
   contextEngineAutomationTools.saveAutomation,
@@ -225,6 +229,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform
   'data-exploration',
   'visualization-creation',
+  'custom-app-creation',
   'graph-creation',
   'agent-builder-traces',
   'proposal-management',
@@ -451,6 +456,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
+
+  // Platform – Custom App
+  'platform.custom_app.app_context',
 
   // Platform – Proposals
   'platform.proposal',

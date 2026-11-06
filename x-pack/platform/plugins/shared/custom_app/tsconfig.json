@@ -1,0 +1,41 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/i18n",
+    "@kbn/zod",
+    "@kbn/custom-app-common",
+    "@kbn/custom-app-registry",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ui-callout",
+    "@kbn/data-plugin",
+    "@kbn/search-types",
+    "@kbn/core-http-browser",
+    "@kbn/custom-content-renderer",
+    "@kbn/esql-types",
+    "@kbn/esql-utils",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/rison",
+    "@kbn/share-plugin",
+    "@kbn/datemath",
+    "@kbn/app-header",
+    "@kbn/presentation-util",
+    "@kbn/presentation-util-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-router",
+    "@kbn/es-types",
+    "@kbn/data-views-plugin",
+    "@kbn/visualization-utils",
+    "@kbn/field-types",
+    "@kbn/expressions-plugin"
+  ],
+  "exclude": ["target/**/*"]
+}

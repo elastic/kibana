@@ -17,6 +17,9 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
+  - '@kbn/custom-app-registry'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/custom-app-common'
   - '@kbn/security-plugin'
   - '@kbn/ui-callout'
   - '@kbn/entity-access-control-ui'
