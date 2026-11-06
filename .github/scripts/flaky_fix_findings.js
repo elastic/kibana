@@ -36,6 +36,7 @@ const INSTRUCTION_PATHS = [
   '.github/workflows/flaky-fix-verifier.md',
   '.github/workflows/failed-test-investigator.md',
   '.agents/skills/flaky-test-investigator',
+  'docs/extend/testing',
 ];
 
 const parseScalar = (raw) => {

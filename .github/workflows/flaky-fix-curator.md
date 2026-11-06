@@ -139,6 +139,7 @@ safe-outputs:
       - .github/workflows/flaky-fix-verifier.md
       - .github/workflows/failed-test-investigator.md
       - .agents/skills/flaky-test-investigator/**
+      - docs/extend/testing/**
 
 strict: false
 timeout-minutes: 30
@@ -163,6 +164,7 @@ The files you may change, and only these:
 - `.github/workflows/shared/flaky-fix-guidelines.md`: the fix guidelines shared by the investigator, fixer and verifier (`lesson_target: guidelines`).
 - `.github/workflows/flaky-test-fixer.md`, `.github/workflows/flaky-fix-verifier.md`, `.github/workflows/failed-test-investigator.md`: the workflow prompts (`lesson_target: fixer | verifier | investigator`). Edit the markdown body only. Never touch the YAML frontmatter between the `---` markers: frontmatter changes need a recompile and a different review.
 - `.agents/skills/flaky-test-investigator/`: the investigation skill the investigator and fixer read.
+- `docs/extend/testing/`: the Scout testing docs the guidelines link to and the fixer reads. Change one when the lesson is about how to write the test, not about how the workflow runs.
 
 Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run without recompiling the lock files.
 
