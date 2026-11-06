@@ -25,7 +25,7 @@ const mockConnectSourcesGrid = ConnectSourcesGrid as jest.Mock;
 describe('OnboardingConnectStep', () => {
   it('names its two pages for the onboarding to show above the step', () => {
     expect(CONNECT_SUB_STEP_TITLES).toEqual({
-      telemetry: 'Add telemetry data',
+      telemetry: 'Add data',
       additional: 'Connect other sources',
     });
   });
