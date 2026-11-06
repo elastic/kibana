@@ -90,6 +90,40 @@ const SHOW_ALL_LABEL = i18n.translate('xpack.notebook.cellFilter.showAll', {
 const toggle = <T,>(values: readonly T[], value: T): T[] =>
   values.includes(value) ? values.filter((current) => current !== value) : [...values, value];
 
+/** A raised icon button for the notebook's floating controls. */
+export const FloatingIconButton = ({
+  iconType,
+  label,
+  tooltip = label,
+  onClick,
+  isDisabled,
+  isPressed,
+  dataTestSubj,
+}: {
+  iconType: string;
+  label: string;
+  tooltip?: string;
+  onClick: () => void;
+  isDisabled?: boolean;
+  isPressed?: boolean;
+  dataTestSubj: string;
+}) => (
+  <EuiPanel hasShadow paddingSize="none" grow={false}>
+    <EuiToolTip content={tooltip} position="left" disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType={iconType}
+        color="text"
+        size="m"
+        aria-label={label}
+        aria-pressed={isPressed}
+        isDisabled={isDisabled}
+        onClick={onClick}
+        data-test-subj={dataTestSubj}
+      />
+    </EuiToolTip>
+  </EuiPanel>
+);
+
 /** A floating icon button that opens a popover, with a badge while its filter is set. */
 const FloatingPopoverButton = ({
   iconType,
@@ -120,19 +154,13 @@ const FloatingPopoverButton = ({
             position: relative;
           `}
         >
-          <EuiPanel hasShadow paddingSize="none" grow={false}>
-            <EuiToolTip content={label} position="left" disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType={iconType}
-                color="text"
-                size="m"
-                aria-label={label}
-                aria-pressed={isOpen}
-                onClick={() => setIsOpen((open) => !open)}
-                data-test-subj={dataTestSubj}
-              />
-            </EuiToolTip>
-          </EuiPanel>
+          <FloatingIconButton
+            iconType={iconType}
+            label={label}
+            isPressed={isOpen}
+            onClick={() => setIsOpen((open) => !open)}
+            dataTestSubj={dataTestSubj}
+          />
           {badge > 0 && (
             <EuiNotificationBadge
               css={css`

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import useLatest from 'react-use/lib/useLatest';
 import { BehaviorSubject } from 'rxjs';
@@ -36,6 +36,7 @@ import {
   type NotebookContextValue,
   type SidePanel,
 } from './notebook_context';
+import { FloatingRunControls } from './floating_run_controls';
 import { NotebookHeader } from './notebook_header';
 import { getCellElementId } from './cell_display';
 import { AppFlyout } from './app_flyout';
@@ -137,6 +138,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     };
   });
   const [isSaving, setIsSaving] = useState(false);
+  const headerRunControls = useRef<HTMLDivElement>(null);
   const sidePanel = useStateFromPublishingSubject(notebook.sidePanel$);
   useEffect(() => {
     notebook.scheduler.start();
@@ -177,8 +179,10 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
       {sidePanel === 'graph' && <GraphFlyout onClose={closeSidePanel} onSelectCell={focusCell} />}
       {sidePanel === 'app' && <AppFlyout onClose={closeSidePanel} onRevealCell={focusCell} />}
       <EuiPageTemplate restrictWidth={1200} paddingSize="m">
+        <FloatingRunControls headerControls={headerRunControls} />
         <EuiPageTemplate.Section paddingSize="m" grow={false}>
           <NotebookHeader
+            runControlsRef={headerRunControls}
             onSave={onSave ? save : undefined}
             isSaving={isSaving}
             sidePanel={sidePanel}

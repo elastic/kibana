@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, type Ref } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -39,15 +39,22 @@ const NO_DEPENDENTS_TOOLTIP = i18n.translate('xpack.notebook.header.refreshNoDep
   defaultMessage: 'No cells use the global time range',
 });
 
-export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
-  const { store, scheduler } = useNotebook();
-  const inputValues = useStateFromPublishingSubject(store.inputValues$);
+/** Whether any cell uses the time input, and its Refresh tooltip. */
+export const useTimeRefresh = (cellId: string): { hasDependents: boolean; tooltip: string } => {
+  const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const hasDependents = useMemo(
-    () => getDescendants(buildGraph(cells, cellOrder), [cell.id]).size > 0,
-    [cells, cellOrder, cell.id]
+    () => getDescendants(buildGraph(cells, cellOrder), [cellId]).size > 0,
+    [cells, cellOrder, cellId]
   );
+  return { hasDependents, tooltip: hasDependents ? REFRESH_TOOLTIP : NO_DEPENDENTS_TOOLTIP };
+};
+
+export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
+  const { store, scheduler } = useNotebook();
+  const inputValues = useStateFromPublishingSubject(store.inputValues$);
+  const { hasDependents, tooltip } = useTimeRefresh(cell.id);
   const value = inputValues[cell.id];
   if (value?.kind !== 'time') return null;
 
@@ -72,7 +79,7 @@ export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
           size="s"
           isDisabled={!hasDependents}
           onClick={() => scheduler.refresh([cell.id])}
-          toolTipProps={{ content: hasDependents ? REFRESH_TOOLTIP : NO_DEPENDENTS_TOOLTIP }}
+          toolTipProps={{ content: tooltip }}
           data-test-subj="notebookTimePickerRefresh"
         />
       </EuiFlexItem>
@@ -142,7 +149,9 @@ export const NotebookHeader = ({
   isSaving,
   sidePanel,
   onToggleSidePanel,
+  runControlsRef,
 }: {
+  runControlsRef?: Ref<HTMLDivElement>;
   onSave?: () => void;
   isSaving?: boolean;
   sidePanel: SidePanel | undefined;
@@ -236,7 +245,9 @@ export const NotebookHeader = ({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <RunAllButton />
+          <div ref={runControlsRef}>
+            <RunAllButton />
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
