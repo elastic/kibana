@@ -71,6 +71,8 @@ import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
+import { GroupByControl, GroupedQueue } from './queue/grouped_queue';
+import type { QueueRow } from './queue/group_by';
 import { AgentBuilderPrivilegeCallout } from '../../components/agent_builder_privilege_callout/agent_builder_privilege_callout';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import {
@@ -183,6 +185,8 @@ const ConversationsPageContent: React.FC = () => {
     selectedProposalId,
     selectConversation,
     clearSelectedConversation,
+    groupBy: groupByParam,
+    setGroupBy,
   } = useConversationsUrlParams();
   const currentProposalId =
     selectedProposalId &&
@@ -272,6 +276,31 @@ const ConversationsPageContent: React.FC = () => {
   // Investigations open cases instead of escalations: the card menu and flyout offer Open a case,
   // Add to existing case, and View case, and cards show their case.
   const isCasesBridgeEnabled = agenticInvestigations?.isCasesBridgeEnabled === true;
+  // Grouping by case only means something once investigations open cases.
+  const groupBy = isCasesBridgeEnabled ? groupByParam : 'type';
+  const openSections = useMemo(
+    () => sections.filter((section) => section.id !== CLOSED_GROUP_KEY),
+    [sections]
+  );
+  // The regrouped views show the open work, so its sections must have loaded their rows.
+  useEffect(() => {
+    if (groupBy === 'type') return;
+    for (const section of openSections) {
+      if (!section.isOpen && (section.total ?? 0) > 0) {
+        section.onToggle(true);
+      }
+    }
+  }, [groupBy, openSections]);
+  const groupedRows = useMemo<QueueRow[]>(
+    () =>
+      openSections.flatMap((section) =>
+        section.investigations.map((investigation) => ({
+          investigation,
+          isPending: proposalsById.get(investigation.id)?.status === 'pending',
+        }))
+      ),
+    [openSections, proposalsById]
+  );
 
   const { mutateAsync: setInvestigationStatus } = useSetInvestigationStatus();
 
@@ -489,9 +518,36 @@ const ConversationsPageContent: React.FC = () => {
           </EuiFlexItem>
         )}
 
+        {isCasesBridgeEnabled && !isIdle && (
+          <EuiFlexItem grow={false}>
+            <GroupByControl groupBy={groupBy} onChange={setGroupBy} />
+          </EuiFlexItem>
+        )}
+        {!isIdle && groupBy !== 'type' && (
+          <EuiFlexItem grow={false}>
+            <GroupedQueue
+              groupBy={groupBy}
+              rows={groupedRows}
+              selectedProposalId={currentProposalId}
+              onClickAction={onClickAction}
+              onClickCard={onClickCard}
+              onOpenChat={openChatForProposal}
+              canOpenInvestigationDetails={canAccessAgentBuilder}
+              getChatHref={getChatHrefForProposal}
+              canManageEscalations={
+                canManageInvestigations && agenticInvestigations?.canCreateCases() === true
+              }
+              canCloseInvestigation={canManageInvestigations}
+              onCopyLink={copyLinkForProposal}
+              renderAssignees={renderAssignees}
+              renderInFlightStatus={renderInFlightStatus}
+            />
+          </EuiFlexItem>
+        )}
         {/* Every bucket is rendered, empty or not: the accordions are the page's structure,
             so one disappearing would move the others as the queue drains. */}
         {!isIdle &&
+          groupBy === 'type' &&
           sections.map((section) => (
             <EuiFlexItem key={section.id} grow={false}>
               <QueueSection

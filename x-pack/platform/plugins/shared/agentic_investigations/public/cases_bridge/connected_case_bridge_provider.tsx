@@ -19,10 +19,18 @@ import {
 import { fetchLinkedInvestigationSummaries, formatCaseNumber, getCaseHref } from './api';
 import { ACTIONS_VIEW_CASE, CASE_BADGE } from './translations';
 
-interface CaseSummary {
+export interface CaseSummary {
   id: string;
   title: string;
   incremental_id?: number | null;
+  status: string;
+  access?: { mode?: string } | null;
+}
+
+export interface CaseSummaries {
+  byId: Map<string, CaseSummary>;
+  /** Ids a finished request asked for and didn't get back: deleted, or not visible to the viewer. */
+  unavailable: Set<string>;
 }
 
 /**
@@ -33,12 +41,13 @@ const useCaseSummaries = (caseIds: string[]) => {
   const { services } = useKibana<CoreStart & { cases?: CasesPublicStart }>();
   return useQuery({
     queryKey: ['agenticInvestigations', 'casesBridge', 'caseSummaries', caseIds],
-    queryFn: async ({ signal }) => {
+    queryFn: async ({ signal }): Promise<CaseSummaries> => {
       if (!services.cases) {
-        return new Map<string, CaseSummary>();
+        return { byId: new Map(), unavailable: new Set() };
       }
       const { cases } = await services.cases.api.cases.bulkGet({ ids: caseIds }, signal);
-      return new Map<string, CaseSummary>(cases.map((theCase) => [theCase.id, theCase]));
+      const byId = new Map<string, CaseSummary>(cases.map((theCase) => [theCase.id, theCase]));
+      return { byId, unavailable: new Set(caseIds.filter((id) => !byId.has(id))) };
     },
     enabled: caseIds.length > 0,
     staleTime: 30_000,
@@ -46,17 +55,32 @@ const useCaseSummaries = (caseIds: string[]) => {
   });
 };
 
-const CaseBadge: React.FC<{ caseId: string; summaries?: Map<string, CaseSummary> }> = ({
+/**
+ * `undefined` while the case hasn't been read yet (including while a newer batch loads over the
+ * previous one), `null` once a finished read asked for it and didn't get it back.
+ */
+export const lookUpCase = (
+  summaries: CaseSummaries | undefined,
+  caseId: string
+): CaseSummary | null | undefined => {
+  const theCase = summaries?.byId.get(caseId);
+  if (theCase != null) {
+    return theCase;
+  }
+  return summaries?.unavailable.has(caseId) ? null : undefined;
+};
+
+const CaseBadge: React.FC<{ caseId: string; summaries?: CaseSummaries }> = ({
   caseId,
   summaries,
 }) => {
   const { services } = useKibana<CoreStart>();
-  const theCase = summaries?.get(caseId);
-  if (summaries == null) {
+  const theCase = lookUpCase(summaries, caseId);
+  if (theCase === undefined) {
     // The id is known before the case number; show nothing until it loads.
     return null;
   }
-  if (theCase == null) {
+  if (theCase === null) {
     return (
       <EuiToolTip content={CASE_BADGE.unavailableTooltip}>
         <EuiBadge color="hollow" tabIndex={0} data-test-subj="caseBridgeCaseUnavailable">
@@ -147,12 +171,24 @@ export const ConnectedCaseBridgeProvider: React.FC<{
       renderCaseBadge: ({ caseId }) => <CaseBadge caseId={caseId} summaries={summaries} />,
       onViewCase,
       getViewCaseLabel: (caseId) => {
-        const theCase = summaries?.get(caseId);
+        const theCase = summaries?.byId.get(caseId);
         return theCase?.incremental_id != null
           ? ACTIONS_VIEW_CASE(formatCaseNumber(theCase))
           : undefined;
       },
       resolveCaseId: (conversationId) => caseIdByConversation?.get(conversationId),
+      getCaseSummary: (caseId) => {
+        const theCase = lookUpCase(summaries, caseId);
+        if (theCase == null) {
+          return theCase;
+        }
+        return {
+          title: theCase.title,
+          incrementalId: theCase.incremental_id ?? undefined,
+          status: theCase.status,
+          isRestricted: theCase.access?.mode === 'restricted',
+        };
+      },
     }),
     [summaries, onViewCase, caseIdByConversation]
   );

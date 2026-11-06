@@ -32,6 +32,9 @@ import {
 } from '../../common/cases_bridge';
 import type { InvestigationStatusService } from '../investigations/services/investigation_status_service';
 
+/** Cases' attachment type for an Agent Builder conversation (`cases/common/constants/attachments`). */
+const AGENT_BUILDER_CONVERSATION_CASE_ATTACHMENT_TYPE = 'agentBuilder.conversation';
+
 const INVESTIGATION_TEMPLATE_ID = 'investigation';
 const MAX_DESCRIPTION_LENGTH = 30000;
 const ACTOR_NAME = 'Elastic AI Agent';
@@ -297,8 +300,31 @@ export class CaseBridgeService {
         })),
       });
 
+      // The investigations' chats ride along as conversation attachments, so the case lists them
+      // (Attachments, and the room's list of chats). Best effort: Cases may have chat turned off.
+      try {
+        await casesClient.attachments.bulkCreate({
+          caseId: theCase.id,
+          attachments: toLink.map(({ id }) => ({
+            type: AGENT_BUILDER_CONVERSATION_CASE_ATTACHMENT_TYPE,
+            owner: theCase.owner,
+            attachmentId: id,
+          })),
+        });
+      } catch (error) {
+        this.deps.logger.debug(
+          `Case ${theCase.id}: the linked investigations' chats weren't attached: ${toMessage(
+            error
+          )}`
+        );
+      }
+
       for (const { id } of toLink) {
         try {
+          // Lock it down before anything names the case on it.
+          if (isRestricted(theCase)) {
+            await this.applyCaseAccess(request, id, theCase);
+          }
           await conversations.patchMetadata(id, { case_id: theCase.id }, { access: 'converse' });
           const data: InvestigationLinkedToCaseEventData = {
             case_id: theCase.id,
@@ -309,9 +335,6 @@ export class CaseBridgeService {
             conversationId: id,
             events: [{ type: INVESTIGATION_LINKED_TO_CASE_EVENT_TYPE, data }],
           });
-          if (isRestricted(theCase)) {
-            await this.applyCaseAccess(request, id, theCase);
-          }
           results.set(id, { id });
         } catch (error) {
           this.deps.logger.warn(
@@ -352,6 +375,102 @@ export class CaseBridgeService {
         : { access_mode: ConversationAccessControlMode.Public, entries: [] },
       actor ? { actor } : undefined
     );
+  }
+
+  /**
+   * Links that reach the case by another path than Open a case or Add to existing case (the Cases
+   * attachments API, a workflow, or an agent tool) still get the investigation's back-link, the
+   * timeline event, and the case's access. Investigations that already name the case are skipped,
+   * so the bridge's own links aren't written twice.
+   */
+  async onInvestigationsAttached({
+    request,
+    caseId,
+    attachmentIds,
+  }: {
+    request: KibanaRequest;
+    caseId: string;
+    attachmentIds: string[];
+  }): Promise<void> {
+    const casesClient = await this.requireCases().getCasesClientWithRequest(request);
+    const theCase = await casesClient.cases.get({ id: caseId, includeComments: false });
+    const { attachments } = await casesClient.attachments.bulkGet({
+      caseID: caseId,
+      savedObjectIds: attachmentIds,
+    });
+    const investigationIds = attachments.flatMap((attachment) =>
+      attachment.type === INVESTIGATION_CASE_ATTACHMENT_TYPE &&
+      'attachmentId' in attachment &&
+      typeof attachment.attachmentId === 'string' &&
+      // The bridge's own links (Open a case, Add to existing case) carry linkedBy and are fully
+      // handled by linkInvestigations; this event can arrive before it finishes.
+      !(attachment.metadata as { linkedBy?: string } | null | undefined)?.linkedBy
+        ? [attachment.attachmentId]
+        : []
+    );
+    if (investigationIds.length === 0) return;
+
+    const conversations = await this.getConversationClient(request);
+    for (const id of investigationIds) {
+      try {
+        const investigation = await conversations.get(id);
+        if (
+          investigation.template_id !== INVESTIGATION_TEMPLATE_ID ||
+          investigation.metadata?.case_id === caseId
+        ) {
+          continue;
+        }
+        const linkedCaseId = investigation.metadata?.case_id;
+        if (typeof linkedCaseId === 'string' && linkedCaseId.length > 0) {
+          this.deps.logger.warn(
+            new InvestigationAlreadyLinkedError(id, linkedCaseId).message +
+              ` It was also attached to case ${caseId}; its back-link still names case ${linkedCaseId}.`
+          );
+          continue;
+        }
+        // A restricted case takes over the investigation's access, which skips Agent Builder's
+        // owner check, so off the bridge's own path only the investigation's owner may do that.
+        if (isRestricted(theCase)) {
+          if (!investigation.permissions?.update_access_control) {
+            this.deps.logger.warn(
+              `Investigation ${id} was attached to restricted case ${caseId} by someone who doesn't own it, so it wasn't linked back or made private.`
+            );
+            continue;
+          }
+          // Lock it down before anything names the case on it.
+          await this.applyCaseAccess(request, id, theCase);
+        }
+        await conversations.patchMetadata(id, { case_id: caseId }, { access: 'converse' });
+        const data: InvestigationLinkedToCaseEventData = {
+          case_id: caseId,
+          case_title: theCase.title,
+        };
+        await conversations.addEvents({
+          conversationId: id,
+          events: [{ type: INVESTIGATION_LINKED_TO_CASE_EVENT_TYPE, data }],
+        });
+        await casesClient.attachments
+          .bulkCreate({
+            caseId,
+            attachments: [
+              {
+                type: AGENT_BUILDER_CONVERSATION_CASE_ATTACHMENT_TYPE,
+                owner: theCase.owner,
+                attachmentId: id,
+              },
+            ],
+          })
+          .catch((error) =>
+            this.deps.logger.debug(`Case ${caseId}: chat of ${id} not attached: ${toMessage(error)}`)
+          );
+      } catch (error) {
+        this.deps.logger.warn(
+          `Investigation ${id} was attached to case ${caseId}, but its back-link wasn't written: ${toMessage(
+            error
+          )}`
+        );
+      }
+    }
   }
 
   async getLinkedInvestigationIds(request: KibanaRequest, caseId: string): Promise<string[]> {

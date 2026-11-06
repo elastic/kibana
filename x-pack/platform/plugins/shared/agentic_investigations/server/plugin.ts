@@ -24,7 +24,11 @@ import { registerCaseBridgeConversationEvents } from './cases_bridge/conversatio
 import { registerCaseBridgeRoutes } from './cases_bridge/routes';
 import { subscribeToCaseEvents } from './cases_bridge/subscriber';
 import { registerCaseBridgeUiSettings } from './cases_bridge/ui_settings';
-import { CLOSE_CASE_WHEN_INVESTIGATIONS_CLOSE_SETTING } from '../common/cases_bridge';
+import { getAiInvestigationTemplate } from './cases_bridge/system_template';
+import {
+  ALERTZERO_CASE_OWNER,
+  CLOSE_CASE_WHEN_INVESTIGATIONS_CLOSE_SETTING,
+} from '../common/cases_bridge';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
@@ -231,6 +235,7 @@ export class AgenticInvestigationsPlugin
             async () => (await coreSetup.getStartServices())[1].agentBuilder
           )
         );
+        cases.registerSystemTemplate(ALERTZERO_CASE_OWNER, getAiInvestigationTemplate());
         registerCaseBridgeConversationEvents(agentBuilder);
         registerCaseBridgeUiSettings(coreSetup.uiSettings);
         registerCaseBridgeRoutes({

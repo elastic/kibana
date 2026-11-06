@@ -53,6 +53,7 @@ const setup = () => {
     },
     attachments: {
       bulkCreate: jest.fn().mockResolvedValue([]),
+      bulkGet: jest.fn().mockResolvedValue({ attachments: [], errors: [] }),
       find: jest.fn().mockResolvedValue({
         data: [
           { type: 'agentic.investigation', attachmentId: 'inv-1' },
@@ -117,6 +118,14 @@ describe('CaseBridgeService', () => {
           expect.objectContaining({ type: 'agentic.investigation', attachmentId: 'inv-2' }),
         ],
       });
+      // The investigations' chats are attached too, for the room and the Attachments tab.
+      expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attachments: [
+          { type: 'agentBuilder.conversation', owner: 'securitySolution', attachmentId: 'inv-1' },
+          { type: 'agentBuilder.conversation', owner: 'securitySolution', attachmentId: 'inv-2' },
+        ],
+      });
       expect(conversations.patchMetadata).toHaveBeenCalledWith(
         'inv-1',
         { case_id: 'case-1' },
@@ -171,6 +180,66 @@ describe('CaseBridgeService', () => {
       expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
       expect(conversations.patchMetadata).not.toHaveBeenCalled();
     });
+  });
+
+  describe('onInvestigationsAttached', () => {
+    it('writes the back-link for a link made outside the bridge (an agent tool, the API)', async () => {
+      const { service, casesClient, conversations } = setup();
+      conversations.get.mockResolvedValueOnce({
+        ...investigation('inv-3'),
+        permissions: { update_access_control: true },
+      } as never);
+      casesClient.attachments.bulkGet.mockResolvedValue({
+        attachments: [{ id: 'a-3', type: 'agentic.investigation', attachmentId: 'inv-3' }],
+        errors: [],
+      });
+
+      await service.onInvestigationsAttached({ request, caseId: 'case-1', attachmentIds: ['a-3'] });
+
+      expect(conversations.patchMetadata).toHaveBeenCalledWith(
+        'inv-3',
+        { case_id: 'case-1' },
+        { access: 'converse' }
+      );
+      // The case is restricted, so the investigation follows its access.
+      expect(conversations.updateAccessControlAsOwner).toHaveBeenCalledWith(
+        'inv-3',
+        expect.objectContaining({ access_mode: 'private' }),
+        expect.anything()
+      );
+    });
+
+    it('leaves an investigation that already names the case alone', async () => {
+      const { service, casesClient, conversations } = setup();
+      casesClient.attachments.bulkGet.mockResolvedValue({
+        attachments: [{ id: 'a-1', type: 'agentic.investigation', attachmentId: 'inv-1' }],
+        errors: [],
+      });
+      conversations.get.mockResolvedValueOnce(investigation('inv-1', { case_id: 'case-1' }));
+
+      await service.onInvestigationsAttached({ request, caseId: 'case-1', attachmentIds: ['a-1'] });
+
+      expect(conversations.patchMetadata).not.toHaveBeenCalled();
+      expect(conversations.addEvents).not.toHaveBeenCalled();
+    });
+  });
+
+  it("won't take over the access of an investigation the linker doesn't own", async () => {
+    const { service, casesClient, conversations } = setup();
+    casesClient.attachments.bulkGet.mockResolvedValue({
+      attachments: [{ id: 'a-4', type: 'agentic.investigation', attachmentId: 'inv-4' }],
+      errors: [],
+    });
+    conversations.get.mockResolvedValueOnce({
+      ...investigation('inv-4'),
+      permissions: { update_access_control: false },
+    } as never);
+
+    await service.onInvestigationsAttached({ request, caseId: 'case-1', attachmentIds: ['a-4'] });
+
+    expect(conversations.updateAccessControlAsOwner).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    expect(conversations.addEvents).not.toHaveBeenCalled();
   });
 
   describe('onCaseUpdated', () => {

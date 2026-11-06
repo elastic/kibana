@@ -44,7 +44,7 @@ import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CaseVisibility } from '../../../common/cases_bridge';
-import { ALERTZERO_CASE_OWNER } from '../../../common/cases_bridge';
+import { AI_INVESTIGATION_TEMPLATE_ID, ALERTZERO_CASE_OWNER } from '../../../common/cases_bridge';
 import { useCurrentUserProfile, useSuggestUserProfiles } from '../../user_profiles';
 import { fetchInvestigation } from '../../investigations/hooks/use_investigation';
 import { formatCaseNumber, getCaseHref, linkCase, listOpenInvestigations, openCase } from '../api';
@@ -65,6 +65,14 @@ const useCaseTemplates = () => {
   return useQuery({
     queryKey: ['agenticInvestigations', 'casesBridge', 'templates'],
     queryFn: async ({ signal }) => {
+      // Adds the shipped AI investigation template to this space if it isn't there yet (a space
+      // created after Kibana started). Best effort: without it the modal still lists the rest.
+      await services.http
+        .post('/internal/cases/system_templates/_ensure', {
+          body: JSON.stringify({ owner: ALERTZERO_CASE_OWNER }),
+          signal,
+        })
+        .catch(() => undefined);
       const response = await services.http.get<{
         templates: Array<{ templateId?: string; id?: string; name?: string; description?: string }>;
       }>('/api/cases/templates', {
@@ -143,6 +151,7 @@ const CreateCaseMode: React.FC<{
   }, [isTitleEdited, sourceInvestigation.data?.title]);
   const sourceTitle = sourceInvestigation.data?.title || investigationTitle;
   const [templateId, setTemplateId] = useState(NO_TEMPLATE);
+  const [isTemplateChosen, setIsTemplateChosen] = useState(false);
   const [visibility, setVisibility] = useState<CaseVisibility>('restricted');
   const [assigneeSearch, setAssigneeSearch] = useState('');
   const [assignees, setAssignees] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -152,6 +161,15 @@ const CreateCaseMode: React.FC<{
   const { data: suggestions = [], isFetching: isSearchingAssignees } =
     useSuggestUserProfiles(assigneeSearch);
   const templates = useCaseTemplates();
+  // The shipped AI investigation template is the default when it is on in this space.
+  useEffect(() => {
+    if (
+      !isTemplateChosen &&
+      templates.data?.some(({ id }) => id === AI_INVESTIGATION_TEMPLATE_ID)
+    ) {
+      setTemplateId(AI_INVESTIGATION_TEMPLATE_ID);
+    }
+  }, [isTemplateChosen, templates.data]);
   const investigations = useQuery({
     queryKey: ['agenticInvestigations', 'casesBridge', 'openInvestigations'],
     queryFn: ({ signal }) => listOpenInvestigations(services.http, { signal }),
@@ -273,7 +291,10 @@ const CreateCaseMode: React.FC<{
               fullWidth
               isLoading={templates.isLoading}
               valueOfSelected={templateId}
-              onChange={setTemplateId}
+              onChange={(value) => {
+                setIsTemplateChosen(true);
+                setTemplateId(value);
+              }}
               data-test-subj="openCaseTemplate"
               options={[
                 { value: NO_TEMPLATE, inputDisplay: OPEN_CASE.templateNone },

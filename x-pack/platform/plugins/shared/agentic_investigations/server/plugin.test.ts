@@ -71,6 +71,7 @@ const setupPlugin = ({
   const cases = withCases
     ? {
         attachmentFramework: { registerAttachment: jest.fn() },
+        registerSystemTemplate: jest.fn(),
         config: { agentic: { enabled: true } },
       }
     : undefined;
@@ -246,6 +247,21 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(cases?.attachmentFramework.registerAttachment).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'agentic.investigation' })
+      );
+    });
+
+    it('ships the AI investigation template for Security cases when the bridge is on', () => {
+      const { cases } = setupPlugin({ casesEnabled: true });
+
+      expect(cases?.registerSystemTemplate).toHaveBeenCalledWith(
+        'securitySolution',
+        expect.objectContaining({
+          name: 'AI investigation',
+          taskList: expect.objectContaining({
+            tasks: expect.arrayContaining([{ title: 'Record the outcome', required: true }]),
+          }),
+          statuses: [expect.objectContaining({ key: 'awaiting_analyst', pausesTimeTracking: true })],
+        })
       );
     });
 

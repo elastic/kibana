@@ -27,7 +27,9 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { CaseViewSectionProps } from '@kbn/cases-plugin/public';
+import type { CaseViewSectionProps, RelatedByReason } from '@kbn/cases-plugin/public';
+import { matchesRelatedFilters } from '@kbn/cases-plugin/public';
+import { parseAiVerdict } from '../../common/cases_bridge';
 import type { Investigation } from '../../common';
 import { fetchLinkedInvestigationSummaries, fetchLinkedInvestigations } from './api';
 import { getLinkedInvestigationIds, useCanLinkInvestigations } from './case_data';
@@ -66,6 +68,15 @@ export const useLinkedInvestigationSummaries = (caseId: string, ids: string[]) =
   });
 };
 
+/** Why a linked investigation is related: always Linked, plus AI verdict when it matches the case's. */
+export const getInvestigationReasons = (
+  investigation: Pick<Investigation, 'metadata'>,
+  caseVerdict: string | null | undefined
+): RelatedByReason[] =>
+  caseVerdict && parseAiVerdict(investigation.metadata.verdict) === caseVerdict
+    ? ['linked', 'aiVerdict']
+    : ['linked'];
+
 const pendingProposals = (investigation: Investigation) =>
   investigation.proposals.filter(({ status }) => status === 'pending');
 
@@ -78,6 +89,7 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
   caseData,
   canUpdate,
   refreshCase,
+  relatedFilters,
 }) => {
   const { services } = useKibana<CoreStart & { agentBuilder?: AgentBuilderPluginStart }>();
   const queryClient = useQueryClient();
@@ -94,9 +106,21 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
     [services.agentBuilder]
   );
 
+  const caseVerdict = caseData.aiVerdict?.verdict;
   const rows = useMemo(
-    () => (data ?? []).flatMap((result) => (result.status === 'ok' ? [result.investigation] : [])),
-    [data]
+    () =>
+      (data ?? [])
+        .flatMap((result) => (result.status === 'ok' ? [result.investigation] : []))
+        .filter((investigation) =>
+          matchesRelatedFilters(
+            {
+              reasons: getInvestigationReasons(investigation, caseVerdict),
+              isClosed: investigation.metadata.status === 'closed',
+            },
+            relatedFilters
+          )
+        ),
+    [data, caseVerdict, relatedFilters]
   );
   const inaccessibleCount = (data ?? []).filter(({ status }) => status === 'inaccessible').length;
 
@@ -190,7 +214,20 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
     },
     {
       name: RELATED.columnRelatedBy,
-      render: () => <EuiBadge color="primary">{RELATED.linkedBadge}</EuiBadge>,
+      render: (investigation: Investigation) => (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">{RELATED.linkedBadge}</EuiBadge>
+          </EuiFlexItem>
+          {getInvestigationReasons(investigation, caseVerdict).includes('aiVerdict') ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="cases-bridge-related-by-ai-verdict">
+                {RELATED.relatedByAiVerdict}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      ),
     },
     {
       align: 'right',

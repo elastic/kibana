@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { BridgeCase, CaseBridgeService } from './case_bridge_service';
+import { INVESTIGATION_CASE_ATTACHMENT_TYPE } from '../../common/cases_bridge';
 
 /**
  * Status and access side effects hang off the Cases event bus rather than a route, so they run for
@@ -22,6 +23,27 @@ export const subscribeToCaseEvents = ({
   service: CaseBridgeService;
   logger: Logger;
 }): void => {
+  cases.getCasesEventBus().onAttachmentsAdded(async (event) => {
+    if (event.payload.attachmentType !== INVESTIGATION_CASE_ATTACHMENT_TYPE) {
+      return;
+    }
+    try {
+      await service.onInvestigationsAttached({
+        request: event.request,
+        caseId: event.payload.caseId,
+        attachmentIds: event.payload.ids,
+      });
+    } catch (error) {
+      logger.warn(
+        `Investigations were attached to case ${
+          event.payload.caseId
+        }, but their back-links weren't written: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  });
+
   cases.getCasesEventBus().onCaseUpdated(async (event, { previousCase, updatedCase }) => {
     if (!previousCase || !updatedCase) {
       return;

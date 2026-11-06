@@ -26,6 +26,20 @@ export interface CaseBridgeContextValue {
    * from proposals, which don't carry the case).
    */
   resolveCaseId?: (conversationId: string) => string | undefined;
+  /**
+   * What a queue group header shows about a case. `undefined` while the case is loading, `null`
+   * when it was deleted or the viewer can't see it.
+   */
+  getCaseSummary?: (caseId: string) => CaseBridgeCaseSummary | null | undefined;
+}
+
+export interface CaseBridgeCaseSummary {
+  title: string;
+  /** The case number, once Cases has assigned it. */
+  incrementalId?: number;
+  /** The case's status category: open, in-progress, or closed. */
+  status: string;
+  isRestricted: boolean;
 }
 
 const CaseBridgeContext = createContext<CaseBridgeContextValue | undefined>(undefined);

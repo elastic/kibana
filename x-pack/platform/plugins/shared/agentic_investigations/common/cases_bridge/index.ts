@@ -21,6 +21,9 @@ export const ALERTZERO_CASE_TAG = 'alertzero' as const;
 /** Bridge cases are Security cases. */
 export const ALERTZERO_CASE_OWNER = 'securitySolution' as const;
 
+/** The shipped AI investigation case template (written by Cases per space). */
+export const AI_INVESTIGATION_TEMPLATE_ID = 'system-ai-investigation';
+
 export const INVESTIGATION_OPEN_CASE_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/{id}/_open_case` as const;
 export const INVESTIGATION_LINK_CASE_URL =

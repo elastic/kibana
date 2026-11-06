@@ -197,6 +197,10 @@ export const RELATED = {
     'xpack.agenticInvestigations.caseSection.related.column.relatedBy',
     { defaultMessage: 'Related by' }
   ),
+  relatedByAiVerdict: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.related.relatedByAiVerdict',
+    { defaultMessage: 'AI verdict' }
+  ),
   linkedBadge: i18n.translate('xpack.agenticInvestigations.caseSection.related.linked', {
     defaultMessage: 'Linked',
   }),
