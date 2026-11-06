@@ -85,6 +85,9 @@ export const DashboardPinnedPanelsRenderer = () => {
 };
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
+  --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
+    ${euiTheme.colors.vis.euiColorVis0};
+
   .kbnFlex {
     padding-top: 0;
   }
@@ -95,7 +98,12 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
     background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
   }
 
-    // styles for the panel grid size gauge that appears when resizing
+  .kbnFlexPanel--active {
+    outline: var(--dashboardActivePanelBorderStyle);
+    border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
+  }
+
+  // styles for the panel grid size gauge that appears when resizing
   .kbnFlexPanel--resizeGauge {
     padding: ${euiTheme.size.xs};
     z-index: ${euiTheme.levels.menu};
@@ -118,4 +126,5 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
       font-weight: ${euiTheme.font.weight.medium};
       color: ${euiTheme.colors.textAccentSecondary};
     }
+  }
 `;
