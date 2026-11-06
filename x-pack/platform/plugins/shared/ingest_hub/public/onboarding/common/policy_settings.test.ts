@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  compactPolicySettings,
+  detectPolicySettingsDrift,
+  getPolicySettings,
+  getPolicySettingsUpdate,
+  supportsPolicySetting,
+} from './policy_settings';
+
+describe('policy settings', () => {
+  it('applies the output to agent-based deploys only', () => {
+    expect(supportsPolicySetting('output_id', 'agent_based')).toBe(true);
+    expect(supportsPolicySetting('output_id', 'managed_integration')).toBe(false);
+    expect(supportsPolicySetting('output_id', 'ecf')).toBe(false);
+  });
+
+  describe('compactPolicySettings', () => {
+    it('leaves out empty settings', () => {
+      expect(compactPolicySettings({ output_id: '' })).toEqual({});
+      expect(compactPolicySettings({ output_id: 'logstash-1' })).toEqual({
+        output_id: 'logstash-1',
+      });
+      expect(compactPolicySettings(undefined)).toEqual({});
+    });
+  });
+
+  describe('getPolicySettings', () => {
+    it('gives a new policy the settings of its deployment method that have a value', () => {
+      expect(getPolicySettings({ output_id: 'logstash-1' }, 'agent_based')).toEqual({
+        output_id: 'logstash-1',
+      });
+      expect(getPolicySettings({ output_id: '' }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ output_id: 'logstash-1' }, 'managed_integration')).toEqual({});
+    });
+
+    it('leaves out a value of the wrong type read back from the saved object', () => {
+      expect(getPolicySettings({ output_id: 1 }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ output_id: { id: 'logstash-1' } }, 'agent_based')).toEqual({});
+    });
+
+    it('leaves out settings it does not know', () => {
+      expect(getPolicySettings({ unknown_setting: 'value' }, 'agent_based')).toEqual({});
+    });
+  });
+
+  describe('getPolicySettingsUpdate', () => {
+    it('sends a chosen setting as it is', () => {
+      expect(getPolicySettingsUpdate({ output_id: 'logstash-1' }, 'agent_based')).toEqual({
+        output_id: 'logstash-1',
+      });
+    });
+
+    it('clears a setting set back to empty', () => {
+      expect(getPolicySettingsUpdate({ output_id: '' }, 'agent_based')).toEqual({
+        output_id: null,
+      });
+    });
+
+    it('leaves out a value of the wrong type, so the policy keeps its own', () => {
+      expect(getPolicySettingsUpdate({ output_id: 1 }, 'agent_based')).toEqual({});
+      expect(getPolicySettingsUpdate({ output_id: ['logstash-1'] }, 'agent_based')).toEqual({});
+    });
+
+    it('leaves out a setting never chosen, and those of other deployment methods', () => {
+      expect(getPolicySettingsUpdate({}, 'agent_based')).toEqual({});
+      expect(getPolicySettingsUpdate({ output_id: 'logstash-1' }, 'managed_integration')).toEqual(
+        {}
+      );
+    });
+  });
+
+  describe('detectPolicySettingsDrift', () => {
+    it('is dirty when a setting of the deployment method changed', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { output_id: 'kafka-1' },
+          { output_id: 'logstash-1' },
+          'agent_based'
+        )
+      ).toBe(true);
+      expect(
+        detectPolicySettingsDrift({ output_id: '' }, { output_id: 'logstash-1' }, 'agent_based')
+      ).toBe(true);
+    });
+
+    it('treats an empty setting and an absent one alike', () => {
+      expect(detectPolicySettingsDrift({ output_id: '' }, undefined, 'agent_based')).toBe(false);
+    });
+
+    it('ignores a value of the wrong type, as the deploy does', () => {
+      expect(detectPolicySettingsDrift({ output_id: 1 }, {}, 'agent_based')).toBe(false);
+    });
+
+    it('ignores settings of other deployment methods', () => {
+      expect(detectPolicySettingsDrift({ output_id: 'kafka-1' }, {}, 'managed_integration')).toBe(
+        false
+      );
+    });
+  });
+});
