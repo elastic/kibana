@@ -33,6 +33,14 @@ import {
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { useSuggestJobsAvailable } from './use_suggest_jobs_available';
 
+interface JobTypeCard {
+  onClick: () => void;
+  iconType: string;
+  title: string;
+  description: string;
+  id: string;
+}
+
 export const Page: FC = () => {
   const {
     services: {
@@ -162,7 +170,7 @@ export const Page: FC = () => {
     });
   };
 
-  const jobTypes = [
+  const jobTypes: JobTypeCard[] = [
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/single_metric${getJobTypeUrlParams()}`),
@@ -234,24 +242,6 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkrareJob',
     },
-    ...(isSuggestJobsAvailable
-      ? [
-          {
-            onClick: openSuggestJobsFlyout,
-            iconType: 'sparkles',
-            title: i18n.translate('xpack.ml.newJob.wizard.jobType.suggestJobsCardTitle', {
-              defaultMessage: 'Suggest jobs',
-            }),
-            description: i18n.translate(
-              'xpack.ml.newJob.wizard.jobType.suggestJobsCardDescription',
-              {
-                defaultMessage: 'Analyze your data and get anomaly detection jobs which suit it.',
-              }
-            ),
-            id: 'mlJobTypeLinkSuggestJobs',
-          },
-        ]
-      : []),
   ];
 
   if (hasGeoFields) {
@@ -265,6 +255,21 @@ export const Page: FC = () => {
         defaultMessage: 'Detect anomalies in the geographic location of the data.',
       }),
       id: 'mlJobTypeLinkGeoJob',
+    });
+  }
+
+  // The suggestions come last, after all of the wizards
+  if (isSuggestJobsAvailable) {
+    jobTypes.push({
+      onClick: openSuggestJobsFlyout,
+      iconType: 'sparkles',
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.suggestJobsCardTitle', {
+        defaultMessage: 'Suggest jobs',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.suggestJobsCardDescription', {
+        defaultMessage: 'Analyze your data and get anomaly detection jobs which suit it.',
+      }),
+      id: 'mlJobTypeLinkSuggestJobs',
     });
   }
 

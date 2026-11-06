@@ -11,7 +11,9 @@ import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/s
 import { filterJobsByIndex } from '../../../../application/components/job_suggestion/filter_jobs_by_index';
 import {
   getSelectedJobId$,
+  getShowAnomalies$,
   setSelectedJobId,
+  setShowAnomalies,
 } from '../../../../application/components/job_suggestion/selected_job';
 import { CurrentJobs } from './current_jobs';
 
@@ -85,6 +87,7 @@ describe('CurrentJobs', () => {
     beforeEach(() => {
       window.localStorage.clear();
       setSelectedJobId('logs-*', undefined);
+      setShowAnomalies('logs-*', true);
       mockJobsSummary.mockResolvedValue([job('a', ['logs-*']), job('b', ['logs-*'])]);
     });
 
@@ -117,6 +120,16 @@ describe('CurrentJobs', () => {
       fireEvent.click(getRadio('mlDiscoverADManagementCurrentJobRadioNone'));
       expect(getSelectedJobId$('logs-*').getValue()).toBeUndefined();
       expect(getRadio('mlDiscoverADManagementCurrentJobRadioNone')).toBeChecked();
+    });
+
+    it('shows the anomalies of the job which is selected', async () => {
+      setShowAnomalies('logs-*', false);
+      renderIt();
+
+      await screen.findByTestId('mlDiscoverADManagementCurrentJobRadio-a');
+      fireEvent.click(getRadio('mlDiscoverADManagementCurrentJobRadio-a'));
+
+      expect(getShowAnomalies$('logs-*').getValue()).toBe(true);
     });
 
     it('does not offer no job when there are no jobs', async () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
@@ -117,6 +117,9 @@ const loaded = (suggestions: JobSuggestion[]): SuggestionsState => ({
 
 const setState = (state: SuggestionsState) => mockState$.next(state);
 
+// Runs the analysis from the time picker, as is needed when there are previous results to show
+const analyze = () => fireEvent.click(screen.getByTestId('superDatePickerApplyTimeButton'));
+
 describe('SuggestADJobsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -138,9 +141,38 @@ describe('SuggestADJobsFlyout', () => {
     setState(loaded([suggestion('a')]));
     renderFlyout();
 
-    fireEvent.click(screen.getByTestId('superDatePickerApplyTimeButton'));
+    analyze();
 
-    expect(mockReload).toHaveBeenCalledTimes(1);
+    expect(mockSuggest).toHaveBeenCalledTimes(2);
+    expect(mockSuggest).toHaveBeenLastCalledWith('logs-*', { from: 'now-30d', to: 'now' });
+  });
+
+  it('does not ask for suggestions until the previous results are known', () => {
+    useSuggestionHistoryMock.mockReturnValue({ ...history(undefined), isLoaded: false });
+    renderFlyout();
+
+    expect(mockSuggest).not.toHaveBeenCalled();
+  });
+
+  it('does not ask for suggestions when there are previous results, until asked to', () => {
+    setState(loaded([suggestion('a')]));
+    useSuggestionHistoryMock.mockReturnValue(
+      history({
+        timeRange: { from: 'now-7d', to: 'now' },
+        ranAt: Date.now(),
+        suggestions: [suggestion('old-1')],
+      })
+    );
+    renderFlyout();
+
+    expect(mockSuggest).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mlSuggestADJobsCard-a')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mlSuggestADJobsPreviousCard-old-1')).toBeInTheDocument();
+
+    analyze();
+
+    expect(mockSuggest).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('mlSuggestADJobsCard-a')).toBeInTheDocument();
   });
 
   it('lists the suggestions with their title and description', () => {
@@ -258,17 +290,13 @@ describe('SuggestADJobsFlyout', () => {
       expect(screen.queryByTestId('mlSuggestADJobsStop')).not.toBeInTheDocument();
     });
 
-    it('says the analysis was stopped, and offers to run it again', () => {
+    it('shows nothing about the analysis once it is stopped', () => {
       setState({ status: 'cancelled' });
       renderFlyout();
 
-      expect(screen.getByTestId('mlSuggestADJobsCancelled')).toHaveTextContent('Analysis stopped');
       expect(screen.queryByTestId('mlSuggestADJobsLoading')).not.toBeInTheDocument();
       expect(screen.queryByTestId('mlSuggestADJobsError')).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('mlSuggestADJobsRunAgain'));
-
-      expect(mockReload).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('mlSuggestADJobsEmpty')).not.toBeInTheDocument();
     });
 
     it('still shows the previous results once the analysis is stopped', () => {
@@ -281,6 +309,7 @@ describe('SuggestADJobsFlyout', () => {
         })
       );
       renderFlyout();
+      analyze();
 
       expect(screen.getByTestId('mlSuggestADJobsPreviousCard-old-1')).toBeInTheDocument();
     });
@@ -321,6 +350,7 @@ describe('SuggestADJobsFlyout', () => {
       setState({ status: 'loading' });
       useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
+      analyze();
 
       expect(
         isBefore(
@@ -335,6 +365,7 @@ describe('SuggestADJobsFlyout', () => {
       setState(loaded([suggestion('a')]));
       useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
+      analyze();
 
       expect(
         isBefore(
@@ -351,6 +382,7 @@ describe('SuggestADJobsFlyout', () => {
       setState({ status: 'error', error: 'AI features are not available.' });
       useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
+      analyze();
 
       expect(screen.getByTestId('mlSuggestADJobsError')).toBeInTheDocument();
       expect(screen.getByTestId('mlSuggestADJobsPreviousCard-old-1')).toBeInTheDocument();
@@ -364,6 +396,30 @@ describe('SuggestADJobsFlyout', () => {
       expect(screen.getByTestId('mlSuggestADJobsPreviousRun')).toHaveTextContent(
         'Last 7 days, run 2 hours ago'
       );
+    });
+
+    it('clears the previous run', () => {
+      const withPreviousRun = history(previousRun());
+      useSuggestionHistoryMock.mockReturnValue(withPreviousRun);
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('mlSuggestADJobsClearPrevious'));
+
+      expect(withPreviousRun.clearPreviousRun).toHaveBeenCalledTimes(1);
+    });
+
+    it('separates the previous run from the analysis only while it is running', () => {
+      setState({ status: 'loading' });
+      useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
+      renderFlyout();
+      const previous = screen.getByTestId('mlSuggestADJobsPrevious');
+      expect(previous.querySelector('hr')).toBeNull();
+
+      analyze();
+      expect(previous.querySelector('hr')).not.toBeNull();
+
+      act(() => setState(loaded([suggestion('a')])));
+      expect(previous.querySelector('hr')).toBeNull();
     });
 
     it('opens the wizard for a suggestion of the previous run', async () => {

@@ -17,7 +17,6 @@ import type { SuggestionsState } from './job_suggestion_service';
 interface Props {
   state: SuggestionsState;
   onStop: () => void;
-  onRunAgain: () => void;
   /** When provided, an error offers to analyze the current time range instead. */
   onUseCurrentTimeRange?: () => void;
   testSubjPrefix: string;
@@ -30,7 +29,6 @@ interface Props {
 export const SuggestionStatus: FC<Props> = ({
   state,
   onStop,
-  onRunAgain,
   onUseCurrentTimeRange,
   testSubjPrefix,
 }) => {
@@ -68,37 +66,6 @@ export const SuggestionStatus: FC<Props> = ({
       />
     );
   }
-  if (state.status === 'cancelled') {
-    return (
-      <EuiEmptyPrompt
-        data-test-subj={`${testSubjPrefix}Cancelled`}
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.ml.suggestADJobsFlyout.cancelledTitle"
-              defaultMessage="Analysis stopped"
-            />
-          </h3>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.ml.suggestADJobsFlyout.cancelledDescription"
-              defaultMessage="No jobs were suggested from this run."
-            />
-          </p>
-        }
-        actions={
-          <EuiButton size="s" onClick={onRunAgain} data-test-subj={`${testSubjPrefix}RunAgain`}>
-            <FormattedMessage
-              id="xpack.ml.suggestADJobsFlyout.runAgainButton"
-              defaultMessage="Run again"
-            />
-          </EuiButton>
-        }
-      />
-    );
-  }
   if (state.status === 'error') {
     return (
       <KbnDangerCallout
@@ -125,6 +92,10 @@ export const SuggestionStatus: FC<Props> = ({
         ) : null}
       </KbnDangerCallout>
     );
+  }
+  // Nothing is said about an analysis which was stopped
+  if (state.status === 'cancelled') {
+    return null;
   }
   if (state.suggestions.length === 0) {
     return (

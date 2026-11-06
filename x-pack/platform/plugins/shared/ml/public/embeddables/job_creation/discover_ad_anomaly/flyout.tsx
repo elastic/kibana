@@ -12,6 +12,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiResizeObserver,
+  EuiSkeletonLoading,
+  EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
@@ -109,7 +111,7 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
             <div ref={resizeRef} data-test-subj="mlDiscoverADAnomalyFlyoutContent">
-              {isAiAvailable ? (
+              {isAiAvailable && !isLoading ? (
                 <>
                   <AiSummary jobId={jobId} timestamp={timestamp} endTimestamp={endTimestamp} />
                   <EuiSpacer size="m" />
@@ -125,44 +127,51 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
                   data-test-subj="mlDiscoverADAnomalyError"
                 />
               ) : (
-                <EuiSkeletonText
-                  lines={10}
+                <EuiSkeletonLoading
                   isLoading={isLoading}
                   data-test-subj="mlDiscoverADAnomalyLoading"
-                >
-                  {chartsData && tableData && jobs && mlLocator ? (
+                  loadingContent={
                     <>
-                      <ExplorerAnomaliesContainer
-                        id={CHART_ID}
-                        chartsData={chartsData}
-                        showCharts
-                        severity={severity}
-                        setSeverity={noop}
-                        mlLocator={mlLocator}
-                        tableData={tableData}
-                        timeBuckets={timeBuckets}
-                        timefilter={timefilter}
-                        onSelectEntity={noop}
-                        chartsService={charts}
-                        timeRange={undefined}
-                        showFilterIcons={false}
-                        isInteractive={false}
-                        colorSelectedIntervalBySeverity
-                      />
+                      <EuiSkeletonRectangle width="100%" height={200} borderRadius="m" />
                       <EuiSpacer size="m" />
-                      {/* The table is wider than the flyout */}
-                      <div css={{ overflowX: 'auto' }} data-test-subj="mlDiscoverADAnomalyTable">
-                        <AnomaliesTable
-                          bounds={timefilter.getBounds()}
-                          tableData={tableData}
-                          sourceIndicesWithGeoFields={{}}
-                          selectedJobs={jobs}
-                          telemetrySource="explorer_anomalies_table"
-                        />
-                      </div>
+                      <EuiSkeletonText lines={10} />
                     </>
-                  ) : null}
-                </EuiSkeletonText>
+                  }
+                  loadedContent={
+                    chartsData && tableData && jobs && mlLocator ? (
+                      <>
+                        <ExplorerAnomaliesContainer
+                          id={CHART_ID}
+                          chartsData={chartsData}
+                          showCharts
+                          severity={severity}
+                          setSeverity={noop}
+                          mlLocator={mlLocator}
+                          tableData={tableData}
+                          timeBuckets={timeBuckets}
+                          timefilter={timefilter}
+                          onSelectEntity={noop}
+                          chartsService={charts}
+                          timeRange={undefined}
+                          showFilterIcons={false}
+                          isInteractive={false}
+                          colorSelectedIntervalBySeverity
+                        />
+                        <EuiSpacer size="m" />
+                        {/* The table is wider than the flyout */}
+                        <div css={{ overflowX: 'auto' }} data-test-subj="mlDiscoverADAnomalyTable">
+                          <AnomaliesTable
+                            bounds={timefilter.getBounds()}
+                            tableData={tableData}
+                            sourceIndicesWithGeoFields={{}}
+                            selectedJobs={jobs}
+                            telemetrySource="explorer_anomalies_table"
+                          />
+                        </div>
+                      </>
+                    ) : null
+                  }
+                />
               )}
             </div>
           )}

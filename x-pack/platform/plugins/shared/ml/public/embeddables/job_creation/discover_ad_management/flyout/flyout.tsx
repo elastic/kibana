@@ -228,7 +228,6 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
           <SuggestionStatus
             state={state}
             onStop={() => jobSuggestionService.cancel()}
-            onRunAgain={() => void jobSuggestionService.reload()}
             onUseCurrentTimeRange={useCurrentTimeRange}
             testSubjPrefix={TEST_SUBJ_PREFIX}
           />

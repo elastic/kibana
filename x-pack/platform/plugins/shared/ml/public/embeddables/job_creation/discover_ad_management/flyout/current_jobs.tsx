@@ -14,7 +14,10 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useMlApi } from '../../../../application/contexts/kibana';
 import { filterJobsByIndex } from '../../../../application/components/job_suggestion/filter_jobs_by_index';
-import { useSelectedJobId } from '../../../../application/components/job_suggestion/use_selected_job_id';
+import {
+  useSelectedJobId,
+  useShowAnomalies,
+} from '../../../../application/components/job_suggestion/use_selected_job_id';
 
 interface Props {
   indexPattern: string;
@@ -29,6 +32,12 @@ export const CurrentJobs: FC<Props> = ({ indexPattern }) => {
   const mlApi = useMlApi();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [selectedJobId, selectJob] = useSelectedJobId(indexPattern);
+  const [, setShowAnomalies] = useShowAnomalies(indexPattern);
+  // The anomalies of a job which is selected are shown, even when they were hidden for the previous one
+  const selectAndShowJob = (jobId: string) => {
+    selectJob(jobId);
+    setShowAnomalies(true);
+  };
 
   useEffect(() => {
     let isCurrent = true;
@@ -127,7 +136,7 @@ export const CurrentJobs: FC<Props> = ({ indexPattern }) => {
                   </>
                 }
                 checked={selectedJobId === id}
-                onChange={() => selectJob(id)}
+                onChange={() => selectAndShowJob(id)}
                 data-test-subj={`mlDiscoverADManagementCurrentJobRadio-${id}`}
               />
             </EuiPanel>

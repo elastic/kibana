@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -74,13 +74,31 @@ export const SuggestADJobsFlyout: FC<Props> = ({
   );
   const state = useObservable(jobSuggestionService.state$, jobSuggestionService.state);
 
-  useEffect(() => {
-    void jobSuggestionService.suggest(indexPattern, timeRange);
-    // Closing the flyout, or asking for something else, stops the analysis which is in progress.
-    return () => jobSuggestionService.cancel();
-  }, [jobSuggestionService, indexPattern, timeRange]);
+  const [hasRequested, setHasRequested] = useState(false);
+  const runAnalysis = (range: SuggestionTimeRange) => {
+    setHasRequested(true);
+    void jobSuggestionService.suggest(indexPattern, range);
+  };
 
-  const { previousRun } = useSuggestionHistory(indexPattern, state);
+  // Closing the flyout stops the analysis which is in progress.
+  useEffect(() => () => jobSuggestionService.cancel(), [jobSuggestionService]);
+
+  const {
+    previousRun,
+    isLoaded: isHistoryLoaded,
+    clearPreviousRun,
+  } = useSuggestionHistory(indexPattern, state);
+
+  // When the flyout opens, the data is analyzed only when there are no results from before to show.
+  const hasCheckedHistory = useRef(false);
+  useEffect(() => {
+    if (!isHistoryLoaded || hasCheckedHistory.current) return;
+    hasCheckedHistory.current = true;
+    if (!previousRun) {
+      setHasRequested(true);
+      void jobSuggestionService.suggest(indexPattern, timeRange);
+    }
+  }, [isHistoryLoaded, previousRun, jobSuggestionService, indexPattern, timeRange]);
 
   const openInWizard = useCallback(
     async (suggestion: JobSuggestion) => {
@@ -157,29 +175,43 @@ export const SuggestADJobsFlyout: FC<Props> = ({
           compressed
           start={timeRange.from}
           end={timeRange.to}
-          onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
-          onRefresh={() => void jobSuggestionService.reload()}
-          isDisabled={state.status === 'loading'}
+          onTimeChange={({ start, end }) => {
+            const range = { from: start, to: end };
+            setTimeRange(range);
+            runAnalysis(range);
+          }}
+          onRefresh={() => runAnalysis(timeRange)}
+          isDisabled={hasRequested && state.status === 'loading'}
           data-test-subj="mlSuggestADJobsTimeRange"
         />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <SuggestionStatus
-          state={state}
-          onStop={() => jobSuggestionService.cancel()}
-          onRunAgain={() => void jobSuggestionService.reload()}
-          testSubjPrefix="mlSuggestADJobs"
-        />
-        {state.status === 'loaded' && state.suggestions.length > 0 ? (
-          <SuggestionCards
-            suggestions={state.suggestions}
-            onSelect={openInWizard}
-            testSubjPrefix="mlSuggestADJobs"
-          />
+        {hasRequested ? (
+          <>
+            <SuggestionStatus
+              state={state}
+              onStop={() => jobSuggestionService.cancel()}
+              testSubjPrefix="mlSuggestADJobs"
+            />
+            {state.status === 'loaded' && state.suggestions.length > 0 ? (
+              <SuggestionCards
+                suggestions={state.suggestions}
+                onSelect={openInWizard}
+                testSubjPrefix="mlSuggestADJobs"
+              />
+            ) : null}
+          </>
         ) : null}
 
-        {previousRun ? <PreviousRun run={previousRun} onSelect={openInWizard} /> : null}
+        {previousRun ? (
+          <PreviousRun
+            run={previousRun}
+            onSelect={openInWizard}
+            onClear={clearPreviousRun}
+            showSeparator={hasRequested && state.status === 'loading'}
+          />
+        ) : null}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
