@@ -46,6 +46,13 @@ export const CONDITIONAL_SNOOZE_UNSUPPORTED = i18n.translate(
   }
 );
 
+export const CONDITIONAL_SNOOZE_ACTIVE_ONLY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.conditionalSnoozeActiveOnly',
+  {
+    defaultMessage: 'Condition based snooze is only available for active alerts.',
+  }
+);
+
 export const RESOLVE = i18n.translate(
   'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.deactivate',
   {

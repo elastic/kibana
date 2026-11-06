@@ -13,11 +13,14 @@ import { QueryClient } from '@kbn/react-query';
 import { createSnoozeAction } from './snooze';
 import * as modal from '../components/snooze_modal';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode as BaseAlertEpisode } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  type AlertEpisode as BaseAlertEpisode,
+} from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeSnoozePayload } from '../components/snooze_modal';
-import { CONDITIONAL_SNOOZE_UNSUPPORTED } from './translations';
+import { CONDITIONAL_SNOOZE_ACTIVE_ONLY, CONDITIONAL_SNOOZE_UNSUPPORTED } from './translations';
 
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): BaseAlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
@@ -233,6 +236,46 @@ describe('createSnoozeAction', () => {
       const open = mockModal({ snoozedUntil: null });
 
       await createSnoozeAction(deps, makeExtension()).execute({ episodes: [makeEpisode()] });
+
+      expect(open).toHaveBeenCalledWith(
+        deps,
+        expect.objectContaining({ conditionalTabDisabledReason: CONDITIONAL_SNOOZE_UNSUPPORTED })
+      );
+    });
+
+    it('disables the conditional tab when a selected row is no longer active', async () => {
+      const deps = makeDeps(conditionalSource);
+      const open = mockModal({ snoozedUntil: null });
+
+      await createSnoozeAction(deps, makeExtension()).execute({
+        episodes: [
+          makeSourceEpisode(),
+          makeSourceEpisode({
+            'episode.id': 'e2',
+            'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+          }),
+        ],
+      });
+
+      expect(open).toHaveBeenCalledWith(
+        deps,
+        expect.objectContaining({ conditionalTabDisabledReason: CONDITIONAL_SNOOZE_ACTIVE_ONLY })
+      );
+    });
+
+    it('reports the universal limitation ahead of an inactive row', async () => {
+      const deps = makeDeps(conditionalSource);
+      const open = mockModal({ snoozedUntil: null });
+
+      await createSnoozeAction(deps, makeExtension()).execute({
+        episodes: [
+          makeEpisode(),
+          makeSourceEpisode({
+            'episode.id': 'e2',
+            'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+          }),
+        ],
+      });
 
       expect(open).toHaveBeenCalledWith(
         deps,
