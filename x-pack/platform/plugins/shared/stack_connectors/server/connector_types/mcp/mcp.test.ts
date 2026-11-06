@@ -699,6 +699,56 @@ describe('McpConnector', () => {
         expect(isRetryableError(last as Error)).toBeNull();
       });
 
+      it('keeps a late failure from an old lease retryable after a new lease succeeds', async () => {
+        fakeClient.callTool.mockRejectedValueOnce(new Error('socket closed'));
+        fakeClient.callTool.mockRejectedValueOnce(new Error('socket closed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+        expect(connectionFailures.get(leaseKey)).toBe(2);
+
+        const resolveOperations: Array<(value: { content: [] }) => void> = [];
+        const rejectOperations: Array<(error: Error) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((resolve, reject) => {
+              resolveOperations.push(resolve);
+              rejectOperations.push(reject);
+            })
+        );
+        const thresholdFailure = expectCallToolError(connector);
+        const lateFailure = expectCallToolError(connector);
+        for (let turn = 0; turn < 10 && rejectOperations.length < 2; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(rejectOperations).toHaveLength(2);
+
+        rejectOperations[0](new Error('socket closed'));
+        const thresholdError = await thresholdFailure;
+        expect(isRetryableError(thresholdError as Error)).toBe(false);
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+
+        const successfulCall = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        for (let turn = 0; turn < 10 && resolveOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(resolveOperations).toHaveLength(3);
+        expect(mcpClientType.build).toHaveBeenCalledTimes(4);
+        resolveOperations[2]({ content: [] });
+        await successfulCall;
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+
+        rejectOperations[1](new Error('socket closed'));
+        const lateError = await lateFailure;
+        expect(isRetryableError(lateError as Error)).toBeNull();
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+      });
+
       it('does not count tool failures that are not connection errors', async () => {
         fakeClient.callTool.mockRejectedValue(new Error('tool failed'));
         mcpClientType.shouldInvalidateOnError.mockReturnValue(false);

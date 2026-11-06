@@ -76,6 +76,24 @@ export const connectionFailures = new LRUCache<string, number>({
 });
 
 const failedLeaseCounts = new WeakMap<Promise<McpClient>, number>();
+const leaseEpochs = new WeakMap<Promise<McpClient>, number>();
+const connectionFailureEpochs = new LRUCache<string, number>({
+  max: 1000,
+  allowStale: false,
+  ttlAutopurge: false,
+});
+let nextConnectionFailureEpoch = 0;
+
+const getConnectionFailureEpoch = (key: string): number => {
+  const epoch = connectionFailureEpochs.get(key);
+  if (epoch !== undefined) {
+    return epoch;
+  }
+
+  const newEpoch = ++nextConnectionFailureEpoch;
+  connectionFailureEpochs.set(key, newEpoch);
+  return newEpoch;
+};
 
 export interface McpTestConnectorResponse {
   connected: boolean;
@@ -200,10 +218,17 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       () => this.buildClient(),
       (client) => clientTypes.mcp.terminate(client)
     );
+    const leaseEpoch = getConnectionFailureEpoch(key);
+    if (!leaseEpochs.has(promise)) {
+      leaseEpochs.set(promise, leaseEpoch);
+    }
     try {
       const result = await fn(await promise);
+      const nextEpoch = ++nextConnectionFailureEpoch;
+      connectionFailureEpochs.set(key, nextEpoch);
       connectionFailures.delete(key);
       failedLeaseCounts.delete(promise);
+      leaseEpochs.set(promise, nextEpoch);
       return result;
     } catch (err) {
       // Release first: invalidate waits for every active use, including this one, to finish.
@@ -212,9 +237,12 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
       let retry = true;
       if (isConnectionError && !isUserError) {
-        const failureCount =
-          failedLeaseCounts.get(promise) ?? this.recordAndRememberLeaseFailure(key, promise);
-        retry = failureCount < CONNECTION_FAILURE_RETRY_LIMIT;
+        const currentEpoch = getConnectionFailureEpoch(key);
+        if (leaseEpochs.get(promise) === currentEpoch) {
+          const failureCount =
+            failedLeaseCounts.get(promise) ?? this.recordAndRememberLeaseFailure(key, promise);
+          retry = failureCount < CONNECTION_FAILURE_RETRY_LIMIT;
+        }
       }
       if (isConnectionError) {
         await this.pool.invalidate(key, promise);
