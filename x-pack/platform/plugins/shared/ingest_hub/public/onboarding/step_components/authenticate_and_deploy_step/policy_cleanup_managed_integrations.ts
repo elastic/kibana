@@ -28,6 +28,7 @@ import {
   toOnboardingDeploymentQuery,
 } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
@@ -134,6 +135,7 @@ export async function updateManagedIntegrationsPolicy(
     globalRegion,
     namespace,
     globalNamespace,
+    policySettings,
     authenticateAndDeployStep,
     servicesMap,
   } = opts;
@@ -251,6 +253,7 @@ export async function updateManagedIntegrationsPolicy(
       package: { name: packageName, version: pkgVersion },
       ...(vars ? { vars } : {}),
       inputs,
+      ...getPolicySettingsUpdate(policySettings, 'managed_integration'),
       // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
       // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
       ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
