@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
-import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
+import {
+  previewAttachmentInDashboard,
+  toDashboardLocatorParams,
+} from './dashboard_integration/preview_attachment';
 import type { AppliedAttachmentsStore } from './dashboard_integration/applied_attachments_store';
 import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
@@ -44,7 +46,6 @@ export const handlePreview = async ({
 
   // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
   if (isSidebar && dashboardLocator && canWriteDashboards) {
-    const dashboardState = attachmentDataToDashboardState(attachment.data);
     return handleEditInDashboard({
       locator: dashboardLocator,
       getExistingDashboardId: async () => {
@@ -55,7 +56,7 @@ export const handlePreview = async ({
         const exists = await checkSavedDashboardExist(attachment.origin);
         return exists ? attachment.origin : undefined;
       },
-      dashboardLocatorParams: dashboardState,
+      dashboardLocatorParams: toDashboardLocatorParams(attachment.data),
     });
   }
 
