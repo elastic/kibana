@@ -748,7 +748,7 @@ ORCA_PARITY_FIXTURES=/tmp/parity_harbor.json node scripts/jest \
 input `{event_id}`, output `{rubric}`, the task's `tests/rubrics/<event_id>.json` unchanged. Tasks
 reference them through `metadata.orca_expected.events[].event_id`. They are a dataset of their own
 rather than task metadata because the 755 would carry about 32 MB of them, over the dataset API's
-5 MB request limit. The eval loads the release by name and fails before any judge
+5 MB request limit. The eval and the re-grade load the release by name and fail before any judge
 runs when its id, count or content digest ([`rubrics.ts`](evals/investigation/orca/rubrics.ts))
 differs. The digest keeps each rubric's key order, which the judge prompt renders in. ORCA's data and rubrics are CC BY 4.0, (c) the ORCA-bench authors; keep that attribution
 when sharing results or the rubrics.
@@ -818,6 +818,19 @@ and hallucination needed at least one named cause. A slice 1 spot check found 22
 scores 0 on both when the investigation found nothing at all and its report is empty.
 `NIGHTSHIFT_ORCA_LEGACY_JUDGES=true` adds those two scores as `orca_flags_rca_accuracy` and
 `orca_flags_hallucination`, to compare both graders on the same runs.
+
+**Re-grading.** `NIGHTSHIFT_DATASETS=orcabench-regrade` with `NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT=<id>`
+re-scores a stored ORCA experiment without new investigations. It reads each run's stored output,
+takes its task's metadata (and so `orca_expected`) from the release `NIGHTSHIFT_ORCA_RELEASE`
+names, writes `report.md` for runs stored before the report step, and records the ORCA scores as a
+new experiment on the dataset `<release>/regrade-<id>`. The connector must be the model that ran
+the experiment, since it writes the missing reports. It needs no sandbox and no ORCA cluster.
+
+```bash
+NIGHTSHIFT_DATASETS=orcabench-regrade NIGHTSHIFT_ORCA_RELEASE=public755 \
+  NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT=<experiment id> \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault
+```
 
 `goal_pass` is unchanged: it scores the single best hypothesis and passes at 4/5.
 `rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It

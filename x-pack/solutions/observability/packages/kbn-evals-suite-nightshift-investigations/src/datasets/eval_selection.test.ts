@@ -11,6 +11,7 @@ const WITH_SANDBOX = { SANDBOX_API_KEY: 'key' };
 
 const NONE = {
   runOrca: false,
+  runOrcaRegrade: false,
   runInvestigations: false,
   runConnectorProbes: false,
   runWikiOptimize: false,
@@ -207,5 +208,26 @@ describe('ORCA selection', () => {
     expect(() =>
       resolveEvalSelection({ ...orcaEnv, NIGHTSHIFT_DATASETS: 'trace-only,orcabench' })
     ).toThrow('own Scout server');
+  });
+});
+
+describe('ORCA re-grade selection', () => {
+  it('runs only the re-grade, without sandbox credentials', () => {
+    expect(
+      resolveEvalSelection({
+        NIGHTSHIFT_DATASETS: 'orcabench-regrade',
+        NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT: 'experiment',
+      })
+    ).toEqual({ ...NONE, runOrcaRegrade: true });
+  });
+  it('needs the experiment to re-grade', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'orcabench-regrade' })).toThrow(
+      'NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT'
+    );
+  });
+  it('runs on its own', () => {
+    expect(() =>
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'trace-only,orcabench-regrade' })
+    ).toThrow('on its own');
   });
 });
