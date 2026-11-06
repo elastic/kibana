@@ -279,8 +279,8 @@ export const CellFrame = ({
         )}
         {children}
         <CellFooter cell={cell} runtime={runtime} resizeHandle={resizeHandle} />
+        {runtime && <RunningBorder isRunning={isRunning} />}
       </EuiPanel>
-      {runtime && <RunningBorder isRunning={isRunning} />}
       {onRun && 'runMode' in cell && !isFlyoutOpen && (
         <div
           className={RUN_GUTTER_CLASS}

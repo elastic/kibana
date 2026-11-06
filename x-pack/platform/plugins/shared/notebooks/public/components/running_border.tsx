@@ -64,7 +64,7 @@ export const RunningBorder = ({ isRunning }: { isRunning: boolean }) => {
         inset: 0;
         pointer-events: none;
         opacity: 0;
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: inherit;
         box-shadow: inset 0 0 0 ${euiTheme.border.width.thick}
           ${euiTheme.colors.borderStrongPrimary};
       `}
