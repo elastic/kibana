@@ -110,11 +110,14 @@ describe('buildRuleChangedEventData', () => {
   it('includes updated_fields on rule.updated', () => {
     const data = buildRuleChangedEventData(
       'rule.updated',
-      { ...payloadFor(), updatedFields: ['metadata.name', 'schedule'] },
+      {
+        ...payloadFor(createRuleResponse({ metadata: { name: 'renamed' } })),
+        prevRule: createRuleResponse(),
+      },
       apiUserOrigin
     );
 
-    expect(data.updated_fields).toEqual(['metadata.name', 'schedule']);
+    expect(data.updated_fields).toEqual(['metadata.name']);
   });
 
   it.each(['rule.created', 'rule.deleted', 'rule.enabled', 'rule.disabled'] as const)(
@@ -123,21 +126,21 @@ describe('buildRuleChangedEventData', () => {
       expect(
         buildRuleChangedEventData(
           operation,
-          { ...payloadFor(), updatedFields: ['metadata.name'] },
+          { ...payloadFor(createRuleResponse({ enabled: false })), prevRule: createRuleResponse() },
           apiUserOrigin
         )
       ).not.toHaveProperty('updated_fields');
     }
   );
 
-  it('omits updated_fields when the list is absent or empty', () => {
+  it('omits updated_fields when prevRule is absent or nothing differs', () => {
     expect(
       buildRuleChangedEventData('rule.updated', payloadFor(), apiUserOrigin)
     ).not.toHaveProperty('updated_fields');
     expect(
       buildRuleChangedEventData(
         'rule.updated',
-        { ...payloadFor(), updatedFields: [] },
+        { ...payloadFor(), prevRule: createRuleResponse() },
         apiUserOrigin
       )
     ).not.toHaveProperty('updated_fields');

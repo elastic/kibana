@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createRuleResponse } from '../../test_utils';
 import type { EventBus } from '../event_bus';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createRuleEventPublisher } from './rule_event_publisher.mock';
@@ -132,26 +133,16 @@ describe('RuleEventPublisher', () => {
     });
   });
 
-  it('copies updatedFields onto a rule.updated payload and drops an empty list', () => {
+  it('copies prevRule onto a rule.updated payload and omits it when absent', () => {
+    const prevRule = createRuleResponse({ id: 'rule-1' });
     publisher.emitRuleUpdated(context, [
-      {
-        ruleId: 'rule-1',
-        spaceId: 'space-1',
-        updatedFields: ['metadata.name', 'schedule'],
-      },
-      {
-        ruleId: 'rule-2',
-        spaceId: 'space-1',
-        updatedFields: [],
-      },
+      { ruleId: 'rule-1', spaceId: 'space-1', prevRule },
+      { ruleId: 'rule-2', spaceId: 'space-1' },
     ]);
 
     const [firstEvent] = eventBus.publish.mock.calls[0];
     const [secondEvent] = eventBus.publish.mock.calls[1];
-    expect((firstEvent.payload as RuleEventPayload).updatedFields).toEqual([
-      'metadata.name',
-      'schedule',
-    ]);
-    expect(secondEvent.payload as RuleEventPayload).not.toHaveProperty('updatedFields');
+    expect((firstEvent.payload as RuleEventPayload).prevRule).toEqual(prevRule);
+    expect(secondEvent.payload as RuleEventPayload).not.toHaveProperty('prevRule');
   });
 });

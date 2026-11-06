@@ -6,7 +6,9 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventOrigin } from '../../event_origin/origin_schemas';
+import { collectRuleUpdatedFields } from './rule_updated_fields';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -148,11 +150,16 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>>
 
 const updatedFieldsPayload = (
   operation: RuleOperation,
-  updatedFields: readonly string[] | undefined
-): Pick<RuleChangedEbtData, 'updated_fields'> =>
-  operation === RULE_UPDATED_EVENT_TYPE && updatedFields && updatedFields.length > 0
-    ? { updated_fields: [...updatedFields] }
-    : {};
+  prevRule: RuleResponse | undefined,
+  rule: RuleResponse | undefined
+): Pick<RuleChangedEbtData, 'updated_fields'> => {
+  if (operation !== RULE_UPDATED_EVENT_TYPE || !prevRule || !rule) {
+    return {};
+  }
+
+  const updatedFields = collectRuleUpdatedFields(prevRule, rule);
+  return updatedFields.length > 0 ? { updated_fields: updatedFields } : {};
+};
 
 /**
  * Projects a rule-change telemetry payload from a lifecycle event. Rule fields
@@ -161,10 +168,10 @@ const updatedFieldsPayload = (
  */
 export const buildRuleChangedEventData = (
   operation: RuleOperation,
-  { ruleId, rule, templateId, updatedFields }: RuleEventPayload,
+  { ruleId, rule, prevRule, templateId }: RuleEventPayload,
   origin: EventOrigin
 ): RuleChangedEbtData => {
-  const fields = updatedFieldsPayload(operation, updatedFields);
+  const fields = updatedFieldsPayload(operation, prevRule, rule);
 
   if (!rule) {
     return { rule_id: ruleId, ...fields, origin };

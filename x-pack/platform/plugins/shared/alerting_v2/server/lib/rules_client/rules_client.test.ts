@@ -3333,7 +3333,7 @@ describe('RulesClient', () => {
         ]
       );
       const [, [rotated]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
-      expect(rotated).not.toHaveProperty('updatedFields');
+      expect(rotated.prevRule).toEqual(expect.objectContaining({ id: 'rule-1' }));
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
@@ -4397,12 +4397,12 @@ describe('RulesClient', () => {
           ]
         );
         const [, [emitted]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
-        expect(emitted).not.toHaveProperty('updatedFields');
+        expect(emitted.prevRule).toEqual(expect.objectContaining({ version: 4 }));
         const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(savedAttrs.version).toBe(5);
       });
 
-      it('emits the paths that differ on a name and schedule PATCH', async () => {
+      it('emits the pre-update rule on a name and schedule PATCH', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-fields');
 
@@ -4416,7 +4416,9 @@ describe('RulesClient', () => {
           [
             expect.objectContaining({
               ruleId: 'rule-id-wf-fields',
-              updatedFields: ['metadata.name', 'schedule.every'],
+              prevRule: expect.objectContaining({
+                metadata: expect.objectContaining({ name: 'rule-1' }),
+              }),
             }),
           ]
         );

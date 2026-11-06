@@ -203,26 +203,26 @@ describe('RuleTelemetrySubscriber', () => {
       expect(ebtService.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('forwards updatedFields on rule.updated', async () => {
+    it('reports the fields that differ from prevRule on rule.updated', async () => {
       subscriber.start();
 
       await handler(RULE_UPDATED_EVENT_TYPE)(
         eventOfType(RULE_UPDATED_EVENT_TYPE, {
           ruleId: 'rule-1',
           spaceId: 'default',
-          rule,
-          updatedFields: ['metadata.name', 'schedule'],
+          rule: { ...rule, metadata: { ...rule.metadata, name: 'renamed' } },
+          prevRule: rule,
         }),
         context
       );
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         RULE_EBT_EVENT_TYPE_BY_OPERATION[RULE_UPDATED_EVENT_TYPE],
-        expect.objectContaining({ updated_fields: ['metadata.name', 'schedule'] })
+        expect.objectContaining({ updated_fields: ['metadata.name'] })
       );
     });
 
-    it('drops updatedFields on create, delete, enable, and disable', async () => {
+    it('drops updated_fields on create, delete, enable, and disable', async () => {
       subscriber.start();
 
       for (const type of [
@@ -236,7 +236,7 @@ describe('RuleTelemetrySubscriber', () => {
             ruleId: 'rule-1',
             spaceId: 'default',
             rule,
-            updatedFields: ['metadata.name'],
+            prevRule: { ...rule, enabled: !rule.enabled },
           }),
           context
         );

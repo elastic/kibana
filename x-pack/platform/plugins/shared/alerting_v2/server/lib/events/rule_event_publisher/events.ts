@@ -40,10 +40,10 @@ export interface RuleEventPayload {
    */
   readonly correlationId?: string;
   /**
-   * Dotted paths of rule fields that differ on a rule update.
-   * Present only for `rule.updated`, and only when at least one path differs.
+   * Rule as it was stored before the operation. Present only for `rule.updated`,
+   * and only when the pre-update state is available.
    */
-  readonly updatedFields?: readonly string[];
+  readonly prevRule?: RuleResponse;
 }
 
 /**
