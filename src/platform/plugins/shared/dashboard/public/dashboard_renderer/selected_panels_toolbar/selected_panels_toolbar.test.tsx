@@ -38,6 +38,12 @@ jest.mock('../../dashboard_actions/copy_to_dashboard_action', () => ({
   userCanCopyToDashboard: jest.fn(() => true),
 }));
 
+jest.mock('../../dashboard_actions/export_json_action', () => ({
+  apiCanExportJson: (api: { supportsJsonExport?: boolean } | undefined) =>
+    Boolean(api?.supportsJsonExport),
+  openPanelsExportJsonFlyout: jest.fn(),
+}));
+
 const renderToolbar = () =>
   render(
     <I18nProvider>
@@ -131,6 +137,34 @@ describe('SelectedPanelsToolbar', () => {
       expect(
         screen.queryByTestId('dashboardSelectedPanelsCopyToDashboard')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Export JSON', () => {
+    it('lists the selected panels that cannot be exported in the disabled tooltip', async () => {
+      mockDashboardApi.children$.next({
+        panel1: { isDuplicable: true, supportsJsonExport: true },
+        markdown: {
+          isDuplicable: true,
+          title$: new BehaviorSubject('Instructions'),
+          hideTitle$: new BehaviorSubject(false),
+        },
+        map: { isDuplicable: true, type: 'map' },
+      } as Parameters<typeof mockDashboardApi.children$.next>[0]);
+      mockDashboardApi.selectedPanelIds$.next(['panel1', 'markdown', 'map']);
+      renderToolbar();
+
+      const exportButton = screen.getByTestId('dashboardSelectedPanelsExportJson');
+      expect(exportButton).toHaveAttribute('aria-disabled', 'true');
+
+      // A disabled button has `pointer-events: none`, so the pointer reaches the tooltip anchor around it
+      await userEvent.hover(exportButton.parentElement as HTMLElement);
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent("These selected panels can't be exported as JSON:");
+      expect(tooltip).toHaveTextContent('Instructions');
+      expect(tooltip).toHaveTextContent('Untitled map');
+      expect(tooltip).not.toHaveTextContent('panel1');
     });
   });
 });

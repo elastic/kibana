@@ -23,7 +23,13 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { apiCanBeDuplicated, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiCanBeDuplicated,
+  apiHasType,
+  apiPublishesTitle,
+  getTitle,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import {
   userCanCopyToDashboard,
@@ -48,9 +54,55 @@ const copyToDashboardDisabledLabel = i18n.translate(
 const exportJsonDisabledLabel = i18n.translate(
   'dashboard.selectedPanelsToolbar.exportJsonDisabledLabel',
   {
-    defaultMessage: 'Some of the selected panels cannot be exported as JSON',
+    defaultMessage: "These selected panels can't be exported as JSON:",
   }
 );
+
+const MAX_LISTED_PANELS = 3;
+
+const getPanelName = (panel: unknown, panelId: string): string => {
+  const title = apiPublishesTitle(panel) ? getTitle(panel) : undefined;
+  if (title) return title;
+  return apiHasType(panel)
+    ? i18n.translate('dashboard.selectedPanelsToolbar.untitledPanelName', {
+        defaultMessage: 'Untitled {typeName}',
+        values: { typeName: panel.type },
+      })
+    : panelId;
+};
+
+/** Tooltip listing the selected panels that a disabled bulk action can't use */
+const UnsupportedPanelsTooltip = ({
+  heading,
+  panelIds,
+  panels,
+}: {
+  heading: string;
+  panelIds: string[];
+  panels: Record<string, unknown>;
+}) => {
+  const styles = useMemoCss(selectedPanelsToolbarStyles);
+  const hiddenCount = panelIds.length - MAX_LISTED_PANELS;
+  return (
+    <>
+      <p>{heading}</p>
+      <ul css={styles.tooltipList}>
+        {panelIds.slice(0, MAX_LISTED_PANELS).map((panelId) => (
+          <li key={panelId}>{getPanelName(panels[panelId], panelId)}</li>
+        ))}
+      </ul>
+      {hiddenCount > 0 && (
+        <p>
+          <FormattedMessage
+            id="dashboard.selectedPanelsToolbar.moreUnsupportedPanels"
+            defaultMessage="and {count, plural, one {# more panel} other {# more panels}}"
+            values={{ count: hiddenCount }}
+          />
+        </p>
+      )}
+    </>
+  );
+};
 
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
 export const SelectedPanelsToolbar = () => {
@@ -89,9 +141,10 @@ export const SelectedPanelsToolbar = () => {
   const canCopySelection = selectedPanelIds.every((panelId) =>
     apiCanBeDuplicated(children[panelId])
   );
-  const canExportSelection = selectedPanelIds.every((panelId) =>
-    apiCanExportJson(children[panelId])
+  const unexportablePanelIds = selectedPanelIds.filter(
+    (panelId) => !apiCanExportJson(children[panelId])
   );
+  const canExportSelection = unexportablePanelIds.length === 0;
 
   return (
     <EuiPanel
@@ -153,7 +206,17 @@ export const SelectedPanelsToolbar = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={canExportSelection ? undefined : exportJsonDisabledLabel}>
+              <EuiToolTip
+                content={
+                  canExportSelection ? undefined : (
+                    <UnsupportedPanelsTooltip
+                      heading={exportJsonDisabledLabel}
+                      panelIds={unexportablePanelIds}
+                      panels={children}
+                    />
+                  )
+                }
+              >
                 <EuiButtonEmpty
                   iconType="code"
                   color="text"
@@ -202,6 +265,11 @@ const selectedPanelsToolbarStyles = {
     }),
   // EuiBadge is fixed to the `xs` font scale; use the `s` scale of the small action buttons next to it
   count: (euiThemeContext: UseEuiTheme) => css(euiFontSize(euiThemeContext, 's')),
+  tooltipList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      listStyle: 'disc',
+      paddingInlineStart: euiTheme.size.l,
+    }),
   divider: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'block',
