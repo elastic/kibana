@@ -8,6 +8,7 @@
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { GetTypesResponse } from '../inventory/types';
+import { INTERIM_AUTHZ } from './interim_authz';
 import { typesRoute } from './types_route';
 
 const route = typesRoute['GET /internal/entity_inventory/types'];
@@ -37,7 +38,8 @@ describe('typesRoute', () => {
     );
   });
 
-  it('requires the entity inventory read privilege', () => {
+  it('requires the entity inventory read privilege through the shared interim authz', () => {
+    expect(route.security).toBe(INTERIM_AUTHZ);
     expect(route.security).toEqual({
       authz: { requiredPrivileges: ['entity_inventory_read'] },
     });
