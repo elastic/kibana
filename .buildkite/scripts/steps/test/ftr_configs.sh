@@ -67,7 +67,8 @@ while read -r config; do
   FULL_COMMAND="node scripts/functional_tests $BAIL_ARG $RETRY_ARG --config $config $EXTRA_ARGS"
 
   # see if this config has already been executed successfully
-  CONFIG_EXECUTION_KEY="${config}_executed"
+  # Buildkite metadata keys must be shorter than 255 bytes, even for deeply nested config paths.
+  CONFIG_EXECUTION_KEY="ftr_config_$(printf '%s' "$config" | sha256sum | cut -d' ' -f1)_executed"
   IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
   # we don't want this optimization for flaky test runs
   IS_FLAKY_TEST_RUN=$(test -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && echo "false" || echo "true")

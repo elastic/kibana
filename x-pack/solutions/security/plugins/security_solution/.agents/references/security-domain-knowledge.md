@@ -131,8 +131,8 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 |-----------|----------|
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/` |
 | Scout (Playwright) | `x-pack/solutions/security/plugins/security_solution/test/scout/` |
-| API Integration (general) | `x-pack/test/security_solution_api_integration/` |
-| API Integration (Security) | `x-pack/solutions/security/test/security_solution_api_integration/` |
+| API Integration (general) | `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/` |
+| API Integration (Security) | `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/` |
 | Entity Analytics API tests | `test_suites/entity_analytics/` (within either API integration path) |
 | Detection Engine API tests | `test_suites/detections_response/` (within either API integration path) |
 | Investigation API tests | `test_suites/investigation/` (within either API integration path) |

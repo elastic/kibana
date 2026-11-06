@@ -60,40 +60,42 @@ interface FunctionalStepGroupOptions {
   retryCount: number;
 }
 
-/**
- * Build the FTR Configs step group from the resolved functional groups.
- * Returns `undefined` when there are no functional groups.
- */
-export function buildFunctionalStepGroup(
-  opts: FunctionalStepGroupOptions
-): BuildkiteGroupStep | undefined {
-  if (opts.functionalGroups.length === 0) return undefined;
+/** Build FTR Configs groups small enough for Buildkite's per-upload job limit. */
+export function buildFunctionalStepGroups(opts: FunctionalStepGroupOptions): BuildkiteGroupStep[] {
+  // Buildkite rejects pipeline uploads containing more than 500 jobs.
+  const maxStepsPerUpload = 400;
+  const sortedSteps = sortFunctionalGroups(opts.functionalGroups).map(
+    ({ title, key, queue = opts.defaultQueue }): BuildkiteStep => ({
+      label: title,
+      command: opts.command,
+      timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
+      key,
+      agents: expandAgentQueue(queue, AGENT_DISK_GIB.FTR),
+      env: {
+        FTR_CONFIG_GROUP_KEY: key,
+        ...opts.ftrExtraArgs,
+        ...opts.envFromLabels,
+      },
+      retry: {
+        automatic: [
+          { exit_status: '-1', limit: RETRIES.INFRA },
+          ...(opts.retryCount > 0 ? [{ exit_status: '*', limit: opts.retryCount }] : []),
+        ],
+      },
+    })
+  );
 
-  return {
-    group: 'FTR Configs',
-    key: STEP_KEYS.FTR_GROUP,
-    depends_on: opts.dependsOn,
-    steps: sortFunctionalGroups(opts.functionalGroups).map(
-      ({ title, key, queue = opts.defaultQueue }): BuildkiteStep => ({
-        label: title,
-        command: opts.command,
-        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
-        key,
-        agents: expandAgentQueue(queue, AGENT_DISK_GIB.FTR),
-        env: {
-          FTR_CONFIG_GROUP_KEY: key,
-          ...opts.ftrExtraArgs,
-          ...opts.envFromLabels,
-        },
-        retry: {
-          automatic: [
-            { exit_status: '-1', limit: RETRIES.INFRA },
-            ...(opts.retryCount > 0 ? [{ exit_status: '*', limit: opts.retryCount }] : []),
-          ],
-        },
-      })
-    ),
-  };
+  const groups: BuildkiteGroupStep[] = [];
+  for (let start = 0; start < sortedSteps.length; start += maxStepsPerUpload) {
+    const groupNumber = groups.length + 1;
+    groups.push({
+      group: groupNumber === 1 ? 'FTR Configs' : `FTR Configs (${groupNumber})`,
+      key: groupNumber === 1 ? STEP_KEYS.FTR_GROUP : `${STEP_KEYS.FTR_GROUP}-${groupNumber}`,
+      depends_on: opts.dependsOn,
+      steps: sortedSteps.slice(start, start + maxStepsPerUpload),
+    });
+  }
+  return groups;
 }
 
 /**
