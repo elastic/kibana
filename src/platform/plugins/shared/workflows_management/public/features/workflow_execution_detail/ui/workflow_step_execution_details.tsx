@@ -177,9 +177,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     useEffect(() => {
       // reset the tab to the default one on step change
-      setSelectedTabId(isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input');
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [stepExecution?.stepId, stepExecution?.status, tabs[0].id]);
+      setSelectedTabId(defaultTabId);
+    }, [stepExecution?.stepId, defaultTabId]);
 
     if (!stepExecution) {
       return (
