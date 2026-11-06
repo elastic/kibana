@@ -36,7 +36,7 @@ import {
   EditingColumnIndexContext,
   getColumnHeaderRenderer,
 } from './grid_custom_renderers/column_header_renderer';
-import type { EditIndexContentContext } from '../types';
+import type { ColumnReadOnlyReason, EditIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
@@ -69,6 +69,9 @@ const ROWS_PER_PAGE_OPTIONS = [25, 50, 100];
 // columns remain reachable through the Fields selector in the toolbar.
 const MAX_DEFAULT_VISIBLE_COLUMNS = 50;
 
+// Stable default so `useObservable` does not resubscribe on every render before the first emission.
+const EMPTY_READ_ONLY_COLUMNS: ReadonlyMap<string, ColumnReadOnlyReason> = new Map();
+
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const { euiTheme } = useEuiTheme();
   const { rows } = props;
@@ -93,10 +96,18 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
   const loadedRowsAreCapped = useObservable(indexUpdateService.loadedRowsAreCapped$, false);
   const totalDocsCount = useObservable(indexUpdateService.totalDocsCount$, undefined);
-  const readOnlyColumns = useObservable(indexUpdateService.readOnlyColumns$, new Set<string>());
+  const readOnlyColumns = useObservable(
+    indexUpdateService.readOnlyColumns$,
+    EMPTY_READ_ONLY_COLUMNS
+  );
 
   const isColumnReadOnly = useCallback(
     (columnName: string) => readOnlyColumns.has(columnName),
+    [readOnlyColumns]
+  );
+
+  const getColumnReadOnlyReason = useCallback(
+    (columnName: string) => readOnlyColumns.get(columnName),
     [readOnlyColumns]
   );
 
@@ -237,7 +248,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             columnIndex,
             isSavedColumn,
             isUnsupportedESQLType,
-            isColumnReadOnly(columnName),
+            getColumnReadOnlyReason(columnName),
             setEditingColumnIndex,
             indexUpdateService,
             indexEditorTelemetryService
@@ -252,7 +263,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     renderedColumns,
     props.dataView.fields,
     columnMetaById,
-    isColumnReadOnly,
+    getColumnReadOnlyReason,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);

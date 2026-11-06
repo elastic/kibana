@@ -26,6 +26,14 @@ import type { IndexEditorTelemetryService } from './telemetry/telemetry_service'
 /** Index mode the editor operates in. Only `lookup` sets an explicit ES index mode. */
 export type IndexEditorIndexMode = 'standard' | 'lookup';
 
+/**
+ * Why a column is rendered read-only in the editor grid.
+ * - `runtimeField`: computed at query time, so edits would never persist.
+ * - `arrayOfObjects`: part of an array of objects, which ES|QL flattens into independent multivalue
+ *   columns that cannot be mapped back onto the stored array, so editing would drop data on save.
+ */
+export type ColumnReadOnlyReason = 'runtimeField' | 'arrayOfObjects';
+
 export interface EditIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;

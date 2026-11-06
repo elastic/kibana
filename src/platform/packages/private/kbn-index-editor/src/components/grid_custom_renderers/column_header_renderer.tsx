@@ -22,8 +22,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { IndexUpdateService } from '../../services/index_update_service';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
+import type { ColumnReadOnlyReason } from '../../types';
 import { AddColumnPopover, COLUMN_INDEX_PROP } from './add_column_popover';
 import { isPlaceholderColumn } from '../../utils';
+
+const getReadOnlyColumnTooltip = (reason: ColumnReadOnlyReason): string => {
+  switch (reason) {
+    case 'arrayOfObjects':
+      return i18n.translate('indexEditor.columnHeader.readOnlyArrayOfObjectsField', {
+        defaultMessage:
+          'This field is part of an array of objects, which cannot be edited here without risking data loss.',
+      });
+    case 'runtimeField':
+      return i18n.translate('indexEditor.columnHeader.readOnlyRuntimeField', {
+        defaultMessage:
+          'This is a runtime field. Its value is computed at query time, so it cannot be edited here.',
+      });
+  }
+};
 
 // Provides the index of the column currently being edited so each column header can derive its own
 // edit state reactively, without the grid rebuilding its per-column configuration on every edit.
@@ -35,7 +51,7 @@ export const getColumnHeaderRenderer = (
   columnIndex: number,
   isSavedColumn: boolean,
   isUnsupportedESQLType: boolean,
-  isReadOnlyColumn: boolean,
+  readOnlyReason: ColumnReadOnlyReason | undefined,
   setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
   telemetryService: IndexEditorTelemetryService
@@ -44,7 +60,7 @@ export const getColumnHeaderRenderer = (
     ...column,
     // Read-only columns (e.g. runtime fields) must not expose the cell expand popover, which is the
     // grid's edit entry point.
-    ...(isReadOnlyColumn ? { isExpandable: false } : {}),
+    ...(readOnlyReason ? { isExpandable: false } : {}),
     display: (
       <ColumnHeader
         setEditingColumnIndex={setEditingColumnIndex}
@@ -52,7 +68,7 @@ export const getColumnHeaderRenderer = (
         initialColumnName={columnName}
         initialColumnType={columnType}
         isUnsupportedESQLType={isUnsupportedESQLType}
-        isReadOnlyColumn={isReadOnlyColumn}
+        readOnlyReason={readOnlyReason}
         columnIndex={columnIndex}
         telemetryService={telemetryService}
         originalColumnDisplay={column.display}
@@ -105,7 +121,7 @@ interface ColumnHeaderProps {
   setEditingColumnIndex: (columnIndex: number | null) => void;
   isSavedColumn: boolean;
   isUnsupportedESQLType: boolean;
-  isReadOnlyColumn: boolean;
+  readOnlyReason: ColumnReadOnlyReason | undefined;
   initialColumnName: string;
   initialColumnType: string | undefined;
   columnIndex: number;
@@ -117,7 +133,7 @@ const ColumnHeader = ({
   setEditingColumnIndex,
   isSavedColumn,
   isUnsupportedESQLType,
-  isReadOnlyColumn,
+  readOnlyReason,
   initialColumnName,
   initialColumnType,
   columnIndex,
@@ -159,15 +175,12 @@ const ColumnHeader = ({
           }}
         />
       )}
-      {isReadOnlyColumn && (
+      {readOnlyReason && (
         <EuiIconTip
           type="lock"
           color="subdued"
           size="m"
-          content={i18n.translate('indexEditor.columnHeader.readOnlyRuntimeField', {
-            defaultMessage:
-              'This is a runtime field. Its value is computed at query time, so it cannot be edited here.',
-          })}
+          content={getReadOnlyColumnTooltip(readOnlyReason)}
           anchorProps={{
             css: { display: 'flex', marginLeft: euiTheme.size.xxs },
           }}

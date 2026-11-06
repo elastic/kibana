@@ -378,22 +378,98 @@ describe('IndexUpdateService', () => {
 
   describe('readOnlyColumns', () => {
     it('starts with no read-only columns', async () => {
-      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(new Set());
+      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(new Map());
     });
 
-    it('exposes the columns set as read-only', async () => {
+    it('exposes runtime-field columns as read-only', async () => {
       service.setReadOnlyColumns(['day_of_week', 'customer.full_name']);
 
       await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(
-        new Set(['day_of_week', 'customer.full_name'])
+        new Map([
+          ['day_of_week', 'runtimeField'],
+          ['customer.full_name', 'runtimeField'],
+        ])
       );
     });
 
-    it('replaces the previous read-only columns on each call', async () => {
+    it('replaces the previous runtime-field columns on each call', async () => {
       service.setReadOnlyColumns(['a']);
       service.setReadOnlyColumns(['b', 'c']);
 
-      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(new Set(['b', 'c']));
+      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(
+        new Map([
+          ['b', 'runtimeField'],
+          ['c', 'runtimeField'],
+        ])
+      );
+    });
+
+    it('locks columns backed by an array of objects detected from the fetched _source', async () => {
+      (data.search.search as jest.Mock).mockReturnValue(
+        of({
+          rawResponse: {
+            columns: [
+              { name: 'a.b', type: 'long' },
+              { name: 'a.c', type: 'long' },
+              { name: 'title', type: 'keyword' },
+              { name: '_id', type: 'keyword' },
+              { name: '_source', type: '_source' },
+            ],
+            values: [
+              [
+                [1, 3],
+                [2, 4],
+                'hello',
+                '1',
+                {
+                  a: [
+                    { b: 1, c: 2 },
+                    { b: 3, c: 4 },
+                  ],
+                  title: 'hello',
+                },
+              ],
+            ],
+          },
+        })
+      );
+
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+
+      const readOnlyColumns = await firstValueFrom(
+        service.readOnlyColumns$.pipe(filter((columns) => columns.size > 0))
+      );
+
+      // Only the array-of-objects sub-fields are locked; the scalar field stays editable.
+      expect(readOnlyColumns).toEqual(
+        new Map([
+          ['a.b', 'arrayOfObjects'],
+          ['a.c', 'arrayOfObjects'],
+        ])
+      );
+    });
+
+    it('keeps fields inside a single (non-array) object editable', async () => {
+      (data.search.search as jest.Mock).mockReturnValue(
+        of({
+          rawResponse: {
+            columns: [
+              { name: 'user.name', type: 'keyword' },
+              { name: '_id', type: 'keyword' },
+              { name: '_source', type: '_source' },
+            ],
+            values: [['Ada', '1', { user: { name: 'Ada' } }]],
+          },
+        })
+      );
+
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+
+      await firstValueFrom(service.rows$.pipe(filter((rows) => rows[0]?.id === '1')));
+
+      expect(await firstValueFrom(service.readOnlyColumns$)).toEqual(new Map());
     });
   });
 

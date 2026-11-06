@@ -63,9 +63,10 @@ import {
   INDEX_EDITOR_UPDATE_MAPPINGS_ROUTE,
   type IndexEditorResolution,
 } from '@kbn/esql-types';
-import { isDocDelete, isDocUpdate, isPlaceholderColumn } from '../utils';
+import { getArrayBackedColumns, isDocDelete, isDocUpdate, isPlaceholderColumn } from '../utils';
 import type {
   ColumnAddition,
+  ColumnReadOnlyReason,
   ColumnUpdate,
   DeleteDocAction,
   DocUpdate,
@@ -217,15 +218,58 @@ export class IndexUpdateService {
   public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
 
   /**
-   * Columns that exist in the index but cannot be edited here (e.g. runtime fields, whose values are
-   * computed at query time, so edits would never persist). The grid renders them read-only.
+   * Columns that exist in the index but cannot be edited here, mapped to the reason why.
    */
-  private readonly _readOnlyColumns$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
-  public readonly readOnlyColumns$: Observable<ReadonlySet<string>> =
+  private readonly _readOnlyColumns$ = new BehaviorSubject<
+    ReadonlyMap<string, ColumnReadOnlyReason>
+  >(new Map());
+  public readonly readOnlyColumns$: Observable<ReadonlyMap<string, ColumnReadOnlyReason>> =
     this._readOnlyColumns$.asObservable();
 
+  /** Columns the host marks read-only up front, e.g. runtime fields detected at pre-flight. */
+  private _runtimeReadOnlyColumns: readonly string[] = [];
+
+  /**
+   * Columns discovered to be part of an array of objects while reading documents. ES|QL flattens
+   * those into independent multivalue columns that cannot be mapped back onto the stored array, so
+   * editing them would drop data on save. Accumulated across fetches so a column never silently
+   * becomes editable again when a later filter happens to exclude the array-valued rows.
+   */
+  private readonly _arrayBackedReadOnlyColumns = new Set<string>();
+
   public setReadOnlyColumns(columns: readonly string[]): void {
-    this._readOnlyColumns$.next(new Set(columns));
+    this._runtimeReadOnlyColumns = columns;
+    this.emitReadOnlyColumns();
+  }
+
+  private emitReadOnlyColumns(): void {
+    const readOnlyColumns = new Map<string, ColumnReadOnlyReason>();
+    for (const name of this._arrayBackedReadOnlyColumns) {
+      readOnlyColumns.set(name, 'arrayOfObjects');
+    }
+    // Runtime fields win the label if a column somehow qualifies for both reasons.
+    for (const name of this._runtimeReadOnlyColumns) {
+      readOnlyColumns.set(name, 'runtimeField');
+    }
+    this._readOnlyColumns$.next(readOnlyColumns);
+  }
+
+  /**
+   * Flags columns that belong to an array of objects as read-only, using the faithful `_source`
+   * returned with each fetched row. New findings are accumulated across fetches.
+   */
+  private registerArrayBackedColumns(columnNames: string[], sources: unknown[]): void {
+    const dataColumnNames = columnNames.filter((name) => name !== '_id' && name !== '_source');
+    let hasNewColumns = false;
+    for (const name of getArrayBackedColumns(dataColumnNames, sources)) {
+      if (!this._arrayBackedReadOnlyColumns.has(name)) {
+        this._arrayBackedReadOnlyColumns.add(name);
+        hasNewColumns = true;
+      }
+    }
+    if (hasNewColumns) {
+      this.emitReadOnlyColumns();
+    }
   }
 
   private placeholderIndex = 0;
@@ -931,15 +975,24 @@ export class IndexUpdateService {
             });
 
             const columnNames = columns.map(({ name }) => name);
-            const resultRows: DataTableRecord[] = values
-              .map((row) => zipObject(columnNames, row))
-              .map((row) => {
-                return {
+            const zippedRows = values.map((row) => zipObject(columnNames, row));
+
+            // Lock columns that are part of an array of objects, which the grid cannot edit without
+            // risking data loss on save (the flattened multivalue columns cannot be mapped back onto
+            // the stored array). Detection uses the faithful `_source` returned with each row.
+            this.registerArrayBackedColumns(
+              columnNames,
+              zippedRows.map((row) => row._source)
+            );
+
+            const resultRows: DataTableRecord[] = zippedRows.map(
+              (row) =>
+                ({
                   id: row._id,
                   raw: row,
                   flattened: row,
-                } as unknown as DataTableRecord;
-              });
+                } as unknown as DataTableRecord)
+            );
 
             if (resultRows.length === 0) {
               resultRows.push(this.buildPlaceholderRow());

@@ -65,6 +65,39 @@ export function getCellValue(value: unknown): string | undefined {
   return value?.toString();
 }
 
+/**
+ * Returns the subset of `columnNames` that cannot be safely edited because, in at least one of the
+ * provided `_source` documents, an ancestor of the column's dotted path is an array (i.e. the field
+ * is part of an array of objects). ES|QL flattens such arrays into independent, doc-value-ordered
+ * multivalue columns, so an edit cannot be mapped back onto the stored array; a partial update would
+ * replace the array and drop sibling data.
+ */
+export function getArrayBackedColumns(
+  columnNames: readonly string[],
+  sources: readonly unknown[]
+): string[] {
+  return columnNames.filter((name) => sources.some((source) => hasArrayAncestor(source, name)));
+}
+
+/** Whether any ancestor of the dotted `path` resolves to an array within `source`. */
+function hasArrayAncestor(source: unknown, path: string): boolean {
+  const segments = path.split('.');
+  let current: unknown = source;
+
+  // Only ancestors matter; a leaf that is itself a scalar array can be replaced wholesale safely.
+  for (let i = 0; i < segments.length - 1; i++) {
+    if (typeof current !== 'object' || current === null) {
+      return false;
+    }
+    current = (current as Record<string, unknown>)[segments[i]];
+    if (Array.isArray(current)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function isDocUpdate(update: unknown): update is { type: 'add-doc'; payload: DocUpdate } {
   return (
     typeof update === 'object' && update !== null && 'type' in update && update.type === 'add-doc'
