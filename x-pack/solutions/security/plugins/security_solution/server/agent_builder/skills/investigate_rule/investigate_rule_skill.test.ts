@@ -12,8 +12,22 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { createToolHandlerContext, createToolTestMocks } from '../../__mocks__/test_helpers';
 import { createInvestigateRuleSkill } from './investigate_rule_skill';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
+import { readRules } from '../../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
 
-const investigateRuleSkill = createInvestigateRuleSkill();
+jest.mock('../../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules');
+
+const readRulesMock = readRules as jest.MockedFunction<typeof readRules>;
+const rulesClient = {};
+const startPlugins = {
+  alerting: { getRulesClientWithRequest: jest.fn() },
+};
+const getStartServices = jest.fn();
+
+const investigateRuleSkill = createInvestigateRuleSkill({
+  getStartServices: getStartServices as unknown as Parameters<
+    typeof createInvestigateRuleSkill
+  >[0]['getStartServices'],
+});
 
 describe('investigateRuleSkill', () => {
   describe('skill definition', () => {
@@ -82,11 +96,11 @@ describe('investigateRuleSkill', () => {
 
   // ── resolve_rule_attachment ─────────────────────────────────────────────────
   //
-  // The skill itself does NO fetching: it adds a security.rule attachment by
-  // reference (origin = rule UUID) and the attachment type's resolve() hook
-  // fetches the rule snapshot. These tests verify the by-reference wiring
-  // and error mapping; rule fetching is covered in the rule attachment type's
-  // own test (../../attachments/rule.test.ts).
+  // The tool looks the rule up by its rule_id only to get the saved-object id,
+  // then adds a security.rule attachment by reference (origin = saved-object id)
+  // and the attachment type's resolve() hook fetches the rule snapshot. These
+  // tests verify the by-reference wiring and error mapping; rule fetching is
+  // covered in the rule attachment type's own test (../../attachments/rule.test.ts).
 
   describe('resolve_rule_attachment inline tool', () => {
     const { mockEsClient, mockRequest, mockLogger } = createToolTestMocks();
@@ -94,6 +108,9 @@ describe('investigateRuleSkill', () => {
 
     beforeEach(async () => {
       jest.clearAllMocks();
+      getStartServices.mockResolvedValue([{}, startPlugins, {}]);
+      startPlugins.alerting.getRulesClientWithRequest.mockResolvedValue(rulesClient);
+      readRulesMock.mockResolvedValue({ id: 'rule-so-id-1' } as never);
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
       tool = inlineTools!.find(
         ({ id }) => id === 'investigate-rule.resolve_rule_attachment'
@@ -129,13 +146,20 @@ describe('investigateRuleSkill', () => {
       expect(data.attachmentId).toBe('rule-investigate-rule-uuid-1');
       expect(data.version).toBe(1);
 
+      // The rule_id is used only to find the rule's saved-object id.
+      expect(readRulesMock).toHaveBeenCalledWith({
+        rulesClient,
+        id: undefined,
+        ruleId: 'rule-uuid-1',
+      });
+
       // By-reference: origin (not data) + a resolve context built from the tool context.
       const [input, actor, resolveContext] = (ctx.attachments.add as jest.Mock).mock.calls[0];
       expect(input).toEqual(
         expect.objectContaining({
           id: 'rule-investigate-rule-uuid-1',
           type: 'security.rule',
-          origin: 'rule-uuid-1',
+          origin: 'rule-so-id-1',
         })
       );
       expect(input.data).toBeUndefined();
