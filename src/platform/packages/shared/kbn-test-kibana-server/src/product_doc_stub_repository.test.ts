@@ -15,6 +15,7 @@ import { PRODUCT_DOC_STUB_REPOSITORY_URL } from './product_doc_stub_repository';
 
 const PRODUCTS = ['kibana', 'elasticsearch', 'observability', 'security'];
 const JINA_INFERENCE_ID = '.jina-embeddings-v5-text-small';
+const SECURITY_LABS_VERSION = '2025.04.30-103600';
 
 const readZipEntry = (zipPath: string, entryPath: string): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -67,6 +68,23 @@ describe('PRODUCT_DOC_STUB_REPOSITORY_URL', () => {
       expect(keys).toContain(`kb-product-doc-${product}-latest.zip`);
       expect(keys).toContain(`kb-product-doc-${product}-0.0--${JINA_INFERENCE_ID}.zip`);
       expect(keys).toContain(`kb-product-doc-${product}-latest--${JINA_INFERENCE_ID}.zip`);
+    }
+  });
+
+  it('lists a Security Labs artifact for ELSER and Jina', async () => {
+    for (const key of [
+      `security-labs-${SECURITY_LABS_VERSION}.zip`,
+      `security-labs-${SECURITY_LABS_VERSION}--${JINA_INFERENCE_ID}.zip`,
+    ]) {
+      expect(keys).toContain(key);
+      const manifest = JSON.parse(
+        await readZipEntry(Path.join(repositoryPath, key), 'manifest.json')
+      );
+      expect(manifest).toEqual({
+        formatVersion: '2.0.0',
+        resourceType: 'security_labs',
+        version: SECURITY_LABS_VERSION,
+      });
     }
   });
 

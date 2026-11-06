@@ -65,4 +65,12 @@
     <Key>kb-product-doc-security-latest--.jina-embeddings-v5-text-small.zip</Key>
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
+  <Contents>
+    <Key>security-labs-2025.04.30-103600.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>security-labs-2025.04.30-103600--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
 </ListBucketResult>
