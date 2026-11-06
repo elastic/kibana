@@ -39,6 +39,10 @@ describe('workflow-page saved object', () => {
     });
   });
 
+  it('builds the id from the workflow and the page', () => {
+    expect(getWorkflowPageSavedObjectId({ workflowId: 'w', pageId: 'default' })).toBe('w:default');
+  });
+
   it('builds a stable id from the workflow and the page', () => {
     const id = getWorkflowPageSavedObjectId({ workflowId: 'w', pageId: 'default' });
     expect(getWorkflowPageSavedObjectId({ workflowId: 'w', pageId: 'default' })).toBe(id);

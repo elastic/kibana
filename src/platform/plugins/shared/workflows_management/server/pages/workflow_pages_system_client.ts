@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { chunk } from 'lodash';
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
@@ -19,7 +20,9 @@ import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './
 import type { WorkflowPageRef } from './page_secret';
 import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
 
-const FIND_PER_PAGE = 100;
+// A find returns at most 10,000 objects. 1,000 workflows leave room for stale pages.
+const FIND_WORKFLOW_IDS_PER_REQUEST = 1_000;
+const FIND_MAX_PAGES = 10_000;
 
 /** The page ids a definition asks for. Global workflows never get a page. */
 const getWantedPageIds = (spaceId: string, definition: WorkflowYaml | null | undefined) =>
@@ -37,6 +40,8 @@ export interface WorkflowPagesSystemClient {
    */
   syncWorkflowPages(params: {
     workflowId: string;
+    /** The workflow's `created_at`. Pages of an earlier workflow with the same id are retired. */
+    workflowCreatedAt: string;
     spaceId: string;
     definition: WorkflowYaml | null | undefined;
     valid: boolean;
@@ -65,6 +70,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
 
   async syncWorkflowPages({
     workflowId,
+    workflowCreatedAt,
     spaceId,
     definition,
     valid,
@@ -75,10 +81,16 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     const wanted = getWantedPageIds(spaceId, definition);
     const existing = await this.findWorkflowPages([workflowId], spaceId);
 
-    const toRetire = existing.filter(({ attributes }) => !wanted.has(attributes.pageId));
-    await this.deletePages(toRetire, spaceId);
+    const isCurrent = ({ attributes }: SavedObject<WorkflowPageAttributes>) =>
+      wanted.has(attributes.pageId) && attributes.workflowCreatedAt === workflowCreatedAt;
+    await this.deletePages(
+      existing.filter((page) => !isCurrent(page)),
+      spaceId
+    );
 
-    const existingIds = new Set(existing.map(({ attributes }) => attributes.pageId));
+    const existingIds = new Set(
+      existing.filter(isCurrent).map(({ attributes }) => attributes.pageId)
+    );
     const toCreate = [...wanted].filter((pageId) => !existingIds.has(pageId));
     if (toCreate.length === 0) {
       return;
@@ -89,7 +101,9 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
       );
       return;
     }
-    await Promise.all(toCreate.map((pageId) => this.createPage({ workflowId, spaceId, pageId })));
+    await Promise.all(
+      toCreate.map((pageId) => this.createPage({ workflowId, spaceId, pageId }, workflowCreatedAt))
+    );
   }
 
   async retireWorkflowPages({
@@ -119,7 +133,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     );
   }
 
-  private async createPage(ref: WorkflowPageRef): Promise<void> {
+  private async createPage(ref: WorkflowPageRef, workflowCreatedAt: string): Promise<void> {
     const secret = generatePageSecret();
     try {
       await this.deps.savedObjectsClient.create<WorkflowPageAttributes>(
@@ -131,6 +145,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
           secretHash: computePageSecretHash(ref, secret),
           access: null,
           enabled: true,
+          workflowCreatedAt,
         },
         {
           id: getWorkflowPageSavedObjectId(ref),
@@ -151,23 +166,21 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     workflowIds: string[],
     spaceId: string
   ): Promise<Array<SavedObject<WorkflowPageAttributes>>> {
-    const finder = this.deps.savedObjectsClient.createPointInTimeFinder<WorkflowPageAttributes>({
-      type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-      namespaces: [spaceId],
-      perPage: FIND_PER_PAGE,
-      filter: nodeBuilder.or(
-        workflowIds.map((workflowId) =>
-          nodeBuilder.is(`${WORKFLOW_PAGE_SAVED_OBJECT_TYPE}.attributes.workflowId`, workflowId)
-        )
-      ),
-    });
     const pages: Array<SavedObject<WorkflowPageAttributes>> = [];
-    try {
-      for await (const response of finder.find()) {
-        pages.push(...response.saved_objects);
-      }
-    } finally {
-      await finder.close();
+    // One page per workflow today, so a chunk always fits in one response.
+    for (const ids of chunk(workflowIds, FIND_WORKFLOW_IDS_PER_REQUEST)) {
+      const { saved_objects: found } =
+        await this.deps.savedObjectsClient.find<WorkflowPageAttributes>({
+          type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+          namespaces: [spaceId],
+          perPage: FIND_MAX_PAGES,
+          filter: nodeBuilder.or(
+            ids.map((workflowId) =>
+              nodeBuilder.is(`${WORKFLOW_PAGE_SAVED_OBJECT_TYPE}.attributes.workflowId`, workflowId)
+            )
+          ),
+        });
+      pages.push(...found);
     }
     return pages;
   }

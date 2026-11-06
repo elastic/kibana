@@ -18,7 +18,7 @@ import {
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { pageRef } from './fake_page_store.mock';
+import { pageRef, WORKFLOW_CREATED_AT } from './fake_page_store.mock';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageAuditLog } from './types';
 import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
@@ -144,6 +144,7 @@ describe('WorkflowPagesService', () => {
     const syncPage = (start: ReturnType<typeof setup>['start']) =>
       start.getSystemClient().syncWorkflowPages({
         workflowId: 'workflow-1',
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
         spaceId: 'default',
         definition: null,
         valid: true,
@@ -155,16 +156,16 @@ describe('WorkflowPagesService', () => {
       const internalClient = core.savedObjects.getUnsafeInternalClient.mock.results[0].value;
 
       await syncPage(start);
-      expect(internalClient.createPointInTimeFinder).not.toHaveBeenCalled();
+      expect(internalClient.find).not.toHaveBeenCalled();
 
       flag.next(true);
       await syncPage(start).catch(() => undefined);
-      expect(internalClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(internalClient.find).toHaveBeenCalledTimes(1);
 
       service.stop();
       flag.next(false);
       await syncPage(start).catch(() => undefined);
-      expect(internalClient.createPointInTimeFinder).toHaveBeenCalledTimes(2);
+      expect(internalClient.find).toHaveBeenCalledTimes(2);
     });
   });
 });

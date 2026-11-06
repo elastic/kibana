@@ -9,7 +9,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createFakeStore, getStoredPage, pageDefinition, pageRef } from './fake_page_store.mock';
+import {
+  createFakeStore,
+  getStoredPage,
+  pageDefinition,
+  pageRef,
+  WORKFLOW_CREATED_AT,
+} from './fake_page_store.mock';
 import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageAuditLog, WorkflowPageKey, WorkflowPageOperation } from './types';
 import { WorkflowPageNotFoundError } from './workflow_page_not_found_error';
@@ -40,6 +46,7 @@ const setup = async ({
   if (withPage) {
     await systemClient.syncWorkflowPages({
       workflowId: ref.workflowId,
+      workflowCreatedAt: WORKFLOW_CREATED_AT,
       spaceId: ref.spaceId,
       definition: pageDefinition(),
       valid: true,
