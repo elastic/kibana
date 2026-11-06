@@ -342,6 +342,12 @@ describe('utils', () => {
   });
 
   describe('constructQueryOptions', () => {
+    it('lists only cases with a pending decision when needsDecision is set', () => {
+      const { filter } = constructQueryOptions({ needsDecision: true });
+      expect(toKqlExpression(filter!)).toBe('cases.attributes.pending_decisions > 0');
+      expect(constructQueryOptions({ needsDecision: false }).filter).toBeUndefined();
+    });
+
     it('creates a filter with the tags', () => {
       const { filter } = constructQueryOptions({ tags: ['tag1', 'tag2'] });
       expect(filter).toMatchInlineSnapshot(`

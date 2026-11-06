@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
@@ -24,6 +24,10 @@ import { CaseViewSidebar } from './sidebar/case_view_sidebar';
 import { SidebarProvider, useSidebar } from './sidebar/sidebar_context';
 import { SavedObjectInAppUrlsProvider } from '../../attachments/common/saved_object/saved_object_in_app_urls_context';
 import type { OnUpdateFields } from '../types';
+import { useCasesConfig } from '../../../common/lib/kibana';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { caseViewSectionRegistry } from '../../../client/case_view_sections';
+import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
 interface CaseViewTabContentProps {
   caseData: CaseUI;
@@ -61,6 +65,12 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
       : CASE_VIEW_PAGE_TABS.ACTIVITY;
 
   const { isSidebarOpen } = useSidebar();
+  const { agenticEnabled } = useCasesConfig();
+  const { permissions } = useCasesContext();
+  const refreshCase = useRefreshCaseViewPage();
+  const aboveTabsSections = agenticEnabled
+    ? caseViewSectionRegistry.getVisible('aboveTabs', caseData)
+    : [];
 
   const caseWithFilteredAttachments = useMemo(
     () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
@@ -69,6 +79,12 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
 
   return (
     <SavedObjectInAppUrlsProvider caseData={caseWithFilteredAttachments}>
+      {aboveTabsSections.map((section) => (
+        <div key={section.id} data-test-subj={`case-view-above-tabs-${section.id}`}>
+          {section.render({ caseData, canUpdate: permissions.update, refreshCase })}
+          <EuiSpacer size="m" />
+        </div>
+      ))}
       <CaseViewTabs caseData={caseData} activeTab={activeTabId} />
       <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
         <EuiFlexItem

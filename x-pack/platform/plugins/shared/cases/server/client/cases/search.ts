@@ -117,6 +117,7 @@ export const search = async (
       customFields: paramArgs.customFields,
       access: paramArgs.access,
       source: paramArgs.source,
+      needsDecision: paramArgs.needsDecision,
     };
 
     const statusStatsOptions = constructQueryOptions({

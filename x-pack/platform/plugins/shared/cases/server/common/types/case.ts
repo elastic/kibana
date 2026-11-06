@@ -92,6 +92,7 @@ export interface CasePersistedAttributes {
   source?: CaseSource | null;
   room_conversation_id?: string | null;
   room_owner_uid?: string | null;
+  pending_decisions?: number | null;
 }
 
 type CasePersistedCustomFields = Array<{

@@ -22,7 +22,12 @@ import {
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { VerdictBadge } from '../../verdict/verdict_badge';
-import { SOURCE_LABELS } from '../../../common/translations';
+import {
+  PENDING_DECISIONS,
+  PENDING_DECISIONS_SHORT,
+  SOURCE_LABELS,
+} from '../../../common/translations';
+import { decisionsAvailability } from '../../../client/case_view_sections';
 import { CaseAccessMode, CaseStatuses } from '../../../../common/types/domain';
 
 import { tableColumnPresetDateRelative } from '../../../utils/table_column_presets';
@@ -91,7 +96,8 @@ export const useCasesColumns = ({
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
-  const { templatesEnabled } = useCasesConfig();
+  const { templatesEnabled, agenticEnabled } = useCasesConfig();
+  const showPendingDecisions = agenticEnabled && decisionsAvailability.isEnabled();
   const { getStatus } = useCaseStatuses();
 
   const {
@@ -152,6 +158,17 @@ export const useCasesColumns = ({
                       data-test-subj={`case-table-column-restricted-${theCase.id}`}
                     />
                   </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {showPendingDecisions && (theCase.pendingDecisions ?? 0) > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color="warning"
+                    title={PENDING_DECISIONS(theCase.pendingDecisions ?? 0)}
+                    data-test-subj="case-table-pending-decisions"
+                  >
+                    {PENDING_DECISIONS_SHORT(theCase.pendingDecisions ?? 0)}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -393,6 +410,7 @@ export const useCasesColumns = ({
       userProfiles,
       disabledCases,
       getStatus,
+      showPendingDecisions,
     ]
   );
 

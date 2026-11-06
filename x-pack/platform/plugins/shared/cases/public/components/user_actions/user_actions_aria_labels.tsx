@@ -37,6 +37,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     apply_task_template: i18n.TASK_TEMPLATE,
     ai_verdict: i18n.AI_VERDICT_LABEL,
     human_verdict: i18n.HUMAN_VERDICT_LABEL,
+    decision: i18n.DECISION_LABEL,
   };
 
   switch (type) {

@@ -556,6 +556,10 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
     min: 0,
     max: MAX_EXTENDED_FIELD_FILTERS,
   }).optional(),
+  /**
+   * Only cases with at least one proposal still awaiting a decision.
+   */
+  needsDecision: lazySchema(() => z.boolean().optional()),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({

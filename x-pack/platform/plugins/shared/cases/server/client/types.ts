@@ -103,6 +103,7 @@ export type CasesSearchParams = Partial<
     | 'customFields'
     | 'access'
     | 'source'
+    | 'needsDecision'
   > & { authorizationFilter?: KueryNode }
 >;
 

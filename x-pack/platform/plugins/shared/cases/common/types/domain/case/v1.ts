@@ -87,6 +87,8 @@ export const CaseAiVerdictSchema = lazySchema(() =>
   z.object({
     verdict: CaseVerdictSchema,
     confidence: z.number().min(0).max(1).nullable().optional(),
+    /** The agent's one-paragraph summary behind the verdict, when it gave one. */
+    summary: z.string().max(10000).nullable().optional(),
     actor: z
       .object({
         type: z.string(),
@@ -241,6 +243,11 @@ export const CaseAttributesSchema = lazySchema(() =>
      * while the room exists, so the case's access never leaves the room's owner outside it.
      */
     room_owner_uid: z.string().nullable().optional(),
+    /**
+     * Proposals on the case still awaiting a decision. Kept by the plugin that adds the proposals,
+     * so the list can filter on cases that need one.
+     */
+    pending_decisions: z.number().int().min(0).nullable().optional(),
   })
 );
 

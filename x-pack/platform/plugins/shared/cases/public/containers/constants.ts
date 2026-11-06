@@ -157,6 +157,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   category: [],
   access: [],
   source: [],
+  needsDecision: [],
   customFields: {},
   extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,

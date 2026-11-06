@@ -544,6 +544,22 @@ export const FILTER_FROM_ALERTZERO = i18n.translate('xpack.cases.allCases.filter
   defaultMessage: 'Opened from AlertZero',
 });
 
+export const FILTER_NEEDS_DECISION = i18n.translate('xpack.cases.allCases.filter.needsDecision', {
+  defaultMessage: 'Needs decision',
+});
+
+export const PENDING_DECISIONS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.pendingDecisions', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# decision} other {# decisions}} pending',
+  });
+
+export const PENDING_DECISIONS_SHORT = (count: number) =>
+  i18n.translate('xpack.cases.allCases.pendingDecisionsShort', {
+    values: { count },
+    defaultMessage: '{count} pending',
+  });
+
 export const SOURCE_COLUMN = i18n.translate('xpack.cases.allCases.column.source', {
   defaultMessage: 'Source',
 });

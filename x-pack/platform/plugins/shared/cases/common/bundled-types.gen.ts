@@ -72,6 +72,14 @@ export const CaseAiVerdict = lazySchema(() =>
         .optional()
         .describe('How confident the agent is in the verdict, from 0 to 1.'),
       /**
+       * The agent's summary behind the verdict, when it gave one.
+       */
+      summary: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("The agent's summary behind the verdict, when it gave one."),
+      /**
        * Who set the verdict.
        */
       actor: z
@@ -1010,6 +1018,16 @@ export const CaseResponseProperties = lazySchema(() =>
       .describe(
         "The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists."
       ),
+    /**
+     * How many proposals on the case are still awaiting a decision.
+     */
+    pending_decisions: z
+      .number()
+      .int()
+      .min(0)
+      .nullable()
+      .optional()
+      .describe('How many proposals on the case are still awaiting a decision.'),
     /**
      * Set while the case is in a status that pauses time tracking.
      */

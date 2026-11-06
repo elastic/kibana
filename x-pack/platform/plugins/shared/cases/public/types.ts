@@ -127,6 +127,13 @@ export interface CasesPublicSetup {
   caseView: {
     registerSection: (section: CaseViewSection) => void;
   };
+  /**
+   * Proposals decided on cases: the pending decisions badge and the Needs decision filter show
+   * only while the getter returns true (and agentic cases are on).
+   */
+  decisions: {
+    setEnabled: (getter: () => boolean) => void;
+  };
 }
 
 export interface CasesPublicStart {

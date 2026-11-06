@@ -14,7 +14,8 @@ export function registerCasesSteps(
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean,
   isTemplatesEnabled: boolean,
-  isKnowledgeEnabled: boolean = false
+  isKnowledgeEnabled: boolean = false,
+  isBidirectionalSyncEnabled: boolean = false
 ) {
   if (!workflowsExtensions) {
     return;
@@ -148,9 +149,11 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.pushCasesStepDefinition)
   );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./simple_steps').then((m) => m.syncCaseStepDefinition)
-  );
+  if (isBidirectionalSyncEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./simple_steps').then((m) => m.syncCaseStepDefinition)
+    );
+  }
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.deleteAttachmentsStepDefinition)

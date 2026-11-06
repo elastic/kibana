@@ -26,6 +26,7 @@ import {
   modelVersion15,
   modelVersion16,
   modelVersion17,
+  modelVersion18,
 } from '.';
 
 describe('Model versions', () => {
@@ -429,6 +430,17 @@ describe('Model versions', () => {
         {
           type: 'mappings_addition',
           addedMappings: { room_conversation_id: { type: 'keyword' } },
+        },
+      ]);
+    });
+  });
+
+  describe('version 18', () => {
+    it('maps the pending decisions counter, with no backfill', () => {
+      expect(modelVersion18.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: { pending_decisions: { type: 'integer' } },
         },
       ]);
     });

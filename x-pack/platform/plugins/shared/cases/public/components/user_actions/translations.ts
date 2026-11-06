@@ -369,3 +369,19 @@ export const OPENED_FROM_ALERTZERO = (count: number) =>
     defaultMessage:
       'opened this case from AlertZero and linked {count, plural, one {# investigation} other {# investigations}}',
   });
+
+export const DECISION_APPROVED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.decisionApproved', {
+    values: { title },
+    defaultMessage: 'approved “{title}”',
+  });
+
+export const DECISION_DISMISSED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.decisionDismissed', {
+    values: { title },
+    defaultMessage: 'dismissed “{title}”',
+  });
+
+export const DECISION_LABEL = i18n.translate('xpack.cases.caseView.userActions.decisionLabel', {
+  defaultMessage: 'Decision',
+});

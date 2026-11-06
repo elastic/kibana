@@ -277,4 +277,12 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('source');
     });
   });
+
+  describe('Model version 17 to 18', () => {
+    it('leaves existing cases without a pending decisions counter', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 17, toVersion: 18 });
+      expect(migrated.attributes).not.toHaveProperty('pending_decisions');
+    });
+  });
 });

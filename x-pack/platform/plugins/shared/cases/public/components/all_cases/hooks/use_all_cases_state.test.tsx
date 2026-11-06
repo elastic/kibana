@@ -206,6 +206,7 @@ describe('useAllCasesQueryParams', () => {
         category: ['test-category'],
         access: [],
         source: [],
+        needsDecision: [],
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },

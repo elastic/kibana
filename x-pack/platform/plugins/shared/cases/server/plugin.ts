@@ -452,7 +452,8 @@ export class CasePlugin
       this.unifiedAttachmentTypeRegistry,
       this.caseConfig.attachments?.enabled === true,
       this.caseConfig.templates?.enabled === true,
-      () => core.getStartServices()
+      () => core.getStartServices(),
+      this.caseConfig.bidirectionalSync?.enabled === true
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 

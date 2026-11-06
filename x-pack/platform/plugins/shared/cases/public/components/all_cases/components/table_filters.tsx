@@ -30,6 +30,7 @@ import { SortFilter } from './sort_filter';
 import { useCasesConfig } from '../../../common/lib/kibana';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { useGlobalInlineFields } from '../hooks/use_global_inline_fields';
+import { decisionsAvailability } from '../../../client/case_view_sections';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -137,6 +138,7 @@ const CasesTableFiltersComponent = ({
     caseAssignmentAuthorized,
     restrictedCasesAuthorized,
     agenticEnabled,
+    decisionsEnabled: decisionsAvailability.isEnabled(),
     categories,
     countClosedCases,
     countInProgressCases,

@@ -233,6 +233,8 @@ export interface SystemFilterOptions {
   access: CaseAccessMode[];
   /** Where the cases came from; the "Opened from AlertZero" filter sets `['alertzero']`. */
   source?: CaseSource[];
+  /** `['true']` while the "Needs decision" filter is on. */
+  needsDecision?: string[];
 }
 
 export interface ExtendedFieldFilter {

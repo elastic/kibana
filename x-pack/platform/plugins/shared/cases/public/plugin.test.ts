@@ -129,6 +129,9 @@ describe('Cases Ui Plugin', () => {
           "caseView": Object {
             "registerSection": [Function],
           },
+          "decisions": Object {
+            "setEnabled": [Function],
+          },
         }
       `);
     });

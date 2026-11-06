@@ -83,3 +83,8 @@ export type {
   WorkflowAttachmentTarget,
   WorkflowAttachmentValidationContext,
 } from './attachment_framework/types';
+export type {
+  DecisionOutcome,
+  RecordDecisionParams,
+  SetPendingDecisionsParams,
+} from './client/cases/decisions';

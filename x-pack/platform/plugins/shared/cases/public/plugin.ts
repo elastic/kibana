@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
-import { caseViewSectionRegistry } from './client/case_view_sections';
+import { caseViewSectionRegistry, decisionsAvailability } from './client/case_view_sections';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -118,7 +118,8 @@ export class CasesUiPlugin
       this.unifiedAttachmentTypeRegistry,
       config.attachments?.enabled === true,
       config.templates?.enabled === true,
-      config.agentic?.enabled === true && config.knowledge?.enabled === true
+      config.agentic?.enabled === true && config.knowledge?.enabled === true,
+      config.bidirectionalSync?.enabled === true
     );
     registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
@@ -130,6 +131,9 @@ export class CasesUiPlugin
       },
       caseView: {
         registerSection: (section) => caseViewSectionRegistry.register(section),
+      },
+      decisions: {
+        setEnabled: (getter) => decisionsAvailability.setEnabled(getter),
       },
     };
   }

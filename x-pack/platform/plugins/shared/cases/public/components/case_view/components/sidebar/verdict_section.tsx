@@ -112,6 +112,14 @@ export const VerdictSection: React.FC<{ caseData: CaseUI }> = ({ caseData }) => 
           },
         ]}
       />
+      {aiVerdict?.summary ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj="case-view-ai-verdict-summary">
+            <p>{aiVerdict.summary}</p>
+          </EuiText>
+        </>
+      ) : null}
       {extensions.map((section) => (
         <React.Fragment key={section.id}>
           <EuiSpacer size="s" />

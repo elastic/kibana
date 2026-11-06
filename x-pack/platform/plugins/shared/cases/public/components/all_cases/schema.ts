@@ -27,6 +27,7 @@ export const AllCasesURLQueryParamsSchema = z
     statusKey: z.array(z.string()),
     access: z.array(CaseAccessModeSchema),
     source: z.array(CaseSourceSchema).optional(),
+    needsDecision: z.array(z.string().max(5)).max(1).optional(),
     tags: z.array(z.string()),
     category: z.array(z.string()),
     assignees: z.array(z.union([z.string(), z.null()])),

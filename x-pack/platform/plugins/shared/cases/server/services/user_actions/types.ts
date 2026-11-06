@@ -163,6 +163,13 @@ export interface BuilderParameters {
   sync: {
     parameters: { payload: SyncUserActionPayload };
   };
+  decision: {
+    parameters: {
+      payload: {
+        decision: { proposal_id: string; title: string; outcome: 'approved' | 'dismissed' };
+      };
+    };
+  };
   bulkAttachments: {
     parameters: {
       payload: { bulkAttachments: BulkAttachmentsPayload };

@@ -41,6 +41,7 @@ export const UserActionTypes = {
   sync: 'sync',
   ai_verdict: 'ai_verdict',
   human_verdict: 'human_verdict',
+  decision: 'decision',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

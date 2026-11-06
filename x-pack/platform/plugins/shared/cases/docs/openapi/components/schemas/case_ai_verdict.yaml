@@ -12,6 +12,10 @@ properties:
     maximum: 1
     nullable: true
     description: How confident the agent is in the verdict, from 0 to 1.
+  summary:
+    type: string
+    nullable: true
+    description: The agent's summary behind the verdict, when it gave one.
   actor:
     type: object
     nullable: true

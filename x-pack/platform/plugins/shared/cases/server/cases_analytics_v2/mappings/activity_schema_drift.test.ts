@@ -247,6 +247,11 @@ const PER_TYPE_FIXTURES: {
     { human_verdict: 'false_positive' },
     { action: 'update' }
   ),
+  decision: makeUserActionSO(
+    'decision',
+    { decision: { proposal_id: 'proposal-1', title: 'Close 1 alert', outcome: 'approved' } },
+    { action: 'update' }
+  ),
   sync: makeUserActionSO(
     'sync',
     {

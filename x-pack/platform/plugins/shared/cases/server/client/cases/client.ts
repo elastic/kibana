@@ -88,6 +88,8 @@ import { withUsageCounter } from '../usage_counters';
 import { getRelatedCases, linkCases, unlinkCase } from './links';
 import type { CaseRoomResponse, PostFromRoomRequest } from './room';
 import { ensureRoom, postFromRoom } from './room';
+import type { RecordDecisionParams, SetPendingDecisionsParams } from './decisions';
+import { recordDecision, setPendingDecisions } from './decisions';
 
 /**
  * API for interacting with the cases entities.
@@ -240,6 +242,16 @@ export interface CasesSubClient {
     request: PostFromRoomRequest,
     getCasesClientAs: (actionSource: ActionSource) => Promise<CasesClient>
   ): Promise<UnifiedAttachment>;
+  /**
+   * Sets how many proposals on the case still await a decision. Bookkeeping for the plugin that
+   * adds them: no user action is written.
+   */
+  setPendingDecisions(params: SetPendingDecisionsParams): Promise<void>;
+  /**
+   * Records a proposal decided on the case as a `decision` user action by the caller, and sets the
+   * pending decisions left.
+   */
+  recordDecision(params: RecordDecisionParams): Promise<void>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -274,6 +286,8 @@ const usageCounterByMethod = {
   getRelatedCases: null,
   ensureRoom: null,
   postFromRoom: 'post_from_room',
+  setPendingDecisions: null,
+  recordDecision: 'record_decision',
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -382,6 +396,13 @@ export const createCasesSubClient = (
         request: PostFromRoomRequest,
         getCasesClientAs: (actionSource: ActionSource) => Promise<CasesClient>
       ) => postFromRoom({ caseId, request }, clientArgs, casesClient, getCasesClientAs)
+    ),
+    setPendingDecisions: (params: SetPendingDecisionsParams) =>
+      setPendingDecisions(params, clientArgs, casesClient),
+    recordDecision: withUsageCounter(
+      usageCounterByMethod.recordDecision,
+      clientArgs,
+      (params: RecordDecisionParams) => recordDecision(params, clientArgs, casesClient)
     ),
   };
 

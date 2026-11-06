@@ -31,6 +31,7 @@ describe('parseUrlParams', () => {
         "customFields": Object {},
         "extendedFieldFilters": Array [],
         "from": "now-30d",
+        "needsDecision": Array [],
         "page": 1,
         "perPage": 10,
         "search": "",

@@ -133,6 +133,7 @@ import {
 } from './utils';
 import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
+import { decisionsAvailability } from '../client/case_view_sections';
 
 export const resolveCase = async ({
   caseId,
@@ -358,6 +359,10 @@ export const getCases = async ({
     ...(filterOptions.access.length > 0 ? { access: filterOptions.access } : {}),
     ...(filterOptions.source && filterOptions.source.length > 0
       ? { source: filterOptions.source }
+      : {}),
+    // Off with the decisions setting, even when a saved list state still has it on.
+    ...(filterOptions.needsDecision?.includes('true') && decisionsAvailability.isEnabled()
+      ? { needsDecision: true }
       : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0

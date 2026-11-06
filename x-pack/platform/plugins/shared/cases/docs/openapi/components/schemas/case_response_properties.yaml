@@ -165,6 +165,11 @@ properties:
     type: string
     nullable: true
     description: The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists.
+  pending_decisions:
+    type: integer
+    minimum: 0
+    nullable: true
+    description: How many proposals on the case are still awaiting a decision.
   paused_at:
     type: string
     format: date-time

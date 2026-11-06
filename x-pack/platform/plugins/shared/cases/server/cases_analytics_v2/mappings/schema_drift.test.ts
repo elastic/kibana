@@ -135,6 +135,7 @@ const buildFullAttributes = (): {
   extract_observables_source: 'rule',
   room_conversation_id: null,
   room_owner_uid: null,
+  pending_decisions: 2,
 });
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>
@@ -228,6 +229,10 @@ const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
   [
     'room_conversation_id',
     'Plumbing: the id of the case room conversation, not an analytics dimension.',
+  ],
+  [
+    'pending_decisions',
+    'A live counter for the list filter; decisions are reported from the decision user actions.',
   ],
   // (`owner` is mirrored at `case.owner` in addition to its
   // top-level DLS copy, so it satisfies the Layer 2 mirror directly.)

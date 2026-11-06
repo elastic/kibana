@@ -123,6 +123,8 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getRelatedCases: jest.fn(),
     ensureRoom: jest.fn(),
     postFromRoom: jest.fn(),
+    setPendingDecisions: jest.fn(),
+    recordDecision: jest.fn(),
   });
 };
 

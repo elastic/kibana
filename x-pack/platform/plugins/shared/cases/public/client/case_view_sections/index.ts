@@ -13,8 +13,9 @@ import type { CaseUI } from '../../../common/ui/types';
  * - `sidebar`: inside the sidebar's Verdict section, under the verdicts.
  * - `related`: at the top of the Related tab, above the similar cases.
  * - `closeModal`: in the close modal, for side effects of closing (one case at a time).
+ * - `aboveTabs`: between the header and the tabs, only for something on the case that needs action.
  */
-export type CaseViewSectionPosition = 'sidebar' | 'related' | 'closeModal';
+export type CaseViewSectionPosition = 'sidebar' | 'related' | 'closeModal' | 'aboveTabs';
 
 /** Why something is related to a case. Each Related section computes the reasons it can. */
 export type RelatedByReason =
@@ -81,7 +82,7 @@ interface CaseViewSectionBase {
 }
 
 export type CaseViewPanelSection = CaseViewSectionBase & {
-  position: 'sidebar' | 'related';
+  position: 'sidebar' | 'related' | 'aboveTabs';
   render: (props: CaseViewSectionProps) => ReactNode;
   /** For `related` sections: how many items the section adds to the Related tab's count. */
   getCount?: (caseData: CaseUI) => number;
@@ -108,7 +109,10 @@ export class CaseViewSectionRegistry {
     this.sections.set(section.id, section);
   }
 
-  getVisible(position: 'sidebar' | 'related', caseData: CaseUI): CaseViewPanelSection[];
+  getVisible(
+    position: 'sidebar' | 'related' | 'aboveTabs',
+    caseData: CaseUI
+  ): CaseViewPanelSection[];
   getVisible(position: 'closeModal', caseData: CaseUI): CaseViewCloseModalSection[];
   getVisible(position: CaseViewSectionPosition, caseData: CaseUI): CaseViewSection[] {
     return [...this.sections.values()].filter(
@@ -119,3 +123,5 @@ export class CaseViewSectionRegistry {
 
 /** One registry per page load; the plugin's setup contract writes to it. */
 export const caseViewSectionRegistry = new CaseViewSectionRegistry();
+
+export { decisionsAvailability } from './decisions_availability';

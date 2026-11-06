@@ -35,6 +35,7 @@ import {
   modelVersion15,
   modelVersion16,
   modelVersion17,
+  modelVersion18,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -261,6 +262,9 @@ export const createCaseSavedObjectType = (
       room_conversation_id: {
         type: 'keyword',
       },
+      pending_decisions: {
+        type: 'integer',
+      },
       ai_verdict: {
         properties: {
           verdict: {
@@ -381,6 +385,7 @@ export const createCaseSavedObjectType = (
     15: modelVersion15,
     16: modelVersion16,
     17: modelVersion17,
+    18: modelVersion18,
   },
   management: {
     importableAndExportable: true,

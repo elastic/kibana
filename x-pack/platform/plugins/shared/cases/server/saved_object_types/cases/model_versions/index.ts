@@ -22,3 +22,4 @@ export { modelVersion14 } from './model_version_14';
 export { modelVersion15 } from './model_version_15';
 export { modelVersion16 } from './model_version_16';
 export { modelVersion17 } from './model_version_17';
+export { modelVersion18 } from './model_version_18';

@@ -16,7 +16,8 @@ import * as i18n from '../translations';
 import { SeverityFilter } from '../components/severity_filter';
 import { AccessFilter } from '../components/access_filter';
 import { SourceFilter } from '../components/source_filter';
-import { FILTER_FROM_ALERTZERO } from '../../../common/translations';
+import { NeedsDecisionFilter } from '../components/needs_decision_filter';
+import { FILTER_FROM_ALERTZERO, FILTER_NEEDS_DECISION } from '../../../common/translations';
 import { AssigneesFilterPopover } from '../components/assignees_filter';
 import type { CurrentUserProfile } from '../../types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from '../types';
@@ -27,6 +28,8 @@ interface UseFilterConfigProps {
   restrictedCasesAuthorized: boolean;
   /** Agentic cases on: offers the "Opened from AlertZero" filter. */
   agenticEnabled?: boolean;
+  /** Decisions on cases are on (the plugin that adds them says so): offers "Needs decision". */
+  decisionsEnabled?: boolean;
   categories: string[];
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -45,6 +48,7 @@ export const getSystemFilterConfig = ({
   caseAssignmentAuthorized,
   restrictedCasesAuthorized,
   agenticEnabled = false,
+  decisionsEnabled = false,
   categories,
   countClosedCases,
   countInProgressCases,
@@ -206,6 +210,23 @@ export const getSystemFilterConfig = ({
       ),
     },
     {
+      key: 'needsDecision',
+      label: FILTER_NEEDS_DECISION,
+      isActive: true,
+      isAvailable: agenticEnabled && decisionsEnabled && !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          needsDecision: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <NeedsDecisionFilter
+          selectedOptionKeys={filterOptions.needsDecision}
+          onChange={onSystemFilterChange}
+        />
+      ),
+    },
+    {
       key: 'owner',
       label: i18n.SOLUTION,
       isActive: true,
@@ -231,6 +252,7 @@ export const useSystemFilterConfig = ({
   caseAssignmentAuthorized,
   restrictedCasesAuthorized,
   agenticEnabled,
+  decisionsEnabled,
   categories,
   countClosedCases,
   countInProgressCases,
@@ -248,6 +270,7 @@ export const useSystemFilterConfig = ({
     caseAssignmentAuthorized,
     restrictedCasesAuthorized,
     agenticEnabled,
+    decisionsEnabled,
     categories,
     countClosedCases,
     countInProgressCases,

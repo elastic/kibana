@@ -163,6 +163,13 @@ const buildSourceFilter = (source: CasesSearchParams['source']): KueryNode | und
   return sourceFilters.length === 1 ? sourceFilters[0] : nodeBuilder.or(sourceFilters);
 };
 
+const buildNeedsDecisionFilter = (
+  needsDecision: CasesSearchParams['needsDecision']
+): KueryNode | undefined =>
+  needsDecision === true
+    ? fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.pending_decisions > 0`)
+    : undefined;
+
 const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
   if (categories === undefined) {
     return;
@@ -436,6 +443,7 @@ export const constructQueryOptions = ({
   statuses = [],
   access,
   source,
+  needsDecision,
   searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -456,6 +464,7 @@ export const constructQueryOptions = ({
   const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
   const accessFilter = buildAccessFilter(access);
   const sourceFilter = buildSourceFilter(source);
+  const needsDecisionFilter = buildNeedsDecisionFilter(needsDecision);
 
   const filters = combineFilters([
     statusFilter,
@@ -470,6 +479,7 @@ export const constructQueryOptions = ({
     customFieldsFilter,
     accessFilter,
     sourceFilter,
+    needsDecisionFilter,
   ]);
 
   const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
