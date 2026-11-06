@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
@@ -18,7 +21,12 @@ import {
 } from '../analytics_list/common';
 import { useStartAnalytics } from '../../services/analytics_service';
 
-import { startActionNameText, StartActionName } from './start_action_name';
+export const startActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.startActionNameText',
+  {
+    defaultMessage: 'Start',
+  }
+);
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
@@ -52,17 +60,22 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: (i: DataFrameAnalyticsListRow) => (
-        <StartActionName
-          isDisabled={!startButtonEnabled(i)}
-          item={i}
-          canStartStopDataFrameAnalytics={canStartStopDataFrameAnalytics}
-        />
-      ),
+      name: startActionNameText,
       available: (i: DataFrameAnalyticsListRow) =>
         !isDataFrameAnalyticsRunning(i.stats.state) && !isDataFrameAnalyticsFailed(i.stats.state),
       enabled: startButtonEnabled,
-      description: startActionNameText,
+      description: (i: DataFrameAnalyticsListRow) => {
+        if (startButtonEnabled(i)) {
+          return startActionNameText;
+        }
+
+        return !canStartStopDataFrameAnalytics
+          ? createPermissionFailureMessage('canStartStopDataFrameAnalytics')
+          : i18n.translate('xpack.ml.dataframe.analyticsList.completeBatchAnalyticsToolTip', {
+              defaultMessage: '{analyticsId} is a completed analytics job and cannot be restarted.',
+              values: { analyticsId: i.config.id },
+            });
+      },
       icon: 'play',
       type: 'icon',
       onClick: openModal,
