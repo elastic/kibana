@@ -8,6 +8,12 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } from '@kbn/evals';
+import { EICAR_TRAP_EVALUATOR_NAME } from './evaluators/eicar_trap_evaluator';
+import { RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME } from './evaluators/rubric_cap_no_tool_call_evaluator';
+import { SIMULATION_AWARENESS_EVALUATOR_NAME } from './evaluators/simulation_awareness_evaluator';
+import { STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME } from './evaluators/stalled_after_load_skill_evaluator';
+import { UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME } from './evaluators/unrequested_side_effects_evaluator';
+import { WORKFLOW_VALIDITY_EVALUATOR_NAME } from './evaluators/workflow_validity_evaluator';
 import {
   toDatasetExample,
   createEvaluatePersonaMatrixDataset,
@@ -690,6 +696,7 @@ describe('task output shape', () => {
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log,
     });
 
@@ -746,6 +753,7 @@ describe('task judges and the last-assistant-step fallback', () => {
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log: buildLog(),
     });
     await evaluateDataset({
@@ -760,6 +768,22 @@ describe('task judges and the last-assistant-step fallback', () => {
       capturedEvaluators,
     };
   };
+
+  it('registers the deterministic behaviour evaluators', async () => {
+    const { capturedEvaluators } = await runTask({ messages: [{ message: 'ok' }] });
+    const names = capturedEvaluators.map(({ name }) => name);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        WORKFLOW_VALIDITY_EVALUATOR_NAME,
+        EICAR_TRAP_EVALUATOR_NAME,
+        SIMULATION_AWARENESS_EVALUATOR_NAME,
+        UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME,
+        STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME,
+        RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME,
+      ])
+    );
+    expect(new Set(names).size).toBe(names.length);
+  });
 
   const judgedAnswer = (evaluate: jest.Mock) => {
     const { output } = evaluate.mock.calls[0][0] as {
@@ -1038,6 +1062,7 @@ describe('task judge failure isolation', () => {
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log,
     });
 
@@ -1103,6 +1128,7 @@ describe('createEvaluatePersonaMatrixDataset judge payload cap', () => {
       evaluators,
       executorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log: buildLog(),
     } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
     await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
@@ -1140,5 +1166,65 @@ describe('createEvaluatePersonaMatrixDataset judge payload cap', () => {
       expect(JSON.stringify(seen)).toContain(HUGE);
     }
     expect(taskResult).not.toHaveProperty('judgePayloadTrim');
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset rawResponse', () => {
+  const runWith = async (extra: Record<string, unknown>) => {
+    const judged: unknown[] = [];
+    const analysis = () => ({
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        judged.push(output);
+        return { metadata: { ok: true } };
+      }),
+    });
+    const criteria = {
+      name: 'criteria',
+      kind: 'LLM',
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        judged.push(output);
+        return { score: 1 };
+      }),
+    };
+    let taskResult: Record<string, unknown> | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn(async () => ({
+          messages: [{ message: 'final answer' }],
+          steps: [{ type: 'tool_call', tool_id: 'security.alerts', results: [] }],
+          errors: [],
+          traceId: 'trace-1',
+          ...extra,
+        })),
+      },
+      evaluators: {
+        correctnessAnalysis: analysis,
+        groundednessAnalysis: analysis,
+        criteria: () => criteria,
+        traceBasedEvaluators: {},
+      },
+      executorClient: {
+        runExperiment: jest.fn(
+          async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+            taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+          }
+        ),
+      },
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    return { judged, taskResult: taskResult as Record<string, unknown> };
+  };
+
+  it('stores rawResponse on the task output but leaves the judge payload unchanged', async () => {
+    const withRaw = await runWith({ rawResponse: '{"message":"final answer","secret":"RAW"}' });
+    const withoutRaw = await runWith({});
+
+    expect(withRaw.taskResult.rawResponse).toBe('{"message":"final answer","secret":"RAW"}');
+    expect(withRaw.judged).toHaveLength(3);
+    expect(withRaw.judged).toEqual(withoutRaw.judged);
+    expect(JSON.stringify(withRaw.judged)).not.toContain('RAW');
   });
 });

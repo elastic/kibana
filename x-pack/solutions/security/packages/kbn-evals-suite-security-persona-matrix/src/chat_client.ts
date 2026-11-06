@@ -17,6 +17,9 @@ import { withRetry } from '@kbn/evals';
 /** Maximum number of auto-confirm continuation calls per query. */
 export const MAX_AUTO_CONFIRM_ROUNDS = 3;
 
+/** Cap on the stored final converse response body, in characters. */
+export const RAW_RESPONSE_MAX_CHARS = 20_000;
+
 /** Prefix of the final message when a round ends paused on a prompt the eval cannot answer. */
 export const UNANSWERED_PROMPT_MARKER = '[UNANSWERED_PROMPT]';
 
@@ -68,7 +71,22 @@ export interface ConverseResponse {
    * is recoverable. Empty when the run authored no workflow attachment.
    */
   workflowAttachments: WorkflowAttachmentYaml[];
+  /**
+   * The final converse `response` body as JSON, capped at
+   * `RAW_RESPONSE_MAX_CHARS`. Kept for post-hoc diagnosis of cells whose
+   * `messages` were rewritten by the fallbacks above. Never given to the judges.
+   */
+  rawResponse: string;
 }
+
+const boundRawResponse = (response: unknown): string => {
+  const serialized = JSON.stringify(response ?? null) ?? 'null';
+  return serialized.length > RAW_RESPONSE_MAX_CHARS
+    ? `${serialized.slice(0, RAW_RESPONSE_MAX_CHARS)}…[truncated ${
+        serialized.length - RAW_RESPONSE_MAX_CHARS
+      } chars]`
+    : serialized;
+};
 
 export interface WorkflowAttachmentYaml {
   id: string;
@@ -256,6 +274,7 @@ export class PersonaMatrixChatClient {
         },
         trajectoryFingerprint,
         workflowAttachments: await this.fetchWorkflowAttachments(conversationId, steps),
+        rawResponse: boundRawResponse(lastResponse),
       };
 
       return result;

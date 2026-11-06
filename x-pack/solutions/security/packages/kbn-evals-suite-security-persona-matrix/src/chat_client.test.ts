@@ -8,8 +8,42 @@
 import {
   MAX_AUTO_CONFIRM_ROUNDS,
   PersonaMatrixChatClient,
+  RAW_RESPONSE_MAX_CHARS,
   UNANSWERED_PROMPT_MARKER,
 } from './chat_client';
+
+describe('PersonaMatrixChatClient rawResponse', () => {
+  const queryWith = (response: Record<string, unknown>) => {
+    const fetch = jest.fn().mockResolvedValue({ response, steps: [] });
+    const client = new PersonaMatrixChatClient(fetch, { warning: jest.fn() } as never, 'c1');
+    return client.query('q');
+  };
+
+  it('keeps the final converse response body verbatim when it is small', async () => {
+    const result = await queryWith({ message: 'done', extra: 1 });
+    expect(JSON.parse(result.rawResponse)).toEqual({ message: 'done', extra: 1 });
+  });
+
+  it('bounds an oversized response body and marks the truncation', async () => {
+    const result = await queryWith({ message: 'x'.repeat(RAW_RESPONSE_MAX_CHARS * 2) });
+    expect(result.rawResponse.length).toBeLessThan(RAW_RESPONSE_MAX_CHARS + 100);
+    expect(result.rawResponse).toContain('[truncated');
+  });
+
+  it('records the last response when confirmations are continued', async () => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        conversation_id: 'c',
+        response: { message: '', prompts: [{ id: 'p1', type: 'confirmation' }] },
+        steps: [],
+      })
+      .mockResolvedValueOnce({ conversation_id: 'c', response: { message: 'after' }, steps: [] });
+    const client = new PersonaMatrixChatClient(fetch, { warning: jest.fn() } as never, 'c1');
+    const result = await client.query('q');
+    expect(JSON.parse(result.rawResponse)).toEqual({ message: 'after' });
+  });
+});
 
 describe('PersonaMatrixChatClient provenance', () => {
   it('persists null sampling controls and hashes tool_id + params, not provider call ids', async () => {

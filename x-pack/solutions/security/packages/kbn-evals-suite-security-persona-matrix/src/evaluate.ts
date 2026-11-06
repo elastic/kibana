@@ -32,7 +32,7 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient, traceEsClient, log, fetch }, use) => {
       use(
         createEvaluatePersonaMatrixDataset({
           chatClient,
@@ -40,6 +40,7 @@ export const evaluate = base.extend<
           executorClient,
           traceEsClient,
           log,
+          fetch,
         })
       );
     },

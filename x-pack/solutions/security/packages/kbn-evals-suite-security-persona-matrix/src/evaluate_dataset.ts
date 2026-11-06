@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
   createQuantitativeCorrectnessEvaluators,
@@ -30,6 +31,12 @@ import {
   collectDeliveredArtifact,
   createConnectorInvokedEvaluator,
 } from './evaluators/connector_invoked_evaluator';
+import { createEicarTrapEvaluator } from './evaluators/eicar_trap_evaluator';
+import { createRubricCapNoToolCallEvaluator } from './evaluators/rubric_cap_no_tool_call_evaluator';
+import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awareness_evaluator';
+import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
+import { createUnrequestedSideEffectsEvaluator } from './evaluators/unrequested_side_effects_evaluator';
+import { createWorkflowValidityEvaluator } from './evaluators/workflow_validity_evaluator';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import {
   createPersonaMatrixInputTokensEvaluator,
@@ -38,10 +45,7 @@ import {
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient } from './chat_client';
-import {
-  capJudgePayload,
-  getJudgePayloadCapOptionsFromEnv,
-} from './judge_payload_cap';
+import { capJudgePayload, getJudgePayloadCapOptionsFromEnv } from './judge_payload_cap';
 
 /**
  * Dataset-level expected output the framework evaluators read via `expected`.
@@ -629,12 +633,15 @@ export function createEvaluatePersonaMatrixDataset({
   executorClient,
   traceEsClient,
   log,
+  fetch,
 }: {
   chatClient: PersonaMatrixChatClient;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   traceEsClient: EsClient;
   log: ToolingLog;
+  /** Kibana HTTP handler, used by `WorkflowValidity` to create and run authored workflows. */
+  fetch: HttpHandler;
 }) {
   return async function evaluateDataset({
     dataset,
@@ -709,6 +716,14 @@ export function createEvaluatePersonaMatrixDataset({
       finalAnswerPresentEvaluator,
       minExpectedStepsEvaluator,
       connectorInvokedEvaluator,
+      // Deterministic behaviour checks. Recorded per cell, excluded from cell
+      // means via `excludeEvaluators` in the matrix config.
+      createWorkflowValidityEvaluator({ fetch }),
+      createEicarTrapEvaluator(),
+      createSimulationAwarenessEvaluator(),
+      createUnrequestedSideEffectsEvaluator(),
+      createStalledAfterLoadSkillEvaluator(),
+      createRubricCapNoToolCallEvaluator(),
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       precomputedCriteriaEvaluator,
@@ -875,6 +890,8 @@ export function createEvaluatePersonaMatrixDataset({
             ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
               ? { judgePayloadTrim }
               : {}),
+            // Added after the judge payload is built so no judge ever reads it.
+            rawResponse: response.rawResponse,
           } as TaskOutput;
         },
       },

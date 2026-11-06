@@ -7,6 +7,22 @@
     "requireEisJudge": true,
     "excludeSelfJudged": true
   },
+  "excludeEvaluators": [
+    "Latency",
+    "Tool Calls",
+    "Input Tokens",
+    "Output Tokens",
+    "Cached Tokens",
+    "Skill Invoked",
+    "WorkflowValidity",
+    "EicarTrap",
+    "SimulationAwareness",
+    "UnrequestedSideEffects",
+    "StalledAfterLoadSkill",
+    "RubricCapNoToolCall",
+    "ChainCoverage",
+    "AD Failure Class"
+  ],
   "defaultScale": 10,
   "decimals": 2,
   "notRecommendedBelow": 0,
@@ -457,7 +473,8 @@
       "Judged evaluators (Groundedness, Factuality, Relevance) are scored from their categorical verdict via an ordinal ladder since 2026-08-24, not the per-run geometric mean over a re-extracted claim list. Repetitions re-run the agent, which emits semantically equivalent but textually different answers; the judge then extracts a different claim list from different prose and the continuous mean wobbles. Rank flip between repetitions drops substantially under the ladder. Contract evaluators are deterministic and unaffected.",
       "Scores from judges that are not EIS-pinned are excluded since 2026-08-24, as are self-judged docs where a model graded its own output. A judge id that is not EIS-pinned cannot be re-run to reproduce a number. Cells whose only grades came from excluded judges are absent rather than estimated.",
       "Scores in this matrix are NOT comparable to matrices generated before 2026-08-24: the judged-evaluator scoring basis changed from continuous mean to verdict ladder, and the judge population changed. Compare model-to-model within this matrix, not cell-to-cell across generations.",
-      "Fixture fingerprint pins the dataset/tool seeds this matrix was scored against; comparing across fingerprints is a cross-generation comparison, not a model delta."
+      "Fixture fingerprint pins the dataset/tool seeds this matrix was scored against; comparing across fingerprints is a cross-generation comparison, not a model delta.",
+      "Deterministic behaviour evaluators (WorkflowValidity, EicarTrap, SimulationAwareness, UnrequestedSideEffects, StalledAfterLoadSkill, RubricCapNoToolCall, ChainCoverage, AD Failure Class) are recorded per cell as informational and excluded from cell means."
     ]
   }
 }
