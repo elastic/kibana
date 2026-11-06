@@ -61,7 +61,6 @@ export const AlertSourcePicker = ({
     <EuiSpacer size="s" />
     <EuiComboBox
       compressed
-      autoFocus
       aria-label={alertSourceLabels.title}
       placeholder={alertSourceLabels.title}
       options={KNOWN_SOURCES}
