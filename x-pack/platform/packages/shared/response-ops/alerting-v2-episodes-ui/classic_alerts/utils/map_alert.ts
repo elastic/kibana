@@ -13,6 +13,7 @@ import {
   ALERT_GROUPING,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -49,6 +50,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_END,
   ALERT_DURATION,
   ALERT_STATUS,
+  ALERT_REASON,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
@@ -86,6 +88,7 @@ export interface ClassicAlertSource {
   [ALERT_END]?: string;
   [ALERT_DURATION]?: number;
   [ALERT_STATUS]?: string;
+  [ALERT_REASON]?: string;
   [ALERT_RULE_UUID]?: string;
   [ALERT_RULE_NAME]?: string;
   [ALERT_RULE_CATEGORY]?: string;
@@ -179,6 +182,7 @@ export const mapClassicAlertToEpisode = (
     episode_data: null,
     severity: normalizeV1Severity(source[ALERT_SEVERITY]),
     rule_category: source[ALERT_RULE_CATEGORY],
+    reason: source[ALERT_REASON],
     supports_actions: false,
     supports_timeline: false,
     source_action_context: actionContext,
