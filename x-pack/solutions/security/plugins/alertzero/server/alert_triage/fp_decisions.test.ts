@@ -390,6 +390,17 @@ describe('matchDecisions', () => {
     expect(wouldSkip).toEqual(new Map([['dismissed', ['a']]]));
   });
 
+  it('keeps a high alert of a dismissed pattern with a human, like a high alert of an approved one', () => {
+    const { wouldClose, wouldSkip, excludedBySeverity } = run({
+      candidates: [candidate('a', 'C:\\x.exe', 'high'), candidate('b', 'C:\\x.exe', 'low')],
+      decisions: [['C:\\x.exe', [{ id: 'dismissed', kind: 'do_not_propose' }]]],
+    });
+
+    expect(wouldClose.size).toBe(0);
+    expect(wouldSkip).toEqual(new Map([['dismissed', ['b']]]));
+    expect(excludedBySeverity).toBe(1);
+  });
+
   it('skips alerts with no strict key, which no decision can match', () => {
     const cloud = { id: 'a', doc: { 'kibana.alert.rule.uuid': 'cloud', user: { name: 'u' } } };
 
