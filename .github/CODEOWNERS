@@ -3193,6 +3193,9 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 # Nightshift investigations managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift
 
+# Context Engine managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/context_engine @elastic/context-eng
+
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution
 # Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.

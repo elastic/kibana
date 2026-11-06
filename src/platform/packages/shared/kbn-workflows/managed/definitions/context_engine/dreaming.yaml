@@ -24,11 +24,30 @@ consts:
 outputs:
   - name: memories
     type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
 triggers:
   - type: scheduled
     with:
       every: '__INTERVAL_MINUTES__m'
   - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what dreaming would write and reject, and write nothing. The run ends cancelled, so the next run reads the same memories.
+        since:
+          type: string
+          maxLength: 64
+          description: Read the memories updated since this ISO 8601 time, instead of since the last successful run.
 steps:
   - name: status
     type: context-engine.getDreamingStatus
@@ -79,7 +98,7 @@ steps:
                   - memory.session
             - range:
                 updated_at:
-                  gte: '{{ steps.last_run.output.since }}'
+                  gte: '{{ inputs.since | default: steps.last_run.output.since }}'
 
   - name: active
     type: data.set
@@ -87,6 +106,11 @@ steps:
       memories: >-
         ${{ steps.read_memories.output.hits.hits | map: "_source"
         | reject_exp: "memory", "memory.governance.lifecycle.status == 'deleted' or memory.governance.lifecycle.status == 'verification_failed'" }}
+      created: 0
+      updated: 0
+      deleted: 0
+      rejected: 0
+      would_write: []
 
   - name: dream
     type: if
@@ -361,8 +385,38 @@ steps:
               ai_index_id: '{{ consts.ai_index_id }}'
               memories: '${{ foreach.item }}'
               changes: '${{ steps.consolidate.output.content }}'
+              dry_run: '${{ inputs.dry_run == true }}'
+
+          - name: tally
+            type: data.set
+            with:
+              created: '${{ variables.created | plus: steps.apply_changes.output.created }}'
+              updated: '${{ variables.updated | plus: steps.apply_changes.output.updated }}'
+              deleted: '${{ variables.deleted | plus: steps.apply_changes.output.deleted }}'
+              rejected: '${{ variables.rejected | plus: steps.apply_changes.output.rejected.size }}'
+              would_write: '${{ variables.would_write | concat: steps.apply_changes.output.would_write }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          memories: '${{ variables.memories | size | default: 0 }}'
+          created: '${{ variables.created | default: 0 }}'
+          updated: '${{ variables.updated | default: 0 }}'
+          deleted: '${{ variables.deleted | default: 0 }}'
+          rejected: '${{ variables.rejected | default: 0 }}'
+          would_write: '${{ variables.would_write }}'
+          reason: 'Dry run: nothing was written.'
 
   - name: output_result
     type: workflow.output
     with:
       memories: '${{ variables.memories | size | default: 0 }}'
+      created: '${{ variables.created | default: 0 }}'
+      updated: '${{ variables.updated | default: 0 }}'
+      deleted: '${{ variables.deleted | default: 0 }}'
+      rejected: '${{ variables.rejected | default: 0 }}'
