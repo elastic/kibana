@@ -25,6 +25,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   CREATE_AUTOMATION: 'createAutomation',
   CREATE_DRAFT_SOURCE: 'createDraftSource',
   DELETE_AUTOMATION: 'deleteAutomation',
+  DELETE_INVESTIGATION: 'deleteInvestigation',
   DELETE_RULES: 'deleteRules',
   OPEN_RULE_IN_DISCOVER: 'openRuleInDiscover',
   CLEAR_RULES_SELECTION: 'clearRulesSelection',
