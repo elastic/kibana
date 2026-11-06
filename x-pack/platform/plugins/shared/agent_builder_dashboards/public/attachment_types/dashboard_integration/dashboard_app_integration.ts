@@ -158,7 +158,8 @@ export const registerDashboardAppIntegration = ({
     stagedAttachmentData.set(attachmentId, dashboard.data);
     agentBuilder.addAttachment({
       id: attachmentId,
-      origin: api.savedObjectId$.getValue() ?? linkedAttachment?.origin,
+      // the origin of an attachment already in the conversation is kept, so only a draft takes it
+      origin: api.savedObjectId$.getValue(),
       type: DASHBOARD_ATTACHMENT_TYPE,
       data: dashboard.data,
     });
