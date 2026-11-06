@@ -123,6 +123,7 @@ export const createConnectorTypeFromSpec = (
     source: ACTION_TYPE_SOURCES.spec,
     spec,
     description: spec.metadata.description,
+    icon: spec.metadata.icon,
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
     sandboxSupportedAuthTypes: getSandboxSupportedAuthTypeIds(spec.auth),

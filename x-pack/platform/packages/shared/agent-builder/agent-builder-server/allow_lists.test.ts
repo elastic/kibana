@@ -37,6 +37,7 @@ describe('isAllowedBuiltinAttachment', () => {
   it('returns true for listed attachment type ids', () => {
     expect(isAllowedBuiltinAttachment('text')).toBe(true);
     expect(isAllowedBuiltinAttachment('esql')).toBe(true);
+    expect(isAllowedBuiltinAttachment('connector_type_draft')).toBe(true);
     expect(isAllowedBuiltinAttachment('platform.dashboard.dashboard_state')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);

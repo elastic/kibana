@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -46,7 +47,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
+import type { ConnectorSigningKey, ConnectorSpec, CredentialAccessor } from '@kbn/connector-specs';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
@@ -134,6 +135,10 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import { createConnectorTypeFromSpec } from './lib/single_file_connectors/create_connector_from_spec';
+import type { CreateConnectorTypeRequest } from '../common/routes/connector/apis/create_type';
+import { toDynamicConnectorTypeSpec } from './application/connector/methods/create_type/create_type';
+import { createConnectorTypeRequestSchemaV1 } from '../common/routes/connector/apis/create_type';
 
 export interface PluginSetupContract {
   registerType<
@@ -204,7 +209,10 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
-  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  listTypes(
+    featureId?: string,
+    includeDynamicTypes?: boolean
+  ): ReturnType<ActionTypeRegistry['list']>;
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -298,10 +306,36 @@ const includedHiddenTypes = [
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
+type CreateDynamicConnectorTypeFromSpec = (
+  spec: ConnectorSpec
+) => ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>;
+
 export class ActionsPlugin
   implements
     Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
 {
+  private createDynamicConnectorTypeFromSpec?: CreateDynamicConnectorTypeFromSpec;
+
+  private getCreateDynamicConnectorTypeFromSpec(): CreateDynamicConnectorTypeFromSpec {
+    if (!this.createDynamicConnectorTypeFromSpec) {
+      throw new Error('Connector type creation is not ready.');
+    }
+    return this.createDynamicConnectorTypeFromSpec;
+  }
+
+  private registerDynamicConnectorType(
+    actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>,
+    definition: CreateConnectorTypeRequest
+  ): void {
+    ensureSufficientLicense(actionType);
+    const actionTypeRegistry = this.actionTypeRegistry;
+    if (!actionTypeRegistry) {
+      throw new Error('Action type registry is not ready.');
+    }
+    actionTypeRegistry.register(actionType);
+    actionTypeRegistry.registerDynamicConnectorType(actionType.id, definition);
+  }
+
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
@@ -535,7 +569,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupContract: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -620,6 +654,9 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    this.createDynamicConnectorTypeFromSpec = (spec) =>
+      createConnectorTypeFromSpec(spec, setupContract);
+    return setupContract;
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
@@ -678,6 +715,11 @@ export class ActionsPlugin
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
+        connectorTypeRegistration: {
+          createTypeFromSpec: this.getCreateDynamicConnectorTypeFromSpec(),
+          registerType: (actionType, definition) =>
+            this.registerDynamicConnectorType(actionType, definition),
+        },
         authTypeRegistry: this.authTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
@@ -908,8 +950,12 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
-      listTypes: (featureId?: string) => {
-        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
+      listTypes: (featureId?: string, includeDynamicTypes?: boolean) => {
+        return this.actionTypeRegistry!.list({
+          featureId,
+          exposeValidation: true,
+          includeDynamicTypes,
+        });
       },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
@@ -1113,7 +1159,12 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
-
+    const getCreateDynamicConnectorTypeFromSpec = () =>
+      this.getCreateDynamicConnectorTypeFromSpec();
+    const registerDynamicConnectorType = (
+      actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>,
+      definition: CreateConnectorTypeRequest
+    ) => this.registerDynamicConnectorType(actionType, definition);
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
@@ -1143,6 +1194,11 @@ export class ActionsPlugin
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
+            connectorTypeRegistration: {
+              createTypeFromSpec: getCreateDynamicConnectorTypeFromSpec(),
+              registerType: (actionType, definition) =>
+                registerDynamicConnectorType(actionType, definition),
+            },
             authTypeRegistry: authTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
@@ -1182,6 +1238,31 @@ export class ActionsPlugin
         },
         listTypes: (featureId?: string) => {
           return actionTypeRegistry!.list({ featureId });
+        },
+        listDynamicConnectorTypes: () => actionTypeRegistry!.listDynamicConnectorTypes(),
+        getDynamicConnectorTypeDefinition: (id) =>
+          actionTypeRegistry!.getDynamicConnectorTypeDefinition(id),
+        updateDynamicConnectorTypeEditable: (id, changes) => {
+          const definition = actionTypeRegistry!.getDynamicConnectorTypeDefinition(id);
+          const validation = createConnectorTypeRequestSchemaV1.safeParse({
+            ...definition,
+            displayName: changes.displayName,
+            description: changes.description,
+            icon: changes.icon,
+            test: changes.testEnabled ? changes.test : undefined,
+          });
+          if (!validation.success) {
+            throw Boom.badRequest(
+              `Invalid connector type update: ${validation.error.issues
+                .map(({ message }) => message)
+                .join('; ')}`
+            );
+          }
+          const updatedDefinition = validation.data;
+          const actionType = getCreateDynamicConnectorTypeFromSpec()(
+            toDynamicConnectorTypeSpec({ ...updatedDefinition, id })
+          );
+          actionTypeRegistry!.replaceDynamicConnectorType(actionType, updatedDefinition);
         },
         getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
       };

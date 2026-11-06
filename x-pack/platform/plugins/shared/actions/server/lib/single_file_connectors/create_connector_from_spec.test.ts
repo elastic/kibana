@@ -701,6 +701,89 @@ describe('createConnectorTypeFromSpec', () => {
       expect(testHandler).toHaveBeenCalled();
     });
 
+    it('activates a test added to a dynamic type after registry replacement', async () => {
+      const registry = new ActionTypeRegistry({
+        licensing: { featureUsage: { register: jest.fn() } },
+        taskManager: { registerTaskDefinitions: jest.fn() },
+        taskRunnerFactory: { create: jest.fn() },
+        actionsConfigUtils: mockActionsConfigUtils,
+        licenseState: {
+          ensureLicenseForActionType() {},
+          isLicenseValidForActionType: () => ({ isValid: true }),
+        },
+        inMemoryConnectors: [],
+      } as unknown as ActionTypeRegistryOpts);
+      const initialSpec = createMockSpec({
+        metadata: {
+          id: '.dynamic',
+          displayName: 'Dynamic',
+          description: 'Dynamic connector',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: ['alerting'],
+        },
+      });
+      const initialType = createConnectorTypeFromSpec(initialSpec, mockActionsPlugin);
+      registry.register(initialType);
+      registry.registerDynamicConnectorType('.dynamic', {
+        id: 'dynamic',
+        displayName: 'Dynamic',
+        description: 'Dynamic connector',
+        auth: { type: 'none' },
+        config: [],
+        actions: {
+          testAction: {
+            description: 'Test action',
+            scope: 'read',
+            input: [],
+            request: { method: 'GET', url: 'https://example.test/action' },
+          },
+        },
+      });
+      const request = jest.fn().mockResolvedValue({ data: { connected: true } });
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ request });
+      const testHandler = jest.fn(
+        async (ctx: Parameters<ConnectorSpec['actions'][string]['handler']>[0]) => {
+          await ctx.client.request({ url: 'https://example.test/health' });
+          return { connected: true };
+        }
+      );
+      const updatedSpec = createMockSpec({
+        metadata: { ...initialSpec.metadata, id: '.dynamic' },
+        test: { enabled: true, handler: testHandler },
+      });
+      const replacement = createConnectorTypeFromSpec(updatedSpec, mockActionsPlugin);
+      registry.replaceDynamicConnectorType(replacement, {
+        ...registry.getDynamicConnectorTypeDefinition('.dynamic'),
+        test: {
+          description: 'Health check',
+          request: { method: 'GET', url: 'https://example.test/health' },
+        },
+      });
+
+      const activeType = registry.get('.dynamic');
+      expect(activeType.isTestable).toBe(true);
+      expect(() =>
+        activeType.validate.params!.schema.parse({
+          subAction: TEST_CONNECTOR_SUB_ACTION,
+          subActionParams: {},
+        })
+      ).not.toThrow();
+      const result = await activeType.executor!({
+        actionId: 'connector-id',
+        config: {},
+        secrets: {},
+        params: { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} },
+        logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() } as never,
+        services: {} as never,
+        configurationUtilities: mockActionsConfigUtils,
+        connectorUsageCollector: {} as never,
+      });
+
+      expect(request).toHaveBeenCalledWith({ url: 'https://example.test/health' });
+      expect(testHandler).toHaveBeenCalled();
+      expect(result).toMatchObject({ status: 'ok', data: { connected: true } });
+    });
+
     it('throws when spec.actions contains the reserved _test key', () => {
       const spec = createMockSpec({
         actions: {

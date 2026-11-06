@@ -84,6 +84,7 @@ export type ManagementId =
   | 'triggersActions'
   | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
+  | 'triggersActionsConnectorTypeBuilder'
   | 'upgrade_assistant'
   | 'users'
   | 'watcher'

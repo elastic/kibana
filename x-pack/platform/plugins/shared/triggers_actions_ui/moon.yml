@@ -104,6 +104,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/security-plugin'
   - '@kbn/std'
+  - '@kbn/zod'
   - '@kbn/lens-common'
   - '@kbn/inspector-plugin'
   - '@kbn/connector-specs'
@@ -113,6 +114,8 @@ dependsOn:
   - '@kbn/alerting-v2-utils'
   - '@kbn/user-profile-components'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/inference-plugin'
+  - '@kbn/inference-common'
 tags:
   - plugin
   - prod

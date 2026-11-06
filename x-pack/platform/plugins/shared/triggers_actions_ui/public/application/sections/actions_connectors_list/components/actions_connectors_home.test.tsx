@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,10 +14,15 @@ import { createMemoryHistory, createLocation } from 'history';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import {
+  CONNECTOR_TYPE_DRAFT_QUERY_PARAM,
+  CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX,
+} from '../../../../common/connector_type_draft_handoff';
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -30,6 +35,12 @@ const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/code-editor', () => ({
+  ...(jest.requireActual('@kbn/code-editor') as object),
+  CodeEditor: (props: React.ComponentProps<typeof MockedCodeEditor>) => (
+    <MockedCodeEditor {...props} />
+  ),
+}));
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveActionsCapability: jest.fn(),
 }));
@@ -103,6 +114,7 @@ describe('ActionsConnectorsHome', () => {
     lastActionsConnectorsListProps = undefined;
     loadAllActions.mockResolvedValue([]);
     loadConnectorAuthStatus.mockResolvedValue({});
+    sessionStorage.clear();
   });
 
   it('renders Actions connectors list component', async () => {
@@ -125,6 +137,7 @@ describe('ActionsConnectorsHome', () => {
     renderHome(connectorsTabProps());
 
     expect(await screen.findByTestId('createConnectorButton')).toBeEnabled();
+    expect(screen.queryByTestId('createConnectorButton-secondary-button')).not.toBeInTheDocument();
     await expectDocumentationInOverflow();
   });
 
@@ -181,6 +194,45 @@ describe('ActionsConnectorsHome', () => {
       name: 'Select a connector',
     });
     expect(selectConnectorFlyout).toBeInTheDocument();
+  });
+
+  it('opens the builder with a draft handed off from chat', async () => {
+    const draft = {
+      id: 'jsonplaceholder',
+      displayName: 'JSONPlaceholder',
+      description: 'Read posts',
+      config: [],
+      auth: { type: 'none' },
+      actions: {
+        getPosts: {
+          description: 'Get posts',
+          scope: 'read',
+          input: [],
+          request: { method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts' },
+        },
+      },
+    };
+    const draftKey = 'draft-1';
+    sessionStorage.setItem(
+      `${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`,
+      JSON.stringify({ draft, logoUrl: 'https://jsonplaceholder.typicode.com/favicon.ico' })
+    );
+    const url = `/connectors?${CONNECTOR_TYPE_DRAFT_QUERY_PARAM}=${draftKey}`;
+    const props = connectorsTabProps();
+    props.history = createMemoryHistory({ initialEntries: [url] });
+    props.location = createLocation(url);
+
+    renderHome(props);
+
+    await waitFor(() => expect(props.history.location.pathname).toBe('/connectors/build'));
+    expect(props.history.location.state).toEqual({
+      initialDefinition: expect.objectContaining({
+        displayName: 'JSONPlaceholder',
+        logoUrl: 'https://jsonplaceholder.typicode.com/favicon.ico',
+      }),
+    });
+    expect(props.history.location.search).toBe('');
+    expect(sessionStorage.getItem(`${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`)).toBeNull();
   });
 
   it('hide "Create connector" button when the user only has read access', async () => {

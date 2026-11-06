@@ -35,6 +35,8 @@ export interface ActionType {
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;
   description?: string;
+  /** Logo of the connector type: an EUI icon name or a `data:` image URI. */
+  icon?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
 }

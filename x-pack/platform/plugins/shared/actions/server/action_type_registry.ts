@@ -14,6 +14,7 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType as CommonActionType } from '../common';
+import type { CreateConnectorTypeRequest } from '../common/routes/connector/apis/create_type';
 import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
@@ -40,11 +41,14 @@ interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
   sandboxCapableOnly?: boolean;
+  includeDynamicTypes?: boolean;
 }
 
 export class ActionTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
+  private readonly dynamicConnectorTypeIds = new Set<string>();
+  private readonly dynamicConnectorTypeDefinitions = new Map<string, CreateConnectorTypeRequest>();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
@@ -129,6 +133,34 @@ export class ActionTypeRegistry {
    */
   public isSpecActionType = (actionTypeId: string): boolean =>
     this.actionTypes.get(actionTypeId)?.source === ACTION_TYPE_SOURCES.spec;
+
+  public registerDynamicConnectorType(id: string, definition: CreateConnectorTypeRequest): void {
+    this.dynamicConnectorTypeIds.add(id);
+    this.dynamicConnectorTypeDefinitions.set(id, definition);
+  }
+
+  public getDynamicConnectorTypeDefinition(id: string): CreateConnectorTypeRequest {
+    const definition = this.dynamicConnectorTypeDefinitions.get(id);
+    if (!definition) throw Boom.notFound(`Dynamic connector type "${id}" was not found.`);
+    return definition;
+  }
+
+  public listDynamicConnectorTypes(): ActionType[] {
+    return [...this.dynamicConnectorTypeIds]
+      .map((id) => this.actionTypes.get(id))
+      .filter((type): type is ActionType => Boolean(type));
+  }
+
+  public replaceDynamicConnectorType(
+    actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>,
+    definition: CreateConnectorTypeRequest
+  ): void {
+    if (!this.dynamicConnectorTypeIds.has(actionType.id)) {
+      throw Boom.notFound(`Dynamic connector type "${actionType.id}" was not found.`);
+    }
+    this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
+    this.dynamicConnectorTypeDefinitions.set(actionType.id, definition);
+  }
 
   /**
    * Returns true if the connector type has a sub-feature type defined
@@ -279,11 +311,16 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, sandboxCapableOnly, includeDynamicTypes }: ListOpts = {
+      exposeValidation: false,
+    }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
-      .filter(([_, actionType]) => {
-        return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
+      .filter(([actionTypeId, actionType]) => {
+        return featureId
+          ? actionType.supportedFeatureIds.includes(featureId) ||
+              (includeDynamicTypes && this.dynamicConnectorTypeIds.has(actionTypeId))
+          : true;
       })
       .filter(([_, actionType]) =>
         sandboxCapableOnly ? isSandboxCapableConnectorType(actionType) : true
@@ -309,6 +346,7 @@ export class ActionTypeRegistry {
         isDeprecated: !!actionType.isDeprecated,
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
         description: actionType.description,
+        icon: actionType.icon,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
       }));

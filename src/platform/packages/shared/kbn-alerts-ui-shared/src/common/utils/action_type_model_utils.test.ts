@@ -152,6 +152,15 @@ describe('action_type_model_utils', () => {
       expect(transformSpecToActionTypeModel(baseSpec, docLinks).iconClass).toBe('plugs');
     });
 
+    it('uses a data URI logo, as a custom connector type carries, for the flyout header', () => {
+      const logo = 'data:image/png;base64,iVBORw0KGgo=';
+      const model = transformSpecToActionTypeModel(
+        { ...baseSpec, metadata: { ...baseSpec.metadata, icon: logo } },
+        docLinks
+      );
+      expect(model.iconClass).toBe(logo);
+    });
+
     describe('docsUrl derivation', () => {
       const DOCS_BASE = 'https://www.elastic.co/docs/reference/kibana/connectors-kibana/';
 

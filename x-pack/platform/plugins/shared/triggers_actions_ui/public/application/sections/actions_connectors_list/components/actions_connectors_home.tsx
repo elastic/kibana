@@ -11,11 +11,23 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { createConnectorTypeRequestSchema } from '@kbn/actions-plugin/common';
+import { lazySchema, z } from '@kbn/zod/v4';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import {
+  CONNECTOR_TYPE_DRAFT_QUERY_PARAM,
+  CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX,
+} from '../../../../common/connector_type_draft_handoff';
 import type { Section } from '../../../constants';
-import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
+import {
+  routeToBuildConnector,
+  routeToConnectorEdit,
+  routeToConnectors,
+  routeToLogs,
+} from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
@@ -33,6 +45,13 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
 
 type ConnectorAuthStatusError = string | undefined;
+
+const connectorTypeDraftHandoffSchema = lazySchema(() =>
+  z.object({
+    draft: createConnectorTypeRequestSchema,
+    logoUrl: z.url().max(2048).optional(),
+  })
+);
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -133,6 +152,48 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
   const canSave = hasSaveActionsCapability(capabilities);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const draftKey = params.get(CONNECTOR_TYPE_DRAFT_QUERY_PARAM);
+    if (!draftKey) return;
+
+    params.delete(CONNECTOR_TYPE_DRAFT_QUERY_PARAM);
+    history.replace({
+      pathname: location.pathname,
+      search: params.toString() ? `?${params.toString()}` : '',
+    });
+
+    const storageKey = `${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`;
+    let storedDraft: string | null;
+    try {
+      storedDraft = sessionStorage.getItem(storageKey);
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      storedDraft = null;
+    }
+    let parsedDraft: unknown;
+    try {
+      parsedDraft = storedDraft ? JSON.parse(storedDraft) : undefined;
+    } catch {
+      parsedDraft = undefined;
+    }
+    const result = connectorTypeDraftHandoffSchema.safeParse(parsedDraft);
+    if (!result.success) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.triggersActionsUI.connectors.home.invalidBuilderDraft', {
+          defaultMessage: 'The connector type draft could not be loaded. Generate it again.',
+        }),
+      });
+      return;
+    }
+    history.push({
+      pathname: routeToBuildConnector,
+      state: {
+        initialDefinition: { ...result.data.draft, logoUrl: result.data.logoUrl },
+      },
+    });
+  }, [history, location.pathname, location.search, toasts]);
+
   const tabs = useMemo<AppHeaderTab[]>(
     () => [
       {
@@ -231,9 +292,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
       {skippedPreconfiguredConnectorIds.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
-            color="warning"
             size="s"
             data-test-subj="preconfiguredSkippedBanner"
             title={

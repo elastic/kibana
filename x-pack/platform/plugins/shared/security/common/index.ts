@@ -23,6 +23,7 @@ export type {
 } from './model';
 
 export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
+export { SUPERUSER_PRIVILEGES } from './constants';
 
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {

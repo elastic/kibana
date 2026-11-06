@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CONNECTOR_TYPE_ICON_MAX_LENGTH } from '../../../../common/routes/connector/apis/create_type';
 
 export const connectorTypeSchema = schema.object({
   id: schema.string(),
@@ -28,6 +29,7 @@ export const connectorTypeSchema = schema.object({
   subFeature: schema.maybe(schema.oneOf([schema.literal('endpointSecurity')])),
   allowMultipleSystemActions: schema.maybe(schema.boolean()),
   description: schema.maybe(schema.string()),
+  icon: schema.maybe(schema.string({ maxLength: CONNECTOR_TYPE_ICON_MAX_LENGTH })),
   isExperimental: schema.maybe(schema.boolean()),
   isTestable: schema.boolean({ defaultValue: false }),
 });

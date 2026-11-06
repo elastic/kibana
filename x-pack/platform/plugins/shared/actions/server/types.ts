@@ -24,6 +24,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
+import type { CreateConnectorTypeRequest } from '../common/routes/connector/apis/create_type';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskInfo } from './lib/action_executor';
@@ -67,6 +68,14 @@ export interface HookServices {
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  listDynamicConnectorTypes(): ReturnType<ActionTypeRegistry['listDynamicConnectorTypes']>;
+  getDynamicConnectorTypeDefinition: ActionTypeRegistry['getDynamicConnectorTypeDefinition'];
+  updateDynamicConnectorTypeEditable: (
+    id: string,
+    changes: Pick<CreateConnectorTypeRequest, 'displayName' | 'description' | 'icon' | 'test'> & {
+      testEnabled: boolean;
+    }
+  ) => void;
   getSkippedPreconfiguredConnectorIds: () => Set<string>;
 }
 
@@ -256,6 +265,11 @@ export interface ActionTypeCoreFields<
    * Description of this connector type.
    */
   description?: string;
+  /**
+   * Logo of the connector type: an EUI icon name or a `data:` image URI.
+   * Populated for spec-backed connectors from the spec metadata.
+   */
+  icon?: string;
   /**
    * When true, the connector type supports testing.
    */

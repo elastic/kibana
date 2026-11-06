@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CONNECTOR_TYPE_ICON_MAX_LENGTH } from '../../apis/create_type';
 
 const connectorResponseFields = {
   id: schema.string({
@@ -176,6 +177,15 @@ export const connectorTypeResponseSchema = schema.object(
         },
       })
     ),
+    icon: schema.maybe(
+      schema.string({
+        maxLength: CONNECTOR_TYPE_ICON_MAX_LENGTH,
+        meta: {
+          description:
+            'The logo of the connector type: an EUI icon name or a base64 `data:` image URI.',
+        },
+      })
+    ),
     is_experimental: schema.maybe(
       schema.boolean({
         meta: {
@@ -317,6 +327,7 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       }),
       icon: schema.maybe(
         schema.string({
+          maxLength: CONNECTOR_TYPE_ICON_MAX_LENGTH,
           meta: {
             description: 'Optional icon key or URL for this connector type in the UI.',
           },

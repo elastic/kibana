@@ -78,7 +78,12 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 
-import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
+import {
+  ALERTS_PAGE_ID,
+  CONNECTORS_PLUGIN_ID,
+  CONNECTOR_TYPE_BUILDER_PLUGIN_ID,
+  PLUGIN_ID,
+} from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
@@ -454,6 +459,25 @@ export class Plugin
           isServerless,
           uiActions: pluginsStart.uiActions,
         });
+      },
+    });
+
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: CONNECTOR_TYPE_BUILDER_PLUGIN_ID,
+      title: i18n.translate(
+        'xpack.triggersActionsUI.managementSection.connectorTypeBuilder.title',
+        {
+          defaultMessage: 'Connector type builder',
+        }
+      ),
+      order: 2,
+      async mount() {
+        const [coreStart] = await core.getStartServices();
+        await coreStart.application.navigateToApp('management', {
+          path: `/insightsAndAlerting/${CONNECTORS_PLUGIN_ID}/connectors/build`,
+          replace: true,
+        });
+        return () => {};
       },
     });
 

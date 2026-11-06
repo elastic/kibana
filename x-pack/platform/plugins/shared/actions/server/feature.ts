@@ -43,6 +43,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
       'triggersActionsRules',
       'triggersActionsAlerts',
       'triggersActionsConnectors',
+      'triggersActionsConnectorTypeBuilder',
     ],
   },
   privileges: {
@@ -55,6 +56,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           'triggersActionsRules',
           'triggersActionsAlerts',
           'triggersActionsConnectors',
+          'triggersActionsConnectorTypeBuilder',
         ],
       },
       aiIndex: { read: [CONNECTOR_KI_TYPE] },

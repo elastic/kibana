@@ -24,6 +24,10 @@ const createActionTypeRegistryMock = () => {
     isDeprecated: jest.fn(),
     getSpec: jest.fn(),
     isSpecActionType: jest.fn().mockReturnValue(false),
+    registerDynamicConnectorType: jest.fn(),
+    listDynamicConnectorTypes: jest.fn().mockReturnValue([]),
+    getDynamicConnectorTypeDefinition: jest.fn(),
+    replaceDynamicConnectorType: jest.fn(),
   };
   return mocked;
 };

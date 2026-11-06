@@ -30,3 +30,12 @@ export {
   parseAggregationResults,
 } from './data';
 export { NORMALIZED_FIELD_TYPES } from './normalized_field_types';
+export type {
+  GenerateConnectorTypeErrorReason,
+  GenerateConnectorTypeRequest,
+  GenerateConnectorTypeResponse,
+} from './connector_type_generation';
+export {
+  GENERATE_CONNECTOR_TYPE_PATH,
+  CONNECTOR_BUILDER_INFERENCE_FEATURE_ID,
+} from './connector_type_generation';

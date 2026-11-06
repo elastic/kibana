@@ -88,6 +88,12 @@ export const getAlertingSectionBreadcrumb = (
           defaultMessage: 'Edit',
         }),
       };
+    case 'buildConnector':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.connectors.build.breadcrumbTitle', {
+          defaultMessage: 'Build',
+        }),
+      };
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {

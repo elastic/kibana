@@ -81,6 +81,61 @@ describe('Plugin Stack Alerts management registration', () => {
   });
 });
 
+describe('Plugin connector type builder management registration', () => {
+  const setupPlugin = () => {
+    const management = managementPluginMock.createSetupContract();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+    const plugin = new Plugin(
+      coreMock.createPluginInitializerContext({
+        enableExperimental: [],
+        rules: { enabled: false },
+      })
+    );
+    plugin.setup(coreSetup, {
+      security: securityMock.createSetup(),
+      management,
+      actions: {
+        validateEmailAddresses: jest.fn(),
+        enabledEmailServices: ['*'],
+        isWebhookSslWithPfxEnabled: jest.fn(),
+      } as unknown as ActionsPublicPluginSetup,
+      share: sharePluginMock.createSetupContract(),
+    });
+    const registrations = (
+      management.sections.section.insightsAndAlerting.registerApp as jest.Mock
+    ).mock.calls.map(([args]) => args);
+    return { coreStart, registrations };
+  };
+
+  it('registers its own app right after Connectors', () => {
+    const { registrations } = setupPlugin();
+    const ids = registrations.map(({ id }) => id);
+    const connectors = registrations.find(({ id }) => id === 'triggersActionsConnectors');
+    const builder = registrations.find(({ id }) => id === 'triggersActionsConnectorTypeBuilder');
+
+    expect(builder).toEqual(expect.objectContaining({ title: 'Connector type builder' }));
+    expect(builder.order).toBe(connectors.order);
+    expect(ids.indexOf('triggersActionsConnectorTypeBuilder')).toBeGreaterThan(
+      ids.indexOf('triggersActionsConnectors')
+    );
+  });
+
+  it('forwards to the /connectors/build route of the Connectors app when mounted', async () => {
+    const { coreStart, registrations } = setupPlugin();
+    const builder = registrations.find(({ id }) => id === 'triggersActionsConnectorTypeBuilder');
+
+    const unmount = await builder.mount({});
+
+    expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('management', {
+      path: '/insightsAndAlerting/triggersActionsConnectors/connectors/build',
+      replace: true,
+    });
+    expect(typeof unmount).toBe('function');
+  });
+});
+
 describe('Plugin getClassicRulesPage', () => {
   it('returns a React element for the given page props', () => {
     const plugin = new Plugin(

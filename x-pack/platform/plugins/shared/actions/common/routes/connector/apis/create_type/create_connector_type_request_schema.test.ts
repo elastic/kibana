@@ -1,0 +1,362 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  CONNECTOR_TYPE_ICON_MAX_BYTES,
+  CONNECTOR_TYPE_ICON_MAX_LENGTH,
+  createConnectorTypeRequestSchema,
+  createConnectorTypeResponseSchema,
+} from './schemas/latest';
+
+const validRequest = {
+  id: 'acme_orders',
+  displayName: 'Acme Orders',
+  description: 'Order API',
+  config: [{ name: 'baseUrl', type: 'string' as const, required: true }],
+  auth: { type: 'api_key_header' as const, headerName: 'X-API-Key' },
+  actions: {
+    getOrder: {
+      description: 'Get an order',
+      input: [{ name: 'orderId', type: 'string' as const, required: true }],
+      request: {
+        method: 'GET' as const,
+        url: '{{config.baseUrl}}/orders/{{input.orderId}}',
+        headers: { Accept: 'application/json', 'X-API-Key': '{{secrets.apiKey}}' },
+      },
+    },
+  },
+};
+
+describe('createConnectorTypeRequestSchema', () => {
+  it('accepts a valid connector type request and applies defaults', () => {
+    const result = createConnectorTypeRequestSchema.parse(validRequest);
+    expect(result.actions.getOrder.scope).toBe('write');
+    expect(result.config[0].required).toBe(true);
+  });
+
+  it('accepts bounded array fields, supported string formats, multiple auth types, and a test request', () => {
+    const result = createConnectorTypeRequestSchema.safeParse({
+      ...validRequest,
+      config: [
+        { name: 'baseUrl', type: 'string', required: true, format: 'uri' },
+        { name: 'addresses', type: 'array', items: 'string', format: undefined },
+      ],
+      auth: { types: ['basic', { type: 'api_key_header', defaults: { headerField: 'X-Key' } }] },
+      test: {
+        description: 'Check credentials',
+        request: {
+          method: 'GET',
+          url: '{{config.baseUrl}}/ping',
+          headers: { 'X-Key': '{{secrets.apiKey}}' },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts typed scalar defaults and rejects mismatched or invalid defaults', () => {
+    const withDefaults = {
+      ...validRequest,
+      config: [
+        { name: 'baseUrl', type: 'string', format: 'uri', default: 'https://api.example.com' },
+        { name: 'limit', type: 'number', default: 25 },
+        { name: 'verbose', type: 'boolean', default: false },
+      ],
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(withDefaults).success).toBe(true);
+    for (const field of [
+      { name: 'baseUrl', type: 'string', default: 25 },
+      { name: 'baseUrl', type: 'string', format: 'uri', default: 'not a URL' },
+      { name: 'limit', type: 'number', default: '25' },
+      { name: 'verbose', type: 'boolean', default: 'false' },
+      { name: 'hosts', type: 'array', items: 'string', default: 'example.com' },
+    ]) {
+      expect(
+        createConnectorTypeRequestSchema.safeParse({ ...validRequest, config: [field] }).success
+      ).toBe(false);
+    }
+  });
+
+  it('requires an item type for arrays and rejects unsupported formats', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        config: [{ name: 'values', type: 'array' }],
+      }).success
+    ).toBe(false);
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        config: [{ name: 'date', type: 'string', format: 'password' }],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects duplicate auth type IDs across string and object definitions', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        auth: { types: ['basic', { type: 'basic' }] },
+      }).success
+    ).toBe(false);
+  });
+
+  it('validates test request references against config and auth, and rejects input references', () => {
+    const base = {
+      ...validRequest,
+      test: { request: { method: 'GET', url: '{{config.baseUrl}}/ping' } },
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(base).success).toBe(true);
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...base,
+        test: { request: { method: 'GET', url: 'https://example.test/{{input.orderId}}' } },
+      }).success
+    ).toBe(false);
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...base,
+        test: {
+          request: {
+            method: 'GET',
+            url: 'https://example.test/ping',
+            headers: { Authorization: '{{secrets.password}}' },
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
+  it('does not accept a caller-supplied minimum license', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        minimumLicense: 'basic',
+      }).success
+    ).toBe(false);
+  });
+
+  it.each(['.acme', '.Uppercase', 'bad.name', ''])('rejects an unsafe connector id: %s', (id) => {
+    expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, id }).success).toBe(false);
+  });
+
+  it('rejects ids that would exceed the final dotted id limit', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({ ...validRequest, id: 'a'.repeat(128) }).success
+    ).toBe(false);
+  });
+
+  it('requires the response id to include the dot prefix', () => {
+    expect(createConnectorTypeResponseSchema.parse({ id: '.acme_orders' }).id).toBe('.acme_orders');
+    expect(createConnectorTypeResponseSchema.safeParse({ id: 'acme_orders' }).success).toBe(false);
+    expect(createConnectorTypeResponseSchema.safeParse({ id: `.${'a'.repeat(127)}` }).success).toBe(
+      true
+    );
+  });
+
+  it('rejects unknown template roots and malformed template braces', () => {
+    for (const url of [
+      '{{env.secret}}',
+      '{{config.bad-name}}',
+      '{{config.baseUrl',
+      '{{params.orderId}}',
+    ]) {
+      const result = createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        actions: {
+          getOrder: {
+            ...validRequest.actions.getOrder,
+            request: { ...validRequest.actions.getOrder.request, url },
+          },
+        },
+      });
+      expect(result.success).toBe(false);
+    }
+  });
+
+  it('checks template names against fields and the selected auth type', () => {
+    const invalidTemplates = [
+      '{{config.missing}}/orders/{{input.orderId}}',
+      '{{config.baseUrl}}/orders/{{input.missing}}',
+    ];
+    for (const url of invalidTemplates) {
+      const result = createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        actions: {
+          getOrder: {
+            ...validRequest.actions.getOrder,
+            request: { ...validRequest.actions.getOrder.request, url },
+          },
+        },
+      });
+      expect(result.success).toBe(false);
+    }
+
+    const wrongSecret = {
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: {
+            ...validRequest.actions.getOrder.request,
+            headers: { 'X-API-Key': '{{secrets.password}}' },
+          },
+        },
+      },
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(wrongSecret).success).toBe(false);
+  });
+
+  it('accepts a path with declared template fields', () => {
+    const result = createConnectorTypeRequestSchema.safeParse({
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: {
+            ...validRequest.actions.getOrder.request,
+            url: '{{config.baseUrl}}',
+            path: '/orders/{{input.orderId}}',
+          },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it.each([
+    '/orders/{{input.missing}}',
+    'orders',
+    '//other.example/orders',
+    '/orders?x=1',
+    '/orders#x',
+  ])('rejects an invalid path: %s', (path) => {
+    const result = createConnectorTypeRequestSchema.safeParse({
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: { ...validRequest.actions.getOrder.request, path },
+        },
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects duplicate field names and unbounded request bodies', () => {
+    const duplicateFields = {
+      ...validRequest,
+      config: [validRequest.config[0], { ...validRequest.config[0] }],
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(duplicateFields).success).toBe(false);
+
+    let deepValue: Record<string, unknown> = { tooDeep: true };
+    for (let depth = 0; depth < 11; depth += 1) deepValue = { nested: deepValue };
+    const oversizedBody = {
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: { ...validRequest.actions.getOrder.request, body: deepValue },
+        },
+      },
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(oversizedBody).success).toBe(false);
+  });
+
+  it('rejects reserved names, non-finite numbers, and request bodies with too many nodes', () => {
+    const unsafeField = {
+      ...validRequest,
+      config: [{ name: 'constructor', type: 'string' as const }],
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(unsafeField).success).toBe(false);
+
+    const nonFiniteNumber = {
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: {
+            ...validRequest.actions.getOrder.request,
+            body: { value: Number.POSITIVE_INFINITY },
+          },
+        },
+      },
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(nonFiniteNumber).success).toBe(false);
+
+    const tooManyNodes = {
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: {
+            ...validRequest.actions.getOrder.request,
+            body: { values: Array.from({ length: 500 }, () => null) },
+          },
+        },
+      },
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(tooManyNodes).success).toBe(false);
+  });
+
+  describe('icon', () => {
+    it.each([
+      ['png', `data:image/png;base64,${Buffer.from('a small image').toString('base64')}`],
+      ['svg', `data:image/svg+xml;base64,${Buffer.from('<svg/>').toString('base64')}`],
+      ['jpeg', 'data:image/jpeg;base64,/9j/4AAQ'],
+      ['webp', 'data:image/webp;base64,UklGRg=='],
+      ['gif', 'data:image/gif;base64,R0lGODlh'],
+      ['ico', 'data:image/x-icon;base64,AAABAAE='],
+      ['vnd.microsoft.icon', 'data:image/vnd.microsoft.icon;base64,AAABAAE='],
+    ])('accepts a base64 %s data URI', (_type, icon) => {
+      expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon }).success).toBe(
+        true
+      );
+    });
+
+    it.each([
+      ['a remote URL, which the browser CSP would block', 'https://example.com/logo.png'],
+      ['a non-image data URI', 'data:text/html;base64,PHNjcmlwdD4='],
+      ['an unsupported image type', 'data:image/bmp;base64,Qk0='],
+      ['a data URI that is not base64', 'data:image/png,%89PNG'],
+      ['an empty payload', 'data:image/png;base64,'],
+      ['an EUI icon name', 'addDataApp'],
+    ])('rejects %s', (_label, icon) => {
+      expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon }).success).toBe(
+        false
+      );
+    });
+
+    it('accepts an image of the largest allowed size and rejects one byte more', () => {
+      const encode = (bytes: number) =>
+        `data:image/png;base64,${Buffer.alloc(bytes, 1).toString('base64')}`;
+      const largest = encode(CONNECTOR_TYPE_ICON_MAX_BYTES);
+
+      expect(largest.length).toBeLessThanOrEqual(CONNECTOR_TYPE_ICON_MAX_LENGTH);
+      expect(
+        createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon: largest }).success
+      ).toBe(true);
+
+      const result = createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        icon: encode(CONNECTOR_TYPE_ICON_MAX_BYTES + 1),
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]).toMatchObject({
+        path: ['icon'],
+        message: 'Logo must be at most 64 KB.',
+      });
+    });
+  });
+
+  it('rejects unknown top-level fields', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({ ...validRequest, unexpected: true }).success
+    ).toBe(false);
+  });
+});

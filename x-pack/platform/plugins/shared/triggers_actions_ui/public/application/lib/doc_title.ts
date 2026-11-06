@@ -41,6 +41,12 @@ export const getCurrentDocTitle = (page: string): string => {
         defaultMessage: 'Edit rule',
       });
       break;
+    case 'buildConnector':
+      updatedTitle = i18n.translate(
+        'xpack.triggersActionsUI.connectors.buildConnector.breadcrumbTitle',
+        { defaultMessage: 'Connector type builder' }
+      );
+      break;
     case 'alerts':
       updatedTitle = i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
         defaultMessage: 'Alerts',
