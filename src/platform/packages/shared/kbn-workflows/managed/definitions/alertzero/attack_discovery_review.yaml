@@ -300,7 +300,7 @@ steps:
   # `generation_source`, which is what splits it from a manual run by the user who
   # last saved the Worker (same `ownerId`).
   - name: open_investigation
-    type: ai.conversation.create
+    type: investigations.create
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
       title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}"
@@ -783,7 +783,7 @@ steps:
       - match: false_positive
         steps:
           - name: close_investigation_false_positive
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
               updates:
@@ -915,7 +915,7 @@ steps:
           # the absence of a payload. Surfacing why needs the analysis to carry
           # structured failure detail on its execution output, which is #19282.
           - name: record_analysis_failure
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
               updates:
@@ -1238,7 +1238,7 @@ steps:
   # and never be decided. This one marker is what the matcher treats as a
   # failed analysis. A cancel or a restart still writes nothing.
   - name: record_gate_failed
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error != blank }}"
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
@@ -1334,7 +1334,7 @@ steps:
   # service-account id on an auto-approval under `supervised` autonomy, and on
   # serverless an opaque user id even when a person decided.
   - name: record_forensics_handoff
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: "${{ steps.record_decision.output.approved == true }}"
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
@@ -1356,7 +1356,7 @@ steps:
   # mapping `low_value` onto `benign_positive` would put a claim on the alert the
   # analyst never made.
   - name: close_investigation_declined
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: "${{ steps.record_decision.output.declined == true }}"
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
@@ -1569,7 +1569,7 @@ steps:
   # the wrong default, so this records the lapse and leaves the Attack Discovery
   # and the Investigation open. Alerts retired at the verdict stay acknowledged.
   - name: record_decision_lapsed
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: "${{ steps.record_decision.output.expired == true }}"
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"

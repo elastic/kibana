@@ -1,0 +1,184 @@
+version: "1"
+name: "AlertZero demo investigation"
+description: >
+  POC only, hidden from the Watch list. A deterministic investigation of the
+  given alerts that needs no model: it creates the investigation through the
+  investigations steps, attaches the alerts, records impact from host.name and
+  user.name, sets fixed hypotheses and a verdict looked up by rule name, and
+  raises one proposal to close the alerts. With "Open a case for every AlertZero
+  investigation" on, the investigation's case gets all of it.
+enabled: true
+tags:
+  - alertzero
+  - poc-demo
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        alert_ids:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            type: string
+          description: The _id values of the alerts to investigate.
+      required:
+        - alert_ids
+steps:
+  - name: read_alerts
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      size: 50
+      query:
+        terms:
+          _id: "${{ inputs.alert_ids }}"
+
+  - name: fail_no_alerts
+    type: workflow.fail
+    if: "${{ steps.read_alerts.output.hits.hits.size == 0 }}"
+    with:
+      message: None of the alerts were found in this space.
+
+  - name: facts
+    type: data.set
+    with:
+      alert_count: "${{ steps.read_alerts.output.hits.hits.size }}"
+      rule_name: "{{ steps.read_alerts.output.hits.hits[0]._source['kibana.alert.rule.name'] | default: 'Unknown rule' }}"
+      severity: "{{ steps.read_alerts.output.hits.hits[0]._source['kibana.alert.severity'] | default: 'medium' }}"
+      host_name: "{{ steps.read_alerts.output.hits.hits[0]._source.host.name | default: steps.read_alerts.output.hits.hits[0]._source['host.name'] }}"
+      user_name: "{{ steps.read_alerts.output.hits.hits[0]._source.user.name | default: steps.read_alerts.output.hits.hits[0]._source['user.name'] }}"
+
+  # The verdict lookup the demo stands in for a model with: a few known-noisy rules are false
+  # positives, everything else is a true positive.
+  - name: verdict
+    type: data.set
+    with:
+      verdict_value: >-
+        {%- case variables.rule_name -%}{%- when 'Unusual Parent-Child Relationship', 'Whoami Process Activity' -%}false_positive{%- when 'Network Connection via Signed Binary' -%}benign_positive{%- else -%}true_positive{%- endcase -%}
+      verdict_label: >-
+        {%- case variables.rule_name -%}{%- when 'Unusual Parent-Child Relationship', 'Whoami Process Activity' -%}False positive{%- when 'Network Connection via Signed Binary' -%}Benign positive{%- else -%}True positive{%- endcase -%}
+
+  - name: create_investigation
+    type: investigations.create
+    with:
+      template_id: investigation
+      title: "Demo investigation: {{ variables.rule_name }}"
+      access_control:
+        access_mode: public
+      metadata:
+        status: open
+        severity: "{{ variables.severity }}"
+        description: >-
+          Deterministic demo investigation of {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %}
+          from rule "{{ variables.rule_name }}".
+        workflow_execution_ids: ["{{ execution.id }}"]
+
+  - name: fail_no_investigation
+    type: workflow.fail
+    if: "${{ steps.create_investigation.error != blank }}"
+    with:
+      message: "The investigation wasn't created: {{ steps.create_investigation.error.message }}"
+
+  - name: set_ids
+    type: data.set
+    with:
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
+  - name: tag_alerts
+    type: kibana.SetAlertTags
+    on-failure:
+      continue: true
+    with:
+      ids: "${{ inputs.alert_ids }}"
+      tags:
+        tags_to_add:
+          - "az:triage_investigation:{{ variables.investigation_id }}"
+        tags_to_remove: []
+
+  - name: attach_alerts
+    type: ai.attachment.add
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ variables.investigation_id }}"
+      type: security.alerts
+      render_inline: false
+      data:
+        tags:
+          - "az:triage_investigation:{{ variables.investigation_id }}"
+      description: "Alerts in this Investigation"
+
+  - name: impact_host
+    type: investigations.attachImpact
+    if: "${{ variables.host_name != blank }}"
+    on-failure:
+      continue: true
+    with:
+      conversationId: "{{ variables.investigation_id }}"
+      entities:
+        - id: "host:{{ variables.host_name }}"
+          name: "{{ variables.host_name }}"
+          type: host
+
+  - name: impact_user
+    type: investigations.attachImpact
+    if: "${{ variables.user_name != blank }}"
+    on-failure:
+      continue: true
+    with:
+      conversationId: "{{ variables.investigation_id }}"
+      entities:
+        - id: "user:{{ variables.user_name }}"
+          name: "{{ variables.user_name }}"
+          type: user
+
+  - name: hypotheses
+    type: investigations.setHypotheses
+    on-failure:
+      continue: true
+    with:
+      conversationId: "{{ variables.investigation_id }}"
+      hypotheses:
+        - candidate: "The activity is malicious: {{ variables.rule_name }} fired on behavior an attacker would need."
+          confidence: 0.8
+          status: "{% if variables.verdict_value == 'true_positive' %}confirmed{% else %}dismissed{% endif %}"
+        - candidate: "An administrator ran an approved tool on {{ variables.host_name | default: 'the host' }}."
+          confidence: 0.3
+          status: "{% if variables.verdict_value == 'true_positive' %}dismissed{% else %}confirmed{% endif %}"
+        - candidate: "The rule matched a known benign pattern that needs an exception."
+          confidence: 0.2
+          status: investigating
+
+  - name: record_verdict
+    type: investigations.patch
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ variables.investigation_id }}"
+      updates:
+        verdict: "{{ variables.verdict_label }}: the demo lookup classifies {{ variables.rule_name }} this way."
+        summary: >-
+          {{ variables.verdict_label }}. {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} from
+          "{{ variables.rule_name }}"{% if variables.host_name != blank %} on {{ variables.host_name }}{% endif %}{% if variables.user_name != blank %} as {{ variables.user_name }}{% endif %}.
+
+  # Async: the proposal's gate holds its run open until someone decides, and this demo ends now.
+  # The gate is called directly with AlertZero's origin: AlertZero's own bridge to it only runs
+  # under a Worker's delegated identity, and the demo runs as whoever starts it.
+  - name: propose_close
+    type: workflow.executeAsync
+    with:
+      workflow-id: system-create-proposal
+      inputs:
+        origin: alertzero
+        conversationId: "{{ variables.investigation_id }}"
+        title: "Close {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} as {{ variables.verdict_label | downcase }}"
+        comment: >-
+          The demo verdict for "{{ variables.rule_name }}" is {{ variables.verdict_label | downcase }}. Approving closes
+          the alert{% if variables.alert_count != 1 %}s{% endif %} with that reason.
+        actionWorkflowId: system-alertzero-demo-action-close-alerts
+        actionInput:
+          alertIds: "${{ inputs.alert_ids }}"
+          reason: "{{ variables.verdict_value }}"
+        impact: medium
+        confidence: high

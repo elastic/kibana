@@ -163,7 +163,7 @@ steps:
   # is nowhere to propose, so the review fails, the alerts stay untagged, and the
   # next sweep retries.
   - name: create_investigation
-    type: ai.conversation.create
+    type: investigations.create
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
@@ -272,7 +272,7 @@ steps:
                     - "{{ consts.dismissed_tag }}"
 
               - name: close_investigation_declined
-                type: ai.conversation.metadata.patch
+                type: investigations.patch
                 with:
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   updates:
@@ -1684,7 +1684,7 @@ steps:
   # the emit point for downstream feedback signals. A gate timeout leaves the
   # investigation open on purpose: nobody decided.
   - name: close_investigation_applied
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.record_proposal_action_decision.output.approved == true }}
@@ -1707,7 +1707,7 @@ steps:
       close_reason: resolved
 
   - name: close_investigation_dismissed
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.record_proposal_action_decision.output.dismissed == true }}

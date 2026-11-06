@@ -248,7 +248,7 @@ steps:
             [View the added alert{% if variables.joined_alert_count != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.join_on_collision.output.alerts_page_query }})
 
       - name: close_investigation_after_join
-        type: ai.conversation.metadata.patch
+        type: investigations.patch
         on-failure:
           continue: true
         with:
@@ -434,7 +434,7 @@ steps:
       # the outcome comment below. Also the failure mode `ai.conversation.metadata.patch`
       # hits when `agentBuilder:experimentalFeatures` is off.
       - name: close_investigation_after_approval
-        type: ai.conversation.metadata.patch
+        type: investigations.patch
         on-failure:
           continue: true
           fallback:
@@ -533,7 +533,7 @@ steps:
           # Same failure tolerance as close_investigation_after_approval: the decision has
           # landed, so a failed bookkeeping patch must not fail the run.
           - name: close_investigation_after_dismissal
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             if: "${{ steps.get_live_revision.error == blank }}"
             on-failure:
               continue: true
@@ -627,7 +627,7 @@ steps:
           failed_retag_count: "${{ steps.retag_expired_alerts.output.failed | default: variables.fp_candidate_count }}"
 
       - name: close_investigation_after_expiry
-        type: ai.conversation.metadata.patch
+        type: investigations.patch
         if: "${{ steps.get_live_revision.error == blank }}"
         on-failure:
           continue: true

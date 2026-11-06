@@ -31,7 +31,7 @@ export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW = {
   id: ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 8,
+  version: 9,
   yaml: COVERAGE_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -67,7 +67,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 36,
+  version: 37,
   yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
