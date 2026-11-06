@@ -1,0 +1,59 @@
+{
+  "operations": {
+    "browse": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/",
+        "source": "reader"
+      }
+    ],
+    "fileToMarkdown": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/",
+        "source": "reader"
+      }
+    ],
+    "fileToRenderedImage": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/",
+        "source": "reader"
+      }
+    ],
+    "search": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "in": "body",
+            "pageParam": "page"
+          },
+          "response": {
+            "itemsPath": "data"
+          },
+          "style": "page"
+        },
+        "path": "/",
+        "source": "search"
+      }
+    ]
+  },
+  "sources": {
+    "reader": {
+      "apiVersion": "0.5.0+6943abb",
+      "fetchedAt": "2026-11-03T08:14:41.382Z",
+      "format": "openapi",
+      "url": "https://r.jina.ai/openapi.json"
+    },
+    "search": {
+      "apiVersion": "0.5.0+6943abb",
+      "fetchedAt": "2026-11-03T08:14:41.828Z",
+      "format": "openapi",
+      "url": "https://s.jina.ai/openapi.json"
+    }
+  }
+}

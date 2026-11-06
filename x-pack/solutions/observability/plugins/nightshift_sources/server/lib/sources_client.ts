@@ -103,6 +103,9 @@ export class SourcesClient {
   /**
    * The checks create and update run on a new query, without writing. Returns the type to store,
    * and whether any index exists yet behind the query.
+   *
+   * Nothing here checks which indices the author can read. The routes that call this are gated
+   * behind manage and configure, and the service account's role decides what engines read.
    */
   async validateQuery({
     esql,
