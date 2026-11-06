@@ -356,6 +356,133 @@ describe('seedScenario world documents', () => {
     expect(seededScenario.worldDocs).toEqual([]);
   });
 
+  it('creates the space discovery index from the default namespace template when it is missing', async () => {
+    const alias = attackDiscoveryIndexForSpace('s');
+    const exists = jest.fn(async ({ index }: { index: string }) => index !== alias);
+    const create = jest.fn(async () => ({}));
+    const simulateIndexTemplate = jest.fn(async () => ({
+      template: {
+        mappings: { dynamic: false, properties: { 'kibana.alert.uuid': { type: 'keyword' } } },
+        settings: { index: { mapping: { ignore_malformed: 'true' } } },
+      },
+    }));
+    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+    const count = jest.fn(
+      async ({
+        query,
+      }: {
+        query?: { ids?: { values: string[] }; bool?: { filter: unknown[] } };
+      }) => ({
+        count:
+          (
+            query?.ids ??
+            (query?.bool?.filter[0] as { ids?: { values: string[] } } | undefined)?.ids
+          )?.values.length ?? 0,
+      })
+    );
+    await seedScenario({
+      esClient: esWith({
+        indices: { exists, create, simulateIndexTemplate },
+        bulk,
+        count,
+        search: jest.fn(async () => ({ hits: { hits: [] } })),
+      }),
+      log,
+      scenario: scenarioById('seeded-false-positive'),
+      spaceId: 's',
+    });
+    expect(simulateIndexTemplate).toHaveBeenCalledWith({
+      name: '.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001',
+    });
+    const discoveryCreate = (create.mock.calls as unknown as Array<[Record<string, unknown>]>).find(
+      ([args]) => String(args.index).includes('attack.discovery')
+    );
+    expect(discoveryCreate?.[0]).toMatchObject({
+      index: `.internal${alias}-000001`,
+      aliases: { [alias]: { is_write_index: true } },
+      mappings: { dynamic: false },
+    });
+    // Created before the bulk that writes the discovery.
+    expect(create.mock.invocationCallOrder[0]).toBeLessThan(bulk.mock.invocationCallOrder[0]);
+  });
+
+  it('leaves the discovery index it created in place, removing only the seeded documents', async () => {
+    const alias = attackDiscoveryIndexForSpace('s');
+    const indicesDelete = jest.fn(async () => ({}));
+    const deleteByQuery = jest.fn(async () => ({ deleted: 1 }));
+    const esClient = esWith({
+      indices: {
+        exists: jest.fn(async ({ index }: { index: string }) => index !== alias),
+        create: jest.fn(async () => ({})),
+        refresh: jest.fn(async () => ({})),
+        delete: indicesDelete,
+        simulateIndexTemplate: jest.fn(async () => ({ template: { mappings: {} } })),
+      },
+      bulk: jest.fn(async () => ({ errors: false, items: [] })),
+      count: jest.fn(
+        async ({
+          query,
+        }: {
+          query?: {
+            ids?: { values: string[] };
+            bool?: { filter: Array<{ ids?: { values: string[] } }> };
+          };
+        }) => ({ count: (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0 })
+      ),
+      search: jest.fn(async () => ({ hits: { hits: [] } })),
+      deleteByQuery,
+    });
+    const seededRow = await seedScenario({
+      esClient,
+      log,
+      scenario: scenarioById('seeded-false-positive'),
+      spaceId: 's',
+    });
+    await cleanupSeed({ esClient, seeded: seededRow });
+    expect(indicesDelete).not.toHaveBeenCalled();
+    expect(deleteByQuery).toHaveBeenCalledWith(expect.objectContaining({ index: alias }));
+  });
+
+  it('seeds the authored discovery for seeded-false-positive, cited alerts included', async () => {
+    const { seededScenario, operations } = await seedWith('seeded-false-positive');
+    const actionsList = actions(operations) as Array<
+      Record<string, { _index: string; _id: string }>
+    >;
+    const discoveryIndex = actionsList.findIndex(({ index }) =>
+      String(index?._index ?? '').startsWith('.adhoc.alerts-security.attack.discovery')
+    );
+    expect(discoveryIndex).toBeGreaterThanOrEqual(0);
+    expect(actionsList[discoveryIndex].index._id).toBe(seededScenario.seededDiscoveryId);
+    expect(actionsList[discoveryIndex].index._id).toMatch(/^[0-9a-f]{64}$/);
+    const doc = bodies(operations)[discoveryIndex] as Record<string, unknown>;
+    // Flat kibana.* keys, like the detection engine writes them.
+    expect(doc['kibana.alert.uuid']).toBe(seededScenario.seededDiscoveryId);
+    const cited = doc['kibana.alert.attack_discovery.alert_ids'] as string[];
+    expect(cited).toHaveLength(4);
+    const seededIds = actionsList
+      .map(({ index }) => index?._id)
+      .filter(
+        (id) =>
+          String(id ?? '').startsWith('adw-') &&
+          !String(id).includes('-world-') &&
+          String(
+            actionsList[actionsList.findIndex((a) => a.index?._id === id)]?.index?._index
+          ).startsWith('.alerts-security')
+      );
+    cited.forEach((id) => expect(seededIds).toContain(id));
+    // No other scenario seeds a discovery.
+    const quiet = await seedWith('benign-batch');
+    expect(quiet.seededScenario.seededDiscoveryId).toBeUndefined();
+    const quietActions = actions(quiet.operations) as Array<
+      Record<string, { _index: string; _id: string }>
+    >;
+    expect(
+      quietActions.some(({ index }) =>
+        String(index?._index ?? '').startsWith('.adhoc.alerts-security.attack.discovery')
+      )
+    ).toBe(false);
+  });
+
   it('puts the events inside the review window around the alerts', async () => {
     const { operations } = await seedWith('benign-batch');
     const docs = bodies(operations) as Array<Record<string, unknown>>;

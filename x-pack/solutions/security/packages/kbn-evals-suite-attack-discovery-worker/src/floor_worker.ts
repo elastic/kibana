@@ -26,8 +26,10 @@ import {
   FLOOR_TICK_POLL_INTERVAL_MS,
   FLOOR_TICK_WAIT_MS,
   PUBLIC_API_VERSION,
+  REVIEW_WORKFLOW_ID,
   RUNNER_WORKFLOW_ID,
 } from './constants';
+import { assertFloorClean, isFloorClean, readFloorWorkflow } from './floor_parent';
 import { apiVersion, errorMessage, httpStatus, sleep, spacePath } from './kibana_api';
 
 export const FLOOR_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -38,6 +40,7 @@ export const FLOOR_SERVICE_ACCOUNT_NAME = WORKER_SERVICE_ACCOUNT_NAMES[FLOOR_WOR
 const LIST_PAGE_SIZE = 100;
 const CONFLICT_LOOKUP_ATTEMPTS = 5;
 const CONFLICT_LOOKUP_DELAY_MS = 500;
+const REPAIR_NUDGE_INTERVAL = '25h';
 
 interface ServiceAccountEntry {
   id: string;
@@ -150,6 +153,113 @@ const patchFloorWorker = async (
   });
 };
 
+const isFloorWorkflowClean = async (
+  fetch: HttpHandler,
+  spaceId: string,
+  workflowId: string
+): Promise<boolean> =>
+  isFloorClean((await readFloorWorkflow({ fetch, spaceId, floorWorkflowId: workflowId })).yaml);
+
+/**
+ * Writes the floor worker's settings with the revision read just before the write, and tries once
+ * more (with a fresh revision) when the write is refused with a revision conflict (409), so a
+ * concurrent write does not leave the worker half put back. Any other failure is rethrown at once.
+ */
+const patchFloorSettingsWithRetry = async (
+  fetch: HttpHandler,
+  spaceId: string,
+  body: Record<string, unknown>
+): Promise<void> => {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const { settingsRevision } = await readFloorWorker(fetch, spaceId);
+      await patchFloorWorker(fetch, spaceId, {
+        settingsRevision: settingsRevision ?? null,
+        ...body,
+      });
+      return;
+    } catch (error) {
+      if (httpStatus(error) !== 409) throw error;
+      lastError = error;
+    }
+  }
+  throw lastError;
+};
+
+/**
+ * Re-renders the floor's YAML from the registry. A floor-parent run edits the stored YAML and puts
+ * it back; a run that was killed in between leaves the edit, and the original cannot be rebuilt
+ * from it (its `${{ consts.* }}` inputs are gone). The managed install skips a worker whose
+ * settings are unchanged (a disable/enable pair leaves the leftover in place, verified live), so
+ * the repair changes one setting and sets it back: each write re-renders from the registry.
+ *
+ * Only call this while the worker is disabled: on a live worker the nudge can put the next tick
+ * in the past and fire it, running whatever the floor dispatches right then. The writes carry no
+ * `enabled` key, so the worker stays disabled. If the interval cannot be put back (the second
+ * write is tried twice) the error says what it was left at.
+ */
+const reRenderFloor = async ({
+  fetch,
+  spaceId,
+  settings,
+}: {
+  fetch: HttpHandler;
+  spaceId: string;
+  settings: Record<string, unknown> | undefined;
+}): Promise<void> => {
+  const current = await readFloorWorker(fetch, spaceId);
+  const interval = String(
+    settings?.scheduleInterval ?? current.settings?.scheduleInterval ?? FLOOR_SCHEDULE_INTERVAL
+  );
+  const nudged = interval === REPAIR_NUDGE_INTERVAL ? '23h' : REPAIR_NUDGE_INTERVAL;
+  await patchFloorWorker(fetch, spaceId, {
+    settingsRevision: current.settingsRevision ?? null,
+    settings: { scheduleInterval: nudged },
+  });
+  try {
+    await patchFloorSettingsWithRetry(fetch, spaceId, {
+      settings: settings ?? { scheduleInterval: interval },
+    });
+  } catch (error) {
+    throw new Error(
+      `Could not put the floor worker's schedule interval back to ${interval}: it is left at ${nudged} (${errorMessage(
+        error
+      )}).`,
+      { cause: error }
+    );
+  }
+};
+
+/**
+ * Throws unless the floor dispatches the runner. When it does not, an earlier floor-parent run
+ * was interrupted: the YAML is re-rendered (see `reRenderFloor`) and checked again, and a floor
+ * that is still not clean fails loudly. The worker must be disabled, so no scheduled run exists
+ * that could dispatch the leftover and none is started by the repair.
+ */
+const ensureFloorClean = async ({
+  fetch,
+  log,
+  spaceId,
+  workflowId,
+  settings,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  spaceId: string;
+  workflowId: string;
+  settings: Record<string, unknown> | undefined;
+}): Promise<void> => {
+  if (await isFloorWorkflowClean(fetch, spaceId, workflowId)) return;
+  log.warning(
+    `[ad-worker] floor workflow "${workflowId}" is not dispatching the runner: an earlier run was interrupted while it was rewritten; re-rendering it from the registry`
+  );
+  await reRenderFloor({ fetch, spaceId, settings });
+  const { yaml } = await readFloorWorkflow({ fetch, spaceId, floorWorkflowId: workflowId });
+  assertFloorClean(workflowId, yaml);
+  log.info('[ad-worker] floor workflow repaired');
+};
+
 export interface EnabledFloorWorker {
   /** Id of the per-space managed workflow that a run is started from. */
   workflowId: string;
@@ -191,6 +301,42 @@ const listActiveExecutionIds = async (
     );
   });
   return results.map(({ id }) => id);
+};
+
+/**
+ * Cancels every active execution of a workflow in the space (the route is workflow-wide, not per
+ * execution), so the eval space must be dedicated. More than one means something other than the
+ * enable-time tick was running, and the count says so.
+ */
+const cancelActiveExecutions = async ({
+  fetch,
+  log,
+  spaceId,
+  workflowId,
+  active,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  spaceId: string;
+  workflowId: string;
+  active: string[];
+}): Promise<void> => {
+  if (active.length > 1) {
+    log.warning(
+      `[ad-worker] cancelling ${
+        active.length
+      } active executions of "${workflowId}" in "${spaceId}" (${active.join(
+        ', '
+      )}); the cancel is workflow-wide, so the eval space must not be shared`
+    );
+  }
+  await fetch(
+    spacePath(
+      spaceId,
+      `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions/cancel`
+    ),
+    { method: 'POST', headers: apiVersion(PUBLIC_API_VERSION) }
+  );
 };
 
 /** Polls until the workflow holds no active execution; throws if one outlives `timeoutMs`. */
@@ -251,20 +397,14 @@ export const settleEnableTimeRun = async ({
   }
   if (active.length === 0) {
     log.warning(
-      `[ad-worker] no enable-time scheduled run appeared within ${waitMs}ms; starting rows. A late ` +
+      `[ad-worker] no enable-time scheduled run appeared within ${waitMs}ms. A late ` +
         "scheduled tick can still cancel the first row's manual run (the floor workflow cancels " +
         'in progress, max 1), so a first row that is cancelled for no visible reason is that tick.'
     );
     return false;
   }
   log.info(`[ad-worker] cancelling the enable-time scheduled run (${active.join(', ')})`);
-  await fetch(
-    spacePath(
-      spaceId,
-      `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions/cancel`
-    ),
-    { method: 'POST', headers: apiVersion(PUBLIC_API_VERSION) }
-  );
+  await cancelActiveExecutions({ fetch, log, spaceId, workflowId, active });
   await waitUntilIdle({
     fetch,
     spaceId,
@@ -272,15 +412,30 @@ export const settleEnableTimeRun = async ({
     timeoutMs: cancelTimeoutMs,
     describeRace: 'The enable-time scheduled run of',
   });
-  // The tick had started the runner as a child. Cancelling the parent does not by itself prove the
-  // child has left its own cancel-in-progress slot, and a row's runner would race it there.
-  await waitUntilIdle({
-    fetch,
-    spaceId,
-    workflowId: RUNNER_WORKFLOW_ID,
-    timeoutMs: cancelTimeoutMs,
-    describeRace: 'The runner started by the enable-time scheduled run,',
-  });
+  // The tick had started the runner as a child (or, on a floor that was left rewritten, the
+  // review). Cancelling the parent does not by itself prove the child has left its own
+  // cancel-in-progress slot, and a row's run would race it there. A child that is still active is
+  // cancelled too, so it does not outlive the tick.
+  for (const childWorkflowId of [RUNNER_WORKFLOW_ID, REVIEW_WORKFLOW_ID]) {
+    const childActive = await listActiveExecutionIds(fetch, spaceId, childWorkflowId);
+    if (childActive.length > 0) {
+      log.info(`[ad-worker] cancelling "${childWorkflowId}" started by the enable-time run`);
+      await cancelActiveExecutions({
+        fetch,
+        log,
+        spaceId,
+        workflowId: childWorkflowId,
+        active: childActive,
+      });
+    }
+    await waitUntilIdle({
+      fetch,
+      spaceId,
+      workflowId: childWorkflowId,
+      timeoutMs: cancelTimeoutMs,
+      describeRace: 'The child started by the enable-time scheduled run,',
+    });
+  }
   return true;
 };
 
@@ -309,35 +464,109 @@ export const enableFloorWorker = async ({
       )}.`
     );
   }
+  const enableSettings = {
+    serviceAccountId,
+    autonomy: 'manual',
+    scheduleInterval: FLOOR_SCHEDULE_INTERVAL,
+  };
+  /** Set once the repair has disabled an enabled worker, so a failed `restore` can say so. */
+  let disabledForRepair = false;
+  /**
+   * Re-renders a floor that an interrupted floor-parent run left rewritten. Only a worker that is
+   * disabled is repaired: on an enabled one the write can fire a tick that dispatches the leftover
+   * (a review of a dead run, as the service account). An enabled worker is disabled first. Returns
+   * whether the floor was repaired; the worker is then left disabled and its settings revision has
+   * moved, so the caller re-reads it and enables the worker again if it needs to be on.
+   */
+  const repairFloorWhileDisabled = async ({
+    workflowId,
+    enabled,
+    settings,
+  }: {
+    workflowId: string;
+    enabled: boolean;
+    settings: Record<string, unknown> | undefined;
+  }): Promise<boolean> => {
+    if (await isFloorWorkflowClean(fetch, spaceId, workflowId)) return false;
+    if (enabled) {
+      // Set first: a disable that was applied but timed out must still be reported as left disabled.
+      disabledForRepair = true;
+      await patchFloorWorker(fetch, spaceId, { enabled: false });
+      log.info('[ad-worker] floor worker disabled while its floor workflow is repaired');
+    }
+    await ensureFloorClean({ fetch, log, spaceId, workflowId, settings });
+    return true;
+  };
   const restore = async (): Promise<void> => {
     const current = await readFloorWorker(fetch, spaceId);
+    const workflowId = current.workflowId ?? before.workflowId;
+    // Neither an enable nor a disable re-renders the floor, so a leftover from a killed floor-parent
+    // run is repaired here rather than handed to the next run, with the worker disabled meanwhile.
+    disabledForRepair = false;
+    let repaired = false;
+    try {
+      repaired = workflowId
+        ? await repairFloorWhileDisabled({
+            workflowId,
+            enabled: current.enabled,
+            settings: before.settings,
+          })
+        : false;
+    } catch (error) {
+      // A failed repair stops before the worker is enabled again, which is right: a worker that
+      // would dispatch a leftover floor must stay off. Say so, since the eval was meant to put it back on.
+      if (before.enabled && (disabledForRepair || !current.enabled)) {
+        throw new Error(
+          `${errorMessage(error)}; worker left disabled (was enabled before the eval)`,
+          { cause: error }
+        );
+      }
+      throw error;
+    }
+    // A worker the repair disabled is off, and one that was enabled before the setup and is off now
+    // (the repair, or a failed enable) goes back on.
+    const enabledNow = repaired ? false : current.enabled;
+    const reEnable = before.enabled && !enabledNow;
     if (before.enabled) {
-      // Put back the settings the setup replaced, using the current revision.
-      await patchFloorWorker(fetch, spaceId, {
-        settingsRevision: current.settingsRevision ?? null,
+      // Put back the settings the setup replaced.
+      await patchFloorSettingsWithRetry(fetch, spaceId, {
         settings: before.settings,
+        ...(reEnable ? { enabled: true } : {}),
       });
       log.info('[ad-worker] floor worker settings restored');
-      return;
+      // Enabling again starts a scheduled run; it must not outlive the restore.
+      if (reEnable && workflowId) await settleEnableTimeRun({ fetch, log, workflowId, spaceId });
+    } else {
+      await patchFloorWorker(fetch, spaceId, { enabled: false });
+      log.info(
+        `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
+      );
     }
-    await patchFloorWorker(fetch, spaceId, { enabled: false });
-    log.info(
-      `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
-    );
+    if (!workflowId) return;
+    const { yaml } = await readFloorWorkflow({ fetch, spaceId, floorWorkflowId: workflowId });
+    assertFloorClean(workflowId, yaml);
   };
   // The caller only receives `restore` when this resolves, so a failure from the PATCH onward must
   // put the worker back itself or it stays enabled in the eval space. The PATCH is inside the try
   // because one that times out may still have been applied; restoring a worker that never got
   // enabled is harmless.
   try {
+    // Repair before enabling: creating the scheduled task runs it at once, and a leftover floor
+    // would dispatch whatever the dead run rewrote it to.
+    const repaired = before.workflowId
+      ? await repairFloorWhileDisabled({
+          workflowId: before.workflowId,
+          enabled: before.enabled,
+          settings: enableSettings,
+        })
+      : false;
+    const revision = repaired
+      ? (await readFloorWorker(fetch, spaceId)).settingsRevision
+      : before.settingsRevision;
     await patchFloorWorker(fetch, spaceId, {
       enabled: true,
-      settingsRevision: before.settingsRevision ?? null,
-      settings: {
-        serviceAccountId,
-        autonomy: 'manual',
-        scheduleInterval: FLOOR_SCHEDULE_INTERVAL,
-      },
+      settingsRevision: revision ?? null,
+      settings: enableSettings,
     });
     const after = await readFloorWorker(fetch, spaceId);
     if (!after.enabled || !after.workflowId) {
@@ -349,6 +578,12 @@ export const enableFloorWorker = async ({
     }
     log.info(`[ad-worker] floor worker enabled as service account ${serviceAccountId}`);
     await settleEnableTimeRun({ fetch, log, workflowId: after.workflowId, spaceId });
+    const { yaml } = await readFloorWorkflow({
+      fetch,
+      spaceId,
+      floorWorkflowId: after.workflowId,
+    });
+    assertFloorClean(after.workflowId, yaml);
     return { workflowId: after.workflowId, restore };
   } catch (error) {
     await restore().catch((restoreError) =>

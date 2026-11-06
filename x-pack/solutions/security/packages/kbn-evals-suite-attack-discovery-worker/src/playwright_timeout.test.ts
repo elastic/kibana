@@ -19,6 +19,16 @@ describe('getPlaywrightTestTimeoutMs', () => {
     expect(getPlaywrightTestTimeoutMs(WORKER_SCENARIOS.length)).toBeGreaterThan(worstCaseMs);
   });
 
+  it('covers a row that waits for the runner and then for two reviews in a row', () => {
+    const worstRowMs = RUNNER_TIMEOUT_MS + 2 * REVIEW_SETTLE_TIMEOUT_MS;
+
+    expect(getPlaywrightTestTimeoutMs(1)).toBeGreaterThan(worstRowMs);
+    // The second review wait is paid once (one row starts a floor-parent review), not per row.
+    expect(getPlaywrightTestTimeoutMs(2) - getPlaywrightTestTimeoutMs(1)).toBe(
+      getPlaywrightTestTimeoutMs(1) - REVIEW_SETTLE_TIMEOUT_MS
+    );
+  });
+
   it('grows with the row count', () => {
     expect(getPlaywrightTestTimeoutMs(2)).toBeGreaterThan(getPlaywrightTestTimeoutMs(1));
   });

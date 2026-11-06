@@ -106,11 +106,15 @@ export const ROW_OVERHEAD_MS = 10 * 60_000;
 
 /**
  * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
- * timeouts. Otherwise a slow model is killed mid-dataset with no scores, and the failure reads as a
- * generic test timeout instead of the suite's labeled one.
+ * timeouts, plus one more review wait for the seeded false-positive row's floor-parent review.
+ * Otherwise a slow model is killed mid-dataset with no scores, and the failure reads as a generic
+ * test timeout instead of the suite's labeled one.
  */
 export const getPlaywrightTestTimeoutMs = (rowCount: number): number =>
-  rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS);
+  rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS) +
+  REVIEW_SETTLE_TIMEOUT_MS;
 
 export const COHORT_ENV = 'AD_WORKER_EVAL_COHORT';
 export const REFERENCE_MODEL_ENV = 'AD_WORKER_EVAL_REFERENCE_MODEL';
+/** Comma-separated scenario ids; when set, the spec scores only those rows (a focused run). */
+export const SCENARIOS_ENV = 'AD_WORKER_EVAL_SCENARIOS';

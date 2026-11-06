@@ -106,6 +106,18 @@ export const WORKER_SCENARIOS: ReadonlyArray<{
       generationCriteria: [],
     },
   },
+  {
+    scenarioId: 'seeded-false-positive',
+    title: 'Seeded false-positive discovery over benign SCCM alerts',
+    expected: {
+      goldVerdict: 'false_positive',
+      expectedDiscoveries: 'none',
+      criteria: [
+        'The rationale recognizes the cited alerts as routine, vendor-signed SCCM endpoint management activity rather than command-and-control.',
+      ],
+      generationCriteria: [],
+    },
+  },
 ];
 
 /** One row per scenario, stamped with the cohort and both stage models of the run. */

@@ -7,7 +7,8 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { AttackDiscoveryWorkerClient, usingClient } from './worker_client';
+import { parse } from 'yaml';
+import { AttackDiscoveryWorkerClient, describeFloorDrift, usingClient } from './worker_client';
 
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
 
@@ -83,6 +84,305 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
     await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
     await client.cancelPending();
     expect(fetch.mock.calls.some(([path]) => String(path).includes('/cancel'))).toBe(false);
+  });
+});
+
+const FLOOR_YAML = `settings:
+  run_as: "kibana/alertzero_attack_discovery"
+steps:
+  - name: run_attack_discovery
+    type: workflow.execute
+    with:
+      workflow-id: system-security-attack-discovery-worker
+      run-as-mode: inherit
+      inputs:
+        autonomy: manual
+`;
+
+/** A Kibana that stores the floor workflow and records every call, with a review child. */
+const fakeKibana = ({
+  childStatus = 'completed',
+  putFailsOn,
+  restoreDrifts = false,
+  children = [{ workflowId: 'system-security-attack-discovery-review', executionId: 'review-9' }],
+  initialYaml = FLOOR_YAML,
+  floorStatus = 'failed',
+}: {
+  childStatus?: string;
+  putFailsOn?: number;
+  restoreDrifts?: boolean;
+  children?: Array<{ workflowId: string; executionId: string }>;
+  initialYaml?: string;
+  floorStatus?: string;
+} = {}) => {
+  let yaml = initialYaml;
+  let puts = 0;
+  const cancelled = new Set<string>();
+  const calls: Array<{ method: string; path: string; body?: string }> = [];
+  const workflow = () => {
+    const definition = parse(yaml);
+    return {
+      yaml,
+      definition: restoreDrifts && puts >= 2 ? { ...definition, drift: true } : definition,
+      enabled: true,
+      definitionHash: 'hash',
+      // The managed version counter is the server's, and it moves with every write.
+      managedVersion: 9,
+      originManagedWorkflowId: 'system-security-floor-attack-discovery',
+      version: 1 + puts,
+    };
+  };
+  const fetch = jest.fn(async (path: string, init?: { method?: string; body?: string }) => {
+    const method = init?.method ?? 'GET';
+    calls.push({ method, path, body: init?.body });
+    if (method === 'PUT') {
+      puts += 1;
+      if (puts === putFailsOn) throw Object.assign(new Error('boom'), { status: 500 });
+      yaml = JSON.parse(init?.body ?? '{}').yaml as string;
+      return {};
+    }
+    if (path.endsWith('/run')) return { workflowExecutionId: 'floor-1' };
+    if (path.endsWith('/children')) return children;
+    if (path.endsWith('/cancel')) {
+      cancelled.add(/executions\/([^/]+)\/cancel/.exec(path)?.[1] ?? '');
+      return {};
+    }
+    const execution = /executions\/([^/]+)$/.exec(path)?.[1];
+    if (execution === 'review-9') {
+      return {
+        id: 'review-9',
+        status: cancelled.has('review-9') ? 'cancelled' : childStatus,
+        stepExecutions: [],
+      };
+    }
+    if (execution === 'floor-1') {
+      return {
+        id: 'floor-1',
+        status: cancelled.has('floor-1') ? 'cancelled' : floorStatus,
+        stepExecutions: [],
+      };
+    }
+    return workflow();
+  });
+  return { fetch, calls, storedYaml: () => yaml, cancelled };
+};
+
+const FLOOR_PATH = '/s/s/api/workflows/workflow/floor';
+const MANAGED_PATH = '/s/s/api/workflows/managed/workflow/floor';
+
+describe('AttackDiscoveryWorkerClient.runReview', () => {
+  const review = (client: AttackDiscoveryWorkerClient, maxWaitMs = 0) =>
+    client.runReview({
+      spaceId: 's',
+      floorWorkflowId: 'floor',
+      attackDiscoveryId: 'a'.repeat(64),
+      title: 'Encoded PowerShell command-and-control on WS-MGMT-201',
+      maxWaitMs,
+    });
+
+  it('runs the review as a child of the floor with the rewritten YAML, then restores it', async () => {
+    const kibana = fakeKibana();
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    const polled = await review(client);
+    expect(polled.execution.id).toBe('review-9');
+    expect(polled.timedOutAfterMs).toBeUndefined();
+
+    const puts = kibana.calls.filter(({ method }) => method === 'PUT');
+    expect(puts.map(({ path }) => path)).toEqual([MANAGED_PATH, MANAGED_PATH]);
+    const edited = parse(JSON.parse(puts[0].body ?? '{}').yaml);
+    expect(edited.settings.run_as).toBe('kibana/alertzero_attack_discovery');
+    expect(edited.steps[0].with).toEqual({
+      'workflow-id': 'system-security-attack-discovery-review',
+      'run-as-mode': 'inherit',
+      inputs: {
+        attack_discovery_id: 'a'.repeat(64),
+        title: 'Encoded PowerShell command-and-control on WS-MGMT-201',
+      },
+    });
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+    // The run started from the floor, never from the review's own run route.
+    expect(kibana.calls.some(({ path }) => path.includes('attack-discovery-review/run'))).toBe(
+      false
+    );
+    expect(kibana.calls.filter(({ path }) => path === `${FLOOR_PATH}/run`)).toHaveLength(1);
+    // Both executions had ended, so there was nothing to cancel, now or at teardown.
+    await client.cancelPending();
+    expect(kibana.calls.some(({ path }) => path.endsWith('/cancel'))).toBe(false);
+  });
+
+  it('cancels the floor and the review before it puts the YAML back', async () => {
+    const kibana = fakeKibana({ childStatus: 'running', floorStatus: 'running' });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    const polled = await review(client);
+    expect(polled.timedOutAfterMs).toBe(0);
+    expect([...kibana.cancelled].sort()).toEqual(['floor-1', 'review-9']);
+    const lastCancel = kibana.calls.map(({ path }) => path.endsWith('/cancel')).lastIndexOf(true);
+    const restore = kibana.calls.map(({ method }) => method === 'PUT').lastIndexOf(true);
+    expect(lastCancel).toBeGreaterThan(-1);
+    expect(lastCancel).toBeLessThan(restore);
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+    // Already cancelled, so teardown has nothing left to cancel.
+    const cancelsBefore = kibana.calls.filter(({ path }) => path.endsWith('/cancel')).length;
+    await client.cancelPending();
+    expect(kibana.calls.filter(({ path }) => path.endsWith('/cancel'))).toHaveLength(cancelsBefore);
+  });
+
+  it('returns the floor execution and restores the YAML when the review never starts', async () => {
+    const kibana = fakeKibana({ children: [] });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    const polled = await review(client);
+    expect(polled.execution.id).toBe('floor-1');
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+  });
+
+  it('restores the YAML when the run fails, and surfaces the run error', async () => {
+    const kibana = fakeKibana();
+    const failing = jest.fn(async (path: string, init?: { method?: string; body?: string }) => {
+      if (path.endsWith('/run')) throw Object.assign(new Error('run refused'), { status: 409 });
+      return kibana.fetch(path, init);
+    });
+    const client = new AttackDiscoveryWorkerClient(failing as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(/run refused/);
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+  });
+
+  it('does not run anything when the rewrite PUT fails, and still restores', async () => {
+    const kibana = fakeKibana({ putFailsOn: 1 });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(/boom/);
+    expect(kibana.calls.some(({ path }) => path === `${FLOOR_PATH}/run`)).toBe(false);
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+  });
+
+  it('throws when the restored definition differs from the one read before the run', async () => {
+    const kibana = fakeKibana({ restoreDrifts: true });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(
+      /differs from before the run after the restore \(definition\)/
+    );
+  });
+
+  it('throws naming the floor when the restore PUT fails', async () => {
+    const kibana = fakeKibana({ putFailsOn: 2 });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(/Could not restore floor workflow "floor"/);
+  });
+
+  it('throws one AggregateError naming the run, cancel and restore failures', async () => {
+    const kibana = fakeKibana({ childStatus: 'running', floorStatus: 'running', putFailsOn: 2 });
+    const failing = jest.fn(async (path: string, init?: { method?: string; body?: string }) => {
+      if (path.endsWith('/cancel'))
+        throw Object.assign(new Error('cancel refused'), { status: 500 });
+      if (path.endsWith('/children')) throw new Error('children unavailable');
+      return kibana.fetch(path, init);
+    });
+    const client = new AttackDiscoveryWorkerClient(failing as unknown as HttpHandler, log);
+    const error = await review(client).then(
+      () => undefined,
+      (thrown: unknown) => thrown
+    );
+    expect(error).toBeInstanceOf(AggregateError);
+    const { errors, message } = error as AggregateError;
+    expect(errors).toHaveLength(3);
+    expect(message).toMatch(/children unavailable/);
+    expect(message).toMatch(/cancel refused/);
+    expect(message).toMatch(/Could not restore floor workflow "floor"/);
+  });
+
+  it('refuses a floor that an interrupted run left rewritten, before any PUT', async () => {
+    const leftover = FLOOR_YAML.replace(
+      'system-security-attack-discovery-worker',
+      'system-security-attack-discovery-review'
+    );
+    const kibana = fakeKibana({ initialYaml: leftover });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(
+      /does not dispatch "system-security-attack-discovery-worker".*interrupted/
+    );
+    expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
+    expect(kibana.calls.some(({ path }) => path.endsWith('/run'))).toBe(false);
+  });
+
+  it('refuses a floor without run_as before changing anything', async () => {
+    const kibana = fakeKibana({ initialYaml: FLOOR_YAML.replace(/settings:\n.*\n/, '') });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(/run_as/);
+    expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
+  });
+});
+
+describe('one deadline for finding the child and polling it', () => {
+  it('does not give the poll a second full wait after the child lookup used the first', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick'] });
+    try {
+      const kibana = fakeKibana({
+        childStatus: 'running',
+        floorStatus: 'running',
+        children: [],
+      });
+      // The review child appears only after 12s of lookup; the budget is 15s in all.
+      const started = Date.now();
+      const fetchWithLateChild = jest.fn(
+        async (path: string, init?: { method?: string; body?: string }) => {
+          if (path.endsWith('/children') && Date.now() - started >= 12_000) {
+            return [
+              { workflowId: 'system-security-attack-discovery-review', executionId: 'review-9' },
+            ];
+          }
+          return kibana.fetch(path, init);
+        }
+      );
+      const client = new AttackDiscoveryWorkerClient(
+        fetchWithLateChild as unknown as HttpHandler,
+        log
+      );
+      const result = client.runReview({
+        spaceId: 's',
+        floorWorkflowId: 'floor',
+        attackDiscoveryId: 'a'.repeat(64),
+        title: 't',
+        maxWaitMs: 15_000,
+      });
+      await jest.advanceTimersByTimeAsync(60_000);
+      const polled = await result;
+      expect(polled.execution.id).toBe('review-9');
+      expect(polled.timedOutAfterMs).toBe(15_000);
+      // Time spent on the call, cancel wait excluded, stays within one budget (+ poll granularity).
+      const pollsOfChild = kibana.calls.filter(({ path }) =>
+        path.endsWith('/executions/review-9')
+      ).length;
+      expect(pollsOfChild).toBeLessThan(6);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
+describe('describeFloorDrift', () => {
+  const state = {
+    yaml: 'a',
+    definition: { steps: [{ a: 1 }] },
+    enabled: true,
+    definitionHash: 'h',
+    managedVersion: 9,
+    originManagedWorkflowId: 'o',
+  };
+
+  it('is undefined when only the YAML text differs', () => {
+    expect(describeFloorDrift(state, { ...state, yaml: 'b' })).toBeUndefined();
+  });
+
+  it('names every field that differs', () => {
+    expect(
+      describeFloorDrift(state, {
+        ...state,
+        definition: { steps: [] },
+        enabled: false,
+        definitionHash: 'x',
+        managedVersion: 10,
+        originManagedWorkflowId: 'p',
+      })
+    ).toMatch(/\(definition, enabled, definitionHash, managedVersion, originManagedWorkflowId\)/);
   });
 });
 

@@ -517,7 +517,7 @@
       "ciLabels": [
         "evals:security-attack-discovery-worker"
       ],
-      "stepTimeoutInMinutes": 465,
+      "stepTimeoutInMinutes": 555,
       "serverConfigSet": "evals_attack_discovery_worker"
     },
     {

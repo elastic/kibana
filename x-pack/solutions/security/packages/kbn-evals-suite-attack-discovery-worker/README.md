@@ -140,6 +140,7 @@ Per-scenario gold:
 | `positive-chain-with-noise`           | TP                                       |
 | `same-display-name-cross-account`     | inconclusive (TP also accepted)          |
 | `bait-false-positive`                 | FP, only if a discovery is written       |
+| `seeded-false-positive`               | FP (review of a seeded discovery)        |
 
 `bait-false-positive` is a negative control built as bait: attack-shaped rule names (encoded
 PowerShell, an outbound PowerShell connection, a SYSTEM scheduled task) over Configuration Manager
@@ -148,6 +149,14 @@ as the only destination. Generation gold is no discovery. When a model writes on
 reviews it through the normal path and the review should call it a false positive. Whether a
 discovery appears depends on the model, so the verdict and negative-control scores on this row are
 reported, not gating.
+
+`seeded-false-positive` exercises the review on a known-bad input: the seed writes a discovery that
+calls routine, vendor-signed SCCM alerts command-and-control, whatever the model generates. Its
+review runs only through the floor parent (see Running; a standalone `/run` of the review is
+refused with 403), and that review is folded into the row's artifacts. Generation gold is no
+discovery and the seeded discovery is excluded from the runner's review-coverage counts. Like the
+bait row, its verdict and negative-control scores are reported, not gating; the pipeline checks
+(`ReviewsSettled`, `OneReviewPerAttack`, ...) gate.
 
 `same-display-name-cross-account` forbids no co-citation pair in its baseline run (the baseline only
 checks that a story is reported). The two groups are separated in the enriched variants, which keep
@@ -188,6 +197,20 @@ AD_WORKER_EVAL_COHORT=whole \
   execution whatever the interval; the concurrency key would let it and the first manual run cancel
   each other, so the preflight cancels it (waiting for the workflow to go idle) before any row.
   The restore step disables the worker again if it was off.
+  The eval space must be dedicated to these evals: that cancel (and the one for the runner and
+  review the tick may have started) is workflow-wide, so it also stops any run of those workflows
+  that something else started in the space. The setup logs a warning with the count when it
+  cancels more than one execution.
+- The review has the same constraint (it inherits its execution identity, so a direct `/run` is
+  refused with 403). The seeded false-positive row therefore runs it as a child of the floor
+  worker: `AttackDiscoveryWorkerClient.runViaFloorParent` reads the floor's stored YAML, `PUT`s
+  it through `/api/workflows/managed/workflow/{id}` with its `workflow.execute` step pointed at the
+  review and literal inputs (`settings.run_as` and everything else unchanged), runs the floor, and
+  restores and verifies the original YAML in a `finally`. This needs the `updateManaged` privilege.
+  A concurrent edit of the same worker, or a worker disable/enable during a row, would race the
+  rewrite (a disable re-renders the YAML from the registry).
+- `AD_WORKER_EVAL_SCENARIOS=seeded-false-positive` (comma-separated scenario ids) scores only those
+  rows, for a focused run.
 - The Scout config set `evals_attack_discovery_worker` starts the stack with
   `xpack.alertzero.enabled`, `xpack.agenticInvestigations.enabled`, `xpack.proposals.enabled` and
   service accounts enabled. Without service accounts AlertZero installs no managed workflows.
@@ -195,11 +218,12 @@ AD_WORKER_EVAL_COHORT=whole \
 - Specs run with one Playwright worker: the runner's concurrency key is per space with
   cancel-in-progress.
 - Timeouts: runner 40 min, review settle 20 min, Playwright rows x (runner + review settle +
-  10 min overhead) per test (420 min for 6 rows), so the suite's own timeouts fire first. Wall time
+  10 min overhead) per test, plus one review settle for the seeded row's floor-parent review (510 min
+  for 7 rows), so the suite's own timeouts fire first. Wall time
   per row is dominated by one generation batch plus one review per unmatched attack (review
   concurrency 2).
-- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 465
-  min, the 420 min Playwright timeout plus 45 min for bootstrap, Scout boot and report upload.
+- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 555
+  min, the 510 min Playwright timeout plus 45 min for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).

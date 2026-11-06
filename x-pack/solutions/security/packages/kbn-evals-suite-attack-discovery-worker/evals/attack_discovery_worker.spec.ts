@@ -6,8 +6,10 @@
  */
 
 import { buildWorkerRows } from '../datasets/worker_rows';
+import { SCENARIOS_ENV } from '../src/constants';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
+import { selectScenarios } from '../src/select_scenarios';
 
 /**
  * One row per audit scenario, through review: alerts retrieved, discoveries persisted,
@@ -44,11 +46,16 @@ evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () 
           judgeConnectorName: evaluationConnector.name,
         },
       });
+      const examples = selectScenarios({
+        rows: buildWorkerRows(routing),
+        only: process.env[SCENARIOS_ENV],
+        envName: SCENARIOS_ENV,
+      });
       await evaluateDataset({
         dataset: {
           name: `attack-discovery-worker: ${routing.cohort}`,
           description: `Attack Discovery Worker through review, cohort ${routing.cohort}`,
-          examples: buildWorkerRows(routing),
+          examples,
         },
       });
     }

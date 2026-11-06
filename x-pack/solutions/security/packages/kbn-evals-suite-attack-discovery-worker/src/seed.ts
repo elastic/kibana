@@ -32,6 +32,10 @@ import {
 import { errorMessage, sleep, spacePath } from './kibana_api';
 import { kbnErrorMessage, type KbnRequest } from './kbn_request';
 import { buildWorld, hasWorld, hostIdFor, type WorldDoc } from './worker_world';
+import {
+  buildSeededFalsePositiveDiscovery,
+  SEEDED_FALSE_POSITIVE_SCENARIO_ID,
+} from './audit_failure_classes/scenarios/seeded_false_positive';
 
 /** Index holding the fingerprints that `match_fingerprints` compares new attacks against. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
@@ -355,6 +359,11 @@ export interface SeededScenario {
    * `worker_world.ts`), by index and `_id`. Removed with the seed.
    */
   worldDocs: ReadonlyArray<Pick<WorldDoc, 'index' | 'id'>>;
+  /**
+   * The `_id` of the authored Attack Discovery the seeded-false-positive scenario seeds straight
+   * into the space's attack discovery index, next to its alerts. Unset for every other scenario.
+   */
+  seededDiscoveryId?: string;
   /**
    * Ids (mapped back to the scenario's own) of every open alert in the space right after seeding.
    * The generation step reports only how many alerts it read, so this is the id set it can read.
@@ -826,6 +835,57 @@ const assertWorldSearchable = async ({
   }
 };
 
+/**
+ * The ad-hoc discovery index of a space is installed lazily by the rule registry on the first real
+ * discovery write. A bulk into a space that never had one auto-creates it with dynamic mappings,
+ * and the review's `_find` read of it then fails with `all shards failed`. When it is missing, it is
+ * created the way the registry would: a `-000001` backing index with the `default` namespace
+ * template's mappings (the registry keeps one template per namespace, none exists for the eval
+ * space yet) and the space's alias as write index.
+ *
+ * The index is left in place by cleanup, which removes only the seeded documents. Deleting it
+ * could leave the rule registry's cached writer for the namespace (`require_alias: true`) pointing
+ * at an alias that no longer exists, and a later product Attack Discovery persist in this space
+ * would fail until Kibana restarts. An empty index is harmless to the rows: `assertCleanSpace`
+ * counts open discoveries, not indices, and this function is a no-op once the alias exists.
+ */
+const ADHOC_DEFAULT_BACKING_INDEX = `.internal${attackDiscoveryIndexForSpace('default')}-000001`;
+
+const ensureDiscoveryIndex = async ({
+  esClient,
+  log,
+  spaceId,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  spaceId: string;
+}): Promise<void> => {
+  const alias = attackDiscoveryIndexForSpace(spaceId);
+  if (await esClient.indices.exists({ index: alias })) return;
+  const { template } = await esClient.indices.simulateIndexTemplate({
+    name: ADHOC_DEFAULT_BACKING_INDEX,
+  });
+  try {
+    await esClient.indices.create({
+      index: `.internal${alias}-000001`,
+      mappings: template.mappings,
+      settings: {
+        index: {
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+          hidden: true,
+          mapping: template.settings?.index?.mapping,
+        },
+      },
+      aliases: { [alias]: { is_write_index: true } },
+    });
+    log.info(`[ad-worker] created discovery index ${alias} from the default namespace template`);
+  } catch (error) {
+    // A concurrent seed or a real discovery write may have created it in between.
+    if (!ALREADY_EXISTS.test(errorMessage(error))) throw error;
+  }
+};
+
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
 export const seedScenario = async ({
   esClient,
@@ -878,12 +938,29 @@ export const seedScenario = async ({
     { [kind === 'event' ? 'create' : 'index']: { _index: index, _id: id } },
     toNestedSource(body),
   ]);
+  // Cites the first four seeded alerts by their full `_id`s.
+  const seededDiscovery =
+    scenario.id === SEEDED_FALSE_POSITIVE_SCENARIO_ID
+      ? buildSeededFalsePositiveDiscovery({
+          runMarker,
+          spaceId,
+          seededAlertIds: [...goldIdBySeededId.keys()],
+          timestampMs: Math.max(0, ...timestamps.values(), 0),
+        })
+      : undefined;
+  const discoveryOperations = seededDiscovery
+    ? [
+        { index: { _index: attackDiscoveryIndexForSpace(spaceId), _id: seededDiscovery.id } },
+        toNestedSource(seededDiscovery.doc, isFlatAlertField),
+      ]
+    : [];
   const seeded: SeededScenario = {
     runMarker,
     spaceId,
     goldIdBySeededId,
     alertCount: scenario.alerts.length,
     worldDocs: world.map(({ index, id }) => ({ index, id })),
+    ...(seededDiscovery ? { seededDiscoveryId: seededDiscovery.id } : {}),
     openAlertIds: [],
   };
   // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
@@ -896,11 +973,12 @@ export const seedScenario = async ({
   let bulkSettled = false;
   try {
     await ensureWorldIndices({ esClient, log, worldDocs: world });
+    if (seededDiscovery) await ensureDiscoveryIndex({ esClient, log, spaceId });
     let response: Awaited<ReturnType<Client['bulk']>>;
     try {
       response = await esClient.bulk({
         refresh: 'wait_for',
-        operations: [...operations, ...worldOperations],
+        operations: [...operations, ...discoveryOperations, ...worldOperations],
       });
     } catch (bulkError) {
       // A 4xx on the first attempt is Elasticsearch refusing the request before it ran anything.
@@ -929,6 +1007,15 @@ export const seedScenario = async ({
     try {
       await removeSeededAlertsById({ esClient, seeded, bulkSettled, wait });
       await removeWorldDocs({ esClient, seeded });
+      // The workflow has not started, so no fingerprints or discoveries of this row exist, except
+      // the seeded discovery itself, which the same bulk wrote and a failed seed must remove.
+      if (seeded.seededDiscoveryId !== undefined) {
+        await deleteMatching({
+          esClient,
+          index: attackDiscoveryIndexForSpace(spaceId),
+          query: { ids: { values: [seeded.seededDiscoveryId] } },
+        });
+      }
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
