@@ -74,7 +74,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   /*
-   * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
+   * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [min_size, maxSize]
    */
   getMbSizeExpression(options?: {
     forceFeatureProperties?: boolean;
@@ -87,7 +87,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       // returning minimum allows "growing" of the symbols when the meta comes in
       // A grow effect us less visually jarring as shrinking.
       // especially relevant when displaying fine-grained grids using mvt
-      return this._options.minSize >= 0 ? this._options.minSize : null;
+      return this._options.min_size >= 0 ? this._options.min_size : null;
     }
 
     const isArea = this.getStyleName() === VECTOR_STYLES.ICON_SIZE;
@@ -137,22 +137,22 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
 
   getMaxStopOutput() {
     return this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
-      ? this._options.maxSize / HALF_MAKI_ICON_SIZE
-      : this._options.maxSize;
+      ? this._options.max_size / HALF_MAKI_ICON_SIZE
+      : this._options.max_size;
   }
 
   getMinStopOutput() {
     return this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
-      ? this._options.minSize / HALF_MAKI_ICON_SIZE
-      : this._options.minSize;
+      ? this._options.min_size / HALF_MAKI_ICON_SIZE
+      : this._options.min_size;
   }
 
   isSizeDynamicConfigComplete() {
     return (
       this._field &&
       this._field.isValid() &&
-      this._options.minSize >= 0 &&
-      this._options.maxSize >= 0
+      this._options.min_size >= 0 &&
+      this._options.max_size >= 0
     );
   }
 

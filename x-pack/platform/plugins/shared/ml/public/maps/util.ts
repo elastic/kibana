@@ -40,12 +40,12 @@ export const ML_ANOMALY_LAYERS = {
 export const getCustomColorRampStyleProperty = (euiTheme: EuiThemeComputed) => ({
   type: STYLE_TYPE.DYNAMIC,
   options: {
-    customColorRamp: getMlSeverityColorRampValue(euiTheme),
+    custom_color_ramp: getMlSeverityColorRampValue(euiTheme),
     field: {
       name: 'record_score',
       origin: FIELD_ORIGIN.SOURCE,
     },
-    useCustomColorRamp: true,
+    use_custom_color_ramp: true,
   },
 });
 
@@ -55,7 +55,7 @@ export const getActualStyle = (euiTheme: EuiThemeComputed) => ({
     fill_color: getCustomColorRampStyleProperty(euiTheme),
     line_color: getCustomColorRampStyleProperty(euiTheme),
   },
-  isTimeAware: false,
+  is_time_aware: false,
 });
 
 export const TYPICAL_STYLE = {

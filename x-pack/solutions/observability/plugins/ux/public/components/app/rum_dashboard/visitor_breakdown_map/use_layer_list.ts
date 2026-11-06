@@ -108,19 +108,19 @@ export function useLayerList() {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
-            colorCategory: 'palette_0',
-            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            color_category: 'palette_0',
+            field_meta_options: { is_enabled: true, sigma: 3 },
             type: COLOR_MAP_TYPE.ORDINAL,
             field: {
               name: fieldName,
               origin: FIELD_ORIGIN.JOIN,
             },
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
         line_color: {
           type: STYLE_TYPE.DYNAMIC,
-          options: { color: '#3d3d3d', fieldMetaOptions: { isEnabled: true } },
+          options: { color: '#3d3d3d', field_meta_options: { is_enabled: true } },
         },
         line_width: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
         icon_size: { type: STYLE_TYPE.STATIC, options: { size: 6 } },
@@ -136,9 +136,9 @@ export function useLayerList() {
         },
         label_zoom_range: {
           options: {
-            useLayerZoomRange: true,
-            minZoom: 0,
-            maxZoom: 24,
+            use_layer_zoom_range: true,
+            min_zoom: 0,
+            max_zoom: 24,
           },
         },
         label_color: {
@@ -153,7 +153,7 @@ export function useLayerList() {
         symbolize_as: { options: { value: SYMBOLIZE_AS_TYPES.CIRCLE } },
         label_border_size: { options: { size: LABEL_BORDER_SIZES.SMALL } },
       },
-      isTimeAware: true,
+      is_time_aware: true,
     };
   };
 

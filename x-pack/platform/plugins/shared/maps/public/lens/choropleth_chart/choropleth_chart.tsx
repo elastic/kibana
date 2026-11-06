@@ -109,14 +109,14 @@ export function ChoroplethChart({
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
-            colorCategory: 'palette_0',
-            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            color_category: 'palette_0',
+            field_meta_options: { is_enabled: true, sigma: 3 },
             type: COLOR_MAP_TYPE.ORDINAL,
             field: {
               name: args.valueAccessor,
               origin: FIELD_ORIGIN.JOIN,
             },
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
         [VECTOR_STYLES.LINE_COLOR]: {
@@ -127,7 +127,7 @@ export function ChoroplethChart({
         },
         [VECTOR_STYLES.LINE_WIDTH]: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
-      isTimeAware: false,
+      is_time_aware: false,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
   } as LayerDescriptor;

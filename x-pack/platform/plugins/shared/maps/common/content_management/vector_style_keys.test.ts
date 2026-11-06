@@ -12,9 +12,18 @@ const storedLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: { type: 'STATIC', options: { color: '#fff' } },
+      fillColor: {
+        type: 'DYNAMIC',
+        options: {
+          fieldMetaOptions: { isEnabled: true },
+          customColorPalette: [{ stop: null, color: '#fff' }],
+        },
+      },
       labelBorderSize: { options: { size: 'SMALL' } },
+      labelZoomRange: { options: { useLayerZoomRange: false, minZoom: 1, maxZoom: 5 } },
     },
+    isTimeAware: true,
+    __styleMeta: { fieldMeta: { isEnabled: { range: { min: 0 } } } },
   },
 };
 const layer = {
@@ -22,9 +31,18 @@ const layer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fill_color: { type: 'STATIC', options: { color: '#fff' } },
+      fill_color: {
+        type: 'DYNAMIC',
+        options: {
+          field_meta_options: { is_enabled: true },
+          custom_color_palette: [{ stop: null, color: '#fff' }],
+        },
+      },
       label_border_size: { options: { size: 'SMALL' } },
+      label_zoom_range: { options: { use_layer_zoom_range: false, min_zoom: 1, max_zoom: 5 } },
     },
+    is_time_aware: true,
+    __styleMeta: { fieldMeta: { isEnabled: { range: { min: 0 } } } },
   },
 };
 

@@ -41,11 +41,17 @@ export function DynamicSizeForm({
     }
   };
 
-  const onSizeRangeChange = ({ minSize, maxSize }: { minSize: number; maxSize: number }) => {
+  const onSizeRangeChange = ({
+    min_size: minSize,
+    max_size: maxSize,
+  }: {
+    min_size: number;
+    max_size: number;
+  }) => {
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
-      minSize,
-      maxSize,
+      min_size: minSize,
+      max_size: maxSize,
     });
   };
 
@@ -62,8 +68,8 @@ export function DynamicSizeForm({
       <>
         <SizeRangeSelector
           onChange={onSizeRangeChange}
-          minSize={styleOptions.minSize}
-          maxSize={styleOptions.maxSize}
+          minSize={styleOptions.min_size}
+          maxSize={styleOptions.max_size}
           showLabels
           compressed
         />

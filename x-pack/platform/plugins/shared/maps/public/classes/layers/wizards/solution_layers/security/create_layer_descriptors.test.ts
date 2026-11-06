@@ -71,7 +71,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_SEARCH',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             fill_color: {
@@ -150,7 +150,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_SEARCH',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             fill_color: {
@@ -226,7 +226,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_PEW_PEW',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             line_color: {
@@ -241,12 +241,12 @@ describe('createLayerDescriptor', () => {
                   name: 'doc_count',
                   origin: 'source',
                 },
-                fieldMetaOptions: {
-                  isEnabled: true,
+                field_meta_options: {
+                  is_enabled: true,
                   sigma: 3,
                 },
-                maxSize: 8,
-                minSize: 1,
+                max_size: 8,
+                min_size: 1,
               },
               type: 'DYNAMIC',
             },
@@ -302,7 +302,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_SEARCH',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             fill_color: {
@@ -381,7 +381,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_SEARCH',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             fill_color: {
@@ -451,7 +451,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_PEW_PEW',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             line_color: {
@@ -466,12 +466,12 @@ describe('createLayerDescriptor', () => {
                   name: 'doc_count',
                   origin: 'source',
                 },
-                fieldMetaOptions: {
-                  isEnabled: true,
+                field_meta_options: {
+                  is_enabled: true,
                   sigma: 3,
                 },
-                maxSize: 8,
-                minSize: 1,
+                max_size: 8,
+                min_size: 1,
               },
               type: 'DYNAMIC',
             },
@@ -529,7 +529,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_SEARCH',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             fill_color: {
@@ -608,7 +608,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_SEARCH',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             fill_color: {
@@ -678,7 +678,7 @@ describe('createLayerDescriptor', () => {
           type: 'ES_PEW_PEW',
         },
         style: {
-          isTimeAware: true,
+          is_time_aware: true,
           properties: {
             ...getDefaultStaticProperties(),
             line_color: {
@@ -693,12 +693,12 @@ describe('createLayerDescriptor', () => {
                   name: 'doc_count',
                   origin: 'source',
                 },
-                fieldMetaOptions: {
-                  isEnabled: true,
+                field_meta_options: {
+                  is_enabled: true,
                   sigma: 3,
                 },
-                maxSize: 8,
-                minSize: 1,
+                max_size: 8,
+                min_size: 1,
               },
               type: 'DYNAMIC',
             },

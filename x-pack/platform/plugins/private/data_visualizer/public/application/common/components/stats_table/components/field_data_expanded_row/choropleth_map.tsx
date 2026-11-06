@@ -72,23 +72,23 @@ export const getChoroplethTopValuesLayer = (
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
-            colorCategory: 'palette_0',
-            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            color_category: 'palette_0',
+            field_meta_options: { is_enabled: true, sigma: 3 },
             type: COLOR_MAP_TYPE.ORDINAL,
             field: {
               name: 'doc_count',
               origin: FIELD_ORIGIN.JOIN,
             },
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
         line_color: {
           type: STYLE_TYPE.DYNAMIC,
-          options: { fieldMetaOptions: { isEnabled: true } },
+          options: { field_meta_options: { is_enabled: true } },
         },
         line_width: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
-      isTimeAware: true,
+      is_time_aware: true,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };

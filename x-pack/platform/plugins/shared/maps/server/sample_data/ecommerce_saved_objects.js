@@ -404,8 +404,8 @@ const layerList = [
               name: 'sum_of_taxful_total_price',
               origin: 'source',
             },
-            minSize: 1,
-            maxSize: 20,
+            min_size: 1,
+            max_size: 20,
           },
         },
         label_text: {
@@ -424,8 +424,8 @@ const layerList = [
               name: 'sum_of_taxful_total_price',
               origin: 'source',
             },
-            minSize: 12,
-            maxSize: 24,
+            min_size: 12,
+            max_size: 24,
           },
         },
         label_border_size: {

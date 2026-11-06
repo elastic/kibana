@@ -114,15 +114,15 @@ export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComp
         fill_color: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
-            customColorRamp: getMlSeverityColorRampValue(euiTheme),
+            custom_color_ramp: getMlSeverityColorRampValue(euiTheme),
             field: {
               name: 'record_score',
               origin: FIELD_ORIGIN.SOURCE,
             },
-            fieldMetaOptions: {
-              isEnabled: false,
+            field_meta_options: {
+              is_enabled: false,
             },
-            useCustomColorRamp: true,
+            use_custom_color_ramp: true,
           },
         },
         line_color: {

@@ -34,7 +34,7 @@ export function LabelZoomRangeEditor(props: Props) {
     props.handlePropertyChange(props.styleProperty.getStyleName(), {
       options: {
         ...props.styleProperty.getOptions(),
-        useLayerZoomRange: event.target.checked,
+        use_layer_zoom_range: event.target.checked,
       },
     });
   };
@@ -43,13 +43,13 @@ export function LabelZoomRangeEditor(props: Props) {
     props.handlePropertyChange(props.styleProperty.getStyleName(), {
       options: {
         ...props.styleProperty.getOptions(),
-        minZoom: Math.max(layerZoomRange.minZoom, parseInt(value[0], 10)),
-        maxZoom: Math.min(layerZoomRange.maxZoom, parseInt(value[1], 10)),
+        min_zoom: Math.max(layerZoomRange.minZoom, parseInt(value[0], 10)),
+        max_zoom: Math.min(layerZoomRange.maxZoom, parseInt(value[1], 10)),
       },
     });
   };
 
-  const { useLayerZoomRange } = props.styleProperty.getOptions();
+  const { use_layer_zoom_range: useLayerZoomRange } = props.styleProperty.getOptions();
   const slider = useLayerZoomRange ? null : (
     <EuiFormRow hasEmptyLabelSpace={true}>
       <ValidatedDualRange

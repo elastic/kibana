@@ -70,12 +70,12 @@ const layerList = [
               origin: 'source',
             },
             color: 'Yellow to Red',
-            fieldMetaOptions: {
+            field_meta_options: {
               isEnabled: false,
               sigma: 3,
             },
             type: 'ORDINAL',
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
         line_color: {
@@ -180,12 +180,12 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             color: 'Yellow to Red',
-            fieldMetaOptions: {
+            field_meta_options: {
               isEnabled: false,
               sigma: 3,
             },
             type: 'ORDINAL',
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
             field: {
               name: 'sum_of_FlightDelayMin',
               origin: 'source',
@@ -211,9 +211,9 @@ const layerList = [
               origin: 'source',
               name: 'doc_count',
             },
-            minSize: 4,
-            maxSize: 32,
-            fieldMetaOptions: {
+            min_size: 4,
+            max_size: 32,
+            field_meta_options: {
               isEnabled: false,
               sigma: 3,
             },

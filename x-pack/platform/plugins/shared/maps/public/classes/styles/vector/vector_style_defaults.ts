@@ -121,9 +121,9 @@ export function getDefaultStaticProperties(
     },
     [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
       options: {
-        useLayerZoomRange: true,
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
+        use_layer_zoom_range: true,
+        min_zoom: MIN_ZOOM,
+        max_zoom: MAX_ZOOM,
       },
     },
     [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
@@ -155,10 +155,10 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
     [VECTOR_STYLES.ICON]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        iconPaletteId: 'filledShapes',
+        icon_palette_id: 'filledShapes',
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
         },
       },
     },
@@ -166,10 +166,10 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
       type: STYLE_TYPE.DYNAMIC,
       options: {
         color: DEFAULT_COLOR_RAMP,
-        colorCategory: DEFAULT_COLOR_PALETTE,
+        color_category: DEFAULT_COLOR_PALETTE,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -178,10 +178,10 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
       type: STYLE_TYPE.DYNAMIC,
       options: {
         color: DEFAULT_COLOR_RAMP,
-        colorCategory: DEFAULT_COLOR_PALETTE,
+        color_category: DEFAULT_COLOR_PALETTE,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -189,11 +189,11 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
     [VECTOR_STYLES.LINE_WIDTH]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: 1,
-        maxSize: 10,
+        min_size: 1,
+        max_size: 10,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -201,11 +201,11 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
     [VECTOR_STYLES.ICON_SIZE]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: DEFAULT_MIN_SIZE,
-        maxSize: DEFAULT_MAX_SIZE,
+        min_size: DEFAULT_MIN_SIZE,
+        max_size: DEFAULT_MAX_SIZE,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -214,8 +214,8 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
       type: STYLE_TYPE.DYNAMIC,
       options: {
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -228,19 +228,19 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
     },
     [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
       options: {
-        useLayerZoomRange: true,
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
+        use_layer_zoom_range: true,
+        min_zoom: MIN_ZOOM,
+        max_zoom: MAX_ZOOM,
       },
     },
     [VECTOR_STYLES.LABEL_COLOR]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         color: DEFAULT_COLOR_RAMP,
-        colorCategory: DEFAULT_COLOR_PALETTE,
+        color_category: DEFAULT_COLOR_PALETTE,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -248,11 +248,11 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: DEFAULT_MIN_SIZE,
-        maxSize: DEFAULT_MAX_SIZE,
+        min_size: DEFAULT_MIN_SIZE,
+        max_size: DEFAULT_MAX_SIZE,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },
@@ -261,10 +261,10 @@ export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDes
       type: STYLE_TYPE.DYNAMIC,
       options: {
         color: DEFAULT_COLOR_RAMP,
-        colorCategory: DEFAULT_COLOR_PALETTE,
+        color_category: DEFAULT_COLOR_PALETTE,
         field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
+        field_meta_options: {
+          is_enabled: true,
           sigma: DEFAULT_SIGMA,
         },
       },

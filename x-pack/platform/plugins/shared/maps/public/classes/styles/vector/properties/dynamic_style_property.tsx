@@ -250,7 +250,7 @@ export class DynamicStyleProperty<T extends object>
 
   getStyleMetaHash(): string {
     const fieldMetaOptions = this.getFieldMetaOptions();
-    const parts: string[] = [fieldMetaOptions.isEnabled.toString()];
+    const parts: string[] = [fieldMetaOptions.is_enabled.toString()];
     if (this.isOrdinal()) {
       const dataMappingFunction = this.getDataMappingFunction();
       parts.push(dataMappingFunction);
@@ -276,7 +276,7 @@ export class DynamicStyleProperty<T extends object>
 
   isFieldMetaEnabled() {
     const fieldMetaOptions = this.getFieldMetaOptions();
-    return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
+    return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'is_enabled', true);
   }
 
   supportsFieldMeta() {
@@ -321,26 +321,27 @@ export class DynamicStyleProperty<T extends object>
   }
 
   getFieldMetaOptions(): FieldMetaOptions {
-    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'field_meta_options', { is_enabled: true });
 
-    // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
+    // In 8.0, UI changed to not allow setting is_enabled to false when fieldMeta from local not supported
     // Saved objects created prior to 8.0 may have a configuration where
-    // fieldMetaOptions.isEnabled is false and the field does not support fieldMeta from local.
-    // In these cases, force isEnabled to true
+    // fieldMetaOptions.is_enabled is false and the field does not support fieldMeta from local.
+    // In these cases, force is_enabled to true
     // The exact case that spawned this fix is with ES_SEARCH sources and 8.0 where vector tiles switched
     // from vector tiles generated via Kibana server to vector tiles generated via Elasticsearch.
     // Kibana vector tiles supported fieldMeta from local while Elasticsearch vector tiles do not support fieldMeta from local.
     return this._field && !this._field.supportsFieldMetaFromLocalData()
       ? {
           ...fieldMetaOptions,
-          isEnabled: true,
+          is_enabled: true,
         }
       : fieldMetaOptions;
   }
 
   getDataMappingFunction() {
-    return 'dataMappingFunction' in this._options
-      ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
+    return 'data_mapping_function' in this._options
+      ? (this._options as T & { data_mapping_function: DATA_MAPPING_FUNCTION })
+          .data_mapping_function
       : DATA_MAPPING_FUNCTION.INTERPOLATE;
   }
 

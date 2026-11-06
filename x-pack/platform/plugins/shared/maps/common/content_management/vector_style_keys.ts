@@ -9,32 +9,74 @@ import { camelCase } from 'lodash';
 import { VECTOR_STYLES } from '../constants';
 
 /**
- * Vector style property keys are persisted in camelCase (pre 9.4 format). In memory and in the API
- * they are snake_case. Only these known keys are renamed; nested keys are left untouched.
+ * Vector style keys are persisted in camelCase (pre 9.4 format). In memory and in the API they are
+ * snake_case. Only the known keys below are renamed, and only inside `style`.
  */
+const NESTED_STYLE_KEYS = [
+  'isTimeAware',
+  'customColorRamp',
+  'useCustomColorRamp',
+  'dataMappingFunction',
+  'colorCategory',
+  'customColorPalette',
+  'useCustomColorPalette',
+  'otherCategoryColor',
+  'fieldMetaOptions',
+  'isEnabled',
+  'useLayerZoomRange',
+  'minZoom',
+  'maxZoom',
+  'iconSource',
+  'iconPaletteId',
+  'customIconStops',
+  'useCustomIconMap',
+  'minSize',
+  'maxSize',
+];
+
 const SNAKE_TO_CAMEL = new Map<string, string>(
-  Object.values(VECTOR_STYLES).map((snakeKey) => [snakeKey, camelCase(snakeKey)])
+  [...Object.values(VECTOR_STYLES), ...NESTED_STYLE_KEYS.map((key) => snakeCaseKey(key))].map(
+    (snakeKey) => [snakeKey, camelCase(snakeKey)]
+  )
 );
 const CAMEL_TO_SNAKE = new Map<string, string>(
   Array.from(SNAKE_TO_CAMEL.entries()).map(([snakeKey, camelKey]) => [camelKey, snakeKey])
 );
 
-function renameStyleProperties(layer: any, keyMap: Map<string, string>) {
-  const properties = layer?.style?.properties;
-  if (!properties || typeof properties !== 'object') return layer;
+function snakeCaseKey(key: string) {
+  return key.replace(/[A-Z]/g, (char) => `_${char.toLowerCase()}`);
+}
+
+function renameKeysDeep(value: unknown, keyMap: Map<string, string>): unknown {
+  if (Array.isArray(value)) return value.map((item) => renameKeysDeep(item, keyMap));
+  if (value === null || typeof value !== 'object') return value;
   const renamed: Record<string, unknown> = {};
-  Object.keys(properties).forEach((key) => {
-    renamed[keyMap.get(key) ?? key] = properties[key];
+  Object.entries(value).forEach(([key, child]) => {
+    renamed[keyMap.get(key) ?? key] = renameKeysDeep(child, keyMap);
   });
-  return { ...layer, style: { ...layer.style, properties: renamed } };
+  return renamed;
+}
+
+function renameStyleKeys(layer: any, keyMap: Map<string, string>) {
+  const style = layer?.style;
+  if (!style || typeof style !== 'object' || style.type !== 'VECTOR') return layer;
+  const { __styleMeta, ...rest } = style;
+  return {
+    ...layer,
+    style: {
+      ...(renameKeysDeep(rest, keyMap) as object),
+      // style meta is keyed by user field names and is not part of the renamed schema
+      ...(__styleMeta ? { __styleMeta } : {}),
+    },
+  };
 }
 
 /** Converts persisted camelCase vector style keys to snake_case */
 export function transformVectorStyleKeysOut<T>(layer: T): T {
-  return renameStyleProperties(layer, CAMEL_TO_SNAKE);
+  return renameStyleKeys(layer, CAMEL_TO_SNAKE);
 }
 
 /** Converts snake_case vector style keys to the persisted camelCase keys */
 export function transformVectorStyleKeysIn<T>(layer: T): T {
-  return renameStyleProperties(layer, SNAKE_TO_CAMEL);
+  return renameStyleKeys(layer, SNAKE_TO_CAMEL);
 }

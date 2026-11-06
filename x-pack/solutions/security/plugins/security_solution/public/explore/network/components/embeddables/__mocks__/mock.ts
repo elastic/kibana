@@ -296,10 +296,10 @@ export const mockLineLayer = {
             name: 'doc_count',
             origin: 'source',
           },
-          minSize: 1,
-          maxSize: 8,
-          fieldMetaOptions: {
-            isEnabled: true,
+          min_size: 1,
+          max_size: 8,
+          field_meta_options: {
+            is_enabled: true,
             sigma: 3,
           },
         },
@@ -361,10 +361,10 @@ export const mockClientServerLineLayer = {
             name: 'doc_count',
             origin: 'source',
           },
-          minSize: 1,
-          maxSize: 8,
-          fieldMetaOptions: {
-            isEnabled: true,
+          min_size: 1,
+          max_size: 8,
+          field_meta_options: {
+            is_enabled: true,
             sigma: 3,
           },
         },
