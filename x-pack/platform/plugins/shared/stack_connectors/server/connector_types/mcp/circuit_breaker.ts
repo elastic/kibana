@@ -8,29 +8,30 @@
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import { clientTypes } from '@kbn/connector-specs/server';
-import { McpError, McpErrorCode, McpNotConnectedError, StreamableHTTPError } from '@kbn/mcp-client';
+import { McpError, McpErrorCode, McpNotConnectedError } from '@kbn/mcp-client';
 import {
   createRetryableError,
   createTaskRunError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running';
 
-export const MAX_IN_FLIGHT_PER_KEY = 10;
 export const BREAKER_FAILURE_THRESHOLD = 3;
 export const BREAKER_BASE_COOLING_MS = 60 * 1000;
 export const BREAKER_MAX_COOLING_MS = 10 * 60 * 1000;
 export const BREAKER_STATE_MAX_SIZE = 1000;
 export const BREAKER_STATE_TTL_MS = 2 * BREAKER_MAX_COOLING_MS;
 
-export interface ExecutionGuardOptions {
-  maxInFlight?: number;
+// Thrown by the SDK protocol layer once its transport is gone.
+const SDK_NOT_CONNECTED_MESSAGE = 'Not connected';
+
+export interface CircuitBreakerOptions {
   failureThreshold?: number;
   baseCoolingMs?: number;
   maxCoolingMs?: number;
   now?: () => number;
 }
 
-export interface GuardedRun {
+export interface BreakerRun {
   key: string;
   connectorId: string;
   logger: Logger;
@@ -72,17 +73,20 @@ const matchesErrorOrCause = (err: unknown, predicate: (current: unknown) => bool
   return cause !== undefined && predicate(cause);
 };
 
+/**
+ * Connect-phase failure shapes. Errors from a tool call on a connected client (request timeouts,
+ * HTTP errors, tool errors) are not included: they say nothing about whether the server can be
+ * reached.
+ */
 const isConnectionFailureShape = (current: unknown): boolean => {
   if (current instanceof McpError) {
-    return (
-      current.code === McpErrorCode.RequestTimeout || current.code === McpErrorCode.ConnectionClosed
-    );
+    return current.code === McpErrorCode.ConnectionClosed;
   }
   if (current instanceof McpNotConnectedError) {
     return true;
   }
-  if (current instanceof StreamableHTTPError) {
-    return typeof current.code === 'number' && current.code >= 500;
+  if (current instanceof Error && current.message === SDK_NOT_CONNECTED_MESSAGE) {
+    return true;
   }
   if (!isRecord(current)) {
     return false;
@@ -96,7 +100,7 @@ const isConnectionFailureShape = (current: unknown): boolean => {
   return false;
 };
 
-/** True for connection-level failures. User errors and tool errors return false. */
+/** True for connect-phase failures only. User errors and tool errors return false. */
 export const isConnectionFailure = (err: unknown): boolean => {
   if (clientTypes.mcp.isUserError?.(err)) {
     return false;
@@ -104,24 +108,18 @@ export const isConnectionFailure = (err: unknown): boolean => {
   if (isRecord(err) && connectFailures.has(err)) {
     return true;
   }
-  if (clientTypes.mcp.shouldInvalidateOnError?.(err)) {
-    return true;
-  }
   return matchesErrorOrCause(err, isConnectionFailureShape);
 };
 
-/** Limits concurrent MCP operations per lease key and opens a breaker after connection failures. */
-export class McpExecutionGuard {
-  private readonly maxInFlight: number;
+/** Opens a per-lease-key breaker after consecutive connection failures and fails fast while open. */
+export class McpCircuitBreaker {
   private readonly failureThreshold: number;
   private readonly baseCoolingMs: number;
   private readonly maxCoolingMs: number;
   private readonly now: () => number;
-  private readonly inFlight = new Map<string, number>();
   private readonly breakers: LRUCache<string, BreakerEntry>;
 
-  constructor(options: ExecutionGuardOptions = {}) {
-    this.maxInFlight = options.maxInFlight ?? MAX_IN_FLIGHT_PER_KEY;
+  constructor(options: CircuitBreakerOptions = {}) {
     this.failureThreshold = options.failureThreshold ?? BREAKER_FAILURE_THRESHOLD;
     this.baseCoolingMs = options.baseCoolingMs ?? BREAKER_BASE_COOLING_MS;
     this.maxCoolingMs = options.maxCoolingMs ?? BREAKER_MAX_COOLING_MS;
@@ -134,17 +132,9 @@ export class McpExecutionGuard {
     });
   }
 
-  async run<T>(ctx: GuardedRun, fn: () => Promise<T>): Promise<T> {
+  async run<T>(ctx: BreakerRun, fn: () => Promise<T>): Promise<T> {
     this.admit(ctx);
 
-    const current = this.inFlight.get(ctx.key) ?? 0;
-    if (current >= this.maxInFlight) {
-      const message = `Too many in-flight requests to MCP server for connector "${ctx.connectorId}": ${current} already in flight (limit ${this.maxInFlight})`;
-      ctx.logger.debug(message);
-      throw this.createGuardError(message);
-    }
-
-    this.inFlight.set(ctx.key, current + 1);
     try {
       const result = await fn();
       this.recordSuccess(ctx);
@@ -156,32 +146,14 @@ export class McpExecutionGuard {
         this.recordSuccess(ctx);
       }
       throw err;
-    } finally {
-      this.releaseInFlight(ctx.key);
     }
-  }
-
-  getInFlight(key: string): number {
-    return this.inFlight.get(key) ?? 0;
-  }
-
-  getBreakerState(key: string): 'closed' | 'open' | 'half-open' {
-    const entry = this.breakers.get(key);
-    if (entry?.openUntil === undefined) {
-      return 'closed';
-    }
-    if (entry.probing || this.now() >= entry.openUntil) {
-      return 'half-open';
-    }
-    return 'open';
   }
 
   clear(): void {
-    this.inFlight.clear();
     this.breakers.clear();
   }
 
-  private admit(ctx: GuardedRun): void {
+  private admit(ctx: BreakerRun): void {
     const entry = this.breakers.get(ctx.key);
     if (entry?.openUntil === undefined) {
       return;
@@ -202,7 +174,7 @@ export class McpExecutionGuard {
     this.throwUnavailable(ctx, entry.openUntil);
   }
 
-  private recordSuccess(ctx: GuardedRun): void {
+  private recordSuccess(ctx: BreakerRun): void {
     const entry = this.breakers.get(ctx.key);
     if (entry === undefined) {
       return;
@@ -213,7 +185,7 @@ export class McpExecutionGuard {
     }
   }
 
-  private recordFailure(ctx: GuardedRun): void {
+  private recordFailure(ctx: BreakerRun): void {
     const now = this.now();
     const existing = this.breakers.get(ctx.key);
 
@@ -254,37 +226,20 @@ export class McpExecutionGuard {
     this.breakers.set(ctx.key, entry);
   }
 
-  private releaseInFlight(key: string): void {
-    const next = this.inFlight.get(key);
-    // clear() may have dropped the entry while this call was still running.
-    if (next === undefined) {
-      return;
-    }
-    if (next <= 1) {
-      this.inFlight.delete(key);
-    } else {
-      this.inFlight.set(key, next - 1);
-    }
-  }
-
   private secondsUntil(openUntil: number): number {
     return Math.ceil(Math.max(0, openUntil - this.now()) / 1000);
   }
 
-  private throwUnavailable(ctx: GuardedRun, openUntil: number): never {
+  private throwUnavailable(ctx: BreakerRun, openUntil: number): never {
     const message = `MCP server for connector "${
       ctx.connectorId
     }" is unavailable, next attempt in ${this.secondsUntil(openUntil)}s`;
     ctx.logger.debug(message);
-    throw this.createGuardError(message);
-  }
-
-  private createGuardError(message: string): Error {
-    return createRetryableError(
+    throw createRetryableError(
       createTaskRunError(new Error(message), TaskErrorSource.FRAMEWORK),
       false
     );
   }
 }
 
-export const mcpExecutionGuard = new McpExecutionGuard();
+export const mcpCircuitBreaker = new McpCircuitBreaker();

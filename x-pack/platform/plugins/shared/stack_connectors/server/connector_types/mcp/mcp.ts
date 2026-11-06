@@ -42,7 +42,7 @@ import type {
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { buildHeadersFromSecrets } from './auth_helpers';
-import { markConnectFailure, mcpExecutionGuard } from './execution_guard';
+import { markConnectFailure, mcpCircuitBreaker } from './circuit_breaker';
 
 // TTL for list_tools cache: 15 minutes
 export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -154,8 +154,8 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     });
   }
 
-  private guarded<T>(fn: () => Promise<T>): Promise<T> {
-    return mcpExecutionGuard.run(
+  private withBreaker<T>(fn: () => Promise<T>): Promise<T> {
+    return mcpCircuitBreaker.run(
       { key: this.getLeaseKey(), connectorId: this.connector.id, logger: this.logger },
       fn
     );
@@ -242,7 +242,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
   ): Promise<McpTestConnectorResponse> {
-    return this.guarded(() => this.runIsolatedTest());
+    return this.withBreaker(() => this.runIsolatedTest());
   }
 
   private async runIsolatedTest(): Promise<McpTestConnectorResponse> {
@@ -291,7 +291,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.guarded(() =>
+    const result = await this.withBreaker(() =>
       this.withPooledClient('listTools', (client) => client.listTools())
     );
     this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
@@ -308,7 +308,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   ): Promise<CallToolResponse> {
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.guarded(() =>
+    const result = await this.withBreaker(() =>
       this.withPooledClient(
         `callTool(${params.name})`,
         (client) => client.callTool({ name: params.name, arguments: params.arguments }),

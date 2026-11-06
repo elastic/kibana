@@ -17,11 +17,8 @@ import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { clientTypes } from '@kbn/connector-specs/server';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { buildHeadersFromSecrets } from './auth_helpers';
-import {
-  BREAKER_FAILURE_THRESHOLD,
-  MAX_IN_FLIGHT_PER_KEY,
-  mcpExecutionGuard,
-} from './execution_guard';
+import { McpError, McpErrorCode } from '@kbn/mcp-client';
+import { BREAKER_FAILURE_THRESHOLD, mcpCircuitBreaker } from './circuit_breaker';
 
 jest.mock('@kbn/connector-specs/server', () => ({
   clientTypes: {
@@ -116,7 +113,7 @@ describe('McpConnector', () => {
 
   afterEach(() => {
     pool.stop();
-    mcpExecutionGuard.clear();
+    mcpCircuitBreaker.clear();
   });
 
   describe('sub-action registration', () => {
@@ -687,77 +684,7 @@ describe('McpConnector', () => {
     });
   });
 
-  describe('execution guard', () => {
-    const deferred = <T>() => {
-      let resolve!: (value: T) => void;
-      const promise = new Promise<T>((res) => {
-        resolve = res;
-      });
-      return { promise, resolve };
-    };
-
-    it('rejects listTools above the in-flight cap without calling the client', async () => {
-      const gate = deferred<{ tools: [] }>();
-      fakeClient.listTools.mockReturnValue(gate.promise);
-      const connector = createConnector();
-
-      const inFlight = Array.from({ length: MAX_IN_FLIGHT_PER_KEY }, () =>
-        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
-      );
-
-      try {
-        await connector.listTools({ forceRefresh: true }, connectorUsageCollector);
-        throw new Error('expected listTools to reject');
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-        expect((err as Error).message).toContain('Too many in-flight requests');
-        expect(getErrorSource(err as Error)).toBe(TaskErrorSource.FRAMEWORK);
-      }
-
-      // The pool defers buildFn by a microtask, so the admitted calls reach the client after the reject.
-      await new Promise((resolve) => setImmediate(resolve));
-      expect(fakeClient.listTools).toHaveBeenCalledTimes(MAX_IN_FLIGHT_PER_KEY);
-
-      gate.resolve({ tools: [] });
-      await Promise.all(inFlight);
-
-      await expect(
-        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
-      ).resolves.toEqual({ tools: [] });
-    });
-
-    it('rejects testConnector above the in-flight cap without building another client', async () => {
-      const gate = deferred<typeof fakeClient>();
-      mcpClientType.build.mockReturnValue(gate.promise);
-      const connector = createConnector();
-
-      const inFlight = Array.from({ length: MAX_IN_FLIGHT_PER_KEY }, () =>
-        connector.testConnector({}, connectorUsageCollector)
-      );
-
-      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
-        'Too many in-flight requests'
-      );
-      expect(mcpClientType.build).toHaveBeenCalledTimes(MAX_IN_FLIGHT_PER_KEY);
-
-      gate.resolve(fakeClient);
-      await Promise.all(inFlight);
-    });
-
-    it('releases the slot after a rejected callTool', async () => {
-      fakeClient.callTool.mockRejectedValueOnce(new Error('tool failed'));
-      const connector = createConnector();
-
-      await expect(
-        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
-      ).rejects.toThrow('tool failed');
-
-      await expect(
-        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
-      ).resolves.toEqual({ content: [] });
-      expect(fakeClient.callTool).toHaveBeenCalledTimes(2);
-    });
-
+  describe('circuit breaker', () => {
     it('opens the breaker after connect failures and fails fast for that connector', async () => {
       mcpClientType.build.mockRejectedValue(new Error('connect failed'));
       const connector = createConnector();
@@ -776,6 +703,9 @@ describe('McpConnector', () => {
       await expect(
         connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
       ).rejects.toThrow('is unavailable');
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+        'is unavailable'
+      );
       expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
 
       const other = createConnector({
@@ -785,6 +715,26 @@ describe('McpConnector', () => {
         other.listTools({ forceRefresh: true }, connectorUsageCollector)
       ).rejects.toThrow('connect failed');
       expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
+    });
+
+    it('does not open the breaker on request timeouts from a connected client', async () => {
+      fakeClient.callTool.mockRejectedValue(
+        new McpError(McpErrorCode.RequestTimeout, 'Request timed out')
+      );
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(
+          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+        ).rejects.toThrow('Request timed out');
+      }
+      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      await expect(
+        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).resolves.toEqual({ tools: [] });
+      expect(fakeClient.listTools).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1);
     });
 
     it('does not open the breaker on tool-level callTool errors', async () => {
