@@ -6,11 +6,9 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { removeLegacySyncWorkflow } from './setup/remove_legacy_default_space_workflows';
 
 export interface SyncWorkflowService {
   /**
@@ -68,24 +66,6 @@ export const createSyncWorkflowService = ({
       await managementApi.updateWorkflow(workflowDocumentId, { enabled: true }, spaceId, request);
 
       log.info(`Enabled KI sync workflow in space ${spaceId}`);
-
-      // Retire the pre-per-space legacy document now that its replacement is live.
-      // The legacy doc (no suffix, default space) was kept by startup until here to
-      // avoid a gap in default-space reconciliation. A bare uninstall is rejected
-      // while a sweep is still running, so this waits for its cancelled runs first.
-      // Best-effort: a failed removal is not worth re-trying — the next restart will
-      // clean it up again.
-      if (spaceId === DEFAULT_SPACE_ID) {
-        await removeLegacySyncWorkflow({
-          getManagedWorkflowsClient,
-          managementApi,
-          request,
-        }).catch((error: unknown) => {
-          log.warn(
-            `Failed to uninstall legacy default-space sync workflow after enabling its replacement: ${error}`
-          );
-        });
-      }
     },
   };
 };

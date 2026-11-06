@@ -512,7 +512,7 @@ export class RulesClient {
 
       this.logger.error({
         error: new Error(message),
-        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+        code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED,
       });
 
       for (const id of driftedRuleIds) {
@@ -1420,7 +1420,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+          code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED,
         });
 
         for (const id of driftedRuleIds) {
@@ -1582,9 +1582,12 @@ export class RulesClient {
    *   - disabled rules (`RULE_DISABLED`) — a disabled rule has no executor task;
    *     rotating would recreate one and corrupt a later re-enable, so they are
    *     rejected before any Task Manager call.
-   *   - currently-running rules (`RULE_ALREADY_RUNNING`) — `bulkUpdateSchedules`
-   *     only touches `idle` tasks, so a running task is skipped; we surface it
-   *     instead of silently leaving its key un-rotated.
+   *   - rules whose executor task is in a state Task Manager cannot update
+   *     (`failed`/`unrecognized`/`dead_letter`/`should_delete`) — surfaced instead
+   *     of silently leaving the key un-rotated. A *running* task is not one of
+   *     them: rotation passes `includeRunningTasks: true`, so a rule whose own
+   *     executor run is in flight rotates in place (Task Manager holds the
+   *     replaced key's invalidation back until that run finishes).
    *   - rules whose rotation call failed — reported per-rule; a failure in one
    *     interval group never aborts the others, so successful groups still rotate.
    *
@@ -1688,14 +1691,16 @@ export class RulesClient {
 
   /**
    * Rotates the executor task API keys for the given (enabled) candidates via
-   * `bulkUpdateSchedules({ regenerateApiKey: true })`, which grants a new key and
-   * invalidates the old one. That API takes one schedule per call and only
-   * updates `idle` tasks, so candidates are grouped by their interval (passing
-   * each group its own interval leaves the schedule unchanged) and any task
-   * skipped for being mid-run is reported as `RULE_ALREADY_RUNNING`.
+   * `bulkUpdateSchedules({ regenerateApiKey: true, includeRunningTasks: true })`,
+   * which grants a new key and invalidates the old one. That API takes one
+   * schedule per call, so candidates are grouped by their interval (passing each
+   * group its own interval leaves the schedule unchanged). `includeRunningTasks`
+   * widens the update beyond `idle` to `running`/`claiming`, so a rule whose own
+   * executor run is in flight rotates in place rather than being skipped — the
+   * rotation must not depend on the rule's run cadence.
    *
    * Returns the candidates whose key actually rotated, plus the per-rule errors
-   * (running tasks and per-task/group failures) to merge into the bulk response.
+   * (skipped tasks and per-task/group failures) to merge into the bulk response.
    * A group whose rotation fails (e.g. the key grant is rejected) is reported as
    * per-rule errors rather than aborting the other groups — so a partial failure
    * still rotates and stamps the groups that succeeded.
@@ -1725,6 +1730,7 @@ export class RulesClient {
               request: this.request,
               regenerateApiKey: true,
               cloneApiKey: true,
+              includeRunningTasks: true,
             }
           );
 
@@ -1763,8 +1769,9 @@ export class RulesClient {
       { concurrency: ROTATION_CONCURRENCY }
     );
 
-    // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
-    // neither rotated nor errored was skipped because its task is non-idle.
+    // `bulkUpdateSchedules` only touches updatable (`idle`/`running`/`claiming`)
+    // tasks, so a candidate that was neither rotated nor errored was skipped
+    // because its task is in some other state.
     const rotated: RotationCandidate[] = [];
     const skipped: RotationCandidate[] = [];
     for (const candidate of candidates) {
@@ -1786,13 +1793,14 @@ export class RulesClient {
   }
 
   /**
-   * Classifies executor tasks that `bulkUpdateSchedules` skipped (non-idle) by
-   * observing their real status rather than assuming they are running: only a
-   * mid-run task (`running`/`claiming`) frees up on its own, so only those get
-   * `RULE_ALREADY_RUNNING`. Any other non-idle state (`failed`/`unrecognized`/`dead_letter`/…)
-   * or a task that can't be read is reported as a generic rotation failure.
-   * If the status lookup itself fails we fall back to `RULE_ALREADY_RUNNING`,
-   * the most likely non-idle reason.
+   * Classifies executor tasks that `bulkUpdateSchedules` skipped by observing
+   * their real status rather than assuming they are running. Because rotation
+   * passes `includeRunningTasks: true`, a skipped task is normally in a state that
+   * never frees up on its own (`failed`/`unrecognized`/`dead_letter`/…) — that, or
+   * a task that can't be read, is reported as a generic rotation failure. A task
+   * that moved back into `running`/`claiming` between the two reads still gets the
+   * retryable `RULE_ALREADY_RUNNING`. If the status lookup itself fails we fall
+   * back to `RULE_ALREADY_RUNNING`, the most likely reason for the skip.
    */
   private async classifySkippedRotations(
     skipped: RotationCandidate[]

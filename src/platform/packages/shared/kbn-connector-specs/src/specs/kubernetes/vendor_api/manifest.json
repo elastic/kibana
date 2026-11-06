@@ -1,0 +1,164 @@
+{
+  "operations": {
+    "applyResource": [
+      {
+        "method": "patch",
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments/{name}",
+        "source": "v1"
+      }
+    ],
+    "createResource": [
+      {
+        "method": "post",
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments",
+        "source": "v1"
+      }
+    ],
+    "deleteResource": [
+      {
+        "method": "delete",
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments/{name}",
+        "source": "v1"
+      }
+    ],
+    "getPodLogs": [
+      {
+        "method": "get",
+        "path": "/api/v1/namespaces/{namespace}/pods/{name}/log",
+        "source": "v1"
+      }
+    ],
+    "getResource": [
+      {
+        "method": "get",
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments/{name}",
+        "source": "v1"
+      }
+    ],
+    "listEvents": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "continue",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "metadata.continue"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/v1/events",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "continue",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "metadata.continue"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/v1/namespaces/{namespace}/events",
+        "source": "v1"
+      }
+    ],
+    "listNamespaces": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "continue",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "metadata.continue"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/v1/namespaces",
+        "source": "v1"
+      }
+    ],
+    "listResources": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "continue",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "metadata.continue"
+          },
+          "style": "cursor"
+        },
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments",
+        "source": "v1"
+      }
+    ],
+    "patchResource": [
+      {
+        "method": "patch",
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments/{name}",
+        "source": "v1"
+      }
+    ],
+    "request": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "continue",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "metadata.continue"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/v1/namespaces/{namespace}/pods",
+        "source": "v1"
+      }
+    ],
+    "scaleWorkload": [
+      {
+        "method": "patch",
+        "path": "/apis/apps/v1/namespaces/{namespace}/deployments/{name}/scale",
+        "source": "v1"
+      },
+      {
+        "method": "patch",
+        "path": "/apis/apps/v1/namespaces/{namespace}/replicasets/{name}/scale",
+        "source": "v1"
+      },
+      {
+        "method": "patch",
+        "path": "/apis/apps/v1/namespaces/{namespace}/statefulsets/{name}/scale",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "unversioned",
+      "fetchedAt": "2026-10-07T20:48:53.372Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/swagger.json"
+    }
+  }
+}

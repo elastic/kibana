@@ -92,8 +92,58 @@ describe('cleanupAgentBasedPolicies', () => {
       currentPolicyIdsByInstance: {},
       selectedAgentPolicyIds: [],
     });
-    expect(mockDeletePackagePolicy).toHaveBeenCalledWith({ packagePolicyIds: ['policy-1'] });
-    expect(mockDeletePackagePolicy).toHaveBeenCalledWith({ packagePolicyIds: ['policy-2'] });
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith(
+      { packagePolicyIds: ['policy-1'] },
+      undefined
+    );
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith(
+      { packagePolicyIds: ['policy-2'] },
+      undefined
+    );
+  });
+
+  it('passes the onboarding deployment id so Fleet lets the flow delete the policies it manages', async () => {
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+      onboardingDeploymentId: 'deploy-1',
+    });
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith(
+      { packagePolicyIds: ['policy-1'] },
+      { onboarding_deployment_id: 'deploy-1' }
+    );
+  });
+
+  it.each([
+    ['an HTTP error', { error: new Error('Fleet 400') }],
+    [
+      'a failed delete in the response body',
+      { data: [{ id: 'policy-1', success: false, statusCode: 400, body: { message: 'no' } }] },
+    ],
+  ])('does not count a delete that resolves with %s as succeeded', async (_, response) => {
+    mockDeletePackagePolicy.mockResolvedValue(response);
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    expect(ops.toDelete).not.toContain('policy-1');
+  });
+
+  it('counts a delete of a policy that is already gone as succeeded', async () => {
+    mockDeletePackagePolicy.mockResolvedValue({
+      data: [{ id: 'policy-1', success: false, statusCode: 404, body: { message: 'not found' } }],
+    });
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    expect(ops.toDelete).toContain('policy-1');
   });
 
   it('swallows individual delete failures — does not reject the whole call', async () => {
@@ -178,10 +228,29 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     });
     const payload = mockUpdatePackagePolicy.mock.calls[0][1];
     expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
+    expect(mockUpdatePackagePolicy.mock.calls[0][2]).toEqual({ query: undefined });
     // Preserves existing policy's namespace (fetched via sendGetOnePackagePolicy).
     expect(payload.namespace).toBe('existing-ns');
     expect(payload.name).toBe('existing-policy-name');
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
+  });
+
+  it('passes the onboarding deployment id so Fleet lets the flow update the policies it manages', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      onboardingDeploymentId: 'deploy-1',
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][2]).toEqual({
+      query: { onboarding_deployment_id: 'deploy-1' },
+    });
   });
 
   it('sends the namespace the instances now deploy into over the existing one', async () => {

@@ -94,6 +94,7 @@ tags:
   - prod
   - group-search
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*

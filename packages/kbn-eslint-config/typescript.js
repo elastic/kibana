@@ -76,94 +76,6 @@ module.exports = {
           '@typescript-eslint/no-unsafe-function-type': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
-          camelcase: 'off',
-          '@typescript-eslint/naming-convention': [
-            'error',
-            {
-              selector: 'default',
-              format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'classMethod',
-              filter: {
-                regex: '^UNSAFE_',
-                match: true,
-              },
-              prefix: ['UNSAFE_'],
-              format: ['camelCase'],
-            },
-            {
-              selector: 'variable',
-              format: [
-                'camelCase',
-                'UPPER_CASE', // e.g. const SOMETHING = ...
-                'PascalCase', // e.g. React.FunctionComponent =
-              ],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'variable',
-              modifiers: ['destructured'],
-              format: [
-                'camelCase',
-                'snake_case', // e.g. properties from ES response objects
-                'UPPER_CASE', // e.g. const SOMETHING = ...
-                'PascalCase', // e.g. React.FunctionComponent =
-              ],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'parameter',
-              format: ['camelCase', 'PascalCase', 'snake_case'],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'function',
-              format: [
-                'camelCase',
-                'PascalCase', // React.FunctionComponent =
-              ],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'typeLike',
-              format: ['PascalCase', 'UPPER_CASE'],
-              leadingUnderscore: 'allow',
-              trailingUnderscore: 'allow',
-            },
-            {
-              selector: 'enum',
-              format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
-            },
-            // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
-            // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
-            {
-              selector: [
-                'classProperty',
-                'objectLiteralProperty',
-                'typeProperty',
-                'classMethod',
-                'objectLiteralMethod',
-                'typeMethod',
-                'accessor',
-                'enumMember',
-              ],
-              format: null,
-              modifiers: ['requiresQuotes'],
-            },
-          ],
-          '@typescript-eslint/member-ordering': [
-            'error',
-            {
-              default: ['public-static-field', 'static-field', 'instance-field'],
-            },
-          ],
           // rely on typescript
           'no-undef': 'off',
 
@@ -174,24 +86,7 @@ module.exports = {
               groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
             },
           ],
-          'no-undef-init': 'error',
-          'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          'spaced-comment': [
-            'error',
-            'always',
-            {
-              exceptions: ['/'],
-            },
-          ],
-          // Old tslint yml override or defined rules
-          'no-restricted-syntax': [
-            'error',
-            {
-              selector: 'TSEnumDeclaration[const=true]',
-              message: 'Do not use `const` with enum declarations',
-            },
-          ],
         },
         eslintConfigPrettierRules
       ),

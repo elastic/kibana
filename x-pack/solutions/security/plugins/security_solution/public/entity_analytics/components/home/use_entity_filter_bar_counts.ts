@@ -26,7 +26,6 @@ import { useResolvedLatestEntitiesIndexName } from '../../../common/hooks/use_re
 import { getEntitiesAlias, ENTITY_LATEST } from './constants';
 import { CRITICALITY_FIELD, RESOLUTION_RISK_LEVEL_FIELD } from './entities_grid/common';
 import type { RowsMode } from './entities_grid/common';
-import { useSearchBarExpression } from './entities_grid/hooks/use_search_bar_expression';
 import { createEsqlRunner } from './entities_grid/queries/esql';
 import { fetchResolvedEntityValueChanges } from './entities_grid/queries/resolved_entities';
 import type { ResolvedEntityValueChange } from './entities_grid/queries/resolved_entities';
@@ -192,13 +191,17 @@ export const useEntityFilterBarCounts = ({
   spaceId,
   rowsMode,
   filter,
+  searchExpression,
+  isSearchOverridesPending,
 }: {
   spaceId: string | undefined;
   rowsMode: RowsMode;
   filter?: QueryDslQueryContainer;
+  searchExpression?: string;
+  /** The search's overrides are still loading. */
+  isSearchOverridesPending?: boolean;
 }): UseEntityFilterBarCountsResult => {
   const { data: dataServices } = useKibana().services;
-  const searchExpression = useSearchBarExpression();
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
   const concreteEntityIndexName = resolvedIndex?.indexName;
 
@@ -226,7 +229,7 @@ export const useEntityFilterBarCounts = ({
     error: changesError,
   } = useQuery({
     queryKey: ['entity-filter-value-changes', spaceId, concreteEntityIndexName, searchExpression],
-    enabled: isResolved && !!spaceId && !!concreteEntityIndexName,
+    enabled: isResolved && !!spaceId && !!concreteEntityIndexName && !isSearchOverridesPending,
     keepPreviousData: true,
     queryFn: ({ signal }) =>
       fetchResolvedEntityValueChanges(

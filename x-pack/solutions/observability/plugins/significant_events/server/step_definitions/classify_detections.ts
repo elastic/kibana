@@ -58,6 +58,10 @@ import {
 export const MAX_CLASSIFIED_ROWS = 100;
 const MAX_INPUT_ROWS = 1_000;
 const MAX_ROW_COLUMNS = 20;
+const SECOND_MS = 1_000;
+const MINUTE_MS = 60 * SECOND_MS;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
 /** A rule's match series holds at most this many buckets, so one read stays bounded. */
 const MAX_SERIES_BUCKETS = 288;
 /** The reasons that mean the rule's data changed, as opposed to the classifier being unsure. */
@@ -93,6 +97,12 @@ const inputSchema = lazySchema(() =>
       .number()
       .min(1)
       .max(24 * 30),
+    /**
+     * How far back the live events a detection belongs to are read. It matches the default 90-day
+     * `.rule-events` retention and is capped at 90: a live event with no version inside it reads
+     * as "not a live member", and nothing warns when retention is raised above it.
+     */
+    live_lookback_days: z.number().min(1).max(90).default(90),
     /** How long the agent's last review of a rule stands in for its verdict while nothing changed. */
     review_fresh_minutes: z.number().int().min(15).max(1_440).default(240),
     /** The bucket size and the history of the rule's match series. */
@@ -843,6 +853,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         probe_concurrency: probeConcurrency,
         budget_ms: budgetMs,
         max_skip_age_hours: maxSkipAgeHours,
+        live_lookback_days: liveLookbackDays,
         review_fresh_minutes: reviewFreshMinutes,
         baseline_bucket_minutes: bucketMinutes,
         baseline_window_minutes: baselineWindowMinutes,
@@ -861,7 +872,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
 
       const now = Date.now();
       const window = {
-        from: new Date(now - windowMinutes * 60_000).toISOString(),
+        from: new Date(now - windowMinutes * MINUTE_MS).toISOString(),
         to: new Date(now).toISOString(),
       };
 
@@ -877,17 +888,18 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
       const output = await classifyBatch({
         rows,
         columns,
-        maxSkipAgeMs: maxSkipAgeHours * 3_600_000,
+        maxSkipAgeMs: maxSkipAgeHours * HOUR_MS,
         now,
         probeWindowMinutes: windowMinutes,
         probeSpanBuckets: probeSpanInBuckets({ probeWindowMinutes: windowMinutes, bucketMinutes }),
-        reviewFreshMs: reviewFreshMinutes * 60_000,
+        reviewFreshMs: reviewFreshMinutes * MINUTE_MS,
         probeConcurrency,
-        // A live series with no write for longer than the skip age cannot rest a skip anyway.
+        // A live event stays a member while it has a version inside the lookback: `series_too_old`
+        // and the review memory decide whether its verdict still stands.
         findLiveMemberships: (ruleUuids) =>
           ruleEventsClient.findLiveMemberships({
             ruleUuids,
-            from: new Date(now - maxSkipAgeHours * 3_600_000).toISOString(),
+            lookback: new Date(now - liveLookbackDays * DAY_MS).toISOString(),
           }),
         probe: (query) => runProbe({ query, window, run }),
         // One series query per rule that is probed or has an agent review.

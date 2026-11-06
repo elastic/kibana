@@ -1,0 +1,2950 @@
+{
+  "components": {
+    "schemas": {
+      "AgentPool": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SubResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/ManagedClusterAgentPoolProfileProperties"
+          }
+        },
+        "type": "object"
+      },
+      "AgentPoolListResult": {
+        "properties": {
+          "nextLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/AgentPool"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AgentPoolMode": {
+        "enum": [
+          "System",
+          "User"
+        ],
+        "title": "The mode of an agent pool.",
+        "type": "string"
+      },
+      "AgentPoolNetworkProfile": {
+        "properties": {
+          "allowedHostPorts": {
+            "items": {
+              "$ref": "#/components/schemas/PortRange"
+            },
+            "type": "array"
+          },
+          "applicationSecurityGroups": {
+            "items": {
+              "format": "arm-id",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodePublicIPTags": {
+            "$ref": "#/components/schemas/NodePublicIPTags"
+          }
+        },
+        "type": "object"
+      },
+      "AgentPoolType": {
+        "enum": [
+          "VirtualMachineScaleSets",
+          "AvailabilitySet"
+        ],
+        "type": "string"
+      },
+      "AgentPoolUpgradeSettings": {
+        "properties": {
+          "drainTimeoutInMinutes": {
+            "format": "int32",
+            "maximum": 1440,
+            "minimum": 1,
+            "title": "The drain timeout for a node",
+            "type": "integer"
+          },
+          "maxSurge": {
+            "title": "The maximum number or percentage of nodes that are surged during upgrade.",
+            "type": "string"
+          },
+          "nodeSoakDurationInMinutes": {
+            "format": "int32",
+            "maximum": 30,
+            "minimum": 0,
+            "title": "The soak duration for a node",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AgentPoolWindowsProfile": {
+        "properties": {
+          "disableOutboundNat": {
+            "title": "Whether to disable OutboundNAT in windows nodes",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AzureKeyVaultKms": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "keyId": {
+            "type": "string"
+          },
+          "keyVaultNetworkAccess": {
+            "default": "Public",
+            "enum": [
+              "Public",
+              "Private"
+            ],
+            "title": "Network access of the key vault",
+            "type": "string"
+          },
+          "keyVaultResourceId": {
+            "format": "arm-id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CapacityReservationGroupID": {
+        "format": "arm-id",
+        "title": "The fully qualified resource ID of the Capacity Reservation Group to provide virtual machines from a reserved group of Virtual Machines.",
+        "type": "string"
+      },
+      "CloudError": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/CloudErrorBody"
+          }
+        },
+        "type": "object"
+      },
+      "CloudErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/CloudErrorBody"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterUpgradeSettings": {
+        "properties": {
+          "overrideSettings": {
+            "$ref": "#/components/schemas/UpgradeOverrideSettings"
+          }
+        },
+        "type": "object"
+      },
+      "CommandResultProperties": {
+        "properties": {
+          "exitCode": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "logs": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "provisioningState": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "reason": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ContainerServiceLinuxProfile": {
+        "properties": {
+          "adminUsername": {
+            "pattern": "^[A-Za-z][-A-Za-z0-9_]*$",
+            "type": "string"
+          },
+          "ssh": {
+            "$ref": "#/components/schemas/ContainerServiceSshConfiguration"
+          }
+        },
+        "required": [
+          "adminUsername",
+          "ssh"
+        ],
+        "type": "object"
+      },
+      "ContainerServiceNetworkProfile": {
+        "properties": {
+          "dnsServiceIP": {
+            "default": "10.0.0.10",
+            "pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+            "type": "string"
+          },
+          "ipFamilies": {
+            "items": {
+              "enum": [
+                "IPv4",
+                "IPv6"
+              ],
+              "type": "string"
+            },
+            "title": "The IP families used to specify IP versions available to the cluster.",
+            "type": "array"
+          },
+          "loadBalancerProfile": {
+            "$ref": "#/components/schemas/ManagedClusterLoadBalancerProfile"
+          },
+          "loadBalancerSku": {
+            "enum": [
+              "standard",
+              "basic"
+            ],
+            "title": "The load balancer sku for the managed cluster.",
+            "type": "string"
+          },
+          "natGatewayProfile": {
+            "$ref": "#/components/schemas/ManagedClusterNATGatewayProfile"
+          },
+          "networkDataplane": {
+            "enum": [
+              "azure",
+              "cilium"
+            ],
+            "type": "string"
+          },
+          "networkMode": {
+            "enum": [
+              "transparent",
+              "bridge"
+            ],
+            "title": "The network mode Azure CNI is configured with.",
+            "type": "string"
+          },
+          "networkPlugin": {
+            "default": "kubenet",
+            "enum": [
+              "azure",
+              "kubenet",
+              "none"
+            ],
+            "type": "string"
+          },
+          "networkPluginMode": {
+            "enum": [
+              "overlay"
+            ],
+            "type": "string"
+          },
+          "networkPolicy": {
+            "enum": [
+              "calico",
+              "azure",
+              "cilium"
+            ],
+            "type": "string"
+          },
+          "outboundType": {
+            "default": "loadBalancer",
+            "enum": [
+              "loadBalancer",
+              "userDefinedRouting",
+              "managedNATGateway",
+              "userAssignedNATGateway"
+            ],
+            "title": "The outbound (egress) routing method.",
+            "type": "string"
+          },
+          "podCidr": {
+            "default": "10.244.0.0/16",
+            "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+            "type": "string"
+          },
+          "podCidrs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "The CIDR notation IP ranges from which to assign pod IPs.",
+            "type": "array"
+          },
+          "serviceCidr": {
+            "default": "10.0.0.0/16",
+            "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+            "type": "string"
+          },
+          "serviceCidrs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "The CIDR notation IP ranges from which to assign service cluster IPs.",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ContainerServiceOSDisk": {
+        "format": "int32",
+        "maximum": 2048,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "ContainerServiceSshConfiguration": {
+        "properties": {
+          "publicKeys": {
+            "items": {
+              "$ref": "#/components/schemas/ContainerServiceSshPublicKey"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "publicKeys"
+        ],
+        "type": "object"
+      },
+      "ContainerServiceSshPublicKey": {
+        "properties": {
+          "keyData": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyData"
+        ],
+        "type": "object"
+      },
+      "CreationData": {
+        "properties": {
+          "sourceResourceId": {
+            "format": "arm-id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CredentialResult": {
+        "properties": {
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "format": "byte",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CredentialResults": {
+        "properties": {
+          "kubeconfigs": {
+            "items": {
+              "$ref": "#/components/schemas/CredentialResult"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DelegatedResource": {
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "referralResource": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DelegatedResources": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/DelegatedResource"
+        },
+        "type": "object"
+      },
+      "ExtendedLocation": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ExtendedLocationType"
+          }
+        },
+        "type": "object"
+      },
+      "ExtendedLocationType": {
+        "enum": [
+          "EdgeZone"
+        ],
+        "type": "string"
+      },
+      "GPUInstanceProfile": {
+        "enum": [
+          "MIG1g",
+          "MIG2g",
+          "MIG3g",
+          "MIG4g",
+          "MIG7g"
+        ],
+        "type": "string"
+      },
+      "IPTag": {
+        "properties": {
+          "ipTagType": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IstioCertificateAuthority": {
+        "properties": {
+          "plugin": {
+            "$ref": "#/components/schemas/IstioPluginCertificateAuthority"
+          }
+        },
+        "type": "object"
+      },
+      "IstioComponents": {
+        "properties": {
+          "egressGateways": {
+            "items": {
+              "$ref": "#/components/schemas/IstioEgressGateway"
+            },
+            "type": "array"
+          },
+          "ingressGateways": {
+            "items": {
+              "$ref": "#/components/schemas/IstioIngressGateway"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IstioEgressGateway": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "IstioIngressGateway": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "mode": {
+            "enum": [
+              "External",
+              "Internal"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "IstioPluginCertificateAuthority": {
+        "properties": {
+          "certChainObjectName": {
+            "type": "string"
+          },
+          "certObjectName": {
+            "type": "string"
+          },
+          "keyObjectName": {
+            "type": "string"
+          },
+          "keyVaultId": {
+            "format": "arm-id",
+            "type": "string"
+          },
+          "rootCertObjectName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IstioServiceMesh": {
+        "properties": {
+          "certificateAuthority": {
+            "$ref": "#/components/schemas/IstioCertificateAuthority"
+          },
+          "components": {
+            "$ref": "#/components/schemas/IstioComponents"
+          },
+          "revisions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "type": "object"
+      },
+      "KubeletConfig": {
+        "properties": {
+          "allowedUnsafeSysctls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "containerLogMaxFiles": {
+            "format": "int32",
+            "minimum": 2,
+            "type": "integer"
+          },
+          "containerLogMaxSizeMB": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "cpuCfsQuota": {
+            "title": "If CPU CFS quota enforcement is enabled for containers that specify CPU limits.",
+            "type": "boolean"
+          },
+          "cpuCfsQuotaPeriod": {
+            "title": "The CPU CFS quota period value.",
+            "type": "string"
+          },
+          "cpuManagerPolicy": {
+            "title": "The CPU Manager policy to use.",
+            "type": "string"
+          },
+          "failSwapOn": {
+            "type": "boolean"
+          },
+          "imageGcHighThreshold": {
+            "format": "int32",
+            "title": "The percent of disk usage after which image garbage collection is always run.",
+            "type": "integer"
+          },
+          "imageGcLowThreshold": {
+            "format": "int32",
+            "title": "The percent of disk usage before which image garbage collection is never run.",
+            "type": "integer"
+          },
+          "podMaxPids": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "topologyManagerPolicy": {
+            "title": "The Topology Manager policy to use.",
+            "type": "string"
+          }
+        },
+        "title": "Kubelet configurations of agent nodes.",
+        "type": "object"
+      },
+      "KubeletDiskType": {
+        "enum": [
+          "OS",
+          "Temporary"
+        ],
+        "type": "string"
+      },
+      "KubernetesSupportPlan": {
+        "enum": [
+          "KubernetesOfficial",
+          "AKSLongTermSupport"
+        ],
+        "type": "string"
+      },
+      "LinuxOSConfig": {
+        "properties": {
+          "swapFileSizeMB": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sysctls": {
+            "$ref": "#/components/schemas/SysctlConfig"
+          },
+          "transparentHugePageDefrag": {
+            "title": "Whether the kernel should make aggressive use of memory compaction to make more hugepages available.",
+            "type": "string"
+          },
+          "transparentHugePageEnabled": {
+            "title": "Whether transparent hugepages are enabled.",
+            "type": "string"
+          }
+        },
+        "title": "OS configurations of Linux agent nodes.",
+        "type": "object"
+      },
+      "ManagedCluster": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TrackedResource"
+          }
+        ],
+        "properties": {
+          "extendedLocation": {
+            "$ref": "#/components/schemas/ExtendedLocation"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/ManagedClusterIdentity"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/ManagedClusterProperties"
+          },
+          "sku": {
+            "$ref": "#/components/schemas/ManagedClusterSKU"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterAADProfile": {
+        "properties": {
+          "adminGroupObjectIDs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "clientAppID": {
+            "type": "string"
+          },
+          "enableAzureRBAC": {
+            "type": "boolean"
+          },
+          "managed": {
+            "type": "boolean"
+          },
+          "serverAppID": {
+            "type": "string"
+          },
+          "serverAppSecret": {
+            "type": "string"
+          },
+          "tenantID": {
+            "type": "string"
+          }
+        },
+        "title": "AADProfile specifies attributes for Azure Active Directory integration.",
+        "type": "object"
+      },
+      "ManagedClusterAPIServerAccessProfile": {
+        "properties": {
+          "authorizedIPRanges": {
+            "items": {
+              "type": "string"
+            },
+            "title": "The IP ranges authorized to access the Kubernetes API server.",
+            "type": "array"
+          },
+          "disableRunCommand": {
+            "type": "boolean"
+          },
+          "enablePrivateCluster": {
+            "title": "Whether to create the cluster as a private cluster or not.",
+            "type": "boolean"
+          },
+          "enablePrivateClusterPublicFQDN": {
+            "type": "boolean"
+          },
+          "privateDNSZone": {
+            "title": "The private DNS zone mode for the cluster.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterAddonProfile": {
+        "properties": {
+          "config": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "identity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserAssignedIdentity"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterAgentPoolProfile": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ManagedClusterAgentPoolProfileProperties"
+          }
+        ],
+        "properties": {
+          "name": {
+            "pattern": "^[a-z][a-z0-9]{0,11}$",
+            "title": "Unique name of the agent pool profile in the context of the subscription and resource group.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterAgentPoolProfileProperties": {
+        "properties": {
+          "availabilityZones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "capacityReservationGroupID": {
+            "$ref": "#/components/schemas/CapacityReservationGroupID"
+          },
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "creationData": {
+            "$ref": "#/components/schemas/CreationData"
+          },
+          "currentOrchestratorVersion": {
+            "readOnly": true,
+            "title": "The version of Kubernetes the Agent Pool is running.",
+            "type": "string"
+          },
+          "enableAutoScaling": {
+            "type": "boolean"
+          },
+          "enableEncryptionAtHost": {
+            "title": "Whether to enable host based OS and data drive encryption.",
+            "type": "boolean"
+          },
+          "enableFIPS": {
+            "title": "Whether to use a FIPS-enabled OS.",
+            "type": "boolean"
+          },
+          "enableNodePublicIP": {
+            "title": "Whether each node is allocated its own public IP.",
+            "type": "boolean"
+          },
+          "enableUltraSSD": {
+            "type": "boolean"
+          },
+          "gpuInstanceProfile": {
+            "$ref": "#/components/schemas/GPUInstanceProfile"
+          },
+          "hostGroupID": {
+            "format": "arm-id",
+            "title": "The fully qualified resource ID of the Dedicated Host Group to provision virtual machines from, used only in creation scenario and not allowed to changed once set.",
+            "type": "string"
+          },
+          "kubeletConfig": {
+            "$ref": "#/components/schemas/KubeletConfig"
+          },
+          "kubeletDiskType": {
+            "$ref": "#/components/schemas/KubeletDiskType"
+          },
+          "linuxOSConfig": {
+            "$ref": "#/components/schemas/LinuxOSConfig"
+          },
+          "maxCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPods": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/AgentPoolMode"
+          },
+          "networkProfile": {
+            "$ref": "#/components/schemas/AgentPoolNetworkProfile"
+          },
+          "nodeImageVersion": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "nodeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "nodePublicIPPrefixID": {
+            "format": "arm-id",
+            "title": "The public IP prefix ID which VM nodes should use IPs from.",
+            "type": "string"
+          },
+          "nodeTaints": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "orchestratorVersion": {
+            "title": "The version of Kubernetes specified by the user.",
+            "type": "string"
+          },
+          "osDiskSizeGB": {
+            "$ref": "#/components/schemas/ContainerServiceOSDisk"
+          },
+          "osDiskType": {
+            "$ref": "#/components/schemas/OSDiskType"
+          },
+          "osSKU": {
+            "$ref": "#/components/schemas/OSSKU"
+          },
+          "osType": {
+            "$ref": "#/components/schemas/OSType"
+          },
+          "podSubnetID": {
+            "format": "arm-id",
+            "title": "The ID of the subnet which pods will join when launched.",
+            "type": "string"
+          },
+          "powerState": {
+            "$ref": "#/components/schemas/PowerState",
+            "title": "Whether the Agent Pool is running or stopped."
+          },
+          "provisioningState": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "proximityPlacementGroupID": {
+            "$ref": "#/components/schemas/ProximityPlacementGroupID"
+          },
+          "scaleDownMode": {
+            "$ref": "#/components/schemas/ScaleDownMode",
+            "title": "The scale down mode to use when scaling the Agent Pool."
+          },
+          "scaleSetEvictionPolicy": {
+            "$ref": "#/components/schemas/ScaleSetEvictionPolicy",
+            "title": "The Virtual Machine Scale Set eviction policy to use."
+          },
+          "scaleSetPriority": {
+            "$ref": "#/components/schemas/ScaleSetPriority"
+          },
+          "spotMaxPrice": {
+            "$ref": "#/components/schemas/SpotMaxPrice",
+            "title": "The max price (in US Dollars) you are willing to pay for spot instances. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand."
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AgentPoolType"
+          },
+          "upgradeSettings": {
+            "$ref": "#/components/schemas/AgentPoolUpgradeSettings"
+          },
+          "vmSize": {
+            "title": "The size of the agent pool VMs.",
+            "type": "string"
+          },
+          "vnetSubnetID": {
+            "format": "arm-id",
+            "title": "The ID of the subnet which agent pool nodes and optionally pods will join on startup.",
+            "type": "string"
+          },
+          "windowsProfile": {
+            "$ref": "#/components/schemas/AgentPoolWindowsProfile"
+          },
+          "workloadRuntime": {
+            "$ref": "#/components/schemas/WorkloadRuntime"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterAutoUpgradeProfile": {
+        "properties": {
+          "nodeOSUpgradeChannel": {
+            "enum": [
+              "Unmanaged",
+              "None",
+              "NodeImage"
+            ],
+            "title": "Node OS Upgrade Channel",
+            "type": "string"
+          },
+          "upgradeChannel": {
+            "enum": [
+              "rapid",
+              "stable",
+              "patch",
+              "node-image",
+              "none"
+            ],
+            "title": "The upgrade channel for auto upgrade. The default is 'none'.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterAzureMonitorProfile": {
+        "properties": {
+          "metrics": {
+            "$ref": "#/components/schemas/ManagedClusterAzureMonitorProfileMetrics"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterAzureMonitorProfileKubeStateMetrics": {
+        "properties": {
+          "metricAnnotationsAllowList": {
+            "type": "string"
+          },
+          "metricLabelsAllowlist": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterAzureMonitorProfileMetrics": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "kubeStateMetrics": {
+            "$ref": "#/components/schemas/ManagedClusterAzureMonitorProfileKubeStateMetrics"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterCostAnalysis": {
+        "properties": {
+          "enabled": {
+            "title": "Whether to enable cost analysis",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterHTTPProxyConfig": {
+        "properties": {
+          "httpProxy": {
+            "type": "string"
+          },
+          "httpsProxy": {
+            "type": "string"
+          },
+          "noProxy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "trustedCa": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterIdentity": {
+        "properties": {
+          "delegatedResources": {
+            "$ref": "#/components/schemas/DelegatedResources"
+          },
+          "principalId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "SystemAssigned",
+              "UserAssigned",
+              "None"
+            ],
+            "title": "The type of identity used for the managed cluster.",
+            "type": "string"
+          },
+          "userAssignedIdentities": {
+            "additionalProperties": {
+              "properties": {
+                "clientId": {
+                  "readOnly": true,
+                  "type": "string"
+                },
+                "principalId": {
+                  "readOnly": true,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "title": "The user identity associated with the managed cluster. This identity will be used in control plane. Only one user assigned identity is allowed.",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterIngressProfile": {
+        "properties": {
+          "webAppRouting": {
+            "$ref": "#/components/schemas/ManagedClusterIngressProfileWebAppRouting"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterIngressProfileWebAppRouting": {
+        "properties": {
+          "dnsZoneResourceIds": {
+            "items": {
+              "format": "arm-id",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "type": "array"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/UserAssignedIdentity",
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterListResult": {
+        "properties": {
+          "nextLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedCluster"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterLoadBalancerProfile": {
+        "properties": {
+          "allocatedOutboundPorts": {
+            "default": 0,
+            "format": "int32",
+            "maximum": 64000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "backendPoolType": {
+            "default": "NodeIPConfiguration",
+            "enum": [
+              "NodeIPConfiguration",
+              "NodeIP"
+            ],
+            "type": "string"
+          },
+          "effectiveOutboundIPs": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceReference"
+            },
+            "type": "array"
+          },
+          "enableMultipleStandardLoadBalancers": {
+            "type": "boolean"
+          },
+          "idleTimeoutInMinutes": {
+            "default": 30,
+            "format": "int32",
+            "maximum": 120,
+            "minimum": 4,
+            "type": "integer"
+          },
+          "managedOutboundIPs": {
+            "properties": {
+              "count": {
+                "default": 1,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "countIPv6": {
+                "default": 0,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "outboundIPPrefixes": {
+            "properties": {
+              "publicIPPrefixes": {
+                "items": {
+                  "$ref": "#/components/schemas/ResourceReference"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "outboundIPs": {
+            "properties": {
+              "publicIPs": {
+                "items": {
+                  "$ref": "#/components/schemas/ResourceReference"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterManagedOutboundIPProfile": {
+        "properties": {
+          "count": {
+            "default": 1,
+            "format": "int32",
+            "maximum": 16,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterMetricsProfile": {
+        "properties": {
+          "costAnalysis": {
+            "$ref": "#/components/schemas/ManagedClusterCostAnalysis",
+            "title": "The configuration for detailed per-Kubernetes resource cost analysis."
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterNATGatewayProfile": {
+        "properties": {
+          "effectiveOutboundIPs": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceReference"
+            },
+            "type": "array"
+          },
+          "idleTimeoutInMinutes": {
+            "default": 4,
+            "format": "int32",
+            "maximum": 120,
+            "minimum": 4,
+            "type": "integer"
+          },
+          "managedOutboundIPProfile": {
+            "$ref": "#/components/schemas/ManagedClusterManagedOutboundIPProfile"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterOIDCIssuerProfile": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "issuerURL": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterPodIdentity": {
+        "properties": {
+          "bindingSelector": {
+            "type": "string"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/UserAssignedIdentity"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "provisioningInfo": {
+            "properties": {
+              "error": {
+                "$ref": "#/components/schemas/ManagedClusterPodIdentityProvisioningError"
+              }
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "provisioningState": {
+            "enum": [
+              "Assigned",
+              "Canceled",
+              "Deleting",
+              "Failed",
+              "Succeeded",
+              "Updating"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "identity"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterPodIdentityException": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "podLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "podLabels"
+        ],
+        "title": "A pod identity exception, which allows pods with certain labels to access the Azure Instance Metadata Service (IMDS) endpoint without being intercepted by the node-managed identity (NMI) server.",
+        "type": "object"
+      },
+      "ManagedClusterPodIdentityProfile": {
+        "properties": {
+          "allowNetworkPluginKubenet": {
+            "title": "Whether pod identity is allowed to run on clusters with Kubenet networking.",
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "userAssignedIdentities": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedClusterPodIdentity"
+            },
+            "type": "array"
+          },
+          "userAssignedIdentityExceptions": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedClusterPodIdentityException"
+            },
+            "type": "array"
+          }
+        },
+        "title": "The pod identity profile of the Managed Cluster.",
+        "type": "object"
+      },
+      "ManagedClusterPodIdentityProvisioningError": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ManagedClusterPodIdentityProvisioningErrorBody"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterPodIdentityProvisioningErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedClusterPodIdentityProvisioningErrorBody"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterProperties": {
+        "properties": {
+          "aadProfile": {
+            "$ref": "#/components/schemas/ManagedClusterAADProfile"
+          },
+          "addonProfiles": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ManagedClusterAddonProfile"
+            },
+            "type": "object"
+          },
+          "agentPoolProfiles": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedClusterAgentPoolProfile"
+            },
+            "type": "array"
+          },
+          "apiServerAccessProfile": {
+            "$ref": "#/components/schemas/ManagedClusterAPIServerAccessProfile"
+          },
+          "autoScalerProfile": {
+            "properties": {
+              "balance-similar-node-groups": {
+                "title": "Detects similar node pools and balances the number of nodes between them.",
+                "type": "string"
+              },
+              "expander": {
+                "enum": [
+                  "least-waste",
+                  "most-pods",
+                  "priority",
+                  "random"
+                ],
+                "title": "The expander to use when scaling up",
+                "type": "string"
+              },
+              "max-empty-bulk-delete": {
+                "title": "The maximum number of empty nodes that can be deleted at the same time. This must be a positive integer.",
+                "type": "string"
+              },
+              "max-graceful-termination-sec": {
+                "title": "The maximum number of seconds the cluster autoscaler waits for pod termination when trying to scale down a node.",
+                "type": "string"
+              },
+              "max-node-provision-time": {
+                "title": "The maximum time the autoscaler waits for a node to be provisioned.",
+                "type": "string"
+              },
+              "max-total-unready-percentage": {
+                "title": "The maximum percentage of unready nodes in the cluster. After this percentage is exceeded, cluster autoscaler halts operations.",
+                "type": "string"
+              },
+              "new-pod-scale-up-delay": {
+                "title": "Ignore unscheduled pods before they're a certain age.",
+                "type": "string"
+              },
+              "ok-total-unready-count": {
+                "title": "The number of allowed unready nodes, irrespective of max-total-unready-percentage.",
+                "type": "string"
+              },
+              "scale-down-delay-after-add": {
+                "title": "How long after scale up that scale down evaluation resumes",
+                "type": "string"
+              },
+              "scale-down-delay-after-delete": {
+                "title": "How long after node deletion that scale down evaluation resumes.",
+                "type": "string"
+              },
+              "scale-down-delay-after-failure": {
+                "title": "How long after scale down failure that scale down evaluation resumes.",
+                "type": "string"
+              },
+              "scale-down-unneeded-time": {
+                "title": "How long a node should be unneeded before it is eligible for scale down.",
+                "type": "string"
+              },
+              "scale-down-unready-time": {
+                "title": "How long an unready node should be unneeded before it is eligible for scale down",
+                "type": "string"
+              },
+              "scale-down-utilization-threshold": {
+                "title": "Node utilization level, defined as sum of requested resources divided by capacity, below which a node can be considered for scale down.",
+                "type": "string"
+              },
+              "scan-interval": {
+                "title": "How often cluster is reevaluated for scale up or down.",
+                "type": "string"
+              },
+              "skip-nodes-with-local-storage": {
+                "title": "If cluster autoscaler will skip deleting nodes with pods with local storage, for example, EmptyDir or HostPath.",
+                "type": "string"
+              },
+              "skip-nodes-with-system-pods": {
+                "title": "If cluster autoscaler will skip deleting nodes with pods from kube-system (except for DaemonSet or mirror pods)",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "autoUpgradeProfile": {
+            "$ref": "#/components/schemas/ManagedClusterAutoUpgradeProfile"
+          },
+          "azureMonitorProfile": {
+            "$ref": "#/components/schemas/ManagedClusterAzureMonitorProfile"
+          },
+          "azurePortalFQDN": {
+            "readOnly": true,
+            "title": "The special FQDN used by the Azure Portal to access the Managed Cluster. This FQDN is for use only by the Azure Portal and should not be used by other clients.",
+            "type": "string"
+          },
+          "currentKubernetesVersion": {
+            "readOnly": true,
+            "title": "The version of Kubernetes the Managed Cluster is running.",
+            "type": "string"
+          },
+          "disableLocalAccounts": {
+            "title": "If local accounts should be disabled on the Managed Cluster.",
+            "type": "boolean"
+          },
+          "diskEncryptionSetID": {
+            "format": "arm-id",
+            "title": "The Resource ID of the disk encryption set to use for enabling encryption at rest.",
+            "type": "string"
+          },
+          "dnsPrefix": {
+            "title": "The DNS prefix of the Managed Cluster.",
+            "type": "string"
+          },
+          "enablePodSecurityPolicy": {
+            "type": "boolean"
+          },
+          "enableRBAC": {
+            "type": "boolean"
+          },
+          "fqdn": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "fqdnSubdomain": {
+            "title": "The FQDN subdomain of the private cluster with custom private dns zone.",
+            "type": "string"
+          },
+          "httpProxyConfig": {
+            "$ref": "#/components/schemas/ManagedClusterHTTPProxyConfig"
+          },
+          "identityProfile": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/UserAssignedIdentity"
+            },
+            "type": "object"
+          },
+          "ingressProfile": {
+            "$ref": "#/components/schemas/ManagedClusterIngressProfile"
+          },
+          "kubernetesVersion": {
+            "title": "The version of Kubernetes specified by the user.",
+            "type": "string"
+          },
+          "linuxProfile": {
+            "$ref": "#/components/schemas/ContainerServiceLinuxProfile"
+          },
+          "maxAgentPools": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "metricsProfile": {
+            "$ref": "#/components/schemas/ManagedClusterMetricsProfile"
+          },
+          "networkProfile": {
+            "$ref": "#/components/schemas/ContainerServiceNetworkProfile"
+          },
+          "nodeResourceGroup": {
+            "type": "string"
+          },
+          "oidcIssuerProfile": {
+            "$ref": "#/components/schemas/ManagedClusterOIDCIssuerProfile"
+          },
+          "podIdentityProfile": {
+            "$ref": "#/components/schemas/ManagedClusterPodIdentityProfile",
+            "title": "The pod identity profile of the Managed Cluster."
+          },
+          "powerState": {
+            "$ref": "#/components/schemas/PowerState",
+            "readOnly": true
+          },
+          "privateFQDN": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "privateLinkResources": {
+            "items": {
+              "$ref": "#/components/schemas/PrivateLinkResource"
+            },
+            "type": "array"
+          },
+          "provisioningState": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "publicNetworkAccess": {
+            "enum": [
+              "Enabled",
+              "Disabled"
+            ],
+            "title": "PublicNetworkAccess of the managedCluster",
+            "type": "string"
+          },
+          "resourceUID": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "securityProfile": {
+            "$ref": "#/components/schemas/ManagedClusterSecurityProfile"
+          },
+          "serviceMeshProfile": {
+            "$ref": "#/components/schemas/ServiceMeshProfile"
+          },
+          "servicePrincipalProfile": {
+            "$ref": "#/components/schemas/ManagedClusterServicePrincipalProfile"
+          },
+          "storageProfile": {
+            "$ref": "#/components/schemas/ManagedClusterStorageProfile"
+          },
+          "supportPlan": {
+            "$ref": "#/components/schemas/KubernetesSupportPlan"
+          },
+          "upgradeSettings": {
+            "$ref": "#/components/schemas/ClusterUpgradeSettings"
+          },
+          "windowsProfile": {
+            "$ref": "#/components/schemas/ManagedClusterWindowsProfile"
+          },
+          "workloadAutoScalerProfile": {
+            "$ref": "#/components/schemas/ManagedClusterWorkloadAutoScalerProfile"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterSKU": {
+        "properties": {
+          "name": {
+            "enum": [
+              "Base"
+            ],
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "Standard",
+              "Free",
+              "Premium"
+            ],
+            "title": "The tier of a managed cluster SKU.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterSecurityProfile": {
+        "properties": {
+          "azureKeyVaultKms": {
+            "$ref": "#/components/schemas/AzureKeyVaultKms"
+          },
+          "defender": {
+            "$ref": "#/components/schemas/ManagedClusterSecurityProfileDefender"
+          },
+          "imageCleaner": {
+            "$ref": "#/components/schemas/ManagedClusterSecurityProfileImageCleaner"
+          },
+          "workloadIdentity": {
+            "$ref": "#/components/schemas/ManagedClusterSecurityProfileWorkloadIdentity"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterSecurityProfileDefender": {
+        "properties": {
+          "logAnalyticsWorkspaceResourceId": {
+            "format": "arm-id",
+            "type": "string"
+          },
+          "securityMonitoring": {
+            "$ref": "#/components/schemas/ManagedClusterSecurityProfileDefenderSecurityMonitoring"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterSecurityProfileDefenderSecurityMonitoring": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterSecurityProfileImageCleaner": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "intervalHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterSecurityProfileWorkloadIdentity": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterServicePrincipalProfile": {
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "clientId"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterStorageProfile": {
+        "properties": {
+          "blobCSIDriver": {
+            "$ref": "#/components/schemas/ManagedClusterStorageProfileBlobCSIDriver"
+          },
+          "diskCSIDriver": {
+            "$ref": "#/components/schemas/ManagedClusterStorageProfileDiskCSIDriver"
+          },
+          "fileCSIDriver": {
+            "$ref": "#/components/schemas/ManagedClusterStorageProfileFileCSIDriver"
+          },
+          "snapshotController": {
+            "$ref": "#/components/schemas/ManagedClusterStorageProfileSnapshotController"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterStorageProfileBlobCSIDriver": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterStorageProfileDiskCSIDriver": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterStorageProfileFileCSIDriver": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterStorageProfileSnapshotController": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterWindowsProfile": {
+        "properties": {
+          "adminPassword": {
+            "type": "string"
+          },
+          "adminUsername": {
+            "type": "string"
+          },
+          "enableCSIProxy": {
+            "title": "Whether to enable CSI proxy.",
+            "type": "boolean"
+          },
+          "gmsaProfile": {
+            "$ref": "#/components/schemas/WindowsGmsaProfile"
+          },
+          "licenseType": {
+            "enum": [
+              "None",
+              "Windows_Server"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "adminUsername"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterWorkloadAutoScalerProfile": {
+        "properties": {
+          "keda": {
+            "$ref": "#/components/schemas/ManagedClusterWorkloadAutoScalerProfileKeda"
+          },
+          "verticalPodAutoscaler": {
+            "$ref": "#/components/schemas/ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedClusterWorkloadAutoScalerProfileKeda": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler": {
+        "properties": {
+          "enabled": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "NodePublicIPTags": {
+        "items": {
+          "$ref": "#/components/schemas/IPTag"
+        },
+        "type": "array"
+      },
+      "OSDiskType": {
+        "enum": [
+          "Managed",
+          "Ephemeral"
+        ],
+        "title": "The OS disk type to be used for machines in the agent pool.",
+        "type": "string"
+      },
+      "OSSKU": {
+        "enum": [
+          "Ubuntu",
+          "CBLMariner",
+          "AzureLinux",
+          "Windows2019",
+          "Windows2022"
+        ],
+        "type": "string"
+      },
+      "OSType": {
+        "default": "Linux",
+        "enum": [
+          "Linux",
+          "Windows"
+        ],
+        "type": "string"
+      },
+      "PortRange": {
+        "properties": {
+          "portEnd": {
+            "format": "int32",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "portStart": {
+            "format": "int32",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "protocol": {
+            "enum": [
+              "TCP",
+              "UDP"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PowerState": {
+        "properties": {
+          "code": {
+            "enum": [
+              "Running",
+              "Stopped"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PrivateLinkResource": {
+        "properties": {
+          "groupId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "privateLinkServiceID": {
+            "format": "arm-id",
+            "readOnly": true,
+            "type": "string"
+          },
+          "requiredMembers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProximityPlacementGroupID": {
+        "format": "arm-id",
+        "type": "string"
+      },
+      "Resource": {
+        "properties": {
+          "id": {
+            "format": "arm-id",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "systemData": {
+            "$ref": "#/components/schemas/systemData",
+            "readOnly": true
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Resource",
+        "type": "object"
+      },
+      "ResourceReference": {
+        "properties": {
+          "id": {
+            "format": "arm-id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RunCommandRequest": {
+        "properties": {
+          "clusterToken": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "type": "object"
+      },
+      "RunCommandResult": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/CommandResultProperties"
+          }
+        },
+        "type": "object"
+      },
+      "ScaleDownMode": {
+        "enum": [
+          "Delete",
+          "Deallocate"
+        ],
+        "type": "string"
+      },
+      "ScaleSetEvictionPolicy": {
+        "default": "Delete",
+        "enum": [
+          "Delete",
+          "Deallocate"
+        ],
+        "title": "The Virtual Machine Scale Set eviction policy.",
+        "type": "string"
+      },
+      "ScaleSetPriority": {
+        "default": "Regular",
+        "enum": [
+          "Spot",
+          "Regular"
+        ],
+        "type": "string"
+      },
+      "ServiceMeshProfile": {
+        "properties": {
+          "istio": {
+            "$ref": "#/components/schemas/IstioServiceMesh"
+          },
+          "mode": {
+            "enum": [
+              "Istio",
+              "Disabled"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "type": "object"
+      },
+      "SpotMaxPrice": {
+        "default": -1,
+        "title": "The max price (in US Dollars) you are willing to pay for spot instances. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand.",
+        "type": "number"
+      },
+      "SubResource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SysctlConfig": {
+        "properties": {
+          "fsAioMaxNr": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fsFileMax": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fsInotifyMaxUserWatches": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fsNrOpen": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "kernelThreadsMax": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreNetdevMaxBacklog": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreOptmemMax": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreRmemDefault": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreRmemMax": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreSomaxconn": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreWmemDefault": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netCoreWmemMax": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4IpLocalPortRange": {
+            "type": "string"
+          },
+          "netIpv4NeighDefaultGcThresh1": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4NeighDefaultGcThresh2": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4NeighDefaultGcThresh3": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4TcpFinTimeout": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4TcpKeepaliveProbes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4TcpKeepaliveTime": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4TcpMaxSynBacklog": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4TcpMaxTwBuckets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netIpv4TcpTwReuse": {
+            "type": "boolean"
+          },
+          "netIpv4TcpkeepaliveIntvl": {
+            "format": "int32",
+            "maximum": 90,
+            "minimum": 10,
+            "type": "integer"
+          },
+          "netNetfilterNfConntrackBuckets": {
+            "format": "int32",
+            "maximum": 524288,
+            "minimum": 65536,
+            "type": "integer"
+          },
+          "netNetfilterNfConntrackMax": {
+            "format": "int32",
+            "maximum": 2097152,
+            "minimum": 131072,
+            "type": "integer"
+          },
+          "vmMaxMapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "vmSwappiness": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "vmVfsCachePressure": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TrackedResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Resource"
+          }
+        ],
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "title": "Tracked Resource",
+        "type": "object"
+      },
+      "UpgradeOverrideSettings": {
+        "properties": {
+          "forceUpgrade": {
+            "type": "boolean"
+          },
+          "until": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserAssignedIdentity": {
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "objectId": {
+            "type": "string"
+          },
+          "resourceId": {
+            "format": "arm-id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WindowsGmsaProfile": {
+        "properties": {
+          "dnsServer": {
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Whether to enable Windows gMSA.",
+            "type": "boolean"
+          },
+          "rootDomainName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkloadRuntime": {
+        "enum": [
+          "OCIContainer",
+          "WasmWasi"
+        ],
+        "type": "string"
+      },
+      "systemData": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          },
+          "lastModifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastModifiedBy": {
+            "type": "string"
+          },
+          "lastModifiedByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "ContainerServiceClient"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters": {
+      "get": {
+        "operationId": "ManagedClusters_ListByResourceGroup",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedClusterListResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}": {
+      "get": {
+        "operationId": "ManagedClusters_Get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedCluster"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools": {
+      "get": {
+        "operationId": "AgentPools_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPoolListResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}": {
+      "get": {
+        "operationId": "AgentPools_Get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentPoolName",
+            "required": true,
+            "schema": {
+              "maxLength": 12,
+              "minLength": 1,
+              "pattern": "^[a-z][a-z0-9]{0,11}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPool"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AgentPools_CreateOrUpdate",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentPoolName",
+            "required": true,
+            "schema": {
+              "maxLength": 12,
+              "minLength": 1,
+              "pattern": "^[a-z][a-z0-9]{0,11}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPool"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPool"
+                }
+              }
+            }
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPool"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/listClusterUserCredential": {
+      "post": {
+        "operationId": "ManagedClusters_ListClusterUserCredentials",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "server-fqdn",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "enum": [
+                "exec",
+                "azure"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResults"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/runCommand": {
+      "post": {
+        "operationId": "ManagedClusters_RunCommand",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunCommandResult"
+                }
+              }
+            }
+          },
+          "202": {
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/start": {
+      "post": {
+        "operationId": "ManagedClusters_Start",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "204": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/stop": {
+      "post": {
+        "operationId": "ManagedClusters_Stop",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceName",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "204": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}
