@@ -67,6 +67,24 @@ describe('EscalationOverviewSlot', () => {
     expect(screen.getByText('Checkout failed for 30% of requests.')).toBeInTheDocument();
   });
 
+  it('hands every copied impact to the renderer at once, under one heading', () => {
+    const renderer = jest.fn(() => <div>Merged impact</div>);
+    registerImpactDetailsRenderer(renderer);
+
+    renderSlot({
+      attachments: [
+        impactAttachment,
+        { ...impactAttachment, id: 'investigation-2:impact-1' },
+        { ...impactAttachment, id: 'investigation-3:impact-1' },
+      ],
+    });
+
+    expect(renderer).toHaveBeenCalledTimes(1);
+    expect(renderer).toHaveBeenCalledWith([{}, {}, {}]);
+    expect(screen.getAllByRole('heading', { name: 'Impact' })).toHaveLength(1);
+    expect(screen.getByText('Merged impact')).toBeInTheDocument();
+  });
+
   it('renders no impact section when no impact attachment was copied', () => {
     registerImpactDetailsRenderer(() => <div>Checkout failed for 30% of requests.</div>);
 

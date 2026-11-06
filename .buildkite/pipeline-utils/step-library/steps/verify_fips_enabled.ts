@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { onDemandAgent, retry } from '../presets.ts';
+import { preemptibleAgent, retry } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const verifyFipsEnabled = (): readonly Step[] => [
@@ -19,7 +19,6 @@ export const verifyFipsEnabled = (): readonly Step[] => [
     depends_on: 'build',
     timeout_in_minutes: 10,
     retry: retry.agentLoss,
-    // Preemptible, with no zone restriction.
-    agents: { ...onDemandAgent('n2-standard-2'), preemptible: true },
+    agents: preemptibleAgent('n2-standard-2'),
   }),
 ];

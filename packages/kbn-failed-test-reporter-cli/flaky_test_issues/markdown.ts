@@ -246,9 +246,9 @@ export const formatFullFailureMessage = (message: string): string =>
 
 export const codeBlock = (text: string): string => `\`\`\`text\n${text}\n\`\`\``;
 
-/** A `<details>` block, collapsed by default; blank lines keep the markdown inside rendering. */
-export const collapsed = (summary: string, body: string): string =>
-  `<details>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
+/** A `<details>` block, collapsed unless `open`; blank lines keep the markdown inside rendering. */
+export const collapsed = (summary: string, body: string, { open = false } = {}): string =>
+  `<details${open ? ' open' : ''}>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
 
 /** A Buildkite build and, when known, the job within it that ran the test. */
 export interface BuildkiteRef {

@@ -50,7 +50,12 @@ const getFlyoutKind = ({
   hasPackagePolicy: boolean;
   canShowEnrollment: boolean;
 }): FlyoutKind | undefined => {
-  if (hasAgent) return isSettled && hasPackagePolicy ? 'details' : undefined;
+  if (hasAgent) {
+    if (!isSettled || !hasPackagePolicy) return undefined;
+    // A managed integration opens the same status as the managed integrations table: the overall
+    // health of the agentless agent, then the health of each component.
+    return canShowEnrollment ? 'enrollment' : 'details';
+  }
   return canShowEnrollment ? 'enrollment' : undefined;
 };
 
@@ -76,9 +81,10 @@ const getIssueMessage = (issue: AgentIssue): string => {
 };
 
 /**
- * Fleet agent badge for a service deployed through Fleet. A healthy or unhealthy agent opens its
- * component health, and a managed integration whose agent is not there yet opens the enrollment
- * status — the same flyouts the Managed integrations table uses.
+ * Fleet agent badge for a service deployed through Fleet. A managed integration opens its
+ * enrollment status, with the overall health of the agentless agent and the health of each
+ * component — the flyout the Managed integrations table uses. An agent-based agent that is healthy
+ * or unhealthy opens its component health.
  */
 export function ServiceAgentStatus({
   name,

@@ -18,17 +18,20 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
+  ConnectAgentPanel,
   DescriptionPanel,
   LockedSectionPanel,
   MemoryPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
+import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
+import { useKibanaUrl } from '../hooks/use_kibana_url';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -138,14 +141,33 @@ export const AiIndexDetailPage = () => {
   const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
   const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
-  const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
-    useAiIndexOverviewSections({
-      aiIndex,
-      isLoading,
-    });
+  const {
+    hideEditControls,
+    showOnboardingPanel,
+    showAutomationsPanel,
+    showSignalsSection,
+    showSignalsPanel,
+  } = useAiIndexOverviewSections({
+    aiIndex,
+    isLoading,
+    hasKnowledgeIndicators,
+    isKnowledgeIndicatorsLoading: isKiSummaryLoading,
+  });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
   const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
+
+  const { kibanaUrl } = useKibanaUrl();
+  const onboardingPrompt = useMemo(() => {
+    if (!showOnboardingPanel) {
+      return '';
+    }
+    return buildAiIndexOnboardingPrompt({
+      aiIndexId: resolvedAiIndexId,
+      aiIndexDest: aiIndex?.dest.value ?? '',
+      kibanaUrl,
+    });
+  }, [aiIndex?.dest.value, kibanaUrl, resolvedAiIndexId, showOnboardingPanel]);
 
   useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : []);
 
@@ -270,6 +292,12 @@ export const AiIndexDetailPage = () => {
           onDismiss={() => setShowCreatedCallout(false)}
           showMemory={isMemoryEnabled && aiIndex?.memory_enabled === true}
         />
+      )}
+      {showOnboardingPanel && (
+        <>
+          <ConnectAgentPanel prompt={onboardingPrompt} />
+          <EuiSpacer size="m" />
+        </>
       )}
       <DescriptionPanel
         isLoading={isLoading}

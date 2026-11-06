@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsUtils } from '@kbn/core/server';
 import { CASE_ATTACHMENTS_URL, MAX_CASE_ID_LENGTH } from '../../../../common/constants';
 import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import {
@@ -21,8 +20,6 @@ import {
   throwIfFileAttachment,
 } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { pickCreatedOrExistingAttachment } from '../../../client/attachments/add';
-import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
 
 export const postAttachmentRoute = createCasesRoute<
   { case_id: string },
@@ -51,24 +48,11 @@ export const postAttachmentRoute = createCasesRoute<
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const caseId = request.params.case_id;
 
-      // Pre-generate the id so we can locate the created attachment in the
-      // returned case. TODO: return the attachment directly once the client no
-      // longer encodes the full case (security-team#15572 follow-up).
-      const id = SavedObjectsUtils.generateId();
-      const updatedCase = await client.attachments.add({
-        caseId,
+      const attachment: attachmentDomainV2.UnifiedAttachment = await client.attachments.add({
+        caseId: request.params.case_id,
         comment: request.body,
-        id,
       });
-
-      const created = pickCreatedOrExistingAttachment(updatedCase.comments, id, request.body);
-      if (created == null) {
-        throw new Error(`Failed to locate created attachment ${id} on case ${caseId}`);
-      }
-
-      const attachment: attachmentDomainV2.UnifiedAttachment = toUnifiedAttachment(created);
 
       incrementAttachmentTypeCounters([getAttachmentRequestType(request.body)]);
       return response.created({

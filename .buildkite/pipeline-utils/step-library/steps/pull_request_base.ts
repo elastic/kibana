@@ -99,7 +99,7 @@ export const prBaseSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/pick_test_group_run_order.sh',
     label: 'Pick Test Group Run Order',
     key: 'pick_test_group_run_order',
-    agents: { ...onDemandAgent('n2-standard-2'), image: minimalImage },
+    agents: { ...onDemandAgent('n2-standard-2') },
     timeout_in_minutes: 15,
     env: {
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh',

@@ -8,7 +8,8 @@
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import type { ApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
-import { toDurationVital, toScoreVital } from '../../../lib/helpers/web_vitals';
+import { toHttpRequests } from '../../../lib/helpers/http_requests';
+import { toWebVitals } from '../../../lib/helpers/web_vitals';
 import type { ClassicBucket } from './search_responses';
 
 /** One application from its bucket. */
@@ -20,22 +21,12 @@ export const toApplication = (bucket: ClassicBucket): ApplicationSummary => {
     source: APPLICATION_SOURCE.classic,
     environments: bucketKeys(bucket.environments),
     pageLoads: { count: bucket.pageLoads.doc_count },
-    webVitals: {
-      lcp: toDurationVital(bucket.lcp),
-      inp: toDurationVital(bucket.inp),
-      cls: toScoreVital(bucket.cls),
-      fcp: toDurationVital(bucket.fcp),
-      ttfb: toDurationVital(bucket.ttfb),
-    },
+    webVitals: toWebVitals(bucket),
     jsErrors: {
       count: bucket.jsErrors.doc_count,
       perPageLoad: ratio(bucket.jsErrors.doc_count, bucket.pageLoads.doc_count),
     },
-    httpRequests: {
-      count: requests,
-      failedCount: failedRequests,
-      failedRatio: ratio(failedRequests, requests),
-    },
+    httpRequests: toHttpRequests(requests, failedRequests),
     lastSeen: toLastSeen(bucket.lastSeen.value),
   };
 };
