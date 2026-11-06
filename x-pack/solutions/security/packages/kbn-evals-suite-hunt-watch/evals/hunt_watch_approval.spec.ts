@@ -58,6 +58,24 @@ const spaceId = DEFAULT_EVAL_SPACE_ID;
 // through `no_action` and never runs an action.
 const reportId = HUNT_REPORT_IDS.actioned;
 const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
+// The multi-candidate hard row shares this report's actioned subject across reports in the same
+// space. A Proposal one of them left pending makes packaging converge onto it instead of minting
+// one here, so they are settled before this report is.
+const convergingReportIds = HUNT_REPORT_IDS.multiCandidate.filter((id) => id !== reportId);
+
+const resetApprovalReports = async ({
+  esClient,
+  fetch,
+  log,
+}: {
+  esClient: Client;
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<void> => {
+  for (const id of [...convergingReportIds, reportId]) {
+    await resetHuntReport({ esClient, fetch, log, reportId: id, spaceId });
+  }
+};
 
 const isPending = (p: ProposalWithMetadata) => p.status === 'pending';
 
@@ -128,7 +146,7 @@ const mintPendingProposals = async (deps: {
       log.warning(`mint ${attempt}/${MINT_ATTEMPTS} missed: ${error.message}`);
       if (attempt < MINT_ATTEMPTS) {
         await huntWatchClient.cancelPending();
-        await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
+        await resetApprovalReports({ esClient, fetch, log });
       }
     }
   }
@@ -190,11 +208,16 @@ const stageApprovePath = async ({
     );
   }
 
-  const previousPolicyId = await retargetFleetAgentPolicyId({
-    esClient,
-    policyId: agentPolicyId,
-    log,
-  });
+  let previousPolicyId: string | undefined;
+  try {
+    previousPolicyId = await retargetFleetAgentPolicyId({ esClient, policyId: agentPolicyId, log });
+  } catch (error) {
+    // No teardown is returned on this path, so the policies created above are deleted here.
+    await deleteIndexedFleetEndpointPolicies(kbnClient, indexed).catch((cleanupError) => {
+      log.warning(`approve path: deleting the Fleet policies failed: ${String(cleanupError)}`);
+    });
+    throw error;
+  }
   log.info(
     `approve path: hunt agent enrolled on endpoint agent policy ${agentPolicyId}${
       previousPolicyId ? ` (was ${previousPolicyId})` : ' (no previous policy_id)'
@@ -227,7 +250,7 @@ evaluate.describe('Hunt Watch proposal gate', { tag: tags.serverless.security.co
   });
 
   evaluate.beforeEach(async ({ esClient, fetch, log }) => {
-    await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
+    await resetApprovalReports({ esClient, fetch, log });
   });
 
   evaluate.afterEach(async ({ huntWatchClient, fetch, log }) => {
@@ -239,12 +262,18 @@ evaluate.describe('Hunt Watch proposal gate', { tag: tags.serverless.security.co
     'approve settles the gate and closes the Investigation as resolved',
     async ({ huntWatchClient, esClient, fetch, log }) => {
       const pending = await mintPendingProposals({ huntWatchClient, esClient, fetch, log });
+      // A minute of slack covers clock skew between this runner and Kibana.
+      const approvedSince = new Date(Date.now() - 60_000).toISOString();
       for (const { id } of pending) {
         await approveProposal({ fetch, spaceId, proposalId: id, rationale: 'eval approve path' });
       }
       // The seeded host cannot answer the dispatched suspend-process itself; respond for it so
       // the action's completion poll resolves and the Proposal settles as `succeeded`.
-      const answered = await respondToOutstandingActions({ esClient, log });
+      const answered = await respondToOutstandingActions({
+        esClient,
+        log,
+        since: approvedSince,
+      });
       if (answered === 0) {
         log.warning('approve path: no outstanding endpoint action was found to respond to');
       }

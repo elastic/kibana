@@ -273,7 +273,7 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
 | D10 proposal-gate-exclusivity | tested | `Proposal Presence`, `Proposal Convergence`, `Canary Inverted`, approval spec |
 | D10a watch-tag-grouping | n/a | Worker triggered directly |
 | D10b per-worker-settings-scope | n/a | v1 bridge is space-level |
-| D10c execute-time-revalidation | n/a | no Defend endpoint actions |
+| D10c execute-time-revalidation | n/a | approval spec runs a Defend action, but the staged responder always answers success |
 | D10d coverage-handoff-integrity | n/a | out of scope |
 <!-- gate-checklist:end -->
 

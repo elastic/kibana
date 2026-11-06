@@ -240,15 +240,28 @@ export const retargetFleetAgentPolicyId = async ({
   }
 };
 
-/** Lists action ids dispatched to the hunt agent that have no response doc yet. */
+export const buildDispatchedActionsQuery = (since: string) => ({
+  bool: {
+    filter: [{ term: { 'agent.id': HUNT_AGENT_ID } }, { range: { '@timestamp': { gte: since } } }],
+  },
+});
+
+/**
+ * Lists action ids dispatched to the hunt agent at or after `since` that have no response doc
+ * yet. Bounded by time and sorted newest first, because a reused stack accumulates this agent's
+ * actions across runs and an unsorted page could miss the one just dispatched.
+ */
 export const listUnansweredActionIds = async ({
   esClient,
+  since,
 }: {
   esClient: Client;
+  since: string;
 }): Promise<string[]> => {
   const { hits } = await esClient.search<{ EndpointActions?: { action_id?: string } }>({
     index: '.logs-endpoint.actions-default',
-    query: { term: { 'agent.id': HUNT_AGENT_ID } },
+    query: buildDispatchedActionsQuery(since),
+    sort: [{ '@timestamp': { order: 'desc' } }],
     size: 50,
     ignore_unavailable: true,
   });
@@ -274,15 +287,18 @@ export const listUnansweredActionIds = async ({
  * Answers every outstanding suspend-process action for the hunt agent with a success response
  * doc, so the approve path's `isCompleted` poll resolves instead of timing out. Called between
  * the approve POST and the close wait: the action id only exists after the workflow dispatches,
- * which happens after the approve call returns.
+ * which happens after the approve call returns. `since` is taken before the approve POST, so only
+ * actions this test dispatched are answered.
  */
 export const respondToOutstandingActions = async ({
   esClient,
   log,
+  since,
   maxWaitMs = 150_000,
 }: {
   esClient: Client;
   log: ToolingLog;
+  since: string;
   maxWaitMs?: number;
 }): Promise<number> => {
   const deadline = Date.now() + maxWaitMs;
@@ -292,7 +308,7 @@ export const respondToOutstandingActions = async ({
   // answered too rather than left to time out the workflow's poll.
   let quietChecks = 0;
   while (Date.now() < deadline) {
-    const outstanding = await listUnansweredActionIds({ esClient });
+    const outstanding = await listUnansweredActionIds({ esClient, since });
     if (outstanding.length === 0) {
       if (answered > 0 && quietChecks >= 2) return answered;
       quietChecks += 1;

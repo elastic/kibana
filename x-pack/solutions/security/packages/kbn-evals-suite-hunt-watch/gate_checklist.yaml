@@ -115,8 +115,8 @@ gates:
   D10c:
     family: D
     name: execute-time-revalidation
-    status: tested
-    reason: "The multi-candidate hit reports propose a real Defend endpoint action (suspend-process on the seeded host's aws.exe), and the approval spec drives it end to end: the managed action POSTs /api/endpoint/action/suspend_process, the staged responder answers, and the Proposal settles succeeded only when the action reports success. Re-validation of pre-approval checks at execution time is still not asserted; the staged responder always answers success."
+    status: n/a
+    reason: "Re-validation of pre-approval checks at execution time is not asserted. The approval spec does run a real Defend endpoint action end to end (suspend-process on the seeded host's aws.exe: the managed action POSTs /api/endpoint/action/suspend_process and the Proposal settles succeeded only when the action reports success), but nothing changes between approval and execution and the staged responder always answers success, so a skipped or broken re-validation would pass unnoticed."
   D10d:
     family: D
     name: coverage-handoff-integrity
