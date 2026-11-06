@@ -136,7 +136,7 @@ export const CellFooter = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {lastRunAt !== undefined && (
+            {lastRunAt !== undefined && runtime?.status !== 'running' && (
               <EuiFlexItem grow={false}>
                 <LastRun lastRunAt={lastRunAt} durationMs={runtime?.durationMs} />
               </EuiFlexItem>

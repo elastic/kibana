@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -103,6 +104,30 @@ const getStaleTooltip = (
   return MANUAL_TOOLTIP;
 };
 
+const TICK_MS = 1000;
+
+const formatElapsed = (ms: number): string => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return minutes > 0 ? `${minutes}m ${String(seconds).padStart(2, '0')}s` : `${seconds}s`;
+};
+
+/** "Running 12s", counting from when the badge started showing the run. */
+const RunningLabel = () => {
+  const [startedAt] = useState(Date.now);
+  const [now, setNow] = useState(startedAt);
+  useInterval(() => setNow(Date.now()), TICK_MS);
+  return (
+    <>
+      {i18n.translate('xpack.notebook.status.runningElapsed', {
+        defaultMessage: 'Running {elapsed}',
+        values: { elapsed: formatElapsed(now - startedAt) },
+      })}
+    </>
+  );
+};
+
 export const CellStatusBadge = ({ runtime }: { runtime: CellRuntime }) => {
   const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);
@@ -121,7 +146,7 @@ export const CellStatusBadge = ({ runtime }: { runtime: CellRuntime }) => {
   const tooltip = getTooltip();
   const badge = (
     <EuiBadge color={color} data-test-subj={`notebookCellStatus-${runtime.status}`}>
-      {label}
+      {runtime.status === 'running' ? <RunningLabel /> : label}
     </EuiBadge>
   );
   return tooltip ? <EuiToolTip content={tooltip}>{badge}</EuiToolTip> : badge;
