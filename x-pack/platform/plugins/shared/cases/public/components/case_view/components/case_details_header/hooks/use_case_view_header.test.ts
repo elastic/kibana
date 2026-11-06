@@ -222,6 +222,50 @@ describe('useCaseViewHeader', () => {
     expect(reportedBy?.label).toBe('Reported by: lknope');
   });
 
+  describe('AlertZero byline', () => {
+    const mockUseCasesConfig = useCasesConfig as jest.Mock;
+    const defaultCasesConfig = mockUseCasesConfig();
+    const alertZeroCase: CaseUI = { ...basicCase, incrementalId: 7, source: 'alertzero' };
+
+    afterEach(() => {
+      mockUseCasesConfig.mockReturnValue(defaultCasesConfig);
+    });
+
+    it('replaces the reporter line with where the case was opened from when agentic cases are on', () => {
+      mockUseCasesConfig.mockReturnValue({ ...defaultCasesConfig, agenticEnabled: true });
+      const { result } = renderHook(
+        () => useCaseViewHeader({ ...defaultArgs, caseData: alertZeroCase }),
+        { wrapper }
+      );
+
+      expect(result.current.metadata.map((item) => item?.['data-test-subj'])).toEqual([
+        'case-view-incremental-id',
+        'case-view-byline-opened',
+        'case-view-byline-updated',
+      ]);
+      expect(result.current.metadata[1]?.label).toMatch(
+        new RegExp(`^Opened by ${basicCase.createdBy.fullName} from AlertZero `)
+      );
+      expect(result.current.metadata[2]?.label).toMatch(/^Updated /);
+      expect(
+        result.current.badges.find((b) => b['data-test-subj'] === 'case-view-source-badge')
+      ).toBeUndefined();
+    });
+
+    it("keeps main's reporter line when agentic cases are off", () => {
+      const { result } = renderHook(
+        () => useCaseViewHeader({ ...defaultArgs, caseData: alertZeroCase }),
+        { wrapper }
+      );
+
+      expect(result.current.metadata.map((item) => item?.['data-test-subj'])).toEqual([
+        'case-view-incremental-id',
+        'case-view-reported-by',
+        'case-view-created-at',
+      ]);
+    });
+  });
+
   it('returns a backHref', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,

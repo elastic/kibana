@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +28,12 @@ import { UserAvatar } from '@kbn/user-profile-components';
 import type { CaseSeverity } from '../../../common/types/domain';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
-import { useUpdateTask } from '../../containers/use_case_tasks';
+import {
+  useGetTaskWorkflowOptions,
+  useRunTaskWorkflow,
+  useUpdateTask,
+} from '../../containers/use_case_tasks';
+import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { SeverityHealth } from '../severity/config';
 import { TaskRowActions } from './task_row_actions';
@@ -73,6 +79,16 @@ export const TasksTable: React.FC<TasksTableProps> = ({
   const { euiTheme } = useEuiTheme();
   const { permissions } = useCasesContext();
   const { mutate: updateTask } = useUpdateTask(caseId);
+  const { mutate: runTaskWorkflow, isLoading: isStartingRun } = useRunTaskWorkflow(caseId);
+  const canRunWorkflow = useCanRunCaseWorkflow();
+  const hasWorkflowTasks = tasks.some((t) => t.workflow_id);
+  const { data: workflowOptions } = useGetTaskWorkflowOptions({
+    enabled: hasWorkflowTasks && canRunWorkflow,
+  });
+  const workflowNames = useMemo(
+    () => new Map((workflowOptions ?? []).map(({ id, name }) => [id, name])),
+    [workflowOptions]
+  );
 
   const uids = useMemo(
     () => [...new Set(tasks.flatMap((t) => t.assignees.map(({ uid }) => uid)))],
@@ -107,10 +123,12 @@ export const TasksTable: React.FC<TasksTableProps> = ({
             />
           );
         }
-        return (
+        const isRunning = task.workflow_run?.status === 'running';
+        const checkbox = (
           <EuiCheckbox
             id={`cases-task-done-${task.id}`}
             checked={done}
+            disabled={isRunning && !done}
             aria-label={done ? i18n.REOPEN_ARIA(task.title) : i18n.MARK_DONE_ARIA(task.title)}
             onChange={() =>
               updateTask({
@@ -120,6 +138,11 @@ export const TasksTable: React.FC<TasksTableProps> = ({
             }
             data-test-subj={`cases-task-done-${task.id}`}
           />
+        );
+        return isRunning && !done ? (
+          <EuiToolTip content={i18n.DONE_WHILE_RUNNING_TOOLTIP}>{checkbox}</EuiToolTip>
+        ) : (
+          checkbox
         );
       },
     },
@@ -168,6 +191,59 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
+                {task.workflow_id && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18n.WORKFLOW_BADGE_TOOLTIP}>
+                      <EuiBadge
+                        color="hollow"
+                        iconType="workflow"
+                        tabIndex={0}
+                        data-test-subj={`cases-task-workflow-${task.id}`}
+                      >
+                        {workflowNames.get(task.workflow_id) ?? i18n.WORKFLOW_UNKNOWN}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {task.workflow_run?.status === 'running' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="primary" data-test-subj={`cases-task-workflow-status-${task.id}`}>
+                      {i18n.WORKFLOW_RUNNING}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {task.workflow_run?.status === 'failed' && !isTaskFinished(task) && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.WORKFLOW_FAILED_TOOLTIP(task.workflow_run.error ?? '')}
+                    >
+                      <EuiBadge
+                        color="danger"
+                        tabIndex={0}
+                        data-test-subj={`cases-task-workflow-status-${task.id}`}
+                      >
+                        {i18n.WORKFLOW_FAILED}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {task.workflow_id &&
+                  canRunWorkflow &&
+                  !isTaskFinished(task) &&
+                  task.workflow_run?.status !== 'running' && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={i18n.RUN_WORKFLOW} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="play"
+                          size="xs"
+                          isDisabled={isStartingRun}
+                          aria-label={i18n.RUN_WORKFLOW_ARIA(task.title)}
+                          onClick={() => runTaskWorkflow(task.id)}
+                          data-test-subj={`cases-task-run-workflow-${task.id}`}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
                 {(commentCounts[task.id] ?? 0) > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiText

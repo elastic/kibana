@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   KibanaRequest,
   SavedObjectsServiceStart,
@@ -125,6 +127,9 @@ interface CasesClientFactoryArgs {
    * unconditionally.
    */
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
+  workflowsManagement?: WorkflowsServerPluginSetup['management'];
+  /** Present when Agent Builder is installed and Cases chat is on; the case room uses it. */
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 interface CreateCasesClientParams {
@@ -240,6 +245,8 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
+      workflowsManagement: this.options.workflowsManagement,
+      agentBuilder: this.options.agentBuilder,
     };
   }
 

@@ -20,6 +20,8 @@ import { CaseViewTabContent } from './components/case_view_tab_content';
 import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
 import { useCaseDataWithVisibleConversations } from '../attachments/conversation/use_visible_conversations';
+import { RoomFlyout } from './components/room/room_flyout';
+import { useIsRoomAvailable } from './components/room/use_room_availability';
 
 export type CaseViewPageComponentProps = Omit<CaseViewPageProps, 'fetchCase'>;
 
@@ -39,6 +41,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
   const { onUpdateField, isLoading } = useOnUpdateField({ caseData });
   useCaseRefreshRef({ refreshRef, isLoading });
   const visibleCaseData = useCaseDataWithVisibleConversations(caseData);
+  const isRoomAvailable = useIsRoomAvailable();
 
   return (
     <>
@@ -62,6 +65,9 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
         />
       </CasesPageBody>
       <CaseDetailsTour caseData={caseData} />
+      {isRoomAvailable ? (
+        <RoomFlyout caseData={visibleCaseData} onUpdateField={onUpdateField} hasAgentBuilder />
+      ) : null}
     </>
   );
 });

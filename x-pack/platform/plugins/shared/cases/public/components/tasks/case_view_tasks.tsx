@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useGetCaseTasks } from '../../containers/use_case_tasks';
+import { useGetCaseTasks, usePollTaskWorkflowRuns } from '../../containers/use_case_tasks';
 import { SidebarToggleButton } from '../case_view/components/sidebar/sidebar_toggle_button';
 import { ApplyTaskListModal } from './apply_task_list_modal';
 import { TaskDetailFlyout } from './task_detail_flyout';
@@ -45,6 +45,7 @@ export interface CaseViewTasksProps {
 export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
   const { permissions } = useCasesContext();
   const { data, isLoading, isError, refetch } = useGetCaseTasks(caseId);
+  usePollTaskWorkflowRuns(caseId, data?.tasks);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [hideCompleted, setHideCompleted] = useState(false);
   const closeDialog = () => setDialog(null);

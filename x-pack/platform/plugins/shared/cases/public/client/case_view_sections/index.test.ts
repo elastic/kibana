@@ -30,3 +30,21 @@ describe('CaseViewSectionRegistry', () => {
     );
   });
 });
+
+describe('matchesRelatedFilters', () => {
+  const { matchesRelatedFilters } = jest.requireActual('.');
+
+  it('passes everything with no filters', () => {
+    expect(matchesRelatedFilters({ reasons: [], isClosed: true }, undefined)).toBe(true);
+    expect(
+      matchesRelatedFilters({ reasons: ['linked'], isClosed: false }, { relatedBy: [], status: [] })
+    ).toBe(true);
+  });
+
+  it('needs one matching reason and a matching status', () => {
+    const filters = { relatedBy: ['observable', 'alert'], status: ['open'] };
+    expect(matchesRelatedFilters({ reasons: ['alert'], isClosed: false }, filters)).toBe(true);
+    expect(matchesRelatedFilters({ reasons: ['linked'], isClosed: false }, filters)).toBe(false);
+    expect(matchesRelatedFilters({ reasons: ['alert'], isClosed: true }, filters)).toBe(false);
+  });
+});

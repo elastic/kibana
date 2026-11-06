@@ -32,7 +32,11 @@ const dueDateFrom = (dueWithin: DueWithin | null, anchor: Date): string | null =
     ? null
     : new Date(anchor.getTime() + dueWithin.value * MS_PER_UNIT[dueWithin.unit]).toISOString();
 
-const toInput = (entry: CaseTaskTemplateSubtask, templateId: string, anchor: Date): TaskInput => ({
+const toInput = (
+  entry: CaseTaskTemplateSubtask & { workflow_id?: string | null },
+  templateId: string,
+  anchor: Date
+): TaskInput => ({
   title: entry.title,
   description: entry.description,
   priority: entry.priority,
@@ -40,6 +44,7 @@ const toInput = (entry: CaseTaskTemplateSubtask, templateId: string, anchor: Dat
   // Lists saved before due_within existed have no value here.
   due_date: dueDateFrom(entry.due_within ?? null, anchor),
   template_id: templateId,
+  workflow_id: entry.workflow_id ?? null,
 });
 
 export const ensureTaskCapacity = async (

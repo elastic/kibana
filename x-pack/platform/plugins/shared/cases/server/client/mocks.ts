@@ -118,6 +118,11 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     bulkAddObservables: jest.fn(),
     bulkDeleteObservables: jest.fn(),
     getApplicableFields: jest.fn(),
+    linkCases: jest.fn(),
+    unlinkCase: jest.fn(),
+    getRelatedCases: jest.fn(),
+    ensureRoom: jest.fn(),
+    postFromRoom: jest.fn(),
   });
 };
 
@@ -150,6 +155,7 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     getAll: jest.fn(),
     get: jest.fn(),
     getFiles: jest.fn(),
+    countByType: jest.fn(),
     update: jest.fn(),
     updateAndGetCase: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
@@ -184,6 +190,8 @@ type TemplatesSubClientMock = jest.Mocked<TemplatesSubClient>;
 const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
   return lazyObject({
     getAllTemplates: jest.fn(),
+    canReadOwnerTemplates: jest.fn(),
+    canUpdateOwnerConfiguration: jest.fn(),
     getTemplate: jest.fn(),
     createTemplate: jest.fn(),
     updateTemplate: jest.fn(),
@@ -224,6 +232,9 @@ const createTasksSubClientMock = (): TasksSubClientMock => {
     getComments: jest.fn(),
     addComment: jest.fn(),
     deleteComment: jest.fn(),
+    runWorkflow: jest.fn(),
+    refreshWorkflowRun: jest.fn(),
+    runWorkflowAndWait: jest.fn(),
   });
 };
 

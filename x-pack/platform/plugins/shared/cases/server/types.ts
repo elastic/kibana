@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SystemTemplateDefinition } from './system_templates';
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 
 /**
@@ -148,6 +149,8 @@ export interface CasesServerStart {
   config: ConfigType;
 }
 
+export type { SystemTemplateDefinition };
+
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
@@ -162,6 +165,12 @@ export interface CasesServerSetup {
    * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
    */
   registerOwnerPrefix: (owner: string, prefix: string) => void;
+  /**
+   * Registers a template Cases ships for an owner: a case template with a task list, plus the
+   * statuses it uses. Cases writes it into every space (stable ids, internal user) when it is
+   * missing; it can be turned off but not deleted.
+   */
+  registerSystemTemplate: (owner: string, definition: SystemTemplateDefinition) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

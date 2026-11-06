@@ -214,6 +214,9 @@ export function transformESModelToCase(
     ...(caseAttributes.settings?.externalSync && {
       externalSync: caseAttributes.settings.externalSync,
     }),
+    ...(caseAttributes.settings?.agent && {
+      agent: caseAttributes.settings.agent,
+    }),
   };
 
   const version = encodeHitVersion(hit);
@@ -317,6 +320,9 @@ export function transformSavedObjectToExternalModel(
     extractObservables: caseSavedObjectAttributes.settings?.extractObservables ?? false,
     ...(caseSavedObjectAttributes.settings?.externalSync && {
       externalSync: caseSavedObjectAttributes.settings.externalSync,
+    }),
+    ...(caseSavedObjectAttributes.settings?.agent && {
+      agent: caseSavedObjectAttributes.settings.agent,
     }),
   };
 

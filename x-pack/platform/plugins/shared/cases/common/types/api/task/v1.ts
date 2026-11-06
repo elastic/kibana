@@ -47,6 +47,7 @@ export const TaskCreateRequestSchema = z.object({
   due_date: z.string().nullable().optional(),
   required: z.boolean().optional(),
   parent_task_id: z.string().nullable().optional(),
+  workflow_id: z.string().min(1).nullable().optional(),
 });
 
 export const TaskPatchRequestSchema = z.object({
@@ -58,6 +59,7 @@ export const TaskPatchRequestSchema = z.object({
   assignees: AssigneesSchema.optional(),
   due_date: z.string().nullable().optional(),
   required: z.boolean().optional(),
+  workflow_id: z.string().min(1).nullable().optional(),
 });
 
 export const TasksFindRequestSchema = paginationSchema({ maxPerPage: MAX_TASKS_PER_CASE }).extend({

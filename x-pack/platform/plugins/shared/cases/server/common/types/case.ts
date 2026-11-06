@@ -50,6 +50,8 @@ export interface CasePersistedAttributes {
     syncAlerts: boolean;
     extractObservables?: boolean;
     externalSync?: ExternalSyncSettings;
+    /** Whether the agent answers in the case room when mentioned. */
+    agent?: { enabled?: boolean };
   };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
@@ -88,6 +90,7 @@ export interface CasePersistedAttributes {
   human_verdict?: CaseVerdict | null;
   ai_verdict?: CaseAiVerdict | null;
   source?: CaseSource | null;
+  room_conversation_id?: string | null;
 }
 
 type CasePersistedCustomFields = Array<{

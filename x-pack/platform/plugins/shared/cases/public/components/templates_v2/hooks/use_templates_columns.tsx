@@ -33,6 +33,7 @@ import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyCellValue } from '../../empty_value';
 import * as i18n from '../translations';
 import { LINE_CLAMP } from '../constants';
+import { isSystemTemplateId } from '../../../../common/utils/system_templates';
 
 type TemplatesColumns =
   | EuiTableActionsColumnType<TemplateListItem>
@@ -112,15 +113,20 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
             onClick: handleExport,
             'data-test-subj': `template-action-export-${template.templateId}`,
           },
-          {
-            isSeparator: true,
-          },
-          {
-            name: i18n.DELETE_TEMPLATE,
-            icon: 'trash',
-            onClick: handleDelete,
-            'data-test-subj': `template-action-delete-${template.templateId}`,
-          },
+          // Shipped templates can be turned off but not deleted.
+          ...(isSystemTemplateId(template.templateId)
+            ? []
+            : [
+                {
+                  isSeparator: true as const,
+                },
+                {
+                  name: i18n.DELETE_TEMPLATE,
+                  icon: 'trash',
+                  onClick: handleDelete,
+                  'data-test-subj': `template-action-delete-${template.templateId}`,
+                },
+              ]),
         ],
       },
     ],
@@ -193,6 +199,19 @@ export const useTemplatesColumns = ({
                   {name}
                 </EuiLink>
               </EuiFlexItem>
+              {isSystemTemplateId(template.templateId) && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.SHIPPED_BADGE_TOOLTIP}>
+                    <EuiBadge
+                      color="hollow"
+                      tabIndex={0}
+                      data-test-subj={`template-shipped-badge-${template.templateId}`}
+                    >
+                      {i18n.SHIPPED_BADGE}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           ) : (
             getEmptyCellValue()

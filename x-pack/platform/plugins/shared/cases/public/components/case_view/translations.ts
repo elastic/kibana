@@ -557,6 +557,14 @@ export const SYNC_KEPT_FIELDS = (fields: string) =>
     defaultMessage: 'kept {fields} changed in Kibana',
   });
 
-export const SOURCE_BADGE_ALERTZERO = i18n.translate('xpack.cases.caseView.sourceBadge.alertzero', {
-  defaultMessage: 'Opened from AlertZero',
-});
+export const BYLINE_OPENED_FROM_ALERTZERO = (user: string, time: string) =>
+  i18n.translate('xpack.cases.caseView.byline.openedFromAlertZero', {
+    values: { user, time },
+    defaultMessage: 'Opened by {user} from AlertZero {time}',
+  });
+
+export const BYLINE_UPDATED = (time: string) =>
+  i18n.translate('xpack.cases.caseView.byline.updated', {
+    values: { time },
+    defaultMessage: 'Updated {time}',
+  });

@@ -102,6 +102,8 @@ export class CaseTaskService {
           completed_at: isFinished(status) ? now : null,
           sort_order: sortOrder,
           template_id: t.template_id ?? null,
+          workflow_id: t.workflow_id ?? null,
+          workflow_run: null,
           owner,
           created_at: now,
           created_by: user,

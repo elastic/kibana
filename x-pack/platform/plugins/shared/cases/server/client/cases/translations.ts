@@ -43,3 +43,19 @@ export const INVALID_CLOSE_REASON = (closeReason: string) =>
       'Invalid close reason: "{closeReason}". Must be one of the default close reasons or a configured custom close reason.',
     values: { closeReason },
   });
+
+export const ROOM_TITLE = (caseTitle: string) =>
+  i18n.translate('xpack.cases.server.room.title', {
+    defaultMessage: 'Room: {caseTitle}',
+    values: { caseTitle },
+  });
+
+export const ROOM_UNKNOWN_AUTHOR = i18n.translate('xpack.cases.server.room.unknownAuthor', {
+  defaultMessage: 'a teammate',
+});
+
+export const POSTED_FROM_ROOM_BY = (name: string) =>
+  i18n.translate('xpack.cases.server.room.postedFromRoomBy', {
+    defaultMessage: 'Posted from the room by {name}',
+    values: { name },
+  });

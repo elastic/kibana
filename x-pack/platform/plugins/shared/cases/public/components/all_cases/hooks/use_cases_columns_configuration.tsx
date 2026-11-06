@@ -6,7 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import { AI_VERDICT_COLUMN, SOURCE_COLUMN, ALERTS, EVENTS } from '../../../common/translations';
+import {
+  AI_VERDICT_COLUMN,
+  INVESTIGATIONS_COLUMN,
+  SOURCE_COLUMN,
+  ALERTS,
+  EVENTS,
+} from '../../../common/translations';
 import * as i18n from '../translations';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useCasesConfig } from '../../../common/lib/kibana';
@@ -129,6 +135,12 @@ export const useCasesColumnsConfiguration = (
             aiVerdict: {
               field: 'aiVerdict',
               name: AI_VERDICT_COLUMN,
+              canDisplay: canDisplayDefault && !isSelectorView,
+              isCheckedDefault: true,
+            },
+            linkedInvestigations: {
+              field: 'linkedInvestigations',
+              name: INVESTIGATIONS_COLUMN,
               canDisplay: canDisplayDefault && !isSelectorView,
               isCheckedDefault: true,
             },

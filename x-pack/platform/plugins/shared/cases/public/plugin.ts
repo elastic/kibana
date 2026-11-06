@@ -140,6 +140,7 @@ export class CasesUiPlugin
       hasDashboardPluginEnabled: Boolean(plugins.dashboard),
       hasMapsPluginEnabled: Boolean(plugins.maps),
       hasAgentBuilderPluginEnabled: Boolean(plugins.agentBuilder) && config?.chat?.enabled === true,
+      agenticEnabled: config?.agentic?.enabled ?? false,
     });
 
     KibanaServices.init({

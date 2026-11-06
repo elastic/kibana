@@ -157,6 +157,10 @@ properties:
     $ref: 'case_ai_verdict.yaml'
   source:
     $ref: 'case_source.yaml'
+  room_conversation_id:
+    type: string
+    nullable: true
+    description: The Agent Builder conversation that is the case's room, created the first time someone opens the room.
   paused_at:
     type: string
     format: date-time

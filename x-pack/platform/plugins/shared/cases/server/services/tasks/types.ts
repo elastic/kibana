@@ -9,6 +9,7 @@ import type {
   CaseTaskStatus,
   CaseTaskPriority,
   CaseTaskAssignee,
+  CaseTaskWorkflowRun,
 } from '../../../common/types/domain/task/v1';
 import type { User } from '../../common/types/user';
 import type { IndexRefresh } from '../types';
@@ -23,6 +24,7 @@ export interface TaskInput {
   required?: boolean;
   parent_task_id?: string | null;
   template_id?: string | null;
+  workflow_id?: string | null;
 }
 
 export interface CreateTaskArgs extends TaskInput, IndexRefresh {
@@ -49,6 +51,8 @@ export interface UpdateTaskArgs extends IndexRefresh {
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
   required?: boolean;
+  workflow_id?: string | null;
+  workflow_run?: CaseTaskWorkflowRun | null;
 }
 
 export interface FindTasksArgs {

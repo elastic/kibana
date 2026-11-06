@@ -31,6 +31,8 @@ import {
   INTERNAL_CASE_WORKFLOW_RUN_URL,
   CASE_TASKS_URL,
   CASE_TASK_DETAILS_URL,
+  CASE_TASK_RUN_WORKFLOW_URL,
+  CASE_TASK_REFRESH_WORKFLOW_URL,
   CASE_TASKS_APPLY_TEMPLATE_URL,
   CASE_TASK_TEMPLATE_DETAILS_URL,
   CASE_TASK_COMMENTS_URL,
@@ -145,6 +147,12 @@ export const getCaseTasksUrl = (caseId: string): string => {
 export const getCaseTaskDetailsUrl = (caseId: string, taskId: string): string => {
   return CASE_TASK_DETAILS_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
 };
+
+export const getCaseTaskRunWorkflowUrl = (caseId: string, taskId: string): string =>
+  CASE_TASK_RUN_WORKFLOW_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+
+export const getCaseTaskRefreshWorkflowUrl = (caseId: string, taskId: string): string =>
+  CASE_TASK_REFRESH_WORKFLOW_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
 
 export const getCaseTasksApplyTemplateUrl = (caseId: string): string => {
   return CASE_TASKS_APPLY_TEMPLATE_URL.replace('{case_id}', caseId);

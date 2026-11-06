@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -78,6 +80,10 @@ export interface CasesClientArgs {
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
   readonly clientSource: CasesClientSource;
+  /** Present when Workflows is installed and running workflows from cases is on; tasks use it. */
+  readonly workflowsManagement?: WorkflowsServerPluginSetup['management'];
+  /** Present when Agent Builder is installed and Cases chat is on; the case room uses it. */
+  readonly agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type CasesSearchParams = Partial<

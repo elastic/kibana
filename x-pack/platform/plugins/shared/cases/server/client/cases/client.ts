@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, User } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseCustomField,
+  User,
+  ActionSource,
+  UnifiedAttachment,
+} from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -29,6 +35,8 @@ import type {
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
   CasesPatchResponse,
+  CaseLinkRequest,
+  RelatedCasesResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -77,6 +85,9 @@ import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
 import { withUsageCounter } from '../usage_counters';
+import { getRelatedCases, linkCases, unlinkCase } from './links';
+import type { CaseRoomResponse, PostFromRoomRequest } from './room';
+import { ensureRoom, postFromRoom } from './room';
 
 /**
  * API for interacting with the cases entities.
@@ -204,6 +215,31 @@ export interface CasesSubClient {
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
    */
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
+  /**
+   * Links the case to other cases, on both sides (a reference each; nothing merged or copied).
+   */
+  linkCases(caseId: string, request: CaseLinkRequest): Promise<RelatedCasesResponse>;
+  /**
+   * Removes a link from both cases.
+   */
+  unlinkCase(caseId: string, targetCaseId: string): Promise<RelatedCasesResponse>;
+  /**
+   * Linked cases and cases sharing an alert with this one, as the caller can see them.
+   */
+  getRelatedCases(caseId: string): Promise<RelatedCasesResponse>;
+  /**
+   * Returns the case's room (an Agent Builder conversation), creating it on first use.
+   */
+  ensureRoom(caseId: string): Promise<CaseRoomResponse>;
+  /**
+   * Posts one room message to the case as a comment. `getCasesClientAs` gives a client that
+   * records the agent as the actor, for agent replies.
+   */
+  postFromRoom(
+    caseId: string,
+    request: PostFromRoomRequest,
+    getCasesClientAs: (actionSource: ActionSource) => Promise<CasesClient>
+  ): Promise<UnifiedAttachment>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -233,6 +269,11 @@ const usageCounterByMethod = {
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
+  linkCases: 'link_cases',
+  unlinkCase: 'unlink_case',
+  getRelatedCases: null,
+  ensureRoom: null,
+  postFromRoom: 'post_from_room',
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -319,6 +360,29 @@ export const createCasesSubClient = (
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
+    linkCases: withUsageCounter(
+      usageCounterByMethod.linkCases,
+      clientArgs,
+      (caseId: string, request: CaseLinkRequest) =>
+        linkCases({ caseId, request }, clientArgs, casesClient)
+    ),
+    unlinkCase: withUsageCounter(
+      usageCounterByMethod.unlinkCase,
+      clientArgs,
+      (caseId: string, targetCaseId: string) =>
+        unlinkCase({ caseId, targetCaseId }, clientArgs, casesClient)
+    ),
+    getRelatedCases: (caseId: string) => getRelatedCases({ caseId }, clientArgs, casesClient),
+    ensureRoom: (caseId: string) => ensureRoom({ caseId }, clientArgs, casesClient),
+    postFromRoom: withUsageCounter(
+      usageCounterByMethod.postFromRoom,
+      clientArgs,
+      (
+        caseId: string,
+        request: PostFromRoomRequest,
+        getCasesClientAs: (actionSource: ActionSource) => Promise<CasesClient>
+      ) => postFromRoom({ caseId, request }, clientArgs, casesClient, getCasesClientAs)
+    ),
   };
 
   return Object.freeze(casesSubClient);

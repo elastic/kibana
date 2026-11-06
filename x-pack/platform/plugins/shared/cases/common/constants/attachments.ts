@@ -35,6 +35,15 @@ export const AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiops.log_rate_analysis'
 
 export const AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE = 'agentBuilder.conversation';
 
+/**
+ * The reference attachment AlertZero registers for an investigation linked to a case. Cases only
+ * counts and groups it; the type itself is owned by the agentic investigations plugin.
+ */
+export const LINKED_INVESTIGATION_ATTACHMENT_TYPE = 'agentic.investigation';
+
+/** A link from one case to another (symmetric: each case holds one). */
+export const CASE_LINK_ATTACHMENT_TYPE = 'cases.case';
+
 export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
 export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discoverSession';
 export const MAP_ATTACHMENT_TYPE = 'map';

@@ -16,8 +16,51 @@ import type { CaseUI } from '../../../common/ui/types';
  */
 export type CaseViewSectionPosition = 'sidebar' | 'related' | 'closeModal';
 
+/** Why something is related to a case. Each Related section computes the reasons it can. */
+export type RelatedByReason =
+  | 'linked'
+  | 'observable'
+  | 'alert'
+  | 'event'
+  | 'dashboard'
+  | 'aiVerdict';
+
+/**
+ * The Related tab's filters. Cases owns the toolbar; each `related` section applies the filters to
+ * its own rows. An empty list means "no filter".
+ */
+export interface RelatedFilters {
+  relatedBy: RelatedByReason[];
+  status: Array<'open' | 'closed'>;
+}
+
+export const EMPTY_RELATED_FILTERS: RelatedFilters = { relatedBy: [], status: [] };
+
+export const isRelatedFilterActive = (filters?: RelatedFilters): boolean =>
+  Boolean(filters && (filters.relatedBy.length > 0 || filters.status.length > 0));
+
+/** True when a row with these reasons and this open or closed state passes the filters. */
+export const matchesRelatedFilters = (
+  row: { reasons: RelatedByReason[]; isClosed: boolean },
+  filters?: RelatedFilters
+): boolean => {
+  if (!filters) return true;
+  if (
+    filters.relatedBy.length > 0 &&
+    !row.reasons.some((reason) => filters.relatedBy.includes(reason))
+  ) {
+    return false;
+  }
+  if (filters.status.length > 0 && !filters.status.includes(row.isClosed ? 'closed' : 'open')) {
+    return false;
+  }
+  return true;
+};
+
 export interface CaseViewSectionProps {
   caseData: CaseUI;
+  /** Present on the Related tab: the active Related by and Status filters. */
+  relatedFilters?: RelatedFilters;
   /** The viewer can update the case (for actions such as linking). */
   canUpdate: boolean;
   /** Reloads the case, for example after a section added an attachment to it. */

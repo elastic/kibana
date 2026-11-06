@@ -487,6 +487,17 @@ export const Settings = lazySchema(() =>
         "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
       ),
     externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted.
+     */
+    agent: z
+      .object({
+        enabled: z.boolean().optional(),
+      })
+      .optional()
+      .describe(
+        "Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted."
+      ),
   })
 );
 export type Settings = z.infer<typeof Settings>;
@@ -979,6 +990,16 @@ export const CaseResponseProperties = lazySchema(() =>
       .describe("The analyst's verdict. Set from the close reason when the case closes; editable."),
     ai_verdict: CaseAiVerdict.optional(),
     source: CaseSource.optional(),
+    /**
+     * The Agent Builder conversation that is the case's room, created the first time someone opens the room.
+     */
+    room_conversation_id: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "The Agent Builder conversation that is the case's room, created the first time someone opens the room."
+      ),
     /**
      * Set while the case is in a status that pauses time tracking.
      */

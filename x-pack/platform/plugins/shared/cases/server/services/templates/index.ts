@@ -16,6 +16,7 @@ import type {
 import { toElasticsearchQuery, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { v4 } from 'uuid';
 import { parse as parseYaml } from 'yaml';
+import { isSystemTemplateId } from '../../../common/utils/system_templates';
 import type {
   CreateTemplateInput,
   ParsedTemplate,
@@ -573,6 +574,9 @@ export class TemplatesService {
   }
 
   async deleteTemplate(templateId: string): Promise<void> {
+    if (isSystemTemplateId(templateId)) {
+      throw Boom.badRequest("Shipped templates can't be deleted. Turn the template off instead.");
+    }
     const latestTemplate = await this._getTemplate(templateId);
 
     if (!latestTemplate) {

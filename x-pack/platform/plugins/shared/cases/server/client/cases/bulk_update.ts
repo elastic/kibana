@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { throwIfClosingWithOpenRequiredTasks } from './required_tasks';
 
 import type {
   SavedObject,
@@ -1010,6 +1011,8 @@ export const bulkUpdate = async (
     );
 
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
+
+    await throwIfClosingWithOpenRequiredTasks({ casesToUpdate, clientArgs, hasPlatinumLicense });
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
     // Owners are collected for both cases that include extended_fields in the request and

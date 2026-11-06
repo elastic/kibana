@@ -2470,6 +2470,12 @@ describe('CasesService', () => {
       'resume_to_status_key',
       'template',
       'access',
+      // Optional, nullable case fields: an old case has none of them.
+      'close_reason',
+      'human_verdict',
+      'ai_verdict',
+      'source',
+      'room_conversation_id',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS,
       CASE_EXTENDED_FIELDS_CONTROLS

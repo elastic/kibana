@@ -33,11 +33,16 @@ import {
   CREATED_ON,
   UNKNOWN_REPORTER,
   EDIT_CASE_NAME_ARIA,
+  BYLINE_OPENED_FROM_ALERTZERO,
+  BYLINE_UPDATED,
 } from '../../../translations';
 import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
+import { useIsRoomAvailable } from '../../room/use_room_availability';
+import { useRoomOpenState } from '../../room/use_room';
+import { ROOM_BUTTON } from '../../room/translations';
 
 /**
  * Returns an element that stays mounted while the settings popover is open. When the settings item
@@ -124,6 +129,9 @@ export const useCaseViewHeader = ({
     };
   }, [caseData.title, permissions.update, onUpdateField]);
 
+  const { agenticEnabled } = useCasesConfig();
+  const isAlertZeroCase = agenticEnabled && caseData.source === 'alertzero';
+
   // Metadata
   const metadata = useMemo((): AppHeaderMetadataItems => {
     // Same precedence as `getUserDisplayName` (used for the participant avatars next to this
@@ -134,6 +142,33 @@ export const useCaseViewHeader = ({
       caseData.createdBy.email ||
       caseData.createdBy.username ||
       UNKNOWN_REPORTER;
+    const incrementalIdItem =
+      typeof caseData.incrementalId === 'number'
+        ? {
+            type: 'text' as const,
+            label: `#${caseData.incrementalId}`,
+            'data-test-subj': 'case-view-incremental-id',
+          }
+        : undefined;
+
+    // The header has three metadata slots; an AlertZero case spends them on the byline the
+    // source badge used to carry, so the badge row stays within what shows without overflow.
+    if (isAlertZeroCase) {
+      const openedItem = {
+        type: 'text' as const,
+        label: BYLINE_OPENED_FROM_ALERTZERO(reporterName, moment(caseData.createdAt).fromNow()),
+        'data-test-subj': 'case-view-byline-opened',
+      };
+      const updatedItem = {
+        type: 'text' as const,
+        label: BYLINE_UPDATED(moment(caseData.updatedAt ?? caseData.createdAt).fromNow()),
+        'data-test-subj': 'case-view-byline-updated',
+      };
+      return incrementalIdItem
+        ? [incrementalIdItem, openedItem, updatedItem]
+        : [openedItem, updatedItem];
+    }
+
     const formattedDate = moment.tz(caseData.createdAt, timeZone).format(dateFormat);
 
     const reportedByItem = {
@@ -147,26 +182,23 @@ export const useCaseViewHeader = ({
       'data-test-subj': 'case-view-created-at',
     };
 
-    if (typeof caseData.incrementalId === 'number') {
-      return [
-        {
-          type: 'text' as const,
-          label: `#${caseData.incrementalId}`,
-          'data-test-subj': 'case-view-incremental-id',
-        },
-        reportedByItem,
-        createdAtItem,
-      ];
-    }
-
-    return [reportedByItem, createdAtItem];
-  }, [caseData.incrementalId, caseData.createdBy, caseData.createdAt, timeZone, dateFormat]);
+    return incrementalIdItem
+      ? [incrementalIdItem, reportedByItem, createdAtItem]
+      : [reportedByItem, createdAtItem];
+  }, [
+    caseData.incrementalId,
+    caseData.createdBy,
+    caseData.createdAt,
+    caseData.updatedAt,
+    isAlertZeroCase,
+    timeZone,
+    dateFormat,
+  ]);
 
   // Back
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);
 
   // Badges
-  const { agenticEnabled } = useCasesConfig();
   const { enabledStatuses, getStatus } = useCaseStatuses();
   const badges = useMemo(
     () =>
@@ -181,7 +213,7 @@ export const useCaseViewHeader = ({
         ...(restrictedCasesAuthorized
           ? { access: { isMenuDisabled: !permissions.update, onAccessChanged } }
           : {}),
-        showSource: agenticEnabled,
+        statusFirst: agenticEnabled,
       }),
     [
       caseData,
@@ -249,6 +281,9 @@ export const useCaseViewHeader = ({
     setIsDeleteModalVisible(true);
   }, []);
 
+  const isRoomAvailable = useIsRoomAvailable();
+  const [isRoomOpen, setRoomOpen] = useRoomOpenState();
+
   const menu = useMemo(
     () =>
       getMenu({
@@ -266,8 +301,14 @@ export const useCaseViewHeader = ({
         onCopyId,
         onOpenDeleteModal,
         runWorkflow: { canRunWorkflow, onOpen: openRunWorkflowModal },
+        ...(isRoomAvailable
+          ? { room: { label: ROOM_BUTTON, onToggle: () => setRoomOpen(!isRoomOpen) } }
+          : {}),
       }),
     [
+      isRoomAvailable,
+      isRoomOpen,
+      setRoomOpen,
       addToChat,
       canRunWorkflow,
       openRunWorkflowModal,

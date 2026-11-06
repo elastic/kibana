@@ -17,6 +17,7 @@ import { patchTaskRoute } from './patch_task_route';
 import { postTaskCommentRoute } from './post_task_comment_route';
 import { postTaskRoute } from './post_task_route';
 import { reorderTasksRoute } from './reorder_tasks_route';
+import { refreshTaskWorkflowRoute, runTaskWorkflowRoute } from './task_workflow_routes';
 
 export const getTaskRoutes = (config: ConfigType) =>
   config.tasks.enabled
@@ -32,5 +33,6 @@ export const getTaskRoutes = (config: ConfigType) =>
         getTaskCommentsRoute,
         postTaskCommentRoute,
         deleteTaskCommentRoute,
+        ...(config.runWorkflows.enabled ? [runTaskWorkflowRoute, refreshTaskWorkflowRoute] : []),
       ]
     : [];

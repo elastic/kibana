@@ -10,6 +10,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiToolTip,
   EuiCallOut,
   EuiModal,
   EuiModalBody,
@@ -35,6 +36,10 @@ export interface CloseCaseModalProps {
   searchPlaceholder?: string;
   /** Rendered under the reasons: the verdict line and plugin sections (agentic cases). */
   children?: React.ReactNode;
+  /** Rendered above the reasons: what must happen before the case can close. */
+  header?: React.ReactNode;
+  /** When set, Close case is disabled and this says what is missing. */
+  confirmDisabledReason?: string;
   closeReasonOptions: Array<EuiSelectableOption<CloseReasonOption>>;
   onClose: () => void;
   onSubmit: () => void;
@@ -55,12 +60,15 @@ export const CloseCaseModal = React.memo<CloseCaseModalProps>(
     title = i18n.CLOSE_CASE_MODAL_TITLE,
     searchPlaceholder = i18n.CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER,
     children,
+    header,
+    confirmDisabledReason,
   }) => (
     <EuiModal onClose={onClose} aria-label={title} data-test-subj="close-case-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        {header}
         {showAlertsDisclaimer ? (
           <>
             <EuiCallOut
@@ -105,9 +113,16 @@ export const CloseCaseModal = React.memo<CloseCaseModalProps>(
         }}
       >
         <EuiButtonEmpty onClick={onClose}>{i18n.CLOSE_CASE_MODAL_CLOSE_BUTTON}</EuiButtonEmpty>
-        <EuiButton onClick={onSubmit} fill data-test-subj="close-case-modal-confirm">
-          {i18n.CLOSE_CASE_MODAL_CONFIRM}
-        </EuiButton>
+        <EuiToolTip content={confirmDisabledReason}>
+          <EuiButton
+            onClick={onSubmit}
+            fill
+            isDisabled={confirmDisabledReason != null}
+            data-test-subj="close-case-modal-confirm"
+          >
+            {i18n.CLOSE_CASE_MODAL_CONFIRM}
+          </EuiButton>
+        </EuiToolTip>
       </EuiModalFooter>
     </EuiModal>
   )

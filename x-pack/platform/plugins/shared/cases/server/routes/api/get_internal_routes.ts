@@ -14,6 +14,7 @@ import { getConnectorsRoute } from './internal/get_connectors';
 import { getCaseUserActionStatsRoute } from './internal/get_case_user_actions_stats';
 import { bulkCreateAttachmentsRoute } from './internal/bulk_create_attachments';
 import { bulkGetCasesRoute } from './internal/bulk_get_cases';
+import { countAttachmentsByTypeRoute } from './internal/count_attachments_by_type';
 import { suggestUserProfilesRoute } from './internal/suggest_user_profiles';
 import type { CaseRoute } from './types';
 import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
@@ -40,6 +41,9 @@ import { createRunWorkflowRoute } from './internal/run_workflow';
 import { getTaskRoutes } from './tasks';
 import { getTaskTemplateRoutes } from './task_templates';
 import { createBulkGetAgentBuilderConversationsRoute } from './internal/bulk_get_agent_builder_conversations';
+import { getAgenticCaseRoutes } from './internal/agentic';
+import type { ActionSource } from '../../../common/types/domain';
+import type { CasesClient } from '../../client';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -49,13 +53,16 @@ export const getInternalRoutes = (
     getSpaceId: (request: KibanaRequest) => string;
     getWorkflowRunContext: (request: KibanaRequest) => Promise<CasesWorkflowRunContext>;
   },
-  getAgentBuilder?: () => Promise<AgentBuilderPluginStart>
+  getAgentBuilder?: () => Promise<AgentBuilderPluginStart>,
+  getCasesClientAs?: (request: KibanaRequest, actionSource: ActionSource) => Promise<CasesClient>
 ) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
     getConnectorsRoute,
     bulkGetCasesRoute,
+    // Counts linked attachments for the cases list's agentic columns (Investigations).
+    ...(config.agentic.enabled ? [countAttachmentsByTypeRoute] : []),
     getCaseUserActionStatsRoute,
     bulkGetAttachmentsRoute,
     bulkDeleteAttachmentsRoute,
@@ -80,4 +87,5 @@ export const getInternalRoutes = (
     ...getTaskRoutes(config),
     ...getTaskTemplateRoutes(config),
     ...(getAgentBuilder ? [createBulkGetAgentBuilderConversationsRoute({ getAgentBuilder })] : []),
+    ...getAgenticCaseRoutes(config, getAgentBuilder ? getCasesClientAs : undefined),
   ] as CaseRoute[];

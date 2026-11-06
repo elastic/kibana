@@ -48,6 +48,32 @@ describe('getBadges', () => {
     expect(badge?.tooltip).toBe('Awaiting vendor · paused 2 hours ago');
   });
 
+  const order = (statusFirst?: boolean) =>
+    getBadges({
+      ...args,
+      caseData: { ...basicCase, totalAlerts: 3, source: 'alertzero' },
+      access: { isMenuDisabled: false, onAccessChanged: jest.fn() },
+      statusFirst,
+    }).map((badge) => badge['data-test-subj']);
+
+  it('puts status and access first for agentic cases so the header never folds them away', () => {
+    expect(order(true)).toEqual([
+      'case-view-status-badge',
+      'case-view-access-badge',
+      'case-view-severity-badge',
+      'case-view-alerts-count-badge',
+    ]);
+  });
+
+  it("keeps main's badge order otherwise", () => {
+    expect(order()).toEqual([
+      'case-view-access-badge',
+      'case-view-severity-badge',
+      'case-view-status-badge',
+      'case-view-alerts-count-badge',
+    ]);
+  });
+
   it('offers no status options when the menu is disabled', () => {
     expect(statusBadge(getBadges({ ...args, isStatusMenuDisabled: true }))?.items).toBeUndefined();
   });

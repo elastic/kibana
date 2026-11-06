@@ -35,6 +35,8 @@ export const CaseTaskTemplateTaskSchema = z.object({
   required: z.boolean(),
   due_within: DueWithinSchema.nullable(),
   subtasks: z.array(CaseTaskTemplateSubtaskSchema),
+  /** A workflow the task runs; copied to the task when the list is applied. */
+  workflow_id: z.string().min(1).nullable().optional(),
 });
 
 export const CaseTaskTemplateAttributesSchema = z.object({

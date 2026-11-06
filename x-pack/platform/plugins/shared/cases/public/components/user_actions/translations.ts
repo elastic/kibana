@@ -137,6 +137,24 @@ export const CHANGED_TASK_STATUS = (title: string, status: string) =>
     defaultMessage: 'marked task "{title}" as {status}',
   });
 
+export const STARTED_TASK_WORKFLOW = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.startedTaskWorkflow', {
+    values: { title },
+    defaultMessage: 'ran the workflow of task "{title}"',
+  });
+
+export const TASK_WORKFLOW_SUCCEEDED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.taskWorkflowSucceeded', {
+    values: { title },
+    defaultMessage: 'completed task "{title}" when its workflow succeeded',
+  });
+
+export const TASK_WORKFLOW_FAILED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.taskWorkflowFailed', {
+    values: { title },
+    defaultMessage: 'recorded that the workflow of task "{title}" failed',
+  });
+
 export const DELETED_TASK = (title: string) =>
   i18n.translate('xpack.cases.caseView.userActions.deletedTask', {
     values: { title },
@@ -344,3 +362,10 @@ export const HUMAN_VERDICT_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.humanVerdictLabel',
   { defaultMessage: 'Human verdict' }
 );
+
+export const OPENED_FROM_ALERTZERO = (count: number) =>
+  i18n.translate('xpack.cases.userActions.openedFromAlertZero', {
+    values: { count },
+    defaultMessage:
+      'opened this case from AlertZero and linked {count, plural, one {# investigation} other {# investigations}}',
+  });

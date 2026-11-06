@@ -189,6 +189,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAllDocumentsAttachedToCase: jest.fn(),
     getUnifiedAttachmentsByTypes: jest.fn().mockResolvedValue([]),
     getCaseAttatchmentStats: jest.fn(),
+    getUnifiedAttachmentCountsByType: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachmentsForDeletion: jest.fn(),
     getCaseAttachmentsForDeletion: jest.fn(),
@@ -289,7 +290,8 @@ export const createCaseTaskServiceMock = (): CaseTaskServiceMock => {
     bulkCreateTasks: jest.fn(),
     getTask: jest.fn(),
     getTasksByCase: jest.fn(),
-    findTasks: jest.fn(),
+    // No tasks by default, so the close-time required-task check passes in unrelated tests.
+    findTasks: jest.fn().mockResolvedValue({ tasks: [], total: 0 }),
     updateTask: jest.fn(),
     deleteTask: jest.fn(),
     deleteTasksByCase: jest.fn(),

@@ -41,6 +41,8 @@ import { bulkDeleteAttachments, bulkDeleteFileAttachments } from './bulk_delete'
 import { addFile, addFileAndGetCase } from './add_file';
 import type { GetFilesResponse } from './get_files';
 import { getFiles } from './get_files';
+import type { CountAttachmentsByTypeArgs } from './count_by_type';
+import { countAttachmentsByType } from './count_by_type';
 import { withUsageCounter } from '../usage_counters';
 
 /**
@@ -99,6 +101,8 @@ export interface AttachmentsSubClient {
    * Lists the files of a case after authorizing the case.
    */
   getFiles(getFilesArgs: GetFilesArgs): Promise<GetFilesResponse>;
+  /** Counts one unified attachment type per visible case. */
+  countByType(args: CountAttachmentsByTypeArgs): Promise<Record<string, number>>;
   /**
    * Full replace. The request must include every field. Returns the updated attachment.
    */
@@ -133,6 +137,7 @@ const usageCounterByMethod = {
   getAll: null,
   get: null,
   getFiles: null,
+  countByType: null,
   update: 'update_attachment',
   updateAndGetCase: 'update_attachment',
   addFile: 'add_file_attachment',
@@ -193,6 +198,8 @@ export const createAttachmentsSubClient = (
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),
     get: (params: GetArgs) => get(params, clientArgs),
     getFiles: (params: GetFilesArgs) => getFiles(params, clientArgs),
+    countByType: (params: CountAttachmentsByTypeArgs) =>
+      countAttachmentsByType(params, clientArgs, casesClient),
     update: withUsageCounter(usageCounterByMethod.update, clientArgs, (params: UpdateArgs) =>
       update(params, clientArgs)
     ),

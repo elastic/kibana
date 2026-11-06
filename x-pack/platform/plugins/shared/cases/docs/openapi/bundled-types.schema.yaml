@@ -3491,6 +3491,13 @@ components:
           example: true
         externalSync:
           $ref: '#/components/schemas/external_sync_settings'
+        agent:
+          type: object
+          description: Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted.
+          properties:
+            enabled:
+              type: boolean
+              example: false
     case_severity:
       type: string
       description: The severity of the case.
@@ -4204,6 +4211,10 @@ components:
           $ref: '#/components/schemas/case_ai_verdict'
         source:
           $ref: '#/components/schemas/case_source'
+        room_conversation_id:
+          type: string
+          nullable: true
+          description: The Agent Builder conversation that is the case's room, created the first time someone opens the room.
         paused_at:
           type: string
           format: date-time

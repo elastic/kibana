@@ -552,6 +552,10 @@ export const AI_VERDICT_COLUMN = i18n.translate('xpack.cases.allCases.column.aiV
   defaultMessage: 'AI verdict',
 });
 
+export const INVESTIGATIONS_COLUMN = i18n.translate('xpack.cases.allCases.column.investigations', {
+  defaultMessage: 'Investigations',
+});
+
 export const SOURCE_LABELS = {
   alertzero: i18n.translate('xpack.cases.allCases.source.alertzero', {
     defaultMessage: 'AlertZero',

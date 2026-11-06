@@ -119,6 +119,8 @@ export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
 export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
+export const INTERNAL_ATTACHMENT_COUNTS_URL =
+  `${CASES_INTERNAL_URL}/attachments/_counts` as const;
 export const INTERNAL_EXTERNAL_SYNC_SERVICE_ACCOUNT_URL =
   `${CASES_INTERNAL_URL}/external_sync/{connector_id}/service_account` as const;
 export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
@@ -131,6 +133,10 @@ export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categorie
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
 export const INTERNAL_CASE_SIMILAR_CASES_URL = `${CASES_INTERNAL_URL}/{case_id}/_similar` as const;
+export const INTERNAL_CASE_LINKS_URL = `${CASES_INTERNAL_URL}/{case_id}/links` as const;
+export const INTERNAL_CASE_LINK_DETAILS_URL = `${CASES_INTERNAL_URL}/{case_id}/links/{target_case_id}` as const;
+export const INTERNAL_CASE_ROOM_URL = `${CASES_INTERNAL_URL}/{case_id}/room` as const;
+export const INTERNAL_CASE_ROOM_POST_URL = `${CASES_INTERNAL_URL}/{case_id}/room/_post` as const;
 export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/custom_fields/{custom_field_id}`;
 export const INTERNAL_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables` as const;
 export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
@@ -158,6 +164,8 @@ export const CASE_TASK_COMMENTS_URL = `${CASE_TASK_DETAILS_URL}/comments` as con
 export const CASE_TASK_COMMENT_DETAILS_URL = `${CASE_TASK_COMMENTS_URL}/{comment_id}` as const;
 export const CASE_TASKS_REORDER_URL = `${CASE_TASKS_URL}/_reorder` as const;
 export const CASE_TASKS_APPLY_TEMPLATE_URL = `${CASE_TASKS_URL}/_apply_template` as const;
+export const CASE_TASK_RUN_WORKFLOW_URL = `${CASE_TASK_DETAILS_URL}/_run_workflow` as const;
+export const CASE_TASK_REFRESH_WORKFLOW_URL = `${CASE_TASK_DETAILS_URL}/_refresh_workflow` as const;
 export const CASES_TASKS_FIND_URL = `${CASES_TASKS_URL}/_find` as const;
 
 /**
@@ -172,6 +180,7 @@ export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bu
 export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
 export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
 export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
+export const INTERNAL_ENSURE_SYSTEM_TEMPLATES_URL = `${CASES_INTERNAL_URL}/system_templates/_ensure` as const;
 
 export const INTERNAL_FIELD_DEFINITIONS_URL = `${CASES_INTERNAL_URL}/field_definitions` as const;
 export const INTERNAL_FIELD_DEFINITION_DETAILS_URL =

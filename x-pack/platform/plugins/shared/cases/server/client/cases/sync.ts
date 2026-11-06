@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type { Case, ExternalSyncConflictStrategy } from '../../../common/types/domain';
-import { UserActionTypes } from '../../../common/types/domain';
+import { CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type { ResolvedExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
 import {
   keepsKibanaValue,
@@ -31,6 +31,7 @@ import {
 import { getLatestPushInfo } from './utils';
 import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
 import { buildMappedFieldsPatch } from './sync_mapped_fields';
+import { hasOpenRequiredTasks } from './required_tasks';
 import * as i18n from './translations';
 
 export interface SyncParams {
@@ -234,6 +235,19 @@ export const sync = async (
       fieldRules,
       defaultStrategy,
     });
+    // Like close by pushing: the incident closing never fails the sync, but the case stays open
+    // while a required task is open. Every other field still syncs.
+    if (
+      builtIn.patch.status === CaseStatuses.closed &&
+      theCase.status !== CaseStatuses.closed &&
+      (await hasOpenRequiredTasks({ caseId, clientArgs }))
+    ) {
+      delete builtIn.patch.status;
+      builtIn.updatedFields = builtIn.updatedFields.filter((field) => field !== 'status');
+      logger.info(
+        `Case ${caseId} stays open: its external incident closed, but required tasks are still open.`
+      );
+    }
     const mapped = await buildMappedFieldsPatch({
       theCase,
       incident,

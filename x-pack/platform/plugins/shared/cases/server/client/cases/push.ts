@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { hasOpenRequiredTasks } from './required_tasks';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
@@ -267,7 +268,11 @@ export const push = async (
       external_url: externalServiceResponse.url,
     };
 
-    const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
+    // A push is never refused for open required tasks (the incident already exists by now); the
+    // case just stays open until they are done.
+    const shouldMarkAsClosed =
+      shouldCloseByPush(myCaseConfigure) &&
+      !(await hasOpenRequiredTasks({ caseId: theCase.id, clientArgs }));
     const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
     const statuses = getConfiguredStatuses({
       configuration: myCaseConfigure.saved_objects[0]?.attributes,

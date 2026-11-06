@@ -37,6 +37,19 @@ import { createCaseError, isSOError } from '../../common/error';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import { applyTaskListToCase, ensureTaskCapacity } from './apply_task_list';
+import {
+  ensureCanReadTaskWorkflows,
+  ensureCanRunTaskWorkflows,
+  ensureTaskCanRunWorkflow,
+  getTaskWorkflowManagement,
+  recordTaskWorkflowStarted,
+  settleRunningTaskWorkflows,
+  settleTaskWorkflowRun,
+  startTaskWorkflow,
+} from './task_workflow';
+
+const WORKFLOW_POLL_INTERVAL_MS = 2000;
+const DEFAULT_WORKFLOW_WAIT_MS = 20_000;
 
 // Bounds the hidden-case lookup in `find`; restricted cases are expected to be few per space.
 const MAX_HIDDEN_CASES_PER_FIND = 1000;
@@ -56,6 +69,12 @@ export interface TasksSubClient {
   getComments(taskId: string): Promise<TaskCommentsResponse>;
   addComment(taskId: string, params: TaskCommentCreateRequest): Promise<CaseTaskComment>;
   deleteComment(taskId: string, commentId: string): Promise<void>;
+  /** Starts the task's workflow as the caller; the task completes only when the run succeeds. */
+  runWorkflow(taskId: string): Promise<CaseTask>;
+  /** Reads the run's outcome: success completes the task, failure records the error. */
+  refreshWorkflowRun(taskId: string): Promise<CaseTask>;
+  /** Runs the workflow and waits up to `timeoutMs` (default 20 s) for its outcome. */
+  runWorkflowAndWait(taskId: string, options?: { timeoutMs?: number }): Promise<CaseTask>;
 }
 
 const asArray = <T>(value: T | T[] | undefined): T[] | undefined =>
@@ -129,6 +148,37 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       entities: [{ id: caseId, owner }],
     });
 
+  const refreshRun = async (taskId: string): Promise<CaseTask> => {
+    const task = await getAuthorizedTask(taskId, WriteOperations.UpdateTask);
+    if (task.workflow_run?.status !== 'running') {
+      return task;
+    }
+    const management = await getTaskWorkflowManagement(clientArgs);
+    await ensureCanReadTaskWorkflows(clientArgs);
+    return settleTaskWorkflowRun({ clientArgs, management, task });
+  };
+
+  const startRun = async (taskId: string): Promise<CaseTask> => {
+    const management = await getTaskWorkflowManagement(clientArgs);
+    const task = await getAuthorizedTask(taskId, WriteOperations.UpdateTask);
+    await ensureCanRunTaskWorkflows(clientArgs);
+    const workflowId = ensureTaskCanRunWorkflow(task);
+    const theCase = await caseService.getCase({ id: task.case_id });
+    const run = await startTaskWorkflow({
+      clientArgs,
+      management,
+      task,
+      workflowId,
+      theCase: {
+        title: theCase.attributes.title,
+        severity: theCase.attributes.severity,
+        status: theCase.attributes.status,
+        tags: theCase.attributes.tags,
+      },
+    });
+    return recordTaskWorkflowStarted(clientArgs, task, run);
+  };
+
   return Object.freeze<TasksSubClient>({
     async create(caseId, params) {
       try {
@@ -193,7 +243,10 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
           taskService.getTasksByCase(caseId),
           taskCommentService.countByCase(caseId),
         ]);
-        return { tasks, comment_counts: commentCounts };
+        return {
+          tasks: await settleRunningTaskWorkflows(clientArgs, tasks),
+          comment_counts: commentCounts,
+        };
       } catch (error) {
         throw createCaseError({
           message: `Failed to get tasks for case ${caseId}: ${error}`,
@@ -273,6 +326,11 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
         await ensureEnabled();
         const { version, ...patch } = decodeWithExcessOrThrowZod(TaskPatchRequestSchema)(params);
         const existing = await getAuthorizedTask(taskId, WriteOperations.UpdateTask);
+        if (patch.status === 'completed' && existing.workflow_run?.status === 'running') {
+          throw Boom.conflict(
+            `Task "${existing.title}" completes when its workflow run succeeds. Wait for the run to end.`
+          );
+        }
         if (patch.assignees !== undefined) {
           await ensureAssignAuthorized(existing.case_id, existing.owner);
         }
@@ -437,6 +495,51 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       } catch (error) {
         throw createCaseError({
           message: `Failed to delete comment ${commentId} from task ${taskId}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    },
+
+    async runWorkflow(taskId) {
+      try {
+        await ensureEnabled();
+        return await startRun(taskId);
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to run the workflow of task ${taskId}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    },
+
+    async refreshWorkflowRun(taskId) {
+      try {
+        await ensureEnabled();
+        return await refreshRun(taskId);
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to read the workflow run of task ${taskId}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    },
+
+    async runWorkflowAndWait(taskId, { timeoutMs = DEFAULT_WORKFLOW_WAIT_MS } = {}) {
+      try {
+        await ensureEnabled();
+        let task = await startRun(taskId);
+        const deadline = Date.now() + timeoutMs;
+        while (task.workflow_run?.status === 'running' && Date.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, WORKFLOW_POLL_INTERVAL_MS));
+          task = await refreshRun(taskId);
+        }
+        return task;
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to run the workflow of task ${taskId}: ${error}`,
           error,
           logger,
         });

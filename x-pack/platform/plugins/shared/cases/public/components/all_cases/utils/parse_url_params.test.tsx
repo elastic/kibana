@@ -37,6 +37,7 @@ describe('parseUrlParams', () => {
         "severity": Array [],
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "source": Array [],
         "status": Array [],
         "statusKey": Array [],
         "tags": Array [],

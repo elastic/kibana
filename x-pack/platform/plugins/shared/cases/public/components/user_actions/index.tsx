@@ -29,6 +29,7 @@ import { useLastPage } from './use_last_page';
 import { useUserPermissions } from './use_user_permissions';
 import { useBuildUserActions } from './hooks/use_build_user_actions';
 import { useBuilderContext } from './hooks/use_builder_context';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { useCommentsList } from './hooks/use_comments_list';
 import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
@@ -123,16 +124,20 @@ export const UserActions = React.memo((props: UserActionsProps) => {
   const visibleInfiniteAttachments = useVisibleConversationAttachments(infiniteLatestAttachments);
   const visibleLastPageAttachments = useVisibleConversationAttachments(lastPageAttachments);
 
+  const { agenticEnabled } = useCasesConfig();
+
   const builtInfiniteActions = useBuildUserActions({
     caseUserActions: infiniteCaseUserActions,
     attachments: visibleInfiniteAttachments,
     ...builderContext,
+    mergeAlertZeroOpening: agenticEnabled,
   });
 
   const builtLastPageActions = useBuildUserActions({
     caseUserActions: lastPageUserActions,
     attachments: visibleLastPageAttachments,
     ...builderContext,
+    mergeAlertZeroOpening: agenticEnabled,
   });
 
   const commentEditor = useMemo(

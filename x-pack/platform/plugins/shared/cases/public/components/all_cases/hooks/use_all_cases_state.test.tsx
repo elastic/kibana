@@ -205,6 +205,7 @@ describe('useAllCasesQueryParams', () => {
         owner: ['cases'],
         category: ['test-category'],
         access: [],
+        source: [],
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },

@@ -20,6 +20,7 @@ import {
 } from './translations';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { caseViewSectionRegistry } from '../../client/case_view_sections';
+import { CASE_LINK_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { type CaseUI } from '../../../common';
 import {
   ATTACHMENT_TAB_ALIASES,
@@ -76,9 +77,13 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         .getVisible('related', caseData)
         .reduce((total, section) => total + (section.getCount?.(caseData) ?? 0), 0)
     : 0;
+  const linkedCasesCount = agenticEnabled
+    ? caseData.comments.filter((comment) => comment.type === CASE_LINK_ATTACHMENT_TYPE).length
+    : 0;
+  // An approximation: a linked case that is also similar counts twice until the tab loads.
   const relatedCount =
-    similarCasesData?.total != null || relatedSectionsCount > 0
-      ? (similarCasesData?.total ?? 0) + relatedSectionsCount
+    similarCasesData?.total != null || relatedSectionsCount + linkedCasesCount > 0
+      ? (similarCasesData?.total ?? 0) + relatedSectionsCount + linkedCasesCount
       : undefined;
 
   const tabs: Tab[] = useMemo(

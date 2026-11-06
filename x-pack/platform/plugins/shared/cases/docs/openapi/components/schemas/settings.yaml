@@ -19,3 +19,10 @@ properties:
     example: true
   externalSync:
     $ref: 'external_sync_settings.yaml'
+  agent:
+    type: object
+    description: Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted.
+    properties:
+      enabled:
+        type: boolean
+        example: false

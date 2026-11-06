@@ -64,6 +64,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     chat: { enabled: true },
     customStatuses: { enabled: false },
     tasks: { enabled: true },
+    agentic: { enabled: true },
     ...overrides,
   };
 }
@@ -220,6 +221,9 @@ describe('Cases Plugin', () => {
       expect(pluginStart).toMatchInlineSnapshot(`
         Object {
           "config": Object {
+            "agentic": Object {
+              "enabled": true,
+            },
             "analytics": Object {
               "index": Object {
                 "enabled": true,

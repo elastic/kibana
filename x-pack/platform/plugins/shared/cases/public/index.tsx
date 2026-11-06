@@ -25,7 +25,10 @@ export type {
   CaseViewSectionPosition,
   CaseViewSectionProps,
   CaseViewCloseModalSectionProps,
+  RelatedByReason,
+  RelatedFilters,
 } from './client/case_view_sections';
+export { matchesRelatedFilters } from './client/case_view_sections';
 
 export type { ICasesDeepLinkId } from './common/navigation';
 export {

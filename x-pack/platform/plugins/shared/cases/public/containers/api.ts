@@ -70,6 +70,8 @@ import {
   getCaseBulkDeleteAttachmentsUrl,
   getCaseTasksUrl,
   getCaseTaskDetailsUrl,
+  getCaseTaskRunWorkflowUrl,
+  getCaseTaskRefreshWorkflowUrl,
   getCaseTasksApplyTemplateUrl,
   getTaskTemplateDetailsUrl,
   getTaskCommentsUrl,
@@ -830,6 +832,16 @@ export const updateTask = async (
 
 export const deleteTask = async (caseId: string, taskId: string): Promise<void> =>
   KibanaServices.get().http.fetch(getCaseTaskDetailsUrl(caseId, taskId), { method: 'DELETE' });
+
+export const runTaskWorkflow = async (caseId: string, taskId: string): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTaskRunWorkflowUrl(caseId, taskId), {
+    method: 'POST',
+  });
+
+export const refreshTaskWorkflow = async (caseId: string, taskId: string): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTaskRefreshWorkflowUrl(caseId, taskId), {
+    method: 'POST',
+  });
 
 export const applyTaskTemplate = async (
   caseId: string,

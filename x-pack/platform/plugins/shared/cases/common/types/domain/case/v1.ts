@@ -232,6 +232,10 @@ export const CaseAttributesSchema = lazySchema(() =>
     human_verdict: CaseVerdictSchema.nullable().optional(),
     ai_verdict: CaseAiVerdictSchema.nullable().optional(),
     source: CaseSourceSchema.nullable().optional(),
+    /**
+     * The Agent Builder conversation that is the case's room; set the first time the room opens.
+     */
+    room_conversation_id: z.string().nullable().optional(),
   })
 );
 

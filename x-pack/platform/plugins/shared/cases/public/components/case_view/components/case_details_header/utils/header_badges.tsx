@@ -32,10 +32,15 @@ interface GetBadgesArgs {
     isMenuDisabled: boolean;
     onAccessChanged: (mode: CaseAccessMode) => void;
   };
-  /** Show where the case came from (agentic cases on). */
-  showSource?: boolean;
+  /** Agentic cases put Status first; otherwise main's order is kept. */
+  statusFirst?: boolean;
 }
 
+/**
+ * Kibana's header shows every badge only when there are at most three, and otherwise folds all but
+ * the first two into "+N". With agentic cases on (more badges), Status and the access boundary come
+ * first so they never fold away.
+ */
 export const getBadges = ({
   caseData,
   currentStatus,
@@ -45,9 +50,31 @@ export const getBadges = ({
   onStatusChanged,
   onSeverityChanged,
   access,
-  showSource = false,
+  statusFirst = false,
 }: GetBadgesArgs): AppHeaderBadge[] => {
   const result: AppHeaderBadge[] = [];
+
+  const statusBadge: AppHeaderBadge = {
+    label: currentStatus.label,
+    onClickAriaLabel: i18n.STATUS_BADGE_ARIA_LABEL(currentStatus.label),
+    color: statuses[currentStatus.category].color as AppHeaderBadge['color'],
+    'data-test-subj': 'case-view-status-badge',
+    // The header badge only takes a string, so the relative time is formatted here.
+    ...(caseData.pausedAt != null && {
+      tooltip: `${PAUSED_TOOLTIP(caseData.pauseReason ?? '')} ${moment(
+        caseData.pausedAt
+      ).fromNow()}`,
+    }),
+  };
+
+  if (!isStatusMenuDisabled) {
+    statusBadge.items = statusOptions.map((status) => ({
+      name: status.label,
+      onClick: () => onStatusChanged(status),
+      'data-test-subj': `case-view-status-dropdown-${status.key}`,
+    }));
+  }
+  result.push(statusBadge);
 
   if (access !== undefined) {
     const isRestricted = caseData.access?.mode === CaseAccessMode.RESTRICTED;
@@ -98,28 +125,6 @@ export const getBadges = ({
   }
   result.push(severityBadge);
 
-  const statusBadge: AppHeaderBadge = {
-    label: currentStatus.label,
-    onClickAriaLabel: i18n.STATUS_BADGE_ARIA_LABEL(currentStatus.label),
-    color: statuses[currentStatus.category].color as AppHeaderBadge['color'],
-    'data-test-subj': 'case-view-status-badge',
-    // The header badge only takes a string, so the relative time is formatted here.
-    ...(caseData.pausedAt != null && {
-      tooltip: `${PAUSED_TOOLTIP(caseData.pauseReason ?? '')} ${moment(
-        caseData.pausedAt
-      ).fromNow()}`,
-    }),
-  };
-
-  if (!isStatusMenuDisabled) {
-    statusBadge.items = statusOptions.map((status) => ({
-      name: status.label,
-      onClick: () => onStatusChanged(status),
-      'data-test-subj': `case-view-status-dropdown-${status.key}`,
-    }));
-  }
-  result.push(statusBadge);
-
   if (caseData.totalAlerts > 0) {
     result.push({
       label: String(caseData.totalAlerts),
@@ -133,18 +138,14 @@ export const getBadges = ({
     });
   }
 
-  if (showSource && caseData.source === 'alertzero') {
-    result.push({
-      label: i18n.SOURCE_BADGE_ALERTZERO,
-      color: 'hollow',
-      'data-test-subj': 'case-view-source-badge',
-      renderCustomBadge: ({ badgeText }) => (
-        <EuiBadge color="hollow" data-test-subj="case-view-source-badge">
-          {badgeText}
-        </EuiBadge>
-      ),
-    });
+  if (statusFirst) {
+    return result;
   }
 
-  return result;
+  // Main's order: access, severity, status, then the alerts count.
+  const [status, ...rest] = result;
+  const severityIndex = rest.findIndex(
+    (badge) => badge['data-test-subj'] === 'case-view-severity-badge'
+  );
+  return [...rest.slice(0, severityIndex + 1), status, ...rest.slice(severityIndex + 1)];
 };

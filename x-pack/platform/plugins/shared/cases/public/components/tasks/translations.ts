@@ -319,3 +319,53 @@ export const NO_DUE_DATE = i18n.translate('xpack.cases.tasks.detail.noDueDate', 
 export const NO_DESCRIPTION = i18n.translate('xpack.cases.tasks.detail.noDescription', {
   defaultMessage: 'No description',
 });
+
+export const FIELD_WORKFLOW = i18n.translate('xpack.cases.tasks.field.workflow', {
+  defaultMessage: 'Workflow',
+});
+
+export const FIELD_WORKFLOW_HELP = i18n.translate('xpack.cases.tasks.field.workflowHelp', {
+  defaultMessage: 'Optional. Running it from the task completes the task when the run succeeds.',
+});
+
+export const FIELD_WORKFLOW_PLACEHOLDER = i18n.translate(
+  'xpack.cases.tasks.field.workflowPlaceholder',
+  { defaultMessage: 'Select a workflow' }
+);
+
+export const RUN_WORKFLOW = i18n.translate('xpack.cases.tasks.runWorkflow', {
+  defaultMessage: 'Run workflow',
+});
+
+export const RUN_WORKFLOW_ARIA = (title: string) =>
+  i18n.translate('xpack.cases.tasks.runWorkflowAria', {
+    values: { title },
+    defaultMessage: 'Run the workflow of task {title}',
+  });
+
+export const WORKFLOW_BADGE_TOOLTIP = i18n.translate('xpack.cases.tasks.workflowBadgeTooltip', {
+  defaultMessage: 'This task runs a workflow. It is done when the run succeeds.',
+});
+
+export const WORKFLOW_UNKNOWN = i18n.translate('xpack.cases.tasks.workflowUnknown', {
+  defaultMessage: 'Workflow',
+});
+
+export const WORKFLOW_RUNNING = i18n.translate('xpack.cases.tasks.workflowRunning', {
+  defaultMessage: 'Running',
+});
+
+export const WORKFLOW_FAILED = i18n.translate('xpack.cases.tasks.workflowFailed', {
+  defaultMessage: 'Workflow failed',
+});
+
+export const WORKFLOW_FAILED_TOOLTIP = (error: string) =>
+  i18n.translate('xpack.cases.tasks.workflowFailedTooltip', {
+    values: { error },
+    defaultMessage: '{error} Run the workflow again, or complete the task by hand.',
+  });
+
+export const DONE_WHILE_RUNNING_TOOLTIP = i18n.translate(
+  'xpack.cases.tasks.doneWhileRunningTooltip',
+  { defaultMessage: 'The task completes when its workflow run succeeds.' }
+);

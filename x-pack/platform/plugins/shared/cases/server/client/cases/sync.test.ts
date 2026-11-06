@@ -132,6 +132,28 @@ describe('sync', () => {
     expect(casesClient.cases.get).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps the case open, still syncing the rest, while a required task is open', async () => {
+    licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    clientArgs.services.taskService.findTasks.mockResolvedValueOnce({
+      tasks: [{ title: 'Record the outcome', required: true, status: 'open' }],
+      total: 1,
+    } as never);
+
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.cases.bulkUpdate).toHaveBeenCalledWith(
+      {
+        cases: [{ id: theCase.id, version: theCase.version, title: 'Renamed in ServiceNow' }],
+      },
+      { origin: 'external_sync' }
+    );
+    expect(userActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: expect.objectContaining({
+        payload: { sync: expect.objectContaining({ updated_fields: ['title'] }) },
+      }),
+    });
+  });
+
   it('keeps fields changed in Kibana since the last push when the strategy is kibana', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,

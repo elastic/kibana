@@ -43,6 +43,7 @@ describe('allCasesUrlStateDeserializer', () => {
             "cases.ef_all_values",
           ],
           "severity": Array [],
+          "source": Array [],
           "status": Array [],
           "statusKey": Array [],
           "tags": Array [],

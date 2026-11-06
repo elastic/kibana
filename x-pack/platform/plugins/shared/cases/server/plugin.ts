@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   type IContextProvider,
   type KibanaRequest,
@@ -29,6 +30,8 @@ import {
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
   registerOwnerPrefix,
 } from '../common/constants';
 
@@ -48,6 +51,7 @@ import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
+import { subscribeRoomAccessToCaseUpdates } from './agentic/room_access_subscriber';
 import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
@@ -56,7 +60,10 @@ import {
   LICENSING_CASE_TASKS_FEATURE,
 } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
-import { createConversationAttachmentType } from './attachment_framework/attachments';
+import {
+  createCaseLinkAttachmentType,
+  createConversationAttachmentType,
+} from './attachment_framework/attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
@@ -88,6 +95,9 @@ import { getExternalSyncRoutes } from './routes/api/external_sync';
 import { LicensingService } from './services/licensing';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
+import type { SystemTemplateDefinition } from './system_templates';
+import { SystemTemplateRegistry, ensureSystemTemplates } from './system_templates';
+import { createEnsureSystemTemplatesRoute } from './routes/api/internal/ensure_system_templates';
 
 export class CasePlugin
   implements
@@ -113,6 +123,8 @@ export class CasePlugin
   private casesEventBus?: CasesEventBus;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
   private casesAnalyticsV2Service?: CasesAnalyticsV2Service;
+  private workflowsManagement?: WorkflowsServerPluginSetup['management'];
+  private readonly systemTemplates = new SystemTemplateRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -258,6 +270,9 @@ export class CasePlugin
 
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
+    this.workflowsManagement = this.caseConfig.runWorkflows.enabled
+      ? plugins.workflowsManagement?.management
+      : undefined;
     const workflowRunService =
       this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
         ? new CasesWorkflowRunService({
@@ -299,6 +314,15 @@ export class CasePlugin
         createConversationAttachmentType(getAgentBuilder)
       );
     }
+
+    if (this.caseConfig.agentic.enabled) {
+      this.unifiedAttachmentTypeRegistry.register(
+        createCaseLinkAttachmentType(async (request) => {
+          const [coreStart] = await core.getStartServices();
+          return this.getCasesClientWithRequest(coreStart, 'rest_api')(request);
+        })
+      );
+    }
     const getActionsClient = async (request: KibanaRequest) => {
       const [, pluginsStart] = await core.getStartServices();
       return pluginsStart.actions.getActionsClientWithRequest(request);
@@ -318,8 +342,23 @@ export class CasePlugin
           workflowRunService && getWorkflowRunContext
             ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
             : undefined,
-          getAgentBuilder
+          getAgentBuilder,
+          async (request, actionSource) => {
+            const [coreStart] = await core.getStartServices();
+            return this.getCasesClientWithRequest(coreStart, 'rest_api')(request, { actionSource });
+          }
         ),
+        ...(this.caseConfig.templates.enabled
+          ? [
+              createEnsureSystemTemplatesRoute({
+                getSpaceId,
+                ensureForSpace: async (spaceId, owner, { addStatuses }) => {
+                  const [coreStart] = await core.getStartServices();
+                  return this.ensureSystemTemplates(coreStart, spaceId, owner, addStatuses);
+                },
+              }),
+            ]
+          : []),
         ...(this.caseConfig.bidirectionalSync.enabled
           ? getExternalSyncRoutes({
               getStartServices: async () => {
@@ -393,6 +432,8 @@ export class CasePlugin
           analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
           attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
           templatesEnabled: this.caseConfig.templates?.enabled === true,
+          tasksEnabled: this.caseConfig.tasks.enabled,
+          agenticEnabled: this.caseConfig.agentic.enabled,
         },
         this.logger
       );
@@ -411,11 +452,63 @@ export class CasePlugin
       registerOwnerPrefix: (owner: string, prefix: string) => {
         registerOwnerPrefix(owner, prefix);
       },
+      registerSystemTemplate: (owner: string, definition: SystemTemplateDefinition) => {
+        this.systemTemplates.register(owner, definition);
+      },
     };
+  }
+
+  private ensureSystemTemplates(
+    core: CoreStart,
+    spaceId: string,
+    owner?: string,
+    addStatuses = true
+  ) {
+    return ensureSystemTemplates({
+      repository: core.savedObjects.createInternalRepository([
+        CASE_TEMPLATE_SAVED_OBJECT,
+        CASE_TASK_TEMPLATE_SAVED_OBJECT,
+        CASE_CONFIGURE_SAVED_OBJECT,
+      ]),
+      spaceId,
+      templates: this.systemTemplates.list(owner),
+      customStatusesEnabled: this.caseConfig.customStatuses.enabled,
+      addStatuses,
+      logger: this.logger,
+    });
+  }
+
+  private async ensureSystemTemplatesInAllSpaces(core: CoreStart) {
+    const { saved_objects: spaces } = await core.savedObjects
+      .createInternalRepository(['space'])
+      .find({ type: 'space', perPage: 1000, fields: ['name'] });
+    const spaceIds = spaces.length > 0 ? spaces.map(({ id }) => id) : [DEFAULT_SPACE_ID];
+    for (const spaceId of spaceIds) {
+      try {
+        await this.ensureSystemTemplates(core, spaceId);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to add shipped case templates to space ${spaceId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
   }
 
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
+
+    if (this.caseConfig.templates.enabled && this.systemTemplates.list().length > 0) {
+      // Never blocks start; spaces created later get the templates from the ensure route.
+      void this.ensureSystemTemplatesInAllSpaces(core).catch((error) =>
+        this.logger.warn(
+          `Failed to add shipped case templates: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      );
+    }
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
@@ -542,6 +635,15 @@ export class CasePlugin
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
 
+    if (this.caseConfig.agentic.enabled && this.caseConfig.chat.enabled && plugins.agentBuilder) {
+      subscribeRoomAccessToCaseUpdates({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        eventBus: this.casesEventBus!,
+        agentBuilder: plugins.agentBuilder,
+        logger: this.logger,
+      });
+    }
+
     if (this.caseConfig.bidirectionalSync.enabled && this.casesEventBus != null) {
       const licensingService = new LicensingService(
         plugins.licensing.license$,
@@ -582,6 +684,8 @@ export class CasePlugin
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
       casesEventBus: this.casesEventBus,
+      workflowsManagement: this.workflowsManagement,
+      agentBuilder: this.caseConfig.chat.enabled ? plugins.agentBuilder : undefined,
       closeReasonValidator:
         this.closeReasonValidators.size > 0
           ? (closeReason, owner, request) => {

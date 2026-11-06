@@ -26,6 +26,10 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface TemplatesSubClient {
   getAllTemplates(params: TemplatesFindRequest): Promise<TemplatesFindResponse>;
+  /** Whether the caller may read the owner's templates; gates writing shipped templates. */
+  canReadOwnerTemplates(owner: string): Promise<boolean>;
+  /** Whether the caller may change the owner's Cases settings; gates adding shipped statuses. */
+  canUpdateOwnerConfiguration(owner: string): Promise<boolean>;
   getTemplate(
     templateId: string,
     version?: string,
@@ -53,6 +57,8 @@ export interface TemplatesSubClient {
  */
 const usageCounterByMethod = {
   getAllTemplates: null,
+  canReadOwnerTemplates: null,
+  canUpdateOwnerConfiguration: null,
   getTemplate: null,
   createTemplate: 'create_template',
   updateTemplate: 'update_template',
@@ -141,6 +147,20 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
       }
 
       return templatesService.getAllTemplates({ ...params, owner });
+    },
+
+    canReadOwnerTemplates: async (owner: string) => {
+      const { authorizedOwners } = await authorization.getAuthorizationFilter(
+        Operations.findTemplates
+      );
+      return !authorizedOwners || authorizedOwners.includes(owner);
+    },
+
+    canUpdateOwnerConfiguration: async (owner: string) => {
+      const { authorizedOwners } = await authorization.getAuthorizationFilter(
+        Operations.updateConfiguration
+      );
+      return !authorizedOwners || authorizedOwners.includes(owner);
     },
 
     getTemplate: async (

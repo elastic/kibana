@@ -133,6 +133,7 @@ const buildFullAttributes = (): {
   extended_fields: { riskScore_as_long: '42' },
   // Server-owned and telemetry-only: `buildCaseDoc` does not emit it, so Layer 1 stays unaffected.
   extract_observables_source: 'rule',
+  room_conversation_id: null,
 });
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>
@@ -223,7 +224,11 @@ describe('case mapping covers every doc-builder field', () => {
  * exactly what this layer exists to prevent.
  */
 const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
-  // Empty. (`owner` is mirrored at `case.owner` in addition to its
+  [
+    'room_conversation_id',
+    'Plumbing: the id of the case room conversation, not an analytics dimension.',
+  ],
+  // (`owner` is mirrored at `case.owner` in addition to its
   // top-level DLS copy, so it satisfies the Layer 2 mirror directly.)
   // The intentional divergences are all covered by an opaque
   // (`enabled: false`) or `dynamic: true` parent in v2 and caught by

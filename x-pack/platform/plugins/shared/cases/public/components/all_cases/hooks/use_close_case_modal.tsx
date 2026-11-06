@@ -21,6 +21,14 @@ import type { CaseUI } from '../../../../common/ui/types';
 import { useCasesConfig } from '../../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { CloseOutcome } from '../components/close_outcome';
+import { useCasesFeatures } from '../../../common/use_cases_features';
+import { useGetCaseTasks } from '../../../containers/use_case_tasks';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import {
+  REQUIRED_TASKS_MISSING,
+  RequiredTasksCallout,
+  isOpenRequiredTask,
+} from '../components/required_tasks_callout';
 
 const closeCaseTitle = (incrementalId?: number | null) =>
   incrementalId != null
@@ -100,6 +108,16 @@ export const useCloseCaseModal = ({
     [initialCloseReasonOptions]
   );
   const [isCloseCaseModalVisible, setIsCloseCaseModalVisible] = useState(false);
+  const { tasksAuthorized } = useCasesFeatures();
+  const { permissions } = useCasesContext();
+  // The server refuses to close with an open required task; the modal says which ones up front.
+  const { data: caseTasks } = useGetCaseTasks(caseData?.id ?? '', {
+    enabled: isCloseCaseModalVisible && tasksAuthorized && caseData != null,
+  });
+  const openRequiredTasks = useMemo(
+    () => (caseData ? (caseTasks?.tasks ?? []).filter(isOpenRequiredTask) : []),
+    [caseData, caseTasks?.tasks]
+  );
   const [closeReasonOptions, setCloseReasonOptions] = useState<
     Array<EuiSelectableOption<CloseReasonOption>>
   >(() => createCloseReasonOptions());
@@ -158,6 +176,18 @@ export const useCloseCaseModal = ({
         onSubmit={onSubmit}
         onCloseReasonOptionsChange={onCloseReasonOptionsChange}
         showAlertsDisclaimer={canSyncCloseReasonToAlerts}
+        header={
+          caseData ? (
+            <RequiredTasksCallout
+              caseId={caseData.id}
+              tasks={openRequiredTasks}
+              canUpdate={permissions.update}
+            />
+          ) : undefined
+        }
+        confirmDisabledReason={
+          openRequiredTasks.length > 0 ? REQUIRED_TASKS_MISSING(openRequiredTasks.length) : undefined
+        }
         {...(agenticEnabled && !canSyncCloseReasonToAlerts
           ? {
               // From the case view, list rows, and bulk actions alike: no alerts are involved.

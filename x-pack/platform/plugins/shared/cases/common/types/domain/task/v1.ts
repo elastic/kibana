@@ -16,6 +16,17 @@ export const CaseTaskAssigneeSchema = z.object({
   uid: z.string(),
 });
 
+export const CaseTaskWorkflowRunStatusSchema = z.enum(['running', 'succeeded', 'failed']);
+
+/** The last run of the task's workflow. The task completes only when a run succeeds. */
+export const CaseTaskWorkflowRunSchema = z.object({
+  execution_id: z.string(),
+  status: CaseTaskWorkflowRunStatusSchema,
+  started_at: z.string(),
+  finished_at: z.string().nullable(),
+  error: z.string().nullable().optional(),
+});
+
 export const CaseTaskAttributesSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -25,13 +36,16 @@ export const CaseTaskAttributesSchema = z.object({
   priority: CaseTaskPrioritySchema,
   assignees: z.array(CaseTaskAssigneeSchema),
   due_date: z.string().nullable(),
-  /** Flagged by the SOP author; shown to analysts, not enforced yet. */
+  /** Required tasks must be finished (completed or cancelled) before the case can close. */
   required: z.boolean(),
   started_at: z.string().nullable(),
   completed_at: z.string().nullable(),
   sort_order: z.number(),
   /** The task list this task was created from, if any. */
   template_id: z.string().nullable(),
+  /** Stored unmapped; tasks written before workflows existed have neither field. */
+  workflow_id: z.string().nullable().optional(),
+  workflow_run: CaseTaskWorkflowRunSchema.nullable().optional(),
   owner: z.string(),
   created_at: z.string(),
   created_by: UserSchema,
@@ -49,6 +63,8 @@ export const CaseTasksSchema = z.array(CaseTaskSchema);
 export type CaseTaskStatus = z.infer<typeof CaseTaskStatusSchema>;
 export type CaseTaskPriority = z.infer<typeof CaseTaskPrioritySchema>;
 export type CaseTaskAssignee = z.infer<typeof CaseTaskAssigneeSchema>;
+export type CaseTaskWorkflowRunStatus = z.infer<typeof CaseTaskWorkflowRunStatusSchema>;
+export type CaseTaskWorkflowRun = z.infer<typeof CaseTaskWorkflowRunSchema>;
 export type CaseTaskAttributes = z.infer<typeof CaseTaskAttributesSchema>;
 export type CaseTask = z.infer<typeof CaseTaskSchema>;
 export type CaseTasks = z.infer<typeof CaseTasksSchema>;

@@ -18,10 +18,14 @@ import {
 import * as hooks from '../../containers/use_case_tasks';
 import { CaseViewTasks } from './case_view_tasks';
 import { orderTasks } from './tasks_table';
+import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 
 jest.mock('../../containers/use_case_tasks');
 jest.mock('../case_view/components/sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => null,
+}));
+jest.mock('../workflows/use_run_case_workflow', () => ({
+  useCanRunCaseWorkflow: jest.fn(() => false),
 }));
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles', () => ({
   useBulkGetUserProfiles: () => ({ data: new Map() }),
@@ -66,6 +70,10 @@ const tasks = [
 
 const mockedHooks = hooks as jest.Mocked<typeof hooks>;
 const updateTask = jest.fn();
+const runTaskWorkflow = jest.fn();
+const mockedUseCanRunCaseWorkflow = useCanRunCaseWorkflow as jest.MockedFunction<
+  typeof useCanRunCaseWorkflow
+>;
 const refetch = jest.fn();
 
 const mockTasksQuery = (overrides: Partial<ReturnType<typeof hooks.useGetCaseTasks>> = {}) =>
@@ -94,6 +102,64 @@ describe('CaseViewTasks', () => {
       mutateAsync: jest.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof hooks.useCreateTask>);
+    mockedHooks.useRunTaskWorkflow.mockReturnValue({
+      mutate: runTaskWorkflow,
+      isLoading: false,
+    } as unknown as ReturnType<typeof hooks.useRunTaskWorkflow>);
+    mockedHooks.useGetTaskWorkflowOptions.mockReturnValue({
+      data: [{ id: 'wf-1', name: 'Isolate host' }],
+      isLoading: false,
+    } as unknown as ReturnType<typeof hooks.useGetTaskWorkflowOptions>);
+    mockedUseCanRunCaseWorkflow.mockReturnValue(false);
+  });
+
+  describe('tasks that run a workflow', () => {
+    const workflowTask = (overrides: Partial<CaseTask> = {}) =>
+      task({ id: 'wf-task', title: 'Isolate the host', workflow_id: 'wf-1', ...overrides });
+
+    it('offers Run workflow to people who can run workflows', async () => {
+      mockedUseCanRunCaseWorkflow.mockReturnValue(true);
+      mockTasksQuery({ data: { tasks: [workflowTask()], comment_counts: {} } });
+      renderWithTestingProviders(<CaseViewTasks caseId="case-1" />);
+
+      expect(screen.getByTestId('cases-task-workflow-wf-task')).toHaveTextContent('Isolate host');
+      await userEvent.click(screen.getByTestId('cases-task-run-workflow-wf-task'));
+      expect(runTaskWorkflow).toHaveBeenCalledWith('wf-task');
+    });
+
+    it('shows a running run and keeps the task from being checked by hand', () => {
+      mockedUseCanRunCaseWorkflow.mockReturnValue(true);
+      mockTasksQuery({
+        data: {
+          tasks: [
+            workflowTask({
+              status: 'in_progress',
+              workflow_run: {
+                execution_id: 'exec-1',
+                status: 'running',
+                started_at: '2026-11-06T00:00:00.000Z',
+                finished_at: null,
+              },
+            }),
+          ],
+          comment_counts: {},
+        },
+      });
+      renderWithTestingProviders(<CaseViewTasks caseId="case-1" />);
+
+      expect(screen.getByTestId('cases-task-workflow-status-wf-task')).toHaveTextContent(
+        'Running'
+      );
+      expect(screen.getByTestId('cases-task-done-wf-task')).toBeDisabled();
+      expect(screen.queryByTestId('cases-task-run-workflow-wf-task')).not.toBeInTheDocument();
+    });
+
+    it('hides Run workflow without the privilege to run workflows', () => {
+      mockTasksQuery({ data: { tasks: [workflowTask()], comment_counts: {} } });
+      renderWithTestingProviders(<CaseViewTasks caseId="case-1" />);
+
+      expect(screen.queryByTestId('cases-task-run-workflow-wf-task')).not.toBeInTheDocument();
+    });
   });
 
   it('orders root tasks by sort order with sub-tasks under their parent', () => {

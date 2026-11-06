@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import type { CaseTask } from '../../common/types/domain/task/v1';
 import type { taskApiV1 } from '../../common/types/api';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
@@ -21,6 +24,8 @@ import {
   getCaseTasks,
   getTaskComments,
   getTaskTemplates,
+  refreshTaskWorkflow,
+  runTaskWorkflow,
   updateTask,
   updateTaskTemplate,
 } from './api';
@@ -104,6 +109,63 @@ export const useApplyTaskTemplate = (caseId: string) =>
     (templateId: string) => applyTaskTemplate(caseId, templateId),
     i18n.TASK_LIST_APPLIED
   );
+
+export const useRunTaskWorkflow = (caseId: string) =>
+  useTaskMutation(
+    caseId,
+    casesMutationsKeys.runTaskWorkflow,
+    (taskId: string) => runTaskWorkflow(caseId, taskId),
+    i18n.TASK_WORKFLOW_STARTED
+  );
+
+const WORKFLOW_RUN_POLL_MS = 3000;
+
+/**
+ * While a task's workflow is running, reads its outcome every few seconds; the server completes
+ * the task when the run succeeds, so the tasks list is reloaded once any run settles.
+ */
+export const usePollTaskWorkflowRuns = (caseId: string, tasks: CaseTask[] | undefined) => {
+  const queryClient = useQueryClient();
+  const { permissions } = useCasesContext();
+  const { canReadWorkflow } = useWorkflowsCapabilities();
+  // Reading a run's outcome needs Cases update and the workflows read privilege; anyone else
+  // would poll a 403 forever and just sees the outcome when the tasks list reloads.
+  const canPoll = permissions.update && canReadWorkflow;
+  const runningIds = (canPoll ? tasks ?? [] : [])
+    .filter((task) => task.workflow_run?.status === 'running')
+    .map(({ id }) => id)
+    .join(',');
+
+  useEffect(() => {
+    if (!runningIds) {
+      return;
+    }
+    const interval = setInterval(async () => {
+      const results = await Promise.allSettled(
+        runningIds.split(',').map((taskId) => refreshTaskWorkflow(caseId, taskId))
+      );
+      const settled = results.some(
+        (result) => result.status === 'fulfilled' && result.value.workflow_run?.status !== 'running'
+      );
+      if (settled) {
+        queryClient.invalidateQueries(casesQueriesKeys.caseTasks(caseId));
+        queryClient.invalidateQueries(casesQueriesKeys.caseView());
+      }
+    }, WORKFLOW_RUN_POLL_MS);
+    return () => clearInterval(interval);
+  }, [caseId, queryClient, runningIds]);
+};
+
+/** Enabled workflows a task can name, for the task flyout's Workflow field. */
+export const useGetTaskWorkflowOptions = ({ enabled }: { enabled: boolean }) => {
+  const api = useWorkflowsApi();
+  return useQuery({
+    queryKey: [...casesQueriesKeys.all, 'task-workflow-options'],
+    queryFn: () => api.getWorkflows({ size: 100, enabled: [true] }),
+    enabled,
+    select: (list) => list.results.map(({ id, name }) => ({ id, name })),
+  });
+};
 
 const useTaskTemplateMutation = <TVariables>(
   mutationKey: readonly string[],

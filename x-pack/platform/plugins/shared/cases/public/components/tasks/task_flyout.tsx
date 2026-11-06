@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,7 +32,12 @@ import type { taskApiV1 } from '../../../common/types/api';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { useCreateTask, useUpdateTask } from '../../containers/use_case_tasks';
+import {
+  useCreateTask,
+  useGetTaskWorkflowOptions,
+  useUpdateTask,
+} from '../../containers/use_case_tasks';
+import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 import { severities } from '../severity/config';
 import { TaskAssigneesField } from './task_assignees_field';
 import { DueWithinField, dueDateFromDraft, type DueWithinDraft } from './due_within_field';
@@ -49,6 +55,7 @@ interface TaskFormState {
   dueWithin: DueWithinDraft;
   required: boolean;
   assignees: CaseTask['assignees'];
+  workflowId: string | null;
 }
 
 /** Expresses an existing deadline as the largest whole unit that still fits, so an edit round-trips. */
@@ -69,6 +76,7 @@ const fromTask = (task?: CaseTask): TaskFormState => ({
   dueWithin: dueWithinFromDate(task?.due_date),
   required: task?.required ?? false,
   assignees: task?.assignees ?? [],
+  workflowId: task?.workflow_id ?? null,
 });
 
 export interface TaskFlyoutProps {
@@ -87,6 +95,10 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
   const canAssign = permissions.assign && caseAssignmentAuthorized;
   const { mutateAsync: createTask, isLoading: isCreating } = useCreateTask(caseId);
   const { mutateAsync: updateTask, isLoading: isUpdating } = useUpdateTask(caseId);
+  const canRunWorkflow = useCanRunCaseWorkflow();
+  const { data: workflowOptions = [], isLoading: isLoadingWorkflows } = useGetTaskWorkflowOptions({
+    enabled: canRunWorkflow,
+  });
 
   const [initialForm] = useState<TaskFormState>(() => fromTask(task));
   const [form, setForm] = useState<TaskFormState>(initialForm);
@@ -115,6 +127,8 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
           : dueDateFromDraft(form.dueWithin),
       required: form.required,
       ...(canAssign ? { assignees: form.assignees } : {}),
+      // Only people who can run workflows pick one; the field is left as it was otherwise.
+      ...(canRunWorkflow ? { workflow_id: form.workflowId } : {}),
     };
     if (task) {
       await updateTask({
@@ -135,6 +149,7 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
     parentTask?.id,
     task,
     updateTask,
+    canRunWorkflow,
   ]);
 
   return (
@@ -210,6 +225,31 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
             onChange={(dueWithin) => setField('dueWithin', dueWithin)}
             dataTestSubj="cases-task-due-within"
           />
+          {canRunWorkflow && (
+            <EuiFormRow label={i18n.FIELD_WORKFLOW} helpText={i18n.FIELD_WORKFLOW_HELP} fullWidth>
+              <EuiComboBox
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                isLoading={isLoadingWorkflows}
+                placeholder={i18n.FIELD_WORKFLOW_PLACEHOLDER}
+                options={workflowOptions.map(({ id, name }) => ({ label: name, value: id }))}
+                selectedOptions={
+                  form.workflowId
+                    ? [
+                        {
+                          label:
+                            workflowOptions.find(({ id }) => id === form.workflowId)?.name ??
+                            form.workflowId,
+                          value: form.workflowId,
+                        },
+                      ]
+                    : []
+                }
+                onChange={(selected) => setField('workflowId', selected[0]?.value ?? null)}
+                data-test-subj="cases-task-workflow"
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow label={i18n.REQUIRED} helpText={i18n.REQUIRED_HELP} fullWidth>
             <EuiSwitch
               label={i18n.REQUIRED}

@@ -69,6 +69,8 @@ export interface GetCasesColumn {
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
   disabledCases?: Set<string>;
+  /** Linked investigations per case id, for the Investigations column (agentic cases). */
+  linkedInvestigationCounts?: Record<string, number>;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -85,6 +87,7 @@ export const useCasesColumns = ({
   disableActions = false,
   selectedColumns,
   disabledCases,
+  linkedInvestigationCounts,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -423,8 +426,23 @@ export const useCasesColumns = ({
           getEmptyCellValue()
         ),
     };
+    if (casesColumnsConfig.linkedInvestigations) {
+      dict.linkedInvestigations = {
+        field: casesColumnsConfig.linkedInvestigations.field,
+        name: casesColumnsConfig.linkedInvestigations.name,
+        width: '9em',
+        render: (_: unknown, theCase: CaseUI) => {
+          const count = linkedInvestigationCounts?.[theCase.id] ?? 0;
+          return count > 0 ? (
+            <span data-test-subj={`case-table-column-investigations-${theCase.id}`}>{count}</span>
+          ) : (
+            getEmptyCellValue()
+          );
+        },
+      };
+    }
     return dict;
-  }, [casesColumnsConfig]);
+  }, [casesColumnsConfig, linkedInvestigationCounts]);
 
   const allColumnsDict = useMemo(
     () => ({

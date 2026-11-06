@@ -22,6 +22,7 @@ export * from './template/latest';
 export * from './task/latest';
 export * from './field_definition/latest';
 export * from './external_sync/latest';
+export * from './case_link/latest';
 export type * from './workflow/latest';
 
 // V1

@@ -15,10 +15,21 @@ describe('task routes', () => {
     const disabled = ConfigSchema.validate({ tasks: { enabled: false } });
 
     const routes = [...getTaskRoutes(enabled), ...getTaskTemplateRoutes(enabled)];
-    expect(routes).toHaveLength(16);
+    expect(routes).toHaveLength(18);
     expect(routes.every((route) => route.routerOptions?.access === 'internal')).toBe(true);
 
     expect(getTaskRoutes(disabled)).toEqual([]);
     expect(getTaskTemplateRoutes(disabled)).toEqual([]);
+  });
+
+  it('adds the task workflow routes only when running workflows from cases is enabled', () => {
+    const withoutWorkflows = ConfigSchema.validate({
+      tasks: { enabled: true },
+      runWorkflows: { enabled: false },
+    });
+    const paths = getTaskRoutes(withoutWorkflows).map((route) => route.path);
+
+    expect(paths).toHaveLength(11);
+    expect(paths.some((path) => path.endsWith('_run_workflow'))).toBe(false);
   });
 });

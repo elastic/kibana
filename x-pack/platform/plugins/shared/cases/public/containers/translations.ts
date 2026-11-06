@@ -129,6 +129,10 @@ export const TASK_LIST_APPLIED = i18n.translate('xpack.cases.containers.tasks.li
   defaultMessage: 'Task list applied',
 });
 
+export const TASK_WORKFLOW_STARTED = i18n.translate('xpack.cases.containers.tasks.workflowStarted', {
+  defaultMessage: 'Workflow started. The task is done when the run succeeds.',
+});
+
 export const TASK_LIST_SAVED = i18n.translate('xpack.cases.containers.tasks.listSaved', {
   defaultMessage: 'Task list saved',
 });

@@ -25,6 +25,7 @@ import {
   modelVersion14,
   modelVersion15,
   modelVersion16,
+  modelVersion17,
 } from '.';
 
 describe('Model versions', () => {
@@ -417,6 +418,17 @@ describe('Model versions', () => {
             source: { type: 'keyword' },
             ai_verdict: { properties: { verdict: { type: 'keyword' } } },
           },
+        },
+      ]);
+    });
+  });
+
+  describe('version 17', () => {
+    it('maps the room conversation id, with no backfill', () => {
+      expect(modelVersion17.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: { room_conversation_id: { type: 'keyword' } },
         },
       ]);
     });

@@ -44,6 +44,17 @@ export const createCreateTaskUserActionBuilder: UserActionBuilder = (params) => 
 export const createUpdateTaskUserActionBuilder: UserActionBuilder = (params) => {
   const { payload } = params.userAction as SnakeToCamelCase<UpdateTaskUserAction>;
   const statusChange = payload.changedFields.find((change) => change.field === 'status');
+  const runChange = payload.changedFields.find((change) => change.field === 'workflow_run');
+  const runStatus = (runChange?.newValue as { status?: string } | null | undefined)?.status;
+  if (runStatus === 'running') {
+    return build(i18n.STARTED_TASK_WORKFLOW(payload.taskTitle), 'play')(params);
+  }
+  if (runStatus === 'succeeded') {
+    return build(i18n.TASK_WORKFLOW_SUCCEEDED(payload.taskTitle), 'checkInCircleFilled')(params);
+  }
+  if (runStatus === 'failed') {
+    return build(i18n.TASK_WORKFLOW_FAILED(payload.taskTitle), 'warning')(params);
+  }
   const status = STATUS_LABELS[statusChange?.newValue as CaseTaskStatus];
   return build(
     status
