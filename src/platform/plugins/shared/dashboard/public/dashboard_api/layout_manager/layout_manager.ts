@@ -753,17 +753,20 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
 
 const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
   const newLayout: FlexLayoutData = {};
-  Object.keys(layout.pinnedPanels).forEach((panelId) => {
+  Object.keys(layout.pinnedPanels).forEach((panelId, index) => {
     const panel = layout.pinnedPanels[panelId];
     const basePanel = {
       id: panelId,
-      grow: panel.grow,
-      order: panel.order,
+      grow: panel.grow ?? false,
+      order: panel.order ?? index,
       width: panel.width,
     };
     newLayout[panelId] = {
       ...basePanel,
       type: 'panel',
+      resizeOptions: {
+        minWidth: 224,
+      },
     };
   });
   return newLayout;
