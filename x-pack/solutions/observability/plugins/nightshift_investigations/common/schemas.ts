@@ -229,14 +229,16 @@ const significantEventUuidSchema = z
   .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen');
 
 /**
- * Deliberately open apart from `event_uuid`. The significant events plugin owns the payload it
- * sends, and this plugin cannot depend on it, so enumerating its fields here would be a hand-kept
- * copy of another plugin's contract — one that starts rejecting their investigations the day they
- * add a field. Only the key with a hazard attached is constrained; the bounds on key count and key
- * length stay, so an open context is still not an unbounded one.
+ * Deliberately open apart from fields this plugin consumes. The significant events plugin owns the
+ * rest of the payload, so enumerating every field here would be a hand-kept copy of another
+ * plugin's contract. The bounds on key count and key length keep an open context bounded.
  */
 export const freeFormContextSchema = z
-  .looseObject({ event_uuid: significantEventUuidSchema.optional() })
+  .looseObject({
+    event_uuid: significantEventUuidSchema.optional(),
+    event_id: z.string().trim().min(1).max(500).optional(),
+    source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
+  })
   .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
   .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
     message: 'context has a key longer than 128 characters',

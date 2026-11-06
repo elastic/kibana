@@ -72,6 +72,7 @@ Use the warehouse's concrete terminal-event and Nightshift silver table names. P
 `execution_id` and `run_id` columns while consumers migrate.
 
 An alert-triggered investigation joins to its originating pipeline through
-`context.source_workflow_execution_id` and to its alert through `context.event_id`. Investigation
-lifecycle telemetry should expose those context fields in its warehouse model alongside the
-investigation's own workflow execution ID.
+`source_workflow_execution_id` and to its alert through `event_id` on the investigation lifecycle
+trigger payloads. Their `workflow_execution_id` is the investigation workflow's own execution ID;
+`execution_id` remains its deprecated alias. The correlation fields are copied from the
+investigation's persisted context rather than supplied by lifecycle route input.

@@ -2705,6 +2705,36 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
   });
 });
 
+describe('NightshiftInvestigationsClient.getLifecycleCorrelation()', () => {
+  it('reads significant-event join keys from the bound investigation execution', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      spaceId: SPACE_ID,
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      effectiveIdentity: INVESTIGATOR_IDENTITY,
+      context: {
+        inputs: {
+          investigation_id: 'inv-1',
+          context: {
+            event_id: 'significant-event-1',
+            source_workflow_execution_id: 'discovery-execution-1',
+          },
+        },
+      },
+    });
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: BOUND_WORKFLOW_ID,
+      definition: BOUND_DEFINITION,
+    });
+
+    await expect(makeClient().getLifecycleCorrelation('inv-1', 'exec-1')).resolves.toEqual({
+      event_id: 'significant-event-1',
+      source_workflow_execution_id: 'discovery-execution-1',
+    });
+  });
+});
+
 describe('NightshiftInvestigationsClient notification destinations', () => {
   const destination = {
     type: 'slack',
