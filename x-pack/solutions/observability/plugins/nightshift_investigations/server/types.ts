@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
+import type {
+  AlertingServerSetup as AlertingV2ServerSetup,
+  AlertingServerStart as AlertingV2ServerStart,
+} from '@kbn/alerting-v2-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -37,6 +40,8 @@ import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
   allowed: boolean;
+  /** Configured daily investigation limit when the callback knows it (used in Slack notices). */
+  limit?: number;
   /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
   release?: () => Promise<void>;
 }
@@ -63,6 +68,7 @@ export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   alerting?: AlertingServerSetup;
+  alertingVTwo?: AlertingV2ServerSetup;
   /**
    * Stores investigations as conversations. Without it investigations are unavailable.
    */

@@ -48,6 +48,24 @@ time, JS errors and failed HTTP requests, its Core Web Vitals, and page loads an
 time, from `GET /internal/digital_experience/applications/{serviceName}/overview`. Without `source`,
 the page shows the Classic RUM application.
 
+The EDOT Browser Overview can be narrowed by environment and by **Browser**, **OS**, **Device**,
+**Country** and **Page**, all kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`).
+`browser`, `os` and `country` are the Sessions tab's own params, so the tab links carry them over.
+
+- **Values:** each filter lists its ten most used values with their page loads in the time range,
+  environment and the other selected filters, but not its own selection, so its other values stay
+  selectable. A filter without values, e.g. the country when the collector does no GeoIP processing,
+  is hidden unless it is selected.
+- **Fields:** the raw documents have no field per dimension, so browser, OS, device and country read
+  the alternatives the sessions transform reads (`SESSION_ATTRIBUTE_FIELDS` in
+  `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
+  runtime field. The page is `attributes.url.full`.
+- **Scope:** browser, OS, device and country narrow every panel of the Overview: the KPIs, Core Web
+  Vitals and trends (`/overview`), the pages, breakdowns and clicks (`/usage`) and the top errors
+  (`/errors`, whose tab has no filters). Web vitals, errors and clicks carry no page URL yet, and an
+  HTTP request's `url.full` is the URL requested, so the page narrows the page loads, with their
+  load time, trend, pages and breakdowns only; the page says so while a page is selected.
+
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
 A tab of EDOT Browser applications only, as sessions are built from EDOT Browser data (see
@@ -75,7 +93,9 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 - **Summary:** duration, page views, clicks and errors; when, who, browser and OS, location, entry and
   exit pages; and the session's Core Web Vitals.
 - **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
-  the page (its counts in a tooltip) and a marker per error.
+  the page and a marker per error. Selecting a segment scrolls to that visit.
+- **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
+  vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions

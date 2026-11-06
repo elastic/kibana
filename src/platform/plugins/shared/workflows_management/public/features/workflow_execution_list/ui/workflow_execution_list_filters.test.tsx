@@ -90,6 +90,53 @@ describe('ExecutionListFilters', () => {
     });
   });
 
+  it('filters by execution name while keeping the other filters', async () => {
+    const onFiltersChange = jest.fn();
+    const filters = {
+      statuses: [ExecutionStatus.COMPLETED],
+      executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: ['user-1'],
+    };
+    renderComponent({ filters, onFiltersChange });
+    await openPopover();
+
+    fireEvent.change(screen.getByLabelText('Filter by execution name'), {
+      target: { value: 'production' },
+    });
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...filters, runName: 'production' });
+  });
+
+  it('keeps the execution name filter when status changes', async () => {
+    const onFiltersChange = jest.fn();
+    renderComponent({
+      filters: { ...defaultFilters, runName: 'production' },
+      onFiltersChange,
+    });
+    await openPopover();
+    fireEvent.click(screen.getByText('Failed'));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      ...defaultFilters,
+      statuses: [ExecutionStatus.FAILED],
+      runName: 'production',
+    });
+  });
+
+  it('counts the execution name filter and clears it with Clear all', async () => {
+    const onFiltersChange = jest.fn();
+    renderComponent({
+      filters: { ...defaultFilters, runName: 'production' },
+      onFiltersChange,
+    });
+    expect(screen.getByTestId('workflowExecutionListFilterCount')).toHaveTextContent('1');
+    await openPopover();
+    expect(screen.getByLabelText('Filter by execution name')).toHaveValue('production');
+    fireEvent.click(screen.getByText('Clear all'));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...defaultFilters, runName: undefined });
+  });
+
   it('shows distinct labels for wait-related statuses', async () => {
     renderComponent();
     fireEvent.click(screen.getByLabelText('Filter executions'));

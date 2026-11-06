@@ -18,7 +18,7 @@ Use only what the transcript shows. Do not invent services, numbers, timings or 
 
 Write for a stressed on-call reader who should grasp each field from its first line. Short sentences, no filler; a lead sentence plus a few bullets beats a paragraph. Use plain words in every lead sentence: name the service and the symptom, with no class, field, setting, file or index names and no identifiers with underscores, dots or slashes (put an identifier in a hypothesis reason or an evidence description instead). Round numbers ("about 1,000 per 30 min", not "700 to 1,300"), at most two per bullet, and state the time window once across the whole record, as 06:00-09:00Z. Leave process notes out of every field: never "I checked...", "Informed by...", or the pages and files the agent read.
 
-The fields described below as Markdown use at most the line breaks and bullets described for them: no headings and no nested bullets. Every other value is plain text with no line breaks and no double quotes (use single quotes when you must quote something). Two things are exempt: an evidence query is copied exactly as the agent wrote it, quotes and line breaks included, and a proposal comment is Markdown and may hold line breaks and code.`;
+The fields described below as Markdown use at most the line breaks and bullets described for them: no headings and no nested bullets. Every other value is plain text with no line breaks and no double quotes (use single quotes when you must quote something). One thing is exempt: a proposal comment is Markdown and may hold line breaks and code.`;
 
 const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as a snapshot that replaces the stored list.
   - candidate is the name on the collapsed card: a noun phrase of at most eight words that tells it apart from the others ('Connection pool exhausted after 14:02 deploy', not 'Deploy' and not a sentence packed with counts). No leading 'Hypothesis:', no counts, no ids.
@@ -59,7 +59,7 @@ const evidenceField = (files: boolean) =>
     files
       ? ' A tool result that was too long to be shown in full says where its full output is: when you want to chart or quote its numbers, read that file first, and use a description only if the numbers are not in it.'
       : ''
-  } A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact and one per hypothesis, and none for a dismissed hypothesis. Give references so a reader can check each observation: the query the agent ran that produced it, copied exactly as written in its command with its time filter, and an http(s) link only when a tool result returned that exact URL, never one you construct. One or two per observation, the query that decided it, and none when there is neither. Keep links out of the description.`;
+  } A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact and one per hypothesis, and none for a dismissed hypothesis. Keep links out of the description.`;
 
 const FINAL_RECORD = (files: boolean) => `${ROLE}
 
