@@ -8,7 +8,6 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 // Evals run in Node; SHA-256 is needed for stable trajectory provenance.
-// eslint-disable-next-line import/no-nodejs-modules
 import { createHash } from 'crypto';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';

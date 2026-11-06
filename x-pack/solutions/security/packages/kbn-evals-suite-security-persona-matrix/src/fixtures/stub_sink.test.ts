@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-// Node-only loopback server: this package is not on the node-only list in `.oxlint/import_plugin.mts`.
-// eslint-disable-next-line import/no-nodejs-modules
 import http from 'http';
-// eslint-disable-next-line import/no-nodejs-modules
 import type { AddressInfo } from 'net';
 import { SINK_MARKER_HEADER, SINK_ORIGIN, startStubSink } from './stub_sink';
 
