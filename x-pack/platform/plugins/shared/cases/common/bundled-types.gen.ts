@@ -35,6 +35,65 @@ export const CaseAccess = lazySchema(() =>
 export type CaseAccess = z.infer<typeof CaseAccess>;
 
 /**
+ * Where the case came from.
+ */
+export const CaseSource = lazySchema(() =>
+  z.enum(['user', 'alertzero', 'rule', 'workflow', 'agent', 'api'])
+);
+export type CaseSource = z.infer<typeof CaseSource>;
+export type CaseSourceEnum = typeof CaseSource.enum;
+export const CaseSourceEnum = CaseSource.enum;
+
+/**
+ * The analyst's or agent's verdict on the case.
+ */
+export const CaseVerdict = lazySchema(() =>
+  z.enum(['true_positive', 'false_positive', 'benign_positive', 'suspicious', 'undetermined'])
+);
+export type CaseVerdict = z.infer<typeof CaseVerdict>;
+export type CaseVerdictEnum = typeof CaseVerdict.enum;
+export const CaseVerdictEnum = CaseVerdict.enum;
+
+/**
+ * The verdict an agent reached, with its confidence and who set it.
+ */
+export const CaseAiVerdict = lazySchema(() =>
+  z
+    .object({
+      verdict: CaseVerdict,
+      /**
+       * How confident the agent is in the verdict, from 0 to 1.
+       */
+      confidence: z
+        .number()
+        .min(0)
+        .max(1)
+        .nullable()
+        .optional()
+        .describe('How confident the agent is in the verdict, from 0 to 1.'),
+      /**
+       * Who set the verdict.
+       */
+      actor: z
+        .object({
+          type: z.string(),
+          id: z.string().nullable().optional(),
+          name: z.string().nullable().optional(),
+          run_id: z.string().nullable().optional(),
+        })
+        .nullable()
+        .optional()
+        .describe('Who set the verdict.'),
+      /**
+       * When the verdict was last set.
+       */
+      updated_at: isoDateTime().nullable().optional().describe('When the verdict was last set.'),
+    })
+    .nullable()
+);
+export type CaseAiVerdict = z.infer<typeof CaseAiVerdict>;
+
+/**
  * An array containing users that are assigned to the case.
  */
 export const Assignees = lazySchema(() =>
@@ -472,6 +531,8 @@ export type CaseExtendedFields = z.infer<typeof CaseExtendedFields>;
 export const CreateCaseRequest = lazySchema(() =>
   z.object({
     access: CaseAccess.optional(),
+    source: CaseSource.optional(),
+    ai_verdict: CaseAiVerdict.optional(),
     assignees: Assignees.optional(),
     connector: z.union([
       ConnectorPropertiesNone,
@@ -899,6 +960,26 @@ export const CaseResponseProperties = lazySchema(() =>
     status: CaseStatus,
     status_key: CaseStatusKey.optional(),
     /**
+     * Why the case was closed. Set when the case closes with a reason and cleared when it reopens.
+     */
+    close_reason: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Why the case was closed. Set when the case closes with a reason and cleared when it reopens.'
+      ),
+    /**
+     * The analyst's verdict. Set from the close reason when the case closes; editable.
+     */
+    human_verdict: z
+      .enum(['true_positive', 'false_positive', 'benign_positive', 'suspicious', 'undetermined'])
+      .nullable()
+      .optional()
+      .describe("The analyst's verdict. Set from the close reason when the case closes; editable."),
+    ai_verdict: CaseAiVerdict.optional(),
+    source: CaseSource.optional(),
+    /**
      * Set while the case is in a status that pauses time tracking.
      */
     paused_at: isoDateTime()
@@ -1116,6 +1197,32 @@ export const UpdateCaseRequest = lazySchema(() =>
           title: CaseTitle.optional(),
           closeReason: CaseCloseSyncReason.optional(),
           /**
+           * The analyst's verdict. Set from the close reason when the case closes; editable.
+           */
+          human_verdict: z
+            .enum([
+              'true_positive',
+              'false_positive',
+              'benign_positive',
+              'suspicious',
+              'undetermined',
+            ])
+            .nullable()
+            .optional()
+            .describe(
+              "The analyst's verdict. Set from the close reason when the case closes; editable."
+            ),
+          ai_verdict: CaseAiVerdict.optional(),
+          /**
+           * When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.
+           */
+          closeLinkedInvestigations: z
+            .boolean()
+            .optional()
+            .describe(
+              'When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.'
+            ),
+          /**
       * The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
 
       */
@@ -1324,6 +1431,30 @@ export type CaseStatusesConfiguration = z.infer<typeof CaseStatusesConfiguration
   */
 export const PauseReasonsConfiguration = lazySchema(() => z.array(z.string().max(50)).max(10));
 export type PauseReasonsConfiguration = z.infer<typeof PauseReasonsConfiguration>;
+
+/**
+ * Whether closing a case asks for a close reason, and which reasons it offers.
+ */
+export const CaseCloseReasonConfiguration = lazySchema(() =>
+  z.object({
+    /**
+     * Whether closing a case asks for a close reason.
+     */
+    show: z.boolean().optional().describe('Whether closing a case asks for a close reason.'),
+    /**
+     * Where the offered reasons come from.
+     */
+    source: z
+      .enum(['alerts', 'cases', 'both'])
+      .optional()
+      .describe('Where the offered reasons come from.'),
+    /**
+     * The close reasons offered for cases.
+     */
+    values: z.array(z.string()).max(50).optional().describe('The close reasons offered for cases.'),
+  })
+);
+export type CaseCloseReasonConfiguration = z.infer<typeof CaseCloseReasonConfiguration>;
 
 /**
   * The words and phrases that help categorize templates. It can be an empty array.
@@ -1566,6 +1697,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
     owner: Owner,
     statuses: CaseStatusesConfiguration.optional(),
     pauseReasons: PauseReasonsConfiguration.optional(),
+    closeReason: CaseCloseReasonConfiguration.optional(),
     templates: Templates.optional(),
     /**
       * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
@@ -1690,6 +1822,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       ),
     statuses: CaseStatusesConfiguration.optional(),
     pauseReasons: PauseReasonsConfiguration.optional(),
+    closeReason: CaseCloseReasonConfiguration.optional(),
     externalSync: ExternalSyncSettings.optional(),
     /**
      * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.

@@ -140,6 +140,29 @@ const buildAccessFilter = (access: CasesSearchParams['access']): KueryNode | und
   return accessFilters.length === 1 ? accessFilters[0] : nodeBuilder.or(accessFilters);
 };
 
+const buildSourceFilter = (source: CasesSearchParams['source']): KueryNode | undefined => {
+  if (source === undefined) {
+    return;
+  }
+
+  const sources = Array.isArray(source) ? source : [source];
+
+  if (sources.length === 0) {
+    return;
+  }
+
+  const sourceFilters = sources.map((value) =>
+    value === 'user'
+      ? // cases created before the source field existed count as created by a user
+        fromKueryExpression(
+          `${CASE_SAVED_OBJECT}.attributes.source: user or not ${CASE_SAVED_OBJECT}.attributes.source: *`
+        )
+      : nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.source`, value)
+  );
+
+  return sourceFilters.length === 1 ? sourceFilters[0] : nodeBuilder.or(sourceFilters);
+};
+
 const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
   if (categories === undefined) {
     return;
@@ -412,6 +435,7 @@ export const constructQueryOptions = ({
   customFieldsConfiguration,
   statuses = [],
   access,
+  source,
   searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -431,6 +455,7 @@ export const constructQueryOptions = ({
   const categoryFilter = buildCategoryFilter(category);
   const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
   const accessFilter = buildAccessFilter(access);
+  const sourceFilter = buildSourceFilter(source);
 
   const filters = combineFilters([
     statusFilter,
@@ -444,6 +469,7 @@ export const constructQueryOptions = ({
     categoryFilter,
     customFieldsFilter,
     accessFilter,
+    sourceFilter,
   ]);
 
   const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);

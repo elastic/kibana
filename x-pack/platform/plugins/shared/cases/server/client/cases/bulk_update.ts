@@ -64,6 +64,8 @@ import {
   dedupAssignees,
   fillMissingCustomFields,
   getCloseReasonIfValid,
+  getOutcomeFieldsForStatusChange,
+  getChangedVerdicts,
   getClosedInfoForUpdate,
   getConfiguredStatuses,
   getDurationForUpdate,
@@ -905,6 +907,9 @@ export const bulkUpdate = async (
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
 
+    const agenticEnabled = clientArgs.config.agentic.enabled;
+    const closeLinkedInvestigationsByCaseId = new Map<string, boolean>();
+
     const casesToUpdate: UpdateRequestWithOriginalCase[] = requestCases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
@@ -913,13 +918,42 @@ export const bulkUpdate = async (
           return acc;
         }
 
-        const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCase);
+        // Request-only: never compared with or written to the stored case. The verdicts are
+        // ignored on write while agentic cases are disabled.
+        const {
+          closeLinkedInvestigations,
+          human_verdict: requestedHumanVerdict,
+          ai_verdict: requestedAiVerdict,
+          ...updateCaseWithoutTransient
+        } = updateCase;
+        if (agenticEnabled && closeLinkedInvestigations != null) {
+          closeLinkedInvestigationsByCaseId.set(updateCase.id, closeLinkedInvestigations);
+        }
+
+        const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCaseWithoutTransient);
         const closeReason = getCloseReasonIfValid(updateCase.closeReason);
         // Explicitly add the closing reason if it exists in the request
-        const fieldsToUpdateIncludingCloseReason =
-          fieldsToUpdate.status === CaseStatuses.closed && closeReason != null
+        const fieldsToUpdateIncludingCloseReason = {
+          ...(fieldsToUpdate.status === CaseStatuses.closed && closeReason != null
             ? { ...fieldsToUpdate, closeReason }
-            : fieldsToUpdate;
+            : fieldsToUpdate),
+          ...(agenticEnabled
+            ? {
+                ...getOutcomeFieldsForStatusChange({
+                  originalCase: originalCase.attributes,
+                  status: fieldsToUpdate.status as CaseStatuses | undefined,
+                  closeReason,
+                  requestedHumanVerdict,
+                }),
+                // Compared here rather than in getCaseToUpdate, which skips a value whose stored
+                // counterpart is missing (cases from before these fields existed).
+                ...getChangedVerdicts(originalCase.attributes, {
+                  human_verdict: requestedHumanVerdict,
+                  ai_verdict: requestedAiVerdict,
+                }),
+              }
+            : {}),
+        };
 
         const { id, version, ...restFields } = fieldsToUpdateIncludingCloseReason;
 
@@ -957,7 +991,9 @@ export const bulkUpdate = async (
 
         const syncAlertsAfterUpdate =
           updateReq.settings?.syncAlerts ?? originalCase.attributes.settings.syncAlerts;
-        if (!syncAlertsAfterUpdate) {
+        // With agentic cases on, the close reason is kept on the case itself, so it is valid
+        // without synced alerts; it just isn't copied to any alert.
+        if (!syncAlertsAfterUpdate && !agenticEnabled) {
           throw Boom.badRequest(
             `Cannot provide a close reason for case ${updateReq.id} when sync alerts is disabled.`
           );
@@ -1236,9 +1272,7 @@ export const bulkUpdate = async (
       await syncAlertCaseIdsForAccessChanges({ casesToUpdate, caseService, alertsService });
     } catch (error) {
       if (
-        casesToUpdate.some(
-          ({ updateReq }) => updateReq.access?.mode === CaseAccessMode.RESTRICTED
-        )
+        casesToUpdate.some(({ updateReq }) => updateReq.access?.mode === CaseAccessMode.RESTRICTED)
       ) {
         incrementCasesClientCounter(clientArgs, RESTRICT_ALERT_UPDATE_FAILED_COUNTER);
       }
@@ -1399,21 +1433,19 @@ export const bulkUpdate = async (
     );
 
     for (const updatedCase of updatedCasesResponse) {
-      // workflow triggers never fire for restricted cases (an unrestricted
-      // case emits normally — it is visible again)
-      if (isCaseRestricted(updatedCase)) {
-        continue;
-      }
-
       const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
+      const closeLinkedInvestigations = closeLinkedInvestigationsByCaseId.get(updatedCase.id);
+      // Restricted cases emit too, so in-process listeners (auto-push, linked investigations)
+      // see them. The Workflows bridge drops restricted events; see event_bridge.ts.
       clientArgs.casesEventBus?.emitCaseUpdated(
         clientArgs.request,
         {
           caseId: updatedCase.id,
           owner: updatedCase.owner as Owner,
-
+          restricted: isCaseRestricted(updatedCase),
           ...(updatedFields != null ? { updatedFields } : {}),
           ...(options.origin != null ? { origin: options.origin } : {}),
+          ...(closeLinkedInvestigations != null ? { closeLinkedInvestigations } : {}),
         },
         { previousCase: casesMap.get(updatedCase.id), updatedCase }
       );

@@ -145,7 +145,16 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    const decodedData = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(data);
+    const decodedRequest = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(data);
+    // The source and AI verdict are ignored on write while agentic cases are disabled.
+    const decodedData = clientArgs.config.agentic.enabled
+      ? decodedRequest
+      : {
+          ...decodedRequest,
+          cases: decodedRequest.cases.map(
+            ({ source: _source, ai_verdict: _aiVerdict, ...theCase }) => theCase
+          ),
+        };
 
     // The access field is ignored on write while the restricted-cases feature
     // is disabled.
@@ -469,14 +478,11 @@ export const bulkCreate = async (
     });
 
     createdCasesResponse.cases.forEach((createdCase) => {
-      // workflow triggers never fire for restricted cases
-      if (isCaseRestricted(createdCase)) {
-        return;
-      }
-
+      // Restricted cases emit too; the Workflows bridge drops them (see event_bridge.ts).
       clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
         caseId: createdCase.id,
         owner: createdCase.owner as Owner,
+        restricted: isCaseRestricted(createdCase),
       });
     });
 

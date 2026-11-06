@@ -84,7 +84,7 @@ describe('delete', () => {
       expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
     });
 
-    it('does not emit attachmentsDeleted for a restricted case', async () => {
+    it('emits a restricted-flagged attachmentsDeleted for a restricted case', async () => {
       clientArgs.services.caseService.getCase.mockResolvedValue({
         ...mockCases[0],
         attributes: { ...mockCases[0].attributes, access: { mode: CaseAccessMode.RESTRICTED } },
@@ -93,7 +93,10 @@ describe('delete', () => {
       await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
 
       expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalled();
-      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ caseId: 'mock-id-1', restricted: true })
+      );
     });
 
     it('throws a not found error when the attachment does not exist', async () => {

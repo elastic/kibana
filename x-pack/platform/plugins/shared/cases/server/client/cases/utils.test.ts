@@ -26,6 +26,7 @@ import {
   dedupAssignees,
   getClosedInfoForUpdate,
   getCloseReasonIfValid,
+  getOutcomeFieldsForStatusChange,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -106,6 +107,58 @@ describe('utils', () => {
 
     it('returns undefined when the assignees is undefined', () => {
       expect(dedupAssignees()).toBeUndefined();
+    });
+  });
+
+  describe('getOutcomeFieldsForStatusChange', () => {
+    const open = { status: CaseStatuses.open, close_reason: null, human_verdict: null };
+
+    it('keeps the close reason on the case and sets the human verdict from it', () => {
+      expect(
+        getOutcomeFieldsForStatusChange({
+          originalCase: open,
+          status: CaseStatuses.closed,
+          closeReason: 'true_positive',
+        })
+      ).toEqual({ close_reason: 'true_positive', human_verdict: 'true_positive' });
+    });
+
+    it('sets no human verdict for a reason that is not a verdict', () => {
+      expect(
+        getOutcomeFieldsForStatusChange({
+          originalCase: open,
+          status: CaseStatuses.closed,
+          closeReason: 'duplicate',
+        })
+      ).toEqual({ close_reason: 'duplicate', human_verdict: null });
+    });
+
+    it('keeps a human verdict the request sets explicitly', () => {
+      expect(
+        getOutcomeFieldsForStatusChange({
+          originalCase: open,
+          status: CaseStatuses.closed,
+          closeReason: 'true_positive',
+          requestedHumanVerdict: 'suspicious',
+        })
+      ).toEqual({ close_reason: 'true_positive' });
+    });
+
+    it('clears both when the case reopens', () => {
+      expect(
+        getOutcomeFieldsForStatusChange({
+          originalCase: {
+            status: CaseStatuses.closed,
+            close_reason: 'false_positive',
+            human_verdict: 'false_positive',
+          },
+          status: CaseStatuses.open,
+        })
+      ).toEqual({ close_reason: null, human_verdict: null });
+    });
+
+    it('changes nothing for other updates', () => {
+      expect(getOutcomeFieldsForStatusChange({ originalCase: open })).toEqual({});
     });
   });
 

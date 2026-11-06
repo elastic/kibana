@@ -233,9 +233,7 @@ describe('caseSavedObjectType model version transformations', () => {
         toVersion: 14,
       });
 
-      expect(migrated.attributes).toEqual(
-        expect.objectContaining({ access: { mode: 'default' } })
-      );
+      expect(migrated.attributes).toEqual(expect.objectContaining({ access: { mode: 'default' } }));
     });
 
     it('removes the access field when converting from v14 to v13', () => {
@@ -251,7 +249,10 @@ describe('caseSavedObjectType model version transformations', () => {
       });
 
       const migrated = migrator.migrate({
-        document: { ...caseObj, attributes: { ...caseObj.attributes, access: { mode: 'default' } } },
+        document: {
+          ...caseObj,
+          attributes: { ...caseObj.attributes, access: { mode: 'default' } },
+        },
         fromVersion: 14,
         toVersion: 13,
       });
@@ -265,6 +266,15 @@ describe('caseSavedObjectType model version transformations', () => {
       const document = createCaseSavedObjectResponse();
       const migrated = migrator.migrate({ document, fromVersion: 14, toVersion: 15 });
       expect(migrated.attributes).toHaveProperty('settings', document.attributes.settings);
+    });
+  });
+
+  describe('Model version 15 to 16', () => {
+    it('leaves existing cases without outcome fields or a source', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 15, toVersion: 16 });
+      expect(migrated.attributes).not.toHaveProperty('close_reason');
+      expect(migrated.attributes).not.toHaveProperty('source');
     });
   });
 });

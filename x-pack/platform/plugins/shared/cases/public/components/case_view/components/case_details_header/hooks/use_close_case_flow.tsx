@@ -15,6 +15,7 @@ import { useRefreshCaseViewPage } from '../../../use_on_refresh_case_view_page';
 import { useStatusAction } from '../../../../actions/status/use_status_action';
 import { useCaseStatuses } from '../../../../status/use_case_statuses';
 import { useCloseCaseModal } from '../../../../all_cases/hooks/use_close_case_modal';
+import type { CloseCaseOptions } from '../../../../all_cases/hooks/use_close_case_modal';
 import { usePauseReasonModal } from '../../../../all_cases/hooks/use_pause_reason_modal';
 import { useCanSyncCloseReasonToAlerts } from '../../../../all_cases/hooks/use_can_sync_close_reason_to_alerts';
 import type { OnUpdateFields } from '../../../types';
@@ -47,11 +48,13 @@ export const useCloseCaseFlow = ({ caseData, onUpdateField, entryPoint }: UseClo
   });
 
   const onCloseCase = useCallback(
-    (closeReason?: string) => {
+    (closeReason?: string, options?: CloseCaseOptions) => {
       statusAction.handleUpdateCaseStatus(
         [caseData],
         closingStatus ?? CaseStatuses.closed,
-        closeReason
+        closeReason,
+        undefined,
+        options
       );
     },
     [caseData, closingStatus, statusAction]
@@ -60,6 +63,7 @@ export const useCloseCaseFlow = ({ caseData, onUpdateField, entryPoint }: UseClo
   const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
     canSyncCloseReasonToAlerts,
     onCloseCase,
+    caseData,
   });
 
   const { openPauseReasonModal, pauseReasonModal } = usePauseReasonModal({

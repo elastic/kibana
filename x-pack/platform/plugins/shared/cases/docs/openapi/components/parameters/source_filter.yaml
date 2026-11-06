@@ -1,0 +1,9 @@
+in: query
+name: source
+description: Filters the returned cases by where they came from.
+schema:
+  oneOf:
+    - $ref: '../schemas/case_source.yaml'
+    - type: array
+      items:
+        $ref: '../schemas/case_source.yaml'

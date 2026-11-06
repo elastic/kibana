@@ -23,17 +23,14 @@ export function emitAttachmentsAddedEvent(
   attachmentType: string,
   origin?: CaseUpdateOrigin
 ): void {
-  // workflow triggers never fire for restricted cases — the event payload
-  // and the workflow run would reveal the case to non-assignees
-  if (isCaseRestricted({ access })) {
-    return;
-  }
-
+  // Restricted cases emit too, flagged: the Workflows bridge drops them, because the event
+  // payload and the workflow run would reveal the case to non-assignees.
   clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
     caseId,
     ids,
     attachmentType,
     owner: owner as Owner,
+    restricted: isCaseRestricted({ access }),
     ...(origin != null ? { origin } : {}),
   });
 }
@@ -56,6 +53,7 @@ interface AttachmentsDeletedEventArgs {
   ids: string[];
   /** The removed fields, read for the alert/event IDs; can include ids removed from kept attachments. */
   removedAttributes: AttachmentAttributesV2[];
+  restricted?: boolean;
 }
 
 /**
@@ -63,7 +61,7 @@ interface AttachmentsDeletedEventArgs {
  */
 export function emitAttachmentsDeletedEvent(
   clientArgs: CasesClientArgs,
-  { caseId, owner, attachmentType, ids, removedAttributes }: AttachmentsDeletedEventArgs
+  { caseId, owner, attachmentType, ids, removedAttributes, restricted }: AttachmentsDeletedEventArgs
 ): void {
   const alerts = toIdsAndIndices(getAlertInfoFromComments(removedAttributes));
   const events = toIdsAndIndices(getEventInfoFromComments(removedAttributes));
@@ -73,6 +71,7 @@ export function emitAttachmentsDeletedEvent(
     ids,
     attachmentType,
     owner: owner as Owner,
+    ...(restricted ? { restricted } : {}),
     ...(alerts.ids.length > 0 ? { alertIds: alerts.ids, alertIndices: alerts.indices } : {}),
     ...(events.ids.length > 0 ? { eventIds: events.ids, eventIndices: events.indices } : {}),
   });
@@ -80,16 +79,14 @@ export function emitAttachmentsDeletedEvent(
 
 /**
  * Emits one attachmentsDeleted event per attachment type, including the referenced alert/event IDs.
- * Suppressed entirely for restricted cases.
+ * Restricted cases are flagged; the Workflows bridge drops them.
  */
 export function emitAttachmentsDeletedEvents(
   clientArgs: CasesClientArgs,
   theCase: { id: string; access?: CaseAccess | null },
   attachments: DeletedAttachment[]
 ): void {
-  if (isCaseRestricted(theCase)) {
-    return;
-  }
+  const restricted = isCaseRestricted(theCase);
 
   const caseId = theCase.id;
   const attachmentsByType = new Map<string, DeletedAttachment[]>();
@@ -109,6 +106,7 @@ export function emitAttachmentsDeletedEvents(
       attachmentType,
       ids: attachmentsOfType.map(({ id }) => id),
       removedAttributes,
+      restricted,
     });
   }
 }

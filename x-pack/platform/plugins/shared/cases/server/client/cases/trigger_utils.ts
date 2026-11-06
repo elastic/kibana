@@ -14,20 +14,17 @@ import { isCaseRestricted } from '../../common/utils';
 
 /**
  * Emits the `cases.observablesAdded` event for the given newly-added
- * observables. Suppressed entirely for restricted cases.
+ * observables. Restricted cases are flagged; the Workflows bridge drops them.
  */
 export const emitObservablesAddedEvent = (
   clientArgs: CasesClientArgs,
   theCase: CaseSavedObjectTransformed,
   observables: Observable[]
 ): void => {
-  if (isCaseRestricted(theCase.attributes)) {
-    return;
-  }
-
   const payload: ObservablesAddedEventPayload = {
     caseId: theCase.id,
     owner: theCase.attributes.owner as Owner,
+    restricted: isCaseRestricted(theCase.attributes),
     // Both arrays are index-aligned: observableTypeKeys[i] is the type of observableIds[i].
     observableIds: observables.map(({ id }) => id),
     observableTypeKeys: observables.map(({ typeKey }) => typeKey),

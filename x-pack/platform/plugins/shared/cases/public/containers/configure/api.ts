@@ -132,6 +132,7 @@ const convertConfigureResponseToCasesConfigure = (
     workflowTags,
     statuses,
     pauseReasons,
+    closeReason,
   } = configuration;
 
   return {
@@ -151,5 +152,6 @@ const convertConfigureResponseToCasesConfigure = (
     workflowTags,
     statuses,
     pauseReasons,
+    closeReason,
   };
 };

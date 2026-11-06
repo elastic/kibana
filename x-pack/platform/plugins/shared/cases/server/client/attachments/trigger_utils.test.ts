@@ -27,10 +27,11 @@ describe('emitAttachmentsAddedEvent', () => {
       ids: ['attachment-1', 'attachment-2'],
       attachmentType: 'comment',
       owner: 'securitySolution',
+      restricted: false,
     });
   });
 
-  it('does not emit for a restricted case', () => {
+  it('emits a restricted-flagged event for a restricted case', () => {
     const clientArgs = createCasesClientMockArgs();
     emitAttachmentsAddedEvent(
       clientArgs,
@@ -43,7 +44,13 @@ describe('emitAttachmentsAddedEvent', () => {
       'comment'
     );
 
-    expect(clientArgs.casesEventBus.emitAttachmentsAdded).not.toHaveBeenCalled();
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(clientArgs.request, {
+      caseId: 'case-1',
+      ids: ['attachment-1'],
+      attachmentType: 'comment',
+      owner: 'securitySolution',
+      restricted: true,
+    });
   });
 });
 
@@ -57,13 +64,24 @@ describe('emitAttachmentsDeletedEvents', () => {
     expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
   });
 
-  it('does not emit for a restricted case', () => {
+  it('emits a restricted-flagged event for a restricted case', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1', access: { mode: CaseAccessMode.RESTRICTED } }, [
-      userComment,
-    ]);
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      { id: 'case-1', access: { mode: CaseAccessMode.RESTRICTED } },
+      [userComment]
+    );
 
-    expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
+    expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+      clientArgs.request,
+      {
+        caseId: 'case-1',
+        ids: ['mock-comment-1'],
+        attachmentType: 'user',
+        owner: 'securitySolution',
+        restricted: true,
+      }
+    );
   });
 
   it('emits one event per attachment type', () => {

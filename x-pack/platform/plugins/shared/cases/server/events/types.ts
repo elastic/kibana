@@ -14,6 +14,11 @@ import type { Owner } from '../../common/constants/types';
  */
 interface BaseCaseEventPayload {
   readonly owner: Owner;
+  /**
+   * True when the case is restricted. Restricted cases emit for in-process listeners; the
+   * Workflows bridge drops these events so no restricted-case data reaches a workflow.
+   */
+  readonly restricted?: boolean;
 }
 
 export interface CaseCreatedEventPayload extends BaseCaseEventPayload {
@@ -30,6 +35,11 @@ export interface CaseUpdatedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
   readonly updatedFields?: string[];
   readonly origin?: CaseUpdateOrigin;
+  /**
+   * Set when the update closed the case and the caller chose whether the linked investigations
+   * close with it. Missing means the default: they close.
+   */
+  readonly closeLinkedInvestigations?: boolean;
 }
 
 /**

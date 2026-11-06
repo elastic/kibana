@@ -73,6 +73,15 @@ export interface CaseAnalyticsDoc {
     pause_reason?: string | null;
     resume_to_status_key?: string | null;
     severity: CaseSeverityString;
+    close_reason: string | null;
+    human_verdict: string | null;
+    source: string | null;
+    ai_verdict: {
+      verdict: string;
+      confidence: number | null;
+      actor: { type: string; id: string | null; name: string | null; run_id: string | null } | null;
+      updated_at: string | null;
+    } | null;
     assignees?: Array<{
       uid: string;
       username?: string | null;
@@ -188,6 +197,24 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       pause_reason: a.pause_reason ?? null,
       resume_to_status_key: a.resume_to_status_key ?? null,
       severity: SEVERITY_TO_STRING[a.severity],
+      close_reason: a.close_reason ?? null,
+      human_verdict: a.human_verdict ?? null,
+      source: a.source ?? null,
+      ai_verdict: a.ai_verdict
+        ? {
+            verdict: a.ai_verdict.verdict,
+            confidence: a.ai_verdict.confidence ?? null,
+            actor: a.ai_verdict.actor
+              ? {
+                  type: a.ai_verdict.actor.type,
+                  id: a.ai_verdict.actor.id ?? null,
+                  name: a.ai_verdict.actor.name ?? null,
+                  run_id: a.ai_verdict.actor.run_id ?? null,
+                }
+              : null,
+            updated_at: a.ai_verdict.updated_at ?? null,
+          }
+        : null,
       assignees: a.assignees,
       created_at: a.created_at,
       updated_at: a.updated_at,

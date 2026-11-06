@@ -7,8 +7,8 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { CaseCustomField, UnifiedAttachments, User } from '../../common/types/domain';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
+import type { CaseCustomField, UnifiedAttachments, User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
   BulkCreateUnifiedAttachmentsRequest,
@@ -354,6 +354,9 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...(filterOptions.access.length > 0 ? { access: filterOptions.access } : {}),
+    ...(filterOptions.source && filterOptions.source.length > 0
+      ? { source: filterOptions.source }
+      : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
       ? { extendedFieldFilters: filterOptions.extendedFieldFilters }

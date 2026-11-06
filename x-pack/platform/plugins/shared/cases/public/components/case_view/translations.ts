@@ -210,6 +210,14 @@ export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.simil
   defaultMessage: 'Similar cases',
 });
 
+export const RELATED_TAB = i18n.translate('xpack.cases.caseView.tabs.related', {
+  defaultMessage: 'Related',
+});
+
+export const RELATED_CASES_TITLE = i18n.translate('xpack.cases.caseView.related.cases.title', {
+  defaultMessage: 'Cases',
+});
+
 export const TASKS_TAB = i18n.translate('xpack.cases.caseView.tabs.tasks', {
   defaultMessage: 'Tasks',
 });
@@ -548,3 +556,7 @@ export const SYNC_KEPT_FIELDS = (fields: string) =>
     values: { fields },
     defaultMessage: 'kept {fields} changed in Kibana',
   });
+
+export const SOURCE_BADGE_ALERTZERO = i18n.translate('xpack.cases.caseView.sourceBadge.alertzero', {
+  defaultMessage: 'Opened from AlertZero',
+});

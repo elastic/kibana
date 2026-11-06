@@ -16,6 +16,11 @@ interface AutoPushListenerDeps {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   isAtLeastEnterprise: () => Promise<boolean>;
   logger: Logger;
+  /**
+   * Restricted cases emit Cases events only so in-process listeners see them; they are pushed only
+   * with agentic cases on, which keeps main's behavior (no auto-push for them) when it is off.
+   */
+  pushRestrictedCases?: boolean;
 }
 
 interface PendingPush {
@@ -32,6 +37,7 @@ export function registerAutoPushListener({
   getCasesClient,
   isAtLeastEnterprise,
   logger,
+  pushRestrictedCases = false,
 }: AutoPushListenerDeps): void {
   const pending = new Map<string, PendingPush>();
 
@@ -92,18 +98,22 @@ export function registerAutoPushListener({
 
   const scheduleUnlessSynced = ({
     request,
-    payload: { caseId, origin },
+    payload: { caseId, origin, restricted },
   }: {
     request: KibanaRequest;
-    payload: { caseId: string; origin?: CaseUpdateOrigin };
+    payload: { caseId: string; origin?: CaseUpdateOrigin; restricted?: boolean };
   }): void => {
     // Changes applied from the external incident must not be pushed straight back.
-    if (origin !== 'external_sync') {
+    if (origin !== 'external_sync' && (pushRestrictedCases || !restricted)) {
       schedule(request, caseId);
     }
   };
 
-  casesEventBus.onCaseCreated((event) => schedule(event.request, event.payload.caseId));
+  casesEventBus.onCaseCreated((event) => {
+    if (pushRestrictedCases || !event.payload.restricted) {
+      schedule(event.request, event.payload.caseId);
+    }
+  });
   casesEventBus.onCaseUpdated(scheduleUnlessSynced);
   casesEventBus.onAttachmentsAdded(scheduleUnlessSynced);
 }

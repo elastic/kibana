@@ -15,6 +15,8 @@ import { StatusFilter } from '../components/status_filter';
 import * as i18n from '../translations';
 import { SeverityFilter } from '../components/severity_filter';
 import { AccessFilter } from '../components/access_filter';
+import { SourceFilter } from '../components/source_filter';
+import { FILTER_FROM_ALERTZERO } from '../../../common/translations';
 import { AssigneesFilterPopover } from '../components/assignees_filter';
 import type { CurrentUserProfile } from '../../types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from '../types';
@@ -23,6 +25,8 @@ interface UseFilterConfigProps {
   availableSolutions: string[];
   caseAssignmentAuthorized: boolean;
   restrictedCasesAuthorized: boolean;
+  /** Agentic cases on: offers the "Opened from AlertZero" filter. */
+  agenticEnabled?: boolean;
   categories: string[];
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -40,6 +44,7 @@ export const getSystemFilterConfig = ({
   availableSolutions,
   caseAssignmentAuthorized,
   restrictedCasesAuthorized,
+  agenticEnabled = false,
   categories,
   countClosedCases,
   countInProgressCases,
@@ -187,6 +192,20 @@ export const getSystemFilterConfig = ({
       ),
     },
     {
+      key: 'source',
+      label: FILTER_FROM_ALERTZERO,
+      isActive: true,
+      isAvailable: agenticEnabled && !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          source: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <SourceFilter selectedOptionKeys={filterOptions.source} onChange={onSystemFilterChange} />
+      ),
+    },
+    {
       key: 'owner',
       label: i18n.SOLUTION,
       isActive: true,
@@ -211,6 +230,7 @@ export const useSystemFilterConfig = ({
   availableSolutions,
   caseAssignmentAuthorized,
   restrictedCasesAuthorized,
+  agenticEnabled,
   categories,
   countClosedCases,
   countInProgressCases,
@@ -227,6 +247,7 @@ export const useSystemFilterConfig = ({
     availableSolutions,
     caseAssignmentAuthorized,
     restrictedCasesAuthorized,
+    agenticEnabled,
     categories,
     countClosedCases,
     countInProgressCases,

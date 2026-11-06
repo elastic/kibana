@@ -13,10 +13,9 @@ import type { EventDetails, UserActionParameters, UserActionEvent } from '../typ
 export class StatusUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'status'>): UserActionEvent {
     const action = UserActionActions.update;
-    const shouldLogCloseReasonSyncMessage =
-      args.payload.status === CaseStatuses.closed &&
-      args.payload.syncAlerts === true &&
-      args.payload.closeReason != null;
+    const hasCloseReason =
+      args.payload.status === CaseStatuses.closed && args.payload.closeReason != null;
+    const shouldLogCloseReasonSyncMessage = hasCloseReason && args.payload.syncAlerts === true;
 
     const parameters = this.buildCommonUserAction({
       ...args,
@@ -30,7 +29,9 @@ export class StatusUserActionBuilder extends UserActionBuilder {
       ...parameters.attributes.payload,
       ...(args.payload.status_key != null ? { status_key: args.payload.status_key } : {}),
       ...(args.payload.pause_reason != null ? { pause_reason: args.payload.pause_reason } : {}),
-      ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
+      // The close reason is recorded whenever the case closes with one. Without synced alerts it
+      // can only get here when the reason is kept on the case itself (see bulk_update).
+      ...(hasCloseReason ? { closeReason: args.payload.closeReason } : {}),
       ...(args.payload.syncedAlertCount != null
         ? { syncedAlertCount: args.payload.syncedAlertCount }
         : {}),

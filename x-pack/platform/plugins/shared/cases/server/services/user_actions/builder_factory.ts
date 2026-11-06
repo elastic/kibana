@@ -7,6 +7,7 @@
 
 import type { UserActionType } from '../../../common/types/domain';
 import { AccessUserActionBuilder } from './builders/access';
+import { AiVerdictUserActionBuilder, HumanVerdictUserActionBuilder } from './builders/verdict';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -37,6 +38,8 @@ import { BulkAttachmentsUserActionBuilder } from './builders/bulk_attachments';
 
 const builderMap = {
   access: AccessUserActionBuilder,
+  ai_verdict: AiVerdictUserActionBuilder,
+  human_verdict: HumanVerdictUserActionBuilder,
   assignees: AssigneesUserActionBuilder,
   title: TitleUserActionBuilder,
   create_case: CreateCaseUserActionBuilder,

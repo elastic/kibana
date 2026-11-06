@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import {
   CaseAccessModeSchema,
+  CaseSourceSchema,
   CaseSeveritySchema,
   CaseStatusSchema,
 } from '../../../common/types/domain';
@@ -25,6 +26,7 @@ export const AllCasesURLQueryParamsSchema = z
     status: z.array(CaseStatusSchema),
     statusKey: z.array(z.string()),
     access: z.array(CaseAccessModeSchema),
+    source: z.array(CaseSourceSchema).optional(),
     tags: z.array(z.string()),
     category: z.array(z.string()),
     assignees: z.array(z.union([z.string(), z.null()])),

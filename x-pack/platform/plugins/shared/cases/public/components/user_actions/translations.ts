@@ -312,3 +312,35 @@ export const NOTHING_TO_COLLAPSE = i18n.translate(
     defaultMessage: 'No comments or attachments to collapse',
   }
 );
+
+export const SET_AI_VERDICT = i18n.translate('xpack.cases.caseView.userActions.setAiVerdict', {
+  defaultMessage: 'set the AI verdict to',
+});
+
+export const CLEARED_AI_VERDICT = i18n.translate(
+  'xpack.cases.caseView.userActions.clearedAiVerdict',
+  {
+    defaultMessage: 'cleared the AI verdict',
+  }
+);
+
+export const SET_HUMAN_VERDICT = i18n.translate(
+  'xpack.cases.caseView.userActions.setHumanVerdict',
+  {
+    defaultMessage: 'set the human verdict to',
+  }
+);
+
+export const CLEARED_HUMAN_VERDICT = i18n.translate(
+  'xpack.cases.caseView.userActions.clearedHumanVerdict',
+  { defaultMessage: 'cleared the human verdict' }
+);
+
+export const AI_VERDICT_LABEL = i18n.translate('xpack.cases.caseView.userActions.aiVerdictLabel', {
+  defaultMessage: 'AI verdict',
+});
+
+export const HUMAN_VERDICT_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.humanVerdictLabel',
+  { defaultMessage: 'Human verdict' }
+);

@@ -6,7 +6,12 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { caseViewSectionRegistry } from '../../../client/case_view_sections';
+import { useCasesConfig } from '../../../common/lib/kibana';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
+import { RELATED_CASES_TITLE } from '../translations';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI, SortOrder } from '../../../../common/ui/types';
@@ -40,6 +45,12 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT_ORDER);
 
   const { pickerColumns, tableColumns, setPickerColumns } = useSimilarCasesColumnsSelection();
+  const { agenticEnabled } = useCasesConfig();
+  const { permissions } = useCasesContext();
+  const refreshCase = useRefreshCaseViewPage();
+  const relatedSections = agenticEnabled
+    ? caseViewSectionRegistry.getVisible('related', caseData)
+    : [];
 
   const { data = initialData, isLoading: isLoadingCases } = useGetSimilarCases({
     caseId: caseData.id,
@@ -105,6 +116,12 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     // A plain block wrapper stops the parent column flex item from stretching the toolbar
     // and the table vertically when the sidebar is taller than the table content.
     <div>
+      {relatedSections.map((section) => (
+        <div key={section.id} data-test-subj={`case-view-related-section-${section.id}`}>
+          {section.render({ caseData, canUpdate: permissions.update, refreshCase })}
+          <EuiSpacer size="l" />
+        </div>
+      ))}
       <EuiFlexGroup
         justifyContent="spaceBetween"
         gutterSize="s"
@@ -112,6 +129,13 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
         css={{ paddingTop: euiTheme.size.s }}
         data-test-subj="similar-cases-table-toolbar"
       >
+        {relatedSections.length > 0 ? (
+          <EuiFlexItem grow={true}>
+            <EuiTitle size="xs">
+              <h3>{RELATED_CASES_TITLE}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <ColumnsPopover
             selectedColumns={pickerColumns}

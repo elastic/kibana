@@ -113,7 +113,13 @@ describe('useCloseCaseFlow', () => {
     const { onCloseCase } = (useCloseCaseModal as jest.Mock).mock.calls.at(-1)[0];
     onCloseCase('duplicate');
 
-    expect(mockHandleUpdateCaseStatus).toHaveBeenCalledWith([basicCase], closedStatus, 'duplicate');
+    expect(mockHandleUpdateCaseStatus).toHaveBeenCalledWith(
+      [basicCase],
+      closedStatus,
+      'duplicate',
+      undefined,
+      undefined
+    );
   });
 
   it('returns closeCaseModal from useCloseCaseModal', () => {

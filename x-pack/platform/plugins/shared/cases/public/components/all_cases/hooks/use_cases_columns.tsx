@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { VerdictBadge } from '../../verdict/verdict_badge';
+import { SOURCE_LABELS } from '../../../common/translations';
 import { CaseAccessMode, CaseStatuses } from '../../../../common/types/domain';
 
 import { tableColumnPresetDateRelative } from '../../../utils/table_column_presets';
@@ -391,9 +393,43 @@ export const useCasesColumns = ({
     ]
   );
 
+  const agenticColumnsDict = useMemo(() => {
+    const dict: Record<string, CasesColumns> = {};
+    if (!casesColumnsConfig.source || !casesColumnsConfig.aiVerdict) {
+      return dict;
+    }
+    dict.source = {
+      field: casesColumnsConfig.source.field,
+      name: casesColumnsConfig.source.name,
+      width: '9em',
+      render: (source: CaseUI['source']) => (
+        <span data-test-subj={`case-table-column-source-${source ?? 'user'}`}>
+          {SOURCE_LABELS[source ?? 'user']}
+        </span>
+      ),
+    };
+    dict.aiVerdict = {
+      field: casesColumnsConfig.aiVerdict.field,
+      name: casesColumnsConfig.aiVerdict.name,
+      width: '10em',
+      render: (aiVerdict: CaseUI['aiVerdict']) =>
+        aiVerdict != null ? (
+          <VerdictBadge
+            verdict={aiVerdict.verdict}
+            confidence={aiVerdict.confidence}
+            data-test-subj="case-table-column-ai-verdict"
+          />
+        ) : (
+          getEmptyCellValue()
+        ),
+    };
+    return dict;
+  }, [casesColumnsConfig]);
+
   const allColumnsDict = useMemo(
     () => ({
       ...columnsDict,
+      ...agenticColumnsDict,
       ...getFieldColumns<CaseUI>({
         templatesEnabled,
         globalInlineFields,
@@ -401,7 +437,14 @@ export const useCasesColumns = ({
         userProfiles,
       }),
     }),
-    [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]
+    [
+      columnsDict,
+      agenticColumnsDict,
+      customFields,
+      templatesEnabled,
+      globalInlineFields,
+      userProfiles,
+    ]
   );
 
   const columns: CasesColumns[] = [];

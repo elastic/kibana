@@ -37,6 +37,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { CaseViewSection } from './client/case_view_sections';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -122,6 +123,10 @@ export interface RenderAppProps {
 
 export interface CasesPublicSetup {
   attachmentFramework: AttachmentFramework;
+  /** Adds sections to the case view: see `CaseViewSectionPosition`. */
+  caseView: {
+    registerSection: (section: CaseViewSection) => void;
+  };
 }
 
 export interface CasesPublicStart {
@@ -132,6 +137,7 @@ export interface CasesPublicStart {
     runWorkflowsEnabled: boolean;
     customStatusesEnabled: boolean;
     bidirectionalSyncEnabled: boolean;
+    agenticEnabled: boolean;
   };
   api: {
     getRelatedCases: (

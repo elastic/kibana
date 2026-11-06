@@ -9,6 +9,9 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   CaseAccess,
+  CaseAiVerdict,
+  CaseSource,
+  CaseVerdict,
   CaseAttributes,
   ExternalSyncSettings,
   Observable,
@@ -81,6 +84,10 @@ export interface CasePersistedAttributes {
    */
   extract_observables_source?: string;
   access?: CaseAccess;
+  close_reason?: string | null;
+  human_verdict?: CaseVerdict | null;
+  ai_verdict?: CaseAiVerdict | null;
+  source?: CaseSource | null;
 }
 
 type CasePersistedCustomFields = Array<{

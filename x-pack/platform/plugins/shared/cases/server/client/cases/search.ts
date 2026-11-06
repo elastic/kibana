@@ -116,6 +116,7 @@ export const search = async (
       category: paramArgs.category,
       customFields: paramArgs.customFields,
       access: paramArgs.access,
+      source: paramArgs.source,
     };
 
     const statusStatsOptions = constructQueryOptions({

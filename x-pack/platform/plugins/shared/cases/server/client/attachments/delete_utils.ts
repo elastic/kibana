@@ -549,16 +549,15 @@ export const deleteByAttachmentIds = async (
       await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
     }
 
-    // workflow triggers never fire for restricted cases
-    if (!isCaseRestricted(originalCase.attributes)) {
-      emitAttachmentsDeletedEvent(clientArgs, {
-        caseId,
-        owner: caseOwner,
-        attachmentType: type,
-        ids: deleted.map(({ id }) => id),
-        removedAttributes,
-      });
-    }
+    // Restricted cases emit too, flagged; the Workflows bridge drops them.
+    emitAttachmentsDeletedEvent(clientArgs, {
+      caseId,
+      owner: caseOwner,
+      attachmentType: type,
+      ids: deleted.map(({ id }) => id),
+      removedAttributes,
+      restricted: isCaseRestricted(originalCase.attributes),
+    });
   };
 
   try {

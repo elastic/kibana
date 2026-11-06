@@ -61,6 +61,8 @@ properties:
     $ref: 'case_statuses_configuration.yaml'
   pauseReasons:
     $ref: 'pause_reasons_configuration.yaml'
+  closeReason:
+    $ref: 'case_close_reason_configuration.yaml'
   templates:
     $ref: 'templates.yaml'
   workflowTags:

@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CaseUI } from '../../../common/ui/types';
+import { CaseViewSectionRegistry } from '.';
+
+const caseData = { id: 'case-1', comments: [] } as unknown as CaseUI;
+
+describe('CaseViewSectionRegistry', () => {
+  it('returns the visible sections of one position, in registration order', () => {
+    const registry = new CaseViewSectionRegistry();
+    registry.register({ id: 'a', position: 'related', render: () => 'a' });
+    registry.register({ id: 'b', position: 'sidebar', render: () => 'b' });
+    registry.register({ id: 'c', position: 'related', isVisible: () => false, render: () => 'c' });
+    registry.register({ id: 'd', position: 'related', render: () => 'd' });
+
+    expect(registry.getVisible('related', caseData).map(({ id }) => id)).toEqual(['a', 'd']);
+    expect(registry.getVisible('closeModal', caseData)).toEqual([]);
+  });
+
+  it('refuses a second section with the same id', () => {
+    const registry = new CaseViewSectionRegistry();
+    registry.register({ id: 'a', position: 'related', render: () => 'a' });
+    expect(() => registry.register({ id: 'a', position: 'sidebar', render: () => 'a' })).toThrow(
+      'Case view section "a" is already registered'
+    );
+  });
+});

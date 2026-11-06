@@ -20,6 +20,12 @@ export type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_se
 export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 
 export type { CaseAttachments, CaseAttachmentsWithoutOwner } from './types';
+export type {
+  CaseViewSection,
+  CaseViewSectionPosition,
+  CaseViewSectionProps,
+  CaseViewCloseModalSectionProps,
+} from './client/case_view_sections';
 
 export type { ICasesDeepLinkId } from './common/navigation';
 export {

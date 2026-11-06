@@ -155,6 +155,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
   access: [],
+  source: [],
   customFields: {},
   extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,

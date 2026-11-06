@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
+import { useCasesConfig } from '../../common/lib/kibana';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
@@ -28,6 +29,28 @@ const StatusBadge: React.FC<{ status: CaseStatuses; statusKey?: string }> = ({
   return <Status status={status} label={getStatus(statusKey, status).label} />;
 };
 StatusBadge.displayName = 'StatusBadge';
+
+/**
+ * A close reason kept on the case itself (agentic cases), with no alerts synced. Hidden with the
+ * flag off so existing status rows render as they always have.
+ */
+const CaseCloseReasonBadge: React.FC<{ userActionId: string; closeReason: string }> = ({
+  userActionId,
+  closeReason,
+}) => {
+  const { agenticEnabled } = useCasesConfig();
+  if (!agenticEnabled) {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiBadge data-test-subj={`${userActionId}-user-action-close-reason-badge`}>
+        {getDefaultClosingReasonLabel(closeReason)}
+      </EuiBadge>
+    </EuiFlexItem>
+  );
+};
+CaseCloseReasonBadge.displayName = 'CaseCloseReasonBadge';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
@@ -56,6 +79,9 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
               {`· ${pauseReason}`}
             </EuiText>
           </EuiFlexItem>
+        )}
+        {closeReason != null && !shouldRenderSyncDetails && (
+          <CaseCloseReasonBadge userActionId={userAction.id} closeReason={closeReason} />
         )}
         {shouldRenderSyncDetails && (
           <>

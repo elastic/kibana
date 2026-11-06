@@ -19,6 +19,7 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
     'assignees',
     'category',
     'access',
+    'source',
     'from',
     'to',
   ]);

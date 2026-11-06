@@ -12,6 +12,7 @@ import type {
   CaseConnector,
   CaseCustomFields,
   CaseSeverity,
+  CloseReasonConfiguration,
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
@@ -37,6 +38,7 @@ export interface ConfigurationPersistedAttributes {
   workflowTags?: string[];
   statuses?: PersistedCaseStatusesConfiguration;
   pauseReasons?: string[];
+  closeReason?: CloseReasonConfiguration;
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**

@@ -33,7 +33,11 @@ import {
   CustomFieldToggleTypeSchema,
   CustomFieldNumberTypeSchema,
 } from '../../domain/custom_field/v1';
-import { ClosureTypeSchema, ConfigurationBasicWithoutOwnerSchema } from '../../domain/configure/v1';
+import {
+  CloseReasonConfigurationSchema,
+  ClosureTypeSchema,
+  ConfigurationBasicWithoutOwnerSchema,
+} from '../../domain/configure/v1';
 import type { Configuration, Configurations } from '../../domain/configure/v1';
 import { CaseStatusSchema } from '../../domain/case/v1';
 import {
@@ -193,15 +197,17 @@ export const CaseStatusesConfigurationSchema = limitedArraySchema({
   min: 0,
   max: MAX_CASE_STATUSES,
   fieldName: 'statuses',
-  codec: z.object({
-    key: CaseStatusKeySchema,
-    label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CASE_STATUS_LABEL_LENGTH }),
-    category: CaseStatusSchema,
-    order: z.number(),
-    isDefault: z.boolean(),
-    disabled: z.boolean(),
-    pausesTimeTracking: z.boolean().optional(),
-  }),
+  codec: lazySchema(() =>
+    z.object({
+      key: CaseStatusKeySchema,
+      label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CASE_STATUS_LABEL_LENGTH }),
+      category: CaseStatusSchema,
+      order: z.number(),
+      isDefault: z.boolean(),
+      disabled: z.boolean(),
+      pausesTimeTracking: z.boolean().optional(),
+    })
+  ),
 });
 
 export const PauseReasonsConfigurationSchema = limitedArraySchema({
@@ -261,6 +267,7 @@ export const ConfigurationRequestSchema = lazySchema(() =>
     workflowTags: WorkflowTagsConfigurationSchema.optional(),
     statuses: CaseStatusesConfigurationSchema.optional(),
     pauseReasons: PauseReasonsConfigurationSchema.optional(),
+    closeReason: CloseReasonConfigurationSchema.optional(),
     externalSync: ExternalSyncSettingsSchema.optional(),
     externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
     externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
@@ -292,6 +299,7 @@ export const ConfigurationPatchRequestSchema = lazySchema(() =>
     workflowTags: WorkflowTagsConfigurationSchema.optional(),
     statuses: CaseStatusesConfigurationSchema.optional(),
     pauseReasons: PauseReasonsConfigurationSchema.optional(),
+    closeReason: CloseReasonConfigurationSchema.optional(),
     externalSync: ExternalSyncSettingsSchema.optional(),
     externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
     externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEmpty, uniqBy } from 'lodash';
+import { isEmpty, isEqual, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { Logger } from '@kbn/logging';
@@ -22,6 +22,7 @@ import type {
   CaseAttributes,
   CaseCustomField,
   CaseStatusesConfiguration,
+  CaseVerdict,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -104,6 +105,76 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
 
 export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
   closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
+
+const CLOSE_REASON_TO_VERDICT: Record<string, CaseVerdict> = {
+  true_positive: 'true_positive',
+  false_positive: 'false_positive',
+  benign_positive: 'benign_positive',
+};
+
+/**
+ * The human verdict a close reason implies, or null when the reason isn't a verdict (duplicate,
+ * automated closure, other, or a case-defined reason).
+ */
+export const getVerdictFromCloseReason = (closeReason: string): CaseVerdict | null =>
+  CLOSE_REASON_TO_VERDICT[closeReason] ?? null;
+
+/**
+ * The verdicts a request sets that differ from the stored ones. A missing stored value counts as
+ * null, so an explicit verdict on a case from before the field existed is kept.
+ */
+export const getChangedVerdicts = (
+  originalCase: Pick<CaseAttributes, 'human_verdict' | 'ai_verdict'>,
+  requested: Partial<Pick<CaseAttributes, 'human_verdict' | 'ai_verdict'>>
+): Partial<Pick<CaseAttributes, 'human_verdict' | 'ai_verdict'>> => ({
+  ...(requested.human_verdict !== undefined &&
+  requested.human_verdict !== (originalCase.human_verdict ?? null)
+    ? { human_verdict: requested.human_verdict }
+    : {}),
+  ...(requested.ai_verdict !== undefined &&
+  !isEqual(requested.ai_verdict, originalCase.ai_verdict ?? null)
+    ? { ai_verdict: requested.ai_verdict }
+    : {}),
+});
+
+/**
+ * The outcome fields a status change writes: closing with a reason keeps the reason on the case
+ * and sets the human verdict from it (unless the request sets one); reopening clears both, since
+ * they describe a close that no longer stands.
+ */
+export const getOutcomeFieldsForStatusChange = ({
+  originalCase,
+  status,
+  closeReason,
+  requestedHumanVerdict,
+}: {
+  originalCase: Pick<CaseAttributes, 'status' | 'close_reason' | 'human_verdict'>;
+  status?: CaseStatuses;
+  closeReason?: string;
+  requestedHumanVerdict?: CaseVerdict | null;
+}): Partial<Pick<CaseAttributes, 'close_reason' | 'human_verdict'>> => {
+  if (status === CaseStatuses.closed && closeReason != null) {
+    return {
+      close_reason: closeReason,
+      ...(requestedHumanVerdict === undefined
+        ? { human_verdict: getVerdictFromCloseReason(closeReason) }
+        : {}),
+    };
+  }
+
+  const isReopening =
+    status != null && status !== CaseStatuses.closed && originalCase.status === CaseStatuses.closed;
+  if (isReopening) {
+    return {
+      ...(originalCase.close_reason != null ? { close_reason: null } : {}),
+      ...(originalCase.human_verdict != null && requestedHumanVerdict === undefined
+        ? { human_verdict: null }
+        : {}),
+    };
+  }
+
+  return {};
+};
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 

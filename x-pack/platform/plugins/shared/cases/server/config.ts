@@ -195,6 +195,13 @@ export const ConfigSchema = schema.object({
   bidirectionalSync: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: cases that work with agentic investigations. Gates the close reason and
+  // verdicts in the UI, the case source marker, and the Related tab's extension sections. The
+  // fields themselves are always in the schema, because model versions can't be flag-gated.
+  agentic: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

@@ -18,6 +18,7 @@ import { createTitleUserActionBuilder } from './title';
 import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
 import { createAccessUserActionBuilder } from './access';
+import { createAiVerdictUserActionBuilder, createHumanVerdictUserActionBuilder } from './verdict';
 import { createCategoryUserActionBuilder } from './category';
 import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 import { createObservablesUserActionBuilder } from './observables';
@@ -35,6 +36,8 @@ import {
 
 export const builderMap: UserActionBuilderMap = {
   access: createAccessUserActionBuilder,
+  ai_verdict: createAiVerdictUserActionBuilder,
+  human_verdict: createHumanVerdictUserActionBuilder,
   create_case: createCaseUserActionBuilder,
   connector: createConnectorUserActionBuilder,
   tags: createTagsUserActionBuilder,

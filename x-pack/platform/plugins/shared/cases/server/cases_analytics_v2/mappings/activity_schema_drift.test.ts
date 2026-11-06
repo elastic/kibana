@@ -230,6 +230,23 @@ const PER_TYPE_FIXTURES: {
   ),
   delete_case: makeUserActionSO('delete_case', {}, { action: 'delete' }),
   access: makeUserActionSO('access', { access: { mode: 'restricted' } }, { action: 'update' }),
+  ai_verdict: makeUserActionSO(
+    'ai_verdict',
+    {
+      ai_verdict: {
+        verdict: 'true_positive',
+        confidence: 0.92,
+        actor: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent', run_id: 'conv-1' },
+        updated_at: '2026-11-06T00:00:00.000Z',
+      },
+    },
+    { action: 'update' }
+  ),
+  human_verdict: makeUserActionSO(
+    'human_verdict',
+    { human_verdict: 'false_positive' },
+    { action: 'update' }
+  ),
   sync: makeUserActionSO(
     'sync',
     {

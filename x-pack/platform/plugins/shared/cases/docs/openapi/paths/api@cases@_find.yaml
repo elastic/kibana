@@ -19,6 +19,7 @@ get:
     - $ref: '../components/parameters/search.yaml'
     - $ref: '../components/parameters/searchFields.yaml'
     - $ref: '../components/parameters/severity.yaml'
+    - $ref: '../components/parameters/source_filter.yaml'
     - $ref: '../components/parameters/sortField.yaml'
     - $ref: '../components/parameters/sort_order.yaml'
     - $ref: '../components/parameters/status.yaml'

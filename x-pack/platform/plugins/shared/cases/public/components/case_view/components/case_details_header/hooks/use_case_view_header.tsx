@@ -21,7 +21,7 @@ import { useAllCasesNavigation } from '../../../../../common/navigation';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../../common/use_cases_features';
 import { useCasesToast } from '../../../../../common/use_cases_toast';
-import { useDateFormat, useTimeZone } from '../../../../../common/lib/kibana';
+import { useCasesConfig, useDateFormat, useTimeZone } from '../../../../../common/lib/kibana';
 import { useRefreshCaseViewPage } from '../../../use_on_refresh_case_view_page';
 import { useGetCaseConnectors } from '../../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
@@ -166,6 +166,7 @@ export const useCaseViewHeader = ({
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);
 
   // Badges
+  const { agenticEnabled } = useCasesConfig();
   const { enabledStatuses, getStatus } = useCaseStatuses();
   const badges = useMemo(
     () =>
@@ -180,6 +181,7 @@ export const useCaseViewHeader = ({
         ...(restrictedCasesAuthorized
           ? { access: { isMenuDisabled: !permissions.update, onAccessChanged } }
           : {}),
+        showSource: agenticEnabled,
       }),
     [
       caseData,
@@ -192,6 +194,7 @@ export const useCaseViewHeader = ({
       restrictedCasesAuthorized,
       permissions.update,
       onAccessChanged,
+      agenticEnabled,
     ]
   );
 

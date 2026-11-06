@@ -25,6 +25,7 @@ import type {
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseAccessMode,
+  CaseSource,
   CaseSeverity,
   CaseStatuses,
   UserAction,
@@ -105,6 +106,9 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
   bidirectionalSync: {
+    enabled: boolean;
+  };
+  agentic?: {
     enabled: boolean;
   };
 }
@@ -190,6 +194,7 @@ export type CasesConfigurationUI = Pick<
   | 'workflowTags'
   | 'statuses'
   | 'pauseReasons'
+  | 'closeReason'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -222,6 +227,8 @@ export interface SystemFilterOptions {
   owner: string[];
   category: string[];
   access: CaseAccessMode[];
+  /** Where the cases came from; the "Opened from AlertZero" filter sets `['alertzero']`. */
+  source?: CaseSource[];
 }
 
 export interface ExtendedFieldFilter {

@@ -106,6 +106,21 @@ properties:
           $ref: 'case_title.yaml'
         closeReason:
           $ref: 'case_close_sync_reason.yaml'
+        human_verdict:
+          type: string
+          nullable: true
+          enum:
+            - true_positive
+            - false_positive
+            - benign_positive
+            - suspicious
+            - undetermined
+          description: The analyst's verdict. Set from the close reason when the case closes; editable.
+        ai_verdict:
+          $ref: 'case_ai_verdict.yaml'
+        closeLinkedInvestigations:
+          type: boolean
+          description: When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.
         version:
           description: >
             The current version of the case.

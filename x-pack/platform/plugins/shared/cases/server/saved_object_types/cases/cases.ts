@@ -33,6 +33,7 @@ import {
   modelVersion13,
   modelVersion14,
   modelVersion15,
+  modelVersion16,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -247,6 +248,22 @@ export const createCaseSavedObjectType = (
         type: 'keyword',
         ignore_above: 1024,
       },
+      close_reason: {
+        type: 'keyword',
+      },
+      human_verdict: {
+        type: 'keyword',
+      },
+      source: {
+        type: 'keyword',
+      },
+      ai_verdict: {
+        properties: {
+          verdict: {
+            type: 'keyword',
+          },
+        },
+      },
       severity: {
         type: 'short',
       },
@@ -358,6 +375,7 @@ export const createCaseSavedObjectType = (
     13: modelVersion13,
     14: modelVersion14,
     15: modelVersion15,
+    16: modelVersion16,
   },
   management: {
     importableAndExportable: true,

@@ -220,6 +220,7 @@ describe('update', () => {
         {
           caseId: mockCases[0].id,
           owner: mockCases[0].attributes.owner,
+          restricted: false,
           updatedFields: ['assignees'],
         },
         expect.anything()
@@ -252,6 +253,7 @@ describe('update', () => {
         {
           caseId: mockCases[0].id,
           owner: mockCases[0].attributes.owner,
+          restricted: false,
           updatedFields: ['status', 'status_key'],
         },
         expect.anything()
@@ -4957,10 +4959,7 @@ describe('update', () => {
       const updatedAttributes =
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
       expect(updatedAttributes.access).toEqual({ mode: CaseAccessMode.RESTRICTED });
-      expect(updatedAttributes.assignees).toEqual([
-        { uid: 'someone-else' },
-        { uid: actorUid },
-      ]);
+      expect(updatedAttributes.assignees).toEqual([{ uid: 'someone-else' }, { uid: actorUid }]);
     });
 
     it('throws when changing access without a platinum license', async () => {
@@ -5124,12 +5123,15 @@ describe('update', () => {
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalled();
     });
 
-    it('does not emit a caseUpdated event when the case becomes restricted', async () => {
+    it('emits a restricted-flagged caseUpdated event when the case becomes restricted', async () => {
       const theCase = buildCaseFixture();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [theCase] });
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [
-          { ...theCase, attributes: { ...theCase.attributes, access: { mode: CaseAccessMode.RESTRICTED } } },
+          {
+            ...theCase,
+            attributes: { ...theCase.attributes, access: { mode: CaseAccessMode.RESTRICTED } },
+          },
         ],
       });
 
@@ -5147,7 +5149,16 @@ describe('update', () => {
         restrictedCasesClientMock
       );
 
-      expect(clientArgs.casesEventBus.emitCaseUpdated).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          restricted: true,
+          updatedFields: ['access', 'assignees'],
+        },
+        expect.anything()
+      );
     });
 
     it('refuses to remove the last assignee of a restricted case', async () => {

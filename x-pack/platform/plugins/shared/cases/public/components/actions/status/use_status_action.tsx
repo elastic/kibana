@@ -150,7 +150,8 @@ export const useStatusAction = ({
       selectedCases: CasesUI,
       status: CaseStatuses | CaseStatusConfiguration,
       closeReason?: string,
-      pauseReason?: string
+      pauseReason?: string,
+      closeOptions?: { closeLinkedInvestigations?: boolean }
     ) => {
       onAction();
       // A bare category lands on its default status.
@@ -162,6 +163,9 @@ export const useStatusAction = ({
         id: theCase.id,
         version: theCase.version,
         closeReason,
+        ...(closeOptions?.closeLinkedInvestigations != null && {
+          closeLinkedInvestigations: closeOptions.closeLinkedInvestigations,
+        }),
       }));
 
       updateCases(

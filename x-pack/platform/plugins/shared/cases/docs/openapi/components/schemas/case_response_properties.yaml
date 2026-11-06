@@ -139,6 +139,24 @@ properties:
     $ref: 'case_status.yaml'
   status_key:
     $ref: 'case_status_key.yaml'
+  close_reason:
+    type: string
+    nullable: true
+    description: Why the case was closed. Set when the case closes with a reason and cleared when it reopens.
+  human_verdict:
+    type: string
+    nullable: true
+    enum:
+      - true_positive
+      - false_positive
+      - benign_positive
+      - suspicious
+      - undetermined
+    description: The analyst's verdict. Set from the close reason when the case closes; editable.
+  ai_verdict:
+    $ref: 'case_ai_verdict.yaml'
+  source:
+    $ref: 'case_source.yaml'
   paused_at:
     type: string
     format: date-time

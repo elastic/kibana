@@ -54,6 +54,7 @@ export const useCasesConfig = () => {
       customStatusesEnabled: config?.customStatuses?.enabled ?? false,
       restrictedCasesEnabled: config?.restrictedCases?.enabled ?? false,
       bidirectionalSyncEnabled: config?.bidirectionalSync?.enabled ?? false,
+      agenticEnabled: config?.agentic?.enabled ?? false,
     }),
     [
       config?.attachments?.enabled,
@@ -63,6 +64,7 @@ export const useCasesConfig = () => {
       config?.customStatuses?.enabled,
       config?.restrictedCases?.enabled,
       config?.bidirectionalSync?.enabled,
+      config?.agentic?.enabled,
     ]
   );
 };

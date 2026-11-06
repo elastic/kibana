@@ -13,10 +13,13 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type {
+  CloseReasonConfiguration,
+  ConfigurationAttributes,
+} from '../../../common/types/domain';
+import { OBSERVABILITY_OWNER, CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { decodeOrThrowZod } from '../../common/runtime_types';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,
@@ -225,6 +228,15 @@ function transformUpdateResponseToExternalModel(
   };
 }
 
+/**
+ * Observability doesn't track outcomes on cases by default, so its close modal stays as it was.
+ * Security and Stack offer both the alert close reasons and any case-defined ones.
+ */
+export const getDefaultCloseReasonConfiguration = (owner: string): CloseReasonConfiguration =>
+  owner === OBSERVABILITY_OWNER
+    ? { show: false, source: 'both', values: [] }
+    : { show: true, source: 'both', values: [] };
+
 function transformToExternalModel(
   configuration: SavedObject<ConfigurationPersistedAttributes>
 ): ConfigurationSavedObjectTransformed {
@@ -259,6 +271,9 @@ function transformToExternalModel(
   const statuses = (configuration.attributes.statuses ??
     []) as ConfigurationTransformedAttributes['statuses'];
   const pauseReasons = configuration.attributes.pauseReasons ?? [];
+  const closeReason =
+    configuration.attributes.closeReason ??
+    getDefaultCloseReasonConfiguration(configuration.attributes.owner);
 
   return {
     ...configuration,
@@ -272,6 +287,7 @@ function transformToExternalModel(
       workflowTags,
       statuses,
       pauseReasons,
+      closeReason,
     },
   };
 }

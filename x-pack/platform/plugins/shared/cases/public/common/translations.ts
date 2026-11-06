@@ -539,3 +539,28 @@ export const ACCESS_EVERYONE = i18n.translate('xpack.cases.access.everyone', {
 export const ACCESS_RESTRICTED = i18n.translate('xpack.cases.access.restricted', {
   defaultMessage: 'Restricted',
 });
+
+export const FILTER_FROM_ALERTZERO = i18n.translate('xpack.cases.allCases.filter.fromAlertZero', {
+  defaultMessage: 'Opened from AlertZero',
+});
+
+export const SOURCE_COLUMN = i18n.translate('xpack.cases.allCases.column.source', {
+  defaultMessage: 'Source',
+});
+
+export const AI_VERDICT_COLUMN = i18n.translate('xpack.cases.allCases.column.aiVerdict', {
+  defaultMessage: 'AI verdict',
+});
+
+export const SOURCE_LABELS = {
+  alertzero: i18n.translate('xpack.cases.allCases.source.alertzero', {
+    defaultMessage: 'AlertZero',
+  }),
+  user: i18n.translate('xpack.cases.allCases.source.user', { defaultMessage: 'Manual' }),
+  rule: i18n.translate('xpack.cases.allCases.source.rule', { defaultMessage: 'Rule' }),
+  workflow: i18n.translate('xpack.cases.allCases.source.workflow', {
+    defaultMessage: 'Workflow',
+  }),
+  agent: i18n.translate('xpack.cases.allCases.source.agent', { defaultMessage: 'Agent' }),
+  api: i18n.translate('xpack.cases.allCases.source.api', { defaultMessage: 'API' }),
+};

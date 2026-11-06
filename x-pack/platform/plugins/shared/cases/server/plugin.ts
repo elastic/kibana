@@ -552,6 +552,7 @@ export class CasePlugin
         getCasesClient: this.getCasesClientWithRequest(core, 'external_sync'),
         isAtLeastEnterprise: () => licensingService.isAtLeastEnterprise(),
         logger: this.logger,
+        pushRestrictedCases: this.caseConfig.agentic.enabled,
       });
     }
 

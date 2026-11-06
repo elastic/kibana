@@ -1,0 +1,10 @@
+type: string
+description: Where the case came from.
+enum:
+  - user
+  - alertzero
+  - rule
+  - workflow
+  - agent
+  - api
+example: user

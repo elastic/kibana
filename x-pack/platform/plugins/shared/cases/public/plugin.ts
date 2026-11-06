@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
+import { caseViewSectionRegistry } from './client/case_view_sections';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -126,6 +127,9 @@ export class CasesUiPlugin
           this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
+      caseView: {
+        registerSection: (section) => caseViewSectionRegistry.register(section),
+      },
     };
   }
 
@@ -186,6 +190,7 @@ export class CasesUiPlugin
         runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
         customStatusesEnabled: config?.customStatuses?.enabled ?? false,
         bidirectionalSyncEnabled: config?.bidirectionalSync?.enabled ?? false,
+        agenticEnabled: config?.agentic?.enabled ?? false,
       },
       api: createClientAPI({ http: core.http }),
       ui: {

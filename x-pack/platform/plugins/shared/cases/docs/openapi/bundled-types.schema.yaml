@@ -145,6 +145,7 @@ paths:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/searchFields'
         - $ref: '#/components/parameters/severity'
+        - $ref: '#/components/parameters/source_filter'
         - $ref: '#/components/parameters/sortField'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/status'
@@ -393,6 +394,8 @@ paths:
                       $ref: '#/components/schemas/case_statuses_configuration'
                     pauseReasons:
                       $ref: '#/components/schemas/pause_reasons_configuration'
+                    closeReason:
+                      $ref: '#/components/schemas/case_close_reason_configuration'
                     templates:
                       $ref: '#/components/schemas/templates'
                     workflowTags:
@@ -610,6 +613,8 @@ paths:
                     $ref: '#/components/schemas/case_statuses_configuration'
                   pauseReasons:
                     $ref: '#/components/schemas/pause_reasons_configuration'
+                  closeReason:
+                    $ref: '#/components/schemas/case_close_reason_configuration'
                   templates:
                     $ref: '#/components/schemas/templates'
                   workflowTags:
@@ -829,6 +834,8 @@ paths:
                     $ref: '#/components/schemas/case_statuses_configuration'
                   pauseReasons:
                     $ref: '#/components/schemas/pause_reasons_configuration'
+                  closeReason:
+                    $ref: '#/components/schemas/case_close_reason_configuration'
                   templates:
                     $ref: '#/components/schemas/templates'
                   workflowTags:
@@ -2812,6 +2819,16 @@ components:
           - low
           - medium
       example: low
+    source_filter:
+      in: query
+      name: source
+      description: Filters the returned cases by where they came from.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/case_source'
+          - type: array
+            items:
+              $ref: '#/components/schemas/case_source'
     sortField:
       in: query
       name: sortField
@@ -3073,6 +3090,65 @@ components:
             - default
             - restricted
           example: default
+    case_source:
+      type: string
+      description: Where the case came from.
+      enum:
+        - user
+        - alertzero
+        - rule
+        - workflow
+        - agent
+        - api
+      example: user
+    case_verdict:
+      type: string
+      description: The analyst's or agent's verdict on the case.
+      enum:
+        - true_positive
+        - false_positive
+        - benign_positive
+        - suspicious
+        - undetermined
+      example: true_positive
+    case_ai_verdict:
+      type: object
+      nullable: true
+      description: The verdict an agent reached, with its confidence and who set it.
+      required:
+        - verdict
+      properties:
+        verdict:
+          $ref: '#/components/schemas/case_verdict'
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: How confident the agent is in the verdict, from 0 to 1.
+        actor:
+          type: object
+          nullable: true
+          description: Who set the verdict.
+          required:
+            - type
+          properties:
+            type:
+              type: string
+            id:
+              type: string
+              nullable: true
+            name:
+              type: string
+              nullable: true
+            run_id:
+              type: string
+              nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the verdict was last set.
     assignees:
       type: array
       description: An array containing users that are assigned to the case.
@@ -3467,6 +3543,10 @@ components:
       properties:
         access:
           $ref: '#/components/schemas/case_access'
+        source:
+          $ref: '#/components/schemas/case_source'
+        ai_verdict:
+          $ref: '#/components/schemas/case_ai_verdict'
         assignees:
           $ref: '#/components/schemas/assignees'
         connector:
@@ -4106,6 +4186,24 @@ components:
           $ref: '#/components/schemas/case_status'
         status_key:
           $ref: '#/components/schemas/case_status_key'
+        close_reason:
+          type: string
+          nullable: true
+          description: Why the case was closed. Set when the case closes with a reason and cleared when it reopens.
+        human_verdict:
+          type: string
+          nullable: true
+          enum:
+            - true_positive
+            - false_positive
+            - benign_positive
+            - suspicious
+            - undetermined
+          description: The analyst's verdict. Set from the close reason when the case closes; editable.
+        ai_verdict:
+          $ref: '#/components/schemas/case_ai_verdict'
+        source:
+          $ref: '#/components/schemas/case_source'
         paused_at:
           type: string
           format: date-time
@@ -4301,6 +4399,21 @@ components:
                 $ref: '#/components/schemas/case_title'
               closeReason:
                 $ref: '#/components/schemas/case_close_sync_reason'
+              human_verdict:
+                type: string
+                nullable: true
+                enum:
+                  - true_positive
+                  - false_positive
+                  - benign_positive
+                  - suspicious
+                  - undetermined
+                description: The analyst's verdict. Set from the close reason when the case closes; editable.
+              ai_verdict:
+                $ref: '#/components/schemas/case_ai_verdict'
+              closeLinkedInvestigations:
+                type: boolean
+                description: When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.
               version:
                 description: |
                   The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
@@ -4518,6 +4631,26 @@ components:
         - Awaiting vendor
         - Awaiting another team
         - Scheduled work
+    case_close_reason_configuration:
+      type: object
+      description: Whether closing a case asks for a close reason, and which reasons it offers.
+      properties:
+        show:
+          type: boolean
+          description: Whether closing a case asks for a close reason.
+        source:
+          type: string
+          description: Where the offered reasons come from.
+          enum:
+            - alerts
+            - cases
+            - both
+        values:
+          type: array
+          description: The close reasons offered for cases.
+          maxItems: 50
+          items:
+            type: string
     template_tags:
       description: |
         The words and phrases that help categorize templates. It can be an empty array.
@@ -4701,6 +4834,8 @@ components:
           $ref: '#/components/schemas/case_statuses_configuration'
         pauseReasons:
           $ref: '#/components/schemas/pause_reasons_configuration'
+        closeReason:
+          $ref: '#/components/schemas/case_close_reason_configuration'
         templates:
           $ref: '#/components/schemas/templates'
         workflowTags:
@@ -4793,6 +4928,8 @@ components:
           $ref: '#/components/schemas/case_statuses_configuration'
         pauseReasons:
           $ref: '#/components/schemas/pause_reasons_configuration'
+        closeReason:
+          $ref: '#/components/schemas/case_close_reason_configuration'
         externalSync:
           $ref: '#/components/schemas/external_sync_settings'
         externalSyncFields:

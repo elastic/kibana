@@ -63,10 +63,11 @@ describe('create', () => {
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(clientArgs.request, {
         caseId: caseSO.id,
         owner: caseSO.attributes.owner,
+        restricted: false,
       });
     });
 
-    it('does not emit a caseCreated event for a restricted case', async () => {
+    it('emits a restricted-flagged caseCreated event for a restricted case', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
 
@@ -75,9 +76,17 @@ describe('create', () => {
         attributes: { ...caseSO.attributes, access: { mode: CaseAccessMode.RESTRICTED } },
       });
 
-      await create({ ...theCase, access: { mode: CaseAccessMode.RESTRICTED } }, clientArgs, casesClientMock);
+      await create(
+        { ...theCase, access: { mode: CaseAccessMode.RESTRICTED } },
+        clientArgs,
+        casesClientMock
+      );
 
-      expect(clientArgs.casesEventBus.emitCaseCreated).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(clientArgs.request, {
+        caseId: caseSO.id,
+        owner: caseSO.attributes.owner,
+        restricted: true,
+      });
     });
   });
 
@@ -94,7 +103,11 @@ describe('create', () => {
 
     it('persists the access field and auto-assigns the creator', async () => {
       await create(
-        { ...theCase, assignees: [{ uid: 'someone-else' }], access: { mode: CaseAccessMode.RESTRICTED } },
+        {
+          ...theCase,
+          assignees: [{ uid: 'someone-else' }],
+          access: { mode: CaseAccessMode.RESTRICTED },
+        },
         clientArgs,
         casesClientMock
       );
@@ -122,7 +135,11 @@ describe('create', () => {
     it('ignores the access field when the feature is disabled', async () => {
       clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: false } };
 
-      await create({ ...theCase, access: { mode: CaseAccessMode.RESTRICTED } }, clientArgs, casesClientMock);
+      await create(
+        { ...theCase, access: { mode: CaseAccessMode.RESTRICTED } },
+        clientArgs,
+        casesClientMock
+      );
 
       const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
       expect(attributes.access).toBeUndefined();

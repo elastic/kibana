@@ -12,6 +12,9 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
+          "agentic": Object {
+            "enabled": true,
+          },
           "analytics": Object {
             "index": Object {
               "enabled": false,

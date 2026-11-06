@@ -106,6 +106,12 @@ export const create = async (
     const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data);
     let query = emptyCaseAssigneesSanitizer(rawQuery);
 
+    // The source and AI verdict are ignored on write while agentic cases are disabled.
+    if (!clientArgs.config.agentic.enabled) {
+      const { source: _source, ai_verdict: _aiVerdict, ...queryWithoutAgentic } = query;
+      query = queryWithoutAgentic;
+    }
+
     // The access field is ignored on write while the restricted-cases feature
     // is disabled.
     if (!clientArgs.config.restrictedCases.enabled && query.access !== undefined) {
@@ -610,13 +616,12 @@ export const create = async (
       });
     }
 
-    // workflow triggers never fire for restricted cases
-    if (!isCaseRestricted(createdCase)) {
-      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
-        caseId: createdCase.id,
-        owner: createdCase.owner as Owner,
-      });
-    }
+    // Restricted cases emit too; the Workflows bridge drops them (see event_bridge.ts).
+    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+      caseId: createdCase.id,
+      owner: createdCase.owner as Owner,
+      restricted: isCaseRestricted(createdCase),
+    });
 
     return createdCase;
   } catch (error) {

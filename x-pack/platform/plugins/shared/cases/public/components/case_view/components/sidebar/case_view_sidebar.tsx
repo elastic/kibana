@@ -23,6 +23,8 @@ import type { CaseUI } from '../../../../../common';
 import type { CaseConnector } from '../../../../../common/types/domain';
 import * as i18n from '../../translations';
 import { AttributesFields } from './attributes_fields';
+import { VerdictSection, useShowVerdictSection } from './verdict_section';
+import { VERDICT_TITLE } from '../../../verdict/translations';
 import { EditConnector } from '../../../edit_connector';
 import { CustomFieldsSection } from './custom_fields_section';
 import { TemplateFields } from '../template_fields';
@@ -58,6 +60,7 @@ export interface CaseViewSidebarProps {
 
 export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
   const { euiTheme } = useEuiTheme();
+  const showVerdictSection = useShowVerdictSection(caseData);
   const fieldsGroupStyles = useMemo(() => css({ gap: euiTheme.size.m }), [euiTheme]);
 
   const { width, sidebarRef, onPointerDown, onKeyDown } = useSidebarResize();
@@ -289,7 +292,19 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
             <EuiScreenReaderOnly>
               <h2>{i18n.CASE_SETTINGS}</h2>
             </EuiScreenReaderOnly>
+            {showVerdictSection ? (
+              <SidebarAccordionSection
+                id="verdict"
+                title={VERDICT_TITLE}
+                isOpen={isOpen('verdict')}
+                onToggle={onToggle}
+                data-test-subj="case-view-sidebar-verdict"
+              >
+                <VerdictSection caseData={caseData} />
+              </SidebarAccordionSection>
+            ) : null}
             <SidebarAccordionSection
+              withDivider={showVerdictSection}
               id="attributes"
               title={i18n.ATTRIBUTES_TITLE}
               isOpen={isOpen('attributes')}

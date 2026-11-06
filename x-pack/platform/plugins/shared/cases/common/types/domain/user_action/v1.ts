@@ -17,6 +17,7 @@ import {
 } from './source/v1';
 import { UserActionActionsSchema } from './action/v1';
 import { AccessUserActionSchema } from './access/v1';
+import { AiVerdictUserActionSchema, HumanVerdictUserActionSchema } from './verdict/v1';
 import { AssigneesUserActionSchema } from './assignees/v1';
 import { CategoryUserActionSchema } from './category/v1';
 import type { CommentUserActionPayloadWithoutIdsSchema } from './comment/v1';
@@ -120,6 +121,8 @@ const BasicUserActionsSchema = lazySchema(() =>
     DeleteTaskUserActionSchema,
     ApplyTaskTemplateUserActionSchema,
     SyncUserActionSchema,
+    AiVerdictUserActionSchema,
+    HumanVerdictUserActionSchema,
   ])
 );
 
@@ -188,6 +191,8 @@ export type UserAction<T extends UserActionPayload = UserActionPayload> = Omit<
  * User actions
  */
 export type AccessUserAction = UserAction<z.infer<typeof AccessUserActionSchema>>;
+export type AiVerdictUserAction = UserAction<z.infer<typeof AiVerdictUserActionSchema>>;
+export type HumanVerdictUserAction = UserAction<z.infer<typeof HumanVerdictUserActionSchema>>;
 export type AssigneesUserAction = UserAction<z.infer<typeof AssigneesUserActionSchema>>;
 export type CategoryUserAction = UserAction<z.infer<typeof CategoryUserActionSchema>>;
 export type CommentUserAction = UserAction<z.infer<typeof CommentUserActionSchema>>;

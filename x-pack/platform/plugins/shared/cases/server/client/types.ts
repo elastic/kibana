@@ -96,6 +96,7 @@ export type CasesSearchParams = Partial<
     | 'sortField'
     | 'customFields'
     | 'access'
+    | 'source'
   > & { authorizationFilter?: KueryNode }
 >;
 

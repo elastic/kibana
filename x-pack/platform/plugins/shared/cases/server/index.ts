@@ -31,6 +31,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     bidirectionalSync: {
       enabled: true,
     },
+    agentic: {
+      enabled: true,
+    },
     attachments: {
       enabled: true,
     },

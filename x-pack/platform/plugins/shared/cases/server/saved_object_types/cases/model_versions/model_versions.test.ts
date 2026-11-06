@@ -24,6 +24,7 @@ import {
   modelVersion13,
   modelVersion14,
   modelVersion15,
+  modelVersion16,
 } from '.';
 
 describe('Model versions', () => {
@@ -402,6 +403,22 @@ describe('Model versions', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('version 16', () => {
+    it('maps the outcome fields and the source, with no backfill', () => {
+      expect(modelVersion16.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            close_reason: { type: 'keyword' },
+            human_verdict: { type: 'keyword' },
+            source: { type: 'keyword' },
+            ai_verdict: { properties: { verdict: { type: 'keyword' } } },
+          },
+        },
+      ]);
     });
   });
 });

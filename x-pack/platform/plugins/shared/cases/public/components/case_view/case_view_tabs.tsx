@@ -11,7 +11,15 @@ import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
-import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB, TASKS_TAB } from './translations';
+import {
+  ACTIVITY_TAB,
+  ATTACHMENTS_TAB,
+  RELATED_TAB,
+  SIMILAR_CASES_TAB,
+  TASKS_TAB,
+} from './translations';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { caseViewSectionRegistry } from '../../client/case_view_sections';
 import { type CaseUI } from '../../../common';
 import {
   ATTACHMENT_TAB_ALIASES,
@@ -53,6 +61,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   const totalTasks = tasksData?.tasks.length ?? 0;
   const completedTasks = tasksData?.tasks.filter(isTaskFinished).length ?? 0;
 
+  const { agenticEnabled } = useCasesConfig();
   const { data: similarCasesData } = useGetSimilarCases({
     caseId: caseData.id,
     perPage: 0,
@@ -61,6 +70,16 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   });
 
   const isAttachmentsTabActive = ATTACHMENT_TAB_ALIASES.has(activeTab);
+  // Related counts the similar cases plus what plugins link to the case (investigations).
+  const relatedSectionsCount = agenticEnabled
+    ? caseViewSectionRegistry
+        .getVisible('related', caseData)
+        .reduce((total, section) => total + (section.getCount?.(caseData) ?? 0), 0)
+    : 0;
+  const relatedCount =
+    similarCasesData?.total != null || relatedSectionsCount > 0
+      ? (similarCasesData?.total ?? 0) + relatedSectionsCount
+      : undefined;
 
   const tabs: Tab[] = useMemo(
     () => [
@@ -81,14 +100,10 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       },
       {
         id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
-        name: SIMILAR_CASES_TAB,
-        badge: (
-          <SimilarCasesBadge
-            activeTab={activeTab}
-            euiTheme={euiTheme}
-            count={similarCasesData?.total}
-          />
-        ),
+        // With agentic cases on, Similar cases becomes Related: the same similar cases, plus what
+        // other plugins link to the case (investigations).
+        name: agenticEnabled ? RELATED_TAB : SIMILAR_CASES_TAB,
+        badge: <SimilarCasesBadge activeTab={activeTab} euiTheme={euiTheme} count={relatedCount} />,
       },
       ...(tasksAuthorized
         ? [
@@ -114,7 +129,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       isAttachmentsTabActive,
       completedTasks,
       totalTasks,
-      similarCasesData?.total,
+      relatedCount,
+      agenticEnabled,
       tasksAuthorized,
       totalAttachments,
     ]

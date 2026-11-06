@@ -32,6 +32,8 @@ interface GetBadgesArgs {
     isMenuDisabled: boolean;
     onAccessChanged: (mode: CaseAccessMode) => void;
   };
+  /** Show where the case came from (agentic cases on). */
+  showSource?: boolean;
 }
 
 export const getBadges = ({
@@ -43,6 +45,7 @@ export const getBadges = ({
   onStatusChanged,
   onSeverityChanged,
   access,
+  showSource = false,
 }: GetBadgesArgs): AppHeaderBadge[] => {
   const result: AppHeaderBadge[] = [];
 
@@ -125,6 +128,19 @@ export const getBadges = ({
       renderCustomBadge: ({ badgeText }) => (
         <EuiBadge color="danger" data-test-subj="case-view-alerts-count-badge">
           <EuiIcon type="warning" size="s" aria-hidden={true} /> {badgeText}
+        </EuiBadge>
+      ),
+    });
+  }
+
+  if (showSource && caseData.source === 'alertzero') {
+    result.push({
+      label: i18n.SOURCE_BADGE_ALERTZERO,
+      color: 'hollow',
+      'data-test-subj': 'case-view-source-badge',
+      renderCustomBadge: ({ badgeText }) => (
+        <EuiBadge color="hollow" data-test-subj="case-view-source-badge">
+          {badgeText}
         </EuiBadge>
       ),
     });

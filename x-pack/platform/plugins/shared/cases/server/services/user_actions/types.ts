@@ -25,6 +25,8 @@ import type {
   CaseStatuses,
   User,
   CaseAccess,
+  CaseAiVerdict,
+  CaseVerdict,
   CaseAssignees,
   CaseCustomFields,
   ExternalSyncSettings,
@@ -91,6 +93,12 @@ export interface BuilderParameters {
   };
   access: {
     parameters: { payload: { access: CaseAccess } };
+  };
+  ai_verdict: {
+    parameters: { payload: { ai_verdict: CaseAiVerdict | null } };
+  };
+  human_verdict: {
+    parameters: { payload: { human_verdict: CaseVerdict | null } };
   };
   pushed: {
     parameters: {
