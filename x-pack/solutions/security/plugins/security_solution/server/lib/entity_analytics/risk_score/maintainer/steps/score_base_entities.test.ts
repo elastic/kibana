@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -47,13 +48,14 @@ const baseParams = {
 
 // Build a fake ES|QL row in the column order parseEsqlBaseScoreRow expects:
 // [alert_count, scores, risk_inputs, alert_sources, entity_id]
-const esqlRow = (entityId: string, alertCount = 1, sources: string | string[] = '1:okta') => [
-  alertCount,
-  0.5,
-  '{"risk_score":"50","time":"2026-01-01T00:00:00.000Z","id":"a"}',
-  sources,
-  entityId,
-];
+const esqlRow = (entityId: string, alertCount = 1, sources: string | string[] = '1:okta') =>
+  [
+    alertCount,
+    0.5,
+    '{"risk_score":"50","time":"2026-01-01T00:00:00.000Z","id":"a"}',
+    sources,
+    entityId,
+  ] as FieldValue[];
 
 // Composite agg page: pass entityIds as bucket keys, optional after_key for
 // the next page (omitted means terminal page).
