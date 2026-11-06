@@ -27,7 +27,7 @@ function WorkflowGraphSettingsGroupNodeInner(
 ) {
   const { hasSelection } = node.data;
   const { euiTheme } = useEuiTheme();
-  const borderRadius = euiTheme.border.radius.small ?? 4;
+  const borderRadius = euiTheme.border.radius.panel;
 
   return (
     <div

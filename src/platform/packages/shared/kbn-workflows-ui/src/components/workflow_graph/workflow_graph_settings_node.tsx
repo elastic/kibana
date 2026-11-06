@@ -38,6 +38,7 @@ function WorkflowGraphSettingsNodeInner(
   const { onSettingsNodeSelect } = useWorkflowGraphActions();
   const isActive = node.selected;
   const borderRadius = euiTheme.border.radius.small ?? 4;
+  const chipBorderRadius = euiTheme.border.radius.control;
   const chipSize = compact ? COMPACT_CHIP_SIZE : CHIP_SIZE;
 
   const select = () => {
@@ -102,7 +103,7 @@ function WorkflowGraphSettingsNodeInner(
           height: chipSize,
           background: euiTheme.colors.backgroundBaseSubdued,
           border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-          borderRadius,
+          borderRadius: chipBorderRadius,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
