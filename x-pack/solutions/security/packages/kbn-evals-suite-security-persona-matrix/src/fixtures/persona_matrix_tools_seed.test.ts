@@ -8,6 +8,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
+import { PARITY_WORKFLOWS } from './parity_workflows';
 
 const mockSinkClose = jest.fn(async () => {});
 
@@ -56,6 +57,8 @@ interface ClientOptions {
   postBehavior?: 'ok' | 'conflict';
   skills?: string[];
   caseIds?: string[];
+  /** Overrides what GET on an existing workflow returns as `yaml` (default: the seeded yaml). */
+  existingWorkflowYaml?: string;
   baseUrl?: string;
   /** What GET on the stub connector id returns after a 409. `'error'` makes the GET throw. */
   existingConnector?: { connector_type_id: string; config?: { url?: string } } | 'error';
@@ -69,12 +72,13 @@ const createClient = ({
   postBehavior = 'ok',
   skills = [...CHRYSALIS_PARITY_AGENT.skillIds],
   caseIds = [],
+  existingWorkflowYaml,
   baseUrl = 'http://elastic:changeme@localhost:5620',
   existingConnector = { connector_type_id: '.http', config: { url: 'http://127.0.0.1:38465' } },
 }: ClientOptions = {}): MockClient => ({
   // Real KbnClient keeps `user:pass@` in resolveUrl().
   resolveUrl: jest.fn((relative: string) => `${baseUrl}${relative}`),
-  request: jest.fn(async ({ method, path }: Req) => {
+  request: jest.fn(async ({ method, path, query }: Req) => {
     if (method === 'GET' && path === AGENT_TOOLS_PATH) {
       // Real KbnClient.request envelope: the payload lives under `data`.
       return { data: agent };
@@ -86,8 +90,19 @@ const createClient = ({
       if (existingConnector === 'error') throw Object.assign(new Error('boom'), { status: 500 });
       return { data: existingConnector };
     }
+    if (method === 'GET' && path.startsWith('/api/workflows/workflow/')) {
+      const seeded = PARITY_WORKFLOWS.find((w) => path.endsWith(`/${w.id}`));
+      return { data: { yaml: existingWorkflowYaml ?? seeded?.yaml } };
+    }
     if (method === 'GET' && path === '/api/cases/_find') {
-      return { data: { cases: caseIds.map((id) => ({ id })) } };
+      const perPage = Number(query?.perPage ?? 20);
+      const page = Number(query?.page ?? 1);
+      return {
+        data: {
+          cases: caseIds.slice((page - 1) * perPage, page * perPage).map((id) => ({ id })),
+          total: caseIds.length,
+        },
+      };
     }
     if (method === 'POST') {
       if (postBehavior === 'conflict') {
@@ -334,7 +349,6 @@ describe('persona_matrix_tools_seed', () => {
 
     it('wires each workflow tool to a seeded workflow id', async () => {
       const { seedPersonaMatrixTools } = await load('parity');
-      const { PARITY_WORKFLOWS } = await import('./parity_workflows');
       const client = createClient();
 
       await seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
@@ -444,6 +458,30 @@ describe('persona_matrix_tools_seed', () => {
     });
   });
 
+  describe('pre-existing workflow with the same id', () => {
+    it('refuses to bind parity tools to a workflow whose definition differs from the seed', async () => {
+      const mod = await load('parity');
+      const client = createClient({
+        postBehavior: 'conflict',
+        existingWorkflowYaml: 'name: create-channel\nsteps:\n  - type: slack\n',
+      });
+
+      await expect(
+        mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, profile: 'chrysalis-parity' })
+      ).rejects.toThrow(/differs from the seeded one/);
+      expect(posts(client, '/api/agent_builder/agents')).toHaveLength(0);
+    });
+
+    it('reuses a pre-existing workflow whose yaml equals the seed', async () => {
+      const mod = await load('parity');
+      const client = createClient({ postBehavior: 'conflict' });
+
+      await expect(
+        mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, profile: 'chrysalis-parity' })
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('cleanupPersonaMatrixTools', () => {
     it('never closes the sink: other workers share it and it dies with the process', async () => {
       mockSinkClose.mockClear();
@@ -483,7 +521,7 @@ describe('persona_matrix_tools_seed', () => {
         expect.objectContaining({
           method: 'GET',
           path: '/api/cases/_find',
-          query: { tags: 'chrysalis' },
+          query: expect.objectContaining({ tags: 'persona-matrix-parity', perPage: 100, page: 1 }),
         })
       );
       expect(log.warning).not.toHaveBeenCalled();
@@ -503,10 +541,59 @@ describe('persona_matrix_tools_seed', () => {
       expect(calls(client).filter((req) => req.method === 'DELETE')).toHaveLength(0);
     });
 
-    it('issues no case delete when no tagged cases exist', async () => {
+    it('skips case cleanup entirely when this run did not create the create-case workflow', async () => {
+      const mod = await load('parity');
+      const client = createClient({ postBehavior: 'conflict', caseIds: ['someone-elses'] });
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        profile: 'chrysalis-parity',
+      });
+
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      expect(calls(client).filter((req) => req.path.startsWith('/api/cases'))).toHaveLength(0);
+    });
+
+    it('skips case cleanup on a minimal run that never seeds workflows', async () => {
       const mod = await load('minimal');
-      const client = createClient();
+      const client = createClient({ caseIds: ['x'] });
       await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      expect(calls(client).filter((req) => req.path.startsWith('/api/cases'))).toHaveLength(0);
+    });
+
+    it('pages through every tagged case and deletes them in chunks, only those opened since the workflow was created', async () => {
+      const mod = await load('parity');
+      const ids = Array.from({ length: 250 }, (_, i) => `case-${i}`);
+      const client = createClient({ caseIds: ids });
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        profile: 'chrysalis-parity',
+      });
+
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      const finds = calls(client).filter((req) => req.path === '/api/cases/_find');
+      expect(finds.map((req) => req.query?.page)).toEqual([1, 2, 3]);
+      expect(finds[0].query?.from).toEqual(expect.any(String));
+      const deleted = calls(client)
+        .filter((req) => req.method === 'DELETE' && req.path.startsWith('/api/cases?'))
+        .flatMap((req) => JSON.parse(decodeURIComponent(req.path.split('ids=')[1])));
+      expect(deleted).toEqual(ids);
+    });
+
+    it('issues no case delete when no tagged cases exist', async () => {
+      const mod = await load('parity');
+      const client = createClient();
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        profile: 'chrysalis-parity',
+      });
 
       await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
 

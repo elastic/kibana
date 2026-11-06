@@ -9,6 +9,8 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { personaMatrixDataset } from '../datasets';
+import { type AgentProfile, withProfileExpectedTools } from '../agent_profile';
+import { PERSONA_MATRIX_PARITY_TOOL_IDS } from './persona_matrix_tools_seed';
 
 /**
  * Collects every expectedTools entry declared across the dataset's examples.
@@ -97,15 +99,18 @@ export async function assertPersonaMatrixToolsRegistered({
   log,
   examples = personaMatrixDataset,
   agentId = agentBuilderDefaultAgentId,
+  profile = 'default',
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
+  /** Agent profile; the parity agent is checked against its own tool ids. */
+  profile?: AgentProfile;
   /** Agent the run converses with; its configuration must carry the custom tools. */
   agentId?: string;
   /** Examples that will actually run; tools of filtered-out examples are not required. */
   examples?: Array<{ metadata?: { expectedTools?: string[] } }>;
 }): Promise<void> {
-  const expected = collectExpectedToolIds(examples);
+  const expected = collectExpectedToolIds(withProfileExpectedTools(examples, profile));
   // Custom (eval-seeded) tools must be registered by the suite; built-ins
   // (platform.* / security.*) are not seeded, so they skip the registration
   // check here and are asserted against the public tools list separately below.
@@ -153,10 +158,13 @@ export async function assertPersonaMatrixToolsRegistered({
   // tools attached to the agent's configuration plus `defaultAgentToolIds`.
   // A registered-but-unattached tool is invisible to the model, which zeroes
   // ExpectedToolCalled while every other signal looks healthy.
-  if (custom.length === 0) {
+  // Parity tool ids contain dots, so the custom filter above misses them.
+  const parityIds: readonly string[] = PERSONA_MATRIX_PARITY_TOOL_IDS;
+  const mustBeAttached = [...custom, ...expected.filter((id) => parityIds.includes(id))];
+  if (mustBeAttached.length === 0) {
     return;
   }
-  const unattached = await findUnattachedToolIds(kbnClient, custom, agentId);
+  const unattached = await findUnattachedToolIds(kbnClient, mustBeAttached, agentId);
   if (unattached.length > 0) {
     throw new Error(
       `[persona-matrix] pre-flight tool-attachment check failed: tools registered but not attached ` +
@@ -164,7 +172,7 @@ export async function assertPersonaMatrixToolsRegistered({
         `Call seedPersonaMatrixTools, which attaches them, before running the suite.`
     );
   }
-  log.info(`[persona-matrix] pre-flight: custom tools attached to '${agentId}'`);
+  log.info(`[persona-matrix] pre-flight: expected tools attached to '${agentId}'`);
 }
 
 export async function findUnattachedToolIds(

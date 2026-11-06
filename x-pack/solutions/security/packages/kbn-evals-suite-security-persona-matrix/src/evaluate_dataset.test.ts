@@ -26,6 +26,7 @@ import {
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
 import type { PersonaMatrixChatClient } from './chat_client';
+import type { AgentProfile } from './agent_profile';
 import {
   PERSONA_MATRIX_EXAMPLES,
   type PersonaMatrixExample,
@@ -1226,5 +1227,69 @@ describe('createEvaluatePersonaMatrixDataset rawResponse', () => {
     expect(withRaw.judged).toHaveLength(3);
     expect(withRaw.judged).toEqual(withoutRaw.judged);
     expect(JSON.stringify(withRaw.judged)).not.toContain('RAW');
+  });
+});
+
+describe('reporting identity per agent profile', () => {
+  const captureExperiment = async (agentProfile: AgentProfile) => {
+    const runExperiment = jest.fn(async () => {});
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: { query: jest.fn() } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {},
+        criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn() }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn() }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn() }),
+      } as unknown as DefaultEvaluators,
+      executorClient: { runExperiment } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+      agentProfile,
+    });
+    await evaluateDataset({
+      dataset: {
+        name: 'security: security-persona-matrix',
+        description: 'd',
+        examples: [baseExample],
+      },
+    });
+    return (
+      runExperiment.mock.calls as unknown as Array<
+        [
+          {
+            datasets: Array<{
+              name: string;
+              examples: Array<{ metadata?: Record<string, unknown> }>;
+            }>;
+            metadata: Record<string, unknown>;
+          }
+        ]
+      >
+    )[0][0];
+  };
+
+  it('keeps the established dataset and suite names for the default agent', async () => {
+    const experiment = await captureExperiment('default');
+    expect(experiment.datasets[0].name).toBe('security: security-persona-matrix');
+    expect(experiment.metadata).toMatchObject({
+      suite: 'security-persona-matrix',
+      agent_profile: 'default',
+    });
+    expect(experiment.datasets[0].examples[0].metadata).toMatchObject({ agentProfile: 'default' });
+  });
+
+  it('gives the parity agent its own dataset name, suite and per-example profile', async () => {
+    const experiment = await captureExperiment('chrysalis-parity');
+    expect(experiment.datasets[0].name).toBe(
+      'security: security-persona-matrix (chrysalis-parity)'
+    );
+    expect(experiment.metadata).toMatchObject({
+      suite: 'security-persona-matrix-chrysalis-parity',
+      agent_profile: 'chrysalis-parity',
+    });
+    expect(experiment.datasets[0].examples[0].metadata).toMatchObject({
+      agentProfile: 'chrysalis-parity',
+    });
   });
 });

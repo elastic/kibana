@@ -6,6 +6,7 @@
  */
 
 import {
+  buildRunInputs,
   createWorkflowValidityEvaluator,
   extractWorkflowYaml,
 } from './workflow_validity_evaluator';
@@ -673,5 +674,62 @@ describe('WorkflowValidity', () => {
         expect(result.metadata).toMatchObject({ outcome: 'run_skipped_external_connector' });
       });
     });
+  });
+});
+
+describe('run inputs', () => {
+  const withInputs = (inputs: string) =>
+    `name: demo\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n${inputs}steps:\n  - name: a\n    type: console\n    with:\n      message: "{{ inputs.message }}"\n`;
+
+  it('supplies fixture values for declared inputs without a default when it runs the workflow', async () => {
+    const { evaluator, calls } = setup();
+    await run(
+      evaluator,
+      `\`\`\`yaml\n${withInputs(
+        '  - name: message\n    type: string\n    required: true\n  - name: count\n    type: number\n    required: true\n'
+      )}\`\`\``
+    );
+    const started = calls.find((call) => call.path.endsWith('/run'));
+    expect(JSON.parse(started?.body as string)).toEqual({
+      inputs: { message: 'persona-matrix-fixture', count: 1 },
+    });
+  });
+
+  it('sends empty inputs for a workflow that declares none', async () => {
+    const { evaluator, calls } = setup();
+    await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+    const started = calls.find((call) => call.path.endsWith('/run'));
+    expect(JSON.parse(started?.body as string)).toEqual({ inputs: {} });
+  });
+
+  it('leaves declared defaults to the engine and fills the rest by type', () => {
+    expect(
+      buildRunInputs({
+        inputs: [
+          { name: 'a', type: 'string', default: 'x' },
+          { name: 'b', type: 'boolean' },
+          { name: 'c', type: 'array' },
+          { name: 'd', type: 'object' },
+          { name: 'e', type: 'choice', options: ['p', 'q'] },
+          { type: 'string' },
+        ],
+      })
+    ).toEqual({ b: true, c: [], d: {}, e: 'p' });
+  });
+
+  it('reads the JSON-schema inputs form', () => {
+    expect(
+      buildRunInputs({
+        inputs: {
+          properties: { summary: { type: 'string' }, n: { type: 'integer', default: 3 } },
+          required: ['summary'],
+        },
+      })
+    ).toEqual({ summary: 'persona-matrix-fixture' });
+  });
+
+  it('ignores malformed inputs declarations', () => {
+    expect(buildRunInputs({ inputs: 'nope' })).toEqual({});
+    expect(buildRunInputs({ inputs: ['x', null] })).toEqual({});
   });
 });
