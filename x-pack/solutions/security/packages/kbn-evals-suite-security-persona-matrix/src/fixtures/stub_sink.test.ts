@@ -94,6 +94,77 @@ describe('stub sink', () => {
     }
   });
 
+  describe('reuse probe', () => {
+    interface Seen {
+      method?: string;
+      url?: string;
+      host?: string;
+    }
+
+    /** A plain server on an ephemeral port that records what the probe sends. */
+    const listen = async (
+      respond: (res: http.ServerResponse) => void
+    ): Promise<{ port: number; seen: Seen[]; stop: () => Promise<void> }> => {
+      const seen: Seen[] = [];
+      const server = http.createServer((req, res) => {
+        seen.push({ method: req.method, url: req.url, host: req.headers.host });
+        respond(res);
+      });
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+      return {
+        port: (server.address() as AddressInfo).port,
+        seen,
+        stop: () =>
+          new Promise<void>((resolve) => {
+            server.close(() => resolve());
+            server.closeAllConnections();
+          }),
+      };
+    };
+
+    it('sends a GET for / to the sink host and port, then reuses a holder that answers with the marker', async () => {
+      const holder = await listen((res) => {
+        res.writeHead(200, { [SINK_MARKER_HEADER]: '1' });
+        res.end();
+      });
+      try {
+        const sink = await startStubSink({ port: holder.port });
+        expect(sink).toMatchObject({ owned: false, origin: `http://127.0.0.1:${holder.port}` });
+        expect(holder.seen).toEqual([
+          { method: 'GET', url: '/', host: `127.0.0.1:${holder.port}` },
+        ]);
+      } finally {
+        await holder.stop();
+      }
+    });
+
+    it('refuses a holder whose marker header has the wrong value', async () => {
+      const holder = await listen((res) => {
+        res.writeHead(200, { [SINK_MARKER_HEADER]: '0' });
+        res.end();
+      });
+      try {
+        await expect(startStubSink({ port: holder.port })).rejects.toThrow(
+          /not the persona-matrix stub sink/
+        );
+        expect(holder.seen).toHaveLength(1);
+      } finally {
+        await holder.stop();
+      }
+    });
+
+    it('refuses a holder that never answers, once the probe times out', async () => {
+      const holder = await listen(() => {});
+      try {
+        await expect(startStubSink({ port: holder.port })).rejects.toThrow(
+          /not the persona-matrix stub sink/
+        );
+      } finally {
+        await holder.stop();
+      }
+    });
+  });
+
   it('refuses a port held by something that is not our sink', async () => {
     const foreign = http.createServer((_req, res) => res.end('nope'));
     await new Promise<void>((resolve) => foreign.listen(0, '127.0.0.1', resolve));

@@ -46,13 +46,16 @@ const createSinkServer = (): http.Server =>
     req.on('error', () => {});
   });
 
-/** True when something on the origin answers with our marker header. */
-const isOurSink = (origin: string): Promise<boolean> =>
+/** True when something on the loopback port answers `GET /` with our marker header. */
+const isOurSink = (port: number): Promise<boolean> =>
   new Promise((resolve) => {
-    const req = http.get(origin, { agent: false, timeout: PROBE_TIMEOUT_MS }, (res) => {
-      res.resume();
-      resolve(res.headers[SINK_MARKER_HEADER] === '1');
-    });
+    const req = http.get(
+      { host: SINK_HOST, port, path: '/', agent: false, timeout: PROBE_TIMEOUT_MS },
+      (res) => {
+        res.resume();
+        resolve(res.headers[SINK_MARKER_HEADER] === '1');
+      }
+    );
     req.on('timeout', () => req.destroy());
     req.on('error', () => resolve(false));
   });
@@ -92,11 +95,10 @@ export const startStubSink = async ({
     });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'EADDRINUSE') throw error;
-    const origin = `http://${SINK_HOST}:${port}`;
-    if (!(await isOurSink(origin))) {
+    if (!(await isOurSink(port))) {
       throw new Error(`port ${port} is in use and is not the persona-matrix stub sink`);
     }
-    return { origin, owned: false, close: async () => {} };
+    return { origin: `http://${SINK_HOST}:${port}`, owned: false, close: async () => {} };
   }
 
   server.unref();
