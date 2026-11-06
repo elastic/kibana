@@ -8,6 +8,7 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
+import { getOmittedStepExecutionsCount } from '../../../../../common';
 import {
   buildStepDurations,
   EMPTY_STEP_DURATIONS,
@@ -254,9 +255,21 @@ export const selectIsEditorYamlExecutionSnapshot = createSelector(
 );
 
 /**
+ * Step executions the server reported but the detail view has not loaded (see the truncation
+ * callout). Step durations only aggregate the loaded ones, so repeated-step figures undercount
+ * while this is above 0.
+ */
+export const selectOmittedStepExecutionsCount = createSelector(
+  selectStepExecutionsTotal,
+  selectStepExecutionPages,
+  (total, pages) => getOmittedStepExecutionsCount(total, pages.length)
+);
+
+/**
  * Per-step duration map, populated whenever an execution is loaded in the store.
  * Covers both the old sidebar (workflow tab + execution open) and the executions tab.
  * Uses the same allow-list as the flyout tree so numbers always agree.
+ * Aggregates only the loaded step executions; see `selectOmittedStepExecutionsCount`.
  */
 export const selectStepDurations = createSelector(
   selectStepExecutions,

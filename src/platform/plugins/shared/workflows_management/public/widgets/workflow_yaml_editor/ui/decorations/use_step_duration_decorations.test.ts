@@ -12,6 +12,7 @@ import React from 'react';
 import { Provider } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
 import { useStepDurationDecorations } from './use_step_duration_decorations';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../common';
 import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
@@ -20,6 +21,8 @@ import {
   setExecution,
   setHighlightedStepId,
   setIsYamlSynced,
+  setStepExecutionPages,
+  setStepExecutionsTotal,
   setYamlString,
 } from '../../../../entities/workflows/store/workflow_detail/slice';
 import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
@@ -626,6 +629,40 @@ describe('useStepDurationDecorations', () => {
       });
 
       expect(tipEl.style.display).toBe('none');
+    });
+
+    it('warns that figures are incomplete only while step executions are left unloaded', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+      const execution = makeMultiRunExecution();
+      const loadedPages = [execution.stepExecutions];
+
+      act(() => {
+        store.dispatch(setExecution(execution));
+        store.dispatch(setStepExecutionPages(loadedPages));
+        store.dispatch(setStepExecutionsTotal(WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE));
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = document.body.querySelector('div[style*="position: fixed"]') as HTMLElement;
+      expect(tipEl.textContent).toContain('2 completed runs');
+      expect(tipEl.textContent).not.toContain('not loaded');
+
+      // The server reports more step executions than the loaded pages hold.
+      act(() => {
+        store.dispatch(setStepExecutionsTotal(WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 842));
+      });
+
+      expect(document.body.querySelector('div[style*="position: fixed"]')).toBe(tipEl);
+      expect(tipEl.textContent).toContain('842 step executions not loaded');
+
+      // "Show more" loads the next page, so nothing is left omitted.
+      act(() => {
+        store.dispatch(setStepExecutionPages([...loadedPages, []]));
+      });
+
+      expect(tipEl.textContent).not.toContain('not loaded');
     });
 
     it('does not show a tooltip for single-run steps', () => {

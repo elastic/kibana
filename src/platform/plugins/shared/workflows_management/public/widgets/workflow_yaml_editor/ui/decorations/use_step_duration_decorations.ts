@@ -18,6 +18,7 @@ import {
   selectExecution,
   selectHighlightedStepId,
   selectIsEditorYamlExecutionSnapshot,
+  selectOmittedStepExecutionsCount,
   selectStepDurationDenominator,
   selectStepDurations,
 } from '../../../../entities/workflows/store';
@@ -52,8 +53,15 @@ const sanitizeLabel = (label: string): string => label.replace(/["\\\n\r]/g, '')
 const labelClass = (label: string): string =>
   `${BASE_CLASS}-l-${Array.from(label, (c) => (c.codePointAt(0) ?? 0).toString(16)).join('')}`;
 
-/** Fills the tooltip element with the run count/total headline and the avg/min/max breakdown. */
-const renderTooltipContent = (tipEl: HTMLElement, duration: StepDuration): void => {
+/**
+ * Fills the tooltip element with the run count/total headline and the avg/min/max breakdown,
+ * plus a warning line when step executions are still unloaded and the figures undercount.
+ */
+const renderTooltipContent = (
+  tipEl: HTMLElement,
+  duration: StepDuration,
+  omittedCount: number
+): void => {
   const total = formatDuration(duration.totalMs).trim();
   const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
   const minStr = formatDuration(duration.minMs).trim();
@@ -73,11 +81,25 @@ const renderTooltipContent = (tipEl: HTMLElement, duration: StepDuration): void 
 
   const bold = document.createElement('strong');
   bold.textContent = runsLabel;
-  tipEl.replaceChildren(
+  const children: Node[] = [
     bold,
     document.createElement('br'),
-    document.createTextNode(breakdownLabel)
-  );
+    document.createTextNode(breakdownLabel),
+  ];
+
+  if (omittedCount > 0) {
+    const omittedLabel = i18n.translate(
+      'workflows.workflowYamlEditor.stepDurationGutter.tooltip.omitted',
+      {
+        defaultMessage:
+          '{count, plural, one {# step execution} other {# step executions}} not loaded · figures may be incomplete',
+        values: { count: omittedCount },
+      }
+    );
+    children.push(document.createElement('br'), document.createTextNode(omittedLabel));
+  }
+
+  tipEl.replaceChildren(...children);
 };
 
 /**
@@ -97,6 +119,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const execution = useSelector(selectExecution);
   const isExecutionSnapshot = useSelector(selectIsEditorYamlExecutionSnapshot);
+  const omittedCount = useSelector(selectOmittedStepExecutionsCount);
 
   const { euiTheme } = useEuiTheme();
   const { colors, border } = euiTheme;
@@ -160,6 +183,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   const tooltipLineRef = useRef<number | null>(null);
   const tipElRef = useRef<HTMLDivElement | null>(null);
   const lineTooltipRef = useRef<Map<number, StepDuration>>(new Map());
+  const omittedCountRef = useRef(0);
 
   useEffect(() => {
     if (!editor) return;
@@ -260,7 +284,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         // Rebuild content only when the hovered line changes, not on every pixel of movement.
         if (tooltipLineRef.current !== line) {
           tooltipLineRef.current = line ?? null;
-          renderTooltipContent(tipEl, duration);
+          renderTooltipContent(tipEl, duration, omittedCountRef.current);
         }
 
         tipEl.style.display = 'block';
@@ -313,6 +337,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       }
     }
     lineTooltipRef.current = lineTooltip;
+    omittedCountRef.current = omittedCount;
 
     const tipEl = tipElRef.current;
     const hoveredLine = tooltipLineRef.current;
@@ -320,12 +345,12 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
 
     const hovered = lineTooltip.get(hoveredLine);
     if (hovered) {
-      renderTooltipContent(tipEl, hovered);
+      renderTooltipContent(tipEl, hovered, omittedCount);
     } else {
       tipEl.style.display = 'none';
       tooltipLineRef.current = null;
     }
-  }, [stepDurations, workflowLookup]);
+  }, [stepDurations, workflowLookup, omittedCount]);
 
   // Build styles: one rule for each distinct label present (content injection),
   // plus the shared layout and tone modifiers.
