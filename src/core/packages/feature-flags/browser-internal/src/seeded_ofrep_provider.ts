@@ -151,10 +151,11 @@ export class SeededOfrepWebProvider implements Provider {
       typeof options.ofrep.pollInterval === 'number' && options.ofrep.pollInterval > 0
         ? options.ofrep.pollInterval
         : DEFAULT_RETRY_DELAY_MS;
-    // The web provider otherwise resolves initialize() from its persisted cache.
+    // network-first still accepts a localStorage snapshot, up to 30 days old, when the
+    // first request fails. That snapshot would replace the seed Kibana just injected.
     const ofrepOptions: OFREPWebProviderOptions = {
       ...options.ofrep,
-      cacheMode: 'network-first',
+      cacheMode: 'disabled',
     };
     this.inner = options.createProvider
       ? options.createProvider(ofrepOptions)

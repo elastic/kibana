@@ -70,7 +70,7 @@ describe('SeededOfrepWebProvider', () => {
     };
   };
 
-  test('asks the OFREP provider for a network evaluation before any persisted cache', () => {
+  test('does not let the OFREP provider persist flags in localStorage', () => {
     const createProvider = jest.fn(() => createDelegate().delegate);
     new SeededOfrepWebProvider({
       ofrep,
@@ -81,7 +81,7 @@ describe('SeededOfrepWebProvider', () => {
     expect(createProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         baseUrl: 'http://kibana/internal/feature-flags/',
-        cacheMode: 'network-first',
+        cacheMode: 'disabled',
       })
     );
   });
