@@ -33,6 +33,13 @@ const memoryConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
+const learningConfigSchema = schema.object({
+  // Governs the investigator's post-run optimize hook (Cortex, Semantic Memory and decision-tree
+  // reinforcement). Turn it off to read knowledge without changing it, as the evals do so every
+  // example sees the same knowledge.
+  enabled: schema.boolean({ defaultValue: true }),
+});
+
 const findingsRecorderConfigSchema = schema.object({
   // Governs the findings recorder: the cycle hook and the blocking final pass that write the
   // summary, severity, verdict, hypotheses and impact the investigator no longer records itself.
@@ -46,6 +53,7 @@ const configSchema = schema.object({
   wiki: wikiConfigSchema,
   decision_trees: decisionTreesConfigSchema,
   memory: memoryConfigSchema,
+  learning: learningConfigSchema,
   findings_recorder: findingsRecorderConfigSchema,
 });
 

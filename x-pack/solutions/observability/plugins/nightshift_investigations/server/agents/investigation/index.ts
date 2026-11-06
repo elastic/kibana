@@ -87,6 +87,8 @@ export interface InvestigationAgentTypeOptions {
   wikiEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  /** Runs the post-execution optimize hook, so a round can change what later rounds read. */
+  learningEnabled?: boolean;
   /** The agentic investigations plugin is enabled, so its tools are registered. */
   investigationToolsEnabled?: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
@@ -179,6 +181,7 @@ export const buildNightshiftAgentConfiguration = ({
   sandboxEnabled,
   wikiEnabled,
   memoryEnabled = false,
+  learningEnabled = true,
   investigationToolsEnabled,
   proposalsEnabled,
   standalone = false,
@@ -231,7 +234,7 @@ export const buildNightshiftAgentConfiguration = ({
       // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
       // workflow, so listing the reinforce workflow here as well would reinforce every round
       // twice — two ai.agent runs, up to 900s each, writing the same trees.
-      ...(wikiEnabled || memoryEnabled
+      ...((wikiEnabled || memoryEnabled) && learningEnabled
         ? { post_execution_workflow_ids: [optimizeWorkflowId] }
         : {}),
     } satisfies AgentBaseConfiguration);
