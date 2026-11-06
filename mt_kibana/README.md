@@ -133,6 +133,22 @@ Give each tenant its own hostname, so the browser keeps a separate session cooki
 
 In a header-injecting extension (for example ModHeader), add one rule per hostname that sets `x-elastic-project-id` to that tenant, the way the proxy will. Log in as `elastic` with the tenant's password (`changeme-a` and so on). [MANUAL_UI_TEST.md](MANUAL_UI_TEST.md) is a step-by-step browser walkthrough. On a single hostname, logging into one tenant replaces the other tenant's cookie. Separate browser profiles also work.
 
+To see which cluster each browser action reaches, put this in a file outside the shared config (for example `.es/mt/kibana-m5-logging.yml`, with an absolute `fileName`) and add `-c config/kibana.yml -c <that file>` to the Kibana command:
+
+```yaml
+logging.appenders.es-queries:
+  type: file
+  fileName: /absolute/path/to/.es/mt/es-queries.ndjson
+  layout:
+    type: json
+logging.loggers:
+  - name: elasticsearch.query
+    level: debug
+    appenders: [default, es-queries]
+```
+
+`mt_kibana/es_calls.sh watch b` then follows project-b's calls live. Each line shows the client (`tenant-project-b`, or `HOME` for the home cluster) and the first 8 characters of the Kibana request id. A `HOME` line that shares a request id with a `tenant-project-b` line is a call that went to the wrong cluster. Background tasks are hidden. `mt_kibana/es_calls.sh check "<local start time, for example 2026-11-05T09:00>"` lists those calls afterwards. `mt_kibana/discover_proof.sh` lists the Discover sessions, data views, settings, and indices that each cluster holds, read directly from Elasticsearch.
+
 Logout is a browser navigation (`/logout`). Calling `/api/security/logout` with `kbn-xsrf` or other AJAX headers returns a 400 instead of redirecting.
 
 ## Owners

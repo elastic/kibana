@@ -9,7 +9,7 @@ cmd=${1:-}
 env=${M3_ENV:-devenv}
 key=$(jq -r ".api_key.$env" "$HOME/.elastic/cloud.json")
 state=.es/mt/m3/projects-$env.json
-names=(home a b)
+names=(a b c)
 mkdir -p "$(dirname "$state")"
 [ -f "$state" ] || echo '{}' >"$state"
 chmod 600 "$state"
@@ -41,7 +41,7 @@ case "$cmd" in
         echo "mt-$n already exists"
         continue
       fi
-      body=$(jq -n --arg name "mt-kibana-m3-$n" --arg image "$KIBANA_IMAGE" --arg region "$region" \
+      body=$(jq -n --arg name "mt-project-$n" --arg image "$KIBANA_IMAGE" --arg region "$region" \
         '{name: $name, region_id: $region, overrides: {kibana: {docker_image: $image}}}')
       res=$(call -XPOST "$api" -d "$body")
       jq --arg n "$n" --argjson res "$res" \

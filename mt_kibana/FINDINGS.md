@@ -76,6 +76,25 @@ Run on 2026-11-05 with `data_check.sh`, `so_check.sh`, and `smoke.sh` (clusters 
 - After both fixes: `data_check.sh` 13/13, `so_check.sh` 13/13, `smoke.sh` 3/3.
 - Not checked: search sessions (background search saved in a session saved object). The search usage collector and the data views usage collector use internal repositories without a request, so they only count the home cluster, like the other usage collectors.
 
+## M3 on a DevShard with real projects
+
+Run on 2026-11-05 on DevShard `briando-devshard-dcbddd`, with image `pr-302955-4a624ed8b3ef` (the review follow-ups, without M5), using `projects.sh`, `deploy_projects.sh`, and `smoke_projects.sh`:
+
+- Three serverless Elasticsearch projects created through the shard's project API all reached `initialized` in about 5 minutes. Each is its own cluster (its `cluster_name` is its project id). In the old devenv, projects never got Elasticsearch.
+- One Kibana pod serves every project's public `kb` hostname. `smoke_projects.sh` passes 19/19: every hostname is served by that pod, the internal user and the logged-in user reach their own project's cluster, a spoofed `x-elastic-project-id` is ignored, A's login gets 401 on B, and the proxy rejects an unknown project.
+- Each tenant uses its project's own `elastic/kibana` token and encryption keys, and TLS to Elasticsearch is verified against the shard's proxy certificate. The project Kibanas themselves use `verificationMode: none`.
+- Browser-style session login (`cloud-basic`) works on each hostname. B's cookie gets 401 on A, and sessions survive a Kibana restart.
+- A dashboard and data view created through B's hostname return 200 on B and 404 on A and C. The query log shows the writes going to B's client.
+- During tenant requests, the only home calls were `GET /_xpack` (licensing's global license).
+- **Advanced settings leak between projects for up to 10 seconds** with this image: after B set its default data view, A and C read B's value, and B then read A's. Writes went to the right cluster. M5 (`<tenant>:<space>` cache key) fixes this, but isn't in this image.
+- A browser run through B and C (2026-11-06, `es_calls.sh check`) found 106 home calls in 239 tenant requests, where the API run found only `GET /_xpack`:
+  - **Workflows data views:** loading B's search homepage created `workflows-executions-managed-default` and `workflows-step-executions-managed-default` in cluster A. The `workflowsManagement` request context used `getUnsafeInternalClient()` and `asInternalUser` without the request, and cached the bootstrap per space for the whole process. Fixed: both clients follow the request, and the cache key is `<tenant>:<space>`. Not in image `4a624ed8b3ef`.
+  - **Workflows themselves** are stored and read with one home `asInternalUser` client (`workflows_management_service.ts`, `workflow_crud_service.ts`, `workflow_access_control.ts`), so a workflow created in B would be stored in A. Not fixed.
+  - **User profile data:** the Spaces post-auth interceptor's "last selected space" update (core `userProfile.update`, no request) wrote to A's admin profile. Every project's `admin` comes from the same file realm and has the same profile id, so it succeeds silently instead of failing as it did locally.
+  - **Usage counters:** UI counters, application usage, search telemetry, and core usage stats are written to A. They use repositories created at startup without a request.
+  - **Reads and probes on A:** the `telemetry` saved object, intercept records, `areAPIKeysEnabled()` (invalidates a key that doesn't exist), and `GET /_xpack`.
+- Routing needed two workarounds, listed under "Gaps found" in [`m3/README.md`](m3/README.md): kibana-controller clears `target_refs` on the `kb` AppNetwork (the Ingress keeps it), and the proxy also routes to each project's own Kibana, so those are scaled to 0.
+
 ## What still reaches the home cluster
 
 - **Project name and other cloud settings:** the project picker showed the same name for every project, because `xpack.cloud.serverless.project_name` is one value per process. As a stopgap, a tenant can set `projectName` in the tenants file, and core swaps it into the cloud plugin's browser config when it renders a page for that tenant. Server-side reads of `cloud.serverless.projectName`, and the other cloud settings (`project_id`, the "Manage project" and "View all projects" URLs), still have one value per process. They belong to the per-tenant config slices.

@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# Run this yourself: logs in to the devenv's dev IAM and saves a Cloud API key as api_key.devenv in
-# ~/.elastic/cloud.json, for projects.sh to create projects in the devenv. Prompts for the password.
-# The gateway's cert only names localhost, so curl skips verification for this one dev-only endpoint.
+# Run this yourself: logs in to the DevShard's dev IAM and saves a Cloud API key as api_key.devenv in
+# ~/.elastic/cloud.json, for projects.sh to create projects in the DevShard. Prompts for the password.
+# The gateway's cert only names localhost, so curl connects to the load balancer as localhost and trusts its CA.
 set -euo pipefail
 
 email=${1:-user@elastic.co}
 gw=$(kubectl -n global-gateway get svc -l gateway.envoyproxy.io/owning-gateway-name=global-gateway-user \
   -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
-read -rs -p "devenv dev-IAM password for $email: " pw
+mkdir -p .es/mt/m3
+kubectl -n global-gateway get secret global-gateway-user-cert -o jsonpath='{.data.ca\.crt}' | base64 -d >.es/mt/m3/gateway_ca.crt
+tls=(--cacert .es/mt/m3/gateway_ca.crt --connect-to "localhost:443:$gw:443")
+read -rs -p "DevShard dev-IAM password for $email: " pw
 echo
 
 token=$(jq -n --arg e "$email" --arg p "$pw" '{email: $e, password: $p}' |
-  curl -sSk --fail-with-body "https://$gw/api/v1/saas/auth/_login" -H 'Content-Type: application/json' -d @- | jq -r .token)
-key=$(curl -sSk --fail-with-body "https://$gw/api/v1/users/auth/keys" -H "Authorization: Bearer $token" \
+  curl -sS "${tls[@]}" --fail-with-body https://localhost/api/v1/saas/auth/_login -H 'Content-Type: application/json' -d @- | jq -r .token)
+key=$(curl -sS "${tls[@]}" --fail-with-body https://localhost/api/v1/users/auth/keys -H "Authorization: Bearer $token" \
   -H 'Content-Type: application/json' -d '{"description":"mt-kibana-m3"}' | jq -r .key)
 [ -n "$key" ] && [ "$key" != null ] || { echo "no key returned" >&2; exit 1; }
 
