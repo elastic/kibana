@@ -8,7 +8,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLoadingSpinner, EuiPanel, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCheckableCard, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -91,55 +91,41 @@ export const CurrentJobs: FC<Props> = ({ indexPattern }) => {
             />
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiPanel
-            hasShadow={false}
-            hasBorder
-            paddingSize="m"
-            data-test-subj="mlDiscoverADManagementCurrentJobNone"
-          >
-            <EuiRadio
-              id="mlDiscoverADManagementCurrentJobNone"
-              name="mlDiscoverADManagementCurrentJob"
-              label={i18n.translate('xpack.ml.discoverADManagementFlyout.noJobSelected', {
-                defaultMessage: 'No job selected',
-              })}
-              checked={selectedJobId === undefined}
-              onChange={() => selectJob(undefined)}
-              data-test-subj="mlDiscoverADManagementCurrentJobRadioNone"
-            />
-          </EuiPanel>
+          <EuiCheckableCard
+            id="mlDiscoverADManagementCurrentJobNone"
+            name="mlDiscoverADManagementCurrentJob"
+            label={i18n.translate('xpack.ml.discoverADManagementFlyout.noJobSelected', {
+              defaultMessage: 'No job selected',
+            })}
+            checked={selectedJobId === undefined}
+            onChange={() => selectJob(undefined)}
+            data-test-subj="mlDiscoverADManagementCurrentJobRadioNone"
+          />
           <EuiSpacer size="s" />
         </>
       )}
       {state.status === 'loaded' &&
         state.jobs.map(({ id, description }) => (
           <React.Fragment key={id}>
-            <EuiPanel
-              hasShadow={false}
-              hasBorder
-              paddingSize="m"
-              data-test-subj={`mlDiscoverADManagementCurrentJob-${id}`}
-            >
-              <EuiRadio
-                id={`mlDiscoverADManagementCurrentJob-${id}`}
-                name="mlDiscoverADManagementCurrentJob"
-                label={
-                  <>
-                    <EuiText size="s">
-                      <strong>{id}</strong>
+            <EuiCheckableCard
+              id={`mlDiscoverADManagementCurrentJob-${id}`}
+              name="mlDiscoverADManagementCurrentJob"
+              label={
+                <>
+                  <EuiText size="s">
+                    <strong>{id}</strong>
+                  </EuiText>
+                  {description ? (
+                    <EuiText size="s" color="subdued">
+                      {description}
                     </EuiText>
-                    {description ? (
-                      <EuiText size="s" color="subdued">
-                        {description}
-                      </EuiText>
-                    ) : null}
-                  </>
-                }
-                checked={selectedJobId === id}
-                onChange={() => selectAndShowJob(id)}
-                data-test-subj={`mlDiscoverADManagementCurrentJobRadio-${id}`}
-              />
-            </EuiPanel>
+                  ) : null}
+                </>
+              }
+              checked={selectedJobId === id}
+              onChange={() => selectAndShowJob(id)}
+              data-test-subj={`mlDiscoverADManagementCurrentJobRadio-${id}`}
+            />
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}

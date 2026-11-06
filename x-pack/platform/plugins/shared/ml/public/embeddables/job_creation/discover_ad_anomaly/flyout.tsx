@@ -34,6 +34,8 @@ const TITLE_ID = 'mlDiscoverADAnomalyFlyoutTitle';
 const CHART_ID = 'mlDiscoverADAnomalyCharts';
 // The width changes while the flyout is resized, which is not worth loading the charts again for
 const MIN_WIDTH_CHANGE_PX = 20;
+// Narrower than this, the columns of the anomalies table are squashed
+const TABLE_MIN_WIDTH = 1000;
 
 interface Props {
   jobId: string;
@@ -158,15 +160,17 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
                           colorSelectedIntervalBySeverity
                         />
                         <EuiSpacer size="m" />
-                        {/* The table is wider than the flyout */}
+                        {/* The table is wider than the flyout, so it scrolls rather than squashing its columns */}
                         <div css={{ overflowX: 'auto' }} data-test-subj="mlDiscoverADAnomalyTable">
-                          <AnomaliesTable
-                            bounds={timefilter.getBounds()}
-                            tableData={tableData}
-                            sourceIndicesWithGeoFields={{}}
-                            selectedJobs={jobs}
-                            telemetrySource="explorer_anomalies_table"
-                          />
+                          <div css={{ minWidth: TABLE_MIN_WIDTH }}>
+                            <AnomaliesTable
+                              bounds={timefilter.getBounds()}
+                              tableData={tableData}
+                              sourceIndicesWithGeoFields={{}}
+                              selectedJobs={jobs}
+                              telemetrySource="explorer_anomalies_table"
+                            />
+                          </div>
                         </div>
                       </>
                     ) : null
