@@ -14,6 +14,12 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { withRetry } from '@kbn/evals';
 
+/** Maximum number of auto-confirm continuation calls per query. */
+export const MAX_AUTO_CONFIRM_ROUNDS = 3;
+
+/** Prefix of the final message when a round ends paused on a prompt the eval cannot answer. */
+export const UNANSWERED_PROMPT_MARKER = '[UNANSWERED_PROMPT]';
+
 interface ConverseStep {
   type?: string;
   tool_id?: string;
@@ -33,7 +39,10 @@ interface ConverseStep {
 export interface ConverseResponse {
   messages: Array<{ message: string }>;
   steps: ConverseStep[];
-  errors: Array<{ error: { message: string; stack?: string }; type: 'error' }>;
+  errors: Array<{
+    error: { message: string; stack?: string };
+    type: 'error' | 'unanswered_prompt';
+  }>;
   conversationId?: string;
   traceId?: string | null;
   /**
@@ -78,12 +87,42 @@ interface ConversationApiResponse {
   attachments?: Array<VersionedAttachment<string, { yaml?: unknown }>>;
 }
 
+interface ConverseApiPrompt {
+  id?: string;
+  type?: string;
+  title?: string;
+  message?: string;
+  connector_name?: string;
+  questions?: Array<{ question?: string }>;
+}
+
 interface ConverseApiResponse {
   conversation_id?: string;
   trace_id?: string;
   steps?: ConverseStep[];
-  response?: { message?: string };
+  response?: { message?: string; prompts?: ConverseApiPrompt[] };
 }
+
+/** Allow every `confirmation` prompt in one response; other prompt types are not answered. */
+const getConfirmationPrompts = (response?: {
+  prompts?: ConverseApiPrompt[];
+}): Record<string, { allow: true }> => {
+  const answers: Record<string, { allow: true }> = {};
+  for (const prompt of response?.prompts ?? []) {
+    if (prompt?.id && prompt.type === 'confirmation') {
+      answers[prompt.id] = { allow: true };
+    }
+  }
+  return answers;
+};
+
+const describePrompt = (prompt: ConverseApiPrompt): string => {
+  const questions = (prompt.questions ?? [])
+    .map((q) => q.question)
+    .filter((q): q is string => Boolean(q));
+  if (questions.length) return questions.join(' | ');
+  return prompt.message ?? prompt.title ?? prompt.connector_name ?? 'no prompt text';
+};
 
 export class PersonaMatrixChatClient {
   constructor(
@@ -108,23 +147,76 @@ export class PersonaMatrixChatClient {
         body.attachments = [{ type: 'text', data: { content: attachment } }];
       }
 
-      const resp = await this.fetch<ConverseApiResponse>({
-        path: '/api/agent_builder/converse',
-        method: 'POST',
-        version: '2023-10-31',
-        body: JSON.stringify(body),
-      });
+      const post = (payload: Record<string, unknown>) =>
+        this.fetch<ConverseApiResponse>({
+          path: '/api/agent_builder/converse',
+          method: 'POST',
+          version: '2023-10-31',
+          body: JSON.stringify(payload),
+        });
 
-      const steps = resp.steps ?? [];
+      const resp = await post(body);
+
+      // A user clicking "Run preview" / "Confirm" is the product flow, so the eval answers
+      // `confirmation` prompts and scores what the agent says afterwards. All confirmations in
+      // one response go into a single continuation POST; the loop repeats only for prompts the
+      // continuation itself emits. Mirrors `autoConfirm` in `kbn-evals-suite-agent-builder`.
+      let steps = resp.steps ?? [];
+      let lastResponse = resp.response;
+      let conversationId = resp.conversation_id;
+      let pending = getConfirmationPrompts(lastResponse);
+      let rounds = 0;
+
+      while (Object.keys(pending).length > 0) {
+        if (rounds >= MAX_AUTO_CONFIRM_ROUNDS) {
+          throw new Error(
+            `persona-matrix: exceeded ${MAX_AUTO_CONFIRM_ROUNDS} auto-confirm continuation rounds. ` +
+              `Outstanding prompt ids: ${Object.keys(pending).join(', ')}. ` +
+              `This indicates a stuck agent.`
+          );
+        }
+        const continuation = await post({
+          agent_id: this.agentId,
+          connector_id: this.connectorId,
+          conversation_id: conversationId,
+          prompts: pending,
+          _execution_mode: 'local',
+        });
+        // The converse response is the folded round, so a continuation already carries every step
+        // of earlier executions; replace instead of appending or each round stacks a copy.
+        steps = continuation.steps ?? steps;
+        lastResponse = continuation.response ?? lastResponse;
+        conversationId = continuation.conversation_id ?? conversationId;
+        rounds++;
+        pending = getConfirmationPrompts(continuation.response);
+      }
+
+      // Whatever is still pending is a prompt the eval cannot answer (ask_user_question,
+      // authorization). Record it as an `unanswered_prompt` error so it never scores as a
+      // silent empty answer.
+      const errors: ConverseResponse['errors'] = (lastResponse?.prompts ?? [])
+        .filter((prompt) => prompt.type !== 'confirmation')
+        .map((prompt) => ({
+          type: 'unanswered_prompt' as const,
+          error: {
+            message: `Agent paused on a ${prompt.type ?? 'unknown'} prompt: ${describePrompt(
+              prompt
+            )}`,
+          },
+        }));
       // Final-answer fallback: some models end on a tool call (no closing
       // assistant turn), so response.message is "". Downstream, a blank final
       // message renders "No final answer message captured" and the answer-
       // based LLM judges see an empty answer. Use the LAST non-empty assistant
       // reasoning/output step verbatim — never synthesized — and mark it as a
       // fallback so the trace card can label it honestly.
-      let message = resp.response?.message ?? '';
+      let message = lastResponse?.message ?? '';
       let messageSource: 'response' | 'last_assistant_step' = 'response';
-      if (!message.trim()) {
+      if (!message.trim() && errors.length > 0) {
+        // Paused with no text: the judges see a visible non-answer instead of "" or of
+        // interior narration that reads like a closing answer.
+        message = `${UNANSWERED_PROMPT_MARKER} ${errors.map((e) => e.error.message).join('; ')}`;
+      } else if (!message.trim()) {
         const lastAssistant = [...steps].reverse().find((step) => {
           const text =
             step.type === 'reasoning' ? step.reasoning : step.type === 'output' ? step.output : '';
@@ -150,9 +242,9 @@ export class PersonaMatrixChatClient {
       const result: ConverseResponse = {
         messages: [{ message }],
         steps,
-        errors: [],
+        errors,
         messageSource,
-        conversationId: resp.conversation_id,
+        conversationId,
         traceId: resp.trace_id ?? null,
         sampling: {
           connectorId: this.connectorId,
@@ -163,7 +255,7 @@ export class PersonaMatrixChatClient {
           seed: null,
         },
         trajectoryFingerprint,
-        workflowAttachments: await this.fetchWorkflowAttachments(resp.conversation_id, steps),
+        workflowAttachments: await this.fetchWorkflowAttachments(conversationId, steps),
       };
 
       return result;
