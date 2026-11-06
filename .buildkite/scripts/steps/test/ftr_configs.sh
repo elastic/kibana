@@ -5,6 +5,8 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/test/ftr_smart_retry.sh
 
+trap scout_await_event_uploads EXIT
+
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
 if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
@@ -114,9 +116,7 @@ while read -r config; do
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
     # Upload events after running each config
     echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-    node scripts/scout upload-events --dontFailOnError
-    echo "Upload successful, removing local events at .scout/reports"
-    rm -rf .scout/reports
+    scout_upload_events_in_background .scout/reports
   else
     echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi

@@ -19,11 +19,11 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
   SESSIONS_LIST_MAX_SEARCH_LENGTH,
-  type FacetBucket,
   type SessionListFacets,
 } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
+import { FacetFilter } from '../../../components/facet_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
 import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
@@ -78,23 +78,6 @@ const FACETS: ReadonlyArray<{
     ebtElement: SESSIONS_EBT_ELEMENTS.ENTRY_PAGE_FILTER,
   },
 ];
-
-/** The facet's values with their session counts; a selection outside the top values stays listed. */
-export const facetOptions = (
-  buckets: FacetBucket[],
-  selected: string | undefined,
-  { formatNumber }: Pick<Formatters, 'formatNumber'>
-) => {
-  const options = buckets.map(({ key, count }) => ({
-    value: key,
-    label: `${key} (${formatNumber(count)})`,
-  }));
-  const withSelected =
-    selected && !buckets.some(({ key }) => key === selected)
-      ? [{ value: selected, label: selected }, ...options]
-      : options;
-  return [{ value: ANY_VALUE, label: ANY_LABEL }, ...withSelected];
-};
 
 export function SessionsFilters({
   state,
@@ -194,16 +177,15 @@ export function SessionsFilters({
             onChange={(value) => onChange({ duration: value || undefined })}
           />
           {FACETS.map(({ param, facet, label, ebtElement }) => (
-            <SingleSelectFilter
+            <FacetFilter
               key={param}
               data-test-subj={`digitalExperienceSessionsFacet-${param}`}
               ebtElement={ebtElement}
               label={label}
-              options={facetOptions(facets?.[facet] ?? [], state[param], formatters)}
-              selected={state[param] ?? ANY_VALUE}
-              isActive={state[param] !== undefined}
-              onChange={(value) => onChange({ [param]: value || undefined })}
-              searchable
+              buckets={facets?.[facet] ?? []}
+              selected={state[param]}
+              onChange={(value) => onChange({ [param]: value })}
+              formatters={formatters}
               isLoading={isLoading && !facets}
             />
           ))}

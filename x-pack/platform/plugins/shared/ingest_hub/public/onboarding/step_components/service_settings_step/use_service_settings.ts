@@ -27,6 +27,7 @@ import {
   getMissingSourceGroup,
   getRequiredTextFields,
   resolveFieldMeta,
+  resolveVarGroupSelections,
   toTyped,
 } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
@@ -52,6 +53,12 @@ export interface ServiceDataStreamVars {
    * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
    */
   varsByInput: Record<string, Record<string, string | string[]>>;
+  /**
+   * Selected option per stream-level var_group, keyed by input type then group name,
+   * e.g. { 'aws-cloudwatch': { log_group_source: 'log_group_arn' } }. Absent → manifest default
+   * (the group's first option), resolved by `resolveVarGroupSelections`.
+   */
+  varGroupSelectionsByInput?: Record<string, Record<string, string>>;
 }
 
 export interface ServiceVars {
@@ -135,7 +142,21 @@ function mergeVarsByDataStream(
     for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
       mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
     }
-    result[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
+    // Stream-level var_group selections merge the same way; an input the incoming draft did not
+    // touch keeps its stored choice.
+    const mergedSelections: Record<string, Record<string, string>> = {
+      ...(existing.varGroupSelectionsByInput ?? {}),
+    };
+    for (const [input, selections] of Object.entries(dsVars.varGroupSelectionsByInput ?? {})) {
+      mergedSelections[input] = { ...(mergedSelections[input] ?? {}), ...selections };
+    }
+    result[dsId] = {
+      enabledInputs: dsVars.enabledInputs,
+      varsByInput: mergedByInput,
+      ...(Object.keys(mergedSelections).length > 0 && {
+        varGroupSelectionsByInput: mergedSelections,
+      }),
+    };
   }
   return result;
 }
@@ -170,17 +191,23 @@ export function isServiceConfigIncomplete(
       activeInputs = activeInputs.filter((input) => supportedInputs.includes(input));
       if (activeInputs.length === 0) return true;
     }
-    return activeInputs.some(
-      (inp) =>
+    return activeInputs.some((inp) => {
+      const selections = resolveVarGroupSelections(
+        dsView,
+        inp,
+        dsVars.varGroupSelectionsByInput?.[inp]
+      );
+      return (
         getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||
-        getRequiredTextFields(dsView, inp).some((f) => {
+        getRequiredTextFields(dsView, inp, selections).some((f) => {
           const meta = resolveFieldMeta(dsView, inp, f);
           const raw = dsVars.varsByInput?.[inp]?.[f];
           const effective = meta ? toTyped(raw, meta) : raw ?? '';
           if (Array.isArray(effective)) return effective.length === 0;
           return typeof effective === 'string' && effective.trim() === '';
         })
-    );
+      );
+    });
   });
 }
 
