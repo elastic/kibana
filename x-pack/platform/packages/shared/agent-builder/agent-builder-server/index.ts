@@ -251,8 +251,16 @@ export {
   resolveAllowedConnectorIds,
 } from './agent_connectors';
 export type {
+  DecisionPredicateQuestion,
+  DecisionChoiceQuestion,
+  DecisionScoreQuestion,
   DecisionQuestion,
+  DecisionPredicateAnswer,
+  DecisionChoiceAnswer,
+  DecisionScoreAnswer,
   DecisionAnswer,
+  DecisionAnswerFor,
+  DecisionAnswersFor,
   DecideParams,
   DecideResult,
   DecisionsStart,

@@ -166,7 +166,7 @@ describe('PluginsService', () => {
           opik_distributed_tracing: false,
         },
         decisionModel: {
-          timeoutMs: 1000,
+          eisTimeoutMs: 1000,
           fastModelTimeoutMs: 2000,
           unavailableTtlMs: 3600000,
         },
@@ -572,7 +572,7 @@ describe('PluginsService', () => {
                 opik_distributed_tracing: false,
               },
               decisionModel: {
-                timeoutMs: 1000,
+                eisTimeoutMs: 1000,
                 fastModelTimeoutMs: 2000,
                 unavailableTtlMs: 3600000,
               },

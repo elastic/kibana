@@ -19,7 +19,7 @@ const HOUR = 60 * 60 * 1000;
 
 const answered: DecisionProviderResult = {
   inferenceId: 'model-1',
-  answers: { should_respond: { type: 'predicate', probability: 0.9 } },
+  answers: [{ type: 'predicate', probability: 0.9 }],
 };
 
 class TestProvider extends BaseDecisionProvider {
@@ -30,7 +30,7 @@ class TestProvider extends BaseDecisionProvider {
   );
 
   constructor(options: Partial<BaseDecisionProviderOptions> = {}) {
-    super({ unavailableTtlMs: HOUR, ...options });
+    super({ timeoutMs: 1000, unavailableTtlMs: HOUR, ...options });
   }
 
   protected ask(params: DecisionProviderParams): Promise<DecisionProviderResult> {
@@ -44,8 +44,7 @@ const attempt = (provider: TestProvider, abortSignal?: AbortSignal) =>
   provider.decide({
     request: httpServerMock.createKibanaRequest(),
     input: 'hello',
-    questions: { should_respond: { type: 'predicate', instructions: 'Respond?' } },
-    timeoutMs: 1000,
+    questions: [{ type: 'predicate', instructions: 'Respond?' }],
     abortSignal,
   });
 
@@ -82,7 +81,7 @@ describe('BaseDecisionProvider', () => {
     expect(signal?.aborted).toBe(true);
   });
 
-  it('uses its own timeout over the one it is given', async () => {
+  it('waits for the timeout it was created with', async () => {
     jest.useFakeTimers();
 
     const provider = new TestProvider({ timeoutMs: 2000 });

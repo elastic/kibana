@@ -5,26 +5,41 @@
  * 2.0.
  */
 
+import type { DecisionQuestion } from '@kbn/agent-builder-server';
 import decisionResponse from './__fixtures__/decision_response.json';
 import { parseDecisionResponse } from './parse_decision_response';
 
-describe('parseDecisionResponse', () => {
-  it('parses predicate and choice answers from the ES response', () => {
-    const answers = parseDecisionResponse(decisionResponse, ['should_respond', 'pick']);
+const predicate: DecisionQuestion = {
+  type: 'predicate',
+  instructions: 'Should the agent respond?',
+};
+const choice: DecisionQuestion = {
+  type: 'choice',
+  instructions: 'Pick one',
+  choices: { a: 'A', b: 'B' },
+};
+const score: DecisionQuestion = {
+  type: 'score',
+  instructions: 'How severe?',
+  levels: [
+    { label: 'low', description: 'Low' },
+    { label: 'medium', description: 'Medium' },
+    { label: 'high', description: 'High' },
+  ],
+};
 
-    expect(answers).toEqual({
-      should_respond: { type: 'predicate', probability: 0.94 },
-      pick: {
-        type: 'choice',
-        choice: 'a',
-        confidence: 0.62,
-        probabilities: { a: 0.81, b: 0.19 },
-      },
-    });
+describe('parseDecisionResponse', () => {
+  it('reads the answers by position, in the order of the questions', () => {
+    const answers = parseDecisionResponse(decisionResponse, [predicate, choice]);
+
+    expect(answers).toEqual([
+      { type: 'predicate', probability: 0.94 },
+      { type: 'choice', choice: 'a', confidence: 0.62, probabilities: { a: 0.81, b: 0.19 } },
+    ]);
   });
 
   it('keys score probabilities by level label', () => {
-    const { severity } = parseDecisionResponse(decisionResponse, ['severity']);
+    const [, , severity] = parseDecisionResponse(decisionResponse, [predicate, choice, score]);
 
     expect(severity).toEqual({
       type: 'score',
@@ -34,19 +49,25 @@ describe('parseDecisionResponse', () => {
     });
   });
 
-  it('throws when a requested question has no answer', () => {
-    expect(() => parseDecisionResponse(decisionResponse, ['should_respond', 'missing'])).toThrow(
-      /missing/
+  it('throws when a question has no answer', () => {
+    expect(() =>
+      parseDecisionResponse(decisionResponse, [predicate, choice, score, predicate])
+    ).toThrow(/question_4/);
+  });
+
+  it('throws when an answer has a different type than its question', () => {
+    expect(() => parseDecisionResponse(decisionResponse, [choice])).toThrow(
+      'Decision answer [question_1] has type [predicate], expected [choice]'
     );
   });
 
   it('throws when the body is not an object', () => {
-    expect(() => parseDecisionResponse('oops', ['should_respond'])).toThrow();
+    expect(() => parseDecisionResponse('oops', [predicate])).toThrow();
   });
 
   it('throws when a predicate answer has no probability', () => {
-    const body = { decision: { answers: { should_respond: { type: 'predicate' } } } };
+    const body = { decision: { answers: { question_1: { type: 'predicate' } } } };
 
-    expect(() => parseDecisionResponse(body, ['should_respond'])).toThrow(/should_respond/);
+    expect(() => parseDecisionResponse(body, [predicate])).toThrow(/question_1/);
   });
 });

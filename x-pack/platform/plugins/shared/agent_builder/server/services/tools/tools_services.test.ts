@@ -45,7 +45,7 @@ describe('ToolsService', () => {
             opik_distributed_tracing: false,
           },
           decisionModel: {
-            timeoutMs: 1000,
+            eisTimeoutMs: 1000,
             fastModelTimeoutMs: 2000,
             unavailableTtlMs: 3600000,
           },
@@ -70,7 +70,7 @@ describe('ToolsService', () => {
             opik_distributed_tracing: false,
           },
           decisionModel: {
-            timeoutMs: 1000,
+            eisTimeoutMs: 1000,
             fastModelTimeoutMs: 2000,
             unavailableTtlMs: 3600000,
           },

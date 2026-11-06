@@ -15,9 +15,11 @@ import decisionEndpoints from './__fixtures__/decision_endpoints.json';
 import { EisDecisionProvider } from './eis';
 import { DecisionProviderUnavailableError, isDecisionProviderUnavailableError } from './types';
 
-const questions: Record<string, DecisionQuestion> = {
-  should_respond: { type: 'predicate', instructions: 'Should the agent respond?' },
+const shouldRespond: DecisionQuestion = {
+  type: 'predicate',
+  instructions: 'Should the agent respond?',
 };
+const questions = [shouldRespond];
 
 const input = 'hello';
 
@@ -35,13 +37,17 @@ const setup = ({ inferenceId }: { inferenceId?: string } = {}) => {
 
   elasticsearch.client.asScoped.mockReturnValue(scopedClient);
 
-  const provider = new EisDecisionProvider({ elasticsearch, inferenceId, unavailableTtlMs: 1000 });
+  const provider = new EisDecisionProvider({
+    elasticsearch,
+    inferenceId,
+    timeoutMs: 1000,
+    unavailableTtlMs: 1000,
+  });
   const run = () =>
     provider.decide({
       request: httpServerMock.createKibanaRequest(),
       input,
       questions,
-      timeoutMs: 1000,
     });
 
   return { run, provider, transportRequest: scopedClient.asCurrentUser.transport.request };
@@ -60,12 +66,12 @@ describe('EisDecisionProvider', () => {
       expect.objectContaining({
         method: 'POST',
         path: '/_inference/decision/my-decision',
-        body: { input, task_settings: { questions } },
+        body: { input, task_settings: { questions: { question_1: shouldRespond } } },
       })
     );
     expect(result).toEqual({
       inferenceId: 'my-decision',
-      answers: { should_respond: { type: 'predicate', probability: 0.94 } },
+      answers: [{ type: 'predicate', probability: 0.94 }],
     });
   });
 
@@ -125,6 +131,6 @@ describe('EisDecisionProvider', () => {
 
     transportRequest.mockResolvedValue({ decision: { answers: {} } });
 
-    await expect(run()).rejects.toThrow(/should_respond/);
+    await expect(run()).rejects.toThrow(/question_1/);
   });
 });

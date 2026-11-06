@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { DecisionAnswer } from '@kbn/agent-builder-server';
+import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
+import { questionKey } from './question_keys';
 
 interface RawProbability {
   value?: unknown;
@@ -80,13 +81,13 @@ const toAnswer = (raw: RawAnswer, name: string): DecisionAnswer => {
 };
 
 /**
- * Reads the answers to `questionNames` from a `POST _inference/decision` response body, throwing
- * when the body is malformed or a question has no answer.
+ * Reads the answers to `questions`, in order, from a `POST _inference/decision` response body,
+ * throwing when the body is malformed or a question has no answer of its own type.
  */
 export const parseDecisionResponse = (
   body: unknown,
-  questionNames: string[]
-): Record<string, DecisionAnswer> => {
+  questions: readonly DecisionQuestion[]
+): DecisionAnswer[] => {
   const decision = isObject(body) ? body.decision : undefined;
   const answers = isObject(decision) ? decision.answers : undefined;
 
@@ -94,15 +95,20 @@ export const parseDecisionResponse = (
     throw new Error('Decision response has no [decision.answers]');
   }
 
-  return Object.fromEntries(
-    questionNames.map((name) => {
-      const raw = answers[name];
+  return questions.map((question, index) => {
+    const name = questionKey(index);
+    const raw = answers[name];
 
-      if (!isObject(raw)) {
-        throw new Error(`Decision response has no answer for question [${name}]`);
-      }
+    if (!isObject(raw)) {
+      throw new Error(`Decision response has no answer for question [${name}]`);
+    }
 
-      return [name, toAnswer(raw, name)];
-    })
-  );
+    if (raw.type !== question.type) {
+      throw new Error(
+        `Decision answer [${name}] has type [${String(raw.type)}], expected [${question.type}]`
+      );
+    }
+
+    return toAnswer(raw, name);
+  });
 };
