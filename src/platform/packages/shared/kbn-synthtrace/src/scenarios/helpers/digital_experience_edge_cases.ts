@@ -355,9 +355,11 @@ export const DIGITAL_EXPERIENCE_EDGE_CASES: Readonly<Record<string, DigitalExper
         rawStacktrace: null,
       },
       {
+        // A `chrome-extension://` frame, in the V8 wording of the message
         type: 'TypeError',
         message: "Cannot read properties of null (reading 'type')",
         weight: 2,
+        engines: ['chromium'],
         stacks: [
           [
             { functionName: 'e.exports', file: EXTENSION_SCRIPT, line: 1 },
@@ -416,8 +418,11 @@ export const DIGITAL_EXPERIENCE_EDGE_CASES: Readonly<Record<string, DigitalExper
     exceptions: [
       {
         type: 'TypeError',
+        // The JavaScriptCore wording, so only Safari sessions throw it. The weight makes up for
+        // the other engines, which would otherwise leave it far rarer than the other ones
         message: "undefined is not an object (evaluating 'window.webkit.messageHandlers')",
-        weight: 3,
+        weight: 12,
+        engines: ['webkit'],
         stacks: [[{ functionName: 'postToApp' }, { functionName: 'shareArticle' }]],
       },
       { type: 'Error', message: 'Script error.', weight: 2, rawStacktrace: null },

@@ -743,6 +743,38 @@ describe('digital experience apps', () => {
         expect(Math.min(...lengthsOf('Maximum update depth exceeded'))).toBeGreaterThan(8_191);
       });
 
+      it('has the errors that one engine words or throws in the sessions of that engine only', () => {
+        // Rare ones, as only the sessions of one engine throw them: three hours of traffic
+        const threeHours = timerange(at(0), at(3 * 3_600), {} as ToolingLog);
+        const longRun = generateEdotBrowserSessions(threeHours, {
+          environment: 'test',
+          from: threeHours.from.getTime(),
+          withSessionId: true,
+          includeRawAttribution: false,
+          environments: false,
+          edgeCases: true,
+          scale: 1,
+          seed: 'digital-experience-test',
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+        const userAgentsOf = (message: string) =>
+          eventsOf(longRun, 'exception')
+            .filter((doc) => attribute(doc, 'exception.message') === message)
+            .map((doc) => String(doc.resource?.attributes?.['user_agent.original']));
+        const javaScriptCore = userAgentsOf(
+          "undefined is not an object (evaluating 'window.webkit.messageHandlers')"
+        );
+        const extension = userAgentsOf("Cannot read properties of null (reading 'type')");
+
+        // Safari words it this way, and Chrome and Firefox have their own wording
+        expect(javaScriptCore.length).toBeGreaterThan(0);
+        javaScriptCore.forEach((userAgent) => expect(userAgent).not.toMatch(/Chrome\/|Firefox\//));
+        // The frames are of a `chrome-extension://` script
+        expect(extension.length).toBeGreaterThan(0);
+        extension.forEach((userAgent) => expect(userAgent).toContain('Chrome/'));
+      });
+
       it('has errors with no type, with no stack trace and with an empty one', () => {
         const exceptions = eventsOf(withEdgeCases, 'exception');
 

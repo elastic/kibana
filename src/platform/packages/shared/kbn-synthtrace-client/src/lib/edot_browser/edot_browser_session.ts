@@ -40,7 +40,7 @@ export interface EdotBrowserRequest {
   method: string;
   /**
    * Path on the site origin, or an absolute URL for cross-origin requests. `{id}` is replaced by
-   * one of `ids` on every request.
+   * one of `ids` on every request, and the two come together: one without the other throws.
    */
   url: string;
   /** The values `{id}` takes in `url`, one picked per request: a family of URLs like `/api/orders/{id}`. */
@@ -99,6 +99,11 @@ export interface EdotBrowserExceptionTemplate {
   /** How often the exception happens compared to the other ones of the site, 1 when unset. */
   weight?: number;
   /**
+   * The engines of the browsers that throw it, for what only one of them does: a message that
+   * JavaScriptCore words, or the URL of an extension. Every engine when unset.
+   */
+  engines?: ReadonlyArray<EdotBrowserClient['browserEngine']>;
+  /**
    * The call stacks the exception is thrown from, innermost frame first. Every occurrence reports
    * the stack of one of them, always with the same frames and positions, so each stack is a group
    * of occurrences. One generic stack in the main script when unset.
@@ -149,7 +154,8 @@ export type EdotBrowserSessionOptions = SessionAnchor & {
   reportExceptions?: boolean;
   /**
    * Whether the app reports resource timings, true when unset. Turn it off to simulate an
-   * environment where the resource timing instrumentation is disabled.
+   * environment where the resource timing instrumentation is disabled. The pages still load their
+   * resources, so they take as long: only the timing entries are left out.
    */
   reportResourceTimings?: boolean;
   random?: () => number;
@@ -165,6 +171,8 @@ const MAX_RESOURCES = 8;
 const MAX_OWN_RESOURCES = 40;
 const MOBILE_SLOWDOWN = 1.4;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
+
+const ID_PLACEHOLDER = '{id}';
 const RELOAD_RATE = 0.1;
 // Many short bounces, most views in the tens of seconds and a long tail of minutes-long reads
 const DEFAULT_DWELL: Distribution = { median: 10_000, sigma: 1 };
@@ -356,7 +364,8 @@ interface DocumentState {
   inpValue: number;
 }
 
-const isAbsoluteUrl = (path: string) => /^https?:\/\//.test(path);
+/** Any scheme, not only http(s): an extension script is `chrome-extension://` on no site's origin. */
+const isAbsoluteUrl = (path: string) => /^[a-z][a-z\d+.-]*:\/\//i.test(path);
 
 const toUrl = ({ origin }: EdotBrowserSite, path: string) =>
   isAbsoluteUrl(path) ? path : `${origin}${path}`;
@@ -476,6 +485,20 @@ const hideDocument = (
   return events;
 };
 
+/** The path of a request, with one of its `ids` in place of every `{id}`. */
+const requestPath = ({ url, ids }: EdotBrowserRequest, random: () => number): string => {
+  const hasPlaceholder = url.includes(ID_PLACEHOLDER);
+  const hasIds = ids !== undefined && ids.length > 0;
+  // A placeholder with nothing to fill it would end up in the URL, and ids with no placeholder
+  // would be ignored, so both are mistakes of the scenario
+  if (hasPlaceholder !== hasIds) {
+    throw new Error(
+      `Request ${url}: ${ID_PLACEHOLDER} in the URL and ids go together, but only one of them is set`
+    );
+  }
+  return hasIds ? url.split(ID_PLACEHOLDER).join(pick(random, ids)) : url;
+};
+
 /**
  * A fetch/XHR span, its resource timing entry, which the instrumentation links to the span, and,
  * for some failures, an uncaught exception.
@@ -497,13 +520,9 @@ const sendRequest = (
     failureStatusCodes = DEFAULT_FAILURE_STATUS_CODES,
     latencyFactor = 1,
     slowTail,
-    ids,
     bodySizeBytes,
   } = request;
-  const url = toUrl(
-    site,
-    ids?.length ? request.url.replace('{id}', pick(random, ids)) : request.url
-  );
+  const url = toUrl(site, requestPath(request, random));
   const tailFactor = slowTail && random() < slowTail.rate ? slowTail.factor : 1;
   const duration = Math.min(
     sample(health.httpLatency, random) * latencyFactor * tailFactor * slowdown,
@@ -540,19 +559,23 @@ const sendRequest = (
   ];
 
   const endTime = Math.floor(time + duration);
-  if (statusCode !== undefined && reportResourceTimings) {
+  if (statusCode !== undefined) {
+    // Sampled even when not reported, so that the flag leaves the rest of the session as it is
+    const timings = resourceTimings(random, time - timeOrigin, duration, 2_000);
     // fetch/XHR requests also show up as resource timing entries
-    events.push(
-      client
-        .resourceTiming({
-          url,
-          initiatorType: instrumentation === 'xhr' ? 'xmlhttprequest' : 'fetch',
-          timings: resourceTimings(random, time - timeOrigin, duration, 2_000),
-          nextHopProtocol: 'h2',
-        })
-        .traceContext(traceContext)
-        .timestamp(endTime)
-    );
+    if (reportResourceTimings) {
+      events.push(
+        client
+          .resourceTiming({
+            url,
+            initiatorType: instrumentation === 'xhr' ? 'xmlhttprequest' : 'fetch',
+            timings,
+            nextHopProtocol: 'h2',
+          })
+          .traceContext(traceContext)
+          .timestamp(endTime)
+      );
+    }
   }
 
   // Unlike fetch, XHR doesn't throw on network errors
@@ -572,7 +595,7 @@ const sendRequest = (
 
 /** Samples the timings of a full page load. */
 const planPageLoad = (
-  { site, health, random, slowdown, reportResourceTimings }: SessionContext,
+  { site, health, random, slowdown }: SessionContext,
   page: EdotBrowserPage
 ): PageLoadPlan => {
   // Document request
@@ -597,7 +620,7 @@ const planPageLoad = (
     Math.min(ownResources.length, MAX_OWN_RESOURCES),
     Math.floor(between(random, MIN_RESOURCES, MAX_RESOURCES + 1))
   );
-  const resources = (reportResourceTimings ? [...ownResources, ...FILLER_RESOURCES] : [])
+  const resources = [...ownResources, ...FILLER_RESOURCES]
     .slice(0, resourceCount)
     .map((resource) => {
       const { path, sizeBytes, renderBlocking, durationFactor = 1 } = resource;
@@ -647,7 +670,7 @@ const planPageLoad = (
 
 /** The events of a full page load: navigation, sub-resources, navigation timing and web vitals. */
 const loadDocument = (
-  { client, site, random }: SessionContext,
+  { client, site, random, reportResourceTimings }: SessionContext,
   { page, start: pageStart, end }: PageView,
   navigationType: NavigationTimingType,
   {
@@ -676,18 +699,20 @@ const loadDocument = (
   const events: EdotBrowserEvent[] = [
     // The navigation instrumentation reports hard navigations on DOMContentLoaded
     client.navigation({ url, sameDocument: false }).timestamp(at(domContentLoadedEventStart)),
-    ...resources.map(
-      ({ resource: { path, initiatorType, renderBlocking }, timings, nextHopProtocol }) =>
-        client
-          .resourceTiming({
-            url: toUrl(site, path),
-            initiatorType,
-            timings,
-            nextHopProtocol,
-            renderBlockingStatus: renderBlocking ? 'blocking' : 'non-blocking',
-          })
-          .timestamp(at(resourcesReportedAt))
-    ),
+    ...(reportResourceTimings
+      ? resources.map(
+          ({ resource: { path, initiatorType, renderBlocking }, timings, nextHopProtocol }) =>
+            client
+              .resourceTiming({
+                url: toUrl(site, path),
+                initiatorType,
+                timings,
+                nextHopProtocol,
+                renderBlockingStatus: renderBlocking ? 'blocking' : 'non-blocking',
+              })
+              .timestamp(at(resourcesReportedAt))
+        )
+      : []),
     client
       .navigationTiming({
         url,
@@ -804,7 +829,9 @@ const interactWithPage = (
   if (random() < health.jsErrorRate && reportExceptions) {
     const exception = pickWeighted(
       random,
-      [...COMMON_EXCEPTIONS, ...(site.exceptions ?? [])],
+      [...COMMON_EXCEPTIONS, ...(site.exceptions ?? [])].filter(
+        ({ engines }) => !engines || engines.includes(client.browserEngine)
+      ),
       ({ weight = 1 }) => weight
     );
     events.push(

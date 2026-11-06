@@ -1345,6 +1345,38 @@ describe('edotBrowser', () => {
         );
       });
 
+      it('keeps the URL of a frame in a file that is not on a web origin', () => {
+        const extension =
+          'chrome-extension://kfnmcaliepdbdkjhfplcongnbjglmeoa/js/content-script.js';
+        const site = exceptionSite([
+          {
+            type: 'Error',
+            message: 'boom',
+            weight: 1000,
+            stacks: [[{ functionName: 'inject', file: extension, line: 1, column: 7 }]],
+          },
+        ]);
+        const trace = exceptionsOf(site).find(
+          ({ attributes }) => attributes?.['exception.message'] === 'boom'
+        )?.attributes?.['exception.stacktrace'];
+
+        expect(String(trace).split('\n')).toContain(`    at inject (${extension}:1:7)`);
+      });
+
+      it('throws an exception in the browsers of its engines only', () => {
+        const site = exceptionSite([
+          { type: 'Error', message: 'JavaScriptCore only', weight: 1000, engines: ['webkit'] },
+        ]);
+        const count = (profile: BrowserProfile) =>
+          exceptionsOf(site, 100, profile).filter(
+            ({ attributes }) => attributes?.['exception.message'] === 'JavaScriptCore only'
+          ).length;
+
+        expect(count(BROWSER_PROFILES.safariIos)).toBeGreaterThan(0);
+        expect(count(BROWSER_PROFILES.chromeMacos)).toBe(0);
+        expect(count(BROWSER_PROFILES.firefoxLinux)).toBe(0);
+      });
+
       it('leaves out the type and the stack trace of what is not an error', () => {
         const attributesOf = (template: EdotBrowserExceptionTemplate) =>
           exceptionsOf(exceptionSite([{ ...template, weight: 1000 }])).find(
@@ -1510,6 +1542,19 @@ describe('edotBrowser', () => {
         expect(eventNames(docs)).not.toContain('browser.resource_timing');
         expect(eventNames(docs)).toContain('browser.navigation_timing');
       });
+
+      it('leaves everything else as it is, so that pages take as long without the timings', () => {
+        const withoutResourceTimings = (docs: ReturnType<typeof createSession>) =>
+          docs.filter(
+            (doc) => !('event_name' in doc && doc.event_name === 'browser.resource_timing')
+          );
+
+        for (let seed = 0; seed < 20; seed++) {
+          expect(createSession({ seed, reportResourceTimings: false })).toEqual(
+            withoutResourceTimings(createSession({ seed }))
+          );
+        }
+      });
     });
 
     describe('requests', () => {
@@ -1537,12 +1582,23 @@ describe('edotBrowser', () => {
         expect(urls).toEqual(new Set(ids.map((id) => `${SITE.origin}/api/orders/${id}`)));
       });
 
-      it('leaves URLs without ids as they are', () => {
-        const urls = spansOf(siteWith({ method: 'GET', url: '/api/orders/{id}' })).map((span) =>
+      it('leaves URLs without {id} and without ids as they are', () => {
+        const urls = spansOf(siteWith({ method: 'GET', url: '/api/orders' })).map((span) =>
           String(span.attributes['url.full'])
         );
 
-        expect(new Set(urls)).toEqual(new Set([`${SITE.origin}/api/orders/{id}`]));
+        expect(new Set(urls)).toEqual(new Set([`${SITE.origin}/api/orders`]));
+      });
+
+      it('throws when {id} and ids are not given together, instead of leaking or ignoring them', () => {
+        const send = (request: EdotBrowserRequest) => () => spansOf(siteWith(request), 1);
+        const message = 'in the URL and ids go together, but only one of them is set';
+
+        // ids that nothing in the URL takes
+        expect(send({ method: 'GET', url: '/api/orders', ids: ['a1'] })).toThrow(message);
+        // {id} that nothing replaces, with no ids or with an empty list
+        expect(send({ method: 'GET', url: '/api/orders/{id}' })).toThrow(message);
+        expect(send({ method: 'GET', url: '/api/orders/{id}', ids: [] })).toThrow(message);
       });
 
       it('gives a slow tail to the share of requests that the endpoint says', () => {
