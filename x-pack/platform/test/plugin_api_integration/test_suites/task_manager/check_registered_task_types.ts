@@ -248,6 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
         'maintenance-window:generate-events',
+        'nightshiftSources:sourceVolumeTelemetry',
         'notification-center:cleanup',
         'osquery:backfillScheduleIds',
         'osquery:telemetry-configs',
