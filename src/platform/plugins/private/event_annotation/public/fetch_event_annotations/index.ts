@@ -51,6 +51,7 @@ export function getFetchEventAnnotations({
       return {
         aggs: search.aggs,
         searchSource: search.searchSource,
+        esql: search.esql,
         dataViews,
         getNow: () => nowProvider.get(),
         uiSettings,

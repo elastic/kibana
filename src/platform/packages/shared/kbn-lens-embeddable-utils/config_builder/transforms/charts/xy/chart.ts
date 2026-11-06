@@ -15,7 +15,12 @@ import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../s
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { isAPIDataLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import {
+  isAPIAnnotationLayer,
+  isAPIDataLayer,
+  isAPIesqlXYLayer,
+  isLensStateDataLayer,
+} from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -175,10 +180,9 @@ export function buildVisualizationState(
   };
 }
 
-// The ES|QL/DSL homogeneity check only applies to data layers. Annotation layers
-// never participate in that split (query annotations carry their own data-view
-// data source, manual annotations none), and reference line layers may be ES|QL
-// or data-view based alongside ES|QL data layers.
+// The chart mode is derived from data layers only. Annotation layers are checked
+// against that mode separately (see hasDslOnlyAnnotations / hasEsqlAnnotations), and
+// reference line layers may be ES|QL or data-view based alongside ES|QL data layers.
 function areAllDataLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
   const dataLayers = apiLayers.filter(isAPIDataLayer);
   return dataLayers.length > 0 && dataLayers.every(isAPIesqlXYLayer);
@@ -187,6 +191,25 @@ function areAllDataLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['
 function areAllDataLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
   const dataLayers = apiLayers.filter(isAPIDataLayer);
   return dataLayers.length > 0 && dataLayers.every((l) => !isAPIesqlXYLayer(l));
+}
+
+// A chart is either ES|QL or DSL; annotations must match the mode, like the API schema requires.
+function hasDslOnlyAnnotations(apiLayers: XYLayer[]): boolean {
+  return apiLayers.filter(isAPIAnnotationLayer).some((layer) => {
+    if (layer.type === 'annotation_group') {
+      return true;
+    }
+    return layer.events.some((event) => event.type === 'query');
+  });
+}
+
+function hasEsqlAnnotations(apiLayers: XYLayer[]): boolean {
+  return apiLayers.filter(isAPIAnnotationLayer).some((layer) => {
+    if (layer.type === 'annotation_group') {
+      return false;
+    }
+    return layer.events.some((event) => event.type === 'esql');
+  });
 }
 
 export function buildVisualizationAPI(
@@ -225,6 +248,9 @@ export function buildVisualizationAPI(
   const legend = convertLegendToAPIFormat(config.legend);
 
   if (areAllDataLayersEsql(apiLayers)) {
+    if (hasDslOnlyAnnotations(apiLayers)) {
+      throw new Error('Query-based and library annotations are not supported in ES|QL charts');
+    }
     return {
       type: 'xy',
       layers: apiLayers,
@@ -234,6 +260,9 @@ export function buildVisualizationAPI(
     };
   }
   if (areAllDataLayersNoEsql(apiLayers)) {
+    if (hasEsqlAnnotations(apiLayers)) {
+      throw new Error('ES|QL annotations are not supported in non-ESQL charts');
+    }
     return {
       type: 'xy',
       layers: apiLayers,

@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-plugins-server'
   - '@kbn/visualizations-common'
+  - '@kbn/search-types'
 tags:
   - plugin
   - prod

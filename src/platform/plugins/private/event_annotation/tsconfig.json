@@ -33,7 +33,8 @@
     "@kbn/content-management-utils",
     "@kbn/logging",
     "@kbn/core-plugins-server",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*",
