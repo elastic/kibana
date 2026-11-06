@@ -165,6 +165,70 @@ describe('logsSearch', () => {
   });
 });
 
+describe('logsSearch and spansSearch with filters', () => {
+  const FILTERS = { browser: 'Chrome', country: 'DE', pageUrl: 'https://shop.example.com/' };
+  const BROWSER_TERM = { term: { digital_experience_filter_browser: 'Chrome' } };
+  const COUNTRY_TERM = { term: { digital_experience_filter_country: 'DE' } };
+
+  it('define the runtime fields the filters read', () => {
+    [logsSearch(PARAMS), spansSearch(PARAMS)].forEach((request) => {
+      expect(Object.keys(request.runtime_mappings ?? {})).toEqual([
+        'digital_experience_filter_browser',
+        'digital_experience_filter_os',
+        'digital_experience_filter_device',
+        'digital_experience_filter_country',
+      ]);
+    });
+  });
+
+  it('narrow the metrics to the selected browser, OS, device and country', () => {
+    const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters: FILTERS })).filter;
+    const spans = inEnvironmentOf(spansSearch({ ...PARAMS, filters: FILTERS })).filter;
+
+    expect(logs).toEqual({ bool: { filter: [{ match_all: {} }, BROWSER_TERM, COUNTRY_TERM] } });
+    expect(spans).toEqual({ bool: { filter: [{ match_all: {} }, BROWSER_TERM, COUNTRY_TERM] } });
+  });
+
+  it('keep the picker environments and the filter values over every selection', () => {
+    const request = logsSearch({ ...PARAMS, filters: FILTERS });
+
+    expect(request.query?.bool?.filter).not.toContainEqual(BROWSER_TERM);
+    expect(request.aggs?.environments).toBeDefined();
+    expect(Object.keys(request.aggs ?? {})).toEqual(
+      expect.arrayContaining(['browserOptions', 'osOptions', 'countryOptions', 'pageUrlOptions'])
+    );
+  });
+
+  it('narrow the page loads and their trend to the selected page, not the other metrics', () => {
+    const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters: FILTERS }));
+
+    expect(pageLoadsOf(logsSearch({ ...PARAMS, filters: FILTERS })).filter).toEqual({
+      bool: {
+        filter: [
+          { term: { event_name: 'browser.navigation_timing' } },
+          { term: { 'attributes.url.full': 'https://shop.example.com/' } },
+        ],
+      },
+    });
+    expect(logs.aggs.jsErrors).toEqual({
+      filter: { bool: { filter: [{ term: { event_name: 'exception' } }] } },
+    });
+  });
+
+  it('leave the HTTP requests whole when only a page is selected', () => {
+    const request = spansSearch({ ...PARAMS, filters: { pageUrl: 'https://shop.example.com/' } });
+
+    expect(inEnvironmentOf(request).filter).toEqual({ match_all: {} });
+  });
+
+  it('are unchanged without a selection', () => {
+    expect(inEnvironmentOf(logsSearch(PARAMS)).filter).toEqual({ match_all: {} });
+    expect(pageLoadsOf(logsSearch(PARAMS)).filter).toEqual({
+      bool: { filter: [{ term: { event_name: 'browser.navigation_timing' } }] },
+    });
+  });
+});
+
 describe('spansSearch', () => {
   it('reads only the HTTP requests the browser makes', () => {
     const filter = spansSearch(PARAMS).query?.bool?.filter;

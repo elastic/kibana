@@ -12,12 +12,13 @@ import {
   getVisibleDestinationFormErrors,
   validateRemoteEndpoint,
 } from './destination_form';
-import { validateRemoteIndex, validateStaticSignalIndex } from './destination_models';
+import { validateFreeFormIndexName, validateStaticSignalIndex } from './destination_models';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_S3_DESTINATION_FORM,
   REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationCreationFormData,
   type RemoteElasticsearchDestinationFormData,
 } from './types';
 
@@ -29,6 +30,17 @@ const unitDefinition: StreamsUnit.GetResponse = {
   },
   ui_metadata: {},
 };
+
+const elasticsearchForm = (
+  elasticsearch: Partial<typeof EMPTY_ELASTICSEARCH_DESTINATION_FORM>
+): DestinationCreationFormData => ({
+  storageKind: 'local_elasticsearch',
+  s3: { ...EMPTY_S3_DESTINATION_FORM },
+  remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
+  destinationName: 'Orders',
+  description: '',
+  elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, ...elasticsearch },
+});
 
 describe('destination form', () => {
   it('allows auto mode without an index', () => {
@@ -280,6 +292,92 @@ describe('destination form', () => {
       expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
     }
   );
+  describe('docs targets', () => {
+    it('requires a docs write pattern once docs is selected', () => {
+      const formData = elasticsearchForm({ useCustomWritePatterns: true, customSignals: ['docs'] });
+
+      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns).toBe(
+        'required'
+      );
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+    });
+
+    it('marks each invalid docs write pattern on its own', () => {
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['docs'],
+        docsWritePatterns: ['logs-orders-*', 'accounting-*', 'Logs-x-*'],
+      });
+
+      expect(
+        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
+      ).toEqual([
+        { pattern: 'accounting-*', error: 'docsPrefix' },
+        { pattern: 'Logs-x-*', error: 'uppercase' },
+      ]);
+    });
+
+    const docsPatterns = (count: number) =>
+      Array.from({ length: count }, (_, index) => `logs-orders${index}-*`);
+
+    it('accepts 32 write patterns across OTel and docs', () => {
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: docsPatterns(31),
+      });
+
+      expect(
+        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
+      ).toBeUndefined();
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+    });
+
+    it('rejects 33 write patterns across OTel and docs', () => {
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: docsPatterns(32),
+      });
+
+      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns).toBe(
+        'tooMany'
+      );
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+    });
+
+    it('marks a docs write pattern over 255 UTF-8 bytes', () => {
+      const longPattern = `logs-${'a'.repeat(251)}`;
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['docs'],
+        docsWritePatterns: [`logs-${'a'.repeat(250)}`, longPattern],
+      });
+
+      expect(
+        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
+      ).toEqual([{ pattern: longPattern, error: 'tooLong' }]);
+    });
+
+    it('accepts a fixed destination with only a docs index', () => {
+      const formData = elasticsearchForm({ auto: false, docsIndex: 'accounting-2026' });
+      const errors = getDestinationCreationFormErrors({ formData, unitDefinition });
+
+      expect(errors.staticIndexes).toBeUndefined();
+      expect(errors.docsIndex).toBeUndefined();
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+    });
+
+    it('rejects an invalid docs index', () => {
+      const formData = elasticsearchForm({ auto: false, docsIndex: 'Acc' });
+
+      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsIndex).toBe(
+        'uppercase'
+      );
+    });
+  });
 });
 
 describe('S3', () => {
@@ -458,21 +556,21 @@ describe('validateRemoteEndpoint', () => {
   });
 });
 
-describe('validateRemoteIndex', () => {
+describe('remote index validation', () => {
   it('accepts a name local rejects', () => {
     expect(validateStaticSignalIndex('logs', 'my-index')).toBe('signalPattern');
-    expect(validateRemoteIndex('my-index')).toBeUndefined();
+    expect(validateFreeFormIndexName('my-index')).toBeUndefined();
   });
 
   it('ignores blank and trims plain surrounding spaces', () => {
-    expect(validateRemoteIndex('')).toBeUndefined();
-    expect(validateRemoteIndex('  my-index  ')).toBeUndefined();
+    expect(validateFreeFormIndexName('')).toBeUndefined();
+    expect(validateFreeFormIndexName('  my-index  ')).toBeUndefined();
   });
 
   it('accepts up to 255 UTF-8 bytes', () => {
-    expect(validateRemoteIndex('a'.repeat(255))).toBeUndefined();
-    expect(validateRemoteIndex('a'.repeat(256))).toBe('invalidName');
-    expect(validateRemoteIndex('\u00e9'.repeat(128))).toBe('invalidName');
+    expect(validateFreeFormIndexName('a'.repeat(255))).toBeUndefined();
+    expect(validateFreeFormIndexName('a'.repeat(256))).toBe('invalidName');
+    expect(validateFreeFormIndexName('\u00e9'.repeat(128))).toBe('invalidName');
   });
 
   it.each([
@@ -484,8 +582,9 @@ describe('validateRemoteIndex', () => {
     ['a*b', 'invalidCharacter'],
     ['MyIndex', 'uppercase'],
     ['.ds-my-index', 'invalidName'],
+    ['.my-index', 'invalidName'],
   ])('rejects %j as %s', (index, error) => {
-    expect(validateRemoteIndex(index)).toBe(error);
+    expect(validateFreeFormIndexName(index)).toBe(error);
   });
 });
 

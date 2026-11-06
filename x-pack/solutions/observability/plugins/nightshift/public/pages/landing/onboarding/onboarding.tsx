@@ -332,8 +332,7 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
       <EuiSpacer size="l" />
-      {(step === 'enable' ||
-        ((step === 'addData' || step === 'connectSources') && !isConnected)) && (
+      {(step === 'enable' || step === 'addData' || step === 'connectSources') && (
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />
