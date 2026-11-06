@@ -3948,6 +3948,12 @@ describe('ProposalsService.reopen', () => {
     expect(successor?.decidedBy).toBeUndefined();
     expect(successor?.workflowExecutionId).toBeUndefined();
     expect(successor?.expiresAt).toBeUndefined();
+    // Stamped with the reopen, not inherited: the successor is offered now, by
+    // whoever took the mark back, and nothing else records either fact.
+    expect(successor?.createdBy).toEqual(analyst('decider'));
+    expect(Date.parse(successor!.createdAt)).toBeGreaterThan(
+      Date.parse(documents.get('proposal-1')!.createdAt)
+    );
     // The card exists by the time the call returns, so the conversation can be
     // refreshed on the response rather than polled for.
     expect(attachmentsClient.create).toHaveBeenCalledWith(
@@ -4087,6 +4093,19 @@ describe('ProposalsService — gateless proposals', () => {
   });
 
   describe('releaseGate', () => {
+    it('refuses a decision whose status pair the guards reject', async () => {
+      // The direct path writes through `applyUpdate`, so a gateless decision
+      // passes the same pair, terminal-status and immutability guards a gated
+      // one does rather than bypassing them.
+      const storage = createStorage(gateless({ status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(
+        service.releaseGate('proposal-1', releaseParams({ approved: true }))
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
     it('writes the decision itself, with no gate to resume', async () => {
       const storage = createStorage(gateless());
       const { service, workflowsApi } = createService(storage);

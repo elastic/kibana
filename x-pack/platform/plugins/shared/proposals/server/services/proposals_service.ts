@@ -592,10 +592,13 @@ export class ProposalsService {
   }
 
   /**
-   * Writes the decision of a proposal no gate owns, in one write guarded by the
-   * sequence number it was loaded under. Two concurrent deciders therefore
-   * resolve the way two concurrent revisions do: the first lands, the second
-   * gets a {@link ProposalConflictError} the routes turn into a 409.
+   * Writes the decision of a proposal no gate owns, through `applyUpdate()` so
+   * that every decision — gated or not — passes the same guards: the valid
+   * decision/status pairs, the terminal-status check and decision immutability.
+   * One write, guarded by the sequence number the record was loaded under, so
+   * two concurrent deciders resolve the way two concurrent revisions do: the
+   * first lands, the second gets a {@link ProposalConflictError} the routes
+   * turn into a 409.
    *
    * `no_action` under both decisions, because a gateless proposal carries
    * nothing to run: approving records that the analyst did it themselves.
@@ -617,23 +620,22 @@ export class ProposalsService {
       request,
     }: Pick<ReleaseGateParams, 'approved' | 'dismissReason' | 'rationale' | 'request'>
   ): Promise<Proposal> {
+    // Ahead of the write, so a refusal leaves no annotation behind, exactly as
+    // on the gated path.
     this.assertDecidable(proposal);
 
-    const decided: StoredProposalRecord = {
-      ...proposal,
-      decision: approved ? 'approved' : 'dismissed',
-      status: 'no_action',
-      decidedAt: new Date().toISOString(),
-      decidedBy: await this.deps.resolveUser(request),
-      decisionMode: 'manual',
-      ...(dismissReason !== undefined ? { dismissReason } : {}),
-      ...(rationale !== undefined ? { rationale } : {}),
-    };
-    const { id, ...document } = decided;
-
-    await this.writeDocument(id, document, { seqNo, primaryTerm });
-
-    return stripRanks(decided);
+    return this.applyUpdate(
+      { proposal, seqNo, primaryTerm },
+      {
+        id: proposal.id,
+        decision: approved ? 'approved' : 'dismissed',
+        status: 'no_action',
+        decidedBy: await this.deps.resolveUser(request),
+        decisionMode: 'manual',
+        dismissReason,
+        rationale,
+      }
+    );
   }
 
   /**
@@ -928,6 +930,12 @@ export class ProposalsService {
 
     const document: ProposalDocument = {
       ...original,
+      // Stamped with the reopen rather than inherited, as the gate's create step
+      // used to: the successor is offered now, by whoever took the mark back, and
+      // nothing else on either row records that. It therefore moves to the top of
+      // a newest-first list, which is where a freshly re-offered to-do belongs.
+      createdAt: new Date().toISOString(),
+      createdBy: await this.deps.resolveUser(request),
       // Gateless whatever the original was: a to-do runs nothing, so there is
       // no execution to park and no deadline anyone would settle.
       gate: 'none',
