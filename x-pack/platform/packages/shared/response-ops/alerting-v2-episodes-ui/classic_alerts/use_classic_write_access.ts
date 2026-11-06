@@ -9,38 +9,49 @@ import { useCallback } from 'react';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import {
   OBSERVABILITY_ALERTS_FEATURE_ID,
-  OBSERVABILITY_RULE_TYPE_IDS,
+  OBS_ALERTING_FEATURES,
+  STACK_ALERTING_FEATURES,
   STACK_ALERTS_ONLY_FEATURE_ID,
-  STACK_RULE_TYPE_IDS,
-  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
 } from '@kbn/rule-data-utils';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 import type { EpisodeWriteAccessServices } from '../types/episode_data_source';
 import type { ClassicAlertActionContext } from './utils/map_alert';
 
-const OBSERVABILITY_ALERTS_RULE_TYPE_IDS = new Set<string>([
-  ...OBSERVABILITY_RULE_TYPE_IDS,
-  ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
-]);
-const STACK_ALERTS_RULE_TYPE_IDS = new Set<string>(STACK_RULE_TYPE_IDS);
+const indexGrantedConsumers = (
+  alertingFeatures: Array<{ ruleTypeId: string; consumers: string[] }>
+): Map<string, Set<string>> => {
+  const index = new Map<string, Set<string>>();
+  for (const { ruleTypeId, consumers } of alertingFeatures) {
+    const granted = index.get(ruleTypeId) ?? new Set<string>();
+    for (const consumer of consumers) {
+      granted.add(consumer);
+    }
+    index.set(ruleTypeId, granted);
+  }
+  return index;
+};
+
+const OBSERVABILITY_ALERTS_GRANTS = indexGrantedConsumers(OBS_ALERTING_FEATURES);
+const STACK_ALERTS_GRANTS = indexGrantedConsumers(STACK_ALERTING_FEATURES);
 
 /**
- * Mirrors the classic alerts pages: each alerts-only feature grants write access through its
- * `write` UI capability for the rule types its page lists, and rule-create authorization grants it
- * for every rule type. The `write` capability and the RAC `alert:all` / `rule:mute_alerts`
- * privileges it stands in for are not otherwise exposed to the browser.
+ * Resolves classic alert write access per row, since the Observability and Stack features grant it
+ * over different rule type and consumer combinations. The alerts-only features expose their
+ * `alert:all` / `rule:mute_alerts` privileges as a `write` UI capability, while the solution
+ * features grant them along with rule privileges, which authorization reports per rule type.
  */
 export const useClassicWriteAccess = ({
   application,
   http,
   notifications,
 }: EpisodeWriteAccessServices): CanWriteEpisode => {
-  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+  const { ruleTypesState } = useGetRuleTypesPermissions({
     http,
     toasts: notifications.toasts,
     filteredRuleTypes: [],
   });
+  const ruleTypes = ruleTypesState.data;
 
   const { capabilities } = application;
   const canWriteObservabilityAlerts = Boolean(capabilities[OBSERVABILITY_ALERTS_FEATURE_ID]?.write);
@@ -48,20 +59,20 @@ export const useClassicWriteAccess = ({
 
   return useCallback(
     (episode: AlertEpisode) => {
-      if (authorizedToCreateAnyRules) {
-        return true;
-      }
-
-      const { ruleTypeId } = (episode.source_action_context ?? {}) as ClassicAlertActionContext;
-      if (!ruleTypeId) {
-        return canWriteObservabilityAlerts || canWriteStackAlerts;
+      const { ruleTypeId, consumer } = (episode.source_action_context ??
+        {}) as ClassicAlertActionContext;
+      if (!ruleTypeId || !consumer) {
+        return false;
       }
 
       return (
-        (canWriteObservabilityAlerts && OBSERVABILITY_ALERTS_RULE_TYPE_IDS.has(ruleTypeId)) ||
-        (canWriteStackAlerts && STACK_ALERTS_RULE_TYPE_IDS.has(ruleTypeId))
+        Boolean(ruleTypes.get(ruleTypeId)?.authorizedConsumers[consumer]?.all) ||
+        Boolean(
+          canWriteObservabilityAlerts && OBSERVABILITY_ALERTS_GRANTS.get(ruleTypeId)?.has(consumer)
+        ) ||
+        Boolean(canWriteStackAlerts && STACK_ALERTS_GRANTS.get(ruleTypeId)?.has(consumer))
       );
     },
-    [authorizedToCreateAnyRules, canWriteObservabilityAlerts, canWriteStackAlerts]
+    [ruleTypes, canWriteObservabilityAlerts, canWriteStackAlerts]
   );
 };

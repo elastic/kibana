@@ -90,6 +90,7 @@ export interface ClassicAlertSource {
   [ALERT_RULE_NAME]?: string;
   [ALERT_RULE_CATEGORY]?: string;
   [ALERT_RULE_TYPE_ID]?: string;
+  [ALERT_RULE_CONSUMER]?: string;
   [ALERT_SEVERITY]?: string;
   [ALERT_WORKFLOW_STATUS]?: string;
   [ALERT_WORKFLOW_TAGS]?: string | string[];
@@ -105,6 +106,7 @@ export interface ClassicAlertActionContext {
   readonly instanceId: string | undefined;
   readonly ruleId: string;
   readonly ruleTypeId: string | undefined;
+  readonly consumer: string | undefined;
   readonly workflowStatus: string | undefined;
   readonly workflowTags: string[];
   readonly caseIds: string[];
@@ -157,6 +159,7 @@ export const mapClassicAlertToEpisode = (
     instanceId: source[ALERT_INSTANCE_ID],
     ruleId: source[ALERT_RULE_UUID] ?? '',
     ruleTypeId: source[ALERT_RULE_TYPE_ID],
+    consumer: source[ALERT_RULE_CONSUMER],
     workflowStatus: source[ALERT_WORKFLOW_STATUS],
     workflowTags,
     caseIds: asStringArray(source[ALERT_CASE_IDS]),
