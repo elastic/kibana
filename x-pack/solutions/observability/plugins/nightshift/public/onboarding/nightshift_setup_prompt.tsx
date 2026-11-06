@@ -66,12 +66,26 @@ export const NightshiftSetupPrompt = ({
         values={{
           accounts: (
             <>
-              {accounts.map((account, index) => (
-                <React.Fragment key={account}>
-                  {index > 0 ? ', ' : null}
-                  <EuiCode>{account}</EuiCode>
-                </React.Fragment>
-              ))}
+              {new Intl.ListFormat(i18n.getLocale(), {
+                style: 'long',
+                type: 'conjunction',
+              })
+                .formatToParts(accounts)
+                .map(({ type, value }, index) =>
+                  type === 'element' ? (
+                    <EuiCode key={value}>{value}</EuiCode>
+                  ) : (
+                    // EuiCode pads its right edge, which would leave a gap before the separator.
+                    <span
+                      key={`${index}-${value}`}
+                      css={css`
+                        margin-inline-start: -${euiTheme.size.xs};
+                      `}
+                    >
+                      {value}
+                    </span>
+                  )
+                )}
             </>
           ),
           privilegesLink: (
