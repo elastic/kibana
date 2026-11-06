@@ -62,8 +62,7 @@ describe('createCustomContentPanelResolver', () => {
   beforeEach(() => {
     mockedBuild.mockReset();
     mockedBuild.mockResolvedValue({
-      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
-      additionalEsqlQueries: [],
+      esqlQueries: ['FROM logs-* | STATS count = COUNT(*) BY host'],
       template: '<div>resolved</div>',
       height: 320,
     });
@@ -97,7 +96,7 @@ describe('createCustomContentPanelResolver', () => {
 
     it('stores no query for a panel without data', async () => {
       mockedBuild.mockResolvedValue({
-        additionalEsqlQueries: [],
+        esqlQueries: [],
         template: '<div>banner</div>',
         height: 200,
       });
@@ -140,8 +139,7 @@ describe('createCustomContentPanelResolver', () => {
         expect.objectContaining({
           nlQuery: 'Make the badges blue',
           existing: {
-            esqlQuery: 'FROM logs-*',
-            additionalEsqlQueries: [],
+            esqlQueries: ['FROM logs-*'],
             template: '<div>old</div>',
           },
         })
@@ -162,8 +160,7 @@ describe('createCustomContentPanelResolver', () => {
       expect(mockedBuild).toHaveBeenCalledWith(
         expect.objectContaining({
           existing: expect.objectContaining({
-            esqlQuery: 'FROM logs-*',
-            additionalEsqlQueries: ['FROM metrics-*'],
+            esqlQueries: ['FROM logs-*', 'FROM metrics-*'],
           }),
         })
       );
@@ -171,8 +168,7 @@ describe('createCustomContentPanelResolver', () => {
 
     it('stores the additional queries the builder keeps after the main one', async () => {
       mockedBuild.mockResolvedValue({
-        esqlQuery: 'FROM logs-*',
-        additionalEsqlQueries: ['FROM metrics-*'],
+        esqlQueries: ['FROM logs-*', 'FROM metrics-*'],
         template: '<div>resolved</div>',
         height: 320,
       });
@@ -190,7 +186,7 @@ describe('createCustomContentPanelResolver', () => {
 
     it('stores no query, and so no additional ones, when the builder returns none', async () => {
       mockedBuild.mockResolvedValue({
-        additionalEsqlQueries: [],
+        esqlQueries: [],
         template: '<div>static</div>',
         height: 200,
       });
@@ -238,7 +234,7 @@ describe('createCustomContentPanelResolver', () => {
 
     it('drops the query but keeps the other settings when the builder returns none', async () => {
       mockedBuild.mockResolvedValue({
-        additionalEsqlQueries: [],
+        esqlQueries: [],
         template: '<div>static</div>',
         height: 200,
       });

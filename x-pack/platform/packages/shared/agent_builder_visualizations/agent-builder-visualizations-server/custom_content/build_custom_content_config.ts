@@ -38,14 +38,10 @@ interface BuildCustomContentConfigParams {
   /** Regenerate the query from `nlQuery`, starting from the stored one so unrelated parts survive. */
   regenerateESQL?: boolean;
   /**
-   * The panel being edited. Absent for a new panel. Its additional queries, the ones after the main
-   * query that its template reads as `queries[1]`, `queries[2]`, ..., are kept as they are.
+   * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
+   * them: the first is the main query (`rows`), the others `queries[1]`, `queries[2]`, ...
    */
-  existing?: {
-    esqlQuery?: string;
-    additionalEsqlQueries?: readonly string[];
-    template?: string;
-  };
+  existing?: { esqlQueries?: readonly string[]; template?: string };
   timeRange?: GenerateParams['timeRange'];
   resolveEsqlVariables?: ResolveCustomContentEsqlVariables;
   modelProvider: ModelProvider;
@@ -55,10 +51,12 @@ interface BuildCustomContentConfigParams {
 }
 
 interface BuildCustomContentConfigResult {
-  /** The query the panel ends up with, absent for a panel without data. */
-  esqlQuery?: string;
-  /** The panel's additional queries, kept only while it has a main query. */
-  additionalEsqlQueries: string[];
+  /**
+   * The queries the panel ends up with, in the order the template reads them, none for a panel
+   * without data. Only the first can be generated, replaced or removed; the others are kept as they
+   * are, and only while the panel has a first one.
+   */
+  esqlQueries: string[];
   /** The HTML template. On an edit that neither has a prompt nor changes the query, the existing one. */
   template: string;
   /** Height the template needs, in CSS pixels. Absent when the existing template was kept. */
@@ -126,11 +124,12 @@ export const buildCustomContentConfig = async ({
       options
     );
 
+  const [existingQuery, ...existingAdditionalQueries] = existing?.esqlQueries ?? [];
   const esqlQuery = await resolveQuery({
     esql,
     hasData,
     regenerate: regenerateESQL,
-    existingQuery: existing?.esqlQuery,
+    existingQuery,
     isNewPanel: !existing,
     generate: async (existingQueries) =>
       generateCustomContentEsql({
@@ -146,12 +145,13 @@ export const buildCustomContentConfig = async ({
       }),
   });
 
-  // The additional queries extend the main one, so there is nothing for them to extend without it.
-  const additionalEsqlQueries = esqlQuery ? [...(existing?.additionalEsqlQueries ?? [])] : [];
+  // The other queries extend the first, so there is nothing for them to extend without it.
+  const additionalEsqlQueries = esqlQuery ? existingAdditionalQueries : [];
+  const esqlQueries = esqlQuery ? [esqlQuery, ...additionalEsqlQueries] : [];
 
-  const isQueryChanging = esqlQuery !== existing?.esqlQuery;
+  const isQueryChanging = esqlQuery !== existingQuery;
   if (existing && nlQuery === undefined && !isQueryChanging) {
-    return { esqlQuery, additionalEsqlQueries, template: existing.template ?? '' };
+    return { esqlQueries, template: existing.template ?? '' };
   }
 
   const resolveTemplate = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
@@ -164,5 +164,5 @@ export const buildCustomContentConfig = async ({
     esqlVariables: isQueryChanging && esqlQuery ? await getEsqlVariables([esqlQuery]) : undefined,
   });
 
-  return { esqlQuery, additionalEsqlQueries, template, height };
+  return { esqlQueries, template, height };
 };

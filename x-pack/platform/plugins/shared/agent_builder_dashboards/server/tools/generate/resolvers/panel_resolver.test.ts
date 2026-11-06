@@ -37,7 +37,7 @@ describe('createPanelResolver', () => {
       validatedConfig: { type: 'metric' },
     } as Awaited<ReturnType<typeof buildLensConfig>>);
     mockedBuildCustomContentConfig.mockResolvedValue({
-      additionalEsqlQueries: [],
+      esqlQueries: [],
       template: '<div>resolved</div>',
       height: 320,
     });

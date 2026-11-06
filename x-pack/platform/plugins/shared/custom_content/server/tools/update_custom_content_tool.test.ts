@@ -71,8 +71,7 @@ describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockBuild.mockResolvedValue({
-      esqlQuery: 'FROM logs',
-      additionalEsqlQueries: [],
+      esqlQueries: ['FROM logs'],
       template: '<div>generated</div>',
       height: 320,
     });
@@ -125,7 +124,7 @@ describe('createUpdateCustomContentTool handler', () => {
           index: 'logs-*',
           esql: undefined,
           regenerateESQL: undefined,
-          existing: { esqlQuery: 'FROM logs', template: '<p>old</p>' },
+          existing: { esqlQueries: ['FROM logs'], template: '<p>old</p>' },
         })
       );
     });
@@ -139,7 +138,7 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({
           existing: expect.objectContaining({
-            additionalEsqlQueries: ['FROM metrics', 'FROM traces'],
+            esqlQueries: ['FROM logs', 'FROM metrics', 'FROM traces'],
           }),
         })
       );
@@ -147,8 +146,7 @@ describe('createUpdateCustomContentTool handler', () => {
 
     it('stores the additional queries the builder keeps, and none when it returns none', async () => {
       mockBuild.mockResolvedValueOnce({
-        esqlQuery: 'FROM logs',
-        additionalEsqlQueries: ['FROM metrics'],
+        esqlQueries: ['FROM logs', 'FROM metrics'],
         template: '<div>kept</div>',
         height: 320,
       });
@@ -175,8 +173,7 @@ describe('createUpdateCustomContentTool handler', () => {
 
     it('stores the template and the query the builder returns', async () => {
       mockBuild.mockResolvedValue({
-        esqlQuery: 'FROM logs | STATS count = COUNT(*) BY host',
-        additionalEsqlQueries: [],
+        esqlQueries: ['FROM logs | STATS count = COUNT(*) BY host'],
         template: '<div>generated</div>',
         height: 320,
       });
@@ -231,7 +228,7 @@ describe('createUpdateCustomContentTool handler', () => {
 
     it('forwards esqlQuery: null, which removes the query, and stores none', async () => {
       mockBuild.mockResolvedValue({
-        additionalEsqlQueries: [],
+        esqlQueries: [],
         template: '<p>static</p>',
         height: 200,
       });
@@ -258,7 +255,7 @@ describe('createUpdateCustomContentTool handler', () => {
       );
 
       expect(mockBuild).toHaveBeenCalledWith(
-        expect.objectContaining({ existing: { esqlQuery: undefined, template: undefined } })
+        expect.objectContaining({ existing: { esqlQueries: [], template: undefined } })
       );
     });
 

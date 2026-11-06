@@ -8,9 +8,6 @@
 import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  readEsqlQuery,
-  readAdditionalEsqlQueries,
-  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import {
@@ -38,18 +35,14 @@ export const createCustomContentPanelResolver = ({
     const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
-      const { esqlQuery, additionalEsqlQueries, template } = await buildCustomContentConfig({
+      const { esqlQueries, template } = await buildCustomContentConfig({
         nlQuery,
         index,
         esql,
         hasData,
         regenerateESQL,
         resolveEsqlVariables,
-        existing: existing && {
-          esqlQuery: readEsqlQuery(existing),
-          additionalEsqlQueries: readAdditionalEsqlQueries(existing),
-          template: existing.template,
-        },
+        existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,
         logger,
         events,
@@ -61,7 +54,7 @@ export const createCustomContentPanelResolver = ({
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           config: {
             ...existing,
-            esql_query: toEsqlQueryState(esqlQuery, additionalEsqlQueries),
+            esql_query: esqlQueries.length ? esqlQueries : undefined,
             template,
           },
         },

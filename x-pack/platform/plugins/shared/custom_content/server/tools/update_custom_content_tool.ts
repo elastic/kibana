@@ -111,8 +111,10 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           ? async () => currentData.esql_variables
           : undefined,
         existing: {
-          esqlQuery: currentData?.esql_query,
-          additionalEsqlQueries: currentData?.additional_esql_queries,
+          // The attachment keeps the main query apart from the others.
+          esqlQueries: currentData?.esql_query
+            ? [currentData.esql_query, ...(currentData.additional_esql_queries ?? [])]
+            : [],
           template: currentData?.panel_template || undefined,
         },
         modelProvider,
@@ -135,9 +137,9 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 
     const newData: CustomContentContextAttachmentData = {
       panel_template: built.template,
-      esql_query: built.esqlQuery,
-      ...(built.additionalEsqlQueries.length
-        ? { additional_esql_queries: built.additionalEsqlQueries }
+      esql_query: built.esqlQueries[0],
+      ...(built.esqlQueries.length > 1
+        ? { additional_esql_queries: built.esqlQueries.slice(1) }
         : {}),
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
