@@ -18,8 +18,9 @@ import { writeConnectorManifest } from './connector_manifest';
 
 const mockWriteConnectorManifest = writeConnectorManifest as jest.Mock;
 
-const createSessionMock = (isReset: boolean): AuditedSandboxSession => {
+const createSessionMock = (isReset: boolean, sessionKey: object = {}): AuditedSandboxSession => {
   const session = {
+    sessionKey,
     get isReset() {
       return isReset;
     },
@@ -46,6 +47,7 @@ const createMutableSessionMock = (): {
 } => {
   let isReset = false;
   const session = {
+    sessionKey: {},
     get isReset() {
       return isReset;
     },
@@ -144,6 +146,36 @@ describe('createSandboxWorkspaceManager', () => {
     );
 
     await manager.ensureWorkspaceReady({ session, callContext });
+
+    expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips manifest write for a second view of the same pod session', async () => {
+    const sessionKey = {};
+    const callContext = createCallContext(['connector-1']);
+
+    await manager.ensureWorkspaceReady({
+      session: createSessionMock(false, sessionKey),
+      callContext,
+    });
+    mockWriteConnectorManifest.mockClear();
+
+    // A view is made per tool call: a new object, the same pod session.
+    await manager.ensureWorkspaceReady({
+      session: createSessionMock(false, sessionKey),
+      callContext,
+    });
+
+    expect(mockWriteConnectorManifest).not.toHaveBeenCalled();
+  });
+
+  it('writes the manifest again for a view of a different pod session', async () => {
+    const callContext = createCallContext(['connector-1']);
+
+    await manager.ensureWorkspaceReady({ session: createSessionMock(false, {}), callContext });
+    mockWriteConnectorManifest.mockClear();
+
+    await manager.ensureWorkspaceReady({ session: createSessionMock(false, {}), callContext });
 
     expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
   });
