@@ -167,7 +167,11 @@ bi-directional connector does not get a second type, and it does not get a class
 The package README's [Inbound events](../../../../README.md#inbound-events) section is the contract.
 This section is the file layout.
 
-Omit `events` when the connector only calls the vendor.
+Omit `events` when the connector only calls the vendor. On the first PR for a new connector type, omit
+them even when the vendor pushes webhooks. Triggers are registered from `events.definitions` without
+reading `supportedFeatureIds`, and the workflows connector list includes event types that do not
+declare `'workflows'`. Add this file in the follow-up that adds `'workflows'`, once the type is
+registered in every Production-NonCanary version. Record the event keys in the first PR's description.
 
 ```
 {connector}/

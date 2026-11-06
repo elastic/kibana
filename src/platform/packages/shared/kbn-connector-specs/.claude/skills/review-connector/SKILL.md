@@ -47,8 +47,12 @@ and whether the vendor API artifacts are trustworthy.
   before it can declare user-facing features, otherwise a rollout or rollback can leave a node without the
   type and break any user action referencing it. A PR that adds a connector may only declare
   `['agentBuilder']`. Flag `'workflows'` or any other user-facing feature ID on a newly added
-  connector and ask for it to move to a follow-up PR. A PR that adds feature IDs to an existing connector
-  is fine as long as that connector is already registered in every Production-NonCanary version.
+  connector and ask for it to move to a follow-up PR. Flag `events` on that same first PR. Triggers are
+  registered from `events.definitions` without reading `supportedFeatureIds`, and
+  `getAvailableConnectors()` includes event connector types even without `'workflows'`, so the feature
+  id does not hide them. `events` land in the follow-up that adds `'workflows'`. A PR that adds feature
+  IDs or `events` to an existing connector is fine as long as that connector is already registered in
+  every Production-NonCanary version.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
 - **Config fields without a widget**: Flag a `z.boolean()`, `z.array()`, or `z.record()` field in the
