@@ -242,6 +242,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -267,6 +268,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       '@typescript-eslint/no-this-alias': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -290,6 +292,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       '@kbn/compat/eslint-require-atomic-updates': 'error',
       'accessor-pairs': 'error',
