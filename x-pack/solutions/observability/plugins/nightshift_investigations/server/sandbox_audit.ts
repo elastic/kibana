@@ -92,7 +92,7 @@ const category = (method: string): 'process' | 'file' =>
  *
  * The proxy's request id is `sandbox.proxy_request_id`, not `http.request.id`. On Serverless the
  * audit pipeline writes Kibana's own request id to `http.request.id` and would overwrite it.
- * sandbox-api logs the proxy id as `http.request.id`, so a join across the two reads both fields.
+ * sandbox-api logs it under the same name, so one search finds both sides of a call.
  */
 const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string) => {
   const outcome: 'success' | 'failure' = rpc.statusCode === 'OK' ? 'success' : 'failure';
