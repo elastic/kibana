@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/ui-callout'
   - '@kbn/unified-tabs'
+  - '@kbn/vis-type-vega-plugin'
   - '@kbn/visualization-utils'
 tags:
   - plugin

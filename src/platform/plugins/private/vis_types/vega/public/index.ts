@@ -11,6 +11,11 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ConfigSchema } from '../server/config';
 import { VegaPlugin as Plugin } from './plugin';
 
+export {
+  VegaSpecEditorComponent as VegaSpecEditor,
+  type VegaSpecEditorProps,
+} from './components/vega_vis_editor_lazy';
+
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new Plugin(initializerContext);
 }

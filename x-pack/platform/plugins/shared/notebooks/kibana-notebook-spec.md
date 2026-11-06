@@ -171,9 +171,10 @@ Observable-style cells that run plain JavaScript in the page (POC: no sandbox, n
 
 A Vega or Vega-Lite spec over an ES|QL cell's results.
 
-- **Language** is chosen by the spec's `$schema`: one mentioning `vega-lite` is compiled with `vega-lite`, anything else is Vega.
+- **Language** is chosen by the spec's `$schema`: one mentioning `vega-lite` is compiled with `vega-lite`, anything else is Vega. Specs are HJSON (comments, unquoted keys) or JSON, as in Kibana's Vega visualization.
 - **Data**: the source cell's rows, as records keyed by column name, are the dataset `table`. A Vega-Lite spec without `data` reads it by default (`datasets.table`); a Vega spec gets a `table` entry added, or values filled into a `table` entry that has no `values`, `url` or `source`. A spec can still declare its own data.
-- Like charts, the cell never fetches: its run takes the source output. Spec edits save to the cell 400 ms after typing stops and re-render without propagating.
+- **Editing**: the cell shows its source picker and chart; **Edit** opens a flyout with Kibana's Vega spec editor (`VegaSpecEditor` from `@kbn/vis-type-vega-plugin`, with its format and help menus), seeded with the starter spec when the cell has none. **Run preview** shows the draft in the cell without applying it, **Apply and close** saves it, and Cancel discards it. Clicking outside the flyout doesn't close it.
+- Like charts, the cell never fetches: its run takes the source output. Applying a spec re-renders without propagating.
 - Rendering lazy-loads `vega`/`vega-lite` and evaluates expressions with `vega-interpreter`, so Kibana's CSP (no `unsafe-eval`) holds. The view is sized to the cell unless the spec sets `width` or `height`, and axes and legends take EUI text and border colours.
 - While the spec is empty, **Start from the results** writes a Vega-Lite bar chart of the first category column against the first numeric column (or a row count).
 - Vega cells can be added to apps.

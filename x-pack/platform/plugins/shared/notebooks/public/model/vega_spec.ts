@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import hjson from 'hjson';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { Spec } from 'vega';
 import type { TopLevelSpec } from 'vega-lite';
@@ -20,16 +21,16 @@ export type ParsedVegaSpec =
   | { language: 'vega-lite'; spec: TopLevelSpec }
   | { language: 'vega'; spec: Spec };
 
-/** The spec text as Vega-Lite or Vega, told apart by its `$schema`, or why it can't be read. */
+/** The HJSON or JSON spec text as Vega-Lite or Vega, told apart by its `$schema`, or why it can't be read. */
 export const parseVegaSpec = (text: string): ParsedVegaSpec | { error: string } => {
   let parsed: TopLevelSpec | Spec;
   try {
-    parsed = JSON.parse(text);
+    parsed = hjson.parse(text, { legacyRoot: false });
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) };
   }
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    return { error: 'The spec must be a JSON object' };
+    return { error: 'The spec must be an object' };
   }
   const schemaUrl = typeof parsed.$schema === 'string' ? parsed.$schema : '';
   return schemaUrl.includes('vega-lite')

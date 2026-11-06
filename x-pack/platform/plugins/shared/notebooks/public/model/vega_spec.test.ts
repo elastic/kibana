@@ -46,9 +46,19 @@ describe('parseVegaSpec', () => {
     expect(parse({ marks: [] }).language).toBe('vega');
   });
 
-  it('reports invalid JSON and non-objects', () => {
+  it('reads HJSON, with comments and unquoted keys', () => {
+    const parsed = parseVegaSpec(
+      '{\n  // a comment\n  $schema: https://vega.github.io/schema/vega-lite/v6.json\n  mark: bar\n}'
+    );
+    expect(parsed).toEqual({
+      language: 'vega-lite',
+      spec: { $schema: 'https://vega.github.io/schema/vega-lite/v6.json', mark: 'bar' },
+    });
+  });
+
+  it('reports unreadable specs and non-objects', () => {
     expect(parseVegaSpec('{')).toHaveProperty('error');
-    expect(parseVegaSpec('[]')).toEqual({ error: 'The spec must be a JSON object' });
+    expect(parseVegaSpec('[]')).toEqual({ error: 'The spec must be an object' });
   });
 });
 
