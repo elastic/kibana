@@ -144,8 +144,8 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   const headerRunControls = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
   const { size } = euiTheme;
-  // Keeps the cells' Run buttons (just outside each cell) and the floating controls (pinned to
-  // the page edge) clear of each other and of the cells. The section centres its content in what
+  // Room at the end for the cells' Run buttons (just outside each cell) and the floating controls
+  // (pinned to the page edge). The section centres its content in what
   // the padding leaves, so the end padding is solved for an end margin of `reservedEnd`: none while
   // centring leaves enough, growing while the cells shift toward the start, then exactly
   // `reservedEnd` once they shrink.
