@@ -1278,11 +1278,14 @@ describe('Agent policy', () => {
 
     it('should never persist an id in the saved object attributes', async () => {
       jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [{ attributes: {}, id: 'mocked', type: 'mocked', references: [] }],
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'mocked',
+        type: 'mocked',
+        references: [],
       });
 
       await agentPolicyService.update(soClient, esClient, 'mocked', {
