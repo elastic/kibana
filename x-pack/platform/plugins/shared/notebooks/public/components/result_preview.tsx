@@ -11,6 +11,8 @@ import {
   EuiDataGrid,
   EuiSpacer,
   type EuiDataGridColumn,
+  type EuiDataGridSorting,
+  type EuiDataGridStyle,
   type RenderCellValue,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -38,8 +40,8 @@ export const getResultSummary = (table: Datatable, durationMs?: number): string 
     },
   });
 
-/** The first rows of a result; sized to its rows unless given a height. */
-export const ResultGrid = ({ table, height }: { table: Datatable; height?: string }) => {
+/** The first rows of a result, sized to them. */
+const ResultGrid = ({ table }: { table: Datatable }) => {
   const columns = useMemo<EuiDataGridColumn[]>(
     () => table.columns.map(({ id, name }) => ({ id, displayAsText: name })),
     [table]
@@ -60,7 +62,7 @@ export const ResultGrid = ({ table, height }: { table: Datatable; height?: strin
       renderCellValue={renderCellValue}
       gridStyle={{ border: 'horizontal', header: 'underline', fontSize: 's' }}
       toolbarVisibility={false}
-      height={height ?? Math.min(400, 40 + rows.length * 34)}
+      height={Math.min(400, 40 + rows.length * 34)}
     />
   );
 };
@@ -88,6 +90,62 @@ export const ResultPlaceholder = ({ id, status }: { id: string; status?: CellSta
     {null}
   </EuiAccordion>
 );
+
+/** Lens's datatable look, so app panels match dashboard tables. */
+const PANEL_GRID_STYLE: EuiDataGridStyle = {
+  border: 'horizontal',
+  header: 'shade',
+  footer: 'shade',
+  cellPadding: 'm',
+  fontSize: 'm',
+};
+
+const getColumnSchema = (type: string): string | undefined => {
+  if (type === 'number') return 'numeric';
+  if (type === 'date') return 'datetime';
+  return undefined;
+};
+
+/** Every row of a result, filling its container and styled like a dashboard table panel. */
+export const PanelResultGrid = ({ table }: { table: Datatable }) => (
+  // Column visibility and sorting start over when a run changes the columns.
+  <PanelGrid key={table.columns.map(({ id }) => id).join('\n')} table={table} />
+);
+
+const PanelGrid = ({ table }: { table: Datatable }) => {
+  const columns = useMemo<EuiDataGridColumn[]>(
+    () =>
+      table.columns.map(({ id, name, meta }) => ({
+        id,
+        displayAsText: name,
+        schema: getColumnSchema(meta.type),
+      })),
+    [table]
+  );
+  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
+  const { rows } = table;
+  const renderCellValue: RenderCellValue = ({ rowIndex, columnId }) =>
+    formatValue(rows[rowIndex]?.[columnId]);
+
+  return (
+    <EuiDataGrid
+      aria-label={i18n.translate('xpack.notebook.resultPreview.gridLabel', {
+        defaultMessage: 'Query results',
+      })}
+      columns={columns}
+      columnVisibility={{ visibleColumns, setVisibleColumns }}
+      rowCount={rows.length}
+      renderCellValue={renderCellValue}
+      inMemory={{ level: 'sorting' }}
+      sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
+      gridStyle={PANEL_GRID_STYLE}
+      toolbarVisibility={false}
+      height="100%"
+      data-test-subj="notebookPanelResultGrid"
+    />
+  );
+};
 
 export const ResultPreview = ({
   id,

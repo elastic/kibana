@@ -65,7 +65,7 @@ import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 import { PinnedTimePicker } from './notebook_header';
 import { VegaCanvas } from './vega_cell';
-import { ResultGrid } from './result_preview';
+import { PanelResultGrid } from './result_preview';
 
 const APP_ROW_HEIGHT = 40;
 
@@ -96,7 +96,7 @@ const EsqlPanelContent = ({ cell }: { cell: CellDefinition }) => {
       </EuiText>
     );
   }
-  return <ResultGrid table={output.table} height="100%" />;
+  return <PanelResultGrid table={output.table} />;
 };
 
 const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinition }) => {
