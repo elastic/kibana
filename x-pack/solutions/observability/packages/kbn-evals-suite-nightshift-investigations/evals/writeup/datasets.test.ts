@@ -12,6 +12,7 @@ import { toWriteupConversation } from './build';
 import {
   ORCA_WRITEUP_RELEASE,
   getWriteupDatasetHash,
+  guardValidatedExamples,
   loadWriteupDataset,
   toWriteupDataset,
   validateOrcaWriteupDataset,
@@ -268,6 +269,16 @@ describe('the pinned ORCA release', () => {
     expect(() => validateOrcaWriteupDataset({ ...stored, id: 'other' }, release)).toThrow(
       'identity differs'
     );
+  });
+
+  it('notes examples the executor runs that differ from the validated copy', async () => {
+    const guarded = guardValidatedExamples(examples, async () => 'ran');
+    await guarded.task(examples[0]);
+    await guarded.task({
+      ...examples[1],
+      output: { ...examples[1].output, recorded_reply: 'Edited.' },
+    });
+    expect(guarded.changed).toEqual([examples[1].metadata.case_id]);
   });
 
   it('is what loads when no dataset or file is named', async () => {

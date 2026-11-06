@@ -149,8 +149,11 @@ new RunWithCommands(
         const dataset = toWriteupDataset(file);
 
         if (goldensDir) {
+          // Only rounds that became examples get a golden; the eval refuses any other.
+          const cases = new Set(dataset.examples.map((e) => e.metadata.case_id));
           for (const conversation of file.conversations) {
             for (const golden of conversation.goldens) {
+              if (!cases.has(`${conversation.case_id}/r${golden.round_index + 1}`)) continue;
               const path = goldenPath(goldensDir, { ...golden, case_id: conversation.case_id });
               mkdirSync(dirname(path), { recursive: true });
               const question = conversation.rounds[golden.round_index].input.message;

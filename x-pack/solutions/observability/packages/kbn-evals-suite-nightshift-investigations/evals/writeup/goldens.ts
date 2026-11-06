@@ -103,11 +103,14 @@ const normalize = (text: string) => text.replace(/\s+/g, ' ').trim();
 
 /**
  * Goldens by example case ID (`<conversation>/r<n>`). Fails when a golden has no recorded round to
- * answer, or quotes a different question from the one the dataset asks.
+ * answer, or quotes a different question from the one the dataset asks. With `everyRecordedRound`,
+ * it also fails when a recorded round (not an added follow-up) has no golden, so a deleted golden
+ * file can't quietly turn its round into `n/a`.
  */
 export const goldensByCase = (
   goldens: readonly Golden[],
-  examples: ReadonlyArray<Pick<WriteupExample, 'input' | 'output' | 'metadata'>>
+  examples: ReadonlyArray<Pick<WriteupExample, 'input' | 'output' | 'metadata'>>,
+  { everyRecordedRound = false }: { everyRecordedRound?: boolean } = {}
 ): Map<string, string> => {
   const byCase = new Map<string, string>();
   for (const golden of goldens) {
@@ -119,6 +122,12 @@ export const goldensByCase = (
       throw new Error(`Golden ${caseId} quotes a different question from the dataset's`);
     }
     byCase.set(caseId, golden.reply);
+  }
+  if (everyRecordedRound) {
+    const missing = examples
+      .map((e) => e.metadata.case_id)
+      .filter((caseId) => /\/r\d+$/.test(caseId) && !byCase.has(caseId));
+    if (missing.length) throw new Error(`No golden for recorded rounds: ${missing.join(', ')}`);
   }
   return byCase;
 };

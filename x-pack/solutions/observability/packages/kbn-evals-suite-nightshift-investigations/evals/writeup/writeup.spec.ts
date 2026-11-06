@@ -10,7 +10,7 @@ import { join } from 'path';
 import { expect } from '@playwright/test';
 import { selectEvaluators, tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import { loadWriteupDataset } from './datasets';
+import { ORCA_WRITEUP_RELEASE, guardValidatedExamples, loadWriteupDataset } from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
 import { formatReport, toWriteupRows, type WriteupResults } from './report';
@@ -52,7 +52,9 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
     }) => {
       const dataset = await loadWriteupDataset(evalsClient);
       // Kept in the repository, not the stored dataset, so a golden change is reviewed as a diff.
-      const goldens = goldensByCase(readGoldens(goldensDirFor(dataset.name)), dataset.examples);
+      const goldens = goldensByCase(readGoldens(goldensDirFor(dataset.name)), dataset.examples, {
+        everyRecordedRound: dataset.name === ORCA_WRITEUP_RELEASE.name,
+      });
       const votes = parseVotes();
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
@@ -78,6 +80,11 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       );
       const cache =
         process.env.NIGHTSHIFT_WRITEUP_CACHE === 'off' ? undefined : createGenerationCache();
+      // The executor fetches a stored dataset again; check what it runs against what was validated.
+      const guarded = guardValidatedExamples(
+        dataset.examples,
+        createWriteupTask({ inferenceClient, connectorId: connector.id, arm, baseline, cache })
+      );
       const [experiment] = await executorClient.runExperiment(
         {
           name: 'Nightshift writeup',
@@ -91,16 +98,14 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
             prompt_hash: arm.hash,
             ...(baseline ? { baseline: baseline.label, baseline_hash: baseline.hash } : {}),
           },
-          task: createWriteupTask({
-            inferenceClient,
-            connectorId: connector.id,
-            arm,
-            baseline,
-            cache,
-          }),
+          task: guarded.task,
         },
         evaluators
       );
+      expect(
+        guarded.changed,
+        'The stored dataset changed after it was validated; these examples ran unchecked'
+      ).toEqual([]);
 
       const runs = Object.values(experiment.runs);
       expect(runs).toHaveLength(dataset.examples.length * repetitions);

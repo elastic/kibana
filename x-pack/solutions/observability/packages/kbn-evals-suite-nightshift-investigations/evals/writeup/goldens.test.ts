@@ -74,6 +74,21 @@ describe('goldensByCase', () => {
       'different question'
     );
   });
+
+  it('can require a golden for every recorded round', () => {
+    expect(() => goldensByCase([golden], examples, { everyRecordedRound: true })).toThrow(
+      'No golden for recorded rounds: orca-x/r1'
+    );
+    expect(
+      goldensByCase(
+        [{ ...golden, round_index: 0, question: 'Why did checkout fail?' }, golden],
+        examples,
+        {
+          everyRecordedRound: true,
+        }
+      ).size
+    ).toBe(2);
+  });
 });
 
 describe('the ORCA goldens', () => {

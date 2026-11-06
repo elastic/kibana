@@ -195,6 +195,29 @@ export const getWriteupDatasetHash = (
   return createHash('sha256').update(serialized).digest('hex');
 };
 
+/**
+ * Wraps a task so it records every example that differs from the validated copy. A stored dataset is
+ * fetched again by the executor, so an edit between the two reads would otherwise run unchecked.
+ */
+export const guardValidatedExamples = <TOutput>(
+  examples: ReadonlyArray<WriteupExample & { id?: string }>,
+  task: (example: WriteupExample) => Promise<TOutput>
+) => {
+  const expected = new Map(
+    examples.map((example) => [example.metadata.case_id, getWriteupDatasetHash([example])])
+  );
+  const changed: string[] = [];
+  return {
+    changed,
+    task: (example: WriteupExample & { id?: string }) => {
+      if (expected.get(example.metadata.case_id) !== getWriteupDatasetHash([example])) {
+        changed.push(example.metadata.case_id);
+      }
+      return task(example);
+    },
+  };
+};
+
 type StoredDataset = NonNullable<Awaited<ReturnType<EvalsClient['getDatasetByName']>>>;
 
 const fromStored = (
