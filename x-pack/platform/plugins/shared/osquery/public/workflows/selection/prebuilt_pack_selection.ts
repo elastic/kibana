@@ -61,12 +61,22 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
   // A failed lookup must not look like "not loaded in this space", and an ambiguous pack must
   // not look like a missing one. Keyed by the looked-up value (the validator resolves in parallel).
   const lookupErrors = new Map<string, string>();
+  // The validator resolves every runPack step at once: share one request while it is in flight.
+  // Not cached past that, so packs loaded or removed meanwhile show up on the next lookup.
+  let inFlight: Promise<PrebuiltPackListItem[]> | undefined;
+  const listPacks = () => {
+    inFlight ??= listPrebuiltPacks(http).finally(() => {
+      inFlight = undefined;
+    });
+
+    return inFlight;
+  };
 
   return {
     search: async (input) => {
       const search = input.trim().toLowerCase();
       try {
-        const packs = await listPrebuiltPacks(http);
+        const packs = await listPacks();
         lookupErrors.delete(search);
 
         return packs.flatMap((pack) => {
@@ -99,7 +109,7 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
       if (!name) return null;
 
       try {
-        const packs = await listPrebuiltPacks(http);
+        const packs = await listPacks();
         // An asset id is unique, a package name may not be: try the id first.
         const pack =
           packs.find((item) => item.asset_id === name) ??

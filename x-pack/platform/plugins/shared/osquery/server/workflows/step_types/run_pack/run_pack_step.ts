@@ -44,6 +44,18 @@ const stateSchema = lazySchema(() =>
   })
 );
 
+/** Keys of a dispatched query's `ecs_mapping` (record or `{ key }` array); undefined when absent. */
+const ecsKeysOf = (
+  ecsMapping: Record<string, unknown> | Array<{ key?: string }> | undefined
+): string[] | undefined => {
+  if (!ecsMapping) return undefined;
+  if (Array.isArray(ecsMapping)) {
+    return ecsMapping.flatMap(({ key }) => (key ? [key] : []));
+  }
+
+  return Object.keys(ecsMapping);
+};
+
 const failedOutput = (
   errorCode: RunPackOutput['error_code'],
   actionId?: string
@@ -66,6 +78,8 @@ export const runPackStepDefinition = createPollServerStepDefinition({
     const { target } = await resolveTarget(contextManager, input, logger);
     // The pack is read before dispatch: the step validates its enabled queries (no `{{…}}`
     // placeholders, at least one) and never sends a bare `pack_id` the caller could not read.
+    // The check is best-effort: the route reloads the pack and, for a `pack_id`, ignores inline
+    // queries, so an edit that lands between this read and the POST is dispatched as saved.
     const pack = await resolvePack(contextManager, input);
     await assertCanReadLiveQueries(contextManager);
 
@@ -96,7 +110,8 @@ export const runPackStepDefinition = createPollServerStepDefinition({
         queries: dispatched.queries.map((query) => ({
           query_id: query.id || query.action_id,
           action_id: query.action_id,
-          ecs_keys: pack.ecsKeysByQuery[query.id ?? ''] ?? [],
+          // What the route dispatched wins over the pre-dispatch read of the pack.
+          ecs_keys: ecsKeysOf(query.ecs_mapping) ?? pack.ecsKeysByQuery[query.id ?? ''] ?? [],
         })),
       },
     };

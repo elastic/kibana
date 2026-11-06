@@ -145,6 +145,28 @@ describe('osquery.runPack step', () => {
       ]);
     });
 
+    it('takes ecs_keys from what the route dispatched over the pre-dispatch read of the pack', async () => {
+      // The pack changed between the read and the POST: the route dispatched other mappings.
+      const { result } = start({
+        [POST]: () => ({
+          data: {
+            ...dispatchBody.data,
+            queries: [
+              { id: 'cron', action_id: 'qa-cron', ecs_mapping: { 'process.name': {} } },
+              { id: 'launchd', action_id: 'qa-launchd', ecs_mapping: [{ key: 'host.name' }, {}] },
+            ],
+          },
+        }),
+      });
+
+      const { state } = (await result) as { state: { queries: unknown[] } };
+
+      expect(state.queries).toEqual([
+        { query_id: 'cron', action_id: 'qa-cron', ecs_keys: ['process.name'] },
+        { query_id: 'launchd', action_id: 'qa-launchd', ecs_keys: ['host.name'] },
+      ]);
+    });
+
     it('sends policy targeting as agent_policy_ids', async () => {
       const { contextManager, result } = start(
         { [AGENTS]: () => ({ total: 3 }) },

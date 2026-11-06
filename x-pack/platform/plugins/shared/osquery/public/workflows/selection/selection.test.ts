@@ -180,6 +180,24 @@ describe('osquery workflow step pickers', () => {
       ]);
     });
 
+    it('strips simple_query_string operators the user typed before adding the trailing *', async () => {
+      http.get.mockResolvedValue({ data: [] });
+      const selection = createPackSelection(http);
+
+      await selection.search('alpha|beta', context('pack_id'));
+      await selection.search('"(*)"', context('pack_id'));
+
+      expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 20, search: 'alphabeta*' },
+      });
+      // Nothing left after stripping: list without a filter rather than send a bare `*`.
+      expect((http.get.mock.calls[1] as unknown[])[1]).toEqual({
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 20 },
+      });
+    });
+
     it('lists without a search filter for an empty input', async () => {
       http.get.mockResolvedValue({ data: [] });
 
@@ -322,6 +340,35 @@ describe('osquery workflow step pickers', () => {
       expect(
         (await selection.search('elastic', context('prebuilt_pack'))).map((o) => o.value)
       ).toEqual(['forensic-persistence']);
+    });
+
+    it('shares one list request between parallel lookups, and fetches again afterwards', async () => {
+      http.get.mockResolvedValue({ data: [persistence, network] });
+      const selection = createPrebuiltPackSelection(http);
+
+      const [first, second] = await Promise.all([
+        selection.resolve('forensic-persistence', context('prebuilt_pack')),
+        selection.resolve('network-recon', context('prebuilt_pack')),
+      ]);
+
+      expect(first).toMatchObject({ value: 'forensic-persistence' });
+      expect(second).toMatchObject({ value: 'network-recon' });
+      expect(http.get).toHaveBeenCalledTimes(1);
+
+      // Not cached past the request: a pack loaded meanwhile shows up on the next lookup.
+      await selection.search('', context('prebuilt_pack'));
+      expect(http.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('lets the next lookup retry after a shared request failed', async () => {
+      http.get.mockRejectedValueOnce({ message: 'Network down' });
+      http.get.mockResolvedValueOnce({ data: [persistence] });
+      const selection = createPrebuiltPackSelection(http);
+
+      expect(await selection.resolve('forensic-persistence', context('prebuilt_pack'))).toBeNull();
+      expect(
+        await selection.resolve('forensic-persistence', context('prebuilt_pack'))
+      ).toMatchObject({ value: 'forensic-persistence' });
     });
 
     it('does not offer a pack the step could not resolve', async () => {

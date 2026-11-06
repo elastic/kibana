@@ -281,7 +281,14 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       const executionId = await workflows.run(workflowId);
       const state = await workflows.waitForDispatch(executionId, 'p');
       expect(state.queries.length).toBeGreaterThan(0);
-      await workflows.waitForEnd(executionId);
+
+      // No agent answers in this space, so every query of the prebuilt pack runs out its 10s wait.
+      const { output } = stepOf(await workflows.waitForEnd(executionId), 'p');
+      expect(output?.status).toBe('timed_out');
+      expect(output?.error_code).toBeUndefined();
+      const statuses = (output?.queries as Array<{ status: string }>).map(({ status }) => status);
+      expect(statuses).toHaveLength(state.queries.length);
+      expect(new Set(statuses)).toStrictEqual(new Set(['timed_out']));
       await workflows.delete(workflowId);
     }
   );

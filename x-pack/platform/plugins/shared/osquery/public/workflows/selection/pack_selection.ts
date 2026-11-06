@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 import { API_VERSIONS } from '../../../common/constants';
+import { sanitizeSearch } from '../../common/sanitize_search';
 import { failureReason, isNotFound } from './failure_reason';
 
 const PAGE_SIZE = 20;
@@ -52,12 +53,17 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
   return {
     search: async (input) => {
       const search = input.trim();
+      // The route searches name and description with `simple_query_string`: operators typed by
+      // the user are stripped, then a trailing `*` matches while they are still typing a word.
+      const sanitized = sanitizeSearch(search);
       try {
         const { data } = await http.get<{ data?: PackItem[] }>('/api/osquery/packs', {
           version: API_VERSIONS.public.v1,
-          // The route searches name and description with `simple_query_string`: a trailing `*`
-          // matches while the user is still typing a word.
-          query: { page: 1, pageSize: PAGE_SIZE, ...(search ? { search: `${search}*` } : {}) },
+          query: {
+            page: 1,
+            pageSize: PAGE_SIZE,
+            ...(sanitized ? { search: `${sanitized}*` } : {}),
+          },
         });
         lookupErrors.delete(search);
 
