@@ -244,6 +244,28 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     );
   });
 
+  test('should update panel when the dashboard time range changes', async ({
+    apiServices,
+    page,
+    pageObjects,
+  }) => {
+    const searchTitle = `Discover embeddable time range ${randomUUID().replace(/-/g, '')}`;
+
+    const searchId = await createDefaultSession(apiServices, searchTitle);
+    createdSavedObjects.push({ type: 'search', id: searchId });
+    await pageObjects.dashboard.openNewDashboard();
+    await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
+    await page.testSubj.locator('savedSearchTotalDocuments').waitFor({ state: 'visible' });
+    await expect(pageObjects.dataGrid.getCellValue(0, 'bytes')).toBeVisible();
+
+    // Set to a time range with no data
+    await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
+    await expect(
+      page.testSubj.locator('embeddedSavedSearchDocTable').locator('.euiDataGrid__noResults'),
+      'No results message should be visible after setting a time range without data'
+    ).toBeVisible();
+  });
+
   test('should recover a deleted selected tab through inline editing', async ({
     apiServices,
     page,
