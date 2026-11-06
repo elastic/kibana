@@ -86,6 +86,8 @@ export interface InvestigationAgentTypeOptions {
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  /** Runs the post-execution optimize hook, so a round can change what later rounds read. */
+  learningEnabled?: boolean;
   /** The agentic investigations plugin is enabled, so its tools are registered. */
   investigationToolsEnabled?: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
@@ -177,6 +179,7 @@ export const buildNightshiftAgentConfiguration = ({
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
+  learningEnabled = true,
   investigationToolsEnabled,
   proposalsEnabled,
   standalone = false,
@@ -225,7 +228,7 @@ export const buildNightshiftAgentConfiguration = ({
       // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
       // workflow, so listing the reinforce workflow here as well would reinforce every round
       // twice — two ai.agent runs, up to 900s each, writing the same trees.
-      ...(cortexEnabled || memoryEnabled
+      ...((cortexEnabled || memoryEnabled) && learningEnabled
         ? { post_execution_workflow_ids: [optimizeWorkflowId] }
         : {}),
     } satisfies AgentBaseConfiguration);
@@ -285,29 +288,7 @@ export const getInvestigationAgentType = ({
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
-  {
-    sandboxEnabled,
-    cortexEnabled,
-    memoryEnabled = false,
-    decisionTreesEnabled = false,
-    investigationToolsEnabled,
-    proposalsEnabled,
-    getCustomContextInstructions,
-    getInheritedConnectorIds,
-    logger,
-  }: InvestigationAgentTypeOptions
+  options: InvestigationAgentTypeOptions
 ): void => {
-  agentBuilder.agents.registerType(
-    getInvestigationAgentType({
-      sandboxEnabled,
-      cortexEnabled,
-      memoryEnabled,
-      decisionTreesEnabled,
-      investigationToolsEnabled,
-      proposalsEnabled,
-      getCustomContextInstructions,
-      getInheritedConnectorIds,
-      logger,
-    })
-  );
+  agentBuilder.agents.registerType(getInvestigationAgentType(options));
 };
