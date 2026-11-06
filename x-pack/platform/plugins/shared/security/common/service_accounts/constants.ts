@@ -10,8 +10,11 @@
  */
 export const SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH = 1000;
 
-/** Maximum length of a service account's human-readable display name. */
-export const SERVICE_ACCOUNT_NAME_MAX_LENGTH = 128;
+/** Maximum length of an Elasticsearch service account's name, which is also part of its id. */
+export const ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH = 128;
+
+/** Maximum length of a UIAM service account's name, in UTF-16 code units as UIAM counts them. */
+export const UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH = 100;
 
 /**
  * Generic cap for identifier/name-like string fields on the service account
@@ -32,12 +35,12 @@ export const SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH = 1024;
 export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 128 * 1024;
 
 /**
- * Character set a service account name must match, mirroring Elasticsearch's
- * `Validation.UserManagedServiceAccounts`. Applied on both backends: the name is
- * interpolated into an Elasticsearch URL path, so this is also what keeps a name
- * like `../_cluster/settings` from reaching the transport layer.
+ * Character set an Elasticsearch service account name must match, mirroring Elasticsearch's
+ * `Validation.UserManagedServiceAccounts`. The name is interpolated into an Elasticsearch URL path,
+ * so this is also what keeps a name like `../_cluster/settings` from reaching the transport layer.
+ * UIAM generates its own ids, so its names are free text and this does not apply to them.
  */
-export const SERVICE_ACCOUNT_NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+export const ES_SERVICE_ACCOUNT_NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 
 /**
  * The Elasticsearch namespace every Kibana-created service account lives under. Fixed, so

@@ -7,21 +7,24 @@
 
 export type { ServiceAccountRoleLimits } from './constants';
 export {
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  ES_SERVICE_ACCOUNT_NAME_REGEX,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_REGEX,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
+  UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from './constants';
 export {
+  esServiceAccountNameSchema,
   getCreateServiceAccountParamsSchema,
   getServiceAccountRolesSchema,
   serviceAccountIdSchema,
-  serviceAccountNameSchema,
+  uiamServiceAccountNameSchema,
 } from './schemas';
+export type { ServiceAccountNameSchema } from './schemas';
 export type {
   DeleteServiceAccountConflictAttributes,
   DeleteServiceAccountResponse,

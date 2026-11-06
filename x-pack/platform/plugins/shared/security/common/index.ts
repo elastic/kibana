@@ -48,4 +48,8 @@ export type {
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
 } from '@kbn/security-plugin-types-common';
-export { serviceAccountIdSchema, serviceAccountNameSchema } from './service_accounts';
+export {
+  esServiceAccountNameSchema,
+  serviceAccountIdSchema,
+  uiamServiceAccountNameSchema,
+} from './service_accounts';

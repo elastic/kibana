@@ -20,12 +20,16 @@ import { defineCreateServiceAccountRoute } from './create';
 import {
   getCreateServiceAccountBodySchema,
   getCreateServiceAccountMaxBodyBytes,
+  getServiceAccountNameSchema,
   getServiceAccountRoleLimits,
 } from './schemas';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import {
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  esServiceAccountNameSchema,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  uiamServiceAccountNameSchema,
 } from '../../../common/service_accounts';
 import { auditServiceMock } from '../../audit/mocks';
 import {
@@ -182,68 +186,114 @@ describe('Create service account route', () => {
   });
 
   describe.each([
-    ['serverless', true, 'UIAM', UIAM_SERVICE_ACCOUNT_ROLE_LIMITS],
-    ['traditional', false, 'Elasticsearch', ES_SERVICE_ACCOUNT_ROLE_LIMITS],
-  ] as const)('role limits on a %s build', (buildFlavor, serverless, backendName, limits) => {
-    const { maxRoles, maxRoleNameLength } = limits;
-    const schema = getCreateServiceAccountBodySchema(limits);
-    const distinctRoles = (count: number) => Array.from({ length: count }, (_, i) => `role-${i}`);
+    [
+      'serverless',
+      true,
+      'UIAM',
+      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
+      uiamServiceAccountNameSchema,
+      UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+      // A lone surrogate is the widest character JSON writes: a six-byte `\uXXXX` escape.
+      '\ud800',
+    ],
+    [
+      'traditional',
+      false,
+      'Elasticsearch',
+      ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+      esServiceAccountNameSchema,
+      ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+      'a',
+    ],
+  ] as const)(
+    'limits on a %s build',
+    (
+      buildFlavor,
+      serverless,
+      backendName,
+      limits,
+      nameSchema,
+      maxNameLength,
+      widestNameCharacter
+    ) => {
+      const { maxRoles, maxRoleNameLength } = limits;
+      const schema = getCreateServiceAccountBodySchema(limits, nameSchema);
+      const distinctRoles = (count: number) => Array.from({ length: count }, (_, i) => `role-${i}`);
 
-    // The build flavor fixes the backend, so the route holds requests to that backend's limits
-    // rather than to the larger of the two.
-    it(`uses the ${backendName} backend's limits`, () => {
-      expect(getServiceAccountRoleLimits(buildFlavor)).toBe(limits);
-    });
-
-    it(`accepts ${maxRoles} roles and rejects one more`, () => {
-      expect(schema.safeParse({ ...requestBody, roles: distinctRoles(maxRoles) }).success).toBe(
-        true
-      );
-      const result = schema.safeParse({ ...requestBody, roles: distinctRoles(maxRoles + 1) });
-      expect(result.success).toBe(false);
-      expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles');
-    });
-
-    // The server contract drops duplicates before counting too, so both entry points agree.
-    it('counts distinct roles, dropping duplicates first', () => {
-      const roles = distinctRoles(maxRoles);
-
-      expect(schema.parse({ ...requestBody, roles: [...roles, roles[0]] })).toEqual({
-        ...requestBody,
-        roles,
+      // The build flavor fixes the backend, so the route holds requests to that backend's limits
+      // rather than to the larger of the two.
+      it(`uses the ${backendName} backend's limits`, () => {
+        expect(getServiceAccountRoleLimits(buildFlavor)).toBe(limits);
+        expect(getServiceAccountNameSchema(buildFlavor)).toBe(nameSchema);
       });
-    });
 
-    it(`accepts role names up to ${maxRoleNameLength} characters and rejects longer ones`, () => {
-      expect(
-        schema.safeParse({ ...requestBody, roles: ['a'.repeat(maxRoleNameLength)] }).success
-      ).toBe(true);
-      const result = schema.safeParse({
-        ...requestBody,
-        roles: ['a'.repeat(maxRoleNameLength + 1)],
+      it(`accepts names up to ${maxNameLength} characters and rejects longer ones`, () => {
+        expect(schema.safeParse({ ...requestBody, name: 'a'.repeat(maxNameLength) }).success).toBe(
+          true
+        );
+        const result = schema.safeParse({ ...requestBody, name: 'a'.repeat(maxNameLength + 1) });
+        expect(result.success).toBe(false);
+        expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('name');
       });
-      expect(result.success).toBe(false);
-      expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles.0');
-    });
 
-    // A 413 carries no field-level message, so the largest body that the schema accepts must fit.
-    // It must fit even when every role name is padded with quotes and every description character
-    // is a control character, which JSON escapes.
-    it('fits the largest valid body within the body size limit', () => {
-      const { routeConfig } = setup({ serverless });
-      const body = {
-        name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
-        roles: Array.from({ length: maxRoles }, (_, i) => `${i}`.padEnd(maxRoleNameLength, '"')),
-        description: '\u0001'.repeat(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH),
-      };
+      it(`${serverless ? 'accepts' : 'rejects'} a free-text name`, () => {
+        expect(schema.safeParse({ ...requestBody, name: 'Nightshift relay 🙂' }).success).toBe(
+          serverless
+        );
+      });
 
-      expect(routeConfig.options?.body?.maxBytes).toBe(getCreateServiceAccountMaxBodyBytes(limits));
-      expect(schema.safeParse(body).success).toBe(true);
-      expect(Buffer.byteLength(JSON.stringify(body))).toBeLessThanOrEqual(
-        routeConfig.options!.body!.maxBytes!
-      );
-    });
-  });
+      it(`accepts ${maxRoles} roles and rejects one more`, () => {
+        expect(schema.safeParse({ ...requestBody, roles: distinctRoles(maxRoles) }).success).toBe(
+          true
+        );
+        const result = schema.safeParse({ ...requestBody, roles: distinctRoles(maxRoles + 1) });
+        expect(result.success).toBe(false);
+        expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles');
+      });
+
+      // The server contract drops duplicates before counting too, so both entry points agree.
+      it('counts distinct roles, dropping duplicates first', () => {
+        const roles = distinctRoles(maxRoles);
+
+        expect(schema.parse({ ...requestBody, roles: [...roles, roles[0]] })).toEqual({
+          ...requestBody,
+          roles,
+        });
+      });
+
+      it(`accepts role names up to ${maxRoleNameLength} characters and rejects longer ones`, () => {
+        expect(
+          schema.safeParse({ ...requestBody, roles: ['a'.repeat(maxRoleNameLength)] }).success
+        ).toBe(true);
+        const result = schema.safeParse({
+          ...requestBody,
+          roles: ['a'.repeat(maxRoleNameLength + 1)],
+        });
+        expect(result.success).toBe(false);
+        expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles.0');
+      });
+
+      // A 413 carries no field-level message, so the largest body that the schema accepts must fit.
+      // It must fit even when every role name is padded with quotes and every name and description
+      // character is one that JSON escapes.
+      it('fits the largest valid body within the body size limit', () => {
+        const { routeConfig } = setup({ serverless });
+        const body = {
+          name: widestNameCharacter.repeat(maxNameLength),
+          roles: Array.from({ length: maxRoles }, (_, i) => `${i}`.padEnd(maxRoleNameLength, '"')),
+          description: '\u0001'.repeat(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH),
+        };
+
+        expect(routeConfig.options?.body?.maxBytes).toBe(
+          getCreateServiceAccountMaxBodyBytes(limits)
+        );
+        expect(schema.safeParse(body).success).toBe(true);
+        expect(Buffer.byteLength(JSON.stringify(body))).toBeLessThanOrEqual(
+          routeConfig.options!.body!.maxBytes!
+        );
+      });
+    }
+  );
 
   describe('UIAM creation credentials', () => {
     const setupUiam = () => {
@@ -344,7 +394,8 @@ describe('Create service account route', () => {
 
   describe('body schema', () => {
     const createServiceAccountBodySchema = getCreateServiceAccountBodySchema(
-      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
+      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
+      uiamServiceAccountNameSchema
     );
 
     const issuesFor = (body: unknown) => {
@@ -413,7 +464,7 @@ describe('Create service account route', () => {
       expect(
         issuePathsFor({
           ...requestBody,
-          name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1),
+          name: 'a'.repeat(UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1),
         })
       ).toContain('name');
     });

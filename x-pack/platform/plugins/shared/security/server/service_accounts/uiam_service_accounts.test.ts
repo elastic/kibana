@@ -205,6 +205,38 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
+    // UIAM generates the account's id, so the name is free text. Kibana trims it first, so names
+    // that differ only by surrounding whitespace cannot both pass UIAM's uniqueness check.
+    it('sends a free-text name, trimmed', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        name: 'Nightshift relay',
+      });
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        name: ' Nightshift relay ',
+      });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ name: 'Nightshift relay' }),
+        undefined
+      );
+    });
+
+    // UIAM accepts control characters, but the name is written to logs and audit events.
+    it('refuses a name with a control character, without calling UIAM', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          name: 'nightshift\nrelay',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
     it('ignores an `assumable_by` passed in the params', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
@@ -689,7 +721,7 @@ describe('UiamServiceAccounts', () => {
         await expect(
           serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
             ...createParams,
-            name: 'not valid!',
+            name: 'not\nvalid',
           })
         ).rejects.toMatchObject({ output: { statusCode: 400 } });
 

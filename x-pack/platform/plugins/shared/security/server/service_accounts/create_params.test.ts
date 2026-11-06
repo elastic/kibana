@@ -10,16 +10,22 @@ import Boom from '@hapi/boom';
 import type { CreateServiceAccountServerParams } from '@kbn/core-security-server';
 
 import { parseCreateServiceAccountParams } from './create_params';
-import { SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH } from '../../common/service_accounts';
+import {
+  esServiceAccountNameSchema,
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
+  uiamServiceAccountNameSchema,
+} from '../../common/service_accounts';
 
 /** Each backend passes its own limits. Small ones keep the boundary cases readable. */
 const limits = { maxRoles: 3, maxRoleNameLength: 8 };
 const { maxRoles, maxRoleNameLength } = limits;
+/** Most cases hold the name to Elasticsearch's rule, the narrower of the two. */
+const nameSchema = esServiceAccountNameSchema;
 
 /** Returns the Boom error `parseCreateServiceAccountParams` threw, or fails the test. */
 const expectRejection = (params: CreateServiceAccountServerParams): Boom.Boom => {
   try {
-    parseCreateServiceAccountParams(params, limits);
+    parseCreateServiceAccountParams(params, limits, nameSchema);
   } catch (e) {
     if (!Boom.isBoom(e)) {
       throw e;
@@ -34,7 +40,8 @@ describe('parseCreateServiceAccountParams', () => {
     expect(
       parseCreateServiceAccountParams(
         { name: 'nightshift-relay', roles: ['viewer', 'editor'] },
-        limits
+        limits,
+        nameSchema
       )
     ).toEqual({ name: 'nightshift-relay', roles: ['viewer', 'editor'] });
   });
@@ -43,7 +50,8 @@ describe('parseCreateServiceAccountParams', () => {
     expect(
       parseCreateServiceAccountParams(
         { name: 'nightshift-relay', roles: ['viewer', 'editor', 'viewer'] },
-        limits
+        limits,
+        nameSchema
       )
     ).toEqual({ name: 'nightshift-relay', roles: ['viewer', 'editor'] });
   });
@@ -67,6 +75,18 @@ describe('parseCreateServiceAccountParams', () => {
     expect(error.message).toContain('`name`');
   });
 
+  // UIAM generates the account's id, so its names are free text. They are trimmed so that names
+  // differing only by surrounding whitespace cannot both pass UIAM's uniqueness check.
+  it("holds the name to the calling backend's own rule", () => {
+    const params = { name: ' Nightshift relay ', roles: ['viewer'] };
+
+    expect(parseCreateServiceAccountParams(params, limits, uiamServiceAccountNameSchema)).toEqual({
+      name: 'Nightshift relay',
+      roles: ['viewer'],
+    });
+    expect(expectRejection(params).message).toContain('`name`');
+  });
+
   it('rejects an empty roles array', () => {
     const error = expectRejection({ name: 'nightshift-relay', roles: [] });
 
@@ -78,7 +98,9 @@ describe('parseCreateServiceAccountParams', () => {
   it('accepts as many distinct roles as the cap allows', () => {
     const roles = Array.from({ length: maxRoles }, (_, i) => `role-${i}`);
 
-    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits)).toEqual({
+    expect(
+      parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits, nameSchema)
+    ).toEqual({
       name: 'nightshift-relay',
       roles,
     });
@@ -95,7 +117,9 @@ describe('parseCreateServiceAccountParams', () => {
   it('accepts a role name as long as the limit allows', () => {
     const roles = ['a'.repeat(maxRoleNameLength)];
 
-    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits)).toEqual({
+    expect(
+      parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits, nameSchema)
+    ).toEqual({
       name: 'nightshift-relay',
       roles,
     });
@@ -115,7 +139,9 @@ describe('parseCreateServiceAccountParams', () => {
   it('applies the cap after dropping duplicates', () => {
     const roles = new Array(maxRoles + 1).fill('viewer');
 
-    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits)).toEqual({
+    expect(
+      parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits, nameSchema)
+    ).toEqual({
       name: 'nightshift-relay',
       roles: ['viewer'],
     });
@@ -147,7 +173,8 @@ describe('parseCreateServiceAccountParams', () => {
           roles: ['viewer'],
           description: '  Relays the nightshift alerts. ',
         },
-        limits
+        limits,
+        nameSchema
       )
     ).toEqual({
       name: 'nightshift-relay',
@@ -159,7 +186,8 @@ describe('parseCreateServiceAccountParams', () => {
   it('drops a blank description', () => {
     const parsed = parseCreateServiceAccountParams(
       { name: 'nightshift-relay', roles: ['viewer'], description: '   ' },
-      limits
+      limits,
+      nameSchema
     );
 
     expect(parsed.description).toBeUndefined();
@@ -185,7 +213,8 @@ describe('parseCreateServiceAccountParams', () => {
             roles: ['viewer'],
             platformAssumers: ['relay', 'sandbox', 'relay'],
           },
-          limits
+          limits,
+          nameSchema
         )
       ).toEqual({
         name: 'nightshift-relay',
@@ -198,7 +227,8 @@ describe('parseCreateServiceAccountParams', () => {
       expect(
         parseCreateServiceAccountParams(
           { name: 'nightshift-relay', roles: ['viewer'], platformAssumers: [] },
-          limits
+          limits,
+          nameSchema
         )
       ).toEqual({ name: 'nightshift-relay', roles: ['viewer'], platformAssumers: [] });
     });

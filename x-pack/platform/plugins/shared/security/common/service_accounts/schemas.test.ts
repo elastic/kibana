@@ -6,32 +6,35 @@
  */
 
 import {
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from './constants';
 import {
+  esServiceAccountNameSchema,
   getServiceAccountRolesSchema,
   serviceAccountDescriptionSchema,
   serviceAccountIdSchema,
-  serviceAccountNameSchema,
+  uiamServiceAccountNameSchema,
 } from './schemas';
 
 describe('service account schemas', () => {
   it.each([
     [serviceAccountIdSchema, SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH],
-    [serviceAccountNameSchema, SERVICE_ACCOUNT_NAME_MAX_LENGTH],
+    [esServiceAccountNameSchema, ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH],
+    [uiamServiceAccountNameSchema, UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH],
   ] as const)('enforces the string length boundary', (schema, maxLength) => {
     expect(schema.safeParse('a'.repeat(maxLength)).success).toBe(true);
     expect(schema.safeParse('a'.repeat(maxLength + 1)).success).toBe(false);
     expect(schema.safeParse(123).success).toBe(false);
   });
 
-  describe('serviceAccountNameSchema', () => {
+  describe('esServiceAccountNameSchema', () => {
     it.each(['a', 'A', '0', 'nightshift-relay', 'nightshift_relay', 'relay-1_2'])(
       'accepts %s',
       (name) => {
-        expect(serviceAccountNameSchema.safeParse(name).success).toBe(true);
+        expect(esServiceAccountNameSchema.safeParse(name).success).toBe(true);
       }
     );
 
@@ -52,8 +55,56 @@ describe('service account schemas', () => {
       'with.dot',
       'emoji-🙂',
     ])('rejects %s', (name) => {
-      expect(serviceAccountNameSchema.safeParse(name).success).toBe(false);
+      expect(esServiceAccountNameSchema.safeParse(name).success).toBe(false);
     });
+  });
+
+  describe('uiamServiceAccountNameSchema', () => {
+    it.each([
+      'nightshift-relay',
+      'Nightshift relay',
+      'name.with.dots',
+      '../_cluster/settings',
+      'Ünïcödé 名前 🙂',
+    ])('accepts %s', (name) => {
+      expect(uiamServiceAccountNameSchema.parse(name)).toBe(name);
+    });
+
+    it('trims surrounding whitespace', () => {
+      expect(uiamServiceAccountNameSchema.parse('  Nightshift relay  ')).toBe('Nightshift relay');
+    });
+
+    // UIAM counts UTF-16 code units, so an emoji counts twice.
+    it('counts UTF-16 code units', () => {
+      const emoji = '🙂';
+      expect(
+        uiamServiceAccountNameSchema.safeParse(
+          emoji.repeat(UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH / 2)
+        ).success
+      ).toBe(true);
+      expect(
+        uiamServiceAccountNameSchema.safeParse(
+          emoji.repeat(UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH / 2 + 1)
+        ).success
+      ).toBe(false);
+    });
+
+    // The cap applies to the raw input, so the route's body cap covers every name that passes.
+    it('applies the length cap before trimming', () => {
+      expect(
+        uiamServiceAccountNameSchema.safeParse(
+          ` ${'a'.repeat(UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH)}`
+        ).success
+      ).toBe(false);
+    });
+
+    // UIAM accepts control characters, but the name is written to logs and audit events.
+    it.each(['', ' ', '\u3000', 'line\nbreak', 'tab\tseparated', 'nul\u0000', 'next\u0085line'])(
+      'rejects %j',
+      (name) => {
+        expect(uiamServiceAccountNameSchema.safeParse(name).success).toBe(false);
+      }
+    );
   });
 
   describe('getServiceAccountRolesSchema', () => {

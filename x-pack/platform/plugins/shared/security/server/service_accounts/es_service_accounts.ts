@@ -56,11 +56,12 @@ import type {
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
 import {
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  ES_SERVICE_ACCOUNT_NAME_REGEX,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
+  esServiceAccountNameSchema,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_REGEX,
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -389,7 +390,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
     const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
-      ES_SERVICE_ACCOUNT_ROLE_LIMITS
+      ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+      esServiceAccountNameSchema
     );
     // Elasticsearch service accounts cannot be assumed by anything outside this Kibana. Dropping
     // the assumers would hand back an account the platform service cannot use.
@@ -1043,8 +1045,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     if (
       !principal ||
       principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
-      principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
-      !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
+      principal.name.length > ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
+      !ES_SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
     ) {
       throw Boom.badRequest('Invalid Elasticsearch service account ID.');
     }

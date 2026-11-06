@@ -175,6 +175,46 @@ describe('ServiceAccountsApp', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  // A UIAM name is free text, since UIAM generates the account's id. An Elasticsearch name is
+  // part of the id, so the same name is refused there.
+  it.each([
+    { isServerless: true, accepted: true },
+    { isServerless: false, accepted: false },
+  ])(
+    'holds a free-text name to the backend rule (serverless: $isServerless)',
+    async ({ isServerless, accepted }) => {
+      const { create } = await renderApp({ isServerless });
+      await fillForm();
+      fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+        target: { value: ' Nightshift relay ' },
+      });
+
+      if (!accepted) {
+        expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
+        return;
+      }
+      fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+      await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
+      expect(create).toHaveBeenCalledWith({ name: 'Nightshift relay', roles: ['workflow_reader'] });
+    }
+  );
+
+  it('refuses a control character in a serverless name', async () => {
+    const { create } = await renderApp({ isServerless: true });
+    await fillForm();
+    const nameInput = screen.getByTestId('serviceAccountNameInput');
+    fireEvent.change(nameInput, { target: { value: 'nightshift\u0007relay' } });
+    fireEvent.blur(nameInput);
+
+    expect(
+      screen.getByText(
+        'Enter a name of up to 100 characters. It cannot be blank or contain control characters.'
+      )
+    ).toBeVisible();
+    expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('flags an invalid name once the field is touched, before submitting', async () => {
     await renderApp();
     const nameInput = await screen.findByTestId('serviceAccountNameInput');
