@@ -359,5 +359,31 @@ describe('runReinforcementExample', () => {
       expect([...docs.keys()]).toEqual(['default:dtree_stamped']);
       expect(docs.get('default:dtree_stamped')).toEqual(original);
     });
+
+    it('rolls back a counts-only traversal when the replay fails before reporting its submit', async () => {
+      const events: string[] = [];
+      const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+      const readExecution = jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          // A traversal of an unedited tree rewrites only its head counts, with no provenance.
+          docs.set(OTHER_HEAD_ID, { ...otherTree, counts: { nodes: { S1: { visits: 1 } } } });
+          throw new Error('Service unavailable');
+        })
+        .mockResolvedValue({ id: EXECUTION_ID, status: ExecutionStatus.CANCELLED });
+      const fetch = fakeFetch(events, { readExecution });
+
+      await expect(
+        runReinforcementExample({
+          esClient,
+          fetch: fetch as unknown as HttpHandler,
+          connectorId: 'connector',
+          example,
+        })
+      ).rejects.toThrow('Service unavailable');
+
+      expect([...docs.keys()]).toEqual([OTHER_HEAD_ID]);
+      expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
+    });
   });
 });

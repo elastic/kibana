@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { setTimeout as delay } from 'timers/promises';
+import { isDeepStrictEqual } from 'util';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import {
@@ -274,15 +275,48 @@ export const snapshotDecisionTrees = async (
 };
 
 /**
+ * Snapshotted trees whose head no longer matches its snapshot. A counts-only write leaves no
+ * provenance on the head, so this is the only trace of a traversal the replay never reported.
+ */
+export const listChangedHeadIds = async (
+  esClient: Client,
+  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>
+): Promise<string[]> => {
+  const changed: string[] = [];
+  for (const [id, docs] of snapshots) {
+    const before = docs.find((doc) => doc.id === headId(id));
+    if (!before) continue;
+    let current: Record<string, unknown> | undefined;
+    try {
+      const head = await esClient.get<Record<string, unknown>>({
+        index: DECISION_TREE_AI_INDEX_DEST,
+        id: headId(id),
+      });
+      current = head.found ? head._source : undefined;
+    } catch (error) {
+      if (!isMissingHead(error)) throw error;
+    }
+    if (!isDeepStrictEqual(current, before.source)) changed.push(id);
+  }
+  return changed;
+};
+
+/**
  * Rolls back only the trees the replay owns: `treeIds` plus every tree whose head or a version
- * carries `conversationId` provenance. An owned tree in `snapshots` is put back and one absent from
- * it is deleted; every other tree, including one another investigation wrote meanwhile, is left
- * alone. Keeps going past a failed tree and throws the first error at the end.
+ * carries `conversationId` provenance. With `restoreChangedHeads`, for a replay that never reported
+ * its submit, every pre-existing tree whose head changed is rolled back too. An owned tree in
+ * `snapshots` is put back and one absent from it is deleted; every other tree, including one
+ * another investigation wrote meanwhile, is left alone. Keeps going past a failed tree and throws
+ * the first error at the end.
  */
 export const restoreDecisionTrees = async (
   esClient: Client,
   snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
-  { treeIds, conversationId }: { treeIds: readonly string[]; conversationId: string }
+  {
+    treeIds,
+    conversationId,
+    restoreChangedHeads = false,
+  }: { treeIds: readonly string[]; conversationId: string; restoreChangedHeads?: boolean }
 ): Promise<void> => {
   let firstError: unknown;
   let stampedIds: string[] = [];
@@ -291,7 +325,15 @@ export const restoreDecisionTrees = async (
   } catch (error) {
     firstError = error;
   }
-  for (const id of new Set([...treeIds, ...stampedIds])) {
+  let changedIds: string[] = [];
+  if (restoreChangedHeads) {
+    try {
+      changedIds = await listChangedHeadIds(esClient, snapshots);
+    } catch (error) {
+      firstError ??= error;
+    }
+  }
+  for (const id of new Set([...treeIds, ...stampedIds, ...changedIds])) {
     try {
       await restoreDecisionTree(esClient, id, snapshots.get(id) ?? []);
     } catch (error) {
@@ -434,6 +476,8 @@ export const runReinforcementExample = async ({
   const snapshots = await snapshotDecisionTrees(esClient, [treeId]);
   const conversationId = replayConversationId(example.metadata.case_id);
   let submissions: SubmitArguments[] = [];
+  // Until the reinforce step reports its submit, a traversal it made is invisible to the rollback.
+  let submitReported = false;
   let executionId: string | undefined;
   let sawTerminal = false;
   try {
@@ -480,6 +524,7 @@ export const runReinforcementExample = async ({
         }
       | undefined;
     submissions = parseSubmissions(output?.submissions_json);
+    submitReported = sawTerminal && output?.submissions_json !== undefined;
     const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
     const finished = sawTerminal;
     const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
@@ -510,6 +555,7 @@ export const runReinforcementExample = async ({
     await restoreDecisionTrees(esClient, snapshots, {
       treeIds: [treeId, ...submittedTreeIds(submissions)],
       conversationId,
+      restoreChangedHeads: !submitReported,
     });
   }
 };
