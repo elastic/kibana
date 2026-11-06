@@ -9,8 +9,12 @@
 
 import { Query } from '@elastic/eui';
 import type { ParsedQuery, UrlStateSlices } from './types';
-import type { SortState, SortDirectionsByField } from './url_codec';
-
+import {
+  isAllowedSort,
+  isSortDirection,
+  type SortDirection,
+  type SortDirectionsByField,
+} from '../sorting';
 const LEGACY_KEYS = ['s', 'title', 'filter', 'sort', 'sortdir', 'created_by', 'favorites'] as const;
 
 export interface LegacyDecodeResult {
@@ -115,9 +119,10 @@ export const decodeLegacyParams = (
     const field = resolveLegacySortField(legacySort, sortDirectionsByField);
     const directionParam = firstString(params.sortdir);
     const defaultDirection = legacySort === 'title' ? 'asc' : 'desc';
-    const direction: SortState['direction'] =
-      directionParam === 'asc' || directionParam === 'desc' ? directionParam : defaultDirection;
-    if (field && sortDirectionsByField.get(field)?.has(direction)) {
+    const direction: SortDirection = isSortDirection(directionParam)
+      ? directionParam
+      : defaultDirection;
+    if (field && isAllowedSort(sortDirectionsByField, { field, direction })) {
       state.sort = { field, direction };
     } else {
       onUnknownValue?.('sort', legacySort);

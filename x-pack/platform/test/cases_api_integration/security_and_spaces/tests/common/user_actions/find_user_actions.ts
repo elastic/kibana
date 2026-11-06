@@ -6,9 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  MAX_USER_ACTIONS_PER_PAGE,
+} from '@kbn/cases-plugin/common/constants';
 import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -36,6 +41,11 @@ import {
   createComment,
   bulkCreateAttachments,
   findCaseUserActions,
+  updateComment,
+  deleteComment,
+  getCaseUserActionStats,
+  addAttachmentV2,
+  updateAttachmentV2,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -60,6 +70,52 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response.userActions.length).to.be(1);
       expect(response.userActions[0].id).not.to.be(undefined);
       expect(response.userActions[0].version).not.to.be(undefined);
+    });
+
+    it('returns user actions whose source type is unknown', async () => {
+      const theCase = await createCase(supertest, getPostCaseRequest());
+      const unknownSource = { type: 'futuristic', id: 'x1' };
+
+      // No API can write an unknown source type; a newer Kibana node can.
+      const { updated } = await es.updateByQuery({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: CASE_USER_ACTION_SAVED_OBJECT } },
+              {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { 'references.id': theCase.id } },
+                        { term: { 'references.type': CASE_SAVED_OBJECT } },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        script: {
+          source: `ctx._source['${CASE_USER_ACTION_SAVED_OBJECT}'].source = params.source`,
+          params: { source: unknownSource },
+        },
+        refresh: true,
+        conflicts: 'proceed',
+      });
+
+      expect(updated).to.be(1);
+
+      const response = await findCaseUserActions({
+        caseID: theCase.id,
+        supertest,
+      });
+
+      expect(response.userActions.length).to.be(1);
+      expect(response.userActions[0].source).to.eql(unknownSource);
     });
 
     describe('default parameters', () => {
@@ -301,6 +357,74 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(commentUserAction.action).to.eql('create');
         expect(commentUserAction.payload).to.eql({
           comment: postCommentUserReq,
+        });
+      });
+
+      it('keeps the original payload on the create user action after the comment is edited', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        const caseWithComment = await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: postCommentUserReq,
+        });
+        const comment = caseWithComment.comments![0];
+
+        await updateComment({
+          supertest,
+          caseId: theCase.id,
+          req: {
+            id: comment.id,
+            version: comment.version,
+            comment: 'updated comment',
+            type: postCommentUserReq.type,
+            owner: postCommentUserReq.owner,
+          },
+        });
+
+        const response = await findCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { sortOrder: 'asc', types: [UserActionTypes.comment] },
+        });
+
+        const [createAction, updateAction] = response.userActions;
+        expect(response.userActions.map(({ action }) => action)).to.eql(['create', 'update']);
+        expect(createAction.payload).to.eql({ comment: postCommentUserReq });
+        expect(updateAction.payload).to.eql({
+          comment: { ...postCommentUserReq, comment: 'updated comment' },
+        });
+      });
+
+      it('keeps the original payload on the create user action after an attachment is replaced', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        const attachment = await addAttachmentV2({
+          supertest,
+          caseId: theCase.id,
+          params: postUnifiedCommentReq,
+        });
+
+        await updateAttachmentV2({
+          supertest,
+          caseId: theCase.id,
+          attachmentId: attachment.id,
+          req: {
+            ...postUnifiedCommentReq,
+            data: { content: 'updated comment' },
+            version: attachment.version,
+          },
+        });
+
+        const response = await findCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { sortOrder: 'asc', types: [UserActionTypes.comment] },
+        });
+
+        const [createAction, updateAction] = response.userActions;
+        expect(response.userActions.map(({ action }) => action)).to.eql(['create', 'update']);
+        expect(createAction.payload).to.eql({ comment: postCommentUserReq });
+        expect(updateAction.payload).to.eql({
+          comment: { ...postCommentUserReq, comment: 'updated comment' },
         });
       });
 
@@ -653,6 +777,52 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(response.userActions[4].type).to.eql('severity');
         expect(response.userActions[4].action).to.eql('update');
+      });
+
+      it('includes comment edits and deletions in the action filter', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        const caseWithComment = await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: postCommentUserReq,
+        });
+        const comment = caseWithComment.comments![0];
+
+        await updateComment({
+          supertest,
+          caseId: theCase.id,
+          req: {
+            id: comment.id,
+            version: comment.version,
+            comment: 'updated comment',
+            type: postCommentUserReq.type,
+            owner: postCommentUserReq.owner,
+          },
+        });
+        await deleteComment({ supertest, caseId: theCase.id, commentId: comment.id });
+
+        const [actionResponse, userResponse, stats] = await Promise.all([
+          findCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: { sortOrder: 'asc', types: ['action'] },
+          }),
+          findCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: { sortOrder: 'asc', types: ['user'] },
+          }),
+          getCaseUserActionStats({ supertest, caseID: theCase.id }),
+        ]);
+
+        expect(actionResponse.userActions.map(({ type, action }) => [type, action])).to.eql([
+          ['create_case', 'create'],
+          ['comment', 'update'],
+          ['comment', 'delete'],
+        ]);
+        expect(userResponse.userActions.length).to.be(1);
+        expect(actionResponse.total).to.be(stats.total - stats.total_comment_creations);
+        expect(userResponse.total).to.be(stats.total_comment_creations);
       });
 
       it('retrieves only alert user actions', async () => {

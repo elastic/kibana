@@ -14,7 +14,10 @@ export type {
   AgentFormattedAttachment,
   AttachmentFormatContext,
   AttachmentResolveContext,
+  AttachmentOriginUpdatedContext,
   AttachmentValidateContext,
+  SurfaceComposition,
+  AttachmentSurfaceCompositionContext,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,
@@ -41,6 +44,7 @@ export type {
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
+  RestoreAttachmentArgs,
   ListAttachmentsArgs,
   BulkCreateAttachmentInput,
   BulkCreateAttachmentError,

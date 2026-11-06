@@ -148,6 +148,8 @@ export const getConverseHelpers = ({
       executionId,
       metadata,
       useTaskManager,
+      // Only browser requests from the Kibana UI, where a user is waiting on the first token.
+      requestImmediateClaim: request.isInternalApiRequest,
       ...(interactive ? { interactive } : {}),
       params: {
         agentId,

@@ -16,6 +16,7 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/isomer-components",
     "@kbn/core-ui-settings-browser",
     "@kbn/core",
     "@kbn/datemath",
@@ -24,6 +25,7 @@
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/agent-builder-server",
+    "@kbn/isomer-plugin",
     "@kbn/agent-builder-skill-loader",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-visualizations",

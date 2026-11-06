@@ -141,6 +141,7 @@ export type {
   TimeScaleIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
@@ -177,6 +178,7 @@ export type {
   RegisterLibraryAnnotationGroupFunction,
   AxesSettingsConfig,
   LensEditContextMapping,
+  DefaultVisualizationOverrides,
 } from './visualizations/types';
 export type {
   LensDatatableSortingState,

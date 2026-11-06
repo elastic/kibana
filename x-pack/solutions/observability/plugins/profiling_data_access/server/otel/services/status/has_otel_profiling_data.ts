@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { PROFILING_EVENTS_INDEX_BY_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
 import type { ProfilingESClient } from '../../../utils/profiling_es_client';
-
-export const OTEL_PROFILING_EVENTS_INDEX_PATTERN = 'profiling-events-all.otel-*';
 
 export async function hasOtelProfilingData({
   client,
@@ -15,7 +14,7 @@ export async function hasOtelProfilingData({
   client: ProfilingESClient;
 }): Promise<boolean> {
   const response = await client.search('has_any_otel_profiling_data', {
-    index: OTEL_PROFILING_EVENTS_INDEX_PATTERN,
+    index: PROFILING_EVENTS_INDEX_BY_SCHEMA[ProfilingSchema.OTEL],
     size: 0,
     track_total_hits: 1,
     terminate_after: 1,

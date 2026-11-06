@@ -52,8 +52,10 @@ describe('Stack Connectors Plugin', () => {
 
       const specConnectorTypes = Object.values(connectorsSpecs).filter(
         (spec) =>
-          !isInboundOnlyConnectorSpec(spec) ||
-          Boolean(actionsConfigurationUtilities.isInboundEventsEnabled())
+          (!isInboundOnlyConnectorSpec(spec) ||
+            Boolean(actionsConfigurationUtilities.isInboundEventsEnabled())) &&
+          (!spec.signingKey ||
+            Boolean(actionsConfigurationUtilities.isConnectorSigningKeysEnabled()))
       );
       const builtInConnectorTypesCount = 18;
 

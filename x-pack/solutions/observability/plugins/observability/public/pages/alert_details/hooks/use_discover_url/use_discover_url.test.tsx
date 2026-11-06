@@ -18,7 +18,9 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
+  ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
+  ALERT_RULE_PARAMETERS,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
@@ -69,33 +71,89 @@ describe('useDiscoverUrl', () => {
   });
 
   describe('custom threshold rule', () => {
-    it('builds Discover url including filters', () => {
-      const query = { language: 'kuery', query: 'message: error' };
-      const rule = {
-        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        params: {
+    const expectedTimeRange = {
+      from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+      to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+    };
+    const savedFilter = {
+      meta: {},
+      query: { term: { 'log.level': 'error' } },
+    };
+    const alertQuery = { language: 'kuery', query: 'message: error' };
+
+    const alertWithSnapshot = {
+      ...MOCK_ALERT,
+      fields: {
+        [ALERT_RULE_PARAMETERS]: {
           searchConfiguration: {
             index: 'logs-data-view',
-            query,
+            query: alertQuery,
+            filter: [savedFilter],
           },
-          criteria: [{ metrics: [{ filter: 'service.name:test' }] }],
+          criteria: [
+            { metrics: [{ filter: 'service.name:test' }] },
+            { metrics: [{ filter: 'host.name:host-1', aggType: 'avg' }] },
+          ],
         },
-      } as unknown as Rule;
+        [ALERT_GROUPING]: { host: { name: 'host-0' } },
+      },
+    } as unknown as TopAlert;
 
-      const expectedTimeRange = {
-        from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
-        to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
-      };
+    const liveRule = {
+      ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+      params: {
+        searchConfiguration: {
+          index: 'edited-data-view',
+          query: { language: 'kuery', query: 'live: true' },
+        },
+        criteria: [{ metrics: [{ filter: 'live:true' }] }],
+      },
+    } as unknown as Rule;
+
+    it('builds Discover url from the alert snapshot, applying one metric filter to the query', () => {
+      const alert = {
+        ...MOCK_ALERT,
+        fields: {
+          [ALERT_RULE_PARAMETERS]: {
+            searchConfiguration: {
+              index: 'logs-data-view',
+              query: alertQuery,
+            },
+            criteria: [{ metrics: [{ filter: 'service.name:test' }] }],
+          },
+        },
+      } as unknown as TopAlert;
 
       mockGetRedirectUrl.mockReturnValue('discover-url');
 
-      const { result } = renderHook(() => useDiscoverUrl({ alert: MOCK_ALERT, rule }));
+      const { result } = renderHook(() => useDiscoverUrl({ alert, rule: liveRule }));
 
       expect(mockGetRedirectUrl).toHaveBeenCalledWith({
         dataViewId: 'logs-data-view',
+        dataViewSpec: undefined,
         timeRange: expectedTimeRange,
-        query,
+        query: { query: '(message: error) and (service.name:test)', language: 'kuery' },
+        filters: [],
+      });
+      expect(result.current.discoverUrl).toBe('discover-url');
+    });
+
+    it('keeps the group, saved filter, and extra metric filters from the alert', () => {
+      mockGetRedirectUrl.mockReturnValue('discover-url');
+
+      renderHook(() => useDiscoverUrl({ alert: alertWithSnapshot, rule: liveRule }));
+
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+        dataViewId: 'logs-data-view',
+        dataViewSpec: undefined,
+        timeRange: expectedTimeRange,
+        query: alertQuery,
         filters: [
+          savedFilter,
+          {
+            meta: {},
+            query: { match_phrase: { 'host.name': 'host-0' } },
+          },
           {
             $state: { store: 'appState' },
             bool: { minimum_should_match: 1, should: [{ match: { 'service.name': 'test' } }] },
@@ -107,9 +165,19 @@ describe('useDiscoverUrl', () => {
               type: 'custom',
             },
           },
+          {
+            $state: { store: 'appState' },
+            bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'host-1' } }] },
+            meta: {
+              alias: null,
+              disabled: true,
+              index: 'logs-data-view',
+              negate: false,
+              type: 'custom',
+            },
+          },
         ],
       });
-      expect(result.current.discoverUrl).toBe('discover-url');
     });
   });
 

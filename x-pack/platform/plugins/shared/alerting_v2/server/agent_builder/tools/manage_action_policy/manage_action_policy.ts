@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -15,25 +15,28 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { WorkflowsManagementClient } from '@kbn/workflows-management-plugin/server';
-import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
   ActionPolicyOperationValidationError,
 } from './operations';
-import { validateDestinations } from './validate_destinations';
+import { validateDestinations, type WorkflowDestinationDiagnostic } from './validate_destinations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import { createAttachmentsClient } from '../../../lib/attachments_client';
 
-const manageActionPolicySchema = z.object({
-  actionPolicyAttachmentId: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) The action policy attachment ID to modify. If not provided, a new policy is created.'
-    ),
-  operations: z.array(actionPolicyOperationSchema).min(1),
-});
+const manageActionPolicySchema = lazySchema(() =>
+  z.object({
+    actionPolicyAttachmentId: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) The action policy attachment ID to modify. If not provided, a new policy is created.'
+      ),
+    operations: z.array(actionPolicyOperationSchema).min(1),
+  })
+);
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
@@ -44,12 +47,24 @@ export interface ManageActionPolicyToolDeps {
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
+  /**
+   * Runs a workflow's YAML through the workflows validation service (schema,
+   * variable refs, Liquid syntax). Optional — when omitted, destination
+   * workflows are still checked for a manual trigger and `inputs.payload`,
+   * but variable-ref errors are not surfaced.
+   */
+  validateWorkflow?: (
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<ValidateWorkflowResponseDto>;
 }
 
 export const manageActionPolicyTool = ({
   logger,
   getWorkflowClient,
   getAvailableConnectors,
+  validateWorkflow,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
@@ -73,16 +88,10 @@ Use operations[] to:
   ) => {
     let policyId: string | undefined;
     try {
-      const currentAttachment = previousAttachmentId
-        ? attachments.getAttachmentRecord(previousAttachmentId)
-        : undefined;
-
-      const isNew = !currentAttachment;
-      const attachmentId = previousAttachmentId ?? uuidv4();
-
-      const currentData: Partial<ActionPolicyAttachmentData> =
-        currentAttachment?.versions.at(-1)?.data ?? {};
-      policyId = currentAttachment?.origin;
+      const attachmentsClient = createAttachmentsClient(attachments);
+      const draft = attachmentsClient.actionPolicies.getDraft(previousAttachmentId);
+      const { isNew, data: currentData } = draft;
+      policyId = draft.origin;
 
       const updatedData = executeActionPolicyOperations(currentData, operations, {
         isNew,
@@ -93,6 +102,8 @@ Use operations[] to:
       }
       // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
       policyId = policyId ?? updatedData.id;
+
+      let workflowDiagnostics: WorkflowDestinationDiagnostic[] = [];
 
       if (updatedData.destinations?.length) {
         const findConnectorById = async (
@@ -110,31 +121,27 @@ Use operations[] to:
           return null;
         };
 
-        await validateDestinations(updatedData.destinations, {
-          attachments,
-          workflowLookup: getWorkflowClient(request),
+        // Hard-block only when this call is the one introducing/changing the
+        // destinations (new policy, or an explicit set_destinations) — an edit
+        // that leaves an already-persisted, already-invalid destination
+        // untouched should warn instead of failing.
+        const blockOnStructuralErrors =
+          isNew || operations.some((op) => op.operation === 'set_destinations');
+
+        const destinationResult = await validateDestinations(updatedData.destinations, {
+          workflowAttachments: attachmentsClient.workflows,
+          persistedWorkflowLookup: getWorkflowClient(request),
           connectorLookup: { findConnectorById },
           spaceId,
+          validateWorkflow,
+          request,
+          logger,
+          blockOnStructuralErrors,
         });
+        workflowDiagnostics = destinationResult.diagnostics;
       }
 
-      const attachmentInput = {
-        id: attachmentId,
-        type: ACTION_POLICY_ATTACHMENT_TYPE,
-        description: `Action Policy: ${updatedData.name ?? attachmentId}`,
-        data: updatedData,
-      };
-
-      const attachment = isNew
-        ? await attachments.add(attachmentInput)
-        : await attachments.update(attachmentId, {
-            data: updatedData,
-            description: attachmentInput.description,
-          });
-
-      if (!attachment) {
-        throw new Error(`Failed to persist action policy attachment "${attachmentId}".`);
-      }
+      const attachment = await attachmentsClient.actionPolicies.saveDraft(draft, updatedData);
 
       logger.debug({
         message: () =>
@@ -158,9 +165,10 @@ Use operations[] to:
                 name: updatedData.name,
                 destinations: updatedData.destinations,
                 matcher: updatedData.matcher,
-                groupingMode: updatedData.grouping_mode,
+                grouping: updatedData.grouping,
                 throttle: updatedData.throttle,
               },
+              ...(workflowDiagnostics.length > 0 ? { workflowDiagnostics } : {}),
             },
           },
         ],

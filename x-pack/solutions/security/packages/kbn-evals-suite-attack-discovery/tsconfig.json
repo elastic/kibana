@@ -16,6 +16,7 @@
     "@kbn/zod",
     "@kbn/security-evals-alerts-snapshot",
     "@kbn/core",
+    "@kbn/discoveries",
     "@kbn/kbn-client"
   ]
 }

@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -22,17 +22,17 @@ import {
   ResolutionSearchTruncatedError,
   SelfLinkError,
 } from '../../../domain/errors';
-import { ENTITY_STORE_RESOLUTION_LINK_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './utils/resolution_telemetry';
 
-const bodySchema = z.object({
-  target_id: z.string().describe('The entity identifier to resolve the linked entities to.'),
-  entity_ids: z
-    .array(z.string())
-    .min(1)
-    .max(1000)
-    .describe('Entity identifiers to link to the target entity. Minimum 1, maximum 1000.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    target_id: z.string().describe('The entity identifier to resolve the linked entities to.'),
+    entity_ids: z
+      .array(z.string())
+      .min(1)
+      .max(1000)
+      .describe('Entity identifiers to link to the target entity. Minimum 1, maximum 1000.'),
+  })
+);
 
 type LinkRequestBody = z.infer<typeof bodySchema>;
 
@@ -41,7 +41,7 @@ export async function handleResolutionLink(
   req: KibanaRequest<unknown, unknown, LinkRequestBody>,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse> {
-  const { logger, resolutionClient, analytics, namespace } = await ctx.entityStore;
+  const { logger, resolutionClient } = await ctx.entityStore;
 
   logger.debug('Resolution Link API called');
 
@@ -50,17 +50,8 @@ export async function handleResolutionLink(
       awaitVisibility: true,
     });
 
-    analytics.reportEvent(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
-      entityType: result.entity_type,
-      entitiesLinked: result.linked.length,
-      entitiesSkipped: result.skipped.length,
-      namespace,
-    });
-
     return res.ok({ body: result });
   } catch (error) {
-    reportResolutionError(analytics, 'link', namespace, error);
-
     if (
       error instanceof EntitiesNotFoundError ||
       error instanceof SelfLinkError ||

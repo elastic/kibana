@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -21,6 +22,9 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
+  isWorkerEnableBlocked,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
@@ -28,13 +32,18 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ServiceAccountField } from './service_account_field';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkerDependenciesCallout } from '../../../components/worker_dependencies/worker_dependencies_callout';
 import type { AlertZeroStartDependencies } from '../../../types';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
-import { ViewExecutionsLink } from './view_executions_link';
+import { FeatureSettingsLink } from './feature_settings_link';
+import { ViewExecutionsLink } from '../../../components/view_executions_link/view_executions_link';
+import { ThreatIntelSupplySection } from './threat_intel_supply_section';
+import { HuntIndexCoverageCallout } from './hunt_index_coverage_callout';
+import { useHuntWorkerIndexCoverage } from '../../../hooks/hunt/use_hunt_worker_index_coverage';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -90,7 +99,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
+    services: { application, docLinks },
   } = useKibana<CoreStart & AlertZeroStartDependencies>();
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
@@ -100,8 +109,24 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
-  // A worker that is already on can be turned off. Turning one on requires an account.
-  const cannotEnable = !enabled && !settings.serviceAccountId;
+  const isHuntWorker = worker.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+  const docsHref = isHuntWorker
+    ? docLinks.links.securitySolution.alertZero.continuousThreatHunt
+    : undefined;
+  // The accordion body is always mounted, so `enabled` keeps the route idle while collapsed.
+  const { data: indexCoverage } = useHuntWorkerIndexCoverage(isHuntWorker && isExpanded);
+  // Start locked until supply status says the hard-gate is ok. Already-on workers can
+  // still turn off because cannotEnable requires !enabled.
+  const [hardGateOk, setHardGateOk] = useState(false);
+  const handleHardGateChange = useCallback((ok: boolean) => {
+    setHardGateOk(ok);
+  }, []);
+  const isEnableBlocked = isWorkerEnableBlocked(worker.blockingReasons);
+  // Hunt hard-blocks turning on when ML/bootstrap supply prerequisites are unmet, and every
+  // Worker blocks on no available model. `worker.enabled` (not the draft `enabled`) so an
+  // already-on Worker can still be turned off, and toggling the draft on cannot itself
+  // unlock a switch that is blocked.
+  const cannotEnable = ((isHuntWorker && !hardGateOk) || isEnableBlocked) && !worker.enabled;
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -255,7 +280,24 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         </EuiFlexGroup>
         {description ? (
           <EuiText size="s" color="subdued" css={bandContentStyles.description}>
-            <p css={{ margin: 0 }}>{description}</p>
+            <p css={{ margin: 0 }}>
+              {description}
+              {docsHref ? (
+                <>
+                  {' '}
+                  {/* The band is the accordion's click target; following the link must not collapse it. */}
+                  <EuiLink
+                    href={docsHref}
+                    target="_blank"
+                    external
+                    onClick={stopAccordionToggle}
+                    data-test-subj={`alertZeroWorkerDocsLink-${worker.id}`}
+                  >
+                    {settingsI18n.WORKER_DOCS_LINK_LABEL}
+                  </EuiLink>
+                </>
+              ) : null}
+            </p>
           </EuiText>
         ) : null}
       </div>
@@ -290,6 +332,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 
   const settingsBody = (
     <>
+      <WorkerDependenciesCallout worker={worker} surface="settings" />
       {settingsLocked ? (
         <EuiText size="s" color="subdued">
           <p>{settingsI18n.WORKER_SETTINGS_UNAVAILABLE}</p>
@@ -303,31 +346,14 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           </EuiText>
         </>
       ) : null}
-      <SettingRow
-        label={settingsI18n.SERVICE_ACCOUNT_LABEL}
-        labelHelp={settingsI18n.SERVICE_ACCOUNT_HELP}
-        data-test-subj={`alertZeroServiceAccountRow-${worker.id}`}
-      >
-        <ServiceAccountField
-          workerId={worker.id}
-          workerName={name}
-          current={settings.serviceAccountId}
-          isDisabled={controlsDisabled}
-          onChange={(serviceAccountId) => onSettingsChange({ serviceAccountId })}
+      {isHuntWorker ? <HuntIndexCoverageCallout coverage={indexCoverage} /> : null}
+      {isHuntWorker ? (
+        <ThreatIntelSupplySection
+          canWrite={canWrite}
+          isSaving={isSaving}
+          onHardGateChange={handleHardGateChange}
         />
-        {enabled && !settings.serviceAccountId ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText
-              size="xs"
-              color="danger"
-              data-test-subj={`alertZeroServiceAccountRequired-${worker.id}`}
-            >
-              <p>{settingsI18n.SERVICE_ACCOUNT_REQUIRED_TO_SAVE}</p>
-            </EuiText>
-          </>
-        ) : null}
-      </SettingRow>
+      ) : null}
       <SettingRow
         label={settingsI18n.AUTONOMY_SECTION_TITLE}
         labelHelp={autonomyIntro}
@@ -345,19 +371,41 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       {settings.scheduleInterval != null ? (
         <SettingRow
           label={settingsI18n.TRIGGER_LABEL}
-          labelHelp={settingsI18n.TRIGGER_HELP_TEXT}
+          labelHelp={
+            isWorkerScheduleIntervalReadOnly(worker.id)
+              ? settingsI18n.TRIGGER_HELP_READ_ONLY_4H
+              : settingsI18n.TRIGGER_HELP_TEXT
+          }
           data-test-subj={`alertZeroTriggerRow-${worker.id}`}
         >
           <ScheduleIntervalField
             workerId={worker.id}
             current={settings.scheduleInterval}
-            isDisabled={controlsDisabled}
+            isDisabled={controlsDisabled || isWorkerScheduleIntervalReadOnly(worker.id)}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
             onValidityChange={onTriggerValidityChange}
             resetKey={draftResetKey}
           />
         </SettingRow>
       ) : null}
+      <SettingRow
+        label={settingsI18n.MODELS_LABEL}
+        data-test-subj={`alertZeroModelsRow-${worker.id}`}
+      >
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.watches.settings.models.description"
+              defaultMessage="This Worker uses the models configured in {featureSettingsLink}."
+              values={{
+                featureSettingsLink: (
+                  <FeatureSettingsLink data-test-subj={`alertZeroModelsLink-${worker.id}`} />
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </SettingRow>
       {/* Watch-owned settings for this Worker's `extras`; extras replaces whole-object on save. */}
       {CustomSettings ? (
         <CustomSettings

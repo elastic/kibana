@@ -28,6 +28,14 @@ node scripts/scout run-tests --location local --arch stateful --domain classic \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
 ```
 
+Local serverless Security (complete) uses the same Playwright config and a different server config:
+
+```bash
+node scripts/scout run-tests --location local --arch serverless --domain security_complete \
+  --serverConfigSet edr_real_fleet \
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
+```
+
 The API project uses the same server config set and a different Playwright config:
 
 ```bash
@@ -56,6 +64,7 @@ Swap that config path for `api/playwright.config.ts` to run the HTTP-only specs 
 
 Not part of default Scout (`excluded_configs`). Agents use nested virtualization (`n2-highmem-4`), same class as Defend Workflows Cypress.
 
+- **Targets:** two parallel jobs. One runs stateful classic (ECH). One runs local serverless `security_complete`. Each job runs the UI config and then the API config. Specs opt in with `@local-stateful-classic` and `@local-serverless-security_complete` (no cloud tag, so Scout does not schedule them against a real project).
 - **PRs:** path-filtered (`fleet_packages.json`, Endpoint/EDR, response-actions, this suite, or its CI wiring) or labels `ci:scout-edr-real-fleet` / `ci:all-ui-test-suites`. Fleet plugin-only PRs do not upload this job.
 - **Weekdays on `main`:** dedicated Buildkite pipeline `kibana / security solution / scout edr real fleet` (05:00 America/New_York, Mon–Fri). Failures go to `#security-defend-workflows-tests`.
 - **Not** on every `kibana-security-solution-on-merge` run.

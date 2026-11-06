@@ -377,6 +377,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await adminClient.put(evaluatorPath(name)).send({}).expect(400);
       });
 
+      it('refuses an edit made from a version that has since been superseded', async () => {
+        const { body } = await adminClient
+          .put(evaluatorPath(name))
+          .send({ description: 'Stale tone evaluator', base_version: '1.0.0' })
+          .expect(409);
+        expect(body.message).to.contain('changed to version 1.0.1');
+
+        const { body: latestBody } = await adminClient.get(evaluatorPath(name)).expect(200);
+        expect((latestBody as GetEvaluatorResponse).evaluator.version).to.eql('1.0.1');
+      });
+
       it('lists the latest persisted version alongside built-ins', async () => {
         const { body } = await adminClient.get(EVALS_EVALUATORS_URL).expect(200);
         const response = body as ListEvaluatorsResponse;

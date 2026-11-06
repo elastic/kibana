@@ -174,6 +174,49 @@ describe('SubjectClaimsService', () => {
     ).resolves.toEqual({ claimed: true });
   });
 
+  it('removes the claims it already wrote when a later claim fails', async () => {
+    const { storage, service, holderOf } = setup();
+    const index = storage.index as jest.Mock;
+    const realIndex = index.getMockImplementation();
+    index.mockImplementationOnce(async (request) => realIndex?.(request));
+    index.mockRejectedValueOnce(new Error('storage unavailable'));
+
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjects: [ALERT, EVENT],
+        isHolderOpen: isOpen(true),
+      })
+    ).rejects.toThrow('storage unavailable');
+
+    expect(holderOf(ALERT)).toBeUndefined();
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
+  it('keeps the claims the investigation held before a failed claim', async () => {
+    const { storage, service, holderOf } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    (storage.index as jest.Mock).mockRejectedValueOnce(new Error('storage unavailable'));
+
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjects: [ALERT, EVENT],
+        isHolderOpen: isOpen(true),
+      })
+    ).rejects.toThrow('storage unavailable');
+
+    expect(holderOf(ALERT)).toBe('conv-1');
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
   it('re-reads when a concurrent start wins the create', async () => {
     const { storage, service } = setup();
     const id = subjectClaimId(SPACE_ID, ALERT);
@@ -274,5 +317,38 @@ describe('SubjectClaimsService', () => {
 
     await expect(service.deleteAllInSpace(SPACE_ID)).resolves.toBe(2);
     expect(storage.entries.size).toBe(1);
+  });
+
+  it('deletes every claim in every space for maintenance', async () => {
+    const { service, storage } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    await service.claim({
+      spaceId: 'other',
+      conversationId: 'conv-2',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await expect(service.deleteAllAcrossSpaces()).resolves.toBe(2);
+    expect(storage.entries.size).toBe(0);
+  });
+
+  it('finds the holder of a subject in its space only', async () => {
+    const { service } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await expect(service.findHolder(SPACE_ID, ALERT)).resolves.toBe('conv-1');
+    await expect(service.findHolder('other', ALERT)).resolves.toBeUndefined();
+    await expect(service.findHolder(SPACE_ID, EVENT)).resolves.toBeUndefined();
   });
 });

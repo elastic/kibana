@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -25,21 +25,23 @@ import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
-const schema = z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to remove entities from. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
-    ),
-  entityIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(MAX_ENTITIES_PER_CALL)
-    .describe(
-      `EUIDs (entity unique ids) to remove from the watchlist, e.g. ["user:jsmith123", "host:server01"]. Up to ${MAX_ENTITIES_PER_CALL} per call.`
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to remove entities from. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
+      ),
+    entityIds: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(MAX_ENTITIES_PER_CALL)
+      .describe(
+        `EUIDs (entity unique ids) to remove from the watchlist, e.g. ["user:jsmith123", "host:server01"]. Up to ${MAX_ENTITIES_PER_CALL} per call.`
+      ),
+  })
+);
 
 export const SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID = securityTool(
   'remove_entities_from_watchlist'

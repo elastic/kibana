@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest, testData } from '../fixtures';
 
 const UPDATED_TIME_RANGE_DISPLAY = {
@@ -35,7 +35,7 @@ const UPDATED_TIME_CONFIGURATION = {
 } as const;
 
 const expectCurrentTimeConfiguration = async (
-  pageObjects: PageObjects,
+  pageObjects: DiscoverPageObjects,
   expected: typeof INITIAL_TIME_CONFIGURATION | typeof UPDATED_TIME_CONFIGURATION
 ) => {
   const { datePicker, discover } = pageObjects;
@@ -45,7 +45,7 @@ const expectCurrentTimeConfiguration = async (
   expect(await discover.getHitCountInt()).toBe(expected.hitCount);
 };
 
-const configureUpdatedTime = async (pageObjects: PageObjects) => {
+const configureUpdatedTime = async (pageObjects: DiscoverPageObjects) => {
   const { datePicker, discover } = pageObjects;
 
   await datePicker.setAbsoluteRange(UPDATED_TIME_RANGE_DISPLAY);
@@ -54,7 +54,7 @@ const configureUpdatedTime = async (pageObjects: PageObjects) => {
   await discover.waitUntilTabIsLoaded();
 };
 
-const createTabsWithStoredTimeDifference = async (pageObjects: PageObjects) => {
+const createTabsWithStoredTimeDifference = async (pageObjects: DiscoverPageObjects) => {
   const { discover, unifiedTabs } = pageObjects;
 
   await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -16,9 +16,11 @@ import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
-const GetWatchRequestParams = z.object({
-  watchId: z.string().min(1).max(128),
-});
+const GetWatchRequestParams = lazySchema(() =>
+  z.object({
+    watchId: z.string().min(1).max(128),
+  })
+);
 
 export const registerGetWatchRoute = ({
   router,

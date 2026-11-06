@@ -11,10 +11,9 @@ import {
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
 import {
-  InvestigationConflictError,
+  InvalidNotificationDestinationError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
-  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from '../client/errors';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -32,13 +31,30 @@ const mapStatusCode = (error: Error): number => {
 
 describe('rethrowInvestigationClientError', () => {
   it.each([
+    [new InvalidNotificationDestinationError('Unsupported notification type'), 400],
     [new InvestigationNotFoundError('investigation-1'), 404],
-    [new InvestigationMetadataMissingError('investigation-1'), 400],
-    [new InvestigationConflictError('Conflict'), 409],
     [new InvestigationUnavailableError('Unavailable'), 503],
     [new InvestigationQuotaDeniedError(), 429],
     [new NightshiftModelNotFoundError('missing-model'), 400],
     [new NightshiftModelBlockedError('blocked-model', 'default-model'), 400],
+    [
+      Object.assign(new Error('Missing manage_investigations'), {
+        name: 'InvestigationsForbiddenError',
+      }),
+      403,
+    ],
+    [
+      Object.assign(new Error('Too many subjects'), {
+        name: 'InvestigationAttachmentInvalidRequestError',
+      }),
+      400,
+    ],
+    [
+      Object.assign(new Error('Concurrent update'), {
+        name: 'InvestigationAttachmentConflictError',
+      }),
+      409,
+    ],
   ])('maps %s to HTTP %i', (error, statusCode) => {
     expect(mapStatusCode(error)).toBe(statusCode);
   });

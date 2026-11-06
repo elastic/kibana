@@ -323,6 +323,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const render: UiRender = (ui, options) => {
     applyIntersectionObserverMock();
+    suppressKnownConsoleLogMessages();
 
     return reactRender(ui, {
       wrapper: AppWrapper,
@@ -496,4 +497,32 @@ const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http
   // as the store middleware for Endpoint list is initialized, thus mocking it here would avoid
   // unnecessary errors being output to the console
   fleetGetPackageHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
+};
+
+/** @private */
+let CONSOLE_WARN_WRAPPER: typeof window.console.warn | undefined;
+
+const CONSOLE_WARNING_SURPRESS_MESSAGES = [
+  // Detected not recommended unit (%, vw, cqw, cqi) in cell width settings. Adjust the `width`, `minWidth` and
+  // `maxWidth` values to use absolute length units like `em` for text cells or `px` for static elements like
+  // icons or plots.
+  'Detected not recommended unit',
+];
+
+const suppressKnownConsoleLogMessages = () => {
+  if (CONSOLE_WARN_WRAPPER && window.console.warn === CONSOLE_WARN_WRAPPER) {
+    return;
+  }
+
+  const realWarn = window.console.warn.bind(window.console);
+
+  CONSOLE_WARN_WRAPPER = (...props) => {
+    const consoleWarnMessage = props[0] ?? '';
+
+    if (CONSOLE_WARNING_SURPRESS_MESSAGES.every((msg) => !consoleWarnMessage.includes(msg))) {
+      return realWarn(...props);
+    }
+  };
+
+  window.console.warn = CONSOLE_WARN_WRAPPER;
 };

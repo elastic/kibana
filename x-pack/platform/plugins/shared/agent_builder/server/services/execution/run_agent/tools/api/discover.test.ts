@@ -27,6 +27,8 @@ const createMeta = (overrides: Partial<ApiRegistryMeta> = {}): ApiRegistryMeta =
   namespace: 'indices',
   description: 'Create an index',
   namespaceFile: 'indices',
+  destructive: false,
+  readOnly: false,
   ...overrides,
 });
 

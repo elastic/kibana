@@ -7,7 +7,7 @@
 
 import { ApplySuppressionStep } from './apply_suppression_step';
 import {
-  createAlertEpisode,
+  createAlert,
   createSuppressionRow,
   createDispatcherPipelineState,
   createStepLogger,
@@ -18,12 +18,12 @@ const logger = createStepLogger();
 describe('ApplySuppressionStep', () => {
   const step = new ApplySuppressionStep();
 
-  it('separates suppressed and active episodes', async () => {
-    const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
-    const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', episode_id: 'e2' });
+  it('separates suppressed and active alerts', async () => {
+    const alert1 = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const alert2 = createAlert({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
 
     const state = createDispatcherPipelineState({
-      episodes: [ep1, ep2],
+      alerts: [alert1, alert2],
       suppressions: [
         createSuppressionRow({
           rule_id: 'r1',
@@ -56,9 +56,9 @@ describe('ApplySuppressionStep', () => {
     );
   });
 
-  it('treats all episodes as active when there are no suppressions', async () => {
+  it('treats all alerts as active when there are no suppressions', async () => {
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode(), createAlertEpisode({ episode_id: 'e2' })],
+      alerts: [createAlert(), createAlert({ alert_id: 'e2' })],
       suppressions: [],
     });
 
@@ -70,8 +70,8 @@ describe('ApplySuppressionStep', () => {
     expect(result.data?.triage?.suppressed).toHaveLength(0);
   });
 
-  it('handles empty episodes', async () => {
-    const state = createDispatcherPipelineState({ episodes: [], suppressions: [] });
+  it('handles empty alerts', async () => {
+    const state = createDispatcherPipelineState({ alerts: [], suppressions: [] });
 
     const result = await step.execute(state, logger);
 

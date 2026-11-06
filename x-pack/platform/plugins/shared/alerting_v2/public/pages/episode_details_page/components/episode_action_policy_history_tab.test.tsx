@@ -120,7 +120,6 @@ const buildItem = (
   alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
-  error: null,
   ...overrides,
 });
 

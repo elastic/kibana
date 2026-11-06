@@ -68,3 +68,6 @@ export const ESCALATION_CLOSE_PREVIEW_URL =
 
 /** URL for linking an investigation to an existing escalation (append-only). */
 export const ESCALATION_LINK_URL = `${ESCALATION_BY_ID_URL}/_link` as const;
+
+/** URL for syncing the attachments of an escalation's linked investigations into the escalation. */
+export const ESCALATION_SYNC_URL = `${ESCALATION_BY_ID_URL}/_sync_attachments` as const;

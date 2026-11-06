@@ -17,7 +17,7 @@ import {
 
 const signal = (ruleUuid: string): SignalEntry => ({
   type: 'detection',
-  stream_name: 'logs',
+  source_id: 'logs',
   verdict: 'confirms',
   description: 'test signal',
   metadata: {
@@ -33,7 +33,7 @@ const feature = (feature_id: string) => ({
   type: 'entity',
   subtype: 'service',
   name: feature_id,
-  stream_name: 'logs',
+  source_id: 'logs',
 });
 
 const event = (
@@ -53,7 +53,7 @@ const event = (
     source: 'a',
     target: 'b',
     protocol: 'http' as const,
-    stream_name: 'logs',
+    source_id: 'logs',
   })),
 });
 
@@ -160,9 +160,27 @@ describe('scoreTopologyCorrectness', () => {
     expect(result.explanation).toMatch(/no matching actual event/);
   });
 
-  it('does not deflate precision for duplicate feature IDs in actual', () => {
-    // actual has ['svc-a', 'svc-a'] (duplicate) — with raw array length as denominator
-    // precision would be 0.5 even though the unique set is exactly right.
+  it('does not penalize entries added beyond the expected topology', () => {
+    const actual = [
+      event('e1', ['uuid-1'], ['svc-a', 'frontend'], ['dep-1', 'frontend']),
+    ] as unknown as SignificantEvent[];
+    const expected = [event('e1', ['uuid-1'], ['svc-a'], ['dep-1'])];
+
+    expect(scoreTopologyCorrectness(actual, expected).score).toBe(1);
+  });
+
+  it('penalizes padding the topology with many entries beyond the expected set', () => {
+    const actual = [
+      event('e1', ['uuid-1'], ['svc-a', 'x1', 'x2', 'x3', 'x4'], []),
+    ] as unknown as SignificantEvent[];
+    const expected = [event('e1', ['uuid-1'], ['svc-a'], [])];
+
+    const result = scoreTopologyCorrectness(actual, expected);
+    expect(result.score).toBeCloseTo(0.2);
+    expect(result.explanation).toMatch(/beyond the expected set/);
+  });
+
+  it('counts duplicate feature IDs in actual once', () => {
     const actualItem = {
       ...event('e1', ['uuid-1'], [], []),
       causal_features: [feature('svc-a'), feature('svc-a')],
@@ -233,13 +251,29 @@ describe('scoreContinuationTopologyStability', () => {
     expect(result.score).toBe(1);
   });
 
-  it('scores topology drift below 1.0', () => {
+  it('scores dropped topology below 1.0', () => {
     const establishing = makeCycle([event('e1', [], ['svc-a', 'svc-b'], [])]);
     const followUp = makeCycle([event('e1', [], ['svc-a'], [])]);
 
     const result = scoreContinuationTopologyStability([establishing, followUp]);
-    expect(result.score).toBeGreaterThan(0);
-    expect(result.score).toBeLessThan(1);
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('missing=[svc-b]');
+  });
+
+  it('does not penalize entries added by a follow-up', () => {
+    const establishing = makeCycle([event('e1', [], ['svc-a'], ['dep-1'])]);
+    const followUp = makeCycle([event('e1', [], ['svc-a', 'frontend'], ['dep-1', 'dep-2'])]);
+
+    expect(scoreContinuationTopologyStability([establishing, followUp]).score).toBe(1);
+  });
+
+  it('does not cap a continuation that adds more than two entries', () => {
+    const establishing = makeCycle([event('e1', [], ['svc-a'], ['dep-1'])]);
+    const followUp = makeCycle([
+      event('e1', [], ['svc-a', 'svc-b', 'svc-c', 'svc-d'], ['dep-1', 'dep-2', 'dep-3', 'dep-4']),
+    ]);
+
+    expect(scoreContinuationTopologyStability([establishing, followUp]).score).toBe(1);
   });
 
   it('matches follow-up items to establishing items by event_id, not just index 0', () => {

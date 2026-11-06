@@ -76,6 +76,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
     mockUseApiKeys.mockReturnValue({
       encodedApiKeys: {},
@@ -143,6 +144,64 @@ describe('ApiEndpoints', () => {
     expect(learnMoreLink).toHaveAttribute('href', 'https://ela.st/managed-inputs');
   });
 
+  it('explains missing privileges instead of asking for a refresh when the request is forbidden', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.Elasticsearch,
+          label: 'Elasticsearch',
+          euiIconType: 'logoElasticsearch',
+          usesManagedInput: false,
+          additionalEndpoints: [],
+        },
+      ],
+      popoverEndpoints: [],
+      isLoading: false,
+      isError: false,
+      isForbidden: true,
+    });
+
+    renderApiEndpoints();
+
+    expect(
+      screen.getByText(
+        "You don't have permission to view endpoint details. Contact your administrator."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Could not load endpoint details. Refresh the page to try again.')
+    ).not.toBeInTheDocument();
+  });
+
+  it('asks for a refresh when loading endpoint details fails for another reason', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.Elasticsearch,
+          label: 'Elasticsearch',
+          euiIconType: 'logoElasticsearch',
+          usesManagedInput: false,
+          additionalEndpoints: [],
+        },
+      ],
+      popoverEndpoints: [],
+      isLoading: false,
+      isError: true,
+      isForbidden: false,
+    });
+
+    renderApiEndpoints();
+
+    expect(
+      screen.getByText('Could not load endpoint details. Refresh the page to try again.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "You don't have permission to view endpoint details. Contact your administrator."
+      )
+    ).not.toBeInTheDocument();
+  });
+
   it('describes direct endpoints when managed OTLP is unavailable', () => {
     mockUseApiEndpoints.mockReturnValue({
       endpoints: [
@@ -158,6 +217,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     const { container } = renderApiEndpoints();
@@ -194,6 +254,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     const { container } = renderApiEndpoints();
@@ -235,6 +296,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     renderApiEndpoints();
@@ -291,6 +353,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     renderApiEndpoints();
@@ -340,6 +403,7 @@ describe('ApiEndpoints', () => {
       ],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     renderApiEndpoints();

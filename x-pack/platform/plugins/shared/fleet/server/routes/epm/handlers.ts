@@ -83,6 +83,7 @@ import {
   getTemplateInputs,
   updateCustomIntegration,
 } from '../../services/epm/packages';
+import { filterOutNonFipsPolicyTemplates } from '../../services/epm/packages/filter_fips_packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import {
   fleetErrorToResponseOptions,
@@ -163,7 +164,10 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res
+  const filteredByFips = appContextService.getIsFipsEnabled()
+    ? filterOutNonFipsPolicyTemplates(res)
+    : res;
+  const flattenedRes = filteredByFips
     // exclude the security_ai_prompts package from being shown in Kibana UI
     // https://github.com/elastic/kibana/pull/227308
     .filter((pkg) => pkg.id !== 'security_ai_prompts')
@@ -544,6 +548,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
     skipDependencyCheck: request.query?.skipDependencyCheck,
+    checkBreakingChanges: true,
+    acknowledgeBreakingChanges: request.body?.acknowledge_breaking_changes,
   });
 
   if (!res.error) {
@@ -678,6 +684,8 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     force: request.body.force,
     allowOutdatedVersion: request.body.allow_outdated_version,
     request,
+    checkBreakingChanges: true,
+    acknowledgeBreakingChanges: request.body.acknowledge_breaking_changes,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {

@@ -9,9 +9,10 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
+import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../../../common/constants';
 import instructions from './instructions/discovery.md.text';
 
-export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'significant-events.discovery';
+export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID };
 export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID = 'platform.sig_events.discovery-type';
 
 export const discoveryAgentType = {

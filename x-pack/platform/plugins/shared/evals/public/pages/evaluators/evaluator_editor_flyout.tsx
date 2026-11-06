@@ -47,6 +47,7 @@ import {
   type ResolveInstrumentationResponse,
   type TestEvaluatorResponse,
 } from '@kbn/evals-common';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   useCreateEvaluator,
   useEvaluator,
@@ -131,6 +132,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     data: evaluatorData,
     isLoading: isLoadingEvaluator,
     error: loadEvaluatorError,
+    refetch: refetchEvaluator,
   } = useEvaluator(mode === 'edit' ? evaluatorName : undefined);
   const {
     connectors,
@@ -157,7 +159,12 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   // Kept apart from `formError` because a server rejection highlights no field, and
   // routing it through EuiForm would title it "address the highlighted errors".
-  const [saveError, setSaveError] = useState<{ title: string; message: string } | null>(null);
+  const [saveError, setSaveError] = useState<{
+    title: string;
+    message: string;
+    isStale?: boolean;
+    reloadError?: string;
+  } | null>(null);
   // Rendered beside the test controls rather than with `saveError` at the top of the form,
   // because the test section is far enough down that a message up there is off-screen.
   const [testError, setTestError] = useState<{ title: string; message: string } | null>(null);
@@ -244,39 +251,21 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const buildDraft = (): LlmJudgeConfig | undefined => {
-    const parsedScores: JudgeScore[] = [];
-    for (const score of scores) {
-      const scoreName = score.name.trim();
-      if (!scoreName) {
-        setFieldErrors({ scores: i18n.SCORES_INVALID_ERROR });
-        setFormError(i18n.HIGHLIGHTED_FIELDS_ERROR);
-        return undefined;
+    // Validate every field before reporting, so one bad score cannot hide other missing fields.
+    let hasInvalidLabels = false;
+    const parsedScores: JudgeScore[] = scores.map((score) => {
+      const labels = score.type === 'categorical' ? parseLabels(score.labels) : undefined;
+      if (score.type === 'categorical' && !labels) {
+        hasInvalidLabels = true;
       }
-
-      if (score.type === 'categorical') {
-        const labels = parseLabels(score.labels);
-        if (!labels) {
-          setFieldErrors({ scores: i18n.INVALID_LABELS_ERROR });
-          setFormError(i18n.INVALID_LABELS_ERROR);
-          return undefined;
-        }
-        parsedScores.push({
-          name: scoreName,
-          type: score.type,
-          direction: score.direction,
-          labels,
-          ...(score.description.trim() ? { description: score.description.trim() } : {}),
-        });
-        continue;
-      }
-
-      parsedScores.push({
-        name: scoreName,
+      return {
+        name: score.name.trim(),
         type: score.type,
         direction: score.direction,
+        ...(labels ? { labels } : {}),
         ...(score.description.trim() ? { description: score.description.trim() } : {}),
-      });
-    }
+      };
+    });
 
     const judge: LlmJudgeConfig = {
       system_prompt: systemPrompt.trim(),
@@ -287,17 +276,25 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     };
     const draft = { name: name.trim(), description: description.trim(), judge };
     const parsed = UserDefinedEvaluatorDraft.safeParse(draft);
-    if (!parsed.success) {
-      const nextFieldErrors = toFieldErrors(parsed.error.issues);
-      setFieldErrors(nextFieldErrors);
-      setFormError(
-        Object.keys(nextFieldErrors).length > 0
-          ? i18n.HIGHLIGHTED_FIELDS_ERROR
-          : i18n.REQUIRED_FIELDS_ERROR
-      );
-      return undefined;
+    const nextFieldErrors: FieldErrors = parsed.success ? {} : toFieldErrors(parsed.error.issues);
+    if (hasInvalidLabels && !nextFieldErrors.scores) {
+      nextFieldErrors.scores = i18n.INVALID_LABELS_ERROR;
     }
-    return judge;
+
+    if (parsed.success && !hasInvalidLabels) {
+      return judge;
+    }
+
+    setFieldErrors(nextFieldErrors);
+    const invalidFields = Object.keys(nextFieldErrors);
+    setFormError(
+      invalidFields.length === 0
+        ? i18n.REQUIRED_FIELDS_ERROR
+        : invalidFields.length === 1 && nextFieldErrors.scores === i18n.INVALID_LABELS_ERROR
+        ? i18n.INVALID_LABELS_ERROR
+        : i18n.HIGHLIGHTED_FIELDS_ERROR
+    );
+    return undefined;
   };
 
   const onSave = async () => {
@@ -319,9 +316,15 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
         });
         toasts?.addSuccess(i18n.CREATE_SUCCESS(created.evaluator.name));
       } else if (evaluatorName) {
+        // The form sends every field, so the server must refuse a save over a newer version.
+        const baseVersion = evaluatorData?.evaluator.version;
         const updated = await updateEvaluator.mutateAsync({
           name: evaluatorName,
-          updates: { description: description.trim(), judge },
+          updates: {
+            description: description.trim(),
+            judge,
+            ...(baseVersion ? { base_version: baseVersion } : {}),
+          },
         });
         // The server declines to write a version identical to the current one, so reporting
         // a version here would claim an edit that never happened.
@@ -333,8 +336,23 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       }
       onClose();
     } catch (error) {
-      setSaveError({ title: i18n.SAVE_ERROR_TITLE, message: getErrorMessage(error) });
+      const isStale = mode === 'edit' && isHttpFetchError(error) && error.response?.status === 409;
+      setSaveError(
+        isStale
+          ? { title: i18n.STALE_EDIT_ERROR_TITLE, message: getErrorMessage(error), isStale }
+          : { title: i18n.SAVE_ERROR_TITLE, message: getErrorMessage(error) }
+      );
     }
+  };
+
+  const onLoadLatest = async () => {
+    // A successful refetch repopulates the form, replacing the unsaved edit.
+    const { error } = await refetchEvaluator();
+    if (error) {
+      setSaveError((current) => current && { ...current, reloadError: getErrorMessage(error) });
+      return;
+    }
+    setSaveError(null);
   };
 
   const onTest = async () => {
@@ -444,6 +462,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const isSaving = createEvaluator.isLoading || updateEvaluator.isLoading;
+  // A failed refetch keeps its data, so only a first load that failed replaces the form.
+  const hasLoadFailedOnOpen = Boolean(loadEvaluatorError) && !evaluatorData;
   const isTesting = isRunningTest || testEvaluator.isLoading || resolveInstrumentation.isLoading;
   const TestResultCallout = testResult?.status === 'ok' ? KbnSuccessCallout : KbnDangerCallout;
 
@@ -459,7 +479,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       <EuiFlyoutBody>
         {mode === 'edit' && isLoadingEvaluator ? (
           <EuiLoadingSpinner size="xl" />
-        ) : loadEvaluatorError ? (
+        ) : hasLoadFailedOnOpen ? (
           <KbnDangerCallout
             announceOnMount
             title={i18n.LOAD_EVALUATOR_ERROR_TITLE}
@@ -474,7 +494,30 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                   announceOnMount
                   title={saveError.title}
                   data-test-subj="evalsEvaluatorSubmitError"
-                  text={<p>{saveError.message}</p>}
+                  text={
+                    <>
+                      <p>
+                        {saveError.message}
+                        {saveError.isStale ? ` ${i18n.STALE_EDIT_ERROR_DESCRIPTION}` : null}
+                      </p>
+                      {saveError.reloadError ? (
+                        <p data-test-subj="evalsEvaluatorLoadLatestError">
+                          {i18n.LOAD_LATEST_ERROR(saveError.reloadError)}
+                        </p>
+                      ) : null}
+                    </>
+                  }
+                  actionProps={
+                    saveError.isStale
+                      ? {
+                          primary: {
+                            children: i18n.LOAD_LATEST_BUTTON,
+                            onClick: onLoadLatest,
+                            'data-test-subj': 'evalsEvaluatorLoadLatest',
+                          },
+                        }
+                      : undefined
+                  }
                 />
                 <EuiSpacer size="m" />
               </>
@@ -821,9 +864,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               fill
               onClick={onSave}
               isLoading={isSaving}
-              disabled={
-                isTesting || Boolean(loadEvaluatorError) || (mode === 'edit' && isLoadingEvaluator)
-              }
+              disabled={isTesting || hasLoadFailedOnOpen || (mode === 'edit' && isLoadingEvaluator)}
               data-test-subj="evalsEvaluatorSave"
             >
               {i18n.SAVE_BUTTON}

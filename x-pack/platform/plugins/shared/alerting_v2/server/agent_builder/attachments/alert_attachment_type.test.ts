@@ -260,7 +260,7 @@ describe('createAlertAttachmentType', () => {
         expect.objectContaining({
           labels: {
             attachment_type: ALERT_ATTACHMENT_TYPE,
-            episode_id: 'ep-missing',
+            alert_id: 'ep-missing',
             space_id: SPACE_ID,
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
           },
@@ -287,7 +287,7 @@ describe('createAlertAttachmentType', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith('Unauthorized to resolve episode attachment', {
         labels: {
           attachment_type: ALERT_ATTACHMENT_TYPE,
-          episode_id: 'ep-1',
+          alert_id: 'ep-1',
           space_id: SPACE_ID,
         },
       });
@@ -388,7 +388,7 @@ describe('createAlertAttachmentType', () => {
         expect.objectContaining({
           labels: {
             attachment_type: ALERT_ATTACHMENT_TYPE,
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: SPACE_ID,
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
           },
@@ -457,7 +457,7 @@ describe('createAlertAttachmentType', () => {
       expect(value).toContain('Call it with no arguments');
       expect(value).toContain('at most 100 rows');
       expect(value).toContain('Do not retry the same window');
-      expect(value).toContain('rule-management');
+      expect(value).toContain('rule-authoring');
     });
 
     it('exposes refresh_alert, get_rule, and get_rule_events bounded tools unique to the attachment', async () => {
@@ -480,7 +480,7 @@ describe('createAlertAttachmentType', () => {
           description: expect.stringContaining('rule-1'),
         })
       );
-      expect(tools[1].description).toContain('rule-management');
+      expect(tools[1].description).toContain('rule-authoring');
       expect(tools[2]).toEqual(
         expect.objectContaining({
           id: getRuleEventsToolId('attach-1'),
@@ -491,7 +491,7 @@ describe('createAlertAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('describes read-only episode context, bounded tools, and rule-management skill', () => {
+    it('describes read-only episode context, bounded tools, and rule-authoring skill', () => {
       const description = definition.getAgentDescription!();
       expect(description).toContain('platform alert');
       expect(description).not.toContain('v2');
@@ -500,7 +500,7 @@ describe('createAlertAttachmentType', () => {
       expect(description).toContain('refresh_alert');
       expect(description).toContain('get_rule');
       expect(description).toContain('get_rule_events');
-      expect(description).toContain('rule-management');
+      expect(description).toContain('rule-authoring');
     });
   });
 

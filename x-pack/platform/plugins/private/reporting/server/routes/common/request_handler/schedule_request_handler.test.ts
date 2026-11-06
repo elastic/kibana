@@ -7,6 +7,7 @@
 
 jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
+import { ScheduleType } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
 import type {
@@ -928,6 +929,20 @@ describe('Handle request to schedule', () => {
                 "body": "seeing this means the license isn't supported",
               }
           `);
+    });
+
+    test('disallows an export type that a serverless feature flag has disabled', async () => {
+      const isExportTypeEnabled = jest
+        .spyOn(reportingCore, 'isExportTypeEnabled')
+        .mockResolvedValue(false);
+
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: mockJobParams,
+        })
+      ).toEqual({ body: 'Invalid export-type of csv_searchsource' });
+      expect(isExportTypeEnabled).toHaveBeenCalledWith('csv_searchsource', ScheduleType.SCHEDULED);
     });
 
     test('disallows invalid browser timezone', async () => {

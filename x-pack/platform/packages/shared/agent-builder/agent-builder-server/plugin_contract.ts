@@ -9,6 +9,7 @@ import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
+import type { CallbackConversationResolver, CallbackTransportDefinition } from './callbacks';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -165,11 +166,15 @@ export interface AgentsStart {
    * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
    * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
    * `ensure` call for that id.
+   *
+   * Optional `hidden` is kept in memory the same way and overrides the default UI visibility
+   * (system-created non-chat agents are hidden from the agent picker and management list).
    */
   ensure: (opts: {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
+    hidden?: boolean;
   }) => Promise<void>;
 }
 
@@ -229,6 +234,33 @@ export interface RuntimeStart {
 }
 
 /**
+ * Opt-in to the `ai.conversation.updated` workflow trigger for conversations of given templates.
+ */
+export interface ConversationUpdatedOptIn {
+  /**
+   * Templates whose conversations emit the trigger. Writes to conversations of other templates,
+   * or without a template, never run `isEnabled`.
+   */
+  templateIds: readonly string[];
+  /**
+   * Resolves whether the trigger is emitted for the request that performed the write.
+   */
+  isEnabled: (request: KibanaRequest) => Promise<boolean>;
+}
+
+/**
+ * AgentBuilder conversations service's setup contract.
+ */
+export interface ConversationsSetup {
+  /**
+   * Opts in to the `ai.conversation.updated` workflow trigger. A conversation write emits it when
+   * an opt-in registered for the conversation's template resolves `true` for the request that
+   * performed it. Without a matching opt-in, the trigger is never emitted.
+   */
+  enableUpdatedTrigger(optIn: ConversationUpdatedOptIn): void;
+}
+
+/**
  * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
@@ -236,6 +268,19 @@ export interface ConversationsStart {
    * Returns a conversation client scoped to the given request's user and space.
    */
   getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
+}
+
+/** AgentBuilder callbacks setup contract. */
+export interface CallbacksSetup {
+  /**
+   * Registers a resolver for the conversation an execution's origin continues, when the execution
+   * names no conversation. Resolvers are asked in registration order and the first answer wins.
+   * When all return `undefined`, the default lookup by origin runs. A resolved conversation runs on
+   * its own agent, and one the caller cannot converse in is skipped.
+   */
+  registerConversationResolver(resolver: CallbackConversationResolver): void;
+  /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
+  registerTransport(transport: CallbackTransportDefinition): void;
 }
 
 /**
@@ -272,6 +317,15 @@ export interface AgentBuilderPluginSetup {
    * Conversation templates setup contract, which can be used to register templates.
    */
   conversationTemplates: ConversationTemplatesSetup;
+  /**
+   * Conversations setup contract, which can be used to opt in to conversation workflow triggers.
+   */
+  conversations: ConversationsSetup;
+  /**
+   * Callbacks setup contract, which can be used to resolve the conversation an execution's origin
+   * continues and to register callback transports.
+   */
+  callbacks: CallbacksSetup;
   /**
    * Renderers setup contract, which can be used to register renderer types.
    */

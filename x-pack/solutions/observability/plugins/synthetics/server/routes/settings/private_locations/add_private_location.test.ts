@@ -136,20 +136,6 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     expect(create).toHaveBeenCalled();
   });
 
-  it('does not persist the deprecated isAgentSharding field', async () => {
-    const { routeContext } = makeRouteContext({
-      policySpaceIds: [ALL_SPACES_ID],
-      requestSpaces: ['naims'],
-    });
-    routeContext.request.body = { ...routeContext.request.body, isAgentSharding: true };
-    const create = stubDownstream();
-
-    await addPrivateLocationRoute().handler(routeContext);
-
-    expect(create).toHaveBeenCalled();
-    expect(create.mock.calls[0][0]).not.toHaveProperty('isAgentSharding');
-  });
-
   it('bypasses the containment check when the agent policy is all-spaces', async () => {
     const { routeContext, response } = makeRouteContext({
       policySpaceIds: [ALL_SPACES_ID],
@@ -189,11 +175,7 @@ describe('PrivateLocationRepository.getLocationSpaces', () => {
 describe('PrivateLocationSchema', () => {
   const base = { label: 'loc', agentPolicyId: 'ap' };
 
-  it('still accepts the deprecated isAgentSharding field', () => {
-    expect(() => PrivateLocationSchema.parse({ ...base, isAgentSharding: true })).not.toThrow();
-  });
-
   it('rejects unknown keys', () => {
-    expect(() => PrivateLocationSchema.parse({ ...base, isAgentShardng: true })).toThrow();
+    expect(() => PrivateLocationSchema.parse({ ...base, unexpectedField: true })).toThrow();
   });
 });

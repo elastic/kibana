@@ -160,7 +160,7 @@ describe('RulesApi', () => {
 
   describe('matchRules', () => {
     it('sends a POST request with the policy matcher and pagination in the body', async () => {
-      const body = { matcher: { tags: ['cpu'], expression: null }, page: 2, per_page: 10 };
+      const body = { matcher: { tags: ['cpu'] }, page: 2, per_page: 10 };
       http.post.mockResolvedValue({ items: [], total: 0, page: 2, per_page: 10 });
 
       await api.matchRules(body);

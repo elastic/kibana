@@ -36,6 +36,7 @@ import * as knowledgeBaseIndex from './knowledge_base_index';
 
 import {
   getAgentTemplateAssetsMap,
+  getInstalledPackageManifests,
   getInstalledPackages,
   getPackageDependencies,
   getPackageFromSource,
@@ -1046,6 +1047,47 @@ owner: elastic`,
           title: 'apm_server_metrics',
         },
       ]);
+    });
+  });
+
+  describe('getInstalledPackageManifests', () => {
+    it('parses a manifest stored as base64', async () => {
+      const soClient = savedObjectsClientMock.create();
+      // A Latin-1 byte in a comment makes the manifest invalid UTF-8, so storage keeps it as base64.
+      const manifest = Buffer.concat([
+        Buffer.from('name: test\ntitle: Test\nversion: 1.0.0\n# caf'),
+        Buffer.from([0xe9]),
+        Buffer.from('\ndescription: Test package\n'),
+      ]);
+      soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            type: ASSETS_SAVED_OBJECT_TYPE,
+            id: 'test-manifest',
+            attributes: {
+              package_name: 'test',
+              package_version: '1.0.0',
+              install_source: 'upload',
+              asset_path: 'test-1.0.0/manifest.yml',
+              media_type: 'text/yaml; charset=utf-8',
+              data_utf8: '',
+              data_base64: manifest.toString('base64'),
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      } as any);
+
+      const manifests = await getInstalledPackageManifests(soClient, [
+        { name: 'test', version: '1.0.0' },
+      ] as any);
+
+      expect(manifests.get('test-1.0.0/manifest.yml')).toMatchObject({
+        title: 'Test',
+        description: 'Test package',
+      });
     });
   });
 

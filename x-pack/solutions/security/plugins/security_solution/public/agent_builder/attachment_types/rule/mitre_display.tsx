@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { groupThreatsByFramework } from '@kbn/security-mitre-attack-common';
 import type { Threat } from '../../../../common/api/detection_engine/model/rule_schema';
+import { UNKNOWN_FRAMEWORK_LABEL } from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
 
 /**
- * Renders a rule's MITRE ATT&CK mappings (tactic → techniques → subtechniques).
+ * Renders a rule's threat mappings grouped by framework (MITRE ATT&CK, MITRE ATLAS, or an unrecognized framework string).
  *
  * This intentionally duplicates a subset of `ThreatEuiFlexGroup`
  * (`detection_engine/rule_creation_ui/components/description_step/threat_description.tsx`)
@@ -36,10 +38,13 @@ interface MitreNode {
 const mitreNodeLabel = ({ id, name }: MitreNode): string =>
   name && id ? `${name} (${id})` : name ?? id ?? '';
 
-const MitreNodeLink: React.FC<{ node: MitreNode; 'data-test-subj': string }> = ({
+const MitreNodeLink: React.FC<{ node: MitreNode | null | undefined; 'data-test-subj': string }> = ({
   node,
   'data-test-subj': dataTestSubj,
 }) => {
+  if (node == null) {
+    return null;
+  }
   const label = mitreNodeLabel(node);
   if (!label) {
     return null;
@@ -54,47 +59,74 @@ const MitreNodeLink: React.FC<{ node: MitreNode; 'data-test-subj': string }> = (
   );
 };
 
-export const MitreAttackDisplay: React.FC<{ threat: Threat[] }> = ({ threat }) => {
+const MitreThreatEntry: React.FC<{ threat: Threat | null | undefined }> = ({ threat }) => {
   const { euiTheme } = useEuiTheme();
-
+  const tactic: MitreNode | undefined = threat?.tactic;
+  const techniques = threat?.technique ?? [];
+  if (!tactic && techniques.length === 0) {
+    return null;
+  }
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="mitreAttackDisplay">
-      {threat.map((singleThreat, threatIndex) => {
-        const tactic: MitreNode | undefined = singleThreat?.tactic;
-        const techniques = singleThreat?.technique ?? [];
-        if (!tactic && techniques.length === 0) {
-          return null;
-        }
-        return (
-          <EuiFlexItem key={tactic?.id ?? threatIndex} grow={false}>
-            {tactic && <MitreNodeLink node={tactic} data-test-subj="mitreTacticLink" />}
+    <EuiFlexItem grow={false}>
+      {tactic && <MitreNodeLink node={tactic} data-test-subj="mitreTacticLink" />}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        alignItems="flexStart"
+        css={{ marginLeft: euiTheme.size.m }}
+      >
+        {techniques.map((technique, techniqueIndex) => (
+          <EuiFlexItem key={`${technique?.id ?? 'none'}-${techniqueIndex}`} grow={false}>
+            <MitreNodeLink node={technique} data-test-subj="mitreTechniqueLink" />
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
               alignItems="flexStart"
               css={{ marginLeft: euiTheme.size.m }}
             >
-              {techniques.map((technique, techniqueIndex) => (
-                <EuiFlexItem key={technique?.id ?? techniqueIndex} grow={false}>
-                  <MitreNodeLink node={technique} data-test-subj="mitreTechniqueLink" />
-                  <EuiFlexGroup
-                    direction="column"
-                    gutterSize="none"
-                    alignItems="flexStart"
-                    css={{ marginLeft: euiTheme.size.m }}
-                  >
-                    {(technique?.subtechnique ?? []).map((subtechnique, subtechniqueIndex) => (
-                      <EuiFlexItem key={subtechnique?.id ?? subtechniqueIndex} grow={false}>
-                        <MitreNodeLink node={subtechnique} data-test-subj="mitreSubtechniqueLink" />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
+              {(technique?.subtechnique ?? []).map((subtechnique, subtechniqueIndex) => (
+                <EuiFlexItem
+                  key={`${subtechnique?.id ?? 'none'}-${subtechniqueIndex}`}
+                  grow={false}
+                >
+                  <MitreNodeLink node={subtechnique} data-test-subj="mitreSubtechniqueLink" />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-        );
-      })}
+        ))}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
+
+export const MitreAttackDisplay: React.FC<{ threat: Threat[] }> = ({ threat }) => {
+  const { euiTheme } = useEuiTheme();
+  const groups = groupThreatsByFramework(threat);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="mitreAttackDisplay">
+      {groups.map((group) => (
+        <EuiFlexItem
+          key={group.framework ?? group.label}
+          grow={false}
+          data-test-subj={`mitreFrameworkGroup-${group.framework ?? 'unknown'}`}
+        >
+          <EuiText size="xs">
+            <strong data-test-subj="mitreFrameworkGroupTitle">
+              {group.label || UNKNOWN_FRAMEWORK_LABEL}
+            </strong>
+          </EuiText>
+          <EuiFlexGroup direction="column" gutterSize="s" css={{ marginLeft: euiTheme.size.m }}>
+            {group.threats.map((singleThreat, threatIndex) => (
+              <MitreThreatEntry
+                key={`${singleThreat?.tactic?.id ?? 'none'}-${threatIndex}`}
+                threat={singleThreat}
+              />
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

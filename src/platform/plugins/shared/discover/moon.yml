@@ -85,6 +85,8 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/deeplinks-observability'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
+  - '@kbn/esql-language'
   - '@kbn/data-source'
   - '@kbn/managed-content-badge'
   - '@kbn/deeplinks-analytics'
@@ -104,6 +106,7 @@ dependsOn:
   - '@kbn/logs-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/apm-ui-shared'
+  - '@kbn/genai-common'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/discover-shared-plugin'
   - '@kbn/response-ops-rule-form'
@@ -126,7 +129,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
-  - '@kbn/zod-helpers'
   - '@kbn/cps'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
@@ -139,6 +141,7 @@ dependsOn:
   - '@kbn/as-code-data-views-schema'
   - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-export-flyout-component'
+  - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
@@ -176,7 +179,6 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-session-constants'
-  - '@kbn/field-types'
   - '@kbn/esql-browser'
 tags:
   - plugin
@@ -184,6 +186,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -192,6 +195,4 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

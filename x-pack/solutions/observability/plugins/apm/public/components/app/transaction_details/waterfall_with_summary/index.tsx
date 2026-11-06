@@ -232,7 +232,7 @@ export function WaterfallWithSummary<TSample extends {}>({
       ) : (
         <EuiFlexItem grow={false}>
           <TransactionSummary
-            errorCount={unifiedWaterfallFetchResult.errors.length}
+            errorCount={unifiedWaterfallFetchResult.totalErrors}
             totalDuration={unifiedRootTransactionDuration}
             transaction={entryTransaction}
           />

@@ -39,7 +39,7 @@ import { observabilityAlertingNavRole } from '../fixtures/roles';
 const ALERTS_PANEL_ID = 'alerting';
 const ALERTS_DEEP_LINK = 'observability-overview:alerts';
 const CLASSIC_ALERTS_TITLE = 'Alerts';
-const V1_ALERTS_NAV_TITLE = 'Alerts (V1)';
+const ALERTS_CLASSIC_NAV_TITLE = 'Alerts (Classic)';
 
 const PANEL_LINKS = {
   alerts: 'observabilityAlerting:alerts',
@@ -166,9 +166,10 @@ const expectPanelForRole = async (
   await expectPanelLinks(nav, visible);
 };
 
+// Suite fails on MKI: https://github.com/elastic/kibana/issues/295308
 test.describe(
   'Observability Alerts nav — alerting v2',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ scoutSpace, kbnClient, config }) => {
       // Serverless Observability is already the observability project; solution
@@ -270,7 +271,7 @@ test.describe(
         ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
-        ).not.toBeVisible();
+        ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.actionPolicies)
         ).toBeVisible();
@@ -286,7 +287,7 @@ test.describe(
       });
     });
 
-    test('clicking Alerts loads Alert episodes when alerting v2 is enabled', async ({
+    test('clicking Alerts loads alerts when alerting v2 is enabled', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -298,7 +299,7 @@ test.describe(
         ALERTS_PANEL_ID,
         PANEL_LINKS.alerts
       );
-      await expectPageTitle(pageObjects.chrome.pageTitle, 'Alert episodes');
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Alerts');
     });
 
     test('clicking Rules loads Rules when alerting v2 is enabled', async ({
@@ -314,6 +315,21 @@ test.describe(
         PANEL_LINKS.rulesV2
       );
       await expectPageTitle(pageObjects.chrome.pageTitle, 'Rules');
+    });
+
+    test('clicking Rule Library loads Rule library when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.ruleLibrary
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Rule library');
     });
 
     test('clicking Action Policies loads Action Policies when alerting v2 is enabled', async ({
@@ -363,6 +379,7 @@ test.describe(
 
     test('clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on', async ({
       browserAuth,
+      page,
       pageObjects,
       kbnClient,
       scoutSpace,
@@ -388,11 +405,12 @@ test.describe(
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toHaveText(
-        V1_ALERTS_NAV_TITLE
+        ALERTS_CLASSIC_NAV_TITLE
       );
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
+      await expect(page.getByTestId('classicAlertsBadge')).toBeVisible();
     });
 
     test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
@@ -451,7 +469,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
-        [PANEL_LINKS.rulesV2]
+        [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary]
       );
     });
 
@@ -464,7 +482,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
-        [PANEL_LINKS.rulesV2]
+        [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary]
       );
     });
 

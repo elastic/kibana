@@ -88,11 +88,22 @@ export const obtainSandboxStepDefinition = ({
         const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
 
         // Stat is enough: the session allocates on the first RPC, including workspace restore.
-        await withTimeout(
-          (_signal) => session.statFiles(['/workspace']),
-          ALLOCATE_TIMEOUT_MS,
-          `Sandbox allocate timed out after ${ALLOCATE_TIMEOUT_MS}ms`
-        );
+        const allocate = () =>
+          withTimeout(
+            (_signal) => session.statFiles(['/workspace']),
+            ALLOCATE_TIMEOUT_MS,
+            `Sandbox allocate timed out after ${ALLOCATE_TIMEOUT_MS}ms`
+          );
+        try {
+          await allocate();
+        } catch (error) {
+          logger.warn(
+            `Sandbox allocate failed for ${sandboxId}, retrying once: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          await allocate();
+        }
       } catch (error) {
         if (required) {
           throw error;

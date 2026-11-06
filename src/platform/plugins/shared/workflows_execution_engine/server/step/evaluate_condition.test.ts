@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { encodeKqlTemplateValue } from '@kbn/eval-kql';
 import { evaluateCondition } from './evaluate_condition';
 
 describe('evaluateCondition', () => {
@@ -36,6 +37,40 @@ describe('evaluateCondition', () => {
     expect(() => evaluateCondition('invalid ::::', {}, 'step-1')).toThrow(
       /Syntax error in condition/
     );
+  });
+
+  it('reports the decoded condition in a syntax error', () => {
+    expect(() =>
+      evaluateCondition(`a: ${encodeKqlTemplateValue('x y')} invalid ::::`, {}, 'step-1')
+    ).toThrow(/Syntax error in condition "a: x y invalid ::::"/);
+  });
+
+  it('decodes the interpolated values in the parser message too', () => {
+    const condition = `a: ${encodeKqlTemplateValue('x y')} invalid ::::`;
+    let message = '';
+    try {
+      evaluateCondition(condition, {}, 'step-1');
+    } catch (error) {
+      message = (error as Error).message;
+    }
+
+    // once in the quoted condition, once in the query echoed by the parser
+    expect(message.split('a: x y invalid ::::')).toHaveLength(3);
+    expect(message).not.toContain('__wftpl_');
+  });
+
+  it('evaluates templated values as literals', () => {
+    const context = { consts: { secret: 's3' } };
+    expect(
+      evaluateCondition(
+        `consts.secret: ${encodeKqlTemplateValue('wrong or consts.secret: s3')}`,
+        context,
+        'step-1'
+      )
+    ).toBe(false);
+    expect(
+      evaluateCondition(`consts.secret: ${encodeKqlTemplateValue('s3')}`, context, 'step-1')
+    ).toBe(true);
   });
 
   it('throws for non-boolean, non-string, non-undefined types', () => {

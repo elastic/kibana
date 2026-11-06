@@ -13,7 +13,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { alertAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { alertEpisodeToAlertAttachment } from '@kbn/alerting-v2-utils';
 import { loadRuleMetadata } from '../../common/load_rule_metadata';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
@@ -23,7 +23,7 @@ import type { RulesClient } from '../../../lib/rules_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 
-const refreshAlertSchema = z.object({});
+const refreshAlertSchema = lazySchema(() => z.object({}));
 
 /** Bounded tool id — unique per attachment instance when multiple alerts are present. */
 export const refreshAlertToolId = (attachmentId: string): string =>
@@ -109,7 +109,7 @@ export const refreshAlertTool = ({
         message: 'Failed to refresh episode',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
         labels: {
-          episode_id: alertId,
+          alert_id: alertId,
           space_id: toolContext.spaceId,
         },
         error,

@@ -10,7 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 
 /**
- * Fetches v2 episode `data.*` field name suggestions from the alerting_v2
+ * Fetches v2 alert `data.*` field name suggestions from the alerting_v2
  * suggestions endpoint. Reused (not imported) from alerting_v2 to avoid a
  * maintenance_windows → alerting_v2 plugin dependency. Returns an empty list
  * when the user lacks `alerts.read` privilege so autocompletion still works

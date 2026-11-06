@@ -59,13 +59,16 @@ describe('AccessControlForm', () => {
 
   it('changes visibility without losing role assignments', async () => {
     const onChange = renderForm();
-    await userEvent.click(screen.getByLabelText('Visibility'));
+    // Query by test subj rather than accessible name: EUI's test-env id mock returns the
+    // same static id for every EuiSuperSelect instance, so aria-labelledby lookups collide
+    // when more than one aria-labeled EuiSuperSelect is rendered at once.
+    await userEvent.click(screen.getByTestId('entityAccessControlMode'));
     await userEvent.click(screen.getByRole('option', { name: /^Public/ }));
     expect(onChange).toHaveBeenCalledWith({ ...value, access_mode: 'public' });
   });
   it('changes an existing user role by profile ID', async () => {
     const onChange = renderForm();
-    await userEvent.click(screen.getByLabelText('Role for reader'));
+    await userEvent.click(screen.getByTestId('entityAccessControlRole-reader'));
     await userEvent.click(screen.getByRole('option', { name: 'Editor' }));
     expect(onChange).toHaveBeenCalledWith({
       ...value,
@@ -213,8 +216,8 @@ describe('AccessControlForm', () => {
 
   it('prevents edits while saving', () => {
     renderForm(true);
-    expect(screen.getByLabelText('Visibility')).toBeDisabled();
-    expect(screen.getByLabelText('Role for reader')).toBeDisabled();
+    expect(screen.getByTestId('entityAccessControlMode')).toBeDisabled();
+    expect(screen.getByTestId('entityAccessControlRole-reader')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Remove reader' })).toBeDisabled();
   });
 });

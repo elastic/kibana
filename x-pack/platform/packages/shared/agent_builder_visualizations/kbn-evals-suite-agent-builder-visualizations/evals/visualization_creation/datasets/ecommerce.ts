@@ -33,6 +33,12 @@ export const ECOMMERCE_EXAMPLES: VisualizationDatasetExample[] = withDataSource(
   }),
   metricExample({
     question:
+      'Create a metric visualization of the total number of orders in kibana_sample_data_ecommerce.',
+    query: totalsQuery({ index: INDEX, metrics: [ORDER_COUNT], timeField: TIME_FIELD }),
+    metrics: [ORDER_COUNT.alias],
+  }),
+  metricExample({
+    question:
       'Create a metric visualization of total revenue in kibana_sample_data_ecommerce with the order count as a secondary metric.',
     query: totalsQuery({
       index: INDEX,

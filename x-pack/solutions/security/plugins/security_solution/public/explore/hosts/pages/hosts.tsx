@@ -20,7 +20,7 @@ import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
-import { SearchWithDataView } from '../../components/search_with_data_view';
+import { SearchWithDataView } from '../../../common/components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import {
   useGlobalFullScreen,
@@ -181,7 +181,7 @@ const HostsComponent = () => {
               />
             )}
             <Display show={!globalFullScreen && !hasFullScreenContent}>
-              <SearchWithDataView dataView={dataView} />
+              <SearchWithDataView dataView={dataView} scope={PageScope.explore} />
 
               <EuiSpacer size="l" />
 

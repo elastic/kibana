@@ -11,8 +11,11 @@ import {
   registerEscalationTemplateUI,
   type LinkedInvestigationsSlotRenderProps,
   type RenderLinkedInvestigations,
+  type RenderSyncIndicator,
+  type SyncIndicatorSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { ESCALATION_TEMPLATE_ID } from '../../../../common';
+import { copyLink } from '../../shared/copy_link';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import type { TemplateDefinition } from '../../registry/types';
 
@@ -26,10 +29,18 @@ const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
   { defaultMessage: 'Loading linked investigations…' }
 );
 
-/** The `escalation` template: status and the linked investigations. */
+/** The `escalation` template: status, summary, attachments and the linked investigations. */
 export const escalationTemplate: TemplateDefinition = {
   templateId: ESCALATION_TEMPLATE_ID,
-  register: ({ templateId, startDeps, makeLazyWithProviders, renderAssignees, renderStatus }) => {
+  register: ({
+    core,
+    startDeps,
+    templateId,
+    makeLazyWithProviders,
+    groupedAttachments,
+    renderAssignees,
+    renderStatus,
+  }) => {
     const { agentBuilder } = startDeps;
 
     // Registered unconditionally: whether the user may see escalations is decided at render time,
@@ -49,6 +60,26 @@ export const escalationTemplate: TemplateDefinition = {
         return GatedLinkedInvestigations;
       });
 
+    // Syncing writes to the escalation, so it needs manage rather than read access.
+    const LazyEscalationSyncIndicator = makeLazyWithProviders<SyncIndicatorSlotRenderProps>(
+      async () => {
+        const [{ EscalationSyncIndicator }, { PrivilegeGate }] = await Promise.all([
+          import('./flyout/escalation_sync_indicator'),
+          import('../../shared/privileges/privilege_gate'),
+        ]);
+        const GatedSyncIndicator: React.FC<SyncIndicatorSlotRenderProps> = (props) =>
+          React.createElement(
+            PrivilegeGate,
+            { privilege: 'manageEscalations' },
+            React.createElement(EscalationSyncIndicator, props)
+          );
+        return GatedSyncIndicator;
+      }
+    );
+
+    const renderSyncIndicator: RenderSyncIndicator = (props) =>
+      React.createElement(LazyEscalationSyncIndicator, props);
+
     const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
       React.createElement(
         EscalationModalBoundary,
@@ -59,12 +90,16 @@ export const escalationTemplate: TemplateDefinition = {
     registerEscalationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
       templateId,
+      groupedAttachments,
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
       // The toggle itself disables when the user may not change the status.
       renderStatus,
       renderLinkedInvestigations,
+      renderSyncIndicator,
+      // The flyout's Copy link button confirms success itself; only a failure needs a toast.
+      onCopyLink: (url) => copyLink(core.notifications.toasts, url),
     });
   },
 };

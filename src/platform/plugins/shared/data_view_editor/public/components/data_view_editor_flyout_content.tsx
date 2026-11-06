@@ -387,6 +387,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   options$={dataViewEditorService.timestampFieldOptions$}
                   isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
                   matchedIndices$={dataViewEditorService.matchedIndices$}
+                  optionsError$={dataViewEditorService.timestampFieldsError$}
                   disabled={isManaged}
                 />
               </EuiFlexItem>
@@ -412,6 +413,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             allowHidden={allowHidden}
             title={title}
             matchedIndices$={dataViewEditorService.matchedIndices$}
+            matchedIndicesError$={dataViewEditorService.matchedIndicesError$}
           />
         )}
       </FlyoutPanels.Item>

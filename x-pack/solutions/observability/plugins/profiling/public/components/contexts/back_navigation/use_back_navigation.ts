@@ -10,10 +10,14 @@ import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
-import { hasProfilingData } from '../../../utils/has_profiling_data';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
+import { hasProfilingData } from '../../../utils/has_profiling_data';
+import {
+  getNavigationLinkQuery,
+  withNavigationLinkQuery,
+} from '../../../utils/navigation_link_query';
 
 // Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
@@ -34,7 +38,7 @@ export const hasBackNavigation = (pathname: string): boolean =>
  * has no back button.
  */
 export const useBackNavigation = (): AppHeaderBack | undefined => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const {
     start: { core },
   } = useProfilingDependencies();
@@ -44,7 +48,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
     return undefined;
   }
 
-  // No back button on the add data page unless we positively know there is data. While the
+  // No back button on the add data page unless we positively know there is data to query. While the
   // status is unresolved the button would otherwise render and then vanish once it reports no data.
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
@@ -55,9 +59,11 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   }
 
   return {
-    href: core.http.basePath.prepend('/app/profiling'),
+    href: core.http.basePath.prepend(
+      withNavigationLinkQuery('/app/profiling', getNavigationLinkQuery(search))
+    ),
     label: i18n.translate('xpack.profiling.header.backTargetLabel', {
-      defaultMessage: 'Universal Profiling',
+      defaultMessage: 'Profiling',
     }),
   };
 };

@@ -15,9 +15,22 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
-import { createEpisodeActions, READ_SAFE_EPISODE_ACTION_IDS } from './create_episode_actions';
+import type { AlertEpisode } from '../queries/episodes_query';
+import type { AddToCaseCasesService } from '../components/add_to_case_modal';
+import type { EpisodeDataSource } from '../types/episode_data_source';
+import { createAddToCaseAction } from './add_to_case';
+import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
+import { createEpisodeActions } from './create_episode_actions';
 
-const buildActions = () =>
+const buildActions = ({
+  additionalDataSource,
+  includeHistory = true,
+  isAlertEventsHistoryAvailable = true,
+}: {
+  additionalDataSource?: EpisodeDataSource;
+  includeHistory?: boolean;
+  isAlertEventsHistoryAvailable?: boolean;
+} = {}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
@@ -31,10 +44,17 @@ const buildActions = () =>
     queryClient: new QueryClient(),
     isRuleAvailable: () => true,
     getDiscoverHref: async () => 'https://discover/foo',
+    ...(includeHistory
+      ? {
+          getAlertEventsHistoryHref: async () => 'https://discover/history',
+          isAlertEventsHistoryAvailable: () => isAlertEventsHistoryAvailable,
+        }
+      : {}),
+    additionalDataSource,
   });
 
 describe('createEpisodeActions', () => {
-  it('returns all 9 actions sorted by order asc', () => {
+  it('returns all 10 actions sorted by order asc', () => {
     const actions = buildActions();
     expect(actions.map((a) => a.id)).toEqual([
       'ALERTING_V2_ACK_EPISODE',
@@ -46,19 +66,84 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_EDIT_EPISODE_TAGS',
       'ALERTING_V2_EDIT_EPISODE_ASSIGNEE',
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+    ]);
+  });
+
+  it('omits alert events history when the surface does not provide its resolver', () => {
+    expect(buildActions({ includeHistory: false }).map((action) => action.id)).not.toContain(
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
+    );
+  });
+
+  it('disables alert events history when Discover is unavailable', () => {
+    const episode = { 'episode.id': 'e1' } as AlertEpisode;
+    const available = buildActions().find(
+      ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
+    );
+    const unavailable = buildActions({ isAlertEventsHistoryAvailable: false }).find(
+      ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
+    );
+
+    expect(available?.isCompatible({ episodes: [episode] })).toBe(true);
+    expect(available?.showWhenDisabled?.({ episodes: [episode] })).toBe(false);
+    expect(unavailable?.isCompatible({ episodes: [episode] })).toBe(false);
+    expect(unavailable?.showWhenDisabled?.({ episodes: [episode] })).toBe(true);
+  });
+
+  it('sorts the host add to case action before edit alert tags', () => {
+    const addToCaseAction = createAddToCaseAction({
+      cases: {} as AddToCaseCasesService,
+      owner: 'observability',
+      rendering: renderingServiceMock.create(),
+      kibanaServices: {},
+    });
+    const actions = buildActions({
+      additionalDataSource: {
+        id: 'host',
+        label: 'Host',
+        queryKeyPrefix: ['host'],
+        fetchEpisodes: async () => [],
+        createActions: () => [addToCaseAction],
+      },
+    });
+
+    expect(actions.map((a) => a.id)).toEqual([
+      'ALERTING_V2_ACK_EPISODE',
+      'ALERTING_V2_UNACK_EPISODE',
+      'ALERTING_V2_SNOOZE_EPISODE',
+      'ALERTING_V2_UNSNOOZE_EPISODE',
+      'ALERTING_V2_RESOLVE_EPISODE',
+      'ALERTING_V2_UNRESOLVE_EPISODE',
+      ADD_TO_CASE_EPISODE_ACTION_ID,
+      'ALERTING_V2_EDIT_EPISODE_TAGS',
+      'ALERTING_V2_EDIT_EPISODE_ASSIGNEE',
+      'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
     ]);
   });
 });
 
-describe('READ_SAFE_EPISODE_ACTION_IDS', () => {
-  it('contains exactly the non-mutating (navigation-only) episode actions', () => {
-    expect([...READ_SAFE_EPISODE_ACTION_IDS]).toEqual(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']);
+describe('enforcesOwnPrivileges', () => {
+  it('is only set on open in Discover among the built-in actions', () => {
+    const ids = buildActions()
+      .filter((action) => action.enforcesOwnPrivileges === true)
+      .map((action) => action.id);
+
+    expect(ids).toEqual([
+      'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+    ]);
   });
 
-  it('is a subset of the ids produced by createEpisodeActions', () => {
-    const allIds = new Set(buildActions().map((action) => action.id));
-    for (const id of READ_SAFE_EPISODE_ACTION_IDS) {
-      expect(allIds.has(id)).toBe(true);
-    }
+  it('is set on the host add to case action', () => {
+    const addToCaseAction = createAddToCaseAction({
+      cases: {} as AddToCaseCasesService,
+      owner: 'observability',
+      rendering: renderingServiceMock.create(),
+      kibanaServices: {},
+    });
+
+    expect(addToCaseAction.enforcesOwnPrivileges).toBe(true);
   });
 });

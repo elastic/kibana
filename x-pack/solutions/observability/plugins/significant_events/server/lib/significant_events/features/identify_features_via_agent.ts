@@ -27,21 +27,22 @@ import {
 } from '@kbn/nightshift-shared';
 import {
   EMPTY_TOKENS,
+  buildFeatureIdentificationUserMessage,
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/nightshift-ai';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
-import { parseFinalizedFeatures, type RawFinalizeFeaturesParams } from './parse_finalized_features';
-import { buildFeatureIdentificationUserMessage } from './build_user_message';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
 
 export interface ExecuteFeatureIdentificationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
   request: KibanaRequest;
   connectorId: string;
-  streamName: string;
+  sourceId: string;
   sampleDocuments: InferenceDocument[];
   excludedFeatures?: ExcludedFeatureSummary[];
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
@@ -55,7 +56,7 @@ export async function executeFeatureIdentificationAgent({
   agentBuilder,
   request,
   connectorId,
-  streamName,
+  sourceId,
   sampleDocuments,
   excludedFeatures,
   previouslyIdentifiedFeatures = [],
@@ -69,7 +70,7 @@ export async function executeFeatureIdentificationAgent({
   tokensUsed: ChatCompletionTokenCount;
 }> {
   const userMessage = buildFeatureIdentificationUserMessage({
-    streamName,
+    sourceId,
     sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures:
       previouslyIdentifiedFeatures.length > 0
@@ -82,7 +83,7 @@ export async function executeFeatureIdentificationAgent({
   const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
   const conversation = await conversationClient.create({
     agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-    title: `Feature identification: ${streamName}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
+    title: `Feature identification: ${sourceId}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
     accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
@@ -142,7 +143,7 @@ export async function executeFeatureIdentificationAgent({
     throw new Error('Feature identification agent returned invalid finalize_features output');
   }
 
-  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName, logger);
+  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, logger);
 
   const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
     roundEvent?.data.round.model_usage

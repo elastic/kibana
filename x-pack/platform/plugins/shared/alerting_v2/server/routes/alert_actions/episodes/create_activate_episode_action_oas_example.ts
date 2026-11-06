@@ -21,7 +21,7 @@ export const CREATE_ACTIVATE_EPISODE_ACTION_REQUEST: CreateActivateEpisodeAction
 export const createActivateEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'createActivateEpisodeActionRequest',
+      name: 'createActivateAlertActionRequest',
       summary: 'Activate with a reason',
       value: CREATE_ACTIVATE_EPISODE_ACTION_REQUEST,
     },

@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
@@ -71,11 +72,16 @@ interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
-  isNamespaceLocked?: boolean;
+  /** Only a duplicate has a namespace of its own; an original takes the global one. */
+  isDuplicate?: boolean;
+  globalNamespace?: string;
+  /** Whether the instance is already deployed, which changes what a new namespace means. */
+  isDeployed?: boolean;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
-    namespace: string
+    /** The duplicate's namespace; absent for an original. */
+    namespace?: string
   ) => void;
   onClose: () => void;
 }
@@ -84,7 +90,9 @@ export function ServiceSettingsFlyout({
   service,
   config,
   globalRegion,
-  isNamespaceLocked = false,
+  isDuplicate = false,
+  globalNamespace = '',
+  isDeployed = false,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -96,8 +104,10 @@ export function ServiceSettingsFlyout({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() =>
     withCollectS3Defaults(service, { ...config.varsByDataStream })
   );
+  // An empty namespace follows the global one, so it stays empty and the global value is only the
+  // placeholder: saving other settings must not pin the duplicate to today's global namespace.
   const [namespace, setNamespace] = useState(config.namespace ?? '');
-  const showNamespace = supportsNamespace(service);
+  const showNamespace = isDuplicate && supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
   const enabledDataStreams = service.dataStreams.filter((dsId) => {
@@ -115,11 +125,15 @@ export function ServiceSettingsFlyout({
   const isDraftIncomplete = isServiceConfigIncomplete(service, {
     enabledDataStreams,
     varsByDataStream: draftByDs,
-    namespace,
+    namespace: showNamespace ? namespace : undefined,
   });
 
   const handleApply = () => {
-    onApply(withCollectS3Defaults(service, draftByDs), enabledDataStreams, namespace);
+    onApply(
+      withCollectS3Defaults(service, draftByDs),
+      enabledDataStreams,
+      showNamespace ? namespace : undefined
+    );
   };
 
   return (
@@ -146,9 +160,18 @@ export function ServiceSettingsFlyout({
         {showNamespace && (
           <>
             <InstanceNamespaceField
+              emptyUsesGlobal
+              placeholder={globalNamespace || undefined}
               namespace={namespace}
               onChange={setNamespace}
-              isLocked={isNamespaceLocked}
+              note={
+                isDeployed
+                  ? i18n.translate('xpack.ingestHub.serviceSettingsStep.namespace.deployedNote', {
+                      defaultMessage:
+                        'On the next deploy, this service switches to the namespace entered here. Data already collected stays in the previous namespace.',
+                    })
+                  : undefined
+              }
             />
             <EuiSpacer size="m" />
           </>

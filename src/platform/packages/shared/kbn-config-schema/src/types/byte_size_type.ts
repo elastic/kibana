@@ -24,20 +24,34 @@ export interface ByteSizeOptions {
 
 export class ByteSizeType extends Type<ByteSizeValue> {
   constructor(options: ByteSizeOptions = {}) {
-    let schema = internals.bytes();
-
+    options = { ...options };
+    const defaultValue = ensureByteSizeValue(options.defaultValue);
     if (options.min !== undefined) {
-      schema = schema.min(options.min);
+      ensureByteSizeValue(options.min);
     }
-
     if (options.max !== undefined) {
-      schema = schema.max(options.max);
+      ensureByteSizeValue(options.max);
     }
 
-    super(schema, {
-      defaultValue: ensureByteSizeValue(options.defaultValue),
-      validate: options.validate,
-    });
+    super(
+      () => {
+        let schema = internals.bytes();
+
+        if (options.min !== undefined) {
+          schema = schema.min(options.min);
+        }
+
+        if (options.max !== undefined) {
+          schema = schema.max(options.max);
+        }
+
+        return schema;
+      },
+      {
+        defaultValue,
+        validate: options.validate,
+      }
+    );
   }
 
   protected handleError(

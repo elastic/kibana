@@ -47,7 +47,7 @@ export const Dropbox: ConnectorSpec = {
   metadata: {
     id: '.dropbox',
     displayName: 'Dropbox',
-    description: i18n.translate('core.kibanaConnectorSpecs.dropbox.metadata.description', {
+    description: i18n.translate('connectorSpecs.dropbox.metadata.description', {
       defaultMessage: 'Search files and folders, read content, and manage shared links in Dropbox',
     }),
     minimumLicense: 'enterprise',

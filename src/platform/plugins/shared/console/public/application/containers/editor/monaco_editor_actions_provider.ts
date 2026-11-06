@@ -13,14 +13,14 @@ import type { ConsoleParsedRequestsProvider, ParsedRequest } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import type { ErrorAnnotation } from '@kbn/monaco/src/languages/definitions/console/types';
 import {
   endsWithConsoleBodyContinuation,
   getLineRemainderWithoutConsoleComments,
   isInsideConsoleComment,
   isInsideConsoleString,
   isRequestLineWithUrl,
-} from '@kbn/monaco/src/languages/console/utils';
+} from '@kbn/monaco/src/languages/definitions/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';

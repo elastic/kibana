@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CaseSeverity, UserActionTypes, CaseSchema } from '../../../common/types/domain';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -19,8 +19,10 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { resolveExtractObservables } from '../../../common/utils/case_settings';
+import type { CaseCreateAttributes } from '../../common/types/case';
+import { getExtractObservablesSource } from '../../common/extract_observables_source';
 import type { CasePostRequest } from '../../../common/types/api';
-import { CasePostRequestRt } from '../../../common/types/api';
+import { CasePostRequestSchema } from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
@@ -83,7 +85,7 @@ export const create = async (
   } = clientArgs;
 
   try {
-    const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data);
     let query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
@@ -120,6 +122,8 @@ export const create = async (
     // point-in-time name) the case was created from. Field values that differ from defaults are
     // audited separately; the create_case user action itself does not carry template or fields.
     let appliedTemplateName: string | undefined;
+    // The template's own `settings.extractObservables`, used as the baseline for the source.
+    let templateExtractObservables: boolean | undefined;
     // Resolved lazily and reused: template expansion needs it to decide whether to apply template
     // assignees, and the license-enforcement block below needs it again — resolve at most once.
     let hasPlatinumLicenseOrGreater: boolean | undefined;
@@ -137,6 +141,7 @@ export const create = async (
         fieldDefinitionsService,
       });
       appliedTemplateName = resolvedTemplate.parsed.name;
+      templateExtractObservables = resolvedTemplate.parsed.definition.settings?.extractObservables;
 
       const callerSentAssignees = query.assignees !== undefined;
 
@@ -150,7 +155,7 @@ export const create = async (
       // The initial decode validated the raw request; template defaults are merged in afterwards
       // and a template's definition tags are unbounded, so re-decode the expanded request to
       // enforce the wire limits (e.g. MAX_TAGS_PER_CASE) on the merged result.
-      query = decodeWithExcessOrThrow(CasePostRequestRt)(query);
+      query = decodeWithExcessOrThrowZod(CasePostRequestSchema)(query);
       resolvedTemplateFields = resolvedTemplate.resolvedFields;
 
       // The assignees authorization above ran against the raw request; if the template just
@@ -163,6 +168,22 @@ export const create = async (
       }
     }
 
+    // The value the case gets when nobody chooses: the space configuration, then the owner default.
+    const defaultExtractObservables = resolveExtractObservables(
+      query.owner,
+      configurations[0]?.extractObservables
+    );
+
+    // Where the extractObservables value came from. A caller value that equals the template or the
+    // space default is not a choice: the create form always sends it. Stored as a server-owned
+    // top-level attribute, so it never enters the request, the response, or the user action payload.
+    const extractObservablesSource = getExtractObservablesSource({
+      chosenValue: rawQuery.settings.extractObservables,
+      chosenSource: 'explicit',
+      templateValue: templateExtractObservables,
+      defaultValue: defaultExtractObservables,
+    });
+
     // Default extractObservables when the caller omitted it and template expansion did not fill it.
     // Precedence: caller-explicit > template definition > space config > owner default > false.
     if (query.settings.extractObservables === undefined) {
@@ -170,10 +191,7 @@ export const create = async (
         ...query,
         settings: {
           ...query.settings,
-          extractObservables: resolveExtractObservables(
-            query.owner,
-            configurations[0]?.extractObservables
-          ),
+          extractObservables: defaultExtractObservables,
         },
       };
     }
@@ -344,10 +362,13 @@ export const create = async (
       });
     }
 
-    const attributes = transformNewCase({
-      user,
-      newCase: normalizedCase,
-    });
+    const attributes: CaseCreateAttributes = {
+      ...transformNewCase({
+        user,
+        newCase: normalizedCase,
+      }),
+      extract_observables_source: extractObservablesSource,
+    };
 
     // Server-derived assignee identity: resolve profile uids to username /
     // full_name / email so downstream consumers (e.g. cases-as-data analytics)
@@ -387,7 +408,7 @@ export const create = async (
     });
 
     // The create_case user action payload does not carry `template` or `extended_fields`
-    // (CreateCaseUserActionRt strips them), so dedicated entries are needed for the activity log
+    // (CreateCaseUserActionSchema strips them), so dedicated entries are needed for the activity log
     // to reflect what was actually persisted: which template (if any) the case came from, and
     // which extended_fields values differ from resolved defaults. Pairing and default injection
     // both run independently of the templates flag (addendum A1), so this must too — a plain
@@ -486,7 +507,7 @@ export const create = async (
       savedObject: newCase,
     });
 
-    const createdCase = decodeOrThrow(CaseRt)(res);
+    const createdCase = decodeOrThrowZod(CaseSchema)(res);
 
     clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
       caseId: createdCase.id,

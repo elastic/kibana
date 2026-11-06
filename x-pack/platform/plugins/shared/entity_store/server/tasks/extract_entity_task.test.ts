@@ -383,13 +383,17 @@ describe('bootstrapNonPriorityTask', () => {
     typeof createLogsExtractionClient
   >;
 
-  const makeDescriptorSo = (status: string, logExtractionConfig?: Record<string, unknown>) => ({
+  const makeDescriptorSo = (
+    status: string,
+    logExtractionConfig?: Record<string, unknown>,
+    nonPriorityStatus: string = ENGINE_STATUS.STARTED
+  ) => ({
     id: `${EngineDescriptorTypeName}-user-default`,
     type: EngineDescriptorTypeName,
     attributes: {
       type: 'user',
       status,
-      nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      nonPriorityStatus,
       logExtractionConfig: logExtractionConfig ?? null,
       logExtractionState: {
         checkpointTimestamp: null,
@@ -414,11 +418,13 @@ describe('bootstrapNonPriorityTask', () => {
 
   const runPriorityTask = async ({
     engineStatus,
+    nonPriorityStatus = ENGINE_STATUS.STARTED,
     mergedFrequency = '1m',
     logExtractionConfig,
     globalStateOverrides = {},
   }: {
     engineStatus: string;
+    nonPriorityStatus?: string;
     mergedFrequency?: string;
     logExtractionConfig?: Record<string, unknown>;
     globalStateOverrides?: Record<string, unknown>;
@@ -438,7 +444,7 @@ describe('bootstrapNonPriorityTask', () => {
     const mockEnsureScheduled = jest.fn().mockResolvedValue(undefined);
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({
-      saved_objects: [makeDescriptorSo(engineStatus, logExtractionConfig)],
+      saved_objects: [makeDescriptorSo(engineStatus, logExtractionConfig, nonPriorityStatus)],
       total: 1,
       per_page: 10,
       page: 1,
@@ -497,6 +503,16 @@ describe('bootstrapNonPriorityTask', () => {
     });
 
     expect(mockEnsureScheduled).toHaveBeenCalledTimes(1);
+  });
+
+  // The internal stop route removes only the non-priority task, so this tick must leave it gone.
+  it('does not schedule the non-priority task when only that process is stopped', async () => {
+    const { mockEnsureScheduled } = await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+      nonPriorityStatus: ENGINE_STATUS.STOPPED,
+    });
+
+    expect(mockEnsureScheduled).not.toHaveBeenCalled();
   });
 
   it('uses the merged config frequency as the task schedule interval', async () => {

@@ -106,6 +106,7 @@ describe(
           'BlocklistNone',
           'Event FiltersNone',
           'Endpoint ExceptionsNone',
+          'Custom YARA SignaturesNone',
           'Elastic Defend Policy ManagementNone',
           'Elastic Defend Scripts ManagementNone',
           'Response Actions HistoryNone',

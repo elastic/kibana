@@ -7,25 +7,34 @@
 
 import { useCallback, useState } from 'react';
 
-interface Props {
-  onDelete: () => void;
+interface Props<Options> {
+  onDelete: (options?: Options) => void;
 }
 
-export const useDeletePropertyAction = ({ onDelete }: Props) => {
+export const useDeletePropertyAction = <Options = never,>({ onDelete }: Props<Options>) => {
   const [showDeletionModal, setShowDeletionModal] = useState(false);
 
   const onModalOpen = useCallback(() => {
     setShowDeletionModal(true);
   }, []);
 
+  // Takes no arguments so it can be passed straight to a modal's click handler.
   const onConfirm = useCallback(() => {
     setShowDeletionModal(false);
     onDelete();
   }, [onDelete]);
 
+  const onConfirmWithOptions = useCallback(
+    (options: Options) => {
+      setShowDeletionModal(false);
+      onDelete(options);
+    },
+    [onDelete]
+  );
+
   const onCancel = useCallback(() => {
     setShowDeletionModal(false);
   }, []);
 
-  return { showDeletionModal, onModalOpen, onConfirm, onCancel };
+  return { showDeletionModal, onModalOpen, onConfirm, onConfirmWithOptions, onCancel };
 };

@@ -17,10 +17,14 @@ import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
+import { toWorkflowIdentityTaskError } from '../lib/workflow_identity_task_error';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { withWorkflowExecutionIdentity } from '../service_account_execution';
+import {
+  getExecutionServiceAccountId,
+  withWorkflowExecutionIdentity,
+} from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -32,6 +36,9 @@ import {
   getIdleTimeoutResumeDeadlineMs,
 } from '../workflow_execution_loop/handle_execution_delay';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+/** Delay before re-reading an execution whose loaded resume response was taken back. */
+const LOST_RESUME_INPUT_RETRY_MS = 1_000;
 
 async function resumeWorkflowWithRequest({
   workflowRunId,
@@ -111,6 +118,27 @@ async function resumeWorkflowWithRequest({
   const waitingForInput = loadedExecution.status === ExecutionStatus.WAITING_FOR_INPUT;
   const hasResumeInput = loadedExecution.context?.resumeInput != null;
   const node = loadedExecution.currentNodeId ? workflowRuntime.getCurrentNode() : undefined;
+  const { resumedBy, resumedAt } = loadedExecution.context ?? {};
+  if (
+    !loadedExecution.cancelRequested &&
+    waitingForInput &&
+    hasResumeInput &&
+    typeof resumedBy === 'string' &&
+    typeof resumedAt === 'string'
+  ) {
+    // The request that stored the response may take it back if handing it off failed, so it is only
+    // applied once marked as taken. If it is gone, run again on a fresh read rather than apply it.
+    const taken = await workflowExecutionRepository.tryTakeResumeInput({
+      workflowExecutionId: workflowRunId,
+      spaceId,
+      resumedBy,
+      resumedAt,
+    });
+    if (!taken) {
+      logger.debug(`Resume input of ${workflowRunId} was taken back before it could be applied`);
+      return { retryAt: new Date(Date.now() + LOST_RESUME_INPUT_RETRY_MS) };
+    }
+  }
   if (
     !loadedExecution.cancelRequested &&
     (loadedExecution.status === ExecutionStatus.WAITING || (waitingForInput && !hasResumeInput)) &&
@@ -215,7 +243,7 @@ export const resumeWorkflow = async (
       }
     );
   } catch (error) {
-    if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+    if (!enteredExecution && getExecutionServiceAccountId(execution)) {
       const executionError = {
         type: 'ServiceAccountExecutionError',
         message: error instanceof Error ? error.message : String(error),
@@ -224,7 +252,7 @@ export const resumeWorkflow = async (
         ...params,
         error: executionError,
       });
-      if (!failedExecution) throw error;
+      if (!failedExecution) throw toWorkflowIdentityTaskError(error);
       if (failedExecution.status === ExecutionStatus.FAILED) {
         await emitWorkflowIdentityFailureEvent({
           execution: failedExecution,
@@ -239,6 +267,7 @@ export const resumeWorkflow = async (
         workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
         cloudSetup: params.dependencies.cloudSetup,
       });
+      throw toWorkflowIdentityTaskError(error);
     }
     throw error;
   }

@@ -56,3 +56,21 @@ export const getNoIndexPatternsPrivilegesRole = (): KibanaRole => ({
     },
   ],
 });
+
+/** Reads the formatter test indices and edits data views; mirrors the FTR `test_field_formatters` role. */
+export const getFieldFormattersRole = (): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['field_formats_*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        indexPatterns: ['all'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});

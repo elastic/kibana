@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
@@ -23,7 +23,7 @@ import { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from '../../lib/attack_d
 import { getScheduledIndexPattern } from '../../lib/attack_discovery/persistence/get_scheduled_index_pattern';
 import { generateAttackDiscoveryAlertHash } from '../../lib/attack_discovery/persistence/transforms/transform_to_alert_documents';
 
-const RESPONSE_SCHEMA = z.object({ data: z.array(z.unknown()) });
+const RESPONSE_SCHEMA = lazySchema(() => z.object({ data: z.array(z.unknown()) }));
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

@@ -6,16 +6,20 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import * as i18n from './translations';
 
+const CONTINUE_DISABLED_REASON_ID = 'alertZeroOnboardingContinueDisabledReason';
+
 interface Props {
   onContinue: () => void;
+  /** When set, Continue is disabled and this explanation is shown next to it. */
+  disabledReason?: string;
 }
 
-export const OnboardingContinueFooter: React.FC<Props> = ({ onContinue }) => {
+export const OnboardingContinueFooter: React.FC<Props> = ({ onContinue, disabledReason }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -31,6 +35,7 @@ export const OnboardingContinueFooter: React.FC<Props> = ({ onContinue }) => {
     >
       <EuiFlexGroup
         justifyContent="flexEnd"
+        alignItems="center"
         gutterSize="m"
         responsive={false}
         css={css`
@@ -38,12 +43,26 @@ export const OnboardingContinueFooter: React.FC<Props> = ({ onContinue }) => {
           margin-inline: auto;
         `}
       >
+        {disabledReason ? (
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="s"
+              color="subdued"
+              id={CONTINUE_DISABLED_REASON_ID}
+              data-test-subj="alertZeroOnboardingContinueDisabledReason"
+            >
+              {disabledReason}
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             iconType="chevronSingleRight"
             iconSide="right"
             onClick={onContinue}
+            isDisabled={Boolean(disabledReason)}
+            aria-describedby={disabledReason ? CONTINUE_DISABLED_REASON_ID : undefined}
             data-test-subj="alertZeroOnboardingContinueButton"
           >
             {i18n.CONTINUE}

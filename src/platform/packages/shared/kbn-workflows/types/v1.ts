@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfileAvatarData } from '@kbn/core-user-settings-types';
 import {
   HUMAN_READABLE_ID_MAX_LENGTH,
   HUMAN_READABLE_ID_MIN_LENGTH,
@@ -18,6 +20,7 @@ import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/acces
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
+  WorkflowEffectiveIdentitySchema,
   WorkflowStepTokenUsageSchema,
   WorkflowTokenUsageSchema,
   WorkflowYaml,
@@ -136,9 +139,18 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+/** Identity snapshot of the user who triggered an execution, captured at trigger time. */
+export interface WorkflowExecutionExecutedByUser {
+  /** Display name: the user's full name when set, otherwise the username. */
+  name: string;
+  username: string;
+  profileUid?: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
+  runName?: string;
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
@@ -159,8 +171,10 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Identity snapshot of the user who triggered the workflow, captured at trigger time. */
+  executedByUser?: WorkflowExecutionExecutedByUser;
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -259,7 +273,8 @@ export interface EsWorkflowStepExecution {
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
    * every property inside it are optional and MUST be treated as such
-   * by readers — the engine itself remains field-agnostic.
+   * by readers — the engine itself remains field-agnostic. `null` once a
+   * claim whose response was not applied is released.
    */
   hitl?: {
     /** Server-resolved username (or API-key principal) that submitted the response. */
@@ -268,7 +283,7 @@ export interface EsWorkflowStepExecution {
     respondedAt?: string;
     /** Free-form channel slug identifying the surface that submitted the response. */
     channel?: string;
-  };
+  } | null;
 
   /** Per-step normalized LLM token usage. See {@link WorkflowTokenUsage}. */
   usage?: WorkflowTokenUsage;
@@ -296,6 +311,7 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  runName?: string;
   managed?: boolean;
   managedBy?: string | null;
   originManagedWorkflowId?: string | null;
@@ -314,8 +330,10 @@ export interface WorkflowExecutionDto {
   /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
   stepExecutionIds?: string[];
   duration: number | null;
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Profile of `executedBy`, resolved server-side so readers don't need `bulkGetUserProfiles`. */
+  executedByProfile?: UserProfile<{ avatar?: UserProfileAvatarData }>;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;

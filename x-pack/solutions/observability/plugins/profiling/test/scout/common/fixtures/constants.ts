@@ -17,6 +17,28 @@ export const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export const esArchiversPath = Path.join(__dirname, 'es_archiver', 'profiling', 'data.json');
+
+// OTel profiling data, adapted from the Elasticsearch profiling OTel integration tests. All but one of
+// its events are within `PROFILING_OTEL_TEST_DATES`, which no Universal Profiling data overlaps, and
+// have container, pod and executable names added so every Stacktraces grouping has data. All of its
+// events are in the `PROFILING_OTEL_TEST_NAMESPACE` namespace.
+export const otelEsArchiverPath = Path.join(
+  __dirname,
+  'es_archiver',
+  'profiling_otel',
+  'data.json'
+);
+export const PROFILING_OTEL_TEST_DATES = {
+  rangeFrom: '2023-10-30T00:00:00.000Z',
+  rangeTo: '2023-10-30T00:01:00.000Z',
+} as const;
+// The host every OTel profiling event in `otelEsArchiverPath` was sampled on.
+export const PROFILING_OTEL_TEST_HOST_ID = '8457605156473051743';
+// The Kubernetes namespace that tells the OTel profiling events in `otelEsArchiverPath` apart from
+// any other OTel profiling data, and the KQL query that matches only them. Don't change the value unless
+// you update the OTEL data.json file as well
+export const PROFILING_OTEL_TEST_NAMESPACE = 'profiling-scout';
+export const PROFILING_OTEL_TEST_KUERY = `k8s.namespace.name: "${PROFILING_OTEL_TEST_NAMESPACE}"`;
 export const esResourcesEndpoint = 'api/profiling/setup/es_resources';
 
 // Headers required by internal profiling API routes (xsrf + internal origin).
@@ -32,6 +54,7 @@ export const internalApiHeaders = {
 export const profilingApiEndpoints = {
   topNContainers: 'internal/profiling/topn/containers',
   topNDeployments: 'internal/profiling/topn/deployments',
+  topNExecutables: 'internal/profiling/topn/executables',
   topNHosts: 'internal/profiling/topn/hosts',
   topNTraces: 'internal/profiling/topn/traces',
   topNThreads: 'internal/profiling/topn/threads',
@@ -39,6 +62,7 @@ export const profilingApiEndpoints = {
   flamechart: 'internal/profiling/flamechart',
   setupInstructions: 'internal/profiling/setup/instructions',
   status: 'internal/profiling/status',
+  schemas: 'internal/profiling/schemas',
 } as const;
 
 // Full-resolution events data stream of the OTel profiling schema.

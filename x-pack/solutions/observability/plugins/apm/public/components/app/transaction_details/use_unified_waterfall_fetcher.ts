@@ -7,6 +7,7 @@
 
 import type { Error, Transaction } from '@kbn/apm-types';
 import type { APIReturnType } from '@kbn/apm-api-shared';
+import { useMemo } from 'react';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 
@@ -21,7 +22,13 @@ const INITIAL_DATA: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'> 
 
 export interface UnifiedWaterfallFetcherResult {
   traceItems: TraceItem[];
+  /** Classic APM error documents only — used to render error marks on the waterfall timeline. */
   errors: Error[];
+  /**
+   * Sum of the per-item unified errors (APM + unprocessed OTel exception logs) across all
+   * trace items — i.e. exactly the total the waterfall row badges render.
+   */
+  totalErrors: number;
   agentMarks: Record<string, number>;
   entryTransaction?: Transaction;
   traceDocsTotal: number;
@@ -44,7 +51,7 @@ export function useUnifiedWaterfallFetcher({
   serviceName?: string;
   /** Host-local refresh signal (e.g. service flyout) — avoids app-wide timeRangeId bumps. */
   refreshToken?: number;
-}) {
+}): UnifiedWaterfallFetcherResult {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       void refreshToken;
@@ -60,9 +67,15 @@ export function useUnifiedWaterfallFetcher({
     [traceId, start, end, entryTransactionId, serviceName, refreshToken]
   );
 
+  const totalErrors = useMemo(
+    () => data.traceItems.reduce((acc: number, item: TraceItem) => acc + item.errors.length, 0),
+    [data.traceItems]
+  );
+
   if (traceId === undefined) {
     return {
       ...INITIAL_DATA,
+      totalErrors: 0,
       status: FETCH_STATUS.NOT_INITIATED,
     };
   }
@@ -70,6 +83,7 @@ export function useUnifiedWaterfallFetcher({
   return {
     traceItems: data.traceItems,
     errors: data.errors,
+    totalErrors,
     agentMarks: data.agentMarks,
     entryTransaction: data.entryTransaction,
     traceDocsTotal: data.traceDocsTotal,

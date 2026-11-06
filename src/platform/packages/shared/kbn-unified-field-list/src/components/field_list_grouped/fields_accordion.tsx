@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { FieldsGroupNames, type FieldListItem, type RenderFieldItemParams } from '../../types';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
@@ -48,6 +49,10 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
   onDeselectSelectedFields?: () => void;
+  /**
+   * Whether the items of the group can be reordered via drag and drop
+   */
+  isReorderable?: boolean;
 }
 
 function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
@@ -71,6 +76,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   showExistenceFetchTimeout,
   extraAction,
   onDeselectSelectedFields,
+  isReorderable,
 }: FieldsAccordionProps<T>) {
   const styles = useMemoCss(componentStyles);
 
@@ -168,6 +174,24 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
     onDeselectSelectedFields,
   ]);
 
+  const fieldsList = (
+    <ul>
+      {paginatedFields &&
+        paginatedFields.map((field, index) => (
+          <Fragment key={getFieldKey(field)}>
+            {renderFieldItem({
+              field,
+              itemIndex: index,
+              groupIndex,
+              groupName,
+              hideDetails,
+              fieldSearchHighlight,
+            })}
+          </Fragment>
+        ))}
+    </ul>
+  );
+
   return (
     <EuiAccordion
       initialIsOpen={initialIsOpen}
@@ -189,21 +213,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         (!!fieldsCount ? (
           <>
             {extraAction}
-            <ul>
-              {paginatedFields &&
-                paginatedFields.map((field, index) => (
-                  <Fragment key={getFieldKey(field)}>
-                    {renderFieldItem({
-                      field,
-                      itemIndex: index,
-                      groupIndex,
-                      groupName,
-                      hideDetails,
-                      fieldSearchHighlight,
-                    })}
-                  </Fragment>
-                ))}
-            </ul>
+            {isReorderable ? <ReorderProvider>{fieldsList}</ReorderProvider> : fieldsList}
           </>
         ) : (
           renderCallout()

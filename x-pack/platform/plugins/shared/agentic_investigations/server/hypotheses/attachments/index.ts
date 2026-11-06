@@ -7,7 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import type { AssertCanReadConversation } from '../../investigation_attachments';
 import type { HypothesesService } from '../services/hypotheses_service';
 import { hypothesesAttachment } from './hypotheses_attachment_type';
 
@@ -17,16 +18,19 @@ export const registerHypothesesAttachment = (
   {
     getHypothesesService,
     privileges,
+    assertCanReadConversation,
     logger,
   }: {
     getHypothesesService: () => HypothesesService;
-    privileges: ImpactPrivilegesChecker;
+    privileges: InvestigationsPrivilegesChecker;
+    assertCanReadConversation: AssertCanReadConversation;
     logger: Logger;
   }
 ): void => {
   hypothesesAttachment.registerAttachmentType(agentBuilder, {
     getService: () => getHypothesesService().getDocumentService(),
     assertCanRead: (request) => privileges.assertCanRead(request),
+    assertCanReadConversation,
     logger,
   });
 };

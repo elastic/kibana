@@ -10,7 +10,10 @@ import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useBulkFetchFleetIntegrationPolicies } from '../../../../../hooks/policy/use_bulk_fetch_fleet_integration_policies';
-import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
+import type {
+  ArtifactEntryCardDecoratorProps,
+  ArtifactEntryCardProps,
+} from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { SearchExceptionsProps } from '../../../../../components/search_exceptions';
@@ -44,6 +47,8 @@ export interface PolicyArtifactsListProps {
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   canWriteArtifact?: boolean;
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
+  CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  showEnabledColumn?: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -57,6 +62,8 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     onDeleteActionCallback,
     canWriteArtifact = false,
     CardDecorator,
+    CriteriaComponent,
+    showEnabledColumn = false,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -177,9 +184,11 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
               ? [fullDetailsAction, deleteAction]
               : [fullDetailsAction],
           policies: artifactCardPolicies,
+          CriteriaComponent,
         };
       },
       [
+        CriteriaComponent,
         artifactCardPolicies,
         canCreateArtifactsByPolicy,
         expandedItemsMap,
@@ -216,6 +225,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           loading={isLoadingArtifacts || isRefetchingArtifacts}
           data-test-subj={'artifacts-collapsed-list'}
           CardDecorator={CardDecorator}
+          showEnabledColumn={showEnabledColumn}
         />
       </>
     );

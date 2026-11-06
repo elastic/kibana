@@ -142,7 +142,7 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
     ),
     notOwnerTooltip: i18n.translate(
       'xpack.agenticInvestigations.escalationModal.addToExistingForm.notOwnerTooltip',
-      { defaultMessage: 'You can only add to escalations you own.' }
+      { defaultMessage: 'You can only add to escalations you own or participate in.' }
     ),
     loadErrorTitle: i18n.translate(
       'xpack.agenticInvestigations.escalationModal.addToExistingForm.loadErrorTitle',
@@ -196,7 +196,7 @@ export const ESCALATION_ERRORS = Object.freeze({
   userProfileUnavailable: i18n.translate(
     'xpack.agenticInvestigations.escalation.userProfileUnavailable',
     {
-      defaultMessage: 'Your user profile is unavailable. Private escalations cannot be created.',
+      defaultMessage: 'Your user profile is unavailable. Escalations cannot be created.',
     }
   ),
   retryButton: i18n.translate('xpack.agenticInvestigations.escalation.retryButton', {

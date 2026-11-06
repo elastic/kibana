@@ -161,8 +161,8 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     /**
      * Login to Kibana using SAML authentication with Editor/Developer role
      */
-    async loginWithPrivilegedRole() {
-      await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
+    async loginWithPrivilegedRole(options: LoginWithRoleOptions = {}) {
+      await this.loginWithRole(svlUserManager.DEFAULT_ROLE, options);
     },
 
     /**

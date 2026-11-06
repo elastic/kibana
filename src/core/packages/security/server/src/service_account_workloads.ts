@@ -69,7 +69,52 @@ export interface ServiceAccountWorkloadTypeRegistration {
    * {@link SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH}.
    */
   description?: string;
+  /**
+   * Optional lookup that turns bound workloads into a title and a link, so the service account
+   * management page can show what each binding points at. Core calls it with internal access, not
+   * on behalf of a user, bounds each call with a timeout and aborts `signal` when that runs out.
+   * Without it, the page shows the workload ID.
+   */
+  resolveWorkloads?: ServiceAccountWorkloadResolver;
 }
+
+/**
+ * A bound workload to resolve: its ID and the space it is bound in.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadLocator {
+  workloadId: string;
+  spaceId: string;
+}
+
+/**
+ * What a workload type knows about one of its workloads.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadDetails {
+  /** Human-readable title of the workload, e.g. the workflow name. */
+  title?: string;
+  /**
+   * Path of the workload's page, relative to the Kibana base path and without a space prefix,
+   * e.g. `/app/workflows/{id}`. It must start with `/app/`. Core adds the base path and the space
+   * of the binding. Core ignores the whole entry, title included, when the path is not one it can
+   * link to safely.
+   */
+  path?: string;
+}
+
+/**
+ * Resolves a batch of workloads of one type to their details. Returns one entry per workload, in
+ * the same order, with `undefined` for a workload that no longer exists or cannot be resolved.
+ *
+ * @public
+ */
+export type ServiceAccountWorkloadResolver = (
+  workloads: ReadonlyArray<ServiceAccountWorkloadLocator>,
+  options: { signal: AbortSignal }
+) => Promise<Array<ServiceAccountWorkloadDetails | undefined>>;
 
 /**
  * Setup contract of Core's service accounts service.

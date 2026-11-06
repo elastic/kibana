@@ -19,7 +19,6 @@ const createCloudMock = (
   overrides: Partial<{
     trialDaysLeft: number;
     billingUrl: string;
-    isServerlessEnabled: boolean;
   }> = {}
 ): CloudStart =>
   ({
@@ -27,7 +26,6 @@ const createCloudMock = (
     getPrivilegedUrls: jest.fn().mockResolvedValue({
       billingUrl: overrides.billingUrl,
     }),
-    isServerlessEnabled: overrides.isServerlessEnabled ?? false,
   } as unknown as CloudStart);
 
 const renderBadge = async (cloud: CloudStart) => {
@@ -123,29 +121,12 @@ describe('TrialUsageBadge', () => {
     });
   });
 
-  describe('popover title', () => {
-    it('shows "Elastic Cloud Serverless" when serverless', async () => {
-      const cloud = createCloudMock({
-        trialDaysLeft: 5,
-        isServerlessEnabled: true,
-      });
-      const { container, getByText } = await renderBadge(cloud);
+  it('shows "Elastic Cloud Hosted" as the popover title', async () => {
+    const cloud = createCloudMock({ trialDaysLeft: 5 });
+    const { container, getByText } = await renderBadge(cloud);
 
-      await userEvent.click(getByTestSubj(container, 'trialUsageBadge')!);
+    await userEvent.click(getByTestSubj(container, 'trialUsageBadge')!);
 
-      expect(getByText('Elastic Cloud Serverless')).toBeInTheDocument();
-    });
-
-    it('shows "Elastic Cloud Hosted" when not serverless', async () => {
-      const cloud = createCloudMock({
-        trialDaysLeft: 5,
-        isServerlessEnabled: false,
-      });
-      const { container, getByText } = await renderBadge(cloud);
-
-      await userEvent.click(getByTestSubj(container, 'trialUsageBadge')!);
-
-      expect(getByText('Elastic Cloud Hosted')).toBeInTheDocument();
-    });
+    expect(getByText('Elastic Cloud Hosted')).toBeInTheDocument();
   });
 });

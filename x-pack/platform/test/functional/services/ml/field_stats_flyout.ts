@@ -83,7 +83,7 @@ export function MachineLearningFieldStatsFlyoutProvider(
       if (Array.isArray(expectedTopValuesContent)) {
         await this.assertTopValuesContent(fieldName, expectedTopValuesContent);
       }
-      await this.ensureFieldStatsFlyoutClosed();
+      await this.closeFieldStatsFlyout();
     },
 
     async assertFieldStatFlyoutContentFromComboBoxTrigger(
@@ -97,7 +97,8 @@ export function MachineLearningFieldStatsFlyoutProvider(
         const fieldTarget = await testSubjects.find(parentComboBoxSelector);
         await comboBox.openOptionsList(fieldTarget);
 
-        await testSubjects.existOrFail(selector);
+        // Bounded so the enclosing retry re-opens the options list instead of waiting it out once.
+        await testSubjects.existOrFail(selector, { timeout: 5000 });
         await testSubjects.click(selector);
         await mlCommonUI.ensureComboBoxClosed();
 
@@ -111,7 +112,7 @@ export function MachineLearningFieldStatsFlyoutProvider(
         if (Array.isArray(expectedTopValuesContent)) {
           await this.assertTopValuesContent(fieldName, expectedTopValuesContent);
         }
-        await this.ensureFieldStatsFlyoutClosed();
+        await this.closeFieldStatsFlyout();
       });
     },
 
@@ -136,14 +137,9 @@ export function MachineLearningFieldStatsFlyoutProvider(
       });
     },
 
-    async ensureFieldStatsFlyoutClosed() {
-      const flyoutIsOpen = await testSubjects.exists('mlFieldStatsFlyout');
-      if (flyoutIsOpen) {
-        await retry.tryForTime(2000, async () => {
-          await testSubjects.click('mlFieldStatsFlyout > euiFlyoutCloseButton');
-          await testSubjects.missingOrFail('mlFieldStatsFlyout');
-        });
-      }
+    async closeFieldStatsFlyout() {
+      await testSubjects.click('mlFieldStatsFlyout > euiFlyoutCloseButton');
+      await testSubjects.missingOrFail('mlFieldStatsFlyout', { timeout: 5000 });
     },
   };
 }

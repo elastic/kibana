@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest } from '../fixtures';
 import { testData } from '../fixtures';
 
@@ -36,7 +36,7 @@ const QUERY_WITHOUT_TIME_FIELD = 'FROM kibana_sample_data_flights';
 const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
 const expectDisabledAllTimeState = async (
-  pageObjects: PageObjects,
+  pageObjects: DiscoverPageObjects,
   expected: 'enabled' | 'disabled'
 ) => {
   const { datePicker } = pageObjects;
@@ -51,7 +51,7 @@ const expectDisabledAllTimeState = async (
 };
 
 const expectCurrentEsqlTabState = async (
-  pageObjects: PageObjects,
+  pageObjects: DiscoverPageObjects,
   {
     disabledAllTime,
     query,

@@ -43,6 +43,7 @@ import {
   USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
+import { defaultInboundEventsLimitConfigs } from './config';
 
 function getConfig(overrides = {}) {
   return {
@@ -81,7 +82,9 @@ function getConfig(overrides = {}) {
       enabled: false,
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
       maxEmitted: 25,
+      ...defaultInboundEventsLimitConfigs,
     },
+    connectorSigningKeys: { enabled: false },
     ...overrides,
   };
 }
@@ -144,7 +147,9 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+          ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -589,7 +594,9 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+          ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -971,7 +978,9 @@ describe('Actions Plugin', () => {
                 enabled: true,
                 maxBodyBytes: new ByteSizeValue(1024 * 1024),
                 maxEmitted: 25,
+                ...defaultInboundEventsLimitConfigs,
               },
+              connectorSigningKeys: { enabled: false },
             })
           );
           const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);

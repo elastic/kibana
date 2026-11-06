@@ -15,6 +15,7 @@ import {
   ESCALATIONS_INTERNAL_URL,
   ESCALATION_ASSIGN_URL,
   ESCALATION_LINK_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
 } from '../../../common/escalations/constants';
 import { SUGGEST_USER_PROFILES_URL } from '../../../common/constants';
@@ -108,6 +109,13 @@ describe('escalation routes', () => {
     it('gates link on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
       const { byPath, posts } = registerAndCollect({});
       expect(byPath(posts, ESCALATION_LINK_URL).config.security?.authz?.requiredPrivileges).toEqual(
+        [ESCALATIONS_API_PRIVILEGE_MANAGE]
+      );
+    });
+
+    it('gates sync on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
+      const { byPath, posts } = registerAndCollect({});
+      expect(byPath(posts, ESCALATION_SYNC_URL).config.security?.authz?.requiredPrivileges).toEqual(
         [ESCALATIONS_API_PRIVILEGE_MANAGE]
       );
     });

@@ -78,6 +78,7 @@ export const registerSuggestFixRoute = (
         const result = await generateEsql({
           model,
           esClient: client,
+          internalEsClient: core.elasticsearch.client.asInternalUser,
           logger,
           nlQuery: 'Fix the following ES|QL query. Return only the corrected query.',
           additionalContext: buildSuggestFixContext(queryString, errorMessage),

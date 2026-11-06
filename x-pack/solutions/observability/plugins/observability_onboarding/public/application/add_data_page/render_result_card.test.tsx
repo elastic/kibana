@@ -20,6 +20,17 @@ expect.extend(matchers);
 // Type-only import above survives this mock: types are erased at runtime.
 jest.mock('@kbn/fleet-plugin/public', () => ({
   CardIcon: () => <span data-test-subj="resultCardIconStub" />,
+  SearchMemberMatchDescription: ({
+    memberTitles,
+    collectionTitle,
+  }: {
+    memberTitles: string[];
+    collectionTitle: string;
+  }) => (
+    <span data-test-subj="searchMemberMatchStub">{`${memberTitles.join(
+      ' + '
+    )} in ${collectionTitle}`}</span>
+  ),
 }));
 
 const item: IntegrationCardItem = {
@@ -82,6 +93,20 @@ describe('createRenderResultCard', () => {
     expect(card.querySelector('a')).not.toHaveAttribute('target');
   });
 
+  it('explains which bundled service the search matched instead of the description', () => {
+    renderCard({
+      ...item,
+      searchMemberMatch: { memberTitles: ['Amazon GuardDuty'], collectionTitle: 'AWS' },
+    });
+
+    expect(screen.getByTestId('searchMemberMatchStub')).toHaveTextContent(
+      'Amazon GuardDuty in AWS'
+    );
+    expect(
+      screen.queryByText('Collect logs and metrics from Nginx servers with Elastic Agent.')
+    ).not.toBeInTheDocument();
+  });
+
   it('reports a plain result click with the card id', async () => {
     const user = userEvent.setup();
     renderCard(item);
@@ -123,6 +148,20 @@ describe('createRenderResultCard', () => {
       surface: 'search_result',
       collection_id: 'nginx',
     });
+  });
+
+  it('explains which member the search matched on a collection card', () => {
+    renderCard({
+      ...collectionItem,
+      searchMemberMatch: { memberTitles: ['Nginx (OpenTelemetry)'], collectionTitle: 'Nginx' },
+    });
+
+    expect(screen.getByTestId('searchMemberMatchStub')).toHaveTextContent(
+      'Nginx (OpenTelemetry) in Nginx'
+    );
+    expect(
+      screen.queryByText('Choose from ECS-based or OTel-based collection.')
+    ).not.toBeInTheDocument();
   });
 
   it('renders a singleton collection as a plain card, mirroring Fleet degradation', () => {

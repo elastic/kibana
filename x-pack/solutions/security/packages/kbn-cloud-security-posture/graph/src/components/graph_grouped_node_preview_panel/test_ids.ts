@@ -27,6 +27,8 @@ export const GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID = `${GROUPED_ITEM_TEST_ID}TitleT
 export const GROUPED_ITEM_TIMESTAMP_TEST_ID = `${GROUPED_ITEM_TEST_ID}Timestamp` as const;
 export const GROUPED_ITEM_ACTOR_TEST_ID = `${GROUPED_ITEM_TEST_ID}Actor` as const;
 export const GROUPED_ITEM_TARGET_TEST_ID = `${GROUPED_ITEM_TEST_ID}Target` as const;
+export const GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID =
+  `${GROUPED_ITEM_TEST_ID}TargetOverflow` as const;
 export const GROUPED_ITEM_IP_TEST_ID = `${GROUPED_ITEM_TEST_ID}Ip` as const;
 export const GROUPED_ITEM_GEO_TEST_ID = `${GROUPED_ITEM_TEST_ID}Geo` as const;
 export const GROUPED_ITEM_RISK_TEST_ID = `${GROUPED_ITEM_TEST_ID}Risk` as const;

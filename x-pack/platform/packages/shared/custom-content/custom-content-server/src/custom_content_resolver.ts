@@ -6,11 +6,12 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, type Message } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
+import { appendLimitToQuery, getNamedParams } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -19,6 +20,7 @@ import {
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
 import { extractDeclaredHeight } from './extract_declared_height';
+import { getLiquidSyntaxError } from './liquid_syntax';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
@@ -64,7 +66,7 @@ Emit nothing before this comment — no markdown fence, no blank line.`;
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
 - If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
-- Do NOT use <a> anchor tags or href attributes of any kind.
+- Links are only allowed to Dashboards and Discover, as <a href="/app/dashboards..."> or <a href="/app/discover..."> (for example /app/dashboards#/view/<id> or /app/discover). Never include a host, a protocol, or a base path. Any other href, including links to other apps and external URLs, is removed at render time, so do not write one. Use no other attribute on <a>.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no image URLs.
 - Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks all outbound network requests. For images, icons, or illustrations draw them with inline SVG, pure CSS shapes, or a Unicode emoji/symbol instead.
 - For diagrams and progress indicators, use pure CSS or inline SVG.`;
@@ -110,7 +112,7 @@ const describeSamplingFailure = (error: unknown): string => {
       : undefined;
 
   if (type === 'verification_exception' || type === 'parsing_exception') {
-    return `ES|QL query is invalid: ${reason}. Build the query with the generate_esql tool instead of writing it directly, then retry.`;
+    return `ES|QL query is invalid: ${reason}. If you supplied the query, correct it or ask the user for a valid one; if it was generated, retry with a more specific description or an exact index.`;
   }
   if (type === 'security_exception') {
     return `No access to the index targeted by this ES|QL query: ${reason}. Use an index the current user can read.`;
@@ -203,6 +205,8 @@ export type CustomContentTemplateResolver = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
   hasExistingQuery?: boolean;
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
+  esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
 
 export const createCustomContentTemplateResolver = ({
@@ -210,14 +214,14 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery }) => {
+  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery, esqlVariables }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
     if (esqlQuery) {
       try {
         const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
-        const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+        const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
           ...(params.length ? { params } : {}),
@@ -265,13 +269,39 @@ export const createCustomContentTemplateResolver = ({
     }
 
     const { inferenceClient } = await modelProvider.getDefaultModel();
-    const response = await inferenceClient.chatComplete({
-      system: systemPrompt,
-      messages: [{ role: MessageRole.User, content: userContent }],
-      stream: false,
-    });
+    const messages: Message[] = [{ role: MessageRole.User, content: userContent }];
+    const generate = async () => {
+      const response = await inferenceClient.chatComplete({
+        system: systemPrompt,
+        messages,
+        stream: false,
+      });
+      return {
+        content: response.content,
+        ...extractDeclaredHeight(stripMarkdownFences(response.content)),
+      };
+    };
 
-    const { template, height } = extractDeclaredHeight(stripMarkdownFences(response.content));
+    let generated = await generate();
+    const syntaxError = getLiquidSyntaxError(generated.template);
+    if (syntaxError) {
+      logger.warn(
+        `custom_content template resolver: invalid Liquid, retrying once — ${syntaxError}`
+      );
+      messages.push(
+        { role: MessageRole.Assistant, content: generated.content },
+        {
+          role: MessageRole.User,
+          content: `That template is not valid Liquid: ${syntaxError}\n\nReturn the complete corrected template.`,
+        }
+      );
+      generated = await generate();
+      const retryError = getLiquidSyntaxError(generated.template);
+      if (retryError) {
+        throw new Error(`Generated template was rejected: invalid Liquid syntax (${retryError}).`);
+      }
+    }
+    const { template, height } = generated;
 
     if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
       throw new Error('Generated template was rejected: contains a <script> tag.');

@@ -44,6 +44,7 @@ import type { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred
 import { DiscardStarredQueryModal } from './discard_starred_query';
 import { useRestorableState } from '../restorable_state';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
+import { ViewCreatedSource } from '../telemetry/telemetry_service';
 import { useCanCreateView } from '../save_as_view/use_can_create_view';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 
@@ -431,6 +432,7 @@ export function QueryList({
           query={queryToSave}
           onClose={() => setQueryToSave(undefined)}
           onSaved={applySavedView}
+          source={ViewCreatedSource.QUERY_HISTORY}
         />
       )}
     </div>

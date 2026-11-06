@@ -12,7 +12,7 @@ describe('PolicyCatalog', () => {
   const catalog = PolicyCatalog.of(
     new Map([
       ['p1', createActionPolicy({ id: 'p1', spaceId: 'space-a', apiKey: 'key-1' })],
-      ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', groupingMode: 'all' })],
+      ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', grouping: { mode: 'all' } })],
     ])
   );
 

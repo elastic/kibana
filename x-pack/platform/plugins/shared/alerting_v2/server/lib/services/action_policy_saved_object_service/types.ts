@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectError } from '@kbn/core/types';
-import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
+import type {
+  ActionPolicySavedObjectAttributes,
+  PartiallyUpdateableActionPolicyAttributes,
+} from '../../../saved_objects';
 
 export type ActionPolicySavedObjectBulkGetItem =
   | {
@@ -48,17 +51,24 @@ export interface ActionPolicySavedObjectServiceContract {
   bulkGetByIds(ids: string[], spaceId?: string): Promise<ActionPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
-    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    attrs: ActionPolicySavedObjectAttributes;
     version?: string;
+  }): Promise<{ id: string; version?: string }>;
+  /** Writes server-owned flat fields onto the stored document, preserving everything else. */
+  patchFields(params: {
+    id: string;
+    attrs: PartiallyUpdateableActionPolicyAttributes;
   }): Promise<{ id: string; version?: string }>;
   bulkUpdate(params: {
     objects: Array<{
       id: string;
-      attrs: Partial<ActionPolicySavedObjectAttributes>;
+      attrs: PartiallyUpdateableActionPolicyAttributes;
     }>;
   }): Promise<ActionPolicySavedObjectBulkUpdateItem[]>;
+  /** Decrypts the action policies in `spaceIds`, or in every space when omitted. */
   findAllDecrypted(params?: {
     filter?: { enabled: boolean };
+    spaceIds?: readonly string[];
   }): Promise<ActionPolicySavedObjectBulkGetItem[]>;
   /**
    * Reads the current space's action policies, up to `maxPolicies`, fetching only the fields

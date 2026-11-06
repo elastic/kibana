@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
@@ -20,8 +19,9 @@ import { css } from '@emotion/react';
 import {
   resolveWatchAccent,
   SYSTEM_SECURITY_WATCH_CATALOG,
-  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  type Worker,
 } from '@kbn/alertzero-common';
+import { WorkerDependenciesCallout } from '../../components/worker_dependencies/worker_dependencies_callout';
 import { workerScheduleCadenceLabel } from '../watches/components/worker_trigger_cadence';
 import { workerName } from '../watches/workers/translations';
 import type { CatalogWorker } from './use_worker_selection';
@@ -29,6 +29,7 @@ import * as i18n from './translations';
 
 interface Props {
   worker: CatalogWorker;
+  serverWorker?: Pick<Worker, 'id'>;
   scheduleInterval?: string;
   checked: boolean;
   disabled: boolean;
@@ -37,6 +38,7 @@ interface Props {
 
 export const WorkerSelectionRow: React.FC<Props> = ({
   worker: { id, name, watchId },
+  serverWorker,
   scheduleInterval,
   checked,
   disabled,
@@ -49,19 +51,13 @@ export const WorkerSelectionRow: React.FC<Props> = ({
   const triggerLabel = scheduleInterval
     ? workerScheduleCadenceLabel(scheduleInterval)
     : i18n.onboardingWorkerEventTrigger(id);
-  const hasWorkflowsNote = id === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
-
   return (
-    <>
-      <EuiFlexGroup
-        alignItems="flexStart"
-        gutterSize="m"
-        responsive={false}
-        css={css`
-          padding: ${euiTheme.size.l} ${euiTheme.size.l}
-            ${hasWorkflowsNote ? euiTheme.size.m : euiTheme.size.l};
-        `}
-      >
+    <div
+      css={css`
+        padding: ${euiTheme.size.l};
+      `}
+    >
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
@@ -88,41 +84,50 @@ export const WorkerSelectionRow: React.FC<Props> = ({
             ) : null}
           </EuiFlexGroup>
           {description ? (
-            <EuiText size="s" color="subdued">
+            <EuiText
+              size="s"
+              color="subdued"
+              css={css`
+                margin-top: ${euiTheme.size.xs};
+              `}
+            >
               <p id={`alertZeroOnboardingWorkerDescription-${id}`}>{description}</p>
             </EuiText>
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={workerName(id, name)}
-            showLabel={false}
-            checked={checked}
-            disabled={disabled}
-            onChange={(e) => onToggle(id, e.target.checked)}
-            data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
-            aria-describedby={
-              description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
-            }
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={workerName(id, name)}
+                showLabel={false}
+                checked={checked}
+                disabled={disabled}
+                onChange={(e) => onToggle(id, e.target.checked)}
+                data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
+                aria-describedby={
+                  description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* The switch is named after the Worker; this is the visible state only. */}
+              <EuiText
+                size="s"
+                color="subdued"
+                aria-hidden
+                css={css`
+                  min-width: ${euiTheme.size.xl};
+                `}
+              >
+                {checked ? i18n.ONBOARDING_WORKER_TOGGLE_ON : i18n.ONBOARDING_WORKER_TOGGLE_OFF}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasWorkflowsNote ? (
-        <div
-          css={css`
-            padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
-          `}
-        >
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType="info"
-            data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
-          >
-            <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
-          </EuiCallOut>
-        </div>
-      ) : null}
-    </>
+      {/* Full width so each dependency's action lines up with the toggle column. */}
+      <WorkerDependenciesCallout worker={serverWorker ?? { id }} surface="onboarding" />
+    </div>
   );
 };

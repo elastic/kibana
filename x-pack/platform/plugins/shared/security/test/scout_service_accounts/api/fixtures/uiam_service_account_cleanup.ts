@@ -14,12 +14,14 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_URL,
 } from '@kbn/mock-idp-utils';
 
-/** Deletes only this test's account from the local UIAM emulator. */
+/**
+ * Removes one account's record straight from the local UIAM emulator. Tests delete through Kibana,
+ * and this is the fallback for an account that Kibana could not delete.
+ */
 export const deleteUiamServiceAccount = async (id: string): Promise<void> => {
   const resource = `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}/docs/${id}`;
   const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   try {
-    // The seeded organization key cannot revoke project accounts in the local UIAM image.
     const response = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/${resource}`, {
       method: 'DELETE',
       dispatcher,

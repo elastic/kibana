@@ -10,7 +10,8 @@ import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { AreaFillOptions, FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { LegendLayout } from '@kbn/chart-expressions-common';
+import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Parser } from '@elastic/esql';
 
 import type {
@@ -22,10 +23,14 @@ import type {
 } from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
-import { visualizationSubtypes, defaultSeriesType } from './types';
-import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { visualizationSubtypes, defaultSeriesType, defaultAreaFill } from './types';
+import { flipSeriesType, getIconForSeries, hasAreaSeries } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
+
+const XY_SUGGESTION_DEFAULTS: Pick<XYVisualizationState, 'legend'> = {
+  legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
+};
 
 const COLUMN_SORT_ORDER = {
   document: 0,
@@ -80,6 +85,7 @@ export function getSuggestions({
   allowMixed,
   datasourceId,
   query,
+  defaultOverrides,
 }: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
   // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
   // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
@@ -110,7 +116,8 @@ export function getSuggestions({
     mainPalette,
     allowMixed,
     datasourceId,
-    query
+    query,
+    defaultOverrides
   );
 
   if (Array.isArray(suggestions)) {
@@ -128,7 +135,8 @@ function getSuggestionForColumns(
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean,
   datasourceId?: string,
-  query?: SuggestionRequest['query']
+  query?: SuggestionRequest['query'],
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides']
 ):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>>
@@ -145,6 +153,7 @@ function getSuggestionForColumns(
     allowMixed,
     datasourceId,
     query,
+    defaultOverrides,
   };
 
   const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
@@ -250,6 +259,7 @@ function getSuggestionsForLayer({
   allowMixed,
   datasourceId,
   query,
+  defaultOverrides,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -264,6 +274,7 @@ function getSuggestionsForLayer({
   allowMixed?: boolean;
   datasourceId?: string;
   query?: SuggestionRequest['query'];
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides'];
 }):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>> {
@@ -288,6 +299,7 @@ function getSuggestionsForLayer({
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
+    defaultOverrides,
   };
 
   if (
@@ -570,6 +582,7 @@ function buildSuggestion({
   hide,
   mainPalette,
   allowMixed,
+  defaultOverrides,
 }: {
   currentState: XYVisualizationState | undefined;
   seriesType: SeriesType;
@@ -583,6 +596,7 @@ function buildSuggestion({
   hide?: boolean;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides'];
 }) {
   let splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -641,13 +655,18 @@ function buildSuggestion({
         )
     : [];
 
+  const layers =
+    existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer];
+
+  const defaults = { ...XY_SUGGESTION_DEFAULTS, ...defaultOverrides };
+
   const state: XYVisualizationState = {
-    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    legend: currentState?.legend ?? defaults.legend,
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
-    areaFill: currentState ? currentState.areaFill : AreaFillOptions.SOLID,
+    areaFill: currentState?.areaFill ?? (hasAreaSeries(layers) ? defaultAreaFill : undefined),
     pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
@@ -680,8 +699,7 @@ function buildSuggestion({
       yRight: true,
     },
     preferredSeriesType: seriesType,
-    layers:
-      existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
+    layers,
   };
 
   const isIncomplete = yValues.length === 0;

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
+import { getSourcesScope } from './sources_scope';
 
 export interface BuildServerESQLCallbacksOptions {
-  client: ElasticsearchClient;
+  esClient: Pick<IScopedClusterClient, 'asCurrentUser' | 'asInternalUser'>;
+  logger: Logger;
 }
 
 /**
@@ -23,13 +25,14 @@ export interface BuildServerESQLCallbacksOptions {
  * Kibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils.
  */
 export const buildServerESQLCallbacks = ({
-  client,
+  esClient,
+  logger,
 }: BuildServerESQLCallbacksOptions): ESQLCallbacks => {
-  const service = new EsqlService({ client });
+  const service = new EsqlService({ client: esClient.asCurrentUser });
 
   return {
     getSources: async () => {
-      return service.getAllIndices('all');
+      return service.getAllIndices(await getSourcesScope(esClient.asInternalUser, logger));
     },
 
     getColumnsFor: async ({ query } = { query: '' }) => {

@@ -1,0 +1,510 @@
+{
+  "sha1": "83eca0703e68d77ecd754926e27735318e8b63b9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e11dd99e43856bd-8769fe0d7fbbac4",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 on every hunt route for a user without AlertZero",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 100,
+        "column": 9
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-7f2652e1327b1b6",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 on hunt write routes for an AlertZero read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 109,
+        "column": 25
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-9da793c87c6d843",
+      "title": "Hunt Watch - authz isolation and evidence projection lets an AlertZero read-only user read supply status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 125,
+        "column": 6
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-e980d26230765dd",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 when an AlertZero read-only user calls Restore",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 131,
+        "column": 25
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-00bef75323a0279",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 when an AlertZero read-only user PATCHes a Worker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 146,
+        "column": 24
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-e287d6765fb732b",
+      "title": "Hunt Watch - authz isolation and evidence projection projects only the caller space evidence on a shared report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 154,
+        "column": 6
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-10311515b5ade2d",
+      "title": "Hunt Watch - authz isolation and evidence projection omits evidence from find_threat_reports",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 164,
+        "column": 33
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-05671b12826c6a9",
+      "title": "Hunt Watch - authz isolation and evidence projection lets a B-only role read a shared report in space B but not in space A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 181,
+        "column": 17
+      }
+    },
+    {
+      "id": "973daa931f715ba-491b49ea72ca709",
+      "title": "Hunt Watch - internal API restriction returns 400 when an admin omits the internal-origin header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
+        "line": 22,
+        "column": 11
+      }
+    },
+    {
+      "id": "973daa931f715ba-b0b528d1b9196a7",
+      "title": "Hunt Watch - internal API restriction returns 400 on the worker coverage route when an admin omits the internal-origin header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
+        "line": 32,
+        "column": 13
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-bf23879094f8703",
+      "title": "Hunt Watch - threat intel supply across two spaces enabling Hunt in A turns ingest, enrich, and attribute-A on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 178,
+        "column": 24
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-5f713ed11b67204",
+      "title": "Hunt Watch - threat intel supply across two spaces enabling Hunt in B leaves deployment rows on and turns attribute-B on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 213,
+        "column": 20
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-f5c08ca70dc8b90",
+      "title": "Hunt Watch - threat intel supply across two spaces disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 251,
+        "column": 31
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-74b92691a7ce09c",
+      "title": "Hunt Watch - threat intel supply across two spaces disabling Hunt in B turns deployment rows off unless another space still hunts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 271,
+        "column": 51
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-ef22601761a5484",
+      "title": "Hunt Watch - threat intel supply across two spaces re-enable A, drift ingest off, Restore clears drift",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 290,
+        "column": 18
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-3acdc75d6f1a836",
+      "title": "Hunt Watch - worker index coverage, role path reads the role for an admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 71,
+        "column": 31
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-1576276a1486f88",
+      "title": "Hunt Watch - worker index coverage, role path lists a custom pattern with data that the built-in role cannot read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 85,
+        "column": 20
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-c87c5abb67d2c59",
+      "title": "Hunt Watch - worker index coverage, role path is role_unreadable for a caller without read_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 99,
+        "column": 25
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-dbe8df5c5620640",
+      "title": "Hunt Watch - worker index coverage, role path is caller_unreadable for a caller with no index privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 113,
+        "column": 49
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-9877194a7e3479d",
+      "title": "Hunt Watch - worker index coverage, role path is discovery_failed when a pattern names a remote that is not configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 132,
+        "column": 24
+      }
+    },
+    {
+      "id": "e77deae9c51c1b5-daa728213d52cfc",
+      "title": "Hunt Watch - worker index coverage, sweep path reads the last sweep and reports the worker as degraded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_sweep.spec.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "id": "f71b7e19573c864-f516b1f17d085ef",
+      "title": "Threat Intel - report ingest API ingests a pasted report, then dedups an identical repeat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
+        "line": 37,
+        "column": 20
+      }
+    },
+    {
+      "id": "f71b7e19573c864-35b6f23f231b0cb",
+      "title": "Threat Intel - report ingest API rejects a report body that fails schema validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
+        "line": 70,
+        "column": 27
+      }
+    },
+    {
+      "id": "f71b7e19573c864-53949f0f794f735",
+      "title": "Threat Intel - report ingest API extracts indicators from pasted text without calling a model",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
+        "line": 86,
+        "column": 74
+      }
+    },
+    {
+      "id": "a69e576b394b908-a542a371a6543c7",
+      "title": "Rule Tuning sweep - candidate rules starts a review only for enabled rules with enough unreviewed false positives at a high enough rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 298,
+        "column": 9
+      }
+    },
+    {
+      "id": "a69e576b394b908-e2bbcaf00b5a721",
+      "title": "Rule Tuning sweep - candidate rules 20 deleted rules with more false positives than two enabled rules do not crowd them out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 537,
+        "column": 48
+      }
+    },
+    {
+      "id": "a69e576b394b908-06a4d8f795f42f6",
+      "title": "Rule Tuning sweep - candidate rules 20 disabled rules with more false positives than two enabled rules do not crowd them out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 550,
+        "column": 15
+      }
+    },
+    {
+      "id": "a69e576b394b908-7296a72b5116b1b",
+      "title": "Rule Tuning sweep - candidate rules 20 already reviewed rules with 150 false positives each do not crowd out two unreviewed rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 575,
+        "column": 15
+      }
+    },
+    {
+      "id": "a69e576b394b908-642bd95e304f16e",
+      "title": "Rule Tuning sweep - candidate rules launches at most max_rules_per_sweep reviews, noisiest rules first",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 605,
+        "column": 63
+      }
+    },
+    {
+      "id": "a69e576b394b908-71208108ef1abd7",
+      "title": "Rule Tuning sweep - candidate rules applies the thresholds passed as inputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 654,
+        "column": 15
+      }
+    },
+    {
+      "id": "a69e576b394b908-422537f06edb047",
+      "title": "Rule Tuning sweep - candidate rules looks only at alerts inside the analysis window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 710,
+        "column": 9
+      }
+    },
+    {
+      "id": "a69e576b394b908-e0e52c5176a3c08",
+      "title": "Rule Tuning sweep - candidate rules leaves EQL sequence members and building blocks out of the count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 747,
+        "column": 18
+      }
+    },
+    {
+      "id": "7157ea8e83a720a-7d3321514ba68c7",
+      "title": "Threat Intel - source catalog API returns the source catalog and creates the space-filtered indicator alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
+        "line": 43,
+        "column": 11
+      }
+    },
+    {
+      "id": "7157ea8e83a720a-d4894bee88697ad",
+      "title": "Threat Intel - source catalog API stays consistent on a second call once the alias is memoized",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
+        "line": 64,
+        "column": 28
+      }
+    },
+    {
+      "id": "7157ea8e83a720a-0f54cc42eb18431",
+      "title": "Threat Intel - source catalog API returns 404 when updating a source that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
+        "line": 88,
+        "column": 16
+      }
+    },
+    {
+      "id": "7157ea8e83a720a-57f339f81c76436",
+      "title": "Threat Intel - source catalog API denies a read-only Security user write access to the source catalog",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
+        "line": 107,
+        "column": 11
+      }
+    }
+  ]
+}

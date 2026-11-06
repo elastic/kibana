@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
 export interface DetailTimeRangeMetadata {
   schemas: DataSchemaFormat[];
@@ -16,26 +16,17 @@ export interface DetailTimeRangeMetadata {
  * Schema for the pod Metric Detail page.
  *
  * Matches Asset Details: trust the URL only when more than one schema is in
- * the time range. While the pod schema selector flag is off, omit schema so
- * a leftover Hosts `semconv` URL stays on the Elastic Common Schema path.
- * `undefined` means the request has not resolved yet, or the server should
- * keep today's default (ECS).
+ * the time range. A leftover Hosts `semconv` URL is honored when detection
+ * supports it. `undefined` means the request has not resolved yet, or the
+ * server should keep the omitted/default path (ECS aggregations).
  */
 export const resolveDetailSchema = ({
   urlSchema,
   timeRangeMetadata,
-  nodeType,
-  isPodSchemaSelectorEnabled,
 }: {
   urlSchema?: DataSchemaFormat | null;
   timeRangeMetadata?: DetailTimeRangeMetadata | null;
-  nodeType: InventoryItemType;
-  isPodSchemaSelectorEnabled: boolean;
 }): DataSchemaFormat | undefined => {
-  if (nodeType === 'pod' && !isPodSchemaSelectorEnabled) {
-    return undefined;
-  }
-
   if (!timeRangeMetadata) {
     return undefined;
   }

@@ -11,8 +11,8 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_TAG_EPISODE_ACTION_REQUEST: BulkTagEpisodeActionBody = {
   items: [
-    { alert_id: 'episode-1', tags: ['production'] },
-    { alert_id: 'episode-2', tags: ['production'] },
+    { alert_id: 'alert-1', tags: ['production'] },
+    { alert_id: 'alert-2', tags: ['production'] },
   ],
 };
 
@@ -30,13 +30,13 @@ const INVALID_BULK_TAG_EPISODE_ACTION_RESPONSE = invalidResponseExample({
 export const bulkTagEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'bulkTagEpisodeActionRequest',
-      summary: 'Tag two alert episodes with production',
+      name: 'bulkTagAlertActionRequest',
+      summary: 'Tag two alerts with production',
       value: BULK_TAG_EPISODE_ACTION_REQUEST,
     },
     responses: {
       200: {
-        name: 'bulkTagEpisodeActionResponse',
+        name: 'bulkTagAlertActionResponse',
         summary: 'All actions created',
         value: BULK_TAG_EPISODE_ACTION_RESPONSE,
       },

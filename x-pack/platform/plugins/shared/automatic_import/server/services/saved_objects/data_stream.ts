@@ -59,7 +59,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
     },
   },
   management: {
-    icon: 'data_stream',
+    icon: 'productStreamsWired',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {

@@ -6,7 +6,7 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
-import type { UserIdAndName } from '../base/users';
+import type { UserIdAndName, UserPrincipalType } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -60,11 +60,13 @@ export interface RoundInput {
    */
   attachments?: Attachment[];
   /**
-   * References to versioned conversation-level attachments.
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
-   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_context?: string;
 }
@@ -80,13 +82,9 @@ export interface ConverseInput {
   /**
    * Optional attachments to provide to the agent.
    * Use `origin` without `data` for by-reference types that implement `resolve`.
-   * @deprecated Use attachment_refs with conversation-level attachments instead
+   * @deprecated Use conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
-  /**
-   * References to versioned conversation-level attachments.
-   */
-  attachment_refs?: AttachmentVersionRef[];
   /**
    * Response from the user to prompt requests.
    */
@@ -109,12 +107,12 @@ export enum ConversationRoundStepType {
   reasoning = 'reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
-  updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
   preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
   substitution = 'substitution',
+  injectedContext = 'injected_context',
 }
 
 // tool call step
@@ -135,6 +133,16 @@ export interface ToolCallProgress {
    * Optional structured metadata attached to this progress event.
    */
   metadata?: Record<string, string>;
+}
+
+/**
+ * How the model reached a tool.
+ */
+export enum ToolCallInvocation {
+  /** Bound to the model as a native tool. */
+  native = 'native',
+  /** Reached through the `execute_dynamic_tool` meta-tool. */
+  dynamic = 'dynamic',
 }
 
 /**
@@ -172,6 +180,17 @@ export interface ToolCallWithResult {
    * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
    */
   interrupted?: true;
+  /**
+   * How the model reached the tool; absent means `native` (steps persisted before this field
+   * existed have none). For `dynamic`, `tool_id` and `params` are the inner tool's; the
+   * `execute_dynamic_tool` wrapper is restored when the call is rendered back to the model or
+   * re-run on resume. Use `isDynamicToolCall` rather than comparing the value.
+   */
+  invocation?: ToolCallInvocation;
+  /**
+   * Short description, provided by the model, of what the agent is doing with this call.
+   */
+  intent?: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -190,6 +209,11 @@ export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallSte
   return step.type === ConversationRoundStepType.toolCall;
 };
 
+/** True when the call went through the `execute_dynamic_tool` meta-tool. */
+export const isDynamicToolCall = (call: Pick<ToolCallWithResult, 'invocation'>): boolean => {
+  return call.invocation === ToolCallInvocation.dynamic;
+};
+
 export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
   return {
     type: ConversationRoundStepType.reasoning,
@@ -202,7 +226,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
-  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  /**
+   * when reasoning is bound to a tool call, the corresponding tool call ID
+   * @deprecated No longer produced; kept for conversations stored before tool call intent.
+   */
   tool_call_id?: string;
   /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
   tool_call_group_id?: string;
@@ -273,6 +300,35 @@ export const isSubstitutionStep = (step: ConversationRoundStep): step is Substit
   return step.type === ConversationRoundStepType.substitution;
 };
 
+/**
+ * A note a cycle hook put in front of the model. Rendered as a user-role notice at its position.
+ */
+export interface InjectedContextStepData {
+  /** Registration id of the hook that appended the step. Set by the runtime, never by the hook. */
+  hook_id: string;
+  /** What the model reads. */
+  text: string;
+  /** For the UI and analytics; never rendered to the model. */
+  data?: JsonObject;
+}
+
+export type InjectedContextStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.injectedContext,
+  InjectedContextStepData
+>;
+
+export const createInjectedContextStep = (data: InjectedContextStepData): InjectedContextStep => ({
+  type: ConversationRoundStepType.injectedContext,
+  ...data,
+});
+
+export const isInjectedContextStep = (step: ConversationRoundStep): step is InjectedContextStep => {
+  return step.type === ConversationRoundStepType.injectedContext;
+};
+
+/** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
+export const relevantSkillsHookId = 'relevant-skills';
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState
@@ -284,19 +340,14 @@ export const isBackgroundAgentCompleteStep = (
   return step.type === ConversationRoundStepType.backgroundAgentComplete;
 };
 
-export interface TodosStepData {
-  todos: TodoItem[];
-  /** True when todos were inherited from the previous round, not written by the agent this round */
-  carried_over?: boolean;
-}
+/**
+ * Step type written by the removed `write_todos` tool. Conversations persisted before its removal
+ * still carry such steps; they are dropped when loaded, so no runtime type describes them.
+ */
+export const LEGACY_TODOS_STEP_TYPE = 'update_todos';
 
-export type TodosStep = ConversationRoundStepMixin<
-  ConversationRoundStepType.updateTodos,
-  TodosStepData
->;
-
-export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
-  return step.type === ConversationRoundStepType.updateTodos;
+export const isLegacyTodosStep = (step: { type: string }): boolean => {
+  return step.type === LEGACY_TODOS_STEP_TYPE;
 };
 
 // ask_user_question step
@@ -389,38 +440,17 @@ export const isPreExecutionWorkflowStep = (
   return step.type === ConversationRoundStepType.preExecutionWorkflow;
 };
 
-/**
- * Returns the (single) todos step from a list of steps, if present.
- * A round only ever has at most one todos step, which is updated in place.
- */
-export const findTodosStep = (
-  steps: ConversationRoundStep[] | undefined
-): TodosStep | undefined => {
-  return steps?.find(isTodosStep);
-};
-
-/**
- * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
- * Carryover only happens when at least one item is still incomplete (pending / in_progress).
- * When carried over, both complete and incomplete items are included so the full plan is visible.
- */
-export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
-  if (!todos?.length) return undefined;
-  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
-  return hasIncomplete ? todos : undefined;
-};
-
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
-  | SubstitutionStep;
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -516,16 +546,6 @@ export interface ConversationRoundFeedback {
   comment?: string;
   /** ISO timestamp when the feedback was (most recently) submitted */
   submitted_at: string;
-  /**
-   * Connector ID from the round's model_usage at submission time.
-   * Present whenever model_usage is available on the round.
-   */
-  connector_id?: string;
-  /**
-   * Model identifier. Only populated when the LLM provider returns the model
-   * in its response — many connectors omit it.
-   */
-  model?: string;
 }
 
 /**
@@ -563,8 +583,6 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  /** User feedback for this round, if submitted. */
-  feedback?: ConversationRoundFeedback;
   /**
    * Set when the round's last execution ended without an outcome (failed or aborted). The round
    * is `completed` with an empty `response.message`; the steps completed before the interruption
@@ -585,10 +603,15 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /** Absent for external authors. */
+  type?: UserPrincipalType;
 }
 
+/** The display-only part of an author a writer may supply. */
+export type ConversationRoundAuthorDecoration = Pick<ConversationRoundAuthor, 'full_name'>;
+
 export const getConversationRoundAuthorDisplayName = (
-  author?: ConversationRoundAuthor
+  author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
   if (!author) {
     return undefined;
@@ -628,21 +651,57 @@ export interface ConversationRoundOrigin {
   type: ConversationOriginType;
 }
 
-export interface RoundModelUsageStats {
+/**
+ * LLM usage of a single connector within a round.
+ */
+export interface ConnectorModelUsageStats {
   /**
-   * Id of the connector used for this round
+   * Id of the connector
    */
   connector_id: string;
   /**
-   * Number of LLM calls which were done during this round.
+   * Number of LLM calls done through this connector.
    */
   llm_calls: number;
   /**
-   * Total number of input tokens sent this round.
+   * Total number of input tokens sent to this connector.
    */
   input_tokens: number;
   /**
-   * Total number of output tokens received this round.
+   * Total number of output tokens received from this connector.
+   */
+  output_tokens: number;
+  /**
+   * Number of input tokens served from cache, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
+  /**
+   * Model identifier for this connector, if available.
+   */
+  model?: string;
+  /**
+   * Number of reasoning (thinking) tokens, when reported by the provider.
+   * Subset of `output_tokens`, not additive.
+   */
+  reasoning_tokens?: number;
+}
+
+export interface RoundModelUsageStats {
+  /**
+   * Id of the main connector used for this round
+   */
+  connector_id: string;
+  /**
+   * Number of LLM calls which were done during this round, across all connectors.
+   */
+  llm_calls: number;
+  /**
+   * Total number of input tokens sent this round, across all connectors.
+   */
+  input_tokens: number;
+  /**
+   * Total number of output tokens received this round, across all connectors.
    */
   output_tokens: number;
   /**
@@ -651,13 +710,25 @@ export interface RoundModelUsageStats {
    */
   cached_input_tokens?: number;
   /**
-   * Model identifier from the provider response, if available.
+   * Model identifier of the main connector from the provider response, if available.
    */
   model?: string;
   /**
    * Total input tokens (including cached) of the agent's last LLM call this round.
    */
   last_call_input_tokens?: number;
+  /**
+   * Number of reasoning (thinking) tokens this round, when reported by the provider.
+   * Subset of `output_tokens`, not additive.
+   */
+  reasoning_tokens?: number;
+  /**
+   * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
+   * top-level `llm_calls`, `input_tokens`, `output_tokens`, `cached_input_tokens` and
+   * `reasoning_tokens`. The last two are only set when at least one entry reports them.
+   * Absent on rounds persisted before the breakdown existed.
+   */
+  connectors?: ConnectorModelUsageStats[];
 }
 
 /**
@@ -678,10 +749,14 @@ export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
   usage.input_tokens === 0 &&
   usage.output_tokens === 0 &&
   usage.cached_input_tokens === undefined &&
-  usage.model === undefined;
+  usage.model === undefined &&
+  usage.connectors === undefined;
 
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
+/** Maximum accepted length for a user chat message (`input` / `message`) */
+export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;
@@ -691,6 +766,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  * Conversation ids are UUIDs, so this should be more than enough.
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
+
+/** Maximum length of the display name a workflow may record on a user message it writes. */
+export const USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH = 256;
 
 /** Maximum accepted length for a conversation metadata key */
 export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
@@ -730,6 +808,8 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /** The run lock held by the conversation's current execution. */
+  active_execution?: ActiveExecution;
   /**
    * Identifier of the bash/VFS workspace for this conversation.
    */
@@ -759,13 +839,8 @@ export interface Conversation {
   events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
-}
-
-export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
-
-export interface TodoItem {
-  content: string;
-  status: TodoStatus;
+  /** Per-execution feedback submitted by the user. Keyed by execution id. */
+  feedback?: Record<string, ConversationRoundFeedback>;
 }
 
 /**
@@ -787,8 +862,6 @@ export interface ConversationInternalState {
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
   background_executions?: Record<string, BackgroundExecutionState>;
-  /** Active todo list for the current conversation. Replaced wholesale on each write. */
-  todos?: TodoItem[];
   /**
    * Map of persistent sub-agent name → sub agent entry describing the sub agent/run.
    */

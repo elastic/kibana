@@ -27,7 +27,9 @@ export const updatePipeline = async ({
   pipeline,
   http,
 }: PostPipelineArgs): Promise<PostPipelineResponse> => {
-  const route = `/internal/content_connectors/connectors/${connectorId}/pipeline`;
+  const route = `/internal/content_connectors/connectors/${encodeURIComponent(
+    connectorId
+  )}/pipeline`;
 
   await http?.put(route, {
     body: JSON.stringify(pipeline),

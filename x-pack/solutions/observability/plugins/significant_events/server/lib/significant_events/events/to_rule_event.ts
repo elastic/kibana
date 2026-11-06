@@ -6,8 +6,10 @@
  */
 
 import type { CreateAlertEventData } from '@kbn/alerting-v2-schemas';
-import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
-import type { SignificantEvent } from './data_stream';
+import {
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  type SignificantEvent,
+} from '@kbn/significant-events-schema';
 
 /**
  * Maps a SignificantEvent to the CreateAlertEventData payload accepted by
@@ -28,7 +30,7 @@ export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
       title: event.title,
       summary: event.summary,
       confidence: event.confidence,
-      stream_names: event.stream_names,
+      source_ids: event.source_ids,
       symptom_hypothesis: event.symptom_hypothesis,
       assessment_note: event.assessment_note,
       signals: event.signals,

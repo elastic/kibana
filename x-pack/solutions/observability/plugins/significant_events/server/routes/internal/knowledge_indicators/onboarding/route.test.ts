@@ -11,6 +11,7 @@ import {
   NightshiftModelNotFoundError,
   SignificantEventsWorkflowStatus,
 } from '@kbn/significant-events-schema';
+import { forbidden } from '@hapi/boom';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { internalKIOnboardingRoutes } from './route';
 
@@ -28,7 +29,11 @@ jest.mock('@kbn/nightshift-ai', () => ({
     mockResolveNightshiftModelForRequest(options),
 }));
 
-const route = internalKIOnboardingRoutes['POST /internal/streams/{streamName}/onboarding/_execute'];
+const route = internalKIOnboardingRoutes['POST /internal/streams/{sourceId}/onboarding/_execute'];
+const bulkStatusRoute =
+  internalKIOnboardingRoutes['POST /internal/streams/onboarding/_bulk_status'];
+const statusRoute =
+  internalKIOnboardingRoutes['GET /internal/streams/{sourceId}/onboarding/_status'];
 type HandlerParams = Parameters<typeof route.handler>[0];
 
 const makeHandlerParams = ({
@@ -39,7 +44,9 @@ const makeHandlerParams = ({
   connectors?: { features?: string; queries?: string };
 } = {}) => {
   const run = jest.fn().mockResolvedValue({ executionId: 'execution-1' });
-  const ensureStream = jest.fn().mockResolvedValue(undefined);
+  const getSource = jest
+    .fn()
+    .mockResolvedValue({ source: { id: 'logs.test', slug: 'logs-test', enabled: true } });
   const request = {};
   const server = {
     inference: {},
@@ -50,7 +57,7 @@ const makeHandlerParams = ({
   return {
     handlerParams: {
       params: {
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         body: {
           action: 'schedule',
           from: 1,
@@ -62,13 +69,13 @@ const makeHandlerParams = ({
       request,
       getScopedClients: jest.fn().mockResolvedValue({
         licensing,
-        streamsClient: { ensureStream },
+        sourcesClient: { get: getSource },
       }),
       server,
       workflowClients: { streamsKIsOnboardingClient: { run } },
       maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
     } as unknown as HandlerParams,
-    ensureStream,
+    getSource,
     licensing,
     request,
     run,
@@ -83,7 +90,7 @@ beforeEach(() => {
 it('bounds per-step connector overrides', () => {
   expect(
     route.params.safeParse({
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         action: 'schedule',
         from: '2026-01-01T00:00:00.000Z',
@@ -111,7 +118,8 @@ it('resolves strict overrides and forwards canonical connector IDs', async () =>
   );
   expect(run).toHaveBeenCalledWith({
     inputs: {
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
+      sourceSlug: 'logs-test',
       features: {
         skip: false,
         start: 1,
@@ -157,4 +165,203 @@ it('maps an unknown strict override to a 400 response', async () => {
     output: { statusCode: 400 },
   });
   expect(run).not.toHaveBeenCalled();
+});
+
+describe('onboardingBulkStatusRoute', () => {
+  it('returns not_started for ids outside the space catalog', async () => {
+    const getStatuses = jest.fn().mockResolvedValue({
+      'source-a': {
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'exec-1',
+      },
+    });
+    const handlerParams = {
+      params: { body: { sourceIds: ['source-a', 'other-space-source'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [{ id: 'source-a', slug: 'slug-a' }],
+            total: 1,
+            page: 1,
+            per_page: 10_000,
+          }),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { getStatuses },
+      },
+    } as unknown as Parameters<typeof bulkStatusRoute.handler>[0];
+
+    const result = await bulkStatusRoute.handler(handlerParams);
+
+    expect(getStatuses).toHaveBeenCalledWith({
+      sources: [{ id: 'source-a', slug: 'slug-a' }],
+      request: handlerParams.request,
+    });
+    expect(result).toEqual({
+      'source-a': {
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'exec-1',
+      },
+      'other-space-source': {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      },
+    });
+    expect(assertSignificantEventsAccess).toHaveBeenCalled();
+  });
+});
+
+describe('onboardingExecuteRoute', () => {
+  it('rejects scheduling a disabled source', async () => {
+    const run = jest.fn();
+    const handlerParams = {
+      params: {
+        path: { sourceId: 'source-a' },
+        body: { action: 'schedule', from: Date.now(), to: Date.now(), steps: [] },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'source-a', enabled: false },
+          }),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { run },
+      },
+      maintenanceService: { getState: jest.fn() },
+    } as unknown as HandlerParams;
+
+    const error = await route.handler(handlerParams).catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({
+      message: 'Cannot schedule onboarding for a disabled source',
+      output: { statusCode: 400 },
+    });
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it('answers a cancel only after the source runs have stopped', async () => {
+    const order: string[] = [];
+    const cancel = jest.fn(async () => {
+      order.push('cancel');
+    });
+    const waitForSourceRunsToStop = jest.fn(async () => {
+      order.push('wait');
+      return true;
+    });
+    const getStatus = jest.fn(async () => {
+      order.push('status');
+      return { status: 'canceled', executionId: 'exec-1' };
+    });
+    const handlerParams = {
+      params: { path: { sourceId: 'source-a' }, body: { action: 'cancel' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'source-a', slug: 'a', enabled: true, esql_updated_at: '2026-01-01' },
+          }),
+          assertReadable: jest.fn().mockResolvedValue(undefined),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { cancel, waitForSourceRunsToStop, getStatus },
+      },
+      maintenanceService: { getState: jest.fn() },
+    } as unknown as HandlerParams;
+
+    await route.handler(handlerParams);
+
+    expect(order).toEqual(['cancel', 'wait', 'status']);
+    expect(waitForSourceRunsToStop).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceId: 'source-a' })
+    );
+  });
+
+  describe('stored output of a completed run', () => {
+    const completed = {
+      status: SignificantEventsWorkflowStatus.Completed,
+      executionId: 'exec-1',
+      features: { discovered: ['f1'] },
+      queries: { persisted: ['q1'] },
+      keepAlive: { kept: 1 },
+    };
+    const setup = ({ readable }: { readable: boolean }) => {
+      const getStatus = jest.fn().mockResolvedValue(completed);
+      const assertReadable = jest.fn(async () => {
+        if (!readable) {
+          throw forbidden('Cannot read source');
+        }
+      });
+      const base = {
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          sourcesClient: {
+            get: jest.fn().mockResolvedValue({
+              source: { id: 'source-a', slug: 'a', enabled: true, esql_updated_at: '2026-01-01' },
+            }),
+            assertReadable,
+          },
+        }),
+        server: {},
+        workflowClients: {
+          streamsKIsOnboardingClient: {
+            cancel: jest.fn(),
+            waitForSourceRunsToStop: jest.fn().mockResolvedValue(true),
+            getStatus,
+          },
+        },
+        maintenanceService: { getState: jest.fn() },
+      };
+      return { base, getStatus };
+    };
+
+    it('does not return the status of a source the caller cannot read', async () => {
+      const { base, getStatus } = setup({ readable: false });
+
+      await expect(
+        statusRoute.handler({
+          ...base,
+          params: { path: { sourceId: 'source-a' } },
+        } as unknown as Parameters<typeof statusRoute.handler>[0])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(getStatus).not.toHaveBeenCalled();
+    });
+
+    it('returns the output of a source the caller can read', async () => {
+      const { base } = setup({ readable: true });
+
+      await expect(
+        statusRoute.handler({
+          ...base,
+          params: { path: { sourceId: 'source-a' } },
+        } as unknown as Parameters<typeof statusRoute.handler>[0])
+      ).resolves.toEqual(completed);
+    });
+
+    it('drops the stored output from the cancel response when the caller cannot read the source', async () => {
+      const { base } = setup({ readable: false });
+
+      await expect(
+        route.handler({
+          ...base,
+          params: { path: { sourceId: 'source-a' }, body: { action: 'cancel' } },
+        } as unknown as HandlerParams)
+      ).resolves.toEqual({
+        status: SignificantEventsWorkflowStatus.Completed,
+        executionId: 'exec-1',
+      });
+    });
+  });
 });

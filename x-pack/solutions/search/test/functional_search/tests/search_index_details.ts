@@ -42,8 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const indexWithoutDataName = 'search-empty-index';
   const indexDoesNotExistName = 'search-not-found';
 
-  // Failing: See https://github.com/elastic/kibana/issues/248780
-  describe.skip('Search index details page', function () {
+  describe('Search index details page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
@@ -76,16 +75,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
-        it('should have breadcrumbs', async () => {
-          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable(
-            'Index Management'
-          );
-          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Indices');
-
-          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Indices');
-          await pageObjects.indexManagement.expectToBeOnIndexManagement();
-
-          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Index Management');
+        it('should navigate back to the indices list', async () => {
+          await pageObjects.searchIndexDetailsPage.clickBackToIndicesList();
           await pageObjects.indexManagement.expectToBeOnIndexManagement();
 
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);

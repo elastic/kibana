@@ -38,6 +38,13 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
 const isIncluded = ({ id, level }: OasdiffEntry): boolean =>
   !isIgnoredRule(id) && (level >= 3 || isPromotedRule(id) || isReportOnlyRule(id));
 
+/**
+ * Whether a rule's `source` is a location in the spec. Kibana's own `kbn:` rules
+ * set it to a JSON pointer. oasdiff sets it to the path of the spec file it read,
+ * which changes per CI agent and per distribution, so it can't identify a change.
+ */
+export const hasLocationSource = (oasdiffId: string): boolean => oasdiffId.startsWith('kbn:');
+
 const mapEntryToBreakingChange = ({
   id,
   path,
@@ -53,7 +60,7 @@ const mapEntryToBreakingChange = ({
     method: type === 'path_removed' ? undefined : operation,
     reason: text,
     oasdiffId: id,
-    source,
+    ...(hasLocationSource(id) ? { source } : {}),
     ...(policy?.disposition === 'report_only'
       ? { reportOnly: true, policyReason: policy.reason }
       : {}),

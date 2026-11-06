@@ -140,7 +140,31 @@ describe('ActionPolicySavedObjectService', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockSoClient.update.mockResolvedValue({
+        id: 'policy-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: mockAttrs,
+        references: [],
+        version: 'v2',
+      });
+    });
+
     it('updates the saved object and returns id and version', async () => {
+      const result = await service.update({ id: 'policy-1', attrs: mockAttrs, version: 'v1' });
+
+      expect(result).toEqual({ id: 'policy-1', version: 'v2' });
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-1',
+        mockAttrs,
+        { version: 'v1', mergeAttributes: false }
+      );
+    });
+  });
+
+  describe('patchFields', () => {
+    it('merges server-owned fields onto the stored document', async () => {
       mockSoClient.update.mockResolvedValue({
         id: 'policy-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -149,14 +173,13 @@ describe('ActionPolicySavedObjectService', () => {
         version: 'v2',
       });
 
-      const result = await service.update({ id: 'policy-1', attrs: mockAttrs, version: 'v1' });
+      const result = await service.patchFields({ id: 'policy-1', attrs: { enabled: false } });
 
       expect(result).toEqual({ id: 'policy-1', version: 'v2' });
       expect(mockSoClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         'policy-1',
-        mockAttrs,
-        { version: 'v1' }
+        { enabled: false }
       );
     });
   });
@@ -507,6 +530,36 @@ describe('ActionPolicySavedObjectService', () => {
         perPage: 1000,
         filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
       });
+    });
+
+    it('scopes the PIT finder to the given space ids', async () => {
+      mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
+        async *find() {},
+        close: mockClose,
+      } as any);
+
+      await service.findAllDecrypted({
+        filter: { enabled: true },
+        spaceIds: ['default', 'space-a'],
+      });
+
+      expect(
+        mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith({
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: ['default', 'space-a'],
+        perPage: 1000,
+        filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+      });
+    });
+
+    it('returns no policies without opening a PIT finder when spaceIds is empty', async () => {
+      const result = await service.findAllDecrypted({ spaceIds: [] });
+
+      expect(result).toEqual([]);
+      expect(
+        mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).not.toHaveBeenCalled();
     });
 
     it('returns attributes and namespaces for successful documents', async () => {

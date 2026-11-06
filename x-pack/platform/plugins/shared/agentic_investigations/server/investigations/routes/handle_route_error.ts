@@ -8,6 +8,8 @@
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { WrongTemplateError } from '../../assignments/assignments_service';
+import { InvestigationAttachmentInvalidRequestError } from '../../investigation_attachments';
+import { InvestigationsForbiddenError } from '../services/investigations_forbidden_error';
 import { MissingDismissReasonError } from '../services/investigation_status_service';
 import { CloseTargetsChangedError } from '../services/close_targets_changed_error';
 import { ProposalDismissFailedError } from '../services/proposal_dismiss_failed_error';
@@ -19,6 +21,14 @@ export const handleInvestigationRouteError = (
 ) => {
   if (error instanceof WrongTemplateError) {
     return response.notFound({ body: { message: error.message } });
+  }
+
+  if (error instanceof InvestigationsForbiddenError) {
+    return response.forbidden({ body: { message: error.message } });
+  }
+
+  if (error instanceof InvestigationAttachmentInvalidRequestError) {
+    return response.badRequest({ body: { message: error.message } });
   }
 
   if (error instanceof MissingDismissReasonError) {

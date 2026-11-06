@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export { EVENTS_DATA_STREAM, eventsDataStream, eventsMappings } from './data_stream';
 export { DEFAULT_EVENTS_SEARCH_FROM, DEFAULT_EVENTS_SEARCH_TO } from './constants';
-export type { SignificantEvent, StoredEvent } from './data_stream';
+export type { SignificantEvent } from '@kbn/significant-events-schema';
 export { RuleEventsClient } from './rule_events_client';
 export { toRuleEvent } from './to_rule_event';
 export type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';

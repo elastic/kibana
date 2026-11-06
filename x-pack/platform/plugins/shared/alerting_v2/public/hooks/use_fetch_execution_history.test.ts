@@ -31,7 +31,6 @@ const item: PolicyExecutionHistoryItem = {
   alerts: [],
   action_group_count: 1,
   workflows: [],
-  error: null,
 };
 
 const createWrapper = () => {
@@ -65,7 +64,6 @@ describe('useFetchExecutionHistory', () => {
       page: 2,
       per_page: 25,
       total: 0,
-      search_matches: null,
     });
 
     renderHook(
@@ -92,7 +90,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 1,
-      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 
@@ -122,7 +119,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 0,
-      search_matches: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -136,7 +132,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 0,
-      search_matches: null,
     });
   });
 
@@ -146,7 +141,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 0,
-      search_matches: null,
     });
 
     const { rerender } = renderHook(

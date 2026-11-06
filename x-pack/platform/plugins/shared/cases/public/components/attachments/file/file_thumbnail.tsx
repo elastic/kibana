@@ -15,7 +15,7 @@ import { useFilePreview } from './use_file_preview';
 import { FilePreview } from './file_preview';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
-import type { FileAttachmentMetadata } from '../../../../common/types/domain_zod/attachment/file/v2';
+import type { FileAttachmentMetadata } from '../../../../common/types/domain/attachment/file/v2';
 import { getFileFromReferenceMetadata } from './utils';
 
 const componentStyle: EuiImageProps['css'] = { cursor: 'pointer' };

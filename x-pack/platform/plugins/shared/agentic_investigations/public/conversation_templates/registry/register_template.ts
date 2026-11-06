@@ -7,7 +7,11 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { RenderAssignees, RenderStatus } from '@kbn/agentic-investigations-common';
+import type {
+  FlyoutGroupedAttachmentsRegistry,
+  RenderAssignees,
+  RenderStatus,
+} from '@kbn/agentic-investigations-common';
 import { EscalationModalBoundary } from '../shared/escalation_modal/escalation_modal_boundary';
 import type {
   TemplateDefinition,
@@ -21,6 +25,9 @@ export interface RegisterTemplateOptions {
   startDeps: TemplateStartDependencies;
   /** `xpack.agenticInvestigations.escalations.enabled`. */
   escalationsEnabled: boolean;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
+  getImpactEntityOpener: TemplateRegistrationContext['getImpactEntityOpener'];
   templates: readonly TemplateDefinition[];
 }
 
@@ -33,6 +40,8 @@ export const registerTemplate = ({
   core,
   startDeps,
   escalationsEnabled,
+  groupedAttachments,
+  getImpactEntityOpener,
   templates,
 }: RegisterTemplateOptions): void => {
   const services: TemplateServices = { ...core, ...startDeps };
@@ -106,8 +115,10 @@ export const registerTemplate = ({
     services,
     escalationsEnabled,
     makeLazyWithProviders,
+    groupedAttachments,
     renderAssignees,
     renderStatus,
+    getImpactEntityOpener,
   };
 
   for (const { templateId, register } of templates) {

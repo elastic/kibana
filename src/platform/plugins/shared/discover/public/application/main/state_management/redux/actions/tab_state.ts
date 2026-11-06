@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction, isEqual } from 'lodash';
+import { isFunction, isEqual, omit } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataSource } from '@kbn/data-source';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerShareableState } from '@kbn/unified-doc-viewer';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -37,6 +38,7 @@ import {
   ExpandedDocLinkability,
   getExpandedDocLinkability,
   getExpandedDocRef,
+  matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
 import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
@@ -66,7 +68,7 @@ import type {
   TabState,
   UpdateESQLQueryActionPayload,
 } from '../types';
-import { appendAdHocDataViews } from './data_views';
+import { appendAdHocDataViews, loadDataViewListOnce } from './data_views';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
@@ -89,7 +91,11 @@ const mergeAppState = (
   { tabId, appState }: AppStatePayload
 ) => {
   const currentAppState = selectTab(currentState, tabId).appState;
-  const mergedAppState = { ...currentAppState, ...appState };
+  const nextAppState = { ...currentAppState, ...appState };
+  // The shareable doc viewer state is only restorable alongside an expanded document reference.
+  const mergedAppState: DiscoverAppState = nextAppState.expandedDoc
+    ? nextAppState
+    : omit(nextAppState, 'docViewerState');
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
@@ -154,7 +160,52 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
       return;
     }
 
-    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
+    // Compare identities rather than references, since a shared link may omit the routing.
+    const isSameDocument = Boolean(
+      expandedDoc &&
+        appState.expandedDoc &&
+        matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
+    );
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          expandedDoc: nextExpandedDocRef,
+          // The shareable doc viewer state belongs to the document it was captured for.
+          ...(isSameDocument ? {} : { docViewerState: undefined }),
+        },
+      })
+    );
+  };
+
+type DocViewerShareableStatePayload = TabActionPayload<{
+  docViewerState: DocViewerShareableState | undefined;
+}>;
+
+/**
+ * Synchronizes the shareable doc viewer state to the URL, only while a linkable document is expanded.
+ * Replaces URL history rather than pushing, so frequent in-flyout changes (tab or nested navigation)
+ * do not flood the browser back stack.
+ */
+export const setDocViewerShareableState: InternalStateThunkActionCreator<
+  [DocViewerShareableStatePayload],
+  Promise<void>
+> = (payload) =>
+  async function setDocViewerShareableStateThunkFn(dispatch, getState) {
+    const { tabId, docViewerState } = payload;
+    const { appState } = selectTab(getState(), tabId);
+
+    // The state is only restorable alongside a shared document reference.
+    const nextDocViewerState = appState.expandedDoc ? docViewerState : undefined;
+
+    if (isEqual(appState.docViewerState, nextDocViewerState)) {
+      return;
+    }
+
+    await dispatch(
+      updateAppStateAndReplaceUrl({ tabId, appState: { docViewerState: nextDocViewerState } })
+    );
   };
 
 /**
@@ -451,70 +502,85 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
     getState,
     { services, runtimeStateManager }
   ) {
-    // Mark all profile app state default fields to reset when transitioning to data view mode
-    dispatch(
-      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
-        tabId,
-        fieldsToReset: 'all',
-      })
-    );
+    dispatch(internalStateSlice.actions.setIsDataViewLoading({ tabId, isDataViewLoading: true }));
 
-    // If currently in ES|QL mode, find or create a proper (non-ESQL_TYPE) DataView for the
-    // FROM index pattern so Classic mode shows the right index — not the default DataView.
-    // The EsqlSource carries the index pattern as .title; no need to re-parse the query string.
-    let dataView = fallbackDataView;
-    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentSource = currentDataSource$.getValue();
-    if (currentSource?.kind === 'esql') {
-      try {
-        const savedDataViews = await services.dataViews.getIdsWithTitle();
-        const match = savedDataViews.find((dv) => dv.title === currentSource.title);
-        if (match?.id) {
-          dataView = await services.dataViews.get(match.id);
-        } else {
-          const adHocDataView = await services.dataViews.create({
-            title: currentSource.title,
-            timeFieldName: currentSource.timeFieldName,
-          });
-          await services.dataViews.refreshFields(adHocDataView);
-          dispatch(appendAdHocDataViews(adHocDataView));
-          dataView = adHocDataView;
-        }
-      } catch {
-        // fall through to fallbackDataView
-      }
+    try {
+      await dispatch(loadDataViewListOnce());
+
+      if (!selectTab(getState(), tabId)) return;
+
+      // Mark all profile app state default fields to reset when transitioning to data view mode
+      dispatch(
+        internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
+          tabId,
+          fieldsToReset: 'all',
+        })
+      );
+
+      const dataView = await dispatch(resolveClassicDataView({ tabId, fallbackDataView }));
+
+      const sort = getDefaultSort(
+        dataView,
+        services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+        services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+        false
+      );
+
+      dispatch(
+        updateAppState({
+          tabId,
+          appState: {
+            expandedDoc: undefined,
+            query: {
+              language: 'kuery',
+              query: '',
+            },
+            columns: [],
+            sort,
+            dataSource: {
+              type: DataSourceType.DataView,
+              dataViewId: dataView.id ?? '',
+            },
+          },
+        })
+      );
+
+      services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+        currentMode: 'classic',
+        defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+      });
+    } finally {
+      dispatch(
+        internalStateSlice.actions.setIsDataViewLoading({ tabId, isDataViewLoading: false })
+      );
     }
+  };
 
-    const sort = getDefaultSort(
-      dataView,
-      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-      false
-    );
+const resolveClassicDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ fallbackDataView: DataView }>],
+  Promise<DataView>
+> =
+  ({ tabId, fallbackDataView }) =>
+  async (dispatch, getState, { services, runtimeStateManager }) => {
+    const source = selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue();
+    if (source?.kind !== 'esql') return fallbackDataView;
 
-    dispatch(
-      updateAppState({
-        tabId,
-        appState: {
-          expandedDoc: undefined,
-          query: {
-            language: 'kuery',
-            query: '',
-          },
-          columns: [],
-          sort,
-          dataSource: {
-            type: DataSourceType.DataView,
-            dataViewId: dataView.id ?? '',
-          },
-        },
-      })
-    );
+    try {
+      const match = getState().savedDataViews.find((dataView) => dataView.title === source.title);
+      if (match?.id) {
+        return await services.dataViews.get(match.id);
+      }
 
-    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
-      currentMode: 'classic',
-      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
-    });
+      const dataView = await services.dataViews.create({
+        title: source.title,
+        timeFieldName: source.timeFieldName,
+      });
+      await services.dataViews.refreshFields(dataView);
+      dispatch(appendAdHocDataViews(dataView));
+      return dataView;
+    } catch {
+      return fallbackDataView;
+    }
   };
 
 /**
@@ -557,7 +623,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
           dataSource: {
             type: DataSourceType.Esql,
           },
-          columns: [],
+          // Not `[]`, which ES|QL reads as "suppress the query's default columns".
+          columns: undefined,
           sort: undefined,
         },
       })

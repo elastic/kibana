@@ -17,10 +17,8 @@ const validResponse = {
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { expression: 'host.name: "server-1"' },
-  group_by: ['host.name'],
-  grouping_mode: 'per_alert' as const,
-  throttle: { strategy: 'on_status_change' as const, interval: null },
-  snoozed_until: null,
+  grouping: { mode: 'per_field' as const, fields: ['host.name'] },
+  throttle: { strategy: 'on_status_change' as const },
   created_by: { profile_uid: 'user-1' },
   created_at: '2026-01-01T00:00:00.000Z',
   updated_by: { profile_uid: 'user-1' },
@@ -36,18 +34,11 @@ describe('actionPolicyResponseSchema', () => {
   it('accepts nullable fields as null', () => {
     const result = actionPolicyResponseSchema.parse({
       ...validResponse,
-      matcher: null,
-      group_by: null,
-      grouping_mode: null,
-      throttle: null,
-      snoozed_until: null,
       created_by: null,
       updated_by: null,
     });
-    expect(result.matcher).toBeNull();
-    expect(result.group_by).toBeNull();
-    expect(result.grouping_mode).toBeNull();
-    expect(result.throttle).toBeNull();
+    expect(result.created_by).toBeNull();
+    expect(result.updated_by).toBeNull();
   });
 
   it('rejects missing required fields', () => {

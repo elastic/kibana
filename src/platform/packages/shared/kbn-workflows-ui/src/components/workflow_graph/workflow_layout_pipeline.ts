@@ -8,16 +8,9 @@
  */
 
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
-import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
+import { dagLayout } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
-import {
-  buildContainerDescendants,
-  buildContainerMembers,
-  enforceForkBranchCompoundOrder,
-  enforceForkLaneOrder,
-  enforceTriggerLaneOrder,
-  reconcileEdgePoints,
-} from './enforce_lane_order';
+import { packCrossAxis } from './pack_workflow_structure';
 
 // Workflow-specific layout constants. These encode domain knowledge (foreach
 // header height, gutter widths) that does not belong in @kbn/dag-layout.
@@ -32,12 +25,16 @@ export interface LayoutSnapshot {
 }
 
 /**
- * Pure data pipeline: TransformResult → dagLayout → positioned nodes + edges.
+ * Pure data pipeline: TransformResult → dagLayout → packCrossAxis → positioned nodes + edges.
  *
- * Maps domain nodes/edges/groups to the @kbn/dag-layout format, runs the
- * layout engine, and derives `triggerNodeIds` / `leafNodeIds` from the domain
- * nodes. Throws on layout failure (e.g. a cyclic compound graph) — callers
- * are responsible for error handling and any perf instrumentation.
+ * Maps domain nodes/edges/groups to the @kbn/dag-layout format and runs the layout
+ * engine, which decides the main axis (ranks, sizes, container heights). The cross
+ * axis is then set from the workflow's block structure (see `packCrossAxis`), so forks,
+ * containers and lanes are placed by rule instead of being repaired afterwards. The
+ * engine's edge waypoints refer to its own cross positions, so they are dropped and
+ * edges are routed by `computeEdgePath` from the final handle positions.
+ * Throws on layout failure (e.g. a cyclic compound graph) — callers are responsible
+ * for error handling and any perf instrumentation.
  */
 export const computeWorkflowLayout = (
   transformed: TransformResult,
@@ -116,85 +113,14 @@ export const computeWorkflowLayout = (
     })),
   });
 
-  // Snapshot cross-axis centres immediately after dagLayout, before any
-  // post-dagre pass moves nodes. reconcileEdgePoints uses this to translate-or-
-  // clear edge waypoints after all position-mutating passes (Step 4).
-  const crossAxis = direction === 'TB' ? 'x' : 'y';
-  const initialCentres = new Map(
-    laid.nodes.map((n) => [n.id, crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2])
-  );
-
-  // Build two closure sets for post-dagre passes (see CONTEXT.md,
-  // "container members vs container descendants"):
-  //   - containerMembers: direct members only (for PAVA inner sweeps — nested
-  //     container bodies must not be separated as peers).
-  //   - containerDescendants: transitive closure (for outer-node exclusion,
-  //     carry-on-move, and any pass that moves a container as an opaque unit).
-  const containerMembers = buildContainerMembers(transformed.foreachGroups);
-  const containerDescendants = buildContainerDescendants(transformed.foreachGroups);
-
-  // Post-dagre pass 1: enforce fork lane declaration order.
-  // Runs once per graph (outer + each foreachGroup body) so containers move as
-  // opaque units — prevents inner nodes from detaching from their container.
-  const { nodes: orderedNodes, edges: orderedEdges } = enforceForkLaneOrder(
-    laid.nodes,
-    laid.edges,
-    transformed,
-    direction,
-    WORKFLOW_NODE_SEP,
-    containerDescendants
-  );
-
-  // Post-dagre pass 1b: pack fork branches as per-step micro-compounds.
-  // Each step's fallback hierarchy is placed contiguously next to that step,
-  // before the next branch starts — "invisible compound container" model.
-  // Runs after pass 1 (which enforces declaration order using spine-only widths)
-  // so this pass can assume branches are already in the correct cross-axis order.
-  const { nodes: compactedNodes, edges: compactedEdges } = enforceForkBranchCompoundOrder(
-    orderedNodes,
-    orderedEdges,
-    transformed,
-    direction,
-    WORKFLOW_NODE_SEP,
-    containerDescendants
-  );
-
-  // Post-dagre pass 2: enforce trigger lane declaration order.
-  const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
-    compactedNodes,
-    compactedEdges,
-    transformed.nodeRefs,
-    direction
-  );
-
-  // Post-dagre pass 3: order-preserving overlap repair.
-  // Packing is fork-local and can leave nested-fork nodes overlapping nodes
-  // outside the fork's own lanes. PAVA is order-preserving (never swaps two
-  // nodes), so it cannot undo the lane ordering from passes 1–2. Lane nodes
-  // are tagged `crossPinned: true` by dagLayout — PAVA treats them as immovable
-  // anchors so packing cannot narrow the reserved margin. On raw dagLayout
-  // output this is expected to be a no-op (verify with the seeded corpus).
-
-  // separatePositionedOverlapsInPlace mutates the array in place.
-  // Pass direct members as groupMemberIds (for inner PAVA sweeps) and the
-  // transitive closure as groupDescendantIds (for outer-node exclusion and
-  // carry-on-move) — these two roles require different granularities.
-  const repairedNodes = [...triggeredNodes];
-  separatePositionedOverlapsInPlace(
-    repairedNodes,
-    crossAxis,
-    WORKFLOW_NODE_SEP,
-    containerMembers,
-    containerDescendants
-  );
-
-  // Post-dagre pass 4: reconcile edge waypoints.
-  // Translate-or-clear based on how much each endpoint moved since dagLayout.
-  // NOTE: dagLayout now moves spine nodes on the main axis (spine push for
-  // reserved lanes — see ADR-0012). That push happens INSIDE dagLayout, before
-  // the snapshot, so the snapshot already captures post-push positions and this
-  // pass compares cross-axis deltas only, as before.
-  const finalEdges = reconcileEdgePoints(triggeredEdges, repairedNodes, initialCentres, crossAxis);
-
-  return { nodes: repairedNodes, edges: finalEdges };
+  return {
+    nodes: packCrossAxis({
+      structure: transformed.structure,
+      nodes: laid.nodes,
+      direction,
+      nodeSep: WORKFLOW_NODE_SEP,
+      compoundPadding: WORKFLOW_COMPOUND_PADDING,
+    }),
+    edges: laid.edges.map((edge) => ({ ...edge, points: [] })),
+  };
 };

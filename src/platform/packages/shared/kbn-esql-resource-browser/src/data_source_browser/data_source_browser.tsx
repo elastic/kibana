@@ -30,7 +30,7 @@ import { getDatasets, getESQLSources, getTimeseriesIndices, getViews } from '@kb
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
-import { DataSourceSelectionChange } from '../types';
+import { DataSourceSelectionChange, type DataSourceSelectionDetails } from '../types';
 import { useAllSources } from './use_all_sources';
 
 // Filter panel size constants
@@ -57,7 +57,11 @@ interface DataSourceBrowserProps {
   selectedSources?: string[];
   onClose: () => void;
   onCloseComplete?: () => void;
-  onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
+  onSelect: (
+    sourceName: string,
+    change: DataSourceSelectionChange,
+    details: DataSourceSelectionDetails
+  ) => void;
   position?: { top?: number; left?: number };
 }
 
@@ -214,6 +218,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         type: source.type,
         typeKey: getSourceTypeKey(source.type),
         title: source.title,
+        isView: source.isView === true,
       },
     }));
   }, [allSources, selectedSources]);
@@ -255,8 +260,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       const key = changedOption.key as string;
       const isAdding = changedOption.checked === 'on';
-
-      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
+      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove, {
+        isView: changedOption.data?.isView === true,
+      });
     },
     [onSelect]
   );

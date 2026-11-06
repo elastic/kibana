@@ -127,6 +127,8 @@ apiTest.describe(
           counter_aggregation: 'max',
           gauge_aggregation: 'min',
           histogram_percentile: 'p99',
+          grid_sort_field: 'recency',
+          grid_sort_direction: 'desc',
           data_source: {
             type: 'esql',
             query: 'TS metrics-* | LIMIT 10',

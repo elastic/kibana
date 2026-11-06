@@ -38,6 +38,10 @@ const meta: Meta<NodeViewModel> = {
     },
     expandButtonClick: { action: 'expandButtonClick' },
     toolbarItemsFn: { control: false },
+    isOrigin: {
+      control: { type: 'boolean' },
+      description: 'Origin entity — draws the starting point highlight ring',
+    },
   },
   args: {
     id: 'siem-windows',
@@ -58,6 +62,7 @@ const meta: Meta<NodeViewModel> = {
     icon: 'aws',
     interactive: true,
     toolbarItemsFn: storybookToolbarItems,
+    isOrigin: false,
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -95,6 +100,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
             'interactive',
             'expandButtonClick',
             'toolbarItemsFn',
+            'isOrigin',
           ]),
           position: { x: 0, y: 0 },
         },
@@ -109,6 +115,15 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
 
 export const Node: StoryObj<NodeViewModel> = {
   render: Template,
+};
+
+/** Origin entity with the starting point highlight ring. */
+export const OriginHighlight: StoryObj<NodeViewModel> = {
+  render: Template,
+  args: {
+    isOrigin: true,
+    count: 1,
+  },
 };
 
 export const Colors: StoryObj = {

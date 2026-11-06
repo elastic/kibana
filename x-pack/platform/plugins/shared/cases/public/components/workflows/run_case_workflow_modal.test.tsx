@@ -24,12 +24,14 @@ jest.mock('@kbn/workflows-ui', () => ({
     inputs,
     runWorkflow,
     showSuccessToast,
+    telemetry,
   }: {
     onClose: () => void;
     onExecutionSettled?: () => void;
     inputs: unknown;
     runWorkflow?: RunWorkflowExecutor;
     showSuccessToast?: boolean;
+    telemetry?: unknown;
   }) => (
     <div data-test-subj="run-workflow-panel-mock">
       <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
@@ -46,6 +48,7 @@ jest.mock('@kbn/workflows-ui', () => ({
       </button>
       <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
       <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+      <span data-test-subj="panel-telemetry">{JSON.stringify(telemetry)}</span>
     </div>
   ),
 }));
@@ -147,5 +150,19 @@ describe('RunCaseWorkflowModal', () => {
     render(<RunCaseWorkflowModal inputs={inputs} runWorkflow={mockExecutor} onClose={onClose} />);
 
     expect(screen.getByTestId('panel-show-success-toast').textContent).toBe('false');
+  });
+
+  it('forwards the telemetry context to RunWorkflowPanel', () => {
+    const telemetry = { origin: 'cases.case', itemCount: 1, owner: 'securitySolution' };
+    render(
+      <RunCaseWorkflowModal
+        inputs={inputs}
+        runWorkflow={mockExecutor}
+        onClose={onClose}
+        telemetry={telemetry}
+      />
+    );
+
+    expect(screen.getByTestId('panel-telemetry').textContent).toBe(JSON.stringify(telemetry));
   });
 });

@@ -20,6 +20,43 @@ const validOutput = {
 describe('enrichTaxonomy', () => {
   const logger = loggingSystemMock.createLogger();
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('uses the output already parsed by withStructuredOutput', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: validOutput,
+    });
+    const model = {
+      chatModel: {
+        withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
+      },
+      connector: { connectorId: 'test-connector' },
+    } as unknown as ScopedModel;
+
+    // Cannot spyOn taxonomyOutputSchema.parse: lazySchema is an immutable proxy.
+    await expect(enrichTaxonomy(model, logger, { text: 'body' })).resolves.toEqual(validOutput);
+  });
+
+  it('throws when structured output parsing fails', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: null,
+    });
+    const model = {
+      chatModel: {
+        withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
+      },
+      connector: { connectorId: 'test-connector' },
+    } as unknown as ScopedModel;
+
+    await expect(enrichTaxonomy(model, logger, { text: 'body' })).rejects.toThrow(
+      'enrich_taxonomy returned no parsed output'
+    );
+  });
+
   it('retries with a smaller context after a confirmed overflow', async () => {
     const overflow = new InferenceTaskError(
       ChatCompletionErrorCode.ContextLengthExceededError,

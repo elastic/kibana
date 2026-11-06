@@ -46,20 +46,19 @@ test.describe(
 
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-      // Verify overview section
-      const overviewSection = page.testSubj.locator('workflowExecutionOverview');
-      await expect(overviewSection).toBeVisible();
-      await expect(overviewSection.getByText('Execution started')).toBeVisible();
-      await expect(overviewSection.getByText('Execution ended')).toBeVisible();
+      // The flyout header shows when the run started and its result. Start/end copy
+      // from the previous overview panel is not part of this flyout.
+      await expect(page.testSubj.locator('workflowExecutionFlyoutStartedAt')).toBeVisible();
+      await expect(page.testSubj.locator('workflowExecutionStatus')).toHaveText('Success');
 
       await pageObjects.workflowExecution.expandStepsTree();
 
-      // Verify trigger section shows the manual input
-      const manualStep = await pageObjects.workflowExecution.getStep('manual');
-      await manualStep.click();
-      const triggerSection = page.testSubj.locator('workflowExecutionTrigger');
-      await expect(triggerSection).toBeVisible();
-      await expect(triggerSection.getByText('test message')).toBeVisible();
+      // Manual runs show their payload on the trigger row.
+      const inputsStep = await pageObjects.workflowExecution.getStep('Manual trigger');
+      await inputsStep.click();
+      expect(
+        await pageObjects.workflowExecution.getStepResultJson<{ message: string }>('input')
+      ).toStrictEqual(expect.objectContaining({ message: 'test message' }));
 
       // Verify execution tree structure
       const firstStepButton = await pageObjects.workflowExecution.getStep('first_step');
@@ -89,17 +88,14 @@ test.describe(
       ).toStrictEqual({ item: 2 });
 
       // Verify foreach produced 2 iterations
-      const logIterationButtons = pageObjects.workflowExecution.executionPanel.getByRole('button', {
-        name: 'log_iteration',
-      });
+      const logIterationButtons = pageObjects.workflowExecution.stepsByName('log_iteration');
       await expect(logIterationButtons).toHaveCount(2);
 
       const firstLogIteration = await pageObjects.workflowExecution.getStep(
         'loop > Iteration #0 > log_iteration'
       );
       await firstLogIteration.click();
-      let stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-      await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
+      await expect(pageObjects.workflowExecution.getStepResultSection('output')).toContainText(
         'Iteration is 0'
       );
 
@@ -107,8 +103,7 @@ test.describe(
         'loop > Iteration #1 > log_iteration'
       );
       await lastLogIteration.click();
-      stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-      await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
+      await expect(pageObjects.workflowExecution.getStepResultSection('output')).toContainText(
         'Iteration is 1'
       );
     });
@@ -130,20 +125,17 @@ test.describe(
 
       await pageObjects.workflowExecution.expandStepsTree();
 
-      const iterationSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
-        name: /^(?!foreach_).*hello_world_step/,
-      });
-      await expect(iterationSteps).toHaveCount(50);
+      // Iterations past the pin threshold fold into one gap. The latest iteration stays visible.
+      await expect(
+        pageObjects.workflowExecution.executionPanel.getByText('Show 49 more iterations')
+      ).toBeVisible();
 
       const afterForeachStep = await pageObjects.workflowExecution.getStep('after_foreach_step');
 
-      const foreachStep = await pageObjects.workflowExecution.getStep('foreach_loop');
-      const foreachArrow = foreachStep.locator('.euiTreeView__expansionArrow');
-
       // Collapse then re-expand the foreach loop
-      await foreachArrow.click();
+      await pageObjects.workflowExecution.toggleStepExpansion('foreach_loop');
       await expect(afterForeachStep).toBeVisible();
-      await foreachArrow.click();
+      await pageObjects.workflowExecution.toggleStepExpansion('foreach_loop');
 
       // Compare vertical positions: the post-foreach step must render
       // below the last iteration group, not interleaved among them.
@@ -151,15 +143,19 @@ test.describe(
         'foreach_loop > Iteration #49'
       );
       await lastIterationGroup.scrollIntoViewIfNeeded();
-      const lastIterationBox = await lastIterationGroup.boundingBox();
-
       await afterForeachStep.scrollIntoViewIfNeeded();
-      const afterForeachBox = await afterForeachStep.boundingBox();
 
-      expect(lastIterationBox).toBeTruthy();
-      expect(afterForeachBox).toBeTruthy();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guarded by the assertions above
-      expect(afterForeachBox!.y).toBeGreaterThan(lastIterationBox!.y);
+      await expect
+        .poll(async () => {
+          const lastIterationBox = await lastIterationGroup.boundingBox();
+          const afterForeachBox = await afterForeachStep.boundingBox();
+          return (
+            lastIterationBox !== null &&
+            afterForeachBox !== null &&
+            afterForeachBox.y >= lastIterationBox.y + lastIterationBox.height
+          );
+        })
+        .toBe(true);
     });
   }
 );

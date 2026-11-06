@@ -10,7 +10,7 @@ import type {
   UnifiedValueAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import type { AttachmentRequest, AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
@@ -88,40 +88,36 @@ export default ({ getService }: FtrProviderContext): void => {
     // for mapped type ids (EXTERNAL_REFERENCE_TYPE_MAP / PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP),
     // which route through the transformer to a registered unified type. An unmapped id
     // has no unified target and must be rejected — this replaces the removed
-    // custom-ER/PS-type registration coverage.
+    // custom-ER/PS-type registration coverage. Only `/comments` still accepts legacy shapes.
     describe('legacy wire shapes with an unmapped type', () => {
       it('400s for a legacy externalReference with an unmapped type id', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await bulkCreateAttachments({
+        await createComment({
           supertest,
           caseId: postedCase.id,
-          params: [
-            {
-              type: 'externalReference',
-              externalReferenceId: 'ref-id',
-              externalReferenceStorage: { type: 'elasticSearchDoc' },
-              externalReferenceAttachmentTypeId: 'not.mapped.external.reference',
-              externalReferenceMetadata: null,
-              owner: 'securitySolutionFixture',
-            } as unknown as AttachmentRequest,
-          ],
+          params: {
+            type: 'externalReference',
+            externalReferenceId: 'ref-id',
+            externalReferenceStorage: { type: 'elasticSearchDoc' },
+            externalReferenceAttachmentTypeId: 'not.mapped.external.reference',
+            externalReferenceMetadata: null,
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentRequestV2,
           expectedHttpCode: 400,
         });
       });
 
       it('400s for a legacy persistableState with an unmapped type id', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await bulkCreateAttachments({
+        await createComment({
           supertest,
           caseId: postedCase.id,
-          params: [
-            {
-              type: 'persistableState',
-              persistableStateAttachmentTypeId: 'not.mapped.persistable.state',
-              persistableStateAttachmentState: { foo: 'foo' },
-              owner: 'securitySolutionFixture',
-            } as unknown as AttachmentRequest,
-          ],
+          params: {
+            type: 'persistableState',
+            persistableStateAttachmentTypeId: 'not.mapped.persistable.state',
+            persistableStateAttachmentState: { foo: 'foo' },
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentRequestV2,
           expectedHttpCode: 400,
         });
       });

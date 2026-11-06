@@ -5,23 +5,69 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
+import type { AgentsStart } from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   connectorSetupAttachmentDataSchema,
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
+
+interface ConnectorSetupAttachmentTypeDeps {
+  getAgentsStart: () => Promise<AgentsStart>;
+  getActionsStart: () => Promise<ActionsPluginStart>;
+  logger: Logger;
+}
 
 /**
  * Server-side definition for the `connector_setup` attachment type.
+ *
+ * When the card records the created connector as its origin, the connector is added to the
+ * conversation's agent so the agent can call it.
  */
-export const createConnectorSetupAttachmentType = (): AttachmentTypeDefinition<
+export const createConnectorSetupAttachmentType = ({
+  getAgentsStart,
+  getActionsStart,
+  logger,
+}: ConnectorSetupAttachmentTypeDeps): AttachmentTypeDefinition<
   typeof CONNECTOR_SETUP_ATTACHMENT_TYPE,
   ConnectorSetupAttachmentData
 > => ({
   id: CONNECTOR_SETUP_ATTACHMENT_TYPE,
   isReadonly: true,
+  onOriginUpdated: async (attachment, { request, agentId, canManageAgents }) => {
+    if (!canManageAgents) {
+      throw new Error(
+        'The connector was created, but adding it to this agent requires the "Create and edit agents" privilege.'
+      );
+    }
+    const connectorId = attachment.origin;
+    // The origin is client-supplied: confirm the connector exists, is visible to the user, and
+    // use its real type. The agent can't call types without a spec (they only work in Workflows).
+    const actionsClient = await (await getActionsStart()).getActionsClientWithRequest(request);
+    const { actionTypeId } = await actionsClient.get({ id: connectorId });
+    if (!isChatCallableConnectorType(actionTypeId)) {
+      return;
+    }
+    const agentsStart = await getAgentsStart();
+    const registry = await agentsStart.getRegistry({ request });
+    const agent = await registry.get(agentId);
+    const currentIds = agent.configuration.connector_ids ?? [];
+    if (currentIds.includes(connectorId)) {
+      return;
+    }
+    await registry.update(agentId, {
+      configuration: { connector_ids: [...currentIds, connectorId] },
+    });
+    logger.debug(`Added connector ${connectorId} to agent ${agentId}`);
+  },
   validate: (input) => {
     const parsed = connectorSetupAttachmentDataSchema.safeParse(input);
     if (parsed.success) {
@@ -44,11 +90,68 @@ export const createConnectorSetupAttachmentType = (): AttachmentTypeDefinition<
         const value = [
           `Connector setup card shown to the user for: ${displayName} (${connectorType}).`,
           'The user enters configuration and secrets in the connector form; those never appear in chat.',
-          'Once the user creates the connector it becomes available automatically — you do not need to ask for the connector id.',
+          'Once the user creates the connector it is added to this agent automatically, if they have permission to edit agents — you do not need to ask for the connector id.',
           'After the user confirms it is set up, proceed using the connector tools on a later turn.',
         ].join('\n');
         return { type: 'text', value };
       },
+    };
+  },
+  toSurfaceComposition: (
+    {
+      data: { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
+      origin,
+    },
+    { agentId, kibanaUrl }
+  ) => {
+    const displayName =
+      connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
+
+    const text =
+      reason ||
+      i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.surface.reason', {
+        defaultMessage: 'Configure the {displayName} connector so the agent can use it here.',
+        values: { displayName },
+      });
+
+    return {
+      type: 'view',
+      title: displayName,
+      subtitle: origin
+        ? i18n.translate(
+            'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.connected',
+            {
+              defaultMessage: 'Connected',
+            }
+          )
+        : i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.surface.setup', {
+            defaultMessage: 'Setup',
+          }),
+      body: [
+        { type: 'markdown', text },
+        ...(kibanaUrl
+          ? [
+              {
+                type: 'actions' as const,
+                buttons: [
+                  {
+                    label: i18n.translate(
+                      'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.configureInKibana',
+                      { defaultMessage: 'Configure in Kibana' }
+                    ),
+                    // The agent's connectors page assigns the connectors created there to the agent.
+                    url: toKibanaAppUrl(
+                      kibanaUrl,
+                      AGENT_BUILDER_APP_ID,
+                      `/agents/${encodeURIComponent(agentId)}/connectors`
+                    ),
+                    ...(origin ? {} : { primary: true }),
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
     };
   },
   getAgentDescription: () => {

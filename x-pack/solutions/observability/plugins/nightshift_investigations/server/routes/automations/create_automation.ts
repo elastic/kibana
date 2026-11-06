@@ -10,33 +10,34 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
+import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
 const triggerSchema = z.object({
-  rows: z.array(triggerRowSchema).min(1),
+  rows: z.array(triggerRowSchema).min(1).max(100),
 });
 
 const executionSchema = z.object({
-  promptTemplate: z.string().max(50000).optional(),
+  promptTemplate: promptTemplateSchema.optional(),
   reasoningMode: z.enum(['investigate', 'observe']).optional(),
   agentId: z.string().max(512).optional(),
   connectorId: z.string().max(512).optional(),
 });
 
-const completionSchema = z.object({
-  action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
-  targetMode: z.enum(['thread', 'channel', 'self']).optional(),
-  destination: z.string().max(500).optional(),
-});
-
 const runtimeSchema = z.object({
-  dailyDispatchLimit: z.number().int().min(0).optional(),
+  dailyDispatchLimit: z.number().int().min(1).optional(),
   timeoutSeconds: z.number().int().min(1).optional(),
   dedupeWindowSeconds: z.number().int().min(0).optional(),
   overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
 });
+
+// A username can be an opaque id (for example on Cloud), so prefer a name a person recognizes.
+const getAuthorName = (
+  user: { username: string; full_name?: string; email?: string } | null
+): string | undefined => user?.full_name?.trim() || user?.email?.trim() || user?.username;
 
 export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/automations',
@@ -57,11 +58,19 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       automationType: z.enum(['custom', 'managed']).optional(),
       trigger: triggerSchema,
       execution: executionSchema,
-      completion: completionSchema,
+      completions: z.array(automationCompletionSchema).max(10),
       runtime: runtimeSchema,
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    isUniversalAlertingAvailable,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -70,22 +79,29 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     const coreContext = await context.core;
     const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const now = new Date().toISOString();
     const attributes: NightshiftAutomationAttributes = {
       name: params.body.name,
       description: params.body.description,
       tags: params.body.tags,
-      author: coreContext.security.authc.getCurrentUser()?.username,
+      author: getAuthorName(coreContext.security.authc.getCurrentUser()),
       automationType: params.body.automationType ?? 'custom',
       isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
       execution: params.body.execution,
-      completion: params.body.completion,
+      completions: params.body.completions,
       runtime: params.body.runtime,
       createdAt: now,
       updatedAt: now,
     };
+
+    validateScheduledAutomation(attributes);
 
     const created = await soClient.create<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
@@ -94,7 +110,12 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml(created.id, attributes);
+      const yaml = generateWorkflowYaml({
+        automationId: created.id,
+        automation: attributes,
+        serviceAccountId,
+        universalAlerts: isUniversalAlertingAvailable(),
+      });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

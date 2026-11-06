@@ -12,7 +12,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { DiscoveriesPluginStartDeps } from '../../../../types';
 import { extractPipelineValidationData } from '../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
@@ -40,14 +40,16 @@ export interface WorkflowExecutionLookup {
   ) => Promise<WorkflowExecutionDto | null>;
 }
 
-const inputSchema = z.object({
-  execution_uuid: z
-    .string()
-    .min(1)
-    .describe(
-      `The Attack Discovery generation \`execution_uuid\` returned by the \`security.attack-discovery.run\` workflow step. Use this to check whether a previously-started generation has completed and to retrieve its discoveries.`
-    ),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    execution_uuid: z
+      .string()
+      .min(1)
+      .describe(
+        `The Attack Discovery generation \`execution_uuid\` returned by the \`security.attack-discovery.run\` workflow step. Use this to check whether a previously-started generation has completed and to retrieve its discoveries.`
+      ),
+  })
+);
 
 const buildResult = (
   partial: Partial<AttackDiscoveryStatusResult> & { execution_uuid: string }

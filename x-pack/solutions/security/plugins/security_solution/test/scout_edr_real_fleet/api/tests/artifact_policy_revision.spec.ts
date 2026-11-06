@@ -117,7 +117,7 @@ const waitForAppliedRevisionAtLeast = async (
 
 apiTest.describe(
   'Endpoint artifact changes on a live host',
-  { tag: ['@local-stateful-classic'] },
+  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
   () => {
     apiTest.afterEach(async ({ kbnClient, esClient, log }) => {
       await getEndpointArtifactsApiService({ kbnClient, esClient, log }).deleteList(

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
   DetectionService,
@@ -23,7 +24,7 @@ export interface SignificantEventsServices {
 
 export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
-  /** Reads Significant Events from `.rule-events`. Writes go through `AlertEventsClient`. */
+  /** Reads and writes Significant Events in `.rule-events`. */
   getEventSearchClient: () => Promise<RuleEventsClient>;
   /** Fire-and-forget workflow trigger emitter; undefined when workflows are unavailable. */
   emitTrigger: TriggerEmitter | undefined;
@@ -39,16 +40,30 @@ export function createSignificantEventsClients({
   services,
   dataStreams,
   esClient,
+  internalEsClient,
+  logger,
   space,
   triggerEmitter,
+  getAlertEventsClient,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
+  /** Reads Alerting v2's private `.alert-actions` index for operator deactivations. */
+  internalEsClient?: ElasticsearchClient;
+  logger?: Logger;
   space: string;
   triggerEmitter?: TriggerEmitter;
+  getAlertEventsClient: () => Promise<AlertEventsClientApi>;
 }): SignificantEventsClients {
-  const eventSearchClient = new RuleEventsClient({ esClient, space });
+  const eventSearchClient = new RuleEventsClient({
+    esClient,
+    internalEsClient,
+    logger,
+    space,
+    getAlertEventsClient,
+    emitTrigger: triggerEmitter,
+  });
 
   return {
     getDetectionClient: async () =>

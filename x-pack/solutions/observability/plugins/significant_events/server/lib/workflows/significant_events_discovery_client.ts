@@ -63,7 +63,7 @@ export class SignificantEventsDiscoveryClient {
     if (lastExecution && !isTerminalStatus(lastExecution.status)) {
       if (requestedConnectorId !== undefined) {
         throw new StatusError(
-          'A Significant Events discovery run is already active. Wait for it to finish or cancel it before starting another run with an explicit model.',
+          'A significant events discovery run is already active. Wait for it to finish or cancel it before starting another run with an explicit model.',
           409
         );
       }

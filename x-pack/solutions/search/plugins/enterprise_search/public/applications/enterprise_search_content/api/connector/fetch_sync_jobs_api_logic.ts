@@ -27,7 +27,9 @@ export const fetchSyncJobs = async ({
   size = 10,
   type,
 }: FetchSyncJobsArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/sync_jobs`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/sync_jobs`;
   const query = { from, size, type };
   return await HttpLogic.values.http.get<Paginate<ConnectorSyncJob>>(route, { query });
 };
