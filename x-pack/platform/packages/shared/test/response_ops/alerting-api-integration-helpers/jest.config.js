@@ -9,6 +9,6 @@ module.exports = {
   preset: '@kbn/jest/jest_node',
   rootDir: '../../../../../../..',
   roots: [
-    '<rootDir>/x-pack/platform/packages/shared/test/response_ops/alerting_api_integration_helpers',
+    '<rootDir>/x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers',
   ],
 };
