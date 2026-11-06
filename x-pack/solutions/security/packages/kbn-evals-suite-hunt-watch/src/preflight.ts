@@ -55,6 +55,13 @@ const SEARCH_INFERENCE_ENDPOINTS_API_VERSION = '1';
 /** The same plugin's `APIRoutes.GET_INFERENCE_CONNECTORS`, inlined for the same reason. */
 const INFERENCE_CONNECTORS_PATH = '/internal/search_inference_endpoints/connectors';
 
+/** The same plugin's `APIRoutes.PUT_INFERENCE_SETTINGS`, inlined for the same reason. */
+const INFERENCE_SETTINGS_PATH = '/internal/search_inference_endpoints/settings';
+
+interface InferenceSettingsResponse {
+  data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
+}
+
 const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
@@ -231,43 +238,86 @@ const BRIDGED_SETTING_IDS = [
 type PreviousSettings = Map<string, Record<string, unknown>>;
 
 /**
+ * Each bridged tier's saved per-feature endpoint rows, keyed by space id: `null` when the space
+ * had no `inference-settings` saved object at all. Restored by the cleanup.
+ */
+type PreviousTierPicks = Map<string, InferenceSettingsResponse['data'] | null>;
+
+/**
  * Bridges the subject model into the Worker. The tier features register with
  * `ignoreGlobalDefault: true` and recommended endpoints, so `genAiSettings:defaultAIConnector`
- * alone never reaches a tier. `genAiSettings:defaultAIConnectorOnly` makes every feature in the
- * space resolve to the default connector only, ahead of saved tier rows and recommendations.
+ * alone never reaches a tier, and `genAiSettings:defaultAIConnectorOnly` cannot be used either:
+ * it would 400-reject the judge's explicit connector calls in the default space. Instead each
+ * tier gets an operator-style pick through the per-space `inference-settings` saved object,
+ * which resolution consults before recommendations and `ignoreGlobalDefault`, in both the
+ * connectors route and the Worker's `endpoints.getForFeature` contract. The default-connector
+ * setting is still written (without `Only`) so non-tier consumers resolve to the subject too.
  *
- * Fills `previous` space by space before each write, so a write that throws partway still leaves
- * the cleanup everything it needs to put back.
+ * Fills `previousSettings` and `previousTierPicks` space by space before each write, so a write
+ * that throws partway still leaves the cleanup everything it needs to put back.
  */
 const bridgeSubjectModel = async ({
   fetch,
   log,
   connectorId,
-  previous,
+  previousSettings,
+  previousTierPicks,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
-  previous: PreviousSettings;
+  previousSettings: PreviousSettings;
+  previousTierPicks: PreviousTierPicks;
 }): Promise<void> => {
   for (const spaceId of EVAL_SPACE_IDS) {
     // The Worker stays enabled in every eval space between runs, and on a long-lived stack the
     // default space is the developer's own, so the cleanup restores values rather than clearing.
     const settings = await getUiSettings({ fetch, spaceId });
-    previous.set(
+    previousSettings.set(
       spaceId,
       Object.fromEntries(BRIDGED_SETTING_IDS.map((key) => [key, settings[key]?.userValue ?? null]))
     );
-    log.info(
-      `[hunt-watch] setting genAiSettings:defaultAIConnector="${connectorId}" and ` +
-        `genAiSettings:defaultAIConnectorOnly=true in space "${spaceId}"`
+
+    // A 404 means no saved picks exist yet; anything else set here must round-trip on cleanup.
+    let existingPicks: InferenceSettingsResponse['data'] | null = null;
+    try {
+      existingPicks = (
+        await fetch<InferenceSettingsResponse>(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+          method: 'GET',
+          headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+        })
+      ).data;
+    } catch (err) {
+      if (httpStatus(err) !== 404) throw err;
+    }
+    previousTierPicks.set(spaceId, existingPicks);
+
+    // Keep any non-tier picks the space already had; only the three AlertZero tiers move.
+    const keptFeatures = (existingPicks?.features ?? []).filter(
+      ({ feature_id }) => !ALERTZERO_TIER_FEATURE_IDS.includes(feature_id)
     );
+    const pinnedFeatures = ALERTZERO_TIER_FEATURE_IDS.map((feature_id) => ({
+      feature_id,
+      endpoints: [{ id: connectorId }],
+    }));
+
+    log.info(
+      `[hunt-watch] pinning Hunt tiers to "${connectorId}" via inference settings and setting ` +
+        `genAiSettings:defaultAIConnector="${connectorId}" in space "${spaceId}"`
+    );
+    await fetch(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+      method: 'PUT',
+      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+      body: JSON.stringify({ features: [...keptFeatures, ...pinnedFeatures] }),
+    });
     await setUiSettings({
       fetch,
       spaceId,
       changes: {
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: connectorId,
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
+        // Clear the flag rather than leaving it set: it survives as a user value and 400-blocks
+        // explicit connector calls (the judge's) until it is overwritten.
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
       },
     });
   }
@@ -565,6 +615,7 @@ export const runPreflight = async ({
   // The Security solution view is not reverted either, `default` included: the Worker stays
   // enabled there between runs. That is why `default` is only converted when CI=true.
   const previous: PreviousSettings = new Map();
+  const previousTierPicks: PreviousTierPicks = new Map();
   // Only spaces the bridge reached are restored, so a space it never wrote is left alone.
   const restoreConnectors: PreflightCleanup = async () => {
     for (const [spaceId, changes] of previous) {
@@ -578,12 +629,33 @@ export const runPreflight = async ({
         );
       }
     }
+    for (const [spaceId, picks] of previousTierPicks) {
+      try {
+        await fetch(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+          method: 'PUT',
+          headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+          body: JSON.stringify({ features: picks?.features ?? [] }),
+        });
+      } catch (err) {
+        log.warning(
+          `[hunt-watch] failed to restore the inference settings in space "${spaceId}": ${errorMessage(
+            err
+          )}`
+        );
+      }
+    }
   };
 
   // Every step below can throw, and a worker fixture that throws before `use()` never runs the
   // cleanup it would have returned, so the settings are put back here before the error leaves.
   try {
-    await bridgeSubjectModel({ fetch, log, connectorId, previous });
+    await bridgeSubjectModel({
+      fetch,
+      log,
+      connectorId,
+      previousSettings: previous,
+      previousTierPicks,
+    });
     await assertTiersResolveToSubject({
       fetch,
       log,

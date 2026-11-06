@@ -45,6 +45,13 @@ interface MockOverrides {
   previousDefaultConnectorBySpace?: Record<string, string>;
   /** `genAiSettings:defaultAIConnectorOnly` user value already set in a space before the preflight. */
   previousDefaultOnlyBySpace?: Record<string, boolean>;
+  /** Saved `inference-settings` features already present per space; absent spaces 404. */
+  previousInferenceSettingsBySpace?: Record<
+    string,
+    Array<{ feature_id: string; endpoints: Array<{ id: string }> }>
+  >;
+  /** Spaces whose inference-settings PUT fails (the settings GET and ui-settings writes succeed). */
+  inferenceSettingsWriteErrorSpaces?: string[];
   /** Spaces whose bridge and restore settings writes fail (index-scope writes still succeed). */
   settingsWriteErrorSpaces?: string[];
   /** Spaces that already exist, keyed by id, as the spaces GET returns them. Others 404. */
@@ -53,6 +60,11 @@ interface MockOverrides {
   spaceWrites?: Array<{ method: string; path: string; body: Record<string, unknown> }>;
   /** Receives every `changes` body POSTed to a space's settings route, keyed by space id. */
   settingsWrites?: Array<{ spaceId: string; changes: Record<string, unknown> }>;
+  /** Receives every `features` body PUT to a space's inference-settings route, keyed by space id. */
+  inferenceSettingsWrites?: Array<{
+    spaceId: string;
+    features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }>;
+  }>;
 }
 
 const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
@@ -63,14 +75,29 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     builtInRoleMissing = false,
     previousDefaultConnectorBySpace = {},
     previousDefaultOnlyBySpace = {},
+    previousInferenceSettingsBySpace = {},
+    inferenceSettingsWriteErrorSpaces = [],
     settingsWriteErrorSpaces = [],
     settingsWrites = [],
+    inferenceSettingsWrites = [],
     existingSpaces,
     spaceWrites = [],
   } = overrides;
 
   // What the bridge last wrote per space, so the connectors route can follow it like the server.
   const currentSettings: Record<string, Record<string, unknown>> = {};
+  // Saved tier picks per space, keyed `<spaceId> -> <featureId> -> endpoint id`, like the server's
+  // `inference-settings` saved object the preflight now reads and writes.
+  const inferenceSettingsBySpace: Record<
+    string,
+    Array<{ feature_id: string; endpoints: Array<{ id: string }> }>
+  > = Object.fromEntries(
+    Object.entries(previousInferenceSettingsBySpace).map(([spaceId, features]) => [
+      spaceId,
+      features.map((f) => ({ ...f, endpoints: [...f.endpoints] })),
+    ])
+  );
+  const tierPicksBySpace: Record<string, Record<string, string | undefined>> = {};
 
   return jest.fn(async (...args: unknown[]) => {
     const first = args[0];
@@ -140,15 +167,43 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     if (connectorsMatch && method === 'GET') {
       const spaceId = decodeURIComponent(connectorsMatch[1]);
       const key = `${spaceId}/${query?.featureId}`;
-      const current = currentSettings[spaceId] ?? {};
-      // Without `defaultAIConnectorOnly` the tiers fall to their recommended endpoints.
+      const pinned = tierPicksBySpace[spaceId]?.[query?.featureId ?? ''];
+      // Without a saved tier pick the tiers fall to their recommended endpoints.
       const resolved =
         key in tierResolutionOverrides
           ? tierResolutionOverrides[key]
-          : current[DEFAULT_ONLY_SETTING] === true
-          ? (current[DEFAULT_CONNECTOR_SETTING] as string)
-          : 'recommended-endpoint';
-      return { connectors: resolved ? [{ connectorId: resolved }] : [], soEntryFound: false };
+          : pinned ?? 'recommended-endpoint';
+      return {
+        connectors: resolved ? [{ connectorId: resolved }] : [],
+        soEntryFound: pinned != null,
+      };
+    }
+    const inferenceSettingsMatch =
+      /^\/s\/([^/]+)\/internal\/search_inference_endpoints\/settings$/.exec(path);
+    if (inferenceSettingsMatch) {
+      const spaceId = decodeURIComponent(inferenceSettingsMatch[1]);
+      if (method === 'GET') {
+        // Spaces with no saved picks 404, like the server does for a missing saved object.
+        const existing = inferenceSettingsBySpace[spaceId];
+        if (!existing) throw Object.assign(new Error('Not Found'), { status: 404 });
+        return { data: { features: existing } };
+      }
+      if (method === 'PUT') {
+        const { features } = JSON.parse(body ?? '{}') as {
+          features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }>;
+        };
+        inferenceSettingsWrites.push({
+          spaceId,
+          features: features.map((f) => ({ ...f, endpoints: [...f.endpoints] })),
+        });
+        if (inferenceSettingsWriteErrorSpaces.includes(spaceId)) {
+          throw Object.assign(new Error('Bad Request'), { status: 400 });
+        }
+        tierPicksBySpace[spaceId] = Object.fromEntries(
+          features.map((f) => [f.feature_id, f.endpoints[0]?.id])
+        );
+        return {};
+      }
     }
     if (/\/internal\/alertzero\/workers$/.test(path) && method === 'GET') {
       return {
@@ -380,18 +435,61 @@ describe('runPreflight', () => {
     ]);
   });
 
-  it('pins every eval space to the subject connector only, so the tiers cannot fall back to their recommended models', async () => {
+  it('pins every tier in every eval space to the subject connector through saved inference settings', async () => {
     const settingsWrites: MockOverrides['settingsWrites'] = [];
-    await run(buildMockFetch({ settingsWrites }));
+    const inferenceSettingsWrites: MockOverrides['inferenceSettingsWrites'] = [];
+    await run(buildMockFetch({ settingsWrites, inferenceSettingsWrites }));
 
+    expect(inferenceSettingsWrites.map(({ spaceId }) => spaceId)).toEqual([...EVAL_SPACE_IDS]);
+    for (const { features } of inferenceSettingsWrites) {
+      expect(features).toEqual(
+        expect.arrayContaining(
+          ['alertzero_efficient', 'alertzero_balanced', 'alertzero_frontier'].map((feature_id) => ({
+            feature_id,
+            endpoints: [{ id: CONNECTOR.id }],
+          }))
+        )
+      );
+    }
+    // The `Only` flag must be cleared, never set: it 400-rejects the judge's explicit connector.
     const bridged = settingsWrites.filter(({ changes }) => DEFAULT_ONLY_SETTING in changes);
     expect(bridged.map(({ spaceId }) => spaceId)).toEqual([...EVAL_SPACE_IDS]);
     for (const { changes } of bridged) {
       expect(changes).toEqual({
         [DEFAULT_CONNECTOR_SETTING]: CONNECTOR.id,
-        [DEFAULT_ONLY_SETTING]: true,
+        [DEFAULT_ONLY_SETTING]: false,
       });
     }
+  });
+
+  it('keeps non-tier picks a space already had and restores them alongside the tiers', async () => {
+    const inferenceSettingsWrites: MockOverrides['inferenceSettingsWrites'] = [];
+    const cleanup = await run(
+      buildMockFetch({
+        previousInferenceSettingsBySpace: {
+          'hunt-a': [
+            { feature_id: 'security_ai_detect_diagnose', endpoints: [{ id: 'ops-pick' }] },
+          ],
+        },
+        inferenceSettingsWrites,
+      })
+    );
+    const pinned = inferenceSettingsWrites.find(({ spaceId }) => spaceId === 'hunt-a');
+    expect(pinned?.features).toEqual(
+      expect.arrayContaining([
+        { feature_id: 'security_ai_detect_diagnose', endpoints: [{ id: 'ops-pick' }] },
+        { feature_id: 'alertzero_efficient', endpoints: [{ id: CONNECTOR.id }] },
+      ])
+    );
+    inferenceSettingsWrites.length = 0;
+    await cleanup();
+    // The space that had no saved object gets an empty features list, not a missing one.
+    expect(inferenceSettingsWrites.find(({ spaceId }) => spaceId === 'default')?.features).toEqual(
+      []
+    );
+    expect(inferenceSettingsWrites.find(({ spaceId }) => spaceId === 'hunt-a')?.features).toEqual([
+      { feature_id: 'security_ai_detect_diagnose', endpoints: [{ id: 'ops-pick' }] },
+    ]);
   });
 
   it('restores both bridged settings in each space to their previous values, not to null', async () => {
@@ -489,10 +587,12 @@ describe('runPreflight', () => {
 
   it('restores both bridged settings and never enables the Worker when a tier does not resolve to the subject', async () => {
     const settingsWrites: MockOverrides['settingsWrites'] = [];
+    const inferenceSettingsWrites: MockOverrides['inferenceSettingsWrites'] = [];
     const calls: string[] = [];
     const inner = buildMockFetch({
       tierResolutionOverrides: { 'hunt-a/alertzero_balanced': 'gpt-6-luna' },
       settingsWrites,
+      inferenceSettingsWrites,
     }) as unknown as jest.Mock;
     const fetch = jest.fn(async (...args: unknown[]) => {
       const first = args[0];
@@ -510,6 +610,12 @@ describe('runPreflight', () => {
         Object.fromEntries(EVAL_SPACE_IDS.map((spaceId) => [spaceId, null]))
       );
     }
+    // Each space the bridge reached gets its (empty) picks put back too: four bridge PUTs, then
+    // four restore PUTs once the assertion throws.
+    expect(inferenceSettingsWrites).toHaveLength(EVAL_SPACE_IDS.length * 2);
+    const restoreWrites = inferenceSettingsWrites.slice(-EVAL_SPACE_IDS.length);
+    expect(restoreWrites.map(({ spaceId }) => spaceId)).toEqual([...EVAL_SPACE_IDS]);
+    expect(restoreWrites.every(({ features }) => features.length === 0)).toBe(true);
   });
 
   it('accepts a tier that resolves to the inference endpoint behind a .inference stack connector', async () => {
