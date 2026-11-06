@@ -9,10 +9,7 @@ import type { Observable } from 'rxjs';
 import { distinctUntilChanged, EMPTY, map, merge, skip, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart, EmbeddableChatAccess } from '@kbn/agent-builder-browser';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  dashboardStateToAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import {
   ENHANCE_DASHBOARD_ACTION_ID,
   type DashboardApi,
@@ -22,6 +19,7 @@ import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { getDashboardsSkillBadge } from '../../common';
 import type { IdGenerator } from '../attachment_types';
+import { getDashboardAttachmentData } from '../attachment_types/dashboard_integration/apply_attachment';
 
 export const ENHANCE_DASHBOARD_PROMPT = `${getDashboardsSkillBadge()} ${i18n.translate(
   'xpack.agentBuilderDashboards.enhanceDashboard.prompt',
@@ -116,7 +114,7 @@ export const createEnhanceDashboardAction = ({
         id: draftAttachmentId.current,
         origin: dashboardApi.savedObjectId$.getValue(),
         type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
+        data: getDashboardAttachmentData(dashboardApi),
       };
 
       openChat({
