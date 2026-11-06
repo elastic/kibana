@@ -403,6 +403,44 @@ describe('FieldsMetadataClient class', () => {
       expect(fieldInstance).toBeUndefined();
     });
 
+    it('should not resolve the field from an integration if the fleet capabilities are missing (Fleet disabled)', async () => {
+      const clientWithoutFleetCapabilities = FieldsMetadataClient.create({
+        capabilities: {},
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      const fieldInstance = await clientWithoutFleetCapabilities.getByName(
+        'mysql.slowlog.filesort'
+      );
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field from an integration if only one of the fleet capabilities is present', async () => {
+      const clientWithPartialFleetCapabilities = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: true } },
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      const fieldInstance = await clientWithPartialFleetCapabilities.getByName(
+        'mysql.slowlog.filesort'
+      );
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
+    });
+
     it('should not resolve the field if the source is not allowed', async () => {
       // '_index' is a metadata field, but we filter for ECS sources only
       const fieldInstance = await fieldsMetadataClient.getByName('_index', {

@@ -24,8 +24,10 @@ import type {
 import type { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 
 interface FleetCapabilities {
-  fleet: Capabilities[string];
-  fleetv2: Capabilities[string];
+  // Both are optional: when the Fleet plugin is disabled its features are not
+  // registered, so the resolved capabilities object has neither key.
+  fleet?: Capabilities[string];
+  fleetv2?: Capabilities[string];
 }
 
 interface FieldsMetadataClientDeps {
@@ -205,7 +207,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   private hasFleetPermissions(capabilities: FleetCapabilities) {
     const { fleet, fleetv2 } = capabilities;
 
-    return fleet.read && fleetv2.read;
+    return Boolean(fleet?.read && fleetv2?.read);
   }
 
   private makeSourceValidator =
