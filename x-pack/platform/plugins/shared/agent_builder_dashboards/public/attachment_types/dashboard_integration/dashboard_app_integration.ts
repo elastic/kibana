@@ -52,13 +52,23 @@ export interface DashboardAppIntegrationParams {
   notifyOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
 }
 
+type VersionedDashboardAttachment = VersionedAttachment<
+  typeof DASHBOARD_ATTACHMENT_TYPE,
+  DashboardAttachmentData
+>;
+
 interface State {
-  attachments: DashboardAttachment[] | undefined;
-  versionedAttachments: Array<
-    VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData>
-  >;
+  versionedAttachments: VersionedDashboardAttachment[];
+  /** Agent updates not yet in the conversation, per attachment id. */
+  liveUpdates: Map<string, DashboardAttachment>;
   conversationId: string | undefined;
 }
+
+const toLatestAttachment = (attachment: VersionedDashboardAttachment): DashboardAttachment[] => {
+  const { id, type, origin } = attachment;
+  const data = getLatestVersion(attachment)?.data;
+  return data ? [{ id, type, origin, data }] : [];
+};
 
 export const registerDashboardAppIntegration = ({
   agentBuilder,
@@ -69,10 +79,18 @@ export const registerDashboardAppIntegration = ({
   notifyOtherDashboardUpdated,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
-    attachments: undefined,
     versionedAttachments: [],
+    liveUpdates: new Map(),
     conversationId: undefined,
   };
+
+  // the latest version of each conversation attachment, with the agent's updates on top
+  const getAttachments = (): DashboardAttachment[] => [
+    ...state.versionedAttachments
+      .flatMap(toLatestAttachment)
+      .filter(({ id }) => !state.liveUpdates.has(id)),
+    ...state.liveUpdates.values(),
+  ];
 
   // dashboard data this dashboard staged in the chat input, per attachment id
   const stagedAttachmentData = new Map<string, DashboardAttachmentData>();
@@ -88,8 +106,21 @@ export const registerDashboardAppIntegration = ({
     }
   };
 
-  // marks every attachment version the open dashboard shows
+  let lastShownCheck:
+    | { versionedAttachments: VersionedDashboardAttachment[]; data: DashboardAttachmentData }
+    | undefined;
+
+  // marks every attachment version the open dashboard shows; skipped when neither side changed,
+  // since it compares the dashboard with every version
   const updateShownVersions = (dashboard: DashboardSnapshot) => {
+    const { versionedAttachments } = state;
+    if (
+      lastShownCheck?.versionedAttachments === versionedAttachments &&
+      isEqual(lastShownCheck.data, dashboard.data)
+    ) {
+      return;
+    }
+    lastShownCheck = { versionedAttachments, data: dashboard.data };
     const shownVersions = new Set<string>();
     for (const { id, versions } of state.versionedAttachments) {
       for (const { version, data } of versions) {
@@ -106,7 +137,7 @@ export const registerDashboardAppIntegration = ({
     const linkedAttachment = getLinkedAttachment({
       api,
       store: appliedAttachments,
-      attachments: state.attachments,
+      attachments: getAttachments(),
       dashboard,
       draftAttachmentId: draftAttachmentId.current,
     });
@@ -145,8 +176,8 @@ export const registerDashboardAppIntegration = ({
   const conversationChangesSubscription = agentBuilder.events.ui.activeConversation$.subscribe(
     (change) => {
       if (!change) {
-        state.attachments = undefined;
         state.versionedAttachments = [];
+        state.liveUpdates.clear();
         state.conversationId = undefined;
         appliedAttachments.setShownVersions();
         return;
@@ -154,32 +185,13 @@ export const registerDashboardAppIntegration = ({
 
       const { id: conversationId, conversation } = change;
       appliedAttachments.setActiveConversationId(conversationId);
-      const versionedDashboardAttachments =
-        conversation?.attachments?.filter(isDashboardAttachment);
-      const dashboardAttachments = versionedDashboardAttachments?.flatMap(
-        (attachment): DashboardAttachment[] => {
-          const latestVersionData = getLatestVersion(attachment)?.data;
-
-          return latestVersionData
-            ? [
-                {
-                  id: attachment.id,
-                  type: attachment.type,
-                  data: latestVersionData,
-                  origin: attachment.origin,
-                },
-              ]
-            : [];
-        }
-      );
-
       // switching conversations empties the chat input, so the dashboard has to be staged again
       if (conversationId !== state.conversationId) {
         stagedAttachmentData.clear();
       }
 
-      state.attachments = dashboardAttachments;
-      state.versionedAttachments = versionedDashboardAttachments ?? [];
+      state.versionedAttachments = conversation?.attachments?.filter(isDashboardAttachment) ?? [];
+      state.liveUpdates.clear();
       state.conversationId = conversationId;
       // we have to defer syncing until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
       if (pendingSyncTimeout !== undefined) {
@@ -197,8 +209,7 @@ export const registerDashboardAppIntegration = ({
     api,
     appliedAttachments,
     upsertAttachment: (attachment: DashboardAttachment) => {
-      const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
-      state.attachments = [...otherAttachments, attachment];
+      state.liveUpdates.set(attachment.id, attachment);
     },
     onOtherDashboardUpdated: notifyOtherDashboardUpdated,
   });
@@ -211,7 +222,7 @@ export const registerDashboardAppIntegration = ({
   const originSyncSubscription = createOriginSyncSubscription({
     api,
     store: appliedAttachments,
-    getAttachments: () => state.attachments,
+    getAttachments,
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
 
@@ -232,8 +243,8 @@ export const registerDashboardAppIntegration = ({
       clearTimeout(pendingSyncTimeout);
       pendingSyncTimeout = undefined;
     }
-    state.attachments = undefined;
     state.versionedAttachments = [];
+    state.liveUpdates.clear();
     state.conversationId = undefined;
     // the staged dashboard belongs to this dashboard, so drop it from the chat input when leaving;
     // attachments already sent stay in the conversation
