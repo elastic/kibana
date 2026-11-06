@@ -10,6 +10,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType } from './types';
 import type { ILicenseState } from './lib';
 import { ActionExecutionSourceType, ActionExecutor, TaskRunnerFactory } from './lib';
@@ -972,6 +973,28 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('isSpecActionType()', () => {
+    it('returns true for a spec-sourced type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType({ id: 'spec-backed', source: ACTION_TYPE_SOURCES.spec }));
+
+      expect(registry.isSpecActionType('spec-backed')).toBe(true);
+    });
+
+    it('returns false for a classic type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType());
+
+      expect(registry.isSpecActionType('my-connector-type')).toBe(false);
+    });
+
+    it('returns false for an unknown id without throwing', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(registry.isSpecActionType('unknown')).toBe(false);
     });
   });
 

@@ -27,7 +27,11 @@ import onboardingIllustrationLight from './assets/ai_index_onboarding_light.svg'
 
 const ILLUSTRATION_SIZE_PX = 236;
 
-export const AiIndexOnboardingPanel = () => {
+interface AiIndexOnboardingPanelProps {
+  onCreateClick: () => void;
+}
+
+export const AiIndexOnboardingPanel = ({ onCreateClick }: AiIndexOnboardingPanelProps) => {
   const { colorMode } = useEuiTheme();
   const {
     services: { docLinks },
@@ -65,7 +69,7 @@ export const AiIndexOnboardingPanel = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
                 <EuiFlexItem grow={false}>
-                  <CreateAiIndexButton />
+                  <CreateAiIndexButton onClick={onCreateClick} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiLink

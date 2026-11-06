@@ -43,9 +43,14 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'isReset'>> => ({
+const createSessionMock = (): jest.Mocked<
+  Pick<SandboxSession, 'writeFiles' | 'mkdirs' | 'isReset'>
+> => ({
   isReset: false,
-  writeFiles: jest.fn().mockResolvedValue([{ path: '/workspace/connectors.md', success: true }]),
+  writeFiles: jest.fn(async (files: Parameters<SandboxSession['writeFiles']>[0]) =>
+    files.map(() => ({ bytes_written: 0, success: true }))
+  ),
+  mkdirs: jest.fn().mockResolvedValue([true]),
 });
 
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
@@ -96,11 +101,57 @@ describe('writeConnectorManifest', () => {
 
   describe('file writing', () => {
     it('writes the manifest to /workspace/connectors.md', async () => {
-      const { files } = await renderManifest();
+      const { files } = await renderManifest({
+        connectors: [createRawConnector({ actionTypeId: '.webhook' })],
+      });
 
-      expect(files).toHaveLength(1);
       expect(files[0].path).toBe('/workspace/connectors.md');
       expect(files[0].content).toBeInstanceOf(Buffer);
+    });
+
+    it('writes every service guide under .connector-docs, even without connectors', async () => {
+      const { files, session } = await renderManifest({ allowedConnectorIds: [], connectors: [] });
+
+      expect(session.mkdirs).toHaveBeenCalledWith(['/workspace/.connector-docs']);
+      expect(files.map(({ path }) => path)).toEqual([
+        '/workspace/connectors.md',
+        '/workspace/.connector-docs/elastic.md',
+        '/workspace/.connector-docs/github.md',
+        '/workspace/.connector-docs/newrelic.md',
+      ]);
+      expect(files[1].content.toString('utf8')).toContain('# Elasticsearch');
+      expect(files[1].content.toString('utf8')).toContain('CONNECTOR_CONFIG_URL');
+      expect(files[2].content.toString('utf8')).toContain('# GitHub');
+      expect(files[3].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
+    });
+
+    it('throws when a guide fails to write, so the workspace is not cached as ready', async () => {
+      const session = createSessionMock();
+      session.writeFiles.mockImplementation(async (files) =>
+        files.map(({ path }) => ({ bytes_written: 0, success: !path.endsWith('/elastic.md') }))
+      );
+      const { getActionsClient } = createGetActionsClient([]);
+
+      await expect(
+        writeConnectorManifest({
+          session: session as unknown as SandboxSession,
+          callContext: createCallContext([]),
+          getActionsClient: getActionsClient as any,
+          logger: loggingSystemMock.createLogger(),
+        })
+      ).rejects.toThrow(
+        'Failed to write sandbox connector guidance: /workspace/.connector-docs/elastic.md'
+      );
+    });
+
+    it('lists every service guide, including Elasticsearch', async () => {
+      const { content } = await renderManifest();
+
+      expect(content).toContain('# Service guides');
+      expect(content).toContain('- Elasticsearch: `/workspace/.connector-docs/elastic.md`');
+      expect(content).toContain('- GitHub: `/workspace/.connector-docs/github.md`');
+      expect(content).toContain('- New Relic: `/workspace/.connector-docs/newrelic.md`');
+      expect(content).not.toContain('sentry.md');
     });
 
     it('documents the per-command credential injection contract', async () => {

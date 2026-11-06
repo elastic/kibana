@@ -6,21 +6,20 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const ENDPOINT = '/internal/nightshift/investigations/service_account';
 // Ids are opaque: `kibana/<name>` on stateful, a generated id on Serverless.
 const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
 
-// Creating the role and account and binding the workflow are each authorized by Elasticsearch
-// and the workflows plugin against `manage_security`; route privileges cannot express a cluster
-// privilege, so the route only requires an authenticated user.
-const DELEGATED_AUTHZ = {
-  authz: {
-    enabled: false as const,
-    reason:
-      'Delegates to Elasticsearch and the workflows plugin, which require manage_security for service account creation and workload binding',
-  },
+// Creating the role and account and binding the workflow also require `manage_security`, which
+// Elasticsearch and the workflows plugin check; route privileges cannot express a cluster privilege.
+const SETUP_AUTHZ = {
+  authz: { requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES },
 };
 
 export const getInvestigatorServiceAccountRoute = createNightshiftInvestigationsServerRoute({
@@ -29,8 +28,9 @@ export const getInvestigatorServiceAccountRoute = createNightshiftInvestigations
     access: 'internal',
     summary: 'Get whether Nightshift is set up with its service account in this space',
   },
-  // Readable by anyone who can read investigations, so every Nightshift user sees the setup step.
-  security: { authz: { requiredPrivileges: ['agentBuilder:read'] } },
+  // Readable by every Nightshift user, so each sees the setup step and whether they may change
+  // automations, whether or not their role also grants Agent Builder.
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>
     getInvestigatorServiceAccountService().getStatus(request, getSpaceId(request)),
 });
@@ -41,7 +41,7 @@ export const enableInvestigatorServiceAccountRoute = createNightshiftInvestigati
     access: 'internal',
     summary: 'Set up Nightshift in this space with its service account',
   },
-  security: DELEGATED_AUTHZ,
+  security: SETUP_AUTHZ,
   params: lazySchema(() =>
     z.object({
       body: z.object({
@@ -68,7 +68,7 @@ export const disableInvestigatorServiceAccountRoute = createNightshiftInvestigat
     access: 'internal',
     summary: 'Remove the Nightshift service account setup from this space',
   },
-  security: DELEGATED_AUTHZ,
+  security: SETUP_AUTHZ,
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>
     getInvestigatorServiceAccountService().disable(request, getSpaceId(request)),
 });

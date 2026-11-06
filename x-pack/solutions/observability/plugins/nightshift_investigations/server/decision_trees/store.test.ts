@@ -202,6 +202,86 @@ describe('commit', () => {
       'E1: Query checkout logs in logs-*',
     ]);
   });
+
+  it('stamps the version with the conversation of the investigation it was written from', async () => {
+    const esClient = createEsClient();
+
+    await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'system',
+      summary: 'Initial tree.',
+      learnings: [],
+      evidenceGathererMetadata: [],
+      conversationId: 'inv-1',
+    });
+
+    expect(esClient.index.mock.calls[0][0].document.attributes.conversation_id).toBe('inv-1');
+  });
+
+  it('leaves the version unstamped for a commit outside an investigation', async () => {
+    const esClient = createEsClient();
+
+    await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'jdoe',
+      summary: 'Edited by hand.',
+      learnings: [],
+      evidenceGathererMetadata: [],
+    });
+
+    expect(esClient.index.mock.calls[0][0].document.attributes).not.toHaveProperty(
+      'conversation_id'
+    );
+  });
+});
+
+describe('listTreeIdsForInvestigation', () => {
+  it("buckets the investigation's versions by tree instead of reading version hits", async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [] },
+      aggregations: {
+        tree_ids: {
+          buckets: [
+            { key: 'symptom:checkout-high-latency', doc_count: 600 },
+            { key: 'symptom:payment-errors', doc_count: 1 },
+          ],
+        },
+      },
+    });
+
+    const treeIds = await createStore(esClient).listTreeIdsForInvestigation('inv-1');
+
+    expect(treeIds).toEqual(['symptom:checkout-high-latency', 'symptom:payment-errors']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: 0,
+        aggs: { tree_ids: { terms: { field: 'attributes.tree_id', size: 500 } } },
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'decision_tree_version' } },
+              { term: { 'attributes.conversation_id': 'inv-1' } },
+              { term: { 'attributes.space_id': 'default' } },
+            ],
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('returns no trees when the index does not exist yet', async () => {
+    const esClient = createEsClient();
+
+    expect(await createStore(esClient).listTreeIdsForInvestigation('inv-1')).toEqual([]);
+  });
 });
 
 describe('list', () => {

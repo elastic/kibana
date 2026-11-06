@@ -92,6 +92,23 @@ const RevisionDetails = ({
   </>
 );
 
+const getRevisionStatusLabel = ({
+  previousStatus,
+  status,
+}: {
+  previousStatus: SignificantEventResponse['status'];
+  status: SignificantEventResponse['status'];
+}): string => {
+  if (previousStatus !== status) {
+    return i18n.translate('xpack.nightshift.flyout.timelineStatusChangedLabel', {
+      defaultMessage: 'Status changed to',
+    });
+  }
+  return i18n.translate('xpack.nightshift.flyout.timelineEventUpdatedLabel', {
+    defaultMessage: 'Significant event updated',
+  });
+};
+
 export const EventTimeline = ({
   event,
   lifecycleQuery: { data, isLoading, isError },
@@ -123,9 +140,8 @@ export const EventTimeline = ({
     );
   }
 
-  const revisions = [...data.events].sort(
-    (first, second) => Date.parse(first['@timestamp']) - Date.parse(second['@timestamp'])
-  );
+  const revisions = data.events;
+
   const items: Array<{ timestamp: string; item: EuiTimelineItemProps }> = data.detections.map(
     (detection) => ({
       timestamp: detection['@timestamp'],
@@ -214,7 +230,7 @@ export const EventTimeline = ({
   });
   items.push(
     ...revisions.slice(1).map((revision, index) => {
-      const statusChanged = revision.status !== revisions[index].status;
+      const previousRevision = revisions[index];
       return {
         timestamp: revision['@timestamp'],
         item: {
@@ -224,15 +240,10 @@ export const EventTimeline = ({
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem>
                 <RevisionStatus
-                  label={
-                    statusChanged
-                      ? i18n.translate('xpack.nightshift.flyout.timelineStatusChangedLabel', {
-                          defaultMessage: 'Status changed to',
-                        })
-                      : i18n.translate('xpack.nightshift.flyout.timelineEventUpdatedLabel', {
-                          defaultMessage: 'Significant event updated',
-                        })
-                  }
+                  label={getRevisionStatusLabel({
+                    previousStatus: previousRevision.status,
+                    status: revision.status,
+                  })}
                   revision={revision}
                 />
                 <RevisionDetails revision={revision} />

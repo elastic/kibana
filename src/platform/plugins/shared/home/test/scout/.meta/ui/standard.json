@@ -1,5 +1,5 @@
 {
-  "sha1": "2dfb32c6cdea98af42eb8f40a1b95225f022753a",
+  "sha1": "737bd7d43ccdd88ae16772e0375c96422b7db71b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -167,7 +167,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/solution_cards_and_nav.spec.ts",
-        "line": 29,
+        "line": 28,
         "column": 20
       }
     },

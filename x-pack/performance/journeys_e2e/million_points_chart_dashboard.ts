@@ -21,5 +21,7 @@ export const journey = setupDashboardJourney({
   }),
   dashboardName: 'Million points',
   dashboardLinkSubj: 'dashboardListingTitleLink-Million-points',
-  visualizationCount: 1,
+  loadCompleteAwaiter: async (_page, kibanaPage) => {
+    await kibanaPage.waitForVisualizations({ count: 1, timeout: 120_000 });
+  },
 });

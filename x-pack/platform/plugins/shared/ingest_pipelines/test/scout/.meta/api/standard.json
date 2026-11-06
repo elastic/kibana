@@ -1,5 +1,5 @@
 {
-  "sha1": "dd55d7370819dd5ab6dd12ea2ba2e7617377517a",
+  "sha1": "e7ea273fa0b8b514a01cfd5e38944036176f3185",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 31,
-        "column": 34
+        "line": 44,
+        "column": 9
       }
     },
     {
@@ -28,8 +28,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 44,
-        "column": 23
+        "line": 57,
+        "column": 14
+      }
+    },
+    {
+      "id": "bff6a9ee7d96cf9-f72a0c1cbcf68a0",
+      "title": "Ingest pipelines feature controls user with the manage cluster privilege can manage pipelines and processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 71,
+        "column": 65
       }
     },
     {
@@ -410,8 +424,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_payload_limit.spec.ts",
-        "line": 24,
-        "column": 13
+        "line": 22,
+        "column": 6
       }
     },
     {
@@ -424,8 +438,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_payload_limit.spec.ts",
-        "line": 33,
-        "column": 23
+        "line": 32,
+        "column": 17
       }
     },
     {
@@ -439,7 +453,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_privileges.spec.ts",
         "line": 29,
-        "column": 82
+        "column": 80
       }
     },
     {
@@ -452,7 +466,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_privileges.spec.ts",
-        "line": 40,
+        "line": 39,
         "column": 9
       }
     },
