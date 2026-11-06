@@ -34,6 +34,12 @@ export interface EnhanceGold {
   defects: EnhanceDefectId[];
 }
 
+/** An answer to the mode question that names specific charts: only those may change. */
+export interface ScopedEnhanceGold {
+  /** Ids of the seeded panels the request names. */
+  panelIds: string[];
+}
+
 /** Where the dashboard's controls may draw their fields from, and what the prompt asked of them. */
 export interface ControlsGold {
   /**
@@ -65,8 +71,8 @@ export type DashboardDatasetExample = Example<
     question: string;
     /** Seeded dashboard sent as a by-value attachment with the opening turn. */
     dashboard?: DashboardAttachmentData;
-    /** Mode to pick if the agent asks which enhance mode to apply. */
-    modeAnswer?: EnhanceMode;
+    /** Mode to pick, or free text to type, if the agent asks which enhance mode to apply. */
+    modeAnswer?: EnhanceMode | { text: string };
     /** Discover ES|QL results sent as an attachment with the opening turn, as the 'AI Agent' action does. */
     esqlResults?: EsqlQueryResultsData;
     /** Screen context sent with the opening turn, as the app attaches it from the page the user is on. */
@@ -76,6 +82,7 @@ export type DashboardDatasetExample = Example<
     route?: DashboardRoute;
     structure?: DashboardStructureGold;
     enhance?: EnhanceGold;
+    scopedEnhance?: ScopedEnhanceGold;
     controls?: ControlsGold;
     /** The time range the dashboard must end up with. */
     timeRange?: { from: string; to: string };

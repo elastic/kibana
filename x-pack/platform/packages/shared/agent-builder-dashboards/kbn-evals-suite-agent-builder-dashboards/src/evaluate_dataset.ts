@@ -42,6 +42,7 @@ import {
   enhanceModeQuestionEvaluator,
   enhanceNoRegressionEvaluator,
 } from './evaluators/enhance_evaluators';
+import { enhanceScopeEvaluator } from './evaluators/enhance_scope_evaluator';
 import {
   combineTurnSteps,
   findAskUserQuestionPrompt,
@@ -95,26 +96,34 @@ const useAgentTraceIds = (evaluator: Evaluator): DashboardAgentEvaluator => ({
   },
 });
 
-/** Answers an `ask_user_question` prompt with the option for `mode`, or free text if none fits. */
+/**
+ * Answers an `ask_user_question` prompt with the option for a mode, or free
+ * text when the answer is text or no option fits the mode.
+ */
 const answerModeQuestion = (
   prompt: AskUserQuestionPrompt,
-  mode: EnhanceMode
+  answer: EnhanceMode | { text: string }
 ): Record<string, unknown> => ({
   [prompt.id]: {
     answers: prompt.questions.map(({ options }, index) => {
       if (index > 0) {
         return { skipped: true };
       }
-      const choice = findModeOptionIndex(options, mode);
+      if (typeof answer !== 'string') {
+        return { custom: answer.text };
+      }
+      const choice = findModeOptionIndex(options, answer);
       return choice === -1
-        ? { custom: mode === 'appearance' ? 'Appearance only' : 'Appearance and content' }
+        ? { custom: answer === 'appearance' ? 'Appearance only' : 'Appearance and content' }
         : { choice: [choice] };
     }),
   },
 });
 
 const expectsDashboard = (expected: DashboardDatasetExample['output']): boolean =>
-  expected?.route === 'dashboard' || expected?.enhance !== undefined;
+  expected?.route === 'dashboard' ||
+  expected?.enhance !== undefined ||
+  expected?.scopedEnhance !== undefined;
 
 export function createEvaluateDataset({
   agentBuilderClient,
@@ -190,7 +199,7 @@ export function createEvaluateDataset({
       ...(attachments.length > 0 ? { attachments } : {}),
     });
 
-    // Enhance examples answer the mode question the way a user would, by picking an option.
+    // Enhance examples answer the mode question the way a user would, by picking an option or typing.
     const modeQuestion = findAskUserQuestionPrompt(opening.prompts);
     const modeAnswer = input?.modeAnswer;
     const answer =
@@ -252,6 +261,7 @@ export function createEvaluateDataset({
     enhanceModeComplianceEvaluator,
     enhanceDefectResolutionEvaluator,
     enhanceNoRegressionEvaluator,
+    enhanceScopeEvaluator,
     positiveOnly(trajectoryEvaluator),
   ].map((evaluator) => withLowScoreLogging(evaluator, log));
 
