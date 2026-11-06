@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/security-solution-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/securitysolution-list-constants'
+  - '@kbn/repo-info'
 tags:
   - functional-tests
   - package
