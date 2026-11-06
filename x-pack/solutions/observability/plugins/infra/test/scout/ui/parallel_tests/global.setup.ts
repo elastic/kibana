@@ -209,9 +209,9 @@ globalSetupHook(
   }
 );
 
-// The Logs ML page specs (`logs/*.spec.ts`) point a per-space log view at this index. It only needs
-// to exist, not hold documents: an existing empty index counts as having data, so the pages show
-// their setup screen / privilege prompts instead of the no-data page.
+// The Logs ML page specs (`logs/*.spec.ts`) point their space's `observability:logSources` setting
+// at this index. It only needs to exist, not hold documents: an existing empty index counts as
+// having data, so the pages show their setup screen / privilege prompts instead of the no-data page.
 globalSetupHook(
   'Create the empty index for the Logs ML pages',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },

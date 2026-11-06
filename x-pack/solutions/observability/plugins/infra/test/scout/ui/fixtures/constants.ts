@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-oblt';
 import type { CreateInventoryViewAttributes } from './apis/inventory_views/types';
 
 export const DATE_WITH_HOSTS_DATA_FROM = '2024-03-28T18:20:00.000Z';
@@ -242,17 +241,3 @@ export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
 // setting.) The index name must not start with `.` (the built-in viewer/editor roles can't read
 // dot indices) or `logs` (it would match the default log sources, `logs*`, used by other specs).
 export const LOGS_ML_INDEX = 'scout-infra-logs-ml';
-
-/**
- * Logs read access without any Machine Learning privilege. No built-in role fits: every Kibana
- * base privilege includes ML. The only Elasticsearch access needed is reading the log source
- * index (the log view status check runs as the user); the ML APIs the page calls run as Kibana's internal
- * user, so no ML cluster privileges are required.
- */
-export const LOGS_READ_WITHOUT_ML_ROLE: KibanaRole = {
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: [LOGS_ML_INDEX], privileges: ['read', 'view_index_metadata'] }],
-  },
-  kibana: [{ base: [], feature: { logs: ['read'] }, spaces: ['*'] }],
-};
