@@ -34,6 +34,7 @@ import { MatchedTable } from './matched_table';
 import { getDefaultRuleType } from '../../../common/presets';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from './rule_flyout';
+import { getMissingTargets, getRuleTargetMode } from './rule_draft';
 import { getRuleTargetItems } from './rule_targets';
 import { DEFAULT_BADGE_LABEL, MANAGED_BADGE_LABEL } from '../badge_labels';
 
@@ -74,6 +75,11 @@ export const RuleDetailsPage = () => {
     .flatMap((matchedName) => dataSourcesByName.get(matchedName) ?? [])
     .sort((a, b) => a.name.localeCompare(b.name));
   const applied = matched.filter((dataSource) => appliedRules.get(dataSource.name)?.name === name);
+  // A rule that selects its targets counts and lists what it selected, including any that no
+  // longer exist, rather than what it matches.
+  const existingNames = new Set(dataSourcesByName.keys());
+  const isSelection = getRuleTargetMode(rule, existingNames) === 'pick';
+  const missingNames = getMissingTargets(rule, existingNames);
   const sizeInBytes = applied.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = profile ? estimateDataSourcesVcuRange(applied, profile) : { atRest: 0, atPeak: 0 };
   // The whole project's search cost, which the rule's is a share of.
@@ -172,19 +178,28 @@ export const RuleDetailsPage = () => {
             <DetailsList
               items={[
                 {
-                  title: i18n.translate('xpack.boost.ruleDetails.matches', {
-                    defaultMessage: 'Matches',
-                  }),
-                  description: formatDataSourceCount(type, matched.length),
+                  title: isSelection
+                    ? i18n.translate('xpack.boost.ruleDetails.selected', {
+                        defaultMessage: 'Selected',
+                      })
+                    : i18n.translate('xpack.boost.ruleDetails.matches', {
+                        defaultMessage: 'Matches',
+                      }),
+                  description: formatDataSourceCount(type, matched.length + missingNames.length),
                 },
                 {
                   title: i18n.translate('xpack.boost.ruleDetails.appliesTo', {
                     defaultMessage: 'Applies to',
                   }),
-                  tip: i18n.translate('xpack.boost.ruleDetails.appliesToTip', {
-                    defaultMessage:
-                      'What this rule matches, less any that a higher-ranked rule applies to instead.',
-                  }),
+                  tip: isSelection
+                    ? i18n.translate('xpack.boost.ruleDetails.appliesToSelectionTip', {
+                        defaultMessage:
+                          'What this rule selected, less any that no longer exist or that a higher-ranked rule applies to instead.',
+                      })
+                    : i18n.translate('xpack.boost.ruleDetails.appliesToTip', {
+                        defaultMessage:
+                          'What this rule matches, less any that a higher-ranked rule applies to instead.',
+                      }),
                   description: formatDataSourceCount(type, applied.length),
                 },
                 {
@@ -244,7 +259,9 @@ export const RuleDetailsPage = () => {
         <MatchedTable
           type={type}
           profile={profile}
+          isSelection={isSelection}
           matched={matched}
+          missingNames={missingNames}
           supersededBy={coverage?.supersededBy ?? new Map()}
         />
       </DetailsBand>

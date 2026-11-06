@@ -157,6 +157,11 @@ const mockState: BoostState = {
     customRule('catalog-first', ['catalog-fall'], BUILTIN_INDICES_PROFILE_NAMES.on_demand, 5),
     customRule('catalogs', ['catalog-*'], 'catalog-search', 1),
     customRule('unused-clicks', ['nothing-*'], 'clicks', 1),
+    // Selected an index that has since been deleted.
+    {
+      ...customRule('outlet', ['outlet'], BUILTIN_INDICES_PROFILE_NAMES.on_demand, 1),
+      _meta: { target_mode: 'pick' },
+    },
     ...createDefaultRules(DEFAULT_RULE_PROFILES),
   ],
   data_sources: [
@@ -633,6 +638,39 @@ describe('RuleDetailsPage', () => {
     // The sort holds as the table re-renders, such as while searching.
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'catalog');
     expect(getNames()).toEqual(['catalog-spring', 'catalog-fall']);
+  });
+
+  it('lists what a rule selected, marking a selected index that no longer exists', () => {
+    renderAt('/rules/outlet');
+
+    // The usage counts what it selected, so its targets just say it uses a selection.
+    expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('TargetsSelected index');
+    const usage = screen.getByTestId('boostRuleUsage');
+    expect(usage).toHaveTextContent('Selected1 index');
+    expect(usage).not.toHaveTextContent('Matches');
+    expect(usage).toHaveTextContent('Applies to0 indices');
+
+    const matched = screen.getByTestId('boostRuleMatched');
+    expect(within(matched).getByRole('heading', { name: 'Selected indices' })).toBeInTheDocument();
+    const missing = within(matched).getByTestId('boostMatchedNotFound');
+    expect(missing).toHaveTextContent('outlet');
+    expect(within(missing).getByTestId('boostNotFoundBadge')).toHaveTextContent('Not found');
+    // Index Management has nothing to link to, and the rest of its row is unknown.
+    const row = within(missing.closest('tr') as HTMLElement);
+    expect(row.queryByRole('link')).not.toBeInTheDocument();
+    expect(row.getByTestId('boostEmptyCell')).toHaveTextContent('—');
+    expect(matched).not.toHaveTextContent('This rule matches nothing yet.');
+  });
+
+  it("says a rule's targets are selected ones, plural while rules can select several", () => {
+    void setPrototypeSettings({ allows_multiple_targets: true });
+    try {
+      renderAt('/rules/catalog-first');
+
+      expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('TargetsSelected indices');
+    } finally {
+      void setPrototypeSettings({ allows_multiple_targets: false });
+    }
   });
 
   it('has no age timeline for an indices rule', () => {

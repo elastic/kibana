@@ -141,6 +141,8 @@ export const SupersedingRuleTip = ({ rule }: { rule: string }) => {
 
 interface SupersedingRuleProps {
   rule: string;
+  /** Takes the color around it, such as a selected list option's, in place of the subdued one. */
+  inheritsColor?: boolean;
   /**
    * Explains the icon in a tooltip. Without one, such as inside a list option, which can't hold
    * focusable content and shows the explanation in its own tooltip, screen readers get the icon's
@@ -150,9 +152,14 @@ interface SupersedingRuleProps {
 }
 
 /** The rule that applies to a target instead, after an icon for ranking higher. */
-export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProps) => {
+export const SupersedingRule = ({
+  rule,
+  hasTooltip = true,
+  inheritsColor = false,
+}: SupersedingRuleProps) => {
   const { euiTheme } = useEuiTheme();
   const tooltipId = useGeneratedHtmlId();
+  const iconColor = inheritsColor ? 'inherit' : 'subdued';
 
   const label = (
     <span
@@ -164,14 +171,14 @@ export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProp
         <EuiIcon
           type={SUPERSEDING_ICON}
           size="s"
-          color="subdued"
+          color={iconColor}
           tabIndex={0}
           aria-label={SUPERSEDING_LABEL}
           aria-describedby={tooltipId}
         />
       ) : (
         <>
-          <EuiIcon type={SUPERSEDING_ICON} size="s" color="subdued" aria-hidden={true} />
+          <EuiIcon type={SUPERSEDING_ICON} size="s" color={iconColor} aria-hidden={true} />
           <EuiScreenReaderOnly>
             <span>{`${SUPERSEDING_LABEL}: `}</span>
           </EuiScreenReaderOnly>

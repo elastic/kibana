@@ -508,6 +508,7 @@ describe('RuleFlyout duplicate', () => {
         index_patterns: ['catalog-*'],
         boost_profile: 'zeta-search',
         priority: 2,
+        _meta: { target_mode: 'pattern' },
       },
       expect.anything()
     );
@@ -861,6 +862,26 @@ describe('RuleFlyout selected targets', () => {
       expect.objectContaining({ index_patterns: ['products'] }),
       expect.anything()
     );
+  });
+
+  it('keeps a selected index that no longer exists, marked as not found', async () => {
+    renderFlyout({ ...rule, index_patterns: ['outlet'], _meta: { target_mode: 'pick' } });
+
+    const missing = getOption(/outlet/);
+    expect(missing).toHaveAttribute('aria-selected', 'true');
+    expect(within(missing).getByTestId('boostNotFoundBadge')).toHaveTextContent('Not found');
+    // The count only includes what exists.
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Select from 2 indices');
+
+    await save();
+    expect(mutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ index_patterns: ['outlet'], _meta: { target_mode: 'pick' } }),
+      expect.anything()
+    );
+
+    // Selecting another replaces it, and it stays listed, so it can be selected again.
+    await userEvent.click(getOption(/products/));
+    expect(getOption(/outlet/)).toHaveAttribute('aria-selected', 'false');
   });
 
   it('selects several, and counts them, when the prototype allows it', async () => {

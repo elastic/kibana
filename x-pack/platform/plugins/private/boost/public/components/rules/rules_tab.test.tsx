@@ -60,7 +60,7 @@ const customRule = (
   is_builtin: false,
 });
 
-const renderTab = (path: string) =>
+const renderTab = (path: string, extraRules: BoostRule[] = []) =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <IntlProvider locale="en">
@@ -72,6 +72,7 @@ const renderTab = (path: string) =>
             // Picks two indices, one of which a higher-priority rule takes.
             customRule('picked', 'archive-search', ['products', 'users']),
             customRule('products-first', 'catalog-search', ['products'], 5),
+            ...extraRules,
           ]}
           profiles={[
             ...BUILTIN_PROFILES,
@@ -228,6 +229,49 @@ describe('RulesTab matches', () => {
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     // The rule's name is left to the icon's tooltip, keeping the list to the targets.
     expect(popover.queryByText('products-first')).not.toBeInTheDocument();
+  });
+
+  it('lists a selected index that no longer exists with what the rule applies to, marked', async () => {
+    renderTab('/rules', [
+      { ...customRule('outlet', 'catalog-search', ['outlet']), _meta: { target_mode: 'pick' } },
+      // Typed as a pattern, so it's only waiting for an index, not missing one.
+      {
+        ...customRule('upcoming', 'catalog-search', ['upcoming']),
+        _meta: { target_mode: 'pattern' },
+      },
+    ]);
+
+    const outlet = getRow('outlet');
+    // It applies to nothing, but its list still has what it selected.
+    expect(outlet.queryByTestId('boostNotFoundBadge')).not.toBeInTheDocument();
+    await userEvent.click(outlet.getByTestId('boostRuleMatches'));
+    const popover = within(screen.getByRole('dialog'));
+    expect(popover.getByText('Using selected index')).toBeInTheDocument();
+    const missing = popover.getByTestId('boostRuleMatchesNotFound');
+    expect(missing).toHaveTextContent('outlet');
+    expect(within(missing).getByTestId('boostNotFoundBadge')).toHaveTextContent('Not found');
+
+    // A pattern that matches nothing yet has nothing to list.
+    expect(getRow('upcoming').getByTestId('boostRuleNoMatches')).toHaveTextContent('0 indices');
+  });
+
+  it('counts what a rule selected that no longer exists when rules can select several', async () => {
+    void setPrototypeSettings({ allows_multiple_targets: true });
+    try {
+      renderTab('/rules', [
+        {
+          ...customRule('outlet', 'catalog-search', ['outlet', 'products', 'users'], 0),
+          _meta: { target_mode: 'pick' },
+        },
+      ]);
+      await userEvent.click(getRow('outlet').getByTestId('boostRuleMatches'));
+
+      expect(
+        within(screen.getByRole('dialog')).getByTestId('boostRuleMatchCount')
+      ).toHaveTextContent('3 selected, 2 outranked, 1 not found');
+    } finally {
+      void setPrototypeSettings({ allows_multiple_targets: false });
+    }
   });
 
   it('counts what a rule selects when rules can select several targets', async () => {

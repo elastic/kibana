@@ -45,6 +45,18 @@ export type BoostProfileInput =
   | Omit<IndicesBoostProfile, 'is_builtin'>
   | Omit<DataStreamsBoostProfile, 'is_builtin'>;
 
+/** How the rule form chose a rule's targets: a pattern, or names picked from a list. */
+export type RuleTargetMode = 'pattern' | 'pick';
+
+/** What Kibana keeps in a rule's `_meta`, which Elasticsearch stores without using. */
+export interface BoostRuleMeta {
+  /**
+   * The mode the rule's targets were chosen in, which a single name alone doesn't say, so the form
+   * reopens in it even after a picked target is deleted.
+   */
+  target_mode?: RuleTargetMode;
+}
+
 export interface BoostRule {
   name: string;
   /**
@@ -56,6 +68,7 @@ export interface BoostRule {
   boost_profile: string;
   priority: number;
   is_builtin: boolean;
+  _meta?: BoostRuleMeta;
 }
 
 /** Rule payload for create and update requests; the server sets `is_builtin`. */

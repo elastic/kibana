@@ -248,7 +248,7 @@ describe('Index Management extensions', () => {
 
       const rule = await screen.findByTestId('boostIndexTabRule');
       expect(within(rule).getByTestId('boostExplanationRule')).toHaveTextContent('storefront-core');
-      expect(rule).toHaveTextContent('TargetsSelected 1 index');
+      expect(rule).toHaveTextContent('TargetsSelected index');
       expect(rule).toHaveTextContent('Priority10');
 
       // Both rules that match, in the order they rank, the first marked as the one that applies.
@@ -256,9 +256,7 @@ describe('Index Management extensions', () => {
         .getAllByRole('row')
         .slice(1);
       expect(matchingRows.map((row) => row.textContent)).toEqual([
-        expect.stringMatching(
-          /^1.*storefront-coreApplied.*storefront-search.*10.*Selected 1 index$/
-        ),
+        expect.stringMatching(/^1.*storefront-coreApplied.*storefront-search.*10.*Selected index$/),
         expect.stringMatching(
           /^2.*_default-indicesDefault.*_performantManaged.*-1.*Index pattern \*$/
         ),

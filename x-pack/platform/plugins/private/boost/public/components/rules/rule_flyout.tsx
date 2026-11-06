@@ -54,6 +54,7 @@ import { PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 import { SupersedingRule, getSupersedingDescription } from './target_name';
+import { NotFoundBadge, getNotFoundDescription } from './not_found_badge';
 import { TARGET_LIST_HEADER_HEIGHT, TargetListHeader } from './target_list_header';
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatches, getPartialPattern } from './pattern_matches';
@@ -211,6 +212,8 @@ interface PickOptionData {
   /** A higher-ranked rule that keeps the data source if this rule targets it. */
   supersededBy?: string;
   isHidden?: boolean;
+  /** A name the rule picked that no index or data stream has, such as one deleted since. */
+  isMissing?: boolean;
 }
 
 const getInitialDraft = (
@@ -252,6 +255,8 @@ export const RuleFlyout = ({
     getInitialDraft(rule, duplicateOf, initialProfileName, state)
   );
   const [showErrors, setShowErrors] = useState(false);
+  // What the rule had picked, so a picked name that no longer exists stays listed while editing.
+  const initialPickedRef = useRef(draft.picked);
   // The last profile picked from the list, restored if the field is left empty or unmatched.
   const [lastProfileName, setLastProfileName] = useState(
     () => (rule ?? duplicateOf)?.boost_profile ?? initialProfileName ?? ''
@@ -511,27 +516,47 @@ export const RuleFlyout = ({
   };
 
   // Hidden data sources are left out until included, except selected ones, which stay in view.
-  const pickOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources
+  const existingOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources
     .filter(({ name, hidden }) => includesHidden || !hidden || draft.picked.includes(name))
     .map((dataSource) => {
       const supersededBy = getSupersedingRule(dataSource);
+      const isChecked = draft.picked.includes(dataSource.name);
       return {
         label: dataSource.name,
-        checked: draft.picked.includes(dataSource.name) ? 'on' : undefined,
+        checked: isChecked ? 'on' : undefined,
         data: { supersededBy, isHidden: dataSource.hidden },
         // A list option can't hold a focusable tooltip, so the option shows the explanation in its
         // own, on hover and when it's reached with the keyboard. EUI places it to the left.
+        // Selected, it takes the option's selected color, as the name does.
         append: supersededBy && (
-          <EuiText size="xs" color="subdued">
-            <SupersedingRule rule={supersededBy} hasTooltip={false} />
+          <EuiText size="xs" color={isChecked ? 'inherit' : 'subdued'}>
+            <SupersedingRule rule={supersededBy} hasTooltip={false} inheritsColor={isChecked} />
           </EuiText>
         ),
         toolTipContent: supersededBy && getSupersedingDescription(supersededBy),
       };
     });
+  // Names the rule picked that nothing has any more, marked rather than dropped, since the rule
+  // still applies to them if they're created again. They stay listed while editing, so a name
+  // cleared by mistake can be picked again.
+  const existingNames = new Set(dataSources.map(({ name }) => name));
+  const missingOptions: Array<EuiSelectableOption<PickOptionData>> = [
+    ...new Set([...initialPickedRef.current, ...draft.picked]),
+  ]
+    .filter((name) => !existingNames.has(name))
+    .map((name) => ({
+      label: name,
+      checked: draft.picked.includes(name) ? 'on' : undefined,
+      data: { isMissing: true },
+      toolTipContent: getNotFoundDescription([name], type),
+    }));
+  const pickOptions = [...existingOptions, ...missingOptions].sort((a, b) =>
+    a.label.localeCompare(b.label)
+  );
   const hasHidden = typedDataSources.some(({ hidden }) => hidden);
-  // What the list shows before it's searched: hidden data sources only once shown, or selected.
-  const pickableCount = pickOptions.length;
+  // What the list shows before it's searched, which only counts what exists: hidden data sources
+  // only once shown, or selected.
+  const pickableCount = existingOptions.length;
   // The hidden ones it leaves out, which the switch would show.
   const hiddenNotListed = typedDataSources.length - pickableCount;
 
@@ -869,15 +894,22 @@ export const RuleFlyout = ({
                   onChange: setPickSearch,
                 }}
                 options={pickOptions}
-                // A name that a higher-ranked rule would keep is struck through and disabled,
-                // whether or not it's selected, until this rule's priority outranks that rule.
-                renderOption={({ label, supersededBy, isHidden }, searchValue) => {
+                // A name that a higher-ranked rule would keep is struck through, whether or not
+                // it's selected, until this rule's priority outranks that rule. It's disabled
+                // unless selected, where it takes the option's selected color like the rest.
+                renderOption={(
+                  { label, checked, supersededBy, isHidden, isMissing },
+                  searchValue
+                ) => {
                   const name = (
                     <EuiHighlight
                       search={searchValue}
                       css={
                         supersededBy
-                          ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
+                          ? {
+                              textDecoration: 'line-through',
+                              color: checked === 'on' ? 'inherit' : euiTheme.colors.textDisabled,
+                            }
                           : undefined
                       }
                       data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
@@ -886,12 +918,15 @@ export const RuleFlyout = ({
                     </EuiHighlight>
                   );
                   // Centered on the name, as hidden names are in the other lists.
-                  return isHidden ? (
+                  return isHidden || isMissing ? (
                     <span
                       css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}
                     >
                       {name}
-                      <HiddenBadge />
+                      {isHidden && <HiddenBadge />}
+                      {isMissing && (
+                        <NotFoundBadge names={[label]} type={type} hasTooltip={false} />
+                      )}
                     </span>
                   ) : (
                     name

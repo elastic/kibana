@@ -12,6 +12,7 @@ import {
   hasRuleDraftErrors,
   normalizePriority,
   ruleDraftToInput,
+  getMissingTargets,
   ruleToDraft,
 } from './rule_draft';
 
@@ -71,11 +72,11 @@ describe('rule drafts', () => {
       index_patterns: ['catalog-*'],
       boost_profile: 'storefront-search',
       priority: 0,
+      _meta: { target_mode: 'pattern' },
     });
     expect(
       ruleDraftToInput({ ...validDraft, mode: 'pick', picked: ['products', 'users'] })
-        .index_patterns
-    ).toEqual(['products', 'users']);
+    ).toMatchObject({ index_patterns: ['products', 'users'], _meta: { target_mode: 'pick' } });
   });
 });
 
@@ -105,5 +106,19 @@ describe('ruleToDraft', () => {
     expect(
       ruleToDraft({ ...rule, index_patterns: ['products', 'users'] }, existing).picked
     ).toEqual(['products', 'users']);
+  });
+
+  it('opens a rule in the mode it was saved in, even once its picked target is gone', () => {
+    const picked = { ...rule, index_patterns: ['outlet'], _meta: { target_mode: 'pick' as const } };
+    expect(ruleToDraft(picked, existing)).toMatchObject({ mode: 'pick', picked: ['outlet'] });
+    expect(getMissingTargets(picked, existing)).toEqual(['outlet']);
+
+    const typed = {
+      ...rule,
+      index_patterns: ['products'],
+      _meta: { target_mode: 'pattern' as const },
+    };
+    expect(ruleToDraft(typed, existing)).toMatchObject({ mode: 'pattern', pattern: 'products' });
+    expect(getMissingTargets({ ...typed, index_patterns: ['outlet'] }, existing)).toEqual([]);
   });
 });

@@ -21,16 +21,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleCoverage } from '../../../common/resolution';
-import type { BoostProfileType } from '../../../common/types';
+import type { BoostProfileType, RuleTargetMode } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
 import { useAllowsMultipleTargets } from '../../prototype/prototype_settings';
 import { formatHiddenTargets } from '../hidden_data';
+import { NotFoundBadge } from './not_found_badge';
 import { SupersedingRuleTip, TargetName } from './target_name';
 
 interface RuleMatchesProps {
   patterns: readonly string[];
+  /** Whether the rule's targets were typed as a pattern or selected, which the title says. */
+  mode: RuleTargetMode;
   type?: BoostProfileType;
   coverage: RuleCoverage;
+  /** The names the rule selected that no index or data stream has, which the list marks. */
+  missingNames?: readonly string[];
   /** The names of hidden indices and data streams, which the list leaves out, ending with how many. */
   hiddenNames?: ReadonlySet<string>;
 }
@@ -66,8 +71,19 @@ const formatMatchCount = (matches: number, outranked: number): string =>
         values: { matches },
       });
 
-const formatSelectedCount = (selected: number, outranked: number): string =>
-  outranked > 0
+const formatSelectedCount = (selected: number, outranked: number, notFound: number): string => {
+  if (notFound > 0) {
+    return outranked > 0
+      ? i18n.translate('xpack.boost.ruleMatches.selectedOutrankedNotFound', {
+          defaultMessage: '{selected} selected, {outranked} outranked, {notFound} not found',
+          values: { selected, outranked, notFound },
+        })
+      : i18n.translate('xpack.boost.ruleMatches.selectedNotFound', {
+          defaultMessage: '{selected} selected, {notFound} not found',
+          values: { selected, notFound },
+        });
+  }
+  return outranked > 0
     ? i18n.translate('xpack.boost.ruleMatches.selectedOutranked', {
         defaultMessage: '{selected} selected, {outranked} outranked',
         values: { selected, outranked },
@@ -76,24 +92,24 @@ const formatSelectedCount = (selected: number, outranked: number): string =>
         defaultMessage: '{selected} selected',
         values: { selected },
       });
+};
 
 /**
  * How many data sources a rule applies to, as a link to the list of what it matches, which shows
- * any that a higher-ranked rule applies to instead.
+ * any that a higher-ranked rule applies to instead, and any it selected that no longer exist.
  */
-export const RuleMatches = ({ patterns, type, coverage, hiddenNames }: RuleMatchesProps) => {
+export const RuleMatches = (props: RuleMatchesProps) => {
   const { euiTheme } = useEuiTheme();
+  const { type, coverage, missingNames = [] } = props;
 
-  if (coverage.matches === 0) {
+  if (coverage.matches === 0 && missingNames.length === 0) {
     return (
       <EuiTextColor color={euiTheme.colors.textDisabled} data-test-subj="boostRuleNoMatches">
         {formatDataSourceCount(type, 0)}
       </EuiTextColor>
     );
   }
-  return (
-    <MatchesPopover patterns={patterns} type={type} coverage={coverage} hiddenNames={hiddenNames} />
-  );
+  return <MatchesPopover {...props} />;
 };
 
 interface MatchesPopoverProps extends RuleMatchesProps {
@@ -103,13 +119,16 @@ interface MatchesPopoverProps extends RuleMatchesProps {
 
 /**
  * The list of what a rule matches, opened from a count of what it applies to, which notes what
- * higher-ranked rules take instead. Like the other lists, it leaves hidden matches out, ending with
- * how many, though the counts include them.
+ * higher-ranked rules take instead, and marks what the rule selected that no longer exists. Like
+ * the other lists, it leaves hidden matches out, ending with how many, though the counts include
+ * them.
  */
 export const MatchesPopover = ({
   patterns,
+  mode,
   type,
   coverage,
+  missingNames = [],
   hiddenNames,
   renderButton,
 }: MatchesPopoverProps) => {
@@ -124,7 +143,7 @@ export const MatchesPopover = ({
   // The title says how the rule chooses what it matches, such as a default rule's `*`; the link
   // already says how many.
   const [pattern] = patterns;
-  const hasPattern = patterns.length === 1 && pattern.includes('*');
+  const hasPattern = mode === 'pattern';
   const title = hasPattern
     ? i18n.translate('xpack.boost.ruleMatches.patternLabel', {
         defaultMessage: 'Using index pattern {pattern}',
@@ -134,10 +153,13 @@ export const MatchesPopover = ({
   const count = hasPattern
     ? formatMatchCount(matches, outranked)
     : allowsMultipleTargets
-    ? formatSelectedCount(matches, outranked)
+    ? formatSelectedCount(matches + missingNames.length, outranked, missingNames.length)
     : undefined;
   const shownNames = matchedNames.filter((name) => !hiddenNames?.has(name));
   const hiddenCount = matchedNames.length - shownNames.length;
+  // What the rule selected that no longer exists sorts in among the rest, as in the rule's form.
+  const missing = new Set(missingNames);
+  const listedNames = [...shownNames, ...missingNames].sort((a, b) => a.localeCompare(b));
 
   return (
     <EuiPopover
@@ -195,7 +217,21 @@ export const MatchesPopover = ({
         `}
       >
         <ul css={{ display: 'grid', gap: euiTheme.size.s }}>
-          {shownNames.map((name) => {
+          {listedNames.map((name) => {
+            if (missing.has(name)) {
+              // A name the rule keeps, which applies again to an index or data stream created with
+              // it, marked as not found.
+              return (
+                <li
+                  key={name}
+                  css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
+                  data-test-subj="boostRuleMatchesNotFound"
+                >
+                  <TargetName name={name} />
+                  <NotFoundBadge names={[name]} type={type} />
+                </li>
+              );
+            }
             const supersedingRule = supersededBy.get(name);
             return (
               // A name, followed by an icon naming any higher-ranked rule in its tooltip. The rule's
@@ -209,7 +245,7 @@ export const MatchesPopover = ({
           {hiddenCount > 0 && (
             // In italics, setting the count apart from the names.
             <li css={{ fontStyle: 'italic' }} data-test-subj="boostRuleMatchesMoreHidden">
-              {formatHiddenTargets(type, hiddenCount, shownNames.length > 0)}
+              {formatHiddenTargets(type, hiddenCount, listedNames.length > 0)}
             </li>
           )}
         </ul>

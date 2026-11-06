@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { BoostRule, BoostRuleInput } from '../../../common/types';
+import type { BoostRule, BoostRuleInput, RuleTargetMode } from '../../../common/types';
 import type { IndexPatternError, ProfileNameError } from '../../../common/validation';
 import {
   MAX_RULE_PRIORITY,
   getIndexPatternError,
   getRuleNameError,
 } from '../../../common/validation';
-
-/** How the rule chooses its targets: one name or `*` pattern, or a list of picked names. */
-export type RuleTargetMode = 'pattern' | 'pick';
 
 // Form fields hold strings so inputs can be empty or mid-edit; they're parsed on validation.
 export interface RuleDraft {
@@ -46,16 +43,34 @@ export const createEmptyRuleDraft = (profileName = ''): RuleDraft => ({
 });
 
 /**
- * Opens an existing rule in the mode that shows its targets: a `*` pattern, or a name that isn't an
- * existing data source, stays in pattern mode, since the picker can only list what exists.
+ * The mode a rule's targets were chosen in, which the rule keeps in its `_meta`. A rule without it,
+ * such as a default rule or one created through the API, is a pattern when it's a `*` pattern or a
+ * name that isn't an existing data source, since the picker can only list what exists.
  */
-export const ruleToDraft = (
-  { name, boost_profile: profileName, index_patterns: patterns, priority }: BoostRule,
+export const getRuleTargetMode = (
+  { index_patterns: patterns, _meta: meta }: BoostRule,
   existingNames: ReadonlySet<string>
-): RuleDraft => {
+): RuleTargetMode => {
+  if (meta?.target_mode) {
+    return meta.target_mode;
+  }
   const [firstPattern = ''] = patterns;
-  const isPattern =
-    patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern));
+  return patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern))
+    ? 'pattern'
+    : 'pick';
+};
+
+/** The names a rule picked that no index or data stream has, such as one deleted since. */
+export const getMissingTargets = (rule: BoostRule, existingNames: ReadonlySet<string>): string[] =>
+  getRuleTargetMode(rule, existingNames) === 'pick'
+    ? rule.index_patterns.filter((name) => !existingNames.has(name))
+    : [];
+
+/** Opens an existing rule in the mode its targets were chosen in. */
+export const ruleToDraft = (rule: BoostRule, existingNames: ReadonlySet<string>): RuleDraft => {
+  const { name, boost_profile: profileName, index_patterns: patterns, priority } = rule;
+  const isPattern = getRuleTargetMode(rule, existingNames) === 'pattern';
+  const [firstPattern = ''] = patterns;
   return {
     name,
     profileName,
@@ -124,4 +139,5 @@ export const ruleDraftToInput = (draft: RuleDraft): BoostRuleInput => ({
   index_patterns: getDraftPatterns(draft),
   boost_profile: draft.profileName,
   priority: Number(normalizePriority(draft.priority)),
+  _meta: { target_mode: draft.mode },
 });
