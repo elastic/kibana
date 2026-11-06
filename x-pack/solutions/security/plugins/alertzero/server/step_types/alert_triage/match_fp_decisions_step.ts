@@ -270,52 +270,61 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         const count = (byDecision: Map<string, string[]>) =>
           [...byDecision.values()].reduce((sum, ids) => sum + ids.length, 0);
 
-        let after: DecisionCursor | undefined;
-        for (let page = 0; page < MAX_PAGES; page++) {
-          if (outOfTime()) break;
-          const found = await fetchDecisionCandidates(
-            contextManager,
-            input.analysis_tag_prefix,
-            now - input.lookback_hours * HOUR_MS,
-            filters,
-            { after, includeTaggedByShadow: mode === 'on' }
-          );
-          const hashes = hashCandidates(found.candidates, input.space_id);
-          const decisionsByHash = await readDecisions({
-            mget: (params) => contextManager.getScopedEsClient().mget(params),
-            hashes: new Set(hashes.values()),
-            now,
-          });
-          for (const decisions of decisionsByHash.values()) {
-            for (const decision of decisions) decisionsById.set(decision.id, decision);
-          }
-          const matches = matchDecisions({
-            candidates: found.candidates,
-            hashes,
-            decisionsByHash,
-            severities: DECISION_AUTO_CLOSE_SEVERITIES,
-          });
+        // A read that fails on a later page must not discard what the earlier pages already did:
+        // those alerts carry a decision tag and are left out of later searches, so their notes
+        // and counts would never be retried.
+        let pageFailed = false;
+        try {
+          let after: DecisionCursor | undefined;
+          for (let page = 0; page < MAX_PAGES; page++) {
+            if (outOfTime()) break;
+            const found = await fetchDecisionCandidates(
+              contextManager,
+              input.analysis_tag_prefix,
+              now - input.lookback_hours * HOUR_MS,
+              filters,
+              { after, includeTaggedByShadow: mode === 'on' }
+            );
+            const hashes = hashCandidates(found.candidates, input.space_id);
+            const decisionsByHash = await readDecisions({
+              mget: (params) => contextManager.getScopedEsClient().mget(params),
+              hashes: new Set(hashes.values()),
+              now,
+            });
+            for (const decisions of decisionsByHash.values()) {
+              for (const decision of decisions) decisionsById.set(decision.id, decision);
+            }
+            const matches = matchDecisions({
+              candidates: found.candidates,
+              hashes,
+              decisionsByHash,
+              severities: DECISION_AUTO_CLOSE_SEVERITIES,
+            });
 
-          if (mode === 'on') {
-            // A dismissed pattern is a verdict of its own: `az:inconclusive` takes the alert out of
-            // the sweep and keeps it from a proposal, and the decision tag says why. It goes first:
-            // it is one cheap call per decision, and when time runs out the closes are what wait.
-            await tagSkipped(matches.wouldSkip);
-            await close(matches.wouldClose);
-          } else {
-            await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
-            await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
-          }
+            if (mode === 'on') {
+              // A dismissed pattern is a verdict of its own: `az:inconclusive` takes the alert out of
+              // the sweep and keeps it from a proposal, and the decision tag says why. It goes first:
+              // it is one cheap call per decision, and when time runs out the closes are what wait.
+              await tagSkipped(matches.wouldSkip);
+              await close(matches.wouldClose);
+            } else {
+              await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
+              await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
+            }
 
-          totals.candidates += found.candidates.length;
-          totals.would_close += count(matches.wouldClose);
-          totals.would_skip += count(matches.wouldSkip);
-          totals.excluded_by_severity += matches.excludedBySeverity;
-          for (const id of [...matches.wouldClose.keys(), ...matches.wouldSkip.keys()]) {
-            decisionsSeen.add(id);
+            totals.candidates += found.candidates.length;
+            totals.would_close += count(matches.wouldClose);
+            totals.would_skip += count(matches.wouldSkip);
+            totals.excluded_by_severity += matches.excludedBySeverity;
+            for (const id of [...matches.wouldClose.keys(), ...matches.wouldSkip.keys()]) {
+              decisionsSeen.add(id);
+            }
+            after = found.after;
+            if (after === undefined) break;
           }
-          after = found.after;
-          if (after === undefined) break;
+        } catch (error) {
+          pageFailed = true;
+          warn('Could not read a page of candidates or decisions', error);
         }
 
         totals.notes_missing += await writeAlertNotes(contextManager, noteJobs, {
@@ -323,7 +332,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           deadline: totalDeadline,
         });
 
-        return result('ok', { ...totals, decisions_matched: decisionsSeen.size });
+        return result(pageFailed ? 'failed' : 'ok', {
+          ...totals,
+          decisions_matched: decisionsSeen.size,
+        });
       } catch (error) {
         logger.warn(
           `Triage decisions were not matched: ${error instanceof Error ? error.message : error}`
