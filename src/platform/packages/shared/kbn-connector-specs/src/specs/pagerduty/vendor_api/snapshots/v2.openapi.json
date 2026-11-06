@@ -1,0 +1,2548 @@
+{
+  "components": {
+    "parameters": {
+      "from_header": {
+        "in": "header",
+        "name": "From",
+        "required": true,
+        "schema": {
+          "format": "email",
+          "type": "string"
+        }
+      },
+      "header_Accept": {
+        "in": "header",
+        "name": "Accept",
+        "required": true,
+        "schema": {
+          "default": "application/vnd.pagerduty+json;version=2",
+          "type": "string"
+        }
+      },
+      "header_Content-Type": {
+        "in": "header",
+        "name": "Content-Type",
+        "required": true,
+        "schema": {
+          "default": "application/json",
+          "enum": [
+            "application/json"
+          ],
+          "type": "string"
+        }
+      },
+      "id": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "include_services": {
+        "explode": true,
+        "in": "query",
+        "name": "include[]",
+        "schema": {
+          "enum": [
+            "escalation_policies",
+            "teams",
+            "integrations",
+            "auto_pause_notifications_parameters"
+          ],
+          "type": "string",
+          "uniqueItems": true
+        }
+      },
+      "offset_limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "offset_offset": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "offset_total": {
+        "in": "query",
+        "name": "total",
+        "required": false,
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "query": {
+        "in": "query",
+        "name": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "service_name": {
+        "in": "query",
+        "name": "name",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "sort_by_service": {
+        "in": "query",
+        "name": "sort_by",
+        "schema": {
+          "default": "name",
+          "enum": [
+            "name",
+            "name:asc",
+            "name:desc"
+          ],
+          "type": "string"
+        }
+      },
+      "team_ids": {
+        "explode": true,
+        "in": "query",
+        "name": "team_ids[]",
+        "schema": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "time_zone": {
+        "in": "query",
+        "name": "time_zone",
+        "schema": {
+          "format": "tzinfo",
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "ArgumentError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/responses/Conflict/content/application~1json/schema"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "properties": {
+                    "code": {
+                      "readOnly": true,
+                      "type": "integer"
+                    },
+                    "errors": {
+                      "items": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "readOnly": true,
+                      "type": "array"
+                    },
+                    "message": {
+                      "readOnly": true,
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/responses/Conflict/content/application~1json/schema"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/responses/Conflict/content/application~1json/schema"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/responses/Conflict/content/application~1json/schema"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/responses/Conflict/content/application~1json/schema"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Acknowledgement": {
+        "properties": {
+          "acknowledger": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcknowledgerReference"
+              },
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "$ref": "#/components/schemas/Service"
+              }
+            ]
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "acknowledger"
+        ],
+        "type": "object"
+      },
+      "AcknowledgerReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "user_reference",
+                  "service_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "AddonReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "src": {
+                "format": "url",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "full_page_addon_reference",
+                  "incident_show_addon_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "AgentReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "user_reference",
+                  "service_reference",
+                  "integration_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "readOnly": true,
+            "type": "object"
+          }
+        ]
+      },
+      "AlertCount": {
+        "properties": {
+          "all": {
+            "type": "integer"
+          },
+          "resolved": {
+            "type": "integer"
+          },
+          "triggered": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AlertGroupingParameters": {
+        "deprecated": true,
+        "properties": {
+          "config": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FlexibleTimeWindowIntelligentAlertGroupingConfig"
+              },
+              {
+                "$ref": "#/components/schemas/TimeBasedAlertGroupingConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/ContentBasedAlertGroupingConfiguration"
+              }
+            ]
+          },
+          "type": {
+            "enum": [
+              "time",
+              "intelligent",
+              "content_based",
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "title": "Alert Grouping Parameters",
+        "type": "object"
+      },
+      "Assignment": {
+        "properties": {
+          "assignee": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UserReference"
+              },
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "assignee"
+        ],
+        "type": "object"
+      },
+      "AutoPauseNotificationsParameters": {
+        "properties": {
+          "enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "recommended_timeout": {
+            "enum": [
+              120,
+              180,
+              300,
+              600,
+              900
+            ],
+            "type": "integer"
+          },
+          "timeout": {
+            "enum": [
+              0,
+              120,
+              180,
+              300,
+              600,
+              900
+            ],
+            "type": "integer"
+          }
+        },
+        "title": "AutoPauseNotificationsParameters",
+        "type": "object"
+      },
+      "Channel": {
+        "oneOf": [
+          {
+            "properties": {
+              "details": {
+                "type": "object"
+              },
+              "host": {
+                "type": "string"
+              },
+              "service": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "title": "NagiosChannel",
+            "type": "object"
+          },
+          {
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object"
+              },
+              "incident_key": {
+                "type": "string"
+              },
+              "service_key": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "title": "APIChannel",
+            "type": "object"
+          },
+          {
+            "properties": {
+              "body": {
+                "type": "string"
+              },
+              "body_content_type": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "raw_url": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "title": "EmailChannel",
+            "type": "object"
+          },
+          {
+            "properties": {
+              "details": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "title": "WebTriggerChannel",
+            "type": "object"
+          },
+          {
+            "properties": {
+              "duration": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "title": "WebsiteChannel",
+            "type": "object"
+          }
+        ],
+        "properties": {
+          "changeset": {
+            "properties": {
+              "application_fields": {
+                "items": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    },
+                    "old_value": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      ]
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "custom_attributes": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "customer_fields": {
+                "items": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    },
+                    "old_value": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      ]
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "customer_schema": {
+                "properties": {
+                  "old_value": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "channel": {
+            "type": "object"
+          },
+          "notification": {
+            "$ref": "#/components/schemas/Notification"
+          },
+          "team": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "ConferenceBridge": {
+        "properties": {
+          "conference_number": {
+            "type": "string"
+          },
+          "conference_url": {
+            "format": "url",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ContactMethodReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "email_contact_method_reference",
+                  "phone_contact_method_reference",
+                  "push_notification_contact_method_reference",
+                  "sms_contact_method_reference",
+                  "whatsapp_contact_method_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "ContentBasedAlertGroupingConfiguration": {
+        "properties": {
+          "aggregate": {
+            "enum": [
+              "all, any"
+            ],
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "recommended_time_window": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "time_window": {
+            "maximum": 86400,
+            "minimum": 300,
+            "type": "integer"
+          }
+        },
+        "title": "Content Only Grouping",
+        "type": "object"
+      },
+      "Context": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "src": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "link",
+              "image"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "EscalationPolicy": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "escalation_rules": {
+                "items": {
+                  "$ref": "#/components/schemas/EscalationRule"
+                },
+                "type": "array"
+              },
+              "name": {
+                "type": "string"
+              },
+              "num_loops": {
+                "default": 0,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "on_call_handoff_notifications": {
+                "enum": [
+                  "if_has_services",
+                  "always"
+                ],
+                "type": "string"
+              },
+              "services": {
+                "items": {
+                  "$ref": "#/components/schemas/ServiceReference"
+                },
+                "minLength": 0,
+                "readOnly": true,
+                "type": "array"
+              },
+              "teams": {
+                "items": {
+                  "$ref": "#/components/schemas/TeamReference"
+                },
+                "minLength": 0,
+                "type": "array"
+              },
+              "type": {
+                "default": "escalation_policy",
+                "enum": [
+                  "escalation_policy"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "name",
+              "escalation_rules"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "EscalationPolicyReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "escalation_policy_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "EscalationRule": {
+        "properties": {
+          "escalation_delay_in_minutes": {
+            "type": "integer"
+          },
+          "escalation_rule_assignment_strategy": {
+            "enum": [
+              "round_robin",
+              "assign_to_everyone"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/EscalationTargetReference"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "escalation_delay_in_minutes",
+          "targets"
+        ],
+        "type": "object"
+      },
+      "EscalationTargetReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "user",
+                  "schedule",
+                  "user_reference",
+                  "schedule_reference",
+                  "schedule_v3_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "FlexibleTimeWindowIntelligentAlertGroupingConfig": {
+        "properties": {
+          "recommended_time_window": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "time_window": {
+            "maximum": 3600,
+            "minimum": 300,
+            "type": "integer"
+          }
+        },
+        "title": "Intelligent Alert Grouping",
+        "type": "object"
+      },
+      "Incident": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "acknowledgements": {
+                "items": {
+                  "$ref": "#/components/schemas/Acknowledgement"
+                },
+                "type": "array"
+              },
+              "alert_counts": {
+                "$ref": "#/components/schemas/AlertCount"
+              },
+              "alert_grouping": {
+                "properties": {
+                  "alert_grouping_active": {
+                    "type": "boolean"
+                  },
+                  "ended_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "grouping_type": {
+                    "enum": [
+                      "basic",
+                      "advanced",
+                      "rules"
+                    ],
+                    "type": "string"
+                  },
+                  "started_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "assigned_via": {
+                "enum": [
+                  "escalation_policy",
+                  "direct_assignment"
+                ],
+                "readOnly": true,
+                "type": "string"
+              },
+              "assignments": {
+                "items": {
+                  "$ref": "#/components/schemas/Assignment"
+                },
+                "type": "array"
+              },
+              "body": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/IncidentBody"
+                  }
+                ]
+              },
+              "conference_bridge": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ConferenceBridge"
+                  }
+                ]
+              },
+              "created_at": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "escalation_policy": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/EscalationPolicyReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EscalationPolicy"
+                  }
+                ]
+              },
+              "first_trigger_log_entry": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/LogEntryReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TriggerLogEntry"
+                  }
+                ]
+              },
+              "incident_key": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "incident_number": {
+                "readOnly": true,
+                "type": "integer"
+              },
+              "incident_type": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "incidents_responders": {
+                "items": {
+                  "$ref": "#/components/schemas/IncidentsRespondersReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "is_mergeable": {
+                "readOnly": true,
+                "type": "boolean"
+              },
+              "last_status_change_at": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "last_status_change_by": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AgentReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                ]
+              },
+              "pending_actions": {
+                "items": {
+                  "$ref": "#/components/schemas/IncidentAction"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "priority": {
+                "$ref": "#/components/schemas/Priority"
+              },
+              "resolve_reason": {
+                "$ref": "#/components/schemas/ResolveReason"
+              },
+              "resolved_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "responder_requests": {
+                "items": {
+                  "$ref": "#/components/schemas/ResponderRequest"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "service": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ServiceReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                ]
+              },
+              "status": {
+                "enum": [
+                  "triggered",
+                  "acknowledged",
+                  "resolved"
+                ],
+                "type": "string"
+              },
+              "teams": {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TeamReference"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Team"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              "title": {
+                "readOnly": false,
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "urgency": {
+                "enum": [
+                  "high",
+                  "low"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "IncidentAction": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "to": {
+            "enum": [
+              "high"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "unacknowledge",
+              "escalate",
+              "resolve",
+              "urgency_change"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "at"
+        ],
+        "type": "object"
+      },
+      "IncidentBody": {
+        "properties": {
+          "details": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "IncidentReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "incident_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "IncidentTypeReference": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentUrgencyRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IncidentUrgencyType"
+          },
+          {
+            "properties": {
+              "during_support_hours": {
+                "$ref": "#/components/schemas/IncidentUrgencyType"
+              },
+              "outside_support_hours": {
+                "$ref": "#/components/schemas/IncidentUrgencyType"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "IncidentUrgencyType": {
+        "properties": {
+          "type": {
+            "default": "constant",
+            "enum": [
+              "constant",
+              "use_support_hours"
+            ],
+            "type": "string"
+          },
+          "urgency": {
+            "default": "high",
+            "enum": [
+              "low",
+              "high",
+              "severity_based"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentsRespondersReference": {
+        "properties": {
+          "escalation_policy_requests": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "incident": {
+            "$ref": "#/components/schemas/IncidentReference"
+          },
+          "message": {
+            "type": "string"
+          },
+          "requested_at": {
+            "type": "string"
+          },
+          "requester": {
+            "$ref": "#/components/schemas/UserReference"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "joined",
+              "declined",
+              "user_cancelled"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "aws_cloudwatch_inbound_integration_reference",
+                  "cloudkick_inbound_integration_reference",
+                  "event_transformer_api_inbound_integration_reference",
+                  "generic_email_inbound_integration_reference",
+                  "generic_events_api_inbound_integration_reference",
+                  "keynote_inbound_integration_reference",
+                  "nagios_inbound_integration_reference",
+                  "pingdom_inbound_integration_reference",
+                  "sql_monitor_inbound_integration_reference",
+                  "events_api_v2_inbound_integration_reference",
+                  "inbound_integration_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "LogEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "agent": {
+                "$ref": "#/components/schemas/AgentReference"
+              },
+              "changeset": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "channel": {
+                "$ref": "#/components/schemas/Channel"
+              },
+              "contexts": {
+                "items": {
+                  "$ref": "#/components/schemas/Context"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "created_at": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "event_details": {
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "readOnly": true,
+                "type": "object"
+              },
+              "incident": {
+                "$ref": "#/components/schemas/IncidentReference"
+              },
+              "note": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "service": {
+                "$ref": "#/components/schemas/ServiceReference"
+              },
+              "teams": {
+                "items": {
+                  "$ref": "#/components/schemas/TeamReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "type": {
+                "enum": [
+                  "acknowledge_log_entry",
+                  "annotate_log_entry",
+                  "assign_log_entry",
+                  "delegate_log_entry",
+                  "escalate_log_entry",
+                  "exhaust_escalation_path_log_entry",
+                  "notify_log_entry",
+                  "reach_ack_limit_log_entry",
+                  "reach_trigger_limit_log_entry",
+                  "repeat_escalation_path_log_entry",
+                  "resolve_log_entry",
+                  "snooze_log_entry",
+                  "trigger_log_entry",
+                  "unacknowledge_log_entry",
+                  "urgency_change_log_entry",
+                  "field_value_change_log_entry",
+                  "custom_field_value_change_log_entry"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "LogEntryReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "acknowledge_log_entry_reference",
+                  "annotate_log_entry_reference",
+                  "assign_log_entry_reference",
+                  "escalate_log_entry_reference",
+                  "exhaust_escalation_path_log_entry_reference",
+                  "notify_log_entry_reference",
+                  "reach_trigger_limit_log_entry_reference",
+                  "repeat_escalation_path_log_entry_reference",
+                  "resolve_log_entry_reference",
+                  "snooze_log_entry_reference",
+                  "trigger_log_entry_reference",
+                  "unacknowledge_log_entry_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Notification": {
+        "properties": {
+          "": {
+            "type": "string"
+          },
+          "address": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "conferenceAddress": {
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "sms_notification",
+              "email_notification",
+              "phone_notification",
+              "push_notification"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationRuleReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "assignment_notification_rule_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Pagination": {
+        "properties": {
+          "limit": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "more": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "offset": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "total": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Priority": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "PriorityReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "priority_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Reference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "required": [
+              "type",
+              "id"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ResolveReason": {
+        "properties": {
+          "incident": {
+            "$ref": "#/components/schemas/IncidentReference"
+          },
+          "type": {
+            "default": "merge_resolve_reason",
+            "enum": [
+              "merge_resolve_reason"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResponderRequest": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "incident": {
+            "$ref": "#/components/schemas/IncidentReference"
+          },
+          "message": {
+            "type": "string"
+          },
+          "requested_at": {
+            "type": "string"
+          },
+          "requester": {
+            "$ref": "#/components/schemas/UserReference"
+          },
+          "responder_request_targets": {
+            "items": {
+              "$ref": "#/components/schemas/ResponderRequestTargetReference"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ResponderRequestTargetReference": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "incident_responders": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentsRespondersReference"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScheduledAction": {
+        "properties": {
+          "at": {
+            "properties": {
+              "name": {
+                "enum": [
+                  "support_hours_start",
+                  "support_hours_end"
+                ],
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "named_time"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ],
+            "type": "object"
+          },
+          "to_urgency": {
+            "enum": [
+              "high"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "urgency_change"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "at",
+          "to_urgency"
+        ],
+        "type": "object"
+      },
+      "Service": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "acknowledgement_timeout": {
+                "default": 1800,
+                "type": "integer"
+              },
+              "addons": {
+                "items": {
+                  "$ref": "#/components/schemas/AddonReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "alert_creation": {
+                "default": "create_alerts_and_incidents",
+                "deprecated": true,
+                "enum": [
+                  "create_incidents",
+                  "create_alerts_and_incidents"
+                ],
+                "type": "string"
+              },
+              "alert_grouping": {
+                "deprecated": true,
+                "enum": [
+                  "time",
+                  "intelligent"
+                ],
+                "type": "string"
+              },
+              "alert_grouping_parameters": {
+                "deprecated": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AlertGroupingParameters"
+                  },
+                  {
+                    "deprecated": true,
+                    "properties": {
+                      "html_url": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "id": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "self": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "summary": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "type": {
+                        "readOnly": true,
+                        "type": "string"
+                      }
+                    },
+                    "title": "Alert Grouping Settings Reference",
+                    "type": "object"
+                  }
+                ]
+              },
+              "alert_grouping_timeout": {
+                "deprecated": true,
+                "type": "integer"
+              },
+              "auto_pause_notifications_parameters": {
+                "$ref": "#/components/schemas/AutoPauseNotificationsParameters"
+              },
+              "auto_resolve_timeout": {
+                "default": 14400,
+                "type": "integer"
+              },
+              "created_at": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "escalation_policy": {
+                "$ref": "#/components/schemas/EscalationPolicyReference"
+              },
+              "incident_urgency_rule": {
+                "$ref": "#/components/schemas/IncidentUrgencyRule"
+              },
+              "integrations": {
+                "items": {
+                  "$ref": "#/components/schemas/IntegrationReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "last_incident_timestamp": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "response_play": {
+                "deprecated": true
+              },
+              "scheduled_actions": {
+                "items": {
+                  "$ref": "#/components/schemas/ScheduledAction"
+                },
+                "type": "array"
+              },
+              "status": {
+                "default": "active",
+                "enum": [
+                  "active",
+                  "warning",
+                  "critical",
+                  "maintenance",
+                  "disabled"
+                ],
+                "type": "string"
+              },
+              "support_hours": {
+                "$ref": "#/components/schemas/SupportHours"
+              },
+              "teams": {
+                "items": {
+                  "$ref": "#/components/schemas/TeamReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "type": {
+                "default": "service",
+                "enum": [
+                  "service"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "escalation_policy"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ServiceReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "service_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "SupportHours": {
+        "properties": {
+          "days_of_week": {
+            "items": {
+              "readOnly": true,
+              "type": "integer"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "end_time": {
+            "format": "time",
+            "type": "string"
+          },
+          "start_time": {
+            "format": "time",
+            "type": "string"
+          },
+          "time_zone": {
+            "format": "activesupport-time-zone",
+            "type": "string"
+          },
+          "type": {
+            "default": "fixed_time_per_day",
+            "enum": [
+              "fixed_time_per_day"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Tag": {
+        "allOf": [
+          {
+            "properties": {
+              "html_url": {
+                "format": "url",
+                "nullable": true,
+                "readOnly": true,
+                "type": "string"
+              },
+              "id": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "self": {
+                "format": "url",
+                "nullable": true,
+                "readOnly": true,
+                "type": "string"
+              },
+              "summary": {
+                "nullable": true,
+                "readOnly": true,
+                "type": "string"
+              },
+              "type": {
+                "readOnly": true,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "properties": {
+              "label": {
+                "maxLength": 191,
+                "type": "string"
+              },
+              "type": {
+                "default": "tag",
+                "enum": [
+                  "tag"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Team": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "default_role": {
+                "default": "manager",
+                "enum": [
+                  "manager",
+                  "none"
+                ],
+                "type": "string"
+              },
+              "description": {
+                "maxLength": 1024,
+                "type": "string"
+              },
+              "name": {
+                "maxLength": 100,
+                "type": "string"
+              },
+              "type": {
+                "default": "team",
+                "enum": [
+                  "team"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TeamReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "team_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "TimeBasedAlertGroupingConfiguration": {
+        "properties": {
+          "timeout": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "title": "Time Grouping",
+        "type": "object"
+      },
+      "TriggerLogEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LogEntry"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger_log_entry"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "User": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tag/allOf/0"
+          },
+          {
+            "properties": {
+              "avatar_url": {
+                "format": "url",
+                "readOnly": true,
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "contact_methods": {
+                "items": {
+                  "$ref": "#/components/schemas/ContactMethodReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "created_via_sso": {
+                "readOnly": true,
+                "type": "boolean"
+              },
+              "description": {
+                "nullable": true,
+                "type": "string"
+              },
+              "email": {
+                "format": "email",
+                "maxLength": 100,
+                "minLength": 6,
+                "type": "string"
+              },
+              "http_cal_url": {
+                "format": "uri",
+                "readOnly": true,
+                "type": "string"
+              },
+              "invitation_sent": {
+                "readOnly": true,
+                "type": "boolean"
+              },
+              "job_title": {
+                "maxLength": 100,
+                "type": "string"
+              },
+              "name": {
+                "maxLength": 100,
+                "type": "string"
+              },
+              "notification_rules": {
+                "items": {
+                  "$ref": "#/components/schemas/NotificationRuleReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "role": {
+                "enum": [
+                  "admin",
+                  "limited_user",
+                  "observer",
+                  "owner",
+                  "read_only_user",
+                  "restricted_access",
+                  "read_only_limited_user",
+                  "user"
+                ],
+                "type": "string"
+              },
+              "teams": {
+                "items": {
+                  "$ref": "#/components/schemas/TeamReference"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "time_zone": {
+                "format": "tzinfo",
+                "type": "string"
+              },
+              "type": {
+                "default": "user",
+                "enum": [
+                  "user"
+                ],
+                "type": "string"
+              },
+              "web_cal_url": {
+                "format": "uri",
+                "readOnly": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "UserReference": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reference"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "user_reference"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "PagerDuty API"
+  },
+  "openapi": "3.0.2",
+  "paths": {
+    "/incidents": {
+      "post": {
+        "operationId": "createIncident",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/header_Accept"
+          },
+          {
+            "$ref": "#/components/parameters/header_Content-Type"
+          },
+          {
+            "$ref": "#/components/parameters/from_header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "incident": {
+                    "properties": {
+                      "assignments": {
+                        "items": {
+                          "properties": {
+                            "assignee": {
+                              "$ref": "#/components/schemas/UserReference"
+                            }
+                          }
+                        },
+                        "type": "array"
+                      },
+                      "body": {
+                        "$ref": "#/components/schemas/IncidentBody"
+                      },
+                      "conference_bridge": {
+                        "$ref": "#/components/schemas/ConferenceBridge"
+                      },
+                      "escalation_policy": {
+                        "$ref": "#/components/schemas/EscalationPolicyReference"
+                      },
+                      "incident_key": {
+                        "type": "string"
+                      },
+                      "incident_type": {
+                        "$ref": "#/components/schemas/IncidentTypeReference"
+                      },
+                      "priority": {
+                        "$ref": "#/components/schemas/PriorityReference"
+                      },
+                      "service": {
+                        "$ref": "#/components/schemas/ServiceReference"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "incident"
+                        ],
+                        "type": "string"
+                      },
+                      "urgency": {
+                        "enum": [
+                          "high",
+                          "low"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "title",
+                      "service"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "incident"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "incident": {
+                      "$ref": "#/components/schemas/Incident"
+                    }
+                  },
+                  "required": [
+                    "incident"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ArgumentError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/incidents/{id}": {
+      "put": {
+        "operationId": "updateIncident",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/header_Accept"
+          },
+          {
+            "$ref": "#/components/parameters/header_Content-Type"
+          },
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/from_header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "incident": {
+                    "properties": {
+                      "assignments": {
+                        "items": {
+                          "properties": {
+                            "assignee": {
+                              "$ref": "#/components/schemas/UserReference"
+                            }
+                          }
+                        },
+                        "type": "array"
+                      },
+                      "conference_bridge": {
+                        "$ref": "#/components/schemas/ConferenceBridge"
+                      },
+                      "escalation_level": {
+                        "type": "integer"
+                      },
+                      "escalation_policy": {
+                        "$ref": "#/components/schemas/EscalationPolicyReference"
+                      },
+                      "incident_type": {
+                        "$ref": "#/components/schemas/IncidentTypeReference"
+                      },
+                      "priority": {
+                        "oneOf": [
+                          {
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": [
+                                  "priority",
+                                  "priority_reference"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "resolution": {
+                        "type": "string"
+                      },
+                      "service": {
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "enum": [
+                              "service_reference"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ],
+                        "type": "object"
+                      },
+                      "status": {
+                        "enum": [
+                          "resolved",
+                          "acknowledged",
+                          "triggered"
+                        ],
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "incident",
+                          "incident_reference"
+                        ],
+                        "type": "string"
+                      },
+                      "urgency": {
+                        "enum": [
+                          "high",
+                          "low"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "incident"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "incident": {
+                          "$ref": "#/components/schemas/Incident"
+                        }
+                      },
+                      "required": [
+                        "incident"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/incidents/{id}/responder_requests": {
+      "post": {
+        "operationId": "createIncidentResponderRequest",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/header_Accept"
+          },
+          {
+            "$ref": "#/components/parameters/header_Content-Type"
+          },
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "requester_id": {
+                    "type": "string"
+                  },
+                  "responder_request_targets": {
+                    "items": {
+                      "$ref": "#/components/schemas/ResponderRequestTargetReference"
+                    }
+                  }
+                },
+                "required": [
+                  "requester_id",
+                  "message",
+                  "responder_request_targets"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "responder_request": {
+                      "$ref": "#/components/schemas/ResponderRequest"
+                    }
+                  },
+                  "required": [
+                    "responder_request"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ArgumentError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "operationId": "listServices",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/header_Accept"
+          },
+          {
+            "$ref": "#/components/parameters/header_Content-Type"
+          },
+          {
+            "$ref": "#/components/parameters/query"
+          },
+          {
+            "$ref": "#/components/parameters/offset_limit"
+          },
+          {
+            "$ref": "#/components/parameters/offset_offset"
+          },
+          {
+            "$ref": "#/components/parameters/offset_total"
+          },
+          {
+            "$ref": "#/components/parameters/team_ids"
+          },
+          {
+            "$ref": "#/components/parameters/time_zone"
+          },
+          {
+            "$ref": "#/components/parameters/sort_by_service"
+          },
+          {
+            "$ref": "#/components/parameters/include_services"
+          },
+          {
+            "$ref": "#/components/parameters/service_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Pagination"
+                    },
+                    {
+                      "properties": {
+                        "services": {
+                          "items": {
+                            "$ref": "#/components/schemas/Service"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "services"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ArgumentError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.pagerduty.com"
+    }
+  ]
+}

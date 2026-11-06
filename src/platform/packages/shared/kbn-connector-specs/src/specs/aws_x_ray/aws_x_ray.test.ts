@@ -9,7 +9,12 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { AwsXRay } from './aws_x_ray';
-import { GetInsightSummariesInputSchema } from './types';
+import {
+  GetGroupsInputSchema,
+  GetInsightInputSchema,
+  GetInsightSummariesInputSchema,
+  GetSamplingRulesInputSchema,
+} from './types';
 
 describe('AwsXRay', () => {
   const mockClient = {
@@ -141,6 +146,16 @@ describe('AwsXRay', () => {
         expect.any(Object)
       );
       expect(result).toEqual({ Insight: { InsightId: '5f169f14-3021-4680-a72c-7ea3faa4b1c8' } });
+    });
+
+    it.each([
+      ['an RFC 4122 UUID', '5f169f14-3021-4680-a72c-7ea3faa4b1c8', true],
+      ['version 0', '5f169f14-3021-0680-a72c-7ea3faa4b1c8', false],
+      ['version 6', '5f169f14-3021-6680-a72c-7ea3faa4b1c8', false],
+      ['variant 0', '5f169f14-3021-4680-072c-7ea3faa4b1c8', false],
+      ['the nil UUID', '00000000-0000-0000-0000-000000000000', false],
+    ])('should validate the insight id: %s', (_name, insightId, expected) => {
+      expect(GetInsightInputSchema.safeParse({ insightId }).success).toBe(expected);
     });
   });
 
@@ -307,6 +322,15 @@ describe('AwsXRay', () => {
         expect.any(Object)
       );
       expect(result).toEqual({ Groups: [{ GroupName: 'default' }] });
+    });
+
+    it('should cap nextToken at 100 characters, unlike the other operations', () => {
+      const token = (length: number) => ({ nextToken: 'a'.repeat(length) });
+
+      expect(GetGroupsInputSchema.safeParse(token(100)).success).toBe(true);
+      expect(GetGroupsInputSchema.safeParse(token(101)).success).toBe(false);
+      expect(GetSamplingRulesInputSchema.safeParse(token(2000)).success).toBe(true);
+      expect(GetSamplingRulesInputSchema.safeParse(token(2001)).success).toBe(false);
     });
   });
 

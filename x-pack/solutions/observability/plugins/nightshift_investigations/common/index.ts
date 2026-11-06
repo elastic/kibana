@@ -8,8 +8,6 @@
 import type { Severity } from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
-export { telemetryTargetNameSchema } from './telemetry_targets';
-
 export type { Severity } from '@kbn/significant-events-schema';
 
 export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
@@ -68,6 +66,8 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional operator guidance for this round, limited to 5,000 characters. */
+  instructions?: string;
   /** Optional upper bound for this investigation workflow run, in seconds. */
   timeout_seconds?: number;
   /**
@@ -77,7 +77,6 @@ export interface StartInvestigationRequest {
   source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
-  telemetry_target?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];

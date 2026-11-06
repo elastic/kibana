@@ -52,8 +52,11 @@ In {{kib}}, you need an Enterprise license and `server.publicBaseUrl` set to the
 | `slack2.channel_created` | `channel_created` | `channelId`, `name`, `creator` |
 | `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
 | `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
+| `slack2.slash_command` | slash command | `workspace`, `channel`, `channelName`, `user`, `userName`, `command`, `text`, `responseUrl`, `apiAppId` |
 
-`threadId`, `sender`, `text`, `subtype`, `botId`, `appId`, and `botName` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+`threadId`, `sender`, `text`, `subtype`, `botId`, `appId`, and `botName` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. On a slash command, `channelName`, `userName`, `text`, `responseUrl`, and `apiAppId` are present only when Slack sends them. An event type that is not in this table does not start a workflow.
+
+Slack slash commands POST `application/x-www-form-urlencoded` to the same ingest URL. The connector emits `slack2.slash_command` and responds with HTTP 200 and an empty body. Post a message to `event.responseUrl` to reply in Slack. That URL is temporary. `command` includes the leading slash, so a workflow can filter with `event.command: "/investigate"`.
 
 For `slack2.message`, `text` also includes the text of the message's blocks and legacy attachments that the message text does not already contain, one line each. A bot post that carries its content only in attachments still has a body, and a message filter on the text also matches that content. Button labels appear in brackets, such as `[Ack]`. Uploaded files are not read.
 
@@ -77,6 +80,29 @@ Example `app_mention` body:
 ```
 
 That payload emits `slack2.app_mention` with `workspace`, `channel`, `messageId`, `sender`, and `text`.
+
+### Receive responses to workflow requests [slack-v2-receive-responses-to-workflow-requests]
+```{applies_to}
+serverless: preview
+stack: preview 9.7+
+```
+
+The connector can receive responses from interactive Slack messages posted by `waitForApproval` and `waitForInput` workflow steps. To have a step post buttons and fields in Slack instead of links to {{kib}}, set `interactive: true` on the step's `with.channels.slack2` channel. For step configuration, refer to [`waitForApproval`](docs-content://explore-analyze/workflows/steps/wait-for-approval.md#external-channels) and [`waitForInput`](docs-content://explore-analyze/workflows/steps/wait-for-input.md#external-channels).
+
+A response resumes the paused step. It doesn't start a workflow.
+
+To receive responses:
+
+- The connector must use your own Slack app, with OAuth Authorization Code or Bot Token authentication. Quick Connect OAuth 2.0 doesn't support interactive responses.
+- **Receive events** must be turned on for the connector.
+- Your Slack app's interactivity request URL must be the connector's webhook URL, with the ingest token added as a `token` query parameter. For details, refer to [Handling user interaction](https://docs.slack.dev/interactivity/handling-user-interaction/) in the Slack documentation.
+
+```text
+https://<kibana-host>/api/actions/events/.slack2/<connector-id>?token=<ingest-token>
+https://<kibana-host>/s/<space-id>/api/actions/events/.slack2/<connector-id>?token=<ingest-token>
+```
+
+You need an Event Subscriptions request URL only if you also want Slack events to start workflows.
 
 ## Test connectors [slack-v2-action-configuration]
 
