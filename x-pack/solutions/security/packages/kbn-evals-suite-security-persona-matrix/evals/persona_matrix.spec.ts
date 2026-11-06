@@ -76,6 +76,7 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
       log,
       examples: selectShard(examples, process.env.PERSONA_MATRIX_SHARD),
       agentId: resolveAgentId(agentProfile),
+      profile: agentProfile,
     });
 
     await evaluateDataset({

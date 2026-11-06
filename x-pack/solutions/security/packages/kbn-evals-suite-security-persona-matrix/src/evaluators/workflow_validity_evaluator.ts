@@ -252,6 +252,50 @@ type ParsedWorkflow = { ok: true; root: Record<string, unknown> } | { ok: false;
 
 const MANUAL_TRIGGERS = [{ type: 'manual' }];
 
+const fixtureValueFor = (declaration: Record<string, unknown>): unknown => {
+  const options = declaration.options ?? declaration.enum;
+  if (Array.isArray(options) && options.length > 0) {
+    const first: unknown = options[0];
+    return isRecord(first) && 'value' in first ? first.value : first;
+  }
+  switch (declaration.type) {
+    case 'number':
+    case 'integer':
+      return 1;
+    case 'boolean':
+      return true;
+    case 'array':
+      return [];
+    case 'object':
+      return {};
+    default:
+      return 'persona-matrix-fixture';
+  }
+};
+
+/**
+ * Run inputs for a workflow the agent authored. The engine rejects a run whose
+ * required inputs are missing before any step executes, which would score the
+ * evaluator's own omission as an authoring failure. Every declared input with no
+ * default gets a fixture value of its declared type; declared defaults are left
+ * to the engine. Handles the list form (`[{ name, type, default }]`) and the
+ * JSON-schema form (`{ properties: { <name>: { type, default } } }`).
+ */
+export const buildRunInputs = (root: Record<string, unknown>): Record<string, unknown> => {
+  const inputs: Record<string, unknown> = {};
+  const declare = (name: unknown, declaration: unknown) => {
+    if (typeof name !== 'string' || !isRecord(declaration) || 'default' in declaration) return;
+    inputs[name] = fixtureValueFor(declaration);
+  };
+  const declared = root.inputs;
+  if (Array.isArray(declared)) {
+    declared.forEach((entry) => isRecord(entry) && declare(entry.name, entry));
+  } else if (isRecord(declared) && isRecord(declared.properties)) {
+    Object.entries(declared.properties).forEach(([name, entry]) => declare(name, entry));
+  }
+  return inputs;
+};
+
 const hasNonManualTrigger = (root: Record<string, unknown>): boolean =>
   Array.isArray(root.triggers) &&
   root.triggers.some((trigger) => !isRecord(trigger) || trigger.type !== 'manual');
@@ -442,7 +486,7 @@ export const createWorkflowValidityEvaluator = ({
         method: 'POST',
         version: API_VERSION,
         headers: PUBLIC_HEADERS,
-        body: JSON.stringify({ inputs: {} }),
+        body: JSON.stringify({ inputs: buildRunInputs(parsed.root) }),
       });
       if (typeof started?.workflowExecutionId !== 'string') {
         throw new Error('run response carried no execution id');

@@ -16,8 +16,12 @@
 
 export const SIDE_EFFECTS_INDEX = 'persona-matrix-side-effects';
 
-/** Tag on every case `create-case` opens; cleanup finds this run's cases by it. */
-export const PARITY_CASE_TAG = 'chrysalis';
+/**
+ * Tag on every case `create-case` opens; cleanup finds this run's cases by it.
+ * Deliberately not `chrysalis`: the external benchmark's own create-case workflow
+ * uses that tag, and cleanup must never match its cases.
+ */
+export const PARITY_CASE_TAG = 'persona-matrix-parity';
 
 export const PARITY_ON_CALL_EMAIL = 'priya.kapoor@example.corp';
 

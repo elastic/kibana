@@ -7,7 +7,12 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { PARITY_WORKFLOWS, PARITY_CASE_TAG, type ParityWorkflow } from './parity_workflows';
+import {
+  PARITY_WORKFLOWS,
+  PARITY_CASE_TAG,
+  CREATE_CASE_WORKFLOW_ID,
+  type ParityWorkflow,
+} from './parity_workflows';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 import { seedProfile } from './chrysalis_seed';
 import type { AgentProfile } from '../agent_profile';
@@ -152,6 +157,14 @@ const createdToolIds = new Set<string>();
  * createdToolIds: a pre-existing workflow (409 on POST) must survive cleanup.
  */
 const createdWorkflowIds = new Set<string>();
+
+/**
+ * When THIS process created the `create-case` workflow. Case cleanup is limited
+ * to cases opened since then, so cases from before the run survive.
+ */
+let parityCaseWindowStart: string | undefined;
+
+const CASES_PAGE_SIZE = 100;
 
 /**
  * True only when the connector at STUB_CONNECTOR_ID is known to be an `.http`
@@ -312,13 +325,41 @@ async function createWorkflowIfMissing({
       body: { id: workflow.id, yaml: workflow.yaml },
     });
     createdWorkflowIds.add(workflow.id);
+    if (workflow.id === CREATE_CASE_WORKFLOW_ID) parityCaseWindowStart = new Date().toISOString();
     log.info(`[persona-matrix] created workflow '${workflow.id}'`);
   } catch (error) {
     if (isAlreadyExists(error)) {
-      log.info(`[persona-matrix] workflow '${workflow.id}' already exists, reusing`);
+      await assertExistingWorkflowMatchesSeed({ kbnClient, workflow });
+      log.info(
+        `[persona-matrix] workflow '${workflow.id}' already exists with seeded yaml, reusing`
+      );
       return;
     }
     throw error;
+  }
+}
+
+/**
+ * A workflow id that already exists is only reused when its definition is the
+ * seeded one. The parity tools bind by id, so a same-id workflow with other
+ * steps (a real Slack call, a different case owner) would run under the tools
+ * and the run would score, and side-effect, against something we never seeded.
+ */
+async function assertExistingWorkflowMatchesSeed({
+  kbnClient,
+  workflow,
+}: Pick<SeedToolsOptions, 'kbnClient'> & { workflow: ParityWorkflow }): Promise<void> {
+  const { data: existing } = await kbnClient.request<{ yaml?: string }>({
+    method: 'GET',
+    path: `${WORKFLOWS_PATH}/${encodeURIComponent(workflow.id)}`,
+    headers: AGENT_BUILDER_TOOLS_HEADERS,
+  });
+  if (existing?.yaml?.trim() !== workflow.yaml.trim()) {
+    throw new Error(
+      `[persona-matrix] workflow '${workflow.id}' already exists with a definition that differs ` +
+        `from the seeded one; refusing to bind parity tools to it. Delete it ` +
+        `(DELETE ${WORKFLOWS_PATH}/${workflow.id}?force=true&acknowledgeAclLoss=true) and re-run.`
+    );
   }
 }
 
@@ -573,24 +614,41 @@ export async function cleanupPersonaMatrixTools({
   }
 
   // create.case runs the seeded create-case workflow, which tags every case it
-  // opens with PARITY_CASE_TAG. Clean those regardless of who created the
-  // workflow — a reused (pre-existing) workflow still opens cases during a run.
+  // opens with PARITY_CASE_TAG. Clean up only when THIS process created that
+  // workflow (a reused one belongs to someone else), and only cases opened since.
+  if (!createdWorkflowIds.has(CREATE_CASE_WORKFLOW_ID)) return;
   try {
-    const { data: found } = await kbnClient.request<{
-      cases?: Array<{ id: string }>;
-    }>({
-      method: 'GET',
-      path: CASES_FIND_PATH,
-      query: { tags: PARITY_CASE_TAG },
-      headers: AGENT_BUILDER_TOOLS_HEADERS,
-    });
-    const caseIds = (found.cases ?? []).map((c) => c.id);
-    if (caseIds.length > 0) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/cases?ids=${encodeURIComponent(JSON.stringify(caseIds))}`,
+    const caseIds: string[] = [];
+    for (let page = 1; ; page++) {
+      const { data: found } = await kbnClient.request<{
+        cases?: Array<{ id: string }>;
+        total?: number;
+      }>({
+        method: 'GET',
+        path: CASES_FIND_PATH,
+        query: {
+          tags: PARITY_CASE_TAG,
+          perPage: CASES_PAGE_SIZE,
+          page,
+          ...(parityCaseWindowStart ? { from: parityCaseWindowStart } : {}),
+        },
         headers: AGENT_BUILDER_TOOLS_HEADERS,
       });
+      const batch = (found.cases ?? []).map((c) => c.id);
+      caseIds.push(...batch);
+      if (batch.length === 0 || caseIds.length >= (found.total ?? 0)) break;
+    }
+    // Delete in chunks: the ids travel in the query string.
+    for (let i = 0; i < caseIds.length; i += CASES_PAGE_SIZE) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/api/cases?ids=${encodeURIComponent(
+          JSON.stringify(caseIds.slice(i, i + CASES_PAGE_SIZE))
+        )}`,
+        headers: AGENT_BUILDER_TOOLS_HEADERS,
+      });
+    }
+    if (caseIds.length > 0) {
       log.info(`[persona-matrix] deleted ${caseIds.length} parity case(s)`);
     }
   } catch (error) {

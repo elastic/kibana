@@ -46,6 +46,11 @@ import {
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient } from './chat_client';
+import {
+  agentProfile as envAgentProfile,
+  withProfileExpectedTools,
+  type AgentProfile,
+} from './agent_profile';
 import { capJudgePayload, getJudgePayloadCapOptionsFromEnv } from './judge_payload_cap';
 
 /**
@@ -628,6 +633,23 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   },
 });
 
+const SUITE_NAME = 'security-persona-matrix';
+
+/**
+ * Reporting identity for a profile. A non-default agent is a different system
+ * under test, so its dataset and experiment suite name carry the profile and a
+ * run cannot be mistaken for the default agent's result when archived scores are
+ * grouped by dataset or experiment suite. The default profile keeps the
+ * established names.
+ */
+export const reportingIdentity = (
+  datasetName: string,
+  profile: AgentProfile
+): { datasetName: string; suite: string } =>
+  profile === 'default'
+    ? { datasetName, suite: SUITE_NAME }
+    : { datasetName: `${datasetName} (${profile})`, suite: `${SUITE_NAME}-${profile}` };
+
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
   evaluators,
@@ -635,6 +657,7 @@ export function createEvaluatePersonaMatrixDataset({
   traceEsClient,
   log,
   fetch,
+  agentProfile = envAgentProfile,
 }: {
   chatClient: PersonaMatrixChatClient;
   evaluators: DefaultEvaluators;
@@ -643,7 +666,10 @@ export function createEvaluatePersonaMatrixDataset({
   log: ToolingLog;
   /** Kibana HTTP handler, used by `WorkflowValidity` to create and run authored workflows. */
   fetch: HttpHandler;
+  /** Agent the chat client converses with; defaults to the `AGENT_PROFILE` env. */
+  agentProfile?: AgentProfile;
 }) {
+  const identity = (datasetName: string) => reportingIdentity(datasetName, agentProfile);
   return async function evaluateDataset({
     dataset,
   }: {
@@ -652,8 +678,16 @@ export function createEvaluatePersonaMatrixDataset({
     // Shard before wrapping so a sharded run seeds and grades only its slice.
     // Slow models need hours for all 21 examples on one stack; shards can be
     // fanned out across separate stacks.
-    const shardedExamples = selectShard(dataset.examples, process.env.PERSONA_MATRIX_SHARD);
-    const wrappedExamples = shardedExamples.map(toDatasetExample);
+    const shardedExamples = withProfileExpectedTools(
+      selectShard(dataset.examples, process.env.PERSONA_MATRIX_SHARD),
+      agentProfile
+    );
+    // The ingest keeps per-example metadata and the dataset name but not the
+    // experiment metadata, so the profile is stamped on each example too.
+    const wrappedExamples = shardedExamples.map((example) => {
+      const wrapped = toDatasetExample(example);
+      return { ...wrapped, metadata: { ...wrapped.metadata, agentProfile } };
+    });
 
     if (process.env.PERSONA_MATRIX_SHARD) {
       log.info(
@@ -744,12 +778,16 @@ export function createEvaluatePersonaMatrixDataset({
         concurrency: Number(process.env.PERSONA_MATRIX_CONCURRENCY) || undefined,
         datasets: [
           {
-            name: dataset.name,
+            name: identity(dataset.name).datasetName,
             description: dataset.description,
             examples: wrappedExamples,
           },
         ],
-        metadata: { suite: 'security-persona-matrix', source: 'persona-matrix-eval' },
+        metadata: {
+          suite: identity(dataset.name).suite,
+          agent_profile: agentProfile,
+          source: 'persona-matrix-eval',
+        },
         task: async (example) => {
           const input = example.input as PersonaMatrixExampleInput;
           const question = input?.question;
