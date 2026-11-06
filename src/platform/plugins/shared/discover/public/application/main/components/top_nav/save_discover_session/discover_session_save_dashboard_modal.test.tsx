@@ -86,6 +86,12 @@ describe('DiscoverSessionSaveDashboardModal', () => {
     expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
   });
 
+  it('shows the store time switch when store time starts on and isTimeBased is false', async () => {
+    renderSaveModal({ initialTimeRestore: true, isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
+  });
+
   it('passes modal state to onSave', async () => {
     const { onSave } = renderSaveModal();
 
@@ -106,6 +112,22 @@ describe('DiscoverSessionSaveDashboardModal', () => {
         newTimeRestore: true,
         newTitle: 'My session',
       })
+    );
+  });
+
+  it('shows a store time error without changing the selection and lets the user turn it off', async () => {
+    const { onSave, rerender } = renderSaveModal({ initialTimeRestore: true });
+    await screen.findByTestId('savedObjectSaveModal');
+
+    rerender({ isTimeBased: false, hasTimeRestoreError: true });
+
+    const timeSwitch = screen.getByTestId('storeTimeWithSearch');
+    expect(timeSwitch).toBeInvalid();
+    expect(timeSwitch).toBeChecked();
+    await userEvent.click(timeSwitch);
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ newTimeRestore: false }))
     );
   });
 

@@ -20,7 +20,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
 import {
-  type DiscoverInternalState,
   internalStateActions,
   InternalStateProvider,
   RuntimeStateManagerProvider,

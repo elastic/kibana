@@ -238,6 +238,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         initialTags: [],
         initialTimeRestore: false,
         isTimeBased: false,
+        hasTimeRestoreError: false,
         managed: true,
         onClose: expect.any(Function),
         onCopyOnSaveChange: expect.any(Function),
@@ -266,6 +267,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         initialTags: [],
         initialTimeRestore: false,
         isTimeBased: false,
+        hasTimeRestoreError: false,
         managed: true,
         onClose: expect.any(Function),
         onCopyOnSaveChange: expect.any(Function),
@@ -295,6 +297,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         initialTags: [],
         initialTimeRestore: false,
         isTimeBased: false,
+        hasTimeRestoreError: false,
         managed: true,
         onClose: expect.any(Function),
         onCopyOnSaveChange: expect.any(Function),
@@ -320,6 +323,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         initialTags: [],
         initialTimeRestore: false,
         isTimeBased: false,
+        hasTimeRestoreError: false,
         managed: false,
         onClose: expect.any(Function),
         onCopyOnSaveChange: expect.any(Function),
@@ -463,7 +467,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       it.each([
         ['keeps', 'time-based', dataViewWithTimeFieldTab, dataViewMockWithTimeField, true],
-        ['drops', 'not time-based', dataViewNoTimeFieldTab, dataViewMock, false],
+        ['rejects', 'not time-based', dataViewNoTimeFieldTab, dataViewMock, false],
       ])(
         '%s store time when the data view list that loads during save shows an unopened tab is %s',
         async (_, __, unopenedTab, unopenedTabDataView, expectedTimeRestore) => {
@@ -473,6 +477,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             isEmbedded: true,
             services,
           });
+          jest.mocked(services.discoverSessionService.save).mockClear();
           const dataViewList = Promise.withResolvers<void>();
           const loadDataViewListOnceSpy = jest
             .spyOn(internalStateActions, 'loadDataViewListOnce')
@@ -497,6 +502,12 @@ describe('DiscoverSessionSaveModalContainer', () => {
             loadDataViewListOnceSpy.mockRestore();
           }
 
+          if (!expectedTimeRestore) {
+            expect(MockModal.mock.lastCall?.[0].hasTimeRestoreError).toBe(true);
+            expect(services.discoverSessionService.save).not.toHaveBeenCalled();
+            return;
+          }
+
           const savedTabs = toolkit.internalState.getState().persistedDiscoverSession?.tabs;
 
           expect(savedTabs?.map(({ timeRestore }) => timeRestore)).toEqual([
@@ -507,7 +518,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       );
     });
 
-    it("should set initialTimeRestore to true if any tab's timeRestore is true", async () => {
+    it("should set initialTimeRestore to true if any tab's timeRestore is true and the session is time-based", async () => {
       const services = createDiscoverServicesMock();
 
       const noTimeRestoreTab = fromTabStateToSavedObjectTab({
@@ -518,7 +529,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
 
       const timeRestoreTab = fromTabStateToSavedObjectTab({
-        currentDataView: dataViewMock,
+        currentDataView: dataViewWithTimefieldMock,
         services,
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         tabType: undefined,
@@ -538,6 +549,32 @@ describe('DiscoverSessionSaveModalContainer', () => {
       }));
       expect(modalProps?.initialTimeRestore).toBe(true);
     });
+
+    it.each([
+      ['resolved', [dataViewMock], false],
+      ['unresolved', [], true],
+    ])(
+      'should keep saved store time of a non time-based tab only if its data view is %s',
+      async (_, dataViewsList, expectedTimeRestore) => {
+        const services = createDiscoverServicesMock();
+        const tab = getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } });
+        const { modalProps } = await setup({
+          additionalPersistedTabs: [
+            fromTabStateToSavedObjectTab({
+              currentDataView: dataViewMock,
+              services,
+              tab,
+              tabType: undefined,
+            }),
+          ],
+          dataViewsList,
+          isEmbedded: true,
+          services,
+        });
+
+        expect(modalProps?.initialTimeRestore).toBe(expectedTimeRestore);
+      }
+    );
   });
 
   describe('save behavior', () => {
@@ -583,7 +620,9 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps());
       });
 
-      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession);
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession, {
+        state: { controlGroupState: undefined },
+      });
     });
 
     it('should navigate to new session on Save As from embedded editor', async () => {

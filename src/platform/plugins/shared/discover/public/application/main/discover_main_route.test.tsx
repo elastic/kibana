@@ -43,6 +43,7 @@ import {
   useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
 } from './state_management/redux';
 
@@ -425,9 +426,20 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
-  test.each(['profile', 'space'])(
-    'opens the %s default ES|QL query without data views',
-    async (defaultQuerySource) => {
+  test('shows the data view prompt with only ES|QL datasets and no query or configured default', async () => {
+    setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+    await waitForLoad();
+
+    expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
+  });
+
+  test.each<[string, boolean, boolean]>([
+    ['profile', false, true],
+    ['space', false, true],
+    ['space', true, false],
+  ])(
+    'opens the %s default ES|QL query without data views (ES data: %s, ES|QL datasets: %s)',
+    async (defaultQuerySource, hasESData, hasESQLDatasets) => {
       mockRootProfileState = {
         ...defaultRootProfileState,
         getDefaultEsqlQuery: () =>
@@ -450,7 +462,7 @@ describe('DiscoverMainRoute', () => {
       getIsEsqlDefaultMock.mockImplementation(() => true);
 
       try {
-        setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+        setupComponent({ hasESData, hasDataView: false, hasESQLDatasets });
         await waitForLoad();
 
         expect(screen.getByTestId('discover-main-app')).toBeVisible();
@@ -483,12 +495,14 @@ describe('DiscoverMainRoute', () => {
       const dataView = useCurrentDataView();
       const query = useAppStateSelector((state) => state.query);
       const mode = isOfAggregateQueryType(query) ? 'ES|QL' : 'Classic';
+      const isLoading = useCurrentTabSelector((tab) => tab.isDataViewLoading);
 
       return (
         <div data-test-subj="discover-main-app">
           <input aria-label="Draft query" defaultValue={initialQuery} />
           <button onClick={() => dispatch(transition({ dataView }))}>Switch to Classic</button>
           <output>{mode}</output>
+          <output>{isLoading ? 'Switching' : 'Ready'}</output>
         </div>
       );
     });
@@ -502,6 +516,7 @@ describe('DiscoverMainRoute', () => {
     await act(async () => {});
 
     expect(screen.getByText('ES|QL')).toBeVisible();
+    expect(screen.getByText('Switching')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
     expect(draft).toHaveValue(draftQuery);
 
@@ -510,6 +525,7 @@ describe('DiscoverMainRoute', () => {
     });
 
     expect(await screen.findByText('Classic')).toBeVisible();
+    expect(screen.getByText('Ready')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
     expect(draft).toHaveValue(draftQuery);
   });

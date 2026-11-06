@@ -14,6 +14,7 @@ import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
 import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
+import { getPolicySettings, type PolicySettings } from '../../../common/policy_settings';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -25,6 +26,8 @@ export interface BuildPackagePolicyOpts {
   /** Integration name as entered in step 2; the policy name is derived from it. */
   integrationName?: string;
   description?: string;
+  /** Package policy fields from Step 2 that every policy gets, such as the output. */
+  policySettings?: PolicySettings;
 }
 
 export interface PkgInfo {
@@ -224,6 +227,7 @@ export async function buildGroupPackagePolicy(
   description?: string;
   package: { name: string; version: string };
   namespace?: string;
+  output_id?: string;
   vars?: Record<string, string | SecretRefValue>;
   inputs: Record<string, unknown>;
 }> {
@@ -237,8 +241,10 @@ export async function buildGroupPackagePolicy(
     agentCredentials,
     integrationName,
     description,
+    policySettings,
   } = opts;
   const descriptionField = description?.trim() ? { description: description.trim() } : {};
+  const policySettingsFields = getPolicySettings(policySettings, 'agent_based');
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -309,6 +315,7 @@ export async function buildGroupPackagePolicy(
         ...descriptionField,
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
+        ...policySettingsFields,
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -341,6 +348,7 @@ export async function buildGroupPackagePolicy(
     ...descriptionField,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
+    ...policySettingsFields,
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
     inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },

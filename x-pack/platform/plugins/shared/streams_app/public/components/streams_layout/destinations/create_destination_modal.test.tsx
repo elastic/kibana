@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
@@ -33,6 +33,9 @@ const renderModal = () => {
   );
   return { createDestination };
 };
+
+const setFieldValue = (testSubject: string, value: string) =>
+  fireEvent.change(screen.getByTestId(testSubject), { target: { value } });
 
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
@@ -67,5 +70,59 @@ describe('CreateDestinationModal', () => {
         expect.anything()
       )
     );
+  });
+
+  describe('remote Elasticsearch', () => {
+    const ENDPOINT_REQUIRED = 'Enter the endpoint of the remote cluster.';
+    const API_KEY_REQUIRED = 'Enter an API key.';
+
+    it('only shows connection errors after their input is left', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+
+      expect(screen.queryByText(ENDPOINT_REQUIRED)).not.toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint')
+      );
+      await userEvent.tab();
+
+      expect(screen.getByText(ENDPOINT_REQUIRED)).toBeInTheDocument();
+      expect(screen.queryByText(API_KEY_REQUIRED)).not.toBeInTheDocument();
+    });
+
+    it('submits the remote form values', async () => {
+      const { createDestination } = renderModal();
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+      await userEvent.click(
+        within(screen.getByTestId('streamsCreateDestinationFixedIndex')).getByRole('radio')
+      );
+      setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
+      setFieldValue(
+        'streamsCreateDestinationRemoteElasticsearchEndpoint',
+        'https://es.example.com:443'
+      );
+      setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      setFieldValue('streamsCreateDestinationName', 'Central');
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+
+      await waitFor(() =>
+        expect(createDestination).toHaveBeenCalledWith(
+          expect.objectContaining({
+            storageKind: 'remote_elasticsearch',
+            destinationName: 'Central',
+            remoteElasticsearch: expect.objectContaining({
+              auto: false,
+              logsIndex: 'shared-idx',
+              metricsIndex: 'shared-idx',
+              tracesIndex: 'shared-idx',
+              endpoint: 'https://es.example.com:443',
+              apiKey: 'remote-key',
+            }),
+          }),
+          expect.anything()
+        )
+      );
+    });
   });
 });

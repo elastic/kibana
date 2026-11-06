@@ -28,6 +28,7 @@ import {
   selectTab,
   selectTabRuntimeState,
   useCurrentTabRuntimeState,
+  useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateGetState,
   useInternalStateSelector,
@@ -59,6 +60,7 @@ export const DiscoverSessionSaveModalContainer = ({
   const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
   const savedDataViews = useInternalStateSelector(selectSavedDataViews);
@@ -67,9 +69,16 @@ export const DiscoverSessionSaveModalContainer = ({
 
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
   const isTimeBased = hasTimeBasedTab({ tabs: allTabs, savedDataViews, runtimeStateManager });
+  const hasUnresolvedTab = hasUnresolvedDataViewTab({
+    tabs: allTabs,
+    savedDataViews,
+    runtimeStateManager,
+  });
+  const initialTimeRestore = timeRestore && (isTimeBased || hasUnresolvedTab);
 
   const isSaveCallbackFlow = Boolean(onSaveCb);
 
+  const [hasTimeRestoreError, setHasTimeRestoreError] = useState(false);
   const [copyOnSaveToggled, setCopyOnSaveToggled] = useState(false);
 
   const showDashboardOptionsForSaveAs = initialCopyOnSave || copyOnSaveToggled;
@@ -108,10 +117,17 @@ export const DiscoverSessionSaveModalContainer = ({
       runtimeStateManager,
     });
 
+    if (newTimeRestore && !isTimeBasedOnSave) {
+      setHasTimeRestoreError(true);
+      return { discoverSession: undefined };
+    }
+
+    setHasTimeRestoreError(false);
+
     return await dispatch(
       internalStateActions.saveDiscoverSession({
         newTitle,
-        newTimeRestore: newTimeRestore && isTimeBasedOnSave,
+        newTimeRestore,
         newCopyOnSave: effectiveCopyOnSave,
         newDescription,
         newTags,
@@ -142,6 +158,7 @@ export const DiscoverSessionSaveModalContainer = ({
           newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
+            controlGroupState,
           },
         });
         return;
@@ -183,7 +200,9 @@ export const DiscoverSessionSaveModalContainer = ({
             ...(profileState ? { profileState } : {}),
           });
         } else if (isEmbeddedEditor) {
-          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
+          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession, {
+            state: { controlGroupState },
+          });
         }
       }
 
@@ -205,8 +224,9 @@ export const DiscoverSessionSaveModalContainer = ({
       hasLibraryItemWithTitle={services.savedSearch.hasLibraryItemWithTitle}
       hideDashboardOptions={!showDashboardOptions}
       initialTags={persistedDiscoverSession?.tags ?? []}
-      initialTimeRestore={timeRestore}
+      initialTimeRestore={initialTimeRestore}
       isTimeBased={isTimeBased}
+      hasTimeRestoreError={hasTimeRestoreError}
       managed={persistedDiscoverSession?.managed ?? false}
       onClose={onClose}
       onCopyOnSaveChange={onCopyOnSaveChange}
@@ -239,4 +259,21 @@ const hasTimeBasedTab = ({
     );
 
     return Boolean(tabDataViewDetails?.timeFieldName);
+  });
+
+const hasUnresolvedDataViewTab = ({
+  tabs,
+  savedDataViews,
+  runtimeStateManager,
+}: Parameters<typeof hasTimeBasedTab>[0]) =>
+  tabs.some((tab) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+
+    if (tabRuntimeState.currentDataSource$.getValue()) return false;
+
+    const serializedSearchSource = tab.initialInternalState?.serializedSearchSource;
+
+    if (typeof serializedSearchSource?.index !== 'string') return false;
+
+    return !getSerializedSearchSourceDataViewDetails(serializedSearchSource, savedDataViews);
   });

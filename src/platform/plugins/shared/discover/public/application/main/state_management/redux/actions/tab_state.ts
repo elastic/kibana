@@ -623,7 +623,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
           dataSource: {
             type: DataSourceType.Esql,
           },
-          columns: [],
+          // Not `[]`, which ES|QL reads as "suppress the query's default columns".
+          columns: undefined,
           sort: undefined,
         },
       })
