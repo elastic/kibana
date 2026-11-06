@@ -527,6 +527,7 @@ include_headers:
 `.trim();
 
 // The pipeline parses event.original, so the duplicate copy of the body under `json` is dropped.
+// It runs after the user's processors so they can still read `json.*`.
 const HTTP_ENDPOINT_REQUIRED_PROCESSORS = `
 - drop_fields:
     fields:
@@ -780,10 +781,10 @@ const buildProcessorsSection = (requiredProcessors?: string): string => {
   if (requiredProcessors) {
     return `
 processors:
-${requiredProcessors}
 {{#if processors}}
 {{processors}}
 {{/if}}
+${requiredProcessors}
 `.trim();
   }
   return OPTIONAL_PROCESSORS_SECTION;
