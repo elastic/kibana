@@ -49,6 +49,7 @@ export interface RulesAdapterV2Params {
     | 'bulkDeleteRules'
     | 'bulkEnableRules'
     | 'bulkDisableRules'
+    | 'bulkUpdateApiKey'
     | 'findRules'
     | 'getTags'
     | 'ruleExists'
@@ -151,6 +152,22 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       const action = enabled ? 'enable' : 'disable';
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk ${action} failed for ${fatal.length} rule(s): ${detail}`);
+    }
+  }
+
+  async rotateRulesApiKey(ids: string[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    const { errors } = await this.rulesClient.bulkUpdateApiKey({ ids });
+    const skipped: string[] = [
+      ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+      ALERTING_ERROR_CODES.RULE_DISABLED,
+    ];
+    const fatal = errors.filter((e) => !skipped.includes(e.error.code));
+    if (fatal.length > 0) {
+      const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
+      throw new Error(`V2 api key rotation failed for ${fatal.length} rule(s): ${detail}`);
     }
   }
 

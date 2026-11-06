@@ -68,6 +68,12 @@ export interface IRulesManagementClient {
   /** Best-effort enable or disable. Missing rules are ignored; other failures are reported. */
   setRulesEnabled(ids: string[], enabled: boolean): Promise<void>;
 
+  /**
+   * Re-keys the rules' executor tasks to the client's own credentials. Rules that are missing or
+   * disabled are skipped: a disabled rule has no task and is keyed again when it is enabled.
+   */
+  rotateRulesApiKey(ids: string[]): Promise<void>;
+
   /** Returns the enabled state of live rules; missing IDs have no live rule. */
   findRuleEnabledStates(ids: string[]): Promise<Map<string, boolean>>;
 
