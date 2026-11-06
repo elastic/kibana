@@ -256,16 +256,12 @@ export class AttackDiscoveryWorkerClient {
 
   /**
    * Runs `targetWorkflowId` as a child of the floor worker and polls that child until `isDone`
-   * accepts it or it ends. Workflows that inherit their execution identity (the review among
-   * them) are refused when started directly, so the floor worker is the parent: its stored YAML
-   * is rewritten to dispatch the target with literal `inputs` (keeping `settings.run_as`, its
-   * concurrency and its schedule), the floor is run through the normal route, and the stored
-   * YAML is put back in a `finally` and compared with what was read. A restore that failed or
-   * does not match is thrown, together with the run's own error if there was one.
+   * accepts it or it ends. A workflow that inherits its execution identity (the review) is refused
+   * with 403 when started directly, so the floor is the parent: its stored YAML is rewritten to
+   * dispatch the target with literal `inputs`, the floor is run, and the YAML is put back.
    *
-   * Only call this while no other floor run is active: the floor cancels in progress, and the
-   * rewritten YAML is what a scheduled tick would run too. After the one-time busy check, only the
-   * long schedule interval keeps a tick out (a PUT reschedules the task, it does not run it now).
+   * Only call this while no other floor run is active. After the one-time busy check, only the long
+   * schedule interval keeps a scheduled tick out (a PUT reschedules the task, it does not run it).
    * The restore re-reads the floor first, but read and PUT are separate requests and the managed
    * route takes no precondition, so a concurrent edit is detected best-effort, not prevented.
    * When the floor ends without starting the target, the floor's own execution is returned.
@@ -508,7 +504,7 @@ export class AttackDiscoveryWorkerClient {
 /**
  * What about the floor read just before the restore is not what this run left, or undefined when
  * it is. Without the post-rewrite state (its read failed), the stored text must be the one written
- * (or the original, if the rewrite PUT never landed) and anything else fails closed. Text is what
+ * (or the original, if the rewrite PUT never landed) and `enabled` unchanged; anything else fails closed. Text is what
  * can be compared there: the server bumps `version` only when the trimmed YAML changes.
  */
 const describeConcurrentChange = ({
@@ -530,9 +526,10 @@ const describeConcurrentChange = ({
         ...(isDeepStrictEqual(current.definition, rewritten.definition) ? [] : ['definition']),
         ...(current.enabled === rewritten.enabled ? [] : ['enabled']),
       ]
-    : text === rewrittenYaml.trim() || text === before.yaml.trim()
-    ? []
-    : ['yaml'];
+    : [
+        ...(text === rewrittenYaml.trim() || text === before.yaml.trim() ? [] : ['yaml']),
+        ...(current.enabled === before.enabled ? [] : ['enabled']),
+      ];
   return differing.length > 0 ? differing.join(', ') : undefined;
 };
 
@@ -540,7 +537,7 @@ const describeConcurrentChange = ({
  * What differs between the floor as it was read before a floor-parent run and as it is after the
  * restore, or undefined when the stored definition and the managed state (the fields the server's
  * drift status is derived from) are the same. The YAML text is not compared: the server stores the
- * parsed definition, and the managed `version` counter moves on every write by design.
+ * parsed definition, and `version` is excluded because the restore PUT itself moves it.
  */
 export const describeFloorDrift = (
   before: FloorWorkflowState,

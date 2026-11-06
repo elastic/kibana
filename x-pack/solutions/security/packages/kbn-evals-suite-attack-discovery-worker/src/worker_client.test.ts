@@ -150,7 +150,7 @@ const fakeKibana = ({
       definition: parse(yaml),
       enabled,
       definitionHash: 'hash',
-      // The managed version counter is the server's, and it moves with every write.
+      // Held constant in this fake: the managed counter is not what these tests exercise.
       managedVersion: 9,
       originManagedWorkflowId: 'system-security-floor-attack-discovery',
       version,
@@ -201,7 +201,16 @@ const fakeKibana = ({
     }
     return workflow();
   });
-  return { fetch, calls, storedYaml: () => yaml, edit: store, cancelled };
+  return {
+    fetch,
+    calls,
+    storedYaml: () => yaml,
+    edit: store,
+    disable: () => {
+      enabled = false;
+    },
+    cancelled,
+  };
 };
 
 const FLOOR_PATH = '/s/s/api/workflows/workflow/floor';
@@ -353,6 +362,23 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
     );
     expect((error as AggregateError).message).toMatch(/read-back failed/);
     expect((error as AggregateError).message).toMatch(/floor changed concurrently/);
+    expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(1);
+  });
+
+  it('does not restore blind when the read-back failed and the floor was disabled since', async () => {
+    const kibana = fakeKibana({ failFloorReadAfterPut: 1 });
+    let reads = 0;
+    const failing = jest.fn(async (path: string, init?: { method?: string; body?: string }) => {
+      if (path === FLOOR_PATH && init?.method === 'GET' && ++reads === 2) kibana.disable();
+      return kibana.fetch(path, init);
+    });
+    const client = new AttackDiscoveryWorkerClient(failing as unknown as HttpHandler, log);
+    const error = await review(client).then(
+      () => undefined,
+      (thrown: unknown) => thrown
+    );
+    expect((error as AggregateError).message).toMatch(/read-back failed/);
+    expect((error as AggregateError).message).toMatch(/floor changed concurrently.*enabled/);
     expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(1);
   });
 

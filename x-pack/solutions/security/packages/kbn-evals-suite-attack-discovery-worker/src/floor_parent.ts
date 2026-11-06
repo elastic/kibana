@@ -93,7 +93,7 @@ export const isFloorClean = (yaml: string): boolean =>
 export interface FloorWorkflowState {
   yaml: string;
   definition: unknown;
-  /** The stored workflow's own revision counter; it moves on every write. */
+  /** The stored workflow's revision counter; the server bumps it only when the trimmed YAML text changes. */
   version?: number;
   enabled: boolean;
   definitionHash?: string;
