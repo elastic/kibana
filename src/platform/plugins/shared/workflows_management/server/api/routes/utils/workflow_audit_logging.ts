@@ -40,7 +40,7 @@ export const WorkflowManagementAuditActions = {
   PAGE_LINK_READ: 'workflow_page_link_read',
   PAGE_SECRET_ROTATE: 'workflow_page_secret_rotate',
   PAGE_ACCESS_CHANGE: 'workflow_page_access_change',
-  PAGE_OFFLINE_CHANGE: 'workflow_page_offline_change',
+  PAGE_ENABLED_CHANGE: 'workflow_page_enabled_change',
 } as const;
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
@@ -575,13 +575,13 @@ export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
     });
   }
 
-  logPageOfflineChanged(
+  logPageEnabledChanged(
     request: KibanaRequest,
-    params: WorkflowPageAuditParams & { offline: boolean }
+    params: WorkflowPageAuditParams & { enabled: boolean }
   ): void {
-    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_OFFLINE_CHANGE, 'change', {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_ENABLED_CHANGE, 'change', {
       ...params,
-      verb: params.offline ? 'took offline' : 'brought online',
+      verb: params.enabled ? 'enabled' : 'disabled',
     });
   }
 

@@ -46,7 +46,7 @@ const setup = ({ canEncrypt = true, enabled = true } = {}) => {
       secret,
       secretHash: computePageSecretHash(ref, secret),
       access: { level: 'secret_link' },
-      offline: false,
+      enabled: true,
     };
   };
   return { client, store, savedObjectsClient, logger, sync, storedPage, putOnline };
@@ -64,7 +64,7 @@ describe('WorkflowPagesSystemClient', () => {
           workflowId: 'workflow-1',
           pageId: 'default',
           access: null,
-          offline: false,
+          enabled: true,
         })
       );
     });
@@ -207,10 +207,10 @@ describe('WorkflowPagesSystemClient', () => {
       await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBe(false);
     });
 
-    it('rejects an offline page', async () => {
+    it('rejects a disabled page', async () => {
       const { client, storedPage } = await onlinePage();
       const page = storedPage();
-      if (page) page.attributes.offline = true;
+      if (page) page.attributes.enabled = false;
       await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBe(false);
     });
 

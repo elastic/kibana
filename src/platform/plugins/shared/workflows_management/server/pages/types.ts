@@ -17,7 +17,8 @@ export interface WorkflowPageDto {
   workflowId: string;
   pageId: string;
   access: WorkflowPageAccess | null;
-  offline: boolean;
+  /** The page switch. A disabled page is offline while its workflow keeps running. */
+  enabled: boolean;
   /** True when the public route serves the page. */
   online: boolean;
   createdAt?: string;
@@ -42,9 +43,9 @@ export interface WorkflowPageAuditLog {
     request: KibanaRequest,
     params: WorkflowPageAuditParams & { access: WorkflowPageAccess | null }
   ): void;
-  logPageOfflineChanged(
+  logPageEnabledChanged(
     request: KibanaRequest,
-    params: WorkflowPageAuditParams & { offline: boolean }
+    params: WorkflowPageAuditParams & { enabled: boolean }
   ): void;
 }
 

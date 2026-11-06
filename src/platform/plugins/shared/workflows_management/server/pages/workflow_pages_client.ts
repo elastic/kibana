@@ -16,7 +16,11 @@ import {
   partiallyUpdateWorkflowPage,
   WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
 } from './page_saved_object';
-import type { WorkflowPageAccess, WorkflowPageAttributes } from './page_saved_object';
+import type {
+  PartiallyUpdatableWorkflowPageAttributes,
+  WorkflowPageAccess,
+  WorkflowPageAttributes,
+} from './page_saved_object';
 import { computePageSecretHash, generatePageSecret } from './page_secret';
 import type { WorkflowPageRef } from './page_secret';
 import type {
@@ -33,7 +37,7 @@ import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_erro
 
 /**
  * The workflow ACL operation that every page operation needs. Anyone who can run the
- * workflow can serve its page, so taking a page offline needs no workflow edit access.
+ * workflow can serve its page, so disabling a page needs no workflow edit access.
  */
 const PAGE_WORKFLOW_ACCESS_OPERATION: WorkflowAccessOperation = 'execute';
 
@@ -50,8 +54,8 @@ export interface WorkflowPagesClient {
   rotateSecret(key: WorkflowPageKey): Promise<string>;
   /** Sets the access level. `null` removes it, which takes the page offline. */
   setAccess(key: WorkflowPageKey, access: WorkflowPageAccess | null): Promise<WorkflowPageDto>;
-  /** Takes the page offline or brings it back. Needs neither workflow update nor security admin. */
-  setOffline(key: WorkflowPageKey, offline: boolean): Promise<WorkflowPageDto>;
+  /** Enables or disables the page. Needs neither workflow update nor security admin. */
+  setEnabled(key: WorkflowPageKey, enabled: boolean): Promise<WorkflowPageDto>;
 }
 
 export interface WorkflowPagesClientDeps {
@@ -147,10 +151,10 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
     );
   }
 
-  async setOffline(key: WorkflowPageKey, offline: boolean): Promise<WorkflowPageDto> {
+  async setEnabled(key: WorkflowPageKey, enabled: boolean): Promise<WorkflowPageDto> {
     const ref = this.toRef(key);
-    return this.partialUpdate(ref, { offline }, (error) =>
-      this.deps.audit.logPageOfflineChanged(this.deps.request, { ...ref, offline, error })
+    return this.partialUpdate(ref, { enabled }, (error) =>
+      this.deps.audit.logPageEnabledChanged(this.deps.request, { ...ref, enabled, error })
     );
   }
 
@@ -175,7 +179,7 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
 
   private async partialUpdate(
     ref: WorkflowPageRef,
-    attributes: { access?: WorkflowPageAccess | null; offline?: boolean },
+    attributes: PartiallyUpdatableWorkflowPageAttributes,
     audit: (error?: unknown) => void
   ): Promise<WorkflowPageDto> {
     const { scopedClient, canEncrypt } = this.deps;

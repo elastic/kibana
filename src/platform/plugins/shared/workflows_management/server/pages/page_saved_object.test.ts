@@ -50,7 +50,7 @@ describe('workflow-page saved object', () => {
     it('never sends encrypted or AAD attributes', async () => {
       const client = savedObjectsClientMock.create();
       const unsafe = {
-        offline: true,
+        enabled: false,
         access: { level: 'secret_link' as const },
         secret: 'leak',
         secretHash: 'leak',
@@ -63,7 +63,7 @@ describe('workflow-page saved object', () => {
       expect(client.update).toHaveBeenCalledWith(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
         'id',
-        { offline: true, access: { level: 'secret_link' } },
+        { enabled: false, access: { level: 'secret_link' } },
         { version: 'v1' }
       );
     });

@@ -72,7 +72,7 @@ const setup = ({
       logPageLinkRead: jest.fn(),
       logPageSecretRotated: jest.fn(),
       logPageAccessChanged: jest.fn(),
-      logPageOfflineChanged: jest.fn(),
+      logPageEnabledChanged: jest.fn(),
     } as jest.Mocked<WorkflowPageAuditLog>,
     logger: loggingSystemMock.createLogger(),
   });
@@ -108,7 +108,7 @@ describe('WorkflowPagesService', () => {
       const { start, assertWorkflowAccess } = setup({ authz });
       const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
 
-      await expect(client.setOffline(key, true)).rejects.toBeInstanceOf(
+      await expect(client.setEnabled(key, false)).rejects.toBeInstanceOf(
         WorkflowPagePrivilegesError
       );
       await client.get(key).catch(() => undefined);
@@ -123,7 +123,7 @@ describe('WorkflowPagesService', () => {
       const { start, assertWorkflowAccess } = setup({ authz: undefined });
       const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
 
-      await client.setOffline(key, true).catch(() => undefined);
+      await client.setEnabled(key, false).catch(() => undefined);
 
       expect(assertWorkflowAccess).toHaveBeenCalled();
     });
