@@ -182,4 +182,35 @@ describe('getPendingRestartActions', () => {
     );
     expect([...res.keys()]).toEqual(['agent-2']);
   });
+
+  it('splits the result lookup into chunks of action ids', async () => {
+    const actions = Array.from({ length: 10001 }, (_, i) => ({
+      action_id: `action-${i}`,
+      agents: ['agent-1'],
+      '@timestamp': `2026-11-06T10:00:00.${String(i).padStart(5, '0')}Z`,
+    }));
+    const resultQueries: string[][] = [];
+    const respond = (params: any) => {
+      if (params.index === '.fleet-actions-results') {
+        const actionIds = params.query.bool.filter[0].terms.action_id;
+        resultQueries.push(actionIds);
+        return searchResponse(
+          actionIds.map((id: string) => ({ action_id: id, agent_id: 'agent-1' }))
+        );
+      }
+      return searchResponse(params.query.bool.filter[0].term.type === 'RESTART' ? actions : []);
+    };
+    esClient.search.mockImplementation(async (params: any) => respond(params));
+    // pages of 10,000 hits are re-fetched through the iterable, which returns them in one page
+    mockCreateEsSearchIterable.mockImplementation(({ searchRequest }: any) =>
+      (async function* () {
+        yield respond(searchRequest);
+      })()
+    );
+
+    const res = await getPendingRestartActions(esClient, ['agent-1']);
+
+    expect(resultQueries.map((ids) => ids.length)).toEqual([10000, 10000, 1]);
+    expect(res.size).toBe(0);
+  });
 });

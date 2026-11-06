@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -15,6 +16,9 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../common/constants';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
+
+// Keeps each `terms` filter well below the default `index.max_terms_count` (65,536).
+const ACTION_IDS_CHUNK_SIZE = 10000;
 
 /**
  * Returns the `_source` of every matching document. A single search covers the common case;
@@ -104,20 +108,30 @@ export async function getPendingRestartActions(
   const candidateActionIds = [...new Set(candidates.map(({ action_id: id }) => id))];
   const candidateAgentIds = [...new Set(candidates.map(({ agentId }) => agentId))];
 
+  const getResults = async () => {
+    let results: Array<{ action_id: string; agent_id: string }> = [];
+    for (const actionIds of chunk(candidateActionIds, ACTION_IDS_CHUNK_SIZE)) {
+      results = results.concat(
+        await searchAllSources<{ action_id: string; agent_id: string }>(
+          esClient,
+          AGENT_ACTIONS_RESULTS_INDEX,
+          {
+            bool: {
+              filter: [
+                { terms: { action_id: actionIds } },
+                { terms: { agent_id: candidateAgentIds } },
+              ],
+            },
+          },
+          ['action_id', 'agent_id']
+        )
+      );
+    }
+    return results;
+  };
+
   const [results, cancelActions] = await Promise.all([
-    searchAllSources<{ action_id: string; agent_id: string }>(
-      esClient,
-      AGENT_ACTIONS_RESULTS_INDEX,
-      {
-        bool: {
-          filter: [
-            { terms: { action_id: candidateActionIds } },
-            { terms: { agent_id: candidateAgentIds } },
-          ],
-        },
-      },
-      ['action_id', 'agent_id']
-    ),
+    getResults(),
     searchAllSources<FleetServerAgentAction>(
       esClient,
       AGENT_ACTIONS_INDEX,
