@@ -71,9 +71,14 @@ describe('TableActionsPopover', () => {
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
+    expect(result.getByTestId('table-actions-copy-id')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-delete')).toBeInTheDocument();
+
+    // management | lifecycle | delete — two separators between the three groups
+    // Menu content is portaled, so query the full document.
+    expect(result.baseElement.querySelectorAll('hr.euiHorizontalRule').length).toBe(2);
   });
 
   test('it shows the correct actions when a maintenance window is upcoming', () => {
