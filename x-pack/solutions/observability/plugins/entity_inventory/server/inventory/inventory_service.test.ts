@@ -80,6 +80,24 @@ describe('InventoryService.listTypes', () => {
     expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
   });
 
+  it('omits definitions with a dynamic block that this plugin did not register', async () => {
+    const builtIn = {
+      ...k8sNodeFixture,
+      type: 'host',
+      managedBy: { kind: 'plugin' as const, id: 'entityStore' },
+    };
+    const integration = {
+      ...k8sNodeFixture,
+      type: 'integration.type',
+      managedBy: { kind: 'integration' as const, package: 'kubernetes' },
+    };
+    const { service } = createService([builtIn, integration, hostLikeFixture]);
+
+    const { types } = await service.listTypes();
+
+    expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
+  });
+
   it('skips and warns on a definition that fails column derivation', async () => {
     const invalid = {
       ...k8sNodeFixture,

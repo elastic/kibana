@@ -11,8 +11,8 @@ import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, INTERNAL_HEADERS, TYPES_PATH } from '../fixtures';
 
 const SPACE_ID = 'entity-inventory-types';
-// `host` is not listed: its built-in definition has a `dynamic` block, so the route returns it.
-const BUILT_IN_TYPES_WITHOUT_DYNAMIC_BLOCK = ['user', 'service', 'generic'];
+// The types this plugin registers. Built-ins such as `host` are left out even when they have a `dynamic` block.
+const INVENTORY_TYPES = ['k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = [
   'k8s.cluster.name',
   'k8s.namespace.name',
@@ -59,7 +59,7 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
     expect(k8sDeployment?.sources).toHaveLength(2);
   });
 
-  apiTest('omits built-in types without a dynamic block', async ({ apiClient }) => {
+  apiTest('returns only the types this plugin registers', async ({ apiClient }) => {
     const response = await apiClient.get(TYPES_PATH, {
       headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
       responseType: 'json',
@@ -67,11 +67,8 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const { types }: { types: InventoryTypeResponse[] } = response.body;
-    const returnedTypes = types.map(({ type }) => type);
 
-    for (const builtInType of BUILT_IN_TYPES_WITHOUT_DYNAMIC_BLOCK) {
-      expect(returnedTypes).not.toContain(builtInType);
-    }
+    expect(types.map(({ type }) => type)).toStrictEqual(INVENTORY_TYPES);
   });
 
   apiTest('returns the same types in a non-default space', async ({ apiClient }) => {

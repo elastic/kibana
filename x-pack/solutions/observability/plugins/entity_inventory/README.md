@@ -14,7 +14,7 @@ The route exists only when the plugin is enabled.
 
 ### `GET /internal/entity_inventory/types`
 
-No body and no parameters. It returns one entry per definition the entity store holds that has a `dynamic` block: this plugin's definitions and any other registered definition that carries one, such as the entity store's built-in `host`. Definitions without a `dynamic` block are left out. Example response for `k8s.deployment`:
+No body and no parameters. It returns one entry per definition this plugin registers (`managedBy: { kind: 'plugin', id: 'entityInventory' }`) that has a `dynamic` block. Definitions registered by anything else are left out, even with a `dynamic` block, such as the entity store's built-in `host`. Example response for `k8s.deployment`:
 
 ```json
 {

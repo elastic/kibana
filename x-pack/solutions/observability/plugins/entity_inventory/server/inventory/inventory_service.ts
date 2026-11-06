@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
+import { isEqual } from 'lodash';
+import { MANAGED_BY } from '../definitions/constants';
 import { buildColumns, getDynamicBlock, resolveIdentityPlan } from './generator';
 import type { GetTypesResponse, InventoryType } from './types';
 
@@ -17,13 +19,14 @@ export class InventoryService {
   ) {}
 
   /**
-   * Returns one entry per registered definition that has a `dynamic` block, in registry order.
+   * Returns one entry per registered definition that has a `dynamic` block and `managedBy` equal to
+   * `MANAGED_BY` (registered by this plugin), in registry order.
    * Skips a definition that throws `InventoryDefinitionError` after logging a warning, and rethrows any other error.
    */
   listTypes = async (): Promise<GetTypesResponse> => {
     const definitions = await this.definitionsClient.list();
     const types = definitions.flatMap((definition) => {
-      if (!definition.dynamic) {
+      if (!definition.dynamic || !isEqual(definition.managedBy, MANAGED_BY)) {
         return [];
       }
       try {
