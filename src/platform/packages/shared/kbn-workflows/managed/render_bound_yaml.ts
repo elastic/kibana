@@ -33,3 +33,14 @@ export const removeRunAs = (yaml: string): string => {
   }
   return yaml.replace(new RegExp(`${RUN_AS_TOKEN_LINE.source}\\n`, 'm'), '');
 };
+
+/**
+ * Substitutes exact tokens in a static YAML template. Values such as batch sizes are needed when
+ * the workflow is installed, not when it runs, so the engine's own `${{ }}` / `{{ }}` runtime
+ * templating cannot express them.
+ */
+export const renderTemplate = (template: string, values: Record<string, string | number>): string =>
+  Object.entries(values).reduce(
+    (yaml, [token, value]) => yaml.split(token).join(String(value)),
+    template
+  );
