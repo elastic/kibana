@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-const ObservablesActionTypeRt = rt.union([
-  rt.literal('add'),
-  rt.literal('delete'),
-  rt.literal('update'),
+const ObservablesActionTypeSchema = z.union([
+  z.literal('add'),
+  z.literal('delete'),
+  z.literal('update'),
 ]);
 
-export const ObservablePayloadRt = rt.strict({
-  count: rt.number,
-  actionType: ObservablesActionTypeRt,
+export const ObservablePayloadSchema = z.object({
+  count: z.number(),
+  actionType: ObservablesActionTypeSchema,
 });
 
-export const ObservablesUserActionPayloadRt = rt.strict({ observables: ObservablePayloadRt });
-
-export const ObservablesUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.observables),
-  payload: ObservablesUserActionPayloadRt,
+export const ObservablesUserActionPayloadSchema = z.object({
+  observables: ObservablePayloadSchema,
 });
 
-export type ObservablesActionType = rt.TypeOf<typeof ObservablesActionTypeRt>;
+export const ObservablesUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.observables),
+  payload: ObservablesUserActionPayloadSchema,
+});
+
+export type ObservablesActionType = z.infer<typeof ObservablesActionTypeSchema>;

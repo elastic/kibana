@@ -6,10 +6,10 @@
  */
 
 import { ConnectorTypes } from '../../connector/v1';
-import { ConnectorUserActionPayloadWithoutConnectorIdRt } from './v1';
+import { ConnectorUserActionPayloadWithoutConnectorIdSchema } from './v1';
 
 describe('Connector', () => {
-  describe('ConnectorUserActionPayloadWithoutConnectorIdRt', () => {
+  describe('ConnectorUserActionPayloadWithoutConnectorIdSchema', () => {
     const defaultRequest = {
       connector: {
         name: 'My JIRA connector',
@@ -23,36 +23,27 @@ describe('Connector', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ConnectorUserActionPayloadWithoutConnectorIdRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ConnectorUserActionPayloadWithoutConnectorIdSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ConnectorUserActionPayloadWithoutConnectorIdRt.decode({
+    it('strips unknown fields', () => {
+      const result = ConnectorUserActionPayloadWithoutConnectorIdSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from fields', () => {
-      const query = ConnectorUserActionPayloadWithoutConnectorIdRt.decode({
+    it('strips unknown fields from fields', () => {
+      const result = ConnectorUserActionPayloadWithoutConnectorIdSchema.safeParse({
         ...defaultRequest,
         fields: { ...defaultRequest.connector.fields, foo: 'bar' },
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

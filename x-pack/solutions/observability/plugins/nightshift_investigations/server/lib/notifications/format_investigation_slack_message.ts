@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
 import type { Severity } from '@kbn/significant-events-schema';
 import type { NotificationPhase } from './notification_routing';
@@ -58,12 +59,15 @@ export const formatInvestigationSlackMessage = ({
     return render([`*${title}* — Investigation started`, automation]);
   }
 
-  if (phase === 'failed') {
-    const failureReason = reason || investigation.error || 'Investigation failed';
-    return render([
-      `*${title}* — Investigation failed: ${escapeMrkdwn(oneLine(failureReason))}`,
-      automation,
-    ]);
+  if (phase === 'failed' || phase === 'timed_out') {
+    const outcome =
+      phase === 'timed_out'
+        ? i18n.translate('xpack.nightshiftInvestigations.notifications.timedOutLabel', {
+            defaultMessage: 'Investigation timed out',
+          })
+        : 'Investigation failed';
+    const failureReason = reason || investigation.error || outcome;
+    return render([`*${title}* — ${outcome}: ${escapeMrkdwn(oneLine(failureReason))}`, automation]);
   }
 
   const severity = investigation.severity
@@ -176,11 +180,17 @@ export const buildInvestigationSlackBlocks = ({
     ];
   }
 
-  if (phase === 'failed') {
-    const failureReason = reason?.trim() || investigation.error?.trim() || 'Investigation failed';
+  if (phase === 'failed' || phase === 'timed_out') {
+    const outcome =
+      phase === 'timed_out'
+        ? i18n.translate('xpack.nightshiftInvestigations.notifications.timedOutLabel', {
+            defaultMessage: 'Investigation timed out',
+          })
+        : 'Investigation failed';
+    const failureReason = reason?.trim() || investigation.error?.trim() || outcome;
     return [
       header(title),
-      context([':warning: Investigation failed', automation]),
+      context([`:warning: ${outcome}`, automation]),
       ...section('What went wrong', escapeMrkdwn(truncate(failureReason, MAX_SUMMARY_LENGTH))),
       linkButton(url),
     ];

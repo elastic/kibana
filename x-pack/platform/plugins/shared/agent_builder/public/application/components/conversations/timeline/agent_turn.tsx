@@ -115,7 +115,7 @@ const renderContent = (
   );
 };
 
-export const AgentTurn: React.FC<AgentTurnProps> = ({
+const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   item,
   agent,
   conversationAttachments,
@@ -128,6 +128,10 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
+  `;
+
+  const contentColumnStyles = css`
+    min-inline-size: 0;
   `;
 
   const content = renderContent(item, conversationId, conversationAttachments);
@@ -146,7 +150,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={contentColumnStyles}>
         <EuiFlexGroup direction="column" gutterSize="s">
           {agent && (
             <EuiFlexItem grow={false}>
@@ -164,3 +168,6 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     </EuiFlexGroup>
   );
 };
+
+export const AgentTurn = React.memo(AgentTurnComponent);
+AgentTurn.displayName = 'AgentTurn';

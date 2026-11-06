@@ -37,10 +37,10 @@ export const useAttackCaseAttachments = (
   } = useKibana();
   const { alertsIndexPattern } = useAssistantContext();
   const { addWarning } = useAppToasts();
-  const attackAttachmentsEnabled = useIsExperimentalFeatureEnabled('attackAttachmentsEnabled');
+  const isAttackAttachmentsEnabled = useIsExperimentalFeatureEnabled('attackAttachments');
   // The attack type is unified-only, so fall back to the markdown payload when the framework is off.
   const canAttachAttacks =
-    attackAttachmentsEnabled &&
+    isAttackAttachmentsEnabled &&
     cases.config.attachmentsEnabled &&
     attacksToAttach != null &&
     attacksToAttach.length > 0;

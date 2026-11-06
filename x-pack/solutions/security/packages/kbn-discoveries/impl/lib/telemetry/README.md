@@ -242,6 +242,8 @@ Emitted when an individual pipeline step fails during generation. Provides per-s
 | `cluster_health` | Elasticsearch cluster health issue (`no_shard_available`, `cluster_block`, `circuit_breaking_exception`, `es_rejected_execution`) |
 | `concurrent_conflict` | Concurrency/version conflict (`409`, `version_conflict`, superseded/cancelled by a newer request) |
 | `connector_error` | Connector-related failure (LLM rejected request, auth failure, model unavailable) |
+| `content_filter` | The model refused the request, e.g. the provider content filter stopped the response (`finish_reason: content_filter`). Retrying the same prompt or sending fewer alerts does not help; a different model does |
+| `context_length_exceeded` | The prompt exceeded the model's context window (provider-specific token-limit messages) |
 | `interrupted` | A prior run was interrupted mid-execution (server restart/crash/shutdown) |
 | `network_error` | Network-level failure (`ECONNREFUSED`, `ENOTFOUND`, `socket hang up`, `fetch failed`, `ETIMEDOUT`) |
 | `permission_error` | Authorization failure (`401`/`403`, `forbidden`, `unauthorized`, `insufficient privileges`, `security_exception`) |

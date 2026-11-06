@@ -50,25 +50,6 @@ export const SOURCE_GRID_COLUMNS: EuiDataGridColumn[] = [
     }),
   },
   {
-    id: 'status',
-    displayAsText: i18n.translate('xpack.streams.sources.table.statusColumnLabel', {
-      defaultMessage: 'Status',
-    }),
-    defaultSortDirection: 'asc',
-  },
-  {
-    id: 'throughput',
-    displayAsText: i18n.translate('xpack.streams.sources.table.throughputColumnLabel', {
-      defaultMessage: 'Throughput',
-    }),
-  },
-  {
-    id: 'lastEvent',
-    displayAsText: i18n.translate('xpack.streams.sources.table.lastEventColumnLabel', {
-      defaultMessage: 'Last event',
-    }),
-  },
-  {
     id: 'destinations',
     displayAsText: i18n.translate('xpack.streams.sources.table.destinationsColumnLabel', {
       defaultMessage: 'Destinations',

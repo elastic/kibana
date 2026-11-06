@@ -1001,16 +1001,11 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 export const ruleResponseSchema = lazySchema(() =>
   createRuleDataBaseSchema
     .extend({
-      // `template` is server-managed: it is returned but not accepted on write.
-      metadata: metadataSchema
-        .extend({
-          template: z
-            .object({ id: z.string().describe('Id of the rule template.') })
-            .strict()
-            .optional()
-            .describe('The rule template this rule was created from.'),
-        })
-        .describe('Rule metadata.'),
+      // The rule-template link (`metadata.template` in storage) is deliberately not
+      // returned: its public shape is undecided, and a response-only key inside the
+      // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
+      // events and telemetry still read it from the saved object.
+      metadata: metadataSchema.describe('Rule metadata.'),
       id: z.string().describe('Unique rule identifier.'),
       version: z
         .number()
@@ -1048,9 +1043,13 @@ export const findRulesRequestSchema = lazySchema(() =>
         .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
       filter: z
         .string()
+        .trim()
+        .min(1)
         .max(MAX_KQL_LENGTH)
         .optional()
-        .describe('The filter to apply to the rules.'),
+        .describe(
+          'A KQL filter to apply to the rules. Supported fields: id, kind, enabled, metadata.name, metadata.description, metadata.tags, metadata.routing_tags. Cannot be empty. Omit it to list every rule.'
+        ),
       sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
       sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
       search: z
@@ -1141,14 +1140,22 @@ export const ruleIdSchema = lazySchema(() =>
 );
 
 /**
- * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_get`. Like every other
+ * bulk route, a missing rule is a per-item error, not a request failure.
  */
 export const bulkGetRulesResponseSchema = lazySchema(() =>
   z
     .object({
       items: z
         .array(ruleResponseSchema)
-        .describe('The requested rules, in the same order as the requested ids.'),
+        .describe(
+          'The rules that were found, in the same order as the requested ids. Rules listed in `errors` are not included.'
+        ),
+      errors: z
+        .array(bulkErrorSchema)
+        .describe(
+          'Errors for rules that could not be returned, keyed by the requested `id`. A rule that does not exist is reported as `RULE_NOT_FOUND`. Empty when every requested rule was found.'
+        ),
     })
     .meta({ id: 'alerting_bulk_get_rules_response' })
 );
@@ -1208,6 +1215,30 @@ export const bulkCreateRulesRequestSchema = lazySchema(() =>
 export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>;
 
 /**
+ * A per-item error of `_bulk_create`. Items are addressed by their position in
+ * the request because an item need not carry an `id`; `id` is echoed only when
+ * the client supplied one, never generated for a rule that was not created.
+ */
+export const bulkCreateErrorSchema = lazySchema(() =>
+  bulkErrorSchema
+    .omit({ id: true })
+    .extend({
+      index: z
+        .number()
+        .int()
+        .min(0)
+        .describe('Zero-based position of the failed item in the request `items`.'),
+      id: z
+        .string()
+        .optional()
+        .describe('The client-supplied `id` of the failed item. Omitted when the item had none.'),
+    })
+    .meta({ id: 'alerting_bulk_create_error' })
+);
+
+export type BulkCreateError = z.infer<typeof bulkCreateErrorSchema>;
+
+/**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
  * Successfully created rules are returned in `items`; per-item failures land
  * in `errors`. HTTP 200 even when some items fail (partial success).
@@ -1219,9 +1250,9 @@ export const bulkCreateRulesResponseSchema = lazySchema(() =>
         .array(ruleResponseSchema)
         .describe('Rules that were created. Rules listed in `errors` are not included.'),
       errors: z
-        .array(bulkErrorSchema)
+        .array(bulkCreateErrorSchema)
         .describe(
-          'Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.'
+          'Errors for rules that could not be created. Each entry carries the `index` of the item in the request, its `id` when one was supplied, and the error. Empty when every requested rule was created.'
         ),
     })
     .meta({ id: 'alerting_bulk_create_rules_response' })

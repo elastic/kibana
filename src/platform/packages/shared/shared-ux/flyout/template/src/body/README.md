@@ -47,6 +47,21 @@ The body stays mounted across tab switches, and each callout is memoized, so swi
 
 An `id` also identifies the part within its parent, so it must be unique among sibling parts of the same kind.
 
+### Tabs
+
+With tabs, a `Body.Section` or `Body.Accordion` directly under `Body` applies to every tab. It renders below the tab bar and above the active tab panel, after any callouts, and it stays in place across tab switches. Use it for content that belongs to the whole flyout, such as a summary every tab depends on. Sections inside a `Body.TabPanel` belong to that tab only.
+
+```tsx
+<FlyoutTemplate.Body>
+  <FlyoutTemplate.Body.Section title="Database statement">
+    <EuiCodeBlock language="sql">{statement}</EuiCodeBlock>
+  </FlyoutTemplate.Body.Section>
+  <FlyoutTemplate.Body.TabPanel tabId="metadata">…</FlyoutTemplate.Body.TabPanel>
+</FlyoutTemplate.Body>
+```
+
+Like callouts, a section or accordion under `Body` does not remount or re-render on a tab switch. With controlled tabs, the same advice about memoizing applies (see [Callouts](#callouts)). Unstructured content directly under `Body` renders nothing in tabbed mode.
+
 ### Borders
 
 The border goes on the innermost container, and the parent decides whether there is one. That is why `Subsection` has no `hasBorder` prop. When a section or accordion has subsections, it drops its own border and each subsection gets one instead. Under `Body.Section`, subsections are bordered when the section's `hasBorder` is set. Under `Body.Accordion`, subsections are always bordered.

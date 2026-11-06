@@ -11,7 +11,7 @@ import {
   DEFAULT_RUN_QUOTA_SETTINGS,
   RUN_QUOTA_GROUPS,
   type RunQuotaGroup,
-  type RunQuotaSettingsUpdate,
+  type RunQuotaSettingsPatch,
 } from '../../../common/run_quotas';
 import {
   RUN_QUOTA_LEDGER_SO_TYPE,
@@ -37,7 +37,7 @@ export const createRunQuotaInternalRepository = (
     RUN_QUOTA_LEDGER_SO_TYPE,
   ]);
 
-export type RunQuotaSettingsPatch = RunQuotaSettingsUpdate;
+export type { RunQuotaSettingsPatch };
 
 export const createDefaultRunQuotaSettingsAttributes = (): RunQuotaSettingsAttributes => ({
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
@@ -63,7 +63,9 @@ const applySettingsPatch = (
   const { activateLimits, limits, ...topLevelPatch } = patch;
   const normalizedLegacyLimits =
     activateLimits && !current.enabled
-      ? Object.fromEntries(RUN_QUOTA_GROUPS.map((group) => [group, 0]))
+      ? Object.fromEntries(
+          RUN_QUOTA_GROUPS.filter((group) => group !== 'investigation').map((group) => [group, 0])
+        )
       : {};
 
   return {

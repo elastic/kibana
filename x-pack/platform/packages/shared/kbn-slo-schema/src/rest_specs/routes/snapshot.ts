@@ -4,76 +4,100 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { dateType, sloIdSchema } from '../../schema';
-import { allOrAnyString, statusSchema } from '../../schema/common';
+import { z, lazySchema } from '@kbn/zod';
 
-const bulkSnapshotRequestItemSchema = t.intersection([
-  t.type({
+import { sloIdSchema } from '../../schema/slo';
+import { allOrAnyString, dateType, statusSchema } from '../../schema/common';
+import { MAX_DATE_STRING_LENGTH } from '../../schema/limits';
+
+const bulkSnapshotRequestItemSchema = lazySchema(() =>
+  z.object({
     id: sloIdSchema,
-  }),
-  t.partial({
-    instanceId: allOrAnyString,
-  }),
-]);
+    instanceId: allOrAnyString
+      .optional()
+      .describe(
+        "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only."
+      ),
+  })
+);
 
-const snapshotErrorBudgetSchema = t.type({
-  initial: t.number,
-  consumed: t.union([t.number, t.null]),
-  remaining: t.union([t.number, t.null]),
+const snapshotErrorBudgetSchema = z.object({
+  initial: z.number(),
+  consumed: z.number().nullable(),
+  remaining: z.number().nullable(),
 });
 
-const snapshotSummarySchema = t.type({
+const snapshotSummarySchema = z.object({
   status: statusSchema,
-  sliValue: t.union([t.number, t.null]),
+  sliValue: z.number().nullable(),
   errorBudget: snapshotErrorBudgetSchema,
-  good: t.number,
-  total: t.number,
+  good: z.number(),
+  total: z.number(),
 });
 
-const snapshotResultSchema = t.intersection([
-  t.type({
-    id: t.string,
-    instanceId: t.string,
+const snapshotResultSchema = z.intersection(
+  z.object({
+    id: z.string(),
+    instanceId: z.string(),
   }),
-  t.union([
-    t.type({ summary: snapshotSummarySchema }),
-    t.type({ error: t.type({ statusCode: t.number, message: t.string }) }),
-  ]),
-]);
+  z.union([
+    z.object({ summary: snapshotSummarySchema }),
+    z.object({ error: z.object({ statusCode: z.number(), message: z.string() }) }),
+  ])
+);
 
-const bulkSnapshotParamsSchema = t.type({
-  body: t.type({
-    at: dateType,
-    requests: t.array(bulkSnapshotRequestItemSchema),
-  }),
-});
-
-const snapshotResponseSchema = t.type({
-  at: t.string,
-  results: t.array(snapshotResultSchema),
-});
-
-const getSnapshotParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-  query: t.intersection([
-    t.type({
-      at: dateType,
+const bulkSnapshotParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      at: dateType.describe(
+        'The point in time at which to compute the SLO instance summaries, for example 2025-01-12T10:00:00.000Z'
+      ),
+      requests: z
+        .array(bulkSnapshotRequestItemSchema)
+        .describe('The list of SLO instances to compute. Limited to 100 entries.'),
     }),
-    t.partial({
-      instanceId: allOrAnyString,
-    }),
-  ]),
+  })
+);
+
+const snapshotResponseSchema = z.object({
+  at: z.string(),
+  results: z.array(snapshotResultSchema),
 });
 
-type BulkSnapshotRequestItem = t.TypeOf<typeof bulkSnapshotRequestItemSchema>;
-type SnapshotSummary = t.TypeOf<typeof snapshotSummarySchema>;
-type SnapshotResult = t.TypeOf<typeof snapshotResultSchema>;
-type BulkSnapshotParams = t.TypeOf<typeof bulkSnapshotParamsSchema.props.body>;
-type GetSnapshotParams = t.TypeOf<typeof getSnapshotParamsSchema>;
-type SnapshotResponse = t.TypeOf<typeof snapshotResponseSchema>;
+// Query params cannot use the `dateType` codec: the OAS query converter rejects
+// codecs whose output is a class instance. The handler converts it to a Date.
+const dateStringQuerySchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_DATE_STRING_LENGTH)
+    .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
+    .describe(
+      'The point in time at which to compute the SLO instance summary (ISO 8601 date-time), for example 2023-01-12T10:03:19.000Z'
+    )
+);
+
+const getSnapshotParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    query: z.object({
+      at: dateStringQuerySchema,
+      instanceId: allOrAnyString
+        .optional()
+        .describe(
+          "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only."
+        ),
+    }),
+  })
+);
+
+type BulkSnapshotRequestItem = z.output<typeof bulkSnapshotRequestItemSchema>;
+type SnapshotSummary = z.output<typeof snapshotSummarySchema>;
+type SnapshotResult = z.output<typeof snapshotResultSchema>;
+type BulkSnapshotParams = z.output<typeof bulkSnapshotParamsSchema.shape.body>;
+type GetSnapshotParams = z.output<typeof getSnapshotParamsSchema>;
+type SnapshotResponse = z.output<typeof snapshotResponseSchema>;
 
 export {
   bulkSnapshotParamsSchema,

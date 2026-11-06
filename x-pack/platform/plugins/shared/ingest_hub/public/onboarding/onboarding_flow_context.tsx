@@ -57,7 +57,17 @@ export interface AuthenticateAndDeployStepState {
   existingSecretRefs?: ExistingSecretRefs;
 }
 
-export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
+/**
+ * `unverified`: the agent runs but sends to another cluster (a remote Elasticsearch output), so no
+ * data check here can confirm it.
+ */
+export type ServiceChipState =
+  | 'instantiating'
+  | 'detecting'
+  | 'receiving'
+  | 'unverified'
+  | 'error'
+  | 'timeout';
 
 export interface DetectAndReviewStepState {
   isDeploying: boolean;
@@ -202,6 +212,8 @@ interface OnboardingFlowState {
   refetchAwsServiceMatrix: () => void;
   /** False while the default data format is being resolved (async spaces lookup). */
   isDataFormatResolved: boolean;
+  /** The data format derived from the solution (OTel for Observability, ECS otherwise), the recommended one. */
+  defaultDataFormat: DataFormat;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -661,6 +673,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
         isDataFormatResolved,
+        defaultDataFormat: defaultFormat,
       }}
     >
       {children}

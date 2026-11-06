@@ -7,6 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  DATA_STREAM_BACKING_PREFIX,
+  joinRemoteCluster,
+  mapIndexPart,
+  splitRemoteCluster,
+} from '../../../../../common/remote_cluster';
+import {
   INTERNAL_DATASET_PREFIXES,
   parseDataStreamName,
   vendorToken,
@@ -22,8 +28,6 @@ const ACTIONABLE_FIELDS = ['process.entity_id', 'process.pid'];
 /** The pseudo type `include_unmapped` reports for indices that do not map the field. */
 const UNMAPPED_TYPE = 'unmapped';
 
-const DATA_STREAM_BACKING_PREFIX = '.ds-';
-
 /** `-2026.09.30-000001` (or a bare `-000001`) closing a backing index name. */
 const BACKING_SUFFIX = /(-\d{4}\.\d{2}\.\d{2})?-\d{6}$/;
 
@@ -33,12 +37,16 @@ const BACKING_SUFFIX = /(-\d{4}\.\d{2}\.\d{2})?-\d{6}$/;
  * (`logs-okta.system-default*`), any other index becomes itself with a `*`
  * (`logs-endpoint.events.e8c68216.2026.09.29*`). Every list handed to Tier 2 or packaging
  * carries the `*` because `buildMatchesRequired` and `isIndexPatternAllowed` glob against
- * `.ds-`-stripped names, and a pattern without one never matches a backing index.
+ * `.ds-`-stripped names, and a pattern without one never matches a backing index. A remote
+ * name keeps its cluster: `remote:.ds-logs-okta.system-default-…` becomes
+ * `remote:logs-okta.system-default*`.
  */
 export const collapseIndexName = (name: string): string =>
-  name.startsWith(DATA_STREAM_BACKING_PREFIX)
-    ? `${name.slice(DATA_STREAM_BACKING_PREFIX.length).replace(BACKING_SUFFIX, '')}*`
-    : `${name}*`;
+  `${mapIndexPart(name, (index) =>
+    index.startsWith(DATA_STREAM_BACKING_PREFIX)
+      ? index.slice(DATA_STREAM_BACKING_PREFIX.length).replace(BACKING_SUFFIX, '')
+      : index
+  )}*`;
 
 const withoutWildcard = (pattern: string): string => pattern.replace(/\*$/, '');
 
@@ -63,24 +71,27 @@ const INTEGRATION_TYPES = ['logs', 'metrics', 'traces'];
  * the entry instead of emitting a near-concrete name or a bare `logs-*`: plain pack indices
  * (`logs-endpoint.events.00e5ea78.2026.10.08`), alert indices (`.alerts-*` and Defend
  * `*.alerts` datasets), and agent-internal datasets. Beats and legacy families collapse to
- * `<family>-*`, which is the Security Solution pattern for them.
+ * `<family>-*`, which is the Security Solution pattern for them. A remote name keeps its
+ * cluster, since that is where a rule has to query it: `remote:.ds-logs-aws.cloudtrail-…`
+ * becomes `remote:logs-aws.cloudtrail-*`.
  */
 export const collapseToDataSourcePattern = (name: string): string | undefined => {
-  if (name.startsWith('.') && !name.startsWith(DATA_STREAM_BACKING_PREFIX)) return undefined;
+  const { cluster, index } = splitRemoteCluster(name);
+  if (index.startsWith('.') && !index.startsWith(DATA_STREAM_BACKING_PREFIX)) return undefined;
 
-  const stripped = withoutWildcard(collapseIndexName(withoutWildcard(name)));
+  const stripped = withoutWildcard(collapseIndexName(withoutWildcard(index)));
   const family = stripped.split('-')[0];
-  if (BEATS_FAMILIES.includes(family)) return `${family}-*`;
+  if (BEATS_FAMILIES.includes(family)) return joinRemoteCluster({ cluster, index: `${family}-*` });
   if (!INTEGRATION_TYPES.includes(family)) return undefined;
 
   // An existing `{type}-{dataset}-*` pattern has no namespace segment left to parse.
-  const dataset = name.endsWith('-*')
-    ? name.slice(family.length + 1, -2)
+  const dataset = index.endsWith('-*')
+    ? index.slice(family.length + 1, -2)
     : parseDataStreamName(stripped)?.dataset;
   if (dataset === undefined || dataset === '') return undefined;
   if (dataset.includes('.alerts')) return undefined;
   if (INTERNAL_DATASET_PREFIXES.some((prefix) => dataset.startsWith(prefix))) return undefined;
-  return `${family}-${dataset}-*`;
+  return joinRemoteCluster({ cluster, index: `${family}-${dataset}-*` });
 };
 
 const isInternalPattern = (pattern: string): boolean => {
@@ -99,7 +110,9 @@ const isInternalPattern = (pattern: string): boolean => {
 const toDatasetPattern = (pattern: string): string => {
   const name = withoutWildcard(pattern);
   const parsed = parseDataStreamName(name);
-  return parsed ? `${parsed.type}-${parsed.dataset}-*` : `${name.split('-')[0]}-*`;
+  return parsed
+    ? joinRemoteCluster({ cluster: parsed.cluster, index: `${parsed.type}-${parsed.dataset}-*` })
+    : mapIndexPart(name, (index) => `${index.split('-')[0]}-*`);
 };
 
 const toVendorPatterns = (pattern: string): string[] => {
@@ -107,7 +120,7 @@ const toVendorPatterns = (pattern: string): string[] => {
   const parsed = parseDataStreamName(name);
   return parsed
     ? vendorWildcards([{ index_pattern: name, vendor: vendorToken(parsed.dataset) }])
-    : [`${name.split('-')[0]}-*`];
+    : [mapIndexPart(name, (index) => `${index.split('-')[0]}-*`)];
 };
 
 const uniqSorted = (values: string[]): string[] => Array.from(new Set(values)).sort();

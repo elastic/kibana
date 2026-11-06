@@ -12,9 +12,11 @@ import type { Feature, QueryFeature, QueryType } from '@kbn/significant-events-s
 import {
   deriveQueryType,
   extractReferencedColumns,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
   getStatsQueryHints,
   normalizeEsqlSafe,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
   replaceFromSources,
 } from '@kbn/streams-schema';
@@ -276,6 +278,19 @@ export async function validateKIQueries({
             status: 'Duplicate',
             exactDuplicate,
             error: 'This query already exists for this source.',
+          };
+        }
+
+        const nonColumnFullTextArguments = findNonColumnFullTextArguments(rewritten);
+        if (nonColumnFullTextArguments.length > 0) {
+          hasNonIntentFailures = true;
+          return {
+            query,
+            valid: false,
+            status: 'Failed to add',
+            failureReason: 'validation_error',
+            exactDuplicate,
+            error: renderNonColumnFullTextArgumentError(nonColumnFullTextArguments),
           };
         }
 

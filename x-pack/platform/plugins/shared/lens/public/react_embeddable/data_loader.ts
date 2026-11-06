@@ -73,7 +73,8 @@ export type ReloadReason =
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
-  | 'searchContext';
+  | 'searchContext'
+  | 'theme';
 
 function getSearchContext(parentApi: unknown) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
@@ -372,6 +373,13 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
+    ),
+    // Visualizations resolve theme colors when the expression is built, so a live theme
+    // switch needs a fresh expression.
+    services.coreStart.theme.theme$.pipe(
+      map(({ darkMode }) => darkMode),
+      waitUntilChanged(),
+      map(() => 'theme' as ReloadReason)
     )
   );
 

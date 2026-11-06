@@ -19,10 +19,13 @@ beforeEach(() => {
   (useTimeZone as jest.Mock).mockReturnValue('UTC');
 });
 
-const renderFlyout = (events: Array<{ timestamp: string; host: string; description: string }>) =>
+const renderFlyout = (
+  events: Array<{ timestamp: string; host: string; description: string }>,
+  window?: { start: string; end: string }
+) =>
   render(
     <I18nProvider>
-      <InvestigationTimelineFlyout events={events} />
+      <InvestigationTimelineFlyout events={events} window={window} />
     </I18nProvider>
   );
 
@@ -72,5 +75,14 @@ describe('InvestigationTimelineFlyout', () => {
     expect(
       screen.getByText('No events were reconstructed from the available telemetry.')
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationTimelineWindow')).not.toBeInTheDocument();
+  });
+
+  it('names the searched window under the title when the payload carries one', () => {
+    renderFlyout([], { start: '2026-09-11T12:00:00.000Z', end: '2026-09-11T16:00:00.000Z' });
+
+    expect(screen.getByTestId('investigationTimelineWindow')).toHaveTextContent(
+      'Searched window: Sep 11, 2026 @ 12:00:00 to Sep 11, 2026 @ 16:00:00'
+    );
   });
 });

@@ -20,8 +20,22 @@ const isSingleQuote = (event: KeyboardEvent): boolean =>
  * @param {KeyboardEvent} event The keyboard event.
  * @return {boolean} 'true' if the keyboard shortcut is pressed, 'false' otherwise.
  */
+const isModifierKey = (event: KeyboardEvent): boolean => event.metaKey || event.ctrlKey;
+
+/**
+ * ⌘ + Shift + ' or Ctrl + Shift + ' toggles grab mode.
+ * Matched on the physical key only, as on some layouts (e.g. German) typing ' itself needs Shift.
+ */
+export const isGrabKeyboardShortcut = (event: KeyboardEvent) =>
+  isModifierKey(event) && event.shiftKey && event.code === 'Quote';
+
+/** ⌘ + ' or Ctrl + ' toggles inspect mode. */
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && isSingleQuote(event);
+  isModifierKey(event) && isSingleQuote(event) && !isGrabKeyboardShortcut(event);
+
+/** ⌘ + C or Ctrl + C copies the hovered element in grab mode, matched on the physical key. */
+export const isCopyKeyboardShortcut = (event: KeyboardEvent): boolean =>
+  isModifierKey(event) && !event.shiftKey && !event.altKey && event.code === 'KeyC';
 
 /**
  * Check if Escape key was pressed.

@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
@@ -128,7 +129,10 @@ describe('runCortexOptimize', () => {
   const toolCalls: InvestigationToolCall[] = [
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
-    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+    {
+      tool_id: 'nightshift_sandbox_view_file',
+      params: { file_path: '/workspace/.connector-docs/elastic.md' },
+    },
   ];
   const recordHypotheses: InvestigationToolCall = {
     tool_id: 'agentic_investigations.set_hypotheses',
@@ -189,6 +193,20 @@ describe('runCortexOptimize', () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { calls: toolCalls.slice(0, 2) });
     expect(optimizeCortex).not.toHaveBeenCalled();
     expect(createModelProvider).not.toHaveBeenCalled();
+  });
+
+  it('skips a round in a conversation the caller cannot read, without writing anything', async () => {
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conversation-1' }));
+    getAgentBuilder.mockReturnValue({
+      runtime: { createModelProvider },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    });
+
+    await expect(run(NIGHTSHIFT_INVESTIGATION_AGENT_ID)).resolves.toBeUndefined();
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   it('attributes inherited connector calls to the Nightshift investigation feature', async () => {

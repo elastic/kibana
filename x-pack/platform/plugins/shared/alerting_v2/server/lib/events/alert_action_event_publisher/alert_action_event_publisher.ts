@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
+import { toEventOrigin } from '../../event_origin/event_origin';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -86,7 +87,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   }
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
-    const context: AlertingPublisherContext = { request, origin: 'user' };
+    const context: AlertingPublisherContext = { request, origin: toEventOrigin('user', request) };
     for (const action of actions) {
       const event = this.buildEvent(action);
       if (event) {

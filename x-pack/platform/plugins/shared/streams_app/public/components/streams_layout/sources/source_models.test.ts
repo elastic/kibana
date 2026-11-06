@@ -8,8 +8,14 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import {
   connectedDestinationLabels,
+  createRuntimeMetadata,
   createUnitSource,
+  defaultSignalsForSourceType,
   getConfiguredSources,
+  getSourceDisplaySignals,
+  selectableSignalsForSourceType,
+  sourceTypeSelectsSignals,
+  telemetryForSelectedSignals,
   withUnitSources,
 } from './source_models';
 
@@ -62,6 +68,146 @@ describe('source models', () => {
         config: { otlp: { signals: ['logs', 'traces'] } },
       },
     ]);
+  });
+
+  it('exposes logs, metrics, and traces for source badges', () => {
+    expect(
+      getSourceDisplaySignals({
+        id: 'otlp-input',
+        name: 'Production OTLP',
+        type: 'otlp',
+        to: null,
+        config: { otlp: { signals: ['logs', 'traces'] } },
+      })
+    ).toEqual(['logs', 'traces']);
+    expect(
+      getSourceDisplaySignals({
+        id: 'prom-in',
+        name: 'Prometheus',
+        type: 'prometheus_remote_write',
+        to: null,
+      })
+    ).toEqual(['metrics']);
+    expect(
+      getSourceDisplaySignals({
+        id: 'async-bulk',
+        name: 'Async bulk',
+        type: 'async_bulk',
+        to: null,
+      })
+    ).toEqual(['logs', 'metrics', 'traces']);
+    expect(
+      getSourceDisplaySignals(
+        {
+          id: 'async-metrics',
+          name: 'Async metrics',
+          type: 'async_bulk',
+          to: null,
+        },
+        ['metrics']
+      )
+    ).toEqual(['metrics']);
+    expect(
+      getSourceDisplaySignals(
+        {
+          id: 'async-docs',
+          name: 'Async docs',
+          type: 'async_bulk',
+          to: null,
+        },
+        ['docs']
+      )
+    ).toEqual([]);
+    expect(
+      getSourceDisplaySignals({
+        id: 'bulk-in',
+        name: 'Bulk',
+        type: 'bulk',
+        to: null,
+      })
+    ).toEqual([]);
+  });
+
+  it('writes selected OTLP signals onto the unit source', () => {
+    expect(
+      createUnitSource({
+        id: 'otlp-logs',
+        name: 'Logs only',
+        type: 'otlp',
+        supportedTelemetry: ['logs'],
+      })
+    ).toEqual({
+      id: 'otlp-logs',
+      name: 'Logs only',
+      type: 'otlp',
+      supported_telemetry: ['logs'],
+    });
+    expect(
+      getConfiguredSources({
+        unit: {
+          sources: [
+            createUnitSource({
+              id: 'otlp-logs',
+              name: 'Logs only',
+              type: 'otlp',
+              supportedTelemetry: ['logs'],
+            }),
+          ],
+          destinations: [],
+          pipelines: [],
+        },
+        ui_metadata: {},
+      })
+    ).toEqual([
+      {
+        id: 'otlp-logs',
+        name: 'Logs only',
+        type: 'otlp',
+        to: null,
+        config: { otlp: { signals: ['logs'] } },
+      },
+    ]);
+    expect(
+      createRuntimeMetadata(
+        {
+          id: 'otlp-logs',
+          name: 'Logs only',
+          type: 'otlp',
+          to: null,
+          config: { otlp: { signals: ['logs'] } },
+        },
+        { managedInputBaseUrl: 'https://cluster.ingest.elastic.cloud' }
+      ).endpoints
+    ).toEqual([
+      {
+        id: 'logs',
+        url: 'https://cluster.ingest.elastic.cloud/inputs/otlp/otlp-logs/v1/logs',
+      },
+    ]);
+  });
+
+  it('lets OTLP and async bulk pick logs, metrics, and traces; Prometheus is metrics-only', () => {
+    expect(selectableSignalsForSourceType('otlp')).toEqual(['logs', 'metrics', 'traces']);
+    expect(selectableSignalsForSourceType('async_bulk')).toEqual(['logs', 'metrics', 'traces']);
+    expect(selectableSignalsForSourceType('prometheus_remote_write')).toEqual(['metrics']);
+    expect(sourceTypeSelectsSignals('otlp')).toBe(true);
+    expect(sourceTypeSelectsSignals('async_bulk')).toBe(true);
+    expect(sourceTypeSelectsSignals('prometheus_remote_write')).toBe(false);
+    expect(defaultSignalsForSourceType('async_bulk')).toEqual(['logs', 'metrics', 'traces']);
+    expect(defaultSignalsForSourceType('prometheus_remote_write')).toEqual([]);
+    expect(telemetryForSelectedSignals('async_bulk', ['logs', 'traces'])).toEqual([
+      'logs',
+      'traces',
+    ]);
+    expect(telemetryForSelectedSignals('prometheus_remote_write', ['logs'])).toEqual(['metrics']);
+    expect(
+      createUnitSource({
+        id: 'bulk-in',
+        name: 'ECS',
+        type: 'async_bulk',
+        supportedTelemetry: telemetryForSelectedSignals('async_bulk', ['metrics']),
+      }).supported_telemetry
+    ).toEqual(['metrics']);
   });
 
   it('adds a source onto the unit without dropping processors, destinations, or unmanaged sources', () => {

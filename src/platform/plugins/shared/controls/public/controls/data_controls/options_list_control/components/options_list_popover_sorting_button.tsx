@@ -85,11 +85,17 @@ export const OptionsListPopoverSortingButton = ({
   const [sort, field, valuesSource] = useBatchedPublishingSubjects(...conditionalApiSubjects);
 
   const sortByOptions = useMemo(() => {
+    // TODO Remove when we're able to get accurate document counts for ES|QL-source controls
+    const sortBy =
+      valuesSource === ControlValuesSource.ESQL &&
+      (sort?.by ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.by) === '_count'
+        ? '_key'
+        : sort?.by;
     return getCompatibleSortingTypes(field?.type, valuesSource).map((key) => {
       return {
         onFocusBadge: false,
         data: { sortBy: key },
-        checked: key === sort?.by ? 'on' : undefined,
+        checked: key === sortBy ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
         label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(field?.type),
       } as SortByItem;
