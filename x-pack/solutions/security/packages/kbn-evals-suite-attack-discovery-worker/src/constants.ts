@@ -93,8 +93,8 @@ export const FLOOR_SCHEDULE_INTERVAL = '24h';
 export const FLOOR_TICK_WAIT_MS = 60_000;
 export const FLOOR_TICK_POLL_INTERVAL_MS = 2_000;
 /**
- * How long a row waits for the floor worker (or its child) to go idle. The engine resumes a parent
- * only after its child ends, so the parent stays active for a moment.
+ * How long a row waits for the floor worker (or its child) to go idle. The engine only schedules a
+ * parent's resume after its child ends, so the parent stays active for a moment.
  */
 export const FLOOR_IDLE_WAIT_MS = 120_000;
 /** How long a cancelled scheduled tick has to leave its concurrency slot. */

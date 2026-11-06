@@ -835,13 +835,16 @@ const assertWorldSearchable = async ({
 /**
  * Creates the space's ad-hoc discovery index the way the rule registry would (a `-000001` backing
  * index with the `default` namespace template's mappings, the space's alias as write index) when it
- * is missing. The registry installs it lazily, and a bulk into a space without one auto-creates it
- * with dynamic mappings, so the review's `_find` read fails with `all shards failed`.
+ * is missing. The registry keeps one template per namespace and none exists for the eval space yet.
+ * It installs the index lazily, and a bulk into a space without one auto-creates it with dynamic
+ * mappings, so the review's `_find` read fails with `all shards failed`.
  *
  * Cleanup leaves it in place: deleting it could leave the registry's cached writer
  * (`require_alias: true`) pointing at a missing alias, and a later product Attack Discovery persist
- * in this space would fail until Kibana restarts. The backing index name mirrors the registry's
- * (`.internal${baseName}` plus `-000001`, see `rule_data_plugin_service/index_info.ts`).
+ * in this space would fail until Kibana restarts. An empty index is harmless to the rows:
+ * `assertCleanSpace` counts open discoveries, not indices, and this function is a no-op once the
+ * alias exists. The backing index name mirrors the registry's (`.internal${baseName}` plus
+ * `-000001`, see `rule_data_plugin_service/index_info.ts`).
  */
 const ADHOC_DEFAULT_BACKING_INDEX = `.internal${attackDiscoveryIndexForSpace('default')}-000001`;
 

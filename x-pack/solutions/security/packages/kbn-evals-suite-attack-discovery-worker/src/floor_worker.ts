@@ -194,8 +194,8 @@ const patchFloorSettingsWithRetry = async (
  * place, verified live), so the repair changes one setting and sets it back: each write re-renders.
  *
  * Only call this while the worker is disabled: on a live worker the nudge can put the next tick in
- * the past and fire it. The writes carry no `enabled` key. If the interval cannot be put back (the
- * second write is tried twice) the error says what it was left at.
+ * the past and fire it. The writes carry no `enabled` key, so the worker stays disabled. If the
+ * interval cannot be put back (the second write is tried twice) the error says what it was left at.
  */
 const reRenderFloor = async ({
   fetch,
@@ -409,7 +409,8 @@ export const settleEnableTimeRun = async ({
     describeRace: 'The enable-time scheduled run of',
   });
   // The tick started the runner (or, on a floor left rewritten, the review) as a child. Cancelling
-  // the parent does not prove the child left its cancel-in-progress slot, so cancel it too.
+  // the parent does not prove the child left its cancel-in-progress slot, and a row's run would
+  // race it there, so cancel it too.
   for (const childWorkflowId of [RUNNER_WORKFLOW_ID, REVIEW_WORKFLOW_ID]) {
     const childActive = await listActiveExecutionIds(fetch, spaceId, childWorkflowId);
     if (childActive.length > 0) {

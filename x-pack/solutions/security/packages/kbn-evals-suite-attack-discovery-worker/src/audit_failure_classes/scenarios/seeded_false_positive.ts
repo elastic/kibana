@@ -35,8 +35,9 @@ interface BenignPattern {
 
 /**
  * Routine SCCM activity: SYSTEM, vendor-signed, from its install path under a service parent. The
- * world (`worker_world.ts`) shows the same hosts as `CcmExec.exe` under `services.exe`, so every
- * world check contradicts the seeded discovery's command-and-control story.
+ * world (`worker_world.ts`) shows the same hosts as `CcmExec.exe` under `services.exe` with one
+ * internal management destination, so every world check, the network one included, contradicts the
+ * seeded discovery's command-and-control story.
  */
 const PATTERNS: readonly BenignPattern[] = [
   {
@@ -170,9 +171,9 @@ export const buildSeededFalsePositiveDiscovery = ({
       'On WS-MGMT-201, powershell.exe ran with an encoded command under the management agent and established repeated connections to an external host. The pattern is consistent with a PowerShell download cradle and command-and-control beaconing.',
     'kibana.alert.attack_discovery.mitre_attack_tactics': ['Execution', 'Command and Control'],
     // Fields the review's attachment resolver requires (`getMissingFields` skips a document without
-    // them, and the review fails with "not found, or is not readable"). The ids are placeholders no
-    // generation run shares, so the row's generation-model and persisted-count checks skip this
-    // one.
+    // them, and the review fails with "not found, or is not readable"). The api_config is an object
+    // because the persisted documents carry it that way. The ids are placeholders no generation run
+    // shares, so the row's generation-model and persisted-count checks skip this one.
     'kibana.alert.attack_discovery.api_config': {
       action_type_id: '.inference',
       connector_id: 'ad-worker-eval-seed',

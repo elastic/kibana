@@ -698,6 +698,23 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     expect(cancelled).toEqual([]);
   });
 
+  it('retries a failed cancel once, then drops it with a warning naming the execution', async () => {
+    const { client, cancelled } = cancelFailing({ b: 500 });
+    await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution b/);
+    cancelled.length = 0;
+    (log.warning as jest.Mock).mockClear();
+    await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution b/);
+    expect(cancelled).toEqual(['b']);
+    expect((log.warning as jest.Mock).mock.calls.map(([message]) => message)).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/Giving up on cancelling execution b.*status 500/),
+      ])
+    );
+    cancelled.length = 0;
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+    expect(cancelled).toEqual([]);
+  });
+
   it('ignores a 404', async () => {
     const { client, cancelled } = cancelFailing({ b: 404 });
     await expect(client.cancelPending()).resolves.toBeUndefined();

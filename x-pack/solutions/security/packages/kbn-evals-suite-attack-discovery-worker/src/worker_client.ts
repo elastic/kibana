@@ -35,6 +35,8 @@ import { listActiveExecutionIds } from './floor_worker';
 import { apiVersion, errorMessage, httpStatus, sleep, spacePath } from './kibana_api';
 
 const CANCEL_SETTLE_TIMEOUT_MS = FLOOR_TICK_CANCEL_TIMEOUT_MS;
+/** A failed cancel is retried once: two attempts in all. */
+const MAX_CANCEL_ATTEMPTS = 2;
 
 export const isTerminal = (status: ExecutionStatus): boolean =>
   TerminalExecutionStatuses.includes(status);
@@ -52,6 +54,8 @@ export interface PolledExecution {
  */
 export class AttackDiscoveryWorkerClient {
   private readonly pendingExecutions: Array<{ spaceId: string; executionId: string }> = [];
+  /** Failed cancels per execution id, so one that keeps failing is retried once, then dropped. */
+  private readonly failedCancels = new Map<string, number>();
 
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
@@ -284,7 +288,8 @@ export class AttackDiscoveryWorkerClient {
    * `FLOOR_IDLE_WAIT_MS` to go idle (nothing is cancelled for that); after that only the long
    * schedule interval keeps a tick out (a PUT reschedules the task, it does not run it). The
    * restore re-reads the floor first, but the managed route takes no precondition, so a
-   * concurrent edit is detected best-effort, not prevented.
+   * concurrent edit is detected best-effort, not prevented. When no target starts, the floor's own
+   * execution is returned, so the caller checks its `workflowId`.
    */
   async runViaFloorParent({
     spaceId,
@@ -455,8 +460,9 @@ export class AttackDiscoveryWorkerClient {
    * Cancels what is still running, including reviews parked on the analyst gate. Every execution
    * is attempted. A 404 (already gone) is ignored; any other failure is thrown after all attempts
    * finish, naming each execution id and HTTP status (an `AggregateError` when several failed),
-   * because a review that could not be cancelled stays parked. Those executions stay pending, so
-   * a later call retries them.
+   * because a review that could not be cancelled stays parked. A failed execution stays pending for
+   * one retry on a later call; if that fails too it is dropped with a warning, so a review that
+   * cannot be cancelled does not fail every later row.
    */
   async cancelPending(): Promise<void> {
     await this.cancelEntries(this.pendingExecutions.splice(0));
@@ -514,9 +520,23 @@ export class AttackDiscoveryWorkerClient {
       )
     );
     const failures = results.flatMap((result, index) => {
-      if (result.status !== 'rejected' || httpStatus(result.reason) === 404) return [];
+      if (result.status !== 'rejected' || httpStatus(result.reason) === 404) {
+        this.failedCancels.delete(pending[index].executionId);
+        return [];
+      }
       const { spaceId, executionId } = pending[index];
-      this.track(spaceId, executionId);
+      const failedCancels = (this.failedCancels.get(executionId) ?? 0) + 1;
+      if (failedCancels < MAX_CANCEL_ATTEMPTS) {
+        this.failedCancels.set(executionId, failedCancels);
+        this.track(spaceId, executionId);
+      } else {
+        this.failedCancels.delete(executionId);
+        this.log.warning(
+          `Giving up on cancelling execution ${executionId} after ${failedCancels} attempts: ${errorMessage(
+            result.reason
+          )}`
+        );
+      }
       const message = `Could not cancel execution ${executionId} (HTTP ${
         httpStatus(result.reason) ?? 'unknown'
       }): ${errorMessage(result.reason)}`;
