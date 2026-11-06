@@ -56,6 +56,7 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
@@ -104,6 +105,7 @@ export function DiscoverLayout() {
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
@@ -477,20 +479,35 @@ export function DiscoverLayout() {
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
+                      // The page hides overflow, so a tall error, such as one with an AI explanation, scrolls here.
+                      <div css={styles.errorContainer}>
+                        <ErrorCallout
+                          title={i18n.translate(
+                            'discover.noResults.searchExamples.noResultsErrorTitle',
+                            {
+                              defaultMessage: 'Unable to retrieve search results',
+                            }
+                          )}
+                          error={dataState.error}
+                          isEsqlMode={isEsqlMode}
+                          showErrorDialog={({ title, error }) =>
+                            core.notifications.showErrorDialog({ title, error })
                           }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
+                          esqlReferenceHref={docLinks.links.query.queryESQL}
+                          aiHelp={
+                            isEsqlMode && isOfAggregateQueryType(query) ? (
+                              <EsqlErrorHelp
+                                http={core.http}
+                                query={query.esql}
+                                errorMessage={dataState.error.message}
+                                onApplyQuery={(esql) =>
+                                  dispatch(updateESQLQuery({ queryOrUpdater: esql }))
+                                }
+                              />
+                            ) : undefined
+                          }
+                        />
+                      </div>
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
@@ -557,6 +574,11 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+  }),
+  errorContainer: css({
+    overflowY: 'auto',
+    flex: '1 1 auto',
+    minHeight: 0,
   }),
   dscPageContent: css({
     position: 'relative',

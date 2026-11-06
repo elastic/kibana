@@ -9,6 +9,7 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
+      "cloud",
       "cps",
       "fieldsMetadata",
       "usageCollection",
