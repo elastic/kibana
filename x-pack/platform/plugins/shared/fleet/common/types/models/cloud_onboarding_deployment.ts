@@ -48,6 +48,9 @@ export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeed
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 
+/** Package policy fields set on every package policy of a deployment, keyed by field name. */
+export type CloudOnboardingPolicySettings = Record<string, unknown>;
+
 /**
  * One row of the Service settings step as of the last deploy: an original service
  * (`instanceId === serviceId`) or a duplicate of one (`<serviceId>__dup-<n>`). Not the same as an
@@ -85,6 +88,8 @@ export interface CloudOnboardingDeployment {
   namespace?: string;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. Absent on onboardings saved before this field existed. */
   instances?: CloudOnboardingInstance[];
+  /** Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (e.g. output_id). Each deployment method uses only the settings it supports. Absent on onboardings saved before this field existed. */
+  policySettings?: CloudOnboardingPolicySettings;
   /** Names of the integration packages this deployment covers (e.g. 'aws', 'aws_bedrock'). Queryable, so a package can list the deployments that touched it. Absent on deployments saved before it existed. */
   packageNames?: string[];
   /** Display name of each service as shown in the onboarding flow, by service id. Written by the onboarding app so the list can show the names without knowing its service catalog. */

@@ -2275,6 +2275,26 @@ describe('Agent policy', () => {
       expect(calledWith[2]).toHaveProperty('is_managed', true);
     });
 
+    it('should never persist an id in the saved object attributes', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [{ attributes: {}, id: 'mocked', type: 'mocked', references: [] }],
+      });
+
+      await agentPolicyService.update(soClient, esClient, 'mocked', {
+        id: '../../../../\\@bad-account.co',
+        name: 'mocked',
+        namespace: 'default',
+      });
+
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(soClient.update.mock.calls[0][1]).toBe('mocked');
+      expect(soClient.update.mock.calls[0][2]).not.toHaveProperty('id');
+    });
+
     it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const soClient = createSavedObjectClientMock();
@@ -2884,6 +2904,61 @@ describe('Agent policy', () => {
           },
         ]
       );
+    });
+
+    it('should copy shared package policies managed by a cloud onboarding instance without the stamp', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      soClient = createSavedObjectClientMock();
+      const mockPolicy = {
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { revision: 1, package_policies: ['package-1'] } as any,
+      };
+      soClient.bulkGet.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ id }) => ({ id, ...mockPolicy })),
+      }));
+      soClient.find.mockImplementation(async () => ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      }));
+      soClient.create.mockImplementation(async (type, attributes) => ({
+        attributes: attributes as unknown as NewAgentPolicy,
+        id: 'mocked',
+        type: 'mocked',
+        references: [],
+      }));
+      const packagePolicies = [
+        {
+          id: 'package-1',
+          name: 'package-1',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1', 'policy_2'],
+          onboarding_deployment_id: 'deployment-1',
+        },
+      ] as any;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
+
+      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        name: 'copy mocked',
+      });
+
+      // Linking the policy would lock the new agent policy too.
+      expect(mockedPackagePolicyService.bulkCreate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            name: 'package-1 (copy)',
+            policy_id: 'policy_1',
+            policy_ids: ['mocked'],
+          },
+        ],
+        expect.anything()
+      );
+      expect(mockedPackagePolicyService.bulkUpdate).not.toHaveBeenCalled();
     });
 
     it('should remove copied endpoint package policy input ids before bulk create', async () => {
