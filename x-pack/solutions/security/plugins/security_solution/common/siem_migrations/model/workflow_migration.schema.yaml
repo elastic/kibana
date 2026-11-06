@@ -42,7 +42,6 @@ components:
       description: Serialization format of the original workflow export. Tines exports use json.
       enum:
         - json
-        - yaml
 
     OriginalWorkflow:
       type: object

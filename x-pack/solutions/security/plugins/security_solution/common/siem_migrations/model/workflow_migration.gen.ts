@@ -64,10 +64,8 @@ export type WorkflowMigration = z.infer<typeof WorkflowMigration>;
 /**
  * Serialization format of the original workflow export. Tines exports use json.
  */
-export const OriginalWorkflowFormat = lazySchema(() => z.enum(['json', 'yaml']));
+export const OriginalWorkflowFormat = lazySchema(() => z.literal('json'));
 export type OriginalWorkflowFormat = z.infer<typeof OriginalWorkflowFormat>;
-export type OriginalWorkflowFormatEnum = typeof OriginalWorkflowFormat.enum;
-export const OriginalWorkflowFormatEnum = OriginalWorkflowFormat.enum;
 
 /**
  * The original workflow to migrate.
