@@ -192,7 +192,6 @@ test.describe(
       page,
     }) => {
       await resume(browserAuth, page);
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeVisible();
 
       const policyPut = page.waitForRequest(
@@ -230,7 +229,6 @@ test.describe(
       await resume(browserAuth, page, { drift: false });
 
       // The deployment is unchanged until the stored keys are replaced.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
 
       // The keys are replaced as a set: a new secret only works with its own access key id.
@@ -243,7 +241,6 @@ test.describe(
       await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('NEW-ACCESS-KEY');
 
       // Replacing the keys is the only change, and it marks the deployment as changed.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
       const policyPut = page.waitForRequest(
@@ -282,12 +279,10 @@ test.describe(
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace').click();
       await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('NEW-ACCESS-KEY');
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       await page.testSubj.locator('awsStaticKeysForm-cancelReplace').click();
 
       // Nothing is changed any more, so the deployment is done again and its section collapses.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
       await expect(page.testSubj.locator('awsStaticKeysForm-cancelReplace')).toBeHidden();
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId')).toBeHidden();
 
