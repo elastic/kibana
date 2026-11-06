@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { MAX_TABLE_CELLS, MAX_TABLE_ROWS, type TableNode, table } from './table';
+export { type TableNode, table } from './table';
 export { TABLE_SORT_ENHANCEMENT, tableSortEnhancement } from './table_sort';

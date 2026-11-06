@@ -10,9 +10,10 @@ import type { PrimitiveNode, Renderers } from '@elastic/isomer-sdk';
 import { navigationHref, nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
+import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
+import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import type { ComponentsPackTypes } from '../../lib';
 import { linkSlackRenderer } from './link_slack';
 import { appPathSchema, appRouteSchema, refineAppOrUrl } from './link_target';
@@ -23,7 +24,9 @@ const linkSchema = z
   .object({
     type: z.literal('link'),
     label: fromTextChildren(
-      plainText().describe('What the link opens, in a few words, such as "Open in Discover".')
+      plainText(SLACK_LIMITS.buttonTextChars).describe(
+        'What the link opens, in a few words, such as "Open in Discover".'
+      )
     ),
     app: appRouteSchema
       .optional()
@@ -33,7 +36,7 @@ const linkSchema = z
     path: appPathSchema
       .optional()
       .describe('A path inside `app`, such as "/kibana/skills/my-skill".'),
-    url: navigationHref()
+    url: navigationHref({ max: SLACK_LIMITS.urlChars })
       .refine((value) => ABSOLUTE_HTTP.test(value), { error: 'must be an absolute http(s) URL' })
       .optional()
       .describe('An absolute URL, when the link leaves Kibana. Give either `app` or `url`.'),
@@ -87,7 +90,6 @@ const linkReactRenderer: Renderers<LinkNode, ComponentsPackTypes>['react'] = (
 export const link = definePrimitive<LinkNode, typeof linkSchema>({
   type: 'link',
   schema: linkSchema,
-  sanitize: (node) => (hasText(node.label) ? node : null),
   catalog: {
     type: 'link',
     purpose: 'One link to where the reader can see more, such as a page in Kibana.',

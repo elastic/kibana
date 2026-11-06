@@ -10,13 +10,14 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
+import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
+import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import { contextSlackRenderer } from './context_slack';
 
 const itemSchema = z
   .object({
-    text: plainText().describe('One short fact, in plain text.'),
+    text: plainText(500).describe('One short fact, in plain text.'),
   })
   .strict();
 
@@ -24,7 +25,11 @@ const contextSchema = z.object({
   type: z.literal('context'),
   items: fromChildren(
     'item',
-    z.array(itemSchema).min(1).describe('Facts shown on one line, in order. At least 1.'),
+    z
+      .array(itemSchema)
+      .min(1)
+      .max(SLACK_LIMITS.contextElements)
+      .describe('Facts shown on one line, in order. 1 to 10.'),
     { text: 'text' }
   ),
 });
@@ -63,10 +68,6 @@ const { handles } = isomerDistillery.createStyleModule(
 export const context = definePrimitive<ContextNode, typeof contextSchema>({
   type: 'context',
   schema: contextSchema,
-  sanitize: (node) => {
-    const items = node.items.filter(({ text }) => hasText(text));
-    return items.length > 0 ? { ...node, items } : null;
-  },
   catalog: {
     type: 'context',
     purpose: 'A line of small, secondary facts under a heading or a section.',

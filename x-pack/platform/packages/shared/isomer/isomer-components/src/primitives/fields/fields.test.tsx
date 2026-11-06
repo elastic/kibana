@@ -25,18 +25,15 @@ const slackFields = (node: FieldsNode) =>
   );
 
 describe('fields', () => {
-  it('takes 1 or more items with a label and a value', () => {
+  it('takes 1 to 10 items with a label and a value', () => {
     const view = (node: FieldsNode) => validate({ type: 'view', body: [node] });
     const item = { label: 'App', value: 'Discover' };
 
     expect(view(fieldsOf()).valid).toBe(false);
     expect(view(fieldsOf(...Array(10).fill(item))).valid).toBe(true);
-    expect(view(fieldsOf(...Array(11).fill(item))).valid).toBe(true);
-    expect(view(fieldsOf({ label: ' ', value: 'x' })).valid).toBe(true);
-    expect(slackFields(fieldsOf({ label: ' ', value: 'x' }, { label: 'App', value: ' ' }))).toEqual(
-      []
-    );
-    expect(view(fieldsOf({ label: 'x'.repeat(5000), value: 'x'.repeat(5000) })).valid).toBe(true);
+    expect(view(fieldsOf(...Array(11).fill(item))).valid).toBe(false);
+    expect(view(fieldsOf({ label: ' ', value: 'x' })).valid).toBe(false);
+    expect(view(fieldsOf({ label: 'App', value: 'x'.repeat(1001) })).valid).toBe(false);
     expect(view(fieldsOf({ label: 'Size', value: { raw: 1024, format: 'bytes' } })).valid).toBe(
       true
     );
@@ -63,20 +60,6 @@ describe('fields', () => {
 
     expect(field.text.length).toBeLessThanOrEqual(SLACK_LIMITS.sectionFieldChars);
     expect(field.text).toMatch(/^\*Note\*\n(&amp;)+…$/);
-  });
-
-  it('clamps a long label to a Slack header and still fits the value in the field', () => {
-    const [field] = slackFields(fieldsOf({ label: 'x'.repeat(5000), value: 'y'.repeat(5000) }));
-
-    expect(field.text.length).toBeLessThanOrEqual(SLACK_LIMITS.sectionFieldChars);
-    expect(field.text).toMatch(new RegExp(`^\\*x{${SLACK_LIMITS.headerTextChars - 1}}…\\*\\ny+…$`));
-  });
-
-  it('puts each 10 items in a Slack section of their own', () => {
-    const items = Array.from({ length: 12 }, (_, index) => ({ label: `L${index}`, value: 'v' }));
-    const blocks = surfaces.slack.renderNode(fieldsOf(...items)).blocks as SlackSectionBlock[];
-
-    expect(blocks.map(({ fields = [] }) => fields.length)).toEqual([10, 2]);
   });
 
   it('formats structured values the same on every surface', () => {

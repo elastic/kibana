@@ -10,17 +10,18 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, structuredValueSchema, z } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
+import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, hasText, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainText } from '../../lib';
 import { fieldEntries } from './field_entries';
 import { fieldsSlackRenderer } from './fields_slack';
 
 const itemSchema = z
   .object({
-    label: plainText().describe('What the value is, in plain text, such as "Time range".'),
+    label: plainText(100).describe('What the value is, in plain text, such as "Time range".'),
     value: z
-      .union([plainText(), structuredValueSchema])
+      .union([plainText(1000), structuredValueSchema])
       .describe(
         'The value: plain text, or `{ raw, format?, precision?, currency? }` to format a number or date the same on every surface.'
       ),
@@ -31,7 +32,11 @@ const fieldsSchema = z.object({
   type: z.literal('fields'),
   items: fromChildren(
     'item',
-    z.array(itemSchema).min(1).describe('Labeled values, in order. At least 1.'),
+    z
+      .array(itemSchema)
+      .min(1)
+      .max(SLACK_LIMITS.fieldsPerSection)
+      .describe('Labeled values, in order. 1 to 10.'),
     { text: 'value' }
   ),
 });
@@ -81,12 +86,6 @@ const { handles } = isomerDistillery.createStyleModule(
 export const fields = definePrimitive<FieldsNode, typeof fieldsSchema>({
   type: 'fields',
   schema: fieldsSchema,
-  sanitize: (node) => {
-    const items = node.items.filter(
-      ({ label, value }) => hasText(label) && (typeof value !== 'string' || hasText(value))
-    );
-    return items.length > 0 ? { ...node, items } : null;
-  },
   catalog: {
     type: 'fields',
     purpose: 'Short labeled values, shown as pairs, such as an app, a URL, or a time range.',

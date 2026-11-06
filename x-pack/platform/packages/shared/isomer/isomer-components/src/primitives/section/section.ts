@@ -10,7 +10,7 @@ import { unresolvedBodyNodeSchema, z } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { slackContainer } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, oneLine, plainLabel } from '../../lib';
+import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import type { DividerNode } from '../divider';
 import type { MarkdownNode } from '../markdown';
 import type { QuoteNode } from '../quote';
@@ -18,7 +18,7 @@ import { sectionReactRenderer } from './section_react';
 
 const sectionSchema = z.object({
   type: z.literal('section'),
-  title: plainLabel().describe('The section label, in plain text, such as "Impact".'),
+  title: plainText(150).describe('The section label, in plain text, such as "Impact".'),
   collapsible: z.boolean().optional().describe('Whether Slack lets the reader collapse it.'),
   body: z.array(unresolvedBodyNodeSchema).min(1).describe('The section content, in order.'),
 });

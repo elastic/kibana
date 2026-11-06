@@ -9,15 +9,14 @@ import React, { Fragment } from 'react';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromTextChildren } from '@elastic/isomer-sdk/author';
-import { SLACK_LIMITS, clampSlackText } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, hasText, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainText } from '../../lib';
 import { quoteMarkdownRenderer } from './quote_markdown';
 
 const quoteSchema = z.object({
   type: z.literal('quote'),
   text: fromTextChildren(
-    plainText().describe('The quoted passage, in plain text. Line breaks are kept.'),
+    plainText(3000).describe('The quoted passage, in plain text. Line breaks are kept.'),
     { dedent: true }
   ),
 });
@@ -55,7 +54,6 @@ const { handles } = isomerDistillery.createStyleModule(
 export const quote = definePrimitive<QuoteNode, typeof quoteSchema>({
   type: 'quote',
   schema: quoteSchema,
-  sanitize: (node) => (hasText(node.text) ? node : null),
   catalog: {
     type: 'quote',
     purpose: 'Sets a passage apart as quoted: a conclusion, a verdict, or a finding as stated.',
@@ -92,14 +90,7 @@ export const quote = definePrimitive<QuoteNode, typeof quoteSchema>({
     markdown: quoteMarkdownRenderer,
     slack: ({ text }) => ({
       type: 'rich_text',
-      elements: [
-        {
-          type: 'rich_text_quote',
-          elements: [
-            { type: 'text', text: clampSlackText(text.trim(), SLACK_LIMITS.sectionTextChars) },
-          ],
-        },
-      ],
+      elements: [{ type: 'rich_text_quote', elements: [{ type: 'text', text: text.trim() }] }],
     }),
   },
 });

@@ -12,13 +12,12 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, plainLabel } from '../../lib';
+import { componentIcon, definePrimitive, plainText } from '../../lib';
 import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
 import { noRowsNote, tableView, textTable } from './table_model';
 
-/** The most rows a table takes, so a full one stays within the SDK's input budget, like `MAX_TABLE_CELLS`. */
-export const MAX_TABLE_ROWS = 1000;
+const MAX_ROWS = 1000;
 
 /**
  * Rows times columns. The SDK refuses a composition of more than 20,000 values (`MAX_INPUT_VALUES`),
@@ -30,7 +29,7 @@ export const MAX_TABLE_CELLS = 10000;
 
 const columnSchema = z
   .object({
-    label: plainLabel().describe('The column heading, in plain text.'),
+    label: plainText(100).describe('The column heading, in plain text.'),
     format: z
       .enum(STRUCTURED_VALUE_FORMATS)
       .optional()
@@ -48,7 +47,7 @@ const columnSchema = z
   })
   .strict();
 
-const cellSchema = z.union([z.string(), z.number(), z.null()]);
+const cellSchema = z.union([z.string().max(500), z.number(), z.null()]);
 
 type RowCell = string | number | null;
 
@@ -88,9 +87,9 @@ const tableSchema = z
       'row',
       z
         .array(z.array(cellSchema).max(SLACK_LIMITS.tableColumns))
-        .max(MAX_TABLE_ROWS)
+        .max(MAX_ROWS)
         .describe(
-          `The rows, one cell per column: plain text, a number, or null when empty. At most ${MAX_TABLE_ROWS} rows and ${MAX_TABLE_CELLS} cells.`
+          `The rows, one cell per column: plain text, a number, or null when empty. At most ${MAX_ROWS} rows and ${MAX_TABLE_CELLS} cells.`
         ),
       { toItem: rowFromProps }
     ),
@@ -106,7 +105,7 @@ const tableSchema = z
       .number()
       .int()
       .min(1)
-      .max(MAX_TABLE_ROWS)
+      .max(MAX_ROWS)
       .optional()
       .describe('The most rows to show. A note says how many were left out.'),
     totalRows: z

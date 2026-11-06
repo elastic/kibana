@@ -74,24 +74,4 @@ describe('graph attachment type', () => {
       ]);
     });
   });
-
-  it('shows the rows a table takes for a large graph, and counts the rest', async () => {
-    const nodes = Array.from({ length: 2500 }, (_, index) => node(`n${index}`, `node ${index}`));
-    const edges = nodes.slice(1, 1201).map(({ id }) => edge('n0', id, 'calls'));
-
-    const composition = await toComposition({ nodes, edges });
-
-    expect(composition?.body).toEqual([
-      expect.objectContaining({ type: 'table', totalRows: 1200 }),
-      expect.objectContaining({ type: 'table', totalRows: 1299 }),
-    ]);
-    expect(
-      composition?.body.map((bodyNode) => bodyNode.type === 'table' && bodyNode.rows.length)
-    ).toEqual([1000, 1000]);
-
-    const { valid, errors, slack } = await renderSurface(composition);
-    expect(errors).toEqual([]);
-    expect(valid).toBe(true);
-    expect(slack).toMatch(/Showing \d+ of 1,200 rows/);
-  });
 });

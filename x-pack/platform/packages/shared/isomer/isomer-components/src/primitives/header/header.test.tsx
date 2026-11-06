@@ -21,11 +21,13 @@ const react = (node: HeaderNode) => renderToStaticMarkup(surfaces.react.renderNo
 const slack = (node: HeaderNode) => surfaces.slack.renderNode(node).blocks;
 
 describe('header', () => {
-  it('takes blank text, which it leaves out, and rejects levels outside 1 to 4', () => {
+  it('rejects blank text and levels outside 1 to 4', () => {
     const outOfRange = { type: 'header', text: 'A', level: 5 };
 
-    expect(validate({ type: 'view', body: [heading({ text: ' \n ' })] }).valid).toBe(true);
-    expect(slack(heading({ text: ' \n ' }))).toEqual([]);
+    expect(
+      validate({ type: 'view', body: [heading({ text: '' })] }).errors.map(({ path }) => path)
+    ).toEqual(['body[0].text']);
+    expect(validate({ type: 'view', body: [heading({ text: ' \n ' })] }).valid).toBe(false);
     expect(validate({ type: 'view', body: [outOfRange] }).valid).toBe(false);
   });
 

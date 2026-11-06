@@ -11,12 +11,12 @@ import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS, clampSlackText } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
+import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import { headerReactRenderer } from './header_react';
 
 const schema = z.object({
   type: z.literal('header'),
-  text: fromTextChildren(plainText().describe('The heading, in plain text.')),
+  text: fromTextChildren(plainText(200).describe('The heading, in plain text.')),
   level: z
     .literal([1, 2, 3, 4])
     .optional()
@@ -51,7 +51,6 @@ const catalog: PrimitiveCatalogEntry = {
 export const header = definePrimitive<HeaderNode, typeof schema>({
   type: 'header',
   schema,
-  sanitize: (node) => (hasText(node.text) ? node : null),
   catalog,
   icon,
   examples: [

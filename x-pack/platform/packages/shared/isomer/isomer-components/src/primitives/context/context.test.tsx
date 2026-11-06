@@ -30,12 +30,11 @@ const slackText = (node: ContextNode): string => {
 };
 
 describe('context', () => {
-  it('takes 1 or more items, and leaves out blank ones', () => {
+  it('takes 1 to 10 items, none blank', () => {
     expect(validate({ type: 'view', body: [line()] }).valid).toBe(false);
-    expect(validate({ type: 'view', body: [line('Owner: SRE', ' ')] }).valid).toBe(true);
-    expect(surfaces.text.renderNode(line('Owner: SRE', ' '))).toBe('Owner: SRE');
+    expect(validate({ type: 'view', body: [line('Owner: SRE', ' ')] }).valid).toBe(false);
     expect(validate({ type: 'view', body: [line(...Array(10).fill('a'))] }).valid).toBe(true);
-    expect(validate({ type: 'view', body: [line(...Array(11).fill('a'))] }).valid).toBe(true);
+    expect(validate({ type: 'view', body: [line(...Array(11).fill('a'))] }).valid).toBe(false);
   });
 
   it('joins items into one escaped, verbatim Slack mrkdwn element', () => {

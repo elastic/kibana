@@ -28,8 +28,7 @@ describe('actions', () => {
     expect(view(links()).valid).toBe(false);
     expect(view(links(...Array(6).fill({ label: 'a', url: URL }))).valid).toBe(false);
     expect(view(links({ label: 'Run', url: 'data:text/html,<b>hi</b>' })).valid).toBe(false);
-    expect(view(links({ label: ' ', url: URL })).valid).toBe(true);
-    expect(surfaces.slack.renderNode(links({ label: ' ', url: URL })).blocks).toEqual([]);
+    expect(view(links({ label: ' ', url: URL })).valid).toBe(false);
     expect(view(links({ label: 'Open', url: '/app/discover' })).valid).toBe(true);
   });
 
@@ -69,21 +68,6 @@ describe('actions', () => {
       },
     ]);
     expect(surfaces.slack.renderNode(links(relative)).blocks).toEqual([]);
-  });
-
-  it('takes a URL of any length, and Slack drops a button past its 3,000 characters', () => {
-    const long = { label: 'Open', url: `${URL}?q=${'x'.repeat(3000)}` };
-    const node = links(long, { label: 'Docs', url: URL });
-
-    expect(validate({ type: 'view', body: [node] }).valid).toBe(true);
-    expect(surfaces.slack.renderNode(node).blocks).toEqual([
-      {
-        type: 'actions',
-        elements: [
-          { type: 'button', text: { type: 'plain_text', text: 'Docs', emoji: true }, url: URL },
-        ],
-      },
-    ]);
   });
 
   it('renders links on the other surfaces', () => {

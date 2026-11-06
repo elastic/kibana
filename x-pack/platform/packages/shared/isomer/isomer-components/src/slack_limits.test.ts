@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-// Ported from elastic/isomer's slides pack: the schemas take text of any length, and every Slack
-// slot stays within Slack's limit. Text that fits is kept whole; past that, the slot is clamped
-// with an ellipsis or cut with a note, the policy the rest of this pack follows.
+// Ported from elastic/isomer's slides pack: every Slack slot of the data primitives whose limit is
+// below what its schema accepts stays within that limit at the schema's maximum. Text that fits is
+// kept whole; past that, the slot is clamped with an ellipsis or cut by row with a note, the
+// policy the rest of this pack follows.
 
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
@@ -20,18 +21,8 @@ import type {
 } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentsPack, type ComponentsNode } from './pack';
-import type {
-  ActionsNode,
-  CodeNode,
-  ContextNode,
-  FieldsNode,
-  HeaderNode,
-  LinkNode,
-  QuoteNode,
-  SectionNode,
-  TableNode,
-} from './primitives';
+import { componentsPack } from './pack';
+import type { CodeNode, FieldsNode, LinkNode, TableNode } from './primitives';
 
 const { surfaces, validate } = createIsomerRuntime({ packs: [componentsPack] });
 
@@ -197,57 +188,7 @@ describe('Slack slots below their schema cap', () => {
       ? element.elements.map(elementText).join('')
       : element.elements.map(inlineText).join('');
 
-  it('keeps every text slot within Slack’s limits, at any length', () => {
-    const text = long(20000);
-    const nodes: Array<
-      | ActionsNode
-      | CodeNode
-      | ContextNode
-      | FieldsNode
-      | HeaderNode
-      | LinkNode
-      | QuoteNode
-      | SectionNode
-      | TableNode
-    > = [
-      { type: 'header', text },
-      { type: 'context', items: [{ text }, { text }] },
-      { type: 'quote', text },
-      { type: 'code', text },
-      { type: 'fields', items: [{ label: text, value: text }] },
-      { type: 'link', label: text, app: 'discover', path: '/' },
-      { type: 'actions', buttons: [{ label: text, url: 'https://example.com' }] },
-      { type: 'table', columns: [{ label: text }], rows: [[text], [text]] },
-      { type: 'section', title: text, body: [{ type: 'quote', text: 'Inside' } as QuoteNode] },
-    ];
-
-    for (const node of nodes) {
-      expect(valid(node)).toBe(true);
-    }
-
-    const blocks = surfaces.slack.render(
-      { type: 'view', body: nodes },
-      { heading: false, baseUrl: BASE_URL }
-    ).blocks as SlackBlock[];
-
-    const sizes = JSON.stringify(blocks, (key, value) =>
-      typeof value === 'string' && value.length > SLACK_LIMITS.sectionTextChars
-        ? `TOO LONG: ${key}`
-        : value
-    );
-    expect(sizes).not.toContain('TOO LONG');
-
-    const byType = (type: string) => blocks.filter((block) => block.type === type);
-    for (const block of byType('header')) {
-      expect(JSON.stringify(block)).not.toContain(long(SLACK_LIMITS.headerTextChars + 1));
-    }
-    expect(tableCells(blocks).flat().join('').length).toBeLessThanOrEqual(
-      SLACK_LIMITS.tableCellCharsPerMessage
-    );
-    expect(tableCells(blocks)).toHaveLength(3);
-  });
-
-  it('keeps code of four sections whole, in section-sized rich-text elements', () => {
+  it('keeps code at the schema maximum whole, in section-sized rich-text elements', () => {
     const text = Array.from({ length: 1000 }, (_, index) => `| EVAL f${index} = "&<>"`)
       .join('\n')
       .slice(0, 12000);
@@ -262,30 +203,5 @@ describe('Slack slots below their schema cap', () => {
       expect(elementText(element).length).toBeLessThanOrEqual(SLACK_LIMITS.sectionTextChars);
     }
     expect(elements.map(elementText).join('')).toBe(text);
-  });
-
-  describe('blank text', () => {
-    it('leaves out blank nodes and items on every surface', () => {
-      const blank = ' \n ';
-      const composition = {
-        type: 'view' as const,
-        body: [
-          { type: 'header', text: blank },
-          { type: 'quote', text: blank },
-          { type: 'code', text: blank },
-          { type: 'link', label: blank, url: 'https://example.com' },
-          { type: 'context', items: [{ text: blank }, { text: 'Kept' }] },
-          { type: 'fields', items: [{ label: blank, value: 'x' }] },
-          { type: 'actions', buttons: [{ label: blank, url: 'https://example.com' }] },
-        ] as ComponentsNode[],
-      };
-
-      expect(validate(composition).valid).toBe(true);
-      expect(surfaces.text.render(composition).trim()).toBe('Kept');
-      expect(surfaces.markdown.render(composition).trim()).toBe('Kept');
-      expect(
-        surfaces.slack.render(composition, { heading: false }).blocks.map(({ type }) => type)
-      ).toEqual(['context']);
-    });
   });
 });
