@@ -453,6 +453,72 @@ describe('applyCortexEdits', () => {
       );
     });
 
+    const corroborate = async ({
+      existing,
+      roundKind,
+      conversationId,
+    }: {
+      existing: ReturnType<typeof cart>;
+      roundKind: 'initial' | 'follow_up' | 'alert_recovery';
+      conversationId: string;
+    }) => {
+      const logger = loggerMock.create();
+      const store = createStore({
+        list: jest.fn().mockResolvedValue({
+          pages: [existing],
+          stats: { total: 1, established: 0, total_corroborations: 0 },
+        }),
+        get: jest.fn().mockResolvedValue(existing),
+      });
+      await applyCortexEdits({
+        store,
+        telemetry: createTelemetry(),
+        logger,
+        roundKind,
+        provenance: { conversationId },
+        edits: [
+          { action: 'corroborate', entity_type: 'service', slug: 'otel-demo-cart', title: 'Cart' },
+        ],
+      });
+      return { store, logger };
+    };
+
+    it.each([
+      [
+        'a follow-up round, even on a page another conversation wrote',
+        'follow_up',
+        'conversation-2',
+      ],
+      ['an initial round on a page its own conversation wrote', 'initial', 'conversation-1'],
+    ] as const)(
+      'does not apply a corroboration from %s',
+      async (_name, roundKind, conversationId) => {
+        const { store, logger } = await corroborate({
+          existing: cart(),
+          roundKind,
+          conversationId,
+        });
+
+        expect(store.corroborate).not.toHaveBeenCalled();
+        expect(logger.info.mock.calls.flat().join('\n')).toContain('Skipped corroborating');
+      }
+    );
+
+    it.each([
+      ['an initial round from a different investigation', 'initial', 'conversation-2'],
+      [
+        'an alert-recovery round, which is ground truth, on its own investigation',
+        'alert_recovery',
+        'conversation-1',
+      ],
+    ] as const)('applies a corroboration from %s', async (_name, roundKind, conversationId) => {
+      const { store } = await corroborate({ existing: cart(), roundKind, conversationId });
+
+      expect(store.corroborate).toHaveBeenCalledWith('cortex_service_otel-demo-cart', {
+        conversationId,
+      });
+    });
+
     it('revives an archived page as tentative when a follow-up rewrites it', async () => {
       const store = await rewrite({
         existing: cart({ status: 'archived', corroborations: 3 }),

@@ -387,6 +387,10 @@ export const applyCortexEdits = async ({
   // A run confirms a page at most once, and never one it created: promotion needs a confirmation
   // from a later run.
   const touchedIds = new Set<string>();
+  // A fresh investigation that did not write a page can confirm it by reaching the same finding.
+  const isIndependentInvestigation = (page: CortexPageSummary): boolean =>
+    roundKind === 'initial' &&
+    !(provenance?.conversationId && page.authored_by?.includes(provenance.conversationId));
   // Integrations hold where a component's telemetry lives; they are not components of the graph.
   const integrationSlugs = new Set([
     ...pages
@@ -416,6 +420,14 @@ export const applyCortexEdits = async ({
           continue;
         }
         const before = await store.get(id);
+        // Only ground truth or an independent investigation can confirm a page. A follow-up is one
+        // person's say-so, and a conversation cannot confirm a page it wrote itself.
+        if (before && roundKind !== 'alert_recovery' && !isIndependentInvestigation(before)) {
+          logger.info(
+            `Skipped corroborating ${edit.entity_type}/${slug}: this round cannot confirm it (${roundKind} round, or the conversation wrote the page)`
+          );
+          continue;
+        }
         const updated = hasProvenance
           ? await store.corroborate(id, provenance)
           : await store.corroborate(id);
@@ -506,14 +518,11 @@ export const applyCortexEdits = async ({
       // touched this run keeps its status, so a page revived earlier in the run is not promoted on
       // its old count.
       const alreadyTouched = touchedIds.has(id);
-      const isIndependent =
-        roundKind === 'initial' &&
-        !(provenance?.conversationId && existing?.authored_by?.includes(provenance.conversationId));
       const confirms =
         existing !== undefined &&
         existing.status !== 'archived' &&
         !alreadyTouched &&
-        isIndependent;
+        isIndependentInvestigation(existing);
       const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
       touchedIds.add(id);
       const status = !existing
