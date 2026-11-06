@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
@@ -43,6 +43,7 @@ import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
 import type { SignalFilter } from '../services_step/use_services_step';
 import { StepFooter } from '../step_footer';
+import { supportsPolicySetting } from '../../common/policy_settings';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -62,6 +63,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespace,
     setNamespace,
     namespaceError,
+    policySettings,
+    setPolicySetting,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -88,6 +91,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     servicesStep,
     refetchAwsServiceMatrix,
     deploymentMethod,
+    agentBasedDeployment,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -116,6 +120,18 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     const entry = awsServicesMap?.get(id);
     return entry !== undefined && !followsGlobalNamespace(entry, deploymentMethod);
   });
+  // Input types of the selected services, which decide the output types their policies accept.
+  const outputInputTypes = useMemo(
+    () => [
+      ...new Set(instances.flatMap((inst) => awsServicesMap?.get(inst.serviceId)?.inputs ?? [])),
+    ],
+    [instances, awsServicesMap]
+  );
+
+  const setOutputId = useCallback(
+    (outputId: string) => setPolicySetting('output_id', outputId),
+    [setPolicySetting]
+  );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -462,6 +478,22 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         hasDeployedServices={isRegionDisabled}
         hasLaunchedEcfStack={hasLaunchedEcfStack}
         hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
+        output={
+          supportsPolicySetting('output_id', deploymentMethod)
+            ? {
+                value: policySettings.output_id ?? '',
+                onChange: setOutputId,
+                packageName: bareNamePackage,
+                inputTypes: outputInputTypes,
+                areInputTypesLoaded:
+                  !!awsServicesMap &&
+                  outputInputTypes.length > 0 &&
+                  !hasUnloadedSelectedManifests &&
+                  !hasErroredSelectedManifests,
+                isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
+              }
+            : undefined
+        }
       />
       <EuiSpacer size="m" />
 

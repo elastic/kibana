@@ -10,6 +10,7 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { InstanceNamespaceField } from './instance_namespace_field';
+import { OutputField, type OutputFieldProps } from './output_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;
@@ -20,6 +21,8 @@ interface SharedAdvancedSettingsProps {
   hasLaunchedEcfStack?: boolean;
   /** Whether a selected service does not follow the namespace (some ECF templates take none). */
   hasServicesIgnoringNamespace?: boolean;
+  /** The output field. It applies to agent-based deploys only, so managed and ECF leave it out. */
+  output?: OutputFieldProps;
 }
 
 /**
@@ -32,6 +35,7 @@ export function SharedAdvancedSettings({
   hasDeployedServices,
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
+  output,
 }: SharedAdvancedSettingsProps) {
   const notes = [
     hasDeployedServices &&
@@ -63,6 +67,11 @@ export function SharedAdvancedSettings({
           data-test-subj="sharedSettingsNamespace"
         />
       </EuiFlexItem>
+      {output && (
+        <EuiFlexItem>
+          <OutputField {...output} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGrid>
   );
 }

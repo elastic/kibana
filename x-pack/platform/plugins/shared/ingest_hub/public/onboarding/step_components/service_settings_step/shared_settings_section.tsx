@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
+import type { OutputFieldProps } from './output_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;
@@ -56,6 +57,8 @@ interface SharedSettingsSectionProps {
   hasLaunchedEcfStack?: boolean;
   /** Whether a selected service does not follow the namespace. */
   hasServicesIgnoringNamespace?: boolean;
+  /** The output field, offered only where an agent-based deploy can set it. */
+  output?: OutputFieldProps;
 }
 
 /**
@@ -81,6 +84,7 @@ export function SharedSettingsSection({
   hasDeployedServices = false,
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
+  output,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
@@ -262,6 +266,7 @@ export function SharedSettingsSection({
             hasDeployedServices={hasDeployedServices}
             hasLaunchedEcfStack={hasLaunchedEcfStack}
             hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
+            output={output}
           />
         </div>
       </div>

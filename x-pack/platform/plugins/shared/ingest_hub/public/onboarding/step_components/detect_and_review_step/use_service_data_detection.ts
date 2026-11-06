@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
+import { useGetOutputs } from '@kbn/fleet-plugin/public';
 import type { DetectAndReviewStepState, ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
@@ -20,6 +21,7 @@ import {
   getEcfStackNamespace,
   getEffectiveNamespace,
 } from '../../common/effective_namespace';
+import { getPolicySettings } from '../../common/policy_settings';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
 import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
@@ -91,6 +93,8 @@ export interface ServiceDataDetectionResult {
   /** Services deployed through Fleet. ECF services have none and show no agent badge. */
   agentInfoByServiceId: Record<string, ServiceAgentInfo>;
   receivingCount: number;
+  /** Services whose data goes to an output outside the local cluster and cannot be detected. */
+  unverifiedCount: number;
   totalCount: number;
   isTimedOut: boolean;
 }
@@ -116,6 +120,19 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     DEFAULT_SERVICE_SETTINGS
   );
   const serviceSettings = storedSettings ?? DEFAULT_SERVICE_SETTINGS;
+
+  // The data check reads the local cluster. Policies sending to a remote Elasticsearch cluster
+  // never show up there, so they cannot be verified. Other non-Elasticsearch outputs (Logstash,
+  // Kafka, OTLP) are intermediaries that may forward into this very cluster, so their data is still
+  // checked. An output that is not known (still loading, or deleted) is checked as before.
+  const { data: outputsData } = useGetOutputs();
+  const outputId = deploymentMethod
+    ? getPolicySettings(serviceSettings.policySettings, deploymentMethod).output_id
+    : undefined;
+  const outputType = outputId
+    ? outputsData?.items.find(({ id }) => id === outputId)?.type
+    : undefined;
+  const isDataVerifiable = outputType !== 'remote_elasticsearch';
 
   // Compute once on mount so the window doesn't reset on re-renders.
   const startRef = useRef<string>(new Date(Date.now() - LOOKBACK_MS).toISOString());
@@ -237,10 +254,13 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
         agentHealth: agentSummary?.health,
         hasData,
         isTimedOut,
+        isDataVerifiable,
+        hasLiveAgent,
       });
     }
     return result;
   }, [
+    isDataVerifiable,
     instances,
     summaryByInstanceId,
     hasDataByInstanceId,
@@ -253,11 +273,14 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     isTimedOut,
   ]);
 
-  // Settled once every instance is effectively receiving. Evaluated on the effective states, so an
-  // agent that goes unhealthy after a saved "receiving" turns polling back on.
+  // Settled once every instance is effectively receiving, or cannot be checked. Evaluated on the
+  // effective states, so an agent that goes unhealthy after a saved "receiving" turns polling back
+  // on.
   useEffect(() => {
     const states = Object.values(instanceStates);
-    setIsSettled(states.length > 0 && states.every((state) => state === 'receiving'));
+    setIsSettled(
+      states.length > 0 && states.every((state) => state === 'receiving' || state === 'unverified')
+    );
   }, [instanceStates]);
 
   // Step 4 shows one tile per service, so a duplicated service folds its instances together.
@@ -312,10 +335,16 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     [statusByInstanceId]
   );
 
+  const unverifiedCount = useMemo(
+    () => Object.values(statusByInstanceId).filter((s) => s === 'unverified').length,
+    [statusByInstanceId]
+  );
+
   return {
     statusByInstanceId,
     agentInfoByServiceId,
     receivingCount,
+    unverifiedCount,
     totalCount: selectedServiceIds.length,
     isTimedOut,
   };

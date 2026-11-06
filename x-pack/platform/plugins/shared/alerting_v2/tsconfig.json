@@ -162,7 +162,9 @@
     "@kbn/test",
     "@kbn/cloud-plugin",
     "@kbn/announcement-banner",
-    "@kbn/ftr-llm-proxy"
+    "@kbn/ftr-llm-proxy",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
