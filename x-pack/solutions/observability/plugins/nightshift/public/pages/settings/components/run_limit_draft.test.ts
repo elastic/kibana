@@ -11,6 +11,7 @@ import {
   isValidLimitedRunLimitDraft,
   isValidRunLimitDraft,
   parseRunLimitDraft,
+  setInvestigationLimitsEnabled,
   setRunLimitEnabled,
 } from './run_limit_draft';
 
@@ -30,6 +31,7 @@ describe('run quota drafts', () => {
     expect(createRunQuotaDraftState({ enabled: false })).toEqual({
       saved: {
         enabled: false,
+        investigationLimitsEnabled: true,
         limits: {
           detection: 0,
           investigation: 5,
@@ -40,6 +42,7 @@ describe('run quota drafts', () => {
       },
       draft: {
         enabled: false,
+        investigationLimitsEnabled: true,
         limits: {
           detection: 0,
           investigation: 5,
@@ -135,6 +138,41 @@ describe('run quota drafts', () => {
     expect(state.draft.enabled).toBe(false);
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
       activateLimits: { detection: 20 },
+    });
+  });
+
+  it('turns the investigation limits off without clearing their values', () => {
+    const state = setInvestigationLimitsEnabled(
+      createRunQuotaDraftState({ ...response, enabled: true }),
+      false
+    );
+
+    expect(state.draft.limits).toEqual(response.limits);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ investigationLimitsEnabled: false });
+  });
+
+  it('restores the remembered limits when the investigation limits are turned on with none set', () => {
+    const state = createRunQuotaDraftState({
+      enabled: true,
+      investigationLimitsEnabled: false,
+      limits: {
+        ...response.limits,
+        investigation: 0,
+        manual_investigation: 0,
+        total_investigation: 0,
+      },
+    });
+
+    const enabled = setInvestigationLimitsEnabled(state, true);
+
+    expect(enabled.draft.limits).toMatchObject({
+      investigation: 5,
+      manual_investigation: 5,
+      total_investigation: 10,
+    });
+    expect(buildRunQuotaSettingsUpdate(enabled)).toEqual({
+      investigationLimitsEnabled: true,
+      limits: { investigation: 5, manual_investigation: 5, total_investigation: 10 },
     });
   });
 

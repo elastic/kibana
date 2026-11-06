@@ -18,8 +18,8 @@ import {
   hasRunQuotaDraftChanges,
   isLowerFiniteLimit,
   keepRestoreLimits,
+  setInvestigationLimitsEnabled,
   setRunLimitEnabled,
-  setRunLimitsEnabled,
   withEmptyLimitsAsUnlimited,
   type RunLimitDraft,
   type RunQuotaDraftState,
@@ -40,7 +40,7 @@ export const useRunLimitsForm = ({
   sharedSwitch = false,
 }: {
   groups: readonly RunQuotaGroup[];
-  /** One switch turns every limit on or off, and an empty limit input means no limit. */
+  /** One switch turns the investigation limits on or off, and an empty input means no limit. */
   sharedSwitch?: boolean;
 }) => {
   const quotas = useRunQuotas();
@@ -145,15 +145,12 @@ export const useRunLimitsForm = ({
     );
   }, []);
 
-  const setLimitsEnabled = useCallback(
-    (limitGroups: readonly RunQuotaGroup[], enabled: boolean) => {
-      setSaveError(undefined);
-      setDraftState((current) =>
-        current ? setRunLimitsEnabled(current, limitGroups, enabled) : current
-      );
-    },
-    []
-  );
+  const setInvestigationLimitsOn = useCallback((enabled: boolean) => {
+    setSaveError(undefined);
+    setDraftState((current) =>
+      current ? setInvestigationLimitsEnabled(current, enabled) : current
+    );
+  }, []);
 
   const setLimitEnabled = useCallback((group: RunQuotaGroup, enabled: boolean) => {
     setSaveError(undefined);
@@ -194,7 +191,7 @@ export const useRunLimitsForm = ({
     saveError,
     updateLimitDraft,
     setLimitEnabled,
-    setLimitsEnabled,
+    setInvestigationLimitsEnabled: setInvestigationLimitsOn,
     cancel,
     requestSave,
     confirmAndSave,

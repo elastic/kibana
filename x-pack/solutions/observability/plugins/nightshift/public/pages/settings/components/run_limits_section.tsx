@@ -57,7 +57,7 @@ export const RunLimitsSection = ({
     saveError,
     updateLimitDraft,
     setLimitEnabled,
-    setLimitsEnabled,
+    setInvestigationLimitsEnabled,
     showConfirmation,
     confirmationTitle,
     confirmationButtonText,
@@ -69,8 +69,7 @@ export const RunLimitsSection = ({
     prefix: 'saveRunLimitsConfirmationModalTitle',
   });
   const response = quotas.data;
-  const sharedSwitchOn =
-    draftState !== undefined && groups.some((group) => draftState.draft.limits[group] !== 0);
+  const sharedSwitchOn = draftState?.draft.investigationLimitsEnabled === true;
 
   return (
     <>
@@ -114,6 +113,7 @@ export const RunLimitsSection = ({
             {exhaustionCallouts === 'automations' ? (
               <RunQuotaExhaustionCallout
                 enabled={response.enabled}
+                investigationLimitsEnabled={response.investigationLimitsEnabled}
                 limits={response.limits}
                 counts={response.counts}
                 groups={groups.filter(isInvestigationRunQuotaGroup)}
@@ -131,7 +131,7 @@ export const RunLimitsSection = ({
                       )}
                       checked={sharedSwitchOn}
                       disabled={!canManage || isSaving}
-                      onChange={(event) => setLimitsEnabled(groups, event.target.checked)}
+                      onChange={(event) => setInvestigationLimitsEnabled(event.target.checked)}
                       data-test-subj="nightshiftRunLimitsEnabledSwitch"
                     />
                   </EuiFormRow>

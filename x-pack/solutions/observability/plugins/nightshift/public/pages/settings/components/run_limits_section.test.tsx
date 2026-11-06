@@ -38,6 +38,7 @@ let updateIsSaving = false;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 100,
     investigation: 30,
@@ -239,11 +240,32 @@ describe('RunLimitsSection', () => {
 
     fireEvent.click(sharedSwitch);
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
-    await waitFor(() =>
-      expect(save).toHaveBeenCalledWith({
-        limits: { investigation: null, manual_investigation: null, total_investigation: null },
-      })
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ investigationLimitsEnabled: false }));
+  });
+
+  it('shows the stored limits when the shared switch is turned on after a reload', () => {
+    setup(
+      response({
+        investigationLimitsEnabled: false,
+        limits: {
+          detection: 100,
+          investigation: 4,
+          manual_investigation: 6,
+          total_investigation: 9,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      'automations',
+      true
     );
+
+    const sharedSwitch = screen.getByTestId('nightshiftRunLimitsEnabledSwitch');
+    expect(sharedSwitch).not.toBeChecked();
+    fireEvent.click(sharedSwitch);
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(4);
+    expect(screen.getByTestId('nightshiftRunLimitInput-manual_investigation')).toHaveValue(6);
+    expect(screen.getByTestId('nightshiftRunLimitInput-total_investigation')).toHaveValue(9);
   });
 
   it('restores the previous limits after saving the shared switch off', async () => {
@@ -256,11 +278,7 @@ describe('RunLimitsSection', () => {
       ki_extraction: 20,
     };
     setup(response({ limits }), groups, 'automations', true);
-    save.mockResolvedValueOnce(
-      response({
-        limits: { ...limits, investigation: 0, manual_investigation: 0, total_investigation: 0 },
-      })
-    );
+    save.mockResolvedValueOnce(response({ limits, investigationLimitsEnabled: false }));
 
     fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
@@ -344,9 +362,7 @@ describe('RunLimitsSection', () => {
       ki_extraction: 20,
     };
     setup(response({ limits }), groups, 'automations', true);
-    save.mockResolvedValueOnce(
-      response({ limits: { ...limits, manual_investigation: 0, total_investigation: 0 } })
-    );
+    save.mockResolvedValueOnce(response({ limits, investigationLimitsEnabled: false }));
     const values = () =>
       groups.map(
         (group) =>

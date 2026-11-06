@@ -21,6 +21,7 @@ const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 100,
     investigation: 30,

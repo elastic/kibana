@@ -43,6 +43,11 @@ const runQuotaSettingsAttributesV1 = schema.object({
   ),
 });
 
+// Settings saved before the flag existed read it as on.
+const runQuotaSettingsAttributesV2 = runQuotaSettingsAttributesV1.extends({
+  investigationLimitsEnabled: schema.maybe(schema.boolean()),
+});
+
 const runQuotaLedgerAttributesV1 = schema.object({
   date: schema.string({ maxLength: RUN_QUOTA_DATE_MAX_LENGTH }),
   group: schema.oneOf([
@@ -80,6 +85,13 @@ export const runQuotaSettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: runQuotaSettingsAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: runQuotaSettingsAttributesV1.extends({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: runQuotaSettingsAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: runQuotaSettingsAttributesV2.extends({}, { unknowns: 'allow' }),
       },
     },
   },

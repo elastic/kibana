@@ -28,6 +28,7 @@ const fetch = jest.fn();
 
 const quotasResponse = (canManage: boolean): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 1,
     investigation: 1,

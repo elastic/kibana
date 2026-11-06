@@ -57,6 +57,7 @@ const request = {};
 
 const defaultSettings: RunQuotaSettingsAttributes = {
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
+  investigationLimitsEnabled: DEFAULT_RUN_QUOTA_SETTINGS.investigationLimitsEnabled,
   limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 };
 
@@ -176,6 +177,7 @@ describe('Significant Events run quota routes', () => {
   it('returns configured limits and current-day counts while enforcement is disabled', async () => {
     const settings: RunQuotaSettingsAttributes = {
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 0,
         investigation: 30,
@@ -201,6 +203,7 @@ describe('Significant Events run quota routes', () => {
 
     expect(response).toEqual({
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: settings.limits,
       counts: {
         detection: 17,
@@ -224,6 +227,7 @@ describe('Significant Events run quota routes', () => {
   it('applies an actual partial update and returns the common snapshot', async () => {
     const updated: RunQuotaSettingsAttributes = {
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 0,
         investigation: 30,
@@ -252,6 +256,7 @@ describe('Significant Events run quota routes', () => {
     });
     expect(response).toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: updated.limits,
       counts: {
         detection: 2,

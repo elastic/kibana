@@ -94,15 +94,21 @@ const settingsUpdateSchema = lazySchema(() =>
     z
       .object({
         enabled: z.boolean().optional(),
+        investigationLimitsEnabled: z.boolean().optional(),
         limits: limitsUpdateSchema.optional(),
       })
       .strict()
-      .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
-        message: 'At least one run quota setting is required',
-      }),
+      .refine(
+        (update) =>
+          update.enabled !== undefined ||
+          update.investigationLimitsEnabled !== undefined ||
+          update.limits !== undefined,
+        { message: 'At least one run quota setting is required' }
+      ),
     z
       .object({
         activateLimits: activateLimitsSchema,
+        investigationLimitsEnabled: z.boolean().optional(),
         limits: z.object(investigationLimitsUpdateShape).strict().optional(),
       })
       .strict(),
@@ -155,6 +161,7 @@ const readRunQuotaSnapshot = async ({
 
   return {
     enabled: settings.enabled,
+    investigationLimitsEnabled: settings.investigationLimitsEnabled,
     limits: Object.fromEntries(
       RUN_QUOTA_GROUPS.map((group) => [group, settings.limits[group]])
     ) as Record<RunQuotaGroup, number>,

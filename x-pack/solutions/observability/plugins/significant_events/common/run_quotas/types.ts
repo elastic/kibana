@@ -43,25 +43,36 @@ export const DEFAULT_RUN_LIMITS: Readonly<Record<RunQuotaGroup, number>> = {
 };
 
 export interface RunQuotaSettings {
+  /** Enforces the scheduled detection and knowledge indicator limits. */
   enabled: boolean;
+  /**
+   * Enforces the investigation limits. Turned off, they are not enforced but keep their values, so
+   * turning them back on restores them.
+   */
+  investigationLimitsEnabled: boolean;
   limits: Record<RunQuotaGroup, number>;
 }
 
 export const isRunQuotaReached = ({
   group,
   enabled,
+  investigationLimitsEnabled = true,
   limit,
   count,
 }: {
   group: RunQuotaGroup;
   enabled: boolean;
+  investigationLimitsEnabled?: boolean;
   limit: number;
   count: number;
 }): boolean =>
-  (isInvestigationRunQuotaGroup(group) || enabled) && limit > MIN_RUN_LIMIT && count >= limit;
+  (isInvestigationRunQuotaGroup(group) ? investigationLimitsEnabled : enabled) &&
+  limit > MIN_RUN_LIMIT &&
+  count >= limit;
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: DEFAULT_RUN_LIMITS,
 };
 
@@ -73,6 +84,7 @@ export interface RunQuotaWindow {
 
 export interface RunQuotasResponse {
   enabled: boolean;
+  investigationLimitsEnabled: boolean;
   limits: Record<RunQuotaGroup, number>;
   counts: Record<RunQuotaGroup, number>;
   window: RunQuotaWindow;
@@ -82,12 +94,14 @@ export interface RunQuotasResponse {
 export type RunQuotaSettingsPatch =
   | {
       enabled?: boolean;
+      investigationLimitsEnabled?: boolean;
       limits?: Partial<Record<RunQuotaGroup, number>>;
       activateLimits?: never;
     }
   | {
       activateLimits: Partial<Record<RunQuotaGroup, number>>;
       enabled?: never;
+      investigationLimitsEnabled?: boolean;
       limits?: Partial<Record<RunQuotaGroup, number>>;
     };
 
@@ -99,6 +113,7 @@ export type InvestigationRunLimitsUpdate = Partial<
 export type RunQuotaSettingsUpdate =
   | {
       enabled?: boolean;
+      investigationLimitsEnabled?: boolean;
       limits?: Partial<Record<Exclude<RunQuotaGroup, InvestigationRunQuotaGroup>, number>> &
         InvestigationRunLimitsUpdate;
       activateLimits?: never;
@@ -110,6 +125,7 @@ export type RunQuotaSettingsUpdate =
        */
       activateLimits: Partial<Record<RunQuotaGroup, number>>;
       enabled?: never;
+      investigationLimitsEnabled?: boolean;
       limits?: InvestigationRunLimitsUpdate;
     };
 

@@ -81,6 +81,7 @@ export const getAutomationBlockingLimit = (
         isRunQuotaReached({
           group,
           enabled: quotas.enabled,
+          investigationLimitsEnabled: quotas.investigationLimitsEnabled,
           limit: quotas.limits[group],
           count: quotas.counts[group],
         })

@@ -64,11 +64,13 @@ const getExhaustionCopy = (
 
 export const RunQuotaExhaustionCallout = ({
   enabled,
+  investigationLimitsEnabled,
   limits,
   counts,
   groups,
 }: {
   enabled: boolean;
+  investigationLimitsEnabled: boolean;
   limits: Record<RunQuotaGroup, number>;
   counts: Record<RunQuotaGroup, number>;
   groups: readonly InvestigationRunQuotaGroup[];
@@ -79,7 +81,13 @@ export const RunQuotaExhaustionCallout = ({
     nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' });
   const exhaustedGroups = groups.filter((group) =>
-    isRunQuotaReached({ group, enabled, limit: limits[group], count: counts[group] })
+    isRunQuotaReached({
+      group,
+      enabled,
+      investigationLimitsEnabled,
+      limit: limits[group],
+      count: counts[group],
+    })
   );
 
   if (exhaustedGroups.length === 0) {

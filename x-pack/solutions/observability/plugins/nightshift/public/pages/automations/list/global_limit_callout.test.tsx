@@ -26,6 +26,7 @@ const quotas = ({
   totalUsed?: number;
 }): RunQuotasResponse => ({
   enabled,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 0,
     ki_extraction: 0,

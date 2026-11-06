@@ -42,6 +42,7 @@ export type { RunQuotaSettingsPatch };
 
 export const createDefaultRunQuotaSettingsAttributes = (): RunQuotaSettingsAttributes => ({
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
+  investigationLimitsEnabled: DEFAULT_RUN_QUOTA_SETTINGS.investigationLimitsEnabled,
   limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 });
 
@@ -135,6 +136,7 @@ export const patchRunQuotaSettings = async (
             RUN_QUOTA_SETTINGS_SO_ID,
             {
               enabled: next.enabled,
+              investigationLimitsEnabled: next.investigationLimitsEnabled,
               limits: next.limits,
             },
             { version: currentSavedObject.version }

@@ -41,6 +41,7 @@ describe('run quota settings repository', () => {
 
     await expect(readRunQuotaSettings(repository)).resolves.toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: DEFAULT_RUN_LIMITS,
     });
   });
@@ -49,6 +50,7 @@ describe('run quota settings repository', () => {
     const repository = makeRepository();
     const first: RunQuotaSettingsAttributes = {
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 100,
         investigation: 30,
@@ -85,6 +87,7 @@ describe('run quota settings repository', () => {
       })
     ).resolves.toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       futureTopLevel: { retained: 'winner' },
       limits: {
         detection: 120,
@@ -101,6 +104,7 @@ describe('run quota settings repository', () => {
     const repository = makeRepository();
     const legacy: RunQuotaSettingsAttributes = {
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 100,
         investigation: 30,
@@ -112,6 +116,7 @@ describe('run quota settings repository', () => {
     };
     const concurrentWinner: RunQuotaSettingsAttributes = {
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 15,
         investigation: 0,
@@ -136,6 +141,7 @@ describe('run quota settings repository', () => {
       })
     ).resolves.toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 15,
         investigation: 0,
@@ -148,6 +154,7 @@ describe('run quota settings repository', () => {
 
     expect(repository.update.mock.calls[0][2]).toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 0,
         investigation: 30,

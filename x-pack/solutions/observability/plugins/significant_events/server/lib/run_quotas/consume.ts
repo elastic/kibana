@@ -32,7 +32,15 @@ export const consumeRunQuota = async ({
     date,
     group,
     mutation: (ledger) => {
-      if (isRunQuotaReached({ group, enabled: settings.enabled, limit, count: ledger.count })) {
+      if (
+        isRunQuotaReached({
+          group,
+          enabled: settings.enabled,
+          investigationLimitsEnabled: settings.investigationLimitsEnabled,
+          limit,
+          count: ledger.count,
+        })
+      ) {
         return { result: { allowed: false } };
       }
 
@@ -84,9 +92,14 @@ export const consumeInvestigationRunQuota = async ({
 
   return {
     allowed: true,
+    // Each ledger is released even when the other fails; the first failure is still reported.
     release: async () => {
-      await release('total_investigation');
-      await release(group);
+      const [failed] = (
+        await Promise.allSettled([release('total_investigation'), release(group)])
+      ).filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+      if (failed) {
+        throw failed.reason;
+      }
     },
   };
 };
