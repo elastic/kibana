@@ -55,6 +55,17 @@ export {
   xyChartExamples,
   xyChartSchema,
 } from '@elastic/isomer-primitives-charts/schema';
+export type {
+  MetricScene,
+  MetricTile,
+  ResolveChartOptions,
+  Scene,
+  SceneAxis,
+  SceneLegendItem,
+  XyScene,
+  XySeries,
+} from '@elastic/isomer-primitives-charts/scene';
+export { resolveChart } from '@elastic/isomer-primitives-charts/scene';
 export { createKibanaIsomerRuntime } from './src/create_kibana_isomer_runtime';
 export type {
   KibanaIsomerRuntime,

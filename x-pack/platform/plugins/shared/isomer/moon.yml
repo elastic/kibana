@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-common'
+  - '@kbn/isomer-gate-a'
 tags:
   - plugin
   - prod

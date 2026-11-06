@@ -22,6 +22,9 @@ import type {
   LensXyLayer,
 } from './types';
 
+/** The time field Kibana's ES|QL time field resolution falls back to. */
+const DEFAULT_TIME_FIELD = '@timestamp';
+
 /** The chart types the Lens materializer maps. */
 const MAPPED_TYPES: ReadonlySet<string> = new Set(['metric', 'xy']);
 
@@ -110,6 +113,7 @@ const esqlRequest = (
   filters: Filter[]
 ): EsqlDataRequest => {
   const timeField = parseTimeFieldFromESQLQuery(query);
+  // Without ?_tstart or ?_tend, Kibana filters on @timestamp when every index the query reads has it.
   const context: MaterializeContextOverride = {
     ...(ignoreGlobalFilters ? { ignoreGlobalFilters: true } : {}),
     ...(filters.length > 0 ? { filters } : {}),
@@ -117,7 +121,7 @@ const esqlRequest = (
   return {
     kind: 'esql',
     query,
-    ...(timeField ? { timeField } : {}),
+    ...(timeField ? { timeField } : { defaultTimeField: DEFAULT_TIME_FIELD }),
     ...(Object.keys(context).length > 0 ? { context } : {}),
   };
 };

@@ -129,6 +129,12 @@ describe('Lens materializer: plan', () => {
     ]);
   });
 
+  it('falls back to @timestamp for a query without ?_tstart, as Kibana does', () => {
+    const [request] = plan(corpusCases.logsVisits.config) as EsqlDataRequest[];
+    expect(request).toMatchObject({ defaultTimeField: '@timestamp' });
+    expect(request).not.toHaveProperty('timeField');
+  });
+
   it('runs one query per xy layer that reads data, in layer order', () => {
     const requests = plan({
       type: 'xy',
