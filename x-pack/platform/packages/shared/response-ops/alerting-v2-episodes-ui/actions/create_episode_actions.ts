@@ -15,7 +15,11 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
+import type {
+  EpisodeActionExtension,
+  EpisodeDataSource,
+  EpisodeSnoozePayload,
+} from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
@@ -71,9 +75,7 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     createUnackAction(actionDeps, ext('ALERTING_V2_UNACK_EPISODE')),
     createSnoozeAction(
       deps,
-      ext('ALERTING_V2_SNOOZE_EPISODE') as
-        | EpisodeActionExtension<{ snoozedUntil: string | null }>
-        | undefined
+      ext('ALERTING_V2_SNOOZE_EPISODE') as EpisodeActionExtension<EpisodeSnoozePayload> | undefined
     ),
     createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),
     createResolveAction(actionDeps, ext('ALERTING_V2_RESOLVE_EPISODE')),

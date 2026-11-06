@@ -79,6 +79,34 @@ describe('SnoozeFormBody', () => {
     });
   });
 
+  describe('conditionalTabDisabledReason', () => {
+    it('disables the conditional tab and ignores clicks on it', async () => {
+      renderBody({ activeTab: 'quick', conditionalTabDisabledReason: 'Not supported' });
+
+      const conditionalTab = await screen.findByTestId('conditional');
+      expect(conditionalTab).toBeDisabled();
+
+      fireEvent.click(conditionalTab);
+
+      expect(onTabChange).not.toHaveBeenCalled();
+    });
+
+    it('shows the reason as a tooltip on the conditional tab', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderBody({ activeTab: 'quick', conditionalTabDisabledReason: 'Not supported' });
+
+      await user.hover(await screen.findByTestId('conditional'));
+
+      expect(await screen.findByText('Not supported')).toBeInTheDocument();
+    });
+
+    it('leaves the conditional tab enabled when no reason is given', async () => {
+      renderBody({ activeTab: 'quick' });
+
+      expect(await screen.findByTestId('conditional')).toBeEnabled();
+    });
+  });
+
   describe('schedule change forwarding', () => {
     it('forwards quick-duration changes via onQuickScheduleChange', async () => {
       renderBody({ activeTab: 'quick' });

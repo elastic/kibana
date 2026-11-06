@@ -9,6 +9,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { getAlertSnoozeStateByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
+import type { SnoozedInstance } from '@kbn/response-ops-alerts-apis/types';
 import type {
   AlertEpisode,
   EpisodesFilterState,
@@ -96,14 +97,14 @@ export const enrichClassicEpisodesWithSnoozeState = async (
   }
 
   const mutedByRule = new Map<string, Set<string>>();
-  const snoozedByRule = new Map<string, Map<string, string | undefined>>();
+  const snoozedByRule = new Map<string, Map<string, SnoozedInstance>>();
 
   for (const rule of snoozeData) {
     mutedByRule.set(rule.id, new Set(rule.mutedAlertIds));
 
-    const instanceMap = new Map<string, string | undefined>();
+    const instanceMap = new Map<string, SnoozedInstance>();
     for (const instance of rule.snoozedInstances) {
-      instanceMap.set(instance.instanceId, instance.expiresAt);
+      instanceMap.set(instance.instanceId, instance);
     }
     snoozedByRule.set(rule.id, instanceMap);
   }
@@ -117,13 +118,19 @@ export const enrichClassicEpisodesWithSnoozeState = async (
 
     const isMuted = mutedByRule.get(ruleId)?.has(instanceId) ?? false;
     const snoozedInstances = snoozedByRule.get(ruleId);
-    const isSnoozed = snoozedInstances?.has(instanceId) ?? false;
+    const snoozedInstance = snoozedInstances?.get(instanceId);
 
-    if (isSnoozed && snoozedInstances) {
+    if (snoozedInstance) {
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snoozed_until: snoozedInstances.get(instanceId) ?? null,
+        snoozed_until: snoozedInstance.expiresAt ?? null,
+        ...(snoozedInstance.conditions?.length
+          ? {
+              snooze_conditions: snoozedInstance.conditions,
+              snooze_condition_operator: snoozedInstance.conditionOperator,
+            }
+          : {}),
         ...(isMuted ? { is_muted: true } : {}),
       };
     }
