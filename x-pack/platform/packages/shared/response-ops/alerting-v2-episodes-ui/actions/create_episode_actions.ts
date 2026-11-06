@@ -15,8 +15,11 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
-import type { EpisodeSnoozePayload } from '../components/snooze_modal';
+import type {
+  EpisodeActionExtension,
+  EpisodeDataSource,
+  EpisodeSnoozePayload,
+} from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';

@@ -14,8 +14,7 @@ import {
   type LocatorHost,
 } from '@kbn/rule-data-utils';
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
-import { classicActionExtensions } from './action_extensions';
-import type { ClassicAlertActionContext } from './utils/map_alert';
+import { classicActionExtensions, getActionContext } from './action_extensions';
 import {
   EPISODE_SEVERITY_WARNING_LABEL,
   EPISODE_SEVERITY_MINOR_LABEL,
@@ -129,8 +128,7 @@ export const createClassicEpisodeSource = ({
   getRuleTypeIds: (episodes) => {
     const ids = new Set<string>();
     for (const episode of episodes) {
-      const { ruleTypeId } = (episode.source_action_context ??
-        {}) as Partial<ClassicAlertActionContext>;
+      const { ruleTypeId } = getActionContext(episode);
       if (ruleTypeId) ids.add(ruleTypeId);
     }
     return [...ids];

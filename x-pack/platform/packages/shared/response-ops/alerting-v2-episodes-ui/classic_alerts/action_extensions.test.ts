@@ -378,7 +378,7 @@ describe('classicActionExtensions', () => {
       expect(mockedSnooze).not.toHaveBeenCalled();
     });
 
-    it('execute unmutes a muted episode before snoozing it', async () => {
+    it('execute snoozes a muted episode before unmuting it', async () => {
       const callOrder: string[] = [];
       mockedBulkUnmute.mockImplementation(async () => {
         callOrder.push('unmute');
@@ -396,7 +396,7 @@ describe('classicActionExtensions', () => {
         http,
         rules: [{ rule_id: 'r1', alert_instance_ids: ['inst-1'] }],
       });
-      expect(callOrder).toEqual(['unmute', 'snooze']);
+      expect(callOrder).toEqual(['snooze', 'unmute']);
       expect(result).toEqual({ succeeded: 1, failed: 0, errors: [] });
     });
 
@@ -421,7 +421,19 @@ describe('classicActionExtensions', () => {
       expect(mockedBulkMute).toHaveBeenCalled();
     });
 
-    it('execute skips the snooze of a muted episode whose unmute failed', async () => {
+    it('execute leaves the mute in place when the snooze fails', async () => {
+      mockedSnooze.mockRejectedValueOnce(new Error('snooze failed'));
+
+      const episodes = [makeClassicEpisode('c1', 'open', { is_muted: true })];
+      const result = await snoozeExtension.execute(episodes, http, {
+        snoozedUntil: '2099-01-01T00:00:00.000Z',
+      });
+
+      expect(mockedBulkUnmute).not.toHaveBeenCalled();
+      expect(result).toEqual({ succeeded: 0, failed: 1, errors: ['snooze failed'] });
+    });
+
+    it('execute reports a failure when the unmute after a successful snooze fails', async () => {
       mockedBulkUnmute.mockRejectedValueOnce(new Error('unmute failed'));
 
       const episodes = [
@@ -432,7 +444,10 @@ describe('classicActionExtensions', () => {
         snoozedUntil: '2099-01-01T00:00:00.000Z',
       });
 
-      expect(mockedSnooze.mock.calls.map(([{ instanceId }]) => instanceId)).toEqual(['inst-2']);
+      expect(mockedSnooze.mock.calls.map(([{ instanceId }]) => instanceId)).toEqual([
+        'inst-1',
+        'inst-2',
+      ]);
       expect(result).toEqual({ succeeded: 1, failed: 1, errors: ['unmute failed'] });
     });
 

@@ -54,7 +54,7 @@ export type { SnoozeFormBodyProps } from './components/snooze_form_body';
 
 export { useSnoozeForm } from './components/use_snooze_form';
 
-export type { SnoozePanelTab } from './components/types';
+export { toApiSnoozeConditions } from './utils/to_api_snooze_conditions';
 
 export { useAlertSnooze } from './hooks/use_alert_snooze';
 export type { UseAlertSnoozeParams, UseAlertSnoozeResult } from './hooks/use_alert_snooze';

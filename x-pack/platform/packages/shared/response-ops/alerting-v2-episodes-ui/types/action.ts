@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
+import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/response-ops-alerts-apis/types';
 
 export interface EpisodeActionState {
   episodeId: string;
@@ -33,6 +33,6 @@ export interface EpisodeStatusGroupAction {
   lastSnoozeAction: string | null;
   snoozedUntil: string | null;
   snoozeConditions?: SnoozeCondition[];
-  snoozeConditionOperator?: 'any' | 'all';
+  snoozeConditionOperator?: SnoozeConditionOperator;
   isMuted?: boolean;
 }

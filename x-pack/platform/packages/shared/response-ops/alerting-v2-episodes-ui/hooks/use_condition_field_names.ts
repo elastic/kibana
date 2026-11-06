@@ -36,10 +36,12 @@ export const useConditionFieldNames = ({
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.conditionFieldNames(dataSource?.id ?? '', ruleTypeIds ?? []),
-    queryFn: ({ signal }) =>
-      fetchSearchFields!({ services: { http }, abortSignal: signal, ruleTypeIds }).then(
-        toConditionFieldNames
-      ),
+    queryFn: async ({ signal }) => {
+      if (!fetchSearchFields) return [];
+      return toConditionFieldNames(
+        await fetchSearchFields({ services: { http }, abortSignal: signal, ruleTypeIds })
+      );
+    },
     enabled: enabled && fetchSearchFields != null,
     staleTime: Infinity,
     refetchOnWindowFocus: false,

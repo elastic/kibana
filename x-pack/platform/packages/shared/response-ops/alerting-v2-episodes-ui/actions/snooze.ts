@@ -12,14 +12,18 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { QueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS, type BulkSnoozeSeriesActionItem } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
-import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
+import type {
+  EpisodeActionExtension,
+  EpisodeDataSource,
+  EpisodeSnoozePayload,
+} from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkSnoozeSeriesActions } from './bulk_create_alert_actions';
 import { uniqueBySeries } from './helpers';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import { executeCompositeAction } from './execute_composite_action';
 import * as i18n from './translations';
-import { openSnoozeModal, type EpisodeSnoozePayload } from '../components/snooze_modal';
+import { openSnoozeModal } from '../components/snooze_modal';
 
 /**
  * Flip once universal episodes can evaluate snooze conditions, mapping the

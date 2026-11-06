@@ -11,7 +11,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { mutationKeys } from '../mutation_keys';
-import type { ServerError, SnoozeCondition } from '../types';
+import type { ServerError, SnoozeCondition, SnoozeConditionOperator } from '../types';
 import { snoozeAlertInstance } from '../apis/snooze_alert_instance';
 
 const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.snoozeAlert.error', {
@@ -29,7 +29,7 @@ export interface SnoozeAlertInstanceMutationParams {
   alertInstanceId: string;
   expiresAt?: string;
   conditions?: SnoozeCondition[];
-  conditionOperator?: 'any' | 'all';
+  conditionOperator?: SnoozeConditionOperator;
 }
 
 export const getKey = mutationKeys.snoozeAlertInstance;

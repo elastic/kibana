@@ -18,8 +18,7 @@ import {
   type AlertEpisode as BaseAlertEpisode,
 } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
-import type { EpisodeActionExtension } from '../types/episode_data_source';
-import type { EpisodeSnoozePayload } from '../components/snooze_modal';
+import type { EpisodeActionExtension, EpisodeSnoozePayload } from '../types/episode_data_source';
 import { CONDITIONAL_SNOOZE_ACTIVE_ONLY, CONDITIONAL_SNOOZE_UNSUPPORTED } from './translations';
 
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): BaseAlertEpisode => ({
