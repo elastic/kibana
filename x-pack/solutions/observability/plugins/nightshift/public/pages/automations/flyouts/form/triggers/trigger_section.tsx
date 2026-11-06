@@ -34,9 +34,6 @@ export const AutomationTriggerSection = ({
   onRaiseLimit,
   showValidationErrors = false,
   readOnly = false,
-  isGlobalLimitReached = false,
-  globalInvestigationLimit,
-  globalLimitSettingsHref,
 }: {
   trigger?: TriggerFormValues;
   instructions: string;
@@ -49,9 +46,6 @@ export const AutomationTriggerSection = ({
   onRaiseLimit?: (limit: number) => void;
   showValidationErrors?: boolean;
   readOnly?: boolean;
-  isGlobalLimitReached?: boolean;
-  globalInvestigationLimit?: number;
-  globalLimitSettingsHref?: string;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
     Partial<Record<TriggerFormValues['kind'], TriggerFormValues>>
@@ -133,9 +127,6 @@ export const AutomationTriggerSection = ({
             savedLimit={savedLimit}
             onRaiseLimit={onRaiseLimit}
             readOnly={readOnly}
-            isGlobalLimitReached={isGlobalLimitReached}
-            globalInvestigationLimit={globalInvestigationLimit}
-            globalLimitSettingsHref={globalLimitSettingsHref}
           />
         )}
         {trigger && (

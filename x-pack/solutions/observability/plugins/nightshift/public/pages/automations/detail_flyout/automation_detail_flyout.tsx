@@ -59,6 +59,7 @@ import {
 } from '../../../data/automations/use_automations';
 import { isAutomationRateLimited, statusLabels } from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';
+import { useGlobalLimit } from '../hooks/use_global_limit';
 import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
 import { InfoStrip } from './info_strip';
@@ -134,9 +135,6 @@ export const AutomationDetailFlyout = ({
   canManage,
   editDisabledReason,
   usedToday,
-  isGlobalLimitReached = false,
-  globalInvestigationLimit,
-  globalLimitSettingsHref,
   runRange,
   rangeLabel,
   onClose,
@@ -149,10 +147,6 @@ export const AutomationDetailFlyout = ({
   /** Why editing is not possible, shown on the disabled controls instead of hiding them. */
   editDisabledReason?: string;
   usedToday: number;
-  /** When the shared investigation quota is exhausted, today's usage uses a disabled look. */
-  isGlobalLimitReached?: boolean;
-  globalInvestigationLimit?: number;
-  globalLimitSettingsHref?: string;
   runRange: RunRange;
   rangeLabel: string;
   onClose: () => void;
@@ -166,6 +160,7 @@ export const AutomationDetailFlyout = ({
     application,
     http: { basePath },
   } = useKibana().services;
+  const { isReached: isGlobalLimitReached } = useGlobalLimit();
   const { pathname, search } = useLocation();
   const statusParam = new URLSearchParams(search).get('status');
   const initialRunFilter = STATUSES.find((status) => status === statusParam);
@@ -523,9 +518,6 @@ export const AutomationDetailFlyout = ({
                     isNameInvalid={isNameInvalid}
                     showValidationErrors={showValidationErrors}
                     savedLimit={dailyLimit}
-                    isGlobalLimitReached={isGlobalLimitReached}
-                    globalInvestigationLimit={globalInvestigationLimit}
-                    globalLimitSettingsHref={globalLimitSettingsHref}
                     onChange={(changes) => {
                       setValues((current) => ({ ...current, ...changes }));
                       if ('name' in changes) setIsNameInvalid(false);
@@ -575,9 +567,6 @@ export const AutomationDetailFlyout = ({
                       isNameInvalid={false}
                       readOnly
                       showIdentityFields={false}
-                      isGlobalLimitReached={isGlobalLimitReached}
-                      globalInvestigationLimit={globalInvestigationLimit}
-                      globalLimitSettingsHref={globalLimitSettingsHref}
                       onRaiseLimit={
                         canManage
                           ? (limit) => startEditing({ dailyDispatchLimit: String(limit) })

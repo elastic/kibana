@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { GlobalLimitCallout } from '../../../list/global_limit_callout';
+import { useGlobalLimit } from '../../../hooks/use_global_limit';
 import { Sentence } from './pills/sentence';
 import { triggerLabels } from './translations';
 import { isValidDailyLimit } from '../validation';
@@ -36,9 +37,6 @@ export const DailyLimitField = ({
   savedLimit,
   onRaiseLimit,
   readOnly = false,
-  isGlobalLimitReached = false,
-  globalInvestigationLimit,
-  globalLimitSettingsHref,
 }: {
   value: string;
   helpText: string;
@@ -47,12 +45,13 @@ export const DailyLimitField = ({
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
   readOnly?: boolean;
-  /** When the shared investigation quota is exhausted, show the deployment callout instead. */
-  isGlobalLimitReached?: boolean;
-  globalInvestigationLimit?: number;
-  globalLimitSettingsHref?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    isReached: isGlobalLimitReached,
+    limit: globalInvestigationLimit,
+    settingsHref: globalLimitSettingsHref,
+  } = useGlobalLimit();
   const isUnlimited = value === UNLIMITED_DAILY_LIMIT;
   const limit = Number(value);
   const tone =

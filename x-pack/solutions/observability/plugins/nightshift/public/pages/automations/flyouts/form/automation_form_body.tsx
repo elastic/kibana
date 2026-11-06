@@ -48,9 +48,6 @@ export const AutomationFormBody = ({
   usedToday,
   savedLimit,
   onRaiseLimit,
-  isGlobalLimitReached = false,
-  globalInvestigationLimit,
-  globalLimitSettingsHref,
   onChange,
 }: {
   values: AutomationFormValues;
@@ -62,9 +59,6 @@ export const AutomationFormBody = ({
   usedToday?: number;
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
-  isGlobalLimitReached?: boolean;
-  globalInvestigationLimit?: number;
-  globalLimitSettingsHref?: string;
   onChange: (changes: Partial<AutomationFormValues>) => void;
 }) => {
   const getActionForTrigger = (trigger?: TriggerFormValues): Partial<AutomationFormValues> => {
@@ -153,9 +147,6 @@ export const AutomationFormBody = ({
           savedLimit={savedLimit}
           onRaiseLimit={onRaiseLimit}
           readOnly={readOnly}
-          isGlobalLimitReached={isGlobalLimitReached}
-          globalInvestigationLimit={globalInvestigationLimit}
-          globalLimitSettingsHref={globalLimitSettingsHref}
         />
       </FormSection>
       <FormSection>
