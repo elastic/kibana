@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedServiceGroup } from '../../../common/service_groups';
@@ -95,7 +96,10 @@ function savedGroup(id: string, groupName: string, kuery: string): SavedServiceG
 }
 
 interface SearchParams {
-  apm: { events?: string[] };
+  apm: {
+    events?: string[];
+    sources?: Array<{ documentType: string; rollupInterval: string }>;
+  };
   query: { bool: { filter: unknown[]; must_not?: unknown[] } };
   aggs: Record<string, unknown>;
 }
@@ -294,7 +298,14 @@ describe('getServiceGroupingAttributes', () => {
     expect(attributes.ops).toEqual({});
 
     const savedCall = findSearchCall(search, 'get_service_grouping_saved_groups_for_service_map');
-    expect(savedCall.params.apm.events).toEqual([ProcessorEvent.transaction]);
+    expect(savedCall.params.apm).toEqual({
+      sources: [
+        {
+          documentType: ApmDocumentType.ServiceTransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+        },
+      ],
+    });
     expect(savedCall.params.query.bool.filter).toEqual([
       ...rangeQuery(START, END),
       ...environmentQuery('production'),
@@ -316,6 +327,29 @@ describe('getServiceGroupingAttributes', () => {
     });
   });
 
+  it('reads saved groups from transaction events when metrics are off', async () => {
+    const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: checkout');
+    const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
+      if (operationName === 'get_service_grouping_attributes_for_service_map') {
+        return namespacesPage([bucket('checkout', 'shop')]);
+      }
+      return savedGroupsPage({
+        'g-frontend': { services: { buckets: [{ key: 'checkout' }] } },
+      });
+    });
+
+    await getServiceGroupingAttributes(
+      makeOptions({
+        apmEventClient: { search } as unknown as APMEventClient,
+        searchAggregatedTransactions: false,
+        savedServiceGroups: [frontend],
+      })
+    );
+
+    const savedCall = findSearchCall(search, 'get_service_grouping_saved_groups_for_service_map');
+    expect(savedCall.params.apm.events).toEqual([ProcessorEvent.transaction]);
+  });
+
   it('does not query saved groups when none are passed', async () => {
     const search: SearchMock = jest
       .fn()
@@ -332,6 +366,68 @@ describe('getServiceGroupingAttributes', () => {
     expect(getSearchCall(search, 0).operationName).toBe(
       'get_service_grouping_attributes_for_service_map'
     );
+  });
+
+  it('does not query saved groups when the map is already a service group map', async () => {
+    const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: checkout');
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValue(namespacesPage([bucket('checkout', 'shop')]));
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({
+        apmEventClient: { search } as unknown as APMEventClient,
+        serviceGroupKuery: 'service.name: "checkout"',
+        savedServiceGroups: [frontend],
+      })
+    );
+
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(getSearchCall(search, 0).operationName).toBe(
+      'get_service_grouping_attributes_for_service_map'
+    );
+    expect(attributes.checkout).toEqual({ serviceNamespace: 'shop' });
+  });
+
+  it('skips a saved group with invalid kuery and keeps the rest', async () => {
+    const broken = savedGroup('g-broken', 'Broken', 'service.name: "');
+    const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: checkout');
+    const logger = makeLogger();
+    const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
+      if (operationName === 'get_service_grouping_attributes_for_service_map') {
+        return namespacesPage([bucket('checkout', 'shop')]);
+      }
+      return savedGroupsPage({
+        'g-frontend': { services: { buckets: [{ key: 'checkout' }] } },
+      });
+    });
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({
+        apmEventClient: { search } as unknown as APMEventClient,
+        logger,
+        savedServiceGroups: [broken, frontend],
+      })
+    );
+
+    expect(attributes.checkout).toEqual({
+      serviceNamespace: 'shop',
+      savedGroups: [{ id: 'g-frontend', name: 'Frontend' }],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipping saved service group "g-broken" with invalid kuery.',
+      { error: expect.any(Error) }
+    );
+    const savedCall = findSearchCall(search, 'get_service_grouping_saved_groups_for_service_map');
+    expect(savedCall.params.aggs).toMatchObject({
+      service_groups: {
+        filters: {
+          filters: {
+            'g-frontend': kqlQuery(frontend.kuery)[0],
+          },
+        },
+      },
+    });
   });
 
   it('lists a service that only appears through a saved group', async () => {

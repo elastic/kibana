@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedServiceGroup } from '../../../common/service_groups';
@@ -15,6 +16,7 @@ import {
   SERVICE_NAMESPACE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { IEnvOptions } from './get_service_map';
 import { extractEsQueryFilters } from './extract_es_query_filters';
 import { recordByService } from './record_by_service';
@@ -64,8 +66,8 @@ type GetServiceGroupingAttributesOptions = IEnvOptions & {
  * events, and which saved service groups match it. Metric rollups do not carry the
  * namespace fields. One value per namespace field per service. A service with neither
  * namespace is still listed. Services are read in pages so a large estate does not pass
- * Elasticsearch's bucket limit. Saved groups use one filters aggregation, like the
- * service-group counts API.
+ * Elasticsearch's bucket limit. Saved groups use one filters aggregation on
+ * service-transaction metrics when available, like the service-group counts API.
  */
 export async function getServiceGroupingAttributes(
   options: GetServiceGroupingAttributesOptions
@@ -181,7 +183,9 @@ async function getNamespaceAttributes({
 
 /**
  * Matches services to saved groups with one filters aggregation (filter key = group id).
- * Skipped when the caller passes no groups — including when the map is already a group map.
+ * Skipped when the caller passes no groups, or when the map is already a group map.
+ * Uses service-transaction metrics when available — same fields as the counts API, and
+ * cheaper than a second raw transaction scan next to the namespace composite.
  */
 async function getSavedGroupMembership({
   environment,
@@ -189,35 +193,53 @@ async function getSavedGroupMembership({
   start,
   end,
   maxNumberOfServices,
+  serviceGroupKuery,
+  searchAggregatedTransactions,
   kuery,
   esQuery,
+  logger,
   savedServiceGroups = [],
 }: GetServiceGroupingAttributesOptions): Promise<Map<string, ServiceGroupingSavedGroup[]>> {
   const membership = new Map<string, ServiceGroupingSavedGroup[]>();
-  if (savedServiceGroups.length === 0) {
+  if (savedServiceGroups.length === 0 || serviceGroupKuery) {
     return membership;
   }
 
   const groupById = new Map<string, SavedServiceGroup>();
   const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> = {};
   for (const group of savedServiceGroups) {
-    const filter = kqlQuery(group.kuery)[0];
-    if (!filter) {
-      continue;
+    try {
+      const filter = kqlQuery(group.kuery)[0];
+      if (!filter) {
+        continue;
+      }
+      serviceGroupsKueryMap[group.id] = filter;
+      groupById.set(group.id, group);
+    } catch (error) {
+      logger.debug(`Skipping saved service group "${group.id}" with invalid kuery.`, { error });
     }
-    serviceGroupsKueryMap[group.id] = filter;
-    groupById.set(group.id, group);
   }
   if (Object.keys(serviceGroupsKueryMap).length === 0) {
     return membership;
   }
 
   const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
+  const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
+  const useMetrics = processorEvent === ProcessorEvent.metric;
 
   const response = await apmEventClient.search(
     'get_service_grouping_saved_groups_for_service_map',
     {
-      apm: { events: [ProcessorEvent.transaction] },
+      apm: useMetrics
+        ? {
+            sources: [
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+              },
+            ],
+          }
+        : { events: [processorEvent] },
       track_total_hits: false,
       size: 0,
       query: {

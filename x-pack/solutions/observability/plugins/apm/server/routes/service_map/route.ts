@@ -124,18 +124,18 @@ const serviceMapRoute = createApmServerRoute({
       : { enabled: false };
 
     // Saved-group matching is only for the full map. A service group's own map skips it.
-    const savedServiceGroups =
+    const [savedServiceGroups, searchAggregatedTransactions] = await Promise.all([
       grouping.enabled && !serviceName && !serviceGroupId
-        ? await getServiceGroups({ savedObjectsClient })
-        : [];
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery,
-    });
+        ? getServiceGroups({ savedObjectsClient })
+        : Promise.resolve([]),
+      getSearchTransactionsEvents({
+        apmEventClient,
+        config,
+        start,
+        end,
+        kuery,
+      }),
+    ]);
 
     return getServiceMap({
       mlClient,
