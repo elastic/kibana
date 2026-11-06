@@ -17,7 +17,6 @@ import type {
   BulkResponse,
   DataClient,
   ExecutionsCountRequest,
-  ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
@@ -75,15 +74,6 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       },
       logger: this.deps.logger,
       fallbackIndexes: [this.deps.indexName],
-    });
-  }
-
-  public async deleteByQuery(
-    request: ExecutionsDeleteByQueryRequest
-  ): Promise<estypes.DeleteByQueryResponse> {
-    return this.deps.esClient.deleteByQuery({
-      ...request,
-      index: this.deps.indexName,
     });
   }
 

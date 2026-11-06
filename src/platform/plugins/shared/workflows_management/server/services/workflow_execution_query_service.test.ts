@@ -95,6 +95,33 @@ describe('WorkflowExecutionQueryService', () => {
       expect(must[1].bool.should[0]).toEqual({ term: { spaceId: 'my-space' } });
     });
 
+    it('filters by workflowUid instead of workflowId when the current document uid is set', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', workflowUid: 'uid-current' },
+        'my-space'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must[0]).toEqual({ term: { workflowUid: 'uid-current' } });
+      expect(JSON.stringify(must)).not.toContain('workflowId');
+    });
+
+    it('leaves the global executions view unfiltered by workflowUid', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.searchExecutionsView(
+        { query: { term: { workflowId: 'wf-1' } }, includeManagedExecutions: true },
+        'my-space'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(JSON.stringify(call.query)).not.toContain('workflowUid');
+      expect(call.query.bool.must).toContainEqual({ term: { workflowId: 'wf-1' } });
+    });
+
     it('adds status filter when statuses provided', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 

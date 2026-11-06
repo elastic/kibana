@@ -119,11 +119,9 @@ const makeDeps = (
   } as unknown as WorkflowValidationService;
   const workflowExecutionsDataClient = {
     refresh: jest.fn().mockResolvedValue(undefined),
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
     refresh: jest.fn().mockResolvedValue(undefined),
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
     getSpaceId: () => 'default',
@@ -1024,12 +1022,12 @@ describe('WorkflowCrudService', () => {
       client.search
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         })
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
@@ -1054,9 +1052,36 @@ describe('WorkflowCrudService', () => {
           refresh: true,
           if_seq_no: 7,
           if_primary_term: 2,
-          document: expect.objectContaining({ version: 5 }),
+          document: expect.objectContaining({ version: 5, workflowUid: 'uid-kept' }),
         })
       );
+    });
+
+    it('overwrite=true does not assign a workflowUid when the stored document has none', async () => {
+      const { deps, client } = makeDeps();
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      const indexed = client.index.mock.calls[0][0].document;
+      expect(indexed.workflowUid).toBeUndefined();
     });
 
     it('overwrite=true resurrects a soft-deleted tombstone in the same space', async () => {
@@ -3533,7 +3558,6 @@ describe('WorkflowCrudService force deletion access', () => {
       }
       expect(client.index).not.toHaveBeenCalled();
       expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
-      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     }
   });
 });
@@ -3660,7 +3684,7 @@ describe('batched ordinary workflow deletion', () => {
     );
   });
 
-  it('bounds hard-delete concurrency and shares execution-data cleanup across the batch', async () => {
+  it('bounds hard-delete concurrency across the batch and leaves executions', async () => {
     const core = {
       ...coreMock.createStart(),
       elasticsearch: elasticsearchServiceMock.createStart(),
@@ -3686,8 +3710,6 @@ describe('batched ordinary workflow deletion', () => {
     expect(maximum).toBeGreaterThan(1);
     expect(maximum).toBeLessThanOrEqual(10);
     expect(client.search).toHaveBeenCalledTimes(1);
-    expect(deps.workflowExecutionsDataClient.deleteByQuery).toHaveBeenCalledTimes(1);
-    expect(deps.stepExecutionsDataClient.deleteByQuery).toHaveBeenCalledTimes(1);
   });
 
   it('does not retry a bulk deletion against a concurrently changed definition', async () => {
@@ -4390,7 +4412,7 @@ describe('managed orphan cleanup without a request', () => {
     };
 
     it('deletes the observed revision of a bound orphan and leaves its binding', async () => {
-      const { core, bindings, client, service } = setup();
+      const { core, bindings, client, deps, service } = setup();
 
       await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
         true

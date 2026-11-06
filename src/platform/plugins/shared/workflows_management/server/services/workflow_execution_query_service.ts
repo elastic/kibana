@@ -197,7 +197,11 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
-      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
+      ...(params.workflowUid
+        ? [{ term: { workflowUid: params.workflowUid } }]
+        : params.workflowId
+        ? [{ term: { workflowId: params.workflowId } }]
+        : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
       ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
@@ -392,7 +396,8 @@ export class WorkflowExecutionQueryService {
     return searchStepExecutions({
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      workflowId: params.workflowId,
+      workflowId: params.workflowUid ? undefined : params.workflowId,
+      workflowUid: params.workflowUid,
       stepId: params.stepId,
       stepType: params.stepType,
       additionalQuery: workflowRunFilter || undefined,

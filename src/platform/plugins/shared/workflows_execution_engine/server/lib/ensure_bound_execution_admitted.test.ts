@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { ensureBoundExecutionAdmitted } from './ensure_bound_execution_admitted';
 
 const execution: Partial<EsWorkflowExecution> = {
@@ -29,36 +29,51 @@ describe('ensureBoundExecutionAdmitted', () => {
     isWorkflowEnabledRealtime: jest.fn(),
     isManagedChildAdmissibleRealtime: jest.fn(),
   };
-  const executions = { discardUnstartedExecution: jest.fn() };
+  const executions = { updateWorkflowExecution: jest.fn() };
 
   beforeEach(() => {
     workflows.isWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
     workflows.isManagedChildAdmissibleRealtime.mockReset().mockResolvedValue(true);
-    executions.discardUnstartedExecution.mockReset().mockResolvedValue(undefined);
+    executions.updateWorkflowExecution.mockReset().mockResolvedValue(undefined);
   });
 
   it('requires live managed eligibility and allows global definitions for inheritance', async () => {
     await ensureBoundExecutionAdmitted(execution, workflows, executions);
     expect(workflows.isManagedChildAdmissibleRealtime).toHaveBeenCalledWith('child', 'default');
     expect(workflows.isWorkflowEnabledRealtime).not.toHaveBeenCalled();
-    expect(executions.discardUnstartedExecution).not.toHaveBeenCalled();
+    expect(executions.updateWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  it('discards an ineligible inherited execution before it can be scheduled', async () => {
+  it('skips an ineligible inherited execution before it can be scheduled', async () => {
     workflows.isManagedChildAdmissibleRealtime.mockResolvedValue(false);
     await expect(ensureBoundExecutionAdmitted(execution, workflows, executions)).rejects.toThrow(
       'Child workflow child must exist, be managed, enabled, valid, and available in space default'
     );
-    expect(executions.discardUnstartedExecution).toHaveBeenCalledWith('child-execution', 'default');
+    expect(executions.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'child-execution',
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: expect.stringContaining('Child workflow child must exist'),
+        cancelledBy: 'system',
+      }),
+      { refresh: 'wait_for' }
+    );
   });
 
-  it('discards the execution and propagates a failed eligibility lookup', async () => {
+  it('skips the execution and propagates a failed eligibility lookup', async () => {
     const error = new Error('storage unavailable');
     workflows.isManagedChildAdmissibleRealtime.mockRejectedValue(error);
     await expect(ensureBoundExecutionAdmitted(execution, workflows, executions)).rejects.toBe(
       error
     );
-    expect(executions.discardUnstartedExecution).toHaveBeenCalledWith('child-execution', 'default');
+    expect(executions.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'child-execution',
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: 'storage unavailable',
+      }),
+      { refresh: 'wait_for' }
+    );
   });
 
   it('preserves ordinary caller execution without a binding check', async () => {

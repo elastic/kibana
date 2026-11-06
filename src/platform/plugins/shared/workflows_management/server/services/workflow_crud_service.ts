@@ -1281,12 +1281,7 @@ export class WorkflowCrudService {
     }
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
-        force: options?.force ?? false,
-        spaceId,
         taskScheduler: this.deps.getTaskScheduler(),
-        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-        stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
-        logger: this.deps.logger,
       });
     return result;
   }
@@ -1375,7 +1370,6 @@ export class WorkflowCrudService {
         ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       getWorkflowExecutions: (params, sp) =>
@@ -1592,16 +1586,21 @@ export class WorkflowCrudService {
     prepared: WorkflowProperties,
     existing: WorkflowProperties
   ): WorkflowProperties {
-    return applyWorkflowVersion(
-      {
-        ...prepared,
-        created_at: existing.created_at,
-        createdBy: existing.createdBy,
-        owner_id: existing.owner_id,
-        access_control: existing.access_control,
-      },
-      existing
-    );
+    const document: WorkflowProperties = {
+      ...prepared,
+      created_at: existing.created_at,
+      createdBy: existing.createdBy,
+      owner_id: existing.owner_id,
+      access_control: existing.access_control,
+    };
+    // A rewrite generates a uid. Keep the stored one, and leave a document that
+    // never had one linked by workflow id.
+    if (existing.workflowUid) {
+      document.workflowUid = existing.workflowUid;
+    } else {
+      delete document.workflowUid;
+    }
+    return applyWorkflowVersion(document, existing);
   }
 
   private async executeBulkOverwrite(

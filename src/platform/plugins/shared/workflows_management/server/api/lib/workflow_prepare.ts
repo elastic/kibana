@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import type { Logger } from '@kbn/logging';
 import {
   collectIgnoredKibanaFetcherOccurrences,
@@ -115,6 +116,8 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
   nameFallback?: string;
   logger?: Logger;
   warnIgnoredKibanaFetcher?: boolean;
+  /** Preserved across a full-document rewrite. Assigned when omitted. */
+  workflowUid?: string;
 }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
@@ -127,6 +130,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     nameFallback,
     logger,
     warnIgnoredKibanaFetcher = false,
+    workflowUid,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -180,6 +184,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
+    workflowUid: workflowUid ?? randomUUID(),
     version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),

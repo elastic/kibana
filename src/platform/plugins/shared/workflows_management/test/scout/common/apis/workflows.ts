@@ -47,11 +47,11 @@ export class WorkflowsApiService {
   constructor(private readonly spaceId: string, private readonly kbnClient: KbnClient) {}
 
   /** POST /api/workflows/workflow — create a single workflow from YAML. */
-  async create(yaml: string): Promise<WorkflowDetailDto> {
+  async create(yaml: string, id?: string): Promise<WorkflowDetailDto> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/workflow`,
-      body: { yaml },
+      body: id ? { yaml, id } : { yaml },
     });
     return response.data;
   }

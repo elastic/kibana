@@ -525,6 +525,37 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.name).toBe('From YAML');
   });
 
+  it('assigns a workflowUid when the caller does not pass one', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: 'name: New document\nenabled: true',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.workflowUid).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    );
+  });
+
+  it('preserves a caller-supplied workflowUid', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: 'name: Existing document\nenabled: true',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      workflowUid: 'uid-kept',
+    });
+
+    expect(result.workflowData.workflowUid).toBe('uid-kept');
+  });
+
   it('logs once when kibana YAML still includes fetcher', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;

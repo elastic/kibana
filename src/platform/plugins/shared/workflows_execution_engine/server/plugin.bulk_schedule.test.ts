@@ -12,7 +12,7 @@ import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 jest.mock('./repositories/data_access_layer', () => {
   const actual = jest.requireActual('./repositories/data_access_layer');
@@ -34,14 +34,14 @@ jest.mock('./lib/get_user', () => ({
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
-const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
+const mockUpdateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
     getWorkflowExecutionById: mockGetWorkflowExecutionById,
-    discardUnstartedExecution: mockDiscardUnstartedExecution,
+    updateWorkflowExecution: mockUpdateWorkflowExecution,
   })),
 }));
 
@@ -147,7 +147,7 @@ describe('bulkScheduleWorkflow', () => {
 
     coreStart = coreMock.createStart();
     mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
-    mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
+    mockUpdateWorkflowExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
     taskManager.schedule.mockImplementation(async (task) => task as any);
     taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
@@ -250,7 +250,10 @@ describe('bulkScheduleWorkflow', () => {
       mockIsWorkflowEnabledRealtime.mockResolvedValue(false);
       gate.resolve(true);
       await rejected;
-      expect(mockDiscardUnstartedExecution).toHaveBeenCalledWith(expect.any(String), 'default');
+      expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.SKIPPED, cancelledBy: 'system' }),
+        { refresh: 'wait_for' }
+      );
       expect(taskManager.schedule).not.toHaveBeenCalled();
     }
   );
@@ -270,16 +273,19 @@ describe('bulkScheduleWorkflow', () => {
     // A deletion starting now must find the pending execution in its post-disable search.
     expect(searchable).toBe(true);
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-    expect(mockDiscardUnstartedExecution).not.toHaveBeenCalled();
+    expect(mockUpdateWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  it('fails closed and removes the unstarted run if the final workflow read fails', async () => {
+  it('fails closed and skips the run if the final workflow read fails', async () => {
     const workflow = enableBoundWorkflow();
     mockIsWorkflowEnabledRealtime.mockRejectedValueOnce(new Error('workflow store unavailable'));
     await expect(
       pluginStart.executeWorkflow(workflow, { spaceId: 'default' }, request)
     ).rejects.toThrow('workflow store unavailable');
-    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.SKIPPED }),
+      { refresh: 'wait_for' }
+    );
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
@@ -293,7 +299,10 @@ describe('bulkScheduleWorkflow', () => {
         request
       )
     ).rejects.toThrow('Workflow is disabled');
-    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.SKIPPED }),
+      { refresh: 'wait_for' }
+    );
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
@@ -311,7 +320,10 @@ describe('bulkScheduleWorkflow', () => {
     expect(result).toEqual([
       { status: 'error', error: { message: expect.stringContaining('Workflow is disabled') } },
     ]);
-    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.SKIPPED }),
+      { refresh: 'wait_for' }
+    );
     expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
   });
 

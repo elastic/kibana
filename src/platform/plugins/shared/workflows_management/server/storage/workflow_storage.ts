@@ -59,6 +59,8 @@ const storageSettings = {
       definitionHash: types.keyword({ index: false }),
       managedTemplateValues: types.object({ enabled: false }),
       originManagedWorkflowId: types.keyword({}),
+      // Document lifetime. History reads filter on this; workflowId stays the stable name.
+      workflowUid: types.keyword({}),
       lifecycle: types.keyword({}),
       managedVisibilityContexts: types.keyword({}),
       updated_at: types.date({}), // We sort by this
@@ -93,6 +95,8 @@ export interface WorkflowProperties extends WorkflowAccessSubject {
   definitionHash?: string | null;
   managedTemplateValues?: Record<string, unknown> | null;
   originManagedWorkflowId?: string | null;
+  /** UUID for this document. A new document, including one that reuses `workflowId`, gets a new value. */
+  workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   managedVisibilityContexts?: string[];
   deleted_at: Date | null;

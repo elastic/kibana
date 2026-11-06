@@ -233,6 +233,29 @@ describe('logWorkflowChanges', () => {
     );
   });
 
+  it('writes metadata.workflowUid and splits a batch when documents have different uids', async () => {
+    await logChanges({
+      workflows: [
+        { id: 'wf-a', document: makeDocument({ version: 2, workflowUid: 'uid-a' }) },
+        { id: 'wf-b', document: makeDocument({ version: 3, workflowUid: 'uid-b' }) },
+      ],
+    });
+
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(2);
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [expect.objectContaining({ objectId: 'wf-a', sequence: 2 })],
+      expect.objectContaining({
+        data: { metadata: { workflowUid: 'uid-a' } },
+      })
+    );
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [expect.objectContaining({ objectId: 'wf-b', sequence: 3 })],
+      expect.objectContaining({
+        data: { metadata: { workflowUid: 'uid-b' } },
+      })
+    );
+  });
+
   it('passes correlationId for bulk operations', async () => {
     await logChanges({ correlationId: 'bulk-123' });
 
