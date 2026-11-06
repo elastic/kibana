@@ -10,6 +10,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { preprocessDocumentInputs } from './preprocess_document_inputs';
+import { WorkflowForbiddenError } from '../../../workflow_forbidden_error';
+import { WorkflowTriggerForbiddenError } from '../../../workflow_trigger_forbidden_error';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
@@ -265,10 +267,55 @@ describe('preprocessDocumentInputs', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    // A 5xx, a timeout or a rejection under load is an Elasticsearch problem the caller cannot fix
-    // and must not read as bad input.
+    // A 403 from every sub-search means the user may not search at all, which must stay a 403,
+    // not a 400.
+    it('surfaces a 403 from every index search as a forbidden error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('action [indices:data/read/search] is unauthorized', 403)],
+      });
+
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerForbiddenError);
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('treats a mix of 403 and other 4xx sub-search failures as a server error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [
+          msearchError('no such remote cluster', 404),
+          msearchError('action [indices:data/read/search] is unauthorized', 403),
+        ],
+      });
+
+      const result = preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'remote:logs' },
+              { _id: 'doc-2', _index: 'logs-b' },
+            ],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowForbiddenError);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    // A 5xx, a timeout, a rejection under load or a cluster credentials failure is an
+    // Elasticsearch problem the caller cannot fix and must not read as bad input.
     it.each([
       ['a 5xx', 500],
+      ['a 401 credentials failure', 401],
       ['a 408 timeout', 408],
       ['a 429 rejection under load', 429],
     ])('surfaces %s from every index search as a server error', async (_name, status) => {
