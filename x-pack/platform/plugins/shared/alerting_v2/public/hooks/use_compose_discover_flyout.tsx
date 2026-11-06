@@ -11,7 +11,7 @@ import type {
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
 import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
-import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -24,6 +24,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyRuleBuilderRegistrations } from '../rule_builder_registration';
+import { ruleBuilderRegistry } from '../rule_builder_registry';
 import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useAlertingLocators } from '../application/locator_context';
@@ -236,7 +237,7 @@ export const useComposeDiscoverFlyout = ({
   const openCreateBuilderFlyout = useCallback(
     (type: string) => {
       const open = () => {
-        if (!RULE_BUILDER_REGISTRY[type]) {
+        if (!ruleBuilderRegistry.has(type)) {
           notifications.toasts.addWarning({
             title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderTitle', {
               defaultMessage: 'Unknown rule builder type',
@@ -257,7 +258,7 @@ export const useComposeDiscoverFlyout = ({
         openSession('create');
       };
 
-      if (RULE_BUILDER_REGISTRY[type]) {
+      if (ruleBuilderRegistry.has(type)) {
         open();
         return;
       }
@@ -344,6 +345,7 @@ export const useComposeDiscoverFlyout = ({
       stackedOnPicker={stackedOnPicker}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
+      ruleBuilderRegistry={ruleBuilderRegistry}
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload) =>

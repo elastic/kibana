@@ -16,15 +16,15 @@ export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
 // Rule Builder registry
-export {
-  RULE_BUILDER_REGISTRY,
-  registerRuleBuilder,
-  getRuleBuilderCreateOptions,
-  useBuilderState,
-} from './flyout/compose_discover/rule_builder';
+export { RuleBuilderRegistry } from './flyout/compose_discover/rule_builder';
 export type {
+  RuleBuilderRegistryContract,
+  RuleBuilderCreateCard,
   RuleBuilderDefinition,
   RuleBuilderCreateOption,
+  RuleBuilderStepProps,
+  RuleBuilderRecoveryStepProps,
+  BuilderStateProps,
   BuilderStateUpdateOptions,
 } from './flyout/compose_discover/rule_builder';
 export type { BuilderState } from './flyout/compose_discover/rule_builder';

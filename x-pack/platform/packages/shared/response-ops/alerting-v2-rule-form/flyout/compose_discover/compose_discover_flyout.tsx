@@ -57,11 +57,12 @@ import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { SandboxSettingsMenu } from './sandbox_settings_menu';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import {
-  RULE_BUILDER_REGISTRY,
   BuilderStateProvider,
   parseDiscoverQueryForBuilder,
   type BuilderState,
   type BuilderStateUpdateOptions,
+  type RuleBuilderDefinition,
+  type RuleBuilderRegistryContract,
 } from './rule_builder';
 import { useEuiFlyoutReregister } from './use_eui_flyout_reregister';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab } from './types';
@@ -185,10 +186,12 @@ const getQuerySandboxTitle = (isBuilderMode: boolean) =>
 const getFlyoutTitle = ({
   mode,
   builderType,
+  builderDefinition,
   ruleName,
 }: {
   mode: ComposeDiscoverMode;
   builderType?: string;
+  builderDefinition?: RuleBuilderDefinition;
   ruleName?: string;
 }): string => {
   if (mode === 'clone') {
@@ -205,9 +208,7 @@ const getFlyoutTitle = ({
     });
   }
   if (builderType) {
-    return (
-      RULE_BUILDER_REGISTRY[builderType]?.createOption?.flyoutTitle ?? CREATE_RULE_FALLBACK_TITLE
-    );
+    return builderDefinition?.createOption?.flyoutTitle ?? CREATE_RULE_FALLBACK_TITLE;
   }
   return CREATE_ESQL_TITLE;
 };
@@ -248,6 +249,7 @@ export interface ComposeDiscoverFlyoutProps {
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
+  ruleBuilderRegistry: RuleBuilderRegistryContract;
   initialBuilderState?: BuilderState;
   /** Pre-populated ES|QL query (e.g. from Discover). Seeds the base query in create mode. */
   initialQuery?: string;
@@ -334,6 +336,7 @@ export function ComposeDiscoverFlyout({
   onUpdateRule,
   isSaving = false,
   builderType,
+  ruleBuilderRegistry,
   initialBuilderState,
   initialQuery,
   esqlVariables,
@@ -342,6 +345,7 @@ export function ComposeDiscoverFlyout({
   stackedOnPicker = false,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
+  const builderDefinition = builderType ? ruleBuilderRegistry.get(builderType) : undefined;
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
    * In edit mode, seed the sandbox draft with the rule's existing query so the
@@ -426,8 +430,7 @@ export function ComposeDiscoverFlyout({
     if (!builderType) return undefined;
     if (initialBuilderState !== undefined) return initialBuilderState;
     if (initialParsedState) return initialParsedState;
-    const definition = RULE_BUILDER_REGISTRY[builderType];
-    return definition ? definition.createDefaultState() : undefined;
+    return builderDefinition ? builderDefinition.createDefaultState() : undefined;
   });
 
   const validationErrors = inlineResult.unresolved;
@@ -977,7 +980,12 @@ export function ComposeDiscoverFlyout({
   const isEditing = mode === 'edit';
   /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
   const supportsUnifiedEditorToggle = isCreate || isEditing;
-  const title = getFlyoutTitle({ mode, builderType, ruleName: watchedRuleName });
+  const title = getFlyoutTitle({
+    mode,
+    builderType,
+    builderDefinition,
+    ruleName: watchedRuleName,
+  });
   /*
    * EUI re-registers the session whenever flyoutMenuProps.title changes, which
    * closes this flyout and the query sandbox. The heading follows the rule
@@ -985,7 +993,7 @@ export function ComposeDiscoverFlyout({
    */
   const sessionTitleRef = useRef(title);
 
-  const { steps } = getSteps(isAlert, builderType);
+  const { steps } = getSteps(isAlert, builderType, builderDefinition);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -1143,8 +1151,7 @@ export function ComposeDiscoverFlyout({
       return;
     }
     if (builderType) {
-      const definition = RULE_BUILDER_REGISTRY[builderType];
-      if (definition?.validate && !definition.validate(uiState, builderState)) {
+      if (builderDefinition?.validate && !builderDefinition.validate(uiState, builderState)) {
         return;
       }
     }
@@ -1599,6 +1606,7 @@ export function ComposeDiscoverFlyout({
                       onKindChange={handleKindChange}
                       isEditing={isEditing}
                       builderType={builderType}
+                      builderDefinition={builderDefinition}
                     />
                   </BuilderStateProvider>
                 </>

@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { RuleCreateOptionsPanel } from '../components/rule_create_options/rule_create_options_panel';
 import { queueRuleBuilderRegistration } from '../rule_builder_registration';
 
@@ -53,12 +52,7 @@ describe('useRuleBuilderCreateOptions', () => {
     queueRuleBuilderRegistration(laterBuilder);
   });
 
-  afterAll(() => {
-    delete RULE_BUILDER_REGISTRY['earlier-builder'];
-    delete RULE_BUILDER_REGISTRY['later-builder'];
-  });
-
-  it('shows builders queued before the form package loads, in order, and opens the selected type', async () => {
+  it('shows builders registered through the plugin contract, in order, and opens the selected type', async () => {
     const onCreateBuilderRule = jest.fn();
 
     render(

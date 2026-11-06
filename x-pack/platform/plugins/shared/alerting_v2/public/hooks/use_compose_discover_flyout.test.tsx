@@ -23,11 +23,20 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     capturedFlyoutProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
-  RULE_BUILDER_REGISTRY: {
-    threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
+  RuleBuilderRegistry: class {
+    public register() {}
+    public has(type: string) {
+      return type === 'threshold';
+    }
+    public get(type: string) {
+      return type === 'threshold'
+        ? { parseState: (...args: unknown[]) => mockParseState(...args) }
+        : undefined;
+    }
+    public getCreateOptions() {
+      return [];
+    }
   },
-  registerRuleBuilder: jest.fn(),
-  getRuleBuilderCreateOptions: () => [],
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({

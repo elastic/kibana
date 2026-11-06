@@ -6,21 +6,22 @@
  */
 
 import { useEffect, useState } from 'react';
-import { getRuleBuilderCreateOptions } from '@kbn/alerting-v2-rule-form';
+import type { RuleBuilderCreateCard } from '@kbn/alerting-v2-rule-form';
 import { applyRuleBuilderRegistrations } from '../rule_builder_registration';
+import { ruleBuilderRegistry } from '../rule_builder_registry';
 
-export type RuleBuilderCreateCard = ReturnType<typeof getRuleBuilderCreateOptions>[number];
+export type { RuleBuilderCreateCard };
 
 export const useRuleBuilderCreateOptions = (): RuleBuilderCreateCard[] => {
-  const [options, setOptions] = useState(getRuleBuilderCreateOptions);
+  const [options, setOptions] = useState(() => ruleBuilderRegistry.getCreateOptions());
 
   useEffect(() => {
     let cancelled = false;
-    void applyRuleBuilderRegistrations().then(() => {
+    void applyRuleBuilderRegistrations().then((registry) => {
       if (cancelled) {
         return;
       }
-      const next = getRuleBuilderCreateOptions();
+      const next = registry.getCreateOptions();
       setOptions((current) =>
         current.length === next.length &&
         current.every((option, index) => option.type === next[index]?.type)
