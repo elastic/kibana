@@ -94,6 +94,9 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
+        getIsSelected: jest.fn(() => false),
+        getIsSomeSelected: jest.fn(() => false),
+        getCanSelect: jest.fn(() => true),
       } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
@@ -126,6 +129,9 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
+        getIsSelected: jest.fn(() => false),
+        getIsSomeSelected: jest.fn(() => false),
+        getCanSelect: jest.fn(() => true),
       } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
@@ -165,6 +171,9 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
+          getIsSelected: jest.fn(() => false),
+          getIsSomeSelected: jest.fn(() => false),
+          getCanSelect: jest.fn(() => true),
         } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           childPropsSpy(props);
@@ -229,6 +238,9 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
+          getIsSelected: jest.fn(() => false),
+          getIsSomeSelected: jest.fn(() => false),
+          getCanSelect: jest.fn(() => true),
         } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           capturedVirtualizerController = props.virtualizerController;

@@ -28,6 +28,9 @@ describe('cascade row utils', () => {
     getParentRows: jest.fn(),
     getToggleSelectedHandler: jest.fn(),
     getToggleExpandedHandler: jest.fn(),
+    getIsSelected: jest.fn(() => false),
+    getIsSomeSelected: jest.fn(() => false),
+    getCanSelect: jest.fn(() => true),
   };
 
   // TODO: implement mock for getParentRows
