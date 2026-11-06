@@ -83,7 +83,7 @@ export const AccessSummary = ({ state, operations, copy }: AccessSummaryProps) =
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon
-                  type={isAllowed ? 'check' : 'cross'}
+                  type={isAllowed ? 'check' : 'minusCircle'}
                   color={isAllowed ? 'success' : 'subdued'}
                   aria-label={
                     isAllowed

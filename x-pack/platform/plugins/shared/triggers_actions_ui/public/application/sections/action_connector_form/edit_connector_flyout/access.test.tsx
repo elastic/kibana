@@ -150,6 +150,7 @@ describe('EditConnectorFlyout with object-level security (OLS)', () => {
     expect(await screen.findByTestId('accessConnectorTab')).toBeInTheDocument();
     expect(await screen.findByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
     expect(screen.queryByTestId('connectorReadOnlyAccessCallout')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('nameInput')).not.toHaveAttribute('readonly');
   });
 
   it('hides Save and shows the read-only callout to people who cannot edit', async () => {
@@ -159,6 +160,12 @@ describe('EditConnectorFlyout with object-level security (OLS)', () => {
     expect(await screen.findByTestId('connectorReadOnlyAccessCallout')).toBeInTheDocument();
     expect(screen.getByTestId('accessConnectorTab')).toBeInTheDocument();
     expect(screen.queryByTestId('edit-connector-flyout-save-btn')).not.toBeInTheDocument();
+    const nameInput = await screen.findByTestId('nameInput');
+    expect(nameInput).toHaveAttribute('readonly');
+    expect(nameInput).not.toBeDisabled();
+    expect(await screen.findByTestId('test-connector-text-field')).toHaveAttribute('readonly');
+    await userEvent.type(nameInput, 'Updated name');
+    expect(nameInput).toHaveValue(connector.name);
   });
 
   it('renders the access panel on the Access tab without the configuration Save button', async () => {

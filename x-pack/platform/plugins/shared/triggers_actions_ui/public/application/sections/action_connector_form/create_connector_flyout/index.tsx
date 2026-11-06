@@ -58,6 +58,7 @@ import { ConnectorForm } from '../connector_form';
 import { useConnectorCreateForm } from '../use_connector_create_form';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorAccessSection } from '../connector_access/connector_access_section';
+import { ConnectorFormTabs } from '../connector_form_tabs';
 import { ConnectorContext } from '../../../context/connector_context';
 import { EditConnectorFlyoutContent } from '../edit_connector_flyout';
 import { FlyoutHeader } from './header';
@@ -119,6 +120,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   // created with that access in one request.
   const accessPolicy = useAccessPolicy(services.http, 'action');
   const [accessDraft, setAccessDraft] = useState<AccessDraft>();
+  const [selectedTab, setSelectedTab] = useState(EditConnectorTabs.Configuration);
   useEffect(() => {
     if (accessPolicy.data?.enabled) {
       setAccessDraft({
@@ -162,6 +164,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
+  const showAccessTab = hasConnectorTypeSelected && accessPolicy.data?.enabled && !!accessDraft;
+  const isAccessTabSelected = showAccessTab && selectedTab === EditConnectorTabs.Access;
   const isTestable = isConnectorTypeTestable(actionType ?? undefined);
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
@@ -216,7 +220,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
   };
 
-  const resetActionType = useCallback(() => setActionType(null), []);
+  const resetActionType = useCallback(() => {
+    setSelectedTab(EditConnectorTabs.Configuration);
+    setActionType(null);
+  }, []);
 
   const [connectorToTest, setConnectorToTest] = useState<ActionConnector | null>(null);
   const [editTab, setEditTab] = useState(EditConnectorTabs.Test);
@@ -228,6 +235,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     const createdConnector = await validateAndCreateConnector();
 
     if (!createdConnector) {
+      setSelectedTab(EditConnectorTabs.Configuration);
       return;
     }
 
@@ -270,35 +278,37 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
-    if (createdConnector) {
-      if (onConnectorCreated) {
-        onConnectorCreated(createdConnector);
-      }
-
-      if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
-        let connectorForEdit = createdConnector;
-        try {
-          const rotated = await rotateIngress(createdConnector.id);
-          connectorForEdit = {
-            ...createdConnector,
-            secrets: { ingestToken: rotated.ingestToken },
-          } as ActionConnector;
-        } catch {
-          // Danger toast is shown by the rotate hook. Edit the connector that was created.
-        }
-        setEditTab(EditConnectorTabs.Configuration);
-        setConnectorToTest(connectorForEdit);
-        return;
-      }
-
-      if (connectorTypePublishesKeys(createdConnector.actionTypeId)) {
-        setEditTab(EditConnectorTabs.Configuration);
-        setConnectorToTest(createdConnector);
-        return;
-      }
-
-      onClose();
+    if (!createdConnector) {
+      setSelectedTab(EditConnectorTabs.Configuration);
+      return;
     }
+    if (onConnectorCreated) {
+      onConnectorCreated(createdConnector);
+    }
+
+    if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
+      let connectorForEdit = createdConnector;
+      try {
+        const rotated = await rotateIngress(createdConnector.id);
+        connectorForEdit = {
+          ...createdConnector,
+          secrets: { ingestToken: rotated.ingestToken },
+        } as ActionConnector;
+      } catch {
+        // Danger toast is shown by the rotate hook. Edit the connector that was created.
+      }
+      setEditTab(EditConnectorTabs.Configuration);
+      setConnectorToTest(connectorForEdit);
+      return;
+    }
+
+    if (connectorTypePublishesKeys(createdConnector.actionTypeId)) {
+      setEditTab(EditConnectorTabs.Configuration);
+      setConnectorToTest(createdConnector);
+      return;
+    }
+
+    onClose();
   }, [
     validateAndCreateConnector,
     onClose,
@@ -427,6 +437,15 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             ? docLinks.links.alerting.agentBuilderConnectors
             : undefined
         }
+        tabs={
+          showAccessTab ? (
+            <ConnectorFormTabs
+              tabs={[EditConnectorTabs.Configuration, EditConnectorTabs.Access]}
+              selectedTab={selectedTab}
+              setTab={setSelectedTab}
+            />
+          ) : undefined
+        }
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
@@ -447,169 +466,170 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
         {hasConnectorTypeSelected ? (
           <>
-            {groupActionButtons.length > 0 && (
-              <>
-                <EuiButtonGroup
-                  isFullWidth
-                  buttonSize="m"
-                  legend=""
-                  options={groupActionButtons}
-                  idSelected={actionType.id}
-                  onChange={onChangeGroupAction}
-                  data-test-subj="slackTypeChangeButton"
-                />
-                <EuiSpacer size="xs" />
-              </>
-            )}
-
-            {showLoadingSpinner && (
-              <EuiFlexGroup
-                direction="column"
-                justifyContent="center"
-                alignItems="center"
-                style={{ minHeight: 200 }}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="xl" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorAdd.loadingConnectorConfiguration',
-                    {
-                      defaultMessage: 'Loading connector configuration...',
-                    }
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-
-            {actionTypeModelError && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  size="s"
-                  color="danger"
-                  iconType="error"
-                  data-test-subj="connector-spec-load-error"
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
-                    {
-                      defaultMessage: 'Failed to load connector configuration',
-                    }
-                  )}
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
-                      {
-                        defaultMessage:
-                          'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
-                      }
-                    )}
-                  </p>
-                  <EuiSpacer size="s" />
-                  <EuiButton
-                    color="danger"
-                    data-test-subj="connector-spec-load-retry"
-                    onClick={() => refetchConnectorSpec()}
-                  >
-                    {i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorRetry',
-                      { defaultMessage: 'Retry' }
-                    )}
-                  </EuiButton>
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            )}
-
-            {isLLMConnectorTypeId(actionType.id) && (
-              <>
-                <EuiCallOut
-                  announceOnMount={false}
-                  size="s"
-                  color="warning"
-                  iconType="warning"
-                  data-test-subj="deprecatedLLMConnectorCallout"
-                  title={DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE}
-                >
-                  {DEPRECATED_LLM_CONNECTOR_INFO}
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            )}
-
-            {showFormErrors && (
-              <>
-                <EuiCallOut
-                  tabIndex={-1}
-                  announceOnMount
-                  ref={handleErrorFocus}
-                  size="s"
-                  color="danger"
-                  iconType="warning"
-                  data-test-subj="connector-form-header-error-label"
-                  role="alert"
-                  aria-label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorAdd.connectorFormErrorDialog',
-                    {
-                      defaultMessage: 'Connector form error notification',
-                    }
-                  )}
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
-                    {
-                      defaultMessage: 'There are errors in the form',
-                    }
-                  )}
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
-
-            {createConnectorError && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  size="s"
-                  color="danger"
-                  iconType="error"
-                  data-test-subj="create-connector-api-error"
-                  title={createConnectorError.title}
-                >
-                  <p>{createConnectorError.message}</p>
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            )}
-
-            {!isLoadingActionTypeModel &&
-              !showLoadingSpinner &&
-              !actionTypeModelError &&
-              actionTypeModel && (
+            <div hidden={isAccessTabSelected}>
+              {groupActionButtons.length > 0 && (
                 <>
-                  <ConnectorForm
-                    actionTypeModel={actionTypeModel}
-                    connector={defaultConnector}
-                    isEdit={false}
-                    onChange={setFormState}
-                    setResetForm={setResetForm}
-                    settingsContent={inboundSettingsContent}
+                  <EuiButtonGroup
+                    isFullWidth
+                    buttonSize="m"
+                    legend=""
+                    options={groupActionButtons}
+                    idSelected={actionType.id}
+                    onChange={onChangeGroupAction}
+                    data-test-subj="slackTypeChangeButton"
                   />
-                  {accessPolicy.data?.enabled && accessDraft ? (
-                    <>
-                      <EuiSpacer size="l" />
-                      <ConnectorAccessSection
-                        policy={accessPolicy.data}
-                        value={accessDraft}
-                        onChange={setAccessDraft}
-                        isDisabled={isSaving}
-                      />
-                    </>
-                  ) : null}
-                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                  <EuiSpacer size="xs" />
                 </>
               )}
+
+              {showLoadingSpinner && (
+                <EuiFlexGroup
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  style={{ minHeight: 200 }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="xl" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.loadingConnectorConfiguration',
+                      {
+                        defaultMessage: 'Loading connector configuration...',
+                      }
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+
+              {actionTypeModelError && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="connector-spec-load-error"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                      {
+                        defaultMessage: 'Failed to load connector configuration',
+                      }
+                    )}
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
+                        {
+                          defaultMessage:
+                            'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+                        }
+                      )}
+                    </p>
+                    <EuiSpacer size="s" />
+                    <EuiButton
+                      color="danger"
+                      data-test-subj="connector-spec-load-retry"
+                      onClick={() => refetchConnectorSpec()}
+                    >
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorRetry',
+                        { defaultMessage: 'Retry' }
+                      )}
+                    </EuiButton>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {isLLMConnectorTypeId(actionType.id) && (
+                <>
+                  <EuiCallOut
+                    announceOnMount={false}
+                    size="s"
+                    color="warning"
+                    iconType="warning"
+                    data-test-subj="deprecatedLLMConnectorCallout"
+                    title={DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE}
+                  >
+                    {DEPRECATED_LLM_CONNECTOR_INFO}
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {showFormErrors && (
+                <>
+                  <EuiCallOut
+                    tabIndex={-1}
+                    announceOnMount
+                    ref={handleErrorFocus}
+                    size="s"
+                    color="danger"
+                    iconType="warning"
+                    data-test-subj="connector-form-header-error-label"
+                    role="alert"
+                    aria-label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.connectorFormErrorDialog',
+                      {
+                        defaultMessage: 'Connector form error notification',
+                      }
+                    )}
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
+                      {
+                        defaultMessage: 'There are errors in the form',
+                      }
+                    )}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {createConnectorError && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="create-connector-api-error"
+                    title={createConnectorError.title}
+                  >
+                    <p>{createConnectorError.message}</p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {!isLoadingActionTypeModel &&
+                !showLoadingSpinner &&
+                !actionTypeModelError &&
+                actionTypeModel && (
+                  <>
+                    <ConnectorForm
+                      actionTypeModel={actionTypeModel}
+                      connector={defaultConnector}
+                      isEdit={false}
+                      onChange={setFormState}
+                      setResetForm={setResetForm}
+                      settingsContent={inboundSettingsContent}
+                    />
+                    {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                  </>
+                )}
+            </div>
+            {accessPolicy.data?.enabled && accessDraft ? (
+              <div hidden={!isAccessTabSelected}>
+                <ConnectorAccessSection
+                  policy={accessPolicy.data}
+                  value={accessDraft}
+                  onChange={setAccessDraft}
+                  isDisabled={isSaving}
+                />
+              </div>
+            ) : null}
           </>
         ) : (
           <Suspense

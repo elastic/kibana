@@ -144,6 +144,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     await openConnector(page, kbnUrl, connectorName);
 
     await expect(page.testSubj.locator('connectorReadOnlyAccessCallout')).toBeVisible();
+    await expect(page.testSubj.locator('nameInput')).toHaveJSProperty('readOnly', true);
     await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toHaveCount(0);
     await expect(page.testSubj.locator('testConnectorTab')).toBeVisible();
 
@@ -211,10 +212,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     await page.testSubj.click('.server-log-card');
     await page.testSubj.fill('nameInput', name);
 
-    await page.testSubj
-      .locator('connectorAccessSection')
-      .getByRole('button', { name: /^Access/, expanded: false })
-      .click();
+    await page.testSubj.click('accessConnectorTab');
     await selectGeneralAccess(page, 'none');
     await page.testSubj.click('create-connector-flyout-save-btn');
     await expect(page.getByText(`Created '${name}'`)).toBeVisible();

@@ -57,7 +57,7 @@ export const GeneralAccessSelect = ({
         </EuiFlexGroup>
       ),
       dropdownDisplay: (
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={LEVEL_ICONS[level]} aria-hidden={true} />
           </EuiFlexItem>
@@ -75,8 +75,8 @@ export const GeneralAccessSelect = ({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('olsUi.generalAccess.label', {
-        defaultMessage: 'General access',
+      label={i18n.translate('olsUi.generalAccess.accessScopeLabel', {
+        defaultMessage: 'Access scope',
       })}
       helpText={getGeneralAccessCopy(copy, value).description}
     >

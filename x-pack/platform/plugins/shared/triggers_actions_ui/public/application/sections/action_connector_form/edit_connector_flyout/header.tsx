@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, Suspense, useCallback } from 'react';
-import { css } from '@emotion/react';
+import React, { memo, Suspense } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -17,9 +16,6 @@ import {
   EuiText,
   EuiFlyoutHeader,
   EuiBetaBadge,
-  EuiTab,
-  EuiTabs,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +24,7 @@ import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { ConnectorFormTabs } from '../connector_form_tabs';
 
 const FlyoutHeaderComponent: React.FC<{
   isExperimental?: boolean;
@@ -61,24 +58,7 @@ const FlyoutHeaderComponent: React.FC<{
     application: { capabilities },
   } = useKibana().services;
 
-  const { euiTheme } = useEuiTheme();
   const canExecute = hasExecuteActionsCapability(capabilities, subFeature);
-
-  const setConfigurationTab = useCallback(() => {
-    setTab(EditConnectorTabs.Configuration);
-  }, [setTab]);
-
-  const setTestTab = useCallback(() => {
-    setTab(EditConnectorTabs.Test);
-  }, [setTab]);
-
-  const setRulesTab = useCallback(() => {
-    setTab(EditConnectorTabs.Rules);
-  }, [setTab]);
-
-  const setAccessTab = useCallback(() => {
-    setTab(EditConnectorTabs.Access);
-  }, [setTab]);
 
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
@@ -188,56 +168,16 @@ const FlyoutHeaderComponent: React.FC<{
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiTabs
-        className="connectorEditFlyoutTabs"
-        bottomBorder={false}
-        css={css`
-          margin-bottom: -${euiTheme.size.l};
-        `}
-      >
-        <EuiTab
-          onClick={setConfigurationTab}
-          data-test-subj="configureConnectorTab"
-          isSelected={EditConnectorTabs.Configuration === selectedTab}
-        >
-          {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
-            defaultMessage: 'Configuration',
-          })}
-        </EuiTab>
-        {!hideRulesTab && (
-          <EuiTab
-            onClick={setRulesTab}
-            data-test-subj="rulesConnectorTab"
-            isSelected={EditConnectorTabs.Rules === selectedTab}
-          >
-            {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
-              defaultMessage: 'Rules',
-            })}
-          </EuiTab>
-        )}
-        {isTestable && canExecute && (
-          <EuiTab
-            onClick={setTestTab}
-            data-test-subj="testConnectorTab"
-            isSelected={EditConnectorTabs.Test === selectedTab}
-          >
-            {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
-              defaultMessage: 'Test',
-            })}
-          </EuiTab>
-        )}
-        {showAccessTab && (
-          <EuiTab
-            onClick={setAccessTab}
-            data-test-subj="accessConnectorTab"
-            isSelected={EditConnectorTabs.Access === selectedTab}
-          >
-            {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.accessTabText', {
-              defaultMessage: 'Access',
-            })}
-          </EuiTab>
-        )}
-      </EuiTabs>
+      <ConnectorFormTabs
+        selectedTab={selectedTab}
+        setTab={setTab}
+        tabs={[
+          EditConnectorTabs.Configuration,
+          ...(showAccessTab ? [EditConnectorTabs.Access] : []),
+          ...(!hideRulesTab ? [EditConnectorTabs.Rules] : []),
+          ...(isTestable && canExecute ? [EditConnectorTabs.Test] : []),
+        ]}
+      />
     </EuiFlyoutHeader>
   );
 };

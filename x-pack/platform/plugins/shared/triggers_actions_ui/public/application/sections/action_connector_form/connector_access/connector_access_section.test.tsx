@@ -32,7 +32,7 @@ describe('ConnectorAccessSection', () => {
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({ users: [] });
   });
 
-  it('summarizes general access and the number of people with access', () => {
+  it('shows access controls and named entries', () => {
     appMockRenderer.render(
       <ConnectorAccessSection
         policy={POLICY}
@@ -47,9 +47,10 @@ describe('ConnectorAccessSection', () => {
       />
     );
 
-    expect(screen.getByTestId('connectorAccessSection')).toHaveTextContent(
-      'Only people with access, 2 more people'
+    expect(screen.getByTestId('accessPanelGeneralAccess')).toHaveTextContent(
+      'Only people with access'
     );
+    expect(screen.getByText('Access scope')).toBeInTheDocument();
     expect(screen.getByTestId('accessPanelEntryLevel-u_alice')).toHaveTextContent('Can run');
   });
 
@@ -65,8 +66,6 @@ describe('ConnectorAccessSection', () => {
       'Everyone in this space can run'
     );
 
-    // The accordion button's accessible name is unreliable: EUI's test IDs are static.
-    await userEvent.click(screen.getByRole('heading', { name: 'Access' }));
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccess'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccessOption-none'));
@@ -83,8 +82,6 @@ describe('ConnectorAccessSection', () => {
       />
     );
 
-    // The accordion button's accessible name is unreliable: EUI's test IDs are static.
-    await userEvent.click(screen.getByRole('heading', { name: 'Access' }));
     await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/svc{enter}');
 
     expect(onChange).toHaveBeenCalledWith({

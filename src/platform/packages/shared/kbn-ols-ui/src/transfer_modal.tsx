@@ -75,6 +75,19 @@ export const TransferModal = ({
           })}
         </EuiText>
         <EuiSpacer size="m" />
+        {isOwnerSelf ? (
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              size="s"
+              title={i18n.translate('olsUi.transfer.selfWarning', {
+                defaultMessage: "You won't be able to manage access to this {objectNoun} anymore.",
+                values: { objectNoun: copy.objectNoun },
+              })}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {newOwner ? (
           <OwnerRow
             label={i18n.translate('olsUi.transfer.newOwner', {
@@ -94,19 +107,6 @@ export const TransferModal = ({
             data-test-subj="accessPanelTransferPicker"
           />
         )}
-        {isOwnerSelf ? (
-          <>
-            <EuiSpacer size="m" />
-            <KbnWarningCallout
-              announceOnMount
-              size="s"
-              title={i18n.translate('olsUi.transfer.selfWarning', {
-                defaultMessage: "You won't be able to manage access to this {objectNoun} anymore.",
-                values: { objectNoun: copy.objectNoun },
-              })}
-            />
-          </>
-        ) : null}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose}>

@@ -582,6 +582,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                     actionTypeModel={actionTypeModel}
                     connector={connectorWithoutSecrets}
                     isEdit={isEdit}
+                    readOnly={!canEditConnector}
                     onChange={setFormState}
                     onFormModifiedChange={onFormModifiedChange}
                     settingsContent={inboundSettingsContent}
@@ -611,6 +612,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     actionTypeModelError,
     isEdit,
     isLoadingActionTypeModel,
+    canEditConnector,
     showLoadingSpinner,
     showFormErrors,
     onFormModifiedChange,

@@ -13,7 +13,7 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { compareLevels, MAX_ACL_ENTRIES, type Principal } from '@kbn/ols';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { AccessList, getPrincipalKey, OwnerRow } from './access_list';
+import { AccessList, getPrincipalKey } from './access_list';
 import type { AccessCopy } from './copy';
 import { GeneralAccessSelect } from './general_access_select';
 import { PrincipalPicker } from './principal_picker';
@@ -26,15 +26,13 @@ export interface AccessDraftEditorProps {
   onChange: (value: AccessDraft) => void;
   suggestPrincipals: (name: string, signal: AbortSignal) => Promise<SuggestedUser[]>;
   copy: AccessCopy;
-  /** Stored owner, in edit mode. */
+  /** Stored owner, excluded from named entries in edit mode. */
   owner?: Principal;
-  isOwnerSelf?: boolean;
   /** Stored access, to explain what lowering general access means for people who already have access. */
   savedValue?: AccessDraft;
   profiles?: UserProfileWithAvatar[];
   /** Entries whose recipients lack feature privileges, from the last save. */
   warnings?: Principal[];
-  onTransfer?: () => void;
   isDisabled?: boolean;
 }
 
@@ -48,11 +46,9 @@ export const AccessDraftEditor = ({
   suggestPrincipals,
   copy,
   owner,
-  isOwnerSelf,
   savedValue,
   profiles = [],
   warnings = [],
-  onTransfer,
   isDisabled,
 }: AccessDraftEditorProps) => {
   // Profiles of users picked in this session, so that new entries show names before saving.
@@ -94,18 +90,6 @@ export const AccessDraftEditor = ({
 
   return (
     <>
-      {owner ? (
-        <>
-          <OwnerRow
-            owner={owner}
-            isOwnerSelf={isOwnerSelf}
-            profiles={profilesByUid}
-            onTransfer={onTransfer}
-            isDisabled={isDisabled}
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
       <GeneralAccessSelect
         allowed={policy.general_access_levels}
         value={value.general_access}

@@ -109,22 +109,30 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
     appMockRenderer.coreStart.http.head = jest.fn().mockResolvedValue({});
   });
 
-  it('creates the connector with the access set in the Access section', async () => {
+  it('keeps configuration and access when switching tabs and saves both together', async () => {
     await renderAndFillForm();
 
-    // The accordion button's accessible name is unreliable: EUI's test IDs are static.
-    await userEvent.click(
-      within(await screen.findByTestId('connectorAccessSection')).getByRole('heading', {
-        name: 'Access',
-      })
-    );
+    const flyout = within(screen.getByTestId('create-connector-flyout'));
+    expect(flyout.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Configuration',
+      'Access',
+    ]);
+    await userEvent.click(flyout.getByRole('tab', { name: 'Access' }));
+    expect(screen.getByTestId('nameInput')).not.toBeVisible();
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccess'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccessOption-none'));
     await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/svc{enter}');
-    expect(screen.getByTestId('connectorAccessSection')).toHaveTextContent(
-      'Only people with access, 1 more person'
+    expect(screen.getByTestId('accessPanelEntryLevel-kibana/svc')).toBeInTheDocument();
+
+    await userEvent.click(flyout.getByRole('tab', { name: 'Configuration' }));
+    expect(screen.getByTestId('nameInput')).toHaveValue('My test');
+    expect(screen.getByTestId('test-connector-text-field')).toHaveValue('My text field');
+    await userEvent.click(flyout.getByRole('tab', { name: 'Access' }));
+    expect(screen.getByTestId('accessPanelGeneralAccess')).toHaveTextContent(
+      'Only people with access'
     );
+    expect(screen.getByTestId('accessPanelEntryLevel-kibana/svc')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
@@ -150,6 +158,7 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
       expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledWith(POLICY_PATH)
     );
     expect(screen.queryByTestId('connectorAccessSection')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Access' })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 

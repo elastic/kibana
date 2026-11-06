@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, Suspense } from 'react';
+import React, { memo, Suspense, type ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
@@ -31,6 +31,7 @@ interface Props {
   isExperimental?: boolean;
   docsUrl?: string;
   selectConnectorDocsUrl?: string;
+  tabs?: ReactNode;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -41,6 +42,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   isExperimental,
   docsUrl,
   selectConnectorDocsUrl,
+  tabs,
 }) => {
   const {
     docLinks: { links },
@@ -141,6 +143,12 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {tabs && (
+        <>
+          <EuiSpacer size="s" />
+          {tabs}
+        </>
+      )}
     </EuiFlyoutHeader>
   );
 };

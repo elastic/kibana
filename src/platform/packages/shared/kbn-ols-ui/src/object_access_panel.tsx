@@ -14,6 +14,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   useGeneratedHtmlId,
@@ -25,6 +26,7 @@ import { readAclParts, type AclWarning, type StoredAcl, type Principal } from '@
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { AccessDraftEditor } from './access_draft_editor';
+import { OwnerRow } from './access_list';
 import { AccessSummary } from './access_summary';
 import type { AccessCopy } from './copy';
 import { toOlsError, useOlsApi, useAccessPolicy, useObjectAccess, type OlsError } from './hooks';
@@ -232,51 +234,65 @@ export const ObjectAccessPanel = ({
 
       {canManage && draft ? (
         <>
-          <AccessDraftEditor
-            policy={policy.data}
-            value={draft}
-            onChange={setDraft}
-            suggestPrincipals={suggestPrincipals}
-            copy={copy}
-            owner={owner}
-            isOwnerSelf={state.is_owner}
-            savedValue={savedDraft}
-            profiles={state.profiles}
-            warnings={warnings.map(({ principal }) => principal)}
-            onTransfer={canTransfer ? () => setIsTransferOpen(true) : undefined}
-            isDisabled={isSaving}
-          />
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                isDisabled={!isDirty || isSaving}
-                onClick={() => setDraft(savedDraft)}
-                data-test-subj="accessPanelCancel"
-              >
-                {i18n.translate('olsUi.panel.cancel', { defaultMessage: 'Discard' })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                // A replacement keeps the owner, so an ACL without a single owner needs a transfer.
-                isDisabled={!isDirty || !owner}
-                isLoading={isSaving}
-                data-test-subj="accessPanelSave"
-                onClick={() =>
-                  runChange(
-                    () => api.replace(type, id, state.version, draft),
-                    i18n.translate('olsUi.panel.saved', {
-                      defaultMessage: 'Access saved.',
-                    })
-                  )
-                }
-              >
-                {i18n.translate('olsUi.panel.save', { defaultMessage: 'Save access' })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {owner ? (
+            <>
+              <EuiPanel hasBorder paddingSize="m">
+                <OwnerRow
+                  owner={owner}
+                  isOwnerSelf={state.is_owner}
+                  profiles={new Map(state.profiles?.map((profile) => [profile.uid, profile]))}
+                  onTransfer={canTransfer ? () => setIsTransferOpen(true) : undefined}
+                  isDisabled={isSaving}
+                />
+              </EuiPanel>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          <EuiPanel hasBorder paddingSize="m">
+            <AccessDraftEditor
+              policy={policy.data}
+              value={draft}
+              onChange={setDraft}
+              suggestPrincipals={suggestPrincipals}
+              copy={copy}
+              owner={owner}
+              savedValue={savedDraft}
+              profiles={state.profiles}
+              warnings={warnings.map(({ principal }) => principal)}
+              isDisabled={isSaving}
+            />
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  isDisabled={!isDirty || isSaving}
+                  onClick={() => setDraft(savedDraft)}
+                  data-test-subj="accessPanelCancel"
+                >
+                  {i18n.translate('olsUi.panel.cancel', { defaultMessage: 'Discard' })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  // A replacement keeps the owner, so an ACL without a single owner needs a transfer.
+                  isDisabled={!isDirty || !owner}
+                  isLoading={isSaving}
+                  data-test-subj="accessPanelSave"
+                  onClick={() =>
+                    runChange(
+                      () => api.replace(type, id, state.version, draft),
+                      i18n.translate('olsUi.panel.saved', {
+                        defaultMessage: 'Access saved.',
+                      })
+                    )
+                  }
+                >
+                  {i18n.translate('olsUi.panel.save', { defaultMessage: 'Save access' })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         </>
       ) : (
         <AccessSummary state={state} operations={Object.keys(policy.data.operations)} copy={copy} />
