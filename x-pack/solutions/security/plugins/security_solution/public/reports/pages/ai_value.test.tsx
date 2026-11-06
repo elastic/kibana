@@ -137,7 +137,7 @@ describe('AIValue', () => {
     renderAIValue();
 
     expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
-    expect(screen.getByTestId('header-page')).toBeInTheDocument();
+    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
   });
 
   it('hides the header in export mode', () => {
@@ -146,7 +146,7 @@ describe('AIValue', () => {
     renderAIValue();
 
     expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
-    expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('appHeader')).not.toBeInTheDocument();
   });
 
   it('disables export button when there is no report data even if export integration is available', () => {
