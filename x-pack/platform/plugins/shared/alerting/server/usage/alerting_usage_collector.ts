@@ -202,11 +202,39 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     DYNAMIC_KEY: { type: 'long' },
     read: { type: 'long' },
     decrypt: { type: 'long' },
-    license: { type: 'long' },
+    execute: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed while running the executor per day.' },
+    },
+    configuration: {
+      type: 'long',
+      _meta: {
+        description: 'Rule executions that failed because of the rule configuration per day.',
+      },
+    },
     unknown: { type: 'long' },
+    license: { type: 'long' },
+    timeout: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed because the rule timed out per day.' },
+    },
+    disabled: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed because the rule is disabled per day.' },
+    },
+    validate: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed rule validation per day.' },
+    },
   };
 
-export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).length;
+// DYNAMIC_KEY is a schema placeholder, not an event.reason value. Size must cover every
+// defined reason or the least common buckets are omitted from the breakdown.
+// Count the schema keys here. Reading the reason enum at module init races a cycle through
+// the alerting plugin barrel and can see the enum before it is initialized.
+export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).filter(
+  (key) => key !== 'DYNAMIC_KEY'
+).length;
 
 const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =
   {
@@ -228,8 +256,13 @@ const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_execution
     DYNAMIC_KEY: byTypeSchema,
     read: byTypeSchema,
     decrypt: byTypeSchema,
-    license: byTypeSchema,
+    execute: byTypeSchema,
+    configuration: byTypeSchema,
     unknown: byTypeSchema,
+    license: byTypeSchema,
+    timeout: byTypeSchema,
+    disabled: byTypeSchema,
+    validate: byTypeSchema,
   };
 
 const byTaskStatusSchema: MakeSchemaFrom<AlertingUsage>['count_failed_and_unrecognized_rule_tasks_by_status_per_day'] =
