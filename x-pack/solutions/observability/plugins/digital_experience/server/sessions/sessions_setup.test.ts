@@ -22,6 +22,7 @@ import {
   getRestrictedSourceIndices,
   getSessionsStatus,
   indexPatternCovers,
+  indexPatternsOverlap,
   lagSecondsOf,
 } from './sessions_setup';
 import { SessionsNewerVersionError } from './sessions_newer_version_error';
@@ -35,6 +36,8 @@ type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClie
 const NOW = Date.parse('2026-10-27T12:00:00.000Z');
 const ENABLED_AT = '2026-10-27T11:00:00.000Z';
 const SOURCE_INDICES = ['traces-*.otel-*', 'logs-*.otel-*'];
+/** How the predefined Serverless `editor` and `viewer` roles grant read. */
+const EDITOR_READ_PATTERN = '/~(([.]|ilm-history-).*)/';
 const oneTransform: SessionsSettings = { frequency: '1m', partitions: 1 };
 
 const managedTransform = (
@@ -118,7 +121,13 @@ const grantAll = (client: Client) => {
 describe('sessions setup', () => {
   let esClient: ScopedClient;
   const logger = loggingSystemMock.createLogger();
-  const enableArgs = () => ({ esClient, logger, enabledBy: 'ana', now: new Date(ENABLED_AT) });
+  const enableArgs = () => ({
+    esClient,
+    logger,
+    enabledBy: 'ana',
+    isServerless: false,
+    now: new Date(ENABLED_AT),
+  });
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -134,10 +143,45 @@ describe('sessions setup', () => {
         username: 'reader',
       });
 
-      expect(await getMissingSessionsPrivileges(esClient.asCurrentUser)).toEqual([
-        'cluster:manage_transform',
-        'index:traces-*.otel-*:read',
-      ]);
+      expect(
+        await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
+      ).toEqual(['cluster:manage_transform', 'index:traces-*.otel-*:read']);
+    });
+
+    it('also requires read_security on Serverless, to read the user’s roles', async () => {
+      esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+        cluster: { manage_transform: false, read_security: false },
+        index: {},
+        application: {},
+        username: 'reader',
+      });
+
+      expect(
+        await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: true })
+      ).toEqual(['cluster:manage_transform', 'cluster:read_security']);
+      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cluster: [
+            'manage_transform',
+            'manage_ingest_pipelines',
+            'manage_index_templates',
+            'read_security',
+          ],
+        })
+      );
+    });
+
+    it('does not require read_security on stateful', async () => {
+      grantAll(esClient.asCurrentUser);
+
+      await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false });
+
+      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
+        })
+      );
     });
   });
 
@@ -439,6 +483,25 @@ describe('sessions setup', () => {
     });
   });
 
+  describe('indexPatternsOverlap', () => {
+    it.each([
+      ['logs-*.otel-*', 'logs-*.otel-*', true],
+      ['logs-*', 'logs-*.otel-*', true],
+      ['logs-checkout*', 'logs-*.otel-*', true],
+      ['logs-*.otel-default', 'logs-*.otel-*', true],
+      ['*-default', 'logs-*.otel-*', true],
+      ['logs-?.otel-?', 'logs-*.otel-*', true],
+      ['*', 'logs-*.otel-*', true],
+      ['traces-*', 'logs-*.otel-*', false],
+      ['logs-*.ecs-*', 'logs-*.otel-*', true],
+      ['logs-apm.app', 'logs-*.otel-*', false],
+      ['.siem-signals*', 'logs-*.otel-*', false],
+      [EDITOR_READ_PATTERN, 'logs-*.otel-*', true],
+    ])('%s overlaps %s: %s', (rolePattern, pattern, overlaps) => {
+      expect(indexPatternsOverlap(rolePattern, pattern)).toBe(overlaps);
+    });
+  });
+
   describe('getRestrictedSourceIndices', () => {
     let client: Client;
 
@@ -451,7 +514,7 @@ describe('sessions setup', () => {
       expect(await getRestrictedSourceIndices(client)).toEqual({ indices: [], reason: 'filtered' });
     });
 
-    it('lists only the patterns without unrestricted read', async () => {
+    it('lists only the patterns a role filters', async () => {
       mockReadPrivileges(client, [
         { names: ['traces-*.otel-*'] },
         { names: ['logs-*.otel-*'], query: ['{"match_all":{}}'] },
@@ -471,12 +534,34 @@ describe('sessions setup', () => {
       expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
     });
 
-    it('ignores privileges that do not include read, and FLS that grants every field', async () => {
+    it('ignores filters on privileges that do not include read, and FLS that grants every field', async () => {
       mockReadPrivileges(client, [
-        { privileges: ['view_index_metadata'] },
+        { privileges: ['view_index_metadata'], query: ['{"match_all":{}}'] },
         { names: ['logs-*.otel-*'], field_security: [{ grant: ['*'] }] },
       ]);
-      expect((await getRestrictedSourceIndices(client)).indices).toEqual(['traces-*.otel-*']);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+    });
+
+    it('ignores filters on indices the source patterns cannot match', async () => {
+      mockReadPrivileges(client, [
+        { names: ['.siem-signals*', 'metrics-*'], query: ['{"match_all":{}}'] },
+        { names: ['logs-checkout*'], field_security: [{ grant: ['@timestamp'] }] },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(['logs-*.otel-*']);
+    });
+
+    it('accepts a read granted through a regular expression, without filters', async () => {
+      // `has_privileges` checks the read itself.
+      mockReadPrivileges(client, [{ names: [EDITOR_READ_PATTERN] }]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+    });
+
+    it('refuses a filtered read through a regular expression, which none can prove lifted', async () => {
+      mockReadPrivileges(client, [
+        { names: [EDITOR_READ_PATTERN], query: ['{"match_all":{}}'] },
+        { names: [EDITOR_READ_PATTERN] },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
     });
 
     it('cannot verify an API key with its own role descriptors', async () => {
@@ -566,10 +651,29 @@ describe('sessions setup', () => {
         expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
       });
 
-      it('refuses a user without roles', async () => {
+      it('accepts the predefined editor role’s regular expression read next to a custom role', async () => {
+        mockAuthenticated(['editor', 'sessions-setup']);
+        mockRoles([
+          {
+            name: 'editor',
+            indices: [
+              { names: [EDITOR_READ_PATTERN], privileges: ['read', 'view_index_metadata'] },
+              { names: ['.siem-signals*'], privileges: ['read'], query: '{"match_all":{}}' },
+            ],
+          },
+          {
+            name: 'sessions-setup',
+            indices: [{ names: ['digital-experience-sessions-*'], privileges: ['all'] }],
+          },
+        ]);
+
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+      });
+
+      it('finds no filter for a user without roles, and reads none', async () => {
         mockAuthenticated([], 'realm');
 
-        expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
         expect(client.security.queryRole).not.toHaveBeenCalled();
       });
 
@@ -583,19 +687,9 @@ describe('sessions setup', () => {
         expect(client.security.queryRole).not.toHaveBeenCalled();
       });
 
-      it('asks for read_security when the user cannot read their roles', async () => {
+      it('rethrows errors reading the roles', async () => {
         mockAuthenticated(['custom']);
         client.security.queryRole.mockRejectedValue(esError(403));
-
-        const error = await getRestrictedSourceIndices(client).catch((e) => e);
-
-        expect(error).toBeInstanceOf(SessionsPrivilegesError);
-        expect(error.missingPrivileges).toEqual(['cluster:read_security']);
-      });
-
-      it('rethrows other errors reading the roles', async () => {
-        mockAuthenticated(['custom']);
-        client.security.queryRole.mockRejectedValue(esError(500));
 
         await expect(getRestrictedSourceIndices(client)).rejects.toThrow();
       });
