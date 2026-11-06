@@ -27,6 +27,14 @@ describe('aliasVariants', () => {
     expect(aliasVariants(['host.name'])).toEqual([['host.name']]);
   });
 
+  it('skips the ECS spelling when another key already is it', () => {
+    const own = ['k8s.pod.uid'];
+    const ecs = ['kubernetes.pod.uid'];
+
+    expect(aliasVariants(own, [own, ecs])).toEqual([own]);
+    expect(aliasVariants(own, [own])).toEqual([own, ecs]);
+  });
+
   it('has no alias that equals its own column', () => {
     Object.entries(ECS_ALIASES).forEach(([column, alias]) => expect(alias).not.toBe(column));
   });

@@ -21,6 +21,9 @@ export const toAlertGroups = (rows: ReadonlyArray<readonly EsqlValue[]>): AlertG
     values: values.map(String),
   }));
 
+/** The most alerts an explain query lists for one entity. */
+export const MAX_EXPLAINED_ALERTS = 100;
+
 const isNameCharacter = (character: string): boolean =>
   (character >= 'a' && character <= 'z') ||
   (character >= 'A' && character <= 'Z') ||

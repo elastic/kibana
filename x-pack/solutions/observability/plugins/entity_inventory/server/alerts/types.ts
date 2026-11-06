@@ -14,6 +14,14 @@ export type EntityRow = Readonly<Record<string, EsqlValue>>;
 /** Entity columns whose values must all equal an alert's group values for the alert to belong to the entity. */
 export type MatchKey = readonly string[];
 
+/** Where a key came from: the `rank`th way the definition's identity is written, or an extra key. */
+export type KeySource = { kind: 'identity'; rank: number } | { kind: 'extra' };
+
+export interface MatchKeyEntry {
+  columns: MatchKey;
+  source: KeySource;
+}
+
 /** The alerts of one value tuple of a match key, as one aggregated row. */
 export interface AlertGroup {
   values: readonly string[];

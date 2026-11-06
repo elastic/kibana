@@ -13,7 +13,7 @@ import {
   k8sNodeDefinition,
   k8sPodDefinition,
 } from '../inventory/definitions/k8s_definitions';
-import { getMatchKeys } from './match_keys';
+import { getMatchKeyEntries, getMatchKeys } from './match_keys';
 
 describe('getMatchKeys', () => {
   it('uses a single identity field as the key', () => {
@@ -34,6 +34,17 @@ describe('getMatchKeys', () => {
     expect(getMatchKeys(k8sPodDefinition)).toEqual([
       ['k8s.pod.uid'],
       ['k8s.pod.name', 'k8s.namespace.name'],
+    ]);
+  });
+
+  it('says where each key came from', () => {
+    expect(getMatchKeyEntries(hostLikeFixture)).toEqual([
+      { columns: ['host.id'], source: { kind: 'identity', rank: 1 } },
+      { columns: ['host.name'], source: { kind: 'identity', rank: 2 } },
+    ]);
+    expect(getMatchKeyEntries(k8sPodDefinition).map(({ source }) => source)).toEqual([
+      { kind: 'identity', rank: 1 },
+      { kind: 'extra' },
     ]);
   });
 

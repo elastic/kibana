@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import type { EntityRow, EsqlValue } from '../alerts/types';
 import { ENTITY_ID_COLUMN, generateListQueries, getDynamicBlock, planSources } from './generator';
-import type { QueryEngine, TimeWindow } from './generator';
+import type { GeneratedQuery, QueryEngine, TimeWindow } from './generator';
 
 /** `TS` only when every index behind the pattern is a time series index, as the generator requires. */
 const resolveEngine = async (
@@ -51,8 +51,8 @@ const mergeRows = (rows: readonly EntityRow[]): EntityRow[] => {
   return [...merged.values()];
 };
 
-/** Lists the entities of one definition over a window by running its generated list queries. */
-export const listEntities = async ({
+/** The ES|QL that lists the entities of one definition over a window, one query per source. */
+export const generateEntityQueries = async ({
   esClient,
   definition,
   window,
@@ -62,13 +62,19 @@ export const listEntities = async ({
   definition: RegisteredEntityDefinition;
   window: TimeWindow;
   limit: number;
-}): Promise<EntityRow[]> => {
+}): Promise<GeneratedQuery[]> => {
   const { sources } = getDynamicBlock(definition);
   const engines = await Promise.all(
     sources.map(({ indexPattern }) => resolveEngine(esClient, indexPattern))
   );
-  const queries = generateListQueries(definition, planSources(definition, engines), window, limit);
+  return generateListQueries(definition, planSources(definition, engines), window, limit);
+};
 
+/** Runs entity list queries and folds the rows of each entity into one. */
+export const runEntityQueries = async (
+  esClient: ElasticsearchClient,
+  queries: readonly GeneratedQuery[]
+): Promise<EntityRow[]> => {
   const rowsPerQuery = await Promise.all(
     queries.map(async ({ esql, params }) => {
       const { columns, values } = await esClient.esql.query({
@@ -84,3 +90,8 @@ export const listEntities = async ({
 
   return mergeRows(rowsPerQuery.flat());
 };
+
+/** Lists the entities of one definition over a window by running its generated list queries. */
+export const listEntities = async (
+  params: Parameters<typeof generateEntityQueries>[0]
+): Promise<EntityRow[]> => runEntityQueries(params.esClient, await generateEntityQueries(params));

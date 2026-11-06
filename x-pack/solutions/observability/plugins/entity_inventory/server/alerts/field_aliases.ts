@@ -30,13 +30,16 @@ export const ECS_ALIASES: Readonly<Record<string, string>> = {
 
 /**
  * The ways a rule can have written a key's group-by columns. The first is the key itself. The
- * second, when every column has an ECS alias, is the key in ECS spelling. Each variant lines up
- * with the key, column for column.
+ * second, when every column has an ECS alias, is the key in ECS spelling, unless that is already
+ * one of `keys` (a definition that ranks both spellings). Each variant lines up with the key,
+ * column for column.
  */
-export const aliasVariants = (key: MatchKey): MatchKey[] => {
+export const aliasVariants = (key: MatchKey, keys: readonly MatchKey[] = []): MatchKey[] => {
   const aliased = key.map((column) => ECS_ALIASES[column]);
   const variants: MatchKey[] = [key];
-  if (aliased.every((alias): alias is string => alias !== undefined)) {
+  const isAnotherKey = (variant: MatchKey): boolean =>
+    keys.some((other) => JSON.stringify(other) === JSON.stringify(variant));
+  if (aliased.every((alias): alias is string => alias !== undefined) && !isAnotherKey(aliased)) {
     variants.push(aliased);
   }
   return variants;

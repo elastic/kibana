@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { GeneratedQuery, NamedParams } from '../inventory/generator';
 import { attributeAlertsToEntities } from './attribute_alerts';
-import { assertLiteralField, toAlertGroups } from './esql_rows';
+import { assertLiteralField, MAX_EXPLAINED_ALERTS, toAlertGroups } from './esql_rows';
 import { aliasVariants } from './field_aliases';
 import type { AlertMatcher, KeyedAlertGroups, MatchKey } from './types';
 
@@ -34,27 +34,40 @@ const activeAlertsPipeline = (extraEval: string[] = []): string[] => [
   ...extraEval,
 ];
 
+interface KeyColumn {
+  alertField: string;
+  column: string;
+}
+
+const keyColumnsOf = (variant: MatchKey): KeyColumn[] => {
+  variant.forEach(assertLiteralField);
+  return variant.map((alertField, index) => ({ alertField, column: `key_${index}` }));
+};
+
+const keyEval = (columns: KeyColumn[]): string =>
+  `| EVAL ${columns
+    .map(({ alertField, column }) => `${column} = FIELD_EXTRACT(\`data\`, "${alertField}")`)
+    .join(', ')}`;
+
+/** An alert's later events can carry an empty payload, so each key value is the last non-null one. */
+const lastKeyValues = (columns: KeyColumn[]): string[] =>
+  columns.map(
+    ({ column }) => `${column} = LAST(${column}, \`@timestamp\`) WHERE ${column} IS NOT NULL`
+  );
+
 /**
  * Active alerts grouped by the key's fields, which a v2 rule stores inside the flattened `data`
- * of its events. An alert's later events can carry an empty payload, so each key value is the
- * last non-null one, while the status comes from the newest event of any kind.
+ * of its events. The status comes from the newest event of any kind.
  */
 export const buildV2GroupQuery = (variant: MatchKey, scope: V2Scope): GeneratedQuery => {
-  variant.forEach(assertLiteralField);
-  const columns = variant.map((alertField, index) => ({ alertField, column: `key_${index}` }));
+  const columns = keyColumnsOf(variant);
 
   return {
     esql: [
-      ...activeAlertsPipeline([
-        `| EVAL ${columns
-          .map(({ alertField, column }) => `${column} = FIELD_EXTRACT(\`data\`, "${alertField}")`)
-          .join(', ')}`,
-      ]),
-      `| STATS last_status = LAST(\`alert.status\`, \`@timestamp\`), ${columns
-        .map(
-          ({ column }) => `${column} = LAST(${column}, \`@timestamp\`) WHERE ${column} IS NOT NULL`
-        )
-        .join(', ')} BY \`alert.id\``,
+      ...activeAlertsPipeline([keyEval(columns)]),
+      `| STATS last_status = LAST(\`alert.status\`, \`@timestamp\`), ${lastKeyValues(columns).join(
+        ', '
+      )} BY \`alert.id\``,
       `| WHERE last_status == "active" AND ${columns
         .map(({ column }) => `${column} IS NOT NULL`)
         .join(' AND ')}`,
@@ -64,6 +77,33 @@ export const buildV2GroupQuery = (variant: MatchKey, scope: V2Scope): GeneratedQ
       `| LIMIT ${MAX_GROUPS}`,
     ].join('\n'),
     params: scopeParams(scope),
+  };
+};
+
+/** The active alerts whose group values equal one entity's values for the key, with their rule id. */
+export const buildV2ExplainQuery = (
+  variant: MatchKey,
+  values: readonly string[],
+  scope: V2Scope
+): GeneratedQuery => {
+  const columns = keyColumnsOf(variant);
+
+  return {
+    esql: [
+      ...activeAlertsPipeline([keyEval(columns)]),
+      `| STATS last_status = LAST(\`alert.status\`, \`@timestamp\`), ${lastKeyValues(columns).join(
+        ', '
+      )}, rule_id = LAST(\`rule.id\`, \`@timestamp\`) BY \`alert.id\``,
+      `| WHERE last_status == "active" AND ${columns
+        .map(({ column }, index) => `${column} == ?value${index}`)
+        .join(' AND ')}`,
+      '| KEEP `alert.id`, rule_id',
+      `| LIMIT ${MAX_EXPLAINED_ALERTS}`,
+    ].join('\n'),
+    params: [
+      ...scopeParams(scope),
+      ...values.map((value, index) => ({ [`value${index}`]: value })),
+    ],
   };
 };
 
@@ -90,7 +130,7 @@ export const createV2AlertMatcher = ({
     const [keyedGroups, activeAlerts] = await Promise.all([
       Promise.all(
         keys.flatMap((key) =>
-          aliasVariants(key).map(async (variant): Promise<KeyedAlertGroups> => {
+          aliasVariants(key, keys).map(async (variant): Promise<KeyedAlertGroups> => {
             const { esql, params } = buildV2GroupQuery(variant, scope);
             const { values } = await esClient.esql.query({ query: esql, params, format: 'json' });
             return { key, groups: toAlertGroups(values) };

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { GeneratedQuery } from '../inventory/generator';
 import { attributeAlertsToEntities } from './attribute_alerts';
-import { assertLiteralField, toAlertGroups } from './esql_rows';
+import { assertLiteralField, MAX_EXPLAINED_ALERTS, toAlertGroups } from './esql_rows';
 import { aliasVariants } from './field_aliases';
 import type { AlertGroup, AlertMatcher, KeyedAlertGroups, MatchKey } from './types';
 
@@ -55,6 +55,28 @@ export const buildGroupQuery = (variant: MatchKey, spaceId: string): GeneratedQu
   );
 };
 
+/** The active alerts whose grouping equals one entity's values for the key, with their rule. */
+export const buildExplainQuery = (
+  variant: MatchKey,
+  values: readonly string[],
+  spaceId: string
+): GeneratedQuery => {
+  const fields = variant.map((column) => quote(alertFieldOf(column)));
+  return {
+    esql: [
+      'SET unmapped_fields="nullify";',
+      `FROM ${CLASSIC_ALERT_INDICES}`,
+      `| WHERE ${[
+        ...ACTIVE_IN_SPACE_FILTERS,
+        ...fields.map((field, index) => `${field} == ?value${index}`),
+      ].join(' AND ')}`,
+      `| KEEP ${ALERT_UUID}, \`kibana.alert.rule.name\`, \`kibana.alert.rule.uuid\``,
+      `| LIMIT ${MAX_EXPLAINED_ALERTS}`,
+    ].join('\n'),
+    params: [{ spaceId }, ...values.map((value, index) => ({ [`value${index}`]: value }))],
+  };
+};
+
 export const buildTotalQuery = (spaceId: string): GeneratedQuery =>
   buildQuery(
     ACTIVE_IN_SPACE_FILTERS,
@@ -94,7 +116,7 @@ export const createClassicAlertMatcher = ({
     const [keyedGroups, activeAlerts] = await Promise.all([
       Promise.all(
         keys.flatMap((key) =>
-          aliasVariants(key).map(
+          aliasVariants(key, keys).map(
             async (variant): Promise<KeyedAlertGroups> => ({
               key,
               groups: await queryGroups(esClient, variant, spaceId),

@@ -18,7 +18,7 @@ const toText = (value: EsqlValue | undefined): string | null => {
 };
 
 /** The entity's value at each column of the key, or `null` when any is missing. */
-const entityTuple = (entity: EntityRow, key: MatchKey): string[] | null => {
+export const entityTuple = (entity: EntityRow, key: MatchKey): string[] | null => {
   const values = key.map((column) => toText(entity[column]));
   return values.every((value): value is string => value !== null) ? values : null;
 };
