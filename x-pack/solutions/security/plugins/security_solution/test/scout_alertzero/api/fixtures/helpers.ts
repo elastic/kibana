@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, ApiServicesFixture } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
@@ -20,7 +20,12 @@ import {
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import { HUNT_WORKER_URL, TI_HEADERS } from './constants';
+import {
+  COLD_ELSER_REQUEST_TIMEOUT_MS,
+  HUNT_WORKER_URL,
+  INTERNAL_HEADERS,
+  TI_HEADERS,
+} from './constants';
 import { SUPPLY_WORKFLOW_IDS, type SupplyWorkflowKey } from './supply_workflow_ids';
 
 /** Minimal ES client surface these tests rely on. */
@@ -32,12 +37,15 @@ interface EsLike {
     ignore_unavailable?: boolean;
     conflicts?: 'proceed' | 'abort';
   }): Promise<unknown>;
-  index(args: {
-    index: string;
-    id: string;
-    document: Record<string, unknown>;
-    refresh?: boolean;
-  }): Promise<unknown>;
+  index(
+    args: {
+      index: string;
+      id: string;
+      document: Record<string, unknown>;
+      refresh?: boolean;
+    },
+    options?: { requestTimeout?: number }
+  ): Promise<unknown>;
 }
 
 /**
@@ -125,6 +133,17 @@ export interface HuntPrerequisites {
 
 const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
 
+/**
+ * The settings route is `access: 'internal'`, so under the alertzero config set
+ * (`--server.restrictInternalApis=true`) a bare cookie header gets a 400 before the
+ * per-space gate is ever read. Merging `INTERNAL_HEADERS` here keeps every caller —
+ * including ones passing plain cookie headers — working on both lanes.
+ */
+const alertZeroSettingsHeaders = (headers: Record<string, string>): Record<string, string> => ({
+  ...INTERNAL_HEADERS,
+  ...headers,
+});
+
 /** Reads the per-space AlertZero gate as the user set it; `undefined` when it is still the default. */
 export const readAlertZeroEnabledInSpace = async ({
   apiClient,
@@ -136,7 +155,7 @@ export const readAlertZeroEnabledInSpace = async ({
   spaceId: string;
 }): Promise<boolean | undefined> => {
   const response = await apiClient.get(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
-    headers,
+    headers: alertZeroSettingsHeaders(headers),
     responseType: 'json',
   });
   if (response.statusCode !== 200) {
@@ -168,7 +187,7 @@ export const setAlertZeroEnabledInSpace = async ({
   enabled: boolean | undefined;
 }): Promise<void> => {
   const response = await apiClient.post(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
-    headers: { ...headers, 'kbn-xsrf': 'true' },
+    headers: alertZeroSettingsHeaders(headers),
     responseType: 'json',
     body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: enabled ?? null } },
   });
@@ -187,6 +206,81 @@ export const enableAlertZeroInSpace = async (args: {
   headers: Record<string, string>;
   spaceId: string;
 }): Promise<void> => setAlertZeroEnabledInSpace({ ...args, enabled: true });
+
+type SpaceSolution = 'security' | 'classic' | 'oblt' | 'es';
+
+const readSpaceSolution = async ({
+  apiClient,
+  headers,
+  spaceId,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<SpaceSolution> => {
+  // Spaces is a public API: it takes the public API version, not the internal one.
+  const response = await apiClient.get(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
+    headers: { ...INTERNAL_HEADERS, ...headers, 'elastic-api-version': '2023-10-31' },
+    responseType: 'json',
+  });
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `Setup: failed to read space ${spaceId} (status ${response.statusCode}): ${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+  return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
+};
+
+/**
+ * Makes one suite's space usable by AlertZero and returns the restore callback for its afterAll.
+ *
+ * AlertZero answers 404 outside a Security solution space, and the default space may be
+ * Classic, so the space's solution view is switched to Security alongside the per-space gate.
+ * The suites run serially (`workers: 1`), so a suite that only enables — never restores — would
+ * leak into the next suite on the same stack; restoring both captured baselines keeps the shared
+ * space exactly as this suite found it, including when the gate or the Security view was
+ * already on.
+ */
+export const withAlertZeroEnabledInSpace = async (args: {
+  apiClient: ApiClientFixture;
+  apiServices: ApiServicesFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<() => Promise<void>> => {
+  const { apiServices, spaceId } = args;
+  const setSpaceSolution = (solution: SpaceSolution): Promise<void> =>
+    apiServices.spaces.setSolutionView({ id: spaceId, solution });
+  const baselineSolution = await readSpaceSolution(args);
+  const switchedSolution = baselineSolution !== 'security';
+  if (switchedSolution) {
+    await setSpaceSolution('security');
+  }
+  let baselineEnabled: boolean | undefined;
+  try {
+    baselineEnabled = await readAlertZeroEnabledInSpace(args);
+    await setAlertZeroEnabledInSpace({ ...args, enabled: true });
+  } catch (error) {
+    // The caller never receives a restore callback when setup throws, so the solution switch
+    // would outlive the suite. Roll it back here before surfacing the original failure.
+    if (switchedSolution) {
+      await setSpaceSolution(baselineSolution).catch(() => undefined);
+    }
+    throw error;
+  }
+  return async () => {
+    // The solution view is restored even when the gate write fails, so the shared space never
+    // stays on Security for later suites; the gate failure is still surfaced.
+    try {
+      await setAlertZeroEnabledInSpace({ ...args, enabled: baselineEnabled });
+    } finally {
+      if (switchedSolution) {
+        await setSpaceSolution(baselineSolution);
+      }
+    }
+  };
+};
 
 /**
  * Creates a space-scoped `.gen-ai` connector (so Workers are not blocked by `noModel`),
@@ -450,31 +544,35 @@ export const seedSharedReportWithEvidence = async ({
   spaceA: string;
   spaceB: string;
 }): Promise<void> => {
-  await esClient.index({
-    index: THREAT_REPORTS_INDEX,
-    id: reportId,
-    refresh: true,
-    document: {
-      space_id: '*',
-      source: { name: sourceName },
-      content: {
-        title: `Scout isolation ${reportId}`,
-        body_text: `Shared report for evidence projection ${reportId}`,
+  // `content.*` is `semantic_text`: on a cold stack this write waits for the ELSER deployment.
+  await esClient.index(
+    {
+      index: THREAT_REPORTS_INDEX,
+      id: reportId,
+      refresh: true,
+      document: {
+        space_id: '*',
+        source: { name: sourceName },
+        content: {
+          title: `Scout isolation ${reportId}`,
+          body_text: `Shared report for evidence projection ${reportId}`,
+        },
+        evidence: [
+          {
+            space_id: spaceA,
+            alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
+            alert_hits_total: 1,
+          },
+          {
+            space_id: spaceB,
+            alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
+            alert_hits_total: 10,
+          },
+        ],
       },
-      evidence: [
-        {
-          space_id: spaceA,
-          alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 0 },
-          alert_hits_total: 1,
-        },
-        {
-          space_id: spaceB,
-          alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 1 },
-          alert_hits_total: 10,
-        },
-      ],
     },
-  });
+    { requestTimeout: COLD_ELSER_REQUEST_TIMEOUT_MS }
+  );
 };
 
 /** Headers for hunt/TI internal calls as a given cookie session. */

@@ -272,19 +272,8 @@ apiTest.describe.serial(
     apiTest.afterAll(async ({ apiServices, apiClient, esClient }) => {
       apiTest.setTimeout(SETUP_TIMEOUT_MS);
       await runCleanupSteps([
-        {
-          name: `delete ${ruleIds.length} rules`,
-          run: async () => {
-            if (ruleIds.length === 0) return;
-            await apiClient.post(`${RULES_URL}/_bulk_action`, {
-              headers: { ...adminHeaders, ...RULE_HEADERS },
-              responseType: 'json',
-              body: { action: 'delete', ids: ruleIds },
-            });
-          },
-        },
         // Each review parks at its analyst gate for up to 72h; cancelled so they do not
-        // pile up as in-flight reviews for later runs.
+        // pile up as in-flight reviews for later runs. Cancelled before the rules they review go.
         ...reviewExecutionIds.map((id) => ({
           name: `cancel review ${id}`,
           run: async () => {
@@ -293,6 +282,22 @@ apiTest.describe.serial(
             });
           },
         })),
+        {
+          name: `delete ${ruleIds.length} rules`,
+          run: async () => {
+            if (ruleIds.length === 0) return;
+            const response = await apiClient.post(`${RULES_URL}/_bulk_action`, {
+              headers: { ...adminHeaders, ...RULE_HEADERS },
+              responseType: 'json',
+              body: { action: 'delete', ids: ruleIds },
+            });
+            if (response.statusCode !== 200) {
+              throw new Error(
+                `delete rules failed: ${response.statusCode} ${JSON.stringify(response.body)}`
+              );
+            }
+          },
+        },
         { name: 'delete seeded alerts', run: () => clearAlerts(esClient) },
         { name: `delete space ${SPACE_ID}`, run: () => apiServices.spaces.delete(SPACE_ID) },
         // Deleting the space leaves its alerts index behind. Resolved by name: wildcard

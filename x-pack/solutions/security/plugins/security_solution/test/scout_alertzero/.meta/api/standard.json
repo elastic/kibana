@@ -1,9 +1,34 @@
 {
-  "sha1": "83eca0703e68d77ecd754926e27735318e8b63b9",
+  "sha1": "eeee5c75f693da9e8a4750518a99b506763b21e2",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "9f068b4a70f77a5-70ee593eeeee8d3",
+      "title": "Apply the AlertZero runtime advanced settings",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "d26af6f4779bb94-fed40caaf10d9e8",
+      "title": "AlertZero e2e - attack discovery to host isolation turns a seeded attack chain into an approved host isolation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
+        "line": 322,
+        "column": 53
+      }
+    },
     {
       "id": "e11dd99e43856bd-8769fe0d7fbbac4",
       "title": "Hunt Watch - authz isolation and evidence projection returns 403 on every hunt route for a user without AlertZero",
@@ -14,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 100,
+        "line": 103,
         "column": 9
       }
     },
@@ -28,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 109,
+        "line": 112,
         "column": 25
       }
     },
@@ -42,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 125,
+        "line": 128,
         "column": 6
       }
     },
@@ -56,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 131,
+        "line": 134,
         "column": 25
       }
     },
@@ -70,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 146,
+        "line": 149,
         "column": 24
       }
     },
@@ -84,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 154,
+        "line": 157,
         "column": 6
       }
     },
@@ -98,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 164,
+        "line": 167,
         "column": 33
       }
     },
@@ -112,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 181,
+        "line": 184,
         "column": 17
       }
     },
@@ -125,8 +150,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 22,
-        "column": 11
+        "line": 35,
+        "column": 18
       }
     },
     {
@@ -138,8 +163,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 32,
-        "column": 13
+        "line": 47,
+        "column": 17
       }
     },
     {
@@ -320,7 +345,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 70,
+        "line": 74,
         "column": 27
       }
     },
@@ -334,7 +359,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 86,
+        "line": 90,
         "column": 74
       }
     },
@@ -348,7 +373,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 298,
+        "line": 303,
         "column": 9
       }
     },
@@ -362,7 +387,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 537,
+        "line": 542,
         "column": 48
       }
     },
@@ -376,7 +401,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 550,
+        "line": 555,
         "column": 15
       }
     },
@@ -390,7 +415,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 575,
+        "line": 580,
         "column": 15
       }
     },
@@ -404,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 605,
+        "line": 610,
         "column": 63
       }
     },
@@ -418,7 +443,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 654,
+        "line": 659,
         "column": 15
       }
     },
@@ -432,7 +457,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 710,
+        "line": 715,
         "column": 9
       }
     },
@@ -446,7 +471,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
-        "line": 747,
+        "line": 752,
         "column": 18
       }
     },
@@ -504,6 +529,73 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 107,
         "column": 11
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-83d619f856d1450",
+      "title": "AlertZero e2e - worker control lists the managed security workers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 192,
+        "column": 22
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-0ad915243afad21",
+      "title": "AlertZero e2e - worker control refuses to enable a worker that has no service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 200,
+        "column": 31
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-594cee81ef81e87",
+      "title": "AlertZero e2e - worker control resets a worker that a previous spec left enabled with a service account bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 232,
+        "column": 7
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-9e1a0a3f30d75e1",
+      "title": "AlertZero e2e - worker control enables a worker once a service account is selected, then disables it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 268,
+        "column": 29
+      }
+    },
+    {
+      "id": "e40104a6a42898a-f810ab52b78e032",
+      "title": "Restore the AlertZero runtime advanced settings",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

@@ -8,6 +8,7 @@ plugins:
     - ai_anonymization_settings
     - alerting
     - alerting_v2
+    - alertzero
     - apm
     - automatic_import
     - banners
