@@ -213,22 +213,25 @@ describe('NightshiftOnboarding', () => {
       mockConnectors({ '.new_relic': 1, '.github': 0 });
     });
 
-    it('links every completed step except Enable, without a Back button', () => {
+    it('links every completed step except Enable, without Back or Back to suggestions', () => {
       renderOnboarding(investigation);
 
       expect(currentStep()).toBe('automate');
       expect(linkedSteps()).toEqual(['addData', 'connectSources', 'investigate']);
       expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
     });
 
-    it('returns to a completed step and forward again through the card', () => {
+    it('returns to a completed step and forward again through the card, not by rerunning', () => {
       renderOnboarding(investigation);
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
       expect(currentStep()).toBe('connectSources');
       expect(linkedSteps()).toEqual(['addData', 'investigate', 'automate']);
+      expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingBackToSuggestionsButton'));
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton'));
+      expect(mockStartSuggestions).not.toHaveBeenCalled();
       expect(currentStep()).toBe('automate');
     });
   });

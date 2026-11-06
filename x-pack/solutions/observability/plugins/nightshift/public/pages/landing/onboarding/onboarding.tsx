@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -91,10 +90,6 @@ const INVESTIGATE_SECTION_TITLE = i18n.translate(
 const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
   defaultMessage: 'Enable Elastic nightshift',
 });
-
-const backButtonStyles = css`
-  width: 100%;
-`;
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
@@ -255,94 +250,58 @@ export function NightshiftOnboarding({
 
   const stepAction =
     step === 'addData' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {hasTelemetrySource && (
-          <EuiButton
-            fill
-            fullWidth
-            size="s"
-            iconType="sortRight"
-            iconSide="right"
-            onClick={() => setStepOverride('connectSources')}
-            data-test-subj="nightshiftOnboardingAddDataProceedButton"
-          >
-            {PROCEED_LABEL}
-          </EuiButton>
-        )}
-        {isConnected && (
-          <EuiButtonEmpty
-            size="s"
-            iconType="sortLeft"
-            iconSide="left"
-            css={backButtonStyles}
-            onClick={() => setStepOverride(undefined)}
-            data-test-subj="nightshiftOnboardingBackToSuggestionsButton"
-          >
-            {i18n.translate('xpack.nightshift.onboarding.cancelEditButton', {
-              defaultMessage: 'Back to suggestions',
-            })}
-          </EuiButtonEmpty>
-        )}
-      </EuiFlexGroup>
+      hasTelemetrySource && (
+        <EuiButton
+          fill
+          fullWidth
+          size="s"
+          iconType="sortRight"
+          iconSide="right"
+          onClick={() => setStepOverride('connectSources')}
+          data-test-subj="nightshiftOnboardingAddDataProceedButton"
+        >
+          {PROCEED_LABEL}
+        </EuiButton>
+      )
     ) : step === 'connectSources' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiButton
-          fill={hasAdditionalSource}
-          fullWidth
-          size="s"
-          iconType="sortRight"
-          iconSide="right"
-          isLoading={startSuggestions.isLoading}
-          onClick={() => startSuggestions.mutate()}
-          data-test-subj="nightshiftOnboardingConnectSourcesProceedButton"
-        >
-          {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}
-        </EuiButton>
-        {isConnected && (
-          <EuiButtonEmpty
-            size="s"
-            iconType="sortLeft"
-            iconSide="left"
-            css={backButtonStyles}
-            onClick={() => setStepOverride(undefined)}
-            data-test-subj="nightshiftOnboardingBackToSuggestionsButton"
-          >
-            {i18n.translate('xpack.nightshift.onboarding.cancelEditButton', {
-              defaultMessage: 'Back to suggestions',
-            })}
-          </EuiButtonEmpty>
-        )}
-      </EuiFlexGroup>
+      <EuiButton
+        fill={hasAdditionalSource}
+        fullWidth
+        size="s"
+        iconType="sortRight"
+        iconSide="right"
+        isLoading={startSuggestions.isLoading}
+        onClick={() => (isConnected ? setStepOverride(undefined) : startSuggestions.mutate())}
+        data-test-subj="nightshiftOnboardingConnectSourcesProceedButton"
+      >
+        {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}
+      </EuiButton>
     ) : step === 'investigate' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {latestInvestigation && (
-          <EuiButton
-            fullWidth
-            size="s"
-            iconType="sortRight"
-            iconSide="right"
-            onClick={() => setStepOverride(undefined)}
-            data-test-subj="nightshiftOnboardingProceedToAutomationButton"
-          >
-            {PROCEED_LABEL}
-          </EuiButton>
-        )}
-      </EuiFlexGroup>
-    ) : step === 'automate' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      latestInvestigation && (
         <EuiButton
           fullWidth
           size="s"
           iconType="sortRight"
           iconSide="right"
-          onClick={onFinish}
-          data-test-subj="nightshiftOnboardingFinishButton"
+          onClick={() => setStepOverride(undefined)}
+          data-test-subj="nightshiftOnboardingProceedToAutomationButton"
         >
-          {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-            defaultMessage: "I'll do it later",
-          })}
+          {PROCEED_LABEL}
         </EuiButton>
-      </EuiFlexGroup>
+      )
+    ) : step === 'automate' ? (
+      <EuiButton
+        fullWidth
+        size="s"
+        iconType="sortRight"
+        iconSide="right"
+        onClick={onFinish}
+        data-test-subj="nightshiftOnboardingFinishButton"
+      >
+        {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
+          defaultMessage: "I'll do it later",
+        })}
+      </EuiButton>
     ) : undefined;
 
   const sectionTitle =
