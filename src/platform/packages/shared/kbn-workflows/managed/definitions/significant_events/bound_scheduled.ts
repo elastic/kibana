@@ -9,7 +9,7 @@
 
 import SCHEDULED_DETECTION_YAML from './bound_scheduled_detection.yaml';
 import SCHEDULED_REVIEW_YAML from './bound_scheduled_review.yaml';
-import { renderRunAs } from '../../render_bound_yaml';
+import { renderRunAs, renderTemplate } from '../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID =
@@ -48,16 +48,6 @@ const NIGHTSHIFT_BOUND_SCHEDULED_WORKFLOW_MANAGEMENT = {
   versionStrategy: 'auto',
   enablement: 'restorable',
 } as const;
-
-// yamlTemplate values are substituted into the static yaml files above via
-// exact-token replacement, since values (e.g. batch sizes) are needed at
-// workflow-install time rather than at workflow-run time and so can't be
-// expressed with the engine's own `${{ }}` / `{{ }}` runtime templating.
-const renderTemplate = (template: string, values: Record<string, string | number>): string =>
-  Object.entries(values).reduce(
-    (yaml, [token, value]) => yaml.split(token).join(String(value)),
-    template
-  );
 
 /** Scheduled detection, installed per space and bound to its detection engine account. */
 export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW = {
