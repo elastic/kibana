@@ -19,8 +19,14 @@ import {
   map,
   merge,
   mergeMap,
+  of,
+  race,
   skip,
+  skipWhile,
   startWith,
+  Subscription,
+  switchMap,
+  take,
   tap,
   type Observable,
 } from 'rxjs';
@@ -44,6 +50,7 @@ import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishin
 import {
   apiHasLibraryTransforms,
   apiHasSerializableState,
+  apiPublishesDataLoading,
   apiPublishesTitle,
   childrenLatestState$,
   childrenUnsavedChanges$,
@@ -84,6 +91,9 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
+
+/** How long a new panel's dataLoading$ must stay falsy before that panel counts as done loading */
+const PANEL_SETTLE_DEBOUNCE_MS = 300;
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -242,6 +252,63 @@ export function initializeLayoutManager(
   };
 
   // --------------------------------------------------------------------------------------
+  // Track incoming panels until they are loaded
+  // --------------------------------------------------------------------------------------
+  /**
+   * Panels added together stay pending until each one is removed, or its API is registered,
+   * it has published its serialized state, and its data has stayed done loading. Undo history
+   * waits so the whole addition, including that state, is recorded as one step.
+   */
+  const pendingPanelIds$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
+  const panelsSettling$ = pendingPanelIds$.pipe(
+    map((ids) => ids.size > 0),
+    distinctUntilChanged()
+  );
+  const settlingSubscriptions = new Subscription();
+
+  const markPanelSettled = (uuid: string) => {
+    if (!pendingPanelIds$.value.has(uuid)) return;
+    const pendingIds = new Set(pendingPanelIds$.value);
+    pendingIds.delete(uuid);
+    pendingPanelIds$.next(pendingIds);
+  };
+
+  const waitForPanelsToSettle = (uuids: string[]) => {
+    pendingPanelIds$.next(new Set([...pendingPanelIds$.value, ...uuids]));
+    for (const uuid of uuids) {
+      const panelReady$ = children$.pipe(
+        skipWhile((children) => !children[uuid]),
+        take(1),
+        switchMap((children) => {
+          const child = children[uuid];
+          // The published state is what undo restores. Wait for it even when the panel never loads data.
+          const stateReady$ = apiHasSerializableState(child)
+            ? child.latestState$.pipe(take(1))
+            : of(undefined);
+          // A stable falsy value gives a panel time to start loading before the addition is snapshotted.
+          const loadingDone$ = apiPublishesDataLoading(child)
+            ? child.dataLoading$.pipe(
+                debounceTime(PANEL_SETTLE_DEBOUNCE_MS),
+                skipWhile(Boolean),
+                take(1)
+              )
+            : of(undefined);
+          return combineLatest([stateReady$, loadingDone$]).pipe(take(1));
+        })
+      );
+      const panelRemoved$ = layout$.pipe(
+        skipWhile((layout) => Boolean(layout.panels[uuid])),
+        take(1)
+      );
+      settlingSubscriptions.add(
+        race(panelReady$, panelRemoved$).subscribe(() => {
+          markPanelSettled(uuid);
+        })
+      );
+    }
+  };
+
+  // --------------------------------------------------------------------------------------
   // Place incoming embeddables (used at init and for late arrivals on the same dashboard)
   // --------------------------------------------------------------------------------------
   const addIncomingEmbeddables = (embeddables?: EmbeddablePackageState[]) => {
@@ -249,6 +316,7 @@ export function initializeLayoutManager(
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
 
+    const addedPanelIds: string[] = [];
     for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
@@ -285,7 +353,9 @@ export function initializeLayoutManager(
       };
 
       layout$.next(updatedLayout);
+      addedPanelIds.push(uuid);
     }
+    waitForPanelsToSettle(addedPanelIds);
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
   };
@@ -536,6 +606,7 @@ export function initializeLayoutManager(
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
       childrenLoading$,
+      panelsSettling$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
 
@@ -717,6 +788,7 @@ export function initializeLayoutManager(
       stateChangedSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
       removeOrphanedChildrenSubscription.unsubscribe();
+      settlingSubscriptions.unsubscribe();
     },
   };
 }

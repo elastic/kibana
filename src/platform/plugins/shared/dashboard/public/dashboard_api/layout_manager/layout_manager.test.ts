@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 import {
@@ -26,6 +26,7 @@ import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getSampleDashboardState } from '../../mocks';
+import { initializeHistoryManager } from '../history_manager';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { deserializeLayout } from './deserialize_layout';
@@ -705,6 +706,167 @@ describe('layout manager', () => {
       });
       expect(loadingStates.filter((loading) => !loading).length).toEqual(3);
       expect(loadingStates.at(-3)).toEqual(false);
+    });
+  });
+
+  describe('panelsSettling$', () => {
+    const incomingEmbeddables = [
+      { embeddableId: 'panelTwo', serializedState: {}, type: 'testPanelType' },
+      { embeddableId: 'panelThree', serializedState: {}, type: 'testPanelType' },
+    ];
+
+    const getSettlingStates = (layoutManager: ReturnType<typeof initializeLayoutManager>) => {
+      const settlingStates: boolean[] = [];
+      layoutManager.internalApi.panelsSettling$.subscribe((settling) => {
+        settlingStates.push(settling);
+      });
+      return settlingStates;
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const serializableApi = (
+      uuid: string,
+      latestState$: Subject<object>,
+      dataLoading$?: BehaviorSubject<boolean | undefined>
+    ) =>
+      ({
+        uuid,
+        latestState$,
+        anyStateChange$: new Subject<void>(),
+        serializeState: () => ({}),
+        applySerializedState: jest.fn(),
+        ...(dataLoading$ ? { dataLoading$ } : {}),
+      } as unknown as DefaultEmbeddableApi);
+
+    test('is settling until the added panels have published state and finished loading', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      const settlingStates = getSettlingStates(layoutManager);
+      expect(settlingStates.at(-1)).toBe(false);
+
+      layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+      expect(settlingStates.at(-1)).toBe(true);
+
+      const panelTwoDataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const panelTwoState$ = new Subject<object>();
+      const panelThreeState$ = new Subject<object>();
+      layoutManager.api.registerChildApi(
+        serializableApi('panelTwo', panelTwoState$, panelTwoDataLoading$)
+      );
+      layoutManager.api.registerChildApi(serializableApi('panelThree', panelThreeState$));
+      jest.advanceTimersByTime(1000);
+      expect(settlingStates.at(-1)).toBe(true);
+
+      panelThreeState$.next({ title: 'panelThree' });
+      expect(settlingStates.at(-1)).toBe(true);
+
+      panelTwoDataLoading$.next(false);
+      jest.advanceTimersByTime(1000);
+      expect(settlingStates.at(-1)).toBe(true);
+
+      panelTwoState$.next({ title: 'panelTwo' });
+      expect(settlingStates.at(-1)).toBe(false);
+    });
+
+    test('stops settling when an added panel is removed before it registers', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      const settlingStates = getSettlingStates(layoutManager);
+
+      layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+      layoutManager.api.registerChildApi({ uuid: 'panelThree' } as DefaultEmbeddableApi);
+      layoutManager.api.removePanel('panelTwo');
+      expect(settlingStates.at(-1)).toBe(false);
+    });
+
+    test("undoes an import, including each panel's published state, as one step", async () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      const latestChangeBySource = {};
+      const getState = jest.fn(() => ({
+        ...getSampleDashboardState(),
+        ...layoutManager.internalApi.serializeLayout(),
+        latestChangeBySource,
+      }));
+      const setState = jest.fn(async () => {});
+      const initialState$ = new Subject<ReturnType<typeof getState>>();
+      const history = initializeHistoryManager({
+        anyStateChange$: layoutManager.internalApi.anyStateChange$,
+        hasOverlays$: new BehaviorSubject(false),
+        getState,
+        setState,
+        dataLoading$: layoutManager.internalApi.panelsSettling$,
+        initialState$,
+      });
+      initialState$.next(getState());
+      getState.mockClear();
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'panelTwo',
+          serializedState: { title: 'incoming two' },
+          type: 'testPanelType',
+        },
+        {
+          embeddableId: 'panelThree',
+          serializedState: { title: 'incoming three' },
+          type: 'testPanelType',
+        },
+      ]);
+      jest.runOnlyPendingTimers();
+
+      const panelTwoDataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const panelTwoState$ = new Subject<object>();
+      const panelThreeState$ = new Subject<object>();
+      layoutManager.api.registerChildApi(
+        serializableApi('panelTwo', panelTwoState$, panelTwoDataLoading$)
+      );
+      layoutManager.api.registerChildApi(serializableApi('panelThree', panelThreeState$));
+      panelTwoState$.next({ title: 'loaded two' });
+      panelThreeState$.next({ title: 'loaded three' });
+      jest.runOnlyPendingTimers();
+      expect(getState).not.toHaveBeenCalled();
+
+      panelTwoDataLoading$.next(false);
+      jest.advanceTimersByTime(300);
+      jest.runOnlyPendingTimers();
+      expect(getState).toHaveBeenCalled();
+      const snapshot = getState.mock.results.at(-1)?.value;
+      expect(snapshot?.panels).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'panelTwo', config: { title: 'loaded two' } }),
+          expect.objectContaining({ id: 'panelThree', config: { title: 'loaded three' } }),
+        ])
+      );
+
+      await history.internalApi.undo();
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({ panels: [expect.objectContaining({ id: PANEL_ONE_ID })] })
+      );
+      expect(history.internalApi.canUndo$.getValue()).toBe(false);
+
+      history.cleanup();
+      layoutManager.cleanup();
     });
   });
 });

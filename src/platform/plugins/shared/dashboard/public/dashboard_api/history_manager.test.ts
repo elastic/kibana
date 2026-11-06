@@ -183,6 +183,35 @@ describe('initializeHistoryManager', () => {
       setup.cleanup();
     });
 
+    it('undoes changes made while loading as one step', async () => {
+      const setup = await makeSetup();
+      const addedPanels = [
+        { id: 'panelOne', type: 'testPanelType', grid: { x: 0, y: 0, w: 1, h: 1 }, config: {} },
+        { id: 'panelTwo', type: 'testPanelType', grid: { x: 1, y: 0, w: 1, h: 1 }, config: {} },
+      ];
+      setup.dataLoading$.next(true);
+
+      setup.stateRef.current = { ...setup.initialState, panels: addedPanels };
+      setup.anyStateChange$.next();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      setup.stateRef.current = {
+        ...setup.initialState,
+        panels: addedPanels.map((panel) => ({ ...panel, config: { title: panel.id } })),
+      };
+      setup.anyStateChange$.next();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(setup.getState).not.toHaveBeenCalled();
+
+      setup.dataLoading$.next(false);
+      await waitFor(() => expect(setup.getState).toHaveBeenCalledTimes(1));
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toBe(false);
+
+      await setup.api.undo();
+      expect(setup.setState).toBeCalledWith(setup.initialState);
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toBe(true);
+      setup.cleanup();
+    });
+
     it('reflects that undo is disabled when overlays are open', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
