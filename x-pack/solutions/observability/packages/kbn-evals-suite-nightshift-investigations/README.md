@@ -334,15 +334,17 @@ workflow.
 
 ## Reinforcement micro-eval
 
-`NIGHTSHIFT_DATASETS=reinforcement` replays three Customer-0 rounds through the reinforcement
+`NIGHTSHIFT_DATASETS=reinforcement` replays four Customer-0 rounds through the reinforcement
 agent (`system-nightshift-agent-optimize`). Each round seeds its prior tree and includes the
 investigator's view of that file, so the agent merges into an existing tree instead of creating one.
 The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and that
-round's `metadata.require_merge` makes an empty `merged_nodes` list score 0. The other two rounds
+round's `metadata.require_merge` makes an empty `merged_nodes` list score 0. The other three rounds
 may submit an empty list. The question and conclusion are the published
 `customer0-eql-slo-burn-rate-2026-09-14` label. The gateway and proxy rounds are the two symptoms
-that label names. Each `view_file` result is the prior tree, and each sandbox command is an ES|QL
-query whose rows restate the label. They are not a captured cluster transcript.
+that label names. The fourth round is a proxy round that confirms no cause, so a causal path on it
+scores 0. It is not part of the label. Each `view_file` result is the prior tree, and each sandbox
+command is an ES|QL query. In the first three rounds its rows restate the label. The rounds are not
+a captured cluster transcript.
 
 A code evaluator checks that the submit includes a traversal for each tree it names, that the visit
 path is non-empty and resolves on the submitted tree, that a causal path is present only when the

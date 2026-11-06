@@ -22,6 +22,9 @@ const SUBMIT_TOOL = 'nightshift_submit_optimizer_result';
  */
 const CONFIRMED_CAUSE_RE = /"status"\s*:\s*"confirmed"|\bstatus:\s*['"]?confirmed\b/i;
 
+/** True when the investigator response confirms a cause, so the submit must carry a causal path. */
+export const confirmsCause = (response: string): boolean => CONFIRMED_CAUSE_RE.test(response);
+
 /** Keeps the merges and traversals that name `treeId`, so one submit can be graded per tree. */
 export const submissionsForTree = (
   submissions: SubmitArguments[],
@@ -201,7 +204,7 @@ const traversalProblems = (
   if (traversals.length === 0) {
     return [`The submit has no traversal for ${treeId}.`];
   }
-  const confirmed = CONFIRMED_CAUSE_RE.test(response);
+  const confirmed = confirmsCause(response);
   const problems: string[] = [];
   for (const traversal of traversals) {
     if ((traversal.visited_path ?? []).length === 0) {

@@ -5,8 +5,43 @@
  * 2.0.
  */
 
+import { confirmsCause, gradeSubmissions, parseTreeMarkdown } from './arguments';
 import { REINFORCEMENT_EXAMPLE_LIMIT, selectCustomer0Examples } from './datasets';
 import { reinforcementExamples } from './traces';
+import type { ReinforcementExample, SubmitArguments } from './types';
+
+const NEGATIVE_CASE_IDS = ['customer0-es-proxy-unconfirmed-2026-09-14'];
+
+const negativeRounds = reinforcementExamples.filter(
+  (example) => !confirmsCause(example.input.response)
+);
+
+const gradeOnPriorTree = (example: ReinforcementExample, submission: SubmitArguments) => {
+  const { tree_id: treeId, markdown } = example.input.prior_tree;
+  const tree = parseTreeMarkdown(markdown, treeId);
+  return gradeSubmissions({
+    submissions: [submission],
+    prior: tree,
+    submitted: tree,
+    response: example.input.response,
+  });
+};
+
+/** Columns a `STATS ... BY ...` command produces: aliases, plus plain grouping fields. */
+const statsColumns = (command: string): Set<string> | undefined => {
+  const stats = command
+    .split('|')
+    .map((segment) => segment.trim())
+    .find((segment) => segment.startsWith('STATS '));
+  if (!stats) return undefined;
+  const aliases = [...stats.matchAll(/([\w.@]+)\s*=/g)].map(([, alias]) => alias);
+  const [, groupings = ''] = stats.split(' BY ');
+  const fields = groupings
+    .split(',')
+    .map((grouping) => grouping.trim())
+    .filter((grouping) => /^[\w.@]+$/.test(grouping));
+  return new Set([...aliases, ...fields]);
+};
 
 describe('selectCustomer0Examples', () => {
   const examples = ['a', 'b', 'c', 'd', 'e', 'f'];
@@ -40,4 +75,50 @@ describe('reinforcementExamples', () => {
     expect(command).toContain('FROM logs-*');
     expect(command.startsWith('esql "FROM logs-*')).toBe(true);
   });
+});
+
+describe('bundled ES|QL queries', () => {
+  it.each(reinforcementExamples.map((example) => [example.metadata.case_id, example] as const))(
+    '%s sorts by a column its STATS produces and its output header names those columns',
+    (_, example) => {
+      const command = String(example.input.tool_calls[1].params.command);
+      const columns = statsColumns(command);
+      if (!columns) return;
+      const [, sortColumn] = command.match(/\| SORT ([\w.@]+)/) ?? [];
+      expect(columns).toContain(sortColumn);
+      const bash = example.input.tool_results[1].results[0] as { data: { stdout: string } };
+      const [header = ''] = bash.data.stdout.split('\n');
+      expect(new Set(header.trim().split(/\s+/))).toEqual(columns);
+    }
+  );
+});
+
+describe('negative reinforcement round', () => {
+  it('bundles a round that confirms no cause, and every other round confirms one', () => {
+    expect(negativeRounds.length).toBeGreaterThanOrEqual(1);
+    expect(negativeRounds.map((example) => example.metadata.case_id)).toEqual(NEGATIVE_CASE_IDS);
+    for (const example of reinforcementExamples) {
+      if (NEGATIVE_CASE_IDS.includes(example.metadata.case_id)) continue;
+      expect(confirmsCause(example.input.response)).toBe(true);
+    }
+  });
+
+  it.each(negativeRounds.map((example) => [example.metadata.case_id, example] as const))(
+    '%s scores 0 when the submit sets a causal path and 1 when it does not',
+    (_, example) => {
+      const treeId = example.input.prior_tree.tree_id;
+      const visitedPath = ['S1', 'E1', 'D1'];
+
+      const withCausalPath = gradeOnPriorTree(example, {
+        traversals: [{ tree_id: treeId, visited_path: visitedPath, causal_path: ['S1', 'E1'] }],
+      });
+      expect(withCausalPath.score).toBeLessThan(1);
+      expect(withCausalPath.explanation).toContain('does not confirm a cause');
+
+      const withoutCausalPath = gradeOnPriorTree(example, {
+        traversals: [{ tree_id: treeId, visited_path: visitedPath }],
+      });
+      expect(withoutCausalPath.score).toBe(1);
+    }
+  );
 });

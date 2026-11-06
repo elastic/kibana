@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { setTimeout as delay } from 'timers/promises';
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
@@ -19,6 +20,7 @@ import {
   parseMermaidDecisionTree,
 } from '@kbn/nightshift-decision-trees';
 import type { EvalConnector } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
@@ -45,6 +47,11 @@ const EXECUTION_LOOKUP_MS = 30_000;
 /** Kibana and Elasticsearch clocks can disagree by a few seconds. */
 const TREE_WRITE_SKEW_MS = 30_000;
 const POLL_INTERVAL_MS = 5_000;
+/** How long a cancelled replay may take to stop before its trees are restored anyway. */
+const CANCEL_WAIT_MS = 60_000;
+/** `prepare_turn` rejects a longer conversation id. */
+const MAX_CONVERSATION_ID_LENGTH = 512;
+const REPLAY_CONVERSATION_PREFIX = 'nightshift-reinforcement-replay-';
 
 const headers = { 'elastic-api-version': API_VERSION };
 
@@ -61,6 +68,7 @@ interface IndexedTreeDoc {
 }
 
 const VERSION_PAGE_SIZE = 100;
+const TREE_ID_PAGE_SIZE = 500;
 
 const errorType = (error: unknown): string | undefined => {
   const candidate = (error ?? {}) as {
@@ -191,6 +199,82 @@ export const restoreDecisionTree = async (
   }
 };
 
+/**
+ * Tree ids of every head document in the space. Throws on a full page, since a partial list would
+ * leave trees out of the snapshot.
+ */
+export const listDecisionTreeIds = async (esClient: Client): Promise<string[]> => {
+  let heads;
+  try {
+    heads = await esClient.search<{ attributes?: { tree_id?: unknown } }>({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      size: TREE_ID_PAGE_SIZE,
+      track_total_hits: false,
+      _source: ['attributes.tree_id'],
+      query: {
+        bool: {
+          filter: [
+            { term: { type: 'decision_tree' } },
+            { term: { 'attributes.space_id': SPACE_ID } },
+          ],
+        },
+      },
+    });
+  } catch (error) {
+    if (isIndexNotFound(error)) return [];
+    throw error;
+  }
+
+  const hits = heads.hits.hits;
+  if (hits.length >= TREE_ID_PAGE_SIZE) {
+    throw new Error(
+      `The ${SPACE_ID} space has ${TREE_ID_PAGE_SIZE} or more decision trees, so the replay cannot snapshot all of them`
+    );
+  }
+  const ids = hits
+    .map((hit) => hit._source?.attributes?.tree_id)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0);
+  return [...new Set(ids)];
+};
+
+/** Snapshots every tree in the space plus `treeIds`, so a replay that edits several trees can be undone. */
+export const snapshotDecisionTrees = async (
+  esClient: Client,
+  treeIds: readonly string[]
+): Promise<Map<string, IndexedTreeDoc[]>> => {
+  const ids = new Set([...(await listDecisionTreeIds(esClient)), ...treeIds]);
+  const snapshots = new Map<string, IndexedTreeDoc[]>();
+  for (const id of ids) {
+    snapshots.set(id, await snapshotDecisionTree(esClient, id));
+  }
+  return snapshots;
+};
+
+/**
+ * Restores every snapshotted tree and deletes trees created since the snapshot. Keeps going past a
+ * failed tree and throws the first error at the end.
+ */
+export const restoreDecisionTrees = async (
+  esClient: Client,
+  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>
+): Promise<void> => {
+  let firstError: unknown;
+  let currentIds: string[] = [];
+  try {
+    currentIds = await listDecisionTreeIds(esClient);
+  } catch (error) {
+    firstError = error;
+  }
+  for (const id of new Set([...snapshots.keys(), ...currentIds])) {
+    try {
+      await restoreDecisionTree(esClient, id, snapshots.get(id) ?? []);
+    } catch (error) {
+      firstError ??= error;
+    }
+  }
+  if (firstError !== undefined) throw firstError;
+};
+
 /** Writes the prior tree as the space's head so hydrate and prepare can see it. */
 export const seedPriorTree = async (
   esClient: Client,
@@ -242,6 +326,42 @@ const readSubmittedMarkdown = async (
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
+/** A unique conversation id per replay, so `prepare_turn` runs it as a first round. */
+const replayConversationId = (caseId: string): string => {
+  const suffix = `-${randomUUID()}`;
+  const room = MAX_CONVERSATION_ID_LENGTH - REPLAY_CONVERSATION_PREFIX.length - suffix.length;
+  return `${REPLAY_CONVERSATION_PREFIX}${caseId.slice(0, room)}${suffix}`;
+};
+
+/** Stops an execution the replay gave up on, so it cannot write trees after they are restored. */
+const cancelExecution = async (
+  fetch: HttpHandler,
+  executionId: string,
+  log: Pick<ToolingLog, 'warning'> | undefined
+): Promise<void> => {
+  try {
+    await fetch(`/api/workflows/executions/${encodeURIComponent(executionId)}/cancel`, {
+      method: 'POST',
+      version: API_VERSION,
+      headers,
+    });
+    const deadline = Date.now() + CANCEL_WAIT_MS;
+    let execution = await readExecution(fetch, executionId);
+    while (!isTerminal(execution.status)) {
+      if (Date.now() >= deadline) {
+        log?.warning(
+          `Workflow execution ${executionId} is still ${execution.status} after cancel; restoring trees anyway`
+        );
+        return;
+      }
+      await delay(POLL_INTERVAL_MS);
+      execution = await readExecution(fetch, executionId);
+    }
+  } catch (error) {
+    log?.warning(`Could not cancel workflow execution ${executionId}: ${String(error)}`);
+  }
+};
+
 /** The same step id is recorded twice; only the later one carries the agent output. */
 const reinforceStep = (execution: WorkflowExecutionDto) =>
   [...(execution.stepExecutions ?? [])].reverse().find((step) => {
@@ -258,11 +378,13 @@ export const runReinforcementExample = async ({
   fetch,
   connectorId,
   example,
+  log,
 }: {
   esClient: Client;
   fetch: HttpHandler;
   connectorId: string;
   example: ReinforcementExample;
+  log?: Pick<ToolingLog, 'warning'>;
 }): Promise<ReinforcementTaskOutput> => {
   const { tree_id: treeId, markdown: priorMarkdown } = example.input.prior_tree;
   const base: ReinforcementTaskOutput = {
@@ -272,7 +394,9 @@ export const runReinforcementExample = async ({
     submissions: [],
   };
 
-  const snapshot = await snapshotDecisionTree(esClient, treeId);
+  const snapshots = await snapshotDecisionTrees(esClient, [treeId]);
+  let executionId: string | undefined;
+  let sawTerminal = false;
   try {
     await seedPriorTree(esClient, example);
     const started = (await fetch(
@@ -285,6 +409,7 @@ export const runReinforcementExample = async ({
           inputs: {
             prompt: example.input.question,
             response: example.input.response,
+            conversation_id: replayConversationId(example.metadata.case_id),
             round_id: example.metadata.case_id,
             agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
             connector_id: connectorId,
@@ -295,12 +420,14 @@ export const runReinforcementExample = async ({
       }
     )) as { workflowExecutionId: string };
 
-    const executionId = started.workflowExecutionId;
+    executionId = started.workflowExecutionId;
     const deadline = Date.now() + MAX_WAIT_MS;
     let execution = await readExecution(fetch, executionId);
-    while (!isTerminal(execution.status) && Date.now() < deadline) {
+    sawTerminal = isTerminal(execution.status);
+    while (!sawTerminal && Date.now() < deadline) {
       await delay(POLL_INTERVAL_MS);
       execution = await readExecution(fetch, executionId);
+      sawTerminal = isTerminal(execution.status);
     }
 
     const reinforce = reinforceStep(execution);
@@ -313,7 +440,7 @@ export const runReinforcementExample = async ({
         }
       | undefined;
     const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
-    const finished = isTerminal(execution.status);
+    const finished = sawTerminal;
     const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
     const submitRejected = output?.submit_rejected === true;
     const failed =
@@ -336,7 +463,10 @@ export const runReinforcementExample = async ({
       submitted_mermaid: submittedMarkdown,
     };
   } finally {
-    await restoreDecisionTree(esClient, treeId, snapshot);
+    if (executionId && !sawTerminal) {
+      await cancelExecution(fetch, executionId, log);
+    }
+    await restoreDecisionTrees(esClient, snapshots);
   }
 };
 

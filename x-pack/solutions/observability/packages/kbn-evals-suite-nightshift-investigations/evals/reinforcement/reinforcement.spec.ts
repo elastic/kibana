@@ -7,8 +7,17 @@
 
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/evals';
+import {
+  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
-import { getDatasetCustomContext, replaceCustomContext } from '../investigation/custom_context';
+import {
+  getDatasetCustomContext,
+  readCustomContext,
+  replaceCustomContext,
+} from '../investigation/custom_context';
+import { ensureNightshiftSetup } from '../investigation/nightshift_setup';
 import {
   loadCustomer0ReinforcementDataset,
   loadReinforcementExamples,
@@ -29,6 +38,8 @@ import { reinforcementExamples } from './traces';
 import type { ReinforcementTaskOutput } from './types';
 
 const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+/** Service accounts, space binding and managed workflow install can take minutes on a cold start. */
+const SETUP_TIMEOUT_MS = 5 * 60_000;
 
 const assertReinforcementScores = async ({
   experiment,
@@ -110,6 +121,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
   evaluate(
     'runs a few Customer-0 investigations and grades the reinforcement submit',
     async ({
+      config,
       executorClient,
       connector,
       fetch,
@@ -130,13 +142,25 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       ];
       const tracesFile = process.env.NIGHTSHIFT_REINFORCEMENT_TRACES_FILE;
       const liveDataset = process.env.NIGHTSHIFT_REINFORCEMENT_DATASET;
+      const setup = (workflowIds: readonly string[]) =>
+        ensureNightshiftSetup({
+          esClient,
+          fetch,
+          connector,
+          log,
+          isServerless: config.serverless,
+          workflowIds,
+        });
       // A first Customer-0 investigation creates a new tree, and merged_nodes is rejected on a
       // new tree. The default replays rounds that already have a prior tree, including one merge.
       if (!liveDataset || tracesFile) {
         const dataset = reinforcementDataset(
           tracesFile ? loadReinforcementExamples(tracesFile) : reinforcementExamples
         );
-        evaluate.setTimeout(dataset.examples.length * repetitions * 22 * 60_000 + 5 * 60_000);
+        evaluate.setTimeout(
+          dataset.examples.length * repetitions * 22 * 60_000 + 5 * 60_000 + SETUP_TIMEOUT_MS
+        );
+        await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID]);
         const [experiment] = await executorClient.runExperiment(
           {
             name: 'Nightshift reinforcement micro-eval',
@@ -148,6 +172,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
                 fetch,
                 connectorId: connector.id,
                 example,
+                log,
               }),
           },
           judges
@@ -164,34 +189,41 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       }
 
       const dataset = await loadCustomer0ReinforcementDataset(evalsClient, liveDataset);
-      await replaceCustomContext(fetch, getDatasetCustomContext(liveDataset));
       // The investigation stays in progress until its post-execution reinforcement run finishes.
       evaluate.setTimeout(
-        dataset.examples.length * repetitions * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000)
+        dataset.examples.length * repetitions * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000) +
+          SETUP_TIMEOUT_MS
       );
-      const [experiment] = await executorClient.runExperiment(
-        {
-          name: 'Nightshift reinforcement micro-eval',
-          datasets: [dataset],
-          concurrency: 1,
-          task: (example) =>
-            runCustomer0Reinforcement({
-              esClient,
-              fetch,
-              connector,
-              example,
-            }),
-        },
-        judges
-      );
-      await assertReinforcementScores({
-        experiment,
-        evalsClient,
-        log,
-        judgeCount: judges.length,
-        caseIds: dataset.examples.map(({ metadata }) => metadata.case_id),
-        repetitions,
-      });
+      await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
+      const previousCustomContext = await readCustomContext(fetch);
+      try {
+        await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        const [experiment] = await executorClient.runExperiment(
+          {
+            name: 'Nightshift reinforcement micro-eval',
+            datasets: [dataset],
+            concurrency: 1,
+            task: (example) =>
+              runCustomer0Reinforcement({
+                esClient,
+                fetch,
+                connector,
+                example,
+              }),
+          },
+          judges
+        );
+        await assertReinforcementScores({
+          experiment,
+          evalsClient,
+          log,
+          judgeCount: judges.length,
+          caseIds: dataset.examples.map(({ metadata }) => metadata.case_id),
+          repetitions,
+        });
+      } finally {
+        await replaceCustomContext(fetch, previousCustomContext);
+      }
     }
   );
 });
