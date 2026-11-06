@@ -23,9 +23,16 @@ import {
   summarizeResults,
   toSourceError,
 } from '../inventory/executor';
-import type { PlanResult, SourceError } from '../inventory/executor';
+import type {
+  EsqlQueryResult,
+  InventoryRow,
+  PlanResult,
+  Provenance,
+  SourceError,
+} from '../inventory/executor';
 import {
   buildColumns,
+  ENTITY_ID_COLUMN,
   generateListQueries,
   getDynamicBlock,
   planSources,
@@ -36,6 +43,7 @@ import type { ListRequest } from '../inventory/types';
 import type {
   GetTypesResponse,
   InventoryType,
+  ListQueryDiagnostic,
   ListResponse,
   UnavailableColumn,
 } from '../routes/types';
@@ -61,6 +69,36 @@ const toUnavailableColumns = (
       ? [{ column: name, indexPattern, field }]
       : [];
   });
+
+const toQueryDiagnostic = (
+  { indexPattern, engine }: QueryPlan,
+  { esql, params }: GeneratedQuery,
+  outcome: PromiseSettledResult<EsqlQueryResult>
+): ListQueryDiagnostic => {
+  const stats =
+    outcome.status === 'fulfilled'
+      ? outcome.value.stats
+      : { took: null, documentsFound: null, rowCount: 0 };
+  return {
+    indexPattern,
+    engine,
+    esql,
+    params,
+    took: stats.took,
+    documentsFound: stats.documentsFound,
+    rowCount: stats.rowCount,
+  };
+};
+
+const restrictProvenance = (provenance: Provenance, rows: InventoryRow[]): Provenance =>
+  Object.fromEntries(
+    rows.flatMap((row) => {
+      const entityId = row[ENTITY_ID_COLUMN];
+      return typeof entityId === 'string' && entityId in provenance
+        ? [[entityId, provenance[entityId]]]
+        : [];
+    })
+  );
 
 export class InventoryService {
   constructor(
@@ -101,9 +139,12 @@ export class InventoryService {
    * type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
    * reported in `errors[]`; neither fails the request. A failed probe or query makes `total` null
-   * and `truncated` true, since the entities of that source are unknown.
+   * and `truncated` true, since the entities of that source are unknown. `queries[]` lists every
+   * plan query sent, `provenance` covers the returned rows only, and `took` is the wall time of
+   * the whole call.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
+    const startedAt = Date.now();
     const definition = await this.getManagedDefinition(type);
     const { plans, identity, columns, queries, probeErrors } = await this.planList(
       definition,
@@ -151,8 +192,13 @@ export class InventoryService {
     return {
       columns: merged.columns,
       rows,
+      provenance: restrictProvenance(merged.provenance, rows),
       total: incomplete ? null : total,
       truncated: truncated || incomplete,
+      took: Date.now() - startedAt,
+      queries: outcomes.map((outcome, planIndex) =>
+        toQueryDiagnostic(plans[planIndex], queries[planIndex], outcome)
+      ),
       errors,
       unavailableColumns,
     };

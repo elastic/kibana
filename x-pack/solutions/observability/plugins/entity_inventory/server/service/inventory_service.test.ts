@@ -637,3 +637,122 @@ describe('InventoryService.list', () => {
     );
   });
 });
+
+describe('InventoryService.list diagnostics', () => {
+  const CART_API_ID = 'k8s.deployment:scout-cluster/checkout/cart-api';
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('reports provenance for the returned rows only, naming the source of each attribute', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
+        stateRow('payments', '2026-11-01T10:01:00.000Z'),
+        stateRow('cart-api', '2026-11-01T10:00:00.000Z'),
+      ]),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 1 });
+
+    expect(response.rows.map((row) => row['entity.id'])).toEqual([CART_API_ID]);
+    expect(Object.keys(response.provenance)).toEqual([CART_API_ID]);
+    expect(response.provenance[CART_API_ID]).toMatchObject({
+      available_replicas: OTEL_PATTERN,
+      resource_id: OTEL_PATTERN,
+      paused: STATE_PATTERN,
+      app: STATE_PATTERN,
+    });
+  });
+
+  it('lists every plan query sent, in plan order, with its text, parameters and stats, and no probe', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
+          stateRow('payments', '2026-11-01T10:01:00.000Z'),
+        ]),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const sentPlanQueries = esClient.esql.query.mock.calls
+      .map(([body]) => body.query)
+      .filter((query) => !isProbe(query));
+    expect(response.queries.map(({ esql }) => esql)).toEqual(sentPlanQueries);
+    expect(response.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toEqual([
+      { indexPattern: STATE_PATTERN, engine: 'FROM' },
+      { indexPattern: OTEL_PATTERN, engine: 'TS' },
+      { indexPattern: OTEL_PATTERN, engine: 'FROM' },
+    ]);
+    expect(response.queries[0]).toEqual({
+      indexPattern: STATE_PATTERN,
+      engine: 'FROM',
+      esql: sentPlanQueries[0],
+      params: [{ from: WINDOW.from }, { to: WINDOW.to }],
+      took: 4,
+      documentsFound: 2,
+      rowCount: 1,
+    });
+  });
+
+  it('lists a failed plan query with null stats and no rows', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esError(400, 'verification_exception', 'Unknown column [x]'),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.queries).toHaveLength(2);
+    expect(response.queries[0]).toMatchObject({
+      indexPattern: STATE_PATTERN,
+      took: null,
+      documentsFound: null,
+      rowCount: 0,
+    });
+    expect(response.queries[1]).toMatchObject({ indexPattern: OTEL_PATTERN, rowCount: 1 });
+  });
+
+  it('leaves out the plan queries of a source whose probe failed', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { probeFails: { [STATE_PATTERN]: esError(503, 'timeout_exception', 'timed out') } }
+    );
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.queries.map(({ indexPattern }) => indexPattern)).toEqual([OTEL_PATTERN]);
+  });
+
+  it('reports took as the wall time of the whole call, probes included', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    // Each probe and plan query takes 100ms of wall time: two probes, then two FROM queries.
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      jest.advanceTimersByTime(100);
+      if (isProbe(query)) {
+        return probeResponse(false);
+      }
+      return query.includes(STATE_PATTERN)
+        ? esqlResponse(STATE_COLUMNS, [])
+        : esqlResponse(OTEL_COLUMNS, []);
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.took).toBe(400);
+  });
+});
