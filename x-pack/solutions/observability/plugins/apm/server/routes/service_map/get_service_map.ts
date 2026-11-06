@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { BoolQuery } from '@kbn/es-query';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
+import type { SavedServiceGroup } from '../../../common/service_groups';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -35,6 +36,8 @@ export interface IEnvOptions {
   start: number;
   end: number;
   serviceGroupKuery?: string;
+  /** Saved groups to match for grouping. Omitted or empty when already on a group map. */
+  savedServiceGroups?: SavedServiceGroup[];
   kuery?: string;
   /** Pre-built ES query from the client (query + filter bar + Controls API). */
   esQuery?: { bool: BoolQuery };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { SavedServiceGroup } from '../../../common/service_groups';
 import {
   KUBERNETES_NAMESPACE,
   SERVICE_NAME,
@@ -22,12 +24,18 @@ const PAGE_SIZE = 1000;
 /** At most this many pages: 50,000 services. */
 const MAX_PAGES = 50;
 
+export interface ServiceGroupingSavedGroup {
+  id: string;
+  name: string;
+}
+
 export interface ServiceGroupingAttributeValues {
   serviceNamespace?: string;
   kubernetesNamespace?: string;
+  savedGroups?: ServiceGroupingSavedGroup[];
 }
 
-/** Namespaces for each service, keyed by `service.name`. Not yet used to choose groups. */
+/** Labels for each service, keyed by `service.name`. Not yet used to choose groups. */
 export type ServiceGroupingAttributes = Record<string, ServiceGroupingAttributeValues>;
 
 interface ServiceAttributeBucket {
@@ -41,13 +49,41 @@ interface ServiceAttributeAggregate {
   after_key?: Record<string, string | number | null>;
 }
 
+interface SavedGroupServicesBucket {
+  services?: { buckets?: Array<{ key?: string | number }> };
+}
+
+type GetServiceGroupingAttributesOptions = IEnvOptions & {
+  maxNumberOfServices: number;
+  /** Saved groups to match. Empty or omitted skips that lookup (also when already on a group map). */
+  savedServiceGroups?: SavedServiceGroup[];
+};
+
 /**
  * Reads each service's `service.namespace` and Kubernetes namespace from transaction
- * events. Metric rollups do not carry those fields. One value per field per service.
- * A service with neither is still listed. Services are read in pages so a large estate
- * does not pass Elasticsearch's bucket limit.
+ * events, and which saved service groups match it. Metric rollups do not carry the
+ * namespace fields. One value per namespace field per service. A service with neither
+ * namespace is still listed. Services are read in pages so a large estate does not pass
+ * Elasticsearch's bucket limit. Saved groups use one filters aggregation, like the
+ * service-group counts API.
  */
-export async function getServiceGroupingAttributes({
+export async function getServiceGroupingAttributes(
+  options: GetServiceGroupingAttributesOptions
+): Promise<ServiceGroupingAttributes> {
+  const [namespaces, savedGroupsByService] = await Promise.all([
+    getNamespaceAttributes(options),
+    getSavedGroupMembership(options),
+  ]);
+
+  for (const [serviceName, savedGroups] of savedGroupsByService) {
+    const current = namespaces.get(serviceName) ?? {};
+    namespaces.set(serviceName, { ...current, savedGroups });
+  }
+
+  return recordByService(namespaces);
+}
+
+async function getNamespaceAttributes({
   environment,
   apmEventClient,
   start,
@@ -58,7 +94,7 @@ export async function getServiceGroupingAttributes({
   kuery,
   esQuery,
   logger,
-}: IEnvOptions & { maxNumberOfServices: number }): Promise<ServiceGroupingAttributes> {
+}: GetServiceGroupingAttributesOptions): Promise<Map<string, ServiceGroupingAttributeValues>> {
   const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
   const attributes = new Map<string, ServiceGroupingAttributeValues>();
   let after: Record<string, string | number | null> | undefined;
@@ -140,5 +176,105 @@ export async function getServiceGroupingAttributes({
     logger.debug(`Service grouping attributes stopped after ${MAX_PAGES} pages.`);
   }
 
-  return recordByService(attributes);
+  return attributes;
+}
+
+/**
+ * Matches services to saved groups with one filters aggregation (filter key = group id).
+ * Skipped when the caller passes no groups — including when the map is already a group map.
+ */
+async function getSavedGroupMembership({
+  environment,
+  apmEventClient,
+  start,
+  end,
+  maxNumberOfServices,
+  kuery,
+  esQuery,
+  savedServiceGroups = [],
+}: GetServiceGroupingAttributesOptions): Promise<Map<string, ServiceGroupingSavedGroup[]>> {
+  const membership = new Map<string, ServiceGroupingSavedGroup[]>();
+  if (savedServiceGroups.length === 0) {
+    return membership;
+  }
+
+  const groupById = new Map<string, SavedServiceGroup>();
+  const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> = {};
+  for (const group of savedServiceGroups) {
+    const filter = kqlQuery(group.kuery)[0];
+    if (!filter) {
+      continue;
+    }
+    serviceGroupsKueryMap[group.id] = filter;
+    groupById.set(group.id, group);
+  }
+  if (Object.keys(serviceGroupsKueryMap).length === 0) {
+    return membership;
+  }
+
+  const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
+
+  const response = await apmEventClient.search(
+    'get_service_grouping_saved_groups_for_service_map',
+    {
+      apm: { events: [ProcessorEvent.transaction] },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...esQueryFilters,
+          ],
+          ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
+        },
+      },
+      aggs: {
+        service_groups: {
+          filters: {
+            filters: serviceGroupsKueryMap,
+          },
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: maxNumberOfServices,
+              },
+            },
+          },
+        },
+      },
+    }
+  );
+
+  const buckets = (
+    response.aggregations as
+      | { service_groups?: { buckets?: Record<string, SavedGroupServicesBucket> } }
+      | undefined
+  )?.service_groups?.buckets;
+
+  if (!buckets) {
+    return membership;
+  }
+
+  for (const [groupId, bucket] of Object.entries(buckets)) {
+    const group = groupById.get(groupId);
+    if (!group) {
+      continue;
+    }
+    const match = { id: group.id, name: group.groupName };
+    for (const serviceBucket of bucket.services?.buckets ?? []) {
+      if (serviceBucket.key == null) {
+        continue;
+      }
+      const serviceName = String(serviceBucket.key);
+      const current = membership.get(serviceName) ?? [];
+      current.push(match);
+      membership.set(serviceName, current);
+    }
+  }
+
+  return membership;
 }

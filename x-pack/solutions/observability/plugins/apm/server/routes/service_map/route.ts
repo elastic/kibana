@@ -27,6 +27,7 @@ import { isServiceMapGroupingEnabled } from '../../lib/helpers/is_service_map_gr
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroup } from '../service_groups/get_service_group';
+import { getServiceGroups } from '../service_groups/get_service_groups';
 import type { ServiceMapGrouping } from './get_service_map';
 import { getServiceMap } from './get_service_map';
 import type { ServiceStatsSource } from './get_enhanced_service_stats';
@@ -122,6 +123,12 @@ const serviceMapRoute = createApmServerRoute({
         }
       : { enabled: false };
 
+    // Saved-group matching is only for the full map. A service group's own map skips it.
+    const savedServiceGroups =
+      grouping.enabled && !serviceName && !serviceGroupId
+        ? await getServiceGroups({ savedObjectsClient })
+        : [];
+
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
       config,
@@ -142,6 +149,7 @@ const serviceMapRoute = createApmServerRoute({
       end,
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
+      savedServiceGroups,
       kuery,
       esQuery: esQuery as { bool: BoolQuery } | undefined,
       grouping,
