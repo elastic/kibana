@@ -51,16 +51,19 @@ const RULES: ReadonlyArray<{ rule: CortexLintRule; blocking: boolean; pattern: R
     blocking: true,
     pattern: /\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{16,}\b/gi,
   },
+  // "currently" and "last hour" also appear in durable guidance and quoted error text ("check the
+  // last hour before onset"), and a regex cannot tell them apart, so this is reported, not blocking.
   {
     rule: 'relative_time',
-    blocking: true,
+    blocking: false,
     pattern:
       /\b(?:today|yesterday|tonight|currently|recently|right now|at the moment|last (?:week|month|night|hour)|this (?:morning|afternoon|week|month))\b/gi,
   },
-  // A count of things seen in one run ("5,944 errors", "23 restarts"), not a configured limit.
+  // A count of things seen in one run ("5,944 errors") looks the same as a configured limit ("gives
+  // up after 3 retries", "1000 documents per batch"), so it is reported, not blocking.
   {
     rule: 'counted_quantity',
-    blocking: true,
+    blocking: false,
     pattern: new RegExp(
       `\\b(?!${HTTP_ERROR_STATUS}\\s?errors?\\b)\\d[\\d,]*\\s?(?:errors?|requests?|restarts?|events?|hits|documents|failures|retries)\\b`,
       'gi'

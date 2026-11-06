@@ -58,12 +58,30 @@ describe('lintCortexContent', () => {
     }
   );
 
-  it('marks every other rule as blocking', () => {
-    const violations = lintCortexContent(
-      'On 2026-08-18 at 07:20 UTC, 5,944 errors, run 45440287bd44aa9addfa424be71a4f0f, recently.'
-    );
+  it.each([
+    'It logged 5,944 errors on one node.',
+    'The client gives up after 3 retries.',
+    'Bulk requests carry 1000 documents per batch.',
+    'The API says "The requested resource is currently unavailable".',
+    'Check the logs from the last hour before onset.',
+  ])('reports a count or a relative time without blocking: %s', (text) => {
+    const violations = lintCortexContent(text);
 
     expect(violations.length).toBeGreaterThan(0);
+    expect(violations.every(({ blocking }) => !blocking)).toBe(true);
+  });
+
+  it('blocks only what names a date, a time or an id', () => {
+    const violations = lintCortexContent(
+      'On 2026-08-18 at 07:20 UTC, run 45440287bd44aa9addfa424be71a4f0f, trace 3f90992e-1b81-4f58-9a2c-0d5e6f7a8b9c.'
+    );
+
+    expect(violations.map(({ rule }) => rule)).toEqual([
+      'iso_timestamp',
+      'clock_time',
+      'uuid',
+      'long_hex_id',
+    ]);
     expect(violations.every(({ blocking }) => blocking)).toBe(true);
   });
 

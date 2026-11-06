@@ -40,6 +40,8 @@ const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
 const MAX_TOOL_CALL_RESULT_CHARS = 2_000;
 const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
+const MAX_INVESTIGATION_PAGES = 8;
+const MAX_INVESTIGATION_PAGE_CHARS = 3_000;
 
 export interface CortexEditProposal {
   action: CortexEditAction;
@@ -55,6 +57,8 @@ export type ProposeCortexEdits = (input: {
   catalog: CortexPageSummary[];
   /** The conversation being learned from, so the catalog can mark the pages it wrote. */
   currentConversationId?: string;
+  /** Bodies of the pages this conversation wrote, so a recovery round can check their claims. */
+  investigationPages?: Array<{ slug: string; entity_type: CortexEntityType; content: string }>;
 }) => Promise<{ edits: CortexEditProposal[] }>;
 
 const isEntityType = (value: unknown): value is CortexEntityType =>
@@ -240,7 +244,7 @@ export const createLlmProposeCortexEdits = ({
 }: {
   inferenceClient: BoundInferenceClient;
 }): ProposeCortexEdits => {
-  return async ({ transcript, catalog, currentConversationId }) => {
+  return async ({ transcript, catalog, currentConversationId, investigationPages = [] }) => {
     const catalogLines =
       catalog.length === 0
         ? '(empty)'
@@ -252,12 +256,19 @@ export const createLlmProposeCortexEdits = ({
               );
               const fromThisInvestigation =
                 currentConversationId !== undefined &&
-                page.conversation_id === currentConversationId
+                page.authored_by?.includes(currentConversationId)
                   ? ' [this investigation]'
                   : '';
               return `- slug=${slug} | ${page.entity_type} | ${page.status} | ${page.title} (${page.corroborations}x)${fromThisInvestigation}`;
             })
             .join('\n');
+
+    const investigationPageLines = investigationPages
+      .map(
+        ({ slug, entity_type: entityType, content }) =>
+          `### ${entityType}/${slug}\n${content.slice(0, MAX_INVESTIGATION_PAGE_CHARS)}`
+      )
+      .join('\n\n');
 
     const response = await inferenceClient.output({
       id: 'nightshift_cortex_optimize',
@@ -271,14 +282,14 @@ ${ENTITY_TYPE_GUIDE_LINES}
 Durable knowledge only:
 - Write what stays true while the system stays the same: how components depend on each other, where their telemetry lives, which queries work and which fail, and what to check for a kind of symptom. A page never records the outcome of one incident.
 - Keep single-run details out of page content: timestamps, alert ids, counts, durations, and the cause of one incident stated as if it were a general rule. Distil them into reusable claims, such as "when X slows down, check Y".
-- A page with a date, a time, an id, or a count of events (such as "5,944 errors" or "23 restarts") is rejected, so write the pattern instead ("restarts repeatedly"). Do not give the number of pods, replicas, nodes or instances either: write "several" or "one per zone". HTTP status codes ("403 errors on registration"), component names and field names are fine.
+- A page with a date, a time or an id is rejected, so such an edit is lost. Counts of events seen in one run ("5,944 errors", "23 restarts") and words like "currently" or "recently" go stale as well: write the pattern instead ("restarts repeatedly"). Do not give the number of pods, replicas, nodes or instances either: write "several" or "one per zone". Limits that are configured ("gives up after 3 retries"), HTTP status codes ("403 errors on registration"), quoted error messages, component names and field names are fine.
 - Name components, streams, indices and fields exactly as the transcript shows them.
 
 What this round is:
 The transcript opens with a "## Round" line that says which kind of round it is.
 - initial — an investigation. Learn the durable structure and tool behaviour it established.
 - follow_up — the user's turn follows an earlier answer, shown under "## Previous answer". It may correct that answer or point at something it missed. A correction from a person outranks a single investigation: turn it into durable knowledge — what to check for this kind of symptom, where it lives (only streams, indices, fields or components that appear in the user's text or the tool calls), and how components relate — and put it under the right type and section. If it shows that an existing page is wrong, rewrite or archive that page.
-- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog hold claims from that investigation. When the assistant's answer says the cause was confirmed, corroborate the pages that state it. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
+- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog were written by that investigation, and their content follows the catalog under "Pages from this investigation". When the assistant's answer says the cause was confirmed, corroborate the pages that state it. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
 
 Services and integrations:
 - When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
@@ -288,7 +299,7 @@ Tool failures:
 - A tool failure is a call that returned an error, timed out, or came back empty because of how the call was made. Record it only when the same failure signature recurs in the tool calls or already appears on the page. Put it on the integration page of the system the tool talks to, under ## Tool failures, as one bullet: the failure signature, its durable cause, and what works instead. A single typo is not a failure signature.
 
 Relations:
-- Record how components relate on ontology pages: name each component as its own page does, and add one relation line per edge. Also list a service's dependencies on its own page.
+- Record how components relate on ontology pages: name each component by its page slug exactly as the catalog shows it, never a display name, and add one relation line per edge. Read "A depends_on B" as "A needs B", "A reads_from B" as "A pulls data from B", "A calls B" as "A sends requests to B" and "A publishes_to B" as "A pushes data to B"; the arrow always points from the component that acts to the one it acts on. Also list a service's dependencies on its own page.
 
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
@@ -302,7 +313,11 @@ Rules:
 - entity_type must be one of: ${CORTEX_ENTITY_TYPES.join(', ')}.
 - slug is a short kebab-case identifier. Reuse an existing page's slug exactly. Never prefix slug with "cortex", the entity type, or a document id.
 - Propose at most ${MAX_PROPOSALS} edits. Return an empty list if nothing durable was learned.`,
-      input: `Existing pages:\n${catalogLines}\n\nInvestigation transcript:\n${transcript}`,
+      input: `Existing pages:\n${catalogLines}\n\n${
+        investigationPageLines.length > 0
+          ? `Pages from this investigation:\n${investigationPageLines}\n\n`
+          : ''
+      }Investigation transcript:\n${transcript}`,
       schema: {
         type: 'object',
         properties: {
@@ -433,7 +448,7 @@ export const applyCortexEdits = async ({
       if (blocking.length > 0) {
         logger.warn(
           `Skipped Cortex edit ${edit.entity_type}/${slug}: content is tied to one occurrence (${[
-            ...new Set(blocking.map(({ rule }) => rule)),
+            ...new Set(blocking.map(({ rule, match }) => `${rule} "${match}"`)),
           ].join(', ')})`
         );
         continue;
@@ -441,7 +456,7 @@ export const applyCortexEdits = async ({
       if (violations.length > 0) {
         logger.info(
           `Kept Cortex edit ${edit.entity_type}/${slug} with details that can go stale (${[
-            ...new Set(violations.map(({ rule }) => rule)),
+            ...new Set(violations.map(({ rule, match }) => `${rule} "${match}"`)),
           ].join(', ')})`
         );
       }
@@ -475,6 +490,17 @@ export const applyCortexEdits = async ({
         conversationId: provenance?.conversationId ?? existing?.conversation_id,
         roundId: provenance?.roundId ?? existing?.round_id,
         workflowExecutionId: provenance?.workflowExecutionId ?? existing?.workflow_execution_id,
+        // Only a write that creates or rewrites the page makes this conversation its author.
+        ...(provenance?.conversationId
+          ? {
+              authoredBy: [
+                ...(existing?.authored_by ?? []).filter(
+                  (author) => author !== provenance.conversationId
+                ),
+                provenance.conversationId,
+              ],
+            }
+          : {}),
       });
       applied.push({ action: 'upsert', entityType: edit.entity_type });
       appliedWrites.push({
@@ -542,10 +568,38 @@ export const optimizeCortex = async ({
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
   ].join('\n');
 
+  const currentConversationId = provenance?.conversationId;
+  // A recovery round judges the claims of its own investigation, so it reads those pages in full.
+  const investigationPages =
+    roundKind === 'alert_recovery' && currentConversationId !== undefined
+      ? (
+          await Promise.all(
+            pages
+              .filter((page) => page.authored_by?.includes(currentConversationId))
+              .slice(0, MAX_INVESTIGATION_PAGES)
+              .map((page) => store.get(page.id))
+          )
+        ).flatMap((page) =>
+          page && page.status !== 'archived'
+            ? [
+                {
+                  slug: canonicalizeSlug(
+                    page.entity_type,
+                    slugFromCortexId(page.id, page.entity_type)
+                  ),
+                  entity_type: page.entity_type,
+                  content: page.content,
+                },
+              ]
+            : []
+        )
+      : [];
+
   const { edits } = await proposeEdits({
     transcript,
     catalog: pages,
-    currentConversationId: provenance?.conversationId,
+    currentConversationId,
+    ...(investigationPages.length > 0 ? { investigationPages } : {}),
   });
   logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {

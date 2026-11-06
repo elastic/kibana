@@ -95,6 +95,11 @@ export interface CortexPageSummary {
   conversation_id?: string;
   round_id?: string;
   workflow_execution_id?: string;
+  /**
+   * Conversations that created or rewrote the page, unlike `conversation_id`, which names whoever
+   * wrote it last, including a write that only corroborated it.
+   */
+  authored_by?: string[];
   doc_version?: number;
 }
 

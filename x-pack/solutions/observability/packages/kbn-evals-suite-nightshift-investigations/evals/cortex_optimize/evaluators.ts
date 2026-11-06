@@ -142,7 +142,8 @@ export const captureRecallEvaluator: CortexOptimizeEvaluator = {
     if (error) {
       return error;
     }
-    const written = writtenPages(output);
+    // An archived page is not materialized for the investigator, so it holds no usable knowledge.
+    const written = writtenPages(output).filter(({ status }) => status !== 'archived');
     const missing = captures.filter(
       (capture) =>
         !written.some((page) => {
@@ -187,11 +188,11 @@ export const nonTemporalEvaluator: CortexOptimizeEvaluator = {
     if (written.length === 0) {
       return notApplicable('The optimizer wrote no pages.');
     }
-    // Only blocking violations count: the optimizer keeps a page whose only issue is something like a
-    // replica count, so scoring it here would punish a page the real pipeline keeps.
+    // The optimizer keeps pages with non-blocking findings, so this score is what tells a regression
+    // there apart from a dropped edit. A replica count is a fact about the system, not an occurrence.
     const dirty = written.flatMap((page) => {
       const violations = lintCortexContent(`${page.slug}\n${page.title}\n${page.content}`).filter(
-        ({ blocking }) => blocking
+        ({ rule }) => rule !== 'replica_count'
       );
       return violations.length === 0 ? [] : [{ page: page.slug, violations }];
     });

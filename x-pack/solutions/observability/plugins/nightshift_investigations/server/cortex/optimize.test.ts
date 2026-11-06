@@ -730,6 +730,125 @@ describe('optimizeCortex', () => {
   });
 });
 
+describe('authorship and recovery context', () => {
+  const written = (
+    slug: string,
+    authoredBy: string[],
+    content = '## Dependencies\n- orders-db'
+  ) => ({
+    id: `cortex_service_${slug}`,
+    title: slug,
+    entity_type: 'service' as const,
+    status: 'tentative' as const,
+    corroborations: 0,
+    updated_at: '2026-03-02T09:00:00.000Z',
+    authored_by: authoredBy,
+    content,
+    slug,
+  });
+
+  it('records the conversation as an author when it creates or rewrites a page', async () => {
+    const store = createStore({
+      get: jest.fn().mockResolvedValue(written('orders-consumer', ['conversation-0'])),
+    });
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      provenance: { conversationId: 'conversation-1' },
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'service',
+          slug: 'orders-consumer',
+          title: 'orders-consumer',
+          content: '## Dependencies\n- orders-db',
+        },
+      ],
+    });
+
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ authoredBy: ['conversation-0', 'conversation-1'] })
+    );
+  });
+
+  it('does not record an author when the page is only corroborated or archived', async () => {
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      provenance: { conversationId: 'conversation-1' },
+      edits: [
+        { action: 'corroborate', entity_type: 'service', slug: 'a', title: 'a' },
+        { action: 'archive', entity_type: 'service', slug: 'b', title: 'b' },
+      ],
+    });
+
+    expect(store.upsert).not.toHaveBeenCalled();
+  });
+
+  const recoveryStore = () => {
+    const own = written('orders-consumer', ['conversation-1']);
+    const shared = written('payments', ['conversation-2'], '## Dependencies\n- ledger');
+    return createStore({
+      list: jest.fn().mockResolvedValue({
+        pages: [own, shared],
+        stats: { total: 2, established: 0, total_corroborations: 0 },
+      }),
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => [own, shared].find((page) => page.id === id)),
+    });
+  };
+
+  it('gives a recovery round the content of the pages its own investigation wrote', async () => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+
+    await optimizeCortex({
+      store: recoveryStore(),
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage: 'An alert in this investigation has recovered.',
+      assistantMessage: 'The cause was refuted.',
+      previousAssistantMessage: 'The cause was a full orders-db.',
+      toolCalls: [],
+      roundKind: 'alert_recovery',
+      provenance: { conversationId: 'conversation-1' },
+      proposeEdits,
+    });
+
+    expect(proposeEdits.mock.calls[0][0].investigationPages).toEqual([
+      { slug: 'orders-consumer', entity_type: 'service', content: '## Dependencies\n- orders-db' },
+    ]);
+  });
+
+  it.each(['initial', 'follow_up'] as const)(
+    'does not load page content for a %s round',
+    async (roundKind) => {
+      const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+      const store = recoveryStore();
+
+      await optimizeCortex({
+        store,
+        telemetry: createTelemetry(),
+        logger: loggerMock.create(),
+        userMessage: 'hello',
+        assistantMessage: 'ok',
+        toolCalls: [],
+        roundKind,
+        provenance: { conversationId: 'conversation-1' },
+        proposeEdits,
+      });
+
+      expect(proposeEdits.mock.calls[0][0].investigationPages).toBeUndefined();
+      expect(store.get).not.toHaveBeenCalled();
+    }
+  );
+});
+
 describe('applyCortexEdits non-temporal check', () => {
   it('skips an upsert that carries a date, an id or a count and applies the rest', async () => {
     const logger = loggerMock.create();
@@ -761,7 +880,7 @@ describe('applyCortexEdits non-temporal check', () => {
     expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ slug: 'session-cache' }));
     const warning = logger.warn.mock.calls.flat().join('\n');
     expect(warning).toContain('service/checkout-api');
-    expect(warning).toContain('iso_timestamp');
+    expect(warning).toContain('iso_timestamp "2026-03-02"');
     expect(warning).not.toContain('5,944');
   });
 
@@ -813,25 +932,44 @@ describe('applyCortexEdits non-temporal check', () => {
     );
   });
 
-  it('still skips a page that mixes a replica count with a count of events', async () => {
+  it.each([
+    [
+      'a configured retry limit',
+      'The client gives up after 3 retries.',
+      'counted_quantity "3 retries"',
+    ],
+    [
+      'a quoted error message',
+      'The API answers "The requested resource is currently unavailable".',
+      'relative_time "currently"',
+    ],
+    [
+      'a batch size',
+      'Bulk requests carry 1000 documents per batch.',
+      'counted_quantity "1000 documents"',
+    ],
+  ])('keeps a page with %s, and says what it matched', async (_name, content, reported) => {
+    const logger = loggerMock.create();
     const store = createStore();
 
     await applyCortexEdits({
       store,
       telemetry: createTelemetry(),
-      logger: loggerMock.create(),
+      logger,
       edits: [
         {
           action: 'upsert',
           entity_type: 'service',
           slug: 'checkout-api',
           title: 'checkout-api',
-          content: '## Failure modes\n9 pods restarted after 5,944 errors.',
+          content: `## Failure modes\n${content}`,
         },
       ],
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ slug: 'checkout-api' }));
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info.mock.calls.flat().join('\n')).toContain(reported);
   });
 
   it('still corroborates and archives, which carry no new content', async () => {
@@ -942,7 +1080,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
       transcript: '',
       currentConversationId: 'conversation-1',
       catalog: [
-        { ...page, conversation_id: 'conversation-1' },
+        { ...page, conversation_id: 'conversation-1', authored_by: ['conversation-1'] },
         { ...page, id: 'cortex_service_payments', title: 'payments', conversation_id: 'other' },
       ],
     });
@@ -952,5 +1090,77 @@ describe('createLlmProposeCortexEdits prompt', () => {
     );
     expect(input).toContain('slug=payments | service | tentative | payments (0x)\n');
     expect(input).not.toContain('payments (0x) [this investigation]');
+  });
+
+  it('keeps the marker on a page another conversation only corroborated afterwards', async () => {
+    const { input } = await run({
+      transcript: '',
+      currentConversationId: 'conversation-1',
+      catalog: [
+        {
+          id: 'cortex_service_orders-consumer',
+          title: 'orders-consumer',
+          entity_type: 'service',
+          status: 'tentative',
+          corroborations: 1,
+          updated_at: '2026-03-02T09:00:00.000Z',
+          conversation_id: 'conversation-2',
+          authored_by: ['conversation-1'],
+        },
+      ],
+    });
+
+    expect(input).toContain('orders-consumer (1x) [this investigation]');
+  });
+
+  it('does not mark a page that this conversation only corroborated', async () => {
+    const { input } = await run({
+      transcript: '',
+      currentConversationId: 'conversation-1',
+      catalog: [
+        {
+          id: 'cortex_service_orders-consumer',
+          title: 'orders-consumer',
+          entity_type: 'service',
+          status: 'tentative',
+          corroborations: 1,
+          updated_at: '2026-03-02T09:00:00.000Z',
+          conversation_id: 'conversation-1',
+          authored_by: ['conversation-2'],
+        },
+      ],
+    });
+
+    expect(input).not.toContain('[this investigation]');
+  });
+
+  it('shows the content of the pages this investigation wrote', async () => {
+    const { input } = await run({
+      transcript: '',
+      catalog: [],
+      investigationPages: [
+        {
+          slug: 'orders-consumer',
+          entity_type: 'service',
+          content: '## Dependencies\n- orders-db',
+        },
+      ],
+    });
+
+    expect(input).toContain('Pages from this investigation:\n### service/orders-consumer');
+    expect(input).toContain('- orders-db');
+  });
+
+  it('leaves out the section when there are no such pages', async () => {
+    const { input } = await run({ transcript: '', catalog: [] });
+
+    expect(input).not.toContain('Pages from this investigation');
+  });
+
+  it('asks for slugs as relation nodes and says which way an edge points', async () => {
+    const { system } = await run({ transcript: '', catalog: [] });
+
+    expect(system).toContain('page slug exactly as the catalog shows it');
+    expect(system).toContain('"A reads_from B" as "A pulls data from B"');
   });
 });

@@ -161,6 +161,24 @@ describe('captureRecallEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
+  it('does not count knowledge that a later round archived', async () => {
+    const created = page();
+    const result = await run(
+      captureRecallEvaluator,
+      outputOf([
+        { before: [], after: [created] },
+        { before: [created], after: [{ ...created, status: 'archived' }] },
+      ]),
+      expectedOf({
+        must_capture: [
+          { entity_type: 'service', section: 'dependencies', terms: ['session-cache'] },
+        ],
+      })
+    );
+
+    expect(result.score).toBe(0);
+  });
+
   it('fails when the replay failed', async () => {
     const result = await run(
       captureRecallEvaluator,
@@ -201,7 +219,20 @@ describe('nonTemporalEvaluator', () => {
     expect(result.explanation).toContain('iso_timestamp');
   });
 
-  it('does not count a replica count against a page, since the optimizer keeps such a page', async () => {
+  it.each(['It logged 5,944 errors on one node.', 'Check the logs from the last hour.'])(
+    'counts a page that carries %s even though the optimizer keeps it',
+    async (text) => {
+      const result = await run(
+        nonTemporalEvaluator,
+        outputOf([{ before: [], after: [page({ content: `## Failure modes\n${text}` })] }]),
+        expectedOf()
+      );
+
+      expect(result.score).toBe(0);
+    }
+  );
+
+  it('does not count a replica count against a page, since it describes the system', async () => {
     const withReplicas = page({ content: '## Telemetry\nRuns as about 32 pods.' });
 
     const result = await run(
