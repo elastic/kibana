@@ -20,7 +20,7 @@ export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => 
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
   validate: {
     query: z.strictObject({
-      // Stops the daily removal of leftover package policies until a call without it.
+      // Stops the daily leftover scan, so neither removal nor re-creation of missing policies, until a call without it.
       disable: queryBoolean.optional(),
     }),
   },

@@ -59,7 +59,10 @@ export const registerCleanUpTask = (
 };
 
 export interface CleanUpTaskState extends Record<string, unknown> {
-  /** Set through the private location cleanup API; expired Test Now policies are still removed. */
+  /**
+   * Set through the private location cleanup API. Skips the leftover scan, so missing
+   * policies are not re-created either; expired Test Now policies are still removed.
+   */
   leftoverCleanUpDisabled?: boolean;
 }
 
