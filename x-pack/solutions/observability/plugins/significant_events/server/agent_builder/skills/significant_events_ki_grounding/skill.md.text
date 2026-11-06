@@ -88,7 +88,7 @@ use only returned KIs and treat missing topology as unknown, not as evidence tha
 
 ES|QL call for a row-level sample, with the modifications from `<query_rules>` applied (`{1|3}` is the limit the Confirm step sets; an aggregate KI has no `SORT` and gets `| LIMIT 2`):
 ```json
-{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT {1|3}", "time_range": { "from": "{sample_from}", "to": "now" } }
+{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT {1|3}", "time_range": { "from": "{sample_from}", "to": "now" }, "timeout_seconds": 60 }
 ```
 Response: `{ "columns": [{ "name": "...", "type": "..." }], "values": [["..."]] }`. `values` is `[]` when empty.
 
@@ -124,12 +124,13 @@ Placeholders used in the Confirm and Profile steps:
    UTC}` in your message (the rule's detection `@timestamp` minus 15 minutes) and copy it verbatim as
    `from` into every `sample` and `re-sample` of that rule; it never comes from `now` or from another
    query's range.
+   Deadline: every call, the Profile step's included, passes `"timeout_seconds": 60`.
 4. **Reuse the KI query verbatim.** Remove `METADATA _id, _source`; never modify its `WHERE` clauses,
    field names, or `FROM`. A `FROM $.{name}` keeps its literal `$.`. Never invent fields, conditions,
    or functions in a Confirm query. ES|QL strings use double quotes.
 5. **Failed answers nothing.** A failed, timed-out, or empty query is skipped; never estimate from it.
-   Neither the Confirm nor the Profile step retries it, except the one resend of `dimensions` without
-   a field its error names (Profile step).
+   Never re-run it, narrowed or not, whatever the error text suggests. The only exception is the one
+   resend of `dimensions` without a field its error names (Profile step); a timeout is never resent.
 6. **Syntax.** Every condition is a `WHERE {condition}`, never its own pipe (`| MATCH_PHRASE(...)` is a
    parse error). Count a condition with `COUNT(*) WHERE {condition}`, a `WHERE` inside the aggregation; never
    `COUNT({condition})`, which counts true and false alike. Reserved words are invalid column names:
@@ -328,8 +329,8 @@ failure condition alone it does not. Decide this once per rule, before its `spre
 variant.
 
 **Not measured** is defined here, once: a `spread`, `trend` or `baseline` figure whose query returned
-no rows, failed or timed out is stated in the description as not measured. Never estimate it, retry
-it or widen its window. A figure that does not apply to the shape that ran (no share without an
+no rows, failed or timed out is stated in the description as not measured. Never estimate it or re-run
+it, narrowed or not (`<query_rules>` rule 5). A figure that does not apply to the shape that ran (no share without an
 isolating scope, no count of days with data without `lines`) is left out, not reported as not measured.
 `dimensions`, `examples` and `breakdown` follow the next paragraph.
 
@@ -487,6 +488,8 @@ Good (breakdown):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS n = COUNT(*), first_seen = MIN(@timestamp), last_seen = MAX(@timestamp) BY `{field}` | SORT n DESC | LIMIT 8
 
 Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets
+Avoid: a backtick you add before or around {failure}   -- parse error; paste {failure} unchanged
+Avoid: `present_` = COUNT(`{field}`)   -- counts values, not rows, when the field is multivalued
 Avoid: an aggregate after BY (BY day = ..., earliest = MIN(@timestamp) WHERE {failure})   -- parse error; write the aggregate before BY
 ```
 
