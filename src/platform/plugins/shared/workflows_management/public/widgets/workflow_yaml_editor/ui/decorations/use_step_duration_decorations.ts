@@ -122,7 +122,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   const omittedCount = useSelector(selectOmittedStepExecutionsCount);
 
   const { euiTheme } = useEuiTheme();
-  const { colors, border } = euiTheme;
+  const { colors, border, font } = euiTheme;
 
   // Chips are only meaningful when the editor content is the exact snapshot the execution ran,
   // so that line positions from the execution's computed lookup still align with the editor.
@@ -394,24 +394,24 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         color: colors.textSubdued,
       },
 
-      // Tone modifiers — flat colour spanning the full gutter width; chip inherits it.
-      [`.${BASE_CLASS}-warning`]: {
-        backgroundColor: colors.backgroundLightWarning,
-      },
-      [`.${BASE_CLASS}-warning::before`]: {
+      // Tone modifiers: a warm intensity ramp (amber text, then a pale fill and heavier weight)
+      // rather than the risk/danger hues that mark failed steps in this gutter: a slow step that
+      // succeeded must not read as failed. The fill spans the full gutter width; the chip inherits it.
+      [`.${BASE_CLASS}-elevated::before`]: {
         color: colors.textWarning,
       },
-      [`.${BASE_CLASS}-danger`]: {
-        backgroundColor: colors.backgroundLightRisk,
+      [`.${BASE_CLASS}-high`]: {
+        backgroundColor: colors.backgroundBaseRisk,
       },
-      [`.${BASE_CLASS}-danger::before`]: {
-        color: colors.textRisk,
+      [`.${BASE_CLASS}-high::before`]: {
+        color: colors.textWarning,
+        fontWeight: font.weight.semiBold,
       },
 
       // Per-label content injection. Built inline so Emotion owns insertion/cleanup.
       ...contentRules,
     });
-  }, [stepDurations, colors, border]);
+  }, [stepDurations, colors, border, font]);
 
   return { styles };
 };

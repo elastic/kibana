@@ -431,29 +431,29 @@ describe('getStepDurationTone', () => {
     expect(getStepDurationTone(1000, -1)).toBe('none');
   });
 
-  it('returns none below the warning threshold (< 40%)', () => {
+  it('returns none below the elevated threshold (< 40%)', () => {
     expect(getStepDurationTone(390, 1000)).toBe('none');
   });
 
-  it('returns warning at exactly 40%', () => {
-    expect(getStepDurationTone(400, 1000)).toBe('warning');
+  it('returns elevated at exactly 40%', () => {
+    expect(getStepDurationTone(400, 1000)).toBe('elevated');
   });
 
-  it('returns warning between 40% and 70%', () => {
-    expect(getStepDurationTone(600, 1000)).toBe('warning');
+  it('returns elevated between 40% and 70%', () => {
+    expect(getStepDurationTone(600, 1000)).toBe('elevated');
   });
 
-  it('returns danger at exactly 70%', () => {
-    expect(getStepDurationTone(700, 1000)).toBe('danger');
+  it('returns high at exactly 70%', () => {
+    expect(getStepDurationTone(700, 1000)).toBe('high');
   });
 
-  it('returns danger above 70%', () => {
-    expect(getStepDurationTone(900, 1000)).toBe('danger');
+  it('returns high above 70%', () => {
+    expect(getStepDurationTone(900, 1000)).toBe('high');
   });
 
   it('clamps ratio at 1 when totalMs exceeds denominator', () => {
     // totalMs > denominator can happen when children run in parallel.
-    expect(getStepDurationTone(2000, 1000)).toBe('danger');
+    expect(getStepDurationTone(2000, 1000)).toBe('high');
   });
 });
 

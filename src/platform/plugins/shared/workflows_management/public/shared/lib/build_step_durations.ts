@@ -100,8 +100,12 @@ export const formatStepDurationLabel = (duration: StepDuration): string => {
   return formatDuration(duration.totalMs).trim();
 };
 
-/** Hotspot tone for a duration chip: the step's share of the whole execution. */
-export type StepDurationTone = 'none' | 'warning' | 'danger';
+/**
+ * Hotspot tone for a duration chip: the step's share of the whole execution.
+ * Deliberately not named after statuses: a slow step still succeeded, and the risk/danger hues
+ * are what the editor gutter uses for failed steps.
+ */
+export type StepDurationTone = 'none' | 'elevated' | 'high';
 
 /**
  * Returns the tone for a duration chip based on the step's total time as a fraction of the
@@ -114,8 +118,8 @@ export type StepDurationTone = 'none' | 'warning' | 'danger';
 export const getStepDurationTone = (totalMs: number, denominatorMs: number): StepDurationTone => {
   if (denominatorMs <= 0) return 'none';
   const ratio = Math.min(1, totalMs / denominatorMs);
-  if (ratio >= 0.7) return 'danger';
-  if (ratio >= 0.4) return 'warning';
+  if (ratio >= 0.7) return 'high';
+  if (ratio >= 0.4) return 'elevated';
   return 'none';
 };
 

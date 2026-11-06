@@ -73,15 +73,19 @@ jest.mock('@kbn/monaco', () => {
 const mockEuiTheme = {
   colors: {
     backgroundBaseHighlighted: '#f5f5f5',
+    backgroundBaseRisk: '#fff3e3',
+    backgroundLightRisk: '#ffdebf',
     backgroundLightWarning: '#fff3cd',
     backgroundLightDanger: '#f8d7da',
     textParagraph: '#333',
     textSubdued: '#666',
     textWarning: '#856404',
+    textRisk: '#9e3a16',
     textDanger: '#842029',
     borderBasePlain: '#ccc',
   },
   border: { radius: { small: '4px' } },
+  font: { weight: { semiBold: 600 } },
 };
 
 jest.mock('@elastic/eui', () => ({
@@ -256,11 +260,11 @@ describe('useStepDurationDecorations', () => {
       expect(stepADec!.options.linesDecorationsClassName).toContain('step-duration-gutter');
     });
 
-    it('applies warning tone class when step is ≥40% of execution duration', () => {
+    it('applies elevated tone class when step is ≥40% of execution duration', () => {
       const editor = createMockEditor();
       const { store } = renderHookWithProviders(editor);
 
-      // step-a takes 400ms out of 1000ms total = 40% → warning
+      // step-a takes 400ms out of 1000ms total = 40% → elevated
       act(() => {
         store.dispatch(
           setExecution(
@@ -283,7 +287,18 @@ describe('useStepDurationDecorations', () => {
       const dec = decorations.find(
         (d: monaco.editor.IModelDeltaDecoration) => d.range.startLineNumber === 5
       );
-      expect(dec?.options.linesDecorationsClassName).toContain('step-duration-gutter-warning');
+      expect(dec?.options.linesDecorationsClassName).toContain('step-duration-gutter-elevated');
+    });
+
+    it('keeps hotspot chips off the risk/danger hues that mark failed steps', () => {
+      const { result } = renderHookWithProviders(createMockEditor());
+
+      const { styles } = result.current.styles;
+      expect(styles).toContain('.step-duration-gutter-elevated::before{color:#856404;}');
+      expect(styles).toContain('.step-duration-gutter-high{background-color:#fff3e3;}');
+      expect(styles).not.toContain(mockEuiTheme.colors.backgroundLightRisk);
+      expect(styles).not.toContain(mockEuiTheme.colors.textRisk);
+      expect(styles).not.toContain(mockEuiTheme.colors.backgroundLightDanger);
     });
 
     it('applies dimmed class when another step is highlighted', () => {
