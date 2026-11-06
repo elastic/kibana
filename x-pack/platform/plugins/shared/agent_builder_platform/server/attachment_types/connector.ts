@@ -12,6 +12,8 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ComponentsNode } from '@kbn/isomer-components';
+import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
   filterActionsBySelection,
@@ -105,6 +107,53 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         },
 
         getBoundedTools: () => [],
+      };
+    },
+
+    toSurfaceComposition: ({
+      data: {
+        connector_name: connectorName,
+        connector_type: connectorType,
+        selected_actions: selectedActions,
+      },
+    }) => {
+      const spec = getConnectorSpec(connectorType);
+      const actionNames = spec
+        ? filterActionsBySelection(spec.actions, selectedActions).map(([actionName]) => actionName)
+        : [];
+      const typeName = spec?.metadata.displayName ?? connectorType;
+      const description = spec?.metadata.description;
+
+      const fields: ComponentsNode = {
+        type: 'fields',
+        items: [
+          {
+            label: i18n.translate('xpack.agentBuilderPlatform.attachments.connector.surface.type', {
+              defaultMessage: 'Type',
+            }),
+            value: typeName,
+          },
+          ...(actionNames.length > 0
+            ? [
+                {
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.connector.surface.actions',
+                    { defaultMessage: 'Actions' }
+                  ),
+                  value: actionNames.join(', '),
+                },
+              ]
+            : []),
+        ],
+      };
+
+      return {
+        type: 'view',
+        title: connectorName,
+        body: [
+          ...(description ? [{ type: 'markdown' as const, text: description }] : []),
+          ...(typeName ? [fields] : []),
+        ],
       };
     },
 

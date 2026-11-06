@@ -418,6 +418,7 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      cloud: this.cloudSetup,
       conversationEventBus: this.conversationEventBus,
     });
 
