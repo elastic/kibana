@@ -1163,7 +1163,7 @@ export class WorkflowCrudService {
       options?.force === true &&
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
-    const result = await this.deleteWorkflowsWithBindings(ids, spaceId, options, deletionOptions);
+    const result = await this.deleteWorkflowsWithBindings(ids, spaceId, deletionOptions);
     await this.retireWorkflowPages(result.successfulIds ?? [], spaceId);
     return result;
   }
@@ -1171,10 +1171,9 @@ export class WorkflowCrudService {
   private async deleteWorkflowsWithBindings(
     ids: string[],
     spaceId: string,
-    options: DeleteWorkflowsOptions | undefined,
     deletionOptions: WorkflowDeletionOptions
   ): Promise<DeleteWorkflowsResponse> {
-    const { profileId, request, isAdmin } = deletionOptions;
+    const { profileId, request, isAdmin, force } = deletionOptions;
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1224,13 +1223,13 @@ export class WorkflowCrudService {
         }
         assertWorkflowOperation(
           versioned.source,
-          getWorkflowDeleteOperation(versioned.source, options?.force),
+          getWorkflowDeleteOperation(versioned.source, force),
           profileId,
           this.accessAuditContext(request, id, spaceId),
           isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
-        if (batch && !accountId && !options?.force) {
+        if (batch && !accountId && !force) {
           unboundSoftDeletes.push({
             _id: id,
             _source: versioned.source,
@@ -1250,7 +1249,7 @@ export class WorkflowCrudService {
           if (executions.total > 0) {
             throw new WorkflowConflictError(
               `Cannot ${
-                options?.force ? 'force-delete' : 'delete'
+                force ? 'force-delete' : 'delete'
               } workflow with running executions: ${id}`,
               id
             );
@@ -1312,7 +1311,7 @@ export class WorkflowCrudService {
     }
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
-        force: options?.force ?? false,
+        force: force ?? false,
         spaceId,
         taskScheduler: this.deps.getTaskScheduler(),
         workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,

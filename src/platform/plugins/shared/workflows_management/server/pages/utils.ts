@@ -55,7 +55,7 @@ export const toPageDto = (
   return {
     workflowId,
     pageId,
-    access: access ?? null,
+    access,
     enabled,
     online: isPageOnline(attributes, canEncrypt),
     createdAt,
