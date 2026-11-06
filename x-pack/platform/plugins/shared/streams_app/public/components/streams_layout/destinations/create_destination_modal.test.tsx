@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
@@ -47,11 +47,8 @@ const docsPills = () =>
     .queryAllByTestId('euiComboBoxPill')
     .map((pill) => pill.textContent);
 
-// Typing long values key by key times out on CI.
-const pasteInto = async (testSubject: string, value: string) => {
-  await userEvent.click(screen.getByTestId(testSubject));
-  await userEvent.paste(value);
-};
+const setFieldValue = (testSubject: string, value: string) =>
+  fireEvent.change(screen.getByTestId(testSubject), { target: { value } });
 
 const addDocsPattern = async (input: HTMLElement, value: string) => {
   await userEvent.click(input);
@@ -141,11 +138,11 @@ describe('CreateDestinationModal', () => {
 
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
       expect(screen.getByText('Name all OTel signals')).toBeInTheDocument();
-      await pasteInto('streamsCreateDestination-docs-index', 'accounting-2026');
-      await pasteInto('streamsCreateDestinationIndex', 'billing-default');
+      setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
+      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
       await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
-      await pasteInto('streamsCreateDestinationName', 'Central');
+      setFieldValue('streamsCreateDestinationName', 'Central');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
 
       await waitFor(() =>
@@ -186,7 +183,7 @@ describe('CreateDestinationModal', () => {
     it('clears the docs index when the mode changes', async () => {
       renderModal();
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
-      await pasteInto('streamsCreateDestination-docs-index', 'accounting-2026');
+      setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
 
       await userEvent.click(screen.getByLabelText('Auto (default)'));
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
@@ -217,14 +214,16 @@ describe('CreateDestinationModal', () => {
     it('submits the remote form values', async () => {
       const { createDestination } = renderModal();
       await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
-      await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
-      await pasteInto('streamsCreateDestinationIndex', 'shared-idx');
-      await pasteInto(
+      await userEvent.click(
+        within(screen.getByTestId('streamsCreateDestinationFixedIndex')).getByRole('radio')
+      );
+      setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
+      setFieldValue(
         'streamsCreateDestinationRemoteElasticsearchEndpoint',
         'https://es.example.com:443'
       );
-      await pasteInto('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
-      await pasteInto('streamsCreateDestinationName', 'Central');
+      setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      setFieldValue('streamsCreateDestinationName', 'Central');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
 
       await waitFor(() =>

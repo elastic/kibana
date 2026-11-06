@@ -21,7 +21,7 @@ The template is the source of truth for what renders. It is either generated ser
 
 | Package | Contents |
 |---------|----------|
-| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the chat tool's update schema (`customContentPanelUpdateSchema`), `resolveCustomContentQuery`, `stripMarkdownFences` |
+| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the chat tool's update schema (`customContentPanelUpdateSchema`), `stripMarkdownFences` |
 | `@kbn/custom-content-server` | `createCustomContentTemplateResolver` (the LLM template generator) and `sanitizeCellValue` |
 
 Both packages are separate from `agent_builder_dashboards` because this plugin and the dashboard generation tool consume the same code.
@@ -140,21 +140,25 @@ Because each round's card is pinned to the version that round produced, clicking
 
 ### 2. Agent-driven dashboard creation and editing
 
-The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `source: "request"` with `renderer: "custom_content"` (schemas in `.../dashboard-agent-authoring/src/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change), `hasData` (required when adding a panel), and optionally `index`, `esql` and, on edits, `regenerateESQL`; it never supplies `template`. The server generates the template in `.../resolvers/custom_content_panel_resolver.ts`, in the same parallel phase as the tool's other generated panels.
+The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `source: "request"` with `renderer: "custom_content"` (schemas in `.../dashboard-agent-authoring/src/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change), `hasData` (required when adding a panel), and optionally `index`, `esql` and, on edits, `regenerateESQL`; it never supplies `template`. The server builds the panel in `.../resolvers/custom_content_panel_resolver.ts`, a thin adapter on the custom content builder (see below), in the same parallel phase as the tool's other generated panels.
 
 A static panel has no query: a new panel must state `hasData` (there is no default): `false` is static, so a banner never gets a stray `ROW` query, and omitting it is a validation error, so a panel that should show data can't silently be generated with no data and invented numbers. With `hasData: true` the server generates the query from `query` (and `index`). On an edit, omitting `esql` keeps the current query, `null` or `hasData: false` removes it, `hasData: true` gives a static panel a query, and `regenerateESQL: true` regenerates it from the current one. The visualization tool (`create_visualization` with `target.type: "custom_content"`) uses the same vocabulary as `has_data` / `regenerate_esql`.
 
 An edit targets a panel by its id in `panels`, so this path can reach any custom content panel on the dashboard whether or not it has a chat attachment. That makes it the fallback described above.
 
-### How a panel's query is resolved
+### One builder for the three flows
 
-All three flows (dashboard generation tool, `custom_content_update_panel`, and `create_visualization`) decide a panel's final query with `resolveCustomContentQuery` (`@kbn/custom-content-common`): an explicit query wins, `has_data: false` or `null` removes it, a new panel generates one unless it is declared static, and an edit keeps the stored query unless it is replaced, removed or regenerated. It also reports whether the query changed, which is what lets the template resolver skip schema sampling for unchanged queries.
+The dashboard generation tool, `custom_content_update_panel` and `create_visualization` all build a custom content panel with `buildCustomContentConfig` (`@kbn/agent-builder-visualizations-server`), next to `buildLensConfig` and `buildVegaConfig`. Each tool maps its own parameters (`hasData` / `has_data`, `regenerateESQL` / `regenerate_esql` / `regenerateEsql`) onto it and stores the result; none of them decides anything about the query or the template itself.
 
-Generation goes through `generateCustomContentEsql` (`@kbn/agent-builder-visualizations-server`), a wrapper around the shared visualization generator with custom content instructions: one row per item shown, `LIMIT 100` unless the user names a number, funnel steps in the order listed. The stored query is passed as `existingQueries` so edits modify it instead of starting over. The generator always returns a query or throws, so a request with no data in it must be declared static (`hasData: false`, which new panels always state) rather than sent through generation.
+The builder decides which query the panel ends with: an explicit query wins, `hasData: false` or `null` removes it, a new panel generates one unless it is declared static, and an edit keeps the stored query unless it is replaced, removed or regenerated. It generates the query with the custom content instructions (one row per item shown, `LIMIT 100` unless the user names a number, funnel steps in the order listed, `FORK` for steps with their own filter), passing the stored query as `existingQueries` so edits modify it instead of starting over, and it throws, with the reason, when no query is produced. A request with no data in it must therefore be declared static (`hasData: false`, which new panels always state) rather than sent through generation.
+
+Then it writes the template with the template resolver, but only when there is something to write: a new panel, a prompt, or a query that changed. An edit with no prompt that keeps the query keeps its template and makes no model call. An edit that only replaces or removes the query writes the template again, with an empty prompt, so it reads the columns the new query returns.
+
+Each tool validates its own input at its edge, in its own parameter names (the dashboard tool's plan-time rules, `create_visualization`'s checks, the update schema's refines); the builder does not repeat that.
 
 ### The shared template resolver
 
-`createCustomContentTemplateResolver` (`@kbn/custom-content-server`) backs both the panel update tool and the dashboard generation tool. It picks one of two system prompts:
+`createCustomContentTemplateResolver` (`@kbn/custom-content-server`) is what the builder calls to write the template. It picks one of two system prompts:
 
 - **Static HTML** — no query involved; produces a self-contained HTML document.
 - **Liquid template** — a query is present or changing; produces a reusable template with no literal data baked in.
