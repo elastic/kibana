@@ -60,18 +60,21 @@ export async function resolveSelectiveTestingContext(
   return { affectedPackages: expandedAffectedPackages, changedFiles };
 }
 
+/** Lazily queries Moon so critical-file runs, which ignore the selection, skip the query. */
+export type MoonSelectionQuery = () => MoonTestSelection;
+
 /** Select Jest unit configs from affected packages and compare Moon selection. */
 export function filterJestUnitConfigsByAffected(
   jestUnitConfigs: string[],
   context: SelectiveTestingContext,
-  moonSelection?: MoonTestSelection
+  queryMoonSelection?: MoonSelectionQuery
 ): string[] {
   return filterByAffected({
     label: 'unit',
     configs: jestUnitConfigs,
     criticalFiles: CRITICAL_FILES_JEST_UNIT_TESTS,
     context,
-    moonSelection,
+    queryMoonSelection,
   });
 }
 
@@ -79,7 +82,7 @@ export function filterJestUnitConfigsByAffected(
 export function filterJestIntegrationConfigsByAffected(
   jestIntegrationConfigs: string[],
   context: SelectiveTestingContext,
-  moonSelection?: MoonTestSelection
+  queryMoonSelection?: MoonSelectionQuery
 ): string[] {
   return filterByAffected({
     label: 'integration',
@@ -87,7 +90,7 @@ export function filterJestIntegrationConfigsByAffected(
     criticalFiles: CRITICAL_FILES_JEST_INTEGRATION_TESTS,
     alwaysRun: ALWAYS_RUN_JEST_INTEGRATION_CONFIGS,
     context,
-    moonSelection,
+    queryMoonSelection,
   });
 }
 
@@ -97,9 +100,9 @@ function filterByAffected(args: {
   criticalFiles: string[];
   alwaysRun?: readonly string[];
   context: SelectiveTestingContext;
-  moonSelection?: MoonTestSelection;
+  queryMoonSelection?: MoonSelectionQuery;
 }): string[] {
-  const { label, configs, criticalFiles, alwaysRun = [], context, moonSelection } = args;
+  const { label, configs, criticalFiles, alwaysRun = [], context, queryMoonSelection } = args;
 
   // Docs are ignored here too, so a docs-only change in a critical package doesn't run everything.
   const matchedCriticalFiles = filterIgnoredFiles(
@@ -119,20 +122,29 @@ function filterByAffected(args: {
   }
 
   const packageSelected = filterFilesByPackages(configs, context.affectedPackages);
-  if (moonSelection) {
-    logMoonSelection(label, configs, packageSelected, moonSelection);
+  if (queryMoonSelection) {
+    compareMoonSelection(label, configs, packageSelected, queryMoonSelection);
   }
   const withAlwaysRun = addAlwaysRunConfigs(packageSelected, configs, alwaysRun);
   console.log(`Filtering Jest ${label} tests: ${configs.length} -> ${withAlwaysRun.length}`);
   return withAlwaysRun;
 }
 
-function logMoonSelection(
+function compareMoonSelection(
   label: 'unit' | 'integration',
   configs: string[],
   packageSelected: string[],
-  { modeledConfigs, affectedConfigs }: MoonTestSelection
+  queryMoonSelection: MoonSelectionQuery
 ): void {
+  let selection: MoonTestSelection;
+  try {
+    selection = queryMoonSelection();
+  } catch (error) {
+    console.error(`Moon Jest ${label} comparison failed; using package selection`, error);
+    return;
+  }
+
+  const { modeledConfigs, affectedConfigs } = selection;
   const packageSet = new Set(packageSelected);
   const moonSelected = configs.filter((config) => affectedConfigs.has(baseConfigPath(config)));
   const moonOnly = moonSelected.filter((config) => !packageSet.has(config));
@@ -140,10 +152,24 @@ function logMoonSelection(
     (config) =>
       modeledConfigs.has(baseConfigPath(config)) && !affectedConfigs.has(baseConfigPath(config))
   );
+  const unmodeled = packageSelected.filter((config) => !modeledConfigs.has(baseConfigPath(config)));
   console.log(
     `Moon Jest ${label} shadow selection: ${moonSelected.length} selected, ${moonOnly.length} Moon-only, ${packageOnly.length} package-only`
   );
+  if (moonOnly.length || packageOnly.length || unmodeled.length) {
+    // One JSON line with full, shard-collapsed paths so mismatches can be analyzed from logs alone.
+    console.log(
+      `Moon Jest ${label} shadow diff: ${JSON.stringify({
+        moonOnly: uniqueBasePaths(moonOnly),
+        packageOnly: uniqueBasePaths(packageOnly),
+        unmodeled: uniqueBasePaths(unmodeled),
+      })}`
+    );
+  }
 }
+
+const uniqueBasePaths = (configs: string[]): string[] =>
+  [...new Set(configs.map(baseConfigPath))].sort();
 
 // Matches on the base path so every shard of an always-run config is restored.
 function addAlwaysRunConfigs(

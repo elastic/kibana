@@ -22,6 +22,13 @@ echo "--- baking pnpm cache into $PNPM_CACHE_DIR (pnpm $(pnpm --version))"
 # Install dependencies. Bootstrap does not build shared frontend bundles.
 CI=true pnpm kbn bootstrap
 
+echo "--- warming Moon toolchain plugins"
+# Moon fetches its toolchain WASM plugins from ghcr.io into ~/.moon/plugins on first use.
+# Baking them into the agent's home avoids that fetch, and its auth failures, in CI jobs.
+node_modules/.bin/moon query projects > /dev/null ||
+  echo "Moon plugin warmup failed; CI jobs will download plugins on demand"
+du -sh "$HOME/.moon/plugins" 2>/dev/null || true
+
 tar -cf - node_modules | zstd -T0 -o node_modules.tar.zst
 
 echo "--- ES snapshots and endpoint agents"

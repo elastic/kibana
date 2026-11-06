@@ -163,4 +163,22 @@ fileGroups:
     - test/scout_iac_provisioner/**/*
     - test/scout_fleet_real_agent/**/*
     - '!target/**/*'
-tasks: {}
+  jestConfigs:
+    - '!cypress/**/*'
+  jestIntegrationConfigs:
+    - '!cypress/**/*'
+  scoutConfigs:
+    - '!cypress/**/*'
+tasks:
+  test-source-upstream:
+    inputs:
+      - '!cypress/**/*'
+  jest:
+    inputs:
+      - '!cypress/**/*'
+  jestIntegrationConfigs:
+    inputs:
+      - '!cypress/**/*'
+  scoutConfigs:
+    inputs:
+      - '!cypress/**/*'
