@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, INTERNAL_HEADERS } from '../fixtures';
@@ -20,8 +21,11 @@ const STANDARD_DATA_STREAM = 'metrics-k8sclusterreceiver.otel-default';
 const SHARED_DEPLOYMENT = 'tsds-shared';
 // Only in the time-series stream: the list must return it from the `TS` plan alone.
 const TSDS_ONLY_DEPLOYMENT = 'tsds-only';
-const NAMESPACE = 'tsds';
-const DEPLOYMENT_NAMES = [SHARED_DEPLOYMENT, TSDS_ONLY_DEPLOYMENT];
+// Only in the standard stream: the list must still read it through the `FROM` plan.
+const STANDARD_ONLY_DEPLOYMENT = 'standard-only';
+// Unique per run, so the rows and the cleanup touch only the documents this run wrote.
+const NAMESPACE = `tsds-${randomUUID()}`;
+const DEPLOYMENT_NAMES = [SHARED_DEPLOYMENT, TSDS_ONLY_DEPLOYMENT, STANDARD_ONLY_DEPLOYMENT];
 
 const LIST_PATH = 'internal/entity_inventory/entities/k8s.deployment/list';
 
@@ -49,6 +53,8 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let adminCookieHeader: Record<string, string>;
+    // Ids of the documents this run wrote to the archive's shared standard stream.
+    let standardDocumentIds: string[] = [];
     const now = Date.now();
     const minutesAgo = (minutes: number) => new Date(now - minutes * 60_000).toISOString();
 
@@ -89,7 +95,7 @@ apiTest.describe(
         },
       });
 
-      await esClient.bulk({
+      const { errors, items } = await esClient.bulk({
         refresh: 'wait_for',
         operations: [
           { create: { _index: TSDS_DATA_STREAM } },
@@ -98,8 +104,14 @@ apiTest.describe(
           otelDocument(TSDS_ONLY_DEPLOYMENT, minutesAgo(3), 2),
           { create: { _index: STANDARD_DATA_STREAM } },
           otelDocument(SHARED_DEPLOYMENT, minutesAgo(10), 4),
+          { create: { _index: STANDARD_DATA_STREAM } },
+          otelDocument(STANDARD_ONLY_DEPLOYMENT, minutesAgo(4), 1),
         ],
       });
+      expect(errors).toBe(false);
+      standardDocumentIds = items.flatMap(({ create }) =>
+        create?._index.includes(STANDARD_DATA_STREAM) && create._id ? [create._id] : []
+      );
     });
 
     apiTest.afterAll(async ({ esClient }) => {
@@ -108,12 +120,12 @@ apiTest.describe(
       await esClient.deleteByQuery({
         index: STANDARD_DATA_STREAM,
         refresh: true,
-        query: { term: { 'k8s.namespace.name': NAMESPACE } },
+        query: { ids: { values: standardDocumentIds } },
       });
     });
 
     apiTest(
-      'returns each time-series deployment once, with the newest values across both streams',
+      'returns deployments from both streams once each, with the newest values',
       async ({ apiClient }) => {
         const from = encodeURIComponent(minutesAgo(60));
         const to = encodeURIComponent(new Date(now + 60_000).toISOString());
@@ -144,6 +156,12 @@ apiTest.describe(
         ).toMatchObject({
           available_replicas: 2,
           last_seen: minutesAgo(3),
+        });
+        expect(
+          suiteRows.find((row) => row['entity.id'] === deploymentId(STANDARD_ONLY_DEPLOYMENT))
+        ).toMatchObject({
+          available_replicas: 1,
+          last_seen: minutesAgo(4),
         });
       }
     );
