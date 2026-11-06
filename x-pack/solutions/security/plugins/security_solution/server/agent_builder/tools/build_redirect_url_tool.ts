@@ -93,7 +93,7 @@ export const buildRedirectUrlTool = (
 Returns a single \`url\`. Render it in your reply as a markdown link \`[title](url)\`, using the returned \`url\` as-is (do not edit it).
 
 - \`path\`: the app-relative path (starting with "/"), without the base path or space segment — the tool adds those for the current deployment and space.
-- \`flyout\` (optional): expandable \`{ left, right, preview }\` panels from the skill. Panels are translated to a \`flyoutV2\` param; panels with no mapping are dropped and the link opens the page without a flyout.
+- \`flyout\` (optional): expandable \`{ left, right, preview }\` panels from the skill, translated to a \`flyoutV2\` param. If the panels can't be translated (unknown panel id or missing required params), the tool returns an error instead of a url.
 
 This tool only builds a link; it performs no action.`,
   schema: buildRedirectUrlSchema,
@@ -124,13 +124,20 @@ This tool only builds a link; it performs no action.`,
 
     if (flyout && Boolean(flyout.left || flyout.right || flyout.preview)) {
       const translated = translateLegacyStateToDescriptors(flyout);
-      if (translated?.length) {
-        relativePath = appendQueryParam(relativePath, FLYOUT_V2_PARAM, translated);
-      } else {
-        logger.debug(
-          `${SECURITY_BUILD_REDIRECT_URL_TOOL_ID} could not translate the flyout panels for path '${path}', linking to the page without a flyout`
-        );
+      if (!translated?.length) {
+        // Linking to the page without the flyout would drop what the user asked to see.
+        return {
+          results: [
+            {
+              type: ToolResultType.error as const,
+              data: {
+                message: `The 'flyout' panels could not be translated into a flyout link (unknown panel id or missing required params). Check that the panels match the skill's flyout template exactly, with the runtime values substituted.`,
+              },
+            },
+          ],
+        };
       }
+      relativePath = appendQueryParam(relativePath, FLYOUT_V2_PARAM, translated);
     }
 
     const url = addSpaceIdToPath(coreStart.http.basePath.serverBasePath, spaceId, relativePath);

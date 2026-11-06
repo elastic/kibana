@@ -150,7 +150,7 @@ describe('buildRedirectUrlTool', () => {
       expect(decodeFlyoutV2(url)).toEqual(expectedV2);
     });
 
-    it('links to the page without a flyout param for panels with no v2 mapping', async () => {
+    it('returns an error result for panels with no v2 mapping', async () => {
       const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         {
           path: '/app/security/entity_analytics_management/watchlists',
@@ -158,9 +158,23 @@ describe('buildRedirectUrlTool', () => {
         },
         context
       )) as ToolHandlerStandardReturn;
-      expect((results[0].data as { url: string }).url).toBe(
-        `${PREFIX}/app/security/entity_analytics_management/watchlists`
-      );
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect((results[0].data as { message: string }).message).toContain('could not be translated');
+    });
+
+    it('returns an error result when a known panel is missing its required params', async () => {
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
+        {
+          path: '/app/security/entity_analytics',
+          flyout: {
+            ...expandable,
+            right: { id: 'user-panel', params: { entityId: 'user:florence' } },
+          },
+        },
+        context
+      )) as ToolHandlerStandardReturn;
+      expect(results[0].type).toBe(ToolResultType.error);
     });
 
     it('does not append a flyout param when flyout has no panels', async () => {
