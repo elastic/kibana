@@ -208,17 +208,19 @@ export interface ResolvedCustomContentTemplate {
 /** Generates a custom content template, or refines `existingTemplate` when one is given. */
 export type CustomContentTemplateResolver = (params: {
   prompt: string;
-  esqlQuery?: string;
-  existingTemplate?: string;
-  /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
-  hasExistingQuery?: boolean;
   /**
-   * The panel's queries after the main one, which its template reads as `queries[1]`, `queries[2]`,
-   * ... They are not sampled: like the main query, a query that is not changing is described by the
-   * template that already reads it. Giving them only tells the model what `queries[n]` is, so a
+   * All the panel's queries, in the order its template reads them: the first is `rows`, the others
+   * `queries[1]`, `queries[2]`, ... A panel with none gets a static template.
+   */
+  esqlQueries?: readonly string[];
+  /**
+   * Whether the first query is new or changing. Only then is it run, to give the model its real
+   * columns; a query that is not changing is described by the template that already reads it. The
+   * other queries are never run: giving them only tells the model what `queries[n]` is, so a
    * refinement keeps the references to them.
    */
-  additionalEsqlQueries?: readonly string[];
+  isQueryChanging?: boolean;
+  existingTemplate?: string;
   /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
   esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
@@ -228,20 +230,15 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({
-    prompt,
-    esqlQuery,
-    existingTemplate,
-    hasExistingQuery,
-    additionalEsqlQueries = [],
-    esqlVariables,
-  }) => {
+  return async ({ prompt, esqlQueries = [], isQueryChanging, existingTemplate, esqlVariables }) => {
+    const [esqlQuery, ...additionalEsqlQueries] = esqlQueries;
+    const queryToSample = isQueryChanging ? esqlQuery : undefined;
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
-    if (esqlQuery) {
+    if (queryToSample) {
       try {
-        const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
+        const sampledQuery = appendLimitToQuery(queryToSample, SAMPLE_ROW_COUNT);
         const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
@@ -255,13 +252,12 @@ export const createCustomContentTemplateResolver = ({
       }
     }
 
-    const systemPrompt =
-      esqlQuery || hasExistingQuery
-        ? buildSystemPromptTemplate(additionalEsqlQueries.length > 0)
-        : buildSystemPromptStatic();
+    const systemPrompt = esqlQuery
+      ? buildSystemPromptTemplate(additionalEsqlQueries.length > 0)
+      : buildSystemPromptStatic();
 
     let userContent: string;
-    if (esqlQuery) {
+    if (queryToSample) {
       const promptPrefix = prompt ? `${prompt}\n\n` : '';
       let schemaSection: string;
       if (columns.length > 0) {

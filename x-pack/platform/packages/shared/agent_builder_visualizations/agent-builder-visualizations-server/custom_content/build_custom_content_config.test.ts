@@ -52,10 +52,9 @@ describe('buildCustomContentConfig', () => {
       );
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: 'Show KPI',
-        esqlQuery: GENERATED,
+        esqlQueries: [GENERATED],
+        isQueryChanging: true,
         existingTemplate: undefined,
-        hasExistingQuery: false,
-        additionalEsqlQueries: [],
       });
       expect(result).toEqual({
         esqlQueries: [GENERATED],
@@ -76,7 +75,7 @@ describe('buildCustomContentConfig', () => {
 
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ prompt: 'Show KPI', esqlQuery: undefined })
+        expect.objectContaining({ prompt: 'Show KPI', esqlQueries: [] })
       );
       expect(result.esqlQueries[0]).toBeUndefined();
     });
@@ -116,10 +115,9 @@ describe('buildCustomContentConfig', () => {
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: 'Make it blue',
-        esqlQuery: undefined,
+        esqlQueries: [STORED],
+        isQueryChanging: false,
         existingTemplate: OLD_TEMPLATE,
-        hasExistingQuery: true,
-        additionalEsqlQueries: [],
       });
       expect(result.esqlQueries[0]).toBe(STORED);
     });
@@ -136,7 +134,7 @@ describe('buildCustomContentConfig', () => {
 
       expect(result.esqlQueries[0]).toBe(EXPLICIT);
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: EXPLICIT, hasExistingQuery: false })
+        expect.objectContaining({ esqlQueries: [EXPLICIT], isQueryChanging: true })
       );
     });
 
@@ -144,7 +142,7 @@ describe('buildCustomContentConfig', () => {
       await build({ existing, esql: STORED });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
+        expect.objectContaining({ esqlQueries: [STORED], isQueryChanging: false })
       );
     });
 
@@ -220,10 +218,9 @@ describe('buildCustomContentConfig', () => {
 
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: '',
-        esqlQuery: EXPLICIT,
+        esqlQueries: [EXPLICIT],
+        isQueryChanging: true,
         existingTemplate: OLD_TEMPLATE,
-        hasExistingQuery: false,
-        additionalEsqlQueries: [],
       });
       expect(result.template).toBe('<div>resolved</div>');
     });
@@ -236,7 +233,7 @@ describe('buildCustomContentConfig', () => {
       });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ prompt: '', esqlQuery: undefined })
+        expect.objectContaining({ prompt: '', esqlQueries: [], isQueryChanging: true })
       );
     });
 
@@ -252,12 +249,15 @@ describe('buildCustomContentConfig', () => {
       template: OLD_TEMPLATE,
     };
 
-    it('keeps them through an edit, and tells the template resolver about them', async () => {
+    it('keeps them through an edit, and gives them to the template resolver with the main query', async () => {
       const result = await build({ nlQuery: 'Make it blue', existing });
 
       expect(result.esqlQueries).toEqual([STORED, 'FROM metrics', 'FROM traces']);
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ additionalEsqlQueries: ['FROM metrics', 'FROM traces'] })
+        expect.objectContaining({
+          esqlQueries: [STORED, 'FROM metrics', 'FROM traces'],
+          isQueryChanging: false,
+        })
       );
     });
 
@@ -284,7 +284,7 @@ describe('buildCustomContentConfig', () => {
 
       expect(result.esqlQueries).toEqual([]);
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ additionalEsqlQueries: [] })
+        expect.objectContaining({ esqlQueries: [] })
       );
     });
 

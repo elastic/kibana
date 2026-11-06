@@ -38,13 +38,13 @@ beforeEach(() => {
 describe('createCustomContentTemplateResolver — system prompt selection', () => {
   const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
 
-  it('uses the Liquid system prompt when hasExistingQuery is true and esqlQuery is omitted', async () => {
+  it('uses the Liquid system prompt for a panel whose query is not changing', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>{{ row["x"].value }}</div>' });
 
     await resolve({
       prompt: 'Change the colors',
       existingTemplate: '<div>{{ row["x"].value }}</div>',
-      hasExistingQuery: true,
+      esqlQueries: ['FROM logs'],
     });
 
     expect(mockEsqlQuery).not.toHaveBeenCalled();
@@ -54,15 +54,15 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).not.toContain('Output ONLY valid HTML');
   });
 
-  it('does not sample ES when hasExistingQuery is true and esqlQuery is omitted', async () => {
+  it('does not sample ES when the query is not changing', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
 
-    await resolve({ prompt: 'Restyle', hasExistingQuery: true });
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
 
     expect(mockEsqlQuery).not.toHaveBeenCalled();
   });
 
-  it('uses the static system prompt when neither esqlQuery nor hasExistingQuery is set', async () => {
+  it('uses the static system prompt for a panel with no queries', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
 
     await resolve({ prompt: 'Show a KPI card' });
@@ -229,9 +229,9 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
   ])('fails with a cause-specific message on %s', async (_label, error, expected) => {
     mockEsqlQuery.mockRejectedValue(error);
 
-    await expect(resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })).rejects.toThrow(
-      expected
-    );
+    await expect(
+      resolve({ prompt: 'Show revenue', esqlQueries: ['FROM logs'], isQueryChanging: true })
+    ).rejects.toThrow(expected);
     expect(mockChatComplete).not.toHaveBeenCalled();
   });
 
@@ -239,14 +239,15 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     mockEsqlQuery.mockResolvedValue({ columns: [{ name: 'count', type: 'long' }], values: [] });
 
     await expect(
-      resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })
+      resolve({ prompt: 'Show revenue', esqlQueries: ['FROM logs'], isQueryChanging: true })
     ).resolves.toMatchObject({ template: '<div>ok</div>' });
   });
 
   it('binds ?_tstart and ?_tend when sampling a time-picker query', async () => {
     await resolve({
       prompt: 'Show revenue',
-      esqlQuery: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend',
+      esqlQueries: ['FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend'],
+      isQueryChanging: true,
     });
 
     expect(mockEsqlQuery).toHaveBeenCalledWith(
@@ -264,7 +265,12 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     ];
 
     it('binds the control values the query uses', async () => {
-      await resolve({ prompt: 'Show hits', esqlQuery: usesHost, esqlVariables });
+      await resolve({
+        prompt: 'Show hits',
+        esqlQueries: [usesHost],
+        isQueryChanging: true,
+        esqlVariables,
+      });
 
       expect(mockEsqlQuery).toHaveBeenCalledWith(
         expect.objectContaining({ params: [{ host: 'web-1' }] })
@@ -274,8 +280,10 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     it('binds the time range and the control values together', async () => {
       await resolve({
         prompt: 'Show hits',
-        esqlQuery:
+        esqlQueries: [
           'FROM logs | WHERE @timestamp >= ?_tstart AND host.name == ?host | STATS hits = COUNT(*)',
+        ],
+        isQueryChanging: true,
         esqlVariables,
       });
 
@@ -287,9 +295,9 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     it('is unchanged for a query that uses a control when no values were provided', async () => {
       mockEsqlQuery.mockRejectedValue(new Error('Unknown query parameter [host]'));
 
-      await expect(resolve({ prompt: 'Show hits', esqlQuery: usesHost })).rejects.toThrow(
-        /Could not sample/
-      );
+      await expect(
+        resolve({ prompt: 'Show hits', esqlQueries: [usesHost], isQueryChanging: true })
+      ).rejects.toThrow(/Could not sample/);
       expect(mockEsqlQuery).toHaveBeenCalledWith(
         expect.not.objectContaining({ params: expect.anything() })
       );
@@ -299,7 +307,7 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
       await resolve({
         prompt: 'Restyle',
         existingTemplate: '<div/>',
-        hasExistingQuery: true,
+        esqlQueries: ['FROM logs'],
         esqlVariables,
       });
 
@@ -308,7 +316,7 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
   });
 
   it('sends no params for a query without time parameters', async () => {
-    await resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' });
+    await resolve({ prompt: 'Show revenue', esqlQueries: ['FROM logs'], isQueryChanging: true });
 
     expect(mockEsqlQuery).toHaveBeenCalledWith(
       expect.not.objectContaining({ params: expect.anything() })
@@ -332,8 +340,7 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
     await resolve({
       prompt: 'Restyle',
       existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
-      hasExistingQuery: true,
-      additionalEsqlQueries: ['FROM a', 'FROM b'],
+      esqlQueries: ['FROM main', 'FROM a', 'FROM b'],
     });
 
     expect(mockEsqlQuery).not.toHaveBeenCalled();
@@ -345,8 +352,8 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
 
     await resolve({
       prompt: 'Show it',
-      esqlQuery: 'FROM main',
-      additionalEsqlQueries: ['FROM a', 'FROM b'],
+      esqlQueries: ['FROM main', 'FROM a', 'FROM b'],
+      isQueryChanging: true,
     });
 
     expect(mockEsqlQuery).toHaveBeenCalledTimes(1);
@@ -358,8 +365,8 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
 
     await resolve({
       prompt: 'Show it',
-      esqlQuery: 'FROM main',
-      additionalEsqlQueries: ['FROM a'],
+      esqlQueries: ['FROM main', 'FROM a'],
+      isQueryChanging: true,
     });
 
     const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
@@ -370,10 +377,14 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
   it('teaches the model about queries[n] only when the panel has additional queries', async () => {
     mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
 
-    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main' });
+    await resolve({ prompt: 'Show it', esqlQueries: ['FROM main'], isQueryChanging: true });
     expect(mockChatComplete.mock.calls[0][0].system).not.toContain('MULTIPLE QUERIES');
 
-    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main', additionalEsqlQueries: ['FROM a'] });
+    await resolve({
+      prompt: 'Show it',
+      esqlQueries: ['FROM main', 'FROM a'],
+      isQueryChanging: true,
+    });
     const system: string = mockChatComplete.mock.calls[1][0].system;
     expect(system).toContain('MULTIPLE QUERIES');
     expect(system).toContain('queries[1]');
@@ -384,8 +395,7 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
     await resolve({
       prompt: 'Restyle',
       existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
-      hasExistingQuery: true,
-      additionalEsqlQueries: ['FROM a'],
+      esqlQueries: ['FROM main', 'FROM a'],
     });
 
     expect(mockChatComplete.mock.calls[0][0].system).toContain('MULTIPLE QUERIES');
@@ -393,22 +403,13 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
     expect(content).toContain('Current template');
   });
 
-  it('ignores additional queries for a panel that has no main query', async () => {
-    await resolve({ prompt: 'Show a banner', additionalEsqlQueries: ['FROM a'] });
-
-    expect(mockEsqlQuery).not.toHaveBeenCalled();
-    const system: string = mockChatComplete.mock.calls[0][0].system;
-    expect(system).toContain('Output ONLY valid HTML');
-    expect(system).not.toContain('MULTIPLE QUERIES');
-  });
-
   // The prompt of a panel with one query must stay what it was: nothing about `queries` until the
   // panel actually has more than one.
   it('does not mention queries[n] in the system prompt of a single-query panel', async () => {
     mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
 
-    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main' });
-    await resolve({ prompt: 'Restyle', existingTemplate: '<div/>', hasExistingQuery: true });
+    await resolve({ prompt: 'Show it', esqlQueries: ['FROM main'], isQueryChanging: true });
+    await resolve({ prompt: 'Restyle', existingTemplate: '<div/>', esqlQueries: ['FROM main'] });
 
     for (const [{ system }] of mockChatComplete.mock.calls) {
       expect(system).not.toContain('queries');
@@ -418,7 +419,7 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
   it('does not change what a single-query panel sends to the model', async () => {
     mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
 
-    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main' });
+    await resolve({ prompt: 'Show it', esqlQueries: ['FROM main'], isQueryChanging: true });
 
     const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
     expect(content).not.toContain('further queries');

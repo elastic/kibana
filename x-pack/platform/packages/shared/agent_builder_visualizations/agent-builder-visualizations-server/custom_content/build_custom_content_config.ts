@@ -146,8 +146,7 @@ export const buildCustomContentConfig = async ({
   });
 
   // The other queries extend the first, so there is nothing for them to extend without it.
-  const additionalEsqlQueries = esqlQuery ? existingAdditionalQueries : [];
-  const esqlQueries = esqlQuery ? [esqlQuery, ...additionalEsqlQueries] : [];
+  const esqlQueries = esqlQuery ? [esqlQuery, ...existingAdditionalQueries] : [];
 
   const isQueryChanging = esqlQuery !== existingQuery;
   if (existing && nlQuery === undefined && !isQueryChanging) {
@@ -157,10 +156,9 @@ export const buildCustomContentConfig = async ({
   const resolveTemplate = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
   const { template, height } = await resolveTemplate({
     prompt: nlQuery ?? '',
-    esqlQuery: isQueryChanging ? esqlQuery : undefined,
+    esqlQueries,
+    isQueryChanging,
     existingTemplate: existing?.template || undefined,
-    hasExistingQuery: !isQueryChanging && Boolean(esqlQuery),
-    additionalEsqlQueries,
     esqlVariables: isQueryChanging && esqlQuery ? await getEsqlVariables([esqlQuery]) : undefined,
   });
 
