@@ -11,8 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +18,6 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiMarkdownFormat,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -118,30 +115,27 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinit
 
 const HOVER_ACTIONS_CLASS = 'notebookAppPanelHoverActions';
 
-const PANEL_MENU_LABEL = i18n.translate('xpack.notebook.app.panelMenu', {
-  defaultMessage: 'Panel menu',
+const REVEAL_PANEL_LABEL = i18n.translate('xpack.notebook.app.revealInNotebook', {
+  defaultMessage: 'Reveal in notebook',
 });
 
 const MOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.movePanel', {
   defaultMessage: 'Move panel',
 });
 
-/** Dashboard-style panel chrome: a dashed outline and floating move and menu actions on hover. */
-const getPanelStyles = (euiThemeContext: UseEuiTheme, isMenuOpen: boolean, inset: number) => {
+/** Dashboard-style panel chrome: a dashed outline and floating move, reveal and remove actions on hover. */
+const getPanelStyles = (euiThemeContext: UseEuiTheme, inset: number) => {
   const { euiTheme } = euiThemeContext;
-  const visible = css`
-    z-index: ${euiTheme.levels.menu};
-    opacity: 1;
-    visibility: visible;
-    transition: none;
-  `;
   return {
     container: css`
       position: relative;
       margin: ${inset}px;
       height: calc(100% - ${inset * 2}px);
       &:hover .${HOVER_ACTIONS_CLASS}, &:has(:focus-visible) .${HOVER_ACTIONS_CLASS} {
-        ${visible}
+        z-index: ${euiTheme.levels.menu};
+        opacity: 1;
+        visibility: visible;
+        transition: none;
       }
     `,
     hoverActions: css`
@@ -160,7 +154,6 @@ const getPanelStyles = (euiThemeContext: UseEuiTheme, isMenuOpen: boolean, inset
       transition: opacity ${euiTheme.animation.extraFast} ease-in,
         visibility ${euiTheme.animation.extraFast} linear;
       transition-delay: ${euiTheme.animation.fast};
-      ${isMenuOpen ? visible : ''}
 
       & > * {
         display: flex;
@@ -209,11 +202,7 @@ const AppGridPanel = ({
   const { store } = useNotebook();
   const euiThemeContext = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const styles = useMemo(
-    () => getPanelStyles(euiThemeContext, isMenuOpen, inset),
-    [euiThemeContext, isMenuOpen, inset]
-  );
+  const styles = useMemo(() => getPanelStyles(euiThemeContext, inset), [euiThemeContext, inset]);
   const dragHandleRef = useCallback(
     (element: HTMLButtonElement | null) => setDragHandles([element]),
     [setDragHandles]
@@ -221,37 +210,11 @@ const AppGridPanel = ({
   const cell = cells[panel.cellId];
   if (!cell || !canShowInApp(cell)) return null;
 
-  const closeMenu = () => setIsMenuOpen(false);
-  const menuItems = [
-    <EuiContextMenuItem
-      key="reveal"
-      icon="eye"
-      onClick={() => {
-        closeMenu();
-        onRevealCell(cell.id);
-      }}
-      data-test-subj="notebookAppPanelReveal"
-    >
-      {i18n.translate('xpack.notebook.app.revealInNotebook', {
-        defaultMessage: 'Reveal in notebook',
-      })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="remove"
-      icon="trash"
-      color="danger"
-      onClick={() => {
-        closeMenu();
-        store.updateApp(app.id, (current) => ({
-          ...current,
-          panels: current.panels.filter(({ id }) => id !== panel.id),
-        }));
-      }}
-      data-test-subj="notebookAppPanelRemove"
-    >
-      {REMOVE_PANEL_LABEL}
-    </EuiContextMenuItem>,
-  ];
+  const removePanel = () =>
+    store.updateApp(app.id, (current) => ({
+      ...current,
+      panels: current.panels.filter(({ id }) => id !== panel.id),
+    }));
 
   return (
     <div css={styles.container} data-test-subj={`notebookAppPanel-${cell.name}`}>
@@ -268,27 +231,24 @@ const AppGridPanel = ({
           </button>
         </span>
         <span>
-          <EuiPopover
-            isOpen={isMenuOpen}
-            closePopover={closeMenu}
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-            repositionOnScroll
-            aria-label={PANEL_MENU_LABEL}
-            button={
-              <EuiToolTip content={PANEL_MENU_LABEL} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="ellipsis"
-                  color="text"
-                  aria-label={PANEL_MENU_LABEL}
-                  onClick={() => setIsMenuOpen((open) => !open)}
-                  data-test-subj="notebookAppPanelMenu"
-                />
-              </EuiToolTip>
-            }
-          >
-            <EuiContextMenuPanel items={menuItems} />
-          </EuiPopover>
+          <EuiToolTip content={REVEAL_PANEL_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="eye"
+              color="text"
+              aria-label={REVEAL_PANEL_LABEL}
+              onClick={() => onRevealCell(cell.id)}
+              data-test-subj="notebookAppPanelReveal"
+            />
+          </EuiToolTip>
+          <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              aria-label={REMOVE_PANEL_LABEL}
+              onClick={removePanel}
+              data-test-subj="notebookAppPanelRemove"
+            />
+          </EuiToolTip>
         </span>
       </div>
       <div css={styles.content}>
