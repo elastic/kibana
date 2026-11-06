@@ -20,12 +20,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { SyncFieldSelector } from './sync_field_selector';
 
 export function AdvancedSettings() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const formState = useFormState({
+    control,
+    name: ['settings.syncDelay', 'settings.frequency', 'settings.preventInitialBackfill'],
+  });
   const preventBackfillCheckbox = useGeneratedHtmlId({ prefix: 'preventBackfill' });
   const advancedSettingsAccordion = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
@@ -59,7 +63,7 @@ export function AdvancedSettings() {
 
           <EuiFlexItem>
             <EuiFormRow
-              isInvalid={getFieldState('settings.syncDelay').invalid}
+              isInvalid={getFieldState('settings.syncDelay', formState).invalid}
               label={
                 <span>
                   {i18n.translate('xpack.slo.sloEdit.settings.syncDelay.label', {
@@ -102,7 +106,7 @@ export function AdvancedSettings() {
 
           <EuiFlexItem>
             <EuiFormRow
-              isInvalid={getFieldState('settings.frequency').invalid}
+              isInvalid={getFieldState('settings.frequency', formState).invalid}
               label={
                 <span>
                   {i18n.translate('xpack.slo.sloEdit.settings.frequency.label', {
@@ -145,7 +149,9 @@ export function AdvancedSettings() {
         </EuiFlexGrid>
 
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
+          <EuiFormRow
+            isInvalid={getFieldState('settings.preventInitialBackfill', formState).invalid}
+          >
             <Controller
               name="settings.preventInitialBackfill"
               control={control}

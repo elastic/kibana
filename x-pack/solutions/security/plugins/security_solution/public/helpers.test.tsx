@@ -14,6 +14,7 @@ import {
   getField,
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isEndpointManagementPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -297,4 +298,25 @@ describe('isDashboardViewPath', () => {
   it('returns false for dashboard listing path', () => {
     expect(isDashboardViewPath('/dashboards')).toEqual(false);
   });
+});
+
+describe('isEndpointManagementPath', () => {
+  it.each([
+    '/administration/endpoints',
+    '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/custom_yara_signatures',
+    '/administration/response_actions_history',
+    '/administration/script_library',
+  ])('returns true for %s', (pathname) => {
+    expect(isEndpointManagementPath(pathname)).toEqual(true);
+  });
+
+  it.each(['/administration', '/administration/notes', '/manage', '/alerts'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isEndpointManagementPath(pathname)).toEqual(false);
+    }
+  );
 });

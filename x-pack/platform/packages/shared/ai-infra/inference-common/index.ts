@@ -32,6 +32,8 @@ export {
   type ChatCompleteAPI,
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
+  type FeatureChatCompleteAPI,
+  type FeatureChatCompleteOptions,
   type ChatCompleteTemplate,
   parseTemplateJson,
   type ChatCompleteCompositeResponse,
