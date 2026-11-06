@@ -119,6 +119,16 @@ describe('findUnattachedToolIds', () => {
     ).resolves.toEqual([]);
   });
 
+  it('reads the agent the run converses with, not always the default agent', async () => {
+    const kbnClient = makeAgentClient([{ tool_ids: ['create.case'] }]);
+    await expect(
+      findUnattachedToolIds(kbnClient, ['create.case'], 'chrysalis-hunting-agent')
+    ).resolves.toEqual([]);
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/api/agent_builder/agents/chrysalis-hunting-agent' })
+    );
+  });
+
   it('flattens tool_ids across multiple selection entries', async () => {
     const kbnClient = makeAgentClient([
       { tool_ids: ['virustotal_lookup'] },

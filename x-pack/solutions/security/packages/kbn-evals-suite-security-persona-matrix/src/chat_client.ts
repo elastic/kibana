@@ -89,13 +89,14 @@ export class PersonaMatrixChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
-    private readonly connectorId: string
+    private readonly connectorId: string,
+    private readonly agentId: string = agentBuilderDefaultAgentId
   ) {}
 
   async query(input: string, attachment?: string): Promise<ConverseResponse> {
     const call = async (): Promise<ConverseResponse> => {
       const body: Record<string, unknown> = {
-        agent_id: agentBuilderDefaultAgentId,
+        agent_id: this.agentId,
         connector_id: this.connectorId,
         input,
         // Run inline so the eval worker's W3C traceparent propagates

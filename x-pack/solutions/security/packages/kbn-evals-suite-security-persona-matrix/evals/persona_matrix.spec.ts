@@ -13,6 +13,7 @@ import { selectShard } from '../src/datasets/select_shard';
 import {
   seedChrysalisAlerts,
   cleanupChrysalisAlerts,
+  assertParityDataGate,
   seedProfile,
 } from '../src/fixtures/chrysalis_seed';
 import {
@@ -20,6 +21,7 @@ import {
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
 import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
+import { agentProfile, resolveAgentId } from '../src/agent_profile';
 
 const DATASET_NAME = 'security: security-persona-matrix';
 const DATASET_DESCRIPTION =
@@ -27,13 +29,19 @@ const DATASET_DESCRIPTION =
 
 evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    if (agentProfile === 'chrysalis-parity' && seedProfile !== 'parity') {
+      throw new Error('AGENT_PROFILE=chrysalis-parity requires SEED_PROFILE=parity');
+    }
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
-    await seedPersonaMatrixTools({ kbnClient, log, parity: seedProfile === 'parity' });
+    if (seedProfile === 'parity') {
+      await assertParityDataGate({ esClient: esClient as unknown as EsClient, log });
+    }
+    await seedPersonaMatrixTools({ kbnClient, log, profile: agentProfile });
     log.info(
-      `[persona-matrix] seeded persona-matrix tools (profile: ${seedProfile}${
-        seedProfile === 'parity' ? ' incl. original-era shims' : ''
-      })`
+      `[persona-matrix] seeded persona-matrix tools (seed profile: ${seedProfile}, agent: ${resolveAgentId(
+        agentProfile
+      )})`
     );
   });
 
@@ -67,6 +75,7 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
       kbnClient,
       log,
       examples: selectShard(examples, process.env.PERSONA_MATRIX_SHARD),
+      agentId: resolveAgentId(agentProfile),
     });
 
     await evaluateDataset({

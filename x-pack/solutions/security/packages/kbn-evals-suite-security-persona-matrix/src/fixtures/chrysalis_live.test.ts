@@ -8,25 +8,30 @@
 /* eslint-disable no-console -- Print live smoke counts to the test log. */
 import { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { parse } from 'yaml';
 import { PARITY_DOCS } from './chrysalis_parity_docs';
-import { seedPersonaMatrixTools, cleanupPersonaMatrixTools } from './persona_matrix_tools_seed';
+import { PARITY_WORKFLOWS, VT_HASH_LOOKUP_WORKFLOW_ID } from './parity_workflows';
 
 // This suite exercises the parity profile end to end, so force it before the
-// seed module is loaded — regardless of the caller's SEED_PROFILE — and load
-// chrysalis_seed inside isolateModules so it reads the forced value. Nothing
-// from './chrysalis_seed' may be statically imported: the module validates
-// SEED_PROFILE at initialization, and a static import would evaluate it before
-// the forced value below is set (failing collection even when skipped).
-// Restore the original value afterwards so 'parity' cannot leak into sibling
-// suites sharing this worker.
+// seed modules are loaded — regardless of the caller's SEED_PROFILE — and load
+// them inside isolateModules so they read the forced value. Nothing from
+// './chrysalis_seed' (or './persona_matrix_tools_seed', which imports it) may be
+// statically imported: the module validates SEED_PROFILE at initialization, and
+// a static import would evaluate it before the forced value below is set
+// (failing collection even when skipped). Restore the original value afterwards
+// so 'parity' cannot leak into sibling suites sharing this worker.
 const outerSeedProfile = process.env.SEED_PROFILE;
 process.env.SEED_PROFILE = 'parity';
 let chrysalisSeed: typeof import('./chrysalis_seed');
+let toolsSeed: typeof import('./persona_matrix_tools_seed');
 jest.isolateModules(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   chrysalisSeed = require('./chrysalis_seed');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  toolsSeed = require('./persona_matrix_tools_seed');
 });
 const { seedChrysalisAlerts, cleanupChrysalisAlerts, ALERT_INDEX } = chrysalisSeed!;
+const { seedPersonaMatrixTools, cleanupPersonaMatrixTools } = toolsSeed!;
 afterAll(() => {
   if (outerSeedProfile === undefined) {
     delete process.env.SEED_PROFILE;
@@ -74,12 +79,24 @@ run(
         body,
       }: {
         method: string;
-        body?: { id: string; configuration: { query: string } };
+        body?: { id: string; configuration?: { query?: string } };
       }) => {
-        if (method === 'POST' && body) queries[body.id] = body.configuration.query;
-        return {};
+        const query = body?.configuration?.query;
+        if (method === 'POST' && body && query) queries[body.id] = query;
+        return { data: {} };
       },
     } as unknown as Parameters<typeof seedPersonaMatrixTools>[0]['kbnClient'];
+    // vt.hash.lookup is a workflow tool: run its workflow's ES|QL step with the
+    // EICAR hash bound, the way the workflow engine renders it.
+    const vtStep = (
+      parse(PARITY_WORKFLOWS.find(({ id }) => id === VT_HASH_LOOKUP_WORKFLOW_ID)?.yaml ?? '') as {
+        steps: Array<{ with: { query: string } }>;
+      }
+    ).steps[0];
+    queries['vt.hash.lookup'] = vtStep.with.query.replace(
+      '{{ inputs.hash }}',
+      '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
+    );
     try {
       await esClient.index({
         index: foreignIndex,
@@ -112,7 +129,8 @@ run(
         },
       });
       await seedChrysalisAlerts({ esClient, log });
-      await seedPersonaMatrixTools({ kbnClient, log, parity: true });
+      await seedPersonaMatrixTools({ kbnClient, log });
+      await chrysalisSeed!.assertParityDataGate({ esClient, log });
       for (const id of ['vt.hash.lookup', 'check.on.call.schedule']) {
         const response = await esClient.esql.query({ query: queries[id] });
         console.log(`shim ${id} rows=${response.values.length}`);

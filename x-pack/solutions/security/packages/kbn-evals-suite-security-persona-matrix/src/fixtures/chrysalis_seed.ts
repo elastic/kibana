@@ -179,6 +179,49 @@ export async function bulkCreateOrThrow(
   }
 }
 
+/** Docs per index that a parity seed writes, derived from PARITY_DOCS. */
+export function parityDocCountsByIndex(): Map<string, number> {
+  const byIndex = new Map<string, number>();
+  for (const { index } of PARITY_DOCS) {
+    byIndex.set(index, (byIndex.get(index) ?? 0) + 1);
+  }
+  return byIndex;
+}
+
+/**
+ * Parity data gate: after a parity seed, every seeded doc must be searchable
+ * in its index. Fails setup with per-index counts instead of letting models be
+ * scored against a partial environment. Counts by the deterministic seed ids
+ * so foreign docs in shared data streams cannot satisfy the gate.
+ */
+export async function assertParityDataGate({
+  esClient,
+  log,
+}: {
+  esClient: EsClient;
+  log: ToolingLog;
+}): Promise<void> {
+  const shortfalls: string[] = [];
+  const summary: string[] = [];
+  for (const [index, expected] of parityDocCountsByIndex()) {
+    const { count } = await esClient.count({
+      index,
+      query: {
+        ids: { values: Array.from({ length: expected }, (_, i) => `${seedIdPrefix(index)}-${i}`) },
+      },
+      ignore_unavailable: true,
+    });
+    summary.push(`${index}=${count}/${expected}`);
+    if (count < expected) {
+      shortfalls.push(`${index}: ${count}/${expected}`);
+    }
+  }
+  if (shortfalls.length > 0) {
+    throw new Error(`Parity data gate failed (found/expected): ${shortfalls.join('; ')}`);
+  }
+  log.info(`[persona-matrix] parity data gate passed: ${summary.join(', ')}`);
+}
+
 const SEED_DOC_ID_PREFIX = 'persona-matrix-seed';
 const seedIdPrefix = (index: string) => `${SEED_DOC_ID_PREFIX}-${index}`;
 
@@ -223,12 +266,7 @@ export async function cleanupChrysalisAlerts({
     });
     log.info(`Cleaned up alerts from ${ALERT_INDEX}`);
     if (seedProfile === 'parity') {
-      const { docs } = loadParityDocs();
-      const byIndex = new Map<string, number>();
-      for (const { index } of docs) {
-        byIndex.set(index, (byIndex.get(index) ?? 0) + 1);
-      }
-      for (const [index, count] of byIndex) {
+      for (const [index, count] of parityDocCountsByIndex()) {
         try {
           await esClient.deleteByQuery({
             index,

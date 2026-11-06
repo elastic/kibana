@@ -96,9 +96,12 @@ export async function assertPersonaMatrixToolsRegistered({
   kbnClient,
   log,
   examples = personaMatrixDataset,
+  agentId = agentBuilderDefaultAgentId,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
+  /** Agent the run converses with; its configuration must carry the custom tools. */
+  agentId?: string;
   /** Examples that will actually run; tools of filtered-out examples are not required. */
   examples?: Array<{ metadata?: { expectedTools?: string[] } }>;
 }): Promise<void> {
@@ -153,26 +156,27 @@ export async function assertPersonaMatrixToolsRegistered({
   if (custom.length === 0) {
     return;
   }
-  const unattached = await findUnattachedToolIds(kbnClient, custom);
+  const unattached = await findUnattachedToolIds(kbnClient, custom, agentId);
   if (unattached.length > 0) {
     throw new Error(
       `[persona-matrix] pre-flight tool-attachment check failed: tools registered but not attached ` +
-        `to agent '${agentBuilderDefaultAgentId}': ${unattached.join(', ')}. ` +
+        `to agent '${agentId}': ${unattached.join(', ')}. ` +
         `Call seedPersonaMatrixTools, which attaches them, before running the suite.`
     );
   }
-  log.info(`[persona-matrix] pre-flight: custom tools attached to '${agentBuilderDefaultAgentId}'`);
+  log.info(`[persona-matrix] pre-flight: custom tools attached to '${agentId}'`);
 }
 
 export async function findUnattachedToolIds(
   kbnClient: KbnClient,
-  toolIds: readonly string[]
+  toolIds: readonly string[],
+  agentId: string = agentBuilderDefaultAgentId
 ): Promise<string[]> {
   const response = await kbnClient.request<{
     configuration?: { tools?: Array<{ tool_ids?: string[] }> };
   }>({
     method: 'GET',
-    path: `/api/agent_builder/agents/${agentBuilderDefaultAgentId}`,
+    path: `/api/agent_builder/agents/${agentId}`,
     headers: {
       'kbn-xsrf': 'persona-matrix-tool-check',
       'elastic-api-version': '2023-10-31',
