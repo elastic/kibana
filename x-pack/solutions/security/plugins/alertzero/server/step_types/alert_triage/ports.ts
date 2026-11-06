@@ -360,9 +360,19 @@ export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): P
 };
 
 /** Which of the given alerts are still open or acknowledged. Used to undo a tag after a failed close. */
-export const findOpenAlertIds = async (
-  { callKibanaApi }: KibanaApi,
+export const findOpenAlertIds = (api: KibanaApi, alertIds: readonly string[]): Promise<string[]> =>
+  findAlertIdsWithStatus(api, alertIds, OPEN_ALERT_STATUSES);
+
+/** Which of the given alerts are still closed. Used by revoke, so it never overrides a later analyst decision. */
+export const findClosedAlertIds = (
+  api: KibanaApi,
   alertIds: readonly string[]
+): Promise<string[]> => findAlertIdsWithStatus(api, alertIds, ['closed']);
+
+const findAlertIdsWithStatus = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[],
+  statuses: readonly string[]
 ): Promise<string[]> => {
   const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
@@ -374,7 +384,7 @@ export const findOpenAlertIds = async (
         bool: {
           filter: [
             { ids: { values: [...alertIds] } },
-            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+            { terms: { [ALERT_FIELDS.status]: [...statuses] } },
           ],
         },
       },

@@ -21,6 +21,7 @@ const setup = ({
   updateError,
   statusError,
   keepTags = false,
+  closed = tagged,
 }: {
   decisionId?: string;
   tagged?: string[];
@@ -29,10 +30,20 @@ const setup = ({
   updateError?: Error & { statusCode?: number };
   statusError?: Error;
   keepTags?: boolean;
+  /** The tagged alerts that are still closed; the others were moved on by an analyst. */
+  closed?: string[];
 }) => {
   let left = [...tagged];
   const callKibanaApi = jest.fn(async ({ path, body }: { path: string; body?: any }) => {
     if (path.endsWith('/signals/search')) {
+      const asked: string[] | undefined = body?.query?.bool?.filter?.[0]?.ids?.values;
+      if (asked) {
+        return {
+          body: {
+            hits: { hits: asked.filter((id) => closed.includes(id)).map((_id) => ({ _id })) },
+          },
+        };
+      }
       return { body: { hits: { hits: left.map((_id) => ({ _id })) } } };
     }
     if (path.endsWith('/signals/status')) {
@@ -88,6 +99,16 @@ describe('triage revoke decision step', () => {
       },
     ]);
     expect(output).toEqual({ status: 'ok', alerts_reopened: 2, alerts_released: 0, failures: 0 });
+  });
+
+  it('does not reopen an alert an analyst moved on from, and still removes its tag', async () => {
+    const { run, calls } = setup({ tagged: ['a', 'b'], closed: ['a'] });
+
+    const { output } = await run();
+
+    expect(calls('/signals/status')).toEqual([{ signal_ids: ['a'], status: 'open' }]);
+    expect(calls('/signals/tags')[0].ids).toEqual(['a', 'b']);
+    expect(output).toEqual({ status: 'ok', alerts_reopened: 1, alerts_released: 0, failures: 0 });
   });
 
   it('releases the alerts a dismissal kept out of analysis without reopening anything', async () => {
@@ -153,7 +174,10 @@ describe('triage revoke decision step', () => {
     const { output } = await run();
 
     expect(output).toEqual(expect.objectContaining({ failures: 1 }));
-    expect(calls('/signals/search')).toHaveLength(MAX_REVOKE_PAGES);
+    // One search per page for the tagged alerts; the status lookup of each page is not a page read.
+    expect(calls('/signals/search').filter(({ query }) => query.bool.filter[0].term)).toHaveLength(
+      MAX_REVOKE_PAGES
+    );
   });
 
   it('does nothing to alerts when none carry the tag', async () => {
