@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/isomer-corpus",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}
