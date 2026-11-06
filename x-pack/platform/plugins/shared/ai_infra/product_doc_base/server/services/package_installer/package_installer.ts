@@ -954,7 +954,7 @@ export class PackageInstaller {
     inferenceId?: string;
   }): Promise<void> {
     const effectiveInferenceId = inferenceId || this.elserInferenceId;
-    const selectedVersion = version || this.currentVersion;
+    const selectedVersion = version || (await this.selectDefaultOpenApiVersion());
     const stackVersion = await this.findInstallableOpenApiVersion({
       selectedVersion,
       inferenceId: effectiveInferenceId,
@@ -1229,6 +1229,18 @@ export class PackageInstaller {
     }
 
     throw new Error(`No candidate versions available for product [${productName}]`);
+  }
+
+  // Same selection as product installs: on serverless the newest `latest-<LastModified>` of the
+  // repository (the only version a bundled repository has), otherwise the stack version
+  private async selectDefaultOpenApiVersion(): Promise<string> {
+    if (!this.isServerless) {
+      return this.currentVersion;
+    }
+    const { openapi } = await this.fetchArtifactVersionsWithRetry();
+    return openapi?.length
+      ? selectVersion(this.currentVersion, openapi, true)
+      : this.currentVersion;
   }
 
   private async findInstallableOpenApiVersion({

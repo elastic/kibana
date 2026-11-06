@@ -1417,6 +1417,58 @@ describe('PackageInstaller', () => {
       );
     });
 
+    it('defaults to the newest `latest` version of the repository on serverless', async () => {
+      const serverlessInstaller = new PackageInstaller({
+        artifactsFolder,
+        logger,
+        esClient,
+        productDocClient,
+        artifactRepositoryUrl,
+        kibanaVersion,
+        isServerless: true,
+      });
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [
+          {
+            inference_id: '.jina-embeddings-v5-text-small',
+            service: 'elastic',
+            task_type: 'text_embedding' as InferenceTaskType,
+            service_settings: {},
+          },
+        ],
+      });
+      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['latest-2026-10-12T20:25:34.000Z'] });
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
+      downloadToDiskMock.mockResolvedValue('/bundle/kb-product-doc-openapi-latest.zip');
+
+      await serverlessInstaller.installOpenAPISpec({
+        inferenceId: '.jina-embeddings-v5-text-small',
+      });
+
+      const latestArtifactUrl = `${artifactRepositoryUrl}/kb-product-doc-openapi-latest--.jina-embeddings-v5-text-small.zip`;
+      expect(checkArtifactAvailableMock).toHaveBeenCalledTimes(1);
+      expect(checkArtifactAvailableMock).toHaveBeenCalledWith(latestArtifactUrl, undefined);
+      expect(downloadToDiskMock.mock.calls[0][0]).toBe(latestArtifactUrl);
+      expect(productDocClient.setOpenapiSpecInstallationSuccessful).toHaveBeenCalledWith(
+        expect.objectContaining({ productVersion: 'latest-2026-10-12T20:25:34.000Z' })
+      );
+    });
+
+    it('defaults to the stack version outside serverless', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.16', '8.15', 'latest'] });
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-stack.zip');
+
+      await packageInstaller.installOpenAPISpec({ inferenceId: defaultInferenceEndpoints.ELSER });
+
+      expect(downloadToDiskMock.mock.calls[0][0]).toBe(
+        `${artifactRepositoryUrl}/kb-product-doc-openapi-8.16.zip`
+      );
+      expect(productDocClient.setOpenapiSpecInstallationSuccessful).toHaveBeenCalledWith(
+        expect.objectContaining({ productVersion: '8.16' })
+      );
+    });
+
     it('checks a missing `latest` artifact once even when several timestamped versions map to it', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
         openapi: [
