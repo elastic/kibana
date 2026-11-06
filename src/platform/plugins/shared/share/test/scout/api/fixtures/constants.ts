@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+export const SHORT_URL_API_PATH = 'api/short_url';
+export const LEGACY_SHORT_URL_LOCATOR_ID = 'LEGACY_SHORT_URL_LOCATOR';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('get_short_url', () => {
-    loadTestFile(require.resolve('./validation'));
-    loadTestFile(require.resolve('./main'));
-  });
-}
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'short-url-scout',
+} as const;
