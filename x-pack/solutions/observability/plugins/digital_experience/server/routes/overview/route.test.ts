@@ -240,6 +240,14 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     ['', '0', '100', '75.5', 'p95'].forEach((raw) => expect(withPercentile(raw)).toBe(false));
   });
 
+  it('bounds the percentile to the length of the longest one', () => {
+    const withPercentile = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, percentile: raw }).success;
+
+    expect(withPercentile('99')).toBe(true);
+    expect(withPercentile('9'.repeat(1_000_000))).toBe(false);
+  });
+
   it('bounds the KQL query to 2048 characters', () => {
     const withKuery = (raw: string) =>
       querySchema().safeParse({ start: START, end: END, kuery: raw }).success;

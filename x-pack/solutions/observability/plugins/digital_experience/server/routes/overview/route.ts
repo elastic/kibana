@@ -16,6 +16,11 @@ import { createDigitalExperienceServerRoute } from '../create_digital_experience
 import { START_AFTER_END_ISSUE, filteredTimeRangeShape, isStartBeforeEnd } from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
 
+/** The longest percentile param, e.g. `99`. */
+const PERCENTILE_PARAM_MAX_LENGTH = Math.max(
+  ...OVERVIEW_PERCENTILES.map((percentile) => String(percentile).length)
+);
+
 export const APPLICATION_OVERVIEW_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/overview';
 
@@ -37,6 +42,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
           // The percentile of the load time, as a string like the rest of the query; 75 when left out.
           percentile: z
             .string()
+            .max(PERCENTILE_PARAM_MAX_LENGTH)
             .refine(
               (raw) => OVERVIEW_PERCENTILES.some((percentile) => String(percentile) === raw),
               {
