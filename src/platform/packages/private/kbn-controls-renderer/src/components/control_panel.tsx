@@ -19,7 +19,6 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
-  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -323,8 +322,8 @@ const controlPanelStyles = {
         outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
       },
       '&.controlFrame__formControlLayout--selected': {
-        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
-        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
         '& div, & button': {
           backgroundColor: 'transparent',
         },

@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -212,12 +212,13 @@ const dashboardGridItemStyles = {
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
-        // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
+        // Call out panels that are selected to indicate their related panels with the a blue border plus a solid background
         '&.dshDashboardGrid__item--selected': {
-          // Ensure the overall panel still has a plain background so we can apply the semitransparent overlay on top of it
+          // Ensure the overall panel still has a plain background underneath the highlight
           backgroundColor: context.euiTheme.colors.backgroundBasePlain,
           '& .embPanel': {
-            backgroundColor: transparentize(context.euiTheme.colors.vis.euiColorVis0, 0.1),
+            outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.primary}`,
+            backgroundColor: context.euiTheme.colors.backgroundLightPrimary,
 
             '& div, & button': {
               backgroundColor: 'transparent',
