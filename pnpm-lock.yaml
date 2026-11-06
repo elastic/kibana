@@ -427,8 +427,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.35.0
-        version: 4.35.0(monaco-editor@0.56.0)
+        specifier: 4.36.0
+        version: 4.36.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -463,8 +463,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
       '@elastic/statistics':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -3540,6 +3540,9 @@ importers:
       '@kbn/securitysolution-timeline-common':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/timeline-common
+      '@kbn/securitysolution-timeline-components':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-components
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -9900,6 +9903,8 @@ importers:
 
   x-pack/solutions/security/packages/timeline-common: {}
 
+  x-pack/solutions/security/packages/timeline-components: {}
+
   x-pack/solutions/security/packages/upselling: {}
 
   x-pack/solutions/security/plugins/alertzero: {}
@@ -11262,8 +11267,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.35.0':
-    resolution: {integrity: sha512-glwGeIao5jaN94wke96pwJh2QSLvcmLRNfzD9OWaw16e4FLX9Pb8diMnx2K/LNP/w52/9Yn9k+o3bf3atQK8/Q==}
+  '@elastic/monaco-esql@4.36.0':
+    resolution: {integrity: sha512-VEhThD2e+K4KMNSg1pPsngpSLe3hjzPW4RC8L/2QLM8M8U5PAba0Z1fV2p7mozw2XBZ7Robj4Dphtu5qk/+LfA==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11328,8 +11333,8 @@ packages:
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
 
-  '@elastic/statistics@0.0.3':
-    resolution: {integrity: sha512-UjND5cw1sykkutO3pAlF6rz1ayXKQr16SyaxiW/H6AAyi21zsfoy2GS+Z3FjLCcKCFuPKR5mkEwtVPcClzNWkQ==}
+  '@elastic/statistics@0.0.4':
+    resolution: {integrity: sha512-RTJKR5gXDnzvgU1VR+q/Nl648w2rRbmMuF6As8BA81DtOVHrlQZO1JzplyiPkJecParC3YjduK01wQhrpweYuA==}
     engines: {node: '>=22'}
 
   '@elastic/transport@8.11.0':
@@ -27394,7 +27399,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.35.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.36.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.36.0
       monaco-editor: 0.56.0
@@ -27553,7 +27558,7 @@ snapshots:
       history: 4.9.0
       qs: 6.17.0
 
-  '@elastic/statistics@0.0.3':
+  '@elastic/statistics@0.0.4':
     dependencies:
       simple-statistics: 7.12.1
 

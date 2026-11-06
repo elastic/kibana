@@ -146,3 +146,24 @@ describe('buildGroupPackagePolicy — inputs of the service policy template', ()
     });
   });
 });
+
+describe('buildGroupPackagePolicy — output', () => {
+  const buildWithOutput = (outputId?: string) =>
+    buildGroupPackagePolicy(group, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: withInputs(['aws-s3']),
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+      policySettings: { output_id: outputId },
+    } as BuildPackagePolicyOpts);
+
+  it('sends the chosen output', async () => {
+    expect((await buildWithOutput('logstash-1')).output_id).toBe('logstash-1');
+  });
+
+  it('leaves the output out when none is chosen, so the agent policy output applies', async () => {
+    expect(await buildWithOutput(undefined)).not.toHaveProperty('output_id');
+    expect(await buildWithOutput('')).not.toHaveProperty('output_id');
+  });
+});
