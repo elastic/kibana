@@ -31,9 +31,11 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useCurrentUserName } from '../../../hooks/use_current_user_name';
 import { OnboardingIntroBanner } from './intro_banner';
 import {
+  ONBOARDING_STEP_IDS,
   OnboardingStepsCard,
   type OnboardingStepId,
   type OnboardingStepState,
+  type OnboardingStepStatus,
 } from './onboarding_steps';
 import { NightshiftSetupPrompt } from './nightshift_setup_prompt';
 import {
@@ -98,6 +100,7 @@ const backButtonStyles = css`
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
  * investigation, create a first automation. The steps follow from the latest onboarding workflow
  * execution, the space's latest investigation and (in the page) whether an automation exists.
+ * Completed steps other than Enable link back to themselves.
  */
 export function NightshiftOnboarding({
   latestInvestigation,
@@ -213,29 +216,25 @@ export function NightshiftOnboarding({
     };
   }, [agentBuilder, closeInvestigation, selectedInvestigationId, shareInvestigationAction]);
 
+  // Status is positional: earlier steps are complete, later ones disabled.
+  const currentIndex = ONBOARDING_STEP_IDS.indexOf(step);
+  const statusOf = (id: OnboardingStepId): OnboardingStepStatus => {
+    const index = ONBOARDING_STEP_IDS.indexOf(id);
+    return index < currentIndex ? 'complete' : index > currentIndex ? 'disabled' : 'current';
+  };
+  const backTo = (id: 'addData' | 'connectSources') =>
+    statusOf(id) === 'complete' ? () => setStepOverride(id) : undefined;
+
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
-    enable: {
-      status: isEnabled ? 'complete' : 'current',
-    },
-    addData: {
-      status: !isEnabled ? 'disabled' : step === 'addData' ? 'current' : 'complete',
-      onClick: isEnabled && step !== 'addData' ? () => setStepOverride('addData') : undefined,
-    },
+    enable: { status: statusOf('enable') },
+    addData: { status: statusOf('addData'), onClick: backTo('addData') },
     connectSources: {
-      status:
-        step === 'connectSources'
-          ? 'current'
-          : step === 'enable' || step === 'addData'
-          ? 'disabled'
-          : 'complete',
-      onClick:
-        step !== 'connectSources' && step !== 'enable' && step !== 'addData'
-          ? () => setStepOverride('connectSources')
-          : undefined,
+      status: statusOf('connectSources'),
+      onClick: backTo('connectSources'),
       hint: step === 'connectSources' ? OPTIONAL_HINT : undefined,
     },
     investigate: {
-      status: step === 'investigate' ? 'current' : latestInvestigation ? 'complete' : 'disabled',
+      status: statusOf('investigate'),
       onClick:
         isConnected && step !== 'investigate' ? () => setStepOverride('investigate') : undefined,
       hint:
@@ -246,7 +245,7 @@ export function NightshiftOnboarding({
           : undefined,
     },
     automate: {
-      status: step === 'automate' ? 'current' : 'disabled',
+      status: statusOf('automate'),
       onClick:
         latestInvestigation && isConnected && step !== 'automate'
           ? () => setStepOverride(undefined)
