@@ -137,9 +137,16 @@ const setup = ({
   const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
   const scheduleSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
   const removeSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
-  const lockManager = {
-    withLock: jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => callback()),
-  } as unknown as LockManagerService;
+  const lock = { held: false };
+  const withLock = jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => {
+    lock.held = true;
+    try {
+      return await callback();
+    } finally {
+      lock.held = false;
+    }
+  });
+  const lockManager = { withLock } as unknown as LockManagerService;
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
@@ -171,6 +178,8 @@ const setup = ({
     listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
     removeSourceVolumeTask,
+    lock,
+    withLock,
   };
 };
 
@@ -485,13 +494,62 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(removeSourceVolumeTask).not.toHaveBeenCalled();
   });
 
-  it('continues setup and teardown when telemetry task changes fail', async () => {
-    const { service, scheduleSourceVolumeTask, removeSourceVolumeTask } = setup();
-    scheduleSourceVolumeTask.mockRejectedValue(new Error('grant failed'));
-    removeSourceVolumeTask.mockRejectedValue(new Error('remove failed'));
+  it('holds the lifecycle lock only around the telemetry task steps', async () => {
+    const {
+      service,
+      managedWorkflows,
+      lock,
+      listInstalledWorkflowStates,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
+    const heldAt: Record<string, boolean> = {};
+    managedWorkflows.install.mockImplementation(async () => {
+      heldAt.install = lock.held;
+    });
+    managedWorkflows.uninstall.mockImplementation(async () => {
+      heldAt.uninstall = lock.held;
+    });
+    scheduleSourceVolumeTask.mockImplementation(async () => {
+      heldAt.schedule = lock.held;
+    });
+    listInstalledWorkflowStates.mockImplementation(async () => {
+      heldAt.check = lock.held;
+      return [];
+    });
+    removeSourceVolumeTask.mockImplementation(async () => {
+      heldAt.remove = lock.held;
+    });
 
     await service.enable(request, SPACE_ID, IDS);
     await service.disable(request, SPACE_ID);
+
+    expect(heldAt).toEqual({
+      install: false,
+      schedule: true,
+      uninstall: false,
+      check: true,
+      remove: true,
+    });
+  });
+
+  it('continues setup and teardown when the telemetry task cannot be changed', async () => {
+    const {
+      service,
+      managedWorkflows,
+      withLock,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
+    withLock.mockRejectedValue(new Error('lock index unavailable'));
+
+    await service.enable(request, SPACE_ID, IDS);
+    await service.disable(request, SPACE_ID);
+
+    expect(managedWorkflows.install).toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).toHaveBeenCalled();
+    expect(scheduleSourceVolumeTask).not.toHaveBeenCalled();
+    expect(removeSourceVolumeTask).not.toHaveBeenCalled();
   });
 
   it('refuses to disable a space the caller cannot access', async () => {

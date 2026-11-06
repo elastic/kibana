@@ -557,7 +557,7 @@ export const createInvestigatorServiceAccountService = ({
       status = await getStatus(request, spaceId);
     }
     assertAllBound(status, spaceId, serviceAccountIds.agent);
-    await scheduleSourceVolumeTask(request).catch((error) => {
+    await withTaskLifecycleLock(() => scheduleSourceVolumeTask(request)).catch((error) => {
       logger.error(`Failed to schedule the source volume telemetry task: ${error.message}`);
     });
     logger.info(
@@ -589,7 +589,7 @@ export const createInvestigatorServiceAccountService = ({
     const previous = queues.get(spaceId) ?? Promise.resolve();
     const run = previous
       .catch(() => undefined)
-      .then(() => withTaskLifecycleLock(() => runEnable(request, spaceId, serviceAccountIds)));
+      .then(() => runEnable(request, spaceId, serviceAccountIds));
     queues.set(spaceId, run);
     run
       .catch(() => undefined)
@@ -615,27 +615,25 @@ export const createInvestigatorServiceAccountService = ({
         'Removing the Nightshift service account setup requires the manage_security cluster privilege.'
       );
     }
-    return withTaskLifecycleLock(async () => {
-      // The agent goes first: a failure after it leaves the space reading as not set up, never a
-      // space reading as removed whose agent still runs as the account.
-      await unbindAgent(request, spaceId);
-      const client = await workflowsExtensions.getClient(request);
-      // The entry point goes first, so the space stops reading as set up before anything else goes.
-      for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {
-        await client.managedWorkflows.uninstall(
-          NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
-          id,
-          {
-            spaceId,
-            workflowIdSuffix: spaceId,
-          }
-        );
-      }
-      await removeSourceVolumeTaskIfUnused().catch((error) => {
-        logger.error(`Failed to reconcile the source volume telemetry task: ${error.message}`);
-      });
-      return getStatus(request, spaceId);
+    // The agent goes first: a failure after it leaves the space reading as not set up, never a
+    // space reading as removed whose agent still runs as the account.
+    await unbindAgent(request, spaceId);
+    const client = await workflowsExtensions.getClient(request);
+    // The entry point goes first, so the space stops reading as set up before anything else goes.
+    for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {
+      await client.managedWorkflows.uninstall(
+        NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
+        id,
+        {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        }
+      );
+    }
+    await withTaskLifecycleLock(removeSourceVolumeTaskIfUnused).catch((error) => {
+      logger.error(`Failed to reconcile the source volume telemetry task: ${error.message}`);
     });
+    return getStatus(request, spaceId);
   };
 
   return {
