@@ -62,6 +62,11 @@ export interface SearchMethodsServiceDependencies {
    * Resolves the query config from advanced settings, used to apply a search context
    */
   getEsQueryConfig: () => Promise<EsQueryConfig>;
+  /**
+   * Resolves the `preference` request param from the `courier:setRequestPreference` and
+   * `courier:customRequestPreference` advanced settings. Omit where those settings don't apply.
+   */
+  getRequestPreference?: () => string | undefined;
 }
 
 /**
@@ -380,9 +385,17 @@ export class SearchMethodsService implements ISearchMethods {
       track_total_hits: trackTotalHits,
     };
 
+    const { index: paramsIndex } = params;
+    const isDataView = typeof paramsIndex !== 'string';
+    const preference = this.deps.getRequestPreference?.();
+
     return {
       params: {
-        index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
+        index: isDataView ? paramsIndex.getIndexPattern() : paramsIndex,
+        // hidden indices for data views that
+        // allow them, and the shard preference (which keeps search_after pages on the same copies)
+        ...(isDataView && paramsIndex.getAllowHidden() && { expand_wildcards: 'all' }),
+        ...(preference && { preference }),
         body,
       },
     };

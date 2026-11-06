@@ -340,6 +340,47 @@ describe('SearchMethodsService', () => {
       expect(third?.pagination.hasNextPage()).toBe(false);
     });
 
+    it('sets expand_wildcards for data views that allow hidden indices', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      const hiddenDataView = {
+        getIndexPattern: () => 'logs-*',
+        getAllowHidden: () => true,
+      } as AbstractDataView;
+
+      await service.dsl({ index: hiddenDataView });
+
+      expect(mockSearch.mock.calls[0][0].params).toEqual(
+        expect.objectContaining({ index: 'logs-*', expand_wildcards: 'all' })
+      );
+    });
+
+    it('sends the request preference and keeps it for later pages', async () => {
+      const getRequestPreference = jest.fn().mockReturnValue('my-preference');
+      service = new SearchMethodsService(mockSearch, { getEsQueryConfig, getRequestPreference });
+      mockSearch.mockReturnValue(
+        createMockResponse({
+          hits: { hits: [{ sort: [1] }], total: { value: 2, relation: 'eq' } },
+        })
+      );
+
+      const result = await service.dslPaginated({ index: 'logs-*', size: 1, sort: [{ a: 'asc' }] });
+      await result.pagination.nextPage();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mock.calls.forEach(([request]) => {
+        expect(request.params.preference).toBe('my-preference');
+      });
+    });
+
+    it('omits preference when none is configured', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      await service.dsl({ index: 'logs-*' });
+
+      expect(mockSearch.mock.calls[0][0].params).not.toHaveProperty('preference');
+    });
+
     describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },
@@ -520,6 +561,7 @@ describe('SearchMethodsService', () => {
       const mockDataView = {
         id: '1',
         getIndexPattern: () => 'logs-*',
+        getAllowHidden: () => false,
       } as AbstractDataView;
 
       await service.dsl({
