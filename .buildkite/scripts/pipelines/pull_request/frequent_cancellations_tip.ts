@@ -23,33 +23,47 @@ const TIMEOUT_MS = 15_000;
 const isBotUser = (login: string): boolean =>
   login.endsWith('[bot]') || login === 'kibanamachine' || login === 'elasticmachine';
 
-const isBotFixCommit = ({ message }: Build): boolean =>
+type CommitRef = Pick<Build, 'commit' | 'message'>;
+
+const isBotFixCommit = ({ message }: CommitRef): boolean =>
   Boolean(message?.startsWith('Changes from '));
 
 // Drafts only build when the author asks for it, through `/ci` or a draft CI label.
 const ranOnDraft = ({ env, meta_data: metaData }: Build): boolean =>
   env?.GITHUB_PR_DRAFT === 'true' || metaData?.['ingest:is_draft_pr'] === 'true';
 
-/** Counts builds of a PR cancelled in the last day after running for a while, ignoring drafts and bot fix commits. */
+/**
+ * Counts builds of a PR cancelled in the last day after running for a while. Draft builds and
+ * builds of, or cancelled by, bot fix commits don't count. `currentCommit` is the running build,
+ * which isn't in `finishedBuilds` but may be the one that cancelled the latest of them.
+ */
 export const countRecentCancelledBuilds = (
-  builds: readonly Build[],
+  finishedBuilds: readonly Build[],
   prNumber: string,
+  currentCommit?: CommitRef,
   now: number = Date.now()
-): number =>
-  builds.filter((build) => {
-    const { state, pull_request: pullRequest, created_at: createdAt } = build;
+): number => {
+  const prBuilds = finishedBuilds
+    .filter(({ pull_request: pullRequest }) => pullRequest?.id === prNumber)
+    .sort((left, right) => Date.parse(left.created_at) - Date.parse(right.created_at));
+  const laterCommits: CommitRef[] = currentCommit ? [...prBuilds, currentCommit] : prBuilds;
+
+  return prBuilds.filter((build, index) => {
+    const { state, created_at: createdAt, commit } = build;
     const startedAt = Date.parse(build.started_at);
     const finishedAt = Date.parse(build.finished_at);
+    const nextCommit = laterCommits.slice(index + 1).find((later) => later.commit !== commit);
 
     return (
-      pullRequest?.id === prNumber &&
       state === 'canceled' &&
       now - Date.parse(createdAt) <= WINDOW_MS &&
       finishedAt - startedAt >= MIN_RUNTIME_MS &&
       !ranOnDraft(build) &&
-      !isBotFixCommit(build)
+      !isBotFixCommit(build) &&
+      !(nextCommit && isBotFixCommit(nextCommit))
     );
   }).length;
+};
 
 export const getFrequentCancellationsTipMessage = (user: string, cancelledBuilds: number): string =>
   '### 🌯 Save a burrito\n\n' +
@@ -61,6 +75,8 @@ const postTip = async (): Promise<void> => {
   const {
     BUILDKITE_PIPELINE_SLUG,
     BUILDKITE_BRANCH,
+    BUILDKITE_COMMIT,
+    BUILDKITE_MESSAGE,
     GITHUB_PR_NUMBER,
     GITHUB_PR_USER,
     GITHUB_PR_DRAFT,
@@ -85,7 +101,11 @@ const postTip = async (): Promise<void> => {
     excludeJobs: true,
   });
 
-  const cancelledBuilds = countRecentCancelledBuilds(finishedBuilds, GITHUB_PR_NUMBER);
+  const cancelledBuilds = countRecentCancelledBuilds(
+    finishedBuilds,
+    GITHUB_PR_NUMBER,
+    BUILDKITE_COMMIT ? { commit: BUILDKITE_COMMIT, message: BUILDKITE_MESSAGE ?? '' } : undefined
+  );
   if (cancelledBuilds < MIN_CANCELLED_BUILDS) {
     return;
   }

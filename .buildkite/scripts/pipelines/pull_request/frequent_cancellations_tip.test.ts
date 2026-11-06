@@ -30,10 +30,13 @@ const PR = '1234';
 const NOW = Date.UTC(2026, 10, 6, 12, 0);
 const minutesAgo = (value: number) => new Date(NOW - value * 60 * 1000).toISOString();
 
+const BOT_FIX_MESSAGE = 'Changes from node scripts/eslint --fix';
+
 const build = ({
   createdMinutesAgo = 60,
   ranMinutes = 20,
   state = 'canceled',
+  commit = `commit-${createdMinutesAgo}`,
   message = 'Address review comments',
   prNumber = PR,
   draft = false,
@@ -41,12 +44,14 @@ const build = ({
   createdMinutesAgo?: number;
   ranMinutes?: number;
   state?: string;
+  commit?: string;
   message?: string;
   prNumber?: string;
   draft?: boolean;
 } = {}): Build =>
   ({
     state,
+    commit,
     message,
     env: { GITHUB_PR_DRAFT: String(draft) },
     meta_data: {},
@@ -64,37 +69,67 @@ describe('countRecentCancelledBuilds', () => {
       build({ state: 'passed' }),
     ];
 
-    expect(countRecentCancelledBuilds(builds, PR, NOW)).toBe(2);
+    expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(2);
   });
 
   it('ignores builds older than a day', () => {
-    expect(countRecentCancelledBuilds([build({ createdMinutesAgo: 25 * 60 })], PR, NOW)).toBe(0);
+    expect(
+      countRecentCancelledBuilds([build({ createdMinutesAgo: 25 * 60 })], PR, undefined, NOW)
+    ).toBe(0);
   });
 
   it('ignores builds cancelled within their first 10 minutes', () => {
-    expect(countRecentCancelledBuilds([build({ ranMinutes: 9 })], PR, NOW)).toBe(0);
+    expect(countRecentCancelledBuilds([build({ ranMinutes: 9 })], PR, undefined, NOW)).toBe(0);
   });
 
   it('ignores builds that ran while the PR was a draft', () => {
     const fromMetaData = { ...build(), env: {}, meta_data: { 'ingest:is_draft_pr': 'true' } };
 
     expect(
-      countRecentCancelledBuilds([build({ draft: true }), fromMetaData as Build], PR, NOW)
-    ).toBe(0);
-  });
-
-  it('ignores builds of bot fix commits', () => {
-    expect(
       countRecentCancelledBuilds(
-        [build({ message: 'Changes from node scripts/eslint --fix' })],
+        [build({ draft: true }), fromMetaData as Build],
         PR,
+        undefined,
         NOW
       )
     ).toBe(0);
   });
 
+  it('ignores builds of bot fix commits', () => {
+    expect(
+      countRecentCancelledBuilds([build({ message: BOT_FIX_MESSAGE })], PR, undefined, NOW)
+    ).toBe(0);
+  });
+
+  it('ignores builds cancelled by a bot fix commit', () => {
+    const builds = [
+      build({ createdMinutesAgo: 120 }),
+      build({ createdMinutesAgo: 90, message: BOT_FIX_MESSAGE }),
+    ];
+
+    expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(0);
+  });
+
+  it('ignores the latest build when the running build is a bot fix commit', () => {
+    const builds = [build({ createdMinutesAgo: 120 }), build({ createdMinutesAgo: 60 })];
+
+    expect(
+      countRecentCancelledBuilds(builds, PR, { commit: 'bot', message: BOT_FIX_MESSAGE }, NOW)
+    ).toBe(1);
+  });
+
+  it('looks past rebuilds of the same commit to find the commit that cancelled a build', () => {
+    const builds = [
+      build({ createdMinutesAgo: 120, commit: 'a' }),
+      build({ createdMinutesAgo: 90, commit: 'a', state: 'passed' }),
+      build({ createdMinutesAgo: 60, commit: 'b', message: BOT_FIX_MESSAGE, state: 'passed' }),
+    ];
+
+    expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(0);
+  });
+
   it('ignores builds of other PRs on the same branch name', () => {
-    expect(countRecentCancelledBuilds([build({ prNumber: '999' })], PR, NOW)).toBe(0);
+    expect(countRecentCancelledBuilds([build({ prNumber: '999' })], PR, undefined, NOW)).toBe(0);
   });
 });
 
@@ -114,6 +149,8 @@ describe('postFrequentCancellationsTip', () => {
       BUILDKITE_PIPELINE_SLUG: 'kibana-pull-request',
       BUILDKITE_BRANCH: 'jane:feature',
       GITHUB_PR_NUMBER: PR,
+      BUILDKITE_COMMIT: 'current',
+      BUILDKITE_MESSAGE: 'Address more review comments',
       GITHUB_PR_USER: 'jane',
       GITHUB_PR_DRAFT: 'false',
     };
@@ -140,6 +177,14 @@ describe('postFrequentCancellationsTip', () => {
       commentContext: FREQUENT_CANCELLATIONS_TIP_CONTEXT,
       clearPrevious: false,
     });
+  });
+
+  it('does not count the build cancelled by the running bot fix commit', async () => {
+    process.env.BUILDKITE_MESSAGE = BOT_FIX_MESSAGE;
+
+    await postFrequentCancellationsTip();
+
+    expect(mockUpsertComment).not.toHaveBeenCalled();
   });
 
   it('does not post below the threshold', async () => {
