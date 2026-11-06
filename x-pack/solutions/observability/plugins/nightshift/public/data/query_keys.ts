@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
+
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
 export const FEATURES_QUERY_KEY = ['features'] as const;

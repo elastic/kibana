@@ -41,6 +41,8 @@ export const AutomationsTable = ({
   pageIndex,
   pageSize,
   onPageChange,
+  onRun,
+  isRunPending,
   onClone,
   onDelete,
   onOpenAutomation,
@@ -59,6 +61,8 @@ export const AutomationsTable = ({
   pageIndex: number;
   pageSize: number;
   onPageChange: (index: number, size: number) => void;
+  onRun: (automation: Automation) => void;
+  isRunPending: boolean;
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
   onOpenAutomation: (automation: Automation) => void;
@@ -174,6 +178,8 @@ export const AutomationsTable = ({
             render: (automation: Automation) => (
               <AutomationActions
                 automation={automation}
+                onRun={() => onRun(automation)}
+                isRunPending={isRunPending}
                 onClone={() => onClone(automation)}
                 onDelete={() => onDelete(automation)}
               />

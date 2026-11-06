@@ -487,3 +487,87 @@ it('returns a truncated failure reason for failed runs only', async () => {
   expect(result.runs[0].error).toBe('x'.repeat(200));
   expect(result.runs[1].error).toBeUndefined();
 });
+
+it.each([true, false])(
+  'hides disabled skips while preserving raw totals, with a visible run=%s',
+  async (hasVisibleRun) => {
+    mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+    mockGetWorkflowExecutions.mockResolvedValue({
+      results: [
+        { id: 'disabled', status: 'completed', triggeredBy: 'scheduled' },
+        ...(hasVisibleRun
+          ? [
+              {
+                id: 'manual',
+                status: 'completed',
+                triggeredBy: 'nightshift-automation-manual',
+                executedBy: 'alice',
+              },
+            ]
+          : []),
+      ],
+      total: 45,
+      page: 2,
+      size: 20,
+    });
+    mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+      results:
+        stepId === 'trigger_investigation'
+          ? [
+              { workflowRunId: 'disabled', output: { skip_reason: 'automation_disabled' } },
+              { workflowRunId: 'manual', output: { investigation_id: 'inv-manual' } },
+            ]
+          : [],
+    }));
+    const result = await call('auto-1', { page: 2 });
+    expect(result).toMatchObject({ total: 45, page: 2, size: 20 });
+    expect(result.runs).toEqual(
+      hasVisibleRun
+        ? [
+            expect.objectContaining({
+              id: 'manual',
+              triggeredBy: 'manual',
+              executedBy: 'alice',
+              investigationId: 'inv-manual',
+            }),
+          ]
+        : []
+    );
+  }
+);
+
+it('hides a disabled recovery when the skipped activation step has no output', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'recovered', status: 'completed', triggeredBy: 'alerting.alertStatusChanged' }],
+    total: 1,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+    results:
+      stepId === 'trigger_investigation_alert_v2'
+        ? [{ workflowRunId: 'recovered', input: {} }]
+        : stepId === 'follow_up_recovered_alert_v2'
+        ? [{ workflowRunId: 'recovered', output: { skip_reason: 'automation_disabled' } }]
+        : [],
+  }));
+  expect(await call('auto-1')).toMatchObject({ runs: [], total: 1 });
+});
+
+it('keeps failures visible even when a prior step skipped disabled automation work', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'failed', status: 'failed', error: { message: 'Workflow failed' } }],
+    total: 1,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [{ workflowRunId: 'failed', output: { skip_reason: 'automation_disabled' } }],
+  });
+  expect(await call('auto-1')).toMatchObject({
+    runs: [{ status: 'failed', error: 'Workflow failed' }],
+    total: 1,
+  });
+});

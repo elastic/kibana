@@ -40,6 +40,34 @@ fresh investigation using a `manual` question subject with an `automatic` trigge
 automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
 
+The **Run** item in an automation's row menu and details **Actions** menu immediately requests a
+run of its saved scheduled investigation, including when the automation is disabled. Automations
+with alert or Slack triggers, including mixed triggers, cannot be run manually. The caller needs
+Nightshift management, bound-workflow management, and Workflows execution permissions. The run
+uses the automation service account, saved instructions, scope, destination, timeout, and overlap
+policy. History shows it as Manual with the initiating user and a link to the investigation.
+
+Generated workflows remain enabled. Before investigation dispatch or an alert-recovery round, the
+step reads the automation's current enabled state and verifies workflow ownership. Disabled
+automatic starts return `automation_disabled`, without consuming investigation quotas, opening or
+continuing an investigation, or sending notifications. They still create workflow executions and
+consume task capacity. Already admitted investigation rounds continue after an automation is
+paused. Only Nightshift's server-controlled manual execution source bypasses this check; ordinary
+Workflows UI runs and caller-supplied metadata do not grant the exemption. Nightshift manual runs
+create fresh investigations, bypass the per-automation budget, and follow manual investigation
+quota enforcement.
+
+Nightshift filters `automation_disabled` results after fetching each history page. Pages can be
+short or empty, totals can include hidden executions, and list statistics use the visible returned
+rows. Raw Workflows history retains these executions for troubleshooting.
+
+Existing workflows adopt this policy on their next save, toggle, or Nightshift Run. Their workflow
+IDs and history are preserved. Untouched workflows retain their previous behavior, including
+legacy alert-recovery steps until their YAML is regenerated. Once upgraded, enabled-state-only
+toggles change the automation record without writing the workflow or rescheduling it. A direct
+external disable of an upgraded workflow is a repair error for Run; saving the automation repairs
+it. No background upgrade runs.
+
 `runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
@@ -60,7 +88,7 @@ both slots. The claims it wrote are removed, but a concurrent start can join the
 removal, and a failed removal leaves them live. Keeping the slots means the count never falls below
 the number of investigations; a retry after such a failure is charged again. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
-To stop an automation from opening investigations, disable it. Changing the limit takes effect on
+To stop automatic investigation starts, disable the automation. Changing the limit takes effect on
 the next attempt.
 
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.

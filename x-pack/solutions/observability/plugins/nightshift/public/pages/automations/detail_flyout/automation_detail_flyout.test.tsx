@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -55,6 +55,7 @@ const runRange = {
 
 describe('AutomationDetailFlyout edit lifecycle', () => {
   const onClose = jest.fn();
+  const onRun = jest.fn();
   const mutate = jest.fn();
   const navigateToUrl = jest.fn();
 
@@ -80,14 +81,22 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     canManage = true,
     usedToday = 0,
     editDisabledReason,
-  }: { canManage?: boolean; usedToday?: number; editDisabledReason?: string } = {}) => {
+    currentAutomation = automation,
+    isRunPending = false,
+  }: {
+    canManage?: boolean;
+    usedToday?: number;
+    editDisabledReason?: string;
+    currentAutomation?: Automation;
+    isRunPending?: boolean;
+  } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
         <Router history={history}>
           <AutomationDetailFlyout
             automations={[automation]}
-            automation={automation}
+            automation={currentAutomation}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
             usedToday={usedToday}
@@ -96,6 +105,8 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
             onClose={onClose}
             onClone={jest.fn()}
             onDelete={jest.fn()}
+            onRun={onRun}
+            isRunPending={isRunPending}
           />
         </Router>
       </I18nProvider>
@@ -106,6 +117,33 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it.each([true, false])(
+    'runs from Actions with enabled=%s and keeps the flyout open',
+    async (isEnabled) => {
+      const scheduled: Automation = {
+        ...automation,
+        isEnabled,
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+        execution: { promptTemplate: 'Review health.' },
+      };
+      const history = renderFlyout({ currentAutomation: scheduled });
+      fireEvent.click(screen.getByTestId('automationActionsButton'));
+      fireEvent.click(screen.getByTestId('automationRunButton'));
+      expect(onRun).toHaveBeenCalledWith(scheduled);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/automations/automation-1');
+      await waitFor(() =>
+        expect(screen.queryByTestId('automationRunButton')).not.toBeInTheDocument()
+      );
+    }
+  );
+
+  it('disables Run in Actions for an alert automation', () => {
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('automationActionsButton'));
+    expect(screen.getByTestId('automationRunButton')).toBeDisabled();
+  });
 
   it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {
     renderFlyout();

@@ -75,6 +75,18 @@ describe('RunHistory skipped run summary', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows who initiated a manual run', () => {
+    renderRunHistory({
+      id: 'manual-1',
+      status: 'running',
+      startedAt: '2026-01-01T12:00:00.000Z',
+      triggeredBy: 'manual',
+      executedBy: 'alice',
+      investigationId: 'inv-1',
+    });
+    expect(screen.getByText('Manual · alice')).toBeInTheDocument();
+  });
+
   it('shows the failure reason of a failed run instead of the automation name', () => {
     renderRunHistory({
       id: 'run-2',

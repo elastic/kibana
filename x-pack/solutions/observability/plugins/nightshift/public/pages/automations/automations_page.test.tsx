@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
@@ -17,6 +17,7 @@ import {
   useCreateAutomation,
   useCurrentUsername,
   useDeleteAutomation,
+  useRunAutomation,
   useFetchAutomations,
   useToggleAutomation,
   useUpdateAutomation,
@@ -32,6 +33,7 @@ jest.mock('../../data/automations/use_automations', () => ({
   useCreateAutomation: jest.fn(),
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
+  useRunAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
   useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
@@ -80,6 +82,8 @@ describe('AutomationsPage', () => {
   });
 
   beforeEach(() => {
+    (useRunAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
+
     mockServiceAccount = {
       data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: true },
     };
@@ -128,6 +132,71 @@ describe('AutomationsPage', () => {
       ),
     };
   };
+
+  it.each([true, false])(
+    'runs a scheduled automation with enabled=%s immediately from the row menu',
+    async (isEnabled) => {
+      const automation = {
+        id: 'scheduled-1',
+        name: 'Health review',
+        isEnabled,
+        tags: [],
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+        execution: { promptTemplate: 'Review health.' },
+        completions: [],
+        runtime: {},
+        author: 'alice',
+      };
+      mockUseFetchAutomations.mockReturnValue({
+        data: { automations: [automation] },
+        isInitialLoading: false,
+      });
+      const mutate = jest.fn();
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+      renderPage();
+      fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
+      fireEvent.click(screen.getByTestId('runAutomation'));
+      expect(mutate).toHaveBeenCalledWith(automation, expect.anything());
+      await waitFor(() => expect(screen.queryByTestId('runAutomation')).not.toBeInTheDocument());
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    [true, [{ kind: 'alert' }], false],
+    [true, [{ kind: 'slack', event: 'message' }], false],
+    [true, [{ kind: 'schedule', schedulePreset: 'hourly' }, { kind: 'alert' }], false],
+    [true, [{ kind: 'schedule', schedulePreset: 'hourly' }], true],
+  ])(
+    'disables Run for ineligible or pending automations: enabled=%s rows=%j pending=%s',
+    (isEnabled, rows, isLoading) => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            {
+              id: 'a1',
+              name: 'Review',
+              isEnabled,
+              trigger: { rows },
+              execution: {},
+              completions: [],
+              runtime: {},
+              tags: [],
+              author: 'alice',
+            },
+          ],
+        },
+        isInitialLoading: false,
+      });
+      const mutate = jest.fn();
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading });
+      renderPage();
+      fireEvent.click(screen.getByTestId('automationActions-a1'));
+      expect(screen.getByTestId('runAutomation')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('runAutomation'));
+      expect(mutate).not.toHaveBeenCalled();
+    }
+  );
 
   it('shows the empty state and create action when no automations exist', () => {
     renderPage();
@@ -296,6 +365,8 @@ describe('AutomationsPage', () => {
     const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
 
     beforeEach(() => {
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
+
       createMutate.mockClear();
       deleteMutate.mockClear();
       toggleMutate.mockClear();

@@ -13,6 +13,7 @@ import type {
 } from '@kbn/nightshift-investigations-plugin/public';
 import { isHttpClientError } from '../../common/http_error';
 import { useKibana } from '../../hooks/use_kibana';
+import { AUTOMATIONS_QUERY_KEY } from '../query_keys';
 
 type AutomationsResponse =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations'>;
@@ -22,7 +23,7 @@ type CreateAutomationBody =
 type UpdateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'PUT /internal/nightshift/automations/{id}'>['params']['body'];
 
-export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
+export { AUTOMATIONS_QUERY_KEY } from '../query_keys';
 
 export const AUTOMATIONS_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.nightshift.automations.loadError',
@@ -36,6 +37,9 @@ const errorToastTitles = {
   }),
   update: i18n.translate('xpack.nightshift.automations.updateError', {
     defaultMessage: 'Failed to update automation',
+  }),
+  run: i18n.translate('xpack.nightshift.automations.runErrorMessage', {
+    defaultMessage: 'Failed to run automation',
   }),
   delete: i18n.translate('xpack.nightshift.automations.deleteError', {
     defaultMessage: 'Failed to delete automation',
@@ -239,6 +243,31 @@ export const useUpdateAutomation = () => {
           defaultMessage: 'Automation updated',
         }),
         text: body.name,
+      })
+  );
+};
+
+export const useRunAutomation = () => {
+  const { nightshiftInvestigations, notifications } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+
+  return useAutomationMutation<Pick<Automation, 'id' | 'name'>, { workflowExecutionId: string }>(
+    ({ id }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('POST /internal/nightshift/automations/{id}/run', {
+        params: { path: { id } },
+        signal: null,
+      });
+    },
+    errorToastTitles.run,
+    ({ name }) =>
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.runRequestedTitle', {
+          defaultMessage: 'Run requested',
+        }),
+        text: name,
       })
   );
 };

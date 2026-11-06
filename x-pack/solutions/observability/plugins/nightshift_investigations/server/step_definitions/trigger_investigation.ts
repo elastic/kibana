@@ -35,9 +35,8 @@ import type {
   GetInvestigationsClient,
 } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
-import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
-import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
+import { admitAutomationRun } from '../lib/automations/admit_automation_run';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
@@ -224,7 +223,7 @@ export const triggerInvestigationStepDefinition = (
         .optional()
         .describe('The investigation (Agent Builder conversation) the start created or continued'),
       skip_reason: z
-        .enum(['daily_limit', 'investigation_limit'])
+        .enum(['daily_limit', 'investigation_limit', 'automation_disabled'])
         .optional()
         .describe('Why the investigation was not dispatched'),
       daily_limit: z
@@ -238,27 +237,34 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow, kibanaUrl } = context.contextManager.getContext();
+      const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
-      const subjectId = toSubjectId(input);
       let automationBudget: AutomationBudget | undefined;
+      let isManualAutomationRun = false;
       if (input.automation_id) {
-        const soClient = getAutomationsSoClient(request, spaceId);
-        const automationId = input.automation_id;
-        const automation = await soClient.get<NightshiftAutomationAttributes>(
-          NIGHTSHIFT_AUTOMATION_SO_TYPE,
-          automationId
-        );
-        if (automation.attributes.workflowId !== workflow.id) {
-          throw new Error('The automation does not belong to this workflow.');
+        const admission = await admitAutomationRun({
+          automationId: input.automation_id,
+          workflowId: workflow.id,
+          triggeredBy: execution.triggeredBy,
+          request,
+          spaceId,
+          getAutomationsSoClient,
+        });
+        if (!admission.allowed) return { output: { skip_reason: admission.skipReason } };
+        isManualAutomationRun = admission.isManualRun;
+        if (!isManualAutomationRun) {
+          automationBudget = createAutomationBudget(
+            getAutomationsSoClient(request, spaceId),
+            input.automation_id,
+            admission.automation.runtime.dailyDispatchLimit
+          );
         }
-        automationBudget = createAutomationBudget(
-          soClient,
-          automationId,
-          automation.attributes.runtime.dailyDispatchLimit
-        );
       }
+      if (isManualAutomationRun && input.subject_type !== 'manual') {
+        throw new Error('Manual automation runs require a manual question subject.');
+      }
+      const subjectId = toSubjectId(input);
       const client = getInvestigationsClient(request, spaceId);
       const alerts =
         input.subject_type === 'alert' && !input.context?.alerts
@@ -275,11 +281,11 @@ export const triggerInvestigationStepDefinition = (
           {
             subject: {
               type: input.subject_type,
-              id: subjectId,
+              id: isManualAutomationRun ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID : subjectId,
               summary: input.summary,
             },
             title: input.title,
-            trigger_type: input.trigger_type ?? 'automatic',
+            trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',
             message: input.message,
             instructions:
               input.instructions ??

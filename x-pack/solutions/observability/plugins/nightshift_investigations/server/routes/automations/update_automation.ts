@@ -11,6 +11,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
+import { hasAutomationRuntimePolicy } from '../../../common/automation_run';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -115,19 +116,38 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
-        await workflowsManagement.management.updateWorkflow(
-          existing.attributes.workflowId,
-          {
-            yaml: generateWorkflowYaml({
-              automationId: params.path.id,
-              automation: merged,
-              serviceAccountId,
-              universalAlerts: isUniversalAlertingAvailable(),
-            }),
-          },
-          spaceId,
-          request
-        );
+        const enabledStateOnly = Object.keys(body).length === 1 && body.isEnabled !== undefined;
+        const workflow = enabledStateOnly
+          ? await workflowsManagement.management.getWorkflow(
+              existing.attributes.workflowId,
+              spaceId,
+              request
+            )
+          : null;
+        if (
+          !(
+            enabledStateOnly &&
+            workflow?.valid &&
+            workflow.enabled &&
+            workflow.definition &&
+            hasAutomationRuntimePolicy(workflow.definition) &&
+            workflow.definition.settings?.run_as === serviceAccountId
+          )
+        ) {
+          await workflowsManagement.management.updateWorkflow(
+            existing.attributes.workflowId,
+            {
+              yaml: generateWorkflowYaml({
+                automationId: params.path.id,
+                automation: merged,
+                serviceAccountId,
+                universalAlerts: isUniversalAlertingAvailable(),
+              }),
+            },
+            spaceId,
+            request
+          );
+        }
       } catch (err) {
         throw badRequest(`Failed to update backing workflow: ${err.message}`);
       }

@@ -50,6 +50,7 @@ import {
   getSaveBlocker,
   isTriggerValid,
 } from '../flyouts/form/validation';
+import { RUN_AUTOMATION_LABEL, getRunAutomationDisabledReason } from '../utils/run_automation';
 import { triggerLabels } from '../flyouts/form/triggers/translations';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
@@ -139,6 +140,8 @@ export const AutomationDetailFlyout = ({
   runRange,
   rangeLabel,
   onClose,
+  onRun,
+  isRunPending,
   onClone,
   onDelete,
 }: {
@@ -151,10 +154,13 @@ export const AutomationDetailFlyout = ({
   runRange: RunRange;
   rangeLabel: string;
   onClose: () => void;
+  onRun: (automation: Automation) => void;
+  isRunPending: boolean;
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
 }) => {
   const titleId = useGeneratedHtmlId();
+  const runDisabledReason = getRunAutomationDisabledReason(automation);
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const {
@@ -690,6 +696,21 @@ export const AutomationDetailFlyout = ({
                               id: 0,
                               width: 240,
                               items: [
+                                {
+                                  name: RUN_AUTOMATION_LABEL,
+                                  icon: 'play',
+                                  disabled: Boolean(runDisabledReason) || isRunPending,
+                                  toolTipContent: runDisabledReason,
+                                  'data-test-subj': 'automationRunButton',
+                                  ...getEbtProps({
+                                    action: NIGHTSHIFT_EBT_ACTIONS.RUN_AUTOMATION,
+                                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                                  }),
+                                  onClick: () => {
+                                    setIsActionsOpen(false);
+                                    onRun(automation);
+                                  },
+                                },
                                 {
                                   name: labels.clone,
                                   icon: 'copy',
