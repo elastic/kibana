@@ -9,14 +9,14 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { useDeleteAutomation, type Automation } from '../data/automations/use_automations';
+import { useDeleteAutomation, type Automation } from '../../../data/automations/use_automations';
 import { OnboardingAutomationStep } from './automation_step';
 
-jest.mock('../data/automations/use_automations', () => ({
+jest.mock('../../../data/automations/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
 }));
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       agenticInvestigations: {
@@ -27,11 +27,11 @@ jest.mock('../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../automations/flyouts/create_flyout/create_automation_flyout', () => ({
+jest.mock('../../automations/flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyout" />,
 }));
 
-jest.mock('../automations/detail_flyout/automation_detail_flyout', () => ({
+jest.mock('../../automations/detail_flyout/automation_detail_flyout', () => ({
   AutomationDetailFlyout: ({
     automation,
     onDelete,
@@ -47,7 +47,7 @@ jest.mock('../automations/detail_flyout/automation_detail_flyout', () => ({
   ),
 }));
 
-jest.mock('../automations/hooks/use_automation_usage', () => ({
+jest.mock('../../automations/hooks/use_automation_usage', () => ({
   useAutomationUsage: () => ({
     runRange: {
       startedAfter: '2026-11-03T00:00:00.000Z',
@@ -58,6 +58,13 @@ jest.mock('../automations/hooks/use_automation_usage', () => ({
   }),
 }));
 
+jest.mock('../../../components/entities/investigation/use_investigation_assignees', () => ({
+  useInvestigationAssignees: () => () => null,
+}));
+
+jest.mock('../../../components/entities/investigation/investigation_card_actions', () => ({
+  InvestigationCardActions: () => null,
+}));
 const investigation = {
   id: 'inv-1',
   in_progress: false,
