@@ -626,3 +626,140 @@ export const RecallUsageJudgePrompt = createPrompt({
     },
   } as const)
   .get();
+
+const ORCA_FLAGS_SYSTEM = `You extract root causes from an investigation report.
+
+## Plausible feature flags
+{{{plausibleFlags}}}
+
+## Reference
+{{{reference}}}
+
+Call the \`score\` tool with:
+- named_flags: every plausible flag the report names as a cause. Use the key from the list. Append \`:variant\` only when the report states a variant. A key without a variant still counts. An empty list is valid.
+- named_causes: every root cause the report asserts, including flags that are not in the list. Use \`key\` or \`key:variant\` for a feature flag; otherwise use the report's wording.
+- reasoning: one sentence.`;
+
+const ORCA_FLAGS_USER = `## Report
+{{{answer}}}
+
+Call the \`score\` tool.`;
+
+export const OrcaFlagsJudgePrompt = createPrompt({
+  name: 'nightshift_orca_flags_judge',
+  description:
+    'Extracts the feature flags and other causes an ORCA report names. Scoring is applied in code.',
+  input: lazySchema(() =>
+    z.object({
+      plausibleFlags: z.string(),
+      reference: z.string(),
+      answer: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: ORCA_FLAGS_SYSTEM } },
+    template: { mustache: { template: ORCA_FLAGS_USER } },
+    tools: {
+      score: {
+        description: 'Return the flags and causes the report names.',
+        schema: {
+          type: 'object',
+          // `reasoning` comes first so the lists follow from it, as in the control judge.
+          properties: {
+            reasoning: { type: 'string', description: 'One sentence.' },
+            named_flags: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'Plausible flag ids the report names, as key or key:variant when a variant is stated.',
+            },
+            named_causes: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Every root cause the report asserts.',
+            },
+          },
+          required: ['reasoning', 'named_flags', 'named_causes'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+/**
+ * ORCA's control judge (`JUDGE_PROMPT_CONTROL` in the public Harbor tasks' `check_prediction.py`),
+ * verbatim except that it answers through the `score` tool instead of a bare JSON object.
+ */
+const ORCA_CONTROL_USER = `You are an expert SRE judging whether an AI-generated incident RCA report makes a false-positive claim about an incident at the queried time.
+
+The task is a **control task**: the user queried the system at \`current_time\` during a verified quiet period in which no problem-pattern feature flag is active. The agent's snapshot includes telemetry from before \`current_time\`, so it may legitimately describe past, resolved incidents. Past incidents are **not** false positives — only claims placing an incident inside the quiet window are.
+
+## Queried time
+
+\`current_time = {{{currentTime}}}\`
+
+## Quiet window (no flag active inside)
+
+- \`quiet_window_start = {{{quietWindowStart}}}\` (inclusive lower bound; "null" means open-ended, i.e. no neighboring incident before \`current_time\`)
+- \`quiet_window_end   = {{{quietWindowEnd}}}\` (exclusive upper bound; "null" means open-ended, i.e. no neighboring incident after \`current_time\`)
+
+## SRE Agent's Incident RCA Report
+
+{{{answer}}}
+
+## Evaluation
+
+Answer the single boolean question \`claims_incident_in_quiet_window\`:
+
+- **true** iff the report places **any** incident — its start, ongoing period, or any reported timestamp of active impact — at a time **strictly inside** \`(quiet_window_start, quiet_window_end)\`. Examples that count as true:
+  - Claiming the incident is currently ongoing at \`current_time\`.
+  - Reporting a timeline entry with a UTC timestamp inside the quiet window.
+  - Stating that the incident started or is still active at any time inside the window.
+- **false** otherwise. In particular, the following are NOT false positives:
+  - Describing a past, resolved incident whose start, end, and timeline entries all fall at or before \`quiet_window_start\`.
+  - Describing a future incident whose entries all fall at or after \`quiet_window_end\`.
+  - Saying "no incident occurred at \`current_time\`" while describing past context.
+  - **Timeline entries that merely document when the user reported the issue** (e.g. "02:04 UTC — Incident reported by user", "22:00 ET — issue reported"). These describe the moment the complaint arrived, not active system impact. Ignore such entries when applying the rule above; only entries that describe the system actively failing or degraded count.
+
+Treat the bounds as half-open: a reported time exactly equal to \`quiet_window_start\` or exactly equal to \`quiet_window_end\` is **outside** the quiet window (no false positive). An open-ended bound (null) is equivalent to \`-inf\` / \`+inf\` respectively.
+
+In \`reasoning\`, briefly state the verdict; if \`claims_incident_in_quiet_window\` is true, quote or paraphrase the specific offending claim from the report.
+
+Call the \`score\` tool.`;
+
+export const OrcaControlJudgePrompt = createPrompt({
+  name: 'nightshift_orca_control_judge',
+  description: "ORCA's control judge: whether a report places an incident inside the quiet window.",
+  input: lazySchema(() =>
+    z.object({
+      currentTime: z.string().max(100),
+      quietWindowStart: z.string().max(100),
+      quietWindowEnd: z.string().max(100),
+      answer: z.string(),
+    })
+  ),
+})
+  .version({
+    template: { mustache: { template: ORCA_CONTROL_USER } },
+    tools: {
+      score: {
+        description: 'Return whether the report claims an incident inside the quiet window.',
+        // `reasoning` comes first so the model compares the times before it commits to the
+        // decision. With the decision first, it sometimes reasoned its way to the opposite answer.
+        schema: {
+          type: 'object',
+          properties: {
+            reasoning: {
+              type: 'string',
+              description:
+                'Compare each reported time of active impact with the window bounds, then state the verdict.',
+            },
+            claims_incident_in_quiet_window: { type: 'boolean' },
+          },
+          required: ['reasoning', 'claims_incident_in_quiet_window'],
+        },
+      },
+    },
+  } as const)
+  .get();

@@ -277,19 +277,25 @@ export class StreamsApp {
     return this.page.locator(`[data-test-subj="streamsCanvasEdge-${edgeId}"]`);
   }
 
+  /** The drag anchors React Flow renders on a line's ends only while the line can be reconnected. */
+  getCanvasEdgeReconnectAnchors(edgeId: string) {
+    return this.page.locator(`[data-testid="rf__edge-${edgeId}"] .react-flow__edgeupdater`);
+  }
+
   /**
-   * Hovers a canvas line and opens its "Add processing / Add routing" menu. A
-   * smooth-step line always passes through the centre of its bounding box, which
-   * is where the pointer goes.
+   * Hovers a canvas line. A smooth-step line always passes through the centre of its bounding
+   * box, which is where the pointer goes. `force` is needed because hovering renders the line's
+   * menu button at that point, which Playwright would otherwise treat as intercepting the hover.
    */
+  async hoverCanvasEdge(edgeId: string) {
+    const edge = this.getCanvasEdge(edgeId);
+    await expect(edge).toBeVisible();
+    await edge.hover({ force: true });
+  }
+
+  /** Hovers a canvas line and opens its "Add processing / Add routing" menu. */
   async openCanvasEdgeMenu(edgeId: string) {
-    const line = this.getCanvasEdge(edgeId).getByTestId('streamsCanvasBasicEdge');
-    await line.waitFor({ state: 'attached' });
-    const box = await line.boundingBox();
-    if (!box) {
-      throw new Error(`Canvas edge ${edgeId} is not rendered`);
-    }
-    await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await this.hoverCanvasEdge(edgeId);
     await this.canvasEdgeMenuButton.click();
   }
 
@@ -344,10 +350,14 @@ export class StreamsApp {
     await this.clickCanvasNode(node, { button: 'right' });
   }
 
-  async openCanvasPaneContextMenu() {
+  async rightClickCanvasPane() {
     await this.page
       .locator('.react-flow__pane')
       .click({ button: 'right', position: { x: 5, y: 5 } });
+  }
+
+  async openCanvasPaneContextMenu() {
+    await this.rightClickCanvasPane();
     await expect(this.canvasContextMenu).toBeVisible();
   }
 

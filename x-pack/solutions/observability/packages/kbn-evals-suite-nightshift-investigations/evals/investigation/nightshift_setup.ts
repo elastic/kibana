@@ -14,6 +14,8 @@ import {
   ensureNightshiftServiceAccountRoles,
   ensureNightshiftServiceAccounts,
 } from '@kbn/nightshift-shared';
+import { createAdminSessionRequest } from './admin_session_request';
+import type { AdminSessionRequestOptions } from './admin_session_request';
 
 /** Creates the Nightshift service accounts, binds the space, and waits until the given managed workflows are installed. */
 export const ensureNightshiftSetup = async ({
@@ -22,6 +24,8 @@ export const ensureNightshiftSetup = async ({
   connector,
   log,
   isServerless,
+  kbnUrl,
+  samlAuth,
   workflowIds,
 }: {
   esClient: Parameters<typeof ensureNightshiftServiceAccountRoles>[0];
@@ -29,23 +33,35 @@ export const ensureNightshiftSetup = async ({
   connector: Pick<EvalConnector, 'id'>;
   log: Pick<ToolingLog, 'warning'>;
   isServerless: boolean;
+  kbnUrl: { get: (path: string) => string };
+  samlAuth: {
+    asInteractiveUser: (role: 'admin') => Promise<{ cookieHeader: Record<string, string> }>;
+  };
   workflowIds: readonly string[];
 }): Promise<void> => {
   // Investigations only run as the Nightshift agent service account, so the space has to be
   // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
   // Elasticsearch has no predefined roles for the account, so the eval creates them first.
   await ensureNightshiftServiceAccountRoles(esClient, { isServerless });
-  // Like the app's setup step: find or create the accounts by name, then bind the space to
-  // the ids the backend assigned (generated ones on Serverless).
-  const serviceAccountIds = await ensureNightshiftServiceAccounts(
-    createHttpServiceAccountsApi({
-      request: (path, { method, query, body, version }) =>
-        fetch(path, {
+  // UIAM rejects the native superuser behind `fetch` on Serverless, so setup there runs as
+  // the admin's SAML session, as the plugin's Scout API tests do.
+  const setupRequest = isServerless
+    ? createAdminSessionRequest(
+        kbnUrl.get('/'),
+        (await samlAuth.asInteractiveUser('admin')).cookieHeader
+      )
+    : <T>(path: string, { method, query, body, version }: AdminSessionRequestOptions) =>
+        fetch<T>(path, {
           method,
           ...(query ? { query } : {}),
           ...(body ? { body } : {}),
           ...(version ? { version } : {}),
-        }),
+        });
+  // Like the app's setup step: find or create the accounts by name, then bind the space to
+  // the ids the backend assigned (generated ones on Serverless).
+  const serviceAccountIds = await ensureNightshiftServiceAccounts(
+    createHttpServiceAccountsApi({
+      request: setupRequest,
       getStatus: (error) => (error as { status?: number }).status,
     }),
     { isServerless }
@@ -53,7 +69,7 @@ export const ensureNightshiftSetup = async ({
   await expect
     .poll(
       async () =>
-        fetch<{ installed: boolean; bound: boolean }>(
+        setupRequest<{ installed: boolean; bound: boolean }>(
           '/internal/nightshift/investigations/service_account/_enable',
           { method: 'POST', body: JSON.stringify({ serviceAccountIds }) }
         ).then(

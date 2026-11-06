@@ -16,9 +16,11 @@ import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import { saveConnectorSetOnInvestigator } from './connector_sets';
 import { ensureNightshiftSetup } from './nightshift_setup';
-import { createInvestigationJudges } from './judges';
+import { createInvestigationJudges, createOrcaEvaluators } from './judges';
+import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
+import { assertScoresWithinQueryLimit } from './score_budget';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
@@ -41,7 +43,7 @@ export const registerInvestigationEvaluation = ({
 }: {
   name: string;
   loadDataset?: (
-    client: Pick<EvalsClient, 'getDatasetByName'>
+    client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;
@@ -65,6 +67,8 @@ export const registerInvestigationEvaluation = ({
         log,
         inferenceClient,
         evaluationConnector,
+        kbnUrl,
+        samlAuth,
       }) => {
         if (orca) {
           expect(repetitions, 'ORCA runs each incident once').toBe(1);
@@ -74,14 +78,27 @@ export const registerInvestigationEvaluation = ({
         // The bundled synthetic examples supply their own evidence and must not query a cluster.
         const bundledSynthetic =
           !orca && !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
-        // The judges score with the evaluation connector, not the model under test.
-        const judges = createInvestigationJudges({
-          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
-          evaluationConnector,
+        // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
+        // not the agent under test.
+        const judgeConnector = orca ? orcaJudgeConnector(evaluationConnector) : evaluationConnector;
+        const judgeDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: judgeConnector.id }),
+          evaluationConnector: judgeConnector,
           log,
-        });
-        const evaluators = [...judges, executionSuccessEvaluator, ...efficiencyEvaluators];
+        };
+        const judges = createInvestigationJudges(judgeDeps);
+        const evaluators = [
+          ...judges,
+          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          executionSuccessEvaluator,
+          ...efficiencyEvaluators,
+        ];
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
+        assertScoresWithinQueryLimit({
+          examples: dataset.examples.length,
+          repetitions,
+          evaluators: evaluators.length,
+        });
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         evaluate.setTimeout(
@@ -95,6 +112,8 @@ export const registerInvestigationEvaluation = ({
           connector,
           log,
           isServerless: config.serverless,
+          kbnUrl,
+          samlAuth,
           workflowIds: [NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID],
         });
         await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });

@@ -122,6 +122,8 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
     'runs a few Customer-0 investigations and grades the reinforcement submit',
     async ({
       config,
+      kbnUrl,
+      samlAuth,
       executorClient,
       connector,
       fetch,
@@ -149,6 +151,8 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           connector,
           log,
           isServerless: config.serverless,
+          kbnUrl,
+          samlAuth,
           workflowIds,
         });
       // A first Customer-0 investigation creates a new tree, and merged_nodes is rejected on a
