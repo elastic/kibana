@@ -1,0 +1,13 @@
+Running 30s test @ http://localhost:9200/_query/async?drop_null_columns=true
+  2 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    30.48ms   13.57ms 168.29ms   82.40%
+    Req/Sec   810.80     69.16     1.02k    68.30%
+  Latency Distribution
+     50%   24.49ms
+     75%   38.17ms
+     90%   47.59ms
+     99%   76.92ms
+  48539 requests in 30.10s, 47.42GB read
+Requests/sec:   1612.71
+Transfer/sec:      1.58GB
