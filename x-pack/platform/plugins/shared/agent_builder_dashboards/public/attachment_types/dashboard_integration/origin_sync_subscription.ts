@@ -24,7 +24,7 @@ export const createOriginSyncSubscription = ({
 }: {
   api: DashboardApi;
   store: AppliedAttachmentsStore;
-  getAttachments: () => undefined | DashboardAttachment[];
+  getAttachments: () => DashboardAttachment[];
   updateOrigin: (
     attachmentId: string,
     origin: string
@@ -34,7 +34,7 @@ export const createOriginSyncSubscription = ({
     if (!dashboardId) {
       return;
     }
-    const attachments = getAttachments() ?? [];
+    const attachments = getAttachments();
     const linkedAttachmentId = store.getLinkedAttachmentId(api);
     const attachmentToSync =
       attachments.find(({ id }) => id === linkedAttachmentId) ??
