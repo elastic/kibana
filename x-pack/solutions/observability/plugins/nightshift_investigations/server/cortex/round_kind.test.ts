@@ -23,6 +23,12 @@ describe('classifyCortexRound', () => {
     expect(classifyCortexRound({ userMessage })).toBe('alert_recovery');
   });
 
+  it('recognises a recovery message that Nightshift wrapped as a follow-up', () => {
+    const userMessage = `${FOLLOW_UP_PREAMBLE}\n\nAn alert in this investigation has recovered. It cleared at 07:30.\n\n\n\nAdditional context: {"is_follow_up":true}`;
+
+    expect(classifyCortexRound({ userMessage, roundIndex: 1 })).toBe('alert_recovery');
+  });
+
   it('treats a later round that is not a recovery as a follow-up', () => {
     expect(classifyCortexRound({ userMessage: 'You missed the cache.', roundIndex: 1 })).toBe(
       'follow_up'
