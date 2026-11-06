@@ -57,7 +57,8 @@ export class SandboxRpcError extends Error {
 
 /**
  * The log fields for one sandbox RPC. Kibana, the proxy and sandbox-api log the same fields with
- * the same values, which is what joins their records. The `rpc.*` fields follow the OpenTelemetry
+ * the same values, which is what joins their records, except the proxy's request id: sandbox-api
+ * logs it as `sandbox.proxy_request_id`, the name the audit event uses, not as `http.request.id`. The `rpc.*` fields follow the OpenTelemetry
  * semantic conventions, where the status code is `rpc.status_code` since 1.45.0 (1.43.0, the version
  * of `@opentelemetry/semantic-conventions` Kibana pins, still calls it `rpc.response.status_code`);
  * `http.request.id` and `event.duration` are ECS fields.

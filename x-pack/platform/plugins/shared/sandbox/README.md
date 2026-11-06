@@ -34,7 +34,8 @@ The plugin writes one debug line for every RPC as well, but it knows only the co
 ### Log fields
 
 `sandboxRpcLogMeta(rpc)` returns the fields below. sandbox-api logs the same fields with the same
-values for the same call. The `rpc.*` fields follow the OpenTelemetry semantic conventions, where the
+values for the same call, except the proxy's request id, which it logs as `sandbox.proxy_request_id`
+(see below). The `rpc.*` fields follow the OpenTelemetry semantic conventions, where the
 status code is `rpc.status_code` since 1.45.0 (1.43.0, the version of
 `@opentelemetry/semantic-conventions` Kibana pins, still calls it `rpc.response.status_code`).
 `http.request.id` and `event.duration` are ECS fields.
@@ -49,7 +50,8 @@ status code is `rpc.status_code` since 1.45.0 (1.43.0, the version of
 
 Kibana's audit pipeline on Serverless writes its own request id to `http.request.id`, so an audit
 event must carry the proxy's id under another name. `nightshift_investigations` uses
-`sandbox.proxy_request_id`.
+`sandbox.proxy_request_id`, and sandbox-api logs the proxy's id under that name, not as
+`http.request.id`.
 
 ### Pod eviction
 
