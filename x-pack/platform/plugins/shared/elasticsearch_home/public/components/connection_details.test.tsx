@@ -23,7 +23,6 @@ const mockOpenConnectionDetails = openWiredConnectionDetails as jest.Mock;
 
 const ES_URL = 'https://my-project.es.example.com';
 
-/** The "Generate API key" button only renders at the `xl` breakpoint, which starts at 1200px. */
 const setViewportWidth = (value: number) =>
   Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value });
 
@@ -70,12 +69,13 @@ describe('ConnectionDetails', () => {
     expect(mockOpenConnectionDetails).toHaveBeenCalledWith();
   });
 
-  it('drops the API key button below the xl breakpoint, to keep the header from overflowing', () => {
-    setViewportWidth(800);
+  // WCAG 1.4.10 Reflow: at 400% zoom the viewport is narrow, so the button must wrap, not disappear
+  it('keeps the API key button on narrow viewports', () => {
+    setViewportWidth(320);
 
     renderWithHomeContext(<ConnectionDetails />);
 
-    expect(screen.queryByTestId('elasticsearchHomeGenerateApiKeyButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('elasticsearchHomeGenerateApiKeyButton')).toBeInTheDocument();
     expect(screen.getByTestId('elasticsearchHomeConnectionDetailsButton')).toBeInTheDocument();
   });
 

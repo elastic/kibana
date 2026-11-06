@@ -12,6 +12,8 @@ import type {
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
   StoreStatus,
+  CreateWatchlistRequest,
+  CreateWatchlistResponse,
 } from '../../../constants/entity_analytics';
 
 const ENTITY_STORE_INSTALL_URL = '/api/security/entity_store/install';
@@ -21,6 +23,7 @@ const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
 const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
+const WATCHLISTS_URL = '/api/entity_analytics/watchlists';
 
 export interface EntityStoreEntryRisk {
   score: number;
@@ -47,6 +50,8 @@ export interface EntityAnalyticsApiService {
     entityName: string,
     options?: IndexEntityStoreEntryOptions
   ) => Promise<void>;
+  /** Removes entries from the space's latest entities index, by entity id. */
+  deleteEntityStoreEntries: (entityIds: string[]) => Promise<void>;
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
   initRiskEngine: () => Promise<void>;
@@ -59,6 +64,10 @@ export interface EntityAnalyticsApiService {
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
+  /** Creates a watchlist in the space, with its entity sources when `entitySources` is set. */
+  createWatchlist: (body: CreateWatchlistRequest) => Promise<CreateWatchlistResponse>;
+  /** Deletes a watchlist; the server also deletes its entity sources and their API keys. */
+  deleteWatchlist: (id: string) => Promise<void>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -187,6 +196,17 @@ export const getEntityAnalyticsApiService = ({
           });
         }
       );
+    },
+
+    deleteEntityStoreEntries: async (entityIds: string[]) => {
+      if (!esClient) {
+        throw new Error('esClient is required to delete entity store entries');
+      }
+      await esClient.deleteByQuery({
+        index: `entities-latest-${spaceId}`,
+        query: { terms: { 'entity.id': entityIds } },
+        refresh: true,
+      });
     },
 
     deleteEntityStoreEngines: async () => {
@@ -441,6 +461,29 @@ export const getEntityAnalyticsApiService = ({
           );
         }
       );
+    },
+
+    createWatchlist: async (body: CreateWatchlistRequest) => {
+      return measurePerformanceAsync(log, 'security.entityAnalytics.createWatchlist', async () => {
+        const response = await kbnClient.request<CreateWatchlistResponse>({
+          method: 'POST',
+          path: `${basePath}${WATCHLISTS_URL}`,
+          headers: PUBLIC_API_HEADERS,
+          body,
+        });
+        return response.data;
+      });
+    },
+
+    deleteWatchlist: async (id: string) => {
+      await measurePerformanceAsync(log, 'security.entityAnalytics.deleteWatchlist', async () => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${basePath}${WATCHLISTS_URL}/${id}`,
+          headers: PUBLIC_API_HEADERS,
+          ignoreErrors: [404],
+        });
+      });
     },
   };
 
