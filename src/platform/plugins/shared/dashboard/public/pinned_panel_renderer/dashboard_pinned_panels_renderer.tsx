@@ -94,4 +94,28 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
 
     background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
   }
+
+    // styles for the panel grid size gauge that appears when resizing
+  .kbnFlexPanel--resizeGauge {
+    padding: ${euiTheme.size.xs};
+    z-index: ${euiTheme.levels.menu};
+    border-top-right-radius: ${euiTheme.border.radius.control};
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+    & .kbnFlexPanel--resizeGauge--inner {
+      padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
+      height: ${euiTheme.size.l};
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+      border-radius: ${euiTheme.border.radius.control};
+    }
+
+    & .kbnFlexPanel--resizeGauge--text {
+      font-weight: ${euiTheme.font.weight.medium};
+      color: ${euiTheme.colors.textAccentSecondary};
+    }
 `;

@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { combineLatest, filter, map, pairwise, skip, startWith } from 'rxjs';
+import { combineLatest, filter, map, pairwise, skip, startWith, tap } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -60,6 +60,16 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       gridLayoutStateManager.activePanelEvent$.pipe(
         // filter out the first active panel event to allow "onClick" events through
         pairwise(),
+        tap(([before, after]) => {
+          if (before !== undefined || after?.type !== 'resize') return;
+          // pin this panel at its rendered width so no panel can grow/shrink and shift the resized one
+          const ref = gridLayoutStateManager.panelRefs.current[panelId];
+          const pinnedWidth = after.panelWidths?.[panelId];
+          if (!ref || pinnedWidth === undefined) return;
+          ref.style.width = `${pinnedWidth}px`;
+          ref.style.flexGrow = '0';
+          ref.style.flexShrink = '0';
+        }),
         filter(([before]) => before !== undefined),
         map(([, after]) => after),
         startWith(undefined)
@@ -96,32 +106,26 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
           }
         } else {
-          if (activePanel?.type === 'resize') {
-            // pin siblings at their rendered width (not `flex-basis`, which would override `width`)
-            // so they can't grow or shrink and shift the resized panel while resizing
-            const pinnedWidth = activePanel.panelWidths?.[currentPanel.id];
-            if (pinnedWidth !== undefined) ref.style.width = `${pinnedWidth}px`;
-            ref.style.flexGrow = '0';
-            ref.style.flexShrink = '0';
-          } else {
-            ref.style.flexShrink = '';
-            ref.classList.remove('kbnFlexPanel--active');
-            ref.style.zIndex = `auto`;
-            // if the panel is not being dragged and/or resized, undo any fixed position styles
-            ref.style.position = '';
-            ref.style.left = ``;
-            ref.style.top = ``;
-            ref.style.flexGrow = currentPanel.grow ? '1' : '0';
-            ref.style.width = `${currentPanel.width}px`;
-            ref.style.order = `${currentPanel.order + 1}`;
-          }
+          // siblings stay pinned (see above) until the resize ends
+          if (activePanel?.type === 'resize') return;
+
+          ref.style.flexShrink = '';
+          ref.classList.remove('kbnFlexPanel--active');
+          ref.style.zIndex = `auto`;
+          // if the panel is not being dragged and/or resized, undo any fixed position styles
+          ref.style.position = '';
+          ref.style.left = ``;
+          ref.style.top = ``;
+          ref.style.flexGrow = currentPanel.grow ? '1' : '0';
+          ref.style.width = `${currentPanel.width}px`;
+          ref.style.order = `${currentPanel.order + 1}`;
         }
       });
 
     return () => {
       activePanelStyleSubscription.unsubscribe();
     };
-  }, [panel$, gridLayoutStateManager, euiTheme.levels.modal]);
+  }, [panelId, panel$, gridLayoutStateManager, euiTheme.levels.modal]);
 
   /**
    * Memoize panel contents to prevent unnecessary re-renders
