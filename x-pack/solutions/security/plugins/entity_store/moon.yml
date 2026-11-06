@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/i18n'
   - '@kbn/workflows'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
