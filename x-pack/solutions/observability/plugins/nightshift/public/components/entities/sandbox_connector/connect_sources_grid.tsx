@@ -20,6 +20,9 @@ export type ConnectSourcesGroup = 'telemetry' | 'additional';
 /** The connector types that read telemetry; the other sandbox-capable types are additional sources. */
 const TELEMETRY_TYPE_IDS = new Set(['.elasticsearch', '.new_relic']);
 
+export const isTelemetryConnectorType = (actionTypeId: string): boolean =>
+  TELEMETRY_TYPE_IDS.has(actionTypeId);
+
 const typesLoadErrorTitle = i18n.translate('xpack.nightshift.connectSources.loadError', {
   defaultMessage: 'Could not load the connector types.',
 });
@@ -46,7 +49,7 @@ export function ConnectSourcesGrid({
   }
   const isTelemetry = group === 'telemetry';
   const shown = triggersActionsUi
-    ? groups.filter(({ actionType }) => TELEMETRY_TYPE_IDS.has(actionType.id) === isTelemetry)
+    ? groups.filter(({ actionType }) => isTelemetryConnectorType(actionType.id) === isTelemetry)
     : [];
   if (shown.length === 0 && !trailing) return null;
 

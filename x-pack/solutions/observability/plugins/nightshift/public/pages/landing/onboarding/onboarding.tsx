@@ -48,6 +48,8 @@ import {
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
+import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
+import { isTelemetryConnectorType } from '../../../components/entities/sandbox_connector/connect_sources_grid';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'connect' | 'investigate' | undefined;
@@ -112,6 +114,7 @@ export function NightshiftOnboarding({
   // The enable step binds the space's service accounts and installs the agent in one click.
   const serviceAccount = useInvestigatorServiceAccount();
   const startSuggestions = useStartOnboardingSuggestions();
+  const { groups: connectorGroups } = useConnectorsByType();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
   const execution = data?.execution;
@@ -120,6 +123,11 @@ export function NightshiftOnboarding({
   const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
   // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
+  // A connector of a type offered on the telemetry page, preconfigured or not, lets the user
+  // leave that page. Other sandbox-capable types belong to the next page and do not count.
+  const hasTelemetrySource = connectorGroups.some(
+    ({ actionType, connectors }) => isTelemetryConnectorType(actionType.id) && connectors.length > 0
+  );
 
   // A new execution (setup changed, or a retry) ends any detour.
   const [lastExecutionId, setLastExecutionId] = useState(execution?.execution_id);
@@ -241,17 +249,19 @@ export function NightshiftOnboarding({
     step === 'connect' ? (
       <EuiFlexGroup direction="column" gutterSize="s">
         {connectSubStep === 'telemetry' ? (
-          <EuiButton
-            fill
-            fullWidth
-            size="s"
-            iconType="sortRight"
-            iconSide="right"
-            onClick={() => setConnectSubStep('additional')}
-            data-test-subj="nightshiftOnboardingContinueButton"
-          >
-            {PROCEED_LABEL}
-          </EuiButton>
+          hasTelemetrySource && (
+            <EuiButton
+              fill
+              fullWidth
+              size="s"
+              iconType="sortRight"
+              iconSide="right"
+              onClick={() => setConnectSubStep('additional')}
+              data-test-subj="nightshiftOnboardingContinueButton"
+            >
+              {PROCEED_LABEL}
+            </EuiButton>
+          )
         ) : (
           <>
             <EuiButton
