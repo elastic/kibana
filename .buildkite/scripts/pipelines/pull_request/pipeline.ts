@@ -16,6 +16,7 @@
         ] */
 
 import { runPreBuild } from './pre_build.ts';
+import { postCancelledBuildsTip } from './cancelled_builds_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
 import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
@@ -160,6 +161,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       emitPipeline([emptyStep]);
       return;
     }
+
+    await postCancelledBuildsTip();
 
     // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
