@@ -7,11 +7,11 @@
 
 import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
 
+import type { GetUninstallTokenResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { UNINSTALL_TOKENS } from '../screens/fleet';
-import type { GetUninstallTokenResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 
