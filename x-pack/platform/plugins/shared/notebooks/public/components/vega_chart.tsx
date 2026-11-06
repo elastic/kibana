@@ -38,11 +38,16 @@ export const VegaChart = ({ spec, table }: { spec: string; table: Datatable | un
   useEffect(() => {
     const container = containerRef.current;
     if (!container || 'error' in parsed) return;
+    // Vega reuses an svg it finds in its element, so a render still in flight would draw into the next one's.
+    const host = document.createElement('div');
+    host.style.width = '100%';
+    host.style.height = '100%';
+    container.replaceChildren(host);
     let isCurrent = true;
     let cleanup: (() => void) | undefined;
     setRenderError(undefined);
     import('./vega_render')
-      .then(({ renderVega }) => renderVega(container, parsed, { text, line }))
+      .then(({ renderVega }) => renderVega(host, parsed, { text, line }))
       .then((render) => {
         if (!isCurrent) {
           render.destroy();
@@ -51,7 +56,7 @@ export const VegaChart = ({ spec, table }: { spec: string; table: Datatable | un
         const observer = new ResizeObserver(([entry]) =>
           render.resize(entry.contentRect.width, entry.contentRect.height)
         );
-        observer.observe(container);
+        observer.observe(host);
         cleanup = () => {
           observer.disconnect();
           render.destroy();
@@ -63,6 +68,7 @@ export const VegaChart = ({ spec, table }: { spec: string; table: Datatable | un
     return () => {
       isCurrent = false;
       cleanup?.();
+      host.remove();
     };
   }, [parsed, text, line]);
 
