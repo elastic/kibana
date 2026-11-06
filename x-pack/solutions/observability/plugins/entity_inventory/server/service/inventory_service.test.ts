@@ -84,7 +84,7 @@ describe('InventoryService.listTypes', () => {
     expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
   });
 
-  it('omits definitions with a dynamic block that this plugin did not register', async () => {
+  it('includes definitions with a dynamic block that another plugin or integration registered', async () => {
     const builtIn = {
       ...k8sNodeFixture,
       type: 'host',
@@ -99,7 +99,11 @@ describe('InventoryService.listTypes', () => {
 
     const { types } = await service.listTypes();
 
-    expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
+    expect(types.map(({ type }) => type)).toEqual([
+      'host',
+      'integration.type',
+      hostLikeFixture.type,
+    ]);
   });
 
   it('skips and warns on a definition that fails column derivation', async () => {
@@ -565,18 +569,6 @@ describe('InventoryService.list', () => {
       k8sNodeFixture.type,
       [k8sNodeWithoutDynamic],
       'its entity definition has no dynamic block',
-    ],
-    [
-      'a type another plugin registered',
-      'host',
-      [
-        {
-          ...hostLikeFixture,
-          type: 'host',
-          managedBy: { kind: 'plugin' as const, id: 'entityStore' },
-        },
-      ],
-      'its entity definition was registered by another plugin',
     ],
   ])(
     'throws InventoryTypeNotFoundError for %s without querying',

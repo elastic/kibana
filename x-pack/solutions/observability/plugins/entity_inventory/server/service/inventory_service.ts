@@ -7,8 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
-import { isEqual } from 'lodash';
-import { MANAGED_BY } from '../definitions/constants';
 import { InventoryTypeDefinitionError, InventoryTypeNotFoundError } from '../inventory/errors';
 import {
   applyLimit,
@@ -70,14 +68,14 @@ export class InventoryService {
   ) {}
 
   /**
-   * Returns one entry per registered definition that has a `dynamic` block and `managedBy` equal to
-   * `MANAGED_BY` (registered by this plugin), in registry order.
+   * Returns one entry per registered definition that has a `dynamic` block, whoever registered it,
+   * in registry order.
    * Skips a definition that throws `InventoryDefinitionError` after logging a warning, and rethrows any other error.
    */
   listTypes = async (): Promise<GetTypesResponse> => {
     const definitions = await this.definitionsClient.list();
     const types = definitions.flatMap((definition) => {
-      if (!this.hasDynamicDefinition(definition) || !this.isManagedByInventory(definition)) {
+      if (!this.hasDynamicDefinition(definition)) {
         return [];
       }
       try {
@@ -97,14 +95,14 @@ export class InventoryService {
    * Lists the entities of a type seen in the window: probes every source pattern, then runs one
    * query per plan concurrently (a `TS` plan beside the `FROM` plan of a source that has a
    * time-series index) and merges the rows by `entity.id`, newest `last_seen` first.
-   * Throws `InventoryTypeNotFoundError` when this plugin registered no `dynamic` definition for the
-   * type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
+   * Throws `InventoryTypeNotFoundError` when no definition with a `dynamic` block is registered for
+   * the type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
    * reported in `errors[]`; neither fails the request. A failed probe or query makes `total` null
    * and `truncated` true, since the entities of that source are unknown.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
-    const definition = await this.getManagedDefinition(type);
+    const definition = await this.getDynamicDefinition(type);
     const { plans, identity, columns, queries, probeErrors } = await this.planList(
       definition,
       window,
@@ -161,28 +159,18 @@ export class InventoryService {
   private hasDynamicDefinition = (definition: RegisteredEntityDefinition): boolean =>
     Boolean(definition.dynamic);
 
-  private isManagedByInventory = (definition: RegisteredEntityDefinition): boolean =>
-    isEqual(definition.managedBy, MANAGED_BY);
-
   /**
-   * Returns the definition of `type` when this plugin registered it with a `dynamic` block.
-   * Throws `InventoryTypeNotFoundError` with one of three reasons: the entity store has no
-   * definition for the type, the definition has no `dynamic` block, or the definition's `managedBy`
-   * differs from `MANAGED_BY`.
+   * Returns the definition of `type` when it has a `dynamic` block, whoever registered it.
+   * Throws `InventoryTypeNotFoundError` with one of two reasons: the entity store has no
+   * definition for the type, or the definition has no `dynamic` block.
    */
-  private getManagedDefinition = async (type: string): Promise<RegisteredEntityDefinition> => {
+  private getDynamicDefinition = async (type: string): Promise<RegisteredEntityDefinition> => {
     const definition = await this.definitionsClient.get(type);
     if (!definition) {
       throw new InventoryTypeNotFoundError(type, 'no entity definition is registered for it');
     }
     if (!this.hasDynamicDefinition(definition)) {
       throw new InventoryTypeNotFoundError(type, 'its entity definition has no dynamic block');
-    }
-    if (!this.isManagedByInventory(definition)) {
-      throw new InventoryTypeNotFoundError(
-        type,
-        'its entity definition was registered by another plugin'
-      );
     }
     return definition;
   };
@@ -192,8 +180,8 @@ export class InventoryService {
    * where the probe found a time-series index. The columns and queries come from every plan, so a
    * definition error never depends on a probe; a source whose probe failed keeps its columns but
    * runs no query, and is reported in `probeErrors`. Rethrows `InventoryDefinitionError` as
-   * `InventoryTypeDefinitionError` after logging it at error level: only this plugin's definitions
-   * are listed, so one that cannot be queried is a bug in the plugin, not in the request.
+   * `InventoryTypeDefinitionError` after logging it at error level: the definition is wrong, not
+   * the request.
    */
   private planList = async (
     definition: RegisteredEntityDefinition,

@@ -343,24 +343,6 @@ apiTest.describe(
     });
 
     apiTest(
-      'answers 404 for a type whose definition another plugin registered',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(
-          'internal/entity_inventory/entities/host/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
-          {
-            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-            responseType: 'json',
-          }
-        );
-
-        expect(response).toHaveStatusCode(404);
-        expect(response.body.message).toBe(
-          'Entity type "host" is not available in the entity inventory: its entity definition was registered by another plugin'
-        );
-      }
-    );
-
-    apiTest(
       'rejects a viewer, which lacks the entity_inventory_read privilege',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
