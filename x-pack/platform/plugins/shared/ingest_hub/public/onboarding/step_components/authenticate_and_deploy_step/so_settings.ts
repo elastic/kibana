@@ -95,8 +95,7 @@ export const toSOSettingsUpdate = (
     dedicatedNamespaceTemplates,
     instances,
     policySettings,
-  } =
-    toSOSettings(serviceSettings);
+  } = toSOSettings(serviceSettings);
   return {
     ...(integrationName ? { integrationName } : {}),
     description: description ?? null,
