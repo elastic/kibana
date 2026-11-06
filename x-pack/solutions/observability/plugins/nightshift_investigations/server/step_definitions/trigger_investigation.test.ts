@@ -446,7 +446,7 @@ describe('triggerInvestigationStepDefinition', () => {
     ).toEqual({ output: { skip_reason: 'investigation_limit' } });
     expect(start).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      'Skipped investigation of significant_event/event-1: global investigation limit reached'
+      'Skipped investigation of significant_event/event-1: The daily investigation limit has been reached'
     );
   });
 });
