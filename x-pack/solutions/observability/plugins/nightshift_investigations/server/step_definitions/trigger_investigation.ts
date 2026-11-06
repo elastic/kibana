@@ -41,6 +41,7 @@ import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limi
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
+import type { NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -207,7 +208,8 @@ export const triggerInvestigationStepDefinition = (
   getAlertsClient: GetAlertsClient,
   getEpisodeLookup: GetEpisodeLookup,
   getActions: () => ActionsPluginStart | undefined,
-  settingsLocator: NightshiftSettingsLocator
+  settingsLocator: NightshiftSettingsLocator,
+  telemetry: NightshiftTelemetryClient
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -294,6 +296,7 @@ export const triggerInvestigationStepDefinition = (
           },
           {
             automationBudget,
+            automationId: input.automation_id,
             // A Slack thread subject means a Slack message started the run.
             entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
           }
@@ -304,6 +307,12 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          telemetry.reportInvestigationSkipped({
+            trigger: 'automation',
+            origin: input.subject_type,
+            automation_id: input.automation_id,
+            skip_reason: 'automation_daily_limit',
+          });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
