@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult>
+  <Name>kibana-ai-assistant-kb-artifacts</Name>
+  <Contents>
+    <Key>kb-product-doc-kibana-0.0.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-kibana-latest.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-0.0.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-latest.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-0.0.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-latest.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-0.0.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-latest.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+</ListBucketResult>

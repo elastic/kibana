@@ -9,7 +9,12 @@
 
 import path from 'path';
 import { format as formatUrl } from 'url';
-import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import {
+  esTestConfig,
+  kbnTestConfig,
+  kibanaServerTestUser,
+  PRODUCT_DOC_STUB_REPOSITORY_URL,
+} from '@kbn/test';
 
 export default function () {
   const servers = {
@@ -49,6 +54,8 @@ export default function () {
         '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging
         '--telemetry.sendUsageTo=staging',
+        // Keeps test servers from downloading the real product documentation artifacts
+        `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
         `--server.maxPayload=1679958`,
         // newsfeed mock service
         `--plugin-path=${path.join(__dirname, 'plugins', 'newsfeed')}`,

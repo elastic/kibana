@@ -118,6 +118,11 @@ Both product documentation and Security Labs artifacts are hosted on the same CD
 xpack.productDocBase.artifactRepositoryUrl: 'https://kibana-knowledge-base-artifacts.elastic.co'
 ```
 
+A `file://` URL pointing at a directory with a bucket `index.xml` and the zips is also accepted. Scout and FTR test
+servers default to the tiny stub repository shipped in `@kbn/test-kibana-server` (`PRODUCT_DOC_STUB_REPOSITORY_URL`)
+so that CI never downloads the real artifacts; a suite that needs the real documentation must set the CDN URL in its
+own config.
+
 Artifact naming conventions:
 
 - Product docs: `kb-product-doc-{product}-{version}.zip`

@@ -68,7 +68,7 @@ export * from './src/kbn_archiver_cli';
 
 export * from '@kbn/kbn-client';
 
-export { findTestPluginPaths } from '@kbn/test-kibana-server';
+export { findTestPluginPaths, PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 
 export { getDockerFileMountPath } from '@kbn/es';
 

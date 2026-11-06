@@ -15,6 +15,7 @@ import {
   kbnTestConfig,
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
+  PRODUCT_DOC_STUB_REPOSITORY_URL,
 } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import {
@@ -138,6 +139,8 @@ export default async () => {
         `--elasticsearch.serviceAccountToken=${kibanaDevServiceAccount.token}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         '--telemetry.sendUsageTo=staging',
+        // Keeps test servers from downloading the real product documentation artifacts
+        `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
         `--logging.appenders.deprecation=${JSON.stringify({
           type: 'console',
           layout: {
