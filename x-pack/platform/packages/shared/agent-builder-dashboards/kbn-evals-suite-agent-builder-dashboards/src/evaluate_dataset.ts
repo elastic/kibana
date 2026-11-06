@@ -243,20 +243,29 @@ export function createEvaluateDataset({
       'Routing example; this evaluator scores produced dashboards only.'
     );
 
+  // A scoped enhance must leave the rest of the seeded dashboard, defects
+  // included, untouched; Enhance Scope scores it instead.
+  const wholeDashboardOnly = (evaluator: DashboardAgentEvaluator) =>
+    onlyWhen(
+      positiveOnly(evaluator),
+      (expected) => expected?.scopedEnhance === undefined,
+      'Scoped enhance example; this evaluator scores the whole dashboard.'
+    );
+
   // Quality evaluators score 0..1 and get low-score logging; trace-based
   // evaluators report counts and seconds, so a "low" value means nothing there.
   const qualityEvaluators = [
     dashboardRoutingEvaluator,
-    positiveOnly(dashboardStructureEvaluator),
-    positiveOnly(dashboardTimeRangeEvaluator),
-    positiveOnly(dashboardLayoutRulesEvaluator),
-    positiveOnly(dashboardCompositionOrderEvaluator),
-    positiveOnly(dashboardTitlesEvaluator),
-    positiveOnly(dashboardChartStylingEvaluator),
-    positiveOnly(dashboardColorFormatEvaluator),
-    positiveOnly(dashboardControlsEvaluator),
-    positiveOnly(dashboardControlSourcingEvaluator),
-    positiveOnly(createControlQueriesEvaluator(esClient)),
+    wholeDashboardOnly(dashboardStructureEvaluator),
+    wholeDashboardOnly(dashboardTimeRangeEvaluator),
+    wholeDashboardOnly(dashboardLayoutRulesEvaluator),
+    wholeDashboardOnly(dashboardCompositionOrderEvaluator),
+    wholeDashboardOnly(dashboardTitlesEvaluator),
+    wholeDashboardOnly(dashboardChartStylingEvaluator),
+    wholeDashboardOnly(dashboardColorFormatEvaluator),
+    wholeDashboardOnly(dashboardControlsEvaluator),
+    wholeDashboardOnly(dashboardControlSourcingEvaluator),
+    wholeDashboardOnly(createControlQueriesEvaluator(esClient)),
     enhanceModeQuestionEvaluator,
     enhanceModeComplianceEvaluator,
     enhanceDefectResolutionEvaluator,
