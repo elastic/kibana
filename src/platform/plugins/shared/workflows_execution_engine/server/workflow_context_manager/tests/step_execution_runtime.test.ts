@@ -177,6 +177,29 @@ describe('StepExecutionRuntime', () => {
     });
   });
 
+  describe('isInputSet', () => {
+    it('is false when the step execution has no input', () => {
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({ stepId: 'node1' });
+
+      expect(underTest.isInputSet).toBe(false);
+    });
+
+    it('is false when the step execution is missing', () => {
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+      expect(underTest.isInputSet).toBe(false);
+    });
+
+    it('is true when the step execution document has an input', () => {
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        stepId: 'node1',
+        input: { message: 'hi' },
+      });
+
+      expect(underTest.isInputSet).toBe(true);
+    });
+  });
+
   describe('step result management', () => {
     beforeEach(() => {
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({

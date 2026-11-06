@@ -78,6 +78,11 @@ export class StepExecutionRuntime {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
 
+  /** True when this step execution already has an input recorded on its document. */
+  public get isInputSet(): boolean {
+    return !!this.stepExecution?.input;
+  }
+
   public get workflowExecution() {
     return this.workflowExecutionState.getWorkflowExecution();
   }
