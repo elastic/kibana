@@ -26,19 +26,12 @@ export const initializeStateApi = <StateType extends object = object>({
   defaultState,
   serializeState,
   anyStateChange$,
-}: Omit<HasSerializableState<StateType>, 'latestState$' | 'compareSerializedState'> &
+}: Omit<HasSerializableState<StateType>, 'latestState$'> &
   HasUniqueId &
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-  }): PublishesUnsavedChanges &
-  HasSerializableState<StateType> &
-  Required<Pick<HasSerializableState<StateType>, 'compareSerializedState'>> => {
-  const compareSerializedState = (
-    baseline: Partial<StateType> | undefined,
-    current: Partial<StateType> | undefined
-  ) => areComparatorsEqual(getComparators(), baseline, current, defaultState);
-
+  }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
   const latestState$ = anyStateChange$.pipe(
     debounceTime(0), // combine all state changes
     // anyStateChange$ does not emit on subscribe
@@ -52,7 +45,6 @@ export const initializeStateApi = <StateType extends object = object>({
     return {
       anyStateChange$,
       applySerializedState,
-      compareSerializedState,
       hasUnsavedChanges$: of(false),
       serializeState,
       latestState$,
@@ -84,7 +76,6 @@ export const initializeStateApi = <StateType extends object = object>({
   return {
     anyStateChange$,
     applySerializedState,
-    compareSerializedState,
     hasUnsavedChanges$,
     latestState$,
     serializeState,
