@@ -204,7 +204,7 @@ describe('describeAiIndex', () => {
         '| WHERE type == "memory.session_fact"',
         '| INLINE STATS latest_at = MAX(@timestamp) BY id',
         '| WHERE @timestamp == latest_at',
-        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
+        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active")',
         '  AND (expires_at IS NULL OR expires_at > NOW())',
         '| FORK',
       ].join('\n')

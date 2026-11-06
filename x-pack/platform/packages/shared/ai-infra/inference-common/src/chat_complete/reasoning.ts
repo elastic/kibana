@@ -10,13 +10,16 @@
  *
  * @see https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-chat-completion-unified
  */
-export type ChatCompletionReasoningEffort =
-  | 'none'
-  | 'minimal'
-  | 'low'
-  | 'medium'
-  | 'high'
-  | 'xhigh';
+export const chatCompletionReasoningEfforts = [
+  'none',
+  'minimal',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+] as const;
+
+export type ChatCompletionReasoningEffort = (typeof chatCompletionReasoningEfforts)[number];
 
 /**
  * Reasoning configuration forwarded to Elasticsearch `_inference/chat_completion`.

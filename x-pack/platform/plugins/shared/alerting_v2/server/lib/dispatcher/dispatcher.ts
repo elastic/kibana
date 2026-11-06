@@ -6,9 +6,12 @@
  */
 
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializer } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import { v4 as uuidV4 } from 'uuid';
+import type { PluginConfig } from '../../config';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -22,11 +25,11 @@ import {
   PRE_FETCH_STUCK_ADVANCE_LAG_MS,
   SETTLE_BUFFER_SECONDS,
   STUCK_TICK_LIMIT,
-  TICK_DEADLINE_MS,
+  getTickDeadlineMs,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import { AlertScan } from './state';
-import { toAction } from './steps/store_actions_step';
+import { toAction } from './steps/utils/action_documents';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -43,10 +46,11 @@ const isValidDate = (d: Date | undefined): d is Date =>
 // AbortSignal.timeout / AbortSignal.any are unavailable in the jsdom test env,
 // so the deadline is wired manually.
 const combineSignalWithDeadline = (
-  signal: AbortSignal
+  signal: AbortSignal,
+  deadlineMs: number
 ): { signal: AbortSignal; deadlineExceeded: () => boolean; cleanup: () => void } => {
   const deadlineController = new AbortController();
-  const deadlineTimer = setTimeout(() => deadlineController.abort(), TICK_DEADLINE_MS);
+  const deadlineTimer = setTimeout(() => deadlineController.abort(), deadlineMs);
 
   const tickController = new AbortController();
   const abortTick = () => tickController.abort();
@@ -75,13 +79,18 @@ export interface DispatcherServiceContract {
 @injectable()
 export class DispatcherService implements DispatcherServiceContract {
   private readonly parentLogger: LoggerServiceContract;
+  private readonly tickDeadlineMs: number;
 
   constructor(
     @inject(DispatcherPipeline) private readonly pipeline: DispatcherPipelineContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
-    @inject(LoggerServiceToken) logger: LoggerServiceContract
+    @inject(LoggerServiceToken) logger: LoggerServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
     this.parentLogger = logger.forSubsystem('dispatcher');
+    const { dispatcher } = pluginConfigAccessor.get<PluginConfig>();
+    this.tickDeadlineMs = getTickDeadlineMs(dispatcher.run.timeout);
   }
 
   public async run({
@@ -99,7 +108,11 @@ export class DispatcherService implements DispatcherServiceContract {
     const settled = new Date(startedAt.getTime() - SETTLE_BUFFER_SECONDS * 1_000);
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
-    const { signal: tickSignal, deadlineExceeded, cleanup } = combineSignalWithDeadline(signal);
+    const {
+      signal: tickSignal,
+      deadlineExceeded,
+      cleanup,
+    } = combineSignalWithDeadline(signal, this.tickDeadlineMs);
 
     try {
       const input: DispatcherPipelineInput = {
@@ -117,7 +130,7 @@ export class DispatcherService implements DispatcherServiceContract {
           logger.warn({
             code: ALERTING_LOG_CODES.DISPATCHER_TICK_DEADLINE_EXCEEDED,
             message: () =>
-              `tick deadline (${TICK_DEADLINE_MS}ms) exceeded; pipeline stopped early. ` +
+              `tick deadline (${this.tickDeadlineMs}ms) exceeded; pipeline stopped early. ` +
               `Watermark is safe.`,
           });
         } else {
@@ -176,19 +189,24 @@ export class DispatcherService implements DispatcherServiceContract {
       return eventWatermark;
     }
 
-    const code = eventWatermark
-      ? ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK
-      : ALERTING_LOG_CODES.DISPATCHER_COLD_START;
-    logger.warn({
-      code,
+    const seed = new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+
+    if (eventWatermark) {
+      logger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK,
+        message: () =>
+          `eventWatermark is Invalid Date; falling back to cold start ` +
+          `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`,
+      });
+      return seed;
+    }
+
+    logger.info({
       message: () =>
-        eventWatermark
-          ? `eventWatermark is Invalid Date; falling back to cold start ` +
-            `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
-          : `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
-            `Rule events older than that will not be dispatched.`,
+        `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
+        `Rule events older than that will not be dispatched.`,
     });
-    return new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+    return seed;
   }
 
   /**

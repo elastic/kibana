@@ -8,10 +8,11 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ProfilingSchemasAvailability } from '@kbn/profiling-utils';
-import { PROFILING_EVENTS_INDEX_BY_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
-import { isServerless } from '../../utils/is_serverless';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
+import { PROFILING_EVENTS_INDEX_BY_SCHEMA } from '@kbn/profiling-utils';
 import type { ProfilingESClient } from '../../utils/profiling_es_client';
 import type { RegisterServicesParams } from '../register_services';
+import { getSchemasToCheck } from './get_schemas_to_check';
 
 export interface AvailableSchemasParams {
   esClient: ElasticsearchClient;
@@ -45,10 +46,7 @@ export function createGetAvailableSchemasService({
   buildFlavor,
   createProfilingEsClient,
 }: RegisterServicesParams) {
-  // Universal Profiling is not available on serverless, so only OTel data can exist there.
-  const schemasToCheck = isServerless(buildFlavor)
-    ? [ProfilingSchema.OTEL]
-    : Object.values(ProfilingSchema);
+  const schemasToCheck = getSchemasToCheck(buildFlavor);
 
   return async ({
     esClient,

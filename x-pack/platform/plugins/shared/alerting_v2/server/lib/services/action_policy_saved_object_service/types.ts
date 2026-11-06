@@ -65,8 +65,10 @@ export interface ActionPolicySavedObjectServiceContract {
       attrs: PartiallyUpdateableActionPolicyAttributes;
     }>;
   }): Promise<ActionPolicySavedObjectBulkUpdateItem[]>;
+  /** Decrypts the action policies in `spaceIds`, or in every space when omitted. */
   findAllDecrypted(params?: {
     filter?: { enabled: boolean };
+    spaceIds?: readonly string[];
   }): Promise<ActionPolicySavedObjectBulkGetItem[]>;
   /**
    * Reads the current space's action policies, up to `maxPolicies`, fetching only the fields

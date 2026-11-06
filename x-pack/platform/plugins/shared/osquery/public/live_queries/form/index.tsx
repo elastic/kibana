@@ -127,16 +127,20 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ? replaceParamsQuery(values.query, alertAttachmentContext).result
           : values.query;
 
+      const isPackMode = queryType === 'pack';
       const serializedData = {
         ...pickBy(
           {
             agentSelection: values.agentSelection,
-            saved_query_id: values.savedQueryId,
-            query,
+            // Single-query fields must not ride along in pack mode. `defaultValue` suppresses
+            // the reset effect below, so a saved query picked before switching to Pack would
+            // otherwise still be posted and get compared against the pack's queries server-side.
+            saved_query_id: !isPackMode ? values.savedQueryId : undefined,
+            query: !isPackMode ? query : undefined,
             alert_ids: values.alertIds,
-            pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
-            ecs_mapping: values.ecs_mapping,
-            ...(queryType === 'query' ? { timeout: values.timeout } : {}),
+            pack_id: isPackMode && values?.packId?.length ? values?.packId[0] : undefined,
+            ecs_mapping: !isPackMode ? values.ecs_mapping : undefined,
+            ...(!isPackMode ? { timeout: values.timeout } : {}),
           },
           (value) => !isEmpty(value) || isNumber(value)
         ),
@@ -196,6 +200,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (defaultValue.query && canRunSingleQuery) {
+        setValue('queryType', 'query');
         setValue('query', defaultValue.query);
         setValue('savedQueryId', defaultValue.savedQueryId);
         setValue('ecs_mapping', defaultValue.ecs_mapping ?? {});

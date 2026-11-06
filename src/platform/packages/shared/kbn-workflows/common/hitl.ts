@@ -98,9 +98,17 @@ export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack_api: 'slack_api',
   email: 'email',
   slack2: 'slack2.sendMessage',
+  teams: 'microsoft-teams.sendChannelMessage',
   servicenow: 'servicenow_search.addComment',
   http: 'http',
 } as const satisfies Record<string, string>;
+
+/**
+ * When `channels.slack2.interactive` is true, HITL posts Slack Block Kit controls and resumes via
+ * Slack Interactivity on the same connector ingest URL used for Receive events.
+ */
+export const HITL_SLACK2_INTERACTIVE_DESCRIPTION =
+  'When true, render interactive Slack controls in-channel (Approve/Decline for waitForApproval, or schema fields for waitForInput) instead of Kibana resume links. Requires the Slack (v2) connector to have Receive events enabled and the Slack app Interactivity Request URL set to that connector ingest URL.' as const;
 
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;
 

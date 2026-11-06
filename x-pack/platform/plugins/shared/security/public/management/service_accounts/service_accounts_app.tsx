@@ -17,6 +17,7 @@ import type { DeleteServiceAccountOutcome } from './delete_service_account_modal
 import { DeleteServiceAccountModal } from './delete_service_account_modal';
 import { ServiceAccountsPage } from './service_accounts_page';
 import type { ServiceAccountTableItem } from './service_accounts_table';
+import { ServiceAccountWorkloadsModal } from './view_service_account_workloads_modal';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 import type { RolesAPIClient } from '../roles';
 
@@ -31,7 +32,7 @@ interface Props {
   createRoleUrl?: string;
   onCreated: (account: ServiceAccount) => void;
   onDeleted: (account: ServiceAccountTableItem, outcome: DeleteServiceAccountOutcome) => void;
-  onDeleteError: (error: Error, title: string) => void;
+  onError: (error: Error, title: string) => void;
 }
 
 export const ServiceAccountsApp = ({
@@ -42,12 +43,13 @@ export const ServiceAccountsApp = ({
   createRoleUrl,
   onCreated,
   onDeleted,
-  onDeleteError,
+  onError,
 }: Props) => {
   const history = useHistory();
   const location = useLocation();
   const [refreshKey, setRefreshKey] = useState(0);
   const [accountToDelete, setAccountToDelete] = useState<ServiceAccountTableItem>();
+  const [accountToView, setAccountToView] = useState<ServiceAccountTableItem>();
   const isMounted = useMountedState();
   const creationClient = useMemo(
     () => ({
@@ -72,7 +74,17 @@ export const ServiceAccountsApp = ({
         onCreateAccount={() => history.push('/create')}
         // Deleting takes the same privilege as creating.
         onDeleteAccount={canCreate ? setAccountToDelete : undefined}
+        onViewWorkloads={setAccountToView}
       />
+      {accountToView && (
+        <ServiceAccountWorkloadsModal
+          key={accountToView.id}
+          serviceAccount={accountToView}
+          serviceAccountsAPIClient={serviceAccountsAPIClient}
+          onClose={() => setAccountToView(undefined)}
+          onError={onError}
+        />
+      )}
       {accountToDelete && (
         <DeleteServiceAccountModal
           key={accountToDelete.id}
@@ -84,7 +96,7 @@ export const ServiceAccountsApp = ({
             setRefreshKey((value) => value + 1);
             onDeleted(accountToDelete, outcome);
           }}
-          onError={onDeleteError}
+          onError={onError}
         />
       )}
       {canCreate && location.pathname === '/create' && (

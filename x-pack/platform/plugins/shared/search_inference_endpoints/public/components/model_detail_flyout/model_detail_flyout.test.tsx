@@ -358,8 +358,8 @@ describe('ModelDetailFlyout', () => {
       } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
-      expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
-      expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('2025-01-10');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('2026-04-15');
     });
 
     it('renders -- for both dates when metadata is absent', () => {
@@ -387,7 +387,7 @@ describe('ModelDetailFlyout', () => {
       } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
-      expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('2025-01-10');
       expect(valueForLabel(eolLabel)).toHaveTextContent('--');
     });
 
@@ -399,7 +399,7 @@ describe('ModelDetailFlyout', () => {
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
-      expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('2026-04-15');
     });
   });
 

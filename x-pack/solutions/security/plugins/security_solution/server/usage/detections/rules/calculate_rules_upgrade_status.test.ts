@@ -17,6 +17,7 @@ function prepareRuleMetric(isCustomized: boolean, enabled: boolean): RuleMetric 
     enabled,
     elastic_rule: true,
     is_customized: isCustomized,
+    has_base_version: true,
     created_on: '2024-01-01T00:00:00Z',
     updated_on: '2024-01-01T00:00:00Z',
     alert_count_daily: 0,

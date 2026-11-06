@@ -44,6 +44,11 @@ const createPluginConfigAccessor = ({
   const config: PluginConfig = {
     enabled: true,
     invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    retention: {
+      ruleEvents: { enabled: false, dataRetention: '90d' },
+      alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+    },
+    dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,

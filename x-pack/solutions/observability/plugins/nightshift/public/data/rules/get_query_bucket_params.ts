@@ -7,6 +7,7 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import moment from 'moment';
 
 export interface QueryBucketParams {
@@ -47,3 +48,12 @@ export function getQueryBucketParams(
     bucketSize: `${bucketSize.asSeconds()}s`,
   };
 }
+
+/** Resolves a relative range to epoch bounds; call it per fetch so `now` stays current. */
+export const toTimeState = (
+  timefilter: { calculateBounds: (range: TimeRange) => TimeRangeBounds },
+  timeRange: TimeRange
+): { start: number; end: number } | undefined => {
+  const { min, max } = timefilter.calculateBounds(timeRange);
+  return min && max ? { start: min.valueOf(), end: max.valueOf() } : undefined;
+};

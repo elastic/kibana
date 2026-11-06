@@ -7,9 +7,11 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { Logger } from '@kbn/logging';
 import type { FilesStart } from '@kbn/files-plugin/server';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { createTextAttachmentType } from './text';
-import { createEsqlAttachmentType } from './esql';
+import { createEsqlAttachmentType, type DiscoverEsqlLocatorParams } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
@@ -25,9 +27,11 @@ import type {
 export const registerAttachmentTypes = ({
   coreSetup,
   setupDeps,
+  logger,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
+  logger: Logger;
 }) => {
   const { agentBuilder } = setupDeps;
 
@@ -36,13 +40,30 @@ export const registerAttachmentTypes = ({
     return startDeps.files;
   };
 
+  const getAgentsStart = async () => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.agentBuilder.agents;
+  };
+
+  const getActionsStart = async () => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.actions;
+  };
+
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
-    createEsqlAttachmentType(),
+    createEsqlAttachmentType({
+      getDiscoverLocator: () =>
+        setupDeps.share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR),
+    }),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
-    createConnectorSetupAttachmentType(),
+    createConnectorSetupAttachmentType({
+      getAgentsStart,
+      getActionsStart,
+      logger: logger.get('connector-setup'),
+    }),
     createSkillAttachmentType(),
     createImageAttachmentType({ getFilesPlugin }),
   ];

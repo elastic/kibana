@@ -54,5 +54,5 @@ export const createAgentLiveUpdatesSubscription = ({
         return;
       }
 
-      api.setState(attachmentDataToDashboardState(attachment.data));
+      api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
     });

@@ -38,6 +38,8 @@ export const createHandlerTestMocks = (initialPersistedState?: Record<string, un
     contextManager: {
       renderValueAccordingToContext: jest.fn((v: unknown) => v),
       renderValueWithContext: jest.fn((v: unknown) => v),
+      renderConditionAccordingToContext: jest.fn((v: unknown) => v),
+      renderConditionWithContext: jest.fn((v: unknown) => v),
       getContext: jest.fn(() => ({})),
       getEsClientAsUser: jest.fn(() => ({})),
       getFakeRequest: jest.fn(() => null),

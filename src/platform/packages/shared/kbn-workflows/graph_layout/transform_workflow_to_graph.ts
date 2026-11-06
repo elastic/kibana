@@ -12,6 +12,7 @@ import type {
   FallbackLane,
   ForeachGroup,
   GraphEdge,
+  LayoutStructure,
   NodeRef,
   PreLayoutBypassLaneNode,
   PreLayoutForeachGroupNode,
@@ -19,20 +20,20 @@ import type {
   PreLayoutStepNode,
   PreLayoutTriggerNode,
   Step,
+  StructureBranch,
+  StructureItem,
+  StructureLane,
+  StructureSequence,
 } from './types';
 import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE } from './types';
 import { visitStepChildSlots } from './walk_step_tree';
+import { getTriggerName } from '../common/get_trigger_name';
 import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-};
+/** Resolves the label drawn on a trigger node. Defaults to {@link getTriggerName}. */
+export type GetTriggerLabel = (triggerType: string) => string;
 
-function getTriggerLabel(triggerType: string): string {
-  return TRIGGER_LABEL[triggerType] ?? triggerType;
-}
+const defaultGetTriggerLabel: GetTriggerLabel = (triggerType) => getTriggerName(triggerType);
 
 /** Collapse duplicate exit ids when empty branches fall through via the same gate. */
 function dedupeIds(ids: string[]): string[] {
@@ -62,10 +63,17 @@ export interface TransformResult {
    * the `mergeNodeIds` predicate so shape-2 rejoin edges route correctly.
    */
   fallbackLanes: FallbackLane[];
+  /**
+   * The workflow's block structure (forks, branches, containers, fallback lanes) in
+   * declaration order. The layout packs cross-axis positions from this tree.
+   */
+  structure: LayoutStructure;
 }
 
-interface InternalTransformResult extends TransformResult {
+interface InternalTransformResult extends Omit<TransformResult, 'structure'> {
   leafIds: string[];
+  /** The structure items of the steps transformed at this level, in order. */
+  items: StructureSequence;
   /**
    * Failure edges collected by this level's transform. Kept separate from
    * `edges` so callers can forward them to their own `failureEdges` bucket
@@ -81,9 +89,14 @@ interface InternalTransformResult extends TransformResult {
  * and edges plus an optional list of `foreachGroup` containers (top-level
  * foreach steps render their body inside a visual container).
  *
- * Pure: same input → same output. Safe to memoize on the topology fingerprint.
+ * Pure for a given `getTriggerLabel`: same workflow and label function → same output.
+ * Safe to memoize on the topology fingerprint. Without `getTriggerLabel`, names come
+ * from {@link getTriggerName}: Manual, Alert, and Scheduled, then the type id.
  */
-export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): TransformResult {
+export function transformWorkflowToGraph(
+  workflow: WorkflowYaml | undefined,
+  getTriggerLabel: GetTriggerLabel = defaultGetTriggerLabel
+): TransformResult {
   if (!workflow)
     return {
       nodes: [],
@@ -92,11 +105,26 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
       bypassLaneNodes: [],
       nodeRefs: {},
       fallbackLanes: [],
+      structure: { triggers: [], items: [] },
     };
 
   const ids = new IdAllocator();
-  const { nodes, edges, failureEdges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes } =
-    transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
+  const {
+    nodes,
+    edges,
+    failureEdges,
+    foreachGroups,
+    bypassLaneNodes,
+    nodeRefs,
+    fallbackLanes,
+    items,
+  } = transformInternal(
+    workflow.triggers ?? [],
+    workflow.steps ?? [],
+    ids,
+    { fallbackDepth: 0 },
+    getTriggerLabel
+  );
   // Boundary 1: concatenate all failure edges after all structural edges so
   // the outer graph's edge list keeps [structural, failure] order (plan step 6).
   return {
@@ -106,6 +134,10 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     bypassLaneNodes,
     nodeRefs,
     fallbackLanes,
+    structure: {
+      triggers: nodes.filter((node) => node.type === 'trigger').map((node) => node.id),
+      items,
+    },
   };
 }
 
@@ -120,7 +152,10 @@ function transformInternal(
   triggers: WorkflowYaml['triggers'],
   steps: Step[],
   ids: IdAllocator,
-  ctx: LevelContext
+  ctx: LevelContext,
+  // Nested calls pass no triggers, so they keep the default. The root call
+  // passes the caller's function, which is what labels the trigger nodes.
+  getTriggerLabel: GetTriggerLabel = defaultGetTriggerLabel
 ): InternalTransformResult {
   const nodes: PreLayoutNode[] = [];
   const bypassLaneNodes: PreLayoutBypassLaneNode[] = [];
@@ -133,6 +168,25 @@ function transformInternal(
   const foreachGroups: ForeachGroup[] = [];
   const fallbackLanes: FallbackLane[] = [];
   const nodeRefs: Record<string, NodeRef> = {};
+  const items: StructureItem[] = [];
+
+  /** Adds a 1px bypass lane node and the labelled edge from `gateId` to it for a branch without steps. */
+  const emitBypassBranch = (
+    gateId: string,
+    bypassName: string,
+    edgeSuffix: string,
+    edge: Pick<GraphEdge, 'branchType' | 'branchIndex' | 'label'>
+  ): string => {
+    const bypassId = ids.allocate(bypassName);
+    bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+    edges.push({
+      id: `${gateId}:${bypassId}-${edgeSuffix}`,
+      source: gateId,
+      target: bypassId,
+      ...edge,
+    });
+    return bypassId;
+  };
 
   const triggerIds: string[] = [];
   let triggerIndex = 0;
@@ -190,6 +244,11 @@ function transformInternal(
     // Default exit point for this step is itself; control structures override
     // this with the leaves of their branches.
     let exitIds: string[] = [id];
+    // Block structure of this step, filled in by the arm that handles its type.
+    let containerBody: StructureSequence | undefined;
+    let forkBranches: StructureBranch[] | undefined;
+    let attached: StructureSequence | undefined;
+    const lanes: StructureLane[] = [];
 
     // Record the back-pointer from this node id to its source step.  Both
     // `step` and `foreachGroup` node kinds map to the same step name — the
@@ -225,6 +284,7 @@ function transformInternal(
         if (slot.kind === 'steps') childSteps = children;
       });
       const inner = transformInternal([], childSteps, ids, { graphId: id, fallbackDepth: 0 });
+      containerBody = inner.items;
       Object.assign(nodeRefs, inner.nodeRefs);
       // inner.bypassLaneNodes stay on the group only — do NOT hoist them to the
       // top-level list. The layout pipeline feeds group bypass nodes separately
@@ -267,6 +327,7 @@ function transformInternal(
       const hasElse = elseSteps.length > 0;
 
       const branchExits: string[] = [];
+      const branches: StructureBranch[] = [];
 
       if (hasThen) {
         const inner = transformInternal([], thenSteps, ids, ctx);
@@ -286,6 +347,7 @@ function transformInternal(
             branchType: 'then',
             label: 'true',
           });
+          branches.push({ head: firstId, items: inner.items, label: 'true' });
         }
         branchExits.push(...inner.leafIds);
       } else if (hasElse) {
@@ -300,6 +362,7 @@ function transformInternal(
           branchType: 'then',
           label: 'true',
         });
+        branches.push({ head: bypassId, items: [], label: 'true' });
         branchExits.push(bypassId);
       } else {
         // Both branches empty — the true path falls through via the gate.
@@ -324,6 +387,7 @@ function transformInternal(
             branchType: 'else',
             label: 'false',
           });
+          branches.push({ head: firstId, items: inner.items, label: 'false' });
         }
         branchExits.push(...inner.leafIds);
       } else if (hasThen) {
@@ -338,6 +402,7 @@ function transformInternal(
           branchType: 'else',
           label: 'false',
         });
+        branches.push({ head: bypassId, items: [], label: 'false' });
         branchExits.push(bypassId);
       } else {
         // Both branches empty — the false path falls through via the gate.
@@ -346,15 +411,39 @@ function transformInternal(
         branchExits.push(id);
       }
 
+      forkBranches = branches;
       exitIds = dedupeIds(branchExits);
     } else if (step.type === 'parallel') {
       const parallelStep = step as ParallelStep;
       const branches = (parallelStep.branches as Array<{ name?: string; steps: Step[] }>) ?? [];
       const branchExits: string[] = [];
+      const parallelBranches: StructureBranch[] = [];
+      const hasSteps = (branch: { steps: Step[] }): boolean =>
+        Array.isArray(branch.steps) && branch.steps.length > 0;
+      const anyBranchHasSteps = branches.some(hasSteps);
       branches.forEach((branch, idx) => {
-        if (!Array.isArray(branch.steps) || branch.steps.length === 0) {
-          // Empty branch — fall through via the gate node's id (same semantics as `if`).
-          branchExits.push(id);
+        if (!hasSteps(branch)) {
+          if (!anyBranchHasSteps) {
+            // Every branch is empty — the gate just falls through (same semantics as `if`).
+            branchExits.push(id);
+            return;
+          }
+          // An empty branch next to non-empty ones keeps its lane, like an `if` without `else`.
+          const bypassId = emitBypassBranch(
+            id,
+            `${step.name}-branch-${idx}-bypass`,
+            `branch-${idx}`,
+            {
+              branchIndex: idx,
+              label: branch.name ?? `branch ${idx + 1}`,
+            }
+          );
+          parallelBranches.push({
+            head: bypassId,
+            items: [],
+            label: branch.name ?? `branch ${idx + 1}`,
+          });
+          branchExits.push(bypassId);
           return;
         }
         const inner = transformInternal([], branch.steps, ids, ctx);
@@ -374,15 +463,22 @@ function transformInternal(
             branchIndex: idx,
             label: branch.name ?? `branch ${idx + 1}`,
           });
+          parallelBranches.push({
+            head: firstId,
+            items: inner.items,
+            label: branch.name ?? `branch ${idx + 1}`,
+          });
         }
         branchExits.push(...inner.leafIds);
       });
+      forkBranches = parallelBranches;
       if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
     } else if (step.type === 'switch') {
       const switchStep = step as SwitchStep;
       const cases =
         (switchStep.cases as Array<{ match: string | number | boolean; steps: Step[] }>) ?? [];
       const branchExits: string[] = [];
+      const switchBranches: StructureBranch[] = [];
 
       const defaultSteps = switchStep.default as Step[] | undefined;
       const hasDefault = Array.isArray(defaultSteps) && defaultSteps.length > 0;
@@ -390,8 +486,14 @@ function transformInternal(
       // Rule 1 — one labeled edge per case (label = match value).
       cases.forEach((caseItem, idx) => {
         if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
-          // Defensive: empty case in loose/partial schema — fall through the gate.
-          branchExits.push(id);
+          // An empty case (loose/partial schema) keeps its labelled lane instead of
+          // falling through the gate.
+          const bypassId = emitBypassBranch(id, `${step.name}-case-${idx}-bypass`, `case-${idx}`, {
+            branchType: 'switch',
+            label: String(caseItem.match),
+          });
+          switchBranches.push({ head: bypassId, items: [], label: String(caseItem.match) });
+          branchExits.push(bypassId);
           return;
         }
         const inner = transformInternal([], caseItem.steps as Step[], ids, ctx);
@@ -411,6 +513,7 @@ function transformInternal(
             branchType: 'switch',
             label: String(caseItem.match),
           });
+          switchBranches.push({ head: firstId, items: inner.items, label: String(caseItem.match) });
         }
         branchExits.push(...inner.leafIds);
       });
@@ -434,6 +537,7 @@ function transformInternal(
             branchType: 'switch',
             label: 'default',
           });
+          switchBranches.push({ head: firstId, items: inner.items, label: 'default' });
         }
         branchExits.push(...inner.leafIds);
       } else {
@@ -449,14 +553,17 @@ function transformInternal(
           branchType: 'switch',
           label: 'default',
         });
+        switchBranches.push({ head: bypassId, items: [], label: 'default' });
         branchExits.push(bypassId);
       }
 
+      forkBranches = switchBranches;
       if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
     } else if (step.type === 'merge') {
       const mergeStep = step as MergeStep;
       const childSteps = (mergeStep.steps as Step[]) ?? [];
       const inner = transformInternal([], childSteps, ids, ctx);
+      attached = inner.items;
       Object.assign(nodeRefs, inner.nodeRefs);
       nodes.push(...inner.nodes);
       bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -556,6 +663,7 @@ function transformInternal(
           | undefined;
         const hasContinuePath =
           typeof onFailure?.continue === 'string' || onFailure?.continue === true;
+        lanes.push({ head: headId, items: inner.items, rejoins: hasContinuePath });
         if (hasContinuePath) {
           exitIds = dedupeIds([...exitIds, ...laneLeaves]);
           // Record these as rejoin sources so the fan-in loop on the NEXT
@@ -576,6 +684,14 @@ function transformInternal(
       }
     }
 
+    if (containerBody) {
+      items.push({ kind: 'container', id, body: containerBody, lanes });
+    } else if (forkBranches && forkBranches.length > 0) {
+      items.push({ kind: 'fork', id, branches: forkBranches, lanes });
+    } else {
+      items.push({ kind: 'step', id, lanes, ...(attached ? { attached } : {}) });
+    }
+
     prevExitIds = exitIds;
   }
 
@@ -591,5 +707,6 @@ function transformInternal(
     nodeRefs,
     fallbackLanes,
     leafIds: prevExitIds,
+    items,
   };
 }

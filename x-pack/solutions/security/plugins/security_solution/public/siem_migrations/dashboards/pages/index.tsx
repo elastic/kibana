@@ -8,25 +8,26 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import type { RouteComponentProps } from 'react-router-dom';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
-import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
 
-import { HeaderButtons, UnknownMigration } from '../../common/components';
+import { UnknownMigration } from '../../common/components';
 import { EmptyMigrationDashboardsPage } from './empty';
 import * as i18n from './translations';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
-import { PageTitle } from '../../common/components/page_title';
 import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { DashboardMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 import { DashboardMigrationDataInputWrapper } from '../components/data_input_flyout/wrapper';
+import { useMigrationAppHeaderProps } from '../../common/hooks/use_migration_app_header_props';
+import { MigrationSelectorRow } from '../../common/components/migration_selector';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -54,9 +55,17 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       }
     }, [isLoading, migrationId, navigateTo, dashboardMigrationsStats]);
 
-    const onMigrationIdChange = (selectedId?: string) => {
-      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsDashboards, path: selectedId });
-    };
+    const onMigrationIdChange = useCallback(
+      (selectedId?: string) => {
+        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsDashboards, path: selectedId });
+      },
+      [navigateTo]
+    );
+
+    const { menu, docLink } = useMigrationAppHeaderProps({
+      migrationType: 'dashboard',
+      migrationsStats: dashboardMigrationsStats,
+    });
 
     const invalidateGetMigrationDashboards = useInvalidateGetMigrationDashboards();
     const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
@@ -87,7 +96,10 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
         <DashboardMigrationDataInputWrapper onFlyoutClosed={refetchData}>
           <>
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+              </>
             )}
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
               <>
@@ -107,7 +119,10 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
               SiemMigrationTaskStatus.INTERRUPTED,
               SiemMigrationTaskStatus.STOPPED,
             ].includes(migrationStats.status) && (
-              <MigrationReadyPanel migrationStats={migrationStats} />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationReadyPanel migrationStats={migrationStats} />
+              </>
             )}
           </>
         </DashboardMigrationDataInputWrapper>
@@ -116,14 +131,12 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
-          <HeaderButtons
-            migrationType="dashboard"
-            migrationsStats={dashboardMigrationsStats}
-            selectedMigrationId={migrationId}
-            onMigrationIdChange={onMigrationIdChange}
-          />
-        </HeaderPage>
+        <AppHeader title={i18n.PAGE_TITLE} menu={menu} docLink={docLink} spacing="bleed" />
+        <MigrationSelectorRow
+          migrationsStats={dashboardMigrationsStats}
+          selectedMigrationId={migrationId}
+          onMigrationIdChange={onMigrationIdChange}
+        />
         <EuiSkeletonLoading
           key={migrationId}
           data-test-subj="migrationDashboardsPageLoading"

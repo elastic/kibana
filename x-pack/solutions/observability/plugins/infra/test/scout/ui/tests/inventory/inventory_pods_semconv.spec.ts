@@ -168,6 +168,27 @@ test.describe(
       await expect(page).toHaveURL(/preferredSchema:semconv/);
     });
 
+    test('empty state call to action switches to the schema that has data', async ({
+      page,
+      pageObjects: { inventoryPage },
+    }) => {
+      await inventoryPage.showHosts();
+      await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await inventoryPage.selectSchema('OpenTelemetry');
+
+      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
+      await inventoryPage.showPods();
+      await expect(inventoryPage.noDataSwitchSchemaLink).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await inventoryPage.switchSchemaFromNoDataPrompt();
+
+      await expect(page).toHaveURL(/preferredSchema:ecs/);
+      const ecsPod = await inventoryPage.podWaffleNodeByName(ECS_POD_NAME);
+      await expect(ecsPod.container).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    });
+
     test('tile menu identity uses k8s.pod.uid on OpenTelemetry', async ({
       pageObjects: { inventoryPage },
     }) => {

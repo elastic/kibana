@@ -42,7 +42,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: '.node-version'
+          node-version-file: '.nvmrc'
 
       # Cache node_modules keyed on pnpm-lock.yaml — shared across all matrix jobs
       # on the same runner pool. First run after a dep bump takes a few minutes;

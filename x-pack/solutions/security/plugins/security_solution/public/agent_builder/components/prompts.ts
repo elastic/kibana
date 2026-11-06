@@ -11,7 +11,7 @@ export const EVENT_ATTACHMENT_PROMPT = `Evaluate the security event described ab
   - Summarize the event using extracted data:
     * **Entities**: \`host.name\`, \`user.name\`, \`service.name\`
     * Include associated **risk scores** for each entity (from the risk score tool)
-  - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+  - Reference relevant MITRE ATT&CK or MITRE ATLAS techniques, with hyperlinks to the official MITRE pages.
 2. Triage Steps
   - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
   - Highlight any relevant detection rules or anomaly findings.
@@ -21,10 +21,10 @@ export const EVENT_ATTACHMENT_PROMPT = `Evaluate the security event described ab
     - Example ES|QL queries for further investigation, formatted as code blocks.
     - Example OSQuery Manager queries for further investigation, formatted as code blocks.
     - Guidance on using Timelines and Entity Analytics for deeper context, with documentation links.
-4. MITRE ATT&CK Context
-  - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
+4. MITRE Context
+  - Summarize the mapped MITRE ATT&CK or MITRE ATLAS techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
 5. Documentation Links
-  - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+  - Include direct links to all referenced Elastic Security documentation and MITRE pages.
 Formatting Requirements:
   - Use markdown headers, tables, and code blocks for clarity.
   - Organize the response into visually distinct sections.
@@ -57,8 +57,8 @@ Analysis Framework:
    - What blind spots or edge cases might exist?
    - What are likely sources of false positives?
 
-3. MITRE ATT&CK Coverage
-   - Explain each mapped technique briefly, provide links to the MITRE ATT&CK pages
+3. MITRE Coverage
+   - Explain each mapped technique briefly, provide links to the MITRE pages
    - Assess coverage quality: Is the mapping accurate and complete?
    - Identify gaps: Are there related techniques that should be included?
 

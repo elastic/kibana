@@ -38,6 +38,7 @@ const makeEvent = (): AlertStatusChangedEvent => ({
       status: 'active',
       actionGroup: 'default',
       start: '2026-09-30T00:00:00.000Z',
+      severity: null,
     },
   },
 });

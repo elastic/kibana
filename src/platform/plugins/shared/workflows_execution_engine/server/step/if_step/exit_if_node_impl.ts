@@ -21,7 +21,10 @@ export class ExitIfNodeImpl implements NodeImplementation {
     const stepState = this.stepExecutionRuntime.getCurrentStepState();
     const conditionResult = stepState?.conditionResult;
     this.stepExecutionRuntime.setCurrentStepState(undefined);
-    this.stepExecutionRuntime.finishStep(conditionResult ? { conditionResult } : {});
+    // `false` is a real result; only a missing step state gives an empty output.
+    this.stepExecutionRuntime.finishStep(
+      typeof conditionResult === 'boolean' ? { conditionResult } : {}
+    );
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

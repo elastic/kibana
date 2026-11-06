@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { PersistedEntityAiSummary } from '@kbn/entity-store/common';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -44,20 +45,22 @@ export interface UseFetchPersistedAiSummaryResult {
 export const useFetchPersistedAiSummary = ({
   entityType,
   entityIdentifier,
+  mode = 'single',
   skip,
 }: {
   entityType: string;
   entityIdentifier: string;
+  mode?: EntityViewMode;
   skip?: boolean;
 }): UseFetchPersistedAiSummaryResult => {
   const { fetchPersistedAiSummary } = useEntityAnalyticsRoutes();
   const { addError } = useAppToasts();
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier],
+    queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier, mode],
     queryFn: ({ signal }) =>
       fetchPersistedAiSummary({
-        params: { entityType, entityIdentifier },
+        params: { entityType, entityIdentifier, mode },
         signal,
         context: PERSISTED_AI_SUMMARY_CONTEXT,
       }),

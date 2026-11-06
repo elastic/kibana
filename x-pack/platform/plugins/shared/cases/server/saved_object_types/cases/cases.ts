@@ -325,7 +325,7 @@ export const createCaseSavedObjectType = (
   management: {
     importableAndExportable: true,
     defaultSearchField: 'title',
-    icon: 'casesApp',
+    icon: 'briefcase',
     getTitle: (savedObject: SavedObject<CasePersistedAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,

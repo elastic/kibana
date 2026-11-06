@@ -29,6 +29,12 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
 import * as getPrivateLocationsModule from '../get_private_locations';
+import * as getSecretConnectionModule from '../get_secret_connection';
+import { SecretConnectionError, type HeartbeatVaultConfig } from '../get_secret_connection';
+import {
+  VAULT_PACKAGE_UPGRADE_MESSAGE,
+  VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
+} from '../formatters/private_formatters/format_synthetics_policy';
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 
 jest.mock('../../tasks/clean_up_package_policies_task', () => ({
@@ -492,6 +498,81 @@ describe('SyntheticsPrivateLocation', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+
+    it('reads the agent policy revision wherever the agent policy lives', async () => {
+      const getByIds = jest.fn().mockResolvedValue([{ id: 'ap-1', revision: 7 }]);
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: { ...serverMock.fleet, agentPolicyService: { getByIds } },
+      } as unknown as SyntheticsServerSetup);
+
+      await expect(syntheticsPrivateLocation.getAgentPolicyRevision('ap-1')).resolves.toBe(7);
+      expect(getByIds).toHaveBeenCalledWith(expect.anything(), [{ id: 'ap-1', spaceId: '*' }], {
+        ignoreMissing: true,
+        fields: ['revision'],
+      });
+    });
+
+    it('does not count parking a browser monitor as a first pin', async () => {
+      jest.spyOn(PackagePolicyService.prototype, 'listByAgentPolicy').mockResolvedValue([
+        {
+          id: 'browser-loc-1',
+          spaceIds: ['default'],
+          version: 'WzAsMV0=',
+          revision: 1,
+          name: 'browser-loc-1',
+          policy_ids: ['ap-1'],
+          inputs: [{ type: 'synthetics/browser', enabled: true }],
+        },
+      ]);
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a', 'agent-b'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(
+        bulkUpdateInSpace.mock.calls[0][0].policiesToUpdate[0].update.attributes.condition
+      ).toBe(UNASSIGNED_CONDITION);
+      expect(result.newlyPinned).toBe(0);
+    });
+
+    it('counts only landed first pins as newly pinned', async () => {
+      const pkgPolicy = (id: string, condition?: string) => ({
+        id,
+        condition,
+        spaceIds: ['default'],
+        version: 'WzAsMV0=',
+        revision: 1,
+        name: id,
+        policy_ids: ['ap-1'],
+        inputs: [{ type: 'synthetics/http', enabled: true }],
+      });
+      jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue([
+          pkgPolicy('moved-loc-1', agentIdCondition('gone-agent')),
+          pkgPolicy('first-loc-1'),
+          pkgPolicy('rejected-loc-1'),
+        ]);
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([{ update: { id: 'rejected-loc-1' } }] as never);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a', 'agent-b'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(result).toEqual(expect.objectContaining({ moved: 2, newlyPinned: 1 }));
     });
 
     it('keeps the single agent policy binding and assigns a new monitor to one enrolled agent', async () => {
@@ -1197,7 +1278,9 @@ describe('SyntheticsPrivateLocation', () => {
       ]);
 
       expect(listAgents).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: `policy_id:"agent-policy\\" or true or \\""` })
+        expect.objectContaining({
+          kuery: `(policy_base_id:"agent-policy\\" or true or \\"" or (policy_id:"agent-policy\\" or true or \\"" and not policy_base_id:*))`,
+        })
       );
     });
     it('does not resolve agents for private locations unused by monitor creation', async () => {
@@ -1227,7 +1310,9 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(listAgents).toHaveBeenCalledTimes(1);
       expect(listAgents).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: 'policy_id:"policyId"' })
+        expect.objectContaining({
+          kuery: '(policy_base_id:"policyId" or (policy_id:"policyId" and not policy_base_id:*))',
+        })
       );
     });
 
@@ -1264,7 +1349,9 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(listAgents).toHaveBeenCalledTimes(1);
       expect(listAgents).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: 'policy_id:"policyId"' })
+        expect.objectContaining({
+          kuery: '(policy_base_id:"policyId" or (policy_id:"policyId" and not policy_base_id:*))',
+        })
       );
     });
 
@@ -1422,6 +1509,169 @@ describe('SyntheticsPrivateLocation', () => {
       });
       expect(result.cleared).toBe(1);
       expect(result.failed).toBe(0);
+    });
+  });
+
+  describe('editMonitors with an unusable Vault reference', () => {
+    const locationA = {
+      id: 'loc-a',
+      label: 'Location A',
+      agentPolicyId: 'agent-policy-a',
+      isServiceManaged: false,
+    } as unknown as PrivateLocationAttributes;
+    const locationB = {
+      id: 'loc-b',
+      label: 'Location B',
+      agentPolicyId: 'agent-policy-b',
+      isServiceManaged: false,
+    } as unknown as PrivateLocationAttributes;
+
+    const templateWithSecretStores = {
+      ...testMonitorPolicy,
+      inputs: testMonitorPolicy.inputs.map((input) =>
+        input.type === 'synthetics/http'
+          ? {
+              ...input,
+              streams: input.streams.map((stream) => ({
+                ...stream,
+                vars: { ...stream.vars, secret_stores: { type: 'text', value: null } },
+              })),
+            }
+          : input
+      ),
+    };
+
+    const vaultConnection: HeartbeatVaultConfig = {
+      type: 'vault',
+      name: 'prod',
+      address: 'https://vault.example.com',
+      auth: { token: 'token' },
+    };
+
+    const okConfig = { ...testConfig, id: 'ok', locations: [locationA] } as HeartbeatConfig;
+    const badConfig = {
+      ...testConfig,
+      id: 'bad',
+      password: 'vault://missing@secret/path#field',
+      locations: [locationA],
+    } as unknown as HeartbeatConfig;
+
+    const setup = ({
+      template = templateWithSecretStores,
+      delivery = { secretConnections: [], secretStorageEnabled: true },
+      existingPolicies = [],
+    }: {
+      template?: typeof templateWithSecretStores;
+      delivery?: { secretConnections: HeartbeatVaultConfig[]; secretStorageEnabled: boolean };
+      existingPolicies?: Array<{ id: string }>;
+    } = {}) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(template),
+          },
+        },
+        pluginsStart: {
+          licensing: { getLicense: jest.fn().mockRejectedValue(new Error('es unavailable')) },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest
+        .spyOn(getSecretConnectionModule, 'getSecretConnectionDelivery')
+        .mockResolvedValue(delivery);
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: existingPolicies,
+        allSpaces: new Set(['default']),
+      } as never);
+      const bulkCreate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [], failed: [] });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkUpdate').mockResolvedValue([]);
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      return { syntheticsPrivateLocation, bulkCreate, bulkDelete };
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each([
+      [
+        'a connection that is not configured',
+        {},
+        /references Vault connection "missing", which is not configured/,
+      ],
+      [
+        'Fleet secret storage being disabled',
+        {
+          delivery: { secretConnections: [vaultConnection], secretStorageEnabled: false },
+        },
+        VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
+      ],
+      [
+        'a package without secret_stores',
+        {
+          template: testMonitorPolicy as unknown as typeof templateWithSecretStores,
+          delivery: { secretConnections: [vaultConnection], secretStorageEnabled: true },
+        },
+        VAULT_PACKAGE_UPGRADE_MESSAGE,
+      ],
+    ])(
+      'reports %s per monitor and still syncs the rest of the batch',
+      async (_label, options, expectedMessage) => {
+        const { syntheticsPrivateLocation, bulkCreate } = setup(options);
+
+        const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+          [
+            { config: okConfig, globalParams: {} },
+            { config: badConfig, globalParams: {} },
+          ],
+          [locationA],
+          'default',
+          []
+        );
+
+        expect(bulkCreate.mock.calls[0][0].newPolicies.map(({ id }) => id)).toEqual(['ok-loc-a']);
+        expect(failedUpdates).toHaveLength(1);
+        expect(failedUpdates[0].config?.id).toBe('bad');
+        expect(failedUpdates[0].error).toBeInstanceOf(SecretConnectionError);
+        expect(failedUpdates[0].error?.message).toMatch(expectedMessage);
+      }
+    );
+
+    it("applies none of a failed monitor's policy changes, including removed locations", async () => {
+      const staleLocationPolicyId = 'bad-loc-b';
+      const { syntheticsPrivateLocation, bulkCreate, bulkDelete } = setup({
+        existingPolicies: [{ id: staleLocationPolicyId }],
+      });
+
+      const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+        [{ config: badConfig, globalParams: {} }],
+        [locationB, locationA],
+        'default',
+        []
+      );
+
+      expect(failedUpdates.map(({ config }) => config?.id)).toEqual(['bad']);
+      expect(bulkCreate.mock.calls[0][0].newPolicies).toEqual([]);
+      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([]);
+    });
+
+    it('reports a monitor once when it fails in several locations', async () => {
+      const { syntheticsPrivateLocation } = setup();
+
+      const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+        [{ config: { ...badConfig, locations: [locationA, locationB] }, globalParams: {} }],
+        [locationA, locationB],
+        'default',
+        []
+      );
+
+      expect(failedUpdates).toHaveLength(1);
     });
   });
 

@@ -10,6 +10,7 @@ import type { BaseSSLSecrets, ValueOf } from '..';
 import type {
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaKerberosAuthType,
   kafkaOAuth2GrantType,
   kafkaOAuth2SignatureAlgorithm,
   kafkaSaslMechanism,
@@ -28,6 +29,7 @@ export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
 export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
+export type KafkaKerberosAuthType = typeof kafkaKerberosAuthType;
 export type KafkaOAuth2GrantType = typeof kafkaOAuth2GrantType;
 export type KafkaOAuth2SignatureAlgorithm = typeof kafkaOAuth2SignatureAlgorithm;
 export type KafkaPartitionType = typeof kafkaPartitionType;
@@ -276,6 +278,7 @@ export interface KafkaOutput extends BeatsBaseOutput {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   } | null;
   oauth2?: KafkaOAuth2Config | null;
+  kerberos?: KafkaKerberosConfig | null;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -331,11 +334,31 @@ export interface KafkaOAuth2Config {
   claims?: Record<string, unknown>;
 }
 
+/**
+ * Settings of the Kerberos authentication method, they follow the `kerberos` settings of the Kafka
+ * output of Beats. The password is in `secrets`.
+ */
+export interface KafkaKerberosConfig {
+  auth_type: ValueOf<KafkaKerberosAuthType>;
+  // path of the `krb5.conf` file, on the host of the agent
+  config_path: string;
+  // path of the keytab file, on the host of the agent (keytab only)
+  keytab?: string;
+  // password only
+  username?: string;
+  service_name?: string;
+  realm: string;
+  enable_krb5_fast?: boolean;
+}
+
 interface KafkaOutputSecrets extends BaseSSLSecrets {
   password?: SOSecret;
   oauth2?: {
     client_secret?: SOSecret;
     client_certificate_key?: SOSecret;
+  };
+  kerberos?: {
+    password?: SOSecret;
   };
 }
 interface RemoteESOutputSecrets extends BaseSSLSecrets {

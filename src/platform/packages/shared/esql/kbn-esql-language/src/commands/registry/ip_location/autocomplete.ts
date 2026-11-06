@@ -73,14 +73,14 @@ export async function autocomplete(
         database_file: {
           type: 'string',
           description: i18n.translate(
-            'kbn-esql-language.commands.ipLocation.autocomplete.databaseFileDescription',
+            'esqlLanguage.commands.ipLocation.autocomplete.databaseFileDescription',
             { defaultMessage: 'IP location database file name' }
           ),
         },
         properties: {
           type: 'array',
           description: i18n.translate(
-            'kbn-esql-language.commands.ipLocation.autocomplete.propertiesDescription',
+            'esqlLanguage.commands.ipLocation.autocomplete.propertiesDescription',
             { defaultMessage: 'List of properties to extract' }
           ),
           suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],
@@ -88,7 +88,7 @@ export async function autocomplete(
         first_only: {
           type: 'boolean',
           description: i18n.translate(
-            'kbn-esql-language.commands.ipLocation.autocomplete.firstOnlyDescription',
+            'esqlLanguage.commands.ipLocation.autocomplete.firstOnlyDescription',
             { defaultMessage: 'Use only the first value from multi-value IP input' }
           ),
           suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],

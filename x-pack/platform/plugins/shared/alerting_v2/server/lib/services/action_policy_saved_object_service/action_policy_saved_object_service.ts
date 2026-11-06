@@ -186,7 +186,12 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
 
   public async findAllDecrypted(params?: {
     filter?: { enabled: boolean };
+    spaceIds?: readonly string[];
   }): Promise<ActionPolicySavedObjectBulkGetItem[]> {
+    if (params?.spaceIds?.length === 0) {
+      return [];
+    }
+
     const kqlFilter =
       params?.filter?.enabled !== undefined
         ? `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: ${params.filter.enabled}`
@@ -196,7 +201,8 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<ActionPolicySavedObjectAttributes>(
         {
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          namespaces: ['*'],
+          // A space id is already its SO namespace string, `default` included.
+          namespaces: params?.spaceIds ? [...params.spaceIds] : ['*'],
           perPage: 1000,
           ...(kqlFilter ? { filter: kqlFilter } : {}),
         }

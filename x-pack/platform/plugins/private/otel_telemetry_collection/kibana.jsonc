@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/otel-telemetry-collection-plugin",
   "owner": [
-    "@elastic/observability-bi"
+    "@elastic/obs-bi-team"
   ],
   "group": "platform",
   "visibility": "private",

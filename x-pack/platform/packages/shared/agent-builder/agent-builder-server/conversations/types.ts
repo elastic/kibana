@@ -121,8 +121,14 @@ export interface ConversationPublicClient {
    */
   update(request: ConversationUpdatePublicRequest): Promise<Conversation>;
   /**
+   * Permanently delete a conversation and cascade to its persistent sub-agent conversations.
+   * Requires `delete` access (the owner, or a principal the ACL grants it to). Resolves `false`
+   * when the conversation does not exist. Irreversible.
+   */
+  delete(conversationId: string): Promise<boolean>;
+  /**
    * Append custom events to a conversation timeline. Requires converse access.
-   * Only custom event types are accepted; built-in timeline event types are rejected.
+   * Only custom event types are accepted; built-in event types (timeline and activity) are rejected.
    */
   addEvents(request: ConversationAddEventsRequest): Promise<ConversationEvent[]>;
 }

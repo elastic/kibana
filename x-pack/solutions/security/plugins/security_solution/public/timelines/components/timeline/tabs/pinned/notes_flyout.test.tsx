@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Dispatch } from 'redux-v4';
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import type { DataTableRecord, RowControlColumn } from '@kbn/discover-utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -32,7 +32,6 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 /**
@@ -67,29 +66,16 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-type ControlColumnCellRender = (
-  props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
-) => React.JSX.Element;
-
 jest.mock('../../body/unified_timeline_body', () => ({
   UnifiedTimelineBody: ({
-    leadingControlColumns,
+    rowAdditionalLeadingControls,
   }: {
-    leadingControlColumns: EuiDataGridControlColumn[];
+    rowAdditionalLeadingControls: RowControlColumn[];
   }) => {
-    const RowCellRender = leadingControlColumns[0].rowCellRender as ControlColumnCellRender;
-
-    return (
-      <RowCellRender
-        colIndex={0}
-        columnId="default-timeline-control-column"
-        isDetails={false}
-        isExpandable={false}
-        isExpanded={false}
-        rowIndex={0}
-        setCellProps={() => {}}
-      />
-    );
+    return rowAdditionalLeadingControls[0].render(() => <></>, {
+      record: {} as DataTableRecord,
+      rowIndex: 0,
+    });
   },
 }));
 

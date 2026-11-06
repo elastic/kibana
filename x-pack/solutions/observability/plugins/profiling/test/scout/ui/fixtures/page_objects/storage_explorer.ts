@@ -10,18 +10,17 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingStorageExplorerPage {
-  public pageTitle: Locator;
+  public otelNotSupportedCallout: Locator;
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.pageTitle = this.page.getByRole('heading', {
-      name: 'Storage explorer',
-      level: 1,
-      exact: true,
-    });
+    this.otelNotSupportedCallout = this.page.getByTestId(
+      'profilingStorageExplorerOtelNotSupportedCallout'
+    );
   }
 
-  async goto() {
-    await this.page.goto(`${this.kbnUrl.app('profiling')}/storage-explorer`);
-    await this.waitForStorageExplorerPage();
+  async dismissOtelNotSupportedCallout() {
+    await this.page
+      .getByTestId('profilingStorageExplorerOtelNotSupportedCalloutDismissButton')
+      .click();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string, kuery?: string) {
@@ -44,82 +43,5 @@ export class ProfilingStorageExplorerPage {
       .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
       .getByText('Storage explorer')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
-  }
-
-  // Summary Stats methods
-  async getSummaryStats() {
-    return this.page.testSubj.locator('profilingStorageExplorerSummaryStats');
-  }
-
-  async getSummaryStatItem(statName: string) {
-    return this.page.testSubj.locator(`profilingSummaryStat-${statName}`);
-  }
-
-  // Storage Chart methods
-  async getStorageChart() {
-    return this.page.testSubj.locator('profilingStorageChart');
-  }
-
-  async getStorageChartCanvas() {
-    return this.page.testSubj.locator('profilingStorageChartCanvas');
-  }
-
-  // Storage Table methods
-  async getStorageTable() {
-    return this.page.testSubj.locator('profilingStorageTable');
-  }
-
-  async getStorageTableRow(rowIndex: number) {
-    return this.page.testSubj.locator(`profilingStorageTableRow-${rowIndex}`);
-  }
-
-  async getStorageTableCell(rowIndex: number, cellIndex: number) {
-    return this.page.testSubj.locator(`profilingStorageTableCell-${rowIndex}-${cellIndex}`);
-  }
-
-  async clickStorageTableRow(rowIndex: number) {
-    const row = await this.getStorageTableRow(rowIndex);
-    await row.click();
-  }
-
-  // Filter methods
-  async addStorageFilter(key: string, value: string) {
-    const filterInput = this.page.testSubj.locator('profilingStorageFilter');
-    await filterInput.fill(`${key}: "${value}"`);
-    await this.page.keyboard.press('Enter');
-  }
-
-  async clearStorageFilter() {
-    const filterInput = this.page.testSubj.locator('profilingStorageFilter');
-    await filterInput.clear();
-    await this.page.keyboard.press('Enter');
-  }
-
-  // Time Range methods
-  async selectTimeRange(rangeFrom: string, rangeTo: string) {
-    await this.page.testSubj.locator('profilingTimeRangePicker').click();
-    await this.page.testSubj.locator('profilingTimeRangeFrom').fill(rangeFrom);
-    await this.page.testSubj.locator('profilingTimeRangeTo').fill(rangeTo);
-    await this.page.testSubj.locator('profilingTimeRangeApply').click();
-  }
-
-  // Refresh methods
-  async refreshData() {
-    await this.page.testSubj.locator('profilingRefreshButton').click();
-  }
-
-  // Export methods
-  async exportData(format: 'csv' | 'json') {
-    await this.page.testSubj.locator('profilingExportButton').click();
-    await this.page.getByText(format).click();
-  }
-
-  // Loading indicator methods
-  async waitForDataLoad() {
-    await this.page.testSubj.locator('profilingLoadingIndicator').waitFor({ state: 'hidden' });
-  }
-
-  async isDataLoading() {
-    return await this.page.testSubj.locator('profilingLoadingIndicator').isVisible();
   }
 }

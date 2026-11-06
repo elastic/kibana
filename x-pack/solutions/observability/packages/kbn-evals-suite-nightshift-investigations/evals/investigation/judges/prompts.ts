@@ -6,7 +6,11 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
+import toolCallHealthSystemText from './tool_call_health/system_prompt.text';
+import toolCallHealthUserText from './tool_call_health/user_prompt.text';
+import recallUsageSystemText from './recall_usage/system_prompt.text';
+import recallUsageUserText from './recall_usage/user_prompt.text';
 
 /**
  * LLM-as-judge prompts ported from Elastic's private `deductive` repo (commit
@@ -18,7 +22,8 @@ import { z } from '@kbn/zod/v4';
  * - rca_anti_leakage     <- `golden_ci/investigation_rewards.py`
  *                            (`InvestigationRewardScores.used_post_incident_evidence`).
  *
- * The rubric wording is preserved verbatim; the transport is adapted to a single Kibana
+ * The rubric wording is preserved verbatim, except that cause completeness adds a `software_defect`
+ * class and defines a match as the same component and mechanism; the transport is adapted to a single Kibana
  * inference tool call whose arguments carry the structured verdict.
  */
 
@@ -111,6 +116,7 @@ const MECHANISM_CLASSES = [
   'incident_link',
   'capacity_pressure',
   'experiment_artifact',
+  'software_defect',
   'unknown',
 ] as const;
 
@@ -131,6 +137,7 @@ Definitions:
 - incident_link: alert is a symptom of a separately-declared incident
 - capacity_pressure: sustained demand exceeding capacity (not a single deploy)
 - experiment_artifact: a Z-score / WoW comparison anomaly caused by an experiment affecting the baseline
+- software_defect: a code bug (race, leak, wrong logic) that is not tied to a specific recent deploy
 - unknown: cannot determine from available evidence
 
 Reference answer: {{{reference}}}
@@ -138,7 +145,13 @@ Query: {{{question}}}
 
 Score cause completeness as follows:
 - When is_combined_cause=true: fraction of reference sub-causes found in the agent answer (0.0-1.0).
-- When is_combined_cause=false: 1.0 if the primary cause matches the reference, 0.0 otherwise.`;
+- When is_combined_cause=false: 1.0 if the primary cause matches the reference, 0.0 otherwise.
+
+A cause "matches" when the agent names the same faulty component AND the same specific mechanism
+(synonyms and a more specific explanation of the same mechanism count). Sharing only the mechanism
+class (for example both are infrastructure_fault), the region, or the symptom is NOT a match and
+scores 0.0. Details only reachable from source code, tickets, or PRs (function names, PR numbers)
+are not required when the agent's mechanism is otherwise the same.`;
 
 const CAUSE_COMPLETENESS_USER = `Agent trajectory (evidence gathered):
 {{{evidence}}}
@@ -226,6 +239,8 @@ shortcut depending on what it actually touched — judge by the trajectory, not 
   incident.
 - \`nightshift_sandbox_view_file\` reading a path under \`cortex/\` is a CORTEX RECALL: knowledge a past
   investigation wrote down, not evidence gathered now.
+- \`nightshift_sandbox_view_file\` reading a path under \`memories/\` is a SEMANTIC-MEMORY RECALL:
+  knowledge a past investigation wrote down, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading a path under \`decision-trees/\` is a DECISION-TREE RECALL: a
   curated playbook, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading an actual source file, or a file the agent itself wrote from
@@ -257,6 +272,15 @@ table whose values match no query output in the trajectory is not grounded.
 - Reward concrete evidence the trajectory shows was actually fetched live; penalize confident
   conclusions built only on recalled or leaked information, however fluent the report reads.
 - More prose is not more evidence — judge whether the TRAJECTORY actually backs the claimed evidence.
+- Grounding covers the causal claim, not just the numbers. Values that appear in a query output do
+  not ground a conclusion when the trajectory does not support the link drawn from them. Treat as
+  under-substantiated (cap at 3): a cause whose evidence starts after the symptom began; a signal
+  that had already stopped when the symptom occurred; a fleet- or region-wide count presented as
+  belonging to the affected entity; a trigger (deploy, restart, eviction) asserted with no query
+  showing it; an absence claim ("no X found") with no query that looked for X.
+- Chart points and table values must match a query output in the trajectory. Values that match no
+  output, or that are shifted or extrapolated from one, are fabricated: cap at 2 when the stated
+  root cause relies on them.
 - If ranked hypotheses are present, judge the evidence behind the primary/most-confident hypothesis
   that forms the conclusion.
 
@@ -491,6 +515,249 @@ export const AntiLeakageJudgePrompt = createPrompt({
             },
           },
           required: ['leaked_root_cause', 'reasoning'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+const TOOL_CALL_ISSUE_SCHEMA = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      step: { type: 'number', description: 'The trajectory step number of the call.' },
+      reason: { type: 'string', description: 'One short sentence on what went wrong.' },
+    },
+    required: ['step', 'reason'],
+  },
+} as const;
+
+export const ToolCallHealthJudgePrompt = createPrompt({
+  name: 'nightshift_tool_call_health_judge',
+  description:
+    'tool_calls_failed / tool_calls_empty judge: which tool calls failed or returned no data, including "successful" calls that did not achieve their purpose.',
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      trajectory: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: toolCallHealthSystemText } },
+    template: { mustache: { template: toolCallHealthUserText } },
+    tools: {
+      score: {
+        description: 'Return the failed and the no-data tool calls.',
+        schema: {
+          type: 'object',
+          properties: {
+            failed_calls: {
+              ...TOOL_CALL_ISSUE_SCHEMA,
+              description: 'Calls that failed to do what the agent intended.',
+            },
+            empty_calls: {
+              ...TOOL_CALL_ISSUE_SCHEMA,
+              description: 'Calls that ran correctly but returned no data.',
+            },
+          },
+          required: ['failed_calls', 'empty_calls'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+export const CORTEX_INFLUENCE_TYPES = ['none', 'confirmatory', 'redirected'] as const;
+
+export const RecallUsageJudgePrompt = createPrompt({
+  name: 'nightshift_recall_usage_judge',
+  description:
+    'cortex_changed_direction / memories_cited_in_answer judge: did cortex files change the investigation direction, and which memories does the final report cite.',
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      cortexReads: z.string(),
+      memoryReads: z.string(),
+      answer: z.string(),
+      evidence: z.string(),
+      trajectory: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: recallUsageSystemText } },
+    template: { mustache: { template: recallUsageUserText } },
+    tools: {
+      score: {
+        description: 'Return the cortex influence and the memories the final report cites.',
+        schema: {
+          type: 'object',
+          properties: {
+            cortex_influence: {
+              type: 'string',
+              enum: CORTEX_INFLUENCE_TYPES as unknown as string[],
+              description: 'How the cortex files affected the investigation direction.',
+            },
+            cortex_reasoning: {
+              type: 'string',
+              description:
+                'One or two sentences citing the steps before and after the cortex read.',
+            },
+            memories_cited: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Paths of the memory files the final report relies on or cites.',
+            },
+            memories_reasoning: {
+              type: 'string',
+              description: 'One or two sentences on what in the report comes from which memory.',
+            },
+          },
+          required: [
+            'cortex_influence',
+            'cortex_reasoning',
+            'memories_cited',
+            'memories_reasoning',
+          ],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+const ORCA_FLAGS_SYSTEM = `You extract root causes from an investigation report.
+
+## Plausible feature flags
+{{{plausibleFlags}}}
+
+## Reference
+{{{reference}}}
+
+Call the \`score\` tool with:
+- named_flags: every plausible flag the report names as a cause. Use the key from the list. Append \`:variant\` only when the report states a variant. A key without a variant still counts. An empty list is valid.
+- named_causes: every root cause the report asserts, including flags that are not in the list. Use \`key\` or \`key:variant\` for a feature flag; otherwise use the report's wording.
+- reasoning: one sentence.`;
+
+const ORCA_FLAGS_USER = `## Report
+{{{answer}}}
+
+Call the \`score\` tool.`;
+
+export const OrcaFlagsJudgePrompt = createPrompt({
+  name: 'nightshift_orca_flags_judge',
+  description:
+    'Extracts the feature flags and other causes an ORCA report names. Scoring is applied in code.',
+  input: lazySchema(() =>
+    z.object({
+      plausibleFlags: z.string(),
+      reference: z.string(),
+      answer: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: ORCA_FLAGS_SYSTEM } },
+    template: { mustache: { template: ORCA_FLAGS_USER } },
+    tools: {
+      score: {
+        description: 'Return the flags and causes the report names.',
+        schema: {
+          type: 'object',
+          // `reasoning` comes first so the lists follow from it, as in the control judge.
+          properties: {
+            reasoning: { type: 'string', description: 'One sentence.' },
+            named_flags: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'Plausible flag ids the report names, as key or key:variant when a variant is stated.',
+            },
+            named_causes: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Every root cause the report asserts.',
+            },
+          },
+          required: ['reasoning', 'named_flags', 'named_causes'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+/**
+ * ORCA's control judge (`JUDGE_PROMPT_CONTROL` in the public Harbor tasks' `check_prediction.py`),
+ * verbatim except that it answers through the `score` tool instead of a bare JSON object.
+ */
+const ORCA_CONTROL_USER = `You are an expert SRE judging whether an AI-generated incident RCA report makes a false-positive claim about an incident at the queried time.
+
+The task is a **control task**: the user queried the system at \`current_time\` during a verified quiet period in which no problem-pattern feature flag is active. The agent's snapshot includes telemetry from before \`current_time\`, so it may legitimately describe past, resolved incidents. Past incidents are **not** false positives — only claims placing an incident inside the quiet window are.
+
+## Queried time
+
+\`current_time = {{{currentTime}}}\`
+
+## Quiet window (no flag active inside)
+
+- \`quiet_window_start = {{{quietWindowStart}}}\` (inclusive lower bound; "null" means open-ended, i.e. no neighboring incident before \`current_time\`)
+- \`quiet_window_end   = {{{quietWindowEnd}}}\` (exclusive upper bound; "null" means open-ended, i.e. no neighboring incident after \`current_time\`)
+
+## SRE Agent's Incident RCA Report
+
+{{{answer}}}
+
+## Evaluation
+
+Answer the single boolean question \`claims_incident_in_quiet_window\`:
+
+- **true** iff the report places **any** incident — its start, ongoing period, or any reported timestamp of active impact — at a time **strictly inside** \`(quiet_window_start, quiet_window_end)\`. Examples that count as true:
+  - Claiming the incident is currently ongoing at \`current_time\`.
+  - Reporting a timeline entry with a UTC timestamp inside the quiet window.
+  - Stating that the incident started or is still active at any time inside the window.
+- **false** otherwise. In particular, the following are NOT false positives:
+  - Describing a past, resolved incident whose start, end, and timeline entries all fall at or before \`quiet_window_start\`.
+  - Describing a future incident whose entries all fall at or after \`quiet_window_end\`.
+  - Saying "no incident occurred at \`current_time\`" while describing past context.
+  - **Timeline entries that merely document when the user reported the issue** (e.g. "02:04 UTC — Incident reported by user", "22:00 ET — issue reported"). These describe the moment the complaint arrived, not active system impact. Ignore such entries when applying the rule above; only entries that describe the system actively failing or degraded count.
+
+Treat the bounds as half-open: a reported time exactly equal to \`quiet_window_start\` or exactly equal to \`quiet_window_end\` is **outside** the quiet window (no false positive). An open-ended bound (null) is equivalent to \`-inf\` / \`+inf\` respectively.
+
+In \`reasoning\`, briefly state the verdict; if \`claims_incident_in_quiet_window\` is true, quote or paraphrase the specific offending claim from the report.
+
+Call the \`score\` tool.`;
+
+export const OrcaControlJudgePrompt = createPrompt({
+  name: 'nightshift_orca_control_judge',
+  description: "ORCA's control judge: whether a report places an incident inside the quiet window.",
+  input: lazySchema(() =>
+    z.object({
+      currentTime: z.string().max(100),
+      quietWindowStart: z.string().max(100),
+      quietWindowEnd: z.string().max(100),
+      answer: z.string(),
+    })
+  ),
+})
+  .version({
+    template: { mustache: { template: ORCA_CONTROL_USER } },
+    tools: {
+      score: {
+        description: 'Return whether the report claims an incident inside the quiet window.',
+        // `reasoning` comes first so the model compares the times before it commits to the
+        // decision. With the decision first, it sometimes reasoned its way to the opposite answer.
+        schema: {
+          type: 'object',
+          properties: {
+            reasoning: {
+              type: 'string',
+              description:
+                'Compare each reported time of active impact with the window bounds, then state the verdict.',
+            },
+            claims_incident_in_quiet_window: { type: 'boolean' },
+          },
+          required: ['reasoning', 'claims_incident_in_quiet_window'],
         },
       },
     },

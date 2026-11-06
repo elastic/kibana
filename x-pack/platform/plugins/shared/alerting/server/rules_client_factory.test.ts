@@ -709,6 +709,117 @@ describe('RulesClientFactory', () => {
     });
   });
 
+  describe('createAPIKey() for a UIAM service account', () => {
+    const serviceAccountRequest = () =>
+      mockRouter.createKibanaRequest({
+        headers: { authorization: 'Bearer essu_service_account_token' },
+      });
+
+    const initializeFactory = async (
+      request: ReturnType<typeof mockRouter.createKibanaRequest>,
+      shouldGrantUiam = true
+    ) => {
+      const factory = new RulesClientFactory();
+      factory.initialize({
+        ...rulesClientFactoryParams,
+        securityService,
+        securityPluginSetup,
+        securityPluginStart,
+        shouldGrantUiam,
+        apiKeyType: ApiKeyType.ES,
+      });
+      await factory.create(request, savedObjectsService);
+      return jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    };
+
+    beforeEach(() => {
+      securityService.authc.getPrincipal.mockReturnValue({
+        type: 'service_account',
+        serviceAccountId: 'sa-id',
+        variant: 'uiam',
+      });
+    });
+
+    test('grants only a UIAM API key, even when apiKeyType is es', async () => {
+      const constructorCall = await initializeFactory(serviceAccountRequest());
+      const uiamApiKeys = {
+        grant: jest
+          .fn()
+          .mockResolvedValueOnce({ id: 'uiam-id', name: 'uiam-test', api_key: 'essu_key' }),
+        invalidate: jest.fn(),
+      };
+      securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+
+      const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+      expect(createAPIKeyResult).toEqual({
+        apiKeysEnabled: true,
+        uiamResult: { id: 'uiam-id', name: 'uiam-test', api_key: 'essu_key' },
+      });
+      expect(createAPIKeyResult).not.toHaveProperty('result');
+      expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.anything(), { name: 'uiam-test' });
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('rethrows the UIAM grant error instead of falling back to an ES API key', async () => {
+      const constructorCall = await initializeFactory(serviceAccountRequest());
+      const refusal = new Error('Unable to grant an API key for service account [sa-id]');
+      securityService.authc.apiKeys.uiam = {
+        grant: jest.fn().mockRejectedValueOnce(refusal),
+        invalidate: jest.fn(),
+      } as never;
+
+      await expect(constructorCall.createAPIKey('test')).rejects.toBe(refusal);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('throws when uiam.grant returns null', async () => {
+      const constructorCall = await initializeFactory(serviceAccountRequest());
+      securityService.authc.apiKeys.uiam = {
+        grant: jest.fn().mockResolvedValueOnce(null),
+        invalidate: jest.fn(),
+      } as never;
+
+      await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create a Cloud API key for alerting rule : test"`
+      );
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('throws when UIAM is not enabled', async () => {
+      const constructorCall = await initializeFactory(serviceAccountRequest(), false);
+
+      await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create UIAM API key for alerting rule : test: UIAM is not enabled"`
+      );
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('keeps the ES grant for an Elasticsearch service account', async () => {
+      securityService.authc.getPrincipal.mockReturnValue({
+        type: 'service_account',
+        serviceAccountId: 'elastic/sa',
+        variant: 'stack',
+      });
+      const constructorCall = await initializeFactory(
+        mockRouter.createKibanaRequest({ headers: { authorization: 'Bearer es_token' } })
+      );
+      const uiamApiKeys = { grant: jest.fn(), invalidate: jest.fn() };
+      securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+        api_key: '123',
+        id: 'abc',
+        name: '',
+      });
+
+      await expect(constructorCall.createAPIKey('test')).resolves.toEqual({
+        apiKeysEnabled: true,
+        result: { api_key: '123', id: 'abc', name: '' },
+      });
+      expect(uiamApiKeys.grant).not.toHaveBeenCalled();
+    });
+  });
+
   test('createAPIKey() returns an API key when security is enabled and grantAsInternalUser succeeds', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({

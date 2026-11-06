@@ -6,6 +6,9 @@
  */
 
 import {
+  ALERT_SEVERITY_MAJOR,
+  ALERT_SEVERITY_MINOR,
+  ALERT_SEVERITY_WARNING,
   getRuleDetailsRoute,
   STACK_MANAGEMENT_RULES_HOST,
   type LocatorHost,
@@ -17,36 +20,35 @@ import {
   EPISODE_SEVERITY_MINOR_LABEL,
   EPISODE_SEVERITY_MAJOR_LABEL,
 } from '../components/severity/translations';
+import { getSeveritySortRank } from '../components/severity/severity_utils';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
 import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
-import { resolveClassicRules } from './apis/resolve_classic_rules';
 import { ELASTIC_SOURCE_ICON, CLASSIC_SOURCE_LABEL } from '../source_labels';
+import { resolveClassicRules } from './apis/resolve_classic_rules';
+import { fetchClassicSearchFields } from './apis/fetch_classic_search_fields';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
 
 export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
   {
-    value: 'warning',
+    value: ALERT_SEVERITY_WARNING,
     label: EPISODE_SEVERITY_WARNING_LABEL,
     color: 'warning',
-    sortRank: 1,
-    filterDotColor: 'textWarning',
+    sortRank: getSeveritySortRank(ALERT_SEVERITY_WARNING),
   },
   {
-    value: 'minor',
+    value: ALERT_SEVERITY_MINOR,
     label: EPISODE_SEVERITY_MINOR_LABEL,
-    color: '#94D8EB',
-    sortRank: 2,
-    filterDotColor: 'textPrimary',
+    color: 'neutral',
+    sortRank: getSeveritySortRank(ALERT_SEVERITY_MINOR),
   },
   {
-    value: 'major',
+    value: ALERT_SEVERITY_MAJOR,
     label: EPISODE_SEVERITY_MAJOR_LABEL,
     color: 'risk',
-    sortRank: 3,
-    filterDotColor: 'textRisk',
+    sortRank: getSeveritySortRank(ALERT_SEVERITY_MAJOR),
   },
 ];
 
@@ -111,6 +113,9 @@ export const createClassicEpisodeSource = ({
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
+
+  fetchSearchFields: ({ services, abortSignal }) =>
+    fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
 
   actionExtensions: classicActionExtensions,
 

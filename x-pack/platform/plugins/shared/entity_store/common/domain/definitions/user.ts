@@ -81,7 +81,9 @@ export function buildUserEntityDefinition(
   return {
     type: 'user',
     managedBy: { kind: 'plugin', id: PLUGIN_ID },
-    name: `Security 'user' Entity Store Definition`,
+    name: 'User',
+    description:
+      'A person or system account that acts in the data. Identified by user.email, user.id or user.name within a namespace; local accounts are scoped to the host they act on.',
     identityField: {
       /**
        * UEBA user documents filter (pre-aggregation: which documents enter the pipeline).

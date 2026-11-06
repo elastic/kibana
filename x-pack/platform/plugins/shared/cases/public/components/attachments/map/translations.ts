@@ -18,3 +18,9 @@ export const ADDED_MAP = i18n.translate('xpack.cases.caseView.map.addedMap', {
 export const REMOVED_MAP = i18n.translate('xpack.cases.caseView.map.removedMap', {
   defaultMessage: 'removed map',
 });
+
+export const MAPS_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.caseView.map.mapsCount', {
+    defaultMessage: '{count, plural, one {# map} other {# maps}}',
+    values: { count },
+  });

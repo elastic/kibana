@@ -30,7 +30,7 @@ export const timeseriesCommand = {
     hidden: false,
     preview: true,
     isTimeseries: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.metricsDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +
         'Similar to STATS command on can calculate aggregate statistics, such as average, count, and sum, over the incoming search results set. ' +

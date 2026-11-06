@@ -19,7 +19,8 @@ export const serviceEntityDefinition: ManagedEntityDefinitionWithoutId & {
 } = {
   type: 'service',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
-  name: `Security 'service' Entity Store Definition`,
+  name: 'Service',
+  description: 'A named application component that emits telemetry. Identified by service.name.',
   identityField: { singleField: 'service.name' },
   extraction: {
     entityTypeFallback: 'Service',

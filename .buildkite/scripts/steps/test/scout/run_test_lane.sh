@@ -244,6 +244,7 @@ run_scout_tests() {
     "${spec_filter_args[@]+"${spec_filter_args[@]}"}"
     "--config=$config_path"
     "--grep=$PLAYWRIGHT_GREP_TAG"
+    "${PLAYWRIGHT_GREP_INVERT_ARGS[@]+"${PLAYWRIGHT_GREP_INVERT_ARGS[@]}"}"
     "--project=$PLAYWRIGHT_PROJECT"
   )
 
@@ -398,6 +399,13 @@ PLAYWRIGHT_PROJECT="local"
 download_test_lane_loads
 read_load_ids
 load_passed_indices
+
+# Skips tests whose '@limit/*' tags the distributed target attributes don't satisfy
+PLAYWRIGHT_GREP_INVERT="$(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].playwright.options.grepInvert // empty' "$SCOUT_TEST_LANE_LOADS_PATH")"
+PLAYWRIGHT_GREP_INVERT_ARGS=()
+if [[ -n "$PLAYWRIGHT_GREP_INVERT" ]]; then
+  PLAYWRIGHT_GREP_INVERT_ARGS=("--grep-invert=$PLAYWRIGHT_GREP_INVERT")
+fi
 
 trap stop_server EXIT
 

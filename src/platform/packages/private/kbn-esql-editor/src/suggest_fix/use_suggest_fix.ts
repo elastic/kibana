@@ -67,6 +67,8 @@ interface UseSuggestFixParams {
   http: HttpStart;
   notifications: NotificationsStart;
   isEnabled: boolean;
+  // Runs the query once a fix is kept.
+  onSubmit: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
   onAfterInsert?: () => void;
 }
@@ -77,6 +79,7 @@ export const useSuggestFix = ({
   http,
   notifications,
   isEnabled,
+  onSubmit,
   telemetryService,
   onAfterInsert,
 }: UseSuggestFixParams) => {
@@ -116,17 +119,16 @@ export const useSuggestFix = ({
     [telemetryService]
   );
 
-  const { showReview, reject: rejectFix } = useReplaceReview({
+  const {
+    showReview,
+    reject: rejectFix,
+    accept: acceptReview,
+    cleanup: discardReview,
+  } = useReplaceReview({
     editorRef,
     editorModel,
     euiTheme,
     contextKeyId: 'esqlFixReviewActive',
-    acceptAction: {
-      id: 'esql.suggestFix.accept',
-      label: i18n.translate('esqlEditor.suggestFix.acceptLabel', {
-        defaultMessage: 'Keep AI fix',
-      }),
-    },
     rejectAction: {
       id: 'esql.suggestFix.reject',
       label: i18n.translate('esqlEditor.suggestFix.rejectLabel', {
@@ -134,8 +136,10 @@ export const useSuggestFix = ({
       }),
     },
     editSourceId: 'esql-suggest-fix',
-    onAfterAccept: (state) =>
-      trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1),
+    onAfterAccept: (state, acceptedQuery) => {
+      trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
+      onSubmit(acceptedQuery);
+    },
     onAfterReject: (state) =>
       trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1),
   });
@@ -280,4 +284,6 @@ export const useSuggestFix = ({
       _suggestFixHandlers.delete(runSuggestFix);
     };
   }, [isEnabled, runSuggestFix, editorModel]);
+
+  return { acceptReview, discardReview };
 };

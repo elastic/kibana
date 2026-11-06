@@ -29,12 +29,17 @@ export const registerGetRoute = (
     .get({
       path: `${basePath}/{id}`,
       summary: 'Get a Discover session',
+      operationId: 'get-discover-session',
       description: 'Returns the complete state of a Discover session by ID.',
       ...routeConfig,
     })
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).getDiscoverSessionOASOperationObject,
+        },
         validate: {
           request: {
             params: z

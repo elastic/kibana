@@ -11,7 +11,7 @@ import { type EuiThemeColorModeStandard, type UseEuiTheme, useEuiTheme } from '@
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { type TriggerType, TriggerTypes } from '@kbn/workflows';
+import { getTriggerName, type TriggerType, TriggerTypes } from '@kbn/workflows';
 import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
@@ -120,15 +120,15 @@ export const predefinedStepTypes = [
   },
   {
     actionTypeId: 'manual',
-    displayName: 'Manual',
+    displayName: getTriggerName('manual'),
   },
   {
     actionTypeId: 'alert',
-    displayName: 'Alert',
+    displayName: getTriggerName('alert'),
   },
   {
     actionTypeId: 'scheduled',
-    displayName: 'Scheduled',
+    displayName: getTriggerName('scheduled'),
   },
 ];
 
