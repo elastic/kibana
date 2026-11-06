@@ -26,6 +26,14 @@ const DEFAULT_MCP_CLIENT_NAME = 'kibana-mcp';
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 const USER_ERROR_HTTP_STATUS_CODES = new Set([401, 403]);
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
+// Connect-level failures of a later request: the pooled client points at an unreachable server.
+const CONNECT_FAILURE_CODES = new Set([
+  'ECONNREFUSED',
+  'EHOSTUNREACH',
+  'ENETUNREACH',
+  'EAI_AGAIN',
+  'UND_ERR_CONNECT_TIMEOUT',
+]);
 const SOCKET_HANG_UP = 'socket hang up';
 // Thrown by the SDK protocol layer once its transport is gone.
 const SDK_NOT_CONNECTED_MESSAGE = 'Not connected';
@@ -316,7 +324,9 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
         return true;
       }
       const code = getErrorCode(current);
-      return code !== undefined && TERMINAL_UNDICI_CODES.has(code);
+      return (
+        code !== undefined && (TERMINAL_UNDICI_CODES.has(code) || CONNECT_FAILURE_CODES.has(code))
+      );
     });
   },
 });

@@ -719,6 +719,17 @@ describe('createMcpClientType', () => {
       expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
 
+    it.each([
+      ['ECONNREFUSED', true],
+      ['EHOSTUNREACH', true],
+      ['ENETUNREACH', true],
+      ['EAI_AGAIN', true],
+      ['UND_ERR_CONNECT_TIMEOUT', true],
+      ['ECONNRESET', false],
+    ])('classifies fetch failed with cause code %s as %s', (code, expected) => {
+      expect(createMcpClientType().shouldInvalidateOnError?.(fetchFailed(code))).toBe(expected);
+    });
+
     it('returns true when a connect-phase request timeout is wrapped as cause', () => {
       // McpClient.connect() rethrows SDK errors as a plain Error with the original as cause.
       const err = new Error('Error connecting to MCP server: MCP error -32001: Request timed out', {
