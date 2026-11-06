@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { WatchlistManualEntity } from '../../../../../common/api/entity_analytics/watchlists/entities/list_manual.gen';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useManualWatchlistEntities } from '../../../api/hooks/use_manual_watchlist_entities';
 import { useUnassignWatchlistEntity } from '../../../api/hooks/use_unassign_watchlist_entity';
 import { useWatchlistsPrivileges } from '../../../api/hooks/use_watchlists_privileges';
@@ -66,10 +65,6 @@ const i18nStrings = {
     'xpack.securitySolution.entityAnalytics.watchlists.manualEntities.noPermissionTooltip',
     { defaultMessage: 'You do not have permission to modify watchlists' }
   ),
-  removeError: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.watchlists.manualEntities.removeError',
-    { defaultMessage: 'Failed to remove the entity from the watchlist' }
-  ),
   removeLabel: (entity: string, watchlist: string) =>
     i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.manualEntities.removeLabel', {
       defaultMessage: 'Remove {entity} from {watchlist}',
@@ -91,7 +86,6 @@ export const ManualEntitiesSection = ({
   watchlistId,
   watchlistName,
 }: ManualEntitiesSectionProps) => {
-  const { addError } = useAppToasts();
   const {
     data: privileges,
     error: privilegesError,
@@ -136,14 +130,7 @@ export const ManualEntitiesSection = ({
                 aria-label={i18nStrings.removeLabel(label, watchlistName)}
                 disabled={!canRemove || isRemoving}
                 isLoading={isRemoving && variables?.euid === euid}
-                onClick={() =>
-                  unassign(
-                    { watchlistId, euid },
-                    {
-                      onError: (error) => addError(error, { title: i18nStrings.removeError }),
-                    }
-                  )
-                }
+                onClick={() => unassign({ watchlistId, euid })}
                 data-test-subj={`watchlistManualEntityRemove-${euid}`}
               />
             </EuiToolTip>
@@ -151,7 +138,7 @@ export const ManualEntitiesSection = ({
         },
       },
     ],
-    [addError, canRemove, isRemoving, unassign, variables?.euid, watchlistId, watchlistName]
+    [canRemove, isRemoving, unassign, variables?.euid, watchlistId, watchlistName]
   );
 
   const onTableChange = ({ page }: Criteria<WatchlistManualEntity>) => {

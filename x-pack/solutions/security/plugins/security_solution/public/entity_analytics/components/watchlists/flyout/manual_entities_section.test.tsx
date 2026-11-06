@@ -8,13 +8,11 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useManualWatchlistEntities } from '../../../api/hooks/use_manual_watchlist_entities';
 import { useUnassignWatchlistEntity } from '../../../api/hooks/use_unassign_watchlist_entity';
 import { useWatchlistsPrivileges } from '../../../api/hooks/use_watchlists_privileges';
 import { ManualEntitiesSection } from './manual_entities_section';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../api/hooks/use_manual_watchlist_entities');
 jest.mock('../../../api/hooks/use_unassign_watchlist_entity');
 jest.mock('../../../api/hooks/use_watchlists_privileges');
@@ -22,10 +20,8 @@ jest.mock('../../../api/hooks/use_watchlists_privileges');
 const mockUseManual = useManualWatchlistEntities as jest.Mock;
 const mockUseUnassign = useUnassignWatchlistEntity as jest.Mock;
 const mockUsePrivileges = useWatchlistsPrivileges as jest.Mock;
-const mockUseAppToasts = useAppToasts as jest.Mock;
 
 const mockRemove = jest.fn();
-const mockAddError = jest.fn();
 
 const JANE = { euid: 'user:jane', name: 'jane', type: 'user', sources: ['manual'] };
 const NAMELESS = { euid: 'host:web-01', sources: ['manual', 'index'] };
@@ -53,7 +49,6 @@ describe('ManualEntitiesSection', () => {
       error: null,
       isLoading: false,
     });
-    mockUseAppToasts.mockReturnValue({ addError: mockAddError });
   });
 
   it('lists each entity by name, or by id when it has none, with its type', () => {
@@ -98,10 +93,7 @@ describe('ManualEntitiesSection', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Remove jane from Vendors' }));
 
       expect(mockRemove).toHaveBeenCalledTimes(1);
-      expect(mockRemove).toHaveBeenCalledWith(
-        { watchlistId: 'wl-1', euid: 'user:jane' },
-        expect.objectContaining({ onError: expect.any(Function) })
-      );
+      expect(mockRemove).toHaveBeenCalledWith({ watchlistId: 'wl-1', euid: 'user:jane' });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -111,19 +103,6 @@ describe('ManualEntitiesSection', () => {
       expect(
         screen.getByRole('button', { name: 'Remove host:web-01 from Vendors' })
       ).toBeInTheDocument();
-    });
-
-    it('shows an error toast when the removal fails', () => {
-      renderSection();
-      fireEvent.click(screen.getByRole('button', { name: 'Remove jane from Vendors' }));
-
-      const { onError } = mockRemove.mock.calls[0][1];
-      const error = new Error('Entity not manually assigned to this watchlist');
-      onError(error);
-
-      expect(mockAddError).toHaveBeenCalledWith(error, {
-        title: 'Failed to remove the entity from the watchlist',
-      });
     });
 
     it('disables every remove button while one removal is running', () => {
