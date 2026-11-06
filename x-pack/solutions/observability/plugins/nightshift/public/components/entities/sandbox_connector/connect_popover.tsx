@@ -80,38 +80,49 @@ export function ConnectPopover({
       <div
         css={css`
           min-width: 320px;
-          padding: ${euiTheme.size.xs} 0;
         `}
       >
-        <ConnectorList
-          connectors={connectors}
-          canOpenDetails={canOpenDetails}
-          onOpenDetails={(connector) => {
-            close();
-            onOpenDetails(connector);
-          }}
-          canDelete={canDelete}
-          onDelete={(connector) => {
-            close();
-            onDelete(connector);
-          }}
-          data-test-subj={`${typeId}-connectors`}
-        />
-        <EuiHorizontalRule margin="xs" />
-        <EuiContextMenuItem
-          icon="plusCircle"
-          disabled={createDisabledReason !== undefined}
-          toolTipContent={createDisabledReason}
-          onClick={() => {
-            close();
-            onCreate();
-          }}
-          data-test-subj={`${typeId}-create`}
+        <div
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
         >
-          {i18n.translate('xpack.nightshift.connectPopover.createConnector', {
-            defaultMessage: 'Create connector',
-          })}
-        </EuiContextMenuItem>
+          <ConnectorList
+            connectors={connectors}
+            canOpenDetails={canOpenDetails}
+            onOpenDetails={(connector) => {
+              close();
+              onOpenDetails(connector);
+            }}
+            canDelete={canDelete}
+            onDelete={(connector) => {
+              close();
+              onDelete(connector);
+            }}
+            data-test-subj={`${typeId}-connectors`}
+          />
+        </div>
+        <EuiHorizontalRule margin="none" />
+        <div
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+        >
+          <EuiContextMenuItem
+            icon="plusCircle"
+            disabled={createDisabledReason !== undefined}
+            toolTipContent={createDisabledReason}
+            onClick={() => {
+              close();
+              onCreate();
+            }}
+            data-test-subj={`${typeId}-create`}
+          >
+            {i18n.translate('xpack.nightshift.connectPopover.createConnector', {
+              defaultMessage: 'Create connector',
+            })}
+          </EuiContextMenuItem>
+        </div>
       </div>
     </EuiPopover>
   );

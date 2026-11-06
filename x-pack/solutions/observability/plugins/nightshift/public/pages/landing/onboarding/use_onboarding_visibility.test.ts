@@ -63,6 +63,34 @@ describe('useOnboardingVisibility', () => {
     expect(result.current.showOnboarding).toBe(false);
   });
 
+  it('stays open after an automation is created during the session', () => {
+    const { result, rerender } = renderHook(
+      ({ automations }: { automations: unknown[] }) => {
+        mockUseFetchAutomations.mockReturnValue({
+          data: { automations },
+          isInitialLoading: false,
+          isError: false,
+        });
+        mockUseFetchLatestInvestigation.mockReturnValue({
+          latestInvestigation: undefined,
+          isInitialLoading: false,
+          error: null,
+        });
+        return useOnboardingVisibility({
+          isEnabled: true,
+          canUseAutomations: true,
+          forceOnboarding: false,
+        });
+      },
+      { initialProps: { automations: [] as unknown[] } }
+    );
+
+    expect(result.current.showOnboarding).toBe(true);
+
+    rerender({ automations: [{ id: 'a-1' }] });
+    expect(result.current.showOnboarding).toBe(true);
+  });
+
   it('forces onboarding with an automation', () => {
     const { result } = setup({ automations: [{ id: 'a-1' }], forceOnboarding: true });
     expect(result.current.showOnboarding).toBe(true);
@@ -76,7 +104,7 @@ describe('useOnboardingVisibility', () => {
     ).toBe(false);
   });
 
-  it('remembers "I\'ll do it later" per space in local storage', () => {
+  it('remembers Skip/Done per space in local storage', () => {
     const { result } = setup();
     act(() => result.current.dismiss());
     expect(result.current.showOnboarding).toBe(false);

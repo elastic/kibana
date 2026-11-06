@@ -427,10 +427,9 @@ function SuggestionRow({
             font-size: ${euiTheme.size.m};
             line-height: ${euiTheme.size.base};
             color: ${euiTheme.colors.textSubdued};
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
           `}
         >
           {suggestion.rationale || suggestion.prompt}
@@ -468,7 +467,8 @@ function ComposeCard({
         align-items: flex-start;
         gap: ${euiTheme.size.l};
         margin-top: ${euiTheme.size.m};
-        padding: ${euiTheme.size.base};
+        padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}
+          ${euiTheme.size.l};
         border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.panel};
         background: ${euiTheme.colors.emptyShade};

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { useFetchAutomations } from '../../../data/automations/use_automations';
+import {
+  useFetchAutomations,
+  type Automation,
+} from '../../../data/automations/use_automations';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchLatestInvestigation } from './use_fetch_latest_investigation';
 
@@ -25,13 +28,16 @@ export interface OnboardingVisibility {
   showOnboarding: boolean;
   /** The space's most recent investigation: the trial investigation of steps 2 and 3. */
   latestInvestigation?: InvestigationSummary;
-  /** "I'll do it later": hides onboarding in this space and browser (local storage). */
+  /** Automations already in the space (for the first-automation step). */
+  automations: Automation[];
+  /** Skip / Done on the last step: hides onboarding in this space and browser (local storage). */
   dismiss: () => void;
 }
 
 /**
- * Onboarding is done once the space has an automation; there is no state of its own. Without
- * automations (feature flag off) it falls back to "the space has an investigation".
+ * Spaces without automations start onboarding. Creating the first automation during that session
+ * does not leave — Skip/Done dismisses. Returning later to a space that already has automations
+ * skips onboarding. Without automations (feature flag off) it falls back to "has an investigation".
  */
 export const useOnboardingVisibility = ({
   isEnabled,
@@ -49,8 +55,9 @@ export const useOnboardingVisibility = ({
     getDismissedStorageKey(http.basePath.get()),
     false
   );
-  const automations = useFetchAutomations({ enabled: isEnabled && canUseAutomations });
-  const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
+  const automationsQuery = useFetchAutomations({ enabled: isEnabled && canUseAutomations });
+  const automations = automationsQuery.data?.automations ?? [];
+  const hasAutomation = automations.length > 0;
   const isOnboardingCandidate =
     isEnabled && (forceOnboarding || (!isDismissed && canUseAutomations && !hasAutomation));
 
@@ -62,18 +69,36 @@ export const useOnboardingVisibility = ({
 
   const isLoading =
     isEnabled &&
-    ((canUseAutomations && automations.isInitialLoading) || investigations.isInitialLoading);
+    ((canUseAutomations && automationsQuery.isInitialLoading) || investigations.isInitialLoading);
 
   const isDone = canUseAutomations
-    ? automations.isError || hasAutomation
+    ? automationsQuery.isError || hasAutomation
     : investigations.error != null || latestInvestigation != null;
 
-  const dismiss = useCallback(() => setIsDismissed(true), [setIsDismissed]);
+  // Once onboarding is shown this session, keep it open after the first automation is created
+  // until the user hits Skip/Done (matches prototype “Add one more”).
+  const [sessionActive, setSessionActive] = useState(false);
+  const wouldShowFresh =
+    forceOnboarding || (!isDismissed && !isLoading && !isDone);
+
+  useEffect(() => {
+    if (wouldShowFresh) {
+      setSessionActive(true);
+    }
+  }, [wouldShowFresh]);
+
+  const dismiss = useCallback(() => {
+    setSessionActive(false);
+    setIsDismissed(true);
+  }, [setIsDismissed]);
 
   return {
     isLoading,
-    showOnboarding: isEnabled && (forceOnboarding || (!isDismissed && !isLoading && !isDone)),
+    showOnboarding:
+      isEnabled &&
+      (forceOnboarding || (!isDismissed && !isLoading && (!isDone || sessionActive))),
     latestInvestigation,
+    automations,
     dismiss,
   };
 };

@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import type { Automation } from '../../../data/automations/use_automations';
 import { NightshiftHeader } from '../header';
 import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
@@ -81,13 +82,17 @@ const SKIP_LABEL = i18n.translate('xpack.nightshift.onboarding.skipStepButton', 
   defaultMessage: 'Skip this step',
 });
 
+const DONE_LABEL = i18n.translate('xpack.nightshift.onboarding.doneButton', {
+  defaultMessage: 'Done',
+});
+
 const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optionalHint', {
   defaultMessage: 'Optional',
 });
 
 const INVESTIGATE_SECTION_TITLE = i18n.translate(
   'xpack.nightshift.onboarding.investigate.sectionTitle',
-  { defaultMessage: 'Try your first investigation' }
+  { defaultMessage: 'Try first investigation' }
 );
 
 const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
@@ -96,18 +101,21 @@ const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
- * investigation, create a first automation. The steps follow from the latest onboarding workflow
- * execution, the space's latest investigation and (in the page) whether an automation exists.
- * Completed steps other than Enable link back to themselves.
+ * investigation, create a first automation. Creating an automation keeps you on the last step so
+ * you can add more; Skip/Done dismisses. Completed steps other than Enable link back to themselves.
  */
 export function NightshiftOnboarding({
   latestInvestigation,
-  automationsHref,
+  automations = [],
+  canCreateAutomation = false,
   onFinish,
 }: {
   latestInvestigation?: InvestigationSummary;
-  automationsHref?: string;
-  /** "I'll do it later" on the last step. */
+  /** Saved automations — after the first create, the step shows them + Add one more. */
+  automations?: Automation[];
+  /** False when automations are unavailable in this deployment. */
+  canCreateAutomation?: boolean;
+  /** Skip / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -121,6 +129,7 @@ export function NightshiftOnboarding({
   const startSuggestions = useStartOnboardingSuggestions();
   const { groups: connectorGroups } = useConnectorsByType();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
+  const hasAutomation = automations.length > 0;
 
   const execution = data?.execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
@@ -295,16 +304,15 @@ export function NightshiftOnboarding({
       )
     ) : step === 'automate' ? (
       <EuiButton
+        fill={hasAutomation}
         fullWidth
         size="s"
-        iconType="sortRight"
-        iconSide="right"
+        iconType={hasAutomation ? 'check' : 'sortRight'}
+        iconSide={hasAutomation ? 'left' : 'right'}
         onClick={onFinish}
         data-test-subj="nightshiftOnboardingFinishButton"
       >
-        {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-          defaultMessage: "I'll do it later",
-        })}
+        {hasAutomation ? DONE_LABEL : SKIP_LABEL}
       </EuiButton>
     ) : undefined;
 
@@ -376,7 +384,9 @@ export function NightshiftOnboarding({
           ) : (
             <OnboardingAutomationStep
               investigation={latestInvestigation}
-              automationsHref={automationsHref}
+              automations={automations}
+              canCreateAutomation={canCreateAutomation}
+              isSelected={selectedInvestigationId === latestInvestigation.id}
               onInvestigationClick={openInvestigation}
             />
           )}

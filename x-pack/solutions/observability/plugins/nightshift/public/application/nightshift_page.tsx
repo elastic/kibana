@@ -477,7 +477,8 @@ export function NightshiftPage(): React.ReactElement | null {
             ) : isOnboarding ? (
               <NightshiftOnboarding
                 latestInvestigation={onboarding.latestInvestigation}
-                automationsHref={canUseAutomations ? automationsHref : undefined}
+                automations={onboarding.automations}
+                canCreateAutomation={canUseAutomations}
                 onFinish={finishOnboarding}
               />
             ) : onboarding.isLoading ? (
