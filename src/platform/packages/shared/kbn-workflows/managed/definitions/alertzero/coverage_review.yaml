@@ -209,7 +209,10 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
-        {% if steps.find_or_create_investigation.output.created != true -%}
+        {% if steps.find_or_create_investigation.output.reopened == true -%}
+        **Review resumed.** An earlier review closed this investigation, and the gap came back as pending, so it was reviewed again. The proposal below is for this new review.
+
+        {% elsif steps.find_or_create_investigation.output.created != true -%}
         **Review resumed.** An earlier review opened this investigation and reached no applied decision, so the gap was reviewed again. The proposal below replaces the earlier one.
 
         {% endif -%}
@@ -519,7 +522,9 @@ steps:
 
   # By-reference security.rule attachment: the framework resolves the rule once
   # from its rule_id and snapshots it, recording the rule as it was when this
-  # review ran. The fixed attachment id makes the refresh below deterministic.
+  # review ran. The fixed attachment id makes the refreshes below deterministic:
+  # on a resumed investigation the add fails on the earlier review's copy, and the
+  # update after it writes the rule as it is now as a new version of that copy.
   - name: attach_rule
     type: ai.attachment.add
     if: >-
@@ -530,6 +535,23 @@ steps:
       id: "coverage-rule"
       type: security.rule
       origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  - name: resume_rule_attachment
+    type: ai.attachment.update
+    if: >-
+      ${{ steps.find_or_create_investigation.output.created != true
+        and steps.resolve_rule.output.id != null
+        and steps.attach_rule.error != null }}
+    with:
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      attachment_id: "coverage-rule"
+      data:
+        text: "{{ steps.resolve_rule.output | json }}"
+        attachmentLabel: "{{ steps.resolve_rule.output.name }}"
       description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
       render_inline: true
     on-failure:
@@ -926,14 +948,24 @@ steps:
     on-failure:
       continue: true
 
+  # Whether the rule attachment exists to refresh: attach_rule or
+  # resume_rule_attachment must have returned an id. Computed here because a step
+  # condition cannot group with parentheses (see the detection workflow tests).
+  - name: rule_attachment_written
+    type: data.set
+    with:
+      written: >-
+        ${{ steps.attach_rule.output.attachment_id != null
+          or steps.resume_rule_attachment.output.attachment_id != null }}
+
   # security.rule attachments resolve once and never refresh, so after the enable
   # the snapshot would silently show the disabled rule. This writes the enabled
-  # rule as version 2; version 1 keeps the before state in the attachment history.
+  # rule as a new version; the earlier versions keep the before state in the
+  # attachment history.
   - name: refresh_rule_attachment
     type: ai.attachment.update
     if: >-
-      ${{ steps.resolve_rule.output.id != null
-        and steps.attach_rule.error == null
+      ${{ steps.rule_attachment_written.output.written == true
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:

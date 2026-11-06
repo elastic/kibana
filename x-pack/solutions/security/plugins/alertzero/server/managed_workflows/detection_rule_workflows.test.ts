@@ -1363,6 +1363,12 @@ describe('detection rule workflows', () => {
         expect(resumed.type).toBe('ai.conversation.add_user_message');
         expect(resumed.if).toContain('steps.find_or_create_investigation.output.created != true');
         expect(resumed['on-failure']).toEqual({ continue: true });
+        // A reopened Investigation was closed by a decision, so the note must not claim
+        // the earlier review reached none.
+        const note = String(resumed.with?.message);
+        expect(note).toContain('steps.find_or_create_investigation.output.reopened == true');
+        expect(note).toContain('closed this investigation');
+        expect(note).toContain('reached no applied decision');
       });
 
       // No agent runs in the investigation to reference an attachment, so without
@@ -1412,9 +1418,10 @@ describe('detection rule workflows', () => {
       });
 
       // A resumed review lands on the Investigation an earlier review attached to under
-      // the same fixed ids, so adding again would 409. The resume steps update those
-      // attachments with this review's rule and alerts instead, and the post-tuning
-      // refresh accepts either writer.
+      // the same fixed ids, so the add fails on the earlier copy. The resume steps then
+      // update that copy with this review's rule and alerts, and the post-tuning refresh
+      // accepts either writer. The add still runs first so an Investigation whose earlier
+      // review failed to attach gets the attachment on the next review.
       it.each([
         ['attach_rule', 'resume_rule_attachment', 'tuned-rule'],
         ['attach_alerts', 'resume_alerts_attachment', 'fp-alerts'],
@@ -1422,9 +1429,10 @@ describe('detection rule workflows', () => {
         const add = reviewSteps.find(({ name }) => name === addName)!;
         const resume = reviewSteps.find(({ name }) => name === resumeName)!;
 
-        expect(add.if).toContain('steps.find_or_create_investigation.output.created == true');
+        expect(add.if).not.toContain('created');
         expect(resume.type).toBe('ai.attachment.update');
         expect(resume.if).toContain('steps.find_or_create_investigation.output.created != true');
+        expect(resume.if).toContain(`steps.${addName}.error != null`);
         expect(resume.with?.attachment_id).toBe(attachmentId);
         expect(resume.with?.data).toEqual(add.with?.data);
         expect(resume.with?.description).toBe(add.with?.description);

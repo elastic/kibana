@@ -116,14 +116,7 @@ const resumeExisting = async (
   return { reopened: wasClosed && changedFields.includes('status') };
 };
 
-/**
- * Mints the deterministic Investigation id for a Worker's subject and creates the
- * conversation, or resumes the one an earlier review opened. A 409 from the create is the
- * reuse path: the existing conversation is read back to confirm it is reachable, reopened
- * if the earlier review closed it, and stamped with this review's execution id. `created`
- * tells the caller which path ran, so a re-review can say it resumed the Investigation
- * instead of claiming to have opened it.
- */
+/** Creates the Worker's Investigation for a subject, or resumes the one an earlier review opened. */
 export const runFindOrCreateWorkerInvestigation = async (
   {
     spaceId,

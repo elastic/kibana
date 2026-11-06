@@ -470,6 +470,38 @@ describe('Detection Coverage review', () => {
       const message = String(withOf('post_indicator')?.message);
       expect(message).toContain('steps.find_or_create_investigation.output.created != true');
       expect(message).toContain('**Review resumed.**');
+      // A reopened Investigation was closed by a decision, so the note must not claim
+      // the earlier review reached none.
+      expect(message).toContain('steps.find_or_create_investigation.output.reopened == true');
+      expect(message).toContain('closed this investigation');
+    });
+
+    // A resumed review finds the earlier review's `coverage-rule` under the same fixed
+    // id, so the add fails and the update after it writes the rule as it is now. The
+    // refresh after an enable accepts either writer.
+    it('updates the rule attachment on a resumed review and refreshes whichever copy exists', () => {
+      const attach = stepByName('attach_rule');
+      const resume = stepByName('resume_rule_attachment');
+      const written = stepByName('rule_attachment_written');
+      const refresh = stepByName('refresh_rule_attachment');
+
+      expect(attach?.if).not.toContain('created');
+      expect(resume?.type).toBe('ai.attachment.update');
+      expect(resume?.if).toContain('steps.find_or_create_investigation.output.created != true');
+      expect(resume?.if).toContain('steps.attach_rule.error != null');
+      expect(resume?.with?.attachment_id).toBe('coverage-rule');
+      expect(JSON.stringify(resume?.with)).toContain('steps.resolve_rule.output | json');
+      expect(stepIndex('attach_rule') + 1).toBe(stepIndex('resume_rule_attachment'));
+
+      expect(written?.type).toBe('data.set');
+      expect(String(written?.with?.written)).toContain(
+        'steps.attach_rule.output.attachment_id != null'
+      );
+      expect(String(written?.with?.written)).toContain(
+        'steps.resume_rule_attachment.output.attachment_id != null'
+      );
+      expect(refresh?.if).toContain('steps.rule_attachment_written.output.written == true');
+      expect(refresh?.if).not.toContain('steps.attach_rule.error');
     });
 
     it('describes the gap from the indicator, not from raw inputs', () => {
@@ -1050,6 +1082,7 @@ describe('Detection Coverage review', () => {
       'coverage_check',
       'resolve_rule',
       'attach_rule',
+      'resume_rule_attachment',
       'run_rule_creation',
       'refetch_rule',
       'refresh_rule_attachment',

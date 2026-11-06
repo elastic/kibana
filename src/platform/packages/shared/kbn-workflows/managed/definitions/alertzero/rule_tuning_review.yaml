@@ -202,7 +202,11 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
+        {% if steps.find_or_create_investigation.output.reopened == true -%}
+        **Review resumed.** An earlier review closed this investigation, and new false positives for the rule reopened it. The proposal below is for this new review.
+        {%- else -%}
         **Review resumed.** An earlier review opened this investigation and reached no applied decision, so the rule was reviewed again. The proposal below replaces the earlier one.
+        {%- endif %}
     on-failure:
       continue: true
 
@@ -211,13 +215,12 @@ steps:
   # and `origin` survives the agent's edits to the card while the ids in `text` do
   # not. The content is passed by value because resolving by origin looks the rule
   # up by rule_id. The fixed attachment id makes the refreshes below deterministic:
-  # a resumed review finds the earlier review's copy under the same id and writes
-  # the current rule as a new version instead of failing with a duplicate id.
+  # on a resumed investigation the add fails on the earlier review's copy, and the
+  # update after it writes the current rule as a new version of that copy. An
+  # investigation whose earlier review failed to attach gets the add instead.
   - name: attach_rule
     type: ai.attachment.add
-    if: >-
-      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
-        and steps.find_or_create_investigation.output.created == true }}
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: "tuned-rule"
@@ -234,8 +237,8 @@ steps:
   - name: resume_rule_attachment
     type: ai.attachment.update
     if: >-
-      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
-        and steps.find_or_create_investigation.output.created != true }}
+      ${{ steps.find_or_create_investigation.output.created != true
+        and steps.attach_rule.error != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: "tuned-rule"
@@ -250,12 +253,10 @@ steps:
   # By value: the first 20 harvested false-positive ids. The schema rejects a
   # longer list. A fixed id makes a retry of this run 409 instead of appending
   # a second copy, and lets a resumed review replace the earlier review's list
-  # with the alerts this review was started for.
+  # with the alerts this review was started for, through the update after it.
   - name: attach_alerts
     type: ai.attachment.add
-    if: >-
-      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
-        and steps.find_or_create_investigation.output.created == true }}
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: fp-alerts
@@ -270,8 +271,8 @@ steps:
   - name: resume_alerts_attachment
     type: ai.attachment.update
     if: >-
-      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
-        and steps.find_or_create_investigation.output.created != true }}
+      ${{ steps.find_or_create_investigation.output.created != true
+        and steps.attach_alerts.error != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: fp-alerts
@@ -1687,9 +1688,9 @@ steps:
           and (steps.propose_exception.output.status == 'succeeded'
             or steps.refetch_rule.output.revision > steps.fetch_rule.output.revision) }}
 
-  # Whether the rule attachment exists to refresh: whichever of attach_rule and
-  # resume_rule_attachment ran for this review must have returned an id. Computed
-  # here because Liquid cannot group a condition with parentheses.
+  # Whether the rule attachment exists to refresh: attach_rule or
+  # resume_rule_attachment must have returned an id. Computed here because a step
+  # condition cannot group with parentheses (see the detection workflow tests).
   - name: rule_attachment_written
     type: data.set
     with:

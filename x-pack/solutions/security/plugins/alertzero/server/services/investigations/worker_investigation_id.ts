@@ -25,16 +25,7 @@ export interface WorkerInvestigationSubject {
   subjectId: string;
 }
 
-/**
- * Derives the Investigation conversation id for a Worker's subject in a space.
- *
- * One enduring Investigation per `(space, worker, subject)`, so a review that runs again
- * for the same subject (a proposal expired, an approved action did not land) resolves to the
- * Investigation the earlier review opened instead of minting another one. The space is
- * hashed in because conversations live in one index shared by every space and keyed by this
- * id alone. The Worker is hashed in so two Workers reviewing the same subject keep separate
- * Investigations.
- */
+/** Derives the one Investigation id a Worker's reviews of a subject share within a space. */
 export const buildWorkerInvestigationConversationId = ({
   spaceId,
   workerId,
