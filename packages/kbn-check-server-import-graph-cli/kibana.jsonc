@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/check-server-import-graph-cli",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}
