@@ -41,6 +41,12 @@ const CAPABILITIES_WITHOUT_CURRENT_COUNTERPART: string[] = [ALERTS_UI_UPDATE_DEP
 const GLOBAL_ARTIFACT_CAPABILITY = 'writeGlobalArtifacts';
 
 /**
+ * Privileges that legitimately grant no `ui:` action on either version, so a privilege dropping out
+ * of the comparison altogether is distinguishable from one that was never in it.
+ */
+const PRIVILEGES_WITHOUT_UI_ACTIONS: string[] = [];
+
+/**
  * The reverse direction has sanctioned widenings, all of which preserve reach a deprecated
  * privilege already had. Each is deliberately narrow: a capability is tolerated only on the exact
  * versions and privileges its mapping targets, and the ESS-only ones stay strict on serverless so
@@ -119,6 +125,12 @@ const capabilitiesWithPrefix = (actions: string[], prefix: string): string[] =>
 interface Comparison {
   /** How many actions were inspected, so an empty result can be told from a vacuous one. */
   checked: number;
+  /**
+   * Privileges that carry no `ui:` action on either version. `checked` is a feature-wide total, so
+   * it stays healthy even if one privilege loses both its namespaces at once — that privilege then
+   * contributes nothing to `missing` or `unexpected` and the comparison silently skips it.
+   */
+  withoutUiActions: string[];
   missing: string[];
   unexpected: string[];
 }
@@ -132,14 +144,22 @@ const compareAgainstCurrentVersion = (
   const currentPrefix = `ui:${SECURITY_FEATURE_ID_V5}/`;
   const missing: string[] = [];
   const unexpected: string[] = [];
+  const withoutUiActions: string[] = [];
   let checked = 0;
 
   for (const [privilegeId, actions] of Object.entries(privileges)) {
-    const deprecated = capabilitiesWithPrefix(actions, deprecatedPrefix).filter(
+    const allDeprecated = capabilitiesWithPrefix(actions, deprecatedPrefix);
+    const deprecated = allDeprecated.filter(
       (capability) => !CAPABILITIES_WITHOUT_CURRENT_COUNTERPART.includes(capability)
     );
     const current = capabilitiesWithPrefix(actions, currentPrefix);
     checked += deprecated.length + current.length;
+
+    // Read before the counterpart filter, so a privilege whose only deprecated action is an
+    // excused one does not read as having lost its namespace.
+    if (allDeprecated.length === 0 && current.length === 0) {
+      withoutUiActions.push(privilegeId);
+    }
 
     for (const capability of deprecated) {
       if (!current.includes(capability)) {
@@ -164,7 +184,7 @@ const compareAgainstCurrentVersion = (
     }
   }
 
-  return { checked, missing, unexpected };
+  return { checked, withoutUiActions, missing, unexpected };
 };
 
 const fetchFeaturePrivileges = async (
@@ -194,14 +214,16 @@ apiTest.describe(
           const privileges = features[featureId];
           expect(privileges).toBeDefined();
 
-          const { checked, missing, unexpected } = compareAgainstCurrentVersion(
+          const { checked, withoutUiActions, missing, unexpected } = compareAgainstCurrentVersion(
             privileges,
             featureId,
             config.serverless
           );
 
-          // Guards against the assertion passing because nothing was inspected.
+          // Guards against the assertions passing because nothing was inspected, feature-wide and
+          // then per privilege, since the feature-wide total hides a single privilege going empty.
           expect(checked).toBeGreaterThan(0);
+          expect(withoutUiActions).toStrictEqual(PRIVILEGES_WITHOUT_UI_ACTIONS);
           expect(missing).toStrictEqual([]);
           expect(unexpected).toStrictEqual([]);
         }
