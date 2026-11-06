@@ -9,7 +9,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
+import { useSetUpNightshiftServiceAccount } from './use_set_up_nightshift_service_account';
 
 jest.mock('../../hooks/use_kibana');
 
