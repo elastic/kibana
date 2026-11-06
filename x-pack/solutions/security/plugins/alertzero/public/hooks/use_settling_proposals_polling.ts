@@ -9,7 +9,7 @@ import { useEffect, useRef } from 'react';
 import { focusManager, useQueryClient } from '@kbn/react-query';
 import { PROPOSAL_SETTLING_POLL_INTERVAL_MS } from '@kbn/proposals-common';
 import type { Proposal } from '@kbn/proposals-common';
-import { hasInFluxProposal, queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
+import { isInFlux, queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
 /**
  * Refreshes the queue every few seconds while an approved action runs, or while a failed action
@@ -21,7 +21,7 @@ import { hasInFluxProposal, queryKeys as platformQueryKeys } from '@kbn/proposal
 export const useSettlingProposalsPolling = (proposals: Iterable<Proposal>): void => {
   const queryClient = useQueryClient();
   const listed = [...proposals];
-  const hasSettling = hasInFluxProposal(listed);
+  const hasSettling = listed.some(isInFlux);
   // The wait for a retry ends with time, not with a render, so the timer checks it again.
   const listedRef = useRef(listed);
   listedRef.current = listed;
@@ -31,7 +31,7 @@ export const useSettlingProposalsPolling = (proposals: Iterable<Proposal>): void
       return;
     }
     const poll = setInterval(() => {
-      if (!focusManager.isFocused() || !hasInFluxProposal(listedRef.current)) {
+      if (!focusManager.isFocused() || !listedRef.current.some(isInFlux)) {
         return;
       }
       // Join a refetch that is still running. Do not cancel it. The queue sections refetch all

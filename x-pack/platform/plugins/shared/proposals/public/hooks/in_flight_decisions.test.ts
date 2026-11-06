@@ -36,24 +36,12 @@ describe('inFlightDecisions', () => {
   it('keeps an unseen decision for its own kind and proposal until it is cleared', () => {
     inFlightDecisions.markUnseen('approve', 'proposal-1');
 
-    expect(inFlightDecisions.has('approve', 'proposal-1')).toBe(true);
-    expect(inFlightDecisions.has('decline', 'proposal-1')).toBe(false);
-    expect(inFlightDecisions.has('approve', 'other-proposal')).toBe(false);
+    expect(inFlightDecisions.hasUnseen('proposal-1', 'approve')).toBe(true);
+    expect(inFlightDecisions.hasUnseen('proposal-1', 'decline')).toBe(false);
+    expect(inFlightDecisions.hasUnseen('other-proposal')).toBe(false);
 
     inFlightDecisions.clearUnseen('proposal-1');
-    expect(inFlightDecisions.has('approve', 'proposal-1')).toBe(false);
-  });
-
-  it('notifies subscribers after the render when an unseen decision is cleared', async () => {
-    inFlightDecisions.markUnseen('approve', 'proposal-1');
-    const listener = jest.fn();
-    inFlightDecisions.subscribe(listener);
-
-    inFlightDecisions.clearUnseen('proposal-1');
-    expect(listener).not.toHaveBeenCalled();
-
-    await Promise.resolve();
-    expect(listener).toHaveBeenCalledTimes(1);
+    expect(inFlightDecisions.hasUnseen('proposal-1')).toBe(false);
   });
 
   it('drops an unseen decision when a new decision starts for the proposal', () => {
@@ -67,9 +55,9 @@ describe('inFlightDecisions', () => {
 describe('useIsDecisionInFlight', () => {
   it('follows the store for the given kind and proposal', () => {
     const { result } = renderHook(() => ({
-      approvingProposal1: useIsDecisionInFlight('approve', 'proposal-1'),
-      decliningProposal1: useIsDecisionInFlight('decline', 'proposal-1'),
-      approvingOther: useIsDecisionInFlight('approve', 'other-proposal'),
+      approvingProposal1: useIsDecisionInFlight('approve', 'proposal-1', false),
+      decliningProposal1: useIsDecisionInFlight('decline', 'proposal-1', false),
+      approvingOther: useIsDecisionInFlight('approve', 'other-proposal', false),
     }));
     expect(result.current).toEqual({
       approvingProposal1: false,
@@ -90,8 +78,20 @@ describe('useIsDecisionInFlight', () => {
 
   it('is false when the id is undefined', () => {
     inFlightDecisions.start('approve', 'proposal-1');
-    const { result } = renderHook(() => useIsDecisionInFlight('approve', undefined));
+    const { result } = renderHook(() => useIsDecisionInFlight('approve', undefined, false));
 
+    expect(result.current).toBe(false);
+  });
+
+  it('counts an unseen decision only until the data of the row shows it', () => {
+    inFlightDecisions.markUnseen('approve', 'proposal-1');
+    const { result, rerender } = renderHook(
+      ({ shown }) => useIsDecisionInFlight('approve', 'proposal-1', shown),
+      { initialProps: { shown: false } }
+    );
+    expect(result.current).toBe(true);
+
+    rerender({ shown: true });
     expect(result.current).toBe(false);
   });
 });
@@ -101,7 +101,7 @@ describe('useIsDecisionInFlight renders', () => {
     let renders = 0;
     renderHook(() => {
       renders += 1;
-      return useIsDecisionInFlight('approve', 'proposal-1');
+      return useIsDecisionInFlight('approve', 'proposal-1', false);
     });
     const before = renders;
 

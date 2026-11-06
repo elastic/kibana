@@ -28,9 +28,10 @@ const notify = (): void => {
  * `useIsMutating` sees only its own client. This store lets the flyout show "Applying" for a
  * decision that the chat page started.
  *
- * A decision also counts after its request ends, until a read of the proposal shows it (the
- * "unseen" mark). The gate workflow writes the decision after the approve call returns, and the
- * write time is not known. A list read can also show data that is older than the write.
+ * A decision also counts after its request ends, until the data of the row shows it (the "unseen"
+ * mark). The gate workflow writes the decision after the approve call returns, and the write time
+ * is not known. A list read can also show data that is older than the write. So each row decides
+ * from its own data, and a read of another row or source never ends the mark.
  */
 export const inFlightDecisions = {
   start(kind: DecisionKind, id: string): void {
@@ -52,7 +53,7 @@ export const inFlightDecisions = {
   },
 
   has(kind: DecisionKind, id: string): boolean {
-    return counts.has(keyOf(kind, id)) || unseen.get(id) === kind;
+    return counts.has(keyOf(kind, id));
   },
 
   markUnseen(kind: DecisionKind, id: string): void {
@@ -62,13 +63,13 @@ export const inFlightDecisions = {
 
   clearUnseen(id: string): void {
     if (unseen.delete(id)) {
-      // `isInFlux` calls this, and some callers run it while React renders.
-      queueMicrotask(notify);
+      notify();
     }
   },
 
-  hasUnseen(id: string): boolean {
-    return unseen.has(id);
+  hasUnseen(id: string, kind?: DecisionKind): boolean {
+    const unseenKind = unseen.get(id);
+    return unseenKind !== undefined && (kind === undefined || unseenKind === kind);
   },
 
   /** Empties the store. For tests. */
@@ -84,11 +85,20 @@ export const inFlightDecisions = {
   },
 };
 
-/** True while a decision of this kind runs, or is unseen, for the proposal in any `QueryClient`. */
-export const useIsDecisionInFlight = (kind: DecisionKind, id: string | undefined): boolean => {
+/**
+ * True while a decision of this kind runs for the proposal in any `QueryClient`, or while it is
+ * unseen and the data of the row (`decisionShown`) does not show it yet.
+ */
+export const useIsDecisionInFlight = (
+  kind: DecisionKind,
+  id: string | undefined,
+  decisionShown: boolean
+): boolean => {
   // The snapshot is a boolean, so a row re-renders only when its own proposal changes.
   return useSyncExternalStore(
     inFlightDecisions.subscribe,
-    () => id !== undefined && inFlightDecisions.has(kind, id)
+    () =>
+      id !== undefined &&
+      (inFlightDecisions.has(kind, id) || (!decisionShown && inFlightDecisions.hasUnseen(id, kind)))
   );
 };

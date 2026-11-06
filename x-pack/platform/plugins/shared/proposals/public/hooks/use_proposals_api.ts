@@ -50,18 +50,18 @@ export const RETRY_WAIT_MS = 30_000;
 
 const awaitingRetrySince = new Map<string, number>();
 
+/** Whether this read of the proposal shows its decision, or no decision can follow. */
+export const isDecisionShown = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'> | undefined
+): boolean =>
+  proposal !== undefined &&
+  (Boolean(proposal.decision) ||
+    isTerminal(proposal.status) ||
+    proposal.supersededBy !== undefined);
+
 const hasUnseenDecision = (
   proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
-): boolean => {
-  if (!inFlightDecisions.hasUnseen(proposal.id)) {
-    return false;
-  }
-  if (proposal.decision || isTerminal(proposal.status) || proposal.supersededBy !== undefined) {
-    inFlightDecisions.clearUnseen(proposal.id);
-    return false;
-  }
-  return true;
-};
+): boolean => inFlightDecisions.hasUnseen(proposal.id) && !isDecisionShown(proposal);
 
 /** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
 export const isInFlux = (
@@ -78,19 +78,8 @@ export const isInFlux = (
   return Date.now() - since < RETRY_WAIT_MS;
 };
 
-/**
- * Whether any of the proposals is in flux. It checks every proposal and does not stop at the first
- * match, because `isInFlux` also clears the unseen mark of the proposal that it checks.
- */
-export const hasInFluxProposal = (
-  proposals: Iterable<Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>>
-): boolean => {
-  let found = false;
-  for (const proposal of proposals) {
-    found = isInFlux(proposal) || found;
-  }
-  return found;
-};
+const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
+  response?.proposals.some(isInFlux) ?? false;
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -145,7 +134,7 @@ export const usePendingProposals = (conversationId?: string) => {
     // No baseline poll otherwise — only while a row is settling, so the badge notices the
     // action finish without the analyst having to reopen the modal to find out.
     refetchInterval: (data) =>
-      hasInFluxProposal(data?.proposals ?? []) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      hasSettlingProposal(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -199,9 +188,7 @@ export const useConversationProposals = (
     // — un-flagged as stale — while this one loads would let an approve/dismiss click land on a
     // proposal from the investigation the analyst just navigated away from.
     refetchInterval: (data) =>
-      hasInFluxProposal((data?.pages ?? []).flatMap((page) => page.proposals))
-        ? PROPOSAL_SETTLING_POLL_INTERVAL_MS
-        : false,
+      (data?.pages ?? []).some(hasSettlingProposal) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -358,6 +345,7 @@ export const useReopenProposal = () => {
         PROPOSAL_REOPEN_URL.replace('{id}', encodeURIComponent(id)),
         { version: PROPOSALS_API_VERSION }
       ),
+    onMutate: ({ id }) => inFlightDecisions.clearUnseen(id),
     onSuccess: async () => {
       await invalidateProposals(queryClient);
     },
@@ -412,14 +400,15 @@ export const useSettleDeclinedProposal = () => {
 const useIsDecisionRunning = (
   kind: DecisionKind,
   mutationKey: MutationKey,
-  id: string | undefined
+  id: string | undefined,
+  decisionShown: boolean
 ): boolean => {
   const inThisClient =
     useIsMutating({
       mutationKey,
       predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
     }) > 0;
-  const inAnyClient = useIsDecisionInFlight(kind, id);
+  const inAnyClient = useIsDecisionInFlight(kind, id, decisionShown);
   return inThisClient || inAnyClient;
 };
 
@@ -434,10 +423,11 @@ const useIsDecisionRunning = (
  * `{ id, body }` a specific `mutate`/`mutateAsync` call was made with.
  *
  * The shared store adds the decisions that another `QueryClient` started, and the decisions whose
- * request ended but that no read shows yet. This applies to the decline hook too.
+ * request ended but whose result the data of this row (`decisionShown`, see `isDecisionShown`) does
+ * not show yet. This applies to the decline hook too.
  */
-export const useIsApprovingProposal = (id: string | undefined): boolean =>
-  useIsDecisionRunning('approve', mutationKeys.proposals.approve, id);
+export const useIsApprovingProposal = (id: string | undefined, decisionShown: boolean): boolean =>
+  useIsDecisionRunning('approve', mutationKeys.proposals.approve, id, decisionShown);
 
 export const useIsReopeningProposal = (id: string | undefined): boolean =>
   useIsMutating({
@@ -445,5 +435,5 @@ export const useIsReopeningProposal = (id: string | undefined): boolean =>
     predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
   }) > 0;
 
-export const useIsDecliningProposal = (id: string | undefined): boolean =>
-  useIsDecisionRunning('decline', mutationKeys.proposals.decline, id);
+export const useIsDecliningProposal = (id: string | undefined, decisionShown: boolean): boolean =>
+  useIsDecisionRunning('decline', mutationKeys.proposals.decline, id, decisionShown);
