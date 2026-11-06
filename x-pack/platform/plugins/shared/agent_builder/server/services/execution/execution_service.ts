@@ -30,6 +30,7 @@ import {
   createBadRequestError,
   createForbiddenError,
   createInternalError,
+  isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationWriteConflictError,
   isExecutionAbortReason,
@@ -58,6 +59,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
+import { reportToParent } from './utils/wake_parent';
 import { apiPrivileges } from '../../../common/features';
 import { AGENT_WORKLOAD_TYPE } from '../agents/service_account_binding';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -143,10 +145,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
 
+    // A wake run acts as the owner of the sub-agent it reports; a task's request does not resolve to that user.
+    const reportedExecutionId =
+      args.mode === AgentExecutionMode.conversation
+        ? args.params.reportsBackgroundExecution
+        : undefined;
     const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
       executionClient,
-      parentExecutionId: params.parentExecutionId,
+      parentExecutionId: params.parentExecutionId ?? reportedExecutionId,
     });
     const owner = conversationClient.getUser();
 
@@ -173,6 +180,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       agentId,
       configurationOverrides: params.configurationOverrides,
     });
+    // A bound run carries no caller credential to report back with, so it never runs in the
+    // background; the tool error sends the parent's model to the foreground.
+    if (params.parentTriggerMode && runAs) {
+      throw createBadRequestError(
+        `Agent "${agentId}" runs as a service account and cannot report back to its parent, so it cannot run in the background: run it in the foreground instead.`
+      );
+    }
 
     if (
       params.reasoningLevel !== undefined &&
@@ -283,7 +297,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       } catch (err) {
         // A refused run never started, so it leaves no execution record behind: a keyed
         // redelivery then starts afresh instead of replaying the refusal.
-        if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+        if (
+          isConversationBusyError(err) ||
+          isConversationWriteConflictError(err) ||
+          isBackgroundExecutionAlreadyReportedError(err)
+        ) {
           try {
             await executionClient.delete(executionId);
           } catch (deleteErr) {
@@ -407,7 +425,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw createBadRequestError('User message requests require input or attachments');
     }
 
-    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const { conversationClient } = await this.resolveConversationClient({
+      request,
+      executionClient: this.createExecutionClient(),
+      parentExecutionId: params.reportsBackgroundExecution,
+    });
     const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
       params,
       request,
@@ -677,6 +699,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionClient,
         abortMonitor,
         heartbeatReporter,
+        request,
       });
 
       this.logger.debug(
@@ -716,12 +739,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionClient,
     abortMonitor,
     heartbeatReporter,
+    request,
   }: {
     events$: Observable<ChatEvent>;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
     abortMonitor: AbortMonitor;
     heartbeatReporter: HeartbeatReporter;
+    request: KibanaRequest;
   }): void {
     const { executionId } = execution;
 
@@ -755,6 +780,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .finally(() => {
         abortMonitor.stop();
         heartbeatReporter.stop();
+        void reportToParent({
+          execution,
+          request,
+          executionClient,
+          conversationService: this.deps.conversationService,
+          executionService: this,
+          taskManager: this.deps.taskManager,
+          logger: this.logger,
+        });
       });
   }
 
@@ -1067,7 +1101,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     appendRefresh?: Refresh;
     activeExecution?: AcquireActiveExecution;
   }): Promise<string> {
-    const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
+    const {
+      nextInput,
+      origin: requestOrigin,
+      author: requestAuthor,
+      actor,
+      reportsBackgroundExecution,
+    } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
     const base = {
@@ -1079,6 +1119,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       appendRefresh,
       ...(activeExecution ? { activeExecution } : {}),
       ...(origin ? { origin } : {}),
+      ...(actor ? { actor } : {}),
+      ...(reportsBackgroundExecution
+        ? { consumeBackgroundExecution: reportsBackgroundExecution }
+        : {}),
       ...(parentExecution
         ? {
             activity: {

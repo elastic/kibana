@@ -23,6 +23,7 @@
  */
 
 import type {
+  MessageEvent,
   ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
@@ -36,9 +37,9 @@ import type {
   PromptResponseEvent,
   RoundInput,
   RoundModelUsageStats,
-  UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import {
+  isMessageEvent,
   CONVERSATION_EVENT_ID_DELIMITER,
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
@@ -309,8 +310,7 @@ export const roundsFromEvents = (events: ConversationEvent[]): ConversationRound
     const execution = parseExecutionId(executionId) ?? { roundId: executionId, index: 0 };
     const triggerId = group.find((event) => event.trigger_event_id)?.trigger_event_id;
     const trigger = triggerId ? byId.get(triggerId) : undefined;
-    const userMessage =
-      trigger?.type === TimelineEventType.userMessage ? (trigger as UserMessageEvent) : undefined;
+    const userMessage = trigger && isMessageEvent(trigger) ? (trigger as MessageEvent) : undefined;
     const promptResponse =
       trigger?.type === TimelineEventType.promptResponse
         ? (trigger as PromptResponseEvent)

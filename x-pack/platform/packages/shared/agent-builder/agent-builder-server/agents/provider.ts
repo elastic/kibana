@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
+  ChatTriggerMode,
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
@@ -105,6 +106,9 @@ export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
+  runInBackground?: boolean;
+  /** How the parent gets the result of a background sub-agent; defaults to `always`. */
+  parentTriggerMode?: ChatTriggerMode;
   connectorId?: string;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
@@ -115,6 +119,9 @@ export interface CreateSubAgentParams {
   agentId: string;
   parentConversationId: string;
   parentExecutionId: string;
+  runInBackground?: boolean;
+  /** How the parent gets the result of a background sub-agent; defaults to `always`. */
+  parentTriggerMode?: ChatTriggerMode;
   subagentName: string;
   subagentPurpose?: string;
   /** Pre-allocated id for the child conversation (assigned by the caller). */

@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isSharedConversation } from '@kbn/agent-builder-common';
+import { isSharedConversation, type Conversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -18,6 +18,10 @@ import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
 
 const POLL_INTERVAL_MS = 5_000;
+
+const hasBackgroundWork = (conversation?: Conversation): boolean =>
+  Boolean(conversation?.active_execution) ||
+  Object.keys(conversation?.state?.background_executions ?? {}).length > 0;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -55,9 +59,11 @@ export const useConversation = () => {
     // Refetching an errored query (no cached success) resets status `error` → `loading`,
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
-    // Shared conversations can be written to by other participants, so poll for their rounds.
+    // Other participants and finished background sub-agents add rounds this client did not start.
     refetchInterval: (data) =>
-      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
+      isSharedConversation(data?.access_control) || hasBackgroundWork(data)
+        ? POLL_INTERVAL_MS
+        : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

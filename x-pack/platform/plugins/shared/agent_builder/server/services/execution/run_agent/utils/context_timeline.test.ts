@@ -214,6 +214,22 @@ describe('groupTimelineRounds', () => {
     expect(isAwaitingPrompt(round)).toBe(true);
     expect(roundResponse(round)).toEqual({ message: '' });
   });
+
+  it('keeps the stored agent message of a completed agent-triggered round through normalization', () => {
+    const [trigger, ...rest] = completedRoundEvents('r1');
+    const agentMessage = {
+      ...trigger,
+      type: TimelineEventType.agentMessage,
+      actor: agentActor,
+    } as TimelineEvent;
+
+    const normalized = eventsForContext(eventsNativeConversation([agentMessage, ...rest]));
+    const [round] = groupTimelineRounds(normalized);
+
+    expect(round.userMessage).toEqual(agentMessage);
+    expect(normalized.filter((event) => event.id === agentMessage.id)).toHaveLength(1);
+    expect(standaloneUserMessages(normalized)).toEqual([]);
+  });
 });
 
 describe('groupTimelineRounds — interrupted rounds', () => {

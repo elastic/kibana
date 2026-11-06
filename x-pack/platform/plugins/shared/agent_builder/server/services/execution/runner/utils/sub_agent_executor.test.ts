@@ -8,6 +8,7 @@
 import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
+import { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { createSubAgentExecutor } from './sub_agent_executor';
 
@@ -206,4 +207,66 @@ describe('createSubAgentExecutor', () => {
       );
     });
   });
+});
+
+describe('createSubAgentExecutor and background sub-agents', () => {
+  it('asks a background sub-agent to wake the parent when it finishes', async () => {
+    const executor = createExecutorWith({ enabled: false });
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      runInBackground: true,
+    });
+    await executor.createSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      parentConversationId: 'parent-conversation-id',
+      subagentName: 'child',
+      runInBackground: true,
+    });
+
+    for (const [params] of executeAgentMock.mock.calls) {
+      expect(params.params.parentTriggerMode).toBe(ChatTriggerMode.Always);
+      expect(params.useTaskManager).toBe(true);
+      expect(params.requestImmediateClaim).toBe(true);
+    }
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      runInBackground: true,
+      parentTriggerMode: ChatTriggerMode.Never,
+    });
+    expect(executeAgentMock.mock.calls[2][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
+  });
+
+  it('leaves a foreground sub-agent alone', async () => {
+    const executor = createExecutorWith({ enabled: false });
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+    });
+
+    expect(executeAgentMock.mock.calls[0][0].params.parentTriggerMode).toBeUndefined();
+    expect(executeAgentMock.mock.calls[0][0].useTaskManager).toBeUndefined();
+  });
+
+  let executeAgentMock: jest.Mock;
+
+  const createExecutorWith = (interactivity: InteractivityConfig) => {
+    executeAgentMock = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
+    return createSubAgentExecutor({
+      request: httpServerMock.createKibanaRequest(),
+      getExecutionService: () =>
+        ({ executeAgent: executeAgentMock } as unknown as AgentExecutionService),
+      interactivity,
+    });
+  };
 });
