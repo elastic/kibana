@@ -41,9 +41,6 @@ export interface DashboardSnapshot {
   comparableState: DashboardState;
 }
 
-export const getDashboardAttachmentData = (api: DashboardApi): DashboardAttachmentData =>
-  dashboardStateToAttachmentData(api.getSerializedState().attributes);
-
 export const getDashboardSnapshot = (api: DashboardApi): DashboardSnapshot => {
   const { attributes: state } = api.getSerializedState();
   return {
