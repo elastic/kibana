@@ -74,6 +74,11 @@ interface DecisionTreeAttributes {
   conversation_id?: string;
   round_id?: string;
   workflow_execution_id?: string;
+  /**
+   * Conversation of the last counts-only write. Kept apart from `conversation_id`, which names the
+   * last edit, so a traversal can be traced to its writer without claiming the tree's content.
+   */
+  counts_conversation_id?: string;
 }
 
 /** The head document, one per tree, holding the current markdown and merged learnings. */
@@ -163,11 +168,13 @@ export interface DecisionTreeStore {
   /**
    * Rewrites only the head's counts, without a new version. Returns `undefined` when the tree
    * does not exist. `reinforced` promotes the tree to established, as a reinforced commit does.
+   * `conversationId` is recorded as the head's `counts_conversation_id`.
    */
   updateCounts: (input: {
     treeId: string;
     update: (current: StoredTreeCounts) => DecisionTreeCounts;
     reinforced?: boolean;
+    conversationId?: string;
   }) => Promise<DecisionTreeDetail | undefined>;
   listVersions: (treeId: string) => Promise<DecisionTreeVersionSummary[]>;
   getVersion: (treeId: string, version: number) => Promise<DecisionTreeVersionDetail | undefined>;
@@ -574,7 +581,7 @@ export const createDecisionTreeStore = ({
       logger.debug(`Wrote pending version ${pending.treeId} v${pending.version}`);
     },
 
-    updateCounts: async ({ treeId, update, reinforced = false }) => {
+    updateCounts: async ({ treeId, update, reinforced = false, conversationId }) => {
       const symptom = symptomSlugFromTreeId(treeId);
       return retryOnConflict(async () => {
         const existing = await getHead(symptom);
@@ -588,6 +595,7 @@ export const createDecisionTreeStore = ({
           attributes: {
             ...source.attributes,
             ...(reinforced ? { status: 'established' } : {}),
+            ...(conversationId ? { counts_conversation_id: conversationId } : {}),
           },
           counts: update(storedTreeCounts(source)),
         };

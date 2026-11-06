@@ -699,6 +699,22 @@ describe('counts', () => {
       expect(detail?.counts.nodes.find((node) => node.node_id === 'E1')?.visit_count).toBe(2);
     });
 
+    it('records the counts writer apart from the conversation that last edited the tree', async () => {
+      const esClient = createEsClient();
+      esClient.get.mockResolvedValue(storedHead());
+
+      await createStore(esClient).updateCounts({
+        treeId: 'symptom:checkout-high-latency',
+        update: ({ counts }) => counts,
+        conversationId: 'replay-conv',
+      });
+
+      const [[request]] = esClient.index.mock.calls;
+      expect(request.document.attributes.counts_conversation_id).toBe('replay-conv');
+      expect(request.document.attributes.conversation_id).toBeUndefined();
+      expect(request.document['@timestamp']).toBe('2026-09-09T12:00:00.000Z');
+    });
+
     it('promotes the tree to established when the update reinforces it', async () => {
       const esClient = createEsClient();
       esClient.get.mockResolvedValue(storedHead());

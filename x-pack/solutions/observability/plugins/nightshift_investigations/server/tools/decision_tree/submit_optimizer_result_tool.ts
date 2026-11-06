@@ -1063,6 +1063,7 @@ const persistTraversal = async ({
       const updated = await store.updateCounts({
         treeId,
         reinforced,
+        ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
         update: ({ tree, counts }) => {
           assertCausalPathMarked(tree, traversal);
           return applyTraversal(tree, counts, traversal, now, counting);

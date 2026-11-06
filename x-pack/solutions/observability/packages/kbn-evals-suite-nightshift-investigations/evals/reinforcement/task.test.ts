@@ -25,7 +25,12 @@ const CANCEL_PATH = `${EXECUTION_PATH}/cancel`;
 
 type Source = Record<string, unknown> & {
   type?: string;
-  attributes?: { tree_id?: string; space_id?: string; conversation_id?: string };
+  attributes?: {
+    tree_id?: string;
+    space_id?: string;
+    conversation_id?: string;
+    counts_conversation_id?: string;
+  };
 };
 
 interface SearchRequest {
@@ -360,18 +365,28 @@ describe('runReinforcementExample', () => {
       expect(docs.get('default:dtree_stamped')).toEqual(original);
     });
 
-    it('rolls back a counts-only traversal when the replay fails before reporting its submit', async () => {
+    it('rolls back its own counts-only traversal but not another tree when the replay fails', async () => {
       const events: string[] = [];
-      const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+      const foreignBefore = head('foreign', 'foreign tree');
+      const { esClient, docs } = fakeEsClient(events, {
+        [OTHER_HEAD_ID]: otherTree,
+        'default:dtree_foreign': foreignBefore,
+      });
       const readExecution = jest
         .fn()
         .mockImplementationOnce(async () => {
-          // A traversal of an unedited tree rewrites only its head counts, with no provenance.
-          docs.set(OTHER_HEAD_ID, { ...otherTree, counts: { nodes: { S1: { visits: 1 } } } });
+          const conversationId = String(runInputs(fetch).conversation_id);
+          // A traversal of an unedited tree rewrites only its head counts and names its writer there.
+          docs.set(OTHER_HEAD_ID, {
+            ...otherTree,
+            attributes: { ...otherTree.attributes, counts_conversation_id: conversationId },
+            counts: { nodes: [] },
+          });
+          docs.set('default:dtree_foreign', head('foreign', 'edited by another investigation'));
           throw new Error('Service unavailable');
         })
         .mockResolvedValue({ id: EXECUTION_ID, status: ExecutionStatus.CANCELLED });
-      const fetch = fakeFetch(events, { readExecution });
+      const fetch: jest.Mock = fakeFetch(events, { readExecution });
 
       await expect(
         runReinforcementExample({
@@ -382,8 +397,8 @@ describe('runReinforcementExample', () => {
         })
       ).rejects.toThrow('Service unavailable');
 
-      expect([...docs.keys()]).toEqual([OTHER_HEAD_ID]);
       expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
+      expect(docs.get('default:dtree_foreign')?.content).toBe('edited by another investigation');
     });
   });
 });

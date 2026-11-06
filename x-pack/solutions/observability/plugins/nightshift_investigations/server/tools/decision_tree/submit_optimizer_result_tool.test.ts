@@ -1143,6 +1143,17 @@ describe('nightshift_submit_optimizer_result counts', () => {
         );
       });
 
+      it('names the investigation on a counts-only traversal of an unedited tree', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const { submit } = createTool({ store, getProvenance });
+
+        await submit({ traversals: [traversal()] });
+
+        expect(updateCountsFor(store, TREE_ID)).toEqual([
+          [expect.objectContaining({ conversationId: provenanceFields.conversationId })],
+        ]);
+      });
+
       it('records the applied write of a traversal added on the retry of a saved edit', async () => {
         const store = createStore(stored(FULL_TREE));
         const onAppliedWrite = jest.fn();

@@ -53,11 +53,15 @@ const CONVERSATION_ID = 'nightshift-reinforcement-replay-case-1';
 const searchByType = (
   headTreeIds: string[],
   versionsByTree: Record<string, number[]> = {},
-  stampedTreeIds: string[] = []
+  stampedTreeIds: string[] = [],
+  countedTreeIds: string[] = []
 ): jest.Mock =>
   jest.fn().mockImplementation(async (request: SearchRequest) => {
     if (termOf(request, 'attributes.conversation_id') === CONVERSATION_ID) {
       return { hits: { hits: stampedTreeIds.map(headHit) } };
+    }
+    if (termOf(request, 'attributes.counts_conversation_id') === CONVERSATION_ID) {
+      return { hits: { hits: countedTreeIds.map(headHit) } };
     }
     if (termOf(request, 'type') === 'decision_tree') {
       return { hits: { hits: headTreeIds.map(headHit) } };
@@ -230,6 +234,19 @@ describe('listDecisionTreeIdsForConversation', () => {
     await expect(listDecisionTreeIdsForConversation(esClient, CONVERSATION_ID)).resolves.toEqual(
       []
     );
+  });
+});
+
+describe('listDecisionTreeIdsForConversation counts writes', () => {
+  it('includes a tree whose last counts-only write the conversation made', async () => {
+    const esClient = client({
+      search: searchByType(['symptom:other'], {}, ['symptom:stamped'], ['symptom:counted']),
+    });
+
+    await expect(listDecisionTreeIdsForConversation(esClient, CONVERSATION_ID)).resolves.toEqual([
+      'symptom:stamped',
+      'symptom:counted',
+    ]);
   });
 });
 

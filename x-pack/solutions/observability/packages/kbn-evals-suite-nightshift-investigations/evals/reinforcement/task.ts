@@ -7,7 +7,6 @@
 
 import { randomUUID } from 'crypto';
 import { setTimeout as delay } from 'timers/promises';
-import { isDeepStrictEqual } from 'util';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import {
@@ -244,19 +243,35 @@ export const listDecisionTreeIds = (esClient: Client): Promise<string[]> =>
     `The ${SPACE_ID} space has ${TREE_ID_PAGE_SIZE} or more decision trees, so the replay cannot snapshot all of them`
   );
 
-/** Tree ids with a head or version document whose commit provenance is `conversationId`. */
-export const listDecisionTreeIdsForConversation = (
+/**
+ * Tree ids `conversationId` wrote: a head or version carrying its commit provenance, or a head whose
+ * last counts-only write it made (`counts_conversation_id`).
+ */
+export const listDecisionTreeIdsForConversation = async (
   esClient: Client,
   conversationId: string
-): Promise<string[]> =>
-  searchTreeIds(
-    esClient,
-    [
-      { terms: { type: ['decision_tree', 'decision_tree_version'] } },
-      { term: { 'attributes.conversation_id': conversationId } },
-    ],
-    `Conversation ${conversationId} wrote ${TREE_ID_PAGE_SIZE} or more decision tree documents, so the replay cannot list the trees it owns`
-  );
+): Promise<string[]> => {
+  const tooMany = `Conversation ${conversationId} wrote ${TREE_ID_PAGE_SIZE} or more decision tree documents, so the replay cannot list the trees it owns`;
+  const [committed, counted] = await Promise.all([
+    searchTreeIds(
+      esClient,
+      [
+        { terms: { type: ['decision_tree', 'decision_tree_version'] } },
+        { term: { 'attributes.conversation_id': conversationId } },
+      ],
+      tooMany
+    ),
+    searchTreeIds(
+      esClient,
+      [
+        { term: { type: 'decision_tree' } },
+        { term: { 'attributes.counts_conversation_id': conversationId } },
+      ],
+      tooMany
+    ),
+  ]);
+  return [...new Set([...committed, ...counted])];
+};
 
 /**
  * Snapshots every tree in the space plus `treeIds`. Which trees the replay owns is only known
@@ -275,48 +290,16 @@ export const snapshotDecisionTrees = async (
 };
 
 /**
- * Snapshotted trees whose head no longer matches its snapshot. A counts-only write leaves no
- * provenance on the head, so this is the only trace of a traversal the replay never reported.
- */
-export const listChangedHeadIds = async (
-  esClient: Client,
-  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>
-): Promise<string[]> => {
-  const changed: string[] = [];
-  for (const [id, docs] of snapshots) {
-    const before = docs.find((doc) => doc.id === headId(id));
-    if (!before) continue;
-    let current: Record<string, unknown> | undefined;
-    try {
-      const head = await esClient.get<Record<string, unknown>>({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        id: headId(id),
-      });
-      current = head.found ? head._source : undefined;
-    } catch (error) {
-      if (!isMissingHead(error)) throw error;
-    }
-    if (!isDeepStrictEqual(current, before.source)) changed.push(id);
-  }
-  return changed;
-};
-
-/**
- * Rolls back only the trees the replay owns: `treeIds` plus every tree whose head or a version
- * carries `conversationId` provenance. With `restoreChangedHeads`, for a replay that never reported
- * its submit, every pre-existing tree whose head changed is rolled back too. An owned tree in
- * `snapshots` is put back and one absent from it is deleted; every other tree, including one
- * another investigation wrote meanwhile, is left alone. Keeps going past a failed tree and throws
- * the first error at the end.
+ * Rolls back only the trees the replay owns: `treeIds` plus every tree `conversationId` wrote,
+ * including a counts-only traversal the replay never got to report. An owned tree in `snapshots` is
+ * put back and one absent from it is deleted; every other tree, including one another investigation
+ * wrote meanwhile, is left alone. Keeps going past a failed tree and throws the first error at the
+ * end.
  */
 export const restoreDecisionTrees = async (
   esClient: Client,
   snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
-  {
-    treeIds,
-    conversationId,
-    restoreChangedHeads = false,
-  }: { treeIds: readonly string[]; conversationId: string; restoreChangedHeads?: boolean }
+  { treeIds, conversationId }: { treeIds: readonly string[]; conversationId: string }
 ): Promise<void> => {
   let firstError: unknown;
   let stampedIds: string[] = [];
@@ -325,15 +308,7 @@ export const restoreDecisionTrees = async (
   } catch (error) {
     firstError = error;
   }
-  let changedIds: string[] = [];
-  if (restoreChangedHeads) {
-    try {
-      changedIds = await listChangedHeadIds(esClient, snapshots);
-    } catch (error) {
-      firstError ??= error;
-    }
-  }
-  for (const id of new Set([...treeIds, ...stampedIds, ...changedIds])) {
+  for (const id of new Set([...treeIds, ...stampedIds])) {
     try {
       await restoreDecisionTree(esClient, id, snapshots.get(id) ?? []);
     } catch (error) {
@@ -476,8 +451,6 @@ export const runReinforcementExample = async ({
   const snapshots = await snapshotDecisionTrees(esClient, [treeId]);
   const conversationId = replayConversationId(example.metadata.case_id);
   let submissions: SubmitArguments[] = [];
-  // Until the reinforce step reports its submit, a traversal it made is invisible to the rollback.
-  let submitReported = false;
   let executionId: string | undefined;
   let sawTerminal = false;
   try {
@@ -524,7 +497,6 @@ export const runReinforcementExample = async ({
         }
       | undefined;
     submissions = parseSubmissions(output?.submissions_json);
-    submitReported = sawTerminal && output?.submissions_json !== undefined;
     const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
     const finished = sawTerminal;
     const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
@@ -555,7 +527,6 @@ export const runReinforcementExample = async ({
     await restoreDecisionTrees(esClient, snapshots, {
       treeIds: [treeId, ...submittedTreeIds(submissions)],
       conversationId,
-      restoreChangedHeads: !submitReported,
     });
   }
 };
