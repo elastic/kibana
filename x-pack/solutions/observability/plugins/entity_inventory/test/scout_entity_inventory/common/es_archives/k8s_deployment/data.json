@@ -345,3 +345,101 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-05T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "tsds-shared",
+          "uid": "uid-streaming-tsds-shared",
+          "available": 4,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T10:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "tsds-shared",
+          "uid": "uid-streaming-tsds-shared",
+          "available": 5,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "tsds-only",
+          "uid": "uid-streaming-tsds-only",
+          "available": 2,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-05T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "standard-only",
+          "uid": "uid-streaming-standard-only",
+          "available": 1,
+          "desired": 5
+        }
+      }
+    }
+  }
+}

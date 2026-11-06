@@ -8,6 +8,10 @@
 export const K8S_ARCHIVE =
   'x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/common/es_archives/k8s_deployment';
 
+// The archive's time-series index and the template that lets it be a plain index (see index.ts).
+export const K8S_TSDS_INDEX = 'metrics-k8sclusterreceiver.otel-tsds';
+export const K8S_TSDS_INDEX_TEMPLATE = 'entity-inventory-scout-k8s-tsds-index';
+
 export const TYPES_PATH = 'internal/entity_inventory/types';
 
 export const INTERNAL_HEADERS = {

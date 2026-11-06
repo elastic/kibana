@@ -6,7 +6,7 @@
  */
 
 import { apiTest as baseApiTest } from '@kbn/scout-oblt';
-import { K8S_ARCHIVE } from './constants';
+import { K8S_ARCHIVE, K8S_TSDS_INDEX, K8S_TSDS_INDEX_TEMPLATE } from './constants';
 
 /**
  * Loads the `k8s_deployment` archive once per worker before any spec runs. The `types` route reads
@@ -14,7 +14,17 @@ import { K8S_ARCHIVE } from './constants';
  */
 export const apiTest = baseApiTest.extend<{}, { seedK8sDeployments: void }>({
   seedK8sDeployments: [
-    async ({ esArchiver }, use) => {
+    async ({ esArchiver, esClient }, use) => {
+      // Elasticsearch's built-in `metrics-otel@template` creates data streams only and matches the
+      // archive's time-series index, which must be a plain index to keep fixed timestamps. A
+      // higher-priority template without `data_stream` lets the archive create it; esArchiver
+      // cannot load index templates itself.
+      await esClient.indices.putIndexTemplate({
+        name: K8S_TSDS_INDEX_TEMPLATE,
+        index_patterns: [K8S_TSDS_INDEX],
+        priority: 500,
+        template: {},
+      });
       await esArchiver.loadIfNeeded(K8S_ARCHIVE);
       await use();
     },

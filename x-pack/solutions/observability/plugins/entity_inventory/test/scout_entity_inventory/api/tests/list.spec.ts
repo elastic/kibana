@@ -19,6 +19,17 @@ const DEPLOYMENT_IDS = [
   'k8s.deployment:scout-cluster/platform/ingress',
 ];
 
+// The archive's `streaming` namespace on 2026-11-05, behind `metrics-k8sclusterreceiver.otel-*`: the
+// time-series index `metrics-k8sclusterreceiver.otel-tsds` and the standard data stream
+// `metrics-k8sclusterreceiver.otel-default`.
+const streamingDeploymentId = (name: string) => `k8s.deployment:scout-cluster/streaming/${name}`;
+// In both: returned once, with the newer time-series values.
+const TSDS_SHARED_ID = streamingDeploymentId('tsds-shared');
+// Only in the time-series index: returned from the `TS` plan alone.
+const TSDS_ONLY_ID = streamingDeploymentId('tsds-only');
+// Only in the standard data stream: still read through the `FROM` plan.
+const STANDARD_ONLY_ID = streamingDeploymentId('standard-only');
+
 interface ListResponse {
   columns: Array<{ name: string; kind: string; type: string | null }>;
   rows: Array<Record<string, unknown>>;
@@ -176,6 +187,41 @@ apiTest.describe(
       expect(total).toBe(3);
       expect(truncated).toBe(false);
     });
+
+    apiTest(
+      'returns deployments from time-series and standard indices once each, with the newest values',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(
+          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-05T09:00:00.000Z&to=2026-11-05T11:00:00.000Z`,
+          {
+            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { rows, total, errors }: ListResponse = response.body;
+
+        expect(errors).toStrictEqual([]);
+        expect(total).toBe(3);
+        expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(
+          [TSDS_SHARED_ID, TSDS_ONLY_ID, STANDARD_ONLY_ID].sort()
+        );
+        expect(rows.find((row) => row['entity.id'] === TSDS_SHARED_ID)).toMatchObject({
+          available_replicas: 5,
+          resource_id: 'uid-streaming-tsds-shared',
+          last_seen: '2026-11-05T10:01:00.000Z',
+        });
+        expect(rows.find((row) => row['entity.id'] === TSDS_ONLY_ID)).toMatchObject({
+          available_replicas: 2,
+          last_seen: '2026-11-05T10:00:00.000Z',
+        });
+        expect(rows.find((row) => row['entity.id'] === STANDARD_ONLY_ID)).toMatchObject({
+          available_replicas: 1,
+          last_seen: '2026-11-05T10:00:00.000Z',
+        });
+      }
+    );
 
     apiTest('accepts a window of exactly 72 hours', async ({ apiClient }) => {
       const response = await apiClient.get(
