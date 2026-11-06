@@ -222,9 +222,13 @@ describe('persona_matrix_tools_seed', () => {
       expect(STUB_CONNECTOR_ID).toBe('d7306385-cbe6-4541-9726-49afdff59ba5');
       const created = posts(client, STUB_PATH);
       expect(created).toHaveLength(1);
-      expect(created[0].body).toMatchObject({
+      // Exact body: Kibana fills in a default `authType` when it is omitted, and
+      // the `.http` config validation then rejects it with a 400 because
+      // `hasAuth` is false. `authType: null` is the only accepted no-auth shape.
+      expect(created[0].body).toEqual({
+        name: 'persona-matrix local sink (stub)',
         connector_type_id: '.http',
-        config: { url: 'http://127.0.0.1:38465', hasAuth: false },
+        config: { url: 'http://127.0.0.1:38465', hasAuth: false, authType: null },
         secrets: {},
       });
     });

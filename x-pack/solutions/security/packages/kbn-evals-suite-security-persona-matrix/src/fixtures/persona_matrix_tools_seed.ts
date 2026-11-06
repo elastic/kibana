@@ -263,7 +263,10 @@ async function createStubConnectorIfMissing({ kbnClient, log }: SeedToolsOptions
       body: {
         name: 'persona-matrix local sink (stub)',
         connector_type_id: '.http',
-        config: { url: SINK_ORIGIN, hasAuth: false },
+        // `authType` must be sent as null: when it is omitted Kibana fills in a
+        // default and the `.http` config validation rejects it with a 400 because
+        // `hasAuth` is false.
+        config: { url: SINK_ORIGIN, hasAuth: false, authType: null },
         secrets: {},
       },
     });
