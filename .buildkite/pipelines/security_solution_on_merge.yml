@@ -434,7 +434,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       preemptible: true
       diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
@@ -454,7 +454,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       preemptible: true
       diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
@@ -474,7 +474,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       preemptible: true
       diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
@@ -495,7 +495,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       preemptible: true
       diskType: pd-balanced
       spotZones: us-central1-f,us-central1-c,us-central1-a
