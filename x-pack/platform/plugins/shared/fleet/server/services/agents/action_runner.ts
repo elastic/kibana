@@ -255,7 +255,7 @@ export abstract class ActionRunner {
     }
   }
 
-  private async processBatch(agents: Agent[]): Promise<{ actionId: string; skipped?: boolean }> {
+  private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
     if (this.retryParams.retryCount) {
       try {
         const actions = await getAgentActions(this.esClient, this.actionParams!.actionId!);
@@ -269,7 +269,9 @@ export abstract class ActionRunner {
                   `skipping batch as there is already an action document present with last agent ids, actionId: ${this
                     .actionParams!.actionId!}`
                 );
-              return { actionId: this.actionParams.actionId!, skipped: true };
+              // The batch is still counted by the caller: the guard only fires for a batch a
+              // previous run actioned but did not get to checkpoint, so its agents are done.
+              return { actionId: this.actionParams.actionId! };
             }
           }
         }
@@ -331,14 +333,13 @@ export abstract class ActionRunner {
       return { actionId: this.actionParams.actionId! }; // stop executing if there are no more results
     }
 
-    const firstBatch = await this.processBatch(currentAgents);
+    await this.processBatch(currentAgents);
     let allAgentsProcessed = currentAgents.length;
-    if (!firstBatch.skipped) {
-      this.nbAgentsProcessed += currentAgents.length;
-    }
-    // The cursor is advanced only once the batch is processed, so a runner that dies mid-batch
-    // leaves a checkpoint pointing before it. Cursor and count always describe the same point:
-    // advancing the count without the cursor would re-fetch a batch on resume and count it twice.
+    // The count and the cursor move together, after the batch is processed, so a runner that dies
+    // mid-batch leaves a checkpoint pointing before it and both values describe the same point.
+    // Advancing one without the other would make a resume re-read a batch and double count it, or
+    // leave the count permanently short of `total` so completion is never recognised.
+    this.nbAgentsProcessed += currentAgents.length;
     this.retryParams.searchAfter = currentAgents[currentAgents.length - 1].sort!;
     await this.updateCheckpoint();
 
@@ -355,12 +356,10 @@ export abstract class ActionRunner {
           .debug('currentAgents returned 0 hits, returning from bulk action query');
         break; // stop executing if there are no more results
       }
-      const batch = await this.processBatch(currentAgents);
+      await this.processBatch(currentAgents);
       allAgentsProcessed += currentAgents.length;
-      if (!batch.skipped) {
-        this.nbAgentsProcessed += currentAgents.length;
-      }
-      // updating check task with latest checkpoint (this.retryParams.searchAfter)
+      // updating check task with latest checkpoint (count and cursor, see above)
+      this.nbAgentsProcessed += currentAgents.length;
       this.retryParams.searchAfter = currentAgents[currentAgents.length - 1].sort!;
       await this.updateCheckpoint();
     }

@@ -364,35 +364,40 @@ describe('ActionRunner', () => {
       expect(mockedOpenPointInTime).not.toHaveBeenCalled();
     });
 
-    it('does not count a batch the dedupe guard skips', async () => {
+    it('counts a batch the dedupe guard skips, so the count still reaches the total', async () => {
       mockAgentPages(2, 2);
-      // an action document already covers the first batch, as after an overlapping resume
+      // the previous run actioned batch 1 but died before checkpointing it, so the resume starts
+      // from scratch and finds its action document
       mockedGetAgentActions.mockResolvedValue([
         { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
       ] as any);
 
-      await createRunner().runActionAsyncWithRetry();
+      const runner = createRunner({}, { nbAgentsProcessed: 0, searchAfter: undefined });
+      await runner.runActionAsyncWithRetry();
 
-      // 4 agents paged, but only the second batch was actually actioned
+      // batch 1 is not actioned again, but its agents are done and must be counted: leaving them
+      // out would hold the count below `total` and completion would never be recognised
+      expect(runner.processedBatches).toEqual([['agent-2', 'agent-3']]);
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
         CHECK_TASK_ID,
-        expect.objectContaining({ nbAgentsProcessed: 2, searchAfter: ['agent-3'] })
+        expect.objectContaining({ nbAgentsProcessed: 4, searchAfter: ['agent-3'] })
       );
     });
 
-    it('does not inflate the count when a resume re-reads a batch', async () => {
-      // resuming from a cursor that already covers batch 1
-      mockAgentPages(2, 2);
-      mockedGetAgentActions.mockResolvedValue([
-        { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
-      ] as any);
+    it('does not inflate the count when resuming, because the cursor moves with it', async () => {
+      // the previous run checkpointed batch 1, so the resume picks up at batch 2
+      mockAgentPages(1, 2);
 
       await createRunner(
         {},
         { nbAgentsProcessed: 2, searchAfter: ['agent-1'] }
       ).runActionAsyncWithRetry();
 
-      // the skipped batch is not counted again, so the total stays truthful
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.objectContaining({ searchAfter: ['agent-1'] })
+      );
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
         CHECK_TASK_ID,
         expect.objectContaining({ nbAgentsProcessed: 4 })
