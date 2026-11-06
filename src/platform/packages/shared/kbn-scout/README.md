@@ -738,9 +738,10 @@ node scripts/scout pick
 It opens with the entry points you are most likely to want:
 
 - **Run last** -- repeat the previous run, config, specs and target included.
-- **Changed tests** -- the Scout configs covering the files you changed on your branch or haven't
-  committed yet. Changed specs are offered on their own; when a page object, fixture or es_archive
-  changed, the whole config is offered first, since any spec in it may use them.
+- **Changed tests** -- the Scout configs covering the specs you changed on your branch or haven't
+  committed yet. Only `*.spec.ts` counts: a page object, fixture or es_archive can be imported from
+  any module, so which specs a change to one affects can't be told from its path. Change one and
+  pick the config yourself.
 - **A pinned config** -- the configs you marked as yours on first use.
 - **Find another config** -- search all Scout configs by group, module and path.
 - **Edit pins** -- add or drop pinned configs.

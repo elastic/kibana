@@ -83,10 +83,14 @@ const findMergeBase = async () => {
 let mergeBase: Promise<string> | undefined;
 const getMergeBase = () => (mergeBase ??= findMergeBase());
 
-/** Everything changed on this branch or not committed yet */
+/**
+ * Specs changed on this branch or not committed yet. Only specs: a page object, fixture or
+ * es_archive can be imported from any module, so the specs a change to one affects cannot be
+ * told from its path, and guessing from the directory it sits in would be wrong as often as
+ * right.
+ */
 export const getChangedFiles = async (): Promise<string[]> => {
-  // fixtures, es_archives and other test data decide what a run does, so only docs are left out
-  const pathspec = [':!*.md'];
+  const pathspec = ['*.spec.ts'];
   const [changed, untracked] = await Promise.all([
     getMergeBase().then((base) => git(['diff', '--name-only', base, '--', ...pathspec])),
     // `git status` finds untracked files faster than `git ls-files --others`
@@ -102,17 +106,13 @@ export const getChangedFiles = async (): Promise<string[]> => {
 export interface ChangedConfig {
   config: PickableConfig;
   specs: string[];
-  /** Other changed files in the config dir, e.g. page objects and fixtures */
-  helpers: string[];
 }
 
 export const getChangedConfigs = (files: string[], configs: PickableConfig[]): ChangedConfig[] =>
   configs.flatMap((config) => {
     const dir = `${Path.dirname(config.path)}/`;
-    const inDir = files.filter((file) => file.startsWith(dir));
-    const specs = inDir.filter(
-      (file) => file.endsWith('.spec.ts') && getConfigForSpec(file) === config.path
+    const specs = files.filter(
+      (file) => file.startsWith(dir) && getConfigForSpec(file) === config.path
     );
-    const helpers = inDir.filter((file) => !file.endsWith('.spec.ts'));
-    return specs.length || helpers.length ? [{ config, specs, helpers }] : [];
+    return specs.length ? [{ config, specs }] : [];
   });

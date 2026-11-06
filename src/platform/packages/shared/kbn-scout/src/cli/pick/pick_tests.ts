@@ -238,10 +238,10 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         changed.map((entry) => ({
           label: formatConfig(entry.config),
           value: entry,
-          hint: `${plural(
-            entry.specs.length + entry.helpers.length,
-            'changed file'
-          )} · ${serversHint(entry.config, running)}`,
+          hint: `${plural(entry.specs.length, 'changed spec')} · ${serversHint(
+            entry.config,
+            running
+          )}`,
         }))
       );
       config = changedConfig.config;
@@ -253,21 +253,13 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       const configDir = Path.dirname(path);
       const names = (files: string[]) =>
         files.map((file) => Path.relative(configDir, file)).join(', ');
-      const { specs: changedSpecs = [], helpers = [] } = changedConfig ?? {};
+      const { specs: changedSpecs = [] } = changedConfig ?? {};
 
-      const changedChoices = changedSpecs.length
-        ? [{ label: 'Changed specs', value: 'changed', hint: names(changedSpecs) }]
-        : [];
-      const wholeChoice = {
-        label: 'Whole config',
-        value: 'whole',
-        hint: `${plural(configSpecs.length, 'spec')}${
-          helpers.length ? ` · uses changed ${names(helpers)}` : ''
-        }`,
-      };
-      // page objects and fixtures may be used by any spec, so then the whole config comes first
       const scope = await select('Run', [
-        ...(helpers.length ? [wholeChoice, ...changedChoices] : [...changedChoices, wholeChoice]),
+        ...(changedSpecs.length
+          ? [{ label: 'Changed specs', value: 'changed', hint: names(changedSpecs) }]
+          : []),
+        { label: 'Whole config', value: 'whole', hint: plural(configSpecs.length, 'spec') },
         { label: 'Pick specs', value: 'pick' },
       ]);
       specs = scope === 'changed' ? changedSpecs : [];
