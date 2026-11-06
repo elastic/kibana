@@ -32,6 +32,7 @@ import { ObservablesUserActionBuilder } from './builders/observables';
 import { ExtendedFieldsUserActionBuilder } from './builders/extended_fields';
 import { TemplateUserActionBuilder } from './builders/template';
 import { WorkflowUserActionBuilder } from './builders/workflow';
+import { SyncUserActionBuilder } from './builders/sync';
 import { BulkAttachmentsUserActionBuilder } from './builders/bulk_attachments';
 
 const builderMap = {
@@ -54,6 +55,7 @@ const builderMap = {
   extended_fields: ExtendedFieldsUserActionBuilder,
   template: TemplateUserActionBuilder,
   workflow: WorkflowUserActionBuilder,
+  sync: SyncUserActionBuilder,
   bulkAttachments: BulkAttachmentsUserActionBuilder,
   create_task: CreateTaskUserActionBuilder,
   update_task: UpdateTaskUserActionBuilder,

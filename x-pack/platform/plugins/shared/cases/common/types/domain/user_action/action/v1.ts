@@ -38,6 +38,7 @@ export const UserActionTypes = {
   update_task: 'update_task',
   delete_task: 'delete_task',
   apply_task_template: 'apply_task_template',
+  sync: 'sync',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

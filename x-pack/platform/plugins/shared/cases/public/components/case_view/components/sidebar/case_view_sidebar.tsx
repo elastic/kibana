@@ -229,6 +229,11 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
     [onUpdateConnectorField]
   );
 
+  const onUpdateSettings = useCallback(
+    (settings: CaseUI['settings']) => onUpdateConnectorField({ key: 'settings', value: settings }),
+    [onUpdateConnectorField]
+  );
+
   const isConnectorLoading = useMemo(
     () =>
       isLoadingAllAvailableConnectors ||
@@ -412,6 +417,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                   supportedActionConnectors={supportedActionConnectors}
                   isLoading={isConnectorLoading}
                   onSubmit={onSubmitConnector}
+                  onUpdateSettings={onUpdateSettings}
                   showHeader={false}
                   actionsVariant="outlined"
                   // ConnectorsForm's `useForm` only reads `caseData.connector` as its

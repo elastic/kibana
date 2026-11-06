@@ -28,6 +28,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     restrictedCases: {
       enabled: true,
     },
+    bidirectionalSync: {
+      enabled: true,
+    },
     attachments: {
       enabled: true,
     },

@@ -20,6 +20,7 @@ import type {
   ConnectorMappings,
   CustomFieldsConfiguration,
   TemplatesConfiguration,
+  ConnectorSyncSettings,
 } from '../../../common/types/domain';
 import type {
   ConfigurationPatchRequest,
@@ -49,6 +50,7 @@ import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './typ
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { ConfigurationSchema, ConfigurationsSchema } from '../../../common/types/domain';
+import { pickConnectorSyncSettings } from './utils';
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
@@ -57,6 +59,8 @@ import {
   validateCustomFieldTypesInRequest,
   validatePauseReasons,
   validateStatusesConfiguration,
+  validateExternalSyncFieldMappingsInRequest,
+  validateExternalSyncFieldsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -251,6 +255,7 @@ export async function get(
           connector,
           extractObservables: caseConfigureWithoutConnector.extractObservables,
           mappings: mappings != null ? mappings.mappings : [],
+          ...pickConnectorSyncSettings(mappings),
           version: configuration.version ?? '',
           error,
           id: configuration.id,
@@ -321,7 +326,24 @@ export async function update(
       requestFields: request.observableTypes,
     });
 
-    const { version, templates, ...queryWithoutVersion } = request;
+    validateExternalSyncFieldsInRequest(request.externalSyncFields);
+    validateExternalSyncFieldMappingsInRequest(request.externalSyncFieldMappings);
+
+    const {
+      version,
+      templates,
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
+      ...queryWithoutVersion
+    } = request;
+    // Sync settings belong to the connector, not the configuration document.
+    const syncPatch = pickConnectorSyncSettings({
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
+    });
+    const hasSyncPatch = Object.keys(syncPatch).length > 0;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
@@ -376,33 +398,36 @@ export async function update(
     let error = null;
     const updateDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
+    let connectorSync: ConnectorSyncSettings = {};
     const { connector, ...queryWithoutVersionAndConnector } = queryWithoutVersion;
 
     try {
+      const mappingsConnector = connector != null ? connector : configuration.attributes.connector;
       const resMappings = await casesClientInternal.configuration.getMappings({
-        connector: connector != null ? connector : configuration.attributes.connector,
+        connector: mappingsConnector,
       });
 
       mappings = resMappings !== null ? resMappings.mappings : [];
+      connectorSync = pickConnectorSyncSettings(resMappings);
 
-      if (connector != null) {
-        if (resMappings !== null) {
-          mappings = (
-            await casesClientInternal.configuration.updateMappings({
-              connector,
-              mappingId: resMappings.id,
-              refresh: false,
-            })
-          ).mappings;
-        } else {
-          mappings = (
-            await casesClientInternal.configuration.createMappings({
-              connector,
-              owner: configuration.attributes.owner,
-              refresh: false,
-            })
-          ).mappings;
-        }
+      if (connector != null || hasSyncPatch) {
+        const written =
+          resMappings !== null
+            ? await casesClientInternal.configuration.updateMappings({
+                connector: mappingsConnector,
+                mappingId: resMappings.id,
+                refresh: false,
+                sync: syncPatch,
+              })
+            : await casesClientInternal.configuration.createMappings({
+                connector: mappingsConnector,
+                owner: configuration.attributes.owner,
+                refresh: false,
+                sync: syncPatch,
+              });
+
+        mappings = written.mappings;
+        connectorSync = { ...connectorSync, ...pickConnectorSyncSettings(written) };
       }
     } catch (e) {
       error = e.isBoom
@@ -453,6 +478,7 @@ export async function update(
       connector: patch.attributes.connector ?? configuration.attributes.connector,
       extractObservables: merged.extractObservables,
       mappings,
+      ...connectorSync,
       version: patch.version ?? '',
       error,
       id: patch.id,
@@ -512,6 +538,10 @@ export async function create(
       statuses: validatedConfigurationRequest.statuses,
       customStatusesEnabled: clientArgs.config.customStatuses.enabled,
     });
+    validateExternalSyncFieldsInRequest(validatedConfigurationRequest.externalSyncFields);
+    validateExternalSyncFieldMappingsInRequest(
+      validatedConfigurationRequest.externalSyncFieldMappings
+    );
 
     let error = null;
 
@@ -581,15 +611,27 @@ export async function create(
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
+    let connectorSync: ConnectorSyncSettings = {};
+    const {
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
+      ...configurationAttributes
+    } = validatedConfigurationRequest;
 
     try {
-      mappings = (
-        await casesClientInternal.configuration.createMappings({
-          connector: validatedConfigurationRequest.connector,
-          owner: validatedConfigurationRequest.owner,
-          refresh: false,
-        })
-      ).mappings;
+      const created = await casesClientInternal.configuration.createMappings({
+        connector: validatedConfigurationRequest.connector,
+        owner: validatedConfigurationRequest.owner,
+        refresh: false,
+        sync: pickConnectorSyncSettings({
+          externalSync,
+          externalSyncFields,
+          externalSyncFieldMappings,
+        }),
+      });
+      mappings = created.mappings;
+      connectorSync = pickConnectorSyncSettings(created);
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
@@ -599,7 +641,7 @@ export async function create(
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
-        ...validatedConfigurationRequest,
+        ...configurationAttributes,
         customFields: validatedConfigurationRequest.customFields ?? [],
         templates: validatedConfigurationRequest.templates ?? [],
         pauseReasons: validatedConfigurationRequest.pauseReasons ?? [],
@@ -625,6 +667,7 @@ export async function create(
       // Reserve for future implementations
       connector: post.attributes.connector,
       mappings,
+      ...connectorSync,
       version: post.version ?? '',
       error,
       id: post.id,

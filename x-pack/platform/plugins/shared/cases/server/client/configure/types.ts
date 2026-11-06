@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseConnector } from '../../../common/types/domain';
+import type { CaseConnector, ConnectorSyncSettings } from '../../../common/types/domain';
 import type { IndexRefresh } from '../../services/types';
 
 export interface MappingsArgs {
@@ -14,8 +14,11 @@ export interface MappingsArgs {
 
 export interface CreateMappingsArgs extends MappingsArgs, IndexRefresh {
   owner: string;
+  sync?: ConnectorSyncSettings;
 }
 
 export interface UpdateMappingsArgs extends MappingsArgs, IndexRefresh {
   mappingId: string;
+  /** Written alongside the regenerated mappings; omitted keys keep their saved value. */
+  sync?: ConnectorSyncSettings;
 }

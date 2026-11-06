@@ -13,6 +13,10 @@ import type {
   ActionConnector,
   CaseStatusConfiguration,
   CaseStatusesConfiguration,
+  ConnectorSyncSettings,
+  ExternalSyncFieldMappings,
+  ExternalSyncFieldRules,
+  ExternalSyncSettings,
   ObservableTypeConfiguration,
 } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
@@ -35,6 +39,7 @@ import { getConnectorById } from '../utils';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useLicense } from '../../common/use_license';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { useIsExternalSyncEnabled } from '../../common/use_is_external_sync_enabled';
 import { CommonFlyout } from './flyout';
 import { ObservableTypesForm } from '../observable_types/form';
 import { StatusForm } from './statuses/status_form';
@@ -81,6 +86,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
+  const isExternalSyncEnabled = useIsExternalSyncEnabled();
   const { isObservablesFeatureEnabled, isExtractObservablesEnabled, tasksAuthorized } =
     useCasesFeatures();
 
@@ -114,6 +120,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     workflowTags,
     statuses: configuredStatuses,
     pauseReasons: configuredPauseReasons,
@@ -292,6 +301,45 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       workflowTags,
       persistCaseConfigure,
     ]
+  );
+
+  const persistConnectorSync = useCallback(
+    (sync: ConnectorSyncSettings) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        ...sync,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeExternalSync = useCallback(
+    (value: ExternalSyncSettings) => persistConnectorSync({ externalSync: value }),
+    [persistConnectorSync]
+  );
+
+  const onChangeExternalSyncFields = useCallback(
+    (value: ExternalSyncFieldRules) => persistConnectorSync({ externalSyncFields: value }),
+    [persistConnectorSync]
+  );
+
+  const onChangeExternalSyncFieldMappings = useCallback(
+    (value: ExternalSyncFieldMappings) =>
+      persistConnectorSync({ externalSyncFieldMappings: value }),
+    [persistConnectorSync]
   );
 
   useEffect(() => {
@@ -757,6 +805,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     isObservablesFeatureEnabled,
     isExtractObservablesEnabled,
     tasksAuthorized,
+    isExternalSyncEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -766,6 +815,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
@@ -786,6 +838,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeExternalSync,
+    onChangeExternalSyncFields,
+    onChangeExternalSyncFieldMappings,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,

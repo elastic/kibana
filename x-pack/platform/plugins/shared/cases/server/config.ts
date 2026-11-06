@@ -190,6 +190,11 @@ export const ConfigSchema = schema.object({
   tasks: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: automatic push and pull-based sync with Jira and ServiceNow.
+  bidirectionalSync: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

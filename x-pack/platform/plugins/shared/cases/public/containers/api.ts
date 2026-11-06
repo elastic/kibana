@@ -55,6 +55,7 @@ import {
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
+  getCaseSyncUrl,
   getCaseFindUserActionsUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
@@ -894,3 +895,17 @@ export const deleteTaskComment = async (
   KibanaServices.get().http.fetch(getTaskCommentDetailsUrl(caseId, taskId, commentId), {
     method: 'DELETE',
   });
+export const syncCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseSyncUrl(caseId), {
+    method: 'POST',
+    signal,
+  });
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};

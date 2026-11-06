@@ -27,7 +27,9 @@ import type {
   CaseAccess,
   CaseAssignees,
   CaseCustomFields,
+  ExternalSyncSettings,
   ActionSource,
+  SyncUserActionPayload,
 } from '../../../common/types/domain';
 import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
@@ -98,7 +100,15 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
+    parameters: {
+      payload: {
+        settings: {
+          syncAlerts?: boolean;
+          extractObservables?: boolean;
+          externalSync?: ExternalSyncSettings;
+        };
+      };
+    };
   };
   comment: {
     parameters: {
@@ -141,6 +151,9 @@ export interface BuilderParameters {
   };
   workflow: {
     parameters: { payload: WorkflowUserActionPayload };
+  };
+  sync: {
+    parameters: { payload: SyncUserActionPayload };
   };
   bulkAttachments: {
     parameters: {

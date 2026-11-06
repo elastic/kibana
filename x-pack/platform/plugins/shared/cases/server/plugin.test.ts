@@ -59,6 +59,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     templates: { enabled: true },
     runWorkflows: { enabled: true },
     restrictedCases: { enabled: false },
+    bidirectionalSync: { enabled: false },
     attachments: { enabled: true },
     chat: { enabled: true },
     customStatuses: { enabled: false },
@@ -236,6 +237,9 @@ describe('Cases Plugin', () => {
             },
             "attachments": Object {
               "enabled": true,
+            },
+            "bidirectionalSync": Object {
+              "enabled": false,
             },
             "chat": Object {
               "enabled": true,

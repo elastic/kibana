@@ -104,6 +104,9 @@ export interface CasesUiConfigType {
   tasks?: {
     enabled: boolean;
   };
+  bidirectionalSync: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -181,6 +184,9 @@ export type CasesConfigurationUI = Pick<
   | 'owner'
   | 'observableTypes'
   | 'extractObservables'
+  | 'externalSync'
+  | 'externalSyncFields'
+  | 'externalSyncFieldMappings'
   | 'workflowTags'
   | 'statuses'
   | 'pauseReasons'

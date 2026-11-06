@@ -144,3 +144,8 @@ export const TASK_COMMENT_DELETED = i18n.translate('xpack.cases.containers.tasks
 export const TASK_LIST_DELETED = i18n.translate('xpack.cases.containers.tasks.listDeleted', {
   defaultMessage: 'Task list deleted',
 });
+export const SUCCESS_SYNC_FROM_EXTERNAL_SERVICE = (serviceName: string) =>
+  i18n.translate('xpack.cases.containers.syncFromExternalService', {
+    values: { serviceName },
+    defaultMessage: 'Synced from { serviceName }',
+  });

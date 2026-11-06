@@ -148,6 +148,10 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.syncCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.deleteAttachmentsStepDefinition)
   );
 

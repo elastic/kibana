@@ -12,12 +12,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -27,11 +31,16 @@ import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { CaseStatusesSection } from './statuses';
 import * as statusesI18n from './statuses/translations';
 import { Connectors } from './connectors';
+import { SyncSettings } from '../edit_connector/sync_settings';
+import { FieldSyncTable } from './field_sync_table';
+import { ExternalFieldMappingTable } from './external_field_mapping_table';
+import { EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES } from '../../../common/utils/external_sync_fields';
 import * as configureCasesI18n from './translations';
 import { useConfigureCasesController } from './use_configure_cases_controller';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { ObservableTypes } from '../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
@@ -62,7 +71,7 @@ type LegacyFlyoutType = 'customField' | 'template';
 export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();
-  const { permissions } = useCasesContext();
+  const { permissions, owner } = useCasesContext();
   const { docLinks } = useKibana().services;
   const { customStatusesEnabled } = useCasesConfig();
 
@@ -74,6 +83,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isObservablesFeatureEnabled,
     isExtractObservablesEnabled,
     tasksAuthorized,
+    isExternalSyncEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -83,6 +93,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
@@ -103,6 +116,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeExternalSync,
+    onChangeExternalSyncFields,
+    onChangeExternalSyncFieldMappings,
     onChangeWorkflowTags,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
@@ -131,6 +147,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
   const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
   const showTaskListsSection = tasksAuthorized && permissions.settings;
+  const syncControlsDisabled =
+    isPersistingConfiguration ||
+    isLoadingCaseConfiguration ||
+    isFetchingCaseConfiguration ||
+    isConfigurationFetchError ||
+    !permissions.settings;
 
   return (
     <>
@@ -180,6 +202,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       }
                       handleShowEditFlyout={onClickUpdateConnector}
                       hideTitle
+                      hideMappings={isExternalSyncEnabled}
                       isLoading={isLoadingAny}
                       mappings={mappings}
                       onChangeConnector={onChangeConnector}
@@ -187,6 +210,64 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
                       onAddNewConnector={onAddNewConnector}
                     />
+                    {isExternalSyncEnabled && (
+                      <div data-test-subj="cases-external-sync-section">
+                        <EuiSpacer size="l" />
+                        {connector.type !== ConnectorTypes.none ? (
+                          <>
+                            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiTitle size="xs">
+                                  <h3>{configureCasesI18n.EXTERNAL_SYNC_TITLE(connector.name)}</h3>
+                                </EuiTitle>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <ExperimentalBadge data-test-subj="external-sync-tech-preview-badge" />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                            <EuiSpacer size="xs" />
+                            <EuiText size="s" color="subdued">
+                              <p>{configureCasesI18n.EXTERNAL_SYNC_DESC(connector.name)}</p>
+                            </EuiText>
+                            <EuiSpacer size="m" />
+                            <SyncSettings
+                              value={externalSync}
+                              disabled={syncControlsDisabled}
+                              onChange={onChangeExternalSync}
+                            />
+                            <EuiSpacer size="l" />
+                            <FieldSyncTable
+                              connector={connector}
+                              mappings={mappings}
+                              rules={externalSyncFields}
+                              disabled={syncControlsDisabled}
+                              onChange={onChangeExternalSyncFields}
+                            />
+                            {EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES.has(connector.type) && (
+                              <>
+                                <EuiSpacer size="l" />
+                                <ExternalFieldMappingTable
+                                  connector={connector}
+                                  owner={owner[0]}
+                                  mappings={mappings}
+                                  value={externalSyncFieldMappings}
+                                  disabled={syncControlsDisabled}
+                                  onChange={onChangeExternalSyncFieldMappings}
+                                />
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            data-test-subj="external-sync-no-connector"
+                          >
+                            {configureCasesI18n.EXTERNAL_SYNC_NO_CONNECTOR}
+                          </EuiText>
+                        )}
+                      </div>
+                    )}
                   </SettingsSection>
                 )}
 

@@ -259,4 +259,12 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('access');
     });
   });
+
+  describe('Model version 14 to 15', () => {
+    it('does not add externalSync to the settings of existing cases', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 14, toVersion: 15 });
+      expect(migrated.attributes).toHaveProperty('settings', document.attributes.settings);
+    });
+  });
 });

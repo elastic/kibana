@@ -62,4 +62,5 @@ export const useCasesConfig = jest.fn().mockReturnValue({
   runWorkflowsEnabled: false,
   customStatusesEnabled: false,
   restrictedCasesEnabled: false,
+  bidirectionalSyncEnabled: false,
 });

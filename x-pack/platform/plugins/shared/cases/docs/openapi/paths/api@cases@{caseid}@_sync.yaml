@@ -1,0 +1,37 @@
+post:
+  summary: Sync a case from its external incident
+  description: >
+    Technical preview. Fetches the incident the case was last pushed to and applies its title, description,
+    and status to the case. Fields that changed in Kibana since the last push are kept when the case
+    conflict strategy is `kibana`. Requires the `xpack.cases.bidirectionalSync.enabled` setting and an
+    Enterprise license.
+    You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+    You must also have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+  operationId: syncCaseDefaultSpace
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/case_response_properties.yaml'
+    '400':
+      description: The case has not been pushed, or its connector cannot be synced from.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'

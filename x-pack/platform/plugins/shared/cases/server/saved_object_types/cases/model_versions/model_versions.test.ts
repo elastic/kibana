@@ -23,6 +23,7 @@ import {
   modelVersion12,
   modelVersion13,
   modelVersion14,
+  modelVersion15,
 } from '.';
 
 describe('Model versions', () => {
@@ -361,6 +362,31 @@ describe('Model versions', () => {
       const context = {} as Parameters<typeof backfillFn>[1];
 
       expect(backfillFn(doc, context)).toEqual({ attributes: { access: { mode: 'default' } } });
+    });
+  });
+
+  describe('version 15', () => {
+    it('returns version 15 changes correctly', () => {
+      expect(modelVersion15.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "settings": Object {
+                "properties": Object {
+                  "externalSync": Object {
+                    "properties": Object {
+                      "autoPush": Object {
+                        "type": "boolean",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
     });
   });
 });

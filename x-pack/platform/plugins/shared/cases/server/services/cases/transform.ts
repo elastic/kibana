@@ -211,6 +211,9 @@ export function transformESModelToCase(
   const settings = {
     syncAlerts: caseAttributes.settings?.syncAlerts ?? false,
     extractObservables: caseAttributes.settings?.extractObservables ?? false,
+    ...(caseAttributes.settings?.externalSync && {
+      externalSync: caseAttributes.settings.externalSync,
+    }),
   };
 
   const version = encodeHitVersion(hit);
@@ -312,6 +315,9 @@ export function transformSavedObjectToExternalModel(
   const settings = {
     syncAlerts: caseSavedObjectAttributes.settings?.syncAlerts ?? false,
     extractObservables: caseSavedObjectAttributes.settings?.extractObservables ?? false,
+    ...(caseSavedObjectAttributes.settings?.externalSync && {
+      externalSync: caseSavedObjectAttributes.settings.externalSync,
+    }),
   };
 
   const extended_fields =

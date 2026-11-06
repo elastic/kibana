@@ -14,12 +14,14 @@ import {
 } from '../../common/utils';
 import type { AlertInfo } from '../../common/types';
 import type { CasesClientArgs } from '..';
+import type { CaseUpdateOrigin } from '../../events/types';
 
 export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
   { id: caseId, owner, access }: Pick<Case, 'id' | 'owner'> & { access?: CaseAccess | null },
   ids: string[],
-  attachmentType: string
+  attachmentType: string,
+  origin?: CaseUpdateOrigin
 ): void {
   // workflow triggers never fire for restricted cases — the event payload
   // and the workflow run would reveal the case to non-assignees
@@ -32,6 +34,7 @@ export function emitAttachmentsAddedEvent(
     ids,
     attachmentType,
     owner: owner as Owner,
+    ...(origin != null ? { origin } : {}),
   });
 }
 

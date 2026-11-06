@@ -50,6 +50,8 @@ import {
   DeleteTaskUserActionSchema,
   ApplyTaskTemplateUserActionSchema,
 } from './task/v1';
+import { SyncUserActionSchema } from './sync/v1';
+import type { SyncUserActionPayloadSchema } from './sync/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
@@ -95,28 +97,31 @@ export const CaseUserActionInjectedIdsSchema = z.object({
   comment_id: z.string().nullable(),
 });
 
-const BasicUserActionsSchema = z.union([
-  AccessUserActionSchema,
-  DescriptionUserActionSchema,
-  TagsUserActionSchema,
-  TitleUserActionSchema,
-  SettingsUserActionSchema,
-  StatusUserActionSchema,
-  SeverityUserActionSchema,
-  AssigneesUserActionSchema,
-  DeleteCaseUserActionSchema,
-  CategoryUserActionSchema,
-  CustomFieldsUserActionSchema,
-  ObservablesUserActionSchema,
-  ExtendedFieldsUserActionSchema,
-  TemplateUserActionSchema,
-  WorkflowUserActionSchema,
-  BulkAttachmentsUserActionSchema,
-  CreateTaskUserActionSchema,
-  UpdateTaskUserActionSchema,
-  DeleteTaskUserActionSchema,
-  ApplyTaskTemplateUserActionSchema,
-]);
+const BasicUserActionsSchema = lazySchema(() =>
+  z.union([
+    AccessUserActionSchema,
+    DescriptionUserActionSchema,
+    TagsUserActionSchema,
+    TitleUserActionSchema,
+    SettingsUserActionSchema,
+    StatusUserActionSchema,
+    SeverityUserActionSchema,
+    AssigneesUserActionSchema,
+    DeleteCaseUserActionSchema,
+    CategoryUserActionSchema,
+    CustomFieldsUserActionSchema,
+    ObservablesUserActionSchema,
+    ExtendedFieldsUserActionSchema,
+    TemplateUserActionSchema,
+    WorkflowUserActionSchema,
+    BulkAttachmentsUserActionSchema,
+    CreateTaskUserActionSchema,
+    UpdateTaskUserActionSchema,
+    DeleteTaskUserActionSchema,
+    ApplyTaskTemplateUserActionSchema,
+    SyncUserActionSchema,
+  ])
+);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
 const CommonUserActionsWithoutIdsSchema = z.union([
@@ -216,6 +221,9 @@ export type TemplateUserAction = UserAction<z.infer<typeof TemplateUserActionSch
 export type WorkflowUserAction = UserAction<z.infer<typeof WorkflowUserActionSchema>>;
 export type BulkAttachmentsUserAction = UserAction<z.infer<typeof BulkAttachmentsUserActionSchema>>;
 export type { BulkAttachmentsPayload } from './bulk_attachments/v1';
+export type SyncUserAction = UserAction<z.infer<typeof SyncUserActionSchema>>;
+export type SyncUserActionPayload = z.infer<typeof SyncUserActionPayloadSchema>;
+export { SyncUserActionSchema } from './sync/v1';
 export { WorkflowUserActionSchema, WorkflowOriginSchema } from './workflow/v1';
 export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';
 export type CreateTaskUserAction = UserAction<z.infer<typeof CreateTaskUserActionSchema>>;

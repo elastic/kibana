@@ -53,8 +53,13 @@ import {
   getTags,
   getCategories,
 } from './get';
+import type { FindByExternalIdParams } from './find_by_external_id';
+import { findByExternalId } from './find_by_external_id';
 import type { PushParams } from './push';
 import { push } from './push';
+import type { SyncParams } from './sync';
+import { sync } from './sync';
+import type { BulkUpdateCasesClientOptions } from './bulk_update';
 import { bulkUpdate } from './bulk_update';
 import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { bulkCreate } from './bulk_create';
@@ -119,9 +124,20 @@ export interface CasesSubClient {
    */
   push(args: PushParams): Promise<Case>;
   /**
+   * Applies the linked external incident to the case. Technical preview.
+   */
+  sync(args: SyncParams): Promise<Case>;
+  /**
+   * Finds the cases last pushed to the given external incident. Technical preview.
+   */
+  findByExternalId(params: FindByExternalIdParams): Promise<Case[]>;
+  /**
    * Update the specified cases with the passed in values.
    */
-  bulkUpdate(cases: CasesPatchRequest): Promise<CasesPatchResponse>;
+  bulkUpdate(
+    cases: CasesPatchRequest,
+    options?: BulkUpdateCasesClientOptions
+  ): Promise<CasesPatchResponse>;
   /**
    * Delete a case and all its comments.
    *
@@ -200,6 +216,8 @@ const usageCounterByMethod = {
   resolve: null,
   bulkGet: null,
   push: 'push_case',
+  sync: 'sync_case',
+  findByExternalId: null,
   bulkUpdate: 'bulk_update_cases',
   delete: 'delete_cases',
   getTags: null,
@@ -245,10 +263,15 @@ export const createCasesSubClient = (
     push: withUsageCounter(usageCounterByMethod.push, clientArgs, (params: PushParams) =>
       push(params, clientArgs, casesClient)
     ),
+    sync: withUsageCounter(usageCounterByMethod.sync, clientArgs, (params: SyncParams) =>
+      sync(params, clientArgs, casesClient)
+    ),
+    findByExternalId: (params: FindByExternalIdParams) => findByExternalId(params, clientArgs),
     bulkUpdate: withUsageCounter(
       usageCounterByMethod.bulkUpdate,
       clientArgs,
-      (cases: CasesPatchRequest) => bulkUpdate(cases, clientArgs, casesClient)
+      (cases: CasesPatchRequest, options?: BulkUpdateCasesClientOptions) =>
+        bulkUpdate(cases, clientArgs, casesClient, options)
     ),
     delete: withUsageCounter(usageCounterByMethod.delete, clientArgs, (ids: string[]) =>
       deleteCases(ids, clientArgs)

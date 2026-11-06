@@ -230,6 +230,21 @@ const PER_TYPE_FIXTURES: {
   ),
   delete_case: makeUserActionSO('delete_case', {}, { action: 'delete' }),
   access: makeUserActionSO('access', { access: { mode: 'restricted' } }, { action: 'update' }),
+  sync: makeUserActionSO(
+    'sync',
+    {
+      sync: {
+        connector_name: 'ServiceNow',
+        external_id: '123',
+        external_title: 'INC01',
+        external_url: 'https://example.com/INC01',
+        updated_fields: ['title', 'status'],
+        conflicted_fields: [],
+        external_updated_by: 'admin',
+      },
+    },
+    { action: 'update' }
+  ),
   category: makeUserActionSO('category', { category: 'malware' }, { action: 'update' }),
   customFields: makeUserActionSO(
     'customFields',

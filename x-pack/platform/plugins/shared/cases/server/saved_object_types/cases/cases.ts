@@ -32,6 +32,7 @@ import {
   modelVersion12,
   modelVersion13,
   modelVersion14,
+  modelVersion15,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -233,6 +234,13 @@ export const createCaseSavedObjectType = (
           extractObservables: {
             type: 'boolean',
           },
+          externalSync: {
+            properties: {
+              autoPush: {
+                type: 'boolean',
+              },
+            },
+          },
         },
       },
       extract_observables_source: {
@@ -349,6 +357,7 @@ export const createCaseSavedObjectType = (
     12: modelVersion12,
     13: modelVersion13,
     14: modelVersion14,
+    15: modelVersion15,
   },
   management: {
     importableAndExportable: true,

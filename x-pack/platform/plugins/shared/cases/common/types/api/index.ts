@@ -21,6 +21,7 @@ export * from './observable/latest';
 export * from './template/latest';
 export * from './task/latest';
 export * from './field_definition/latest';
+export * from './external_sync/latest';
 export type * from './workflow/latest';
 
 // V1
@@ -40,6 +41,7 @@ export * as observableApiV1 from './observable/v1';
 export * as templateApiV1 from './template/v1';
 export * as taskApiV1 from './task/v1';
 export * as fieldDefinitionApiV1 from './field_definition/v1';
+export * as externalSyncApiV1 from './external_sync/v1';
 
 // V2
 export * as attachmentApiV2 from './attachment/v2';

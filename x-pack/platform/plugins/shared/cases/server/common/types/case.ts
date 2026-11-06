@@ -7,7 +7,12 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { CaseAccess, CaseAttributes, Observable } from '../../../common/types/domain';
+import type {
+  CaseAccess,
+  CaseAttributes,
+  ExternalSyncSettings,
+  Observable,
+} from '../../../common/types/domain';
 import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
@@ -41,6 +46,7 @@ export interface CasePersistedAttributes {
   settings: {
     syncAlerts: boolean;
     extractObservables?: boolean;
+    externalSync?: ExternalSyncSettings;
   };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;

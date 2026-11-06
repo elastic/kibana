@@ -296,6 +296,7 @@ describe('Cases Ui Plugin', () => {
           chatEnabled: false,
           runWorkflowsEnabled: true,
           customStatusesEnabled: false,
+          bidirectionalSyncEnabled: false,
         },
         helpers: {
           canUseCases: expect.any(Function),

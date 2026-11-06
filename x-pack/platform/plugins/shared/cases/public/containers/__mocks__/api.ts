@@ -155,6 +155,9 @@ export const pushCase = async (
   signal: AbortSignal
 ): Promise<CaseUI> => Promise.resolve(pushedCase);
 
+export const syncCase = async (caseId: string, signal: AbortSignal): Promise<CaseUI> =>
+  Promise.resolve(pushedCase);
+
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> =>
   Promise.resolve(actionLicenses);
 
