@@ -107,7 +107,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
   let logger: Logger;
   let getWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
-  let installer: { install: jest.Mock; uninstall: jest.Mock };
+  let installer: { install: jest.Mock; uninstall: jest.Mock; disable: jest.Mock };
   let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
 
   beforeEach(() => {
@@ -134,6 +134,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
     installer = {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      disable: jest.fn().mockResolvedValue(true),
     };
   });
 
@@ -179,12 +180,11 @@ describe('createContinuousOnboardingWorkflowService', () => {
   });
 
   it('throws when disabling fails', async () => {
-    getWorkflow.mockResolvedValue({ enabled: true });
-    managementApi.updateWorkflow.mockRejectedValue(new Error('update failed'));
+    installer.disable.mockRejectedValue(new Error('disable failed'));
 
     await expect(
       createService().ensureWorkflow({ enabled: false, request, spaceId })
-    ).rejects.toThrow('update failed');
+    ).rejects.toThrow('disable failed');
   });
 
   it('disables and drains the space document but keeps it when turned off', async () => {
@@ -195,12 +195,12 @@ describe('createContinuousOnboardingWorkflowService', () => {
 
     await createService().ensureWorkflow({ enabled: false, request, spaceId });
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: false },
+    // Through the owner: a plain update of a bound workflow needs `manage_security`.
+    expect(installer.disable).toHaveBeenCalledWith({
       spaceId,
-      request
-    );
+      workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    });
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
     expect(installer.install).not.toHaveBeenCalled();
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
@@ -216,12 +216,12 @@ describe('createContinuousOnboardingWorkflowService', () => {
       skipExecutionDrain: true,
     });
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: false },
+    // Through the owner: a plain update of a bound workflow needs `manage_security`.
+    expect(installer.disable).toHaveBeenCalledWith({
       spaceId,
-      request
-    );
+      workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    });
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
   });
 });

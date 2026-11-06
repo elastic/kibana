@@ -59,7 +59,26 @@ describe('reset route', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
+  it('refuses a caller without manage_security in a space that runs as the service account', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue('account-1');
+    jest.mocked(canManageSecurity).mockResolvedValue(false);
+    const reset = jest.fn();
+
+    const error = await resetRoute
+      .handler({
+        request: { spaceId: 'space-a' },
+        server: { core: {} },
+        maintenanceService: { reset },
+        getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      } as unknown as Parameters<typeof resetRoute.handler>[0])
+      .catch((caught: unknown) => caught);
+
+    expect((error as Boom).output.statusCode).toBe(403);
+    expect(reset).not.toHaveBeenCalled();
+  });
+
   it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue(undefined);
     const request = {};
     const licensing = {};
     const reset = jest.fn().mockResolvedValue({ state: 'enabled' });

@@ -660,6 +660,8 @@ export const createSignificantEventsMaintenanceService = ({
           existing?.disabledWorkflows ?? [],
           currentState === 'paused' ? buildSetupEnabledTargets(spaceId) : []
         );
+        // A setup target of a space that was never set up has no document: that is not a failure.
+        const recordedKeys = new Set((existing?.disabledWorkflows ?? []).map(targetKey));
         const recordedRules = existing?.disabledRules ?? [];
         const hasRetryInventory =
           recordedWorkflows.length > 0 ||
@@ -692,7 +694,13 @@ export const createSignificantEventsMaintenanceService = ({
             if (!shouldAttemptWorkflow(workflow)) {
               continue;
             }
-            const outcome = await reEnableWorkflow({ mgmt, workflow, request, failures });
+            const outcome = await reEnableWorkflow({
+              mgmt,
+              workflow,
+              request,
+              failures,
+              reportMissing: recordedKeys.has(targetKey(workflow)),
+            });
             if (outcome === 'toggled') {
               workflowsToggled += 1;
             } else if (outcome === 'failed') {
