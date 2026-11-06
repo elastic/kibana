@@ -18,14 +18,19 @@ export const apiTest = baseApiTest.extend<{}, { seedK8sDeployments: void }>({
       // Elasticsearch's built-in `metrics-otel@template` creates data streams only and matches the
       // archive's time-series index, which must be a plain index to keep fixed timestamps. A
       // higher-priority template without `data_stream` lets the archive create it; esArchiver
-      // cannot load index templates itself.
+      // cannot load index templates itself. The template only matters while the index is created,
+      // so it is deleted right after the load and never outlives it.
       await esClient.indices.putIndexTemplate({
         name: K8S_TSDS_INDEX_TEMPLATE,
         index_patterns: [K8S_TSDS_INDEX],
         priority: 500,
         template: {},
       });
-      await esArchiver.loadIfNeeded(K8S_ARCHIVE);
+      try {
+        await esArchiver.loadIfNeeded(K8S_ARCHIVE);
+      } finally {
+        await esClient.indices.deleteIndexTemplate({ name: K8S_TSDS_INDEX_TEMPLATE });
+      }
       await use();
     },
     { scope: 'worker', auto: true },

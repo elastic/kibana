@@ -202,9 +202,7 @@
         "time_series": {
           "start_time": "2026-11-05T00:00:00.000Z",
           "end_time": "2026-11-06T00:00:00.000Z"
-        },
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
+        }
       }
     }
   }
