@@ -7,14 +7,14 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { MANAGED_TAIL_SAMPLING_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
+import { TAIL_SAMPLING_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
 
 /**
  * These schemas only check that the stored keys exist and have the right type.
  * Rules such as "sample rate is between 0 and 100" belong to the route validator:
  * a rule here could make an already stored document fail on read.
  */
-const managedTailSamplingAttributes = {
+const tailSamplingAttributes = {
   enabled: schema.boolean(),
   // The ordered policy list, serialized as JSON.
   policiesJson: schema.string(),
@@ -23,19 +23,18 @@ const managedTailSamplingAttributes = {
   updatedBy: schema.maybe(schema.string()),
 };
 
-export const managedTailSamplingCreateSchema = schema.object(managedTailSamplingAttributes);
+export const tailSamplingCreateSchema = schema.object(tailSamplingAttributes);
 
-export const managedTailSamplingForwardCompatibilitySchema = schema.object(
-  managedTailSamplingAttributes,
-  { unknowns: 'ignore' }
-);
+export const tailSamplingForwardCompatibilitySchema = schema.object(tailSamplingAttributes, {
+  unknowns: 'ignore',
+});
 
 /**
  * One document for the whole project, not one per Kibana space, because the
  * collector that polls it has no space to choose. Hence `agnostic`.
  */
-export const managedTailSampling: SavedObjectsType = {
-  name: MANAGED_TAIL_SAMPLING_SAVED_OBJECT_TYPE,
+export const tailSampling: SavedObjectsType = {
+  name: TAIL_SAMPLING_SAVED_OBJECT_TYPE,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {
@@ -46,8 +45,8 @@ export const managedTailSampling: SavedObjectsType = {
     '1': {
       changes: [],
       schemas: {
-        create: managedTailSamplingCreateSchema,
-        forwardCompatibility: managedTailSamplingForwardCompatibilitySchema,
+        create: tailSamplingCreateSchema,
+        forwardCompatibility: tailSamplingForwardCompatibilitySchema,
       },
     },
   },
