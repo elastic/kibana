@@ -362,7 +362,7 @@ apiTest.describe(
       'returns no rows to a user who cannot read the source indices',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader: restrictedCookieHeader } = await samlAuth.asInteractiveUser({
-          kibana: [{ base: ['read'], spaces: ['*'] }],
+          kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
           elasticsearch: { cluster: [], indices: [{ names: ['logs-*'], privileges: ['read'] }] },
         });
 
