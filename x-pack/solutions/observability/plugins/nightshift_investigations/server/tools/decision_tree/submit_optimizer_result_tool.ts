@@ -204,8 +204,8 @@ interface RetryState {
   visits: Set<string>;
   /** Tree slugs whose causal-path reinforcement was counted. */
   reinforcements: Set<string>;
-  /** {@link learningRetryKey} of each learning written to a head. */
-  persistedLearnings: Set<string>;
+  /** {@link learningRetryKey} of the learning last written to a head, by {@link learningSlotKey}. */
+  persistedLearnings: Map<string, string>;
   /** Version documents owed by heads that were saved, by tree slug. */
   pendingVersions: Map<string, PendingVersionWrite>;
 }
@@ -219,7 +219,7 @@ const freshRetryState = (): RetryState => ({
   edits: new Set(),
   visits: new Set(),
   reinforcements: new Set(),
-  persistedLearnings: new Set(),
+  persistedLearnings: new Map(),
   pendingVersions: new Map(),
 });
 
@@ -233,21 +233,27 @@ const provenanceFieldsOf = (
     : {}),
 });
 
-/** Identifies one learning across attempts, so a retry does not write it to its tree again. */
-const learningRetryKey = ({
+/** The store keeps one learning per tree, kind, category and connector; the newest replaces it. */
+const learningSlotKey = ({
   tree_id: treeId = '',
   kind,
   category,
   connector_name: connectorName,
-  content,
 }: LearningRecord): string =>
-  JSON.stringify([
-    symptomSlugFromTreeId(treeId),
-    kind,
-    category ?? '',
-    connectorName ?? '',
-    content,
-  ]);
+  JSON.stringify([symptomSlugFromTreeId(treeId), kind, category ?? '', connectorName ?? '']);
+
+/** Identifies one learning across attempts, so a retry does not write it to its tree again. */
+const learningRetryKey = (learning: LearningRecord): string =>
+  JSON.stringify([learningSlotKey(learning), learning.content]);
+
+/** The last learning recorded in each slot, since an earlier one in that slot would be replaced. */
+const latestLearningPerSlot = (learnings: readonly LearningRecord[]): LearningRecord[] => {
+  const bySlot = new Map<string, LearningRecord>();
+  for (const learning of learnings) {
+    bySlot.set(learningSlotKey(learning), learning);
+  }
+  return [...bySlot.values()];
+};
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -354,11 +360,14 @@ export const createSubmitOptimizerResultTool = ({
         : undefined;
       // Peek until every submission is accepted. Draining first would drop this turn's learnings
       // when the agent has to fix a rejected file and call submit again.
-      const turnLearnings = peekLearnings?.(conversationId) ?? [];
+      // A slot is pending until the head holds the turn's latest learning for it: a retry that
+      // recorded an earlier value again must still overwrite whatever was written in between.
+      const turnLearnings = latestLearningPerSlot(
+        (peekLearnings?.(conversationId) ?? []).filter((learning) => learning.tree_id !== undefined)
+      );
       const pendingLearnings = turnLearnings.filter(
         (learning) =>
-          learning.tree_id !== undefined &&
-          !state.persistedLearnings.has(learningRetryKey(learning))
+          state.persistedLearnings.get(learningSlotKey(learning)) !== learningRetryKey(learning)
       );
       const outcomes: SubmissionOutcome[] = [];
       const committedThisAttempt = new Set<string>();
@@ -405,7 +414,7 @@ export const createSubmitOptimizerResultTool = ({
         }
         for (const learning of outcome.persistedLearnings ?? []) {
           const key = learningRetryKey(learning);
-          state.persistedLearnings.add(key);
+          state.persistedLearnings.set(learningSlotKey(learning), key);
           committedThisAttempt.add(key);
         }
         if (outcome.pendingVersion) {

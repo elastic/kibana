@@ -1266,6 +1266,46 @@ describe('nightshift_submit_optimizer_result counts', () => {
         expect(commitsFor(store, TREE_ID)).toHaveLength(1);
       });
 
+      // The store keeps one learning per slot, so the head must end on the turn's latest value
+      // even when that value was already written once and then replaced.
+      it('writes a learning again when a later retry replaced it in its slot', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const first = learningFor(TREE_ID, 'Checkout writes through a pool.');
+        const second = learningFor(TREE_ID, 'Checkout writes through a queue.');
+        const { submit } = createTool({
+          store,
+          peekLearnings: jest
+            .fn()
+            .mockReturnValueOnce([first])
+            .mockReturnValueOnce([first, second])
+            .mockReturnValue([first, second, first]),
+        });
+
+        await submit({ symptom_trees: [otherSubmission] });
+        await submit({ symptom_trees: [otherSubmission] });
+        await submit({ symptom_trees: [otherSubmission] });
+
+        expect(commitsFor(store, TREE_ID)).toEqual([
+          expect.objectContaining({ learnings: [first] }),
+          expect.objectContaining({ learnings: [second] }),
+          expect.objectContaining({ learnings: [first] }),
+        ]);
+      });
+
+      it('writes only the latest learning per slot and not again once the head holds it', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const first = learningFor(TREE_ID, 'Checkout writes through a pool.');
+        const second = learningFor(TREE_ID, 'Checkout writes through a queue.');
+        const { submit } = createTool({ store, peekLearnings: () => [first, second] });
+
+        await submit({ symptom_trees: [otherSubmission] });
+        await submit({ symptom_trees: [otherSubmission] });
+
+        expect(commitsFor(store, TREE_ID)).toEqual([
+          expect.objectContaining({ learnings: [second] }),
+        ]);
+      });
+
       it('attaches a learning recorded after the edit of its tree was saved', async () => {
         const store = createStore(stored(FULL_TREE));
         const learning = learningFor(TREE_ID);
