@@ -62,7 +62,7 @@ export interface ConversationTemplateDetailsFlyoutDescriptor {
   header: {
     /**
      * Plain text, so the collapsed header can show it in full on hover. The flyout menu is titled
-     * "Chat info" either way.
+     * "Summary" either way.
      */
     title: string;
     description?: ReactNode;
@@ -139,7 +139,7 @@ export interface ConversationTemplateUIDefinition {
      * Loads the module that describes the flyout's header and footer. Called once, the first time
      * a flyout for this template opens; the flyout shows its loading state until it resolves. Use
      * a dynamic `import()` so the module stays out of the page-load bundle. Without it, the flyout
-     * is titled "Chat info" and has no footer.
+     * is titled "Summary" and has no footer.
      */
     load?: () => Promise<ConversationTemplateDetailsFlyoutModule>;
     /**

@@ -17,6 +17,8 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
+import type { EnhancedServiceStatsOptions } from './get_enhanced_service_stats';
+import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 import { getServiceCallGraph } from './get_service_call_graph';
 import { matchCallGraphToServices } from './match_service_call_graph';
@@ -85,15 +87,19 @@ async function getConnectionData({
   });
 }
 
+/** Service map grouping features, only available when service map grouping is enabled */
+export type ServiceMapGrouping =
+  | { enabled: false }
+  | ({ enabled: true } & Pick<EnhancedServiceStatsOptions, 'source'>);
+
 export function getServiceMap(
   options: IEnvOptions & {
     maxNumberOfServices: number;
-    /** When off, the call graph query does not run and the map is unchanged. */
-    groupingEnabled?: boolean;
+    grouping: ServiceMapGrouping;
   }
 ): Promise<ServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
-    const { logger } = options;
+    const { logger, grouping } = options;
     const anomaliesPromise = getServiceAnomalies(
       options
 
@@ -105,7 +111,7 @@ export function getServiceMap(
 
     // A service page map stays ungrouped. A failed query leaves this map unchanged.
     const callGraphPromise =
-      options.groupingEnabled && !options.serviceName
+      grouping.enabled && !options.serviceName
         ? getServiceCallGraph(options).catch((error) => {
             logger.debug(`Unable to retrieve the call graph for service maps.`, { error });
             return undefined;
@@ -114,7 +120,9 @@ export function getServiceMap(
 
     const [connectionData, servicesData, anomalies, callGraph] = await Promise.all([
       getConnectionData(options),
-      getServiceStats(options),
+      grouping.enabled
+        ? getEnhancedServiceStats({ ...options, source: grouping.source })
+        : getServiceStats(options),
       anomaliesPromise,
       callGraphPromise,
     ]);

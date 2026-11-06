@@ -45,7 +45,7 @@ const ERROR_BODY = 'Something went wrong while loading this conversation.';
 /** The hosts render the content inside a frame, which shows its loading state while a module loads. */
 const FrameWrapper = ({ children }: PropsWithChildren) => (
   <EuiProvider>
-    <FlyoutTemplate.Frame onClose={jest.fn()} flyoutMenuProps={{ title: 'Chat info' }}>
+    <FlyoutTemplate.Frame onClose={jest.fn()} flyoutMenuProps={{ title: 'Summary' }}>
       {children}
     </FlyoutTemplate.Frame>
   </EuiProvider>
@@ -409,7 +409,7 @@ describe('ConversationDetailsFlyoutContent', () => {
 
     renderContent(createService({ detailsFlyout: { load } }));
 
-    expect(screen.getByRole('heading', { name: 'Chat info' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
     expect(screen.getByTestId('flyoutHeaderTitleLoading')).toBeInTheDocument();
 
     await act(async () =>
@@ -515,17 +515,17 @@ describe('ConversationDetailsFlyoutContent', () => {
     expect(screen.getByTestId('agentBuilderConversationDetailsFlyoutFooter')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderConversationDetailsFlyoutTabs')).toHaveAttribute(
       'aria-label',
-      'Chat info tabs'
+      'Summary tabs'
     );
     expect(
       screen.getByTestId('agentBuilderConversationDetailsFlyoutTab-test.second')
     ).toHaveAttribute('role', 'tab');
   });
 
-  it('titles the flyout "Chat info" for a conversation with no template', () => {
+  it('titles the flyout "Summary" for a conversation with no template', () => {
     renderContent(createService({}), createConversation({ template_id: undefined }));
 
-    expect(screen.getByRole('heading', { name: 'Chat info' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
   });
 });
 

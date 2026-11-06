@@ -6,6 +6,7 @@
  */
 
 import { uniq } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   AGENTS_INDEX,
@@ -185,7 +186,9 @@ export const parseAgentSelection = async (
       if (platformsSelected.length > 0 || policiesSelected.length > 0) {
         const groupFragments = [];
         if (platformsSelected.length) {
-          groupFragments.push(`local_metadata.os.platform:(${platformsSelected.join(' or ')})`);
+          // Quoted: a bare `and` / `or` / `not` platform value would be read as a KQL operator.
+          const platformValues = platformsSelected.map((platform) => `"${escapeQuotes(platform)}"`);
+          groupFragments.push(`local_metadata.os.platform:(${platformValues.join(' or ')})`);
         }
 
         if (policiesSelected.length) {

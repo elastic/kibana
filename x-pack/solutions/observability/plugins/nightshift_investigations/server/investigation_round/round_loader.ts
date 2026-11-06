@@ -313,7 +313,7 @@ export const stepsFromToolCalls = (
   );
 };
 
-const toolCallsFromRoundSteps = (steps: readonly RawRoundStep[]): InvestigationToolCall[] =>
+export const toolCallsFromRoundSteps = (steps: readonly RawRoundStep[]): InvestigationToolCall[] =>
   steps.flatMap((step) => {
     if (step.type !== 'tool_call' || typeof step.tool_id !== 'string') {
       return [];

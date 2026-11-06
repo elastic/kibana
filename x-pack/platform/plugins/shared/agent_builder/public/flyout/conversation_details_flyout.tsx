@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Component, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
@@ -26,10 +26,10 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
-import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
+import { useConversationFlyoutWidthProps } from './conversation_details_flyout_width';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
-  defaultMessage: 'Chat info',
+  defaultMessage: 'Summary',
 });
 
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
@@ -37,7 +37,7 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
 });
 
 const TAB_BAR_LABEL = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabBarLabel', {
-  defaultMessage: 'Chat info tabs',
+  defaultMessage: 'Summary tabs',
 });
 
 /**
@@ -365,9 +365,7 @@ export interface ConversationDetailsFlyoutProps {
 export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyoutProps) => {
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
-  // Resolved once per open: EUI re-seeds the flyout whenever `size` changes, so reading the
-  // remembered width again on every render would fight the user's drag.
-  const widthPropsRef = useRef(getConversationDetailsFlyoutWidthProps());
+  const widthProps = useConversationFlyoutWidthProps();
 
   const trailingActions = useMemo(() => {
     if (!conversation?.template_id) {
@@ -401,7 +399,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       session="start"
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
-      {...widthPropsRef.current}
+      {...widthProps}
       type="push"
       role="region"
       data-test-subj="agentBuilderConversationDetailsFlyout-live"

@@ -63,7 +63,7 @@ describe('openConversationDetailsFlyout', () => {
       expect.objectContaining({
         session: 'start',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-        flyoutMenuProps: expect.objectContaining({ title: 'Chat info' }),
+        flyoutMenuProps: expect.objectContaining({ title: 'Summary' }),
         type: 'push',
       }),
       expect.any(Function)
@@ -82,7 +82,7 @@ describe('openConversationDetailsFlyout', () => {
 
     expect(core.overlays.openFlyoutTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
-        flyoutMenuProps: { title: 'Chat info', trailingActions: [copyLink] },
+        flyoutMenuProps: { title: 'Summary', trailingActions: [copyLink] },
       }),
       expect.any(Function)
     );
