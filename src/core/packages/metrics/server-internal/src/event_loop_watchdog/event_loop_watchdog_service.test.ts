@@ -19,10 +19,13 @@ import {
   EventLoopWatchdogService,
 } from './event_loop_watchdog_service';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
+import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 
 jest.mock('./event_loop_watchdog');
+jest.mock('./resolve_diagnostic_dir');
 
 const EventLoopWatchdogMock = jest.mocked(EventLoopWatchdog);
+const resolveDiagnosticDirMock = jest.mocked(resolveDiagnosticDir);
 
 const available: ServiceStatus = { level: ServiceStatusLevels.available, summary: '' };
 const degraded: ServiceStatus = { level: ServiceStatusLevels.degraded, summary: '' };
@@ -59,6 +62,7 @@ describe('EventLoopWatchdogService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     EventLoopWatchdogMock.mockClear();
+    resolveDiagnosticDirMock.mockReset().mockReturnValue('/diag');
     overall$ = new BehaviorSubject(degraded);
     flag$ = new Subject();
     getBooleanValue$ = jest.fn(() => flag$);
@@ -79,6 +83,12 @@ describe('EventLoopWatchdogService', () => {
           format: 'text',
           service: { node: { roles: ['background_tasks'] }, version: '9.3.0', type: 'kibana' },
         },
+        profiling: {
+          startAfterMs: { starting: 30_000, running: 30_000 },
+          maxDurationMs: { starting: 10_000, running: 10_000 },
+          cooldownMs: { starting: 60_000, running: 60_000 },
+          diagnosticDir: '/diag',
+        },
       });
     });
 
@@ -90,6 +100,33 @@ describe('EventLoopWatchdogService', () => {
     it('uses startup.blockThreshold for the starting phase when set', async () => {
       await setup({ blockThreshold: '500ms', startup: { blockThreshold: '2s' } });
       expect(params().thresholdsMs).toEqual({ starting: 2000, running: 500 });
+    });
+
+    it('uses the profiling settings for both phases when startup.profiling is unset', async () => {
+      await setup({ profiling: { startAfter: '1m', maxDuration: '5s', cooldown: '10m' } });
+      expect(params().profiling).toMatchObject({
+        startAfterMs: { starting: 60_000, running: 60_000 },
+        maxDurationMs: { starting: 5_000, running: 5_000 },
+        cooldownMs: { starting: 600_000, running: 600_000 },
+      });
+    });
+
+    it('falls back to each running profiling setting on its own', async () => {
+      await setup({
+        profiling: { startAfter: '1m' },
+        startup: { profiling: { startAfter: '2m', cooldown: '30s' } },
+      });
+      expect(params().profiling).toMatchObject({
+        startAfterMs: { starting: 120_000, running: 60_000 },
+        maxDurationMs: { starting: 10_000, running: 10_000 },
+        cooldownMs: { starting: 30_000, running: 60_000 },
+      });
+    });
+
+    it('leaves the diagnostic directory unset when Node has none', async () => {
+      resolveDiagnosticDirMock.mockReturnValue(undefined);
+      await setup();
+      expect(params().profiling.diagnosticDir).toBeUndefined();
     });
   });
 

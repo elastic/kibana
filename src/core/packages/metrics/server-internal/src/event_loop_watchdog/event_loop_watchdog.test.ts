@@ -24,6 +24,12 @@ const logging = {
   format: 'json',
   service: { node: { roles: ['ui'] }, version: '9.3.0', type: 'kibana' },
 } as const;
+const profiling = {
+  startAfterMs: { starting: 30_000, running: 30_000 },
+  maxDurationMs: { starting: 10_000, running: 10_000 },
+  cooldownMs: { starting: 60_000, running: 60_000 },
+  diagnosticDir: '/diag',
+};
 
 describe('EventLoopWatchdog', () => {
   let worker: jest.Mocked<ManagedWorker>;
@@ -43,6 +49,7 @@ describe('EventLoopWatchdog', () => {
       thresholdsMs: { starting: 300, running: 200 },
       statsIntervalMs: 600_000,
       logging,
+      profiling,
       workerEntry: '/entry.js',
     });
 
@@ -76,6 +83,7 @@ describe('EventLoopWatchdog', () => {
         thresholdsMs: { starting: 300, running: 200 },
         statsIntervalMs: 600_000,
         logging,
+        profiling,
       },
     });
     expect(worker.start).toHaveBeenCalledTimes(1);
@@ -87,6 +95,7 @@ describe('EventLoopWatchdog', () => {
       thresholdsMs: { starting: 200, running: 200 },
       statsIntervalMs: 600_000,
       logging,
+      profiling,
     }).start();
     expect(options().entry).toBe(require.resolve('./worker'));
   });
@@ -189,6 +198,7 @@ describe('EventLoopWatchdog', () => {
       thresholdsMs: { starting: 200, running: 200 },
       statsIntervalMs: 600_000,
       logging: { ...logging, format: undefined },
+      profiling,
       workerEntry: '/entry.js',
     }).start();
     expect(logger.warn).toHaveBeenCalledWith(
@@ -202,6 +212,7 @@ describe('EventLoopWatchdog', () => {
       thresholdsMs: { starting: 200, running: 200 },
       statsIntervalMs: 600_000,
       logging: { ...logging, level: 'warn' },
+      profiling,
       workerEntry: '/entry.js',
     }).start();
     expect(logger.warn).toHaveBeenCalledWith(
@@ -217,6 +228,7 @@ describe('EventLoopWatchdog', () => {
         thresholdsMs: { starting: 200, running: 200 },
         statsIntervalMs: 600_000,
         logging: { ...logging, level },
+        profiling,
         workerEntry: '/entry.js',
       }).start();
       expect(logger.error).toHaveBeenCalledWith(

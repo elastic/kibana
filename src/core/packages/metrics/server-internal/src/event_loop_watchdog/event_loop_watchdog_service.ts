@@ -27,6 +27,7 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
+import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 
@@ -70,6 +71,11 @@ export class EventLoopWatchdogService {
       firstValueFrom(configService.atPath<LoggingConfigSubset>('logging')),
     ]);
     const runningThresholdMs = config.blockThreshold.asMilliseconds();
+    const { profiling, startup } = config;
+    const perPhaseMs = (key: keyof typeof profiling) => ({
+      starting: (startup.profiling[key] ?? profiling[key]).asMilliseconds(),
+      running: profiling[key].asMilliseconds(),
+    });
     this.enabledFallback = config.enabled;
     this.watchdog = new EventLoopWatchdog({
       logger: this.logger,
@@ -82,6 +88,12 @@ export class EventLoopWatchdogService {
         nodeRoles,
         version: serviceVersion,
       }),
+      profiling: {
+        startAfterMs: perPhaseMs('startAfter'),
+        maxDurationMs: perPhaseMs('maxDuration'),
+        cooldownMs: perPhaseMs('cooldown'),
+        diagnosticDir: resolveDiagnosticDir(),
+      },
     });
   }
 

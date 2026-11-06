@@ -75,6 +75,11 @@ const create = (workerEntry?: string) =>
       format: 'json',
       service: { node: { roles: ['background_tasks'] }, version: 'harness', type: 'kibana' },
     },
+    profiling: {
+      startAfterMs: { starting: 30_000, running: 30_000 },
+      maxDurationMs: { starting: 10_000, running: 10_000 },
+      cooldownMs: { starting: 60_000, running: 60_000 },
+    },
     workerEntry,
   });
 
