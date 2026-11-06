@@ -31,9 +31,7 @@ export function StreamsLayout() {
   } = useStreamsAppParams('/new-experience/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    features: { canvas },
-  } = useStreamsPrivileges();
+  const { access } = useStreamsPrivileges();
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
     () =>
@@ -50,7 +48,7 @@ export function StreamsLayout() {
     [tab, router, rangeFrom, rangeTo]
   );
 
-  if (!canvas.enabled) {
+  if (!access.v2) {
     return <RedirectTo path="/" />;
   }
 
