@@ -14,8 +14,8 @@ export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID = 'system-sources-ki-onb
 
 /**
  * The space's entry point to KI onboarding, installed per space and bound to the detection engine
- * service account. It calls the shared onboarding workflow, which inherits its identity and hands
- * it to the workflows it starts. A space without this entry point cannot run KI extraction.
+ * service account. It runs features identification and queries generation itself, as child
+ * workflows that inherit its identity. A space without this entry point cannot run KI extraction.
  */
 export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
