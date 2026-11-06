@@ -29,10 +29,15 @@ export const loadDataAvailabilityOnce: InternalStateThunkActionCreator<
     let request = initialDataAvailabilityRequests.get(runtimeStateManager);
 
     if (!request) {
-      request = fetchDataAvailability(services).then((dataAvailability) => {
-        dispatch(internalStateSlice.actions.setInitializationState(dataAvailability));
-        return dataAvailability;
-      });
+      request = fetchDataAvailability(services)
+        .then((dataAvailability) => {
+          dispatch(internalStateSlice.actions.setInitializationState(dataAvailability));
+          return dataAvailability;
+        })
+        .catch((error) => {
+          initialDataAvailabilityRequests.delete(runtimeStateManager);
+          throw error;
+        });
       initialDataAvailabilityRequests.set(runtimeStateManager, request);
     }
 
