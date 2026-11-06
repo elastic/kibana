@@ -28,6 +28,8 @@ export interface PatternKeys {
   /** Absent when the alert has no identifying field. */
   strict?: string;
   wide: string;
+  /** True when the wide key has no condition, so it groups by rule and detection only. */
+  wideIsRuleOnly: boolean;
 }
 
 type PathKind = 'library' | 'registry' | 'file' | 'process';
@@ -263,8 +265,12 @@ export const describePatternKey = (key: string): PatternKeyDescription => {
 /** The strict and the wide key of an alert document, as stable strings (hash them to store them). */
 export const buildPatternKeys = (doc: AlertDocument): PatternKeys => {
   const condition = buildCondition(doc);
-  if (condition === undefined) return { wide: serialize(doc, undefined) };
+  if (condition === undefined) return { wide: serialize(doc, undefined), wideIsRuleOnly: true };
   // A cloud alert keeps its wide key, so proposals and grouping do not change; only decisions use the new strict key.
   const wide = condition.kind === 'cloud' ? undefined : widen(condition);
-  return { strict: serialize(doc, condition), wide: serialize(doc, wide) };
+  return {
+    strict: serialize(doc, condition),
+    wide: serialize(doc, wide),
+    wideIsRuleOnly: wide === undefined,
+  };
 };
