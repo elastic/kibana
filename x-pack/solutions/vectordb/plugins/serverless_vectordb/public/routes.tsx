@@ -34,12 +34,24 @@ const OnboardingRoutes = ({ onOnboardingExit }: AppRoutesProps) => {
   );
 };
 
+const Home = ({ onOnboardingExit }: AppRoutesProps) => {
+  useEffect(() => onOnboardingExit(), [onOnboardingExit]);
+
+  return <HomePage />;
+};
+
 export const AppRoutes = ({ onOnboardingExit }: AppRoutesProps) => (
   <Routes>
     <Route
       exact
       path="/"
-      render={() => (hasSeenOnboarding() ? <HomePage /> : <Redirect to={GETTING_STARTED_PATH} />)}
+      render={() =>
+        hasSeenOnboarding() ? (
+          <Home onOnboardingExit={onOnboardingExit} />
+        ) : (
+          <Redirect to={GETTING_STARTED_PATH} />
+        )
+      }
     />
     <Route path={GETTING_STARTED_PATH}>
       <OnboardingRoutes onOnboardingExit={onOnboardingExit} />

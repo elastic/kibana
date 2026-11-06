@@ -74,16 +74,24 @@ describe('AppRoutes', () => {
       expect(onOnboardingExit).not.toHaveBeenCalled();
     });
 
-    it('is called once when leaving the wizard', () => {
+    it('is called when leaving the wizard', () => {
       const history = renderRoutes(`${GETTING_STARTED_PATH}/search`);
 
       act(() => history.push('/'));
 
       expect(screen.getByTestId('homePage')).toBeInTheDocument();
+      expect(onOnboardingExit).toHaveBeenCalled();
+    });
+
+    it('is called when the home page renders without the wizard being entered', () => {
+      renderRoutes('/');
+
       expect(onOnboardingExit).toHaveBeenCalledTimes(1);
     });
 
-    it('is not called when the wizard was never entered', () => {
+    it('is not called when a first-time user is redirected into the wizard', () => {
+      mockHasSeenOnboarding.mockReturnValue(false);
+
       renderRoutes('/');
 
       expect(onOnboardingExit).not.toHaveBeenCalled();
