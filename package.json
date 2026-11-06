@@ -1145,6 +1145,7 @@
     "@kbn/search-api-keys-server": "workspace:*",
     "@kbn/search-api-panels": "workspace:*",
     "@kbn/search-assistant": "workspace:*",
+    "@kbn/search-boost-plugin": "workspace:*",
     "@kbn/search-code-examples": "workspace:*",
     "@kbn/search-connectors": "workspace:*",
     "@kbn/search-errors": "workspace:*",

@@ -3361,6 +3361,9 @@ importers:
       '@kbn/search-assistant':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_assistant
+      '@kbn/search-boost-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/search_boost
       '@kbn/search-code-examples':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-search-code-examples
@@ -9408,6 +9411,8 @@ importers:
   x-pack/platform/plugins/private/rollup: {}
 
   x-pack/platform/plugins/private/runtime_fields: {}
+
+  x-pack/platform/plugins/private/search_boost: {}
 
   x-pack/platform/plugins/private/snapshot_restore: {}
 
