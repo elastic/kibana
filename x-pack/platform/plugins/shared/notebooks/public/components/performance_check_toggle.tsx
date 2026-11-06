@@ -8,28 +8,37 @@
 import React from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const TOGGLE_LABEL = i18n.translate('xpack.notebook.performanceCheck.toggle', {
-  defaultMessage: 'Notebook performance check',
+const LABEL = i18n.translate('xpack.notebook.performanceCheck.label', {
+  defaultMessage: 'Performance',
+});
+
+const TOOLTIP = i18n.translate('xpack.notebook.performanceCheck.tooltip', {
+  defaultMessage: 'Click to toggle the notebook performance check.',
+});
+
+const ARIA_LABEL = i18n.translate('xpack.notebook.performanceCheck.toggle', {
+  defaultMessage: 'Toggle notebook performance check',
 });
 
 /** Toggles the notebook performance check from the developer toolbar. */
 export const PerformanceCheckToggle = ({ enabled$ }: { enabled$: BehaviorSubject<boolean> }) => {
   const enabled = useObservable(enabled$, enabled$.getValue());
   return (
-    <EuiToolTip content={TOGGLE_LABEL} position="top" disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="chartLine"
-        color="text"
-        size="xs"
-        isSelected={enabled}
-        aria-pressed={enabled}
-        aria-label={TOGGLE_LABEL}
+    <EuiToolTip content={TOOLTIP}>
+      <EuiBadge
+        color="hollow"
         onClick={() => enabled$.next(!enabled)}
+        onClickAriaLabel={ARIA_LABEL}
+        aria-pressed={enabled}
         data-test-subj="notebookPerformanceCheckToggle"
-      />
+      >
+        <EuiHealth color={enabled ? 'success' : 'danger'} textSize="xs">
+          {LABEL}
+        </EuiHealth>
+      </EuiBadge>
     </EuiToolTip>
   );
 };

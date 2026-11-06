@@ -6,6 +6,7 @@
  */
 
 import React, { Suspense, lazy } from 'react';
+import { distinctUntilChanged, map, type Subscription } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { CustomContentPublicStart } from '@kbn/custom-content-plugin/public';
@@ -28,7 +29,7 @@ const LazyPerformanceCheckToggle = lazy(async () => {
 
 export class NotebookPlugin implements Plugin<void, void, {}, NotebookStartDependencies> {
   private readonly performanceCheck$ = createPerformanceCheck$();
-  private unregisterToolbarItem?: () => void;
+  private toolbarSubscription?: Subscription;
 
   public setup(core: CoreSetup<NotebookStartDependencies>): void {
     core.application.register({
@@ -53,18 +54,33 @@ export class NotebookPlugin implements Plugin<void, void, {}, NotebookStartDepen
     });
   }
 
-  public start(_core: CoreStart, { developerToolbar }: NotebookStartDependencies): void {
-    this.unregisterToolbarItem = developerToolbar?.registerItem({
-      id: 'Notebook Performance Check',
-      children: (
-        <Suspense fallback={null}>
-          <LazyPerformanceCheckToggle enabled$={this.performanceCheck$} />
-        </Suspense>
-      ),
-    });
+  public start(core: CoreStart, { developerToolbar }: NotebookStartDependencies): void {
+    if (!developerToolbar) return;
+    let unregister: (() => void) | undefined;
+    this.toolbarSubscription = core.application.currentAppId$
+      .pipe(
+        map((appId) => appId === APP_ID),
+        distinctUntilChanged()
+      )
+      .subscribe((isNotebookApp) => {
+        unregister?.();
+        unregister = isNotebookApp
+          ? developerToolbar.registerItem({
+              id: 'Notebook Performance Check',
+              // Higher priority sorts first, placing this left of the toolbar's own items.
+              priority: 1,
+              children: (
+                <Suspense fallback={null}>
+                  <LazyPerformanceCheckToggle enabled$={this.performanceCheck$} />
+                </Suspense>
+              ),
+            })
+          : undefined;
+      });
+    this.toolbarSubscription.add(() => unregister?.());
   }
 
   public stop(): void {
-    this.unregisterToolbarItem?.();
+    this.toolbarSubscription?.unsubscribe();
   }
 }
