@@ -603,6 +603,83 @@ describe('McpConnector', () => {
         expect(logger.error).toHaveBeenLastCalledWith(expect.stringContaining('retries disabled'));
       });
 
+      it('counts concurrent failures on one pooled client once', async () => {
+        const rejectOperations: Array<(error: Error) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((_, reject) => {
+              rejectOperations.push(reject);
+            })
+        );
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+        const calls = [
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+        ];
+
+        for (let turn = 0; turn < 10 && rejectOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(fakeClient.callTool).toHaveBeenCalledTimes(3);
+        expect(rejectOperations).toHaveLength(3);
+        rejectOperations.forEach((rejectOperation, index) =>
+          rejectOperation(new Error(`socket closed ${index}`))
+        );
+        const errors = await Promise.all(calls);
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(errors.every((err) => isRetryableError(err as Error) === null)).toBe(true);
+      });
+
+      it('resets a lease generation after a mixed concurrent success and failure', async () => {
+        fakeClient.callTool
+          .mockRejectedValueOnce(new Error('socket closed'))
+          .mockRejectedValueOnce(new Error('socket closed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+
+        const rejectOperations: Array<(error: Error) => void> = [];
+        const resolveOperations: Array<(value: { content: [] }) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((resolve, reject) => {
+              resolveOperations.push(resolve);
+              rejectOperations.push(reject);
+            })
+        );
+        const failedCall = expectCallToolError(connector);
+        const successfulCall = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        const laterFailedCall = expectCallToolError(connector);
+
+        for (let turn = 0; turn < 10 && rejectOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(fakeClient.callTool).toHaveBeenCalledTimes(5);
+        rejectOperations[0](new Error('socket closed'));
+        for (let turn = 0; turn < 10 && connectionFailures.get(leaseKey) !== 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(connectionFailures.get(leaseKey)).toBe(3);
+        resolveOperations[1]({ content: [] });
+        await successfulCall;
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+
+        rejectOperations[2](new Error('socket closed'));
+        const [firstError, laterError] = await Promise.all([failedCall, laterFailedCall]);
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(isRetryableError(firstError as Error)).toBe(false);
+        expect(isRetryableError(laterError as Error)).toBeNull();
+      });
+
       it('resets the counter after a success so the next failure is retryable', async () => {
         fakeClient.callTool
           .mockRejectedValueOnce(new Error('socket closed'))

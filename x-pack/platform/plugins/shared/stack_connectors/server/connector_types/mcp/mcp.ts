@@ -75,7 +75,7 @@ export const connectionFailures = new LRUCache<string, number>({
   ttlAutopurge: false,
 });
 
-const failedBuildCounts = new WeakMap<Promise<McpClient>, number>();
+const failedLeaseCounts = new WeakMap<Promise<McpClient>, number>();
 
 export interface McpTestConnectorResponse {
   connected: boolean;
@@ -200,31 +200,24 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       () => this.buildClient(),
       (client) => clientTypes.mcp.terminate(client)
     );
-    let buildRejected = false;
-    const clientPromise = promise.catch((err) => {
-      buildRejected = true;
-      throw err;
-    });
-
     try {
-      const result = await fn(await clientPromise);
+      const result = await fn(await promise);
       connectionFailures.delete(key);
+      failedLeaseCounts.delete(promise);
       return result;
     } catch (err) {
       // Release first: invalidate waits for every active use, including this one, to finish.
       release();
       const isConnectionError = clientTypes.mcp.shouldInvalidateOnError?.(err) ?? false;
       const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
-      if (isConnectionError) {
-        await this.pool.invalidate(key, promise);
-      }
-
       let retry = true;
       if (isConnectionError && !isUserError) {
-        const failureCount = buildRejected
-          ? failedBuildCounts.get(promise) ?? this.recordAndRememberBuildFailure(key, promise)
-          : this.recordConnectionFailure(key);
+        const failureCount =
+          failedLeaseCounts.get(promise) ?? this.recordAndRememberLeaseFailure(key, promise);
         retry = failureCount < CONNECTION_FAILURE_RETRY_LIMIT;
+      }
+      if (isConnectionError) {
+        await this.pool.invalidate(key, promise);
       }
 
       this.throwClassified(operation, err, {
@@ -243,9 +236,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     return count;
   }
 
-  private recordAndRememberBuildFailure(key: string, promise: Promise<McpClient>): number {
+  private recordAndRememberLeaseFailure(key: string, promise: Promise<McpClient>): number {
     const count = this.recordConnectionFailure(key);
-    failedBuildCounts.set(promise, count);
+    failedLeaseCounts.set(promise, count);
     return count;
   }
 
