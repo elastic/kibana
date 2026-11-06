@@ -46,7 +46,7 @@ export const DashboardChangeHistoryProvider = ({
 
   const { analytics } = coreServices;
   const [isComparingToPrevious, setIsComparingToPrevious] = useState<boolean>(false);
-  const ignoreEventPropogation = useRef<boolean>(false);
+  const ignoreEventPropagation = useRef<boolean>(false);
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [previewTitle, setPreviewTitle] = useState<string>(
@@ -80,10 +80,10 @@ export const DashboardChangeHistoryProvider = ({
   const onSelectChange = useCallback<
     NonNullable<ChangeHistoryProviderProps['onSelectChange']>
   >(() => {
-    if (!ignoreEventPropogation.current) {
+    if (!ignoreEventPropagation.current) {
       setIsComparingToPrevious(false);
     }
-    ignoreEventPropogation.current = false;
+    ignoreEventPropagation.current = false;
   }, []);
 
   // renders the nChanges string as a link that triggers the comparison view
@@ -97,7 +97,7 @@ export const DashboardChangeHistoryProvider = ({
           size={'xs'}
           flush={'both'}
           onClick={() => {
-            ignoreEventPropogation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
+            ignoreEventPropagation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
             setIsComparingToPrevious(true);
           }}
         >
@@ -121,7 +121,7 @@ export const DashboardChangeHistoryProvider = ({
   );
 
   const resetComparison = useCallback(() => {
-    ignoreEventPropogation.current = false;
+    ignoreEventPropagation.current = false;
     setIsComparingToPrevious(false);
   }, []);
 

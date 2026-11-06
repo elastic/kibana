@@ -182,6 +182,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                           role="button"
                           tabIndex={0}
                           aria-describedby={actorId}
+                          aria-current={selected ? true : undefined}
                           onKeyDown={handleKeyDown}
                           css={selectButtonStyles}
                         >
