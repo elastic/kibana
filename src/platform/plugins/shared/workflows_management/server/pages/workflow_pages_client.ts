@@ -66,7 +66,10 @@ export interface WorkflowPagesClientDeps {
   canEncrypt: boolean;
   /** Internal client with the page type. Reads use it after the checks. */
   internalClient: SavedObjectsClientContract;
-  /** Request-scoped client with the page type. Writes use it, so core sets `updated_by`. */
+  /**
+   * Request-scoped client with the page type. Writes use it, so core sets `updated_by`.
+   * Its spaces extension uses the request's space and rejects a `namespace` option.
+   */
   scopedClient: SavedObjectsClientContract;
   encryptedClient: EncryptedSavedObjectsClient;
   assertWorkflowAccess: AssertWorkflowAccess;
@@ -89,8 +92,8 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
   async getSecret(key: WorkflowPageKey): Promise<string> {
     const ref = this.toRef(key);
     const { request, audit, encryptedClient } = this.deps;
-    this.assertCanEncrypt();
     try {
+      this.assertCanEncrypt();
       await this.authorize(ref, 'readPage');
       const { attributes } =
         await encryptedClient.getDecryptedAsInternalUser<WorkflowPageAttributes>(
@@ -109,15 +112,13 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
   async rotateSecret(key: WorkflowPageKey): Promise<string> {
     const ref = this.toRef(key);
     const { request, audit, scopedClient } = this.deps;
-    this.assertCanEncrypt();
     try {
+      this.assertCanEncrypt();
       await this.authorize(ref, 'managePage');
       const id = getWorkflowPageSavedObjectId(ref);
-      const namespace = namespaceOf(ref.spaceId);
       const { version } = await scopedClient.get<WorkflowPageAttributes>(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-        id,
-        { namespace }
+        id
       );
       const secret = generatePageSecret();
       // Writes the secret with every AAD attribute, so ESO encrypts it with the full AAD.
@@ -131,7 +132,7 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
           secret,
           secretHash: computePageSecretHash(ref, secret),
         },
-        { namespace, version, refresh: 'wait_for' }
+        { version, refresh: 'wait_for' }
       );
       audit.logPageSecretRotated(request, ref);
       return secret;
@@ -186,23 +187,18 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
     try {
       await this.authorize(ref, 'managePage');
       const id = getWorkflowPageSavedObjectId(ref);
-      const namespace = namespaceOf(ref.spaceId);
       // Reads first, so an update cannot create a page that the lifecycle never made.
       const { version } = await scopedClient.get<WorkflowPageAttributes>(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-        id,
-        { namespace }
+        id
       );
       await partiallyUpdateWorkflowPage(scopedClient, id, attributes, {
-        namespace,
         version,
         refresh: 'wait_for',
       });
       audit();
       return toPageDto(
-        await scopedClient.get<WorkflowPageAttributes>(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id, {
-          namespace,
-        }),
+        await scopedClient.get<WorkflowPageAttributes>(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id),
         canEncrypt
       );
     } catch (error) {

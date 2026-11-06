@@ -4737,6 +4737,61 @@ describe('workflow page lifecycle', () => {
     expect(deps.logger.error).toHaveBeenCalled();
   });
 
+  it('syncs the pages after an update, with the stored created_at', async () => {
+    const { service, client, pagesService, request } = setup();
+    client.search.mockResolvedValue({
+      hits: { hits: [occSearchHit('wf-1', { created_at: '2024-01-01T00:00:00.000Z' })] },
+    });
+
+    await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request);
+
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-1',
+        workflowCreatedAt: '2024-01-01T00:00:00.000Z',
+        spaceId: 'default',
+      })
+    );
+  });
+
+  it.each([false, true])(
+    'syncs the pages of every bulk-written workflow (overwrite=%s)',
+    async (overwrite) => {
+      const { service, client, pagesService, request } = setup();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: overwrite
+            ? [occSearchHit('existing', { created_at: '2024-01-01T00:00:00.000Z' })]
+            : [],
+        },
+      });
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'new-workflow', status: 201 } }] });
+
+      await service.bulkCreateWorkflows(
+        [
+          { id: 'new-workflow', yaml: pageYaml },
+          ...(overwrite ? [{ id: 'existing', yaml: pageYaml }] : []),
+        ],
+        'default',
+        request,
+        { overwrite }
+      );
+
+      expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'new-workflow', spaceId: 'default' })
+      );
+      if (overwrite) {
+        // An import over a workflow keeps its created_at, so its page keeps its secret.
+        expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+          expect.objectContaining({
+            workflowId: 'existing',
+            workflowCreatedAt: '2024-01-01T00:00:00.000Z',
+          })
+        );
+      }
+    }
+  );
+
   it('retires the pages of a deleted workflow', async () => {
     const { service, client, pagesService, request } = setup();
     client.search.mockResolvedValue({
