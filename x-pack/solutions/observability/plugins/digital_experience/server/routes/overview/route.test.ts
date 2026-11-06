@@ -31,7 +31,7 @@ const runHandler = ({
 }: {
   serviceName?: string;
   query?: { start: string; end: string; environment?: string } & Partial<
-    Record<'browser' | 'os' | 'device' | 'country' | 'pageUrl', string>
+    Record<'browser' | 'os' | 'device' | 'country' | 'pageUrl' | 'percentile' | 'kuery', string>
   >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
@@ -104,27 +104,30 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     );
   });
 
-  it('passes the selected filters, and none when they are left out', async () => {
+  it('passes the selected filters as values, included or excluded, and none when left out', async () => {
     await runHandler({
       query: {
         start: START,
         end: END,
-        browser: 'Chrome',
+        browser: 'Chrome,!Safari',
         os: 'macOS',
         device: 'iPhone',
         country: 'DE',
-        pageUrl: 'https://shop.example.com/',
+        pageUrl: 'https://shop.example.com/a\\,b',
       },
     });
 
     expect(mockedOtel).toHaveBeenCalledWith(
       expect.objectContaining({
         filters: {
-          browser: 'Chrome',
-          os: 'macOS',
-          device: 'iPhone',
-          country: 'DE',
-          pageUrl: 'https://shop.example.com/',
+          browser: [
+            { value: 'Chrome', exclude: false },
+            { value: 'Safari', exclude: true },
+          ],
+          os: [{ value: 'macOS', exclude: false }],
+          device: [{ value: 'iPhone', exclude: false }],
+          country: [{ value: 'DE', exclude: false }],
+          pageUrl: [{ value: 'https://shop.example.com/a,b', exclude: false }],
         },
       })
     );
@@ -133,15 +136,41 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
 
     expect(mockedOtel).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        filters: {
-          browser: undefined,
-          os: undefined,
-          device: undefined,
-          country: undefined,
-          pageUrl: undefined,
-        },
+        filters: { browser: [], os: [], device: [], country: [], pageUrl: [] },
       })
     );
+  });
+
+  it('passes the percentile as a number, and none when it is left out', async () => {
+    await runHandler({ query: { start: START, end: END, percentile: '95' } });
+
+    expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ percentile: 95 }));
+
+    await runHandler();
+
+    expect(mockedOtel).toHaveBeenLastCalledWith(expect.objectContaining({ percentile: undefined }));
+  });
+
+  it('passes the KQL query as a query, and none when it is left out', async () => {
+    await runHandler({ query: { start: START, end: END, kuery: 'user_agent.name: Chrome' } });
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kuery: expect.objectContaining({ bool: expect.anything() }),
+      })
+    );
+
+    await runHandler();
+
+    expect(mockedOtel).toHaveBeenLastCalledWith(expect.objectContaining({ kuery: undefined }));
+  });
+
+  it('answers a KQL query that does not parse with a 400 and searches nothing', async () => {
+    await expect(
+      runHandler({ query: { start: START, end: END, kuery: 'user_agent.name: (Chrome' } })
+    ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 400 } });
+
+    expect(mockedOtel).not.toHaveBeenCalled();
   });
 
   it('answers a failed search without the Elasticsearch details', async () => {
@@ -181,23 +210,44 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     expect(withEnvironment(0).success).toBe(false);
   });
 
-  it('accepts each filter up to its length, and rejects an empty or longer one', () => {
-    const withFilter = (name: string, length: number) =>
-      querySchema().safeParse({ start: START, end: END, [name]: 'x'.repeat(length) }).success;
+  it('accepts each filter value up to its length, and rejects an empty or longer one', () => {
+    const withFilter = (name: string, raw: string) =>
+      querySchema().safeParse({ start: START, end: END, [name]: raw }).success;
+    const lengths = { browser: 256, os: 256, device: 256, country: 16, pageUrl: 1024 };
 
-    expect(withFilter('browser', 256)).toBe(true);
-    expect(withFilter('browser', 257)).toBe(false);
-    expect(withFilter('os', 256)).toBe(true);
-    expect(withFilter('os', 257)).toBe(false);
-    expect(withFilter('device', 256)).toBe(true);
-    expect(withFilter('device', 257)).toBe(false);
-    expect(withFilter('country', 16)).toBe(true);
-    expect(withFilter('country', 17)).toBe(false);
-    expect(withFilter('pageUrl', 1024)).toBe(true);
-    expect(withFilter('pageUrl', 1025)).toBe(false);
-    ['browser', 'os', 'device', 'country', 'pageUrl'].forEach((name) =>
-      expect(withFilter(name, 0)).toBe(false)
-    );
+    Object.entries(lengths).forEach(([name, length]) => {
+      expect(withFilter(name, 'x'.repeat(length))).toBe(true);
+      expect(withFilter(name, 'x'.repeat(length + 1))).toBe(false);
+      expect(withFilter(name, '')).toBe(false);
+    });
+  });
+
+  it('accepts several values of a filter, each up to its length, in a param of up to 2048', () => {
+    const withBrowser = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, browser: raw }).success;
+
+    expect(withBrowser('Chrome,!Safari,Firefox')).toBe(true);
+    expect(withBrowser(`${'a'.repeat(256)},${'b'.repeat(256)}`)).toBe(true);
+    expect(withBrowser(`${'a'.repeat(256)},${'b'.repeat(257)}`)).toBe(false);
+    expect(withBrowser('x,'.repeat(1025))).toBe(false);
+  });
+
+  it('accepts the percentiles the Overview offers only', () => {
+    const withPercentile = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, percentile: raw }).success;
+
+    ['50', '75', '90', '95', '99'].forEach((raw) => expect(withPercentile(raw)).toBe(true));
+    ['', '0', '100', '75.5', 'p95'].forEach((raw) => expect(withPercentile(raw)).toBe(false));
+  });
+
+  it('bounds the KQL query to 2048 characters', () => {
+    const withKuery = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, kuery: raw }).success;
+
+    expect(withKuery('a: b')).toBe(true);
+    expect(withKuery('x'.repeat(2048))).toBe(true);
+    expect(withKuery('x'.repeat(2049))).toBe(false);
+    expect(withKuery('')).toBe(false);
   });
 
   it('requires an application name of up to 1024 characters', () => {

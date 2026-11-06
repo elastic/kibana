@@ -23,8 +23,8 @@ const BREAKDOWNS: Breakdowns = {
   ],
   operatingSystems: [{ name: 'macOS', pageLoads: 40 }],
   devices: [
-    { name: 'desktop', pageLoads: 30 },
-    { name: 'mobile', pageLoads: 10 },
+    { name: 'iPhone', pageLoads: 30 },
+    { name: 'Pixel 8', pageLoads: 10 },
   ],
 };
 
@@ -89,12 +89,12 @@ describe('BreakdownsPanel', () => {
     );
   });
 
-  it('labels the devices Desktop and Mobile, without links', () => {
+  it('lists the devices by name, without links', () => {
     renderPanel();
 
     const devices = within(screen.getByTestId('digitalExperienceOverviewDevices'));
-    expect(devices.getByText('Desktop')).toBeInTheDocument();
-    expect(devices.getByText('Mobile')).toBeInTheDocument();
+    expect(devices.getByText('iPhone')).toBeInTheDocument();
+    expect(devices.getByText('Pixel 8')).toBeInTheDocument();
     expect(devices.queryByRole('link')).not.toBeInTheDocument();
   });
 

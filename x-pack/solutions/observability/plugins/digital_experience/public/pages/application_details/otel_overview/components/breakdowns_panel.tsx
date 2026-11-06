@@ -32,14 +32,6 @@ const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.overview.breakdown
   defaultMessage: 'No page loads with browser details in this time range.',
 });
 
-const MOBILE_LABEL = i18n.translate('xpack.digitalExperience.overview.breakdowns.mobile', {
-  defaultMessage: 'Mobile',
-});
-
-const DESKTOP_LABEL = i18n.translate('xpack.digitalExperience.overview.breakdowns.desktop', {
-  defaultMessage: 'Desktop',
-});
-
 const sessionsLinkLabel = (name: string) => {
   return i18n.translate('xpack.digitalExperience.overview.breakdowns.sessionsLink', {
     defaultMessage: 'Sessions on {name}',
@@ -70,7 +62,7 @@ function Breakdown({
   );
 }
 
-/** The page loads by browser, operating system and device type, linked to their sessions. */
+/** The page loads by browser, operating system and device, linked to their sessions. */
 export function BreakdownsPanel({
   breakdowns,
   isLoading,
@@ -108,10 +100,7 @@ export function BreakdownsPanel({
 
   // Sessions have no device filter, so the devices are not linked.
   const deviceItems = devices.map(({ name, pageLoads }) => {
-    return {
-      key: name === 'mobile' ? MOBILE_LABEL : DESKTOP_LABEL,
-      value: pageLoads,
-    };
+    return { key: name, value: pageLoads };
   });
 
   return (

@@ -32,6 +32,8 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   BACK_TO_SESSIONS: 'backToSessions',
   /** The user clears the list's search and filters. */
   CLEAR_FILTERS: 'clearFilters',
+  /** The user closes the filters flyout without applying what they picked. */
+  CANCEL_FILTERS: 'cancelFilters',
 } as const;
 
 /*
@@ -65,7 +67,12 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   DEVICE_FILTER: 'overviewDeviceFilter',
   COUNTRY_FILTER: 'overviewCountryFilter',
   PAGE_FILTER: 'overviewPageFilter',
+  ALL_FILTERS: 'overviewAllFilters',
+  ALL_FILTERS_APPLY: 'overviewAllFiltersApply',
+  ALL_FILTERS_CANCEL: 'overviewAllFiltersCancel',
+  ALL_FILTERS_RESET: 'overviewAllFiltersReset',
   CLEAR_FILTERS: 'overviewClearFilters',
+  PERCENTILE: 'overviewPercentile',
 } as const;
 
 export const ERRORS_EBT_ELEMENTS = {

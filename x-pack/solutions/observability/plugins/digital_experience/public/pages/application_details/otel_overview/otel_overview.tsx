@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
-import type { OverviewFilters } from '../../../../common/overview_filters';
+import type { OverviewPercentile, OverviewSearchParams } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
@@ -22,8 +22,10 @@ import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../..
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
 import { useApplicationData } from '../../../hooks/use_application_data';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
+import { useFittingCount } from '../../../hooks/use_fitting_count';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useOverviewFilters } from '../../../hooks/use_overview_filters';
+import { useOverviewPercentile, useOverviewSearchParams } from '../../../hooks/use_overview_search';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
 import { withOverviewFilters } from '../../../utils/with_overview_filters';
@@ -31,10 +33,17 @@ import { JsErrorsPanel } from '../../errors/components/js_errors_panel';
 import { ERRORS_FETCH_ERROR_TITLE } from '../../errors/errors_tab';
 import type { ApplicationErrors } from '../../errors/hooks/use_application_errors';
 import { useApplicationErrors } from '../../errors/hooks/use_application_errors';
+import { AllFiltersFlyout } from './components/all_filters_flyout';
 import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
-import { ClearOverviewFilters, OverviewFilterButtons } from './components/overview_filters';
+import {
+  limitFilters,
+  OverviewFilterButtons,
+  OverviewFilterPills,
+  visibleFilters,
+} from './components/overview_filters';
 import { OverviewKpis } from './components/overview_kpis';
+import { OverviewSearchBar } from './components/overview_search_bar';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
@@ -64,54 +73,65 @@ const EMPTY_USAGE: ApplicationUsageResponse = {
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
 
-/** The request for the Overview narrowed by `filters`; a change of them is a new request. */
+/** The request for the Overview narrowed by `searchParams`; a change of them is a new request. */
 const overviewRequestOf = (
-  filters: OverviewFilters
+  searchParams: OverviewSearchParams,
+  percentile: string | undefined
 ): ApplicationRequest<ApplicationOverviewResponse> => {
   return (apiClient, options) => {
-    return apiClient.fetch(
-      'GET /internal/digital_experience/applications/{serviceName}/overview',
-      withOverviewFilters(options, filters)
-    );
+    const { signal, params } = withOverviewFilters(options, searchParams);
+    return apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/overview', {
+      signal,
+      params: { ...params, query: { ...params.query, ...(percentile ? { percentile } : {}) } },
+    });
   };
 };
 
-/** The request for the pages, breakdowns and clicks narrowed by `filters`. */
-const usageRequestOf = (filters: OverviewFilters): ApplicationRequest<ApplicationUsageResponse> => {
+/** The request for the pages, breakdowns and clicks narrowed by `searchParams`. */
+const usageRequestOf = (
+  searchParams: OverviewSearchParams
+): ApplicationRequest<ApplicationUsageResponse> => {
   return (apiClient, options) => {
     return apiClient.fetch(
       'GET /internal/digital_experience/applications/{serviceName}/usage',
-      withOverviewFilters(options, filters)
+      withOverviewFilters(options, searchParams)
     );
   };
 };
 
 /** Shown while loading: no metric is a measured zero. */
-const emptyOverview = (serviceName: string): ApplicationOverview => {
-  return {
-    serviceName,
-    pageLoads: { count: 0 },
-    loadTime: { p75Ms: null, sampleCount: 0 },
-    jsErrors: { count: 0 },
-    httpRequests: { count: 0, failedCount: 0, failedRatio: null },
-    webVitals: NO_WEB_VITALS,
-    trend: [],
-  };
-};
+const emptyOverview = (
+  serviceName: string,
+  percentile: OverviewPercentile
+): ApplicationOverview => ({
+  serviceName,
+  percentile,
+  pageLoads: { count: 0 },
+  loadTime: { percentileMs: null, sampleCount: 0 },
+  jsErrors: { count: 0 },
+  httpRequests: { count: 0, failedCount: 0, failedRatio: null },
+  webVitals: NO_WEB_VITALS,
+  trend: [],
+});
 
 /** The KPIs, Core Web Vitals and trends of one Overview, empty while it loads. */
 function OverviewPanels({
   overview,
+  percentile,
+  onPercentileChange,
   isLoading,
   onTimeRangeSelect,
 }: {
   overview: ApplicationOverview;
+  /** The percentile asked for, which the panels name before its response arrives. */
+  percentile: OverviewPercentile;
+  onPercentileChange: (percentile: OverviewPercentile) => void;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   return (
     <>
-      <OverviewKpis overview={overview} isLoading={isLoading} />
+      <OverviewKpis overview={overview} percentile={percentile} isLoading={isLoading} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="stretch">
         <EuiFlexItem grow={2}>
@@ -121,7 +141,9 @@ function OverviewPanels({
           <OverviewTrends
             points={overview.trend}
             pageLoads={overview.pageLoads.count}
-            loadTimeP75Ms={overview.loadTime.p75Ms}
+            loadTimePercentileMs={overview.loadTime.percentileMs}
+            percentile={percentile}
+            onPercentileChange={onPercentileChange}
             isLoading={isLoading}
             onTimeRangeSelect={onTimeRangeSelect}
           />
@@ -206,14 +228,20 @@ function UsageAndErrorsPanels({
  */
 export function OtelOverview({ serviceName }: { serviceName: string }) {
   const { setTimeRange } = useTimeRange();
-  const { filters, setFilter, clearFilters, hasActiveFilters } = useOverviewFilters();
+  const { filters, setFilter, setFilters, clearFilters, hasActiveFilters } = useOverviewFilters();
+  const { percentile, percentileParam, setPercentile } = useOverviewPercentile();
+  const searchParams = useOverviewSearchParams();
   const formatters = useFormatters();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
-  const overviewRequest = useMemo(() => overviewRequestOf(filters), [filters]);
-  const usageRequest = useMemo(() => usageRequestOf(filters), [filters]);
+  const overviewRequest = useMemo(
+    () => overviewRequestOf(searchParams, percentileParam),
+    [searchParams, percentileParam]
+  );
+  const usageRequest = useMemo(() => usageRequestOf(searchParams), [searchParams]);
   const overview = useApplicationData(serviceName, overviewRequest);
   const usage = useApplicationData(serviceName, usageRequest);
-  const topErrors = useApplicationErrors(serviceName, filters);
+  const topErrors = useApplicationErrors(serviceName);
   // The pickers swap their lists for a spinner while loading, so they only load until they have one.
   const pickerOptions = usePickerOptions(serviceName, overview.response);
 
@@ -223,27 +251,61 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     topErrors.refresh();
   };
 
+  // The row of the query, the filters and the date picker keeps to one row: when it is too narrow,
+  // the filters give way, those without a selection first and the least important first. What
+  // they select stays in the pills below, and every filter in "All filters".
+  const pinnedFilters = visibleFilters(pickerOptions?.filters, filters);
+  const { count: fittingCount, containerRef: controlsRef } = useFittingCount({
+    total: pinnedFilters.length,
+    resetKey: `${pinnedFilters.join()}|${pinnedFilters
+      .filter((name) => (filters[name] ?? []).length > 0)
+      .join()}`,
+  });
+  const shownFilters = limitFilters(pinnedFilters, filters, fittingCount);
+
   return (
     <>
       <EuiSpacer size="m" />
+      {/* The query, the filters and the date picker share a row, each as tall as the others. */}
       <ApplicationTabToolbar
+        containerRef={controlsRef}
         environments={pickerOptions?.environments}
         isLoading={overview.isLoading}
         onRefresh={refreshAll}
+        leading={
+          // The bar is never narrower than 300px, which the row has to leave room for.
+          <EuiFlexItem grow css={{ minInlineSize: 300 }}>
+            <OverviewSearchBar onRefresh={refreshAll} />
+          </EuiFlexItem>
+        }
         filters={
           <OverviewFilterButtons
+            names={shownFilters}
             options={pickerOptions?.filters}
             filters={filters}
             setFilter={setFilter}
+            onOpenAllFilters={() => setIsFlyoutOpen(true)}
             isLoading={overview.isLoading}
             formatters={formatters}
           />
         }
-        afterFilters={
-          <ClearOverviewFilters hasActiveFilters={hasActiveFilters} onClear={clearFilters} />
-        }
       />
-      {filters.pageUrl && (
+      {hasActiveFilters && (
+        <>
+          <EuiSpacer size="s" />
+          <OverviewFilterPills filters={filters} setFilter={setFilter} onClear={clearFilters} />
+        </>
+      )}
+      {isFlyoutOpen && (
+        <AllFiltersFlyout
+          options={pickerOptions?.filters}
+          filters={filters}
+          formatters={formatters}
+          onApply={setFilters}
+          onClose={() => setIsFlyoutOpen(false)}
+        />
+      )}
+      {(filters.pageUrl ?? []).length > 0 && (
         <>
           <EuiSpacer size="s" />
           <EuiText
@@ -267,7 +329,9 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         />
       ) : (
         <OverviewPanels
-          overview={overview.response?.overview ?? emptyOverview(serviceName)}
+          overview={overview.response?.overview ?? emptyOverview(serviceName, percentile)}
+          percentile={percentile}
+          onPercentileChange={setPercentile}
           isLoading={overview.isLoading}
           onTimeRangeSelect={setTimeRange}
         />

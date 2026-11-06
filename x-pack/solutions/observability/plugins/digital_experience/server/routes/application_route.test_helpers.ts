@@ -26,12 +26,15 @@ export const applicationRouteTestCases = ({
   route,
   getData,
   hasFilters = false,
+  takesPage = true,
 }: {
   route: () => ApplicationRoute;
   /** The mocked function the handler returns the result of. */
   getData: jest.Mock;
-  /** Whether the route takes the Overview's filters too. */
+  /** Whether the route takes the Overview's filters and KQL query too. */
   hasFilters?: boolean;
+  /** Whether the route applies the page filter; the one whose documents have no page URL does not. */
+  takesPage?: boolean;
 }) => {
   const esClient = { search: jest.fn() };
   const RESPONSE = { data: 'response' };
@@ -42,6 +45,7 @@ export const applicationRouteTestCases = ({
     environment?: string;
     browser?: string;
     pageUrl?: string;
+    kuery?: string;
   }) => {
     return (route().handler as (resources: unknown) => Promise<unknown>)({
       params: { path: { serviceName: 'shop' }, query },
@@ -59,7 +63,10 @@ export const applicationRouteTestCases = ({
   const schemaOf = (key: 'path' | 'query') => {
     return (
       route().params as {
-        shape: Record<string, { safeParse: (value: unknown) => { success: boolean } }>;
+        shape: Record<
+          string,
+          { safeParse: (value: unknown) => { success: boolean; data?: Record<string, unknown> } }
+        >;
       }
     ).shape[key];
   };
@@ -121,21 +128,24 @@ export const applicationRouteTestCases = ({
   });
 
   if (hasFilters) {
-    it('passes the selected filters, and none when they are left out', async () => {
+    it('passes the selected filters as values, and none when they are left out', async () => {
       await runHandler({
         start: START,
         end: END,
-        browser: 'Chrome',
+        browser: 'Chrome,!Safari',
         pageUrl: 'https://shop.test/',
       });
       expect(getData).toHaveBeenLastCalledWith(
         expect.objectContaining({
           filters: {
-            browser: 'Chrome',
-            os: undefined,
-            device: undefined,
-            country: undefined,
-            pageUrl: 'https://shop.test/',
+            browser: [
+              { value: 'Chrome', exclude: false },
+              { value: 'Safari', exclude: true },
+            ],
+            os: [],
+            device: [],
+            country: [],
+            pageUrl: [{ value: 'https://shop.test/', exclude: false }],
           },
         })
       );
@@ -143,24 +153,53 @@ export const applicationRouteTestCases = ({
       await runHandler({ start: START, end: END });
       expect(getData).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          filters: {
-            browser: undefined,
-            os: undefined,
-            device: undefined,
-            country: undefined,
-            pageUrl: undefined,
-          },
+          filters: { browser: [], os: [], device: [], country: [], pageUrl: [] },
+          kuery: undefined,
         })
       );
     });
 
-    it('bounds the filters like the Overview route', () => {
+    it('passes the KQL query as a query, and answers one that does not parse with a 400', async () => {
+      await runHandler({ start: START, end: END, kuery: 'browser.name: Chrome' });
+      expect(getData).toHaveBeenLastCalledWith(
+        expect.objectContaining({ kuery: expect.objectContaining({ bool: expect.anything() }) })
+      );
+
+      await expect(
+        runHandler({ start: START, end: END, kuery: 'browser.name: (Chrome' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+    });
+
+    it('bounds the filters and the query like the Overview route', () => {
       const query = (filters: Record<string, string>) => ({ start: START, end: END, ...filters });
 
-      expect(schemaOf('query').safeParse(query({ browser: 'Chrome' })).success).toBe(true);
+      expect(schemaOf('query').safeParse(query({ browser: 'Chrome,!Safari' })).success).toBe(true);
       expect(schemaOf('query').safeParse(query({ browser: '' })).success).toBe(false);
+      expect(schemaOf('query').safeParse(query({ browser: 'x'.repeat(257) })).success).toBe(false);
       expect(schemaOf('query').safeParse(query({ country: 'x'.repeat(17) })).success).toBe(false);
-      expect(schemaOf('query').safeParse(query({ pageUrl: 'x'.repeat(1025) })).success).toBe(false);
+      expect(schemaOf('query').safeParse(query({ kuery: '' })).success).toBe(false);
+      expect(schemaOf('query').safeParse(query({ kuery: 'x'.repeat(2049) })).success).toBe(false);
     });
+
+    if (takesPage) {
+      it('bounds the page like the Overview route', () => {
+        const query = (pageUrl: string) => ({ start: START, end: END, pageUrl });
+
+        expect(schemaOf('query').safeParse(query('x'.repeat(1024))).success).toBe(true);
+        expect(schemaOf('query').safeParse(query('x'.repeat(1025))).success).toBe(false);
+      });
+    } else {
+      it('leaves the page out, as its documents have no page URL', () => {
+        const result = schemaOf('query').safeParse({
+          start: START,
+          end: END,
+          browser: 'Chrome',
+          pageUrl: 'https://shop.test/',
+        });
+
+        expect(result.data).toEqual(expect.objectContaining({ browser: 'Chrome' }));
+        expect(result.data).not.toHaveProperty('pageUrl');
+      });
+    }
   }
 };
