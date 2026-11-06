@@ -12,6 +12,7 @@ export type {
   LinksByReferenceState,
   LinksEmbeddableState,
 } from './embeddable/types';
+export { linksStateComparison } from './embeddable/state_comparison';
 export {
   APP_ICON,
   APP_NAME,
