@@ -318,7 +318,9 @@ export const applyWriteOutcomes = ({
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
-        ...(candidate.reopensSeries !== undefined ? { existing_event_id: candidate.eventId } : {}),
+        ...(candidate.mode === 'snapshot' && candidate.reopensSeries !== undefined
+          ? { existing_event_id: candidate.eventId }
+          : {}),
         status,
         written: false,
         reason: outcome.error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
