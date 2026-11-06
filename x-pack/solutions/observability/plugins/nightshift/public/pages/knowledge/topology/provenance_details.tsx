@@ -10,7 +10,7 @@ import type { EuiDescriptionListProps } from '@elastic/eui';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TopologyProvenance } from '@kbn/significant-events-schema';
-import { useTopologyFeatures } from '../../data/topology/use_topology_features';
+import { useTopologyFeatures } from '../../../data/topology/use_topology_features';
 
 const provenanceLabel = i18n.translate('xpack.nightshift.topology.details.provenance', {
   defaultMessage: 'Provenance',

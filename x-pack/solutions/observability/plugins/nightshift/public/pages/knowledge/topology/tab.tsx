@@ -29,9 +29,9 @@ import { i18n } from '@kbn/i18n';
 import { MAX_SOURCES_PER_PAGE } from '@kbn/nightshift-shared';
 import type { TopologyProvenance } from '@kbn/significant-events-schema';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { useFetchSources } from '../../data/sources/use_fetch_sources';
-import { useTopologySnapshot } from '../../data/topology/use_topology_snapshot';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useFetchSources } from '../../../data/sources/use_fetch_sources';
+import { useTopologySnapshot } from '../../../data/topology/use_topology_snapshot';
 import { useProvenanceDetails } from './provenance_details';
 import { TopologyGraph, type TopologyGraphSelection } from './topology_graph';
 import {

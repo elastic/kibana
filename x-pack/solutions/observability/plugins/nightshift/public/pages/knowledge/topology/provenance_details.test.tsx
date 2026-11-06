@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { Feature, TopologyProvenance } from '@kbn/significant-events-schema';
-import { useTopologyFeatures } from '../../data/topology/use_topology_features';
+import { useTopologyFeatures } from '../../../data/topology/use_topology_features';
 import { useProvenanceDetails } from './provenance_details';
 
-jest.mock('../../data/topology/use_topology_features');
+jest.mock('../../../data/topology/use_topology_features');
 
 const provenance = (sourceId: string, uuid: string): TopologyProvenance => ({
   source_id: sourceId,

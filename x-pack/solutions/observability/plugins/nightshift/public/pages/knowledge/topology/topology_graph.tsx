@@ -23,7 +23,7 @@ import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import type { TopologyViewEdge, TopologyViewModel, TopologyViewNode } from './topology_model';
 
 const NODE_WIDTH = 220;
