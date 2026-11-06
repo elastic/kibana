@@ -99,7 +99,7 @@ const CellList = () => {
           <CellView cell={cell} />
         </Fragment>
       ))}
-      {!isFiltering && <AddCellBar index={cellOrder.length} alwaysVisible />}
+      {!isFiltering && <AddCellBar index={cellOrder.length} alwaysVisible={listed.length === 0} />}
     </EuiFlexGroup>
   );
 };
