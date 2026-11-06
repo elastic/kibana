@@ -43,6 +43,7 @@ describe('allCasesUrlStateDeserializer', () => {
           ],
           "severity": Array [],
           "status": Array [],
+          "statusKey": Array [],
           "tags": Array [],
           "to": "now",
         },

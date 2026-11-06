@@ -451,7 +451,7 @@ export class CasesService {
      * `statsOptions.filter` in place of `caseOptions.filter` — the caller passes a filter with
      * the status clause stripped so all three status counts are always populated.
      */
-    statsOptions?: { filter?: KueryNode };
+    statsOptions?: { filter?: KueryNode; pausingStatusKeys?: string[] };
   }): Promise<CasesMapWithPageInfo & { searchStats?: CasesSearchStats }> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -507,6 +507,7 @@ export class CasesService {
               searchQuery,
               statsOptions.filter ? toElasticsearchQuery(statsOptions.filter) : undefined
             ),
+            pausingStatusKeys: statsOptions.pausingStatusKeys,
             ...(hasRuntimeMappings ? { runtimeMappings } : {}),
           })
         : undefined,
@@ -567,10 +568,12 @@ export class CasesService {
     namespaces,
     query,
     runtimeMappings,
+    pausingStatusKeys = [],
   }: {
     namespaces: string[];
     query?: estypes.QueryDslQueryContainer;
     runtimeMappings?: estypes.MappingRuntimeFields;
+    pausingStatusKeys?: string[];
   }): Promise<CasesSearchStats> {
     const response = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
@@ -593,6 +596,13 @@ export class CasesService {
             field: `${CASE_SAVED_OBJECT}.duration`,
           },
         },
+        ...(pausingStatusKeys.length > 0
+          ? {
+              paused: {
+                filter: { terms: { [`${CASE_SAVED_OBJECT}.status_key`]: pausingStatusKeys } },
+              },
+            }
+          : {}),
       },
     });
 
@@ -600,6 +610,7 @@ export class CasesService {
       | {
           statuses?: { buckets: Array<{ key: string; doc_count: number }> };
           mttr?: { value: number | null };
+          paused?: { doc_count: number };
         }
       | undefined;
 
@@ -612,6 +623,7 @@ export class CasesService {
         closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
       },
       mttr: aggregations?.mttr?.value ?? null,
+      ...(pausingStatusKeys.length > 0 ? { paused: aggregations?.paused?.doc_count ?? 0 } : {}),
     };
   }
 
@@ -653,6 +665,20 @@ export class CasesService {
       'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
       closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
     };
+  }
+
+  public async countCases({
+    searchOptions,
+  }: {
+    searchOptions: SavedObjectFindOptionsKueryNode;
+  }): Promise<number> {
+    const cases = await this.unsecuredSavedObjectsClient.find({
+      ...searchOptions,
+      type: CASE_SAVED_OBJECT,
+      perPage: 0,
+    });
+
+    return cases.total;
   }
 
   private static getStatusBuckets(

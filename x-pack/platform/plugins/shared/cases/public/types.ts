@@ -130,6 +130,7 @@ export interface CasesPublicStart {
     attachmentsEnabled: boolean;
     chatEnabled: boolean;
     runWorkflowsEnabled: boolean;
+    customStatusesEnabled: boolean;
   };
   api: {
     getRelatedCases: (

@@ -35,6 +35,8 @@ export interface ConfigurationPersistedAttributes {
   observableTypes?: PersistedObservableTypesConfiguration;
   extractObservables?: boolean;
   workflowTags?: string[];
+  statuses?: PersistedCaseStatusesConfiguration;
+  pauseReasons?: string[];
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**
@@ -49,6 +51,16 @@ export interface ConfigurationPersistedAttributes {
 type PersistedObservableTypesConfiguration = Array<{
   key: string;
   label: string;
+}>;
+
+type PersistedCaseStatusesConfiguration = Array<{
+  key: string;
+  label: string;
+  category: string;
+  order: number;
+  isDefault: boolean;
+  disabled: boolean;
+  pausesTimeTracking?: boolean;
 }>;
 
 type PersistedCustomFieldsConfiguration = Array<{

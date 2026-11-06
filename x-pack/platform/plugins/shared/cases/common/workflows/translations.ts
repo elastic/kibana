@@ -231,7 +231,7 @@ export const SET_STATUS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setStatus.documentation.details',
   {
     defaultMessage:
-      'This step sets only the status field of an existing case. If version is not specified, the latest case version is resolved automatically.',
+      'This step sets only the status of an existing case, by category (`status`) or by configured status key (`status_key`). A status that pauses time tracking needs a `pause_reason` from Case settings. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -575,6 +575,25 @@ export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTIO
   'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.previousStatus',
   {
     defaultMessage: 'The previous status of the case.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_KEY_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.statusKey',
+  {
+    defaultMessage: 'The key of the configured status the case moved to.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_KEY_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.previousStatusKey', {
+    defaultMessage: 'The key of the configured status the case moved from.',
+  });
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PAUSED_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.paused',
+  {
+    defaultMessage: 'Whether the new status pauses time tracking for the case.',
   }
 );
 

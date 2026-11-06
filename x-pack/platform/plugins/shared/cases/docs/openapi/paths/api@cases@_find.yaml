@@ -22,6 +22,7 @@ get:
     - $ref: '../components/parameters/sortField.yaml'
     - $ref: '../components/parameters/sort_order.yaml'
     - $ref: '../components/parameters/status.yaml'
+    - $ref: '../components/parameters/status_key.yaml'
     - $ref: '../components/parameters/tags.yaml'
     - $ref: '../components/parameters/to.yaml'
   responses:
@@ -43,6 +44,9 @@ get:
                 type: integer
               count_open_cases:
                 type: integer
+              count_paused_cases:
+                type: integer
+                description: Cases in a status that pauses time tracking. Present when such statuses are configured.
               page:
                 type: integer
               per_page:

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes, CaseSchema } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, UserActionTypes, CaseSchema } from '../../../common/types/domain';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
@@ -33,7 +33,12 @@ import {
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
-import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
+import {
+  getConfiguredStatuses,
+  normalizeCreateCaseRequest,
+  populateAssigneesIdentity,
+  resolveStatusForUpdate,
+} from './utils';
 import {
   buildExtendedFieldsDefaults,
   pickExtendedFieldsDifferingFromDefaults,
@@ -362,10 +367,19 @@ export const create = async (
       });
     }
 
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
     const attributes: CaseCreateAttributes = {
       ...transformNewCase({
         user,
         newCase: normalizedCase,
+        statusKey: resolveStatusForUpdate({
+          status: CaseStatuses.open,
+          statuses: getConfiguredStatuses({
+            configuration: configurations[0],
+            customStatusesEnabled,
+          }),
+          customStatusesEnabled,
+        })?.status_key,
       }),
       extract_observables_source: extractObservablesSource,
     };

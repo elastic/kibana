@@ -18,6 +18,7 @@ const emptyFilterOptions: FilterOptions = {
   searchFields: [],
   severity: [],
   status: [],
+  statusKey: [],
   tags: [],
   assignees: [],
   reporters: [],

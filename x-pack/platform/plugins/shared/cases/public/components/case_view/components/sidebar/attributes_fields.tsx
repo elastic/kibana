@@ -19,6 +19,7 @@ import { TagsField } from './tags_field';
 import { useCaseParticipantsData } from './hooks/use_case_participants_data';
 import { useAttributesFieldActions } from './hooks/use_attributes_field_actions';
 import { useCloseCaseFlow } from '../case_details_header/hooks/use_close_case_flow';
+import { useCaseStatuses } from '../../../status/use_case_statuses';
 import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../common/use_cases_features';
@@ -54,7 +55,28 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
   // Status editing mirrors the header status pill: closing a case routes through the
   // close-case flow (which may open the close-reason modal), while other transitions patch
   // the field directly. `closeCaseModal` renders null until that flow opens it.
-  const { onStatusChanged, closeCaseModal } = useCloseCaseFlow({ caseData, onUpdateField });
+  const {
+    onStatusChanged,
+    onResume,
+    resumeStatus,
+    closeCaseModal,
+    pauseReasonModal,
+    isUpdatingStatus,
+  } = useCloseCaseFlow({
+    caseData,
+    onUpdateField,
+    entryPoint: 'case_view_sidebar',
+  });
+  const { enabledStatuses, getStatus } = useCaseStatuses();
+  const currentStatus = getStatus(caseData.statusKey, caseData.status);
+  // A disabled status stays selectable-as-current so the field keeps showing the case's label.
+  const statusOptions = useMemo(
+    () =>
+      enabledStatuses.some((status) => status.key === currentStatus.key)
+        ? enabledStatuses
+        : [...enabledStatuses, currentStatus],
+    [currentStatus, enabledStatuses]
+  );
   const shouldDisableStatusFn = useShouldDisableStatus();
   const isStatusMenuDisabled = useMemo(
     () => shouldDisableStatusFn([caseData]),
@@ -84,9 +106,14 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
         ) : null}
         <StatusField
           isDisabled={!permissions.update || isStatusMenuDisabled}
-          isLoading={isStatusLoading}
-          selectedStatus={caseData.status}
+          isLoading={isStatusLoading || isUpdatingStatus}
+          statuses={statusOptions}
+          selectedStatusKey={currentStatus.key}
           onStatusChange={onStatusChanged}
+          pausedAt={caseData.pausedAt}
+          pauseReason={caseData.pauseReason}
+          resumeStatus={permissions.update ? resumeStatus : undefined}
+          onResume={onResume}
         />
         <SeverityField
           isDisabled={!permissions.update}
@@ -113,6 +140,7 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
         />
       </EuiFlexGroup>
       {closeCaseModal}
+      {pauseReasonModal}
     </>
   );
 };

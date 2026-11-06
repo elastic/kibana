@@ -33,6 +33,7 @@ interface CreateTestConfigOptions {
 // Registers the unified `security.entity` and `security.attack` attachment types so the
 // cases attachment tests exercise them (both are gated behind these experimental flags).
 const DEFAULT_EXPERIMENTAL_FEATURES = ['entityAttachmentsEnabled', 'attackAttachments'];
+const CUSTOM_STATUSES_FLAG = '--xpack.cases.customStatuses.enabled';
 
 const enabledActionTypes = [
   '.cases',
@@ -133,6 +134,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.securitySolution.enableExperimental=${JSON.stringify(
             options.experimentalFeatures ?? DEFAULT_EXPERIMENTAL_FEATURES
           )}`,
+          // Custom statuses write `status_key` on every case, which changes the shape the shared
+          // fixtures expect, so suites run with them off unless their config opts in.
+          ...(options.kbnServerArgs?.some((arg) => arg.startsWith(CUSTOM_STATUSES_FLAG))
+            ? []
+            : [`${CUSTOM_STATUSES_FLAG}=false`]),
           ...(options.kbnServerArgs ?? []),
         ],
       },

@@ -13,7 +13,7 @@ import {
   CustomFieldToggleTypeSchema,
   CustomFieldNumberTypeSchema,
 } from '../custom_field/v1';
-import { CaseBaseOptionalFieldsSchema } from '../case/v1';
+import { CaseBaseOptionalFieldsSchema, CaseStatusSchema } from '../case/v1';
 import { CaseObservableTypeSchema } from '../observable/v1';
 
 export const ClosureTypeSchema = z.union([
@@ -90,6 +90,30 @@ export const TemplateConfigurationSchema = z.object({
 
 export const TemplatesConfigurationSchema = z.array(TemplateConfigurationSchema);
 
+export const CaseStatusConfigurationSchema = z.object({
+  /**
+   * Immutable identifier; the built-in entries use the `CaseStatuses` values as keys
+   */
+  key: z.string(),
+  label: z.string(),
+  /**
+   * The built-in status this entry belongs to. Drives every status-dependent behavior.
+   */
+  category: CaseStatusSchema,
+  order: z.number(),
+  /**
+   * Target of writes that only specify the category (legacy clients, close-by-pushing, connectors)
+   */
+  isDefault: z.boolean(),
+  disabled: z.boolean(),
+  /**
+   * Time spent in this status is left out of the case's duration and time-to metrics
+   */
+  pausesTimeTracking: z.boolean().optional(),
+});
+
+export const CaseStatusesConfigurationSchema = z.array(CaseStatusConfigurationSchema);
+
 export const ConfigurationBasicWithoutOwnerSchema = z.object({
   /**
    * The external connector
@@ -120,6 +144,14 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
    * An empty array shows all workflows.
    */
   workflowTags: WorkflowTagsConfigurationSchema,
+  /**
+   * Statuses configured for the case. Empty means the three built-in statuses.
+   */
+  statuses: CaseStatusesConfigurationSchema,
+  /**
+   * Reasons an analyst picks from when moving a case to a status that pauses time tracking
+   */
+  pauseReasons: z.array(z.string()),
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
@@ -161,3 +193,5 @@ export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
 export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
 export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;
+export type CaseStatusConfiguration = z.infer<typeof CaseStatusConfigurationSchema>;
+export type CaseStatusesConfiguration = z.infer<typeof CaseStatusesConfigurationSchema>;

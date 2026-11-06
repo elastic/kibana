@@ -67,6 +67,11 @@ export interface CaseAnalyticsDoc {
     tags: string[];
     category?: string | null;
     status: CaseStatusString;
+    status_key: string | null;
+    paused_at?: string | null;
+    time_paused?: number | null;
+    pause_reason?: string | null;
+    resume_to_status_key?: string | null;
     severity: CaseSeverityString;
     assignees?: Array<{
       uid: string;
@@ -177,6 +182,11 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       tags: a.tags,
       category: a.category,
       status: STATUS_TO_STRING[a.status],
+      status_key: a.status_key ?? null,
+      paused_at: a.paused_at ?? null,
+      time_paused: a.time_paused ?? 0,
+      pause_reason: a.pause_reason ?? null,
+      resume_to_status_key: a.resume_to_status_key ?? null,
       severity: SEVERITY_TO_STRING[a.severity],
       assignees: a.assignees,
       created_at: a.created_at,

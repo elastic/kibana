@@ -131,6 +131,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   assignees: [],
   reporters: [],
   status: [],
+  statusKey: [],
   tags: [],
   owner: [],
   category: [],

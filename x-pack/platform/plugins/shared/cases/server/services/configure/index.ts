@@ -256,6 +256,10 @@ function transformToExternalModel(
     ? []
     : (configuration.attributes.workflowTags as ConfigurationTransformedAttributes['workflowTags']);
 
+  const statuses = (configuration.attributes.statuses ??
+    []) as ConfigurationTransformedAttributes['statuses'];
+  const pauseReasons = configuration.attributes.pauseReasons ?? [];
+
   return {
     ...configuration,
     attributes: {
@@ -266,6 +270,8 @@ function transformToExternalModel(
       observableTypes,
       extractObservables,
       workflowTags,
+      statuses,
+      pauseReasons,
     },
   };
 }

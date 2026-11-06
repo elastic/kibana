@@ -49,6 +49,27 @@ describe('createStatusUserActionBuilder ', () => {
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
+  it('renders the pause reason next to the status', () => {
+    const userAction = getUserAction('status', UserActionActions.update, {
+      payload: {
+        status: CaseStatuses['in-progress'],
+        statusKey: 'on_hold',
+        pauseReason: 'Awaiting customer',
+      },
+    });
+    const builder = createStatusUserActionBuilder({ ...builderArgs, userAction });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(`${userAction.id}-user-action-pause-reason`)).toHaveTextContent(
+      'Awaiting customer'
+    );
+  });
+
   it('renders close reason details when provided by status user action', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
       payload: { status: CaseStatuses.closed, closeReason: 'false_positive', syncedAlertCount: 2 },

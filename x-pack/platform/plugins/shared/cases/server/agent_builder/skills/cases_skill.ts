@@ -125,7 +125,7 @@ Examples:
 | \`observability\` | APM errors, SLO violations, metric thresholds, log anomalies | Rarely relevant — do not proactively suggest | complete service outage |
 | \`cases\` | General-purpose, no domain assumptions | Rarely relevant | — |
 
-Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`.
+Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`. Teams may define their own statuses inside those categories: a case's \`status_key\` names the configured status and \`status\` its category. To move a case to a configured status, set \`status_key\` in \`updates\`. A status that pauses time tracking requires \`pause_reason\`, one of the pause reasons from Case settings; the update is rejected with 400 without it or with a reason that is not configured. Setting \`status_key\` to a status that does not pause (or \`resume_to_status_key\` from the case) resumes it.
 
 ## Bulk and batch
 

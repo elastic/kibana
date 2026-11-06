@@ -70,6 +70,10 @@ extractObservables:
   example: true
 owner:
   $ref: 'owner.yaml'
+statuses:
+  $ref: 'case_statuses_configuration.yaml'
+pauseReasons:
+  $ref: 'pause_reasons_configuration.yaml'
 templates:
   $ref: 'templates.yaml'
 workflowTags:

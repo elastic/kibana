@@ -14,6 +14,7 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
     'search',
     'severity',
     'status',
+    'statusKey',
     'tags',
     'assignees',
     'category',

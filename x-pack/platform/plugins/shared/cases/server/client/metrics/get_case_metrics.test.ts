@@ -68,6 +68,7 @@ describe('getCaseMetrics', () => {
         statusInfo: {
           openDuration,
           inProgressDuration,
+          pausedDuration: 0,
           reopenDates: [],
         },
       },
@@ -101,6 +102,7 @@ describe('getCaseMetrics', () => {
       statusInfo: {
         openDuration,
         inProgressDuration,
+        pausedDuration: 0,
         reopenDates: [],
       },
     });
@@ -221,7 +223,7 @@ function createMockClientArgs() {
       alertsService,
       userActionService,
     },
-    config: { attachments: { enabled: false } },
+    config: { attachments: { enabled: false }, customStatuses: { enabled: false } },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

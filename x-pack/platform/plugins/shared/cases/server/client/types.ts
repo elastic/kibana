@@ -80,6 +80,7 @@ export type CasesSearchParams = Partial<
     | 'tags'
     | 'reporters'
     | 'status'
+    | 'status_key'
     | 'severity'
     | 'owner'
     | 'from'

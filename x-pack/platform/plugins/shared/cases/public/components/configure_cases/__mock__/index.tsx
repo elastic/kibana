@@ -35,6 +35,8 @@ const mockConfigurationData = {
   observableTypes: [],
   extractObservables: true,
   workflowTags: [],
+  statuses: [],
+  pauseReasons: [],
 };
 
 export const useCaseConfigureResponse = {

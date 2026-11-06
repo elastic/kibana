@@ -38,6 +38,8 @@ export const usePersistConfiguration = () => {
       observableTypes,
       extractObservables,
       workflowTags,
+      statuses,
+      pauseReasons,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -49,6 +51,8 @@ export const usePersistConfiguration = () => {
           observableTypes,
           extractObservables,
           workflowTags,
+          statuses,
+          pauseReasons,
         });
       }
 
@@ -61,6 +65,8 @@ export const usePersistConfiguration = () => {
         observableTypes,
         extractObservables,
         workflowTags,
+        statuses,
+        pauseReasons,
       });
     },
     {

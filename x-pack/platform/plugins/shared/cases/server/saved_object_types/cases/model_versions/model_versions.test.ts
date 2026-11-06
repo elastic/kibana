@@ -16,6 +16,8 @@ import {
   modelVersion8,
   modelVersion9,
   modelVersion11,
+  modelVersion12,
+  modelVersion13,
 } from '.';
 
 describe('Model versions', () => {
@@ -267,6 +269,49 @@ describe('Model versions', () => {
               "extract_observables_source": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 12', () => {
+    it('returns version 12 changes correctly', () => {
+      expect(modelVersion12.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "status_key": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 13', () => {
+    it('returns version 13 changes correctly', () => {
+      expect(modelVersion13.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "pause_reason": Object {
+                "type": "keyword",
+              },
+              "paused_at": Object {
+                "type": "date",
+              },
+              "resume_to_status_key": Object {
+                "type": "keyword",
+              },
+              "time_paused": Object {
+                "type": "long",
               },
             },
             "type": "mappings_addition",

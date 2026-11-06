@@ -24,10 +24,12 @@ import type {
   CaseCustomField,
   CaseSeverity,
   CaseStatuses,
+  CaseStatusesConfiguration,
   CustomFieldsConfiguration,
   TemplatesConfiguration,
   CustomFieldTypes,
 } from '../../common/types/domain';
+import { findStatusByKey } from '../../common/utils/statuses';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
@@ -67,6 +69,36 @@ const addStatusFilter = (status: CaseStatuses | CaseStatuses[]): KueryNode | und
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.status`,
     `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
+  );
+};
+
+const addStatusKeyFilter = (
+  statusKey: string | string[],
+  statuses: CaseStatusesConfiguration
+): KueryNode | undefined => {
+  const keys = Array.isArray(statusKey) ? statusKey : [statusKey];
+
+  if (keys.length === 0) {
+    return;
+  }
+
+  return nodeBuilder.or(
+    keys.map((key) => {
+      const keyFilter = nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.status_key`, key);
+      const status = findStatusByKey(statuses, key);
+
+      // Cases written before statuses were configured have no key and sit on their category's default.
+      return status?.isDefault
+        ? nodeBuilder.or([
+            keyFilter,
+            fromKueryExpression(
+              `${CASE_SAVED_OBJECT}.attributes.status: ${
+                STATUS_EXTERNAL_TO_ESMODEL[status.category]
+              } and not ${CASE_SAVED_OBJECT}.attributes.status_key: *`
+            ),
+          ])
+        : keyFilter;
+    })
   );
 };
 
@@ -343,6 +375,7 @@ export const constructQueryOptions = ({
   tags,
   reporters,
   status,
+  status_key: statusKey,
   severity,
   sortField,
   owner,
@@ -353,9 +386,12 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  statuses = [],
   searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
+  /** The configured statuses `status_key` may reference */
+  statuses?: CaseStatusesConfiguration;
   searchType?: 'find' | 'search';
 }): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
@@ -363,6 +399,7 @@ export const constructQueryOptions = ({
   const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
   const statusFilter = status != null ? addStatusFilter(status) : undefined;
+  const statusKeyFilter = statusKey != null ? addStatusKeyFilter(statusKey, statuses) : undefined;
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
@@ -371,6 +408,7 @@ export const constructQueryOptions = ({
 
   const filters = combineFilters([
     statusFilter,
+    statusKeyFilter,
     severityFilter,
     tagsFilter,
     reportersFilter,

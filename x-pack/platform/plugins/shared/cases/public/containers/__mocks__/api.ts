@@ -91,6 +91,7 @@ export const getCases = async ({
     assignees: [],
     reporters: [],
     status: [CaseStatuses.open],
+    statusKey: [],
     tags: [],
     owner: [],
     category: [],

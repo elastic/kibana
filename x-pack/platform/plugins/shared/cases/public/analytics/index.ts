@@ -20,6 +20,7 @@ import {
 } from '../../common/constants';
 import { registerFieldLibraryAnalytics } from './field_library';
 import { registerObservablesAnalytics } from './observables';
+import { registerStatusAnalytics } from './statuses';
 import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
@@ -259,4 +260,5 @@ export const registerAnalytics = ({
   registerFieldLibraryAnalytics({ analyticsService });
 
   registerObservablesAnalytics({ analyticsService });
+  registerStatusAnalytics({ analyticsService });
 };

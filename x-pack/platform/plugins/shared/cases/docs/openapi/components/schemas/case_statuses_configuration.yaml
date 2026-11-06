@@ -1,0 +1,50 @@
+type: array
+description: >
+  The statuses available for cases. Each entry belongs to one of the built-in statuses, its
+  category, which drives every status-dependent behavior such as alert synchronization and
+  closure. An empty array means only the built-in statuses are available.
+  Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+maxItems: 30
+items:
+  type: object
+  required:
+    - key
+    - label
+    - category
+    - order
+    - isDefault
+    - disabled
+  properties:
+    key:
+      type: string
+      description: The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.
+      maxLength: 50
+      example: awaiting_customer
+    label:
+      type: string
+      description: The label shown on cases.
+      maxLength: 50
+      example: Awaiting customer
+    category:
+      $ref: 'case_status.yaml'
+    order:
+      type: integer
+      description: The display position of the status.
+      example: 3
+    isDefault:
+      type: boolean
+      description: Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.
+      example: false
+    disabled:
+      type: boolean
+      description: Disabled statuses cannot be applied but keep their label on cases that already use them.
+      example: false
+    pausesTimeTracking:
+      type: boolean
+      description: >
+        Time a case spends in this status is left out of its `duration`, `time_to_investigate`,
+        `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and
+        `in-progress` categories, and never on a category's default status. Moving a case to such
+        a status requires `pause_reason`.
+      default: false
+      example: true

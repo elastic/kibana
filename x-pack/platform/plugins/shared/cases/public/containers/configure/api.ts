@@ -127,6 +127,8 @@ const convertConfigureResponseToCasesConfigure = (
     observableTypes,
     extractObservables,
     workflowTags,
+    statuses,
+    pauseReasons,
   } = configuration;
 
   return {
@@ -141,5 +143,7 @@ const convertConfigureResponseToCasesConfigure = (
     observableTypes,
     extractObservables,
     workflowTags,
+    statuses,
+    pauseReasons,
   };
 };

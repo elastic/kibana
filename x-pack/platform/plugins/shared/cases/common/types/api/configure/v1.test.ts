@@ -28,7 +28,10 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  MAX_CASE_STATUSES,
+  MAX_CASE_STATUS_LABEL_LENGTH,
 } from '../../../constants';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
@@ -43,6 +46,7 @@ import {
   NumberCustomFieldConfigurationSchema,
   TemplateConfigurationSchema,
   ObservableTypesConfigurationSchema,
+  CaseStatusesConfigurationSchema,
 } from './v1';
 
 describe('configure', () => {
@@ -739,5 +743,52 @@ describe('configure', () => {
       const result = ObservableTypesConfigurationSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('CaseStatusesConfigurationSchema', () => {
+  const status = {
+    key: 'awaiting_customer',
+    label: 'Awaiting customer',
+    category: 'in-progress',
+    order: 1,
+    isDefault: false,
+    disabled: false,
+  };
+
+  it('decodes a valid configuration', () => {
+    expect(CaseStatusesConfigurationSchema.parse([status])).toStrictEqual([status]);
+  });
+
+  it('removes foo:bar attributes from statuses', () => {
+    expect(CaseStatusesConfigurationSchema.parse([{ ...status, foo: 'bar' }])).toStrictEqual([
+      status,
+    ]);
+  });
+
+  it('rejects a key with invalid characters', () => {
+    expect(
+      parseErrors(CaseStatusesConfigurationSchema, [{ ...status, key: 'Awaiting Customer' }])
+    ).toContain(`Key must be lower case, a-z, 0-9, '_', and '-' are allowed`);
+  });
+
+  it(`rejects a label longer than ${MAX_CASE_STATUS_LABEL_LENGTH} characters`, () => {
+    expect(
+      parseErrors(CaseStatusesConfigurationSchema, [
+        { ...status, label: 'a'.repeat(MAX_CASE_STATUS_LABEL_LENGTH + 1) },
+      ])
+    ).not.toEqual([]);
+  });
+
+  it('rejects an unknown category', () => {
+    expect(
+      parseErrors(CaseStatusesConfigurationSchema, [{ ...status, category: 'pending' }])
+    ).not.toEqual([]);
+  });
+
+  it(`rejects more than ${MAX_CASE_STATUSES} statuses`, () => {
+    expect(
+      parseErrors(CaseStatusesConfigurationSchema, new Array(MAX_CASE_STATUSES + 1).fill(status))
+    ).not.toEqual([]);
   });
 });

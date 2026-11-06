@@ -171,6 +171,28 @@ export const REOPEN_CASE = i18n.translate('xpack.cases.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
 });
 
+export const RESUME = i18n.translate('xpack.cases.caseView.resume', {
+  defaultMessage: 'Resume',
+});
+
+export const RESUME_TO = (status: string) =>
+  i18n.translate('xpack.cases.caseView.resumeTo', {
+    values: { status },
+    defaultMessage: 'Resume to {status}',
+  });
+
+export const PAUSED_SINCE = (reason: string) =>
+  i18n.translate('xpack.cases.caseView.pausedSince', {
+    values: { reason },
+    defaultMessage: 'Paused: {reason} ·',
+  });
+
+export const PAUSED_TOOLTIP = (reason: string) =>
+  i18n.translate('xpack.cases.caseView.pausedTooltip', {
+    values: { reason },
+    defaultMessage: '{reason} · paused',
+  });
+
 export const OPEN_CASE = i18n.translate('xpack.cases.caseView.openCase', {
   defaultMessage: 'Open case',
 });

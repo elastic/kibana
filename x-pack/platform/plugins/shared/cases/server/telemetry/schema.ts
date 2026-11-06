@@ -430,6 +430,8 @@ export const casesSchema: CasesTelemetrySchema = {
       attachmentFramework: attachmentFrameworkSchema,
       assignees: assigneesSchema,
       status: statusSchema,
+      customStatuses: statusSchema,
+      pausedCases: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
       extractObservablesOn: {
@@ -574,6 +576,29 @@ export const casesSchema: CasesTelemetrySchema = {
         },
       },
       ...customFieldsSolutionTelemetrySchema,
+      customStatuses: {
+        configurations: {
+          type: 'long',
+          _meta: { description: 'Number of configurations with at least one custom status' },
+        },
+        statuses: statusSchema,
+        pausing: {
+          configurations: {
+            type: 'long',
+            _meta: {
+              description:
+                'Number of configurations with at least one enabled status that pauses time tracking',
+            },
+          },
+          statuses: statusSchema,
+          customizedReasons: {
+            type: 'long',
+            _meta: {
+              description: 'Number of configurations whose pause reasons differ from the defaults',
+            },
+          },
+        },
+      },
     },
     sec: customFieldsSolutionTelemetrySchema,
     obs: customFieldsSolutionTelemetrySchema,

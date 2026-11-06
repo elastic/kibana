@@ -531,7 +531,7 @@ describe('useCaseViewHeader', () => {
       statusBadge?.items?.[2]?.onClick?.();
     });
 
-    expect(mockOnStatusChanged).toHaveBeenCalledWith('closed');
+    expect(mockOnStatusChanged).toHaveBeenCalledWith(expect.objectContaining({ key: 'closed' }));
   });
 
   it('calls onSeverityChanged when severity badge item is clicked', () => {

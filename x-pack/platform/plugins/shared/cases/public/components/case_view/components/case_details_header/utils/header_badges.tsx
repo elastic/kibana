@@ -6,25 +6,32 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
-import type { CaseSeverity } from '../../../../../../common/types/domain';
-import { CaseStatuses } from '../../../../../../common/types/domain';
+import type { CaseSeverity, CaseStatusConfiguration } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import { statuses } from '../../../../status/config';
 import { severities } from '../../../../severity/config';
 import * as i18n from '../../../translations';
+import { PAUSED_TOOLTIP } from '../../../../../common/translations';
 
 interface GetBadgesArgs {
   caseData: CaseUI;
+  /** The configured status the case is on */
+  currentStatus: CaseStatusConfiguration;
+  /** The statuses the case can move to */
+  statusOptions: CaseStatusConfiguration[];
   isStatusMenuDisabled: boolean;
   isSeverityMenuDisabled: boolean;
-  onStatusChanged: (status: CaseStatuses) => void;
+  onStatusChanged: (status: CaseStatusConfiguration) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
 }
 
 export const getBadges = ({
   caseData,
+  currentStatus,
+  statusOptions,
   isStatusMenuDisabled,
   isSeverityMenuDisabled,
   onStatusChanged,
@@ -50,32 +57,25 @@ export const getBadges = ({
   }
   result.push(severityBadge);
 
-  const statusConfig = statuses[caseData.status];
   const statusBadge: AppHeaderBadge = {
-    label: statusConfig.label,
-    onClickAriaLabel: i18n.STATUS_BADGE_ARIA_LABEL(statusConfig.label),
-    color: statusConfig.color as AppHeaderBadge['color'],
+    label: currentStatus.label,
+    onClickAriaLabel: i18n.STATUS_BADGE_ARIA_LABEL(currentStatus.label),
+    color: statuses[currentStatus.category].color as AppHeaderBadge['color'],
     'data-test-subj': 'case-view-status-badge',
+    // The header badge only takes a string, so the relative time is formatted here.
+    ...(caseData.pausedAt != null && {
+      tooltip: `${PAUSED_TOOLTIP(caseData.pauseReason ?? '')} ${moment(
+        caseData.pausedAt
+      ).fromNow()}`,
+    }),
   };
 
   if (!isStatusMenuDisabled) {
-    statusBadge.items = [
-      {
-        name: statuses.open.label,
-        onClick: () => onStatusChanged(CaseStatuses.open),
-        'data-test-subj': 'case-view-status-dropdown-open',
-      },
-      {
-        name: statuses['in-progress'].label,
-        onClick: () => onStatusChanged(CaseStatuses['in-progress']),
-        'data-test-subj': 'case-view-status-dropdown-in-progress',
-      },
-      {
-        name: statuses.closed.label,
-        onClick: () => onStatusChanged(CaseStatuses.closed),
-        'data-test-subj': 'case-view-status-dropdown-closed',
-      },
-    ];
+    statusBadge.items = statusOptions.map((status) => ({
+      name: status.label,
+      onClick: () => onStatusChanged(status),
+      'data-test-subj': `case-view-status-dropdown-${status.key}`,
+    }));
   }
   result.push(statusBadge);
 

@@ -706,6 +706,23 @@ describe('UserActionPersister', () => {
       expect(updatedUserActionsDict['2']).toEqual(userActionsDict['2']);
     });
 
+    it('creates one status user action when only the status key changes', () => {
+      const [firstCase] = patchCasesRequest.cases;
+      const userActionsDict = persister.buildUserActions({
+        updatedCases: {
+          cases: [{ ...firstCase, updatedAttributes: { status_key: 'awaiting_customer' } }],
+        },
+        user: testUser,
+      });
+
+      expect(userActionsDict['1']).toHaveLength(1);
+      expect(userActionsDict['1'][0].parameters.attributes.type).toBe(UserActionTypes.status);
+      expect(userActionsDict['1'][0].parameters.attributes.payload).toEqual({
+        status: firstCase.originalCase.attributes.status,
+        status_key: 'awaiting_customer',
+      });
+    });
+
     it('adds close reason details to the status audit message when alerts are synced', () => {
       const updatedCases = {
         ...patchCasesRequest,

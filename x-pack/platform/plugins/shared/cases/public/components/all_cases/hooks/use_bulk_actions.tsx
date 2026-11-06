@@ -9,9 +9,10 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
 
+import type { CaseStatusConfiguration } from '../../../../common/types/domain';
 import type { CasesUI } from '../../../containers/types';
 import { useDeleteAction } from '../../actions/delete/use_delete_action';
 import { useSeverityAction } from '../../actions/severity/use_severity_action';
@@ -23,6 +24,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useAssigneesAction } from '../../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../../actions/assignees/edit_assignees_flyout';
 import { useCloseCaseModal } from './use_close_case_modal';
+import { usePauseReasonModal } from './use_pause_reason_modal';
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import { useRunWorkflowAction } from '../../actions/run_workflow/use_run_workflow_action';
 import { RunCaseWorkflowModal } from '../../workflows/run_case_workflow_modal';
@@ -58,7 +60,10 @@ export const useBulkActions = ({
     isDisabled,
     onAction,
     onActionSuccess,
+    entryPoint: 'list_bulk_action',
   });
+  // The closed-category status picked from the menu; the close-reason modal applies it.
+  const [closingStatus, setClosingStatus] = useState<CaseStatusConfiguration | null>(null);
 
   const severityAction = useSeverityAction({
     isDisabled,
@@ -92,27 +97,36 @@ export const useBulkActions = ({
 
   const onCloseCase = useCallback(
     (closeReason?: string) => {
-      statusAction.handleUpdateCaseStatus(selectedCases, CaseStatuses.closed, closeReason);
+      statusAction.handleUpdateCaseStatus(
+        selectedCases,
+        closingStatus ?? CaseStatuses.closed,
+        closeReason
+      );
     },
-    [selectedCases, statusAction]
+    [closingStatus, selectedCases, statusAction]
   );
   const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
     canSyncCloseReasonToAlerts,
     onCloseCase,
   });
 
-  const statusActions = useMemo((): EuiContextMenuPanelItemDescriptor[] => {
-    return statusAction.getActions(selectedCases).map((statusActionMenuItem) => {
-      if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
-        return {
-          ...statusActionMenuItem,
-          onClick: openCloseCaseModal,
-        } as EuiContextMenuPanelItemDescriptor;
-      }
+  const { openPauseReasonModal, pauseReasonModal } = usePauseReasonModal({
+    onPause: (status, reason) =>
+      statusAction.handleUpdateCaseStatus(selectedCases, status, undefined, reason),
+  });
 
-      return statusActionMenuItem;
-    });
-  }, [openCloseCaseModal, selectedCases, statusAction]);
+  const statusActions = useMemo(
+    (): EuiContextMenuPanelItemDescriptor[] =>
+      statusAction.getActions(
+        selectedCases,
+        (status) => {
+          setClosingStatus(status);
+          openCloseCaseModal();
+        },
+        (status) => openPauseReasonModal(status, selectedCases.length)
+      ),
+    [openCloseCaseModal, openPauseReasonModal, selectedCases, statusAction]
+  );
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -213,6 +227,7 @@ export const useBulkActions = ({
           <RunCaseWorkflowModal {...runWorkflowAction.modalProps} />
         ) : null}
         {closeCaseModal}
+        {pauseReasonModal}
       </>
     ),
     flyouts: (

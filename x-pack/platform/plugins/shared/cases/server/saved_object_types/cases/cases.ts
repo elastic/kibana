@@ -29,6 +29,8 @@ import {
   modelVersion9,
   modelVersion10,
   modelVersion11,
+  modelVersion12,
+  modelVersion13,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -178,6 +180,21 @@ export const createCaseSavedObjectType = (
       status: {
         type: 'short',
       },
+      status_key: {
+        type: 'keyword',
+      },
+      paused_at: {
+        type: 'date',
+      },
+      time_paused: {
+        type: 'long',
+      },
+      pause_reason: {
+        type: 'keyword',
+      },
+      resume_to_status_key: {
+        type: 'keyword',
+      },
       tags: {
         type: 'keyword',
       },
@@ -321,6 +338,8 @@ export const createCaseSavedObjectType = (
     9: modelVersion9,
     10: modelVersion10,
     11: modelVersion11,
+    12: modelVersion12,
+    13: modelVersion13,
   },
   management: {
     importableAndExportable: true,

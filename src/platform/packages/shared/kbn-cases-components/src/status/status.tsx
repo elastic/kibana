@@ -15,18 +15,20 @@ import type { CaseStatuses } from './types';
 
 interface Props {
   status: CaseStatuses;
+  /** Label of an admin-defined status; the badge keeps the color of its `status` category */
+  label?: string;
   dataTestSubj?: string;
 }
 
 const statuses = getStatusConfiguration();
 
-const CaseStatusComponent: React.FC<Props> = ({ status, dataTestSubj }) => {
+const CaseStatusComponent: React.FC<Props> = ({ status, label, dataTestSubj }) => {
   return (
     <EuiBadge
       data-test-subj={dataTestSubj ? dataTestSubj : `case-status-badge-${status}`}
       color={statuses[status]?.color}
     >
-      {statuses[status]?.label}
+      {label ?? statuses[status]?.label}
     </EuiBadge>
   );
 };

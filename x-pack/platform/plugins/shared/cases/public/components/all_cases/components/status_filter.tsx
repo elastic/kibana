@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { CaseStatuses } from '../../../../common/types/domain';
+import { findStatusByKey } from '../../../../common/utils/statuses';
+import { useCaseStatuses } from '../../status/use_case_statuses';
 
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter } from './multi_select_filter';
@@ -20,7 +22,12 @@ interface Props {
   countOpenCases: number | null;
   hiddenStatuses?: CaseStatuses[];
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
+  /** Selected categories; applied when custom statuses are off */
   selectedOptionKeys: string[];
+  /** Selected status keys; applied when custom statuses are on */
+  selectedStatusKeys?: string[];
+  /** Cases in a status that pauses time tracking; null when none is configured */
+  countPausedCases?: number | null;
 }
 
 const caseStatuses = [
@@ -29,6 +36,8 @@ const caseStatuses = [
   { key: CaseStatuses.closed, label: i18n.STATUS_CLOSED },
 ];
 
+type StatusOption = MultiSelectFilterOption<string, string>;
+
 export const StatusFilterComponent = ({
   countClosedCases,
   countInProgressCases,
@@ -36,7 +45,10 @@ export const StatusFilterComponent = ({
   hiddenStatuses = [],
   onChange,
   selectedOptionKeys,
+  selectedStatusKeys = [],
+  countPausedCases,
 }: Props) => {
+  const { enabledStatuses, isCustomStatusesEnabled, isLoading } = useCaseStatuses();
   const stats = useMemo(
     () => ({
       [CaseStatuses.open]: countOpenCases ?? 0,
@@ -45,23 +57,63 @@ export const StatusFilterComponent = ({
     }),
     [countClosedCases, countInProgressCases, countOpenCases]
   );
-  const options = useMemo(
-    () =>
-      [...caseStatuses].filter((status) => !hiddenStatuses.includes(status.key)) as Array<
-        MultiSelectFilterOption<string, CaseStatuses>
-      >,
-    [hiddenStatuses]
+  const options = useMemo((): StatusOption[] => {
+    const categories = caseStatuses.filter((status) => !hiddenStatuses.includes(status.key));
+
+    if (!isCustomStatusesEnabled) {
+      return categories;
+    }
+
+    // Counts are per category, so custom statuses group under a category heading that carries it.
+    // Statuses that pause time tracking get their own group so "how many are waiting" is a glance.
+    const pausing = enabledStatuses.filter(
+      (status) => status.pausesTimeTracking && !hiddenStatuses.includes(status.category)
+    );
+    return [
+      ...categories.flatMap(({ key: category, label }) => [
+        // Built-in default keys equal their category, so the heading needs its own key.
+        { key: `${category}-group`, label: `${label} (${stats[category]})`, isGroupLabel: true },
+        ...enabledStatuses
+          .filter((status) => status.category === category && !status.pausesTimeTracking)
+          .map((status) => ({ key: status.key, label: status.label })),
+      ]),
+      ...(pausing.length > 0
+        ? [
+            {
+              key: 'paused-group',
+              label: `${i18n.STATUS_PAUSED} (${countPausedCases ?? 0})`,
+              isGroupLabel: true,
+            },
+            ...pausing.map((status) => ({ key: status.key, label: status.label })),
+          ]
+        : []),
+    ];
+  }, [countPausedCases, enabledStatuses, hiddenStatuses, isCustomStatusesEnabled, stats]);
+
+  const onFilterChange = useCallback(
+    ({ selectedOptionKeys: keys }: { filterId: string; selectedOptionKeys: string[] }) =>
+      onChange({
+        filterId: isCustomStatusesEnabled ? 'statusKey' : 'status',
+        selectedOptionKeys: keys,
+      }),
+    [isCustomStatusesEnabled, onChange]
   );
-  const renderOption = (option: MultiSelectFilterOption<string, CaseStatuses>) => {
-    const selectedStatus = option.key;
+
+  const renderOption = (option: StatusOption) => {
+    const status = isCustomStatusesEnabled
+      ? findStatusByKey(enabledStatuses, option.key)
+      : undefined;
+    const category = status?.category ?? (option.key as CaseStatuses);
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={1}>
           <span>
-            <Status status={selectedStatus} />
+            <Status status={category} label={status?.label} />
           </span>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{` (${stats[selectedStatus]})`}</EuiFlexItem>
+        {!isCustomStatusesEnabled && (
+          <EuiFlexItem grow={false}>{` (${stats[category]})`}</EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };
@@ -69,11 +121,11 @@ export const StatusFilterComponent = ({
     <MultiSelectFilter
       buttonLabel={i18n.STATUS}
       id={'status'}
-      onChange={onChange}
+      onChange={onFilterChange}
       options={options}
       renderOption={renderOption}
-      selectedOptionKeys={selectedOptionKeys}
-      isLoading={false}
+      selectedOptionKeys={isCustomStatusesEnabled ? selectedStatusKeys : selectedOptionKeys}
+      isLoading={isCustomStatusesEnabled && isLoading}
     />
   );
 };

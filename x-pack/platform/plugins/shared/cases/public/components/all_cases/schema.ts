@@ -19,6 +19,7 @@ export const AllCasesURLQueryParamsSchema = z
     search: z.string(),
     severity: z.array(CaseSeveritySchema),
     status: z.array(CaseStatusSchema),
+    statusKey: z.array(z.string()),
     tags: z.array(z.string()),
     category: z.array(z.string()),
     assignees: z.array(z.union([z.string(), z.null()])),

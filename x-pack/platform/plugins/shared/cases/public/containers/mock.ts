@@ -320,6 +320,7 @@ export const basicCaseMetrics: SingleCaseMetrics = {
     closeDate: basicClosedAt,
     statusInfo: {
       inProgressDuration: 20,
+      pausedDuration: 0,
       openDuration: 10,
       reopenDates: [],
     },

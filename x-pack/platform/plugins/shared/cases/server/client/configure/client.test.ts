@@ -27,6 +27,7 @@ import {
   createMockConnectorFindResult,
 } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { ConfigSchema } from '../../config';
+import { getBuiltInStatuses } from '../../../common/utils/statuses';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -334,6 +335,58 @@ describe('client', () => {
       );
     });
 
+    describe('statuses', () => {
+      const onHold = {
+        key: 'on_hold',
+        label: 'On hold',
+        category: 'in-progress' as const,
+        order: 3,
+        isDefault: false,
+        disabled: false,
+      };
+
+      beforeEach(() => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: { customFields: [], statuses: [...getBuiltInStatuses(), onHold] },
+        });
+      });
+
+      afterEach(() => {
+        clientArgs.config = ConfigSchema.validate({});
+      });
+
+      it('throws when custom statuses are not enabled', async () => {
+        clientArgs.config = { ...ConfigSchema.validate({}), customStatuses: { enabled: false } };
+
+        await expect(
+          update(
+            'test-id',
+            { version: 'test-version', statuses: getBuiltInStatuses() },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: Custom statuses are not enabled'
+        );
+      });
+
+      it('validates the request against the stored statuses', async () => {
+        clientArgs.config = { ...ConfigSchema.validate({}), customStatuses: { enabled: true } };
+
+        await expect(
+          update(
+            'test-id',
+            { version: 'test-version', statuses: getBuiltInStatuses() },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: The status "on_hold" cannot be removed, disable it instead'
+        );
+      });
+    });
+
     describe('templates', () => {
       it(`does not throw error when trying to update templates`, async () => {
         clientArgs.services.caseConfigureService.get.mockResolvedValue({
@@ -391,6 +444,8 @@ describe('client', () => {
             },
             observableTypes: [],
             workflowTags: [],
+            statuses: [],
+            pauseReasons: [],
           },
         });
 
@@ -452,6 +507,8 @@ describe('client', () => {
               },
             ],
             observableTypes: [],
+            statuses: [],
+            pauseReasons: [],
             extractObservables: true,
             workflowTags: [],
           },
@@ -467,6 +524,8 @@ describe('client', () => {
           attributes: {
             observableTypes: [],
             workflowTags: [],
+            statuses: [],
+            pauseReasons: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1063,6 +1122,8 @@ describe('client', () => {
               closure_type: 'close-by-user',
               owner: 'cases',
               observableTypes: [],
+              statuses: [],
+              pauseReasons: [],
               extractObservables: true,
               workflowTags: [],
             },
@@ -1135,6 +1196,8 @@ describe('client', () => {
                 ],
                 observableTypes: [],
                 workflowTags: [],
+                statuses: [],
+                pauseReasons: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1371,6 +1434,8 @@ describe('client', () => {
             },
             observableTypes: [],
             workflowTags: [],
+            statuses: [],
+            pauseReasons: [],
           },
         };
 
@@ -1586,6 +1651,16 @@ describe('client', () => {
       );
     });
 
+    it('throws when statuses are set while custom statuses are not enabled', async () => {
+      clientArgs.config = { ...ConfigSchema.validate({}), customStatuses: { enabled: false } };
+
+      await expect(
+        create({ ...baseRequest, statuses: getBuiltInStatuses() }, clientArgs, casesClientInternal)
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: Custom statuses are not enabled'
+      );
+    });
+
     it('throws when there are duplicated keys in the request', async () => {
       await expect(
         create(
@@ -1718,6 +1793,8 @@ describe('client', () => {
                   updated_at: null,
                   updated_by: null,
                   observableTypes: [],
+                  statuses: [],
+                  pauseReasons: [],
                   extractObservables: true,
                   workflowTags: [],
                 },
@@ -1746,6 +1823,8 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              statuses: [],
+              pauseReasons: [],
               extractObservables: true,
               workflowTags: [],
             },
@@ -1987,6 +2066,8 @@ describe('client', () => {
           ],
           templates: [],
           observableTypes: [],
+          statuses: [],
+          pauseReasons: [],
           extractObservables: true,
           workflowTags: [],
           created_at: '2019-11-25T21:54:48.952Z',

@@ -28,12 +28,16 @@ import {
   MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_CASE_STATUSES,
+  MAX_CASE_PAUSE_REASON_LENGTH,
+  MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import {
   limitedArraySchema,
   limitedStringSchema,
   NonEmptyString,
   paginationSchema,
+  regexStringSchema,
 } from '../../../schema';
 import {
   CaseCustomFieldToggleSchema,
@@ -184,11 +188,29 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
   closeReason: CaseCloseReasonSchema.optional(),
 });
 
+export const CaseStatusKeySchema = regexStringSchema({
+  codec: limitedStringSchema({ fieldName: 'status_key', min: 1, max: MAX_CASE_STATUS_KEY_LENGTH }),
+  pattern: '^[a-z0-9_-]+$',
+  message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+});
+
 export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.extend({
   /**
    * The current status of the case (open, closed, in-progress)
    */
   status: CaseStatusSchema.optional(),
+  /**
+   * The key of a configured status; the server derives `status` from its category
+   */
+  status_key: CaseStatusKeySchema.optional(),
+  /**
+   * Why the case is paused; required when the target status pauses time tracking
+   */
+  pause_reason: limitedStringSchema({
+    fieldName: 'pause_reason',
+    min: 1,
+    max: MAX_CASE_PAUSE_REASON_LENGTH,
+  }).optional(),
   /**
    * The plugin owner of the case
    */
@@ -321,6 +343,20 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
    * The status of the case (open, closed, in-progress)
    */
   status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
+  /**
+   * The keys of configured statuses to filter by
+   */
+  status_key: z
+    .union([
+      limitedArraySchema({
+        codec: z.string(),
+        fieldName: 'status_key',
+        min: 0,
+        max: MAX_CASE_STATUSES,
+      }),
+      z.string(),
+    ])
+    .optional(),
   /**
    * The severity of the case
    */
@@ -487,6 +523,10 @@ export const CasesFindResponseSchema = CasesStatusResponseSchema.extend({
   page: z.number(),
   per_page: z.number(),
   total: z.number(),
+  /**
+   * Cases in a status that pauses time tracking; present when such statuses are configured
+   */
+  count_paused_cases: z.number().optional(),
 });
 
 /**
