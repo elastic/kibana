@@ -1651,7 +1651,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       mockNewInvestigationId.mockReturnValueOnce('inv-failed');
       mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
       await expect(startWithBudget(2)).rejects.toThrow('failed');
-      expect(subjectsClient.releaseClaims).toHaveBeenCalledWith('inv-failed');
+      expect(subjectsClient.releaseClaims).toHaveBeenCalledWith('inv-failed', expect.any(Array));
 
       mockNewInvestigationId.mockReturnValueOnce('inv-retry');
       await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-retry' });

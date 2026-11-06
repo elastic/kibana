@@ -23,7 +23,7 @@ const setup = ({
     findConversationIdsBySubjects: jest.fn().mockResolvedValue(['conv-1']),
     listByConversationIds: jest.fn().mockResolvedValue([]),
     claimSubjects: jest.fn().mockResolvedValue({ claimed: true }),
-    deleteClaimsByConversationIds: jest.fn().mockResolvedValue(1),
+    releaseClaims: jest.fn().mockResolvedValue(undefined),
   };
   const deny = jest.fn().mockRejectedValue(new InvestigationsForbiddenError('Missing privilege'));
   const privileges = {
@@ -94,10 +94,14 @@ describe('createSubjectsClient', () => {
   it('releases the claims of one investigation in the request space', async () => {
     const { client, service, privileges } = setup();
 
-    await client.releaseClaims('conv-2');
+    await client.releaseClaims('conv-2', [{ type: 'alert', id: 'a-1' }]);
 
     expect(privileges.assertCanManage).toHaveBeenCalledWith(request);
-    expect(service.deleteClaimsByConversationIds).toHaveBeenCalledWith(['conv-2'], 'space-a');
+    expect(service.releaseClaims).toHaveBeenCalledWith({
+      spaceId: 'space-a',
+      conversationId: 'conv-2',
+      subjects: [{ type: 'alert', id: 'a-1' }],
+    });
   });
 
   it('leaves out investigations the caller cannot read', async () => {
@@ -131,10 +135,12 @@ describe('createSubjectsClient', () => {
     await expect(
       client.claimSubjects({ conversationId: 'c', subjects: [], isHolderOpen: jest.fn() })
     ).rejects.toBeInstanceOf(InvestigationsForbiddenError);
-    await expect(client.releaseClaims('c')).rejects.toBeInstanceOf(InvestigationsForbiddenError);
+    await expect(client.releaseClaims('c', [])).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
 
     expect(service.upsertSubjects).not.toHaveBeenCalled();
-    expect(service.deleteClaimsByConversationIds).not.toHaveBeenCalled();
+    expect(service.releaseClaims).not.toHaveBeenCalled();
     expect(service.listByConversationIds).not.toHaveBeenCalled();
     expect(service.claimSubjects).not.toHaveBeenCalled();
   });

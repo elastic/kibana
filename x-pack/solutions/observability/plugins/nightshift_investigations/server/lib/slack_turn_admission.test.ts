@@ -56,6 +56,16 @@ describe('createSlackTurnAdmissionCheck', () => {
     }
   );
 
+  it('names the value of the limit that was reached', async () => {
+    const callback = jest.fn().mockResolvedValue({ allowed: false, deniedBy: 'all', limit: 10 });
+
+    const error = await admit(NIGHTSHIFT_ASSISTANT_AGENT_ID, callback).catch((e) => e);
+
+    expect(error.message).toBe(
+      'The daily limit of 10 for all investigations has been reached. An admin can raise it in [Nightshift settings](https://kibana.example/s/default/app/nightshift/settings).'
+    );
+  });
+
   it('does not charge turns for other agents', async () => {
     const callback = jest.fn().mockResolvedValue({ allowed: false });
 

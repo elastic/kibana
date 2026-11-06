@@ -152,6 +152,37 @@ export class SubjectClaimsService {
     return { claimed: true };
   }
 
+  /**
+   * Releases the claims a new investigation took, for a start that failed before it ran. The
+   * start's own claims are deleted by id, since a search may not see them yet; a claim another
+   * investigation now holds is left alone. Claims handed over to the investigation go too.
+   */
+  async release({
+    spaceId,
+    conversationId,
+    subjects,
+  }: {
+    spaceId: string;
+    conversationId: string;
+    subjects: InvestigationSubjectKey[];
+  }): Promise<void> {
+    const ids = [...new Set(subjects.map((subject) => subjectClaimId(spaceId, subject)))];
+    const owned: string[] = [];
+    for (const id of ids) {
+      const existing = await this.findVersioned(id);
+      if (!existing || existing.claim.conversationId === conversationId) {
+        owned.push(id);
+      }
+    }
+    if (owned.length > 0) {
+      await this.deps.storage.bulk({
+        operations: owned.map((id) => ({ delete: { _id: id } })),
+        throwOnFail: true,
+      });
+    }
+    await this.deleteByConversationIds([conversationId], spaceId);
+  }
+
   /** The investigation (conversation id) holding the subject's claim in the space, open or closed. */
   async findHolder(spaceId: string, subject: InvestigationSubjectKey): Promise<string | undefined> {
     const existing = await this.findVersioned(subjectClaimId(spaceId, subject));
@@ -185,7 +216,8 @@ export class SubjectClaimsService {
       const response = await this.search({
         track_total_hits: false,
         size: DELETE_PAGE_SIZE,
-        _source: false,
+        // The storage adapter rejects hits without a source.
+        _source: ['spaceId'],
         query: { bool: { filter } },
       });
       const ids = response.hits.hits.flatMap((hit) => (hit._id !== undefined ? [hit._id] : []));

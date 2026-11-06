@@ -333,6 +333,65 @@ describe('SubjectClaimsService', () => {
     }
   });
 
+  it('releases the claims a failed start took, even before a search sees them', async () => {
+    const { storage, service, holderOf } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT, EVENT],
+      isHolderOpen: isOpen(true),
+    });
+    (storage.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
+
+    await service.release({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT, EVENT],
+    });
+
+    expect(holderOf(ALERT)).toBeUndefined();
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
+  it('leaves a claim another investigation holds when releasing', async () => {
+    const { service, holderOf } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-other',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [EVENT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await service.release({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT, EVENT],
+    });
+
+    expect(holderOf(ALERT)).toBe('conv-other');
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
+  it('also releases a claim handed over to the failed investigation', async () => {
+    const { service, holderOf } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [EVENT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await service.release({ spaceId: SPACE_ID, conversationId: 'conv-1', subjects: [ALERT] });
+
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
   it('deletes every claim in a space for maintenance', async () => {
     const { service, storage } = setup();
     await service.claim({

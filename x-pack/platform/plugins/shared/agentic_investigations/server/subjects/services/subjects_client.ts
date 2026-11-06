@@ -34,8 +34,8 @@ export interface SubjectsClient {
   listByConversationIds: (conversationIds: string[]) => Promise<InvestigationSubject[]>;
   /** Claims every subject for a new investigation, or returns the investigation holding one. */
   claimSubjects: (params: Omit<ClaimSubjectsParams, 'spaceId'>) => Promise<ClaimSubjectsResult>;
-  /** Drops every claim a new investigation holds, for a start that failed before it ran. */
-  releaseClaims: (conversationId: string) => Promise<void>;
+  /** Releases the claims a new investigation took, for a start that failed before it ran. */
+  releaseClaims: (conversationId: string, subjects: InvestigationSubjectKey[]) => Promise<void>;
 }
 
 export interface SubjectsClientDeps {
@@ -98,11 +98,12 @@ export const createSubjectsClient =
       await privileges.assertCanManage(request);
       return getSubjectsService().claimSubjects({ ...params, spaceId: getSpaceId(request) });
     },
-    releaseClaims: async (conversationId) => {
+    releaseClaims: async (conversationId, subjects) => {
       await privileges.assertCanManage(request);
-      await getSubjectsService().deleteClaimsByConversationIds(
-        [conversationId],
-        getSpaceId(request)
-      );
+      await getSubjectsService().releaseClaims({
+        spaceId: getSpaceId(request),
+        conversationId,
+        subjects,
+      });
     },
   });

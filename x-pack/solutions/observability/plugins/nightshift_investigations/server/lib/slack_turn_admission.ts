@@ -31,9 +31,10 @@ export const USER_FACING_ERROR_HEADER = 'x-elastic-user-facing-error';
  */
 export const getLimitReachedMessage = (
   deniedBy: InvestigationQuotaLimit,
-  settingsUrl?: string
+  settingsUrl?: string,
+  limit?: number
 ): string => {
-  const reached = new InvestigationQuotaDeniedError(deniedBy).message;
+  const reached = new InvestigationQuotaDeniedError(deniedBy, limit).message;
   return settingsUrl
     ? `${reached}. An admin can raise it in [Nightshift settings](${settingsUrl}).`
     : `${reached}. An admin can raise it in the Nightshift settings.`;
@@ -60,7 +61,7 @@ export const createSlackTurnAdmissionCheck =
       return;
     }
 
-    const { allowed, deniedBy, release } = await evaluateInvestigationQuota({
+    const { allowed, deniedBy, limit, release } = await evaluateInvestigationQuota({
       callback: getQuotaCallback(),
       trigger: 'manual',
       logger,
@@ -72,7 +73,7 @@ export const createSlackTurnAdmissionCheck =
     });
     if (!allowed) {
       const refusal = tooManyRequests(
-        getLimitReachedMessage(deniedBy ?? 'manual', getSettingsUrl(spaceId))
+        getLimitReachedMessage(deniedBy ?? 'manual', getSettingsUrl(spaceId), limit)
       );
       refusal.output.headers[USER_FACING_ERROR_HEADER] = 'true';
       throw refusal;
