@@ -13,12 +13,13 @@ import {
   InventoryTypeNotFoundError,
 } from '../inventory/errors';
 import { createEntityInventoryServerRoute } from './create_server_route';
+import { INTERIM_AUTHZ } from './interim_authz';
 
 const callRouteThrowing = (error: Error): Promise<unknown> => {
   const route = createEntityInventoryServerRoute({
     endpoint: 'GET /internal/entity_inventory/test',
     options: { access: 'internal' },
-    security: { authz: { requiredPrivileges: ['entity_inventory_read'] } },
+    security: INTERIM_AUTHZ,
     handler: async () => {
       throw error;
     },

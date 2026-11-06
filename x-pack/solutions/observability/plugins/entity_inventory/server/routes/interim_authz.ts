@@ -6,15 +6,13 @@
  */
 
 import type { RouteSecurity } from '@kbn/core/server';
-import { ENTITY_INVENTORY_API_PRIVILEGES } from '../../common/privileges';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 /**
- * The authorization every entity inventory route declares until a Kibana feature grants
- * `entity_inventory_read`; until then only `superuser` passes.
+ * The authorization every entity inventory route declares: Kibana checks none, and the
+ * request-scoped Elasticsearch client enforces index privileges on every query.
  */
-// TODO(elastic/observability-dev#6244): revisit once the entityInventory Kibana feature exists.
+// TODO(elastic/observability-dev#6244): replace with the inventory's privilege model.
 export const INTERIM_AUTHZ = {
-  authz: {
-    requiredPrivileges: [ENTITY_INVENTORY_API_PRIVILEGES.read],
-  },
-} as const satisfies RouteSecurity;
+  authz: AuthzDisabled.delegateToESClient,
+} satisfies RouteSecurity;
