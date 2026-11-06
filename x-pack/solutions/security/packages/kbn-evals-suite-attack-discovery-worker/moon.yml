@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/alertzero-common'
   - '@kbn/elastic-assistant-common'
   - '@kbn/repo-info'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package
