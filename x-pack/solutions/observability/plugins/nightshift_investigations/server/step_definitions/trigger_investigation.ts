@@ -317,9 +317,7 @@ export const triggerInvestigationStepDefinition = (
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
-            error.limit === undefined
-              ? `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
-              : `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit of ${error.limit} reached`
+            `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
           if (input.slack_thread) {
             await notifyInvestigationQuotaReached({

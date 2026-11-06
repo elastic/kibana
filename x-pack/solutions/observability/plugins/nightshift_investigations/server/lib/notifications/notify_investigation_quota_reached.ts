@@ -27,7 +27,9 @@ export const getInvestigationQuotaReachedMessage = ({
   const quotaReached =
     limit === undefined
       ? "Elastic nightshift has reached today's limit for automatic investigations across all automations."
-      : `Elastic nightshift has reached today's limit of ${limit} automatic investigations across all automations.`;
+      : `Elastic nightshift has reached today's limit of ${limit} automatic investigation${
+          limit === 1 ? '' : 's'
+        } across all automations.`;
   const settings = settingsUrl !== undefined ? `<${settingsUrl}|settings>` : 'settings';
   return `${quotaReached} New investigations resume at 00:00 UTC, or an admin can raise the limit in ${settings}.`;
 };
