@@ -7,6 +7,7 @@
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
+import { MAX_REVOKE_PAGES } from '../../alert_triage/constants';
 import { getTriageRevokeFpDecisionStepDefinition } from './revoke_fp_decision_step';
 
 const APPROVAL = 'fp-decision-0123456789abcdef';
@@ -19,6 +20,7 @@ const setup = ({
   getError,
   updateError,
   statusError,
+  keepTags = false,
 }: {
   decisionId?: string;
   tagged?: string[];
@@ -26,6 +28,7 @@ const setup = ({
   getError?: Error & { statusCode?: number };
   updateError?: Error & { statusCode?: number };
   statusError?: Error;
+  keepTags?: boolean;
 }) => {
   let left = [...tagged];
   const callKibanaApi = jest.fn(async ({ path, body }: { path: string; body?: any }) => {
@@ -36,7 +39,7 @@ const setup = ({
       if (statusError) throw statusError;
       return { body: { updated: body.signal_ids.length, failures: [] } };
     }
-    left = left.filter((id) => !body.ids.includes(id));
+    if (!keepTags) left = left.filter((id) => !body.ids.includes(id));
     return { body: { updated: body.ids.length, timed_out: false, failures: [] } };
   });
   const get = jest.fn(async () => {
@@ -141,6 +144,16 @@ describe('triage revoke decision step', () => {
 
     expect(output).toEqual(expect.objectContaining({ alerts_reopened: 0, failures: 1 }));
     expect(calls('/signals/tags')).toEqual([]);
+  });
+
+  it('reports a failure when the page limit stops it with alerts still tagged, so it is not read as complete', async () => {
+    // The status route reports success but the tags never leave, so every page finds the same alerts.
+    const { run, calls } = setup({ tagged: ['a', 'b'], keepTags: true });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ failures: 1 }));
+    expect(calls('/signals/search')).toHaveLength(MAX_REVOKE_PAGES);
   });
 
   it('does nothing to alerts when none carry the tag', async () => {
