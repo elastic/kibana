@@ -115,7 +115,8 @@ describe('GraphVisualization', () => {
     jest.clearAllMocks();
     mockUseGraphTelemetry.mockReturnValue({
       onTelemetryEvent: mockOnTelemetryEvent,
-      reportPreviewExpanded: jest.fn(),
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: jest.fn(),
       reportGraphOpened: mockReportGraphOpened,
       reportDrillThrough: mockReportDrillThrough,
     });
@@ -143,7 +144,8 @@ describe('GraphVisualization', () => {
       // does, so hand out a new function on every render.
       mockUseGraphTelemetry.mockImplementation(() => ({
         onTelemetryEvent: mockOnTelemetryEvent,
-        reportPreviewExpanded: jest.fn(),
+        reportGraphPreviewShown: jest.fn(),
+        reportGraphPreviewExpanded: jest.fn(),
         reportGraphOpened: () => mockReportGraphOpened(),
         reportDrillThrough: mockReportDrillThrough,
       }));

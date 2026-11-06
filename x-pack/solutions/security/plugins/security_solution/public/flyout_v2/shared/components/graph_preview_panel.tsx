@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -51,11 +51,23 @@ export const GraphPreviewPanel = ({
   showIcon,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
-  const { reportPreviewExpanded } = useGraphTelemetry(entryPoint);
+  const { reportGraphPreviewShown, reportGraphPreviewExpanded } = useGraphTelemetry(entryPoint);
   const onExpandGraph = useCallback(() => {
-    reportPreviewExpanded();
+    reportGraphPreviewExpanded();
     onShowGraph?.();
-  }, [reportPreviewExpanded, onShowGraph]);
+  }, [reportGraphPreviewExpanded, onShowGraph]);
+
+  // Mirrors when GraphPreview renders the graph rather than its loading, error or empty states.
+  const isGraphShown = shouldShowGraph && !isLoading && !isError && (data?.nodes.length ?? 0) > 0;
+  const hasReportedShown = useRef(false);
+
+  useEffect(() => {
+    if (!isGraphShown || hasReportedShown.current) {
+      return;
+    }
+    hasReportedShown.current = true;
+    reportGraphPreviewShown();
+  }, [isGraphShown, reportGraphPreviewShown]);
 
   useEffect(() => {
     if (shouldShowGraph) {

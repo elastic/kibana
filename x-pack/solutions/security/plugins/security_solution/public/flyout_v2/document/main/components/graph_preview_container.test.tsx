@@ -55,7 +55,7 @@ const mockHit = {
 } as DataTableRecord;
 
 const mockUseGraphTelemetry = useGraphTelemetry as jest.Mock;
-const mockReportPreviewExpanded = jest.fn();
+const mockReportGraphPreviewExpanded = jest.fn();
 
 const mockOnShowGraph = jest.fn();
 
@@ -82,7 +82,8 @@ describe('<GraphPreviewContainer />', () => {
     mockUseUpsellingComponent.mockReturnValue(null);
     mockUseGraphTelemetry.mockReturnValue({
       onTelemetryEvent: jest.fn(),
-      reportPreviewExpanded: mockReportPreviewExpanded,
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: mockReportGraphPreviewExpanded,
       reportGraphOpened: jest.fn(),
       reportDrillThrough: jest.fn(),
     });
@@ -120,13 +121,13 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockOnShowGraph).toHaveBeenCalled();
   });
 
-  it('reports the preview expand when the header link is clicked', () => {
+  it('reports the graph preview expand when the header link is clicked', () => {
     mockUseGraphPreview.mockReturnValue(previewAvailable);
 
     const { getByTestId } = renderContainer();
     fireEvent.click(getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)));
 
-    expect(mockReportPreviewExpanded).toHaveBeenCalledTimes(1);
+    expect(mockReportGraphPreviewExpanded).toHaveBeenCalledTimes(1);
   });
 
   it('reports through the alert_flyout entry point for an alert', () => {

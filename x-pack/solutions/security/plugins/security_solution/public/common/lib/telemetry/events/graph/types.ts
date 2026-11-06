@@ -102,7 +102,8 @@ export type GraphEventId =
   | 'node_action_clicked'
   | 'filter_changed'
   | 'search_submitted'
-  | 'preview_expanded'
+  | 'graph_preview_shown'
+  | 'graph_preview_expanded'
   | 'graph_opened'
   | 'expansion_result'
   | 'grouped_panel_opened'
@@ -115,7 +116,8 @@ export const GRAPH_EVENT_ID: Record<GraphEventId, GraphEventId> = {
   node_action_clicked: 'node_action_clicked',
   filter_changed: 'filter_changed',
   search_submitted: 'search_submitted',
-  preview_expanded: 'preview_expanded',
+  graph_preview_shown: 'graph_preview_shown',
+  graph_preview_expanded: 'graph_preview_expanded',
   graph_opened: 'graph_opened',
   expansion_result: 'expansion_result',
   grouped_panel_opened: 'grouped_panel_opened',
@@ -145,7 +147,8 @@ export type GraphEventProperties = GraphEventCommon &
     | ({ id: 'node_action_clicked' } & DistributiveOmit<GraphNodeActionEvent, 'type'>)
     | { id: 'filter_changed'; change: 'added' | 'removed' }
     | { id: 'search_submitted'; timeRangeChanged: boolean; queryChanged: boolean }
-    | { id: 'preview_expanded' }
+    | { id: 'graph_preview_shown' }
+    | { id: 'graph_preview_expanded' }
     | { id: 'graph_opened' }
     | {
         id: 'expansion_result';

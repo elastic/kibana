@@ -10,10 +10,12 @@ import '@testing-library/jest-dom';
 import { fireEvent, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { GraphPreviewData } from './graph_preview_panel';
 import { GraphPreviewPanel } from './graph_preview_panel';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 
-const mockReportPreviewExpanded = jest.fn();
+const mockReportGraphPreviewShown = jest.fn();
+const mockReportGraphPreviewExpanded = jest.fn();
 const mockUseGraphTelemetry = jest.fn();
 
 jest.mock('../hooks/use_graph_telemetry', () => ({
@@ -33,14 +35,16 @@ jest.mock('./graph_preview', () => ({
   GraphPreview: () => <div data-test-subj="mockGraphPreview" />,
 }));
 
+const wrapPanel = (props: React.ComponentProps<typeof GraphPreviewPanel>) => (
+  <I18nProvider>
+    <EuiThemeProvider>
+      <GraphPreviewPanel {...props} />
+    </EuiThemeProvider>
+  </I18nProvider>
+);
+
 const renderPanel = (props: React.ComponentProps<typeof GraphPreviewPanel>) =>
-  render(
-    <I18nProvider>
-      <EuiThemeProvider>
-        <GraphPreviewPanel {...props} />
-      </EuiThemeProvider>
-    </I18nProvider>
-  );
+  render(wrapPanel(props));
 
 const TITLE_LINK_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}TitleLink`;
 
@@ -52,15 +56,24 @@ const defaultProps = {
   isError: false,
 };
 
+const dataWithNodes: GraphPreviewData = {
+  nodes: [{ id: 'node-1', color: 'primary', shape: 'ellipse' }],
+  edges: [],
+};
+
+const emptyData: GraphPreviewData = { nodes: [], edges: [] };
+
 describe('<GraphPreviewPanel />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseGraphTelemetry.mockReturnValue({
+    // A new function identity on every call, like the hook returns when telemetry or entryPoint change.
+    mockUseGraphTelemetry.mockImplementation(() => ({
       onTelemetryEvent: jest.fn(),
-      reportPreviewExpanded: mockReportPreviewExpanded,
+      reportGraphPreviewShown: () => mockReportGraphPreviewShown(),
+      reportGraphPreviewExpanded: mockReportGraphPreviewExpanded,
       reportGraphOpened: jest.fn(),
       reportDrillThrough: jest.fn(),
-    });
+    }));
   });
 
   it('reports through the entry point it was given', () => {
@@ -71,13 +84,13 @@ describe('<GraphPreviewPanel />', () => {
 
   it('reports the expand and then calls onShowGraph when the title link is clicked', () => {
     const calls: string[] = [];
-    mockReportPreviewExpanded.mockImplementation(() => calls.push('report'));
+    mockReportGraphPreviewExpanded.mockImplementation(() => calls.push('report'));
     const onShowGraph = jest.fn(() => calls.push('navigate'));
 
-    const { getByTestId } = renderPanel({ ...defaultProps, onShowGraph });
+    const { getByTestId } = renderPanel({ ...defaultProps, data: dataWithNodes, onShowGraph });
     fireEvent.click(getByTestId(TITLE_LINK_TEST_ID));
 
-    expect(mockReportPreviewExpanded).toHaveBeenCalledTimes(1);
+    expect(mockReportGraphPreviewExpanded).toHaveBeenCalledTimes(1);
     expect(onShowGraph).toHaveBeenCalledTimes(1);
     expect(calls).toEqual(['report', 'navigate']);
   });
@@ -86,6 +99,88 @@ describe('<GraphPreviewPanel />', () => {
     const { queryByTestId } = renderPanel(defaultProps);
 
     expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(mockReportPreviewExpanded).not.toHaveBeenCalled();
+    expect(mockReportGraphPreviewExpanded).not.toHaveBeenCalled();
+  });
+
+  describe('graph preview shown report', () => {
+    it('reports once when the graph is loaded and has nodes', () => {
+      renderPanel({ ...defaultProps, data: dataWithNodes });
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report while the graph is loading', () => {
+      renderPanel({ ...defaultProps, isLoading: true, data: dataWithNodes });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('does not report when loading the graph failed', () => {
+      renderPanel({ ...defaultProps, isError: true, data: dataWithNodes });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('does not report when the graph has no nodes', () => {
+      renderPanel({ ...defaultProps, data: emptyData });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('does not report when there is no data', () => {
+      renderPanel({ ...defaultProps, data: undefined });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('does not report when the graph is not available (license upsell)', () => {
+      renderPanel({ ...defaultProps, shouldShowGraph: false, data: dataWithNodes });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('reports once when loading finishes with nodes', () => {
+      const { rerender } = renderPanel({ ...defaultProps, isLoading: true, data: undefined });
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+
+      rerender(wrapPanel({ ...defaultProps, isLoading: false, data: dataWithNodes }));
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report when loading finishes without nodes', () => {
+      const { rerender } = renderPanel({ ...defaultProps, isLoading: true, data: undefined });
+
+      rerender(wrapPanel({ ...defaultProps, isLoading: false, data: emptyData }));
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('reports only once per mount when re-rendered, even if the report function changes identity', () => {
+      const { rerender } = renderPanel({ ...defaultProps, data: dataWithNodes });
+      const firstReport = mockUseGraphTelemetry.mock.results[0].value.reportGraphPreviewShown;
+
+      rerender(wrapPanel({ ...defaultProps, data: dataWithNodes }));
+      rerender(wrapPanel({ ...defaultProps, data: { ...dataWithNodes } }));
+
+      const lastReport = mockUseGraphTelemetry.mock.results.at(-1)?.value.reportGraphPreviewShown;
+      expect(lastReport).not.toBe(firstReport);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports again for a new mount', () => {
+      const { unmount } = renderPanel({ ...defaultProps, data: dataWithNodes });
+      unmount();
+
+      renderPanel({ ...defaultProps, data: dataWithNodes });
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not report the expand when the preview is only shown', () => {
+      renderPanel({ ...defaultProps, data: dataWithNodes, onShowGraph: jest.fn() });
+
+      expect(mockReportGraphPreviewExpanded).not.toHaveBeenCalled();
+    });
   });
 });

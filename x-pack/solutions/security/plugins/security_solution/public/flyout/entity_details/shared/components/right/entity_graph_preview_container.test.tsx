@@ -43,7 +43,7 @@ const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
 const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 const mockUseGraphTelemetry = useGraphTelemetry as jest.Mock;
-const mockReportPreviewExpanded = jest.fn();
+const mockReportGraphPreviewExpanded = jest.fn();
 
 const mockOnShowGraph = jest.fn();
 
@@ -68,7 +68,8 @@ describe('<EntityGraphPreviewContainer />', () => {
     mockUseShouldShowGraph.mockReturnValue(true);
     mockUseGraphTelemetry.mockReturnValue({
       onTelemetryEvent: jest.fn(),
-      reportPreviewExpanded: mockReportPreviewExpanded,
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: mockReportGraphPreviewExpanded,
       reportGraphOpened: jest.fn(),
       reportDrillThrough: jest.fn(),
     });
@@ -133,13 +134,13 @@ describe('<EntityGraphPreviewContainer />', () => {
     expect(mockOnShowGraph).toHaveBeenCalled();
   });
 
-  it('reports the preview expand when the header link is clicked', async () => {
+  it('reports the graph preview expand when the header link is clicked', async () => {
     const { findByTestId, getByTestId } = renderContainer();
 
     expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
 
-    expect(mockReportPreviewExpanded).toHaveBeenCalledTimes(1);
+    expect(mockReportGraphPreviewExpanded).toHaveBeenCalledTimes(1);
   });
 
   it('reports through the entity_flyout entry point by default', async () => {

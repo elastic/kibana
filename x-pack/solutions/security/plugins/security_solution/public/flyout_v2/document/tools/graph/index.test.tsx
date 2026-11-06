@@ -70,7 +70,8 @@ describe('<GraphDetails />', () => {
     jest.clearAllMocks();
     jest.mocked(useGraphTelemetry).mockReturnValue({
       onTelemetryEvent: mockOnTelemetryEvent,
-      reportPreviewExpanded: jest.fn(),
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: jest.fn(),
       reportGraphOpened: jest.fn(),
       reportDrillThrough: jest.fn(),
     });

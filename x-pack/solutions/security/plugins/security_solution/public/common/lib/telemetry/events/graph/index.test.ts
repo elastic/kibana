@@ -7,7 +7,7 @@
 
 import { telemetryEvents } from '../telemetry_events';
 import { graphTelemetryEvents } from '.';
-import { GraphEventTypes } from './types';
+import { GRAPH_EVENT_ID, GraphEventTypes } from './types';
 
 describe('graph telemetry events', () => {
   it('defines a schema for every GraphEventTypes member', () => {
@@ -66,6 +66,17 @@ describe('graph telemetry events', () => {
       .map(([name]) => name)
       .sort();
     expect(requiredFields).toEqual(['entryPoint', 'id']);
+  });
+
+  it('describes the graph preview funnel ids in the id field', () => {
+    const [{ schema }] = graphTelemetryEvents;
+    const { description } = (schema.id as { _meta: { description: string } })._meta;
+
+    expect(description).toContain('graph_preview_shown');
+    expect(description).toContain('graph_preview_expanded');
+    expect(Object.keys(GRAPH_EVENT_ID)).toEqual(
+      expect.arrayContaining(['graph_preview_shown', 'graph_preview_expanded'])
+    );
   });
 
   it('uses a single entity_graph event type', () => {

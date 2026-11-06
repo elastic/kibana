@@ -18,8 +18,10 @@ import { GraphEventTypes } from '../../../common/lib/telemetry';
 export interface UseGraphTelemetryResult {
   /** Pass to `GraphInvestigation`'s `onTelemetryEvent`. */
   onTelemetryEvent: GraphTelemetryHandler;
+  /** Reports that the graph preview was shown with a loaded graph. */
+  reportGraphPreviewShown: () => void;
   /** Reports that the graph preview was expanded into the full graph. */
-  reportPreviewExpanded: () => void;
+  reportGraphPreviewExpanded: () => void;
   /** Reports that the full graph was opened. */
   reportGraphOpened: () => void;
   /** Reports that a graph node drilled through to something outside the graph. */
@@ -115,8 +117,15 @@ export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetr
     [telemetry, entryPoint]
   );
 
-  const reportPreviewExpanded = useCallback(() => {
-    telemetry?.reportEvent(GraphEventTypes.EntityGraph, { id: 'preview_expanded', entryPoint });
+  const reportGraphPreviewShown = useCallback(() => {
+    telemetry?.reportEvent(GraphEventTypes.EntityGraph, { id: 'graph_preview_shown', entryPoint });
+  }, [telemetry, entryPoint]);
+
+  const reportGraphPreviewExpanded = useCallback(() => {
+    telemetry?.reportEvent(GraphEventTypes.EntityGraph, {
+      id: 'graph_preview_expanded',
+      entryPoint,
+    });
   }, [telemetry, entryPoint]);
 
   const reportGraphOpened = useCallback(() => {
@@ -135,7 +144,19 @@ export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetr
   );
 
   return useMemo(
-    () => ({ onTelemetryEvent, reportPreviewExpanded, reportGraphOpened, reportDrillThrough }),
-    [onTelemetryEvent, reportPreviewExpanded, reportGraphOpened, reportDrillThrough]
+    () => ({
+      onTelemetryEvent,
+      reportGraphPreviewShown,
+      reportGraphPreviewExpanded,
+      reportGraphOpened,
+      reportDrillThrough,
+    }),
+    [
+      onTelemetryEvent,
+      reportGraphPreviewShown,
+      reportGraphPreviewExpanded,
+      reportGraphOpened,
+      reportDrillThrough,
+    ]
   );
 };
