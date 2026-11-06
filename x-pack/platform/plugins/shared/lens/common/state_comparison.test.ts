@@ -6,23 +6,14 @@
  */
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensSerializedState } from '@kbn/lens-common';
-import { getLensInternalApiMock, getLensRuntimeStateMock } from '../mocks';
-import { initializeStateManagement } from './initialize_state_management';
+import { lensStateComparison } from './state_comparison';
 
-const getAttributesComparator = (attributes: LensSerializedState['attributes']) => {
-  const { getComparators } = initializeStateManagement(
-    getLensRuntimeStateMock({ attributes }),
-    getLensInternalApiMock()
-  );
-  const comparator = getComparators().attributes;
-  if (typeof comparator !== 'function') {
-    throw new Error('Expected a by-value Lens panel to compare its attributes');
-  }
-  return comparator;
-};
+const compareAttributes = lensStateComparison.comparators.attributes;
+if (typeof compareAttributes !== 'function') {
+  throw new Error('Expected Lens to compare attributes with a custom comparator');
+}
 
-describe('initializeStateManagement', () => {
+describe('lensStateComparison', () => {
   describe('attributes comparator', () => {
     // Converting from the API format leaves keys set to `undefined` (e.g. a gauge without a goal
     // has `goalAccessor: undefined`). Those keys are dropped when the state is saved as JSON.
@@ -37,14 +28,10 @@ describe('initializeStateManagement', () => {
     const savedAttributes = JSON.parse(JSON.stringify(attributes));
 
     test('treats attributes that only differ by undefined keys as equal', () => {
-      const compareAttributes = getAttributesComparator(attributes);
-
       expect(compareAttributes(savedAttributes, attributes)).toBe(true);
     });
 
     test('detects a changed attribute', () => {
-      const compareAttributes = getAttributesComparator(attributes);
-
       expect(compareAttributes(savedAttributes, { ...attributes, title: 'Errors' })).toBe(false);
     });
   });
