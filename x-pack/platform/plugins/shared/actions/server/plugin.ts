@@ -102,7 +102,11 @@ import {
 } from './constants/saved_objects';
 import { createConnectorJwtSigner } from './lib/connector_signing_keys';
 import { setupSavedObjects } from './saved_objects';
-import { ACTIONS_FEATURE } from './feature';
+import { ACTIONS_FEATURE, ACTIONS_FEATURE_V2 } from './feature';
+import {
+  actionsCapabilitiesProvider,
+  actionsCapabilitiesSwitcher,
+} from './lib/actions_capabilities_alias';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
@@ -354,6 +358,11 @@ export class ActionsPlugin
     }
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
+    plugins.features.registerKibanaFeature(ACTIONS_FEATURE_V2);
+    core.capabilities.registerProvider(actionsCapabilitiesProvider);
+    core.capabilities.registerSwitcher(actionsCapabilitiesSwitcher, {
+      capabilityPath: 'actions.*',
+    });
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
