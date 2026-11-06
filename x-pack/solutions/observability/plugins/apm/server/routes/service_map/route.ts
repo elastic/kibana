@@ -123,10 +123,18 @@ const serviceMapRoute = createApmServerRoute({
         }
       : { enabled: false };
 
+    const serviceMapLogger = logger.get('serviceMap');
+
     // Saved-group matching is only for the full map. A service group's own map skips it.
+    // A failed SO lookup leaves the map without saved-group labels (still loads).
     const [savedServiceGroups, searchAggregatedTransactions] = await Promise.all([
       grouping.enabled && !serviceName && !serviceGroupId
-        ? getServiceGroups({ savedObjectsClient })
+        ? getServiceGroups({ savedObjectsClient }).catch((error): [] => {
+            serviceMapLogger.debug(`Unable to retrieve saved service groups for service maps.`, {
+              error,
+            });
+            return [];
+          })
         : Promise.resolve([]),
       getSearchTransactionsEvents({
         apmEventClient,
@@ -144,7 +152,7 @@ const serviceMapRoute = createApmServerRoute({
       serviceName,
       environment,
       searchAggregatedTransactions,
-      logger: logger.get('serviceMap'),
+      logger: serviceMapLogger,
       start,
       end,
       maxNumberOfServices,
