@@ -392,6 +392,26 @@ describe('InventoryService.list', () => {
     expect(response).not.toHaveProperty('documentFilterWarnings');
   });
 
+  it.each([
+    ['another plugin', { kind: 'plugin' as const, id: 'entityStore' }],
+    ['an integration', { kind: 'integration' as const, package: 'kubernetes' }],
+  ])('lists the rows of a type that %s registered', async (_label, managedBy) => {
+    const { service, esClient } = createService([{ ...k8sDeploymentDefinition, managedBy }]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
+        stateRow('cart-api', '2026-11-01T10:00:00.000Z'),
+      ]),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.rows.map((row) => row['entity.id'])).toEqual([
+      'k8s.deployment:scout-cluster/checkout/cart-api',
+    ]);
+    expect(response).toMatchObject({ total: 1, errors: [] });
+  });
+
   it('starts every list query before any resolves', async () => {
     const { service, esClient } = createService([k8sDeploymentDefinition]);
     const pending: Array<() => void> = [];
