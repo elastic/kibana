@@ -272,6 +272,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
           attachedProposalIds.push(origin);
         }),
       } as never),
+    resolveUser: async () => ({
+      username: 'analyst',
+      fullName: null,
+      email: null,
+    }),
   });
 
   const update = service.update.bind(service);
@@ -422,6 +427,8 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
           comment: 'Seeded',
           origin: FIXTURE_ORIGIN,
           confidence: 'medium',
+          // Seeded as a gated proposal, which is what the gate workflow writes.
+          workflowExecutionId: 'seeded-execution',
           id,
         },
         { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
