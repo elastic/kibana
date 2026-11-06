@@ -209,7 +209,7 @@ globalSetupHook(
   }
 );
 
-// The Logs ML page specs (`logs/*.spec.ts`) point their space's `observability:logSources` setting
+// The Logs ML page specs (`logs_ml/*.spec.ts`) point their space's `observability:logSources` setting
 // at this index. It only needs to exist, not hold documents: an existing empty index counts as
 // having data, so the pages show their setup screen / privilege prompts instead of the no-data page.
 globalSetupHook(

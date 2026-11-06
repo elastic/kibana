@@ -121,7 +121,7 @@ export interface InfraParallelTestFixtures extends ObltParallelTestFixtures {
  * space (`scoutSpace`) instead of the default space shared with every other spec and with earlier
  * configs in the CI lane.
  *
- * The Logs ML page specs (`parallel_tests/logs/`) need it: the setup screen they assert only shows
+ * The Logs ML page specs (`parallel_tests/logs_ml/`) need it: the setup screen they assert only shows
  * while no Logs ML job exists in the current space (the job IDs include the space ID), and each
  * spec points the space's `observability:logSources` setting at its own index. Running them in the
  * default space would make them depend on jobs or settings that other suites may have created,
