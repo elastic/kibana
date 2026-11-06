@@ -8,10 +8,11 @@
 import { config } from './config';
 
 describe('agenticInvestigations config', () => {
-  it('keeps the plugin off and escalations on by default', () => {
+  it('keeps the plugin off, and escalations and the cases bridge on, by default', () => {
     expect(config.schema.validate({})).toEqual({
       enabled: false,
       escalations: { enabled: true },
+      cases: { enabled: true },
     });
   });
 
@@ -21,7 +22,10 @@ describe('agenticInvestigations config', () => {
     );
   });
 
-  it('exposes only the escalations flag to the browser', () => {
-    expect(config.exposeToBrowser).toEqual({ escalations: { enabled: true } });
+  it('exposes the escalations and cases bridge flags to the browser', () => {
+    expect(config.exposeToBrowser).toEqual({
+      escalations: { enabled: true },
+      cases: { enabled: true },
+    });
   });
 });

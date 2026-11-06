@@ -32,7 +32,10 @@ import {
   EscalationModalBoundary,
   LazyConnectedCloseInvestigationModal,
   LazyConnectedEscalationModal,
+  CaseBridgeForQueue,
+  OpenCaseModalForQueue,
 } from '@kbn/agentic-investigations-plugin/public';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -264,8 +267,11 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const {
-    services: { notifications },
-  } = useKibana<CoreStart>();
+    services: { notifications, agenticInvestigations },
+  } = useKibana<CoreStart & { agenticInvestigations?: AgenticInvestigationsPublicPluginStart }>();
+  // Investigations open cases instead of escalations: the card menu and flyout offer Open a case,
+  // Add to existing case, and View case, and cards show their case.
+  const isCasesBridgeEnabled = agenticInvestigations?.isCasesBridgeEnabled === true;
 
   const { mutateAsync: setInvestigationStatus } = useSetInvestigationStatus();
 
@@ -350,10 +356,18 @@ const ConversationsPageContent: React.FC = () => {
   const renderEscalationModal = useCallback(
     (props: EscalationModalRenderProps) => (
       <EscalationModalBoundary>
-        <LazyConnectedEscalationModal {...props} />
+        {isCasesBridgeEnabled ? (
+          <OpenCaseModalForQueue {...props} />
+        ) : (
+          <LazyConnectedEscalationModal {...props} />
+        )}
       </EscalationModalBoundary>
     ),
-    []
+    [isCasesBridgeEnabled]
+  );
+  const conversationIdsOnScreen = useMemo(
+    () => conversations.flatMap(({ conversationId }) => (conversationId ? [conversationId] : [])),
+    [conversations]
   );
 
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
@@ -392,7 +406,7 @@ const ConversationsPageContent: React.FC = () => {
     [conversations, modalState.recordId]
   );
 
-  return (
+  const page = (
     <AlertZeroPageSection
       contentProps={{
         css: css`
@@ -489,7 +503,11 @@ const ConversationsPageContent: React.FC = () => {
                 onOpenChat={openChatForProposal}
                 canOpenInvestigationDetails={canAccessAgentBuilder}
                 getChatHref={getChatHrefForProposal}
-                canManageEscalations={canManageEscalations}
+                canManageEscalations={
+                  isCasesBridgeEnabled
+                    ? canManageInvestigations && agenticInvestigations?.canCreateCases() === true
+                    : canManageEscalations
+                }
                 canCloseInvestigation={canManageInvestigations}
                 onCopyLink={copyLinkForProposal}
                 renderAssignees={renderAssignees}
@@ -499,5 +517,11 @@ const ConversationsPageContent: React.FC = () => {
           ))}
       </EuiFlexGroup>
     </AlertZeroPageSection>
+  );
+
+  return isCasesBridgeEnabled ? (
+    <CaseBridgeForQueue conversationIds={conversationIdsOnScreen}>{page}</CaseBridgeForQueue>
+  ) : (
+    page
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AssignmentsService } from '../assignments/assignments_service';
 import type { InvestigationStatusService } from './services/investigation_status_service';
 import type { InvestigationsQueryService } from './services/investigations_query_service';
@@ -16,6 +16,8 @@ export interface InvestigationRouteDependencies {
   logger: Logger;
   getAssignmentsService: () => AssignmentsService;
   getInvestigationStatusService?: () => InvestigationStatusService;
+  /** Runs after a user closes an investigation through the status route; failures are logged. */
+  onInvestigationClosed?: (request: KibanaRequest, investigationId: string) => Promise<void>;
   getInvestigationsQueryService: () => InvestigationsQueryService;
   privileges: InvestigationsPrivilegesReader;
 }

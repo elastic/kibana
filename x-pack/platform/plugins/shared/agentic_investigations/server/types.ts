@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
@@ -44,6 +45,8 @@ export interface AgenticInvestigationsSetupDependencies {
    * progress. Without it no investigation is in progress.
    */
   workflowsManagement?: WorkflowsServerPluginSetup;
+  /** Registers the investigation link attachment type, when the cases bridge is on. */
+  cases?: CasesServerSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
@@ -61,6 +64,8 @@ export interface AgenticInvestigationsStartDependencies {
    */
   entityStore?: EntityStoreStartContract;
   agentBuilder: AgentBuilderPluginStart;
+  /** Opens and links cases, and follows case changes, when the cases bridge is on. */
+  cases?: CasesServerStart;
 }
 
 /**

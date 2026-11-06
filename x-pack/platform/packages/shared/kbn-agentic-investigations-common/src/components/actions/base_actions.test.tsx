@@ -10,6 +10,7 @@ import { act, fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { BaseActions } from './base_actions';
+import { CaseBridgeProvider } from '../case_bridge/case_bridge_context';
 import { getCopyLinkFlyoutAction } from './copy_link_action';
 
 const investigation: Investigation = {
@@ -138,6 +139,62 @@ describe('BaseActions open and close', () => {
 
     expect(screen.queryByText('Open investigation')).not.toBeInTheDocument();
     expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
+});
+
+describe('BaseActions cases bridge', () => {
+  const caseBridge = {
+    renderCaseBadge: () => null,
+    onViewCase: jest.fn(),
+  };
+
+  const renderMenu = (inv: Investigation, withBridge: boolean) => {
+    const onClickAction = jest.fn();
+    const ui = (
+      <BaseActions
+        investigation={inv}
+        canManageEscalations
+        onClickAction={onClickAction}
+        onCopyLink={jest.fn()}
+        data-test-subj="actions"
+      />
+    );
+    renderWithKibanaRenderContext(
+      withBridge ? <CaseBridgeProvider value={caseBridge}>{ui}</CaseBridgeProvider> : ui
+    );
+    openMenu();
+    return onClickAction;
+  };
+
+  beforeEach(() => caseBridge.onViewCase.mockClear());
+
+  it('offers View case, and not Open a case, when the investigation has a case', () => {
+    renderMenu({ ...investigation, caseId: 'case-1' }, true);
+
+    expect(screen.queryByText('Open a case…')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add to existing case…')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('View case'));
+
+    expect(caseBridge.onViewCase).toHaveBeenCalledWith('case-1');
+  });
+
+  it('offers Open a case and Add to existing case when the investigation has no case', () => {
+    const onClickAction = renderMenu(investigation, true);
+
+    expect(screen.queryByText('View case')).not.toBeInTheDocument();
+    expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();
+    expect(screen.getByText('Add to existing case…')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Open a case…'));
+
+    expect(onClickAction).toHaveBeenCalledWith('createEscalation', investigation.recordId);
+  });
+
+  it('keeps Open an escalation without a provider', () => {
+    renderMenu(investigation, false);
+
+    expect(screen.getByText('Open an escalation')).toBeInTheDocument();
+    expect(screen.queryByText('Open a case…')).not.toBeInTheDocument();
+    expect(screen.queryByText('View case')).not.toBeInTheDocument();
   });
 });
 

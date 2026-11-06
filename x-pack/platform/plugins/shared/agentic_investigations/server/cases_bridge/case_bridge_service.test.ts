@@ -1,0 +1,283 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { CaseBridgeService, InvestigationAlreadyLinkedError } from './case_bridge_service';
+import type { BridgeCase } from './case_bridge_service';
+
+const createdCase = {
+  id: 'case-1',
+  title: 'Credential dumping on fin-ws-07',
+  owner: 'securitySolution',
+  incremental_id: 1287,
+  status: 'open',
+  version: 'v1',
+  assignees: [{ uid: 'u-jordan' }, { uid: 'u-priya' }],
+  access: { mode: 'restricted' },
+  connector: { id: 'none' },
+};
+
+const investigation = (id: string, metadata: Record<string, unknown> = {}) => ({
+  id,
+  title: `Investigation ${id}`,
+  agent_id: 'alert-triage',
+  template_id: 'investigation',
+  metadata: { status: 'open', ...metadata },
+});
+
+const setup = () => {
+  const conversations = {
+    get: jest.fn(async (id: string) =>
+      investigation(
+        id,
+        id === 'inv-1' ? { verdict: 'True positive: LSASS dump', severity: 'high' } : {}
+      )
+    ),
+    bulkGet: jest.fn(),
+    patchMetadata: jest.fn().mockResolvedValue({}),
+    addEvents: jest.fn().mockResolvedValue([]),
+    updateAccessControlAsOwner: jest.fn().mockResolvedValue(undefined),
+  };
+  const casesClient = {
+    cases: {
+      create: jest.fn().mockResolvedValue(createdCase),
+      get: jest.fn().mockResolvedValue(createdCase),
+      push: jest.fn(),
+      bulkUpdate: jest.fn(),
+    },
+    attachments: {
+      bulkCreate: jest.fn().mockResolvedValue([]),
+      find: jest.fn().mockResolvedValue({
+        data: [
+          { type: 'agentic.investigation', attachmentId: 'inv-1' },
+          { type: 'agentic.investigation', attachmentId: 'inv-2' },
+        ],
+      }),
+    },
+  };
+  const statusService = {
+    getPreview: jest.fn().mockResolvedValue({
+      pending_proposal_count: 1,
+      pending_proposals: [{ id: 'p-1', action_name: 'close_alerts' }],
+      running_proposal_count: 0,
+    }),
+    setStatus: jest.fn().mockResolvedValue({}),
+  };
+  const service = new CaseBridgeService({
+    logger: loggingSystemMock.createLogger(),
+    getCases: () =>
+      ({
+        getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClient),
+      } as never),
+    getAgentBuilder: () =>
+      ({ conversations: { getScopedClient: jest.fn().mockResolvedValue(conversations) } } as never),
+    getInvestigationStatusService: () => statusService as never,
+    getActor: () => ({ type: 'user' as never, id: 'u-jordan', username: 'jordan' }),
+    getCurrentUserProfileUid: async () => 'u-jordan',
+  });
+  return { service, conversations, casesClient, statusService };
+};
+
+const request = httpServerMock.createKibanaRequest();
+
+describe('CaseBridgeService', () => {
+  describe('openCase', () => {
+    it('opens a restricted AlertZero case and links each investigation by reference', async () => {
+      const { service, casesClient, conversations } = setup();
+
+      const result = await service.openCase(request, 'inv-1', {
+        title: 'Credential dumping on fin-ws-07',
+        visibility: 'restricted',
+        assignees: ['u-priya'],
+        linked_investigation_ids: ['inv-2'],
+        push: false,
+      });
+
+      expect(casesClient.cases.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          owner: 'securitySolution',
+          tags: ['alertzero'],
+          source: 'alertzero',
+          access: { mode: 'restricted' },
+          severity: 'high',
+          assignees: [{ uid: 'u-jordan' }, { uid: 'u-priya' }],
+          ai_verdict: expect.objectContaining({ verdict: 'true_positive' }),
+        })
+      );
+      expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attachments: [
+          expect.objectContaining({ type: 'agentic.investigation', attachmentId: 'inv-1' }),
+          expect.objectContaining({ type: 'agentic.investigation', attachmentId: 'inv-2' }),
+        ],
+      });
+      expect(conversations.patchMetadata).toHaveBeenCalledWith(
+        'inv-1',
+        { case_id: 'case-1' },
+        { access: 'converse' }
+      );
+      // A restricted case makes each linked investigation private to the case's assignees.
+      expect(conversations.updateAccessControlAsOwner).toHaveBeenCalledWith(
+        'inv-2',
+        {
+          access_mode: 'private',
+          entries: [
+            { type: 'user', id: 'u-jordan', role: 'member' },
+            { type: 'user', id: 'u-priya', role: 'member' },
+          ],
+        },
+        { actor: expect.objectContaining({ username: 'jordan' }) }
+      );
+      expect(result).toEqual({
+        case_id: 'case-1',
+        case_title: 'Credential dumping on fin-ws-07',
+        incremental_id: 1287,
+        linked: [{ id: 'inv-1' }, { id: 'inv-2' }],
+        pushed: false,
+      });
+    });
+
+    it('refuses an investigation that already has a case', async () => {
+      const { service, conversations, casesClient } = setup();
+      conversations.get.mockResolvedValueOnce(investigation('inv-1', { case_id: 'case-9' }));
+
+      await expect(
+        service.openCase(request, 'inv-1', {
+          title: 't',
+          visibility: 'public',
+          assignees: [],
+          linked_investigation_ids: [],
+          push: false,
+        })
+      ).rejects.toBeInstanceOf(InvestigationAlreadyLinkedError);
+      expect(casesClient.cases.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('linkCase', () => {
+    it('answers not-found and writes nothing when the user cannot see the case', async () => {
+      const { service, casesClient, conversations } = setup();
+      casesClient.cases.get.mockRejectedValueOnce(Boom.notFound('Case not found'));
+
+      await expect(service.linkCase(request, 'inv-3', 'restricted-case')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+      expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onCaseUpdated', () => {
+    const before: BridgeCase = {
+      id: 'case-1',
+      title: 'Credential dumping',
+      incremental_id: 1287,
+      status: 'open',
+      assignees: [{ uid: 'u-jordan' }],
+      access: { mode: 'restricted' },
+    };
+
+    /** Both linked investigations name case-1 as their case. */
+    const setupLinked = (metadata: Record<string, unknown> = {}) => {
+      const result = setup();
+      result.conversations.get.mockImplementation(async (id: string) =>
+        investigation(id, { case_id: 'case-1', ...metadata })
+      );
+      return result;
+    };
+
+    it('closes linked investigations with the pending proposals the close preview showed', async () => {
+      const { service, statusService } = setupLinked();
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: before,
+        updatedCase: { ...before, status: 'closed' },
+      });
+
+      expect(statusService.setStatus).toHaveBeenCalledTimes(2);
+      expect(statusService.setStatus).toHaveBeenCalledWith(request, 'inv-1', {
+        status: 'closed',
+        expected_proposal_ids: ['p-1'],
+        dismiss_reason: 'handled_elsewhere',
+        rationale: 'Closed with case #1287',
+      });
+    });
+
+    it('leaves the investigations open when the closer chose not to close them', async () => {
+      const { service, statusService } = setupLinked();
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: before,
+        updatedCase: { ...before, status: 'closed' },
+        closeLinkedInvestigations: false,
+      });
+
+      expect(statusService.setStatus).not.toHaveBeenCalled();
+    });
+
+    it('reopens closed linked investigations when the case reopens', async () => {
+      const { service, statusService } = setupLinked({ status: 'closed' });
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: { ...before, status: 'closed' },
+        updatedCase: before,
+      });
+
+      expect(statusService.setStatus).toHaveBeenCalledWith(request, 'inv-2', { status: 'open' });
+    });
+
+    it('makes linked investigations public again when the case is no longer restricted', async () => {
+      const { service, conversations } = setupLinked();
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: before,
+        updatedCase: { ...before, access: { mode: 'default' } },
+      });
+
+      expect(conversations.updateAccessControlAsOwner).toHaveBeenCalledWith(
+        'inv-1',
+        { access_mode: 'public', entries: [] },
+        expect.anything()
+      );
+    });
+
+    it('ignores an attachment whose investigation does not link back to the case', async () => {
+      // A forged or stale attachment: the conversation names another case, or none.
+      const { service, conversations, statusService } = setup();
+      conversations.get.mockImplementation(async (id: string) =>
+        investigation(id, id === 'inv-1' ? { case_id: 'case-9' } : {})
+      );
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: before,
+        updatedCase: { ...before, status: 'closed', access: { mode: 'default' } },
+      });
+
+      expect(conversations.updateAccessControlAsOwner).not.toHaveBeenCalled();
+      expect(statusService.setStatus).not.toHaveBeenCalled();
+    });
+
+    it('does nothing, without reading attachments, for unrelated changes', async () => {
+      const { service, casesClient } = setup();
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: before,
+        updatedCase: { ...before, title: 'Renamed' },
+      });
+
+      expect(casesClient.attachments.find).not.toHaveBeenCalled();
+    });
+  });
+});

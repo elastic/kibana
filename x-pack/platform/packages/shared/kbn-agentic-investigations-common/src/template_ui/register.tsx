@@ -76,6 +76,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   wrapEscalationButton?: import('./slots').FooterSlotProps['wrapEscalationButton'];
   /**
+   * Wraps the flyout's header and footer, so the caller can supply a case bridge context: the
+   * footer then offers Open a case or View case, and the header shows the investigation's case.
+   */
+  wrapWithCaseBridge?: (props: { caseIds: string[]; children: React.ReactNode }) => React.ReactNode;
+  /**
    * When provided, the overview tab renders a "Proposed actions" section with this as its
    * content. Supplied by the caller because listing and deciding a conversation's proposals
    * needs Kibana HTTP hooks unavailable in this package.
@@ -146,6 +151,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   icon,
   renderEscalationModal,
   wrapEscalationButton,
+  wrapWithCaseBridge,
   renderProposedActions,
   renderProposedActionsCount,
   renderAssignees,
@@ -159,6 +165,19 @@ export const registerAgenticInvestigationTemplateUI = ({
   onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
+  const withCaseBridge = (
+    conversation: { metadata?: Record<string, unknown> },
+    children: React.ReactNode
+  ): React.ReactNode => {
+    if (!wrapWithCaseBridge) {
+      return children;
+    }
+    const caseId = conversation.metadata?.case_id;
+    return wrapWithCaseBridge({
+      caseIds: typeof caseId === 'string' && caseId.length > 0 ? [caseId] : [],
+      children,
+    });
+  };
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
@@ -210,39 +229,45 @@ export const registerAgenticInvestigationTemplateUI = ({
                 />
               }
             >
-              <LazyHeaderSlot
-                conversation={conversation}
-                renderAssignees={renderAssignees}
-                renderStatus={renderStatus}
-                renderSeverity={renderSeverity}
-                renderLiveState={renderLiveState}
-                renderTitle={renderTitle}
-                refetchConversation={refetchConversation}
-              />
+              {withCaseBridge(
+                conversation,
+                <LazyHeaderSlot
+                  conversation={conversation}
+                  renderAssignees={renderAssignees}
+                  renderStatus={renderStatus}
+                  renderSeverity={renderSeverity}
+                  renderLiveState={renderLiveState}
+                  renderTitle={renderTitle}
+                  refetchConversation={refetchConversation}
+                />
+              )}
             </Suspense>
           );
         },
         footer: function InvestigationFlyoutFooter({ conversation, isOpenedFromChat }) {
           return (
             <Suspense fallback={null}>
-              <LazyFooterSlot
-                isOpenedFromChat={isOpenedFromChat}
-                conversation={conversation}
-                // Full screen rather than the sidebar: the chat is the investigation's own record,
-                // so it gets the whole page instead of a panel beside the flyout that opened it.
-                // The conversation list is collapsed so the investigation's chat gets the width.
-                onOpenChat={() =>
-                  openFullscreenConversation({
-                    conversationId: conversation.id,
-                    agentId: conversation.agent_id,
-                    openDetails: true,
-                    collapseSidebar: true,
-                  })
-                }
-                onOpenEscalation={renderEscalationModal}
-                wrapEscalationButton={wrapEscalationButton}
-                onCloseInvestigation={renderCloseInvestigationModal}
-              />
+              {withCaseBridge(
+                conversation,
+                <LazyFooterSlot
+                  isOpenedFromChat={isOpenedFromChat}
+                  conversation={conversation}
+                  // Full screen rather than the sidebar: the chat is the investigation's own record,
+                  // so it gets the whole page instead of a panel beside the flyout that opened it.
+                  // The conversation list is collapsed so the investigation's chat gets the width.
+                  onOpenChat={() =>
+                    openFullscreenConversation({
+                      conversationId: conversation.id,
+                      agentId: conversation.agent_id,
+                      openDetails: true,
+                      collapseSidebar: true,
+                    })
+                  }
+                  onOpenEscalation={renderEscalationModal}
+                  wrapEscalationButton={wrapEscalationButton}
+                  onCloseInvestigation={renderCloseInvestigationModal}
+                />
+              )}
             </Suspense>
           );
         },

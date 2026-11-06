@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCanOpenCaseFromInvestigation } from '../../../cases_bridge/use_can_open_cases';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useCanManageInvestigations } from '../../../investigations/hooks/use_can_manage_investigations';
@@ -17,6 +18,9 @@ import { PrivilegeGate, type TemplatePrivilege } from './privilege_gate';
 jest.mock('../../../investigations/hooks/use_can_manage_investigations', () => ({
   useCanManageInvestigations: jest.fn(),
 }));
+jest.mock('../../../cases_bridge/use_can_open_cases', () => ({
+  useCanOpenCaseFromInvestigation: jest.fn(),
+}));
 jest.mock('../../../escalations/hooks/use_escalation_privileges', () => ({
   useCanManageEscalations: jest.fn(),
   useCanReadEscalations: jest.fn(),
@@ -26,6 +30,7 @@ const HOOKS: Record<TemplatePrivilege, jest.Mock> = {
   manageInvestigations: useCanManageInvestigations as jest.Mock,
   manageEscalations: useCanManageEscalations as jest.Mock,
   readEscalations: useCanReadEscalations as jest.Mock,
+  openCases: useCanOpenCaseFromInvestigation as jest.Mock,
 };
 
 describe('PrivilegeGate', () => {

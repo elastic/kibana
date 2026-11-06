@@ -180,7 +180,11 @@ export class AlertZeroPublicPlugin
       this.appUpdater$.next(() => ({
         status: settingEnabled || !spaceSupported ? AppStatus.accessible : AppStatus.inaccessible,
         visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
-        deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
+        deepLinks: showNavigation
+          ? getAlertZeroDeepLinks(core.application.capabilities, {
+              casesBridgeEnabled: startDeps.agenticInvestigations?.isCasesBridgeEnabled === true,
+            })
+          : [],
       }));
     });
 
