@@ -12,4 +12,5 @@ export const MIGRATION_VENDOR_COLOR_CONFIG: Record<SiemMigrationVendor, string> 
   splunk: '#D9E8FF', // bgLightPrimary
   qradar: '#FDDDE9', // bgLightAccent
   'microsoft-sentinel': '#E6F1E8', // bgLightSuccess (Azure green)
+  tines: '#ECE2FE', // bgLightAssistance (Tines purple)
 };

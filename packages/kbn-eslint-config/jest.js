@@ -12,10 +12,6 @@ module.exports = {
       env: {
         'jest': true,
       },
-
-      rules: {
-        'import/order': 'off',
-      },
     }
   ]
 };

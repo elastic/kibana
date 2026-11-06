@@ -131,6 +131,7 @@ export interface ServicesStartDeps {
   licensing: LicensingPluginStart;
   deploymentInfo: DeploymentInfo;
   isomer: IsomerPluginStart;
+  cloud: CloudSetup | undefined;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }
