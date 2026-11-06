@@ -77,9 +77,18 @@ export async function getServiceGroupingAttributes(
     getSavedGroupMembership(options),
   ]);
 
+  // Merge saved groups onto namespace rows. New services from membership only are
+  // added while under maxNumberOfServices so the record stays within the map cap.
   for (const [serviceName, savedGroups] of savedGroupsByService) {
-    const current = namespaces.get(serviceName) ?? {};
-    namespaces.set(serviceName, { ...current, savedGroups });
+    const current = namespaces.get(serviceName);
+    if (current) {
+      namespaces.set(serviceName, { ...current, savedGroups });
+      continue;
+    }
+    if (namespaces.size >= options.maxNumberOfServices) {
+      continue;
+    }
+    namespaces.set(serviceName, { savedGroups });
   }
 
   return recordByService(namespaces);
@@ -205,98 +214,104 @@ async function getSavedGroupMembership({
     return membership;
   }
 
-  const groupById = new Map<string, SavedServiceGroup>();
-  const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> = {};
-  for (const group of savedServiceGroups) {
-    try {
-      const filter = kqlQuery(group.kuery)[0];
-      if (!filter) {
-        continue;
+  try {
+    const groupById = new Map<string, SavedServiceGroup>();
+    const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> = {};
+    for (const group of savedServiceGroups) {
+      try {
+        const filter = kqlQuery(group.kuery)[0];
+        if (!filter) {
+          continue;
+        }
+        serviceGroupsKueryMap[group.id] = filter;
+        groupById.set(group.id, group);
+      } catch (error) {
+        logger.debug(`Skipping saved service group "${group.id}" with invalid kuery.`, { error });
       }
-      serviceGroupsKueryMap[group.id] = filter;
-      groupById.set(group.id, group);
-    } catch (error) {
-      logger.debug(`Skipping saved service group "${group.id}" with invalid kuery.`, { error });
     }
-  }
-  if (Object.keys(serviceGroupsKueryMap).length === 0) {
-    return membership;
-  }
+    if (Object.keys(serviceGroupsKueryMap).length === 0) {
+      return membership;
+    }
 
-  const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
-  const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
-  const useMetrics = processorEvent === ProcessorEvent.metric;
+    const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
+    const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
+    const useMetrics = processorEvent === ProcessorEvent.metric;
 
-  const response = await apmEventClient.search(
-    'get_service_grouping_saved_groups_for_service_map',
-    {
-      apm: useMetrics
-        ? {
-            sources: [
-              {
-                documentType: ApmDocumentType.ServiceTransactionMetric,
-                rollupInterval: RollupInterval.OneMinute,
-              },
+    const response = await apmEventClient.search(
+      'get_service_grouping_saved_groups_for_service_map',
+      {
+        apm: useMetrics
+          ? {
+              sources: [
+                {
+                  documentType: ApmDocumentType.ServiceTransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                },
+              ],
+            }
+          : { events: [processorEvent] },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...esQueryFilters,
             ],
-          }
-        : { events: [processorEvent] },
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...esQueryFilters,
-          ],
-          ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
-        },
-      },
-      aggs: {
-        service_groups: {
-          filters: {
-            filters: serviceGroupsKueryMap,
+            ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
           },
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: maxNumberOfServices,
+        },
+        aggs: {
+          service_groups: {
+            filters: {
+              filters: serviceGroupsKueryMap,
+            },
+            aggs: {
+              services: {
+                terms: {
+                  field: SERVICE_NAME,
+                  size: maxNumberOfServices,
+                },
               },
             },
           },
         },
-      },
+      }
+    );
+
+    const buckets = (
+      response.aggregations as
+        | { service_groups?: { buckets?: Record<string, SavedGroupServicesBucket> } }
+        | undefined
+    )?.service_groups?.buckets;
+
+    if (!buckets) {
+      return membership;
     }
-  );
 
-  const buckets = (
-    response.aggregations as
-      | { service_groups?: { buckets?: Record<string, SavedGroupServicesBucket> } }
-      | undefined
-  )?.service_groups?.buckets;
-
-  if (!buckets) {
-    return membership;
-  }
-
-  for (const [groupId, bucket] of Object.entries(buckets)) {
-    const group = groupById.get(groupId);
-    if (!group) {
-      continue;
-    }
-    const match = { id: group.id, name: group.groupName };
-    for (const serviceBucket of bucket.services?.buckets ?? []) {
-      if (serviceBucket.key == null) {
+    for (const [groupId, bucket] of Object.entries(buckets)) {
+      const group = groupById.get(groupId);
+      if (!group) {
         continue;
       }
-      const serviceName = String(serviceBucket.key);
-      const current = membership.get(serviceName) ?? [];
-      current.push(match);
-      membership.set(serviceName, current);
+      const match = { id: group.id, name: group.groupName };
+      for (const serviceBucket of bucket.services?.buckets ?? []) {
+        if (serviceBucket.key == null) {
+          continue;
+        }
+        const serviceName = String(serviceBucket.key);
+        const current = membership.get(serviceName) ?? [];
+        current.push(match);
+        membership.set(serviceName, current);
+      }
     }
-  }
 
-  return membership;
+    return membership;
+  } catch (error) {
+    // Keep namespaces usable when membership fails (e.g. filters agg hits max_buckets).
+    logger.debug(`Unable to retrieve saved group membership for service maps.`, { error });
+    return new Map();
+  }
 }

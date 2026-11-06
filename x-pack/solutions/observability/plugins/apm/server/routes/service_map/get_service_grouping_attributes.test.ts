@@ -455,4 +455,64 @@ describe('getServiceGroupingAttributes', () => {
     });
     expect(attributes.checkout).toEqual({ serviceNamespace: 'shop' });
   });
+
+  it('keeps namespaces when saved group membership fails', async () => {
+    const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: checkout');
+    const logger = makeLogger();
+    const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
+      if (operationName === 'get_service_grouping_attributes_for_service_map') {
+        return namespacesPage([bucket('checkout', 'shop')]);
+      }
+      throw new Error('max_buckets exceeded');
+    });
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({
+        apmEventClient: { search } as unknown as APMEventClient,
+        logger,
+        savedServiceGroups: [frontend],
+      })
+    );
+
+    expect(attributes).toEqual({
+      checkout: { serviceNamespace: 'shop' },
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Unable to retrieve saved group membership for service maps.',
+      { error: expect.any(Error) }
+    );
+  });
+
+  it('does not grow past the map service limit with saved-group-only services', async () => {
+    const frontend = savedGroup(
+      'g-frontend',
+      'Frontend',
+      'service.name: ghost or service.name: checkout'
+    );
+    const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
+      if (operationName === 'get_service_grouping_attributes_for_service_map') {
+        return namespacesPage([bucket('checkout', 'shop'), bucket('cart', 'shop')]);
+      }
+      return savedGroupsPage({
+        'g-frontend': {
+          services: { buckets: [{ key: 'checkout' }, { key: 'ghost' }] },
+        },
+      });
+    });
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({
+        apmEventClient: { search } as unknown as APMEventClient,
+        maxNumberOfServices: 2,
+        savedServiceGroups: [frontend],
+      })
+    );
+
+    expect(Object.keys(attributes)).toEqual(['checkout', 'cart']);
+    expect(attributes.checkout).toEqual({
+      serviceNamespace: 'shop',
+      savedGroups: [{ id: 'g-frontend', name: 'Frontend' }],
+    });
+    expect(attributes.ghost).toBeUndefined();
+  });
 });
