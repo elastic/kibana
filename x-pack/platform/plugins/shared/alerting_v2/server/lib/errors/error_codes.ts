@@ -215,7 +215,7 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * The domain matches the subsystem that owns the failure, so an operator can
  * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
  * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
- * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
+ * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `RETRY_*`, `MAINTENANCE_WINDOW_*`,
  * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
@@ -637,6 +637,15 @@ export const ALERTING_LOG_CODES = {
    * failed to bootstrap. Rule execution stays degraded until it succeeds.
    */
   RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
+
+  // ──────────────────────────────── Retries ──────────────────────────
+  /**
+   * An Elasticsearch call failed with a transient error (connection, timeout,
+   * retryable status, unacknowledged mutation, concurrent modification) and is
+   * about to be retried. Emitted under the calling subsystem's `log.logger`;
+   * the final failure, if any, is logged by the caller with its own code.
+   */
+  RETRY_ATTEMPT_FAILED: 'RETRY_ATTEMPT_FAILED',
 
   // ─────────────────────────── Saved objects ─────────────────────────
   /**
