@@ -23,7 +23,6 @@ import {
   MigrationStatus,
   MigrationComments,
 } from './common.gen';
-import { TinesStoryExport } from './vendor/workflows/tines.gen';
 
 /**
  * The original workflow vendor identifier.
@@ -63,7 +62,15 @@ export const WorkflowMigration = lazySchema(() =>
 export type WorkflowMigration = z.infer<typeof WorkflowMigration>;
 
 /**
- * The original Tines workflow to migrate.
+ * Serialization format of the original workflow export. Tines exports use json.
+ */
+export const OriginalWorkflowFormat = lazySchema(() => z.enum(['json', 'yaml']));
+export type OriginalWorkflowFormat = z.infer<typeof OriginalWorkflowFormat>;
+export type OriginalWorkflowFormatEnum = typeof OriginalWorkflowFormat.enum;
+export const OriginalWorkflowFormatEnum = OriginalWorkflowFormat.enum;
+
+/**
+ * The original workflow to migrate.
  */
 export const OriginalWorkflow = lazySchema(() =>
   z.object({
@@ -84,9 +91,15 @@ export const OriginalWorkflow = lazySchema(() =>
      */
     description: z.string().max(10000).optional().describe('The original workflow description.'),
     /**
-     * Raw Tines story export JSON.
+     * Raw workflow export from source system.
      */
-    data: TinesStoryExport.describe('Raw Tines story export JSON.'),
+    data: z.string().max(1000000).describe('Raw workflow export from source system.'),
+    /**
+     * Serialization format of the original workflow export.
+     */
+    format: OriginalWorkflowFormat.describe(
+      'Serialization format of the original workflow export.'
+    ),
   })
 );
 export type OriginalWorkflow = z.infer<typeof OriginalWorkflow>;
@@ -138,9 +151,9 @@ export const WorkflowMigrationWorkflow = lazySchema(() =>
      */
     created_by: NonEmptyString.describe('The user who created the workflow item.'),
     /**
-     * The original Tines workflow.
+     * The original workflow.
      */
-    original_workflow: OriginalWorkflow.describe('The original Tines workflow.'),
+    original_workflow: OriginalWorkflow.describe('The original workflow.'),
     /**
      * The translated Elastic workflow.
      */

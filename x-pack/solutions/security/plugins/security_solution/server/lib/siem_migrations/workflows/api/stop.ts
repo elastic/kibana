@@ -14,6 +14,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 import { authz } from './util/authz';
 
 export const registerSiemWorkflowMigrationsStopRoute = (
@@ -36,10 +37,12 @@ export const registerSiemWorkflowMigrationsStopRoute = (
         },
       },
       withLicense(
-        async (_context, req, res): Promise<IKibanaResponse<StopWorkflowMigrationResponse>> => {
-          logger.debug(`Workflow migration stop is not implemented (${req.params.migration_id})`);
-          return res.ok({ body: { stopped: false } });
-        }
+        withExistingMigration(
+          async (_context, req, res): Promise<IKibanaResponse<StopWorkflowMigrationResponse>> => {
+            logger.debug(`Workflow migration stop is not implemented (${req.params.migration_id})`);
+            return res.ok({ body: { stopped: false } });
+          }
+        )
       )
     );
 };

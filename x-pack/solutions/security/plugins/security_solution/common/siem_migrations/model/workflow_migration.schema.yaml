@@ -37,14 +37,22 @@ components:
           description: The last execution of the migration task.
           $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
 
+    OriginalWorkflowFormat:
+      type: string
+      description: Serialization format of the original workflow export. Tines exports use json.
+      enum:
+        - json
+        - yaml
+
     OriginalWorkflow:
       type: object
-      description: The original Tines workflow to migrate.
+      description: The original workflow to migrate.
       required:
         - id
         - vendor
         - title
         - data
+        - format
       properties:
         id:
           description: The original workflow id.
@@ -60,8 +68,12 @@ components:
           maxLength: 10000
           description: The original workflow description.
         data:
-          description: Raw Tines story export JSON.
-          $ref: './vendor/workflows/tines.schema.yaml#/components/schemas/TinesStoryExport'
+          type: string
+          maxLength: 1000000
+          description: Raw workflow export from source system.
+        format:
+          description: Serialization format of the original workflow export.
+          $ref: '#/components/schemas/OriginalWorkflowFormat'
 
     ElasticWorkflow:
       type: object
@@ -109,7 +121,7 @@ components:
           description: The user who created the workflow item.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         original_workflow:
-          description: The original Tines workflow.
+          description: The original workflow.
           $ref: '#/components/schemas/OriginalWorkflow'
         elastic_workflow:
           description: The translated Elastic workflow.

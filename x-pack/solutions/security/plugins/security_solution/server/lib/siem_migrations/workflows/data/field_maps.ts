@@ -7,21 +7,9 @@
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/index-adapter';
 import type {
-  OriginalWorkflow,
   WorkflowMigration,
   WorkflowMigrationWorkflow,
 } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
-
-/**
- * The stored story is an unindexed object. Typing it as a string here keeps the
- * field-map keys from expanding into the arbitrary Tines export.
- */
-type WorkflowMigrationWorkflowFieldDocument = Omit<
-  WorkflowMigrationWorkflow,
-  'id' | 'original_workflow'
-> & {
-  original_workflow: Omit<OriginalWorkflow, 'data'> & { data: string };
-};
 
 export const workflowMigrationsFieldMap: FieldMap<
   SchemaFieldMapKeys<Omit<WorkflowMigration, 'id' | 'last_execution'>>
@@ -32,7 +20,7 @@ export const workflowMigrationsFieldMap: FieldMap<
 };
 
 export const workflowMigrationsWorkflowsFieldMap: FieldMap<
-  SchemaFieldMapKeys<WorkflowMigrationWorkflowFieldDocument>
+  SchemaFieldMapKeys<Omit<WorkflowMigrationWorkflow, 'id'>>
 > = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
@@ -50,7 +38,8 @@ export const workflowMigrationsWorkflowsFieldMap: FieldMap<
     fields: { keyword: { type: 'keyword' } },
   },
   'original_workflow.description': { type: 'text', required: false },
-  'original_workflow.data': { type: 'object', enabled: false, required: true },
+  'original_workflow.data': { type: 'text', required: true },
+  'original_workflow.format': { type: 'keyword', required: true },
   elastic_workflow: { type: 'object', required: false },
   'elastic_workflow.id': { type: 'keyword', required: false },
   'elastic_workflow.title': {

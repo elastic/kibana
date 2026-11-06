@@ -15,6 +15,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { withLicense } from '../../../common/api/util/with_license';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 import { authz } from '../util/authz';
 
 export const registerSiemWorkflowMigrationsUpdateWorkflowsRoute = (
@@ -38,19 +39,21 @@ export const registerSiemWorkflowMigrationsUpdateWorkflowsRoute = (
         },
       },
       withLicense(
-        async (
-          _context,
-          req,
-          res
-        ): Promise<IKibanaResponse<UpdateWorkflowMigrationWorkflowsResponse>> => {
-          logger.debug(
-            `Workflow migration item update is not implemented (${req.params.migration_id})`
-          );
-          if (req.body.length === 0) {
-            return res.noContent();
+        withExistingMigration(
+          async (
+            _context,
+            req,
+            res
+          ): Promise<IKibanaResponse<UpdateWorkflowMigrationWorkflowsResponse>> => {
+            logger.debug(
+              `Workflow migration item update is not implemented (${req.params.migration_id})`
+            );
+            if (req.body.length === 0) {
+              return res.noContent();
+            }
+            return res.ok({ body: { updated: false } });
           }
-          return res.ok({ body: { updated: false } });
-        }
+        )
       )
     );
 };
