@@ -37,6 +37,12 @@ import { scrollSectionIntoView } from './scroll_section_into_view';
 const getCollapsedSectionsStorageKey = (basePath: string): string =>
   `nightshift.investigations.collapsedSections:${basePath || 'default'}`;
 
+/**
+ * Closed starts collapsed; severity / in-progress start open. Stored ids are the ones the
+ * user collapsed (for default-open sections) or left collapsed (Closed stays here until opened).
+ */
+const DEFAULT_COLLAPSED_SECTIONS: InvestigationSectionId[] = ['closed'];
+
 /** How long a section the user was sent to keeps its highlighted border. */
 const SECTION_HIGHLIGHT_MS = 700;
 
@@ -59,10 +65,10 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
     const { euiTheme } = useEuiTheme();
     const visibleSections = sections.filter(isInvestigationSectionVisible);
     const { http } = useKibana().services;
-    // Sections are open by default, so only the ones the user closed are stored.
-    const [collapsedSections = [], setCollapsedSections] = useLocalStorage<
+    // Default-open sections store collapses; Closed starts in the default collapsed list.
+    const [collapsedSections = DEFAULT_COLLAPSED_SECTIONS, setCollapsedSections] = useLocalStorage<
       InvestigationSectionId[]
-    >(getCollapsedSectionsStorageKey(http.basePath.get()), []);
+    >(getCollapsedSectionsStorageKey(http.basePath.get()), DEFAULT_COLLAPSED_SECTIONS);
 
     // EUI's accordion can hold on to an older `onToggle`, and the setter's updater form would then
     // read an older list, so the next list is built from the latest one instead.
