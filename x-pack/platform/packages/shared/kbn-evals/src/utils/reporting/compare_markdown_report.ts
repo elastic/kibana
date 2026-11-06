@@ -79,6 +79,7 @@ export function formatMarkdownCompareReport({
   skippedNullScores = 0,
   baselineBranch = 'main',
   repetitionPolicy = 'mean',
+  rejectedSlices = [],
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
@@ -92,6 +93,7 @@ export function formatMarkdownCompareReport({
   skippedNullScores?: number;
   baselineBranch?: string;
   repetitionPolicy?: RepetitionPolicy;
+  rejectedSlices?: string[];
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -159,6 +161,14 @@ export function formatMarkdownCompareReport({
       `> **Note**: ${parts.join(
         ', '
       )} skipped. Comparison may be incomplete — the baseline could be a partial run.`
+    );
+  }
+
+  if (rejectedSlices.length > 0) {
+    lines.push(
+      `> **Note**: Left out of the median comparison (score outside [0, 1]): ${rejectedSlices.join(
+        ', '
+      )}.`
     );
   }
 

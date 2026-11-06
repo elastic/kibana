@@ -334,6 +334,7 @@ export const compareCmd: Command<void> = {
         skippedNullScores,
         baselineBranch: baselineBranch ?? undefined,
         repetitionPolicy,
+        rejectedSlices: rejectedNames,
       });
 
       if (outputPath) {

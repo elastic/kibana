@@ -200,6 +200,18 @@ describe('formatMarkdownCompareReport', () => {
   });
 
   describe('skipped pairs', () => {
+    it('names the slices left out of a median comparison', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [makeResult()],
+        rejectedSlices: ['dataset-1 / Latency'],
+      });
+
+      expect(output).toContain('Left out of the median comparison');
+      expect(output).toContain('dataset-1 / Latency');
+    });
+
     it('shows a note when skippedMissingPairs > 0', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
