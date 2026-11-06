@@ -8,12 +8,16 @@
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { ConversationTracker } from './conversation_tracker';
 
+// a navigation that was cancelled, e.g. at the unsaved changes prompt, never opens the dashboard
+// the link was left for, so a dashboard opened later must not take it over
+export const NEXT_DASHBOARD_LINK_TTL_MS = 60000;
+
 /** Which attachment of a conversation each dashboard was applied from or staged as. */
 export const createAttachmentLinks = (conversation: ConversationTracker) => {
   // per conversation id, where `undefined` is a new conversation
   const linksByConversation = new Map<string | undefined, WeakMap<DashboardApi, string>>();
   let nextDashboardLink:
-    | { fromApi: DashboardApi; conversationSwitch: number; attachmentId: string }
+    | { fromApi: DashboardApi; conversationSwitch: number; attachmentId: string; expiresAt: number }
     | undefined;
 
   const getLinkedAttachmentId = (api: DashboardApi) =>
@@ -51,6 +55,7 @@ export const createAttachmentLinks = (conversation: ConversationTracker) => {
         fromApi,
         conversationSwitch: conversation.getSwitchCount(),
         attachmentId,
+        expiresAt: Date.now() + NEXT_DASHBOARD_LINK_TTL_MS,
       };
     },
     claimNextDashboardLink: (api: DashboardApi) => {
@@ -58,9 +63,13 @@ export const createAttachmentLinks = (conversation: ConversationTracker) => {
       if (!nextDashboardLink || nextDashboardLink.fromApi === api) {
         return;
       }
-      const { conversationSwitch, attachmentId } = nextDashboardLink;
+      const { conversationSwitch, attachmentId, expiresAt } = nextDashboardLink;
       nextDashboardLink = undefined;
-      if (conversationSwitch === conversation.getSwitchCount() && !api.savedObjectId$.getValue()) {
+      if (
+        Date.now() < expiresAt &&
+        conversationSwitch === conversation.getSwitchCount() &&
+        !api.savedObjectId$.getValue()
+      ) {
         setLinkedAttachmentId(api, attachmentId);
       }
     },

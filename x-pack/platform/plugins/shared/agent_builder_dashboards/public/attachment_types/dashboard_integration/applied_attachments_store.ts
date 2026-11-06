@@ -25,7 +25,7 @@ export interface AppliedAttachmentsStore {
   isLinkedInOtherConversation: (api: DashboardApi, draftAttachmentId: string) => boolean;
   /** Links the next dashboard that opens after `fromApi`, for a preview that navigates to a new dashboard. */
   linkNextDashboard: (fromApi: DashboardApi, attachmentId: string) => void;
-  /** Takes over the link `linkNextDashboard` left, when the dashboard is the unsaved one it opened. */
+  /** Takes over the link `linkNextDashboard` left, when the dashboard is the unsaved one it opened shortly after. */
   claimNextDashboardLink: (api: DashboardApi) => void;
   queueApply: (apply: () => Promise<void>) => Promise<void>;
   /** Whether an apply is queued or the dashboard is still settling after one. */
