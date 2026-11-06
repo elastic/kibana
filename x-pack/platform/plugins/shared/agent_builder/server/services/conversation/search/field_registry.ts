@@ -39,6 +39,7 @@ const FIELD_DEFINITIONS: Record<ConversationSearchFilterField, ConversationFilte
 export interface ResolvedFilterField {
   path: string;
   astPath: string;
+  esType: 'keyword' | 'date';
   nestedPath?: string;
   rangeSupported: boolean;
 }
@@ -50,6 +51,7 @@ const toResolvedField = ({
 }: ConversationFilterFieldDefinition): ResolvedFilterField => ({
   path,
   astPath: nestedPath ? path.slice(nestedPath.length + 1) : path,
+  esType,
   nestedPath,
   rangeSupported: esType === 'date',
 });
@@ -85,6 +87,7 @@ export const resolveFilterField = (apiFieldName: string): ResolvedFilterField | 
   return {
     path: apiFieldName,
     astPath: apiFieldName,
+    esType: 'keyword',
     rangeSupported: false,
   };
 };

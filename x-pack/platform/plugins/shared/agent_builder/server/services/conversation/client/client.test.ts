@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { z } from '@kbn/zod/v4';
 import {
+  AgentBuilderErrorCode,
   CONVERSATION_SCHEMA_VERSION,
   ConversationActivityEventType,
   ConversationParentRelation,
@@ -31,6 +32,7 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
 import type {
+  ConversationCountOptions,
   ConversationEvent,
   ConversationSearchOptions,
   ConversationParentLink,
@@ -679,6 +681,53 @@ describe('ConversationClient', () => {
       expect(searchFilter).toEqual(listFilter);
     });
 
+    it('restricts to the given ids with a single ids clause after the access filters', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({
+        filter: 'status: completed',
+        ids: ['conversation-1', 'conversation-2'],
+      });
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray[filterArray.length - 1]).toEqual({
+        ids: { values: ['conversation-1', 'conversation-2'] },
+      });
+      // Space scoping, read access, the sub-agent exclusion, the KQL filter, then the ids clause.
+      expect(filterArray).toHaveLength(5);
+    });
+
+    it('sends an ids clause matching nothing for an empty ids array', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ ids: [] });
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray).toContainEqual({ ids: { values: [] } });
+    });
+
+    it('omits the ids clause when ids is not set', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything' });
+
+      const filterArray: Array<Record<string, unknown>> =
+        mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray.some((clause) => 'ids' in clause)).toBe(false);
+    });
+
+    it('rejects more ids than the maximum before touching Elasticsearch', async () => {
+      const ids = Array.from(
+        { length: CONVERSATION_BULK_GET_MAX_IDS + 1 },
+        (_, index) => `conversation-${index}`
+      );
+
+      await expect(client.search({ ids })).rejects.toThrow(/Too many conversation ids/);
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
     it('never sends a pinned filter', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
@@ -881,6 +930,224 @@ describe('ConversationClient', () => {
       expect(agentRegistry.getIds).not.toHaveBeenCalled();
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
+  });
+
+  describe('count', () => {
+    const emptyCountResponse = { hits: { total: { value: 0, relation: 'eq' } } };
+
+    it('sends size 0 with an exact total and no aggregation when groupBy is not set', async () => {
+      mockEsClient.search.mockResolvedValue(emptyCountResponse);
+
+      await client.count();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 0, track_total_hits: true })
+      );
+      const request = mockEsClient.search.mock.calls[0][0];
+      expect(request).not.toHaveProperty('aggs');
+      expect(request).not.toHaveProperty('from');
+      expect(request).not.toHaveProperty('sort');
+      expect(request).not.toHaveProperty('_source');
+    });
+
+    it('builds the same query as search for the same filter, query, ids, and agent', async () => {
+      agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const options = {
+        query: 'payment',
+        filter: 'status: completed',
+        ids: ['conversation-1', 'conversation-2'],
+        agentId: 'agent-2',
+      };
+
+      await client.search(options);
+      const searchQuery = mockEsClient.search.mock.calls[0][0].query;
+
+      mockEsClient.search.mockClear();
+      mockEsClient.search.mockResolvedValue(emptyCountResponse);
+      await client.count(options);
+      const countQuery = mockEsClient.search.mock.calls[0][0].query;
+
+      expect(countQuery).toEqual(searchQuery);
+      expect(countQuery.bool.must).toHaveLength(1);
+      expect(countQuery.bool.filter).toHaveLength(5);
+      expect(countQuery.bool.filter[4]).toEqual({
+        ids: { values: ['conversation-1', 'conversation-2'] },
+      });
+    });
+
+    it('rejects more ids than the maximum before touching Elasticsearch', async () => {
+      const ids = Array.from(
+        { length: CONVERSATION_BULK_GET_MAX_IDS + 1 },
+        (_, index) => `conversation-${index}`
+      );
+
+      await expect(client.count({ ids })).rejects.toThrow(/Too many conversation ids/);
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns the exact total, beyond the 10000 result window', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 123_456, relation: 'eq' } },
+      });
+
+      await expect(client.count()).resolves.toEqual({ total: 123_456, groups: [] });
+    });
+
+    it('returns total when hits.total is a plain number', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { total: 7 } });
+
+      await expect(client.count()).resolves.toEqual({ total: 7, groups: [] });
+    });
+
+    it('sends a terms aggregation for 1 groupBy field and maps its buckets', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 9, relation: 'eq' } },
+        aggregations: {
+          groups: {
+            buckets: [
+              { key: 'open', doc_count: 6 },
+              { key: 'closed', doc_count: 3 },
+            ],
+          },
+        },
+      });
+
+      const result = await client.count({
+        filter: 'template_id: investigation',
+        groupBy: 'metadata.status',
+        missing: { 'metadata.status': 'open' },
+        size: 10,
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: { groups: { terms: { field: 'metadata.status', missing: 'open', size: 10 } } },
+        })
+      );
+      expect(result).toEqual({
+        total: 9,
+        groups: [
+          { key: { 'metadata.status': 'open' }, count: 6 },
+          { key: { 'metadata.status': 'closed' }, count: 3 },
+        ],
+      });
+    });
+
+    it('sends a multi_terms aggregation for 2 groupBy fields and maps its buckets', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 7, relation: 'eq' } },
+        aggregations: {
+          groups: {
+            buckets: [
+              { key: ['open', 'high'], key_as_string: 'open|high', doc_count: 6 },
+              { key: ['open', 'none'], key_as_string: 'open|none', doc_count: 1 },
+            ],
+          },
+        },
+      });
+
+      const result = await client.count({
+        groupBy: ['metadata.status', 'metadata.severity'],
+        missing: { 'metadata.status': 'open', 'metadata.severity': 'none' },
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: {
+            groups: {
+              multi_terms: {
+                terms: [
+                  { field: 'metadata.status', missing: 'open' },
+                  { field: 'metadata.severity', missing: 'none' },
+                ],
+                size: 100,
+              },
+            },
+          },
+        })
+      );
+      expect(result).toEqual({
+        total: 7,
+        groups: [
+          { key: { 'metadata.status': 'open', 'metadata.severity': 'high' }, count: 6 },
+          { key: { 'metadata.status': 'open', 'metadata.severity': 'none' }, count: 1 },
+        ],
+      });
+    });
+
+    it('groups by a registry field through its stored path', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 2, relation: 'eq' } },
+        aggregations: { groups: { buckets: [{ key: 'user-1', doc_count: 2 }] } },
+      });
+
+      const result = await client.count({ groupBy: 'owner' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ aggs: { groups: { terms: { field: 'user_id', size: 100 } } } })
+      );
+      expect(result.groups).toEqual([{ key: { owner: 'user-1' }, count: 2 }]);
+    });
+
+    it('returns no groups when Elasticsearch omits the aggregation', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { total: { value: 0, relation: 'eq' } } });
+
+      await expect(client.count({ groupBy: 'metadata.status' })).resolves.toEqual({
+        total: 0,
+        groups: [],
+      });
+    });
+
+    it('returns an empty result without querying when the requested agent is inaccessible', async () => {
+      agentRegistry.getIds.mockResolvedValue(['agent-1']);
+
+      await expect(client.count({ agentId: 'agent-2', groupBy: 'status' })).resolves.toEqual({
+        total: 0,
+        groups: [],
+      });
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty result when the user cannot access any underlying agents', async () => {
+      agentRegistry.getIds.mockResolvedValue([]);
+
+      await expect(client.count()).resolves.toEqual({ total: 0, groups: [] });
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid filter before touching Elasticsearch', async () => {
+      await expect(client.count({ filter: 'space: default' })).rejects.toThrow(
+        /Invalid filter field "space"/
+      );
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['an unknown field', { groupBy: 'space' }, /Invalid group by field "space"/],
+      ['a nested field', { groupBy: 'event_type' }, /is a nested field/],
+      ['a date field', { groupBy: 'created_at' }, /is a date field/],
+      ['an oversized bucket count', { groupBy: 'status', size: 1001 }, /between 1 and 1000/],
+    ])(
+      'rejects %s as a bad request before touching Elasticsearch',
+      async (_label, options, message) => {
+        await expect(client.count(options as ConversationCountOptions)).rejects.toThrow(
+          expect.objectContaining({
+            code: AgentBuilderErrorCode.badRequest,
+            message: expect.stringMatching(message),
+          })
+        );
+
+        expect(agentRegistry.getIds).not.toHaveBeenCalled();
+        expect(mockEsClient.search).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe('bulkGet', () => {
