@@ -20,6 +20,7 @@ const moon = path.join(REPO_ROOT, 'node_modules/.bin/moon');
 describe('Moon Jest task inputs', () => {
   let fixtureRoot: string;
   const originalMoonWorkspaceRoot = process.env.MOON_WORKSPACE_ROOT;
+  const originalBuildkiteBaseBranch = process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH;
 
   const write = (relativePath: string, contents: string): void => {
     const filePath = path.join(fixtureRoot, relativePath);
@@ -42,6 +43,8 @@ describe('Moon Jest task inputs', () => {
   beforeAll(() => {
     fixtureRoot = mkdtempSync(path.join(tmpdir(), 'kbn-moon-jest-inputs-'));
     process.env.MOON_WORKSPACE_ROOT = fixtureRoot;
+    // Moon uses Buildkite's PR base in CI, while this fixture only has a main branch.
+    process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH = 'main';
     write(
       '.moon/workspace.yml',
       `projects:
@@ -152,6 +155,11 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
       delete process.env.MOON_WORKSPACE_ROOT;
     } else {
       process.env.MOON_WORKSPACE_ROOT = originalMoonWorkspaceRoot;
+    }
+    if (originalBuildkiteBaseBranch === undefined) {
+      delete process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH;
+    } else {
+      process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH = originalBuildkiteBaseBranch;
     }
     if (fixtureRoot) rmSync(fixtureRoot, { recursive: true, force: true });
   });
