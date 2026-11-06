@@ -242,9 +242,9 @@ export interface AlertRecoveredMessageInput {
   alertId: string;
   alertStart?: string | null;
   recoveredAt?: string;
-  ruleId: string;
-  ruleName: string;
-  ruleTypeId: string;
+  ruleId?: string;
+  ruleName?: string;
+  ruleTypeId?: string;
   ruleTags?: string[];
   snapshot?: Partial<AlertSnapshot> & Record<string, unknown>;
 }
@@ -269,11 +269,15 @@ export function buildAlertRecoveredFollowUpMessage({
     (isString(snapshot?.start) ? snapshot.start || undefined : undefined);
   const recoveredClause = recoveredAt ? ` at ${sanitize(recoveredAt)}` : '';
   const startClause = start ? `, first active at ${sanitize(start)}` : '';
+  const identifiers = [
+    `UUID ${sanitize(alertUuid)}`,
+    `instance "${sanitize(alertId)}"`,
+    ruleId ? `rule ${sanitize(ruleId)}` : undefined,
+    ruleTypeId ? `type ${sanitize(ruleTypeId)}` : undefined,
+  ].filter(isString);
   const lines = [
-    `Alert "${sanitize(ruleName)}" (UUID ${sanitize(alertUuid)}, instance "${sanitize(
-      alertId
-    )}", rule ${sanitize(ruleId)}, type ${sanitize(
-      ruleTypeId
+    `Alert "${sanitize(ruleName || alertUuid)}" (${identifiers.join(
+      ', '
     )}) transitioned to recovered${recoveredClause}${startClause}.`,
   ];
   if (isString(snapshot?.reason) && snapshot.reason)
