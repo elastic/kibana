@@ -25,8 +25,7 @@ const getStatusWithoutRequest = (unitId: string): UnitCheck | undefined => {
 };
 
 /**
- * Whether the unit in the URL exists. Only ids other than `default` that pass the unit id grammar
- * cost a request, and any error other than a 404 is left to the tabs.
+ * Whether the unit in the URL exists. Errors other than a 404 are left to the tabs.
  */
 export const useUnitCheck = (unitId: string): UnitCheck => {
   const {

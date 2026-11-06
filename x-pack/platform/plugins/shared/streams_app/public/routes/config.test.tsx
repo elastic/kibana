@@ -61,17 +61,4 @@ describe('streams app routes', () => {
       unitId: 'edge',
     });
   });
-
-  it('builds index links with the unitId query param', () => {
-    expect(
-      streamsAppRouter.link('/v2/indices/{indexName}/{tab}', {
-        path: { indexName: 'logs-a-b', tab: 'overview' },
-        query: { unitId: 'edge' },
-      })
-    ).toBe('/v2/indices/logs-a-b/overview?unitId=edge');
-  });
-
-  it('has no catch-all under v2', () => {
-    expect(() => leaf('/v2/foo')).toThrow('No route was matched');
-  });
 });

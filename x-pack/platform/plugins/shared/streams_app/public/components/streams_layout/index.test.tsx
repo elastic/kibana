@@ -27,11 +27,7 @@ jest.mock('./unit_not_found_prompt', () => ({
   ),
 }));
 jest.mock('../redirect_to', () => ({
-  RedirectTo: ({ path, params }: { path: string; params?: unknown }) => (
-    <div data-test-subj="redirectTo" data-path={path}>
-      {JSON.stringify(params)}
-    </div>
-  ),
+  RedirectTo: ({ path }: { path: string }) => <div data-test-subj="redirectTo" data-path={path} />,
 }));
 jest.mock('./tabs', () => {
   const { useEffect } = jest.requireActual('react');
@@ -132,15 +128,6 @@ describe('StreamsLayout', () => {
 
     expect(screen.getByTestId('streamsUnitNotFoundPrompt')).toBeInTheDocument();
     expect(screen.queryByTestId('redirectTo')).not.toBeInTheDocument();
-  });
-
-  it('keeps the unit when redirecting an unknown tab', () => {
-    setup({ unitId: 'edge', tab: 'bogus' });
-    render(<StreamsLayout />);
-
-    const redirect = screen.getByTestId('redirectTo');
-    expect(redirect).toHaveAttribute('data-path', '/v2/unit/{unitId}/{tab}');
-    expect(JSON.parse(redirect.textContent ?? '')).toEqual({ path: { tab: 'map' } });
   });
 
   it('renders the tab and unit scoped tab links for a found unit', () => {

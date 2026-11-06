@@ -83,8 +83,7 @@ const streamsAppRoutes = {
         }),
       },
       /**
-       * `v2` is the one top-level segment V2 reserves. Declared before `/{key}` so it wins over a
-       * stream name, every other first segment stays a stream name.
+       * Declared before `/{key}` so `v2` wins over a stream name.
        */
       '/v2': {
         element: <Outlet />,

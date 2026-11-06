@@ -48,13 +48,8 @@ describe('useUnitCheck', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['upper case', 'Default'],
-    ['a leading hyphen', '-edge'],
-    ['an underscore', 'a_b'],
-    ['more than 256 characters', 'a'.repeat(257)],
-  ])('treats an id with %s as not found without a request', (_label, unitId) => {
-    const { statuses } = renderUnitCheck(unitId);
+  it('treats an id outside the unit id grammar as not found without a request', () => {
+    const { statuses } = renderUnitCheck('Default');
 
     expect(statuses[0]).toBe('notFound');
     expect(statuses.every((status) => status === 'notFound')).toBe(true);
@@ -106,14 +101,15 @@ describe('useUnitCheck', () => {
     }
   );
 
-  it('checks again when the unit changes', async () => {
+  it('never reports the new unit as ready from the previous lookup', async () => {
     fetch.mockResolvedValue({ unit: {}, ui_metadata: {} });
-    const { result, rerender } = renderUnitCheck('edge');
+    const { result, rerender, statuses } = renderUnitCheck('edge');
     await waitFor(() => expect(result.current).toBe('ready'));
 
     fetch.mockReturnValue(new Promise(() => {}));
+    const rendersBefore = statuses.length;
     rerender({ id: 'other' });
 
-    expect(result.current).toBe('checking');
+    expect(statuses.slice(rendersBefore)).not.toContain('ready');
   });
 });

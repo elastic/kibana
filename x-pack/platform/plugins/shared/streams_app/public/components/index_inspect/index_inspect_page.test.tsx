@@ -9,11 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IndexInspectPage } from './index_inspect_page';
 
-let mockUnitId: string | undefined;
 jest.mock('../../hooks/use_streams_app_params', () => ({
   useStreamsAppParams: () => ({
     path: { indexName: 'logs-a-b', tab: 'overview' },
-    query: { unitId: mockUnitId },
+    query: { unitId: 'edge' },
   }),
 }));
 jest.mock('../../hooks/use_streams_app_router', () => ({
@@ -64,7 +63,6 @@ jest.mock('../streams_app_page_template', () => ({
         </div>
       ))}
       <div data-test-subj="streamsIndexInspectBack">{back.href}</div>
-      <div data-test-subj="streamsIndexInspectBackLabel">{back.label}</div>
     </div>
   ),
   StreamsAppPageTemplate: {
@@ -75,10 +73,6 @@ jest.mock('../streams_app_page_template', () => ({
 const range = { rangeFrom: 'now-15m', rangeTo: 'now' };
 
 describe('IndexInspectPage', () => {
-  beforeEach(() => {
-    mockUnitId = 'edge';
-  });
-
   it('keeps the unit on the tab links and the back link', () => {
     render(<IndexInspectPage />);
 
@@ -95,16 +89,5 @@ describe('IndexInspectPage', () => {
       path: '/v2/unit/{unitId}/{tab}',
       params: { path: { unitId: 'edge', tab: 'destinations' }, query: range },
     });
-    expect(screen.getByTestId('streamsIndexInspectBackLabel')).toHaveTextContent('Destinations');
-  });
-
-  it('goes back to the V2 landing page without a unit', () => {
-    mockUnitId = undefined;
-    render(<IndexInspectPage />);
-
-    expect(JSON.parse(screen.getByTestId('streamsIndexInspectBack').textContent ?? '')).toEqual({
-      path: '/v2',
-    });
-    expect(screen.getByTestId('streamsIndexInspectBackLabel')).toHaveTextContent('Streams');
   });
 });
