@@ -12,6 +12,7 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
+  SerializedStateComparison,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -111,6 +112,12 @@ export interface EmbeddablePublicDefinition<
    * Provide layout contraints to customize resize behavior
    */
   layoutConstraints?: LayoutConstraints;
+
+  /**
+   * Stateless rules for comparing two serialized states, used by containers to compare panels without
+   * a rendered embeddable. Define them in common and register the same rules on the server definition.
+   */
+  stateComparison?: SerializedStateComparison<SerializedState>;
 }
 
 export type LayoutConstraints = {

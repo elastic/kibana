@@ -8,18 +8,10 @@
  */
 
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
-import type { StateComparators } from '@kbn/presentation-publishing';
 import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
 import { DEFAULT_TIME_SLIDER_STATE } from '@kbn/controls-constants';
 import type { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
-
-export const timeRangePercentageComparators: StateComparators<
-  Pick<TimeSliderControlState, 'start_percentage_of_time_range' | 'end_percentage_of_time_range'>
-> = {
-  start_percentage_of_time_range: 'referenceEquality',
-  end_percentage_of_time_range: 'referenceEquality',
-};
 
 export function initTimeRangePercentage(
   state: TimeSliderControlState,
