@@ -9,12 +9,15 @@ import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { SecurityAppHeader } from '@kbn/security-solution-plugin/public/common/components/app_header';
+import { AppHeader } from '@kbn/app-header';
 import { useKibana } from '@kbn/security-solution-plugin/public/common/lib/kibana';
+import type { UpsellingPageProps } from '@kbn/security-solution-upselling/service';
 import { UpgradeActions } from '../attack_discovery/upgrade_actions';
 import * as i18n from './translations';
 
-const AIValueUpsellingPageESSComponent: React.FC = () => {
+const AIValueUpsellingPageESSComponent: React.FC<UpsellingPageProps> = ({
+  appHeader: Header = AppHeader,
+}) => {
   const actions = useMemo(
     () => (
       <EuiFlexGroup justifyContent="center" gutterSize="none">
@@ -67,7 +70,7 @@ const AIValueUpsellingPageESSComponent: React.FC = () => {
 
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
-      <SecurityAppHeader
+      <Header
         title={i18n.PAGE_TITLE}
         spacing="largeBleed"
         docLink={docLinks.links.siem.valueReport}
