@@ -41,7 +41,6 @@ export const getActionResponses = (
             aggs: {
               responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
                 rows_count: estypes.AggregationsSumAggregate;
-                responding_agents?: estypes.AggregationsCardinalityAggregate;
                 responding_agent_ids?: { buckets: Array<{ key: string }> };
                 responses: {
                   buckets: Array<{
@@ -84,11 +83,10 @@ export const getActionResponses = (
         // targeted count is known), falling back to documents when no agg is present.
         const responded =
           responsesByAction?.responding_agent_ids?.buckets.length ??
-          responsesByAction?.responding_agents?.value ??
           responsesByAction?.doc_count ??
           0;
-        // Never negative: an estimate above the targeted count (`cardinality` past the exact
-        // limit) must complete the query, as the details route completes on `pending === 0`.
+        // Never negative: past the exact limit `responded` counts documents, so a duplicate
+        // response can overshoot the targeted count. The details route completes on `pending === 0`.
         const pending = Math.max(0, agentsCount - responded);
 
         return of({

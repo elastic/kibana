@@ -96,7 +96,7 @@ describe('getActionResponses', () => {
       const search = searchClient({
         doc_count: 2,
         rows_count: { value: 2 },
-        responding_agents: { value: 1 },
+        responding_agent_ids: { buckets: [{ key: 'agent-1' }] },
         responses: { buckets: [{ key: 'success', doc_count: 2 }] },
       });
 
@@ -108,11 +108,10 @@ describe('getActionResponses', () => {
       expect(response.responded).toBe(1);
     });
 
-    it('never reports negative pending when the estimate exceeds the targeted agents', async () => {
+    it('never reports negative pending when document counts exceed the targeted agents', async () => {
       const search = searchClient({
         doc_count: 3,
         rows_count: { value: 3 },
-        responding_agents: { value: 3 },
         responses: { buckets: [{ key: 'success', doc_count: 3 }] },
       });
 

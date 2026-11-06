@@ -6,10 +6,7 @@
  */
 
 import moment from 'moment';
-import {
-  AGENT_CARDINALITY_PRECISION,
-  EXACT_RESPONDING_AGENTS_LIMIT,
-} from '../../../../../../common/constants';
+import { EXACT_RESPONDING_AGENTS_LIMIT } from '../../../../../../common/constants';
 import { buildActionResultsQuery } from './query.action_results.dsl';
 
 // The agent-carried space only speaks for documents Kibana never stamped, so the
@@ -89,12 +86,6 @@ describe('buildActionResultsQuery', () => {
                   rows_count: {
                     sum: {
                       field: 'action_response.osquery.count',
-                    },
-                  },
-                  responding_agents: {
-                    cardinality: {
-                      field: 'agent_id',
-                      precision_threshold: AGENT_CARDINALITY_PRECISION,
                     },
                   },
                   responses: {
@@ -372,12 +363,6 @@ describe('buildActionResultsQuery', () => {
                   rows_count: {
                     sum: {
                       field: 'action_response.osquery.count',
-                    },
-                  },
-                  responding_agents: {
-                    cardinality: {
-                      field: 'agent_id',
-                      precision_threshold: AGENT_CARDINALITY_PRECISION,
                     },
                   },
                   responses: {
@@ -697,16 +682,11 @@ describe('buildActionResultsQuery', () => {
       ['the targeted count is unknown', undefined],
       ['the targeted count is zero', 0],
       ['the targeted count is past the bucket limit', EXACT_RESPONDING_AGENTS_LIMIT + 1],
-    ])('estimates the responders with cardinality when %s', (_name, agentsCount) => {
+    ])('adds no responder aggregation when %s, so documents are counted', (_name, agentsCount) => {
       const aggs = getResponseAggs(buildActionResultsQuery({ ...baseOptions, agentsCount }));
 
-      expect(aggs.responding_agents).toEqual({
-        cardinality: {
-          field: 'agent_id',
-          precision_threshold: AGENT_CARDINALITY_PRECISION,
-        },
-      });
       expect(aggs.responding_agent_ids).toBeUndefined();
+      expect(aggs.responding_agents).toBeUndefined();
     });
   });
 

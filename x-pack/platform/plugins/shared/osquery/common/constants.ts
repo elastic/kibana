@@ -86,8 +86,8 @@ export const AGENT_CARDINALITY_PRECISION = 40000;
 
 /**
  * Largest targeted-agent count whose responders are counted with an exact `terms` aggregation
- * instead of `cardinality`. The aggregation returns one bucket per responder and runs on every
- * poll of the live query details route, so this is kept well below Elasticsearch's default
- * `search.max_buckets` (65,536) to bound the response size.
+ * instead of counting response documents. The aggregation returns one bucket per responder and
+ * runs on every poll of the live query details route, so this is kept well below Elasticsearch's
+ * default `search.max_buckets` (65,536) to bound the response size.
  */
 export const EXACT_RESPONDING_AGENTS_LIMIT = 10000;

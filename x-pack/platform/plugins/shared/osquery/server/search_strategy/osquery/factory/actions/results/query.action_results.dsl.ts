@@ -13,7 +13,6 @@ import moment from 'moment';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   ACTION_RESPONSES_INDEX,
-  AGENT_CARDINALITY_PRECISION,
   EXACT_RESPONDING_AGENTS_LIMIT,
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
@@ -149,7 +148,7 @@ export const buildActionResultsQuery = ({
               // agents that answered. Completion is decided on distinct agents. A `terms` agg sized
               // to the targeted agents is exact, which `cardinality` is not (it estimated wrong in
               // about 1 of 2 runs at 10k agents and left answered queries `running`). Fleets past
-              // the bucket limit fall back to `cardinality`.
+              // the bucket limit keep counting response documents (`doc_count`), as before.
               ...(agentsCount &&
               Number.isInteger(agentsCount) &&
               agentsCount > 0 &&
@@ -159,14 +158,7 @@ export const buildActionResultsQuery = ({
                       terms: { field: 'agent_id', size: agentsCount },
                     },
                   }
-                : {
-                    responding_agents: {
-                      cardinality: {
-                        field: 'agent_id',
-                        precision_threshold: AGENT_CARDINALITY_PRECISION,
-                      },
-                    },
-                  }),
+                : {}),
               responses: {
                 terms: {
                   script: {

@@ -218,6 +218,8 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
       runQueryStep(`agent_ids: ["${AGENT_B.id}"]`, '      wait_timeout: 15s')
     );
     const executionId = await workflows.run(workflowId);
+    // Records the dispatched action ids, so the teardown removes their documents.
+    await workflows.waitForDispatch(executionId, 'q');
 
     const { output } = stepOf(await workflows.waitForEnd(executionId), 'q');
     expect(output).toMatchObject({

@@ -473,7 +473,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       expect(aggs.responding_agents).toBeUndefined();
     });
 
-    it('falls back to cardinality when agentsCount is not sent', async () => {
+    it('counts response documents when agentsCount is not sent', async () => {
       const { provider, searchMock } = setup();
 
       await lastValueFrom(
@@ -482,7 +482,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
       const aggs = searchMock.mock.calls[0][0].params.aggs.aggs.aggs.responses_by_action_id.aggs;
 
-      expect(aggs.responding_agents).toBeDefined();
+      expect(aggs.responding_agents).toBeUndefined();
       expect(aggs.responding_agent_ids).toBeUndefined();
     });
 
