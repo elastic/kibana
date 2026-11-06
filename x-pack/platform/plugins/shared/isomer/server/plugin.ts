@@ -14,12 +14,12 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import type { KibanaIsomerRuntime, ValidationError } from '@kbn/isomer';
+import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
-import type { MaterializedNode } from './materialize/nodes';
 import { MaterializerRegistry } from './materialize/registry';
+import { createNodeValidator } from './materialize/validate_node';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
 import { abortSignalFor } from './materialize/abort_signal';
 import { registerMaterializeRoute } from './routes/materialize_route';
@@ -133,11 +133,7 @@ export class IsomerPlugin
     });
   };
 
-  private readonly validateNode = async (node: MaterializedNode): Promise<ValidationError[]> => {
-    const runtime = await this.getRuntime();
-    const { errors } = runtime.validate({ type: 'view', body: [node] });
-    return errors.map((error) => ({ ...error, path: error.path.replace(/^body\[0\]\.?/, '') }));
-  };
+  private readonly validateNode = createNodeValidator();
 
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(

@@ -6,12 +6,54 @@
  */
 
 export type {
+  AnyPrimitiveDefinition,
   Composition,
   PrimitiveNode,
   PrimitivePack,
   ValidationError,
 } from '@elastic/isomer-sdk';
-export { CompositionValidationError } from '@elastic/isomer-sdk';
+export {
+  CompositionValidationError,
+  MAX_INPUT_VALUES,
+  checkInputBudget,
+  createCompositionValidator,
+  definePrimitive,
+} from '@elastic/isomer-sdk';
+export type {
+  Cell,
+  ChartBrushEvent,
+  ChartData,
+  ChartEvent,
+  ChartSelectEvent,
+  ColorValue,
+  GridNode,
+  Loss,
+  MetricNode,
+  PortableFormat,
+  Provenance,
+  SelectTarget,
+  UnsupportedNode,
+  XyChartNode,
+} from '@elastic/isomer-primitives-charts/schema';
+export {
+  CHART_EVENT_NAMES,
+  chartEventSchema,
+  gridCatalog,
+  gridExamples,
+  gridSchema,
+  gridSchemaFor,
+  metricCatalog,
+  metricExamples,
+  metricSchema,
+  readChartEvent,
+  toActionEvent,
+  unsupportedCatalog,
+  unsupportedExamples,
+  unsupportedSchema,
+  xyChartCatalog,
+  xyChartExamples,
+  xyChartSchema,
+} from '@elastic/isomer-primitives-charts/schema';
 export { createKibanaIsomerRuntime } from './src/create_kibana_isomer_runtime';
 export type {
   KibanaIsomerRuntime,

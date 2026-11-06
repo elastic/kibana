@@ -10,74 +10,49 @@
  * from here, so this file is the only one that names the charts pack's types.
  */
 
-import type { PrimitiveNode } from '@kbn/isomer';
-import type { LinkNode, MarkdownNode, UnsupportedNode } from '@kbn/isomer-components';
+import type {
+  Cell,
+  ChartEvent,
+  GridNode,
+  Loss,
+  MetricNode,
+  PrimitiveNode,
+  Provenance,
+  UnsupportedNode,
+  XyChartNode,
+} from '@kbn/isomer';
+import type { LinkNode, MarkdownNode } from '@kbn/isomer-components';
 
 /** A readable node explaining why requested content could not be materialized. */
-export type { UnsupportedNode } from '@kbn/isomer-components';
+export type { UnsupportedNode };
 
 /** Where a materialized node came from, so a host can materialize it again. Never rendered. */
-export interface MaterializedNodeSource {
-  kind: 'kibana-panel';
-  kibanaVersion: string;
-  /** The saved object type whose materializer produced the node. */
-  adapter: string;
-  adapterVersion: number;
-  /** The saved object ID, when the node came from one. */
-  savedObjectId?: string;
-  /** The dashboard panel ID, when applicable. */
-  panelId?: string;
-  /** The time range captured from the host. */
-  timeRange?: { from: string; to: string };
-  /** When the node was materialized. */
-  capturedAt: string;
-}
+export type MaterializedNodeSource = Provenance;
 
 /** Something a materializer or the pipeline dropped, approximated or pre-rendered. */
-export interface MaterializeLoss {
-  /** The path in the source config that was changed. */
-  path: string;
-  /** How the source content was represented in the output. */
-  kind: 'dropped' | 'approximated' | 'prerendered';
-  /** Why the change was necessary. */
-  note: string;
-}
+export type MaterializeLoss = Loss;
 
-/** A chart or layout node from the charts pack, with the provenance and losses its core carries. */
-export interface MaterializedChartNode extends PrimitiveNode {
-  /** Each primitive's own fields, which the charts pack's schemas define. */
-  [field: string]: unknown;
-  /** The title shown for this node. */
-  title?: string;
-  /** The Kibana object that produced this node. */
-  source?: MaterializedNodeSource;
-  /** Changes made while producing this node. */
-  losses?: MaterializeLoss[];
-}
+/** A chart node from the charts pack, with the provenance and losses its core carries. */
+export type MaterializedChartNode = MetricNode | XyChartNode;
+
+/** A layout node from the charts pack, which places other nodes. */
+export type MaterializedLayoutNode = GridNode;
 
 /** Components pack nodes that panels whose config is their content map onto. */
 export type MaterializedComponentNode = MarkdownNode | LinkNode;
 
 /** What `materialize` returns: always a node that renders. */
-export type MaterializedNode = MaterializedChartNode | MaterializedComponentNode | UnsupportedNode;
+export type MaterializedNode =
+  | MaterializedChartNode
+  | MaterializedLayoutNode
+  | MaterializedComponentNode
+  | UnsupportedNode;
 
 /** A cell value in a chart node's `data.rows`. `null` is not `0`. */
-export type ChartCell = number | string | boolean | null | ChartCell[];
+export type ChartCell = Cell;
 
 /** A gesture on a chart node, referring to rows and columns of the node's own `data`. */
-export type ChartEvent = { node: string } & (
-  | {
-      kind: 'select';
-      target: 'datum' | 'series' | 'category' | 'legend' | 'cell' | 'tile';
-      rows: number[];
-      columns: string[];
-      negate?: boolean;
-    }
-  | { kind: 'brush'; column: string; range: [number, number] }
-) & {
-    description: string;
-    values: Record<string, ChartCell>;
-  };
+export type { ChartEvent };
 
 /** The Isomer primitive type used for unsupported materialization results. */
 export const UNSUPPORTED_NODE_TYPE = 'unsupported';
@@ -86,11 +61,11 @@ export const UNSUPPORTED_NODE_TYPE = 'unsupported';
 export const isUnsupportedNode = (node: PrimitiveNode): node is UnsupportedNode =>
   node.type === UNSUPPORTED_NODE_TYPE;
 
-const COMPONENT_NODE_TYPES: ReadonlySet<string> = new Set<MaterializedComponentNode['type']>([
-  'markdown',
-  'link',
+const chartNodeTypes: ReadonlySet<string> = new Set<MaterializedChartNode['type']>([
+  'metric',
+  'xyChart',
 ]);
 
-/** Whether `node` is a charts pack node, which carries provenance and losses. */
-export const isChartNode = (node: MaterializedNode): node is MaterializedChartNode =>
-  !isUnsupportedNode(node) && !COMPONENT_NODE_TYPES.has(node.type);
+/** Whether `node` is a chart node, which carries provenance and losses. */
+export const isChartNode = (node: PrimitiveNode): node is MaterializedChartNode =>
+  chartNodeTypes.has(node.type);
