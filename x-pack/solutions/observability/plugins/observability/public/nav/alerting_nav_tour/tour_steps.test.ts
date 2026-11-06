@@ -15,9 +15,9 @@ const FULL_CAPABILITIES = {
   alerting_v2_action_policies: { read: true },
   alerting_v2_execution_history: { read: true },
   observabilityAlerts: { show: true },
+  stackAlerts: { show: true },
   management: {
     insightsAndAlerting: {
-      triggersActionsRules: true,
       maintenanceWindows: true,
     },
   },
@@ -80,7 +80,7 @@ describe('getAlertingNavTourSteps', () => {
   it('targets Classic rules and omits Universal-only steps for a Classic-only user', () => {
     const core = createCore({
       observabilityAlerts: { show: true },
-      management: { insightsAndAlerting: { triggersActionsRules: true } },
+      stackAlerts: { show: true },
     });
     const steps = getAlertingNavTourSteps(core);
 
@@ -112,7 +112,7 @@ describe('getAlertingNavTourSteps', () => {
       ...FULL_CAPABILITIES,
       alerting_v2_action_policies: { read: false },
       alerting_v2_execution_history: { read: false },
-      management: { insightsAndAlerting: { triggersActionsRules: true } },
+      management: { insightsAndAlerting: {} },
     });
 
     expect(stepIds).not.toContain('actionPolicies');

@@ -104,7 +104,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       api: ['rac', 'bulkGetUserProfiles'],
-      ui: [],
+      ui: ['show'],
     },
     read: {
       app: [],
@@ -125,7 +125,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       api: ['rac', 'bulkGetUserProfiles'],
-      ui: [],
+      ui: ['show'],
     },
   },
 };

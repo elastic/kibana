@@ -8,6 +8,7 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import { STACK_ALERTS_FEATURE_ID } from './rule_types/stack_rules';
 
 /**
  * UI capability key under `capabilities.management.insightsAndAlerting` granting access to the
@@ -17,3 +18,36 @@ export const TRIGGERS_ACTIONS_RULES_CAPABILITY_ID = 'triggersActionsRules' as co
 
 export const canAccessTriggersActionsRules = (capabilities: Capabilities): boolean =>
   Boolean(capabilities.management?.insightsAndAlerting?.[TRIGGERS_ACTIONS_RULES_CAPABILITY_ID]);
+
+const OBSERVABILITY_RULES_NAV_LINKS = ['apm', 'metrics', 'uptime', 'synthetics', 'slo'] as const;
+
+/**
+ * Security rules feature ids that are still registered. Each grants `read_rules` with classic
+ * rule read. Older ids stay so unmigrated roles keep the Observability Rules link.
+ */
+const SECURITY_RULES_FEATURE_IDS = [
+  'securitySolutionRulesV1',
+  'securitySolutionRulesV2',
+  'securitySolutionRulesV3',
+  'securitySolutionRulesV4',
+] as const;
+
+/**
+ * Feature UI capabilities that imply classic rule read.
+ * `canUseMlAlerts` excludes the Machine Learning APM sub-privilege, which grants `canGetJobs`
+ * and has no rule read.
+ */
+const CLASSIC_RULES_FEATURE_CAPABILITIES: ReadonlyArray<readonly [string, string]> = [
+  ['logs', 'show'],
+  [STACK_ALERTS_FEATURE_ID, 'show'],
+  ['ml', 'canUseMlAlerts'],
+  ['dataQuality', 'show'],
+  ...SECURITY_RULES_FEATURE_IDS.map((featureId) => [featureId, 'read_rules'] as const),
+];
+
+/** True when a Kibana privilege grants read access to at least one classic rule type. */
+export const hasClassicRulesReadCapability = (capabilities: Capabilities): boolean =>
+  OBSERVABILITY_RULES_NAV_LINKS.some((appId) => capabilities.navLinks?.[appId] === true) ||
+  CLASSIC_RULES_FEATURE_CAPABILITIES.some(
+    ([featureId, uiCapability]) => capabilities[featureId]?.[uiCapability] === true
+  );

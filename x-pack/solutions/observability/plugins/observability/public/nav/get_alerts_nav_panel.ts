@@ -19,6 +19,7 @@ import {
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
 import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
+import { hasClassicRulesReadCapability } from '@kbn/rule-data-utils';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
@@ -33,7 +34,6 @@ export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): str
     : i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
       });
-const V1_RULES_MANAGEMENT_ID = 'triggersActionsRules';
 const MAINTENANCE_WINDOWS_MANAGEMENT_ID = 'maintenanceWindows';
 
 const obsAlertingLink = (deepLinkId: ObservabilityAlertingLinkId) =>
@@ -65,7 +65,7 @@ export const canReadV1Alerts = (core: CoreStart): boolean =>
 
 /** Gate for the Classic rules link in the Alerting panel. */
 export const canReadV1Rules = (core: CoreStart): boolean =>
-  hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);
+  hasClassicRulesReadCapability(core.application.capabilities);
 
 /** Gate for the Maintenance windows link in the Alerting panel. */
 export const canReadMaintenanceWindows = (core: CoreStart): boolean =>
