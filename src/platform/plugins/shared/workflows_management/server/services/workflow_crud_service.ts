@@ -1335,6 +1335,7 @@ export class WorkflowCrudService {
         try {
           await pagesSystemClient.syncWorkflowPages({
             workflowId: id,
+            workflowCreatedAt: document.created_at,
             spaceId: document.spaceId,
             definition: document.definition,
             valid: document.valid,

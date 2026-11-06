@@ -4683,6 +4683,7 @@ describe('workflow page lifecycle', () => {
 
     expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith({
       workflowId: id,
+      workflowCreatedAt: expect.any(String),
       spaceId: 'default',
       definition: expect.objectContaining({
         triggers: [expect.objectContaining({ type: 'page' })],

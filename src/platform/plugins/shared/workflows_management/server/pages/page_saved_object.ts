@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v5 as uuidv5 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
@@ -26,6 +25,7 @@ export type WorkflowPageAccessLevel = (typeof WORKFLOW_PAGE_ACCESS_LEVELS)[numbe
 
 const ID_MAX_LENGTH = 255;
 const SECRET_HASH_HEX_LENGTH = 64;
+const CREATED_AT_MAX_LENGTH = 64;
 // The schema sees the stored value: the ESO ciphertext of a 43-character secret.
 const ENCRYPTED_SECRET_MAX_LENGTH = 1024;
 
@@ -43,6 +43,7 @@ const workflowPageSchemaV1 = schema.object({
   }),
   access: schema.nullable(workflowPageAccessSchema),
   enabled: schema.boolean(),
+  workflowCreatedAt: schema.string({ maxLength: CREATED_AT_MAX_LENGTH }),
 });
 
 export type WorkflowPageAccess = TypeOf<typeof workflowPageAccessSchema>;
@@ -59,6 +60,11 @@ export interface WorkflowPageAttributes {
   secretHash: string;
   access: WorkflowPageAccess | null;
   enabled: boolean;
+  /**
+   * The `created_at` of the workflow that owns the page. A force delete frees the workflow
+   * id, so a page left by a failed retire must not pass to a new workflow with the same id.
+   */
+  workflowCreatedAt: string;
 }
 
 // Keep these lists in sync with the ESO registration below.
@@ -71,15 +77,14 @@ export type PartiallyUpdatableWorkflowPageAttributes = Partial<
   Pick<WorkflowPageAttributes, 'access' | 'enabled'>
 >;
 
-/** Fixed namespace, so one page of one workflow always gets the same saved object id. */
-const PAGE_ID_NAMESPACE = '0d8a6f0e-5c2b-4c3e-9a51-7f3c2d1b8e64';
-
-/** Workflow ids are unique across spaces, so the id does not need the space. */
+/**
+ * Workflow ids are unique across spaces and never contain `:`, and page ids never do
+ * either, so the id needs no space and splits back into one workflow and one page.
+ */
 export const getWorkflowPageSavedObjectId = ({
   workflowId,
   pageId,
-}: Pick<WorkflowPageRef, 'workflowId' | 'pageId'>): string =>
-  uuidv5(`${workflowId}|${pageId}`, PAGE_ID_NAMESPACE);
+}: Pick<WorkflowPageRef, 'workflowId' | 'pageId'>): string => `${workflowId}:${pageId}`;
 
 /**
  * Updates the attributes that are neither encrypted nor in AAD.

@@ -108,7 +108,7 @@ export const createFakeStore = () => {
           }),
         })
       ),
-      createPointInTimeFinder: jest.fn((options: { namespaces: string[]; filter: unknown }) => {
+      find: jest.fn(async (options: { namespaces: string[]; filter: unknown }) => {
         const filterText = JSON.stringify(options.filter);
         const matches = [...docs.values()].filter(
           (doc) =>
@@ -116,10 +116,10 @@ export const createFakeStore = () => {
             filterText.includes(`"${doc.attributes.workflowId}"`)
         );
         return {
-          find: async function* find() {
-            yield { saved_objects: matches.map(strip), total: matches.length };
-          },
-          close: jest.fn(async () => {}),
+          saved_objects: matches.map(strip),
+          total: matches.length,
+          per_page: matches.length,
+          page: 1,
         };
       }),
     } as unknown as jest.Mocked<SavedObjectsClientContract>);
@@ -147,6 +147,8 @@ export const noPageDefinition = {
   triggers: [{ type: 'manual' }],
   steps: [],
 } as unknown as WorkflowYaml;
+
+export const WORKFLOW_CREATED_AT = '2026-01-01T00:00:00.000Z';
 
 export const pageRef: WorkflowPageRef = {
   workflowId: 'workflow-1',

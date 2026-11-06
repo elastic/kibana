@@ -15,6 +15,7 @@ import {
   noPageDefinition,
   pageDefinition,
   pageRef as ref,
+  WORKFLOW_CREATED_AT,
 } from './fake_page_store.mock';
 import { computePageSecretHash } from './page_secret';
 import { WorkflowPagesSystemClientImpl } from './workflow_pages_system_client';
@@ -29,9 +30,13 @@ const setup = ({ canEncrypt = true, enabled = true } = {}) => {
     isEnabled: () => enabled,
     savedObjectsClient,
   });
-  const sync = (definition: WorkflowYaml | null, overrides: Partial<typeof ref> = {}) =>
+  const sync = (
+    definition: WorkflowYaml | null,
+    overrides: Partial<typeof ref> & { workflowCreatedAt?: string } = {}
+  ) =>
     client.syncWorkflowPages({
       workflowId: overrides.workflowId ?? ref.workflowId,
+      workflowCreatedAt: overrides.workflowCreatedAt ?? WORKFLOW_CREATED_AT,
       spaceId: overrides.spaceId ?? ref.spaceId,
       definition,
       valid: true,
@@ -108,6 +113,7 @@ describe('WorkflowPagesSystemClient', () => {
 
       await client.syncWorkflowPages({
         workflowId: ref.workflowId,
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
         spaceId: ref.spaceId,
         definition: null,
         valid: false,
@@ -125,7 +131,7 @@ describe('WorkflowPagesSystemClient', () => {
     it('does nothing while the feature flag is off', async () => {
       const { savedObjectsClient, sync } = setup({ enabled: false });
       await sync(pageDefinition());
-      expect(savedObjectsClient.createPointInTimeFinder).not.toHaveBeenCalled();
+      expect(savedObjectsClient.find).not.toHaveBeenCalled();
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 
@@ -140,11 +146,11 @@ describe('WorkflowPagesSystemClient', () => {
       const { savedObjectsClient, storedPage, sync } = setup();
       await sync(pageDefinition());
       const { secret } = storedPage()?.attributes ?? {};
-      savedObjectsClient.createPointInTimeFinder.mockReturnValueOnce({
-        find: async function* find() {
-          yield { saved_objects: [], total: 0, per_page: 100, page: 1 };
-        },
-        close: jest.fn(async () => {}),
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 0,
+        page: 1,
       });
 
       await sync(pageDefinition());
@@ -153,7 +159,44 @@ describe('WorkflowPagesSystemClient', () => {
     });
   });
 
+  describe('stale pages', () => {
+    it('gives a recreated workflow with a reused id a new page, not the old secret', async () => {
+      const { storedPage, sync } = setup();
+      await sync(pageDefinition());
+      const { secret } = storedPage()?.attributes ?? {};
+
+      // The old workflow was force-deleted, its retire failed, and the id was reused.
+      await sync(pageDefinition(), { workflowCreatedAt: '2026-02-01T00:00:00.000Z' });
+
+      expect(storedPage()?.attributes).toEqual(
+        expect.objectContaining({
+          workflowCreatedAt: '2026-02-01T00:00:00.000Z',
+          access: null,
+        })
+      );
+      expect(storedPage()?.attributes.secret).not.toBe(secret);
+    });
+
+    it('retires a stale page even when the new workflow has no page trigger', async () => {
+      const { storedPage, sync } = setup();
+      await sync(pageDefinition());
+
+      await sync(noPageDefinition, { workflowCreatedAt: '2026-02-01T00:00:00.000Z' });
+
+      expect(storedPage()).toBeUndefined();
+    });
+  });
+
   describe('retireWorkflowPages', () => {
+    it('searches 1,000 workflows per request', async () => {
+      const { client, savedObjectsClient } = setup();
+      const workflowIds = Array.from({ length: 2_001 }, (_, index) => `workflow-${index}`);
+
+      await client.retireWorkflowPages({ workflowIds, spaceId: 'default' });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
+    });
+
     it('retires every page of the given workflows', async () => {
       const { client, storedPage, sync } = setup();
       await sync(pageDefinition());
@@ -171,7 +214,7 @@ describe('WorkflowPagesSystemClient', () => {
     it('does nothing for an empty list', async () => {
       const { client, savedObjectsClient } = setup();
       await client.retireWorkflowPages({ workflowIds: [], spaceId: 'default' });
-      expect(savedObjectsClient.createPointInTimeFinder).not.toHaveBeenCalled();
+      expect(savedObjectsClient.find).not.toHaveBeenCalled();
     });
   });
 
