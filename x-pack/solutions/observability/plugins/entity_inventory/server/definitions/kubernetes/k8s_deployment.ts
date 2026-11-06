@@ -18,7 +18,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
   description:
-    'A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.',
+    'A Kubernetes deployment, identified by cluster/namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.',
   managedBy: MANAGED_BY,
   identityField: {
     euidRanking: {
@@ -54,20 +54,18 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
         indexPattern: 'metrics-kubernetes.state_deployment-*',
         filter: 'metricset.name == "state_deployment"',
         attributes: [
-          { name: 'cluster', field: 'orchestrator.cluster.name' },
-          { name: 'available_replicas', field: 'kubernetes.deployment.replicas.available' },
-          { name: 'desired_replicas', field: 'kubernetes.deployment.replicas.desired' },
-          { name: 'paused', field: 'kubernetes.deployment.paused' },
-          { name: 'app', field: 'kubernetes.labels.app' },
+          { name: 'k8s.deployment.available', field: 'kubernetes.deployment.replicas.available' },
+          { name: 'k8s.deployment.desired', field: 'kubernetes.deployment.replicas.desired' },
+          { name: 'k8s.deployment.paused', field: 'kubernetes.deployment.paused' },
+          { name: 'k8s.deployment.label.app', field: 'kubernetes.labels.app' },
         ],
       },
       {
         indexPattern: 'metrics-k8sclusterreceiver.otel-*',
         attributes: [
-          { name: 'cluster', field: 'k8s.cluster.name' },
-          { name: 'available_replicas', field: 'k8s.deployment.available' },
-          { name: 'desired_replicas', field: 'k8s.deployment.desired' },
-          { name: 'resource_id', field: 'k8s.deployment.uid' },
+          { name: 'k8s.deployment.available', field: 'k8s.deployment.available' },
+          { name: 'k8s.deployment.desired', field: 'k8s.deployment.desired' },
+          { name: 'k8s.deployment.uid', field: 'k8s.deployment.uid' },
         ],
       },
     ],

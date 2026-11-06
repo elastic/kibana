@@ -22,7 +22,7 @@ Registered today:
 
 | type | identified by | sources |
 | --- | --- | --- |
-| `k8s.deployment` | `<namespace>/<name>`, OpenTelemetry names ranked before the Elastic Agent ones | `metrics-kubernetes.state_deployment-*`, `metrics-k8sclusterreceiver.otel-*` |
+| `k8s.deployment` | `<cluster>/<namespace>/<name>`, OpenTelemetry names ranked before the Elastic Agent ones | `metrics-kubernetes.state_deployment-*`, `metrics-k8sclusterreceiver.otel-*` |
 
 The definitions under `server/inventory/__fixtures__/` are test-only and stay that way; nothing
 registers them.
