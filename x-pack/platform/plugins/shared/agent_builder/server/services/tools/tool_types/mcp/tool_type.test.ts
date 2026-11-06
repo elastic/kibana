@@ -236,7 +236,7 @@ describe('MCP tool_type', () => {
 
   describe('getMcpToolType', () => {
     it('should return a tool type definition with correct toolType', () => {
-      const toolType = getMcpToolType({ actions: mockActions });
+      const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
 
       expect(toolType.toolType).toBe(ToolType.mcp);
       expect(toolType.createSchema).toBeDefined();
@@ -247,7 +247,7 @@ describe('MCP tool_type', () => {
     });
 
     it('should have trackHealth enabled for external service monitoring', () => {
-      const toolType = getMcpToolType({ actions: mockActions });
+      const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
 
       expect(toolType.trackHealth).toBe(true);
     });
@@ -256,7 +256,7 @@ describe('MCP tool_type', () => {
   describe('getDynamicProps', () => {
     describe('getHandler', () => {
       it('should execute MCP tool successfully and return results', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -300,7 +300,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should return error result without calling the connector when it is not an MCP connector', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -331,7 +331,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should return error result when connector execution returns error status', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -360,7 +360,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should prefer serviceMessage over message when connector execution returns error status', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -390,7 +390,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should return error result with default message when connector error has no message', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -418,7 +418,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should catch exceptions and return error result', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -448,7 +448,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should handle non-Error exceptions', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -476,7 +476,7 @@ describe('MCP tool_type', () => {
 
     describe('getSchema', () => {
       it('should retrieve and convert input schema from listTools', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -504,7 +504,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should return empty schema without calling listTools when the connector is not an MCP connector', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -519,10 +519,14 @@ describe('MCP tool_type', () => {
 
         expect(schema.shape).toEqual({});
         expect(mockActionsClient.execute).not.toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          "Failed to list tools for MCP tool 'test_tool' on connector 'test-connector-id', falling back to an empty schema: " +
+            `Connector 'test-connector-id' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '.pagerduty_mcp'`
+        );
       });
 
       it('should return empty schema when fromJSONSchema throws', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -540,10 +544,13 @@ describe('MCP tool_type', () => {
         const schema = await dynamicProps.getSchema();
 
         expect(schema.shape).toEqual({});
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          "Failed to resolve input schema for MCP tool 'test_tool' on connector 'test-connector-id', falling back to an empty schema: Unsupported JSON schema"
+        );
       });
 
       it('should return empty schema when listTools fails', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -557,10 +564,13 @@ describe('MCP tool_type', () => {
         const schema = await dynamicProps.getSchema();
         expect(schema).toBeDefined();
         expect(mockFromJSONSchema).not.toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          "Failed to list tools for MCP tool 'test_tool' on connector 'test-connector-id', falling back to an empty schema: Connection failed"
+        );
       });
 
       it('should return empty schema when tool not found in listTools response', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -579,7 +589,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should return empty schema when fromJSONSchema returns undefined', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -599,7 +609,7 @@ describe('MCP tool_type', () => {
 
     describe('getLlmDescription', () => {
       it('should return formatted description with MCP-specific information', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
@@ -616,7 +626,7 @@ describe('MCP tool_type', () => {
       });
 
       it('should include the correct tool name from config', async () => {
-        const toolType = getMcpToolType({ actions: mockActions });
+        const toolType = getMcpToolType({ actions: mockActions, logger: mockLogger });
         const customConfig = {
           connector_id: 'my-connector',
           tool_name: 'custom_search_tool',

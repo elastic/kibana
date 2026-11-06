@@ -217,8 +217,10 @@ async function executeMcpTool({
  */
 export const getMcpToolType = ({
   actions,
+  logger,
 }: {
   actions: ActionsPluginStart;
+  logger: Logger;
 }): ToolTypeDefinition<ToolType.mcp, McpToolConfig, z.ZodObject<any>> => {
   return {
     toolType: ToolType.mcp,
@@ -232,7 +234,16 @@ export const getMcpToolType = ({
             actions,
             request,
             connectorId: config.connector_id,
-          }).catch(() => undefined);
+          }).catch((error) => {
+            logger.warn(
+              `Failed to list tools for MCP tool '${config.tool_name}' on connector '${
+                config.connector_id
+              }', falling back to an empty schema: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return undefined;
+          });
         }
         return toolsPromise;
       };
@@ -240,9 +251,9 @@ export const getMcpToolType = ({
       return {
         getHandler: () => {
           return async (params, context) => {
-            const { logger } = context;
+            const { logger: executionLogger } = context;
 
-            logger.debug(
+            executionLogger.debug(
               `Executing MCP tool: connector=${config.connector_id}, tool=${config.tool_name}`
             );
 
@@ -279,7 +290,7 @@ export const getMcpToolType = ({
                 ],
               };
             } catch (error) {
-              logger.error(`MCP tool execution failed: ${error}`);
+              executionLogger.error(`MCP tool execution failed: ${error}`);
               return {
                 results: [
                   {
@@ -309,7 +320,14 @@ export const getMcpToolType = ({
               return (zodSchema ?? z.object({})) as z.ZodObject<any>;
             }
             return z.object({});
-          } catch {
+          } catch (error) {
+            logger.warn(
+              `Failed to resolve input schema for MCP tool '${config.tool_name}' on connector '${
+                config.connector_id
+              }', falling back to an empty schema: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
             return z.object({});
           }
         },
