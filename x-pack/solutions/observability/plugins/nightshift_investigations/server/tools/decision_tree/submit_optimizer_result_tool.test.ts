@@ -579,6 +579,18 @@ describe('nightshift_submit_optimizer_result counts', () => {
     expect(nodeVisits(committedCounts(store, previous)).E2).toBe(5);
   });
 
+  it('does not promote a tree created in the same submit as its causal path', async () => {
+    const store = createStore();
+
+    await runSubmit({
+      store,
+      markdown: markdownFor(CAUSAL_TREE),
+      traversals: [traversal({ causal_path: MAIN_PATH })],
+    });
+
+    expect(store.commit).toHaveBeenCalledWith(expect.objectContaining({ reinforced: false }));
+  });
+
   it('reinforces the causal path even when its ✅ marks already existed', async () => {
     const store = createStore(stored(CAUSAL_TREE));
 

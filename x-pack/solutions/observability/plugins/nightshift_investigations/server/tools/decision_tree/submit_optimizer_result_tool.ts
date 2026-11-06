@@ -930,10 +930,11 @@ const persistSubmission = async ({
   updateCounts(existing ? storedCountsOf(existing) : undefined);
 
   // A traversal names the confirmed causal path outright. Without one, fall back to the old signal
-  // until the turn prompts ask for traversals: a taken edge an existing tree did not have.
-  const reinforced = traversal
-    ? traversal.causal_path.length > 0
-    : hasNewlyTakenEdges(existing, newTree);
+  // until the turn prompts ask for traversals: a taken edge an existing tree did not have. Only an
+  // existing tree is promoted; a tree created this turn starts tentative either way.
+  const reinforced =
+    existing !== undefined &&
+    (traversal ? traversal.causal_path.length > 0 : hasNewlyTakenEdges(existing, newTree));
   const outcome: SubmissionOutcome = {
     tree_id: treeId,
     file_path: filePath,
