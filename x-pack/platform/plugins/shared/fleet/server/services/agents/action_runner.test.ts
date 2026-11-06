@@ -44,6 +44,8 @@ const RETRY_TASK_ID = `${TASK_TYPE}:${ACTION_ID}`;
 class TestActionRunner extends ActionRunner {
   public processedBatches: string[][] = [];
   public processAgentsError?: Error;
+  /** Let the first N batches succeed before `processAgentsError` is thrown. */
+  public failFromBatch = 0;
 
   protected getActionType() {
     return 'test-action';
@@ -54,7 +56,7 @@ class TestActionRunner extends ActionRunner {
   }
 
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    if (this.processAgentsError) {
+    if (this.processAgentsError && this.processedBatches.length >= this.failFromBatch) {
       throw this.processAgentsError;
     }
     this.processedBatches.push(agents.map(({ id }) => id));
@@ -321,10 +323,15 @@ describe('ActionRunner', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('rejected the saved checkpoint')
       );
-      // cursor and count restart together, otherwise the count would never match the total
+      // cursor and count restart together, otherwise the count would never match the total, and
+      // the batch dedupe guard is dropped because the new sort moves the batch boundaries it keys on
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 }),
+        expect.objectContaining({
+          searchAfter: undefined,
+          nbAgentsProcessed: 0,
+          skipBatchDedupe: true,
+        }),
         TASK_TYPE,
         RETRY_TASK_ID
       );
@@ -332,6 +339,32 @@ describe('ActionRunner', () => {
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
         CHECK_TASK_ID,
         expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 })
+      );
+    });
+
+    it('keeps the count on a 400 raised once the cursor has been accepted', async () => {
+      mockAgentPages(3, 2);
+      const runner = createRunner({ total: 6 }, { searchAfter: ['agent-1'], nbAgentsProcessed: 2 });
+      // the first batch pages fine, so Elasticsearch accepted the resumed cursor; this 400 comes
+      // from somewhere else and must not restart the action
+      runner.failFromBatch = 1;
+      runner.processAgentsError = new EsErrors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'illegal_argument_exception' } },
+        warnings: [],
+        meta: {} as any,
+      });
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining('rejected the saved checkpoint')
+      );
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ searchAfter: ['agent-1'], nbAgentsProcessed: 4 }),
+        TASK_TYPE,
+        RETRY_TASK_ID
       );
     });
 
@@ -495,6 +528,23 @@ describe('ActionRunner', () => {
         CHECK_TASK_ID,
         expect.objectContaining({ nbAgentsProcessed: 4, searchAfter: ['agent-3'] })
       );
+    });
+
+    it('actions a batch again rather than dedupe it after a restart from scratch', async () => {
+      mockAgentPages(2, 2);
+      // a document from before the restart, whose batch no longer means the same set of agents
+      mockedGetAgentActions.mockResolvedValue([
+        { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
+      ] as any);
+
+      const runner = createRunner({}, { skipBatchDedupe: true });
+      await runner.runActionAsyncWithRetry();
+
+      // matching on the first agent could otherwise skip a batch holding agents never actioned
+      expect(runner.processedBatches).toEqual([
+        ['agent-0', 'agent-1'],
+        ['agent-2', 'agent-3'],
+      ]);
     });
 
     it('does not inflate the count when resuming, because the cursor moves with it', async () => {

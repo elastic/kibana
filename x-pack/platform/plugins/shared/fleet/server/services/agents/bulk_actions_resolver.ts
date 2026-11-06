@@ -157,14 +157,19 @@ export class BulkActionsResolver {
     retryParams: RetryParams,
     taskType: string,
     taskId: string,
-    options: { runAt?: Date; schedule?: IntervalSchedule; isCheckTask?: boolean } = {}
+    options: {
+      runAt?: Date;
+      schedule?: IntervalSchedule;
+      isCheckTask?: boolean;
+      maxRetryAttempts?: number;
+    } = {}
   ) {
     const logger = appContextService.getLogger();
     if (!this.taskManager) {
       logger.warn(`Task manager is not available, cannot schedule task ${taskId}`);
       return taskId;
     }
-    const { runAt, schedule, isCheckTask } = options;
+    const { runAt, schedule, isCheckTask, maxRetryAttempts } = options;
     const params: BulkActionTaskParams = {
       actionParams,
       retryParams,
@@ -182,7 +187,7 @@ export class BulkActionsResolver {
           ...(schedule ? { schedule } : {}),
           runAt: runAt ?? moment(new Date()).add(3, 's').toDate(),
         }),
-      { logger }
+      { logger, maxAttempts: maxRetryAttempts }
     );
     logger.info('Scheduling task ' + taskId);
     return taskId;
@@ -387,7 +392,14 @@ const runCheckTask = async (
     actionParams,
     { ...retryParams, retryCount: 1, taskId: retryTaskId },
     taskInstance.taskType,
-    retryTaskId
+    retryTaskId,
+    // Scheduling must not retry on its own backoff here. This task is itself the retry loop, so a
+    // transient failure costs one interval, while the default backoff sleeps longer than the 1m
+    // task timeout. An expired run is worse than a late one: `shouldUpdateExpiredTask` in Task
+    // Manager reads the schedule off the stored document, so a check task created before this was
+    // recurring would have the schedule returned below discarded and be removed as a finished
+    // one-shot task, leaving the action unwatched.
+    { maxRetryAttempts: 0 }
   );
 
   return await withWatcherFields({

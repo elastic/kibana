@@ -395,7 +395,10 @@ describe('createRetryTask', () => {
           taskId: RETRY_TASK_ID,
         }),
         BulkActionTaskType.REASSIGN_RETRY,
-        RETRY_TASK_ID
+        RETRY_TASK_ID,
+        // the default backoff sleeps past this task's 1m timeout, and an expired run would lose
+        // the recurring schedule returned below; the next interval is the retry instead
+        { maxRetryAttempts: 0 }
       );
       expect(result).toEqual(
         expect.objectContaining({ state: expect.objectContaining({ resumeCount: 1 }) })
@@ -415,7 +418,8 @@ describe('createRetryTask', () => {
         expect.anything(),
         expect.objectContaining({ pitId: 'stale-pit', searchAfter: ['lastAgent'] }),
         expect.anything(),
-        RETRY_TASK_ID
+        RETRY_TASK_ID,
+        expect.anything()
       );
     });
 
@@ -431,7 +435,8 @@ describe('createRetryTask', () => {
         expect.anything(),
         expect.objectContaining({ pitId: 'latest-pit' }),
         expect.anything(),
-        RETRY_TASK_ID
+        RETRY_TASK_ID,
+        expect.anything()
       );
     });
 
@@ -448,6 +453,7 @@ describe('createRetryTask', () => {
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ searchAfter: undefined, pitId: undefined }),
+        expect.anything(),
         expect.anything(),
         expect.anything()
       );
@@ -492,6 +498,7 @@ describe('createRetryTask', () => {
           nbAgentsProcessed: 30000,
         }),
         expect.anything(),
+        expect.anything(),
         expect.anything()
       );
     });
@@ -513,6 +520,7 @@ describe('createRetryTask', () => {
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ searchAfter: ['current'] }),
+        expect.anything(),
         expect.anything(),
         expect.anything()
       );

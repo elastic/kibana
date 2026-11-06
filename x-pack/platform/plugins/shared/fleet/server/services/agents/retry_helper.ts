@@ -27,6 +27,15 @@ export interface RetryParams {
   taskId?: string;
   /** Agents processed by earlier runs of this action, so the count stays cumulative. */
   nbAgentsProcessed?: number;
+  /**
+   * Set once an action has been restarted from the beginning because Elasticsearch rejected its
+   * saved cursor. `processBatch` identifies an already actioned batch by its first agent, which
+   * only identifies a batch while batch boundaries are stable; a restart under a different sort
+   * moves them, so a new batch could share its first agent with an old one while also holding
+   * agents that were never actioned. The guard is therefore dropped for the rest of the action,
+   * which is consistent with a restart re-actioning agents anyway.
+   */
+  skipBatchDedupe?: boolean;
 }
 
 /**

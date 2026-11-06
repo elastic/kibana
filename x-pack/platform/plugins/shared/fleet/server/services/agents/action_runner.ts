@@ -64,6 +64,12 @@ export abstract class ActionRunner {
   private checkTaskId?: string;
   /** Agents processed across every run of this action, not just the current one. */
   private nbAgentsProcessed = 0;
+  /**
+   * Whether a batch of this run has moved the cursor. Until one has, `retryParams.searchAfter` is
+   * still the checkpoint this run resumed from, which is what lets the 400 handler tell a rejected
+   * saved cursor apart from any other bad request.
+   */
+  private hasAdvancedCheckpoint = false;
 
   constructor(
     esClient: ElasticsearchClient,
@@ -165,21 +171,31 @@ export abstract class ActionRunner {
               );
               this.retryParams = { ...this.retryParams, pitId: undefined };
             }
-            // A 400 while a cursor is in hand means Elasticsearch rejected the `search_after`
-            // value. The cursor holds one value per sort clause, so a checkpoint taken under a
-            // different sort no longer fits — an action that was in flight while Kibana was
-            // upgraded to a version that changed ACTION_SORT_FIELD. It cannot be translated, so
-            // the action restarts from the beginning, and the count restarts with it to stay
-            // consistent with the cursor. Agents already actioned are actioned again.
+            // A 400 on the cursor this run resumed from means Elasticsearch rejected the
+            // `search_after` value. The cursor holds one value per sort clause, so a checkpoint
+            // taken under a different sort no longer fits — an action that was in flight while
+            // Kibana was upgraded to a version that changed ACTION_SORT_FIELD. It cannot be
+            // translated, so the action restarts from the beginning, and the count restarts with
+            // it to stay consistent with the cursor. Agents already actioned are actioned again.
+            //
+            // Only the first search of the run can raise it: once a batch has advanced the cursor,
+            // Elasticsearch has accepted it, and a 400 then comes from something else — a
+            // subclass's writes in `processAgents`, or a later page — which must be retried rather
+            // than restart the whole action and reset its count.
             if (
               isResponseError(error) &&
               error.statusCode === 400 &&
-              this.retryParams.searchAfter
+              this.retryParams.searchAfter &&
+              !this.hasAdvancedCheckpoint
             ) {
               logger.error(
                 `Elasticsearch rejected the saved checkpoint of action ${this.actionParams.actionId}, restarting it from the beginning: ${error.message}`
               );
-              this.retryParams = { ...this.retryParams, searchAfter: undefined };
+              this.retryParams = {
+                ...this.retryParams,
+                searchAfter: undefined,
+                skipBatchDedupe: true,
+              };
               this.nbAgentsProcessed = 0;
               // Clear the stored checkpoint too, so the check task does not hand the rejected
               // cursor back to the next run if this one dies before its first batch.
@@ -300,11 +316,12 @@ export abstract class ActionRunner {
   private async advanceCheckpoint(agents: Agent[]) {
     this.nbAgentsProcessed += agents.length;
     this.retryParams.searchAfter = agents[agents.length - 1].sort!;
+    this.hasAdvancedCheckpoint = true;
     await this.updateCheckpoint();
   }
 
   private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
-    if (this.retryParams.retryCount) {
+    if (this.retryParams.retryCount && !this.retryParams.skipBatchDedupe) {
       try {
         const actions = await getAgentActions(this.esClient, this.actionParams!.actionId!);
 
