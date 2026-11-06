@@ -48,6 +48,7 @@ export const AutomationFormBody = ({
   usedToday,
   savedLimit,
   onRaiseLimit,
+  showGlobalLimit = false,
   onChange,
 }: {
   values: AutomationFormValues;
@@ -59,6 +60,7 @@ export const AutomationFormBody = ({
   usedToday?: number;
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
+  showGlobalLimit?: boolean;
   onChange: (changes: Partial<AutomationFormValues>) => void;
 }) => {
   const getActionForTrigger = (trigger?: TriggerFormValues): Partial<AutomationFormValues> => {
@@ -147,6 +149,7 @@ export const AutomationFormBody = ({
           savedLimit={savedLimit}
           onRaiseLimit={onRaiseLimit}
           readOnly={readOnly}
+          showGlobalLimit={showGlobalLimit}
         />
       </FormSection>
       <FormSection>

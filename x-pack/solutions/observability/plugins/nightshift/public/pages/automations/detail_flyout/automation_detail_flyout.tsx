@@ -518,6 +518,7 @@ export const AutomationDetailFlyout = ({
                     isNameInvalid={isNameInvalid}
                     showValidationErrors={showValidationErrors}
                     savedLimit={dailyLimit}
+                    showGlobalLimit
                     onChange={(changes) => {
                       setValues((current) => ({ ...current, ...changes }));
                       if ('name' in changes) setIsNameInvalid(false);
@@ -567,6 +568,7 @@ export const AutomationDetailFlyout = ({
                       isNameInvalid={false}
                       readOnly
                       showIdentityFields={false}
+                      showGlobalLimit
                       onRaiseLimit={
                         canManage
                           ? (limit) => startEditing({ dailyDispatchLimit: String(limit) })

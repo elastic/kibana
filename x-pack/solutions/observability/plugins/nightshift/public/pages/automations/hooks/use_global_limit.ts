@@ -10,7 +10,14 @@ import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_ru
 import { useKibana } from '../../../hooks/use_kibana';
 import { isGlobalInvestigationLimitReached } from '../utils/filter_automations';
 
-export const useGlobalLimit = () => {
+interface GlobalLimit {
+  isReached: boolean;
+  limit?: number;
+  settingsHref?: string;
+  refetch: () => Promise<unknown>;
+}
+
+export const useGlobalLimit = (): GlobalLimit => {
   const { data: quotas, refetch } = useRunQuotas();
   const { application } = useKibana().services;
 
