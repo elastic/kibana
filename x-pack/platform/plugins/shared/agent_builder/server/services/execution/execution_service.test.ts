@@ -197,7 +197,7 @@ describe('AgentExecutionService', () => {
     decisions: { decide: jest.fn() },
     decisionConfig: {
       triggerThreshold: 0.5,
-      timeoutMs: 1000,
+      eisTimeoutMs: 1000,
       fastModelTimeoutMs: 2000,
       unavailableTtlMs: 3600000,
     },
@@ -276,7 +276,7 @@ describe('AgentExecutionService', () => {
         decisions: { decide: jest.fn() },
         decisionConfig: {
           triggerThreshold: 0.5,
-          timeoutMs: 1000,
+          eisTimeoutMs: 1000,
           fastModelTimeoutMs: 2000,
           unavailableTtlMs: 3600000,
         },

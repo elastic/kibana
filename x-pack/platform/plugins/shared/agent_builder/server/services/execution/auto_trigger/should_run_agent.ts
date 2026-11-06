@@ -25,11 +25,7 @@ import type { AgentBuilderConfig } from '../../../config';
 import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
 import { sourceEvents } from '../../conversation/client/source_events';
-import {
-  buildTriggerDecisionInput,
-  SHOULD_RESPOND_QUESTION,
-  shouldRespondQuestions,
-} from './build_trigger_decision_input';
+import { buildTriggerDecisionInput, shouldRespondQuestion } from './build_trigger_decision_input';
 
 export interface ShouldRunAgentDeps {
   logger: Logger;
@@ -39,7 +35,7 @@ export interface ShouldRunAgentDeps {
   conversationService: Pick<ConversationService, 'getScopedClient'>;
   agentService: AgentsServiceStart;
   decisions: DecisionsStart;
-  decisionConfig: Pick<AgentBuilderConfig['decisionModel'], 'triggerThreshold' | 'timeoutMs'>;
+  decisionConfig: Pick<AgentBuilderConfig['decisionModel'], 'triggerThreshold'>;
 }
 
 /**
@@ -128,8 +124,11 @@ export const shouldRunAgent = async ({
     return true;
   }
 
-  const { decisions, decisionConfig, logger } = deps;
-  const { triggerThreshold } = decisionConfig;
+  const {
+    decisions,
+    decisionConfig: { triggerThreshold },
+    logger,
+  } = deps;
 
   return withActiveInferenceSpan(
     'auto_trigger',
@@ -140,13 +139,7 @@ export const shouldRunAgent = async ({
       },
     },
     async (span) => {
-      const result = await decisions.decide({
-        request,
-        input,
-        questions: shouldRespondQuestions,
-        timeoutMs: decisionConfig.timeoutMs,
-        abortSignal,
-      });
+      const result = await decisions.decide({ request, input, abortSignal }, shouldRespondQuestion);
 
       if (result.status !== 'decided') {
         logger.debug(`auto trigger: decision ${result.status}, running the agent`);
@@ -157,20 +150,7 @@ export const shouldRunAgent = async ({
         return true;
       }
 
-      const answer = result.answers[SHOULD_RESPOND_QUESTION];
-
-      if (answer?.type !== 'predicate') {
-        logger.debug(
-          `auto trigger: no predicate answer from [${result.inferenceId}], running the agent`
-        );
-        span?.setAttributes({
-          'elastic.auto_trigger.status': 'invalid_answer',
-          'elastic.auto_trigger.inference_id': result.inferenceId,
-          'elastic.auto_trigger.run': true,
-        });
-        return true;
-      }
-
+      const { answer } = result;
       const run = answer.probability >= triggerThreshold;
 
       logger.debug(

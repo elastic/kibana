@@ -1,11 +1,11 @@
 {
   "decision": {
     "answers": {
-      "should_respond": {
+      "question_1": {
         "type": "predicate",
         "probability": 0.94
       },
-      "pick": {
+      "question_2": {
         "type": "choice",
         "choice": "a",
         "probabilities": [
@@ -14,7 +14,7 @@
         ],
         "confidence": 0.62
       },
-      "severity": {
+      "question_3": {
         "type": "score",
         "score": 1.2,
         "probabilities": [

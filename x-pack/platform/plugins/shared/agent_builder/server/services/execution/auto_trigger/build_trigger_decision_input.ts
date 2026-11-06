@@ -11,16 +11,12 @@ import {
   isExecutionTerminatedEvent,
   isUserMessageEvent,
 } from '@kbn/agent-builder-common';
-import type { DecisionQuestion } from '@kbn/agent-builder-server';
+import type { DecisionPredicateQuestion } from '@kbn/agent-builder-server';
 
-export const SHOULD_RESPOND_QUESTION = 'should_respond';
-
-export const shouldRespondQuestions: Record<string, DecisionQuestion> = {
-  [SHOULD_RESPOND_QUESTION]: {
-    type: 'predicate',
-    instructions:
-      "This is a shared conversation between people and an AI agent, described on the first line of the input. Decide whether the AI agent should respond to the new message. Answer true when the message @mentions the agent: it replies when addressed directly, even if only to say it can't help, unless the message tells it not to reply. Also answer true when the message asks for something the agent can help with according to its description, even without mentioning it. Answer false when the message is directed at other people, is a reaction or acknowledgement, or asks for something outside what the agent does without addressing it.",
-  },
+export const shouldRespondQuestion: DecisionPredicateQuestion = {
+  type: 'predicate',
+  instructions:
+    "This is a shared conversation between people and an AI agent, described on the first line of the input. Decide whether the AI agent should respond to the new message. Answer true when the message @mentions the agent: it replies when addressed directly, even if only to say it can't help, unless the message tells it not to reply. Also answer true when the message asks for something the agent can help with according to its description, even without mentioning it. Answer false when the message is directed at other people, is a reaction or acknowledgement, or asks for something outside what the agent does without addressing it.",
 };
 
 const DEFAULT_AUTHOR = 'User';

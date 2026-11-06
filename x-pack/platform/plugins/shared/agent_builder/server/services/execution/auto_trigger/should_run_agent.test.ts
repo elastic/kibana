@@ -15,7 +15,7 @@ import {
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ConversationWithPermissions, ConverseInput } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { DecideResult } from '@kbn/agent-builder-server';
+import type { DecideResult, DecisionPredicateAnswer } from '@kbn/agent-builder-server';
 import {
   createAgentsServiceStartMock,
   createConversationClientMock,
@@ -23,7 +23,7 @@ import {
   createMockedAgentRegistry,
   createMockedInternalAgent,
 } from '../../../test_utils';
-import { shouldRespondQuestions } from './build_trigger_decision_input';
+import { shouldRespondQuestion } from './build_trigger_decision_input';
 import { shouldRunAgent } from './should_run_agent';
 
 const span = { setAttributes: jest.fn() };
@@ -47,13 +47,15 @@ const sharedAccessControl = {
   entries: [],
 };
 
+type AutoTriggerDecideResult = DecideResult<{ answer: DecisionPredicateAnswer }>;
+
 type AccessControl = ConversationWithPermissions['access_control'];
 
 const setup = (
   options: {
     experimental?: boolean | Error;
     accessControl?: AccessControl;
-    decideResult?: DecideResult;
+    decideResult?: AutoTriggerDecideResult;
   } = {}
 ) => {
   const { experimental = true, decideResult = { status: 'unavailable' } } = options;
@@ -108,17 +110,17 @@ const setup = (
         },
         agentService,
         decisions: { decide },
-        decisionConfig: { triggerThreshold: 0.5, timeoutMs: 2000 },
+        decisionConfig: { triggerThreshold: 0.5 },
       },
     });
 
   return { run, decide };
 };
 
-const predicate = (probability: number): DecideResult => ({
+const predicate = (probability: number): AutoTriggerDecideResult => ({
   status: 'decided',
   inferenceId: 'decision-1',
-  answers: { should_respond: { type: 'predicate', probability } },
+  answer: { type: 'predicate', probability },
 });
 
 describe('shouldRunAgent', () => {
@@ -215,7 +217,10 @@ describe('shouldRunAgent', () => {
 
     await run({ abortSignal: signal });
 
-    expect(decide).toHaveBeenCalledWith(expect.objectContaining({ abortSignal: signal }));
+    expect(decide).toHaveBeenCalledWith(
+      expect.objectContaining({ abortSignal: signal }),
+      shouldRespondQuestion
+    );
   });
 
   it('asks should_respond for a shared conversation', async () => {
@@ -224,11 +229,8 @@ describe('shouldRunAgent', () => {
     await run();
 
     expect(decide).toHaveBeenCalledWith(
-      expect.objectContaining({
-        questions: shouldRespondQuestions,
-        timeoutMs: 2000,
-        input: expect.stringContaining('@agent can you help?'),
-      })
+      expect.objectContaining({ input: expect.stringContaining('@agent can you help?') }),
+      shouldRespondQuestion
     );
   });
 
@@ -249,24 +251,6 @@ describe('shouldRunAgent', () => {
 
   it('runs when decide returns failed', async () => {
     const { run } = setup({ decideResult: { status: 'failed', error: new Error('boom') } });
-
-    expect(await run()).toBe(true);
-  });
-
-  it.each<[string, DecideResult]>([
-    ['missing', { status: 'decided', inferenceId: 'decision-1', answers: {} }],
-    [
-      'not a predicate',
-      {
-        status: 'decided',
-        inferenceId: 'decision-1',
-        answers: {
-          should_respond: { type: 'choice', choice: 'no', confidence: 1, probabilities: {} },
-        },
-      },
-    ],
-  ])('runs when the answer is %s', async (_, decideResult) => {
-    const { run } = setup({ decideResult });
 
     expect(await run()).toBe(true);
   });

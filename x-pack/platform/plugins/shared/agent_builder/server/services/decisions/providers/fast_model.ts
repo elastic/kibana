@@ -12,6 +12,7 @@ import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server
 import type { ModelProviderFactoryFn } from '../../execution/runner/model_provider';
 import type { BaseDecisionProviderOptions } from './base_decision_provider';
 import { BaseDecisionProvider } from './base_decision_provider';
+import { questionKey } from './question_keys';
 import type { DecisionProviderParams, DecisionProviderResult } from './types';
 import { DecisionProviderUnavailableError } from './types';
 
@@ -63,7 +64,7 @@ export class FastModelDecisionProvider extends BaseDecisionProvider {
 
     const schema = z.object(
       Object.fromEntries(
-        Object.entries(questions).map(([name, question]) => [name, this.answerSchema(question)])
+        questions.map((question, index) => [questionKey(index), this.answerSchema(question)])
       )
     );
     const structuredModel = chatModel.withStructuredOutput(schema, { name: 'decide' });
@@ -76,8 +77,8 @@ export class FastModelDecisionProvider extends BaseDecisionProvider {
 ${CALIBRATION_RULES}
 
 ## Questions
-${Object.entries(questions)
-  .map(([name, question]) => this.describeQuestion(name, question))
+${questions
+  .map((question, index) => this.describeQuestion(questionKey(index), question))
   .join('\n')}`,
       ],
       ['user', input],
@@ -87,17 +88,16 @@ ${Object.entries(questions)
       signal,
     });
 
-    const answers = Object.fromEntries(
-      Object.entries(questions).map(([name, question]) => {
-        const raw = output?.[name];
+    const answers = questions.map((question, index) => {
+      const name = questionKey(index);
+      const raw = output?.[name];
 
-        if (!raw) {
-          throw new Error(`Fast model output has no answer for question [${name}]`);
-        }
+      if (!raw) {
+        throw new Error(`Fast model output has no answer for question [${name}]`);
+      }
 
-        return [name, this.toAnswer(question, raw)];
-      })
-    );
+      return this.toAnswer(question, raw);
+    });
 
     return { inferenceId: `fast_model:${connector.connectorId}`, answers };
   }
