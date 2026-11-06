@@ -32,7 +32,9 @@ describe('typesRoute', () => {
   });
 
   it('declares internal access', () => {
-    expect(route.options).toEqual(expect.objectContaining({ access: 'internal' }));
+    expect(route).toEqual(
+      expect.objectContaining({ options: expect.objectContaining({ access: 'internal' }) })
+    );
   });
 
   it('requires the entity inventory read privilege', () => {
