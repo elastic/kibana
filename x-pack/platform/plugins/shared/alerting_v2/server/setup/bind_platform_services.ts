@@ -26,7 +26,7 @@ import { LoggerService, LoggerServiceToken } from '../lib/services/logger_servic
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { AlertingRetryService } from '../lib/services/retry_service';
+import { EsTransientRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { SettingsService } from '../lib/services/settings_service/settings_service';
 import {
@@ -53,8 +53,8 @@ export function bindPlatformServices({ bind }: ContainerModuleLoadOptions) {
   bind(SpacesService).toSelf();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
-  bind(AlertingRetryService).toSelf();
-  bind(RetryServiceToken).toService(AlertingRetryService);
+  bind(EsTransientRetryService).toSelf();
+  bind(RetryServiceToken).toService(EsTransientRetryService);
 
   bind(LoggerService).toSelf();
   bind(LoggerServiceToken).toService(LoggerService);
