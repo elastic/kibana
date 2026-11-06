@@ -23,9 +23,7 @@ const TIMEOUT_MS = 15_000;
 const isBotUser = (login: string): boolean =>
   login.endsWith('[bot]') || login === 'kibanamachine' || login === 'elasticmachine';
 
-type CommitRef = Pick<Build, 'commit' | 'message'>;
-
-const isBotFixCommit = ({ message }: CommitRef): boolean =>
+const isBotFixCommit = (message: string | null | undefined): boolean =>
   Boolean(message?.startsWith('Changes from '));
 
 // Drafts only build when the author asks for it, through `/ci` or a draft CI label.
@@ -34,33 +32,36 @@ const ranOnDraft = ({ env, meta_data: metaData }: Build): boolean =>
 
 /**
  * Counts builds of a PR cancelled in the last 8 hours after running for a while. Draft builds and
- * builds of, or cancelled by, bot fix commits don't count. `currentCommit` is the running build,
- * which isn't in `finishedBuilds` but may be the one that cancelled the latest of them.
+ * builds of, or cancelled by, bot fix commits don't count. `currentBuildMessage` is the running
+ * build's message: it isn't in `finishedBuilds`, but may be the build that cancelled the latest one.
  */
 export const countRecentCancelledBuilds = (
   finishedBuilds: readonly Build[],
   prNumber: string,
-  currentCommit?: CommitRef,
+  currentBuildMessage?: string,
   now: number = Date.now()
 ): number => {
   const prBuilds = finishedBuilds
     .filter(({ pull_request: pullRequest }) => pullRequest?.id === prNumber)
     .sort((left, right) => Date.parse(left.created_at) - Date.parse(right.created_at));
-  const laterCommits: CommitRef[] = currentCommit ? [...prBuilds, currentCommit] : prBuilds;
+  // Buildkite cancels a running build when the next build on the branch is created.
+  const cancellingBuildMessages = [
+    ...prBuilds.slice(1).map(({ message }) => message),
+    currentBuildMessage,
+  ];
 
   return prBuilds.filter((build, index) => {
-    const { state, created_at: createdAt, commit } = build;
+    const { state, message } = build;
     const startedAt = Date.parse(build.started_at);
     const finishedAt = Date.parse(build.finished_at);
-    const nextCommit = laterCommits.slice(index + 1).find((later) => later.commit !== commit);
 
     return (
       state === 'canceled' &&
-      now - Date.parse(createdAt) <= WINDOW_MS &&
+      now - finishedAt <= WINDOW_MS &&
       finishedAt - startedAt >= MIN_RUNTIME_MS &&
       !ranOnDraft(build) &&
-      !isBotFixCommit(build) &&
-      !(nextCommit && isBotFixCommit(nextCommit))
+      !isBotFixCommit(message) &&
+      !isBotFixCommit(cancellingBuildMessages[index])
     );
   }).length;
 };
@@ -71,11 +72,10 @@ export const getFrequentCancellationsTipMessage = (user: string, cancelledBuilds
   `${cancelledBuilds} CI builds were cancelled in the last few hours before they finished. ` +
   "Drafts don't run CI automatically, and you can comment `/ci` whenever you want a build.";
 
-const postTip = async (): Promise<void> => {
+const postTip = async (signal: AbortSignal): Promise<void> => {
   const {
     BUILDKITE_PIPELINE_SLUG,
     BUILDKITE_BRANCH,
-    BUILDKITE_COMMIT,
     BUILDKITE_MESSAGE,
     GITHUB_PR_NUMBER,
     GITHUB_PR_USER,
@@ -104,7 +104,7 @@ const postTip = async (): Promise<void> => {
   const cancelledBuilds = countRecentCancelledBuilds(
     finishedBuilds,
     GITHUB_PR_NUMBER,
-    BUILDKITE_COMMIT ? { commit: BUILDKITE_COMMIT, message: BUILDKITE_MESSAGE ?? '' } : undefined
+    BUILDKITE_MESSAGE
   );
   if (cancelledBuilds < MIN_CANCELLED_BUILDS) {
     return;
@@ -114,19 +114,24 @@ const postTip = async (): Promise<void> => {
     commentBody: getFrequentCancellationsTipMessage(GITHUB_PR_USER, cancelledBuilds),
     commentContext: FREQUENT_CANCELLATIONS_TIP_CONTEXT,
     clearPrevious: false,
+    signal,
   });
 };
 
 /** Posts a one-time tip on PRs where many running builds were recently cancelled. Never throws. */
 export const postFrequentCancellationsTip = async (): Promise<void> => {
+  const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`timed out after ${TIMEOUT_MS}ms`)), TIMEOUT_MS);
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`timed out after ${TIMEOUT_MS}ms`));
+    }, TIMEOUT_MS);
     timer.unref();
   });
 
   try {
-    await Promise.race([postTip(), timeout]);
+    await Promise.race([postTip(controller.signal), timeout]);
   } catch (error) {
     console.error('Failed to post the frequent cancellations tip, continuing', error);
   } finally {

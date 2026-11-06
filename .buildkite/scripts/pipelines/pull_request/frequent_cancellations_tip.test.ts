@@ -72,10 +72,21 @@ describe('countRecentCancelledBuilds', () => {
     expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(2);
   });
 
-  it('ignores builds older than 8 hours', () => {
+  it('ignores builds cancelled over 8 hours ago', () => {
     expect(
       countRecentCancelledBuilds([build({ createdMinutesAgo: 9 * 60 })], PR, undefined, NOW)
     ).toBe(0);
+  });
+
+  it('counts builds created over 8 hours ago but cancelled within them', () => {
+    expect(
+      countRecentCancelledBuilds(
+        [build({ createdMinutesAgo: 9 * 60, ranMinutes: 90 })],
+        PR,
+        undefined,
+        NOW
+      )
+    ).toBe(1);
   });
 
   it('ignores builds cancelled within their first 10 minutes', () => {
@@ -113,19 +124,17 @@ describe('countRecentCancelledBuilds', () => {
   it('ignores the latest build when the running build is a bot fix commit', () => {
     const builds = [build({ createdMinutesAgo: 120 }), build({ createdMinutesAgo: 60 })];
 
-    expect(
-      countRecentCancelledBuilds(builds, PR, { commit: 'bot', message: BOT_FIX_MESSAGE }, NOW)
-    ).toBe(1);
+    expect(countRecentCancelledBuilds(builds, PR, BOT_FIX_MESSAGE, NOW)).toBe(1);
   });
 
-  it('looks past rebuilds of the same commit to find the commit that cancelled a build', () => {
+  it('attributes a cancellation to the next build, even a rebuild of the same commit', () => {
     const builds = [
       build({ createdMinutesAgo: 120, commit: 'a' }),
       build({ createdMinutesAgo: 90, commit: 'a', state: 'passed' }),
       build({ createdMinutesAgo: 60, commit: 'b', message: BOT_FIX_MESSAGE, state: 'passed' }),
     ];
 
-    expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(0);
+    expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(1);
   });
 
   it('ignores builds of other PRs on the same branch name', () => {
@@ -149,7 +158,6 @@ describe('postFrequentCancellationsTip', () => {
       BUILDKITE_PIPELINE_SLUG: 'kibana-pull-request',
       BUILDKITE_BRANCH: 'jane:feature',
       GITHUB_PR_NUMBER: PR,
-      BUILDKITE_COMMIT: 'current',
       BUILDKITE_MESSAGE: 'Address more review comments',
       GITHUB_PR_USER: 'jane',
       GITHUB_PR_DRAFT: 'false',
@@ -176,6 +184,7 @@ describe('postFrequentCancellationsTip', () => {
       commentBody: getFrequentCancellationsTipMessage('jane', 3),
       commentContext: FREQUENT_CANCELLATIONS_TIP_CONTEXT,
       clearPrevious: false,
+      signal: expect.any(AbortSignal),
     });
   });
 
