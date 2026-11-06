@@ -59,6 +59,35 @@ describe('TaskFlyout', () => {
     expect(screen.queryByTestId('taskManagerUiFailuresInWindow')).not.toBeInTheDocument();
   });
 
+  it('shows the full error of a run in a popover', async () => {
+    const errorMessage =
+      'Error: Request timed out\n    at Object.run (/usr/share/kibana/task.js:1:1)';
+    mockHttpGet(http, {
+      task: createTaskDetailResponse({
+        recent_runs: [
+          {
+            timestamp: '2026-11-04T10:00:00.000Z',
+            outcome: 'failure',
+            error_message: errorMessage,
+          },
+        ],
+      }),
+    });
+
+    renderWithProviders(
+      <TaskFlyout taskId="task-1" timeRange={TIME_RANGE} onClose={jest.fn()} />,
+      http
+    );
+
+    const runs = await screen.findByTestId('taskManagerUiRecentRuns');
+    expect(screen.queryByTestId('taskManagerUiRunError')).not.toBeInTheDocument();
+    await userEvent.click(within(runs).getByRole('button', { name: 'Show full error' }));
+
+    expect(await screen.findByTestId('taskManagerUiRunError')).toHaveTextContent(
+      'at Object.run (/usr/share/kibana/task.js:1:1)'
+    );
+  });
+
   it('shows failures in the time range that are older than the recent runs', async () => {
     mockHttpGet(http, {
       task: createTaskDetailResponse({

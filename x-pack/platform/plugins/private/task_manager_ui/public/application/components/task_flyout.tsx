@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { EuiBasicTableColumn, EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiBadge,
@@ -21,6 +21,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -193,6 +194,62 @@ const NodeIdCell: React.FC<{ nodeId?: string }> = ({ nodeId }) =>
     <>{EMPTY_VALUE}</>
   );
 
+const SHOW_FULL_ERROR_LABEL = i18n.translate('xpack.taskManagerUi.flyout.runs.showFullError', {
+  defaultMessage: 'Show full error',
+});
+
+const FULL_ERROR_LABEL = i18n.translate('xpack.taskManagerUi.flyout.runs.fullError', {
+  defaultMessage: 'Full error',
+});
+
+const ErrorMessageCell: React.FC<{ errorMessage?: string }> = ({ errorMessage }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  if (!errorMessage) {
+    return <>{EMPTY_VALUE}</>;
+  }
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ minWidth: 0 }}>
+      <EuiFlexItem css={{ minWidth: 0 }}>
+        <div className="eui-textTruncate">{errorMessage}</div>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          aria-label={FULL_ERROR_LABEL}
+          button={
+            <EuiToolTip content={SHOW_FULL_ERROR_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="maximize"
+                size="xs"
+                color="text"
+                onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+                aria-label={SHOW_FULL_ERROR_LABEL}
+                data-test-subj="taskManagerUiShowRunError"
+              />
+            </EuiToolTip>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          anchorPosition="downRight"
+          panelPaddingSize="s"
+        >
+          <div css={{ inlineSize: 480, maxInlineSize: '80vw' }}>
+            <EuiCodeBlock
+              paddingSize="s"
+              fontSize="s"
+              whiteSpace="pre-wrap"
+              overflowHeight={300}
+              isCopyable
+              data-test-subj="taskManagerUiRunError"
+            >
+              {errorMessage}
+            </EuiCodeBlock>
+          </div>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const RelativeTime: React.FC<{ value: string }> = ({ value }) => (
   <EuiToolTip content={formatDateTime(value)}>
     <span tabIndex={0}>{formatRelativeTime(value)}</span>
@@ -240,14 +297,7 @@ const runColumns: Array<EuiBasicTableColumn<TaskRun>> = [
     field: 'error_message',
     name: i18n.translate('xpack.taskManagerUi.flyout.runs.error', { defaultMessage: 'Error' }),
     truncateText: true,
-    render: (errorMessage?: string) =>
-      errorMessage ? (
-        <EuiToolTip content={errorMessage}>
-          <span tabIndex={0}>{errorMessage}</span>
-        </EuiToolTip>
-      ) : (
-        EMPTY_VALUE
-      ),
+    render: (errorMessage?: string) => <ErrorMessageCell errorMessage={errorMessage} />,
   },
 ];
 
