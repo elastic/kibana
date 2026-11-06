@@ -53,8 +53,8 @@ export class CallbackDeliveryService {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
       },
-      registerOnBeforeNewConversation: (check) => {
-        this.onBeforeNewConversationHooks.push(check);
+      registerOnBeforeNewConversation: (hook) => {
+        this.onBeforeNewConversationHooks.push(hook);
       },
       registerTransport: (transport) => {
         this.transports.push(transport);
