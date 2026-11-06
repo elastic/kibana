@@ -59,8 +59,13 @@ export interface AccessOperation {
  * Per-type access policy, declared once when the type is registered.
  */
 export interface AccessPolicy {
-  /** The general access values the type supports, and the one that new objects get. */
-  generalAccess: { default: GeneralAccessLevel; allowed: readonly GeneralAccessLevel[] };
+  /** The levels that general access can take for objects of this type. */
+  generalAccessLevels: readonly GeneralAccessLevel[];
+  /**
+   * The general access that new objects get, and that applies to objects without an ACL. It is
+   * one of the {@link AccessPolicy.generalAccessLevels}.
+   */
+  defaultGeneralAccessLevel: GeneralAccessLevel;
   /** The levels that entries can grant. */
   entryLevels: readonly EntryLevel[];
   /**

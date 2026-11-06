@@ -18,20 +18,20 @@ import { isReservedOperation, REQUIRED_OPERATIONS, type AccessPolicy } from './t
  * general access, misses a {@link REQUIRED_OPERATIONS} entry, or defines a reserved operation.
  */
 export const validateAccessPolicy = (policy: AccessPolicy): void => {
-  const { generalAccess, entryLevels, operations } = policy;
+  const { generalAccessLevels, defaultGeneralAccessLevel, entryLevels, operations } = policy;
 
   if (
-    generalAccess.allowed.length === 0 ||
-    generalAccess.allowed.some((level) => !isGeneralAccessLevel(level))
+    generalAccessLevels.length === 0 ||
+    generalAccessLevels.some((level) => !isGeneralAccessLevel(level))
   ) {
     throw new Error(
-      `General access must allow one or more levels below "manage", got [${generalAccess.allowed}].`
+      `General access must allow one or more levels below "manage", got [${generalAccessLevels}].`
     );
   }
 
-  if (!generalAccess.allowed.includes(generalAccess.default)) {
+  if (!generalAccessLevels.includes(defaultGeneralAccessLevel)) {
     throw new Error(
-      `Default general access "${generalAccess.default}" is not one of the allowed levels.`
+      `Default general access "${defaultGeneralAccessLevel}" is not one of the allowed levels.`
     );
   }
 

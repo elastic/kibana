@@ -11,7 +11,8 @@ import type { AccessPolicy } from './types';
 import { validateAccessPolicy } from './validate_access_policy';
 
 const POLICY: AccessPolicy = {
-  generalAccess: { default: 'edit', allowed: ['none', 'use', 'edit'] },
+  generalAccessLevels: ['none', 'use', 'edit'],
+  defaultGeneralAccessLevel: 'edit',
   entryLevels: ['use'],
   operations: {
     view: { level: 'view', privileges: {} },
@@ -27,14 +28,11 @@ describe('validateAccessPolicy', () => {
   });
 
   it.each<[string, Partial<AccessPolicy>]>([
-    [
-      'manage general access',
-      { generalAccess: { default: 'edit', allowed: ['edit', 'manage' as 'edit'] } },
-    ],
-    ['no general access values', { generalAccess: { default: 'edit', allowed: [] } }],
+    ['manage general access', { generalAccessLevels: ['edit', 'manage' as 'edit'] }],
+    ['no general access values', { generalAccessLevels: [] }],
     [
       'a default outside the allowed levels',
-      { generalAccess: { default: 'use', allowed: ['none'] } },
+      { generalAccessLevels: ['none'], defaultGeneralAccessLevel: 'use' },
     ],
     ['no entry levels', { entryLevels: [] }],
     ['an entry level of none', { entryLevels: ['none' as 'use'] }],
@@ -51,8 +49,12 @@ describe('validateAccessPolicy', () => {
       { operations: { ...POLICY.operations, run: { level: 'owner' as 'use', privileges: {} } } },
     ],
     [
-      'a reserved operation',
+      'the reserved transfer operation',
       { operations: { ...POLICY.operations, transfer: { level: 'edit', privileges: {} } } },
+    ],
+    [
+      'the reserved manage_access operation',
+      { operations: { ...POLICY.operations, manage_access: { level: 'manage', privileges: {} } } },
     ],
   ])('rejects %s', (_, overrides) => {
     expect(() => validateAccessPolicy({ ...POLICY, ...overrides })).toThrow();

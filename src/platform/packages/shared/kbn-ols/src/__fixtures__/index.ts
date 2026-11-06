@@ -12,6 +12,7 @@
 export {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
+  FIXTURE_POLICY_ALL_LEVELS,
   FIXTURE_PROBES,
   type AclShapeFixture,
   type FixtureProbe,
