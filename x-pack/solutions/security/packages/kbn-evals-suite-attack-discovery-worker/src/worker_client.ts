@@ -256,24 +256,22 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Runs the runner through the floor worker within one `maxWaitMs` deadline (see
+   * Runs the runner through the floor worker within one `RUNNER_TIMEOUT_MS` deadline (see
    * `runFloorToChild`).
    */
   async run({
     spaceId,
     floorWorkflowId,
-    maxWaitMs = RUNNER_TIMEOUT_MS,
   }: {
     spaceId: string;
     floorWorkflowId: string;
-    maxWaitMs?: number;
   }): Promise<PolledExecution> {
     return this.runFloorToChild({
       spaceId,
       floorWorkflowId,
       childWorkflowId: RUNNER_WORKFLOW_ID,
       childLabel: 'a runner',
-      maxWaitMs,
+      maxWaitMs: RUNNER_TIMEOUT_MS,
       started: [],
     });
   }

@@ -46,13 +46,13 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
 
   it('returns a zero-step runner execution instead of throwing', async () => {
     const client = clientReturning({ id: 'run-1', status: 'failed', stepExecutions: [] });
-    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
     expect(polled.execution.stepExecutions).toHaveLength(0);
   });
 
   it('falls back to the floor execution when the worker ends without starting a runner', async () => {
     const client = clientReturning({ id: 'floor-1', status: 'failed', stepExecutions: [] }, []);
-    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
     expect(polled.execution.id).toBe('floor-1');
     expect(log.warning).toHaveBeenCalled();
   });
@@ -60,7 +60,7 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
   it('names the concurrency cancel when the worker was cancelled before it dispatched a runner', async () => {
     (log.warning as jest.Mock).mockClear();
     const client = clientReturning({ id: 'floor-1', status: 'cancelled', stepExecutions: [] }, []);
-    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
     expect(polled.execution.status).toBe('cancelled');
     expect(log.warning).toHaveBeenCalledWith(
       expect.stringMatching(/cancelled before it dispatched a runner.*concurrency/)
@@ -70,7 +70,7 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
   it('does not blame concurrency when the worker failed without a runner', async () => {
     (log.warning as jest.Mock).mockClear();
     const client = clientReturning({ id: 'floor-1', status: 'failed', stepExecutions: [] }, []);
-    await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
     expect(log.warning).not.toHaveBeenCalledWith(expect.stringMatching(/concurrency/));
   });
 
@@ -82,7 +82,7 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
       return { id: 'run-1', status: 'completed', stepExecutions: [] };
     });
     const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
-    await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
     await client.cancelPending();
     expect(fetch.mock.calls.some(([path]) => String(path).includes('/cancel'))).toBe(false);
   });
@@ -729,7 +729,7 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
     client.track('s', 'run-1');
     await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution run-1/);
-    await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
     (log.warning as jest.Mock).mockClear();
     fetch.mockClear();
     await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution run-1/);
