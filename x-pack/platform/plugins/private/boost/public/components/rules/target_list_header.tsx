@@ -10,10 +10,6 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ShowHiddenSwitch } from '../hidden_data';
 
-// The height of a target list's header, with the space above it, for lists that size themselves to
-// fit under it: EUI's small tabs are 32px tall, and a heading is made as tall.
-export const TARGET_LIST_HEADER_HEIGHT = 40;
-
 interface TargetListHeaderProps {
   /** The list's tabs, or its heading. */
   children: ReactNode;
@@ -26,7 +22,7 @@ interface TargetListHeaderProps {
 
 /**
  * The row atop a rule's list of targets: its tabs or heading, then the switch that shows hidden data
- * sources at the end, so the pattern's matches and the list to select from look alike.
+ * sources at the end.
  */
 export const TargetListHeader = ({
   children,

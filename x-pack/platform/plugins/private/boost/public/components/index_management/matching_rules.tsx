@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
+import type { BoostProfile, BoostRule } from '../../../common/types';
 import { PRIORITY_LABEL, TARGETS_LABEL, getRuleTargets } from '../rules/rule_targets';
 import { ProfileLink, RuleLink } from './boost_page_links';
 
@@ -22,7 +22,6 @@ interface MatchingRulesProps {
   /** Every rule that matches, in the order Elasticsearch ranks them. */
   matches: readonly BoostRule[];
   profilesByName: ReadonlyMap<string, BoostProfile>;
-  dataSources: readonly BoostDataSource[];
 }
 
 /**
@@ -30,7 +29,7 @@ interface MatchingRulesProps {
  * with the first, which applies, marked. Its columns don't sort: the order is the point, and
  * sorting by priority alone would misorder rules that share one.
  */
-export const MatchingRules = ({ matches, profilesByName, dataSources }: MatchingRulesProps) => {
+export const MatchingRules = ({ matches, profilesByName }: MatchingRulesProps) => {
   const columns: Array<EuiBasicTableColumn<RankedRule>> = [
     {
       field: 'rank',
@@ -66,7 +65,7 @@ export const MatchingRules = ({ matches, profilesByName, dataSources }: Matching
     {
       name: TARGETS_LABEL,
       render: ({ rule }: RankedRule) =>
-        getRuleTargets(rule, profilesByName.get(rule.boost_profile)?.type, dataSources),
+        getRuleTargets(rule, profilesByName.get(rule.boost_profile)?.type),
     },
   ];
 

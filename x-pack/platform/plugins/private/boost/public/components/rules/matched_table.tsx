@@ -40,7 +40,6 @@ import { useShowsEstimates } from '../../prototype/prototype_settings';
 import { EmptyCell } from '../empty_cell';
 import { formatDataSourceCount, formatMaxAge } from '../format';
 import { ShowHiddenSwitch, formatHiddenCount } from '../hidden_data';
-import { NotFoundBadge } from './not_found_badge';
 import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
@@ -65,26 +64,6 @@ const NO_STATUS_TIPS: Readonly<Record<MatchStatus, string>> = {
   }),
 };
 
-// The table's title: what the rule matches, or what it selected.
-const TITLES: Readonly<Record<'matching' | 'selected', Record<BoostProfileType, string>>> = {
-  matching: {
-    indices: i18n.translate('xpack.boost.matchedTable.indicesTitle', {
-      defaultMessage: 'Matching indices',
-    }),
-    data_streams: i18n.translate('xpack.boost.matchedTable.dataStreamsTitle', {
-      defaultMessage: 'Matching data streams',
-    }),
-  },
-  selected: {
-    indices: i18n.translate('xpack.boost.matchedTable.selectedIndicesTitle', {
-      defaultMessage: 'Selected indices',
-    }),
-    data_streams: i18n.translate('xpack.boost.matchedTable.selectedDataStreamsTitle', {
-      defaultMessage: 'Selected data streams',
-    }),
-  },
-};
-
 // Why the switch that shows hidden matches is off.
 const NO_HIDDEN_TIPS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.matchedTable.noHiddenIndicesTip', {
@@ -95,15 +74,8 @@ const NO_HIDDEN_TIPS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-/**
- * A match, with what its columns show and sort by beyond the data source itself, or a name the rule
- * selected that no index or data stream has, which has nothing else to show.
- */
-interface MatchedRow extends Omit<BoostDataSource, 'size_in_bytes'> {
-  /** Unknown for a name that no longer exists, which sorts last. */
-  size_in_bytes?: number;
-  /** Whether no index or data stream has the name the rule selected, such as one deleted since. */
-  isMissing?: boolean;
+/** A match, with what its columns show and sort by beyond the data source itself. */
+interface MatchedRow extends BoostDataSource {
   /** The higher-ranked rule that applies to it instead, if any. */
   outrankedBy?: string;
   /** Its search VCUs under the rule's profile, unless a higher-ranked rule applies instead. */
@@ -263,33 +235,21 @@ interface MatchedTableProps {
   type?: BoostProfileType;
   /** The rule's profile, which its search cost estimates use. */
   profile?: BoostProfile;
-  /** Whether the rule selects its targets, so the table lists what it selected. */
-  isSelection?: boolean;
   /** What the rule matches, sorted by name. */
   matched: readonly BoostDataSource[];
-  /** Names the rule selected that no index or data stream has, which the table marks. */
-  missingNames?: readonly string[];
   /** Matches that a higher-ranked rule applies to instead, with that rule's name. */
   supersededBy: ReadonlyMap<string, string>;
 }
 
 /**
- * The indices or data streams a rule matches, or selected, each linking to its details in Index
- * Management, with a data stream's retention, and each match's data and search cost at rest and at peak. Those a higher-ranked rule
+ * The indices or data streams a rule matches, each linking to its details in Index Management, with
+ * a data stream's retention, and each match's data and search cost at rest and at peak. Those a higher-ranked rule
  * applies to instead are struck through, with that rule in a column that only shows when there are
  * any. A search box filters them by name, and a filter group by whether the rule applies to them,
  * with how many of the search results each would show. Hidden matches are left out until a switch
- * beside the filters shows them, and the count of what it shows says how many until then. A name the
- * rule selected that no longer exists is listed too, marked as not found, with dashes for the rest.
+ * beside the filters shows them, and the count of what it shows says how many until then.
  */
-export const MatchedTable = ({
-  type,
-  profile,
-  isSelection = false,
-  matched,
-  missingNames = [],
-  supersededBy,
-}: MatchedTableProps) => {
+export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const { euiTheme } = useEuiTheme();
   const showsEstimates = useShowsEstimates();
   // The size bars only add a glance at the sizes beside them, so a narrower table gives their space
@@ -304,8 +264,8 @@ export const MatchedTable = ({
   const isDataStreams = type === 'data_streams';
 
   const rows = useMemo(
-    () => [
-      ...matched.map((dataSource): MatchedRow => {
+    () =>
+      matched.map((dataSource): MatchedRow => {
         const outrankedBy = supersededBy.get(dataSource.name);
         const vcus =
           profile && outrankedBy === undefined
@@ -319,27 +279,14 @@ export const MatchedTable = ({
           retentionHours: getRetentionHours(dataSource.lifecycle),
         };
       }),
-      ...missingNames.map(
-        (name): MatchedRow => ({
-          name,
-          type: isDataStreams ? 'data_stream' : 'index',
-          isMissing: true,
-        })
-      ),
-    ],
-    [matched, missingNames, supersededBy, profile, isDataStreams]
+    [matched, supersededBy, profile]
   );
   // The largest match fills its size bar; the search doesn't change it, so bars keep their scale.
-  const maxBytes = Math.max(0, ...rows.map(({ size_in_bytes: bytes }) => bytes ?? 0));
+  const maxBytes = Math.max(0, ...rows.map(({ size_in_bytes: bytes }) => bytes));
   // Whether to show the column of rules that outrank matches, which the search doesn't change.
   const hasOutranked = rows.some(({ outrankedBy }) => outrankedBy !== undefined);
-  // A name that no longer exists is neither applied nor outranked, so only shows unfiltered.
-  const getStatus = ({ isMissing, outrankedBy }: MatchedRow): MatchStatus | undefined => {
-    if (isMissing) {
-      return undefined;
-    }
-    return outrankedBy === undefined ? 'applied' : 'outranked';
-  };
+  const getStatus = ({ outrankedBy }: MatchedRow): MatchStatus =>
+    outrankedBy === undefined ? 'applied' : 'outranked';
   const normalizedQuery = query.trim().toLowerCase();
   // Whether the switch that shows hidden matches has any to show, which the search doesn't change.
   const hasHidden = rows.some(({ hidden }) => hidden);
@@ -347,12 +294,7 @@ export const MatchedTable = ({
   const searched = includesHidden ? searchedAll : searchedAll.filter(({ hidden }) => !hidden);
   // Each filter counts what it would show with the current search.
   const counts: Record<MatchStatus, number> = { applied: 0, outranked: 0 };
-  searched.forEach((dataSource) => {
-    const rowStatus = getStatus(dataSource);
-    if (rowStatus) {
-      counts[rowStatus]++;
-    }
-  });
+  searched.forEach((dataSource) => counts[getStatus(dataSource)]++);
   const isShownByStatus = (dataSource: MatchedRow) =>
     status === undefined || getStatus(dataSource) === status;
   const items = searched.filter(isShownByStatus);
@@ -390,32 +332,14 @@ export const MatchedTable = ({
           })
         : i18n.translate('xpack.boost.matchedTable.indexColumn', { defaultMessage: 'Index' }),
       sortable: true,
-      render: (
-        name: string,
-        { type: dataSourceType, outrankedBy, hidden, isMissing }: MatchedRow
-      ) =>
-        isMissing ? (
-          // Not linked, as Index Management has nothing to show for it.
-          <span
-            css={{
-              display: 'inline-flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: euiTheme.size.s,
-            }}
-            data-test-subj="boostMatchedNotFound"
-          >
-            {name}
-            <NotFoundBadge names={[name]} type={type} />
-          </span>
-        ) : (
-          <TargetName
-            name={name}
-            supersededBy={outrankedBy}
-            linkedAs={dataSourceType}
-            isHidden={hidden}
-          />
-        ),
+      render: (name: string, { type: dataSourceType, outrankedBy, hidden }: MatchedRow) => (
+        <TargetName
+          name={name}
+          supersededBy={outrankedBy}
+          linkedAs={dataSourceType}
+          isHidden={hidden}
+        />
+      ),
     },
     // Only when a higher-ranked rule applies to any of the matches instead, which it names. Like
     // the columns below, matches without a value sort last, whichever the direction.
@@ -456,7 +380,7 @@ export const MatchedTable = ({
       width: '9em',
       sortable: true,
       dataType: 'number',
-      render: (bytes?: number) => (bytes === undefined ? <EmptyCell /> : formatSize(bytes)),
+      render: formatSize,
     },
     // Each size's bar, in a column of its own beside the right-aligned sizes, when the table is wide
     // enough to spare it.
@@ -466,15 +390,9 @@ export const MatchedTable = ({
             name: SIZE_BAR_NAME,
             // The bar's width, and the cell's padding on either side.
             width: `calc(${SIZE_BAR_WIDTH} + ${euiTheme.size.base})`,
-            // Nothing for a name that no longer exists, whose size beside it is a dash.
-            render: ({ size_in_bytes: bytes, outrankedBy }: MatchedRow) =>
-              bytes === undefined ? null : (
-                <SizeBar
-                  bytes={bytes}
-                  maxBytes={maxBytes}
-                  isOutranked={outrankedBy !== undefined}
-                />
-              ),
+            render: ({ size_in_bytes: bytes, outrankedBy }: MatchedRow) => (
+              <SizeBar bytes={bytes} maxBytes={maxBytes} isOutranked={outrankedBy !== undefined} />
+            ),
           },
         ]
       : []),
@@ -560,11 +478,17 @@ export const MatchedTable = ({
   return (
     <DetailsSection
       title={
-        TITLES[isSelection ? 'selected' : 'matching'][isDataStreams ? 'data_streams' : 'indices']
+        isDataStreams
+          ? i18n.translate('xpack.boost.matchedTable.dataStreamsTitle', {
+              defaultMessage: 'Matching data streams',
+            })
+          : i18n.translate('xpack.boost.matchedTable.indicesTitle', {
+              defaultMessage: 'Matching indices',
+            })
       }
       data-test-subj="boostRuleMatched"
     >
-      {rows.length > 0 && (
+      {matched.length > 0 && (
         <>
           {toolbar}
           <EuiSpacer size="s" />
@@ -580,15 +504,9 @@ export const MatchedTable = ({
       )}
       <div ref={setTableWrapper}>
         <EuiInMemoryTable
-          tableCaption={
-            isSelection
-              ? i18n.translate('xpack.boost.matchedTable.selectedCaption', {
-                  defaultMessage: 'Indices or data streams this rule selected',
-                })
-              : i18n.translate('xpack.boost.matchedTable.caption', {
-                  defaultMessage: 'Indices or data streams this rule matches',
-                })
-          }
+          tableCaption={i18n.translate('xpack.boost.matchedTable.caption', {
+            defaultMessage: 'Indices or data streams this rule matches',
+          })}
           items={items}
           columns={columns}
           sorting={{ sort: { field: 'name', direction: 'asc' } }}
@@ -596,7 +514,7 @@ export const MatchedTable = ({
           pagination={pagination}
           onTableChange={onTableChange}
           noItemsMessage={
-            rows.length === 0
+            matched.length === 0
               ? i18n.translate('xpack.boost.matchedTable.noMatches', {
                   defaultMessage: 'This rule matches nothing yet.',
                 })

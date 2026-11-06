@@ -12,14 +12,8 @@
 export interface PrototypeSettings {
   /** Whether to show search cost and VCU estimates, which aren't planned for the initial release. */
   shows_estimates: boolean;
-  /**
-   * Whether a rule can select several indices or data streams. Elasticsearch takes one index pattern
-   * per rule, so a rule selects one unless this is on.
-   */
-  allows_multiple_targets: boolean;
 }
 
 export const DEFAULT_PROTOTYPE_SETTINGS: Readonly<PrototypeSettings> = {
   shows_estimates: false,
-  allows_multiple_targets: false,
 };

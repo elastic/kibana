@@ -82,11 +82,6 @@ const ruleSchema = schema.object({
     validate: (priority) =>
       Number.isInteger(priority) ? undefined : 'priority must be a whole number',
   }),
-  _meta: schema.maybe(
-    schema.object({
-      target_mode: schema.maybe(schema.oneOf([schema.literal('pattern'), schema.literal('pick')])),
-    })
-  ),
 });
 
 const ruleNameParamsSchema = schema.object({

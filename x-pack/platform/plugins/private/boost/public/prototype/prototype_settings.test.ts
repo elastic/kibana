@@ -35,15 +35,12 @@ const createHttp = (saved: PrototypeSettings) => {
 describe('prototype settings', () => {
   it('are off until the shared settings load, and load once', async () => {
     const { loadPrototypeSettings, getPrototypeSettings } = loadModule();
-    const { http, get } = createHttp({ shows_estimates: true, allows_multiple_targets: true });
+    const { http, get } = createHttp({ shows_estimates: true });
     expect(getPrototypeSettings()).toEqual(DEFAULT_PROTOTYPE_SETTINGS);
 
     void loadPrototypeSettings(http);
     await loadPrototypeSettings(http);
-    expect(getPrototypeSettings()).toEqual({
-      shows_estimates: true,
-      allows_multiple_targets: true,
-    });
+    expect(getPrototypeSettings()).toEqual({ shows_estimates: true });
     expect(get).toHaveBeenCalledTimes(1);
   });
 
@@ -58,10 +55,7 @@ describe('prototype settings', () => {
     expect(put).toHaveBeenCalledWith(expect.any(String), {
       body: JSON.stringify({ shows_estimates: true }),
     });
-    expect(getPrototypeSettings()).toEqual({
-      shows_estimates: true,
-      allows_multiple_targets: false,
-    });
+    expect(getPrototypeSettings()).toEqual({ shows_estimates: true });
   });
 
   it('keeps a later change when an earlier one finishes saving after it', async () => {
@@ -70,17 +64,14 @@ describe('prototype settings', () => {
     await loadPrototypeSettings(http);
     let finishFirst: () => void = () => {};
     put.mockImplementationOnce(
-      () => new Promise((resolve) => (finishFirst = () => resolve(DEFAULT_PROTOTYPE_SETTINGS)))
+      () => new Promise((resolve) => (finishFirst = () => resolve({ shows_estimates: true })))
     );
 
-    const first = setPrototypeSettings({ allows_multiple_targets: true });
-    await setPrototypeSettings({ shows_estimates: true });
+    const first = setPrototypeSettings({ shows_estimates: true });
+    await setPrototypeSettings({ shows_estimates: false });
     finishFirst();
     await first;
-    expect(getPrototypeSettings()).toEqual({
-      shows_estimates: true,
-      allows_multiple_targets: true,
-    });
+    expect(getPrototypeSettings()).toEqual({ shows_estimates: false });
   });
 
   it("goes back to what it was when a change can't be saved", async () => {
@@ -89,9 +80,7 @@ describe('prototype settings', () => {
     put.mockRejectedValue(new Error('Forbidden'));
     await loadPrototypeSettings(http);
 
-    await expect(setPrototypeSettings({ allows_multiple_targets: true })).rejects.toThrow(
-      'Forbidden'
-    );
-    expect(getPrototypeSettings().allows_multiple_targets).toBe(false);
+    await expect(setPrototypeSettings({ shows_estimates: true })).rejects.toThrow('Forbidden');
+    expect(getPrototypeSettings().shows_estimates).toBe(false);
   });
 });

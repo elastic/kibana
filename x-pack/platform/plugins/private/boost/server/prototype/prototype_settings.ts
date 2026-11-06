@@ -30,8 +30,6 @@ export const getPrototypeSettings = async (
     );
     return {
       shows_estimates: attributes.shows_estimates ?? DEFAULT_PROTOTYPE_SETTINGS.shows_estimates,
-      allows_multiple_targets:
-        attributes.allows_multiple_targets ?? DEFAULT_PROTOTYPE_SETTINGS.allows_multiple_targets,
     };
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {

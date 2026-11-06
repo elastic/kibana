@@ -48,7 +48,6 @@ export const SAMPLE_RULES: readonly BoostRuleInput[] = [
     // A selected index rather than a pattern. Elasticsearch takes one per rule.
     name: 'storefront-products',
     index_patterns: ['products'],
-    _meta: { target_mode: 'pick' },
     boost_profile: 'storefront-search',
     priority: 10,
   },
@@ -67,7 +66,6 @@ export const SAMPLE_RULES: readonly BoostRuleInput[] = [
   {
     name: 'mobile-clicks-weekly',
     index_patterns: ['clicks-mobile'],
-    _meta: { target_mode: 'pick' },
     boost_profile: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
     priority: 20,
   },

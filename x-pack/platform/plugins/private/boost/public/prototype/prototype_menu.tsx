@@ -43,8 +43,7 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const { shows_estimates: showsEstimates, allows_multiple_targets: allowsMultipleTargets } =
-    usePrototypeSettings();
+  const { shows_estimates: showsEstimates } = usePrototypeSettings();
   const { euiTheme } = useEuiTheme();
 
   const changeSettings = (changes: Partial<PrototypeSettings>) =>
@@ -107,17 +106,6 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
             checked={showsEstimates}
             onChange={({ target: { checked } }) => changeSettings({ shows_estimates: checked })}
             data-test-subj="boostShowEstimatesSwitch"
-          />
-          <EuiSwitch
-            compressed
-            label={i18n.translate('xpack.boost.prototype.allowMultipleTargets', {
-              defaultMessage: 'Select multiple targets per rule',
-            })}
-            checked={allowsMultipleTargets}
-            onChange={({ target: { checked } }) =>
-              changeSettings({ allows_multiple_targets: checked })
-            }
-            data-test-subj="boostAllowMultipleTargetsSwitch"
           />
         </div>
         <EuiHorizontalRule margin="none" />

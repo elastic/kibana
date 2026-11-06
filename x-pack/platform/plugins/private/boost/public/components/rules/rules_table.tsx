@@ -17,7 +17,6 @@ import type {
   BoostProfile,
   BoostProfileType,
   BoostRule,
-  RuleTargetMode,
 } from '../../../common/types';
 import { formatSize } from '../cost_format';
 import { DetailsLink } from '../details_link';
@@ -27,7 +26,6 @@ import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout
 import { DeleteRuleModal } from './delete_rule_modal';
 import { RuleFlyout } from './rule_flyout';
 import { RuleMatches } from './rule_matches';
-import { getMissingTargets, getRuleTargetMode } from './rule_draft';
 import { DEFAULT_BADGE_LABEL } from '../badge_labels';
 
 export type RuleRow = BoostRule &
@@ -35,10 +33,6 @@ export type RuleRow = BoostRule &
     profileType?: BoostProfileType;
     /** The storage of what the rule applies to, after higher-ranked rules. */
     appliedSize: number;
-    /** Whether the rule's targets were typed as a pattern or selected. */
-    targetMode: RuleTargetMode;
-    /** Names the rule picked that no index or data stream has, such as ones deleted since. */
-    missingTargets: string[];
   };
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
@@ -103,7 +97,6 @@ export const RulesTable = ({
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
     const coverage = getRuleCoverage(dataSources, rules, profiles);
     const sizes = new Map(dataSources.map(({ name, size_in_bytes: bytes }) => [name, bytes]));
-    const existingNames = new Set(sizes.keys());
     return rules.map((rule) => {
       const ruleCoverage = coverage.get(rule.name) ?? {
         matches: 0,
@@ -119,8 +112,6 @@ export const RulesTable = ({
         appliedSize: matchedNames
           .filter((name) => !supersededBy.has(name))
           .reduce((total, name) => total + (sizes.get(name) ?? 0), 0),
-        targetMode: getRuleTargetMode(rule, existingNames),
-        missingTargets: getMissingTargets(rule, existingNames),
       };
     });
   }, [rules, profiles, dataSources]);
@@ -231,8 +222,7 @@ export const RulesTable = ({
     },
     {
       // Spelled out ("3 indices") and left-aligned; it still sorts numerically. It counts what the
-      // rule applies to; its list shows everything it matches, what higher-ranked rules take, and
-      // what the rule selected that no longer exists.
+      // rule applies to; its list shows everything it matches, and what higher-ranked rules take.
       field: 'appliesTo',
       name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
         defaultMessage: 'Applies to',
@@ -241,22 +231,12 @@ export const RulesTable = ({
       sortable: true,
       render: (
         appliesTo: number,
-        {
-          index_patterns: patterns,
-          profileType,
-          matches,
-          matchedNames,
-          supersededBy,
-          targetMode,
-          missingTargets,
-        }: RuleRow
+        { index_patterns: patterns, profileType, matches, matchedNames, supersededBy }: RuleRow
       ) => (
         <RuleMatches
           patterns={patterns}
-          mode={targetMode}
           type={profileType}
           coverage={{ matches, matchedNames, appliesTo, supersededBy }}
-          missingNames={missingTargets}
           hiddenNames={hiddenNames}
         />
       ),

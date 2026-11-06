@@ -276,7 +276,6 @@ const ProjectDefaultPanel = ({
               {coverage.matches > 0 ? (
                 <MatchesPopover
                   patterns={patterns}
-                  mode="pattern"
                   type={type}
                   coverage={coverage}
                   hiddenNames={hiddenNames}

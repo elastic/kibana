@@ -119,7 +119,7 @@ export const BoostIndexDetails = ({ indexName, dataStream }: BoostIndexDetailsPr
                   }),
                   description: <RuleLink rule={rule} />,
                 },
-                ...getRuleTargetItems(rule, profile.type, dataSources),
+                ...getRuleTargetItems(rule, profile.type),
                 ...(dataStream
                   ? [
                       {
@@ -197,11 +197,7 @@ export const BoostIndexDetails = ({ indexName, dataStream }: BoostIndexDetailsPr
             })}
             data-test-subj="boostIndexTabMatchingRulesSection"
           >
-            <MatchingRules
-              matches={matches}
-              profilesByName={profilesByName}
-              dataSources={dataSources}
-            />
+            <MatchingRules matches={matches} profilesByName={profilesByName} />
           </DetailsSection>
         </DetailsBand>
       )}

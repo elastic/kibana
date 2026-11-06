@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoostRule, BoostRuleInput, RuleTargetMode } from '../../../common/types';
+import type { BoostRule, BoostRuleInput } from '../../../common/types';
 import type { IndexPatternError, ProfileNameError } from '../../../common/validation';
 import {
   MAX_RULE_PRIORITY,
@@ -17,9 +17,8 @@ import {
 export interface RuleDraft {
   name: string;
   profileName: string;
-  mode: RuleTargetMode;
+  /** A name, or a pattern using `*`. */
   pattern: string;
-  picked: string[];
   priority: string;
 }
 
@@ -27,59 +26,33 @@ export interface RuleDraftErrors {
   name?: ProfileNameError;
   profile?: 'required';
   pattern?: IndexPatternError;
-  picked?: 'required' | 'too_many';
   /** Set by the form to the name of a rule the draft would tie with, which Elasticsearch rejects. */
   conflictsWith?: string;
 }
 
-/** A new rule starts in pattern mode at priority 0, which Elasticsearch also defaults to. */
+/** A new rule starts without targets at priority 0, which Elasticsearch also defaults to. */
 export const createEmptyRuleDraft = (profileName = ''): RuleDraft => ({
   name: '',
   profileName,
-  mode: 'pattern',
   pattern: '',
-  picked: [],
   priority: '0',
 });
 
 /**
- * The mode a rule's targets were chosen in, which the rule keeps in its `_meta`. A rule without it,
- * such as a default rule or one created through the API, is a pattern when it's a `*` pattern or a
- * name that isn't an existing data source, since the picker can only list what exists.
+ * Opens an existing rule. One saved with several targets, which the prototype once allowed, lists
+ * them with commas, which the field asks to narrow to one.
  */
-export const getRuleTargetMode = (
-  { index_patterns: patterns, _meta: meta }: BoostRule,
-  existingNames: ReadonlySet<string>
-): RuleTargetMode => {
-  if (meta?.target_mode) {
-    return meta.target_mode;
-  }
-  const [firstPattern = ''] = patterns;
-  return patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern))
-    ? 'pattern'
-    : 'pick';
-};
-
-/** The names a rule picked that no index or data stream has, such as one deleted since. */
-export const getMissingTargets = (rule: BoostRule, existingNames: ReadonlySet<string>): string[] =>
-  getRuleTargetMode(rule, existingNames) === 'pick'
-    ? rule.index_patterns.filter((name) => !existingNames.has(name))
-    : [];
-
-/** Opens an existing rule in the mode its targets were chosen in. */
-export const ruleToDraft = (rule: BoostRule, existingNames: ReadonlySet<string>): RuleDraft => {
-  const { name, boost_profile: profileName, index_patterns: patterns, priority } = rule;
-  const isPattern = getRuleTargetMode(rule, existingNames) === 'pattern';
-  const [firstPattern = ''] = patterns;
-  return {
-    name,
-    profileName,
-    mode: isPattern ? 'pattern' : 'pick',
-    pattern: isPattern ? firstPattern : '',
-    picked: isPattern ? [] : patterns,
-    priority: String(priority),
-  };
-};
+export const ruleToDraft = ({
+  name,
+  boost_profile: profileName,
+  index_patterns: patterns,
+  priority,
+}: BoostRule): RuleDraft => ({
+  name,
+  profileName,
+  pattern: patterns.join(', '),
+  priority: String(priority),
+});
 
 const parseNumber = (value: string): number | undefined => {
   const parsed = Number(value);
@@ -98,36 +71,17 @@ export const normalizePriority = (value: string): string => {
   return String(Math.min(Math.floor(parsed), MAX_RULE_PRIORITY));
 };
 
-/** The draft's targets in the shape a rule stores them. */
-export const getDraftPatterns = ({ mode, pattern, picked }: RuleDraft): string[] =>
-  mode === 'pattern' ? [pattern.trim()] : picked;
+/** The draft's target in the shape a rule stores it. */
+export const getDraftPatterns = ({ pattern }: RuleDraft): string[] => [pattern.trim()];
 
-const getPickedError = (
-  { mode, picked }: RuleDraft,
-  allowsMultipleTargets: boolean
-): RuleDraftErrors['picked'] => {
-  if (mode !== 'pick') {
-    return undefined;
-  }
-  if (picked.length === 0) {
-    return 'required';
-  }
-  return picked.length > 1 && !allowsMultipleTargets ? 'too_many' : undefined;
-};
-
-/**
- * Returns only the errors that apply to the draft's target mode. Elasticsearch takes one target per
- * rule, so a draft can only select several when the prototype allows it.
- */
+/** Validates the draft. Elasticsearch takes one name or pattern per rule. */
 export const getRuleDraftErrors = (
   draft: RuleDraft,
-  takenNames: readonly string[],
-  allowsMultipleTargets = false
+  takenNames: readonly string[]
 ): RuleDraftErrors => ({
   name: getRuleNameError(draft.name, takenNames),
   profile: draft.profileName ? undefined : 'required',
-  pattern: draft.mode === 'pattern' ? getIndexPatternError(draft.pattern.trim()) : undefined,
-  picked: getPickedError(draft, allowsMultipleTargets),
+  pattern: getIndexPatternError(draft.pattern.trim()),
 });
 
 export const hasRuleDraftErrors = (errors: RuleDraftErrors): boolean =>
@@ -139,5 +93,4 @@ export const ruleDraftToInput = (draft: RuleDraft): BoostRuleInput => ({
   index_patterns: getDraftPatterns(draft),
   boost_profile: draft.profileName,
   priority: Number(normalizePriority(draft.priority)),
-  _meta: { target_mode: draft.mode },
 });

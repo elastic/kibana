@@ -6,12 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
@@ -22,15 +21,11 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiHighlight,
   EuiLink,
-  EuiPanel,
-  EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -41,7 +36,6 @@ import {
   resolveRule,
 } from '../../../common/resolution';
 import type {
-  BoostDataSource,
   BoostProfileInput,
   BoostProfileType,
   BoostRule,
@@ -49,21 +43,16 @@ import type {
 } from '../../../common/types';
 import { estimateRuleCost } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
-import { useAllowsMultipleTargets } from '../../prototype/prototype_settings';
 import { PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
-import { SupersedingRule, getSupersedingDescription } from './target_name';
-import { NotFoundBadge, getNotFoundDescription } from './not_found_badge';
-import { TARGET_LIST_HEADER_HEIGHT, TargetListHeader } from './target_list_header';
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
-import { HiddenBadge, formatHiddenCount } from '../hidden_data';
 import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
-import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
+import { PROFILE_TYPE_LABELS } from '../format';
 import type { RuleDraft, RuleDraftErrors } from './rule_draft';
 import {
   createEmptyRuleDraft,
@@ -75,10 +64,9 @@ import {
   ruleToDraft,
 } from './rule_draft';
 import {
-  INDEX_PATTERN_ERROR_MESSAGES,
   PROFILE_REQUIRED_MESSAGE,
   RULE_NAME_ERROR_MESSAGES,
-  getPickedErrorMessage,
+  INDEX_PATTERN_ERROR_MESSAGES,
   getPriorityConflictMessage,
 } from './rule_messages';
 
@@ -99,62 +87,21 @@ interface RuleFlyoutProps {
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
 
-// Heads the list to select from, as the tabs head the pattern's matches.
-const PICKED_COUNT_FORMATS: Readonly<
-  Record<BoostProfileType, (selected: number, total: number) => string>
-> = {
-  indices: (selected, total) =>
-    i18n.translate('xpack.boost.ruleForm.pickedIndicesCount', {
-      defaultMessage: 'Selected {selected} of {total, plural, one {# index} other {# indices}}',
-      values: { selected, total },
-    }),
-  data_streams: (selected, total) =>
-    i18n.translate('xpack.boost.ruleForm.pickedDataStreamsCount', {
-      defaultMessage:
-        'Selected {selected} of {total, plural, one {# data stream} other {# data streams}}',
-      values: { selected, total },
-    }),
-};
-
-const PICK_LABELS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.pickIndicesMode', {
-    defaultMessage: 'Select indices',
+// Names the field by what it takes, which the profile's type decides.
+const TARGET_LABELS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.indexTargetLabel', {
+    defaultMessage: 'Index name or pattern',
   }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.pickDataStreamsMode', {
-    defaultMessage: 'Select data streams',
+  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamTargetLabel', {
+    defaultMessage: 'Data stream name or pattern',
   }),
 };
 
-// Elasticsearch takes one target per rule, which the rule selects unless the prototype allows more.
-const PICK_ONE_LABELS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.pickIndexMode', {
-    defaultMessage: 'Select index',
-  }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.pickDataStreamMode', {
-    defaultMessage: 'Select data stream',
-  }),
-};
-
-// Names the list to select one from.
-const SINGLE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.indexLabel', { defaultMessage: 'Index' }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamLabel', {
-    defaultMessage: 'Data stream',
-  }),
-};
-
-// The tallest the pattern's matches and the list to select from grow, so both modes match.
+// The tallest the list of matches grows.
 const PREVIEW_MAX_HEIGHT = 320;
 
 // The width of the priority beside the targets, which only needs room for a number.
 const PRIORITY_WIDTH = 140;
-
-// The height of each data source in the list to select from, which is EUI's default.
-const PICK_ROW_HEIGHT = 32;
-
-// The space around the data sources in the list to select from, like the pattern's matches: its
-// panel's small padding.
-const PICK_LIST_PADDING = 8;
 
 const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.ruleForm.managedBadge', {
   defaultMessage: 'Managed',
@@ -165,10 +112,6 @@ const NEW_PROFILE_NAME = '<new profile>';
 
 const SELECT_PROFILE_FIRST = i18n.translate('xpack.boost.ruleForm.selectProfileFirst', {
   defaultMessage: 'Select a boost profile to choose targets.',
-});
-
-const SELECT_PROFILE_FOR_PATTERN = i18n.translate('xpack.boost.ruleForm.selectProfileForPattern', {
-  defaultMessage: 'Select a boost profile to input an index pattern.',
 });
 
 const PROFILE_HELP_TEXT = i18n.translate('xpack.boost.ruleForm.profileDescription', {
@@ -188,33 +131,15 @@ const EDIT_PROFILE_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-// The same before a profile is chosen, when the tooltip says why the targets are disabled.
-const TARGETS_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
-    defaultMessage: 'Provide an index pattern or manually select indices.',
+// The same before a profile is chosen, when the tooltip says why the field is disabled.
+const TARGET_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.indexTargetDescription', {
+    defaultMessage: 'Choose an index from the list, or use * to match several.',
   }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
-    defaultMessage: 'Provide an index pattern or manually select data streams.',
-  }),
-};
-
-const SINGLE_TARGET_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.indexAppliesToDescription', {
-    defaultMessage: 'Provide an index pattern or manually select an index.',
-  }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamAppliesToDescription', {
-    defaultMessage: 'Provide an index pattern or manually select a data stream.',
+  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamTargetDescription', {
+    defaultMessage: 'Choose a data stream from the list, or use * to match several.',
   }),
 };
-
-/** Passed to each option's renderer through EUI's `data`, which keeps it out of the page's HTML. */
-interface PickOptionData {
-  /** A higher-ranked rule that keeps the data source if this rule targets it. */
-  supersededBy?: string;
-  isHidden?: boolean;
-  /** A name the rule picked that no index or data stream has, such as one deleted since. */
-  isMissing?: boolean;
-}
 
 const getInitialDraft = (
   rule: BoostRule | undefined,
@@ -222,14 +147,13 @@ const getInitialDraft = (
   initialProfileName: string | undefined,
   state: BoostState | undefined
 ): RuleDraft => {
-  const existingNames = new Set(state?.data_sources.map(({ name }) => name));
   if (rule) {
-    return ruleToDraft(rule, existingNames);
+    return ruleToDraft(rule);
   }
   if (duplicateOf) {
     const ruleNames = state?.rules.map(({ name }) => name) ?? [];
     return {
-      ...ruleToDraft(duplicateOf, existingNames),
+      ...ruleToDraft(duplicateOf),
       name: getCopyName(duplicateOf.name, ruleNames),
     };
   }
@@ -244,19 +168,14 @@ export const RuleFlyout = ({
   initialProfileName,
   onClose,
 }: RuleFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const { notifications } = useBoostServices();
   const { data: state } = useBoostState();
-  const allowsMultipleTargets = useAllowsMultipleTargets();
   const titleId = useGeneratedHtmlId();
   const profileTitleId = useGeneratedHtmlId();
-  const modeIdPrefix = useGeneratedHtmlId({ prefix: 'ruleTargetMode' });
   const [draft, setDraft] = useState<RuleDraft>(() =>
     getInitialDraft(rule, duplicateOf, initialProfileName, state)
   );
   const [showErrors, setShowErrors] = useState(false);
-  // What the rule had picked, so a picked name that no longer exists stays listed while editing.
-  const initialPickedRef = useRef(draft.picked);
   // The last profile picked from the list, restored if the field is left empty or unmatched.
   const [lastProfileName, setLastProfileName] = useState(
     () => (rule ?? duplicateOf)?.boost_profile ?? initialProfileName ?? ''
@@ -268,9 +187,7 @@ export const RuleFlyout = ({
   // Whether the pattern or profile field has focus. While one does, an estimate it made
   // unavailable stays, faded.
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
-  // Text typed to search the list to select from, which sizes the list to what it shows.
-  const [pickSearch, setPickSearch] = useState('');
-  // Whether the pattern's matches and the list to select from show hidden data sources.
+  // Whether the list of matches shows hidden data sources.
   const [includesHidden, setIncludesHidden] = useState(false);
   // Set when leaving the profile form, so the link that opened it gets focus back.
   const shouldFocusCreateProfileRef = useRef(false);
@@ -305,12 +222,7 @@ export const RuleFlyout = ({
   const targetType = type ?? 'indices';
   // The rule being edited is replaced by the draft when previewing what the draft would apply to.
   const otherRules = rules.filter(({ name }) => name !== rule?.name);
-  const draftErrors = getRuleDraftErrors(
-    draft,
-    isEditing ? [] : rules.map(({ name }) => name),
-    allowsMultipleTargets
-  );
-  const pickLabels = allowsMultipleTargets ? PICK_LABELS : PICK_ONE_LABELS;
+  const draftErrors = getRuleDraftErrors(draft, isEditing ? [] : rules.map(({ name }) => name));
   const updateDraft = (changes: Partial<RuleDraft>) => setDraft({ ...draft, ...changes });
 
   const typedDataSources = dataSources
@@ -334,23 +246,23 @@ export const RuleFlyout = ({
         const winner = resolveRule(dataSource, [...otherRules, previewRule], profilesByName);
         return {
           name: dataSource.name,
+          pattern: previewedPattern,
           overriddenBy: winner && winner !== previewRule ? winner.name : undefined,
           isHidden: dataSource.hidden,
         };
       });
   };
-  const isPatternPreviewable = draft.mode === 'pattern' && !draftErrors.pattern;
-  const patternPreview = isPatternPreviewable ? previewPattern(pattern) : [];
-  // Until the pattern matches something, what contains it, ranked as if the pattern were widened to
-  // match them. Widening only adds wildcards, so it ranks the same however it's done.
+  const patternPreview = draftErrors.pattern ? [] : previewPattern(pattern);
+  // Until it matches something, what contains it, ranked as if it were widened to match them.
+  // Widening only adds wildcards, so it ranks the same however it's done.
   const partialPreview =
-    isPatternPreviewable && patternPreview.length === 0
+    !draftErrors.pattern && patternPreview.length === 0
       ? previewPattern(getPartialPattern(pattern))
       : [];
 
   // Elasticsearch rejects a rule that ties with another, since neither would apply over the other.
   const conflictingRule =
-    draftErrors.profile || draftErrors.pattern || draftErrors.picked
+    draftErrors.profile || draftErrors.pattern
       ? undefined
       : findConflictingRule(draftRule, otherRules, profilesByName);
   const errors: RuleDraftErrors = {
@@ -433,10 +345,8 @@ export const RuleFlyout = ({
     }
     const profileName = selected.value;
     isSelectingProfileRef.current = true;
-    const nextType = profilesByName.get(profileName)?.type;
     setLastProfileName(profileName);
-    // Picked names only make sense for one type, so switching type clears them.
-    updateDraft({ profileName, picked: nextType === type ? draft.picked : [] });
+    updateDraft({ profileName });
   };
 
   // An empty field would show the selected name again, so emptying it clears the selection.
@@ -469,20 +379,16 @@ export const RuleFlyout = ({
   };
 
   // A profile created in the profile form is selected as if it were picked from the list.
-  const onProfileCreate = (profileName: string, profileType: BoostProfileType) => {
+  const onProfileCreate = (profileName: string) => {
     setLastProfileName(profileName);
-    setDraft((current) => ({
-      ...current,
-      profileName,
-      picked: profileType === type ? current.picked : [],
-    }));
+    setDraft((current) => ({ ...current, profileName }));
     setProfileFieldKey(profileFieldKey + 1);
     closeProfileForm();
   };
 
   // The rule's own cost: what it applies to after higher-ranked rules, compared with the saved rule
   // when editing, or the original when duplicating.
-  const hasValidTargets = draft.mode === 'pattern' ? !errors.pattern : draft.picked.length > 0;
+  const hasValidTargets = !errors.pattern;
   const impact =
     draft.profileName && type && hasValidTargets
       ? estimateRuleCost({
@@ -507,109 +413,28 @@ export const RuleFlyout = ({
         })
       : undefined;
 
-  // A higher-ranked rule that would still apply to a data source if this rule targeted it, so the
-  // list only notes the ones this rule can't take.
-  const getSupersedingRule = (dataSource: BoostDataSource): string | undefined => {
-    const targetingRule = { ...draftRule, index_patterns: [dataSource.name] };
-    const winner = resolveRule(dataSource, [...otherRules, targetingRule], profilesByName);
-    return winner && winner !== targetingRule ? winner.name : undefined;
-  };
-
-  // Hidden data sources are left out until included, except selected ones, which stay in view.
-  const existingOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources
-    .filter(({ name, hidden }) => includesHidden || !hidden || draft.picked.includes(name))
-    .map((dataSource) => {
-      const supersededBy = getSupersedingRule(dataSource);
-      const isChecked = draft.picked.includes(dataSource.name);
-      return {
-        label: dataSource.name,
-        checked: isChecked ? 'on' : undefined,
-        data: { supersededBy, isHidden: dataSource.hidden },
-        // A list option can't hold a focusable tooltip, so the option shows the explanation in its
-        // own, on hover and when it's reached with the keyboard. EUI places it to the left.
-        // Selected, it takes the option's selected color, as the name does.
-        append: supersededBy && (
-          <EuiText size="xs" color={isChecked ? 'inherit' : 'subdued'}>
-            <SupersedingRule rule={supersededBy} hasTooltip={false} inheritsColor={isChecked} />
-          </EuiText>
-        ),
-        toolTipContent: supersededBy && getSupersedingDescription(supersededBy),
-      };
-    });
-  // Names the rule picked that nothing has any more, marked rather than dropped, since the rule
-  // still applies to them if they're created again. They stay listed while editing, so a name
-  // cleared by mistake can be picked again.
-  const existingNames = new Set(dataSources.map(({ name }) => name));
-  const missingOptions: Array<EuiSelectableOption<PickOptionData>> = [
-    ...new Set([...initialPickedRef.current, ...draft.picked]),
-  ]
-    .filter((name) => !existingNames.has(name))
-    .map((name) => ({
-      label: name,
-      checked: draft.picked.includes(name) ? 'on' : undefined,
-      data: { isMissing: true },
-      toolTipContent: getNotFoundDescription([name], type),
-    }));
-  const pickOptions = [...existingOptions, ...missingOptions].sort((a, b) =>
-    a.label.localeCompare(b.label)
-  );
   const hasHidden = typedDataSources.some(({ hidden }) => hidden);
-  // What the list shows before it's searched, which only counts what exists: hidden data sources
-  // only once shown, or selected.
-  const pickableCount = existingOptions.length;
-  // The hidden ones it leaves out, which the switch would show.
-  const hiddenNotListed = typedDataSources.length - pickableCount;
-
-  // The list grows with what the search shows, up to the same height as the pattern's matches.
-  // EUI only sizes a list to its options up to seven of them, so the height is set here.
-  const searchedName = pickSearch.trim().toLowerCase();
-  const pickListHeight = Math.min(
-    pickOptions.filter(({ label }) => label.toLowerCase().includes(searchedName)).length *
-      PICK_ROW_HEIGHT,
-    // Less the heading and the panel's padding, top and bottom. Its border takes no space.
-    PREVIEW_MAX_HEIGHT - TARGET_LIST_HEADER_HEIGHT - 2 * PICK_LIST_PADDING
+  // A higher-ranked rule that would still apply to each data source if this rule named it, which the
+  // list notes before it's chosen.
+  const outrankedIfChosen = new Map(
+    typedDataSources.flatMap((dataSource): Array<[string, string]> => {
+      const namingRule = { ...draftRule, index_patterns: [dataSource.name] };
+      const winner = resolveRule(dataSource, [...otherRules, namingRule], profilesByName);
+      return winner && winner !== namingRule ? [[dataSource.name, winner.name]] : [];
+    })
   );
 
-  const modeToggle = (
-    <EuiButtonGroup
-      legend={i18n.translate('xpack.boost.ruleForm.targetModeLegend', {
-        defaultMessage: 'How this rule chooses what it applies to',
-      })}
-      buttonSize="compressed"
-      isFullWidth
-      idSelected={`${modeIdPrefix}-${draft.mode}`}
-      onChange={(id) =>
-        updateDraft({
-          mode: id === `${modeIdPrefix}-pick` ? 'pick' : 'pattern',
-        })
-      }
-      options={[
-        {
-          id: `${modeIdPrefix}-pattern`,
-          label: i18n.translate('xpack.boost.ruleForm.patternMode', {
-            defaultMessage: 'Index pattern',
-          }),
-        },
-        { id: `${modeIdPrefix}-pick`, label: pickLabels[targetType] },
-      ]}
-      isDisabled={isSaving || !type}
-      data-test-subj="boostRuleTargetMode"
-    />
-  );
+  // A name chosen from the list becomes the rule's target, replacing what the field had.
+  const selectName = (name: string) => updateDraft({ pattern: name });
 
   const nameError = visibleErrors.name && RULE_NAME_ERROR_MESSAGES[visibleErrors.name];
   const patternError = visibleErrors.pattern && INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern];
-  const pickedError =
-    visibleErrors.picked && type
-      ? getPickedErrorMessage(visibleErrors.picked, type, allowsMultipleTargets)
-      : undefined;
 
   const patternRow = (
     <EuiFormRow
       display="rowCompressed"
-      label={i18n.translate('xpack.boost.ruleForm.patternLabel', {
-        defaultMessage: 'Index pattern',
-      })}
+      label={TARGET_LABELS[targetType]}
+      helpText={TARGET_HELP_TEXTS[targetType]}
       isInvalid={Boolean(patternError)}
       error={patternError}
       fullWidth
@@ -622,8 +447,11 @@ export const RuleFlyout = ({
         onFocus={() => setIsEditingEstimateInput(true)}
         onBlur={() => setIsEditingEstimateInput(false)}
         placeholder={i18n.translate('xpack.boost.ruleForm.patternPlaceholder', {
-          defaultMessage: 'Example: {pattern}',
-          values: { pattern: targetType === 'data_streams' ? 'logs-*' : 'products-*' },
+          defaultMessage: 'Example: {name} or {pattern}',
+          values: {
+            name: targetType === 'data_streams' ? 'logs-app' : 'products',
+            pattern: targetType === 'data_streams' ? 'logs-*' : 'products-*',
+          },
         })}
         isInvalid={Boolean(patternError)}
         disabled={isSaving || !type}
@@ -805,190 +633,42 @@ export const RuleFlyout = ({
 
         {profileRow}
 
-        <>
-          {/* EUI only spaces rows that are siblings, so the group and the row after it take the
-                same space. */}
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" responsive={false}>
-            <EuiFlexItem>
-              <EuiFormRow
-                display="rowCompressed"
-                labelType="legend"
-                label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
-                  defaultMessage: 'Targets',
-                })}
-                helpText={
-                  (allowsMultipleTargets ? TARGETS_HELP_TEXTS : SINGLE_TARGET_HELP_TEXTS)[
-                    targetType
-                  ]
-                }
-                fullWidth
-              >
-                {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
-                  explains the disabled state, so it's dropped once a profile is chosen. */}
-                <div>
-                  {type ? (
-                    modeToggle
-                  ) : (
-                    <EuiToolTip content={SELECT_PROFILE_FIRST} display="block">
-                      {modeToggle}
-                    </EuiToolTip>
-                  )}
-                </div>
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} css={{ inlineSize: PRIORITY_WIDTH }}>
-              {priorityRow}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-
-          {draft.mode === 'pattern' ? (
-            <>
-              {/* The tooltip wraps the row, so the input stays the row's child and keeps its
-                    label. */}
-              {type ? (
-                patternRow
-              ) : (
-                <EuiToolTip content={SELECT_PROFILE_FOR_PATTERN} display="block">
-                  {patternRow}
-                </EuiToolTip>
-              )}
-              <EuiSpacer size="s" />
-              <PatternMatches
-                type={type}
-                targetType={targetType}
-                pattern={pattern}
-                exactMatches={patternPreview}
-                partialMatches={partialPreview}
-                dataSources={typedDataSources}
-                hasHidden={hasHidden}
-                includesHidden={includesHidden}
-                onIncludesHiddenChange={setIncludesHidden}
-                maxHeight={PREVIEW_MAX_HEIGHT}
-              />
-            </>
-          ) : (
-            <EuiFormRow
-              display="rowCompressed"
-              label={
-                allowsMultipleTargets
-                  ? PROFILE_TYPE_LABELS[targetType]
-                  : SINGLE_TYPE_LABELS[targetType]
-              }
-              isInvalid={Boolean(pickedError)}
-              error={pickedError}
-              fullWidth
-            >
-              <EuiSelectable
-                aria-label={pickLabels[targetType]}
-                // Selecting one replaces what's selected, so a rule saved with several, while the
-                // prototype allowed it, keeps one.
-                singleSelection={!allowsMultipleTargets}
-                searchable
-                searchProps={{
-                  compressed: true,
-                  placeholder: i18n.translate('xpack.boost.ruleForm.pickSearchPlaceholder', {
-                    defaultMessage: 'Search',
-                  }),
-                  onChange: setPickSearch,
-                }}
-                options={pickOptions}
-                // A name that a higher-ranked rule would keep is struck through, whether or not
-                // it's selected, until this rule's priority outranks that rule. It's disabled
-                // unless selected, where it takes the option's selected color like the rest.
-                renderOption={(
-                  { label, checked, supersededBy, isHidden, isMissing },
-                  searchValue
-                ) => {
-                  const name = (
-                    <EuiHighlight
-                      search={searchValue}
-                      css={
-                        supersededBy
-                          ? {
-                              textDecoration: 'line-through',
-                              color: checked === 'on' ? 'inherit' : euiTheme.colors.textDisabled,
-                            }
-                          : undefined
-                      }
-                      data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
-                    >
-                      {label}
-                    </EuiHighlight>
-                  );
-                  // Centered on the name, as hidden names are in the other lists.
-                  return isHidden || isMissing ? (
-                    <span
-                      css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}
-                    >
-                      {name}
-                      {isHidden && <HiddenBadge />}
-                      {isMissing && (
-                        <NotFoundBadge names={[label]} type={type} hasTooltip={false} />
-                      )}
-                    </span>
-                  ) : (
-                    name
-                  );
-                }}
-                onChange={(options) =>
-                  updateDraft({
-                    picked: options
-                      .filter(({ checked }) => checked === 'on')
-                      .map(({ label }) => label),
-                  })
-                }
-                listProps={{ rowHeight: PICK_ROW_HEIGHT }}
-                height={pickListHeight}
-                isLoading={isSaving}
-                data-test-subj="boostRulePicker"
-              >
-                {(list, search) => (
-                  <>
-                    {search}
-                    <EuiSpacer size="s" />
-                    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-                      {/* How many are selected, of all the list shows, as the pattern's tab of
-                        every data source counts them, or just how many it shows when the rule
-                        selects one, and how many hidden ones it leaves out. Off until a profile is
-                        selected, as in the pattern's matches, and the switch only while there's
-                        something hidden to show, unless it's on already. */}
-                      <TargetListHeader
-                        includesHidden={includesHidden}
-                        onIncludesHiddenChange={setIncludesHidden}
-                        isShowHiddenDisabled={!type || (!hasHidden && !includesHidden)}
-                      >
-                        <EuiText
-                          size="xs"
-                          color={type ? 'subdued' : euiTheme.colors.textDisabled}
-                          data-test-subj="boostRulePickedCount"
-                        >
-                          {allowsMultipleTargets
-                            ? PICKED_COUNT_FORMATS[targetType](draft.picked.length, pickableCount)
-                            : i18n.translate('xpack.boost.ruleForm.pickFromCount', {
-                                defaultMessage: 'Select from {targets}',
-                                values: {
-                                  targets: formatDataSourceCount(targetType, pickableCount),
-                                },
-                              })}
-                          {hiddenNotListed > 0 && (
-                            <>
-                              {' '}
-                              <span aria-hidden={true}>·</span> {formatHiddenCount(hiddenNotListed)}
-                            </>
-                          )}
-                        </EuiText>
-                      </TargetListHeader>
-                      {/* Padding rather than the list's own, which it would count in its width. */}
-                      <div css={{ padding: PICK_LIST_PADDING }}>{list}</div>
-                    </EuiPanel>
-                  </>
-                )}
-              </EuiSelectable>
-            </EuiFormRow>
-          )}
-        </>
+        {/* EUI only spaces rows that are siblings, so the group takes the same space. */}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="m" responsive={false}>
+          <EuiFlexItem>
+            {/* The tooltip wraps the row, so the input stays the row's child and keeps its label.
+                It only explains the disabled state, so it's dropped once a profile is chosen. */}
+            {type ? (
+              patternRow
+            ) : (
+              <EuiToolTip content={SELECT_PROFILE_FIRST} display="block">
+                {patternRow}
+              </EuiToolTip>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ inlineSize: PRIORITY_WIDTH }}>
+            {priorityRow}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        {/* A new rule starts on every data source to choose from, and an existing one on what it
+            matches. */}
+        <PatternMatches
+          type={type}
+          targetType={targetType}
+          pattern={pattern}
+          exactMatches={patternPreview}
+          partialMatches={partialPreview}
+          dataSources={typedDataSources}
+          hasHidden={hasHidden}
+          includesHidden={includesHidden}
+          onIncludesHiddenChange={setIncludesHidden}
+          maxHeight={PREVIEW_MAX_HEIGHT}
+          initialTab={draft.pattern ? 'matching' : 'all'}
+          onSelectName={type && !isSaving ? selectName : undefined}
+          outrankedIfChosen={outrankedIfChosen}
+        />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

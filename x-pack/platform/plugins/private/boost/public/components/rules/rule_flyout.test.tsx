@@ -508,7 +508,6 @@ describe('RuleFlyout duplicate', () => {
         index_patterns: ['catalog-*'],
         boost_profile: 'zeta-search',
         priority: 2,
-        _meta: { target_mode: 'pattern' },
       },
       expect.anything()
     );
@@ -516,15 +515,31 @@ describe('RuleFlyout duplicate', () => {
 });
 
 describe('RuleFlyout pattern matches', () => {
-  const renderNewRule = () =>
+  // A new rule opens on every index to choose from, so these start on what it matches.
+  const renderNewRule = async () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
       </IntlProvider>
     );
+    await userEvent.click(screen.getByTestId('boostRuleMatchingTab'));
+  };
+
+  it('opens a new rule on every index to choose from, and an existing one on its matches', () => {
+    const { unmount } = render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
+    expect(screen.getByTestId('boostRuleAllTab')).toHaveAttribute('aria-selected', 'true');
+    unmount();
+
+    renderFlyout();
+    expect(screen.getByTestId('boostRuleMatchingTab')).toHaveAttribute('aria-selected', 'true');
+  });
 
   it('counts and lists what the pattern matches', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
@@ -537,7 +552,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('highlights the parts of each match that the pattern spells out', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat*-fa*');
 
@@ -548,7 +563,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('lists exact matches without partial ones', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
@@ -557,7 +572,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('shows what a partial pattern could match until it matches something', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
 
@@ -574,7 +589,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('marks each exact match, or each partial match, with its icon', async () => {
-    renderNewRule();
+    await renderNewRule();
     // The match icons, leaving out the icon of a rule that ranks higher.
     const getIcons = () =>
       Array.from(
@@ -602,7 +617,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('marks the matches among every data source, keeping the rest aligned', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
     await userEvent.click(screen.getByTestId('boostRuleAllTab'));
@@ -623,7 +638,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('finds partial matches by any part of their name', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'fall');
 
@@ -631,7 +646,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('finds partial matches for a pattern that only needs a leading wildcard', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'alog-*');
 
@@ -639,7 +654,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('says when nothing matches, in the same panel', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
 
@@ -649,7 +664,7 @@ describe('RuleFlyout pattern matches', () => {
 
   it('saves a pattern that matches nothing yet, as Elasticsearch allows', async () => {
     mutation.mutate.mockClear();
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRuleName'), 'new-rule');
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'upcoming-*');
@@ -658,17 +673,17 @@ describe('RuleFlyout pattern matches', () => {
     expect(mutation.mutate).toHaveBeenCalled();
   });
 
-  it('asks for a pattern until one is entered', () => {
-    renderNewRule();
+  it('asks for a name or pattern until one is entered', async () => {
+    await renderNewRule();
 
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
-      'Enter an index pattern to see matches'
+      'Enter a name or pattern to see matches'
     );
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
   });
 
   it('lists every index, highlighting the same matches', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
     await userEvent.click(screen.getByTestId('boostRuleAllTab'));
@@ -681,7 +696,7 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('keeps showing every index while the pattern changes', async () => {
-    renderNewRule();
+    await renderNewRule();
 
     await userEvent.click(screen.getByTestId('boostRuleAllTab'));
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'prod');
@@ -716,7 +731,7 @@ describe('RuleFlyout pattern matches', () => {
     );
 
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
-      'Enter an index pattern to see matches'
+      'Enter a name or pattern to see matches'
     );
     const matchingTab = screen.getByTestId('boostRuleMatchingTab');
     expect(matchingTab).toBeDisabled();
@@ -728,7 +743,7 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.queryByTestId('boostRuleDataSourceCount')).not.toBeInTheDocument();
   });
 
-  it('explains why the pattern is disabled before a profile is selected', async () => {
+  it('explains why the field is disabled before a profile is selected', async () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
@@ -737,10 +752,10 @@ describe('RuleFlyout pattern matches', () => {
 
     expect(screen.getByTestId('boostRulePattern')).toBeDisabled();
     // EUI turns off pointer events on disabled inputs, so hovers land on the row the tooltip wraps.
-    await userEvent.hover(screen.getByText('Index pattern', { selector: 'label' }));
+    await userEvent.hover(screen.getByText('Index name or pattern', { selector: 'label' }));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Select a boost profile to input an index pattern.'
+      'Select a boost profile to choose targets.'
     );
   });
 });
@@ -764,83 +779,80 @@ describe('RuleFlyout superseded targets', () => {
     expect(matches.getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
   });
 
-  it('only notes the data sources in the list that a higher-ranked rule keeps', async () => {
+  // A new rule opens on every index, which notes what a higher-ranked rule would keep if named.
+  const getRow = (name: string) =>
+    screen
+      .getAllByTestId('boostRuleAvailableTarget')
+      .find((row) => row.textContent?.startsWith(name)) as HTMLElement;
+
+  it('notes the data sources in the list that a higher-ranked rule would keep if chosen', () => {
     renderNewRule();
 
-    await userEvent.click(screen.getByText('Select index'));
-
-    const picker = within(screen.getByTestId('boostRulePicker'));
-    expect(picker.getByRole('option', { name: /catalog-fall/ })).toHaveTextContent(
-      'Higher-ranked rule: catalogs'
+    expect(within(getRow('catalog-fall')).getByTestId('boostSupersedingRule')).toHaveTextContent(
+      'catalogs'
     );
-    expect(picker.getByRole('option', { name: /products/ })).not.toHaveTextContent(
-      'Higher-ranked rule'
-    );
+    expect(within(getRow('products')).queryByTestId('boostSupersedingRule')).toBeNull();
   });
 
   it('strikes through data sources in the list that a higher-ranked rule keeps, until this rule outranks it', async () => {
     renderNewRule();
-    await userEvent.click(screen.getByText('Select index'));
-    const getOption = (name: RegExp) =>
-      within(screen.getByTestId('boostRulePicker')).getByRole('option', { name });
 
-    // Whether or not it's selected.
-    expect(
-      within(getOption(/catalog-fall/)).getByTestId('boostSupersededTarget')
-    ).toHaveTextContent('catalog-fall');
-    expect(within(getOption(/products/)).queryByTestId('boostSupersededTarget')).toBeNull();
+    expect(within(getRow('catalog-fall')).getByTestId('boostSupersededTarget')).toHaveTextContent(
+      'catalog-fall'
+    );
+    expect(within(getRow('products')).queryByTestId('boostSupersededTarget')).toBeNull();
 
     // Above the saved catalogs rule's priority of 1.
     await userEvent.clear(screen.getByTestId('boostRulePriority'));
     await userEvent.type(screen.getByTestId('boostRulePriority'), '2');
 
-    expect(within(getOption(/catalog-fall/)).queryByTestId('boostSupersededTarget')).toBeNull();
+    expect(within(getRow('catalog-fall')).queryByTestId('boostSupersededTarget')).toBeNull();
   });
 
-  it('explains a higher-ranked rule when its data source in the list is hovered', async () => {
+  it('explains a higher-ranked rule when its icon in the list is hovered', async () => {
     renderNewRule();
 
-    await userEvent.click(screen.getByText('Select index'));
-    const option = within(screen.getByTestId('boostRulePicker')).getByRole('option', {
-      name: /catalog-fall/,
-    });
-    await userEvent.hover(within(option).getByText('catalog-fall'));
+    await userEvent.hover(within(getRow('catalog-fall')).getByTestId('boostSupersedingRule'));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       '"catalogs" ranks higher, so it applies instead.'
     );
   });
-
-  it('counts what the list shows', async () => {
-    renderNewRule();
-
-    await userEvent.click(screen.getByText('Select index'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(/^Select from 2 indices$/);
-  });
 });
 
-describe('RuleFlyout selected targets', () => {
-  const getOption = (name: RegExp) =>
-    within(screen.getByTestId('boostRulePicker')).getByRole('option', { name });
+describe('RuleFlyout choosing from the list', () => {
+  const getField = (): HTMLInputElement => screen.getByTestId('boostRulePattern');
+  const choose = async (name: string) => {
+    const button = screen
+      .getAllByTestId('boostRuleSelectTarget')
+      .find(({ textContent }) => textContent === name);
+    if (!button) {
+      throw new Error(`No ${name} to choose`);
+    }
+    await userEvent.click(button);
+  };
   const save = () => userEvent.click(screen.getByTestId('boostRuleSave'));
-
-  beforeEach(() => mutation.mutate.mockClear());
-  // The prototype's settings outlast each test, so they're turned back off after each one.
-  afterEach(() => setPrototypeSettings({ allows_multiple_targets: false }));
-
-  it('selects one index, as Elasticsearch takes one per rule', async () => {
+  const renderNewRule = () =>
     render(
       <IntlProvider locale="en">
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
       </IntlProvider>
     );
+
+  beforeEach(() => mutation.mutate.mockClear());
+
+  it('uses a name chosen from the list, replacing what the field had', async () => {
+    renderNewRule();
     await userEvent.type(screen.getByTestId('boostRuleName'), 'one-index');
-    await userEvent.click(screen.getByText('Select index'));
+    await userEvent.type(getField(), 'catalog-*');
 
-    // Selecting another replaces it.
-    await userEvent.click(getOption(/products/));
-    await userEvent.click(getOption(/catalog-fall/));
+    await choose('products');
+    expect(getField()).toHaveValue('products');
+    // The chosen name matches exactly.
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
 
+    await choose('catalog-fall');
+    expect(getField()).toHaveValue('catalog-fall');
     await save();
     expect(mutation.mutate).toHaveBeenCalledWith(
       expect.objectContaining({ index_patterns: ['catalog-fall'] }),
@@ -848,56 +860,33 @@ describe('RuleFlyout selected targets', () => {
     );
   });
 
-  it('asks to keep one of the targets a rule selected while the prototype allowed several', async () => {
+  it("can't choose until a profile sets what to choose from", () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId('boostRuleSelectTarget')).not.toBeInTheDocument();
+  });
+
+  it('asks for one name or pattern for a rule saved with several, which the prototype once allowed', async () => {
     renderFlyout({ ...rule, index_patterns: ['catalog-fall', 'products'], priority: 2 });
+    expect(getField()).toHaveValue('catalog-fall, products');
 
     await save();
-    expect(screen.getByText('Select only one index.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Enter one name or pattern, without commas or spaces.')
+    ).toBeInTheDocument();
     expect(mutation.mutate).not.toHaveBeenCalled();
 
-    // Unselecting one keeps the other.
-    await userEvent.click(getOption(/catalog-fall/));
+    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+    await choose('products');
     await save();
     expect(mutation.mutate).toHaveBeenCalledWith(
       expect.objectContaining({ index_patterns: ['products'] }),
       expect.anything()
     );
-  });
-
-  it('keeps a selected index that no longer exists, marked as not found', async () => {
-    renderFlyout({ ...rule, index_patterns: ['outlet'], _meta: { target_mode: 'pick' } });
-
-    const missing = getOption(/outlet/);
-    expect(missing).toHaveAttribute('aria-selected', 'true');
-    expect(within(missing).getByTestId('boostNotFoundBadge')).toHaveTextContent('Not found');
-    // The count only includes what exists.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Select from 2 indices');
-
-    await save();
-    expect(mutation.mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ index_patterns: ['outlet'], _meta: { target_mode: 'pick' } }),
-      expect.anything()
-    );
-
-    // Selecting another replaces it, and it stays listed, so it can be selected again.
-    await userEvent.click(getOption(/products/));
-    expect(getOption(/outlet/)).toHaveAttribute('aria-selected', 'false');
-  });
-
-  it('selects several, and counts them, when the prototype allows it', async () => {
-    void setPrototypeSettings({ allows_multiple_targets: true });
-    render(
-      <IntlProvider locale="en">
-        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
-      </IntlProvider>
-    );
-
-    await userEvent.click(screen.getByText('Select indices'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 2 indices');
-
-    await userEvent.click(getOption(/products/));
-    await userEvent.click(getOption(/catalog-fall/));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 2 of 2 indices');
   });
 });
 
@@ -919,9 +908,11 @@ describe('RuleFlyout hidden data sources', () => {
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
       </IntlProvider>
     );
+  const showMatching = () => userEvent.click(screen.getByTestId('boostRuleMatchingTab'));
 
   it('counts hidden matches, but only lists them once they are shown', async () => {
     renderNewRule();
+    await showMatching();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
 
@@ -959,6 +950,7 @@ describe('RuleFlyout hidden data sources', () => {
 
   it('counts a pattern that only matches hidden data sources as matching', async () => {
     renderNewRule();
+    await showMatching();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
 
@@ -969,26 +961,17 @@ describe('RuleFlyout hidden data sources', () => {
     );
   });
 
-  it('leaves hidden data sources out of the list to select from until shown, except selected ones', async () => {
+  it('lists hidden data sources to choose from once they are shown', async () => {
     renderNewRule();
-    await userEvent.click(screen.getByText('Select index'));
-    const picker = within(screen.getByTestId('boostRulePicker'));
-    expect(picker.queryByRole('option', { name: /\.catalog-archive/ })).not.toBeInTheDocument();
-    // It counts what it lists.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(
-      /^Select from 2 indices · 1 hidden$/
-    );
+    expect(screen.queryByText('.catalog-archive')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(/^Select from 3 indices$/);
-    const option = picker.getByRole('option', { name: /\.catalog-archive/ });
-    expect(within(option).getByTestId('boostHiddenBadge')).toBeInTheDocument();
-    await userEvent.click(option);
+    const row = screen
+      .getAllByTestId('boostRuleAvailableTarget')
+      .find(({ textContent }) => textContent?.startsWith('.catalog-archive')) as HTMLElement;
+    expect(within(row).getByTestId('boostHiddenBadge')).toBeInTheDocument();
+    await userEvent.click(within(row).getByTestId('boostRuleSelectTarget'));
 
-    // Selected, it stays in view once hidden ones are left out again.
-    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
-    expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
-    // Still listed, so still counted.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(/^Select from 3 indices$/);
+    expect(screen.getByTestId('boostRulePattern')).toHaveValue('.catalog-archive');
   });
 });

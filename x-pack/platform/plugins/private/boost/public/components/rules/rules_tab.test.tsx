@@ -17,7 +17,6 @@ import {
   createDefaultRules,
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule } from '../../../common/types';
-import { setPrototypeSettings } from '../../prototype/prototype_settings';
 import { RulesTab, getProfileRulesLocation } from './rules_tab';
 
 jest.mock('../../hooks/use_boost_services', () => ({
@@ -60,7 +59,7 @@ const customRule = (
   is_builtin: false,
 });
 
-const renderTab = (path: string, extraRules: BoostRule[] = []) =>
+const renderTab = (path: string) =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <IntlProvider locale="en">
@@ -72,7 +71,6 @@ const renderTab = (path: string, extraRules: BoostRule[] = []) =>
             // Picks two indices, one of which a higher-priority rule takes.
             customRule('picked', 'archive-search', ['products', 'users']),
             customRule('products-first', 'catalog-search', ['products'], 5),
-            ...extraRules,
           ]}
           profiles={[
             ...BUILTIN_PROFILES,
@@ -223,69 +221,11 @@ describe('RulesTab matches', () => {
     await userEvent.click(picked.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
-    expect(popover.getByText('Using selected indices')).toBeInTheDocument();
-    // While a rule selects only one target, a count of what it selects would always be 1.
-    expect(popover.queryByTestId('boostRuleMatchCount')).not.toBeInTheDocument();
+    expect(popover.getByText('Using indices')).toBeInTheDocument();
+    expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('2 matches, 1 outranked');
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     // The rule's name is left to the icon's tooltip, keeping the list to the targets.
     expect(popover.queryByText('products-first')).not.toBeInTheDocument();
-  });
-
-  it('lists a selected index that no longer exists with what the rule applies to, marked', async () => {
-    renderTab('/rules', [
-      { ...customRule('outlet', 'catalog-search', ['outlet']), _meta: { target_mode: 'pick' } },
-      // Typed as a pattern, so it's only waiting for an index, not missing one.
-      {
-        ...customRule('upcoming', 'catalog-search', ['upcoming']),
-        _meta: { target_mode: 'pattern' },
-      },
-    ]);
-
-    const outlet = getRow('outlet');
-    // It applies to nothing, but its list still has what it selected.
-    expect(outlet.queryByTestId('boostNotFoundBadge')).not.toBeInTheDocument();
-    await userEvent.click(outlet.getByTestId('boostRuleMatches'));
-    const popover = within(screen.getByRole('dialog'));
-    expect(popover.getByText('Using selected index')).toBeInTheDocument();
-    const missing = popover.getByTestId('boostRuleMatchesNotFound');
-    expect(missing).toHaveTextContent('outlet');
-    expect(within(missing).getByTestId('boostNotFoundBadge')).toHaveTextContent('Not found');
-
-    // A pattern that matches nothing yet has nothing to list.
-    expect(getRow('upcoming').getByTestId('boostRuleNoMatches')).toHaveTextContent('0 indices');
-  });
-
-  it('counts what a rule selected that no longer exists when rules can select several', async () => {
-    void setPrototypeSettings({ allows_multiple_targets: true });
-    try {
-      renderTab('/rules', [
-        {
-          ...customRule('outlet', 'catalog-search', ['outlet', 'products', 'users'], 0),
-          _meta: { target_mode: 'pick' },
-        },
-      ]);
-      await userEvent.click(getRow('outlet').getByTestId('boostRuleMatches'));
-
-      expect(
-        within(screen.getByRole('dialog')).getByTestId('boostRuleMatchCount')
-      ).toHaveTextContent('3 selected, 2 outranked, 1 not found');
-    } finally {
-      void setPrototypeSettings({ allows_multiple_targets: false });
-    }
-  });
-
-  it('counts what a rule selects when rules can select several targets', async () => {
-    void setPrototypeSettings({ allows_multiple_targets: true });
-    try {
-      renderTab('/rules');
-      await userEvent.click(getRow('picked').getByTestId('boostRuleMatches'));
-
-      expect(
-        within(screen.getByRole('dialog')).getByTestId('boostRuleMatchCount')
-      ).toHaveTextContent('2 selected, 1 outranked');
-    } finally {
-      void setPrototypeSettings({ allows_multiple_targets: false });
-    }
   });
 
   it('names a higher-ranked rule in the tooltip of the icon after its target', async () => {
@@ -308,21 +248,19 @@ describe('RulesTab matches', () => {
 
     const popover = screen.getByRole('dialog');
     expect(popover).toHaveTextContent('Using index pattern archives-*');
-    expect(popover).not.toHaveTextContent('Using selected');
     expect(popover).toHaveTextContent('archives-2024');
     // No higher-ranked rule takes any of its matches, so its count notes nothing outranked.
     expect(screen.getByTestId('boostRuleMatchCount')).toHaveTextContent(/^\d+ match(es)?$/);
   });
 
-  it("doesn't show a pattern for a rule that names its targets", async () => {
+  it('names the index a rule names, without a count, which would always be 1', async () => {
     renderTab('/rules');
 
     await userEvent.click(getRow('products-first').getByTestId('boostRuleMatches'));
 
+    expect(screen.getByRole('dialog')).toHaveTextContent('Using index products');
     expect(screen.getByRole('dialog')).not.toHaveTextContent('Using index pattern');
-    // It selects one index, which the title says.
-    expect(screen.getByRole('dialog')).toHaveTextContent('Using selected index');
-    expect(screen.getByRole('dialog')).not.toHaveTextContent('Using selected indices');
+    expect(screen.queryByTestId('boostRuleMatchCount')).not.toBeInTheDocument();
   });
 
   it('counts what a default rule applies to, and lists everything it matches with what other rules take', async () => {

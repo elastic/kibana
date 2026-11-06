@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiNotificationBadge,
   EuiPanel,
   EuiTab,
@@ -27,9 +28,11 @@ import { formatHiddenTargets } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
 import { TargetListHeader } from './target_list_header';
 
-/** A data source an index pattern matches. */
+/** A data source a rule's name or pattern matches. */
 export interface TargetPreview {
   name: string;
+  /** The name or pattern that matches it, whose spelled-out parts are highlighted. */
+  pattern: string;
   /** A higher-ranked rule that still applies to this target, if any. */
   overriddenBy?: string;
   isHidden?: boolean;
@@ -41,7 +44,7 @@ export interface TargetPreview {
  */
 export const getPartialPattern = (pattern: string) => `*${pattern}*`;
 
-type MatchesTab = 'matching' | 'all';
+export type MatchesTab = 'matching' | 'all';
 
 const TABS: readonly MatchesTab[] = ['matching', 'all'];
 
@@ -125,10 +128,11 @@ interface PatternMatchesProps {
   type: BoostProfileType | undefined;
   /** The type the wording follows, indices until a profile sets it. */
   targetType: BoostProfileType;
+  /** What's typed in the rule's field, until which there's nothing to match. */
   pattern: string;
-  /** What the pattern matches. */
+  /** What the name or pattern matches. */
   exactMatches: readonly TargetPreview[];
-  /** What contains the pattern, until it matches something. */
+  /** What contains it, until it matches something. */
   partialMatches: readonly TargetPreview[];
   /** Every data source of the rule's type, in the order they're listed. */
   dataSources: ReadonlyArray<Pick<BoostDataSource, 'name' | 'hidden'>>;
@@ -139,13 +143,22 @@ interface PatternMatchesProps {
   onIncludesHiddenChange: (includesHidden: boolean) => void;
   /** The panel's tallest height, past which its list scrolls. */
   maxHeight: number;
+  /** The tab it opens on. */
+  initialTab?: MatchesTab;
+  /** Uses a listed name as the rule's target, which makes each name a button. */
+  onSelectName?: (name: string) => void;
+  /**
+   * For each data source, a higher-ranked rule that would keep it if the rule named it, which the
+   * list of every data source notes for those the rule doesn't match yet.
+   */
+  outrankedIfChosen?: ReadonlyMap<string, string>;
 }
 
 /**
- * What an index pattern matches, or partly matches until it matches something, beside every data
- * source it could target, like the data view editor's preview. Hidden data sources are left out
- * until a switch beside the tabs shows them, with a note of how many, so the lists add up to the
- * pattern's match count.
+ * What a rule's name or pattern matches, or partly matches until it matches something, beside every
+ * data source it could target, like the data view editor's preview. Choosing a name in either list
+ * makes it the rule's target. Hidden data sources are left out until a switch beside the tabs shows
+ * them, with a note of how many, so the lists add up to the match count.
  */
 export const PatternMatches = ({
   type,
@@ -158,20 +171,21 @@ export const PatternMatches = ({
   includesHidden,
   onIncludesHiddenChange,
   maxHeight,
+  initialTab = 'matching',
+  onSelectName,
+  outrankedIfChosen,
 }: PatternMatchesProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const idPrefix = useGeneratedHtmlId({ prefix: 'patternMatches' });
-  const [tab, setTab] = useState<MatchesTab>('matching');
+  const [tab, setTab] = useState<MatchesTab>(initialTab);
   // What the tabs list depends on the type, so they wait for a profile.
   const selectedTab = type ? tab : 'matching';
   const panelId = `${idPrefix}-panel`;
   const getTabId = (id: MatchesTab) => `${idPrefix}-${id}`;
 
-  const partialPattern = getPartialPattern(pattern);
   // The full list highlights the same names as the matching one.
   const hasExactMatches = exactMatches.length > 0;
-  const highlightPattern = hasExactMatches ? pattern : partialPattern;
   const matchesByName = new Map(
     (hasExactMatches ? exactMatches : partialMatches).map((target) => [target.name, target])
   );
@@ -252,7 +266,7 @@ export const PatternMatches = ({
   );
 
   // A target after its match icon, struck through with the rule that keeps it when a higher-ranked
-  // rule does.
+  // rule does. Its name is a button that makes it the rule's target, when the list offers that.
   const renderRow = ({
     name,
     pattern: rowPattern,
@@ -282,12 +296,27 @@ export const PatternMatches = ({
       <EuiFlexItem grow={false}>
         <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}>
           <MatchIcon match={match} isDisabled={overriddenBy !== undefined} isLabeled={isLabeled} />
-          <TargetName
-            name={name}
-            pattern={rowPattern}
-            supersededBy={overriddenBy}
-            isHidden={isHidden}
-          />
+          {onSelectName ? (
+            <EuiLink
+              color="text"
+              onClick={() => onSelectName(name)}
+              data-test-subj="boostRuleSelectTarget"
+            >
+              <TargetName
+                name={name}
+                pattern={rowPattern}
+                supersededBy={overriddenBy}
+                isHidden={isHidden}
+              />
+            </EuiLink>
+          ) : (
+            <TargetName
+              name={name}
+              pattern={rowPattern}
+              supersededBy={overriddenBy}
+              isHidden={isHidden}
+            />
+          )}
         </span>
       </EuiFlexItem>
       {overriddenBy && (
@@ -305,13 +334,12 @@ export const PatternMatches = ({
   const renderTargets = (
     label: string,
     targets: readonly TargetPreview[],
-    targetPattern: string,
     match: MatchKind,
     testSubj?: string
   ) => {
     const shown = includesHidden ? targets : targets.filter(({ isHidden }) => !isHidden);
     return renderList(label, [
-      ...shown.map(({ name, overriddenBy, isHidden }) =>
+      ...shown.map(({ name, pattern: targetPattern, overriddenBy, isHidden }) =>
         renderRow({
           name,
           pattern: targetPattern,
@@ -330,7 +358,7 @@ export const PatternMatches = ({
     if (!type || !pattern) {
       return renderEmpty(
         i18n.translate('xpack.boost.patternMatches.enterPattern', {
-          defaultMessage: 'Enter an index pattern to see matches',
+          defaultMessage: 'Enter a name or pattern to see matches',
         })
       );
     }
@@ -342,7 +370,6 @@ export const PatternMatches = ({
           defaultMessage: 'Exact matches',
         }),
         exactMatches,
-        pattern,
         'exact'
       );
     }
@@ -352,7 +379,6 @@ export const PatternMatches = ({
           defaultMessage: 'Partial matches',
         }),
         partialMatches,
-        partialPattern,
         'partial',
         'boostRulePartialMatch'
       );
@@ -381,15 +407,16 @@ export const PatternMatches = ({
     return renderList(
       TAB_LABELS.all[targetType],
       // Matches are mixed with everything else here, so their icons say which they are, and each
-      // notes a higher-ranked rule that keeps it, as in the matching list.
+      // notes a higher-ranked rule that keeps it, as in the matching list. The rest note one that
+      // would keep them if the rule named them, since choosing one does.
       [
         ...shown.map(({ name, hidden }) => {
           const target = matchesByName.get(name);
           return renderRow({
             name,
-            pattern: target && highlightPattern,
+            pattern: target?.pattern,
             match: target && matchKind,
-            overriddenBy: target?.overriddenBy,
+            overriddenBy: target ? target.overriddenBy : outrankedIfChosen?.get(name),
             isHidden: hidden,
             isLabeled: true,
             testSubj: 'boostRuleAvailableTarget',

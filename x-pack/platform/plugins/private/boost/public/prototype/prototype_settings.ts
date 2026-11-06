@@ -76,7 +76,3 @@ export const usePrototypeSettings = (): PrototypeSettings =>
 
 /** Whether to show search cost and VCU estimates, following the prototype menu's setting. */
 export const useShowsEstimates = (): boolean => usePrototypeSettings().shows_estimates;
-
-/** Whether a rule can select several indices or data streams, following the prototype menu. */
-export const useAllowsMultipleTargets = (): boolean =>
-  usePrototypeSettings().allows_multiple_targets;

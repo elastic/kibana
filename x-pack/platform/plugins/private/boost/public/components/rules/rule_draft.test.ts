@@ -12,7 +12,6 @@ import {
   hasRuleDraftErrors,
   normalizePriority,
   ruleDraftToInput,
-  getMissingTargets,
   ruleToDraft,
 } from './rule_draft';
 
@@ -28,8 +27,6 @@ describe('rule drafts', () => {
       name: 'required',
       profile: 'required',
       pattern: 'required',
-      picked: undefined,
-      priority: undefined,
     });
   });
 
@@ -37,21 +34,11 @@ describe('rule drafts', () => {
     expect(getRuleDraftErrors(validDraft, ['storefront-catalogs']).name).toBe('already_exists');
   });
 
-  it('only validates the fields of the selected target mode', () => {
-    const picking = { ...validDraft, mode: 'pick' as const, pattern: '' };
-
-    expect(getRuleDraftErrors(picking, []).pattern).toBeUndefined();
-    expect(getRuleDraftErrors(picking, []).picked).toBe('required');
-    expect(hasRuleDraftErrors(getRuleDraftErrors({ ...picking, picked: ['products'] }, []))).toBe(
-      false
+  it('takes one name or pattern, as Elasticsearch does', () => {
+    expect(getRuleDraftErrors({ ...validDraft, pattern: 'products' }, []).pattern).toBeUndefined();
+    expect(getRuleDraftErrors({ ...validDraft, pattern: 'products, users' }, []).pattern).toBe(
+      'invalid_characters'
     );
-  });
-
-  it('only selects several targets when the prototype allows it', () => {
-    const picking = { ...validDraft, mode: 'pick' as const, picked: ['products', 'synonyms'] };
-
-    expect(getRuleDraftErrors(picking, []).picked).toBe('too_many');
-    expect(getRuleDraftErrors(picking, [], true).picked).toBeUndefined();
   });
 
   it("corrects a priority it can't use rather than rejecting it", () => {
@@ -66,17 +53,13 @@ describe('rule drafts', () => {
     expect(ruleDraftToInput({ ...validDraft, priority: '' }).priority).toBe(0);
   });
 
-  it('converts either target mode into index patterns', () => {
+  it('converts the field into index patterns', () => {
     expect(ruleDraftToInput(validDraft)).toEqual({
       name: 'storefront-catalogs',
       index_patterns: ['catalog-*'],
       boost_profile: 'storefront-search',
       priority: 0,
-      _meta: { target_mode: 'pattern' },
     });
-    expect(
-      ruleDraftToInput({ ...validDraft, mode: 'pick', picked: ['products', 'users'] })
-    ).toMatchObject({ index_patterns: ['products', 'users'], _meta: { target_mode: 'pick' } });
   });
 });
 
@@ -87,38 +70,20 @@ describe('ruleToDraft', () => {
     priority: 10,
     is_builtin: false,
   };
-  const existing = new Set(['products', 'users']);
 
-  it('opens patterns and unknown names in pattern mode', () => {
-    expect(ruleToDraft({ ...rule, index_patterns: ['catalog-*'] }, existing)).toMatchObject({
-      mode: 'pattern',
+  it('opens a pattern or a name in the same field, whether or not the name exists', () => {
+    expect(ruleToDraft({ ...rule, index_patterns: ['catalog-*'] })).toEqual({
+      name: 'storefront',
+      profileName: 'storefront-search',
       pattern: 'catalog-*',
       priority: '10',
     });
-    expect(ruleToDraft({ ...rule, index_patterns: ['outlet'] }, existing).mode).toBe('pattern');
+    expect(ruleToDraft({ ...rule, index_patterns: ['outlet'] }).pattern).toBe('outlet');
   });
 
-  it('opens existing names in pick mode', () => {
-    expect(ruleToDraft({ ...rule, index_patterns: ['products'] }, existing)).toMatchObject({
-      mode: 'pick',
-      picked: ['products'],
-    });
-    expect(
-      ruleToDraft({ ...rule, index_patterns: ['products', 'users'] }, existing).picked
-    ).toEqual(['products', 'users']);
-  });
-
-  it('opens a rule in the mode it was saved in, even once its picked target is gone', () => {
-    const picked = { ...rule, index_patterns: ['outlet'], _meta: { target_mode: 'pick' as const } };
-    expect(ruleToDraft(picked, existing)).toMatchObject({ mode: 'pick', picked: ['outlet'] });
-    expect(getMissingTargets(picked, existing)).toEqual(['outlet']);
-
-    const typed = {
-      ...rule,
-      index_patterns: ['products'],
-      _meta: { target_mode: 'pattern' as const },
-    };
-    expect(ruleToDraft(typed, existing)).toMatchObject({ mode: 'pattern', pattern: 'products' });
-    expect(getMissingTargets({ ...typed, index_patterns: ['outlet'] }, existing)).toEqual([]);
+  it('lists the names of a rule saved with several, which the prototype once allowed, with commas', () => {
+    expect(ruleToDraft({ ...rule, index_patterns: ['products', 'users'] }).pattern).toBe(
+      'products, users'
+    );
   });
 });
