@@ -11,6 +11,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
+import { once } from 'lodash';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
@@ -18,6 +19,7 @@ import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
+import { registerServerShutdown } from './server_shutdown';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -35,12 +37,16 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
-    const shutdownEs = await runElasticsearch({
-      config,
-      log,
-      esFrom: options.esFrom,
-      logsDir: options.logsDir,
-    });
+    const shutdownEs = once(
+      await runElasticsearch({
+        config,
+        log,
+        esFrom: options.esFrom,
+        logsDir: options.logsDir,
+      })
+    );
+
+    const removeShutdownHook = registerServerShutdown(procs, shutdownEs);
 
     await runKibanaServer({
       procs,
@@ -72,5 +78,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
     await procs.waitForAllToStop();
     await shutdownEs();
+    removeShutdownHook();
   });
 }
