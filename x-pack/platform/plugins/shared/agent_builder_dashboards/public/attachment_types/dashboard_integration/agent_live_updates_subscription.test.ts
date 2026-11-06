@@ -59,6 +59,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     appliedAttachments: createAppliedAttachmentsStore(),
     upsertAttachment,
     onOtherDashboardUpdated,
+    onApplyError: jest.fn(),
   });
 
   return {

@@ -14,6 +14,12 @@ const NEW_DASHBOARD_TITLE = i18n.translate(
   { defaultMessage: 'New Dashboard' }
 );
 
+export interface OtherDashboardUpdateNotifier {
+  notify: (attachment: DashboardAttachment) => void;
+  /** Removes the toasts, whose Open action previews from a dashboard that is no longer open. */
+  removeAll: () => void;
+}
+
 /**
  * Tells the user when the agent changed a dashboard other than the open one, with one toast per
  * attachment, since applying it would overwrite the open dashboard.
@@ -24,7 +30,7 @@ export const createOtherDashboardUpdateNotifier = ({
 }: {
   toasts: CoreStart['notifications']['toasts'];
   openAttachment: (attachment: DashboardAttachment) => void;
-}): ((attachment: DashboardAttachment) => void) => {
+}): OtherDashboardUpdateNotifier => {
   const toastsByAttachmentId = new Map<string, Toast>();
 
   const removeToast = (attachmentId: string) => {
@@ -35,7 +41,7 @@ export const createOtherDashboardUpdateNotifier = ({
     }
   };
 
-  return (attachment) => {
+  const notify = (attachment: DashboardAttachment) => {
     removeToast(attachment.id);
     const toast = toasts.addInfo({
       title: i18n.translate('xpack.agentBuilderDashboards.otherDashboardUpdate.title', {
@@ -58,5 +64,14 @@ export const createOtherDashboardUpdateNotifier = ({
       },
     });
     toastsByAttachmentId.set(attachment.id, toast);
+  };
+
+  return {
+    notify,
+    removeAll: () => {
+      for (const attachmentId of [...toastsByAttachmentId.keys()]) {
+        removeToast(attachmentId);
+      }
+    },
   };
 };

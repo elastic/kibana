@@ -49,6 +49,8 @@ export interface DashboardAppIntegrationParams {
   ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
   /** Tells the user the agent changed a dashboard other than the open one. */
   notifyOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
+  /** Tells the user an agent update could not be applied to the open dashboard. */
+  notifyApplyError: (error: Error) => void;
 }
 
 type VersionedDashboardAttachment = VersionedAttachment<
@@ -76,6 +78,7 @@ export const registerDashboardAppIntegration = ({
   appliedAttachments,
   getUpdateOrigin,
   notifyOtherDashboardUpdated,
+  notifyApplyError,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     versionedAttachments: [],
@@ -216,6 +219,7 @@ export const registerDashboardAppIntegration = ({
       state.liveUpdates.set(attachment.id, attachment);
     },
     onOtherDashboardUpdated: notifyOtherDashboardUpdated,
+    onApplyError: notifyApplyError,
   });
 
   const originSyncSubscription = createOriginSyncSubscription({
