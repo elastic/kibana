@@ -24,6 +24,7 @@ import {
   McpConnectionTransportError,
   MCP_CONNECT_RETRY_DELAY_MS,
 } from './client_type';
+import { McpFetchTimeoutError } from './fetch_resource';
 
 jest.mock('@kbn/mcp-client', () => {
   const actual = jest.requireActual('@kbn/mcp-client');
@@ -37,6 +38,7 @@ jest.mock('@kbn/mcp-client', () => {
 });
 
 jest.mock('./fetch_resource', () => ({
+  ...jest.requireActual('./fetch_resource'),
   createFetchResource: jest.fn().mockReturnValue({
     fetch: jest.fn(),
     close: jest.fn().mockResolvedValue(undefined),
@@ -699,6 +701,7 @@ describe('createMcpClientType', () => {
       [new McpConnectionHttpError(503, new Error('bad gateway')), true],
       [new McpConnectionHttpError(401, new Error('nope')), false],
       [new McpConnectionTransportError('UND_ERR_CONNECT_TIMEOUT', new Error('timeout')), true],
+      [new McpFetchTimeoutError(1_000), true],
       [new Error('boom'), false],
     ])('classifies terminal errors', (error, expected) => {
       expect(createMcpClientType().shouldInvalidateOnError?.(error)).toBe(expected);
@@ -720,6 +723,11 @@ describe('createMcpClientType', () => {
       const err = new Error('Error connecting to MCP server: MCP error -32001: Request timed out', {
         cause: new McpError(McpErrorCode.RequestTimeout, 'Request timed out'),
       });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
+    });
+
+    it('returns true when the fetch deadline error is wrapped as cause', () => {
+      const err = new Error('fetch failed', { cause: new McpFetchTimeoutError(1_000) });
       expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
 

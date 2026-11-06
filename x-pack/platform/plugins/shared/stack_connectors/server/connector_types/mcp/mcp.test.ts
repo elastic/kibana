@@ -681,6 +681,80 @@ describe('McpConnector', () => {
         expect(isRetryableError(errors[1] as Error)).toBeNull();
         expect(isRetryableError(errors[CONNECTION_FAILURE_RETRY_LIMIT - 1] as Error)).toBe(false);
       });
+
+      it('applies the retry limit to fetch deadline failures', async () => {
+        const timeoutError = new Error('Request timed out after 1ms');
+        timeoutError.name = 'McpFetchTimeoutError';
+        mcpClientType.build.mockImplementation(() => Promise.reject(timeoutError));
+        mcpClientType.shouldInvalidateOnError.mockImplementation(
+          (err: unknown) => err instanceof Error && err.name === 'McpFetchTimeoutError'
+        );
+        const connector = createConnector();
+
+        const errors = [];
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          errors.push(await expectCallToolError(connector));
+        }
+
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+        expect(isRetryableError(errors[0] as Error)).toBeNull();
+        expect(isRetryableError(errors[1] as Error)).toBeNull();
+        expect(isRetryableError(errors[2] as Error)).toBe(false);
+        expect((errors[2] as Error).cause).toBe(timeoutError);
+      });
+
+      it('counts a shared rejected build once and does not mutate its error', async () => {
+        const buildError = new Error('connect failed');
+        mcpClientType.build.mockRejectedValueOnce(new Error('connect failed'));
+        mcpClientType.build.mockRejectedValueOnce(new Error('connect failed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+
+        let rejectBuild!: (error: Error) => void;
+        mcpClientType.build.mockReturnValue(
+          new Promise((_, reject) => {
+            rejectBuild = reject;
+          })
+        );
+        const firstCall = expectCallToolError(connector);
+        const secondCall = expectCallToolError(connector);
+        rejectBuild(buildError);
+        const errors = await Promise.all([firstCall, secondCall]);
+
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+        expect(errors[0]).not.toBe(errors[1]);
+        expect(isRetryableError(errors[0] as Error)).toBe(false);
+        expect(isRetryableError(errors[1] as Error)).toBe(false);
+        expect((errors[0] as Error).cause).toBe(buildError);
+        expect((errors[1] as Error).cause).toBe(buildError);
+        expect(isRetryableError(buildError)).toBeNull();
+        expect(buildError.message).toBe('connect failed');
+      });
+
+      it('counts a first shared rejected build once across three callers', async () => {
+        let rejectBuild!: (error: Error) => void;
+        mcpClientType.build.mockReturnValue(
+          new Promise((_, reject) => {
+            rejectBuild = reject;
+          })
+        );
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+        const calls = [
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+        ];
+
+        rejectBuild(new Error('connect failed'));
+        const errors = await Promise.all(calls);
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(errors.every((err) => isRetryableError(err as Error) === null)).toBe(true);
+      });
     });
 
     it('surfaces a build rejection and does not cache the failed lease', async () => {

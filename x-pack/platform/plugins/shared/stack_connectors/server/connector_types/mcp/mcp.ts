@@ -75,6 +75,8 @@ export const connectionFailures = new LRUCache<string, number>({
   ttlAutopurge: false,
 });
 
+const failedBuildCounts = new WeakMap<Promise<McpClient>, number>();
+
 export interface McpTestConnectorResponse {
   connected: boolean;
   capabilities?: ServerCapabilities;
@@ -198,9 +200,14 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       () => this.buildClient(),
       (client) => clientTypes.mcp.terminate(client)
     );
+    let buildRejected = false;
+    const clientPromise = promise.catch((err) => {
+      buildRejected = true;
+      throw err;
+    });
 
     try {
-      const result = await fn(await promise);
+      const result = await fn(await clientPromise);
       connectionFailures.delete(key);
       return result;
     } catch (err) {
@@ -212,10 +219,13 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         await this.pool.invalidate(key, promise);
       }
 
-      const retry =
-        isConnectionError && !isUserError
-          ? this.recordConnectionFailure(key) < CONNECTION_FAILURE_RETRY_LIMIT
-          : true;
+      let retry = true;
+      if (isConnectionError && !isUserError) {
+        const failureCount = buildRejected
+          ? failedBuildCounts.get(promise) ?? this.recordAndRememberBuildFailure(key, promise)
+          : this.recordConnectionFailure(key);
+        retry = failureCount < CONNECTION_FAILURE_RETRY_LIMIT;
+      }
 
       this.throwClassified(operation, err, {
         redact: redactToolError && !isConnectionError,
@@ -230,6 +240,12 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   private recordConnectionFailure(key: string): number {
     const count = (connectionFailures.get(key) ?? 0) + 1;
     connectionFailures.set(key, count);
+    return count;
+  }
+
+  private recordAndRememberBuildFailure(key: string, promise: Promise<McpClient>): number {
+    const count = this.recordConnectionFailure(key);
+    failedBuildCounts.set(promise, count);
     return count;
   }
 
@@ -261,7 +277,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     }
 
     if (!retry) {
-      throw createRetryableError(err instanceof Error ? err : new Error(String(err)), false);
+      const retryableError = new Error(err instanceof Error ? err.message : String(err), {
+        cause: err,
+      });
+      throw createRetryableError(retryableError, false);
     }
 
     throw err;

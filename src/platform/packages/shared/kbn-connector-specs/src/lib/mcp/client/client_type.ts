@@ -17,7 +17,7 @@ import {
   type FetchLike,
 } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
-import { createFetchResource, type McpFetchResource } from './fetch_resource';
+import { createFetchResource, McpFetchTimeoutError, type McpFetchResource } from './fetch_resource';
 import { McpConnectionTransportError } from './mcp_connection_transport_error';
 
 export { McpConnectionTransportError };
@@ -278,6 +278,9 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
 
   shouldInvalidateOnError(err: unknown): boolean {
     return matchesErrorOrCause(err, (current) => {
+      if (current instanceof McpFetchTimeoutError) {
+        return true;
+      }
       if (current instanceof UnauthorizedError) {
         return true;
       }
