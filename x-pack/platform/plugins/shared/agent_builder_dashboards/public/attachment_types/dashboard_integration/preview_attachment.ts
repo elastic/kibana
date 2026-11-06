@@ -12,7 +12,7 @@ import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-co
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { applyAttachmentToDashboard } from './apply_attachment';
 import type { AppliedAttachmentsStore } from './applied_attachments_store';
-import { canShowAttachmentInDashboard, isNewEmptyDashboard } from './linked_attachment';
+import { resolveAttachmentTarget } from './linked_attachment';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
@@ -29,25 +29,20 @@ export const previewAttachmentInDashboard = async ({
   dashboardLocator,
   checkSavedDashboardExist,
 }: PreviewAttachmentInDashboardParams) => {
-  // the attachment belongs on the open dashboard, or the dashboard is new and empty -> apply state
-  if (canShowAttachmentInDashboard({ api: dashboardApi, store: appliedAttachments, attachment })) {
+  const target = await resolveAttachmentTarget({
+    api: dashboardApi,
+    store: appliedAttachments,
+    attachment,
+    checkSavedDashboardExist,
+  });
+  if (target === 'apply') {
     await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
     return;
   }
 
-  const linkedDashboardExists = attachment.origin
-    ? await checkSavedDashboardExist(attachment.origin)
-    : false;
-
-  // the attachment's saved dashboard was deleted, so a new, empty dashboard can stand for it
-  if (!linkedDashboardExists && isNewEmptyDashboard(dashboardApi)) {
-    await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
-    return;
-  }
-
-  // otherwise navigate to the attachment's saved dashboard, or a new unsaved dashboard with its state,
-  // so the open dashboard is not overwritten; a new dashboard stays linked to the attachment
-  if (!linkedDashboardExists) {
+  const openSavedDashboard = target === 'open_saved_dashboard';
+  // a new dashboard stays linked to the attachment
+  if (!openSavedDashboard) {
     appliedAttachments.linkNextDashboard(dashboardApi, attachment.id);
   }
   const { filters, query, ...dashboardState } = attachmentDataToDashboardState(attachment.data);
@@ -59,7 +54,7 @@ export const previewAttachmentInDashboard = async ({
     query: toStoredQuery(query),
     // the attachment holds the dashboard's filters, so they replace the saved ones
     preserveSavedFilters: false,
-    dashboardId: linkedDashboardExists ? attachment.origin : undefined,
+    dashboardId: openSavedDashboard ? attachment.origin : undefined,
     viewMode: 'edit',
     changedBy: ['agent'],
   });
