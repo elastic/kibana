@@ -21,6 +21,7 @@ import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-spec
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
 import {
+  ConsoleStepInputSchema,
   KibanaFetcherConfigSchema,
   KibanaHttpMethodSchema,
   KibanaStepMetaSchema,
@@ -486,11 +487,7 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'console',
     summary: 'Console',
-    paramsSchema: z
-      .object({
-        message: z.string(),
-      })
-      .required(),
+    paramsSchema: ConsoleStepInputSchema,
     outputSchema: z.string(),
     description: i18n.translate('workflows.connectors.console.description', {
       defaultMessage: 'Log a message to the workflow logs',

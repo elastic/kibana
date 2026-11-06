@@ -19,6 +19,7 @@ import {
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useCanvasEvents } from '../state_management';
+import { useCanvasReadOnly } from '../canvas_read_only_context';
 import type { ClassicCanvasEdge } from '../types';
 
 const addRoutingUnavailableLabel = i18n.translate(
@@ -79,11 +80,12 @@ export function AnimatedEdge({
   data,
 }: EdgeProps<ClassicCanvasEdge>) {
   const { openRoutingFlyout, openProcessingFlyout, openLineProcessingFlyout } = useCanvasEvents();
+  const readOnly = useCanvasReadOnly();
   const edgeMenuId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const canUnhook = Boolean(data?.unitConnection);
+  const canUnhook = Boolean(data?.unitConnection) && !readOnly;
   const processingTarget = data?.processingTarget;
   const routingLine = data?.routingLine;
 
@@ -263,7 +265,7 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      {isActive ? (
+      {isActive && !readOnly ? (
         <EdgeLabelRenderer>
           <div className="nopan nodrag" style={labelPositionStyle}>
             <EuiPopover

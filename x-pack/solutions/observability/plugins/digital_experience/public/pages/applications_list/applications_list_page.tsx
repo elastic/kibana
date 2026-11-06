@@ -42,10 +42,11 @@ import type { CoreWebVital, VitalRating } from '../../../common/core_web_vitals'
 import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../common/feature';
 import { ApplicationsSummaryPanel } from './components/applications_summary_panel';
-import { ColumnSelector } from './components/column_selector';
 import { PageLoadsChart } from './components/page_loads_chart';
 import { SourceFilter } from './components/source_filter';
+import { ColumnSelector } from '../../components/column_selector';
 import { EnvironmentFilter } from '../../components/environment_filter';
+import { formatVital, RATING_COLORS, RATING_LABELS } from '../../utils/web_vitals';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import {
@@ -61,53 +62,24 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import type { Formatters } from '../../hooks/use_formatters';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { useVisibleColumns } from './hooks/use_visible_columns';
-import { APPLICATIONS_LABEL, SOURCE_LABELS } from '../../labels';
+import { useVisibleColumns } from '../../hooks/use_visible_columns';
+import { APPLICATIONS_LABEL, LAST_SEEN_LABEL, SOURCE_LABELS } from '../../labels';
 import type { ApplicationRow } from './utils/filter_applications';
 import { applicationsMatching, filterApplications } from './utils/filter_applications';
 import { pageLoadsOfSources, summarizeApplications } from './utils/summarize_applications';
-import { formatDurationMs } from '../../utils/format_duration';
+import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
 import {
   applicationColumnPreset,
   metricColumnPreset,
   timeColumnPreset,
-} from './utils/column_presets';
-
-export const EDOT_BROWSER_DOCS_URL =
-  'https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/browser';
+} from '../../utils/column_presets';
 
 // Long names shrink and truncate; the badges keep their size.
 const nameCss = css({ minWidth: 0 });
 
-const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
-  good: 'success',
-  needsImprovement: 'warning',
-  poor: 'danger',
-};
-
-const VITAL_FORMATTERS: Record<CoreWebVital, (value: number) => string> = {
-  lcp: formatDurationMs,
-  inp: formatDurationMs,
-  cls: (value) => value.toFixed(3),
-  fcp: formatDurationMs,
-  ttfb: formatDurationMs,
-};
-
 /** In display order. */
 const VITAL_RATINGS: VitalRating[] = ['good', 'needsImprovement', 'poor'];
-
-const RATING_LABELS: Record<VitalRating, string> = {
-  good: i18n.translate('xpack.digitalExperience.applications.rating.good', {
-    defaultMessage: 'Good',
-  }),
-  needsImprovement: i18n.translate('xpack.digitalExperience.applications.rating.needsImprovement', {
-    defaultMessage: 'Needs improvement',
-  }),
-  poor: i18n.translate('xpack.digitalExperience.applications.rating.poor', {
-    defaultMessage: 'Poor',
-  }),
-};
 
 const vitalTooltip = (
   sampleCount: number,
@@ -162,7 +134,7 @@ const renderVital =
           data-sample-count={sampleCount}
           color={RATING_COLORS[rating]}
         >
-          {VITAL_FORMATTERS[vital](value)}
+          {formatVital(vital, value)}
         </EuiTextColor>
       </EuiToolTip>
     );
@@ -257,10 +229,6 @@ const ERROR_RATE_DESCRIPTION = i18n.translate(
   'xpack.digitalExperience.applications.errorRateDescription',
   { defaultMessage: 'JS errors per page load' }
 );
-
-const LAST_SEEN_COLUMN = i18n.translate('xpack.digitalExperience.applications.lastSeenColumn', {
-  defaultMessage: 'Last seen',
-});
 
 const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.digitalExperience.applications.searchPlaceholder',
@@ -403,7 +371,7 @@ const OPTIONAL_COLUMNS: Array<{ id: OptionalColumnId; label: string }> = [
   { id: 'ttfb', label: TTFB_COLUMN },
   { id: 'jsErrors', label: JS_ERRORS_COLUMN },
   { id: 'failedHttp', label: FAILED_HTTP_COLUMN },
-  { id: 'lastSeen', label: LAST_SEEN_COLUMN },
+  { id: 'lastSeen', label: LAST_SEEN_LABEL },
 ];
 
 const OPTIONAL_COLUMN_IDS = OPTIONAL_COLUMNS.map(({ id }) => id);
@@ -639,7 +607,7 @@ export function ApplicationsListPage() {
       },
       lastSeen: {
         field: 'lastSeen',
-        name: LAST_SEEN_COLUMN,
+        name: LAST_SEEN_LABEL,
         ...timeColumnPreset<ApplicationRow>(),
         sortable: true,
         render: renderLastSeen(formatters),
