@@ -7,7 +7,12 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { DecideResult, DecisionQuestion } from '@kbn/agent-builder-server';
+import type {
+  DecideResult,
+  DecisionAnswer,
+  DecisionChoiceQuestion,
+  DecisionPredicateQuestion,
+} from '@kbn/agent-builder-server';
 import { createDecisionProviders, DecisionService } from './decision_service';
 import { BaseDecisionProvider } from './providers/base_decision_provider';
 import { EisDecisionProvider } from './providers/eis';
@@ -27,15 +32,28 @@ jest.mock('@kbn/inference-tracing', () => ({
     cb(span),
 }));
 
-const questions: Record<string, DecisionQuestion> = {
-  should_respond: { type: 'predicate', instructions: 'Should the agent respond?' },
+const shouldRespond: DecisionPredicateQuestion = {
+  type: 'predicate',
+  instructions: 'Should the agent respond?',
+};
+
+const topic: DecisionChoiceQuestion = {
+  type: 'choice',
+  instructions: 'What is the message about?',
+  choices: { observability: 'Logs, metrics and traces', other: 'Anything else' },
 };
 
 const input = 'secret conversation text';
 
-const answered = (probability: number) => ({
+const answered = (probability: number): DecisionProviderResult => ({
   inferenceId: 'model-1',
-  answers: { should_respond: { type: 'predicate' as const, probability } },
+  answers: [{ type: 'predicate', probability }],
+});
+
+const decided = (probability: number) => ({
+  status: 'decided',
+  inferenceId: 'model-1',
+  answer: { type: 'predicate', probability },
 });
 
 type Ask = (params: DecisionProviderParams) => Promise<DecisionProviderResult>;
@@ -43,7 +61,7 @@ type Ask = (params: DecisionProviderParams) => Promise<DecisionProviderResult>;
 class FakeProvider extends BaseDecisionProvider {
   readonly handler: jest.Mock<Promise<DecisionProviderResult>, [DecisionProviderParams]>;
 
-  constructor(public readonly id: DecisionProviderId, ask: Ask, timeoutMs?: number) {
+  constructor(public readonly id: DecisionProviderId, ask: Ask, timeoutMs: number) {
     super({ timeoutMs, unavailableTtlMs: 60 * 60 * 1000 });
     this.handler = jest.fn(ask);
   }
@@ -56,26 +74,80 @@ class FakeProvider extends BaseDecisionProvider {
 const fakeProvider = (
   id: DecisionProviderId,
   ask: Ask = async () => answered(0.5),
-  timeoutMs?: number
+  timeoutMs = 1000
 ) => new FakeProvider(id, ask, timeoutMs);
 
 const never = () => new Promise<never>(() => {});
 
 const setup = (providers: FakeProvider[]) => {
   const logger = loggingSystemMock.createLogger();
-  const service = new DecisionService({ logger, providers, timeoutMs: 1000 });
+  const service = new DecisionService({ logger, providers });
   const request = httpServerMock.createKibanaRequest();
 
   const decide = (abortSignal?: AbortSignal) =>
-    service.decide({ request, input, questions, abortSignal });
+    service.decide({ request, input, abortSignal }, shouldRespond);
 
-  return { decide, logger };
+  return { decide, logger, service, request };
 };
 
 describe('DecisionService', () => {
   afterEach(() => {
     jest.useRealTimers();
     span.setAttributes.mockClear();
+  });
+
+  it('returns a single answer for one question', async () => {
+    const provider = fakeProvider('eis', async () => answered(0.9));
+    const { decide } = setup([provider]);
+
+    const result = await decide();
+
+    expect(result).toEqual(decided(0.9));
+    expect(provider.handler).toHaveBeenCalledWith(
+      expect.objectContaining({ input, questions: [shouldRespond] })
+    );
+
+    if (result.status === 'decided') {
+      const probability: number = result.answer.probability;
+      expect(probability).toBe(0.9);
+    }
+  });
+
+  it('returns the answers in the order of the questions', async () => {
+    const choice = {
+      type: 'choice',
+      choice: 'observability',
+      confidence: 0.8,
+      probabilities: { observability: 0.8, other: 0.2 },
+    } as const;
+    const provider = fakeProvider('eis', async () => ({
+      inferenceId: 'model-1',
+      answers: [{ type: 'predicate', probability: 0.6 }, choice],
+    }));
+    const { service, request } = setup([provider]);
+
+    const result = await service.decide({ request, input }, shouldRespond, topic);
+
+    expect(result).toEqual({
+      status: 'decided',
+      inferenceId: 'model-1',
+      answers: [{ type: 'predicate', probability: 0.6 }, choice],
+    });
+    expect(provider.handler).toHaveBeenCalledWith(
+      expect.objectContaining({ questions: [shouldRespond, topic] })
+    );
+
+    if (result.status === 'decided') {
+      const [{ probability }, { choice: picked }] = result.answers;
+      expect([probability, picked]).toEqual([0.6, 'observability']);
+    }
+  });
+
+  it('throws when called without questions', () => {
+    const { service, request } = setup([fakeProvider('eis')]);
+    expect(() => Reflect.apply(service.decide, service, [{ request, input }])).toThrow(
+      'at least one question'
+    );
   });
 
   it('records the provider and inference endpoint that answered on the decide span', async () => {
@@ -112,7 +184,7 @@ describe('DecisionService', () => {
     const second = fakeProvider('fast_model');
     const { decide } = setup([first, second]);
 
-    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.9) });
+    await expect(decide()).resolves.toEqual(decided(0.9));
     expect(second.handler).not.toHaveBeenCalled();
   });
 
@@ -123,7 +195,7 @@ describe('DecisionService', () => {
     const second = fakeProvider('fast_model', async () => answered(0.3));
     const { decide } = setup([first, second]);
 
-    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.3) });
+    await expect(decide()).resolves.toEqual(decided(0.3));
     await decide();
 
     expect(first.handler).toHaveBeenCalledTimes(2);
@@ -136,8 +208,8 @@ describe('DecisionService', () => {
     const second = fakeProvider('fast_model', async () => answered(0.7));
     const { decide } = setup([first, second]);
 
-    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
-    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
+    await expect(decide()).resolves.toEqual(decided(0.7));
+    await expect(decide()).resolves.toEqual(decided(0.7));
 
     expect(first.handler).toHaveBeenCalledTimes(1);
     expect(second.handler).toHaveBeenCalledTimes(2);
@@ -152,11 +224,11 @@ describe('DecisionService', () => {
 
     first.handler.mockRejectedValueOnce(new DecisionProviderUnavailableError('no endpoint'));
 
-    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
+    await expect(decide()).resolves.toEqual(decided(0.7));
 
     jest.setSystemTime(new Date('2026-11-05T11:00:00Z'));
 
-    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.9) });
+    await expect(decide()).resolves.toEqual(decided(0.9));
     expect(first.handler).toHaveBeenCalledTimes(2);
   });
 
@@ -178,21 +250,21 @@ describe('DecisionService', () => {
 
     await jest.advanceTimersByTimeAsync(1);
 
-    await expect(pending).resolves.toEqual({ status: 'decided', ...answered(0.2) });
+    await expect(pending).resolves.toEqual(decided(0.2));
     expect(firstSignal?.aborted).toBe(true);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it("uses a provider's own timeout instead of the default", async () => {
+  it("waits for a slower provider's own timeout", async () => {
     jest.useFakeTimers();
 
     const slow = fakeProvider('fast_model', never, 2000);
     const { decide } = setup([slow]);
 
-    let result: DecideResult | undefined;
+    let result: DecideResult<{ answer: DecisionAnswer }> | undefined;
 
-    decide().then((decided) => {
-      result = decided;
+    decide().then((outcome) => {
+      result = outcome;
     });
 
     await jest.advanceTimersByTimeAsync(1000);
@@ -254,9 +326,7 @@ describe('DecisionService', () => {
       }),
     ]);
 
-    const result: DecideResult = await decide();
-
-    expect(result).toEqual({ status: 'failed', error: last });
+    await expect(decide()).resolves.toEqual({ status: 'failed', error: last });
   });
 
   it('logs retryable failures at warn without the input text', async () => {
@@ -290,6 +360,7 @@ describe('createDecisionProviders', () => {
       elasticsearch,
       createModelProvider,
       config: {
+        eisTimeoutMs: 1000,
         fastModelTimeoutMs: 2000,
         unavailableTtlMs: 3600000,
       },
@@ -303,6 +374,7 @@ describe('createDecisionProviders', () => {
       elasticsearch,
       createModelProvider,
       config: {
+        eisTimeoutMs: 1000,
         fastModelTimeoutMs: 2000,
         unavailableTtlMs: 3600000,
       },

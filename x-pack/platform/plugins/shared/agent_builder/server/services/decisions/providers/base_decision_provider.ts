@@ -15,8 +15,8 @@ import type {
 import { DecisionProviderAbortedError, isDecisionProviderUnavailableError } from './types';
 
 export interface BaseDecisionProviderOptions {
-  /** Overrides the timeout the service passes in. */
-  timeoutMs?: number;
+  /** How long the provider gets before the next one is tried. */
+  timeoutMs: number;
   /** How long the provider is skipped after it reports it cannot answer. */
   unavailableTtlMs: number;
 }
@@ -28,7 +28,7 @@ export interface BaseDecisionProviderOptions {
 export abstract class BaseDecisionProvider implements DecisionProvider {
   abstract readonly id: DecisionProviderId;
 
-  private readonly timeoutMs?: number;
+  private readonly timeoutMs: number;
   private readonly unavailableTtlMs: number;
   private skipUntil = 0;
 
@@ -45,16 +45,12 @@ export abstract class BaseDecisionProvider implements DecisionProvider {
     return Date.now() >= this.skipUntil;
   }
 
-  async decide({
-    timeoutMs: fallbackTimeoutMs,
-    abortSignal,
-    ...params
-  }: DecisionAttemptParams): Promise<DecisionProviderResult> {
+  async decide({ abortSignal, ...params }: DecisionAttemptParams): Promise<DecisionProviderResult> {
     if (abortSignal?.aborted) {
       throw new DecisionProviderAbortedError(`Decision provider [${this.id}] aborted`);
     }
 
-    const timeoutMs = this.timeoutMs ?? fallbackTimeoutMs;
+    const { timeoutMs } = this;
     const controller = new AbortController();
     const onAbort = () => controller.abort();
     let timer: ReturnType<typeof setTimeout> | undefined;

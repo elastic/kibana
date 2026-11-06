@@ -11,18 +11,24 @@ import type { DecisionQuestion, ModelProvider } from '@kbn/agent-builder-server'
 import { FastModelDecisionProvider } from './fast_model';
 import { DecisionProviderUnavailableError, isDecisionProviderUnavailableError } from './types';
 
-const questions: Record<string, DecisionQuestion> = {
-  should_respond: { type: 'predicate', instructions: 'Should the agent respond?' },
-  pick: { type: 'choice', instructions: 'Pick one', choices: { a: 'first', b: 'second' } },
-  severity: {
-    type: 'score',
-    instructions: 'How severe?',
-    levels: [
-      { label: 'low', description: 'minor' },
-      { label: 'high', description: 'major' },
-    ],
-  },
+const shouldRespond: DecisionQuestion = {
+  type: 'predicate',
+  instructions: 'Should the agent respond?',
 };
+const pick: DecisionQuestion = {
+  type: 'choice',
+  instructions: 'Pick one',
+  choices: { a: 'first', b: 'second' },
+};
+const severity: DecisionQuestion = {
+  type: 'score',
+  instructions: 'How severe?',
+  levels: [
+    { label: 'low', description: 'minor' },
+    { label: 'high', description: 'major' },
+  ],
+};
+const questions = [shouldRespond, pick, severity];
 
 const setup = ({
   output,
@@ -42,12 +48,15 @@ const setup = ({
   const createModelProvider = jest
     .fn()
     .mockReturnValue({ selectModel } as unknown as ModelProvider);
-  const run = (asked: Record<string, DecisionQuestion> = questions) =>
-    new FastModelDecisionProvider({ createModelProvider, unavailableTtlMs: 1000 }).decide({
+  const run = (asked: DecisionQuestion[] = questions) =>
+    new FastModelDecisionProvider({
+      createModelProvider,
+      timeoutMs: 1000,
+      unavailableTtlMs: 1000,
+    }).decide({
       request: httpServerMock.createKibanaRequest(),
       input: '@agent can you help?',
       questions: asked,
-      timeoutMs: 1000,
     });
 
   return { run, invoke, withStructuredOutput, selectModel };
@@ -56,10 +65,10 @@ const setup = ({
 describe('FastModelDecisionProvider', () => {
   it('asks the fast model with structured output', async () => {
     const { run, selectModel, withStructuredOutput, invoke } = setup({
-      output: { should_respond: { probability: 0.8 } },
+      output: { question_1: { probability: 0.8 } },
     });
 
-    await run({ should_respond: questions.should_respond });
+    await run([shouldRespond]);
 
     expect(selectModel).toHaveBeenCalledWith({ effortLevel: EffortLevels.low });
     expect(withStructuredOutput).toHaveBeenCalledWith(expect.anything(), { name: 'decide' });
@@ -68,53 +77,49 @@ describe('FastModelDecisionProvider', () => {
   });
 
   it('asks for calibrated probabilities', async () => {
-    const { run, invoke } = setup({ output: { should_respond: { probability: 0.8 } } });
+    const { run, invoke } = setup({ output: { question_1: { probability: 0.8 } } });
 
-    await run({ should_respond: questions.should_respond });
+    await run([shouldRespond]);
 
     const [[system]] = invoke.mock.calls[0];
 
     expect(JSON.stringify(system)).toContain('Use the whole range');
+    expect(JSON.stringify(system)).toContain('- question_1 (yes or no): Should the agent respond?');
   });
 
   it('asks for a probability per option on choice and score questions', async () => {
     const { run, withStructuredOutput } = setup({
       output: {
-        pick: { probabilities: { a: 0.3, b: 0.7 } },
+        question_1: { probabilities: { a: 0.3, b: 0.7 } },
       },
     });
 
-    await run({ pick: questions.pick });
+    await run([pick]);
 
     const [schema] = withStructuredOutput.mock.calls[0];
 
     expect(
-      schema.parse({ pick: { probabilities: { a: 0.3, b: 0.7 } } }).pick.probabilities
+      schema.parse({ question_1: { probabilities: { a: 0.3, b: 0.7 } } }).question_1.probabilities
     ).toEqual({ a: 0.3, b: 0.7 });
-    expect(() => schema.parse({ pick: { choice: 'a', confidence: 1 } })).toThrow();
+    expect(() => schema.parse({ question_1: { choice: 'a', confidence: 1 } })).toThrow();
   });
 
   it('answers with the most likely option and its probability as the confidence', async () => {
     const { run } = setup({
       output: {
-        should_respond: { probability: 0.8 },
-        pick: { probabilities: { a: 0.3, b: 0.7 } },
-        severity: { probabilities: { low: 0.4, high: 0.6 } },
+        question_1: { probability: 0.8 },
+        question_2: { probabilities: { a: 0.3, b: 0.7 } },
+        question_3: { probabilities: { low: 0.4, high: 0.6 } },
       },
     });
 
     await expect(run()).resolves.toEqual({
       inferenceId: 'fast_model:fast-connector',
-      answers: {
-        should_respond: { type: 'predicate', probability: 0.8 },
-        pick: { type: 'choice', choice: 'b', confidence: 0.7, probabilities: { a: 0.3, b: 0.7 } },
-        severity: {
-          type: 'score',
-          score: 1,
-          confidence: 0.6,
-          probabilities: { low: 0.4, high: 0.6 },
-        },
-      },
+      answers: [
+        { type: 'predicate', probability: 0.8 },
+        { type: 'choice', choice: 'b', confidence: 0.7, probabilities: { a: 0.3, b: 0.7 } },
+        { type: 'score', score: 1, confidence: 0.6, probabilities: { low: 0.4, high: 0.6 } },
+      ],
     });
   });
 
@@ -134,8 +139,8 @@ describe('FastModelDecisionProvider', () => {
   });
 
   it('rejects output missing an answer', async () => {
-    const { run } = setup({ output: { should_respond: { probability: 0.8 } } });
+    const { run } = setup({ output: { question_1: { probability: 0.8 } } });
 
-    await expect(run()).rejects.toThrow(/pick/);
+    await expect(run()).rejects.toThrow(/question_2/);
   });
 });

@@ -297,7 +297,6 @@ export class ServiceManager {
 
     const decisions = new DecisionService({
       logger: logger.get('decisions'),
-      timeoutMs: this.config.decisionModel.timeoutMs,
       providers: createDecisionProviders({
         config: this.config.decisionModel,
         elasticsearch,

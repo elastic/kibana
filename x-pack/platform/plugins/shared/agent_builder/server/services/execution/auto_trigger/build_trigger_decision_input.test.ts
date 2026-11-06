@@ -11,11 +11,7 @@ import type {
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
-import {
-  buildTriggerDecisionInput,
-  shouldRespondQuestions,
-  SHOULD_RESPOND_QUESTION,
-} from './build_trigger_decision_input';
+import { buildTriggerDecisionInput, shouldRespondQuestion } from './build_trigger_decision_input';
 
 const agent = { name: 'Observability Assistant', description: 'Investigates service health' };
 
@@ -45,21 +41,20 @@ const agentReply = (message: string): ExecutionTerminatedEvent => ({
 
 const historyLines = (input: string) => input.split('\n').filter((line) => line.startsWith('['));
 
-describe('shouldRespondQuestions', () => {
-  it('asks one predicate question named should_respond', () => {
-    expect(Object.keys(shouldRespondQuestions)).toEqual([SHOULD_RESPOND_QUESTION]);
-    expect(shouldRespondQuestions[SHOULD_RESPOND_QUESTION].type).toBe('predicate');
+describe('shouldRespondQuestion', () => {
+  it('is a predicate question', () => {
+    expect(shouldRespondQuestion.type).toBe('predicate');
   });
 
   it("weighs the request against the agent's description", () => {
-    const { instructions } = shouldRespondQuestions[SHOULD_RESPOND_QUESTION];
+    const { instructions } = shouldRespondQuestion;
 
     expect(instructions).toContain('described on the first line of the input');
     expect(instructions).toContain('according to its description, even without mentioning it');
   });
 
   it('replies to an @mention unless told not to', () => {
-    const { instructions } = shouldRespondQuestions[SHOULD_RESPOND_QUESTION];
+    const { instructions } = shouldRespondQuestion;
 
     expect(instructions).toContain('unless the message tells it not to reply');
   });

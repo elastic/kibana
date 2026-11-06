@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
 import { parseDecisionResponse } from './parse_decision_response';
+import { toKeyedQuestions } from './question_keys';
 import type { BaseDecisionProviderOptions } from './base_decision_provider';
 import { BaseDecisionProvider } from './base_decision_provider';
 import type { DecisionProviderParams, DecisionProviderResult } from './types';
@@ -55,12 +56,12 @@ export class EisDecisionProvider extends BaseDecisionProvider {
         {
           method: 'POST',
           path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
-          body: { input, task_settings: { questions } },
+          body: { input, task_settings: { questions: toKeyedQuestions(questions) } },
         },
         { signal }
       );
 
-      return { inferenceId, answers: parseDecisionResponse(body, Object.keys(questions)) };
+      return { inferenceId, answers: parseDecisionResponse(body, questions) };
     } catch (error) {
       if (this.isPermanentEsError(error)) {
         throw new DecisionProviderUnavailableError(error.message);
