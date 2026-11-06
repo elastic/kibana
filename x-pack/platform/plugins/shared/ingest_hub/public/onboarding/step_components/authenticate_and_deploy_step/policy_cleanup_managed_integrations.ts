@@ -22,8 +22,13 @@ import {
 } from './secret_refs';
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
@@ -55,6 +60,7 @@ export async function cleanupManagedIntegrationsPolicies(
     hasTypedSecrets,
     addedInstanceIdsByPolicy,
     alreadyUpdatedPolicyIds,
+    onboardingDeploymentId,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -69,7 +75,7 @@ export async function cleanupManagedIntegrationsPolicies(
 
   const deletes = Promise.allSettled(
     planned.toDelete.map((policyId) =>
-      sendDeleteAgentlessPolicy(policyId)
+      sendDeleteAgentlessPolicy(policyId, toOnboardingDeploymentQuery(onboardingDeploymentId))
         .then(() => {
           succeededDeletes.push(policyId);
         })
@@ -129,6 +135,7 @@ export async function updateManagedIntegrationsPolicy(
     globalRegion,
     namespace,
     globalNamespace,
+    policySettings,
     authenticateAndDeployStep,
     servicesMap,
   } = opts;
@@ -238,14 +245,19 @@ export async function updateManagedIntegrationsPolicy(
       : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item)
   );
 
-  await sendUpdateAgentlessPolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
-    // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
-    ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
-  });
+  await sendUpdateAgentlessPolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      ...getPolicySettingsUpdate(policySettings, 'managed_integration'),
+      // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
+      // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
+      ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
+    },
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
 }

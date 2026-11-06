@@ -16,6 +16,7 @@ import {
   isDashboardViewPath,
   isRuleCreationPath,
   isRuleEditPath,
+  isEndpointManagementPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -323,6 +324,27 @@ describe('isRuleEditPath', () => {
     'returns false for %s',
     (pathname) => {
       expect(isRuleEditPath(pathname)).toEqual(false);
+    }
+  );
+});
+
+describe('isEndpointManagementPath', () => {
+  it.each([
+    '/administration/endpoints',
+    '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/custom_yara_signatures',
+    '/administration/response_actions_history',
+    '/administration/script_library',
+  ])('returns true for %s', (pathname) => {
+    expect(isEndpointManagementPath(pathname)).toEqual(true);
+  });
+
+  it.each(['/administration', '/administration/notes', '/manage', '/alerts'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isEndpointManagementPath(pathname)).toEqual(false);
     }
   );
 });

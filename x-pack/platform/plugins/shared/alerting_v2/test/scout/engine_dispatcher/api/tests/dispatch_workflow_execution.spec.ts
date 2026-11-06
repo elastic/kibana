@@ -127,6 +127,36 @@ apiTest.describe(
         await apiServices.alertingV2.workflows.waitForSuccessfulExecution(workflowId, {
           triggeredBy: ACTION_POLICY_TRIGGER,
         });
+
+        // A real, delivered dispatch is the only way to exercise the successful-dispatch
+        // aggregations of the snapshot telemetry against Elasticsearch. Counters are lower bounds
+        // since the event log is shared with the other specs of this config.
+        const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
+
+        expect(state.has_errors).toBe(false);
+        expect(state.dispatcher_alerts_count_by_outcome_24hr?.dispatched).toBeGreaterThanOrEqual(1);
+        expect(
+          state.dispatcher_action_groups_count_by_outcome_24hr?.dispatched
+        ).toBeGreaterThanOrEqual(1);
+        expect(state.dispatcher_unique_alerts_dispatched_count_24hr).toBeGreaterThanOrEqual(1);
+        expect(state.dispatcher_workflow_executions_count_24hr).toBeGreaterThanOrEqual(1);
+        expect(state.dispatcher_unique_workflows_triggered_count_24hr).toBeGreaterThanOrEqual(1);
+        expect(state.dispatcher_notifying_executions_count_24hr).toBeGreaterThanOrEqual(1);
+        expect(state.dispatcher_notifying_spaces_count_24hr).toBeGreaterThanOrEqual(1);
+        expect(state.dispatcher_policies_count_by_activity_24hr?.dispatched).toBeGreaterThanOrEqual(
+          1
+        );
+        for (const distribution of [
+          state.dispatcher_action_groups_dispatched_per_policy_24hr,
+          state.dispatcher_alerts_dispatched_per_policy_24hr,
+          state.dispatcher_workflow_executions_per_policy_24hr,
+        ]) {
+          expect(distribution?.p50).toBeGreaterThanOrEqual(1);
+          expect(distribution?.p99).toBeGreaterThanOrEqual(1);
+          expect(distribution?.avg).toBeGreaterThanOrEqual(1);
+        }
+        // Policies that dispatched but never throttled have a ratio of 0, not a missing one.
+        expect(state.dispatcher_throttle_ratio_per_policy_24hr?.p50).toBeGreaterThanOrEqual(0);
       }
     );
   }

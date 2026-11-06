@@ -54,12 +54,15 @@ import {
 } from 'rxjs';
 import {
   isExecutionTerminalEvent,
+  isToolCallEvent,
   isToolUiEvent,
   type ToolUiEvent,
 } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
   readEsqlQuery,
   toEsqlQueryState,
 } from '@kbn/custom-content-common';
@@ -83,6 +86,18 @@ import {
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import type { CustomContentEmbeddableState } from '../server';
+
+const isToolCallForPanel = (event: BrowserChatEvent, panelId: string): boolean => {
+  if (!isToolCallEvent(event)) return false;
+  const { tool_id: toolId, params } = event.data;
+  if (toolId === CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID) return params.embeddable_id === panelId;
+  if (toolId !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID || !Array.isArray(params.panels))
+    return false;
+  return params.panels.some(
+    (panel: unknown) =>
+      typeof panel === 'object' && panel !== null && 'id' in panel && panel.id === panelId
+  );
+};
 
 const isCustomContentUpdatedUiEvent = (
   event: BrowserChatEvent
@@ -141,11 +156,18 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
-    const chatGeneratingCallbacks = {
-      onSubmit: () => isGenerating$.next(true),
-      onClose: () => {
-        if (isGenerating$.getValue()) isGenerating$.next(false);
-      },
+    const createChatGeneratingCallbacks = () => {
+      let hasSubmitted = false;
+      return {
+        onSubmit: () => {
+          if (hasSubmitted) return;
+          hasSubmitted = true;
+          isGenerating$.next(true);
+        },
+        onClose: () => {
+          if (isGenerating$.getValue()) isGenerating$.next(false);
+        },
+      };
     };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -263,7 +285,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
-                ...chatGeneratingCallbacks,
+                ...createChatGeneratingCallbacks(),
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
@@ -466,6 +488,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 return;
               }
 
+              if (isToolCallForPanel(event, uuid)) {
+                isGenerating$.next(true);
+                return;
+              }
+
               if (!isCustomContentUpdatedUiEvent(event)) return;
 
               const {
@@ -505,7 +532,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
-            ...chatGeneratingCallbacks,
+            ...createChatGeneratingCallbacks(),
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',
