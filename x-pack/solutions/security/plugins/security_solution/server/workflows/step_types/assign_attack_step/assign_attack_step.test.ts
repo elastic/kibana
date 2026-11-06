@@ -8,6 +8,7 @@
 import { assignAttackStepDefinition } from './assign_attack_step';
 import { assignAttackInputSchema } from '../../../../common/workflows/step_types/assign_attack_step/assign_attack_step_common';
 import { ExecutionError } from '@kbn/workflows/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL } from '../../../../common/constants';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
@@ -108,18 +109,32 @@ describe('assignAttackStepDefinition', () => {
       });
     });
 
-    it('should throw ExecutionError if API returns >= 400', async () => {
+    it('persists only status (not the raw body/headers) when callKibanaApi throws on a non-2xx', async () => {
       const mockContext = createMockContext({
         ids: 'attack-1',
         assignees_to_add: ['user1'],
         assignees_to_remove: [],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
-        status: 404,
-        body: { error: 'Not found' },
-      });
+      (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+        new KibanaApiCallError({
+          status: 500,
+          headers: { 'x-leaky-header': 'header-value' },
+          body: { sensitive: 'partial-success-payload', items: [{ id: 'attack-1' }] },
+          message: 'HTTP 500: bulk action partially failed',
+        })
+      );
 
-      await expect(assignAttackStepDefinition.handler(mockContext)).rejects.toThrow(ExecutionError);
+      const error = await assignAttackStepDefinition
+        .handler(mockContext)
+        .then(() => undefined)
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(ExecutionError);
+      const serialized = (error as ExecutionError).toSerializableObject();
+      expect(serialized.type).toBe('ApiError');
+      expect(serialized.details).toEqual({ status: 500 });
+      expect(JSON.stringify(serialized.details)).not.toContain('partial-success-payload');
+      expect(JSON.stringify(serialized.details)).not.toContain('x-leaky-header');
     });
 
     it('should throw ExecutionError if API call throws an error', async () => {
