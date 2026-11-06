@@ -565,6 +565,10 @@ export const APPLY_TO_ALL_ALERTS_MODAL_CONFIRM = i18n.translate(
   }
 );
 
+export const TABLE_ACTIONS = i18n.translate('xpack.maintenanceWindows.table.actions', {
+  defaultMessage: 'Actions',
+});
+
 export const TABLE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',
   {

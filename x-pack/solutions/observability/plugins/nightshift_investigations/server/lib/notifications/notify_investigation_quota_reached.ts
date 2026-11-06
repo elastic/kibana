@@ -16,13 +16,21 @@ import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflo
 export const getQuotaNoticeId = (channel: string): string =>
   `investigation-quota-notice:${channel}`;
 
-const QUOTA_REACHED = 'The daily limit for automatic investigations has been reached.';
-
 /** Readers may lack the privilege to change settings, so the text addresses an admin. */
-export const getInvestigationQuotaReachedMessage = (settingsUrl?: string): string =>
-  settingsUrl
-    ? `${QUOTA_REACHED} An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
-    : `${QUOTA_REACHED} An admin can raise the limit in the Nightshift settings.`;
+export const getInvestigationQuotaReachedMessage = ({
+  settingsUrl,
+  limit,
+}: {
+  settingsUrl?: string;
+  limit?: number;
+} = {}): string => {
+  const quotaReached =
+    limit === undefined
+      ? "Elastic nightshift has reached today's limit for automatic investigations across all automations."
+      : `Elastic nightshift has reached today's limit of ${limit} automatic investigations across all automations.`;
+  const settings = settingsUrl !== undefined ? `<${settingsUrl}|settings>` : 'settings';
+  return `${quotaReached} New investigations resume at 00:00 UTC, or an admin can raise the limit in ${settings}.`;
+};
 
 /** Absolute settings URL in the workflow's space, or undefined when it can't be built. */
 export const getNightshiftSettingsUrl = ({
@@ -57,6 +65,7 @@ export const notifyInvestigationQuotaReached = async ({
   slackThread,
   settingsLocator,
   kibanaUrl,
+  limit,
   signal,
   logger,
 }: {
@@ -67,6 +76,7 @@ export const notifyInvestigationQuotaReached = async ({
   slackThread: { channel: string; thread_ts: string };
   settingsLocator: Pick<NightshiftSettingsLocator, 'getRedirectUrl'>;
   kibanaUrl?: string;
+  limit?: number;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
@@ -94,9 +104,10 @@ export const notifyInvestigationQuotaReached = async ({
         subAction: 'sendMessage',
         subActionParams: {
           channel: slackThread.channel,
-          text: getInvestigationQuotaReachedMessage(
-            getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl })
-          ),
+          text: getInvestigationQuotaReachedMessage({
+            settingsUrl: getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl }),
+            limit,
+          }),
           threadTs: slackThread.thread_ts,
         },
       },
