@@ -113,7 +113,7 @@ record_suite_failure() {
 export_token_usage() {
   [[ -f .scout/servers/local.json ]] || return 0
   command -v buildkite-agent >/dev/null 2>&1 || return 0
-  local es_url out_dir out_file scroll_id page hits pages=0 max_pages=500 name_part artifact_name=''
+  local es_url out_dir out_file scroll_id='' page hits pages=0 truncated=0 max_pages=500 name_part artifact_name=''
   es_url="$(jq -r '.hosts.elasticsearch // empty' .scout/servers/local.json | sed -E 's:/*$::; s:^([a-z]+\://)[^/@]*@:\1:')"
   [[ -n "$es_url" ]] || return 0
   out_dir="target/token_usage"
@@ -128,16 +128,22 @@ export_token_usage() {
   : >"$out_file"
   page="$(es_curl -sS --max-time 60 "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
     -H 'Content-Type: application/json' -d '{"sort":["_doc"]}' 2>/dev/null)" || page=""
-  while (( pages++ < max_pages )); do
+  while true; do
     hits="$(printf '%s' "$page" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || break
+    # Assigned before the empty-page exit so the scroll context is cleared even when page 1 is empty.
+    scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty' 2>/dev/null)" || scroll_id=""
     [[ -n "$hits" ]] || break
+    if (( pages >= max_pages )); then
+      truncated=1
+      break
+    fi
     printf '%s\n' "$hits" >>"$out_file"
-    scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty')"
+    pages=$((pages + 1))
     [[ -n "$scroll_id" ]] || break
     page="$(es_curl -sS --max-time 60 "$es_url/_search/scroll" -H 'Content-Type: application/json' \
       -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}" 2>/dev/null)" || break
   done
-  if (( pages > max_pages )); then
+  if (( truncated )); then
     echo "--- Token usage export truncated at $max_pages pages; the artifact is incomplete"
   fi
   if [[ -n "${scroll_id:-}" ]]; then
