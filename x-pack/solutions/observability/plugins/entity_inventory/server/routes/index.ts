@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { listRoute } from './list_route';
 import { typesRoute } from './types_route';
 
 export const entityInventoryRouteRepository = {
   ...typesRoute,
+  ...listRoute,
 };
