@@ -75,7 +75,6 @@ import {
 } from './rule_draft';
 import {
   INDEX_PATTERN_ERROR_MESSAGES,
-  PATTERN_NO_MATCHES_MESSAGES,
   PROFILE_REQUIRED_MESSAGE,
   RULE_NAME_ERROR_MESSAGES,
   getPickedErrorMessage,
@@ -344,14 +343,6 @@ export const RuleFlyout = ({
       ? previewPattern(getPartialPattern(pattern))
       : [];
 
-  // A valid pattern has to match something, unless it's the rule's saved pattern, so a rule whose
-  // targets have since gone can still be edited.
-  const isSavedPattern = rule?.index_patterns.length === 1 && rule.index_patterns[0] === pattern;
-  const hasNoMatches =
-    draft.mode === 'pattern' &&
-    !draftErrors.pattern &&
-    patternPreview.length === 0 &&
-    !isSavedPattern;
   // Elasticsearch rejects a rule that ties with another, since neither would apply over the other.
   const conflictingRule =
     draftErrors.profile || draftErrors.pattern || draftErrors.picked
@@ -359,7 +350,6 @@ export const RuleFlyout = ({
       : findConflictingRule(draftRule, otherRules, profilesByName);
   const errors: RuleDraftErrors = {
     ...draftErrors,
-    patternMatches: hasNoMatches ? 'none' : undefined,
     conflictsWith: conflictingRule?.name,
   };
   const visibleErrors = showErrors ? errors : {};
@@ -583,11 +573,7 @@ export const RuleFlyout = ({
   );
 
   const nameError = visibleErrors.name && RULE_NAME_ERROR_MESSAGES[visibleErrors.name];
-  const patternError = visibleErrors.pattern
-    ? INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern]
-    : visibleErrors.patternMatches && type
-    ? PATTERN_NO_MATCHES_MESSAGES[type]
-    : undefined;
+  const patternError = visibleErrors.pattern && INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern];
   const pickedError =
     visibleErrors.picked && type
       ? getPickedErrorMessage(visibleErrors.picked, type, allowsMultipleTargets)

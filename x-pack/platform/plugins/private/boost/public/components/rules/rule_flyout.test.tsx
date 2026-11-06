@@ -646,27 +646,12 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
-  it('requires the pattern to match something before saving', async () => {
+  it('saves a pattern that matches nothing yet, as Elasticsearch allows', async () => {
     mutation.mutate.mockClear();
     renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRuleName'), 'new-rule');
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
-    await userEvent.click(screen.getByTestId('boostRuleSave'));
-
-    expect(mutation.mutate).not.toHaveBeenCalled();
-    const message = 'Enter a pattern that exactly matches at least one index.';
-    expect(screen.getByText(message)).toBeInTheDocument();
-
-    await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
-
-    expect(screen.queryByText(message)).not.toBeInTheDocument();
-  });
-
-  it('still saves a rule whose saved pattern no longer matches anything', async () => {
-    mutation.mutate.mockClear();
-    renderFlyout({ ...rule, index_patterns: ['retired-*'] });
-
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'upcoming-*');
     await userEvent.click(screen.getByTestId('boostRuleSave'));
 
     expect(mutation.mutate).toHaveBeenCalled();

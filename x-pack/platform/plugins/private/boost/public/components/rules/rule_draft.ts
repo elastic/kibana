@@ -30,8 +30,6 @@ export interface RuleDraftErrors {
   name?: ProfileNameError;
   profile?: 'required';
   pattern?: IndexPatternError;
-  /** Set by the form when a valid pattern matches nothing, which needs the data sources to check. */
-  patternMatches?: 'none';
   picked?: 'required' | 'too_many';
   /** Set by the form to the name of a rule the draft would tie with, which Elasticsearch rejects. */
   conflictsWith?: string;
