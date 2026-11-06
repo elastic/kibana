@@ -19,6 +19,129 @@ export function assertConnectorSucceeded(result: {
   throw new Error(result.serviceMessage ?? result.message ?? 'Connector execution failed');
 }
 
+const HITL_WORD_JOINER = '\u2060';
+const HITL_FULLWIDTH_VERTICAL_LINE = '\uff5c';
+
+/** Keeps `http://`, `https://`, and `//` from becoming an autolink. The text still reads as the URL. */
+function breakHitlSchemeUrls(value: string): string {
+  const withSchemeBroken = value.replace(
+    /https?:\/\//gi,
+    (scheme) => `${scheme.slice(0, -2)}${HITL_WORD_JOINER}//`
+  );
+  return withSchemeBroken.replace(/\/\//g, (match, offset, full) =>
+    full[offset - 1] === HITL_WORD_JOINER ? match : `/${HITL_WORD_JOINER}/`
+  );
+}
+
+function needsEmailMarkdownEscape(value: string, index: number): boolean {
+  const char = value[index];
+  if (char === '[' || char === ']' || char === '`' || char === '~') {
+    return true;
+  }
+  if (char !== '<') {
+    return false;
+  }
+  const scheme = value.slice(index + 1, index + 9).toLowerCase();
+  return (
+    scheme.startsWith('https://') || scheme.startsWith('http://') || scheme.startsWith('mailto:')
+  );
+}
+
+/** Escapes markdown characters in one pass. An odd run of backslashes already escapes the next one. */
+function escapeHitlEmailMarkdownChars(value: string): string {
+  const parts: string[] = [];
+  let slashCount = 0;
+
+  const pushSlashes = (escapeNext: boolean) => {
+    if (slashCount > 0) {
+      parts.push('\\'.repeat(slashCount));
+    }
+    if (escapeNext && slashCount % 2 === 0) {
+      parts.push('\\');
+    }
+    slashCount = 0;
+  };
+
+  for (let index = 0; index < value.length; index++) {
+    const char = value[index];
+    if (char === '\\') {
+      slashCount++;
+    } else {
+      pushSlashes(needsEmailMarkdownEscape(value, index));
+      parts.push(char);
+    }
+  }
+  if (slashCount > 0) {
+    parts.push('\\'.repeat(slashCount));
+  }
+
+  return parts.join('');
+}
+
+/** Escapes generated email text so it cannot add a markdown link or code fence. */
+export function escapeHitlEmailMarkdown(value: string): string {
+  return breakHitlSchemeUrls(escapeHitlEmailMarkdownChars(value));
+}
+
+/** Escapes an email link label, including a trailing backslash. */
+export function escapeHitlEmailLinkLabel(value: string): string {
+  return escapeHitlEmailMarkdown(value.replace(/\\/g, '\\\\'));
+}
+
+/** Escapes `&`, `<`, and `>` so Slack cannot treat them as mrkdwn control characters. */
+function escapeSlackMrkdwnControlCharacters(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Escapes generated Slack mrkdwn so it cannot open an explicit link. Mentions stay intact. */
+export function escapeSlackMrkdwnText(value: string): string {
+  return breakHitlSchemeUrls(
+    value.replace(/&/g, '&amp;').replace(/<([@!#][^>\n]*)>|<|>/g, (token) => {
+      if (token === '<') {
+        return '&lt;';
+      }
+      if (token === '>') {
+        return '&gt;';
+      }
+      return token;
+    })
+  );
+}
+
+/** Collapses line breaks so a label stays inside one generated link. */
+export function flattenHitlLinkLabel(value: string): string {
+  return value.replace(/[\r\n\u2028\u2029]+/g, ' ');
+}
+
+/** Escapes a label used inside a Slack `<url|label>` link. */
+export function escapeSlackMrkdwnLabel(value: string): string {
+  return breakHitlSchemeUrls(
+    escapeSlackMrkdwnControlCharacters(flattenHitlLinkLabel(value))
+  ).replace(/\|/g, HITL_FULLWIDTH_VERTICAL_LINE);
+}
+
+/** Escapes `&` in a resume URL placed inside Slack mrkdwn. */
+export function escapeSlackMrkdwnUrl(url: string): string {
+  return url.replace(/&/g, '&amp;');
+}
+
+export const SLACK_SECTION_TEXT_MAX_LENGTH = 3000;
+
+/** Shortens escaped Slack section text to 3,000 characters without splitting an entity. */
+export function fitSlackMrkdwnSectionText(value: string): string {
+  if (value.length <= SLACK_SECTION_TEXT_MAX_LENGTH) {
+    return value;
+  }
+
+  const slice = value.slice(0, SLACK_SECTION_TEXT_MAX_LENGTH);
+  const ampersand = slice.lastIndexOf('&');
+  if (ampersand !== -1 && !slice.slice(ampersand).includes(';')) {
+    return slice.slice(0, ampersand);
+  }
+
+  return slice;
+}
+
 export type SlackApiChannelTarget = { channelNames: string[] } | { channelIds: string[] };
 
 /** Maps a HITL `channels.slack_api.channels` entry to the Slack API connector param. */
