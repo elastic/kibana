@@ -446,7 +446,7 @@ describe('triggerInvestigationStepDefinition', () => {
     ).toEqual({ output: { skip_reason: 'investigation_limit' } });
     expect(start).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      'Skipped investigation of significant_event/event-1: global investigation limit reached'
+      'Skipped investigation of significant_event/event-1: The daily investigation limit has been reached'
     );
   });
 });
@@ -462,7 +462,7 @@ describe('investigation quota notice', () => {
   beforeEach(() => jest.mocked(notifyInvestigationQuotaReached).mockClear());
 
   it('tells the Slack thread when the global limit denies the start', async () => {
-    const error = new InvestigationQuotaDeniedError();
+    const error = new InvestigationQuotaDeniedError(5);
     const soClient = savedObjectsClientMock.create();
     const { definition, getActions } = createDefinition(
       jest.fn().mockRejectedValue(error),
@@ -480,6 +480,7 @@ describe('investigation quota notice', () => {
         spaceId: 'test-space',
         slackThread,
         kibanaUrl: 'https://kibana.example.com',
+        limit: 5,
       })
     );
     expect(params.getSoClient()).toBe(soClient);

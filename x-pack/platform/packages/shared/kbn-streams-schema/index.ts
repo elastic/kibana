@@ -39,7 +39,7 @@ export {
 } from './src/models/unit';
 export type { StreamsUnit } from './src/models/unit';
 export {
-  AUTO_WRITE_PATTERN_BY_SIGNAL,
+  AUTO_WRITE_PATTERNS_BY_SIGNAL,
   UNIT_DESTINATION_SIGNALS,
   getSignalTargetsWritePatterns,
   getUnitDestinationSignalTargets,

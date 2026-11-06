@@ -316,6 +316,7 @@ describe('AlertsListPage', () => {
       'severity',
       '@timestamp',
       'rule.id',
+      'reason',
       'duration',
       'tags',
       'rule_tags',
@@ -330,6 +331,7 @@ describe('AlertsListPage', () => {
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
     ['suppressed', 'Suppressed'],
+    ['reason', 'Reason'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -348,6 +350,7 @@ describe('AlertsListPage', () => {
     'severity',
     '@timestamp',
     'rule.id',
+    'reason',
     'duration',
     'tags',
     'rule_tags',

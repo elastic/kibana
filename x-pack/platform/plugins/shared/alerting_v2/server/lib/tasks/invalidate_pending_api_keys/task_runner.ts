@@ -7,9 +7,9 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { Logger as BaseLogger } from '@kbn/core-di';
-import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
+import { CoreStart } from '@kbn/core-di-server';
 import { PluginStart } from '@kbn/core-di';
-import type { Logger, PluginInitializerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
@@ -20,6 +20,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { ConfigService } from '../../services/config_service/config_service';
 import { ApiKeyServiceSavedObjectsClientToken } from '../../services/api_key_service/tokens';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
@@ -30,7 +31,7 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class ApiKeyInvalidationTaskRunner {
-  private readonly config: PluginConfig;
+  private readonly taskConfig: PluginConfig['invalidateApiKeysTask'];
   private readonly logger: LoggerServiceContract;
 
   constructor(
@@ -41,17 +42,16 @@ export class ApiKeyInvalidationTaskRunner {
     @inject(CoreStart('security')) private readonly securityCore: SecurityServiceStart,
     @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
     private readonly security: SecurityPluginStart,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.taskConfig = configService.get('invalidateApiKeysTask');
     this.logger = loggerService.forSubsystem('tasks');
   }
 
   public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
     const state = taskInstance.state as LatestTaskStateSchema;
-    const interval = this.config.invalidateApiKeysTask.interval;
-    const removalDelay = this.config.invalidateApiKeysTask.removalDelay;
+    const interval = this.taskConfig.interval;
+    const removalDelay = this.taskConfig.removalDelay;
     let totalInvalidated = 0;
     let missingApiKeyRetries = { ...state.missing_api_key_retries };
 

@@ -12,18 +12,18 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 // (PREFIX = 'securitySolutionFlyout'). Kept as plain strings to avoid a
 // cross-module import from cypress into the plugin's public surface.
 
-// Right-panel ResolutionSection (EuiAccordion wrapper)
+// Entity flyout ResolutionSection (EuiAccordion wrapper)
 export const RESOLUTION_SECTION = getDataTestSubjectSelector(
   'securitySolutionFlyoutResolutionSection'
 );
 
-// Right-panel "Resolution group" link inside the section header.
+// Entity flyout "Resolution group" link inside the section header.
 // ExpandablePanel suffixes its data-test-subj with `TitleLink` for the EuiLink.
 export const RESOLUTION_GROUP_LINK = getDataTestSubjectSelector(
   'securitySolutionFlyoutResolutionGroupLinkTitleLink'
 );
 
-// Right-panel populated group table
+// Populated group table (entity flyout and Resolution group tool)
 export const RESOLUTION_GROUP_TABLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutResolutionGroupTable'
 );
@@ -39,17 +39,12 @@ export const RESOLUTION_EMPTY_STATE = getDataTestSubjectSelector(
   'securitySolutionFlyoutResolutionEmptyState'
 );
 
-// Left-panel tab button (in the tab list above the content)
-export const RESOLUTION_GROUP_TAB = getDataTestSubjectSelector(
-  'securitySolutionFlyoutResolutionGroupTab'
-);
-
-// Left-panel resolution tab content body
+// Resolution group tool content body
 export const RESOLUTION_GROUP_TAB_CONTENT = getDataTestSubjectSelector(
   'securitySolutionFlyoutResolutionGroupTabContent'
 );
 
-// Left-panel "Add entities" accordion (collapsed by default)
+// Resolution group tool "Add entities" accordion (collapsed by default)
 export const ADD_ENTITIES_ACCORDION = getDataTestSubjectSelector(
   'securitySolutionFlyoutAddEntitiesAccordion'
 );
