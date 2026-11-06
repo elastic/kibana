@@ -25,6 +25,47 @@ import type {
 import { applyStepUpdates } from '../step_state';
 import { CycleHookRuntime, type CycleDispatchFacts } from './cycle_hook_runtime';
 
+interface RecordedSpan {
+  name: string;
+  parent?: string;
+  attributes: Record<string, unknown>;
+  setAttribute: (key: string, value: unknown) => void;
+}
+
+interface TracingMock {
+  spans: RecordedSpan[];
+  currentSpan: () => RecordedSpan | undefined;
+}
+
+// Records spans with their parent, following the active span through async calls like OTel does.
+jest.mock('@kbn/inference-tracing', () => {
+  const { AsyncLocalStorage } = jest.requireActual('async_hooks');
+  const storage = new AsyncLocalStorage();
+  const spans: RecordedSpan[] = [];
+  return {
+    ...jest.requireActual('@kbn/inference-tracing'),
+    withActiveInferenceSpan: (
+      name: string,
+      opts: { attributes?: Record<string, unknown> },
+      cb: (span: RecordedSpan) => unknown
+    ) => {
+      const span: RecordedSpan = {
+        name,
+        parent: storage.getStore()?.name,
+        attributes: { ...opts.attributes },
+        setAttribute(key, value) {
+          span.attributes[key] = value;
+        },
+      };
+      spans.push(span);
+      return storage.run(span, () => cb(span));
+    },
+    tracingMock: { spans, currentSpan: () => storage.getStore() },
+  };
+});
+
+const { tracingMock } = jest.requireMock<{ tracingMock: TracingMock }>('@kbn/inference-tracing');
+
 const execution = {
   agent: { id: 'agent-1' },
   execution: { id: 'exec-1', resumed: false },
@@ -79,6 +120,115 @@ describe('CycleHookRuntime', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     clock = 1_000;
+    tracingMock.spans.length = 0;
+  });
+
+  describe('tracing', () => {
+    const spanNames = () => tracingMock.spans.map(({ name, parent }) => `${parent} > ${name}`);
+
+    it("nests each due hook's span, and what its handler traces, under one cycle_hooks span", async () => {
+      const seen: Array<string | undefined> = [];
+      const runtime = createRuntime([
+        hook('a', () => {
+          seen.push(tracingMock.currentSpan()?.name);
+        }),
+        hook('b', async () => {
+          await Promise.resolve();
+          seen.push(tracingMock.currentSpan()?.name);
+        }),
+      ]);
+      await runtime.start();
+      tracingMock.spans.length = 0;
+
+      await runtime.dispatch(facts(2));
+
+      expect(seen).toEqual(['cycle_hook a', 'cycle_hook b']);
+      expect(spanNames()).toEqual([
+        'undefined > cycle_hooks',
+        'cycle_hooks > cycle_hook a',
+        'cycle_hooks > cycle_hook b',
+      ]);
+      expect(tracingMock.spans[0].attributes).toMatchObject({
+        'cycle_hooks.phase': 'cycle',
+        'hook.cycle': 2,
+      });
+    });
+
+    it('traces handler creation and the early calls under the start cycle_hooks span', async () => {
+      let seen: string | undefined;
+      const runtime = createRuntime([
+        hook(
+          'early',
+          () => {
+            seen = tracingMock.currentSpan()?.name;
+          },
+          { when: 'first' }
+        ),
+      ]);
+
+      await runtime.start();
+      await runtime.dispatch(facts(0));
+
+      expect(seen).toBe('cycle_hook early');
+      expect(spanNames()).toEqual([
+        'undefined > cycle_hooks',
+        'cycle_hooks > cycle_hook early',
+        'cycle_hooks > cycle_hook early',
+      ]);
+      expect(tracingMock.spans[0].attributes).toMatchObject({ 'cycle_hooks.phase': 'start' });
+      expect(tracingMock.spans.map(({ attributes }) => attributes['hook.call'])).toEqual([
+        undefined,
+        'getHandler',
+        'handler',
+      ]);
+    });
+
+    it('opens no cycle_hooks span when no handler is called', async () => {
+      const runtime = createRuntime([hook('every3', jest.fn(), { when: { everyCycles: 3 } })]);
+      await runtime.start();
+      tracingMock.spans.length = 0;
+
+      await runtime.dispatch(facts(1));
+      await runtime.dispatch(facts(3, { attempt: 1 }));
+
+      expect(tracingMock.spans).toEqual([]);
+    });
+
+    it("records the hook's metadata and the call's outcome on its span", async () => {
+      const runtime = createRuntime([
+        hook('ok', jest.fn(), { when: { everyCycles: 2 }, boundAgents: ['agent-1'] }),
+        hook(
+          'boom',
+          () => {
+            throw new Error('handler failed');
+          },
+          { timeout: 500 }
+        ),
+        hook('slow', () => new Promise<void>(() => {}), { timeout: 10 }),
+      ]);
+      await runtime.start();
+      tracingMock.spans.length = 0;
+
+      await runtime.dispatch(facts(2));
+
+      const [, ok, boom, slow] = tracingMock.spans;
+      expect(ok.attributes).toMatchObject({
+        'hook.id': 'ok',
+        'hook.call': 'handler',
+        'hook.when': 'every_2_cycles',
+        'hook.bound_agents': ['agent-1'],
+        'hook.cycle': 2,
+        'hook.outcome': 'ok',
+      });
+      expect(boom.attributes).toMatchObject({
+        'hook.id': 'boom',
+        'hook.when': 'every_cycle',
+        'hook.timeout_ms': 500,
+        'hook.outcome': 'error',
+        'hook.error': 'handler failed',
+      });
+      expect(slow.attributes).toMatchObject({ 'hook.id': 'slow', 'hook.outcome': 'timeout' });
+    });
   });
 
   describe('start', () => {
