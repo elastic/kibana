@@ -14,6 +14,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { LockManagerService } from '@kbn/lock-manager';
 import { BOUND_WORKFLOW_IDS } from './bound_workflows';
 import { getBoundInvestigationWorkflowId } from './constants';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
@@ -136,6 +137,9 @@ const setup = ({
   const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
   const scheduleSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
   const removeSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
+  const lockManager = {
+    withLock: jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => callback()),
+  } as unknown as LockManagerService;
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
@@ -145,6 +149,7 @@ const setup = ({
     getAgentBuilder: () => agentBuilder,
     getAgentAvailability: () => AVAILABILITY,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
+    lockManager,
     listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
     removeSourceVolumeTask,
@@ -449,8 +454,13 @@ describe('createInvestigatorServiceAccountService', () => {
   });
 
   it('removes the source volume task once the last space is disabled', async () => {
-    const { service, managedWorkflows, listInstalledWorkflowStates, removeSourceVolumeTask } =
-      setup();
+    const {
+      service,
+      managedWorkflows,
+      listInstalledWorkflowStates,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
     listInstalledWorkflowStates.mockResolvedValue([
       { workflowId: 'other-workflow-marketing', spaceId: 'marketing' },
     ]);
@@ -458,6 +468,7 @@ describe('createInvestigatorServiceAccountService', () => {
     await service.disable(request, SPACE_ID);
 
     expect(removeSourceVolumeTask).toHaveBeenCalledTimes(1);
+    expect(scheduleSourceVolumeTask).not.toHaveBeenCalled();
     expect(removeSourceVolumeTask.mock.invocationCallOrder[0]).toBeGreaterThan(
       Math.max(...managedWorkflows.uninstall.mock.invocationCallOrder)
     );
@@ -474,35 +485,13 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(removeSourceVolumeTask).not.toHaveBeenCalled();
   });
 
-  it('restores the task when another space appears during removal', async () => {
-    const {
-      service,
-      listInstalledWorkflowStates,
-      scheduleSourceVolumeTask,
-      removeSourceVolumeTask,
-    } = setup();
-    listInstalledWorkflowStates
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        { workflowId: getBoundInvestigationWorkflowId('marketing'), spaceId: 'marketing' },
-      ]);
-
-    await service.disable(request, SPACE_ID);
-
-    expect(removeSourceVolumeTask).toHaveBeenCalledTimes(1);
-    expect(scheduleSourceVolumeTask).toHaveBeenCalledWith(request);
-    expect(removeSourceVolumeTask.mock.invocationCallOrder[0]).toBeLessThan(
-      scheduleSourceVolumeTask.mock.invocationCallOrder[0]
-    );
-  });
-
-  it('enables and disables the space when the telemetry task cannot be changed', async () => {
+  it('continues setup and teardown when telemetry task changes fail', async () => {
     const { service, scheduleSourceVolumeTask, removeSourceVolumeTask } = setup();
     scheduleSourceVolumeTask.mockRejectedValue(new Error('grant failed'));
     removeSourceVolumeTask.mockRejectedValue(new Error('remove failed'));
 
-    await expect(service.enable(request, SPACE_ID, IDS)).resolves.toBeDefined();
-    await expect(service.disable(request, SPACE_ID)).resolves.toBeDefined();
+    await service.enable(request, SPACE_ID, IDS);
+    await service.disable(request, SPACE_ID);
   });
 
   it('refuses to disable a space the caller cannot access', async () => {

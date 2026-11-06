@@ -6,7 +6,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { BasicPrettyPrinter, Parser } from '@elastic/esql';
+import { BasicPrettyPrinter, isColumn, isOptionNode, Parser } from '@elastic/esql';
+import type { ESQLCommandOption } from '@elastic/esql/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { getSourceLocalIndexExpressions, getSourceReadTargets } from '@kbn/nightshift-shared';
@@ -33,14 +34,12 @@ const buildCountSourceQuery = (esql: string): string => {
 
   const source = BasicPrettyPrinter.command(sourceCommand).replace(/^TS(?=\s)/, 'FROM');
   const metadata = sourceCommand.args.find(
-    (argument) =>
-      !Array.isArray(argument) && argument.type === 'option' && argument.name === 'metadata'
+    (argument): argument is ESQLCommandOption =>
+      isOptionNode(argument) && argument.name === 'metadata'
   );
   const hasIndexModeMetadata =
-    metadata?.args.some(
-      (argument) =>
-        !Array.isArray(argument) && argument.type === 'column' && argument.name === INDEX_MODE_FIELD
-    ) ?? false;
+    metadata?.args.some((argument) => isColumn(argument) && argument.name === INDEX_MODE_FIELD) ??
+    false;
   const metadataSeparator = metadata ? ', ' : ' METADATA ';
   const from = hasIndexModeMetadata ? source : `${source}${metadataSeparator}${INDEX_MODE_FIELD}`;
   return [

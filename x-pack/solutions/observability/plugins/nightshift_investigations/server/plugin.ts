@@ -26,6 +26,7 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/ma
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
   InvestigationLocatorDefinition,
@@ -172,6 +173,7 @@ export class NightshiftInvestigationsPlugin
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
   private investigatorServiceAccountService?: InvestigatorServiceAccountService;
+  private lockManager?: LockManagerService;
   /** The managed workflows client of this plugin, shared by startup installs and setup. */
   private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
@@ -192,6 +194,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+    this.lockManager = new LockManagerService(core, this.logger);
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
     );
@@ -937,8 +940,10 @@ export class NightshiftInvestigationsPlugin
     if (this.investigatorServiceAccountService) {
       return this.investigatorServiceAccountService;
     }
-    if (!this.coreStart || !this.workflowsExtensionsStart) {
-      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    if (!this.coreStart || !this.workflowsExtensionsStart || !this.lockManager) {
+      throw new Error(
+        'Required start services are unavailable — plugin start() has not been called'
+      );
     }
     this.investigatorServiceAccountService = createInvestigatorServiceAccountService({
       core: this.coreStart,
@@ -952,6 +957,7 @@ export class NightshiftInvestigationsPlugin
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
       getAutomationsSoClient: this.getAutomationsSoClient,
+      lockManager: this.lockManager,
       listInstalledWorkflowStates: async () => {
         const client = await this.managedWorkflowsClient;
         return client ? client.listInstalledWorkflowStates() : [];

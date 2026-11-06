@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { isAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -63,6 +64,7 @@ interface Deps {
   getAgentAvailability: () => AgentAvailabilityConfig;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
+  lockManager: LockManagerService;
   listInstalledWorkflowStates: PluginScopedManagedWorkflows['listInstalledWorkflowStates'];
   scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
   removeSourceVolumeTask: () => Promise<void>;
@@ -74,6 +76,13 @@ interface Deps {
 
 /** Matches the wait `nightshift.ensureInvestigationAgent` uses for a just-installed agent. */
 const AGENT_VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as const;
+const TASK_LIFECYCLE_LOCK_ID = 'nightshift-source-volume-task-lifecycle';
+const TASK_LIFECYCLE_LOCK_RETRY_OPTIONS = {
+  retries: 120,
+  factor: 1,
+  minTimeout: 500,
+  maxTimeout: 500,
+} as const;
 
 const getStatusCode = (error: unknown): number | undefined => {
   if (Boom.isBoom(error)) return error.output.statusCode;
@@ -110,6 +119,7 @@ export const createInvestigatorServiceAccountService = ({
   getAgentBuilder,
   getAgentAvailability,
   getAutomationsSoClient,
+  lockManager,
   listInstalledWorkflowStates,
   scheduleSourceVolumeTask,
   removeSourceVolumeTask,
@@ -117,6 +127,15 @@ export const createInvestigatorServiceAccountService = ({
   isServerless,
   logger,
 }: Deps) => {
+  const withTaskLifecycleLock = <T>(callback: () => Promise<T>): Promise<T> =>
+    pRetry(
+      () =>
+        lockManager.withLock(TASK_LIFECYCLE_LOCK_ID, callback).catch((error) => {
+          throw isLockAcquisitionError(error) ? error : new AbortError(error);
+        }),
+      TASK_LIFECYCLE_LOCK_RETRY_OPTIONS
+    );
+
   const getServiceAccounts = (
     ids: Partial<NightshiftServiceAccountIds>
   ): NightshiftServiceAccountInfo[] =>
@@ -498,15 +517,11 @@ export const createInvestigatorServiceAccountService = ({
     );
   };
 
-  const removeSourceVolumeTaskIfUnused = async (request: KibanaRequest): Promise<void> => {
+  const removeSourceVolumeTaskIfUnused = async (): Promise<void> => {
     if (await hasInstalledNightshiftSpace()) {
       return;
     }
     await removeSourceVolumeTask();
-    if (await hasInstalledNightshiftSpace()) {
-      await scheduleSourceVolumeTask(request);
-      return;
-    }
     logger.info('No space has Nightshift set up; removed the source volume telemetry task');
   };
 
@@ -574,7 +589,7 @@ export const createInvestigatorServiceAccountService = ({
     const previous = queues.get(spaceId) ?? Promise.resolve();
     const run = previous
       .catch(() => undefined)
-      .then(() => runEnable(request, spaceId, serviceAccountIds));
+      .then(() => withTaskLifecycleLock(() => runEnable(request, spaceId, serviceAccountIds)));
     queues.set(spaceId, run);
     run
       .catch(() => undefined)
@@ -600,25 +615,27 @@ export const createInvestigatorServiceAccountService = ({
         'Removing the Nightshift service account setup requires the manage_security cluster privilege.'
       );
     }
-    // The agent goes first: a failure after it leaves the space reading as not set up, never a
-    // space reading as removed whose agent still runs as the account.
-    await unbindAgent(request, spaceId);
-    const client = await workflowsExtensions.getClient(request);
-    // The entry point goes first, so the space stops reading as set up before anything else goes.
-    for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {
-      await client.managedWorkflows.uninstall(
-        NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
-        id,
-        {
-          spaceId,
-          workflowIdSuffix: spaceId,
-        }
-      );
-    }
-    await removeSourceVolumeTaskIfUnused(request).catch((error) => {
-      logger.error(`Failed to reconcile the source volume telemetry task: ${error.message}`);
+    return withTaskLifecycleLock(async () => {
+      // The agent goes first: a failure after it leaves the space reading as not set up, never a
+      // space reading as removed whose agent still runs as the account.
+      await unbindAgent(request, spaceId);
+      const client = await workflowsExtensions.getClient(request);
+      // The entry point goes first, so the space stops reading as set up before anything else goes.
+      for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {
+        await client.managedWorkflows.uninstall(
+          NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
+          id,
+          {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          }
+        );
+      }
+      await removeSourceVolumeTaskIfUnused().catch((error) => {
+        logger.error(`Failed to reconcile the source volume telemetry task: ${error.message}`);
+      });
+      return getStatus(request, spaceId);
     });
-    return getStatus(request, spaceId);
   };
 
   return {
