@@ -248,7 +248,6 @@ To delete the projects too, run `mt_kibana/m3/projects.sh delete`. To release th
 ## What you will see that is not a routing bug
 
 - **Certificate warning.** The shard's certificate is self-signed. It still covers the project hostnames, and the proxy routes on the hostname.
-- **Same project name everywhere.** The project picker shows project A's name in every project. One Kibana process has one `xpack.cloud.serverless.project_name`, and `deploy_projects.sh` doesn't set a `projectName` per tenant yet.
 - **Configuration recommended** toast about `server.publicBaseUrl`. One Kibana process has one public URL, and three hostnames share it.
 - **Advanced settings or the default data view from another project** within 10 seconds of switching projects, on images without the M5 fix.
 - **Misrouted calls to project A.** Some background reads and usage counters still use the home cluster. FINDINGS.md lists them.

@@ -37,15 +37,17 @@ fi
 
 project_yml() { kubectl -n "project-$1" get secret kb-kb-config -o jsonpath='{.data.kibana\.yml}' | base64 -d; }
 
-# tenants.yml, keyed by project id: the header the Cloud Proxy sets.
+# tenants.yml, keyed by project id: the header the Cloud Proxy sets. projectName is what the project picker shows,
+# taken from the project's own Kibana, so each tenant shows its own name instead of home's.
 tenants='{}'
 for id in $(jq -r '.[].id' "$state"); do
   tenants=$(project_yml "$id" | yq -o=json '{
       "hosts": ["https://'"$id.es.$domain"'"],
       "serviceAccountToken": .elasticsearch.serviceAccountToken,
       "encryptionKey": .xpack.encryptedSavedObjects.encryptionKey,
-      "securityEncryptionKey": .xpack.security.encryptionKey
-    }' | jq --arg id "$id" --argjson t "$tenants" '$t + {($id): .}')
+      "securityEncryptionKey": .xpack.security.encryptionKey,
+      "projectName": .xpack.cloud.serverless.project_name
+    }' | jq --arg id "$id" --argjson t "$tenants" '$t + {($id): with_entries(select(.value != null))}')
 done
 
 # Home's config, minus what can't be per project in one process, with TLS to Elasticsearch verified.
