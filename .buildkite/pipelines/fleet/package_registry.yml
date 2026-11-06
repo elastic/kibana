@@ -23,6 +23,7 @@ steps:
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -113,6 +114,7 @@ steps:
       diskSizeGb: 130
       preemptible: true
       diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     depends_on: build
@@ -131,6 +133,7 @@ steps:
       diskSizeGb: 130
       preemptible: true
       diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     depends_on: build
