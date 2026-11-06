@@ -305,6 +305,7 @@ export class NightshiftInvestigationsPlugin
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
+        learningEnabled: config.learning.enabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         getCustomContextInstructions: ({ request, spaceId }) =>

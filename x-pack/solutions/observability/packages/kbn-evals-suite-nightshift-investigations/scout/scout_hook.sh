@@ -146,6 +146,50 @@ if [[ -n "$connector_set" && -z "$api_key" ]]; then
   exit 1
 fi
 
+# Knowledge switches: NIGHTSHIFT_KNOWLEDGE lists the systems (memory, cortex, decision-trees) the run
+# turns on and restores before the first example. They are read from the endpoint the connector set
+# investigates, `nightshiftKnowledge.<set>`, so an ORCA run only ever loads ORCA knowledge.
+knowledge=''
+knowledge_url=''
+knowledge_key=''
+knowledge_space=''
+knowledge_input="${NIGHTSHIFT_KNOWLEDGE:-}"
+for system in ${knowledge_input//,/ }; do
+  case "$system" in
+    memory | cortex | decision-trees) ;;
+    *)
+      echo "nightshift-investigations scout hook: unknown NIGHTSHIFT_KNOWLEDGE system '$system';" \
+        "use memory, cortex or decision-trees" >&2
+      exit 1
+      ;;
+  esac
+done
+requested=",${knowledge_input// /},"
+for system in memory cortex decision-trees; do
+  [[ "$requested" == *",$system,"* ]] && knowledge+="${knowledge:+,}$system"
+done
+if [[ -n "$knowledge" ]]; then
+  if [[ -z "$connector_set" ]]; then
+    echo "nightshift-investigations scout hook: NIGHTSHIFT_KNOWLEDGE requires a connector set," \
+      "whose endpoint the knowledge is read from" >&2
+    exit 1
+  fi
+  knowledge_url="$(config_value ".nightshiftKnowledge.\"$connector_set\".url")"
+  knowledge_key="$(config_value ".nightshiftKnowledge.\"$connector_set\".apiKey")"
+  if [[ -z "$knowledge_url$knowledge_key" ]]; then
+    knowledge_url="${NIGHTSHIFT_KNOWLEDGE_ES_URL:-}"
+    knowledge_key="${NIGHTSHIFT_KNOWLEDGE_ES_API_KEY:-}"
+  fi
+  knowledge_space="$(config_value ".nightshiftKnowledge.\"$connector_set\".spaceId")"
+  knowledge_space="${knowledge_space:-${NIGHTSHIFT_KNOWLEDGE_SPACE_ID:-default}}"
+  if [[ -z "$knowledge_url" || -z "$knowledge_key" || "$knowledge_url" == *@* ]]; then
+    echo "nightshift-investigations scout hook: NIGHTSHIFT_KNOWLEDGE requires" \
+      "nightshiftKnowledge.$connector_set.url and apiKey (or NIGHTSHIFT_KNOWLEDGE_ES_URL and" \
+      "NIGHTSHIFT_KNOWLEDGE_ES_API_KEY), with no credentials in the URL" >&2
+    exit 1
+  fi
+fi
+
 if [[ -z "$api_key" ]]; then
   partial=()
   for name in host port certificate key ca; do
@@ -187,6 +231,10 @@ HOOK_HOST="$host" \
   HOOK_CONNECTORS_CONFIG="${connector_set:+$script_dir/connector_sets/$connector_set.yml}" \
   HOOK_ES_URL="$es_url" \
   HOOK_ES_KEY="$es_key" \
+  HOOK_KNOWLEDGE="$knowledge" \
+  HOOK_KNOWLEDGE_URL="$knowledge_url" \
+  HOOK_KNOWLEDGE_KEY="$knowledge_key" \
+  HOOK_KNOWLEDGE_SPACE="$knowledge_space" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
     env: (({
@@ -206,5 +254,10 @@ HOOK_HOST="$host" \
       NIGHTSHIFT_ES_API_KEY: $ENV.HOOK_ES_KEY
     } end) + (if $ENV.HOOK_CONNECTOR_SET == "orcabench" then {
       NIGHTSHIFT_DATASETS: "orcabench"
-    } else {} end))
+    } else {} end) + (if $ENV.HOOK_KNOWLEDGE == "" then {} else {
+      NIGHTSHIFT_KNOWLEDGE: $ENV.HOOK_KNOWLEDGE,
+      NIGHTSHIFT_KNOWLEDGE_ES_URL: $ENV.HOOK_KNOWLEDGE_URL,
+      NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: $ENV.HOOK_KNOWLEDGE_KEY,
+      NIGHTSHIFT_KNOWLEDGE_SPACE_ID: $ENV.HOOK_KNOWLEDGE_SPACE
+    } end))
   }'

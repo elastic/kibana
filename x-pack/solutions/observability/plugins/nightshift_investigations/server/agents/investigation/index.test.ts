@@ -121,6 +121,24 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
   });
 
+  it('keeps hydrating knowledge but drops the optimize hook when learning is disabled', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        memoryEnabled: true,
+        decisionTreesEnabled: true,
+        learningEnabled: false,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
   it('drops both cortex workflows when cortex is disabled', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
