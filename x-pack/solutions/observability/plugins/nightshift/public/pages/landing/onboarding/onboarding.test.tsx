@@ -54,13 +54,21 @@ jest.mock('./automation_step', () => ({ OnboardingAutomationStep: () => null }))
 
 const STEP_IDS = ['enable', 'addData', 'connectSources', 'investigate', 'automate'];
 
-/** Connector counts per sandbox-capable type in the space. */
-const mockConnectors = (countByType: Record<string, number>) =>
+/** Per sandbox-capable type: the connectors the agent has, and ones that only exist in the space. */
+const mockConnectors = (
+  assignedByType: Record<string, number>,
+  unassignedByType: Record<string, number> = {}
+) =>
   (useConnectorsByType as jest.Mock).mockReturnValue({
-    groups: Object.entries(countByType).map(([id, count]) => ({
-      actionType: { id },
-      connectors: Array.from({ length: count }, (_, i) => ({ id: `${id}-${i}` })),
-    })),
+    groups: Object.keys({ ...unassignedByType, ...assignedByType }).map((id) => {
+      const assigned = assignedByType[id] ?? 0;
+      const total = assigned + (unassignedByType[id] ?? 0);
+      return {
+        actionType: { id },
+        connectors: Array.from({ length: total }, (_, i) => ({ id: `${id}-${i}` })),
+        assignedCount: assigned,
+      };
+    }),
     isLoading: false,
     error: null,
   });
@@ -123,6 +131,16 @@ describe('NightshiftOnboarding', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('does not count a preconfigured connector the agent has not been given', () => {
+      mockConnectors({ '.elasticsearch': 0 }, { '.elasticsearch': 1 });
+
+      renderOnboarding();
+
+      expect(
+        screen.queryByTestId('nightshiftOnboardingAddDataProceedButton')
+      ).not.toBeInTheDocument();
+    });
+
     it('proceeds to Connect other sources once a telemetry connector exists', () => {
       mockConnectors({ '.elasticsearch': 0, '.new_relic': 1, '.http': 2 });
 
@@ -144,12 +162,25 @@ describe('NightshiftOnboarding', () => {
       fireEvent.click(screen.getByTestId('nightshiftOnboardingAddDataProceedButton'));
     };
 
-    it('is optional while current', () => {
-      mockConnectors({ '.new_relic': 1, '.github': 0 });
+    it('is optional while current and skippable while nothing is connected there', () => {
+      mockConnectors({ '.new_relic': 1, '.github': 0 }, { '.github': 1, '.http': 2 });
 
       goToSources();
 
       expect(stepsCard()).toHaveTextContent('Optional');
+      expect(
+        screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton')
+      ).toHaveTextContent('Skip this step');
+    });
+
+    it('proceeds once an additional source is connected', () => {
+      mockConnectors({ '.new_relic': 1, '.github': 1 });
+
+      goToSources();
+
+      expect(
+        screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton')
+      ).toHaveTextContent('Proceed');
     });
 
     it('starts looking for first investigations either way', () => {

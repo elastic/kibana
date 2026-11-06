@@ -73,6 +73,10 @@ const PROCEED_LABEL = i18n.translate('xpack.nightshift.onboarding.proceedButton'
   defaultMessage: 'Proceed',
 });
 
+const SKIP_LABEL = i18n.translate('xpack.nightshift.onboarding.skipStepButton', {
+  defaultMessage: 'Skip this step',
+});
+
 const BACK_LABEL = i18n.translate('xpack.nightshift.onboarding.backButton', {
   defaultMessage: 'Back',
 });
@@ -127,10 +131,14 @@ export function NightshiftOnboarding({
   const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
   // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
-  // A connector of a type offered on the telemetry page, preconfigured or not, lets the user
-  // leave that page. Other sandbox-capable types belong to the next page and do not count.
+  // A source is connected once a connector of a type offered on the step is assigned to the
+  // agent: creating one from a card assigns it; a preconfigured one has to be assigned by hand.
   const hasTelemetrySource = connectorGroups.some(
-    ({ actionType, connectors }) => isTelemetryConnectorType(actionType.id) && connectors.length > 0
+    ({ actionType, assignedCount }) => isTelemetryConnectorType(actionType.id) && assignedCount > 0
+  );
+  // Connect other sources is optional: it can be skipped, or proceeded from once one is connected.
+  const hasAdditionalSource = connectorGroups.some(
+    ({ actionType, assignedCount }) => !isTelemetryConnectorType(actionType.id) && assignedCount > 0
   );
 
   // A new execution (setup changed, or a retry) ends any detour.
@@ -284,7 +292,7 @@ export function NightshiftOnboarding({
     ) : step === 'connectSources' ? (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiButton
-          fill
+          fill={hasAdditionalSource}
           fullWidth
           size="s"
           iconType="sortRight"
@@ -293,7 +301,7 @@ export function NightshiftOnboarding({
           onClick={() => startSuggestions.mutate()}
           data-test-subj="nightshiftOnboardingConnectSourcesProceedButton"
         >
-          {PROCEED_LABEL}
+          {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}
         </EuiButton>
         <EuiButtonEmpty
           size="s"
