@@ -533,6 +533,96 @@ describe('mergeChunks', () => {
     expect(message).toEqual({ content: '', tool_calls: [] });
   });
 
+  it('does not merge an id-less call with a call whose real toolCallId looks like a fallback key', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'idlessFunction', arguments: '{ "a": 1 }' },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'realFunction', arguments: '{ "b": 2 }' },
+            index: 1,
+            toolCallId: '__index_0',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        { function: { name: 'idlessFunction', arguments: '{ "a": 1 }' }, toolCallId: '' },
+        { function: { name: 'realFunction', arguments: '{ "b": 2 }' }, toolCallId: '__index_0' },
+      ],
+    });
+  });
+
+  it('merges an id-less prefix with the continuation that carries the first real toolCallId', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'myFunction', arguments: '{ "a": ' }, index: 0, toolCallId: '' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '1 }' }, index: 0, toolCallId: '001' }],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 0, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        { function: { name: 'myFunction', arguments: '{ "a": 1 }' }, toolCallId: '001' },
+      ],
+    });
+  });
+
+  it('keeps tool calls in first-seen order when an id-less call is re-keyed by a later real id', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'firstFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'secondFunction', arguments: '{}' }, index: 1, toolCallId: '002' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 0, toolCallId: '001' }],
+      },
+    ]);
+
+    expect(message.tool_calls.map((call) => call.toolCallId)).toEqual(['001', '002']);
+  });
+
   it('uses the real toolCallId when it arrives after a fully empty delta for the same index', async () => {
     const message = mergeChunks([
       {

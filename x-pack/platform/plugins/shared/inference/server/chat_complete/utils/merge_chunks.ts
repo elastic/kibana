@@ -13,6 +13,10 @@ interface UnvalidatedMessage {
   tool_calls: UnvalidatedToolCall[];
 }
 
+interface ToolCallEntry {
+  call: UnvalidatedToolCall;
+}
+
 /**
  * Merges tool calls from chunks into a single array of tool calls.
  *
@@ -22,49 +26,79 @@ interface UnvalidatedMessage {
  * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index
  * - A delta with no `toolCallId` and no id previously established for its index is handled as follows:
  *   - fully empty (no name, no arguments, e.g. GPT-OSS-120B via EIS): skipped, it carries no data
- *   - otherwise (e.g. Gemini-via-EIS emits a single delta with empty id/name and full args): a
- *     per-index synthetic key is used so the tool call still merges cleanly
+ *   - otherwise (e.g. Gemini-via-EIS emits a single delta with empty id/name and full args): the
+ *     call is tracked under a per-index key that can't collide with a real id, so it still merges
+ *     cleanly. If the first real id for that index arrives later, the call is re-keyed to it.
  * - Real `toolCallId`s, when present, still take precedence and disambiguate tool calls that
  *   share an index but have different ids.
  */
 const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
-  // Map to store tool calls by their unique identifier
-  const toolCallsMap = new Map<string, UnvalidatedToolCall>();
+  // Tool calls by identifier: the provider's toolCallId, or a per-index symbol while no id was seen.
+  // Symbols can't equal a string id, so provider ids never collide with the fallback keys.
+  const entriesByKey = new Map<string | symbol, ToolCallEntry>();
+  // Entries in first-seen order, kept separately so re-keying an entry doesn't change the order
+  const orderedEntries: ToolCallEntry[] = [];
   // Map to track which index corresponds to which toolCallId
   const indexToToolCallId = new Map<number, string>();
-
-  const syntheticKeyForIndex = (index: number) => `__index_${index}`;
+  // Map to track the fallback key of an id-less tool call at each index
+  const indexToIdlessKey = new Map<number, symbol>();
 
   for (const chunk of chunks) {
     chunk.tool_calls?.forEach((toolCall) => {
+      const { index, toolCallId, function: toolFunction } = toolCall;
+
       // Track toolCallId for continuation chunks
-      if (toolCall.toolCallId) {
-        indexToToolCallId.set(toolCall.index, toolCall.toolCallId);
+      if (toolCallId) {
+        indexToToolCallId.set(index, toolCallId);
+
+        // The first real id for an index claims the call previously accumulated without one
+        const idlessKey = indexToIdlessKey.get(index);
+        if (idlessKey) {
+          indexToIdlessKey.delete(index);
+          const idlessEntry = entriesByKey.get(idlessKey);
+          if (idlessEntry && !entriesByKey.has(toolCallId)) {
+            entriesByKey.delete(idlessKey);
+            entriesByKey.set(toolCallId, idlessEntry);
+          }
+        }
       }
 
-      const knownKey = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
+      const knownKey = toolCallId || indexToToolCallId.get(index);
 
       // An empty delta with no known id would otherwise become a phantom tool call with an empty name
-      if (!knownKey && !toolCall.function.name && !toolCall.function.arguments) {
+      if (!knownKey && !toolFunction.name && !toolFunction.arguments) {
         return;
       }
 
-      const key = knownKey || syntheticKeyForIndex(toolCall.index);
+      let key: string | symbol;
+      if (knownKey) {
+        key = knownKey;
+      } else {
+        key = indexToIdlessKey.get(index) ?? Symbol(`tool_call_index_${index}`);
+        indexToIdlessKey.set(index, key);
+      }
 
-      const existingToolCall = toolCallsMap.get(key);
+      const existingEntry = entriesByKey.get(key);
+      const existingToolCall = existingEntry?.call;
       const updatedToolCall: UnvalidatedToolCall = {
         function: {
-          name: toolCall.function.name || existingToolCall?.function.name || '',
-          arguments: (existingToolCall?.function.arguments || '') + toolCall.function.arguments,
+          name: toolFunction.name || existingToolCall?.function.name || '',
+          arguments: (existingToolCall?.function.arguments || '') + toolFunction.arguments,
         },
-        toolCallId: toolCall.toolCallId || existingToolCall?.toolCallId || '',
+        toolCallId: toolCallId || existingToolCall?.toolCallId || '',
       };
 
-      toolCallsMap.set(key, updatedToolCall);
+      if (existingEntry) {
+        existingEntry.call = updatedToolCall;
+      } else {
+        const entry: ToolCallEntry = { call: updatedToolCall };
+        entriesByKey.set(key, entry);
+        orderedEntries.push(entry);
+      }
     });
   }
 
-  return Array.from(toolCallsMap.values()).map((call) => {
+  return orderedEntries.map(({ call }) => {
     if (call.function.arguments === '') {
       return {
         ...call,
