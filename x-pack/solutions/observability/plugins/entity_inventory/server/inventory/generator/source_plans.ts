@@ -16,8 +16,7 @@ import { MAX_QUERY_PLANS } from './types';
 /**
  * Turns the sources of a definition into validated query plans, with `probes[i]` the probe result
  * for source `i`. Every source gives a `FROM` plan, preceded by a `TS` plan when its probe found a
- * readable time-series index, in which case the `FROM` plan excludes time-series indices; a plan's
- * filter is the canonical form of its source's filter.
+ * readable time-series index; a plan's filter is the canonical form of its source's filter.
  */
 export const planSources = (
   definition: EntityDefinitionWithoutId,
@@ -35,16 +34,9 @@ export const planSources = (
     .flatMap(({ indexPattern, attributes = [] }, sourceIndex) => {
       // `TS` reads only time-series indices and `FROM` excludes them, so together they cover the
       // pattern once; without a readable time-series index the `TS` query would fail to verify.
-      const { hasTimeSeries } = probes[sourceIndex];
-      const engines: QueryEngine[] = hasTimeSeries ? ['TS', 'FROM'] : ['FROM'];
+      const engines: QueryEngine[] = probes[sourceIndex].hasTimeSeries ? ['TS', 'FROM'] : ['FROM'];
       return engines.map(
-        (engine): Omit<QueryPlan, 'index'> => ({
-          sourceIndex,
-          indexPattern,
-          attributes,
-          engine,
-          excludeTimeSeries: hasTimeSeries && engine === 'FROM',
-        })
+        (engine): Omit<QueryPlan, 'index'> => ({ sourceIndex, indexPattern, attributes, engine })
       );
     })
     .map((plan, index): QueryPlan => ({ index, ...plan }));

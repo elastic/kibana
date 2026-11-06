@@ -15,7 +15,6 @@ const plan: QueryPlan = {
   sourceIndex: 0,
   indexPattern: 'p',
   engine: 'FROM',
-  excludeTimeSeries: false,
   attributes: [],
 };
 

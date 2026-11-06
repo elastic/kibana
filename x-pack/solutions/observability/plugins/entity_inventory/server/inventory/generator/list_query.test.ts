@@ -37,19 +37,15 @@ const plansOf = (definition: EntityDefinitionWithoutId, hasTimeSeries: boolean) 
 
 const WINDOW_PREDICATE = '`@timestamp` >= ?from AND `@timestamp` < ?to';
 
-// The source line and the leading `WHERE` lines each plan writes before its filter.
-const sourceLinesOf = ({ engine, indexPattern, excludeTimeSeries }: QueryPlan): string[] => {
-  if (engine === 'TS') {
-    return [`TS ${indexPattern}`, `| WHERE ${WINDOW_PREDICATE}`];
-  }
-  return excludeTimeSeries
-    ? [
+// The source line and the leading `WHERE` lines each engine writes before the plan's filter.
+const sourceLinesOf = ({ engine, indexPattern }: QueryPlan): string[] =>
+  engine === 'TS'
+    ? [`TS ${indexPattern}`, `| WHERE ${WINDOW_PREDICATE}`]
+    : [
         `FROM ${indexPattern} METADATA _index_mode`,
         '| WHERE `_index_mode` != "time_series"',
         `    AND ${WINDOW_PREDICATE}`,
-      ]
-    : [`FROM ${indexPattern}`, `| WHERE ${WINDOW_PREDICATE}`];
-};
+      ];
 
 const cases = INVENTORY_DEFINITION_FIXTURES.map(
   (definition) => [definition.type, definition] as const
@@ -60,13 +56,8 @@ describe('buildListQuery', () => {
     jest.mocked(assertParses).mockClear();
   });
 
-  describe.each(
-    cases.flatMap(([type, definition]) => [
-      [type, 'with', definition, true] as const,
-      [type, 'without', definition, false] as const,
-    ])
-  )('%s %s time-series indices', (_type, _with, definition, hasTimeSeries) => {
-    const plans = plansOf(definition, hasTimeSeries);
+  describe.each(cases)('%s with time-series indices', (_type, definition) => {
+    const plans = plansOf(definition, true);
     const identity = resolveIdentityPlan(definition);
     const columns = buildColumns(definition, plans, identity);
 
@@ -307,23 +298,6 @@ FROM metrics-kubernetes.state_deployment-* METADATA _index_mode
 | WHERE \`_index_mode\` != "time_series"
     AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
 ${tail}`);
-  });
-
-  it('reads the whole pattern under FROM, with no _index_mode, when the source has no TS plan', () => {
-    const queries = generateListQueries(
-      k8sDeploymentFixture,
-      plansOf(k8sDeploymentFixture, false),
-      window,
-      LIMIT
-    );
-
-    queries.forEach(({ esql }) => {
-      expect(esql.split('\n').slice(1, 3)).toEqual([
-        expect.stringMatching(/^FROM metrics-\S+$/),
-        `| WHERE ${WINDOW_PREDICATE}`,
-      ]);
-      expect(esql).not.toContain('_index_mode');
-    });
   });
 
   it('names the pattern as written under both engines, with no concrete index', () => {

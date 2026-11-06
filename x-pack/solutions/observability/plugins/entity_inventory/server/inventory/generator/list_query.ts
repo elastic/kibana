@@ -58,31 +58,27 @@ export const buildListQuery = ({
   limit,
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
-  const { engine, indexPattern, filter, excludeTimeSeries } = plan;
+  const { engine, indexPattern, filter } = plan;
   const { groupingFields, presenceFilter, idEvaluation, rawIdentityColumns } = identity;
 
-  // A source becomes one or two plans that together read every index behind the pattern exactly
-  // once. Each names the pattern as the author wrote it, so Elasticsearch applies index privileges,
-  // alias filters and routing itself; naming an alias's backing indices would bypass its filter, and
-  // no metadata call is needed to learn them.
+  // One source becomes two plans that together read every index behind the pattern exactly once.
+  // Both name the pattern as the author wrote it, so Elasticsearch applies index privileges, alias
+  // filters and routing itself; naming an alias's backing indices would bypass its filter, and no
+  // metadata call is needed to learn them.
   // - `TS <pattern>` resolves only `index.mode: time_series` indices and silently skips the rest.
   //   It is built only when the probe found a readable time-series index (see probe_query.ts),
   //   because over a pattern with none `TS ... | STATS` fails verification.
-  // - With a `TS` plan beside it (`excludeTimeSeries`), `FROM <pattern> METADATA _index_mode |
-  //   WHERE _index_mode != "time_series"` reads the rest. `_index_mode` is per-index metadata
-  //   (`standard`, `time_series`, `logsdb`, `lookup`), so the predicate is resolved at planning and
-  //   time-series shards are never opened; verified with the query profile, not documented.
-  //   `METADATA` takes the name bare: Elasticsearch rejects a quoted one there.
-  // - Without one, `FROM <pattern>` reads every index, time-series ones included. `LAST` and `MAX`
-  //   work under `FROM` on time-series indices; only counter rates need `TS`.
+  // - `FROM <pattern> METADATA _index_mode | WHERE _index_mode != "time_series"` reads the rest.
+  //   `_index_mode` is per-index metadata (`standard`, `time_series`, `logsdb`, `lookup`), so the
+  //   predicate is resolved at planning and time-series shards are never opened; verified with the
+  //   query profile, not documented. `METADATA` takes the name bare: Elasticsearch rejects a quoted
+  //   one there.
   // Under `unmapped_fields="nullify"` a field mapped in no index a plan reads comes back as a column
   // of type `null`; the executor reads readability and availability from that (plan_result.ts).
   const sourceCommand =
-    engine === 'TS'
-      ? `TS ${indexPattern}`
-      : `FROM ${indexPattern}${excludeTimeSeries ? ' METADATA _index_mode' : ''}`;
+    engine === 'TS' ? `TS ${indexPattern}` : `FROM ${indexPattern} METADATA _index_mode`;
   const predicates = [
-    ...(excludeTimeSeries ? [`${INDEX_MODE} != "time_series"`] : []),
+    ...(engine === 'FROM' ? [`${INDEX_MODE} != "time_series"`] : []),
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
     ...(filter !== undefined ? [`(${filter})`] : []),
     presenceFilter,

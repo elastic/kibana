@@ -24,7 +24,6 @@ const plan = (index: number, indexPattern = `pattern-${index}`): QueryPlan => ({
   sourceIndex: index,
   indexPattern,
   engine: 'FROM',
-  excludeTimeSeries: false,
   attributes: [],
 });
 
@@ -321,7 +320,6 @@ describe('mergeRows', () => {
         sourceIndex: index,
         indexPattern,
         engine: 'FROM',
-        excludeTimeSeries: false,
         attributes,
       })
     );
