@@ -66,7 +66,9 @@ export async function restartBatch(
     ? new Map<string, AgentPendingRestart>()
     : await getPendingRestartActions(
         esClient,
-        givenAgents.map((agent) => agent.id)
+        givenAgents.map((agent) => agent.id),
+        // a retried batch must not treat its own, already written action as pending
+        { excludeActionId: actionId }
       );
 
   for (const agent of givenAgents) {

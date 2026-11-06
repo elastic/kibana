@@ -224,7 +224,9 @@ describe('restartBatch', () => {
         spaceId: 'default',
       });
 
-      expect(mockGetPendingRestartActions).toHaveBeenCalledWith(esClient, ['pending-agent', 'a1']);
+      expect(mockGetPendingRestartActions).toHaveBeenCalledWith(esClient, ['pending-agent', 'a1'], {
+        excludeActionId: expect.any(String),
+      });
       expect(mockCreateAgentAction).toHaveBeenCalledWith(
         esClient,
         internalSoClient,
@@ -233,6 +235,17 @@ describe('restartBatch', () => {
       const errorsArg = (mockCreateErrorActionResults as jest.Mock).mock.calls[0][2];
       expect(Object.keys(errorsArg)).toEqual(['pending-agent']);
       expect(errorsArg['pending-agent'].message).toMatch(/pending restart action pending-action/);
+    });
+
+    it('excludes the current bulk action from the pending lookup', async () => {
+      await restartBatch(esClient, soClient, [makeAgent('a1')], {
+        spaceId: 'default',
+        actionId: 'retried-action',
+      });
+
+      expect(mockGetPendingRestartActions).toHaveBeenCalledWith(esClient, ['a1'], {
+        excludeActionId: 'retried-action',
+      });
     });
 
     it('includes agents with a pending restart when force is set', async () => {

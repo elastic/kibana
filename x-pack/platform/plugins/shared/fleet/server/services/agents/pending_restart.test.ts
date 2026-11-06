@@ -8,7 +8,17 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import { createEsSearchIterable } from '../utils/create_es_search_iterable';
+
 import { getPendingRestartActions } from './pending_restart';
+
+jest.mock('../utils/create_es_search_iterable', () => ({
+  createEsSearchIterable: jest.fn(),
+}));
+
+const mockCreateEsSearchIterable = createEsSearchIterable as jest.MockedFunction<
+  typeof createEsSearchIterable
+>;
 
 function searchResponse(sources: object[]) {
   return { hits: { hits: sources.map((_source) => ({ _source })) } } as any;
@@ -33,6 +43,7 @@ describe('getPendingRestartActions', () => {
   }
 
   beforeEach(() => {
+    jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   });
 
@@ -124,5 +135,51 @@ describe('getPendingRestartActions', () => {
     const res = await getPendingRestartActions(esClient, ['agent-1']);
 
     expect(res.get('agent-1')?.action_id).toBe('action-new');
+  });
+
+  it('ignores the excluded action', async () => {
+    mockSearch({});
+
+    await getPendingRestartActions(esClient, ['agent-1'], { excludeActionId: 'current-action' });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.any(Array),
+            must_not: [{ term: { action_id: 'current-action' } }],
+          },
+        },
+      })
+    );
+  });
+
+  it('pages through all results when the first page is full', async () => {
+    const fullPage = Array.from({ length: 10000 }, (_, i) => ({
+      action_id: 'other-action',
+      agent_id: `other-agent-${i}`,
+    }));
+    mockSearch({
+      actions: [
+        { action_id: 'action-1', agents: ['agent-1', 'agent-2'], '@timestamp': '2026-11-06' },
+      ],
+      results: fullPage,
+    });
+    mockCreateEsSearchIterable.mockReturnValue(
+      (async function* () {
+        yield searchResponse(fullPage);
+        yield searchResponse([{ action_id: 'action-1', agent_id: 'agent-1' }]);
+      })() as any
+    );
+
+    const res = await getPendingRestartActions(esClient, ['agent-1', 'agent-2']);
+
+    expect(mockCreateEsSearchIterable).toHaveBeenCalledTimes(1);
+    expect(mockCreateEsSearchIterable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        searchRequest: expect.objectContaining({ index: '.fleet-actions-results' }),
+      })
+    );
+    expect([...res.keys()]).toEqual(['agent-2']);
   });
 });
