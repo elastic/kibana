@@ -43,6 +43,16 @@ export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'accesses_frequently',
   'owns',
   'supervises',
+  // Added for POC demo data
+  'member_of',
+  'sso_to_role',
+  'can_assume',
+  'can_connect',
+  'runs_as',
+  'grants_access_to',
+  'executed',
+  'dropped',
+  'connected_to',
 ] as const;
 
 export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];
