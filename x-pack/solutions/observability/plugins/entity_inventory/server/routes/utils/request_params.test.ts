@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { instantParam, listLimitParam } from './query_params';
+import { instantParam, listLimitParam } from './request_params';
 
 describe('instantParam', () => {
   it.each(['2026-11-01T00:00:00Z', '2026-11-01T01:00:00+02:00', '2026-11-01T00:00:00.123456789Z'])(
@@ -30,8 +30,8 @@ describe('listLimitParam', () => {
     expect(listLimitParam.parse(undefined)).toBe(9999);
   });
 
-  it('coerces the numeric string a query string carries', () => {
-    expect(listLimitParam.parse('10')).toBe(10);
+  it('rejects a numeric string', () => {
+    expect(listLimitParam.safeParse('10').success).toBe(false);
   });
 
   it.each([1, 9999])('accepts %i', (limit) => {

@@ -20,5 +20,5 @@ export const instantParam = lazySchema(() =>
 );
 
 export const listLimitParam = lazySchema(() =>
-  z.coerce.number().int().min(1).max(MAX_LIST_LIMIT).default(MAX_LIST_LIMIT)
+  z.number().int().min(1).max(MAX_LIST_LIMIT).default(MAX_LIST_LIMIT)
 );

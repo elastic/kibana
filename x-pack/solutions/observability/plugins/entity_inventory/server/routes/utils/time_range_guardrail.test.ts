@@ -17,7 +17,7 @@ describe('withTimeRangeGuardrail', () => {
 
   it('calls the handler with its options for a window of exactly 72 hours', async () => {
     const handler = jest.fn().mockResolvedValue('rows');
-    const options = { params: { query: { from: FROM, to: at(MAX_TIME_RANGE_MS) } } };
+    const options = { params: { body: { from: FROM, to: at(MAX_TIME_RANGE_MS) } } };
 
     await expect(withTimeRangeGuardrail(handler)(options)).resolves.toBe('rows');
     expect(handler).toHaveBeenCalledWith(options);
@@ -28,7 +28,7 @@ describe('withTimeRangeGuardrail', () => {
     const to = at(MAX_TIME_RANGE_MS + 1);
 
     await expect(
-      withTimeRangeGuardrail(handler)({ params: { query: { from: FROM, to } } })
+      withTimeRangeGuardrail(handler)({ params: { body: { from: FROM, to } } })
     ).rejects.toMatchObject({
       name: 'InventoryRequestError',
       statusCode: 400,
@@ -41,7 +41,7 @@ describe('withTimeRangeGuardrail', () => {
     const handler = jest.fn().mockResolvedValue('rows');
     // 72h in UTC, written with different offsets.
     const options = {
-      params: { query: { from: '2026-11-01T02:00:00+02:00', to: '2026-11-03T19:00:00-05:00' } },
+      params: { body: { from: '2026-11-01T02:00:00+02:00', to: '2026-11-03T19:00:00-05:00' } },
     };
 
     await expect(withTimeRangeGuardrail(handler)(options)).resolves.toBe('rows');

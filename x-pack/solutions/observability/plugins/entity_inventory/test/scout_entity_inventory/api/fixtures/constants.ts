@@ -16,4 +16,5 @@ export const TYPES_PATH = 'internal/entity_inventory/types';
 
 export const INTERNAL_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
+  'kbn-xsrf': 'true',
 };

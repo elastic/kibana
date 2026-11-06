@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, INTERNAL_HEADERS } from '../fixtures';
 
 // The archive writes every deployment at 10:00:00 and 10:01:00 on 2026-11-01.
 const K8S_DEPLOYMENT_LIST_PATH = 'internal/entity_inventory/entities/k8s.deployment/list';
+const WINDOW = { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' };
 
 const CART_API_ID = 'k8s.deployment:scout-cluster/checkout/cart-api';
 const DEPLOYMENT_IDS = [
@@ -40,7 +42,7 @@ interface ListResponse {
 }
 
 apiTest.describe(
-  'GET /internal/entity_inventory/entities/{type}/list',
+  'POST /internal/entity_inventory/entities/{type}/list',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let adminCookieHeader: Record<string, string>;
@@ -50,16 +52,21 @@ apiTest.describe(
       ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
     });
 
+    const postList = (
+      apiClient: ApiClientFixture,
+      body: Record<string, unknown>,
+      path: string = K8S_DEPLOYMENT_LIST_PATH
+    ) =>
+      apiClient.post(path, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        body,
+        responseType: 'json',
+      });
+
     apiTest(
       'returns one row per deployment, merged across the Agent and OpenTelemetry sources',
       async ({ apiClient }) => {
-        const response = await apiClient.get(
-          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
-          {
-            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-            responseType: 'json',
-          }
-        );
+        const response = await postList(apiClient, WINDOW);
 
         expect(response).toHaveStatusCode(200);
         const body: ListResponse = response.body;
@@ -88,13 +95,7 @@ apiTest.describe(
     );
 
     apiTest('returns the typed columns in column order', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, WINDOW);
 
       expect(response).toHaveStatusCode(200);
       const { columns }: ListResponse = response.body;
@@ -120,13 +121,10 @@ apiTest.describe(
       'reports last_seen as the newest timestamp inside the window',
       async ({ apiClient }) => {
         // Ends before the 10:01:00 documents, so only the 10:00:00 ones are read.
-        const response = await apiClient.get(
-          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T10:00:30.000Z`,
-          {
-            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-            responseType: 'json',
-          }
-        );
+        const response = await postList(apiClient, {
+          from: '2026-11-01T09:00:00.000Z',
+          to: '2026-11-01T10:00:30.000Z',
+        });
 
         expect(response).toHaveStatusCode(200);
         const { rows, total }: ListResponse = response.body;
@@ -141,27 +139,17 @@ apiTest.describe(
     );
 
     apiTest('accepts bounds with an offset other than Z', async ({ apiClient }) => {
-      // `+` is percent-encoded as `%2B`; left raw, a query string decodes it as a space.
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T11:00:00%2B02:00&to=2026-11-01T13:00:00%2B02:00`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, {
+        from: '2026-11-01T11:00:00+02:00',
+        to: '2026-11-01T13:00:00+02:00',
+      });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.total).toBe(3);
     });
 
     apiTest('cuts the rows at limit, reports truncated with no total', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=1`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, { ...WINDOW, limit: 1 });
 
       expect(response).toHaveStatusCode(200);
       const { rows, total, truncated }: ListResponse = response.body;
@@ -172,13 +160,7 @@ apiTest.describe(
     });
 
     apiTest('reports an exact total when limit equals the entity count', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=3`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, { ...WINDOW, limit: 3 });
 
       expect(response).toHaveStatusCode(200);
       const { rows, total, truncated }: ListResponse = response.body;
@@ -191,13 +173,10 @@ apiTest.describe(
     apiTest(
       'returns deployments from time-series and standard indices once each, with the newest values',
       async ({ apiClient }) => {
-        const response = await apiClient.get(
-          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-05T09:00:00.000Z&to=2026-11-05T11:00:00.000Z`,
-          {
-            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-            responseType: 'json',
-          }
-        );
+        const response = await postList(apiClient, {
+          from: '2026-11-05T09:00:00.000Z',
+          to: '2026-11-05T11:00:00.000Z',
+        });
 
         expect(response).toHaveStatusCode(200);
         const { rows, total, errors }: ListResponse = response.body;
@@ -224,26 +203,20 @@ apiTest.describe(
     );
 
     apiTest('accepts a window of exactly 72 hours', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T00:00:00.000Z&to=2026-11-04T00:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, {
+        from: '2026-11-01T00:00:00.000Z',
+        to: '2026-11-04T00:00:00.000Z',
+      });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.total).toBe(3);
     });
 
     apiTest('rejects a window over 72 hours with 400', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T00:00:00.000Z&to=2026-11-04T00:00:01.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, {
+        from: '2026-11-01T00:00:00.000Z',
+        to: '2026-11-04T00:00:01.000Z',
+      });
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toBe(
@@ -252,20 +225,14 @@ apiTest.describe(
     });
 
     apiTest('rejects from equal to or after to with 400', async ({ apiClient }) => {
-      const equal = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T09:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
-      const reversed = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T11:00:00.000Z&to=2026-11-01T09:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const equal = await postList(apiClient, {
+        from: '2026-11-01T09:00:00.000Z',
+        to: '2026-11-01T09:00:00.000Z',
+      });
+      const reversed = await postList(apiClient, {
+        from: '2026-11-01T11:00:00.000Z',
+        to: '2026-11-01T09:00:00.000Z',
+      });
 
       expect(equal).toHaveStatusCode(400);
       expect(equal.body.message).toContain('from must be earlier than to');
@@ -274,20 +241,11 @@ apiTest.describe(
     });
 
     apiTest('rejects a missing or malformed bound with 400', async ({ apiClient }) => {
-      const missing = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?to=2026-11-01T11:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
-      const malformed = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=yesterday&to=2026-11-01T11:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const missing = await postList(apiClient, { to: '2026-11-01T11:00:00.000Z' });
+      const malformed = await postList(apiClient, {
+        from: 'yesterday',
+        to: '2026-11-01T11:00:00.000Z',
+      });
 
       expect(missing).toHaveStatusCode(400);
       expect(malformed).toHaveStatusCode(400);
@@ -295,45 +253,31 @@ apiTest.describe(
     });
 
     apiTest('rejects a limit below 1 or above 9,999 with 400', async ({ apiClient }) => {
-      const tooSmall = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=0`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
-      const tooBig = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=10000`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const tooSmall = await postList(apiClient, { ...WINDOW, limit: 0 });
+      const tooBig = await postList(apiClient, { ...WINDOW, limit: 10000 });
 
       expect(tooSmall).toHaveStatusCode(400);
       expect(tooBig).toHaveStatusCode(400);
     });
 
+    apiTest('rejects a limit sent as a string with 400', async ({ apiClient }) => {
+      const response = await postList(apiClient, { ...WINDOW, limit: '1' });
+
+      expect(response).toHaveStatusCode(400);
+    });
+
     apiTest('rejects a malformed type in the path with 400', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        'internal/entity_inventory/entities/K8S/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
-      );
+      const response = await postList(apiClient, WINDOW, 'internal/entity_inventory/entities/K8S/list');
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toContain('type must start with a lowercase letter');
     });
 
     apiTest('answers 404 for a type with no entity definition', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        'internal/entity_inventory/entities/does.not.exist/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          responseType: 'json',
-        }
+      const response = await postList(
+        apiClient,
+        WINDOW,
+        'internal/entity_inventory/entities/does.not.exist/list'
       );
 
       expect(response).toHaveStatusCode(404);
@@ -345,12 +289,10 @@ apiTest.describe(
     apiTest(
       'answers 404 for a type whose definition another plugin registered',
       async ({ apiClient }) => {
-        const response = await apiClient.get(
-          'internal/entity_inventory/entities/host/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
-          {
-            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-            responseType: 'json',
-          }
+        const response = await postList(
+          apiClient,
+          WINDOW,
+          'internal/entity_inventory/entities/host/list'
         );
 
         expect(response).toHaveStatusCode(404);
@@ -360,18 +302,27 @@ apiTest.describe(
       }
     );
 
+    apiTest('rejects a request without the kbn-xsrf header with 400', async ({ apiClient }) => {
+      const response = await apiClient.post(K8S_DEPLOYMENT_LIST_PATH, {
+        headers: { 'x-elastic-internal-origin': 'kibana', ...adminCookieHeader },
+        body: WINDOW,
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe('Request must contain a kbn-xsrf header.');
+    });
+
     apiTest(
       'rejects a viewer, which lacks the entity_inventory_read privilege',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
-        const response = await apiClient.get(
-          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
-          {
-            headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
-            responseType: 'json',
-          }
-        );
+        const response = await apiClient.post(K8S_DEPLOYMENT_LIST_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+          body: WINDOW,
+          responseType: 'json',
+        });
 
         expect(response).toHaveStatusCode(403);
       }

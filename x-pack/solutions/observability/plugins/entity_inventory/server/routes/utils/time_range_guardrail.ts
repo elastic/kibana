@@ -15,14 +15,14 @@ export const MAX_TIME_RANGE_MS = MAX_TIME_RANGE_HOURS * 60 * 60 * 1000;
 
 /**
  * Wraps a route handler so it throws `InventoryRequestError` (400 through the route factory)
- * before running when `query.to - query.from` exceeds `MAX_TIME_RANGE_MS`; exactly 72 hours is allowed.
+ * before running when `body.to - body.from` exceeds `MAX_TIME_RANGE_MS`; exactly 72 hours is allowed.
  */
 export const withTimeRangeGuardrail =
-  <TOptions extends { params: { query: TimeWindow } }, TResult>(
+  <TOptions extends { params: { body: TimeWindow } }, TResult>(
     handler: (options: TOptions) => Promise<TResult>
   ) =>
   async (options: TOptions): Promise<TResult> => {
-    const { from, to } = options.params.query;
+    const { from, to } = options.params.body;
     if (Date.parse(to) - Date.parse(from) > MAX_TIME_RANGE_MS) {
       throw new InventoryRequestError(
         `the time range from ${from} to ${to} is longer than the maximum of ${MAX_TIME_RANGE_HOURS} hours`
