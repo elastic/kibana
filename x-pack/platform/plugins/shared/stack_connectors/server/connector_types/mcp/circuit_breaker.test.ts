@@ -203,6 +203,26 @@ describe('McpCircuitBreaker', () => {
       );
     });
 
+    it('keeps the breaker open when a call admitted before it opened fails with a non-connect error', async () => {
+      const breaker = createBreaker();
+      const lateGate = deferred<string>();
+      const lateRun = breaker.run(ctx(), () => lateGate.promise).catch((err: unknown) => err);
+
+      for (let i = 0; i < 3; i++) {
+        await breaker
+          .run(ctx(), async () => Promise.reject(await connectError()))
+          .catch(() => undefined);
+      }
+
+      clock = 400;
+      lateGate.reject(timeoutError());
+      await lateRun;
+
+      const fn = jest.fn().mockResolvedValue('no');
+      await expect(breaker.run(ctx(), fn)).rejects.toThrow('is unavailable');
+      expect(fn).not.toHaveBeenCalled();
+    });
+
     it('counts one failed build once when concurrent callers share the same error', async () => {
       const breaker = createBreaker();
       const err = await connectError();

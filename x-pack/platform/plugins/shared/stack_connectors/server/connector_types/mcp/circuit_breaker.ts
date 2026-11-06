@@ -93,7 +93,8 @@ export class McpCircuitBreaker {
           this.countedErrors.add(err as object);
           this.recordFailure(ctx);
         }
-      } else {
+      } else if (!this.isOpen(ctx)) {
+        // A late non-connect error says nothing about reachability: only a result may close an open breaker.
         this.recordSuccess(ctx);
       }
       throw err;
@@ -109,6 +110,11 @@ export class McpCircuitBreaker {
     if (openUntil !== undefined && this.now() < openUntil) {
       this.throwUnavailable(ctx, openUntil);
     }
+  }
+
+  private isOpen(ctx: BreakerRun): boolean {
+    const openUntil = this.breakers.get(ctx.key)?.openUntil;
+    return openUntil !== undefined && this.now() < openUntil;
   }
 
   private recordSuccess(ctx: BreakerRun): void {
