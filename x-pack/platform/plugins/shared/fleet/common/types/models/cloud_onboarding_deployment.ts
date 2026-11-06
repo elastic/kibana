@@ -26,6 +26,8 @@ export interface CloudOnboardingEcfStack {
   serviceIds?: string[];
   /** Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated. Used to detect settings drift on session resume. */
   serviceConfigs?: CloudOnboardingEcfServiceConfig[];
+  /** `DataStreamNamespace` the stack was last launched or updated with. Only the unified family takes one. Used to detect namespace drift on session resume. */
+  namespace?: string;
 }
 
 /** The per-service values that feed an ECF stack's parameters. */

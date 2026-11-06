@@ -13,10 +13,14 @@ import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
 import { useGetOutputs } from '@kbn/fleet-plugin/public';
-import type { ServiceChipState } from '../../onboarding_flow_context';
+import type { DetectAndReviewStepState, ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
-import { deploysAsPolicy, getEffectiveNamespace } from '../../common/effective_namespace';
+import {
+  deploysAsPolicy,
+  getEcfStackNamespace,
+  getEffectiveNamespace,
+} from '../../common/effective_namespace';
 import { getPolicySettings } from '../../common/policy_settings';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
 import type { HasDataResponse } from '../../../../common/core/detection_api';
@@ -63,13 +67,15 @@ function getInstancePatterns(
   entry: AwsServiceMatrixEntry,
   instanceId: string,
   serviceSettings: ServiceSettingsPersistedState,
-  deploymentMethod: DeploymentMethod | undefined
+  deploymentMethod: DeploymentMethod | undefined,
+  ecfStacks: DetectAndReviewStepState['ecfStacks']
 ): string[] {
   const { serviceVars = {}, namespace } = serviceSettings;
-  // An ECF service has no namespace: its data does not follow the setting.
+  // An ECF service lands in the namespace its stack was launched with, which only follows the
+  // setting once the stack is updated. The OTel and CrowdStrike stacks have none.
   const effectiveNamespace = deploysAsPolicy(entry, deploymentMethod)
     ? getEffectiveNamespace(instanceId, serviceVars, namespace)
-    : undefined;
+    : getEcfStackNamespace(entry, ecfStacks);
   return getServiceIndexPatterns(entry, effectiveNamespace);
 }
 
@@ -103,7 +109,12 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     updateDetectAndReviewStep,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
-  const { serviceStatuses, deployErrors, policyIdsByInstance = {} } = detectAndReviewStep;
+  const {
+    serviceStatuses,
+    deployErrors,
+    policyIdsByInstance = {},
+    ecfStacks,
+  } = detectAndReviewStep;
   const [storedSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     DEFAULT_SERVICE_SETTINGS
@@ -179,7 +190,7 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
       for (const instanceId of instanceIds.filter(isPatternInstance)) {
         byId.set(
           instanceId,
-          getInstancePatterns(entry, instanceId, serviceSettings, deploymentMethod)
+          getInstancePatterns(entry, instanceId, serviceSettings, deploymentMethod, ecfStacks)
         );
       }
     }
@@ -190,6 +201,7 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     serviceSettings,
     isPatternInstance,
     deploymentMethod,
+    ecfStacks,
   ]);
 
   const allPatterns = useMemo(() => {
