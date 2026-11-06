@@ -8,14 +8,14 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { preemptibleAgent, retry } from '../presets.ts';
+import { retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 const buildCloudImage = commandStep({
   command: '.buildkite/scripts/steps/cloud/build_cloud_image.sh',
   label: 'Build Cloud Image',
   key: 'build_cloud_image',
-  agents: preemptibleAgent('n2-standard-16'),
+  agents: spotAgent('n2-standard-16', spotZones.n2),
   timeout_in_minutes: 60,
   retry: retry.agentLoss,
 });
@@ -37,7 +37,7 @@ export const deployCloudSteps = (): readonly Step[] => [
     key: 'deploy_cloud',
     concurrency: 1,
     concurrency_group: 'kibana/cloud-deploy/pr-${GITHUB_PR_NUMBER}',
-    agents: preemptibleAgent('n2-standard-2'),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     depends_on: ['build_cloud_image'],
     timeout_in_minutes: 30,
     retry: retry.agentLoss,

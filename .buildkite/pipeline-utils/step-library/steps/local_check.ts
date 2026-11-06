@@ -15,7 +15,7 @@ export const localCheck = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/checks/local_check.sh',
     label: 'Local Check',
-    agents: withHyperdisk(spotAgent('n4-standard-16', spotZones.allUS)),
+    agents: withHyperdisk(spotAgent('n4-standard-16', spotZones.n4)),
     key: 'check',
     timeout_in_minutes: 35,
     retry: retry.agentLoss,
