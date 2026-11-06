@@ -83,6 +83,7 @@ export const registerInvestigationEvaluation = ({
         inferenceClient,
         evaluationConnector,
         kbnUrl,
+        kbnClient,
         samlAuth,
       }) => {
         if (orca) {
@@ -92,7 +93,10 @@ export const registerInvestigationEvaluation = ({
         const dataset = await loadDataset(evalsClient);
         // An ORCA task reads telemetry only up to its snapshot. Each cutoff gets a space whose
         // investigator holds one connector, whose key's document-level security stops there.
-        const cutoffGroups = orca ? groupOrcaCasesByCutoff(dataset.examples) : [];
+        const orcaVariant = orca ? resolveOrcaTelemetryVariant() : undefined;
+        const cutoffGroups = orcaVariant
+          ? groupOrcaCasesByCutoff(dataset.examples, orcaVariant)
+          : [];
         if (orca && config.serverless) {
           // Counts the spaces earlier slices left on a reused stack, not only this slice's.
           expect(
@@ -134,13 +138,13 @@ export const registerInvestigationEvaluation = ({
         });
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
-        evaluate.setTimeout(
+        const timeoutMs =
           Math.ceil((dataset.examples.length * repetitions) / concurrency) *
             (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
-            5 * 60_000 +
-            // Minting, checking and setting up each ORCA cutoff's key and space.
-            cutoffGroups.length * 60_000
-        );
+          5 * 60_000 +
+          // Minting, checking and setting up each ORCA cutoff's key and space.
+          cutoffGroups.length * 60_000;
+        evaluate.setTimeout(timeoutMs);
         // Investigations only run as the Nightshift agent service account, so each space has to be
         // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
         // Elasticsearch has no predefined roles for the account, so the eval creates them first.
@@ -249,12 +253,14 @@ export const registerInvestigationEvaluation = ({
           );
 
         let experimentResults: Awaited<ReturnType<typeof runExperiment>>;
-        if (orcaCredentials) {
+        if (orcaCredentials && orcaVariant) {
           const { url } = orcaCredentials;
           const { apiKeys, invalidate } = await mintOrcaCutoffKeys({
             credentials: orcaCredentials,
             cutoffs: cutoffGroups.map(({ cutoff }) => cutoff),
-            variant: resolveOrcaTelemetryVariant(),
+            variant: orcaVariant,
+            // Minted after the timeout is set, so no key expires while the test can still run.
+            expiresInMs: timeoutMs,
           });
           log.info(
             `ORCA: ${dataset.examples.length} tasks read through ${cutoffGroups.length} cutoff keys`
@@ -269,7 +275,7 @@ export const registerInvestigationEvaluation = ({
                 const basePath = spaceBasePath(spaceId);
                 await ensureOrcaSpace(fetch, spaceId);
                 await setUpNightshiftSpace(basePath);
-                await saveOrcaConnector(fetch, { basePath, connectorId, url, apiKey });
+                await saveOrcaConnector(kbnClient, { basePath, connectorId, url, apiKey });
                 await saveConnectorsOnInvestigator(fetch, [connectorId], basePath);
               },
               { concurrency: 4 }

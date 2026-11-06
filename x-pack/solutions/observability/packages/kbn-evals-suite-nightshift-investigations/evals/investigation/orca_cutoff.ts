@@ -68,11 +68,20 @@ export interface OrcaCutoffGroup {
 }
 
 /**
+ * The id suffix of a cutoff's space, connector and key. A hash, so neither the ids nor the key's
+ * name show the investigator its snapshot time or the variant.
+ */
+const orcaCutoffSuffix = (cutoff: string, variant: OrcaTelemetryVariant): string =>
+  createHash('sha256').update(`${variant}:${cutoff}`).digest('hex').slice(0, 12);
+
+/**
  * Groups tasks by cutoff, in cutoff order. Space and connector ids derive from a hash of the
- * cutoff, so they are stable across runs and do not show the investigator its snapshot time.
+ * cutoff and the variant: stable across runs, and never shared by a `full` and a `no-flags` run on
+ * one stack, which would otherwise overwrite each other's keys.
  */
 export const groupOrcaCasesByCutoff = (
-  examples: ReadonlyArray<Pick<InvestigationExample, 'metadata'>>
+  examples: ReadonlyArray<Pick<InvestigationExample, 'metadata'>>,
+  variant: OrcaTelemetryVariant
 ): OrcaCutoffGroup[] => {
   const caseIdsByCutoff = new Map<string, string[]>();
   for (const example of examples) {
@@ -82,7 +91,7 @@ export const groupOrcaCasesByCutoff = (
   return [...caseIdsByCutoff.entries()]
     .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
     .map(([cutoff, caseIds]) => {
-      const suffix = createHash('sha256').update(cutoff).digest('hex').slice(0, 12);
+      const suffix = orcaCutoffSuffix(cutoff, variant);
       return {
         cutoff,
         spaceId: `orca-${suffix}`,
@@ -193,18 +202,21 @@ export interface OrcaCutoffKeys {
  * Mints a short-lived document-level security key per cutoff as the eval user, and checks each
  * before any investigation starts. A reference key first proves the variant with the pinned counts.
  * Keys can only carry privileges when a user creates them, so the eval holds a user credential
- * rather than an API key. Each key expires after a day; `invalidate` revokes them all sooner.
+ * rather than an API key. Each key expires after `expiresInMs`, the run's own timeout, so it
+ * outlives the investigations that use it; `invalidate` revokes them all sooner.
  */
 export const mintOrcaCutoffKeys = async ({
   credentials: { url, username, password },
   cutoffs,
   variant,
+  expiresInMs,
   request = globalThis.fetch,
   concurrency = 8,
 }: {
   credentials: OrcaEsCredentials;
   cutoffs: readonly string[];
   variant: OrcaTelemetryVariant;
+  expiresInMs: number;
   request?: typeof globalThis.fetch;
   concurrency?: number;
 }): Promise<OrcaCutoffKeys> => {
@@ -241,8 +253,9 @@ export const mintOrcaCutoffKeys = async ({
   const mint = async (cutoff: string) => {
     const { id, encoded } = apiKeySchema.parse(
       await asEvalUser('POST', '/_security/api_key', {
-        name: `nightshift-orcabench-eval-${variant}-${cutoff}`,
-        expiration: '1d',
+        // `_security/_authenticate` shows a key its own name, so the name is only the hash.
+        name: `nightshift-orcabench-eval-${orcaCutoffSuffix(cutoff, variant)}`,
+        expiration: `${Math.ceil(expiresInMs / 60_000)}m`,
         role_descriptors: {
           orca_cutoff: {
             indices: [

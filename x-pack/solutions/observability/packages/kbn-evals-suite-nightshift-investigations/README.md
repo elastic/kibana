@@ -585,14 +585,20 @@ read. The agent investigates unchanged and no query it writes can see past its t
   role reads the three ORCA index patterns and holds `manage_own_api_key`. Elasticsearch only lets a
   user, not an API key, create a key that carries privileges. At run start the eval mints one key
   per cutoff in the run, with `read` and `view_index_metadata` on those patterns and the
-  document-level security query `{"range": {"@timestamp": {"lte": "<cutoff>"}}}`. Keys expire after
-  a day and are invalidated as soon as the experiment ends. No key is logged, stored in a start
-  input or written to experiment metadata; each lives only in its connector's secrets.
+  document-level security query `{"range": {"@timestamp": {"lte": "<cutoff>"}}}`. A key expires
+  when the test's own timeout would, so it outlives every investigation that reads with it, and is
+  invalidated as soon as the experiment ends. Its name is `nightshift-orcabench-eval-<hash>`, the
+  same hash as its space, because the agent can read its key's name with `_security/_authenticate`;
+  the cutoff and variant are only in the key's metadata. No key is logged, stored in a start input
+  or written to experiment metadata; each lives only in its connector's secrets, and the eval writes
+  the connector without letting `kbnClient` log a failed response.
 - **Spaces.** Connectors are saved on the investigator as a whole, so each cutoff gets its own
   Kibana space, `orca-<hash>`, with its own investigator, service-account binding and connector
-  `orcabench-es-<hash>`. The hash of the cutoff keeps ids stable across runs without showing the
-  agent its snapshot time. A task starts and is read in its cutoff's space, so eight investigations
-  still run at a time. Spaces stay after a run, so slices that reuse one stack add up. Serverless
+  `orcabench-es-<hash>`. The hash of the cutoff and the variant keeps ids stable across runs without
+  showing the agent its snapshot time, and keeps a `full` and a `no-flags` run on one stack from
+  overwriting each other's keys. Run one ORCA eval of a variant on a stack at a time: a second one
+  would replace the first one's keys, and revoke them when it ends. A task starts and is read in
+  its cutoff's space, so eight investigations still run at a time. Spaces stay after a run, so slices that reuse one stack add up. Serverless
   allows 100 spaces, and the eval fails before minting keys when this run's cutoffs and the stack's
   existing spaces would exceed that; start a fresh stack (`node scripts/evals stop`) between slices
   there. A model connector must be visible in every space: a preconfigured connector or an

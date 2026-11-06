@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { KbnClient } from '@kbn/scout';
 import { countSpacesWith, ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
@@ -41,14 +42,22 @@ describe('ensureOrcaSpace', () => {
 });
 
 describe('saveOrcaConnector', () => {
+  // A fake kbnClient that answers the connector GET with `found`, and the write with `saved`.
+  const mockKbnClient = (found: number, saved = { status: 200, data: '{}' }) => {
+    const request = jest.fn(async ({ method }: { method: string }) =>
+      method === 'GET' ? { status: found, data: '' } : saved
+    );
+    return { request } as unknown as Pick<KbnClient, 'request'> & { request: jest.Mock };
+  };
+
   it("creates the space's Elasticsearch connector with the cutoff key", async () => {
-    const fetch = mockFetch(false);
+    const kbnClient = mockKbnClient(404);
 
-    await saveOrcaConnector(fetch, connector);
+    await saveOrcaConnector(kbnClient, connector);
 
-    const [path, { method, body }] = fetch.mock.calls[1];
+    const [{ path, method, body }] = kbnClient.request.mock.calls[1];
     expect([path, method]).toEqual(['/s/orca-abc/api/actions/connector/orcabench-es-abc', 'POST']);
-    expect(JSON.parse(body)).toEqual({
+    expect(body).toEqual({
       name: 'orcabench_es',
       connector_type_id: '.elasticsearch',
       config: { url: 'https://orca.example', selectedActions: ['_test'] },
@@ -57,25 +66,40 @@ describe('saveOrcaConnector', () => {
   });
 
   it("replaces an existing connector's key, so a rerun reads with this run's key", async () => {
-    const fetch = mockFetch(true);
+    const kbnClient = mockKbnClient(200);
 
-    await saveOrcaConnector(fetch, connector);
+    await saveOrcaConnector(kbnClient, connector);
 
-    const [, { method, body }] = fetch.mock.calls[1];
+    const [{ method, body }] = kbnClient.request.mock.calls[1];
     expect(method).toBe('PUT');
-    expect(JSON.parse(body)).not.toHaveProperty('connector_type_id');
-    expect(JSON.parse(body).secrets.Authorization).toBe('ApiKey cutoff-key');
+    expect(body).not.toHaveProperty('connector_type_id');
+    expect(body.secrets.Authorization).toBe('ApiKey cutoff-key');
   });
 
-  it('redacts the key from a failure', async () => {
-    const fetch = jest
-      .fn()
-      .mockRejectedValueOnce(notFound())
-      .mockRejectedValueOnce(new Error('400 -- {"Authorization":"ApiKey cutoff-key"} is invalid'));
+  it('takes every failure as a response, so the client never logs one, and redacts the key', async () => {
+    const kbnClient = mockKbnClient(404, {
+      status: 400,
+      data: '{"Authorization":"ApiKey cutoff-key"} is invalid',
+    });
 
-    await expect(saveOrcaConnector(fetch as unknown as HttpHandler, connector)).rejects.toThrow(
-      'Saving ORCA connector orcabench-es-abc failed: 400 -- {"Authorization":"ApiKey [redacted]"} is invalid'
+    await expect(saveOrcaConnector(kbnClient, connector)).rejects.toThrow(
+      'Saving ORCA connector orcabench-es-abc returned HTTP 400: {"Authorization":"ApiKey [redacted]"} is invalid'
     );
+    for (const [{ ignoreErrors, retries }] of kbnClient.request.mock.calls) {
+      expect(retries).toBe(0);
+      expect(ignoreErrors).toEqual(
+        expect.arrayContaining([400, 401, 403, 404, 409, 500, 502, 503])
+      );
+    }
+  });
+
+  it('stops before writing when the connector cannot be read', async () => {
+    const kbnClient = mockKbnClient(500);
+
+    await expect(saveOrcaConnector(kbnClient, connector)).rejects.toThrow(
+      'Reading ORCA connector orcabench-es-abc returned HTTP 500'
+    );
+    expect(kbnClient.request).toHaveBeenCalledTimes(1);
   });
 });
 

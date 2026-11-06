@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { KbnClient } from '@kbn/scout';
 import { isNotFound } from './task';
 
 /** The name the investigator sees for the ORCA connector in every space, as an operator would name it. */
@@ -44,12 +45,16 @@ export const ensureOrcaSpace = async (fetch: HttpHandler, spaceId: string): Prom
   });
 };
 
+// Every error status, so `kbnClient` returns a failed response instead of logging its body.
+const ERROR_STATUSES = Array.from({ length: 200 }, (_, index) => 400 + index);
+
 /**
- * Creates or updates a space's ORCA connector so it reads with that cutoff's key. A failure is
- * rethrown with the key redacted, since Kibana's error can echo the request.
+ * Creates or updates a space's ORCA connector so it reads with that cutoff's key. The write goes
+ * through `kbnClient` with errors returned rather than thrown: a thrown error carries Kibana's
+ * response, which can echo the request, into the client's debug log before it could be redacted.
  */
 export const saveOrcaConnector = async (
-  fetch: HttpHandler,
+  kbnClient: Pick<KbnClient, 'request'>,
   {
     basePath,
     connectorId,
@@ -63,18 +68,31 @@ export const saveOrcaConnector = async (
     config: { url, selectedActions: ['_test'] },
     secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey}` },
   };
-  try {
-    const update = await exists(fetch, path);
-    await fetch(path, {
-      method: update ? 'PUT' : 'POST',
-      body: JSON.stringify(
-        update ? connector : { ...connector, connector_type_id: '.elasticsearch' }
-      ),
+  const request = async (method: 'GET' | 'POST' | 'PUT', body?: object) => {
+    const { status, data } = await kbnClient.request<string>({
+      method,
+      path,
+      body,
+      retries: 0,
+      ignoreErrors: ERROR_STATUSES,
+      responseType: 'text',
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    return { status, text: data };
+  };
+  const found = await request('GET');
+  if (found.status !== 200 && found.status !== 404) {
+    throw new Error(`Reading ORCA connector ${connectorId} returned HTTP ${found.status}`);
+  }
+  const update = found.status === 200;
+  const saved = await request(
+    update ? 'PUT' : 'POST',
+    update ? connector : { ...connector, connector_type_id: '.elasticsearch' }
+  );
+  if (saved.status >= 400) {
     throw new Error(
-      `Saving ORCA connector ${connectorId} failed: ${message.split(apiKey).join('[redacted]')}`
+      `Saving ORCA connector ${connectorId} returned HTTP ${saved.status}: ${saved.text
+        .split(apiKey)
+        .join('[redacted]')}`
     );
   }
 };

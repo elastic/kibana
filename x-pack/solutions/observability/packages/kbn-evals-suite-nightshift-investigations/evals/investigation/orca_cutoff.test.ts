@@ -49,7 +49,7 @@ describe('groupOrcaCasesByCutoff', () => {
     task('early-2', { telemetry_snapshot_time: '2026-04-19T16:27:11.000Z' }),
   ];
   it('puts tasks sharing a cutoff in one space with one connector, in cutoff order', () => {
-    const groups = groupOrcaCasesByCutoff(tasks);
+    const groups = groupOrcaCasesByCutoff(tasks, 'full');
     expect(groups.map(({ cutoff, caseIds }) => [cutoff, caseIds])).toEqual([
       ['2026-04-19T16:27:11.000Z', ['early-1', 'early-2']],
       ['2026-04-24T19:25:42.000Z', ['late']],
@@ -62,7 +62,7 @@ describe('groupOrcaCasesByCutoff', () => {
   });
   it('keeps ids stable across runs without showing the investigator its snapshot time', () => {
     const ids = (examples: typeof tasks) =>
-      groupOrcaCasesByCutoff(examples).map(({ cutoff, spaceId, connectorId }) => ({
+      groupOrcaCasesByCutoff(examples, 'full').map(({ cutoff, spaceId, connectorId }) => ({
         cutoff,
         spaceId,
         connectorId,
@@ -71,6 +71,12 @@ describe('groupOrcaCasesByCutoff', () => {
     for (const { connectorId } of ids(tasks)) {
       expect(connectorId).not.toMatch(/2026|1627|1925/);
     }
+  });
+  it('never gives a full and a no-flags run the same space, so neither overwrites the other’s key', () => {
+    const spaces = (variant: OrcaTelemetryVariant) =>
+      groupOrcaCasesByCutoff(tasks, variant).map(({ spaceId }) => spaceId);
+    expect(spaces('no-flags')).toHaveLength(2);
+    expect(spaces('no-flags').filter((spaceId) => spaces('full').includes(spaceId))).toEqual([]);
   });
 });
 
@@ -182,12 +188,15 @@ const fakeOrca = ({
 describe('mintOrcaCutoffKeys', () => {
   const credentials = { url: 'https://orca.example', username: 'eval', password: 'password' };
   const cutoffs = ['2026-04-19T16:27:00.000Z', '2026-04-24T19:25:42.000Z'];
+  // Longer than a day, as a half of the 755 can run.
+  const expiresInMs = 26 * 3_600_000 + 1;
 
   it('mints a checked DLS key per cutoff as the eval user, after a reference key proves the variant', async () => {
     const orca = fakeOrca({ variant: 'no-flags' });
 
     const { apiKeys, invalidate } = await mintOrcaCutoffKeys({
       credentials,
+      expiresInMs,
       cutoffs,
       variant: 'no-flags',
       request: orca.request,
@@ -198,8 +207,14 @@ describe('mintOrcaCutoffKeys', () => {
       [cutoffs[0], 'encoded-key-2'],
       [cutoffs[1], 'encoded-key-3'],
     ]);
-    expect(orca.minted[0].body.name).toBe(
-      `nightshift-orcabench-eval-no-flags-${ORCA_REFERENCE_CUTOFF}`
+    // Named by its space's hash alone, since the investigator can read its key's name.
+    const keyName = (cutoff: string) =>
+      `nightshift-orcabench-eval-${groupOrcaCasesByCutoff(
+        [task('a', { telemetry_snapshot_time: cutoff })],
+        'no-flags'
+      )[0].spaceId.slice('orca-'.length)}`;
+    expect(orca.minted.map(({ body }) => body.name)).toEqual(
+      [ORCA_REFERENCE_CUTOFF, ...cutoffs].map(keyName)
     );
     expect(orca.minted[1].body.role_descriptors).toEqual({
       orca_cutoff: {
@@ -213,7 +228,8 @@ describe('mintOrcaCutoffKeys', () => {
       },
     });
     expect(orca.minted.map(({ body }) => body)).toEqual(
-      orca.minted.map(() => expect.objectContaining({ expiration: '1d' }))
+      // Outlives the run's own timeout, rounded up to the minute.
+      orca.minted.map(() => expect.objectContaining({ expiration: '1561m' }))
     );
     // Each cutoff key is checked on every signal: after the cutoff, up to it, and flag documents.
     const counts = orca.request.mock.calls.filter(([url]) => String(url).endsWith('/_count'));
@@ -229,6 +245,7 @@ describe('mintOrcaCutoffKeys', () => {
 
     const minting = mintOrcaCutoffKeys({
       credentials,
+      expiresInMs,
       cutoffs,
       variant: 'full',
       request: orca.request,
@@ -247,6 +264,7 @@ describe('mintOrcaCutoffKeys', () => {
     const orca = fakeOrca({ failInvalidations: 1 });
     const { invalidate } = await mintOrcaCutoffKeys({
       credentials,
+      expiresInMs,
       cutoffs,
       variant: 'full',
       request: orca.request,
@@ -264,6 +282,7 @@ describe('mintOrcaCutoffKeys', () => {
     const orca = fakeOrca({ stuckKeys: ['key-2'] });
     const { invalidate } = await mintOrcaCutoffKeys({
       credentials,
+      expiresInMs,
       cutoffs,
       variant: 'full',
       request: orca.request,
@@ -280,7 +299,13 @@ describe('mintOrcaCutoffKeys', () => {
     const orca = fakeOrca({ variant: 'no-flags', flagDocuments: 2 });
 
     await expect(
-      mintOrcaCutoffKeys({ credentials, cutoffs, variant: 'no-flags', request: orca.request })
+      mintOrcaCutoffKeys({
+        credentials,
+        expiresInMs,
+        cutoffs,
+        variant: 'no-flags',
+        request: orca.request,
+      })
     ).rejects.toThrow(/no-flags key for .* reads 2 .* flag documents/);
   });
 
@@ -288,7 +313,13 @@ describe('mintOrcaCutoffKeys', () => {
     const orca = fakeOrca({ variant: 'full' });
 
     await expect(
-      mintOrcaCutoffKeys({ credentials, cutoffs, variant: 'no-flags', request: orca.request })
+      mintOrcaCutoffKeys({
+        credentials,
+        expiresInMs,
+        cutoffs,
+        variant: 'no-flags',
+        request: orca.request,
+      })
     ).rejects.toThrow('pinned no-flags snapshot');
     expect(orca.minted).toHaveLength(1);
     expect(orca.invalidated).toEqual([{ ids: ['key-1'], owner: true }]);
