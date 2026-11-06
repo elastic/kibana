@@ -30,7 +30,7 @@ export const DashboardPinnedPanelsRenderer = () => {
     dashboardInternalApi.pinnedLayout$,
     dashboardApi.viewMode$
   );
-
+  console.log({ flexLayout });
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const panels = dashboardApi.layout$.getValue().pinnedPanels;

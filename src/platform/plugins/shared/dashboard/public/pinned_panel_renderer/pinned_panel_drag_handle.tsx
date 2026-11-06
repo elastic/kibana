@@ -35,7 +35,7 @@ const dragHandleStyles = {
       '&:hover > .euiIcon:first-of-type': {
         color: euiTheme.colors.vis.euiColorVis0,
       },
-      '.euiFormLabel': {
+      '.euiFormLabel:not([role="button"])': {
         pointerEvents: 'none', // Prevent label from blocking drag events
       },
     }),
@@ -43,6 +43,9 @@ const dragHandleStyles = {
     css({
       '.euiIcon': {
         color: euiTheme.colors.textParagraph,
+      },
+      '&:hover > .euiIcon:first-of-type': {
+        color: euiTheme.colors.primary,
       },
     }),
 };

@@ -122,7 +122,7 @@ export function transformPinnedPanelProperties(
               : width === 'medium'
               ? 400
               : 224
-            : width,
+            : width ?? 224,
         config: 'explicitInput' in rest ? rest.explicitInput : rest.config,
       } as DashboardPinnedPanel;
     });
@@ -158,15 +158,14 @@ function transformPanels(
       if (schema) {
         config = schema.parse(config) as DashboardPinnedPanel['config'];
       }
-      console.log('MADE IT HERE 2', { config, rest });
+      console.log('OUT !!!!!!!', { rest });
+
       transformedPanels.push({
         ...pinnedControlSchema.parse(rest),
         config,
         type,
       } as DashboardPinnedPanel);
     } catch (e) {
-      console.log('OUT !!!!!!!', { e });
-
       warnings.push({
         type: 'dropped_panel',
         panel_type: panel.type,

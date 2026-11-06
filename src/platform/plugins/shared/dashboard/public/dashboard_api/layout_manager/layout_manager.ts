@@ -461,7 +461,7 @@ export function initializeLayoutManager(
     newPinnedPanels[uuid] = {
       type: panelToPin.type as PinnedControlLayoutState['type'],
       order: panelToPin.order ?? Object.keys(newPinnedPanels).length,
-      width: panelToPin.width ?? DEFAULT_PINNED_CONTROL_STATE.width,
+      width: panelToPin.width ?? 224,
       grow: panelToPin.grow ?? DEFAULT_PINNED_CONTROL_STATE.grow,
     };
     const newPanels = { ...layout$.getValue().panels };
@@ -476,8 +476,11 @@ export function initializeLayoutManager(
     prevLayoutState?: Partial<PinnedControlLayoutState>
   ) => {
     const { serializedState } = panelPackage;
-    const { grow, width, ...panelState } =
-      (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
+    const {
+      grow,
+      width = 224,
+      ...panelState
+    } = (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
     const newPanelUuid = createPanel({ ...panelPackage, serializedState: panelState });
     const layoutState = {
       ...(serializedState ? { grow, width } : {}),

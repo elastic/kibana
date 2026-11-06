@@ -26,6 +26,11 @@ import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
 import type { PinnableControlApi } from './types';
+import {
+  CONTROL_WIDTH_LARGE,
+  CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_SMALL,
+} from '@kbn/controls-constants';
 
 interface Props {
   api: PinnableControlApi;
@@ -98,7 +103,13 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
           legend={strings.minimumWidth}
           options={widthOptions}
           idSelected={
-            width === 224 ? 'small' : width === 400 ? 'medium' : width === 800 ? 'large' : undefined
+            width === 224
+              ? (CONTROL_WIDTH_SMALL as string)
+              : width === 400
+              ? (CONTROL_WIDTH_MEDIUM as string)
+              : width === 800
+              ? (CONTROL_WIDTH_LARGE as string)
+              : undefined
           }
           onChange={(newWidth) => setWidth(mapping[newWidth as keyof typeof mapping])}
           type="single"

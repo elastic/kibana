@@ -56,6 +56,8 @@ export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
               },
             };
           }
+
+          console.log('IN !!!!!!!', { transformedControlState });
         } else {
           transformedControlState = {
             ...transformedControlState,
@@ -63,7 +65,6 @@ export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
           };
         }
       } catch (e) {
-        console.log('IN !!!!!!!', { e });
         panelErrors.push(
           new TransformPanelInError(
             `Transform error: ${e.message}`,

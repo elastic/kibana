@@ -8,10 +8,11 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiFlexItem,
+  EuiIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
@@ -19,7 +20,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlLabelTooltip } from '@kbn/controls-renderer';
+import { ControlLabelTooltip, useIndicateRelatedPanelsSelector } from '@kbn/controls-renderer';
 import { apiPublishesLabel } from '@kbn/controls-renderer/src/utils';
 import { HasCustomPrepend } from '@kbn/controls-schemas';
 import { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
@@ -28,6 +29,7 @@ import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin
 import { i18n } from '@kbn/i18n';
 import {
   apiCanCancelRequests,
+  apiPublishesRelatedPanels,
   apiPublishesTitle,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -53,8 +55,33 @@ export const PinnedPanel = ({
     (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
   >(null);
 
-  const [viewMode] = useBatchedPublishingSubjects(dashboardApi.viewMode$);
+  const [viewMode, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
+    dashboardApi.viewMode$,
+    dashboardApi.relatedPanelsIndicatorId$
+  );
   const [panelLabel, setPanelLabel] = useState<string>('');
+  const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
+
+  const selectedPanel = useMemo(
+    () =>
+      relatedPanelsIndicatorId
+        ? Object.entries(dashboardApi.children$.value).find(
+            ([key]) => key === relatedPanelsIndicatorId
+          )?.[1]
+        : undefined,
+    [dashboardApi.children$.value, relatedPanelsIndicatorId]
+  );
+  const indicatePanel = Boolean(
+    api && // onApiAvailable may not have returned yet
+      apiPublishesRelatedPanels(selectedPanel) &&
+      selectedPanelRelatedPanels.includes(id)
+  );
+  const {
+    canIndicateRelatedPanels,
+    isIndicatingRelatedPanels,
+    onToggleIndicateRelatedPanels,
+    numberOfRelatedPanels,
+  } = useIndicateRelatedPanelsSelector(api);
 
   useEffect(() => {
     return () => {
@@ -78,10 +105,15 @@ export const PinnedPanel = ({
         setPanelLabel(title || label || defaultTitle);
       })
     );
+    if (apiPublishesRelatedPanels(selectedPanel)) {
+      subscriptions.add(selectedPanel.relatedPanels$.subscribe(setSelectedPanelRelatedPanels));
+    } else {
+      setSelectedPanelRelatedPanels([]);
+    }
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [api]);
+  }, [api, selectedPanel]);
 
   const onApiAvailable = useCallback(
     (controlApi: DefaultEmbeddableApi) => {
@@ -93,13 +125,45 @@ export const PinnedPanel = ({
 
   const isEditable = viewMode === 'edit';
 
+  const enableIndicateRelatedPanels = Boolean(canIndicateRelatedPanels && numberOfRelatedPanels);
+  const handleToggleIndicateRelated = useCallback(
+    () => (enableIndicateRelatedPanels ? onToggleIndicateRelatedPanels() : null),
+    [enableIndicateRelatedPanels, onToggleIndicateRelatedPanels]
+  );
+
   const controlLabel = (
     <ControlLabelTooltip
+      canIndicateRelatedPanels={canIndicateRelatedPanels}
+      isIndicatingRelatedPanels={isIndicatingRelatedPanels}
+      numberOfRelatedPanels={numberOfRelatedPanels}
       panelLabel={panelLabel}
       anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
     >
-      <EuiFormLabel className="controlPanel--label">
-        <span css={styles.prependWrapperStyles}>{panelLabel}</span>
+      <EuiFormLabel
+        className="controlPanel--label"
+        onClick={handleToggleIndicateRelated}
+        onKeyDown={(e) =>
+          e.key === 'Enter' || e.key === ' ' ? handleToggleIndicateRelated() : null
+        }
+        role={enableIndicateRelatedPanels ? 'button' : undefined}
+        tabIndex={enableIndicateRelatedPanels ? 0 : undefined}
+      >
+        <span css={styles.prependWrapperStyles}>
+          {panelLabel}
+          {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
+            <>
+              {' '}
+              <EuiIcon
+                size="s"
+                aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
+                  defaultMessage: 'Warning: No related panels',
+                })}
+                type="warning"
+                className="controlLabel__warning-icon"
+              />
+            </>
+          )}
+        </span>
       </EuiFormLabel>
     </ControlLabelTooltip>
   );
@@ -132,6 +196,8 @@ export const PinnedPanel = ({
             fullWidth
             className={classNames('controlFrame__formControlLayout', {
               'controlFrame__formControlLayout--edit': isEditable,
+              'controlFrame__formControlLayout--focused': indicatePanel,
+              'controlFrame__formControlLayout--selected': isIndicatingRelatedPanels,
               type,
             })}
             css={styles.formControl}
@@ -151,6 +217,7 @@ export const PinnedPanel = ({
                     <DragHandle
                       isEditable={viewMode === 'edit'}
                       controlTitle={panelLabel}
+                      highContrast={isIndicatingRelatedPanels}
                       setDragHandles={setDragHandles}
                     >
                       {controlLabel}
@@ -217,6 +284,19 @@ const controlPanelStyles = {
           '&:hover': {
             backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
           },
+        },
+      },
+      '&.controlFrame__formControlLayout--focused': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+      },
+      '&.controlFrame__formControlLayout--selected': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+        backgroundColor: transparentize(euiTheme.colors.primary, 0.1),
+        '& div, & button': {
+          backgroundColor: 'transparent',
+        },
+        '&.controlFrame__formControlLayout--edit .euiFormControlLayout__prepend:hover': {
+          backgroundColor: transparentize(euiTheme.colors.primary, 0.1),
         },
       },
       '.controlPanel--label': {
