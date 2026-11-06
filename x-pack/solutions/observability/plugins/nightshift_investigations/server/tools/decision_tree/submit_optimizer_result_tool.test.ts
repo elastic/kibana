@@ -1021,6 +1021,25 @@ describe('nightshift_submit_optimizer_result counts', () => {
       expect(nodeVisits(committedCounts(store)).X1).toBe(1);
     });
 
+    it('rejects the traversal when the tree disappears before its counts are written', async () => {
+      const store = createStore(stored(FULL_TREE));
+      store.updateCounts.mockResolvedValue(undefined);
+
+      const { result } = await runSubmit({
+        store,
+        markdown: '',
+        edited: false,
+        traversals: [traversal()],
+      });
+
+      expect('results' in result && result.results[0]).toEqual(
+        expect.objectContaining({
+          type: ToolResultType.error,
+          data: { message: expect.stringContaining(`${TREE_ID} no longer exists`) },
+        })
+      );
+    });
+
     it('rejects a traversal of a tree that does not exist', async () => {
       const store = createStore();
 
@@ -1119,6 +1138,29 @@ describe('nightshift_submit_optimizer_result counts', () => {
       workflowExecutionId: 'wf-1',
     };
     const getProvenance = () => provenanceFields;
+
+    it('rejects a submit that lists one tree twice without committing either entry', async () => {
+      const store = createStore(stored(FULL_TREE));
+      const { submit } = createTool({
+        store,
+        files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+      });
+
+      const result = await submit({
+        symptom_trees: [
+          mainSubmission({ evidence_gatherer_metadata: ['E1: Checkout latency from APM'] }),
+          mainSubmission(),
+        ],
+      });
+
+      expect(resultOf(result)).toEqual(
+        expect.objectContaining({
+          type: ToolResultType.error,
+          data: { message: expect.stringMatching(/Submit each tree once in symptom_trees/) },
+        })
+      );
+      expect(store.commit).not.toHaveBeenCalled();
+    });
 
     describe('provenance and applied writes', () => {
       it('records both for learnings on a tree the submit neither edits nor traverses', async () => {

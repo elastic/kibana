@@ -554,14 +554,29 @@ export const createSubmitOptimizerResultTool = ({
           })),
       ];
 
-      if (traversals.size < params.traversals.length) {
-        outcomes.push({
-          tree_id: params.traversals.map((traversal) => traversal.tree_id).join(', '),
-          file_path: '',
-          status: 'rejected',
-          detail:
-            'Submit at most one traversal per tree; combine its visited edges into one entry.',
-        });
+      // A tree listed twice would be committed twice in one turn, and the second entry's metadata
+      // would replace the first's, so duplicates reject the whole submit before anything is written.
+      const duplicateTrees = editedSlugs.size < params.symptom_trees.length;
+      const duplicateTraversals = traversals.size < params.traversals.length;
+      if (duplicateTrees || duplicateTraversals) {
+        if (duplicateTrees) {
+          outcomes.push({
+            tree_id: params.symptom_trees.map((submission) => submission.tree_id).join(', '),
+            file_path: '',
+            status: 'rejected',
+            detail:
+              'Submit each tree once in symptom_trees; put all of its evidence_gatherer_metadata and merged_nodes in one entry.',
+          });
+        }
+        if (duplicateTraversals) {
+          outcomes.push({
+            tree_id: params.traversals.map((traversal) => traversal.tree_id).join(', '),
+            file_path: '',
+            status: 'rejected',
+            detail:
+              'Submit at most one traversal per tree; combine its visited edges into one entry.',
+          });
+        }
       } else {
         for (const { treeId, filePath, persist } of work) {
           if (!blockedSlugs.has(symptomSlugFromTreeId(treeId))) {
@@ -1069,6 +1084,10 @@ const persistTraversal = async ({
           return applyTraversal(tree, counts, traversal, now, counting);
         },
       });
+      // The head can vanish after the read above, even mid-retry; then nothing was counted.
+      if (!updated) {
+        throw new DecisionTreeValidationError(treeId, `${treeId} no longer exists`);
+      }
       recordApplied(updated, existing.version);
     }
   } catch (error) {
