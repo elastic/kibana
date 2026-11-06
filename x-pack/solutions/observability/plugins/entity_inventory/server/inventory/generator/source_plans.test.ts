@@ -40,6 +40,7 @@ describe('planSources', () => {
         indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
         attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
         engine: 'TS',
+        excludeTimeSeries: false,
       },
       {
         index: 1,
@@ -47,6 +48,7 @@ describe('planSources', () => {
         indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
         attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
         engine: 'FROM',
+        excludeTimeSeries: true,
       },
       {
         index: 2,
@@ -58,6 +60,7 @@ describe('planSources', () => {
           { name: 'paused', field: 'kubernetes.deployment.paused' },
         ],
         engine: 'FROM',
+        excludeTimeSeries: false,
       },
     ]);
   });
@@ -81,6 +84,15 @@ describe('planSources', () => {
         { index: 2, sourceIndex: 1, engine: 'FROM' },
       ]
     );
+  });
+
+  it('excludes time-series indices from a FROM plan only when its source also has a TS plan', () => {
+    const plans = planSources(k8sDeploymentFixture, [NO_TIME_SERIES, TIME_SERIES]);
+    expect(plans.map(({ engine, excludeTimeSeries }) => ({ engine, excludeTimeSeries }))).toEqual([
+      { engine: 'FROM', excludeTimeSeries: false },
+      { engine: 'TS', excludeTimeSeries: false },
+      { engine: 'FROM', excludeTimeSeries: true },
+    ]);
   });
 
   it('gives a source without attributes an empty attribute list', () => {

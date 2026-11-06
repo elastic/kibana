@@ -13,6 +13,7 @@ const plan: QueryPlan = {
   sourceIndex: 0,
   indexPattern: 'metrics-*',
   engine: 'FROM',
+  excludeTimeSeries: false,
   attributes: [
     { name: 'phase', field: 'k8s.pod.phase', valueLabels: { '2': 'running', Running: 'running' } },
     { name: 'ready', field: 'k8s.pod.ready', valueLabels: { true: 'yes' } },

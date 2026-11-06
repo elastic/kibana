@@ -75,6 +75,7 @@ describe('summarizeResults', () => {
     sourceIndex: 0,
     indexPattern: 'p',
     engine: 'FROM',
+    excludeTimeSeries: false,
     attributes: [],
   };
   const result = (rowCount: number, isPartial = false): PlanResult => ({

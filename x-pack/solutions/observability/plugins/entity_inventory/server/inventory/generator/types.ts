@@ -30,8 +30,13 @@ export interface QueryPlan {
   filter?: string;
   /** The source's attributes; every plan of a source carries them. */
   attributes: DynamicAttribute[];
-  /** `TS` reads the pattern's time-series indices, `FROM` every other index behind it. */
+  /** `TS` reads the pattern's time-series indices; `FROM` reads the other indices, or all of them. */
   engine: QueryEngine;
+  /**
+   * True on a `FROM` plan whose source also has a `TS` plan: the `FROM` query then skips the
+   * time-series indices the `TS` plan reads. False otherwise, and always on a `TS` plan.
+   */
+  excludeTimeSeries: boolean;
 }
 
 /** The query window as ISO 8601 bounds, `[from, to)`. */
