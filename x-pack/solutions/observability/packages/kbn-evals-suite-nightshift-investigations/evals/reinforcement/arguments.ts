@@ -18,7 +18,7 @@ import type { PathStep, SubmitArguments, TraversalSubmission } from './types';
 const SUBMIT_TOOL = 'nightshift_submit_optimizer_result';
 
 /**
- * Same signal `deriveCausalConfirmed` uses in the reinforcement turn script: a confirmed
+ * A hypothesis the investigator marked `confirmed`, in a JSON or YAML-like status field. A confirmed
  * hypothesis is what makes a path causal.
  */
 const CONFIRMED_CAUSE_RE = /"status"\s*:\s*"confirmed"|\bstatus:\s*['"]?confirmed\b/i;
@@ -29,6 +29,10 @@ export const confirmsCause = (response: string): boolean => CONFIRMED_CAUSE_RE.t
 /** The submit tool accepts a bare slug for the `symptom:<slug>` tree, so compare by slug. */
 const namesTree = (named: string | undefined, treeId: string): boolean =>
   !named || symptomSlugFromTreeId(named) === symptomSlugFromTreeId(treeId);
+
+/** True when `treeId` is the round's seeded tree, or the round seeded none. */
+export const isSeededTree = (seededId: string | undefined, treeId: string): boolean =>
+  namesTree(seededId, treeId);
 
 /**
  * A submit naming no tree applies to every tree. One that names only other trees, like a retry of
@@ -151,10 +155,11 @@ const formatArguments = (submission: SubmitArguments): string =>
 /**
  * Structural check of the last submit call against the investigation response, the tree before
  * the run, and the tree after it. A score of 1 means the agent passed a traversal for this tree,
- * the visit path is non-empty, the causal path is present only when the response confirms a
- * cause, and any declared merges agree with the two trees. A round marked `requireMerge` must
- * declare one. Whether those merges and paths are the right ones for the investigation is the
- * LLM judge's job.
+ * the visit path is non-empty, the causal path is set only when the response confirms a cause,
+ * and any declared merges agree with the two trees. With `requireMerge` the submit must declare a
+ * merge, and with `requireCausalPath` a confirmed response must come with a causal path; both are
+ * round-level rules the caller sets for the seeded tree only. Whether those merges and paths are
+ * the right ones for the investigation is the LLM judge's job.
  */
 export const gradeSubmissions = ({
   submissions,
@@ -162,12 +167,14 @@ export const gradeSubmissions = ({
   submitted,
   response,
   requireMerge = false,
+  requireCausalPath = true,
 }: {
   submissions: SubmitArguments[];
   prior: DecisionTreeView | undefined;
   submitted: DecisionTreeView | undefined;
   response: string;
   requireMerge?: boolean;
+  requireCausalPath?: boolean;
 }): { score: 0 | 1; explanation: string } => {
   if (submissions.length === 0) {
     return {
@@ -182,7 +189,7 @@ export const gradeSubmissions = ({
   if (!submitted || !treeId) {
     problems.push('The submitted tree could not be parsed.');
   } else {
-    problems.push(...traversalProblems(last, treeId, response));
+    problems.push(...traversalProblems(last, treeId, response, requireCausalPath));
     problems.push(...mergeProblems(last, prior, submitted));
     problems.push(...pathProblems(last, submitted));
     if (requireMerge && !declaresMerge(last, treeId)) {
@@ -211,11 +218,15 @@ const declaresMerge = (submission: SubmitArguments, treeId: string): boolean =>
 const traversalsForTree = (submission: SubmitArguments, treeId: string): TraversalSubmission[] =>
   (submission.traversals ?? []).filter((traversal) => namesTree(traversal.tree_id, treeId));
 
-/** The submit has to name the path this round followed, and a causal path only when it confirmed one. */
+/**
+ * The submit has to name the path this round followed, and a causal path only when it confirmed
+ * one. A confirmed cause requires a causal path only when `requireCausalPath` is set.
+ */
 const traversalProblems = (
   submission: SubmitArguments,
   treeId: string,
-  response: string
+  response: string,
+  requireCausalPath: boolean
 ): string[] => {
   const traversals = traversalsForTree(submission, treeId);
   if (traversals.length === 0) {
@@ -232,7 +243,7 @@ const traversalProblems = (
       ...walkEdges(traversal.causal_path, 'causal_path', treeId).problems
     );
     const causal = traversal.causal_path ?? [];
-    if (confirmed && causal.length === 0) {
+    if (requireCausalPath && confirmed && causal.length === 0) {
       problems.push(`The response confirms a cause, but causal_path for ${treeId} is empty.`);
     }
     if (!confirmed && causal.length > 0) {

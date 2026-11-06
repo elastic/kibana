@@ -253,7 +253,7 @@ describe('nightshift-investigations scout hook', () => {
         .NIGHTSHIFT_DECISION_TREES
     ).toBe('true');
     expect(
-      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'trace-only, reinforcement' }).output.env
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: ' reinforcement ' }).output.env
         .NIGHTSHIFT_DECISION_TREES
     ).toBe('true');
     expect(

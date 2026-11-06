@@ -223,7 +223,31 @@ describe('restoreDecisionTree', () => {
     await expect(
       restoreDecisionTree(esClient, TREE_ID, [{ id: HEAD_ID, source: { content: 'original' } }])
     ).rejects.toBe(forbidden);
-    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('re-indexes the snapshot head after a failed version delete, then throws it', async () => {
+    const unavailable = { statusCode: 503 };
+    const esClient = client({
+      get: jest.fn().mockResolvedValue({ found: true, _source: { content: 'replay head' } }),
+      search: jest.fn().mockResolvedValue(searchPage([1, 2])),
+      delete: jest
+        .fn()
+        .mockImplementation(async ({ id }: { id: string }) =>
+          id === `${HEAD_ID}_v1` ? Promise.reject(unavailable) : {}
+        ),
+    });
+
+    await expect(
+      restoreDecisionTree(esClient, TREE_ID, [{ id: HEAD_ID, source: { content: 'original' } }])
+    ).rejects.toBe(unavailable);
+    expect(esClient.delete.mock.calls.map(([request]) => request.id)).toEqual([
+      HEAD_ID,
+      `${HEAD_ID}_v1`,
+      `${HEAD_ID}_v2`,
+    ]);
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: HEAD_ID, document: { content: 'original' } })
+    );
   });
 });
 
@@ -444,6 +468,7 @@ describe('restoreDecisionTrees', () => {
       })
     ).rejects.toBe(failure);
     expect(esClient.index.mock.calls.map(([request]) => request.id)).toEqual([
+      'default:dtree_first',
       'default:dtree_second',
     ]);
   });

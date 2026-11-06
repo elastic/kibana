@@ -12,6 +12,7 @@ import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
+import { saveConnectorSetOnInvestigator } from '../investigation/connector_sets';
 import {
   getDatasetCustomContext,
   readCustomContext,
@@ -199,6 +200,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           SETUP_TIMEOUT_MS
       );
       await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
+      await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
       const previousCustomContext = await readCustomContext(fetch);
       try {
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));

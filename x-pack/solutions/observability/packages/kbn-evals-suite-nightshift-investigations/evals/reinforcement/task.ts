@@ -20,6 +20,7 @@ import {
   parseMermaidDecisionTree,
   symptomSlugFromTreeId,
   symptomTreeId,
+  REPLAY_CONVERSATION_ID_PREFIX,
 } from '@kbn/nightshift-decision-trees';
 import type { EvalConnector } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -53,7 +54,6 @@ const POLL_INTERVAL_MS = 5_000;
 const CANCEL_WAIT_MS = 60_000;
 /** `prepare_turn` rejects a longer conversation id. */
 const MAX_CONVERSATION_ID_LENGTH = 512;
-const REPLAY_CONVERSATION_PREFIX = 'nightshift-reinforcement-replay-';
 
 const headers = { 'elastic-api-version': API_VERSION };
 
@@ -179,7 +179,9 @@ export const snapshotDecisionTree = async (
 
 /**
  * Deletes what the replay wrote for `treeId` and puts the previous documents back. Deletes wait for
- * a refresh, so the next example's snapshot, which lists versions by search, cannot see them.
+ * a refresh, so the next example's snapshot, which lists versions by search, cannot see them. Keeps
+ * going past a failed delete or write, so a pre-existing tree is never left without its head, and
+ * throws the first error at the end.
  */
 export const restoreDecisionTree = async (
   esClient: Client,
@@ -187,6 +189,7 @@ export const restoreDecisionTree = async (
   snapshot: readonly IndexedTreeDoc[]
 ): Promise<void> => {
   const current = await snapshotDecisionTree(esClient, treeId);
+  let firstError: unknown;
   for (const doc of current) {
     try {
       await esClient.delete({
@@ -195,18 +198,23 @@ export const restoreDecisionTree = async (
         refresh: 'wait_for',
       });
     } catch (error) {
-      // A concurrent delete already removed it. Anything else would leave replay documents behind.
-      if (!isMissingDocument(error)) throw error;
+      // A concurrent delete already removed it. Anything else leaves replay documents behind.
+      if (!isMissingDocument(error)) firstError ??= error;
     }
   }
   for (const doc of snapshot) {
-    await esClient.index({
-      index: DECISION_TREE_AI_INDEX_DEST,
-      id: doc.id,
-      document: doc.source,
-      refresh: 'wait_for',
-    });
+    try {
+      await esClient.index({
+        index: DECISION_TREE_AI_INDEX_DEST,
+        id: doc.id,
+        document: doc.source,
+        refresh: 'wait_for',
+      });
+    } catch (error) {
+      firstError ??= error;
+    }
   }
+  if (firstError !== undefined) throw firstError;
 };
 
 /**
@@ -380,8 +388,8 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 /** A unique conversation id per replay, so `prepare_turn` runs it as a first round. */
 const replayConversationId = (caseId: string): string => {
   const suffix = `-${randomUUID()}`;
-  const room = MAX_CONVERSATION_ID_LENGTH - REPLAY_CONVERSATION_PREFIX.length - suffix.length;
-  return `${REPLAY_CONVERSATION_PREFIX}${caseId.slice(0, room)}${suffix}`;
+  const room = MAX_CONVERSATION_ID_LENGTH - REPLAY_CONVERSATION_ID_PREFIX.length - suffix.length;
+  return `${REPLAY_CONVERSATION_ID_PREFIX}${caseId.slice(0, room)}${suffix}`;
 };
 
 /** Stops an execution the replay gave up on, so it cannot write trees after they are restored. */

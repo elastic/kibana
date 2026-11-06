@@ -150,6 +150,15 @@ describe('resolveEvalSelection', () => {
     );
   });
 
+  it.each(['trace-only, reinforcement', 'reinforcement,synthetic-smoke', 'all,reinforcement'])(
+    'rejects reinforcement combined with another dataset (%s)',
+    (value) => {
+      expect(() => resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toThrow(
+        'Run reinforcement on its own Scout server'
+      );
+    }
+  );
+
   it('rejects empty list items like selectDatasets does', () => {
     expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'synthetic-smoke,,' })).toThrow(
       'NIGHTSHIFT_DATASETS contains an empty item'

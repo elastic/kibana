@@ -59,7 +59,10 @@ export interface ReinforcementExample {
     response: string;
     prior_tree: {
       tree_id: string;
-      /** Head version. Greater than 1 selects the follow-up reinforcement script. */
+      /**
+       * Head version of the seeded tree. It does not pick the reinforcement script: the turn kind
+       * comes from the conversation's earlier rounds, and a replay always runs as a first round.
+       */
       version: number;
       markdown: string;
     };
@@ -70,7 +73,7 @@ export interface ReinforcementExample {
     case_id: string;
     /** Where the round came from, so a reduced fixture is not mistaken for a raw export. */
     source: string;
-    /** The prior tree contains nodes this round must fold. An empty `merged_nodes` scores 0. */
+    /** The prior tree contains nodes this round must fold. An empty `merged_nodes` for it scores 0. */
     require_merge?: boolean;
   };
 }

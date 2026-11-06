@@ -17,7 +17,7 @@ export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
 
 /**
  * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables decision trees
- * without turning Cortex on. Unset and `all` never select it.
+ * on the Scout server, so it needs its own server. Unset and `all` never select it.
  */
 export const REINFORCEMENT_DATASET_ID = 'reinforcement';
 
@@ -86,6 +86,18 @@ export const resolveEvalSelection = (
   }
   if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === 'orcabench')) {
     throw new Error('Run orcabench on its own Scout server; it needs the orcabench connector set');
+  }
+  const listedIds = (env.NIGHTSHIFT_DATASETS ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+  if (
+    listedIds.includes(REINFORCEMENT_DATASET_ID) &&
+    listedIds.some((id) => id !== REINFORCEMENT_DATASET_ID)
+  ) {
+    throw new Error(
+      'Run reinforcement on its own Scout server; it enables decision trees on the server'
+    );
   }
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||

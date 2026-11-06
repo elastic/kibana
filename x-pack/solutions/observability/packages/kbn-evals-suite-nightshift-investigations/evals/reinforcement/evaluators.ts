@@ -13,14 +13,14 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import pRetry from 'p-retry';
 import type { EvalConnector, Evaluator } from '@kbn/evals';
 import { buildModelFromConnector } from '@kbn/evals';
-import { gradeSubmissions, parseTreeMarkdown, submissionsForTree } from './arguments';
+import { gradeSubmissions, isSeededTree, parseTreeMarkdown, submissionsForTree } from './arguments';
 import type { ReinforcementTaskOutput } from './types';
 
 export const SUBMIT_ARGUMENTS_EVALUATOR = 'submit_arguments_consistent';
 export const MERGED_NODES_EVALUATOR = 'merged_nodes_and_paths';
 
 interface ReinforcementEvalExample {
-  input: { question: string; response?: string };
+  input: { question: string; response?: string; prior_tree?: { tree_id?: string } };
   metadata?: { case_id?: string; require_merge?: boolean };
 }
 
@@ -115,15 +115,18 @@ export const submitArgumentsEvaluator: ReinforcementEvaluator = {
             submitted_mermaid: output.submitted_mermaid,
           },
         ];
-    const graded = trees.map((tree) =>
-      gradeSubmissions({
+    // The round's merge and causal-path rules describe the seeded tree, not every tree it visited.
+    const graded = trees.map((tree) => {
+      const seeded = isSeededTree(input.prior_tree?.tree_id, tree.tree_id);
+      return gradeSubmissions({
         submissions: submissionsForTree(output.submissions, tree.tree_id),
         prior: parseTreeMarkdown(tree.prior_mermaid, tree.tree_id),
         submitted: parseTreeMarkdown(tree.submitted_mermaid, tree.tree_id),
         response,
-        requireMerge: metadata?.require_merge === true,
-      })
-    );
+        requireMerge: seeded && metadata?.require_merge === true,
+        requireCausalPath: seeded,
+      });
+    });
     const failed = graded.filter((result) => result.score !== 1);
     return {
       score: failed.length === 0 ? 1 : 0,
