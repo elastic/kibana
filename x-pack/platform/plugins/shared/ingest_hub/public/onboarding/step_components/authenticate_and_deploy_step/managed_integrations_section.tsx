@@ -77,10 +77,6 @@ interface ManagedIntegrationsSectionProps {
    * the callout when there is no underlying service-var drift.
    */
   onReplaceFormDirtyChange?: (dirty: boolean) => void;
-  /** Automatic deploy after the stack reports back; see the identity form's props of the same names. */
-  onPrepareLaunch?: React.ComponentProps<typeof LazyAwsIdentityFederationSetup>['onPrepareLaunch'];
-  onDeployOutcome?: React.ComponentProps<typeof LazyAwsIdentityFederationSetup>['onDeployOutcome'];
-  onWaitingChange?: React.ComponentProps<typeof LazyAwsIdentityFederationSetup>['onWaitingChange'];
 }
 
 const NO_STORED_SECRET_FIELDS: NonNullable<ManagedIntegrationsSectionProps['storedSecretFields']> =
@@ -99,9 +95,6 @@ export function ManagedIntegrationsSection({
   isStoredSecretsLoading = false,
   isDirty = false,
   onReplaceFormDirtyChange,
-  onPrepareLaunch,
-  onDeployOutcome,
-  onWaitingChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const {
@@ -110,7 +103,6 @@ export function ManagedIntegrationsSection({
     clearStagedStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep,
-    isLaunchLocked,
   } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
@@ -183,15 +175,11 @@ export function ManagedIntegrationsSection({
   // value is not. Emptying the fields again clears the change.
   // On the identity form's New Identity tab the only click is Launch; Deploy belongs to the
   // manual fallback there, next to Create Identity. Everywhere else it sits below the form,
-  // including on that tab once the stack has made the identity and no launch is in flight: a
-  // launch that could not deploy on its own (a resumed or relaunched deployment) still ends
-  // with an identity selected, and Deploy must not be folded away under a section the user
-  // never needed.
+  // including on that tab once the stack has made the identity: Deploy is the next click then,
+  // and must not be folded away under a section the user never needed.
   const [isNewIdentityTab, setIsNewIdentityTab] = useState(true);
   const isDeployInManualSection =
-    preferredMethod === 'identity_federation' &&
-    isNewIdentityTab &&
-    !(isDeployReady && !isLaunchLocked);
+    preferredMethod === 'identity_federation' && isNewIdentityTab && !isDeployReady;
   const isEditingDeployedKeys = isStaticKeysEditMode || storedSecretFields.length > 0;
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -269,7 +257,6 @@ export function ManagedIntegrationsSection({
     !hasFailed && !isDone ? (
       <EuiButton
         isDisabled={
-          isLaunchLocked ||
           isDeploying ||
           (!isDeployReady &&
             !isCleanupOnly &&
@@ -385,7 +372,6 @@ export function ManagedIntegrationsSection({
                     name="managedIntegrationsPreferredMethod"
                     options={radioOptions}
                     idSelected={preferredMethod}
-                    disabled={isLaunchLocked}
                     onChange={(id) => {
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
@@ -436,9 +422,6 @@ export function ManagedIntegrationsSection({
                   onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
-                  onPrepareLaunch={onPrepareLaunch}
-                  onDeployOutcome={onDeployOutcome}
-                  onWaitingChange={onWaitingChange}
                   manualEntryActions={isDeployInManualSection ? deployButton : undefined}
                   onNewIdentityTabChange={setIsNewIdentityTab}
                 />
@@ -479,14 +462,13 @@ export function ManagedIntegrationsSection({
                   color="danger"
                   onClick={onDeploy}
                   isDisabled={
-                    isLaunchLocked ||
-                    (!isDeployReady &&
-                      !(
-                        isDirty &&
-                        isStaticKeysEditMode &&
-                        !!authenticateAndDeployStep.staticKeys?.access_key_id &&
-                        !!authenticateAndDeployStep.staticKeys?.secret_access_key
-                      ))
+                    !isDeployReady &&
+                    !(
+                      isDirty &&
+                      isStaticKeysEditMode &&
+                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
+                    )
                   }
                   data-test-subj="managedIntegrationsSection-retryButton"
                 >

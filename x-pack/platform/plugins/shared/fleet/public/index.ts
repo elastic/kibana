@@ -148,7 +148,6 @@ export type {
   IacRenderedTemplate,
   IacTemplateLaunchedFor,
 } from './components/cloud_connector/components/iac_key_check';
-export type { ProvisioningCallbackDeployOutcome } from './components/cloud_connector/hooks/use_provisioning_callback';
 export {
   sendCreateCloudOnboardingDeployment,
   sendGetCloudOnboardingDeployment,

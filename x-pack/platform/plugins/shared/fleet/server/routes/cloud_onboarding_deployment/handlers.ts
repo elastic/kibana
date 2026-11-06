@@ -33,8 +33,7 @@ const getUsername = (request: KibanaRequest): string | undefined =>
 function toResponseItem<T extends CloudOnboardingDeployment>(deployment: T) {
   // Omit null optional fields — the response schema uses schema.maybe() (undefined-or-value),
   // which does not accept null. Null is only used internally to clear a stored field.
-  // Pending agentless-policy requests are server-side state; the browser never needs them back.
-  const { connectorId, authMethod, pendingAgentlessPolicies: _pending, ...rest } = deployment;
+  const { connectorId, authMethod, ...rest } = deployment;
   return {
     ...rest,
     ...(connectorId != null ? { connectorId } : {}),
@@ -77,18 +76,7 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   TypeOf<typeof CreateCloudOnboardingDeploymentRequestSchema.body>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const { internalSoClient, authz } = fleetContext;
-
-  // Stored requests are later executed by the internal user, so storing them needs what calling
-  // the create-agentless-policy API needs: the privilege to write integration policies.
-  if (request.body.pendingAgentlessPolicies && !authz.integrations.writeIntegrationPolicies) {
-    return response.forbidden({
-      body: {
-        message:
-          'Storing agentless policies to deploy requires the privilege to create integration policies',
-      },
-    });
-  }
+  const { internalSoClient } = fleetContext;
 
   const authMethodError = validateAuthMethod(
     request.body.mechanisms ?? [],

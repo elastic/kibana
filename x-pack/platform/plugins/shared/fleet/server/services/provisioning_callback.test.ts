@@ -203,27 +203,6 @@ describe('provisioningCallbackService', () => {
       );
       expect(item).toMatchObject({ connector_name: 'my-identity', iac_key: 'sha256:abc' });
     });
-
-    it('stores the onboarding deployment id and starts the deploy stage pending', async () => {
-      await provisioningCallbackService.create(soClient, {
-        provider: 'aws',
-        identity: { onboarding_deployment_id: 'dep-1' },
-      });
-
-      expect(soClient.create).toHaveBeenCalledWith(
-        'fleet-provisioning-callback',
-        expect.objectContaining({ onboarding_deployment_id: 'dep-1', deploy_status: 'pending' }),
-        { id: 'cb-1' }
-      );
-    });
-
-    it('has no deploy stage when no deployment is attached', async () => {
-      await provisioningCallbackService.create(soClient, { provider: 'aws' });
-
-      const [, attributes] = soClient.create.mock.calls[0];
-      expect(attributes).not.toHaveProperty('deploy_status');
-      expect(attributes).not.toHaveProperty('onboarding_deployment_id');
-    });
   });
 
   describe('get', () => {

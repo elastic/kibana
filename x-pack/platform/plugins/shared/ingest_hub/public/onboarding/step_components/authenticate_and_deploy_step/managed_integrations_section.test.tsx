@@ -71,7 +71,6 @@ function setupMocks({
   authMethod = undefined,
   staticKeys = undefined,
   searchParams = '',
-  isLaunchLocked = false,
 }: {
   cloud?: object;
   setConnectorId?: jest.Mock;
@@ -82,7 +81,6 @@ function setupMocks({
   authMethod?: 'identity_federation' | 'static_keys';
   staticKeys?: { access_key_id?: string; secret_access_key?: string };
   searchParams?: string;
-  isLaunchLocked?: boolean;
 } = {}) {
   mockUseKibana.mockReturnValue({
     services: {
@@ -99,7 +97,6 @@ function setupMocks({
     clearStagedStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep: { connectorId, authMethod, staticKeys },
-    isLaunchLocked,
     awsServicesMap: new Map([
       [
         'guardduty',
@@ -196,9 +193,6 @@ function renderSection(
     storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
     isStoredSecretsLoading?: boolean;
     onReplaceFormDirtyChange?: jest.Mock;
-    onPrepareLaunch?: jest.Mock;
-    onDeployOutcome?: jest.Mock;
-    onWaitingChange?: jest.Mock;
   } = {}
 ) {
   return render(
@@ -216,9 +210,6 @@ function renderSection(
           storedSecretFields={props.storedSecretFields}
           isStoredSecretsLoading={props.isStoredSecretsLoading}
           onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
-          onPrepareLaunch={props.onPrepareLaunch}
-          onDeployOutcome={props.onDeployOutcome}
-          onWaitingChange={props.onWaitingChange}
         />
       </React.Suspense>
     </I18nProvider>
@@ -228,31 +219,7 @@ function renderSection(
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('ManagedIntegrationsSection', () => {
-  describe('automatic deploy', () => {
-    it('keeps Deploy and Retry unreachable while a launch is pending', () => {
-      setupMocks({ isLaunchLocked: true });
-      const { unmount } = renderSection({ showIdentityFederation: true });
-      fireEvent.click(screen.getByText('mark-ready'));
-      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
-      unmount();
-
-      setupMocks({ isLaunchLocked: true, connectorId: 'cc-1', authMethod: 'identity_federation' });
-      renderSection({ showIdentityFederation: true, hasFailed: true });
-      fireEvent.click(screen.getByText('mark-ready'));
-      expect(screen.getByTestId('managedIntegrationsSection-retryButton')).toBeDisabled();
-    });
-
-    it('disables the authentication method choice while a launch is pending', () => {
-      setupMocks({ isLaunchLocked: true });
-      renderSection({ showIdentityFederation: true });
-
-      const radios = screen
-        .getByTestId('managedIntegrationsSection-preferredMethodRadio')
-        .querySelectorAll('input[type="radio"]');
-      expect(radios.length).toBeGreaterThan(0);
-      radios.forEach((radio) => expect(radio).toBeDisabled());
-    });
-
+  describe('Deploy button placement with the identity form', () => {
     it('shows Deploy inside the manual section of the identity form on the New Identity tab, below it otherwise', () => {
       setupMocks();
       renderSection({ showIdentityFederation: true });
@@ -267,42 +234,16 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
     });
 
-    it('moves Deploy below the form once the New Identity tab holds a ready identity and nothing is in flight', () => {
+    it('moves Deploy below the form once the New Identity tab holds a ready identity', () => {
       setupMocks();
       renderSection({ showIdentityFederation: true });
       fireEvent.click(screen.getByText('tab-new'));
 
-      // The stack's report made and selected the identity, and this launch could not deploy on
-      // its own: Deploy is the next click, so it must not sit under "Create stack manually".
+      // The stack's report made and selected the identity: Deploy is the next click, so it must
+      // not sit under "Create stack manually".
       fireEvent.click(screen.getByText('mark-ready'));
       expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
-    });
-
-    it('keeps Deploy in the manual section while a launch with a ready identity is still in flight', () => {
-      setupMocks({ isLaunchLocked: true });
-      renderSection({ showIdentityFederation: true });
-      fireEvent.click(screen.getByText('tab-new'));
-
-      // The identity exists but the server is still deploying for it.
-      fireEvent.click(screen.getByText('mark-ready'));
-      expect(screen.getByTestId('manual-entry-actions')).toContainElement(
-        screen.getByTestId('managedIntegrationsSection-deployButton')
-      );
-    });
-
-    it('passes the launch preparation, outcome and waiting callbacks to the identity form', () => {
-      setupMocks();
-      const onPrepareLaunch = jest.fn();
-      const onDeployOutcome = jest.fn();
-      const onWaitingChange = jest.fn();
-
-      renderSection({ onPrepareLaunch, onDeployOutcome, onWaitingChange });
-
-      const formProps = MockIdentityFederation.mock.calls.at(-1)![0];
-      expect(formProps.onPrepareLaunch).toBe(onPrepareLaunch);
-      expect(formProps.onDeployOutcome).toBe(onDeployOutcome);
-      expect(formProps.onWaitingChange).toBe(onWaitingChange);
     });
   });
 

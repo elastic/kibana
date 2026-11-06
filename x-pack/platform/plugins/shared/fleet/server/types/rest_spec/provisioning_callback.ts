@@ -53,24 +53,6 @@ export const CloudConnectorCallbackItemSchema = schema.object({
   iac_blueprint_id: schema.maybe(schema.nullable(schema.string())),
   iac_blueprint_version: schema.maybe(schema.nullable(schema.string())),
   cloud_connector_id: schema.maybe(schema.string()),
-  onboarding_deployment_id: schema.maybe(schema.string()),
-  deploy_status: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('pending'),
-        schema.literal('deploying'),
-        schema.literal('deployed'),
-        schema.literal('failed'),
-      ],
-      {
-        meta: {
-          description:
-            'Stage of the integrations deploy that follows the report when an onboarding deployment is attached. `pending`: waiting for the report. `deploying`: policies are being created. `deployed`: done. `failed`: see deploy_error.',
-        },
-      }
-    )
-  ),
-  deploy_error: schema.maybe(schema.string()),
 });
 
 export const GetProvisioningCallbackAvailabilityResponseSchema = schema.object({
@@ -107,16 +89,6 @@ export const CreateProvisioningCallbackRequestSchema = {
     ),
     iac_blueprint_version: schema.maybe(
       schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))
-    ),
-    onboarding_deployment_id: schema.maybe(
-      schema.string({
-        minLength: 1,
-        maxLength: 256,
-        meta: {
-          description:
-            'Onboarding deployment whose stored agentless policies Kibana deploys once the stack has reported back. Requires the privilege to create integration policies: Integrations All together with Fleet Agent policies All.',
-        },
-      })
     ),
   }),
 };

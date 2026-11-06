@@ -83,7 +83,6 @@ export function OnboardingShell() {
     isDataFormatResolved,
     detectAndReviewStep,
   } = useOnboardingFlow();
-  const { isLaunchLocked } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   useInvalidateDownstreamSteps({
@@ -115,12 +114,11 @@ export function OnboardingShell() {
 
   // The first step has no previous step: Back there cancels the flow, after a confirmation.
   const onBack = useMemo(() => {
-    // A launched stack is being waited on: the choices it was launched with must not change.
-    if (isLaunchLocked || currentStepIndex < 0) return undefined;
+    if (currentStepIndex < 0) return undefined;
     if (currentStepIndex === 0) return () => setIsCancelModalOpen(true);
     const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
     return () => history.push({ ...history.location, hash: `#${prevStep.id}` });
-  }, [isLaunchLocked, currentStepIndex, history]);
+  }, [currentStepIndex, history]);
 
   // Once something is deployed (resumed with ?deploymentId=, or deployed in this session), leaving
   // only drops the unsaved changes: the policies stay in Fleet.
@@ -153,13 +151,13 @@ export function OnboardingShell() {
             | 'current'
             | 'incomplete',
           onClick:
-            (isComplete || isCurrent) && !isLaunchLocked
+            isComplete || isCurrent
               ? () => history.push({ ...history.location, hash: `#${step.id}` })
               : () => {},
           'data-test-subj': `onboardingStepIndicator-${step.id}`,
         };
       }),
-    [completedSteps, currentStepId, history, isLaunchLocked]
+    [completedSteps, currentStepId, history]
   );
 
   if (!meta || !isValidStep) {

@@ -81,18 +81,11 @@ export type ListAgentlessPoliciesOptions = Pick<
   'page' | 'perPage' | 'sortField' | 'sortOrder' | 'kuery'
 >;
 
-/** Options for a create that runs on someone's behalf rather than from their request. */
-export interface CreateAgentlessPolicyOptions {
-  /** Recorded as the policies' creator in place of the request's user. */
-  createdBy?: string;
-}
-
 export interface AgentlessPoliciesService {
   createAgentlessPolicy: (
     data: NewAgentlessPolicy,
     context?: RequestHandlerContext,
-    request?: KibanaRequest,
-    options?: CreateAgentlessPolicyOptions
+    request?: KibanaRequest
   ) => Promise<AgentlessPolicy>;
 
   updateAgentlessPolicy: (
@@ -229,13 +222,6 @@ const collectSecretRefIds = (node: unknown, found = new Set<string>()): Set<stri
   return found;
 };
 
-/**
- * A user object carrying only the name. The policy services record `user.username` as the
- * creator and read nothing else from it, so a launch-time username is enough to attribute a
- * policy created later on that user's behalf.
- */
-const userNamed = (username: string): AuthenticatedUser => ({ username } as AuthenticatedUser);
-
 export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   constructor(
     private readonly packagePolicyService: PackagePolicyClient,
@@ -247,8 +233,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   async createAgentlessPolicy(
     data: NewAgentlessPolicy,
     context?: RequestHandlerContext,
-    request?: KibanaRequest,
-    options?: CreateAgentlessPolicyOptions
+    request?: KibanaRequest
   ) {
     const packagePolicyId = data.id || uuidv4();
 
@@ -262,9 +247,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     // point a new policy at a secret no policy it can see uses.
     await assertSecretIdsReusable(this.soClient, [...collectSecretRefIds(data)]);
 
-    const user = options?.createdBy
-      ? userNamed(options.createdBy)
-      : request
+    const user = request
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 

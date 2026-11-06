@@ -14,7 +14,6 @@ import type {
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
   CloudOnboardingEcfStack,
-  PendingAgentlessPolicy,
 } from '../models/cloud_onboarding_deployment';
 
 export interface CreateCloudOnboardingDeploymentRequest {
@@ -34,8 +33,6 @@ export interface CreateCloudOnboardingDeploymentRequest {
     agentPolicyIds?: string[];
     packageNames?: string[];
     serviceNames?: Record<string, string>;
-    /** Agentless policies the server creates once the launched stack reports back. Never returned. */
-    pendingAgentlessPolicies?: PendingAgentlessPolicy[];
   };
 }
 

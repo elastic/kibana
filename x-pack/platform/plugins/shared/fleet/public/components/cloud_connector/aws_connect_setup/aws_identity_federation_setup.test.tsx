@@ -895,7 +895,7 @@ describe('AwsIdentityFederationSetup', () => {
       // A project with no identities yet: the initial tab was decided on an empty list.
       mockGetConnectors({ data: [] });
       mockUseProvisioningCallback.mockReturnValue(
-        callbackState({ status: 'deploying', created: { id: 'cc-1', name: 'my-identity' } })
+        callbackState({ status: 'received', created: { id: 'cc-1', name: 'my-identity' } })
       );
       const { rerender } = renderSetup({ cloud, integrations });
       expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
@@ -1036,123 +1036,6 @@ describe('AwsIdentityFederationSetup', () => {
 
       expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue('');
       expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue('');
-    });
-
-    describe('automatic deploy handoff', () => {
-      const launch = async (user: ReturnType<typeof userEvent.setup>) => {
-        await typeIdentityName(user);
-        const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
-        await act(async () => {
-          await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
-        });
-      };
-
-      it('asks the host to prepare the launch and hands the deployment id to the record', async () => {
-        const onPrepareLaunch = jest.fn().mockResolvedValue({ onboardingDeploymentId: 'dep-1' });
-        const user = userEvent.setup();
-        renderSetup({ cloud, integrations, onPrepareLaunch });
-
-        await launch(user);
-
-        expect(onPrepareLaunch).toHaveBeenCalledTimes(1);
-        expect(mockCallbackStart).toHaveBeenCalledWith(
-          expect.objectContaining({ connectorName: 'my-identity', onboardingDeploymentId: 'dep-1' })
-        );
-      });
-
-      it('launches without a deployment when the host returns nothing', async () => {
-        const onPrepareLaunch = jest.fn().mockResolvedValue(undefined);
-        const user = userEvent.setup();
-        renderSetup({ cloud, integrations, onPrepareLaunch });
-
-        await launch(user);
-
-        const [input] = mockCallbackStart.mock.lastCall!;
-        expect(input).not.toHaveProperty('onboardingDeploymentId');
-      });
-
-      it('says it is deploying integrations on the same screen, with Create disabled, while the server deploys', () => {
-        mockUseProvisioningCallback.mockReturnValue(
-          callbackState({
-            status: 'deploying',
-            created: {
-              id: 'cc-1',
-              name: 'my-identity',
-              role_arn: REPORTED_ROLE_ARN,
-              stack_arn: VALID_STACK_ARN,
-            },
-          })
-        );
-        renderSetup({ cloud, integrations });
-
-        // The identity exists already, but the user stays where the stages are shown.
-        expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
-          'aria-selected',
-          'true'
-        );
-        expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-          'Deploying integrations'
-        );
-        expect(
-          screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')
-        ).toBeInTheDocument();
-        expect(
-          screen.queryByTestId('awsIdentityFederationSetup-enterManually')
-        ).not.toBeInTheDocument();
-        expectManualEntryLocked();
-        expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
-          REPORTED_ROLE_ARN
-        );
-        expect(
-          screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')
-        ).toBeDisabled();
-      });
-
-      it('hands the deploy outcome to the host once', () => {
-        const onDeployOutcome = jest.fn();
-        const outcome = { status: 'deployed' as const, onboardingDeploymentId: 'dep-1' };
-        mockUseProvisioningCallback.mockReturnValue(
-          callbackState({
-            status: 'received',
-            created: { id: 'cc-1', name: 'my-identity' },
-            deployOutcome: outcome,
-          })
-        );
-        const { rerender } = renderSetup({ cloud, integrations, onDeployOutcome });
-        rerender(setupElement({ cloud, integrations, onDeployOutcome }));
-
-        expect(onDeployOutcome).toHaveBeenCalledTimes(1);
-        expect(onDeployOutcome).toHaveBeenCalledWith(outcome);
-      });
-
-      it('tells the host it stopped waiting when unmounted mid-wait', () => {
-        const onWaitingChange = jest.fn();
-        mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
-        const { unmount } = renderSetup({ cloud, integrations, onWaitingChange });
-        expect(onWaitingChange).toHaveBeenLastCalledWith(true);
-
-        unmount();
-
-        expect(onWaitingChange).toHaveBeenLastCalledWith(false);
-      });
-
-      it('tells the host when it starts and stops waiting', () => {
-        const onWaitingChange = jest.fn();
-        const { rerender } = renderSetup({ cloud, integrations, onWaitingChange });
-        expect(onWaitingChange).toHaveBeenLastCalledWith(false);
-
-        mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
-        rerender(setupElement({ cloud, integrations, onWaitingChange }));
-        expect(onWaitingChange).toHaveBeenLastCalledWith(true);
-
-        mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'deploying' }));
-        rerender(setupElement({ cloud, integrations, onWaitingChange }));
-        expect(onWaitingChange).toHaveBeenLastCalledWith(true);
-
-        mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'received' }));
-        rerender(setupElement({ cloud, integrations, onWaitingChange }));
-        expect(onWaitingChange).toHaveBeenLastCalledWith(false);
-      });
     });
 
     it('retires a record the deadline could not before creating the identity by hand', async () => {

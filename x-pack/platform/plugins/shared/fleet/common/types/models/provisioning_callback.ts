@@ -14,12 +14,6 @@ import type { AccountType, CloudConnectorIacState } from './cloud_connector';
 export type ProvisioningCallbackStatus = 'pending' | 'receiving' | 'received' | 'cancelled';
 
 /**
- * Stage of the server-side deploy that follows a received report when an onboarding deployment
- * is attached. `pending` until the report lands, `deploying` while policies are created.
- */
-export type ProvisioningCallbackDeployStatus = 'pending' | 'deploying' | 'deployed' | 'failed';
-
-/**
  * A one-time record that lets something launched from Kibana report back to it, whatever the
  * report creates. The record has a short-lived random token, which is not a credential and admits
  * nothing but the report. The token is returned once, when the record is created, and only its
@@ -52,11 +46,6 @@ export interface CloudConnectorCallbackIdentity
   extends Pick<CloudConnectorIacState, 'iac_key' | 'iac_blueprint_id' | 'iac_blueprint_version'> {
   connector_name?: string;
   account_type?: AccountType;
-  /**
-   * Onboarding deployment whose stored agentless policies the server deploys once the stack has
-   * reported back. Set at launch by the ingest hub only.
-   */
-  onboarding_deployment_id?: string;
 }
 
 /**
@@ -69,7 +58,4 @@ export interface CloudConnectorCallback
     Partial<CloudConnectorCallbackReceivedValues> {
   /** Set when the stack's report has created the cloud connector. */
   cloud_connector_id?: string;
-  /** Present only when an onboarding deployment is attached. Written by the deploy executor. */
-  deploy_status?: ProvisioningCallbackDeployStatus;
-  deploy_error?: string;
 }

@@ -64,23 +64,10 @@ jest.mock('../step_components', () => ({
       Continue
     </button>
   ),
-  AuthenticateAndDeployStep: ({
-    onContinue,
-    onBack,
-  }: {
-    onContinue: () => void;
-    onBack?: () => void;
-  }) => (
-    <>
-      <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
-        Continue
-      </button>
-      {onBack && (
-        <button data-test-subj="authenticateAndDeployStep-back" onClick={onBack}>
-          Back
-        </button>
-      )}
-    </>
+  AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
+    <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
+      Continue
+    </button>
   ),
   DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
 }));
@@ -112,12 +99,10 @@ function stepIndicatorStatus(stepId: string): string | null {
 function renderShell(initialHash = '#services') {
   const history = createMemoryHistory({ initialEntries: [`/aws${initialHash}`] });
   let exposedSetIds: (ids: string[]) => void = () => {};
-  let exposedSetLaunchLocked: (locked: boolean) => void = () => {};
 
   function SetterCapture() {
-    const { setSelectedServiceIds, setLaunchLocked } = useOnboardingFlow();
+    const { setSelectedServiceIds } = useOnboardingFlow();
     exposedSetIds = setSelectedServiceIds;
-    exposedSetLaunchLocked = setLaunchLocked;
     return null;
   }
 
@@ -137,30 +122,8 @@ function renderShell(initialHash = '#services') {
   return {
     history,
     setIds: (ids: string[]) => act(() => exposedSetIds(ids)),
-    setLaunchLocked: (locked: boolean) => act(() => exposedSetLaunchLocked(locked)),
   };
 }
-
-describe('OnboardingShell — launch lock', () => {
-  it('disables step navigation and Back while a launch is pending, and restores them after', () => {
-    const { history, setIds, setLaunchLocked } = renderShell('#services');
-    setIds([AGENTLESS_ID]);
-    fireEvent.click(screen.getByTestId('servicesStep-continue'));
-    fireEvent.click(screen.getByTestId('serviceSettingsStep-continue'));
-    expect(history.location.hash).toBe('#authenticate-and-deploy');
-    expect(screen.getByTestId('authenticateAndDeployStep-back')).toBeInTheDocument();
-
-    setLaunchLocked(true);
-    expect(screen.queryByTestId('authenticateAndDeployStep-back')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('onboardingStepIndicator-services'));
-    expect(history.location.hash).toBe('#authenticate-and-deploy');
-
-    setLaunchLocked(false);
-    expect(screen.getByTestId('authenticateAndDeployStep-back')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('onboardingStepIndicator-services'));
-    expect(history.location.hash).toBe('#services');
-  });
-});
 
 describe('OnboardingShell — ?deploymentId= survives hash navigation', () => {
   /**

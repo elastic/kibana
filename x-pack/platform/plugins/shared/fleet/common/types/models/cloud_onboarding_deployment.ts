@@ -6,7 +6,6 @@
  */
 
 import type { CloudProvider } from './cloud_connector';
-import type { NewAgentlessPolicy } from '../rest_spec/agentless_policy';
 
 export type { CloudProvider };
 
@@ -48,19 +47,6 @@ export type CloudOnboardingDeploymentAuthMethod =
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
-
-/**
- * An agentless policy the server creates once the launched stack reports back, exactly as the
- * Deploy button would have created it. Stored on a `pending` deployment at Launch.
- */
-export interface PendingAgentlessPolicy {
-  /** Pre-assigned package policy id; the executor passes it as `id` so a retry finds the policy. */
-  id: string;
-  /** Instances this policy covers, for `policyIdsByInstance`. */
-  instanceIds: string[];
-  /** The create-agentless-policy body, without `cloud_connector`; the executor adds it. */
-  request: NewAgentlessPolicy;
-}
 
 /**
  * One row of the Service settings step as of the last deploy: an original service
@@ -124,8 +110,6 @@ export interface CloudOnboardingDeployment {
    * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
    */
   authMethod?: CloudOnboardingDeploymentAuthMethod | null;
-  /** Policies to create when the launched stack reports back. Never returned by the API. */
-  pendingAgentlessPolicies?: PendingAgentlessPolicy[];
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;

@@ -50,7 +50,6 @@ const IDENTITY_FIELDS: Array<keyof CloudConnectorCallbackIdentity> = [
   'iac_key',
   'iac_blueprint_id',
   'iac_blueprint_version',
-  'onboarding_deployment_id',
 ];
 
 const CONNECTOR_NAME_MAX_LENGTH = 255;
@@ -146,11 +145,6 @@ class ProvisioningCallbackService {
         Object.assign(attributes, { [field]: identity[field] });
       }
     }
-    if (identity.onboarding_deployment_id) {
-      // The deploy waits for the report; the executor moves it on from here.
-      attributes.deploy_status = 'pending';
-    }
-
     auditLoggingService.writeCustomAuditLog({
       message: `User creating provisioning callback [id=${id}]`,
     });
@@ -167,19 +161,6 @@ class ProvisioningCallbackService {
     );
 
     return { item: toItem(so.id, so.attributes), token };
-  }
-
-  /** Moves the deploy stage on; only the deploy executor writes it. */
-  public async updateDeployStage(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    stage: Pick<ProvisioningCallbackSOAttributes, 'deploy_status' | 'deploy_error'>
-  ): Promise<void> {
-    await soClient.update<ProvisioningCallbackSOAttributes>(
-      PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
-      id,
-      stage
-    );
   }
 
   public async get(
