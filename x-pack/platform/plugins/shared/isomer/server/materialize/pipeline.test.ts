@@ -11,6 +11,9 @@ import { metricExamples } from '@kbn/isomer';
 import type { MaterializedChartNode, MaterializedNode, UnsupportedNode } from './nodes';
 import type { PipelineDeps } from './pipeline';
 import { runPipeline } from './pipeline';
+
+const runNode = async (...args: Parameters<typeof runPipeline>) =>
+  (await runPipeline(...args)).node;
 import type { MaterializeContext } from '../../common';
 import type { DataRequest, MaterializeKit, Materializer } from './types';
 
@@ -96,7 +99,7 @@ describe('runPipeline', () => {
       ],
     };
 
-    const node = await runPipeline(
+    const node = await runNode(
       { type: 'lens', materializer, config, context, savedObjectId: 'abc', spaceId: 'ops' },
       deps
     );
@@ -142,7 +145,7 @@ describe('runPipeline', () => {
       executeEsql: jest.fn(async () => ({ table: table('x'), losses: [rowCap] })),
     });
 
-    const node = await runPipeline(
+    const node = await runNode(
       {
         type: 'lens',
         materializer,
@@ -168,7 +171,7 @@ describe('runPipeline', () => {
       },
     ];
 
-    await runPipeline(
+    await runNode(
       { type: 'dashboard', materializer, config: { title: 'Logs', requests }, context },
       deps
     );
@@ -207,7 +210,7 @@ describe('runPipeline', () => {
     const deps = createDeps();
 
     await expect(
-      runPipeline(
+      runNode(
         { type: 'lens', materializer, config: { title: 'Countries', requests: [] }, context },
         deps
       )
@@ -228,7 +231,7 @@ describe('runPipeline', () => {
     const deps = createDeps();
 
     await expect(
-      runPipeline(
+      runNode(
         { type: 'lens', materializer, config: { title: 'Requests', requests: [] }, context },
         deps
       )
@@ -246,7 +249,7 @@ describe('runPipeline', () => {
     const materializer = chart();
     const deps = createDeps();
 
-    const node = await runPipeline(
+    const node = await runNode(
       {
         type: 'lens',
         materializer,
@@ -278,7 +281,7 @@ describe('runPipeline', () => {
     });
 
     await expect(
-      runPipeline(
+      runNode(
         {
           type: 'lens',
           materializer: chart(),
@@ -304,7 +307,7 @@ describe('runPipeline', () => {
     });
 
     await expect(
-      runPipeline(
+      runNode(
         {
           type: 'lens',
           materializer: chart(),
@@ -327,7 +330,7 @@ describe('runPipeline', () => {
     const materializer = chart({ map: () => ({ type: 'markdown', text: 'Hello' }) });
 
     await expect(
-      runPipeline(
+      runNode(
         { type: 'markdown', materializer, config: { title: 'Note', requests: [] }, context },
         createDeps()
       )
@@ -354,6 +357,54 @@ describe('runPipeline', () => {
     );
     expect(materializer.plan).toHaveBeenLastCalledWith(config, {
       timeRange: { from: '2026-11-03T15:00:00.000Z', to: '2026-11-04T14:59:59.999Z' },
+    });
+  });
+
+  describe('stats', () => {
+    it('counts the planned requests and the capped ones', async () => {
+      const rowCap = { path: 'data.rows', kind: 'dropped' as const, note: 'Capped.' };
+      const deps = createDeps({
+        executeEsql: jest.fn(async (request) => ({
+          table: table(request.query),
+          losses: request.query === 'FROM b' ? [rowCap] : [],
+        })),
+      });
+      const requests: DataRequest[] = [
+        { kind: 'esql', query: 'FROM a' },
+        { kind: 'esql', query: 'FROM b' },
+      ];
+
+      const { dataRequests, rowCapsHit, budgetRefused } = await runPipeline(
+        { type: 'lens', materializer: chart(), config: { title: 'Requests', requests }, context },
+        deps
+      );
+
+      expect({ dataRequests, rowCapsHit, budgetRefused }).toEqual({
+        dataRequests: 2,
+        rowCapsHit: 1,
+        budgetRefused: false,
+      });
+    });
+
+    it('records a node refused as over the input budget', async () => {
+      const deps = createDeps({
+        validate: jest.fn(async () => [
+          { path: '', message: 'is over the input budget', code: 'INPUT_OVER_BUDGET' as const },
+        ]),
+      });
+
+      const { node, budgetRefused } = await runPipeline(
+        {
+          type: 'lens',
+          materializer: chart(),
+          config: { title: 'Requests', requests: [] },
+          context,
+        },
+        deps
+      );
+
+      expect(node.type).toBe('unsupported');
+      expect(budgetRefused).toBe(true);
     });
   });
 });
