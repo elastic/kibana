@@ -79,6 +79,7 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/rrule'
   - '@kbn/inference-tracing'
+  - '@kbn/server-route-repository-utils'
 tags:
   - plugin
   - prod
