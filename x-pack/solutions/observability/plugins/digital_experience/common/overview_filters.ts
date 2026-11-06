@@ -64,6 +64,9 @@ export const OVERVIEW_PERCENTILES = [50, 75, 90, 95, 99] as const;
 
 export type OverviewPercentile = (typeof OVERVIEW_PERCENTILES)[number];
 
+/** A percentile as the routes take it in a query, e.g. `'95'`. */
+export type OverviewPercentileParam = `${OverviewPercentile}`;
+
 export const DEFAULT_OVERVIEW_PERCENTILE: OverviewPercentile = 75;
 
 /** The longest KQL query the Overview takes. */

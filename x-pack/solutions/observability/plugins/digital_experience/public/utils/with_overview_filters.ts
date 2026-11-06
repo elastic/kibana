@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { OverviewSearchParams } from '../../common/overview_filters';
+import type { OverviewPercentileParam, OverviewSearchParams } from '../../common/overview_filters';
 import type { ApplicationRequestOptions } from '../hooks/use_application_data';
 
-/** The options of an application's request with the Overview's filters and KQL in its query. */
+/**
+ * The options of an application's request with the Overview's filters and KQL in its query, and
+ * `extra` params of the routes that take more, e.g. the percentile.
+ */
 export const withOverviewFilters = (
   { signal, params: { path, query } }: ApplicationRequestOptions,
-  searchParams: OverviewSearchParams
+  searchParams: OverviewSearchParams,
+  extra?: { percentile?: OverviewPercentileParam }
 ) => ({
   signal,
-  params: { path, query: { ...query, ...searchParams } },
+  params: { path, query: { ...query, ...searchParams, ...extra } },
 });

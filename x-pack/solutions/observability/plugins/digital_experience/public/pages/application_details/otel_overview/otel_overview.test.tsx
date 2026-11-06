@@ -210,7 +210,7 @@ const mockSearch = ({
 }: { percentile?: OverviewPercentile; kuery?: string } = {}) => {
   jest.mocked(useOverviewPercentile).mockReturnValue({
     percentile,
-    percentileParam: percentile === 75 ? undefined : String(percentile),
+    percentileParam: percentile === 75 ? undefined : `${percentile}`,
     setPercentile,
   });
   jest.mocked(useOverviewKuery).mockReturnValue({ kuery, setKuery: jest.fn() });

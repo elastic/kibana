@@ -30,6 +30,7 @@ export function FacetOptionRow({
   count,
   isIncluded,
   isExcluded,
+  isDisabled = false,
   onInclude,
   onExclude,
   ebtElement,
@@ -42,6 +43,8 @@ export function FacetOptionRow({
   count?: string;
   isIncluded: boolean;
   isExcluded: boolean;
+  /** Neither includes nor excludes it, e.g. for a value past the filter's cap. */
+  isDisabled?: boolean;
   onInclude: () => void;
   onExclude: () => void;
   /** Names the filter in click telemetry. */
@@ -76,6 +79,7 @@ export function FacetOptionRow({
         <EuiCheckbox
           id={id}
           checked={isIncluded}
+          disabled={isDisabled}
           onChange={onInclude}
           label={
             <EuiText
@@ -110,10 +114,11 @@ export function FacetOptionRow({
             size="xs"
             aria-label={excludeLabel}
             aria-pressed={isExcluded}
+            isDisabled={isDisabled}
             onClick={onExclude}
             data-test-subj={`${dataTestSubj}-exclude`}
             {...getEbtProps({
-              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.EXCLUDE_FILTER_VALUE,
               element: ebtElement,
             })}
           />

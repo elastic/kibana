@@ -19,26 +19,26 @@ export interface FilterValue {
   exclude: boolean;
 }
 
-/**
- * The values of a filter param: a comma-separated list, with `!` before an excluded value. A
- * comma, `!` at the start and backslash in a value are escaped with a backslash, so a page URL
- * with a comma stays one value. Duplicates and values past the cap are dropped.
- */
-export const parseFilterValues = (raw?: string): FilterValue[] => {
-  if (!raw) {
-    return [];
-  }
+interface FilterTokens {
+  /** Every value of the param, in order, with repeats and values past the cap. */
+  values: FilterValue[];
+  /** The param ends with a backslash that escapes nothing. */
+  hasDanglingEscape: boolean;
+  /** The param has a value of no characters, e.g. `a,,b` or a lone `!`. */
+  hasEmptyValue: boolean;
+}
 
-  const values: FilterValue[] = [];
-  const seen = new Set<string>();
+const tokenizeFilterParam = (raw: string): FilterTokens => {
+  const tokens: FilterTokens = { values: [], hasDanglingEscape: false, hasEmptyValue: false };
   let token = '';
   let exclude = false;
   let isTokenStart = true;
 
   const flush = () => {
-    if (token !== '' && !seen.has(token) && values.length < FILTER_VALUE_CAP) {
-      seen.add(token);
-      values.push({ value: token, exclude });
+    if (token === '') {
+      tokens.hasEmptyValue = true;
+    } else {
+      tokens.values.push({ value: token, exclude });
     }
     token = '';
     exclude = false;
@@ -50,6 +50,10 @@ export const parseFilterValues = (raw?: string): FilterValue[] => {
     if (char === FILTER_ESCAPE && index + 1 < raw.length) {
       index++;
       token += raw[index];
+      isTokenStart = false;
+    } else if (char === FILTER_ESCAPE) {
+      tokens.hasDanglingEscape = true;
+      token += char;
       isTokenStart = false;
     } else if (char === FILTER_SEPARATOR) {
       flush();
@@ -63,7 +67,52 @@ export const parseFilterValues = (raw?: string): FilterValue[] => {
   }
   flush();
 
-  return values;
+  return tokens;
+};
+
+/**
+ * The values of a filter param: a comma-separated list, with `!` before an excluded value. A
+ * comma, `!` at the start and backslash in a value are escaped with a backslash, so a page URL
+ * with a comma stays one value. It reads what a link or an old bookmark holds as far as it can:
+ * empty values, duplicates and values past the cap are dropped. `filterParamIssue` tells whether
+ * a param needs any of that.
+ */
+export const parseFilterValues = (raw?: string): FilterValue[] => {
+  if (!raw) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  return tokenizeFilterParam(raw)
+    .values.filter(({ value }) => {
+      const isNew = !seen.has(value);
+      seen.add(value);
+      return isNew;
+    })
+    .slice(0, FILTER_VALUE_CAP);
+};
+
+/**
+ * What is wrong with a filter param that `parseFilterValues` would repair, or `undefined` when it
+ * reads back as written: no dangling backslash, empty value, value past the cap, repeated value or
+ * value that is both included and excluded. The routes reject such a param, so a request never
+ * answers with a different filter than it asked for.
+ */
+export const filterParamIssue = (raw: string): string | undefined => {
+  const { values, hasDanglingEscape, hasEmptyValue } = tokenizeFilterParam(raw);
+  if (hasDanglingEscape) {
+    return 'A backslash must escape the character after it';
+  }
+  if (hasEmptyValue) {
+    return 'A value must not be empty';
+  }
+  if (values.length > FILTER_VALUE_CAP) {
+    return `A filter takes at most ${FILTER_VALUE_CAP} values`;
+  }
+  if (new Set(values.map(({ value }) => value)).size < values.length) {
+    return 'A value must not be given twice, nor both included and excluded';
+  }
+  return undefined;
 };
 
 const escapeValue = (value: string): string => {

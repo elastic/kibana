@@ -16,11 +16,6 @@ import { createDigitalExperienceServerRoute } from '../create_digital_experience
 import { START_AFTER_END_ISSUE, filteredTimeRangeShape, isStartBeforeEnd } from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
 
-/** The longest percentile param, e.g. `99`. */
-const PERCENTILE_PARAM_MAX_LENGTH = Math.max(
-  ...OVERVIEW_PERCENTILES.map((percentile) => String(percentile).length)
-);
-
 export const APPLICATION_OVERVIEW_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/overview';
 
@@ -41,14 +36,8 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
           ...filteredTimeRangeShape(),
           // The percentile of the load time, as a string like the rest of the query; 75 when left out.
           percentile: z
-            .string()
-            .max(PERCENTILE_PARAM_MAX_LENGTH)
-            .refine(
-              (raw) => OVERVIEW_PERCENTILES.some((percentile) => String(percentile) === raw),
-              {
-                message: `The percentile is one of ${OVERVIEW_PERCENTILES.join(', ')}`,
-              }
-            )
+            .enum(OVERVIEW_PERCENTILES.map(String))
+            .transform((raw) => OVERVIEW_PERCENTILES.find((candidate) => String(candidate) === raw))
             .optional(),
         })
         .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
@@ -71,7 +60,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       end,
       environment,
       filters: parseOverviewFilterParams({ browser, os, device, country, pageUrl }),
-      percentile: OVERVIEW_PERCENTILES.find((candidate) => String(candidate) === percentile),
+      percentile,
       kuery: kueryToQuery(kuery),
       signal,
     });

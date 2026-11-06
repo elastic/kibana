@@ -52,7 +52,7 @@ const RESPONSE: ApplicationErrorsResponse = {
 const timeRange = { rangeFrom: '2021-01-18T12:00:00.000Z', rangeTo: '2021-01-18T13:00:00.000Z' };
 const fetch = jest.fn();
 const setFilter = jest.fn();
-const clearFilters = jest.fn();
+const setFilters = jest.fn();
 
 /** The Overview's filters and KQL query in the URL, as the hooks return them. */
 const mockSearch = ({
@@ -70,8 +70,8 @@ const mockSearch = ({
     filters,
     params,
     setFilter,
-    setFilters: jest.fn(),
-    clearFilters,
+    setFilters,
+    clearFilters: jest.fn(),
     hasActiveFilters: Object.keys(filters).length > 0,
   });
 };
@@ -183,8 +183,9 @@ describe('ErrorsTab', () => {
       'user_agent.name: Chrome'
     );
 
+    // Clears what shows, and leaves the page, which the Overview shows.
     fireEvent.click(screen.getByTestId('digitalExperienceOverviewClearFilters'));
-    expect(clearFilters).toHaveBeenCalled();
+    expect(setFilters).toHaveBeenCalledWith({ browser: [] });
   });
 
   it('shows no filters while none narrows the errors', async () => {

@@ -7,6 +7,7 @@
 
 import {
   FILTER_VALUE_CAP,
+  filterParamIssue,
   formatFilterValues,
   parseFilterValues,
   partitionFilterValues,
@@ -61,6 +62,30 @@ describe('parseFilterValues', () => {
 
   it('keeps a trailing backslash as it is', () => {
     expect(parseFilterValues('path\\')).toEqual([{ value: 'path\\', exclude: false }]);
+  });
+});
+
+describe('filterParamIssue', () => {
+  it('has no issue with a param that reads back as written', () => {
+    [
+      'Chrome',
+      'Firefox,!Chrome,Safari',
+      'https://shop.example.com/a\\,b,\\!bang,back\\\\slash',
+      'Wow!',
+      Array.from({ length: FILTER_VALUE_CAP }, (_, index) => `v${index}`).join(','),
+    ].forEach((raw) => expect(filterParamIssue(raw)).toBeUndefined());
+  });
+
+  it('names what a param has that the parser would repair', () => {
+    expect(filterParamIssue('path\\')).toMatch(/backslash/);
+    expect(filterParamIssue('a,,b')).toMatch(/empty/);
+    expect(filterParamIssue('a,')).toMatch(/empty/);
+    expect(filterParamIssue('!')).toMatch(/empty/);
+    expect(filterParamIssue('Chrome,Chrome')).toMatch(/twice/);
+    expect(filterParamIssue('Chrome,!Chrome')).toMatch(/twice/);
+    expect(
+      filterParamIssue(Array.from({ length: FILTER_VALUE_CAP + 1 }, (_, i) => `v${i}`).join(','))
+    ).toMatch(new RegExp(`at most ${FILTER_VALUE_CAP}`));
   });
 });
 

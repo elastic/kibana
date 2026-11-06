@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { isoDateTime, z } from '@kbn/zod/v4';
-import { parseFilterValues } from '../../common/filter_values';
+import { filterParamIssue, parseFilterValues } from '../../common/filter_values';
 import {
   OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_PARAM_MAX_LENGTH,
@@ -40,13 +40,18 @@ export const timeRangeQuery = () =>
 
 /**
  * A filter's param: its values, which `parseFilterValues` reads (a comma-separated list, with `!`
- * before an excluded value), each as short as the filter's lists keep them.
+ * before an excluded value), each as short as the filter's lists keep them. A param that the
+ * parser would repair, e.g. one with too many values, is rejected instead of answered with other
+ * filters than it asked for.
  */
 const filterParam = (name: OverviewFilterName) =>
   z
     .string()
     .min(1)
     .max(OVERVIEW_FILTER_PARAM_MAX_LENGTH)
+    .refine((raw) => filterParamIssue(raw) === undefined, {
+      error: ({ input }) => `${name}: ${filterParamIssue(String(input))}`,
+    })
     .refine(
       (raw) =>
         parseFilterValues(raw).every(

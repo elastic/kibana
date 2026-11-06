@@ -31,6 +31,10 @@ const create = jest.fn();
 const setKuery = jest.fn();
 const onRefresh = jest.fn();
 
+const resetSearchBarProps = () => {
+  searchBarProps = undefined;
+};
+
 const submit = (query: string) =>
   act(() => {
     searchBarProps?.onQuerySubmit?.(
@@ -114,6 +118,37 @@ describe('OverviewSearchBar', () => {
     expect(create).toHaveBeenCalled();
     expect(searchBarProps?.indexPatterns).toBeUndefined();
     expect(searchBarProps?.showQueryInput).toBe(true);
+  });
+
+  it('creates the data view once, not at every mount, e.g. when back from another tab', async () => {
+    const { unmount } = render(<OverviewSearchBar onRefresh={onRefresh} />, {
+      wrapper: EuiProvider,
+    });
+    await waitFor(() => expect(searchBarProps).toBeDefined());
+    unmount();
+    resetSearchBarProps();
+
+    render(<OverviewSearchBar onRefresh={onRefresh} />, { wrapper: EuiProvider });
+    await waitFor(() => expect(searchBarProps).toBeDefined());
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(searchBarProps?.indexPatterns).toEqual([dataView]);
+  });
+
+  it('tries again at the next mount when there was no data view to make', async () => {
+    create.mockRejectedValueOnce(new Error('No matching indices found'));
+    const { unmount } = render(<OverviewSearchBar onRefresh={onRefresh} />, {
+      wrapper: EuiProvider,
+    });
+    await waitFor(() => expect(searchBarProps).toBeDefined());
+    expect(searchBarProps?.indexPatterns).toBeUndefined();
+    unmount();
+    resetSearchBarProps();
+
+    render(<OverviewSearchBar onRefresh={onRefresh} />, { wrapper: EuiProvider });
+    await waitFor(() => expect(searchBarProps?.indexPatterns).toEqual([dataView]));
+
+    expect(create).toHaveBeenCalledTimes(2);
   });
 
   it('sets a new query, trimmed', async () => {

@@ -24,7 +24,11 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { formatFilterValues, toggleFilterValue } from '../../../../../common/filter_values';
+import {
+  FILTER_VALUE_CAP,
+  formatFilterValues,
+  toggleFilterValue,
+} from '../../../../../common/filter_values';
 import {
   OVERVIEW_FILTER_NAMES,
   type OverviewFilterName,
@@ -32,6 +36,7 @@ import {
   type OverviewFilters,
 } from '../../../../../common/overview_filters';
 import { FacetOptionRow } from '../../../../components/facet_option_row';
+import { FilterLimitNote } from '../../../../components/filter_limit_note';
 import { facetRows } from '../../../../components/multi_facet_filter';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
@@ -99,6 +104,7 @@ export function AllFiltersFlyout({
         {OVERVIEW_FILTER_NAMES.map((name, filterIndex) => {
           const selected = draft[name] ?? [];
           const rows = facetRows(options?.[name] ?? [], selected);
+          const isFull = selected.length >= FILTER_VALUE_CAP;
           return (
             <React.Fragment key={name}>
               {filterIndex > 0 && <EuiSpacer size="m" />}
@@ -141,6 +147,7 @@ export function AllFiltersFlyout({
                         count={count === undefined ? undefined : formatNumber(count)}
                         isIncluded={selection !== undefined && !selection.exclude}
                         isExcluded={selection?.exclude === true}
+                        isDisabled={isFull && selection === undefined}
                         onInclude={() => toggle(name, value, false)}
                         onExclude={() => toggle(name, value, true)}
                         ebtElement={FILTER_EBT_ELEMENTS[name]}
@@ -148,6 +155,14 @@ export function AllFiltersFlyout({
                       />
                     );
                   })
+                )}
+                {isFull && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <FilterLimitNote
+                      data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}LimitNote`}
+                    />
+                  </>
                 )}
               </EuiAccordion>
             </React.Fragment>

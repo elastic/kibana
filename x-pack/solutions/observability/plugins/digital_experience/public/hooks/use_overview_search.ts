@@ -7,7 +7,11 @@
 
 import { useCallback, useMemo } from 'react';
 import { DEFAULT_OVERVIEW_PERCENTILE, OVERVIEW_PERCENTILES } from '../../common/overview_filters';
-import type { OverviewPercentile, OverviewSearchParams } from '../../common/overview_filters';
+import type {
+  OverviewPercentile,
+  OverviewPercentileParam,
+  OverviewSearchParams,
+} from '../../common/overview_filters';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useOverviewFilters } from './use_overview_filters';
 import { useUpdateUrlQuery } from './use_update_url_query';
@@ -19,7 +23,7 @@ import { useUpdateUrlQuery } from './use_update_url_query';
 export const useOverviewPercentile = (): {
   percentile: OverviewPercentile;
   /** The param the route takes, `undefined` for the default. */
-  percentileParam: string | undefined;
+  percentileParam: OverviewPercentileParam | undefined;
   setPercentile: (percentile: OverviewPercentile) => void;
 } => {
   const { query } = useDigitalExperienceParams('/');
@@ -39,7 +43,7 @@ export const useOverviewPercentile = (): {
 
   return {
     percentile,
-    percentileParam: percentile === DEFAULT_OVERVIEW_PERCENTILE ? undefined : String(percentile),
+    percentileParam: percentile === DEFAULT_OVERVIEW_PERCENTILE ? undefined : `${percentile}`,
     setPercentile,
   };
 };

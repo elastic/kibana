@@ -30,8 +30,9 @@ const runHandler = ({
   query = { start: START, end: END },
 }: {
   serviceName?: string;
-  query?: { start: string; end: string; environment?: string } & Partial<
-    Record<'browser' | 'os' | 'device' | 'country' | 'pageUrl' | 'percentile' | 'kuery', string>
+  // As the schema parses it: the percentile is a number by now.
+  query?: { start: string; end: string; environment?: string; percentile?: number } & Partial<
+    Record<'browser' | 'os' | 'device' | 'country' | 'pageUrl' | 'kuery', string>
   >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
@@ -52,7 +53,11 @@ const querySchema = () => {
   const { params } = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT];
   return (
     params as unknown as {
-      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+      shape: {
+        query: {
+          safeParse: (query: unknown) => { success: boolean; data?: { percentile?: number } };
+        };
+      };
     }
   ).shape.query;
 };
@@ -141,8 +146,8 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     );
   });
 
-  it('passes the percentile as a number, and none when it is left out', async () => {
-    await runHandler({ query: { start: START, end: END, percentile: '95' } });
+  it('passes the percentile, and none when it is left out', async () => {
+    await runHandler({ query: { start: START, end: END, percentile: 95 } });
 
     expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ percentile: 95 }));
 
@@ -232,20 +237,37 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     expect(withBrowser('x,'.repeat(1025))).toBe(false);
   });
 
-  it('accepts the percentiles the Overview offers only', () => {
-    const withPercentile = (raw: string) =>
-      querySchema().safeParse({ start: START, end: END, percentile: raw }).success;
+  it('rejects a filter param that would be repaired instead of answering with another filter', () => {
+    const withBrowser = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, browser: raw }).success;
+    const eleven = Array.from({ length: 11 }, (_, index) => `b${index}`).join(',');
+    const ten = Array.from({ length: 10 }, (_, index) => `b${index}`).join(',');
 
-    ['50', '75', '90', '95', '99'].forEach((raw) => expect(withPercentile(raw)).toBe(true));
-    ['', '0', '100', '75.5', 'p95'].forEach((raw) => expect(withPercentile(raw)).toBe(false));
+    expect(withBrowser(ten)).toBe(true);
+    expect(withBrowser(eleven)).toBe(false);
+    expect(withBrowser('Chrome,Chrome')).toBe(false);
+    expect(withBrowser('Chrome,!Chrome')).toBe(false);
+    expect(withBrowser('Chrome,,Safari')).toBe(false);
+    expect(withBrowser('Chrome,')).toBe(false);
+    expect(withBrowser('!')).toBe(false);
+    expect(withBrowser('Chrome\\')).toBe(false);
+    expect(withBrowser('Chrome\\\\')).toBe(true);
+    expect(withBrowser('a\\,b')).toBe(true);
   });
 
-  it('bounds the percentile to the length of the longest one', () => {
-    const withPercentile = (raw: string) =>
-      querySchema().safeParse({ start: START, end: END, percentile: raw }).success;
+  it('accepts the percentiles the Overview offers only, and reads them as numbers', () => {
+    const parse = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, percentile: raw });
 
-    expect(withPercentile('99')).toBe(true);
-    expect(withPercentile('9'.repeat(1_000_000))).toBe(false);
+    ['50', '75', '90', '95', '99'].forEach((raw) => {
+      const { success, data } = parse(raw);
+      expect(success).toBe(true);
+      expect(data?.percentile).toBe(Number(raw));
+    });
+    ['', '0', '100', '75.5', 'p95', '9'.repeat(1_000_000)].forEach((raw) =>
+      expect(parse(raw).success).toBe(false)
+    );
+    expect(querySchema().safeParse({ start: START, end: END }).data?.percentile).toBeUndefined();
   });
 
   it('bounds the KQL query to 2048 characters', () => {

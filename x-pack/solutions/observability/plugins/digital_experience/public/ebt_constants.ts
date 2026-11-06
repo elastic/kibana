@@ -14,6 +14,8 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   OPEN_FILTER: 'openFilter',
   /** The user narrows the list, e.g. to one environment or source. */
   SET_FILTER: 'setFilter',
+  /** The user leaves a value out of the data, e.g. every Chrome page load. */
+  EXCLUDE_FILTER_VALUE: 'excludeFilterValue',
   /** The user opens the list of columns to show or hide. */
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */

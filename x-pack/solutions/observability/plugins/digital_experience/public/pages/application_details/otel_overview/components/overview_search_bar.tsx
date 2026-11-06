@@ -29,6 +29,37 @@ const PLACEHOLDER = i18n.translate('xpack.digitalExperience.overview.kuery.place
   defaultMessage: 'Filter by any field, e.g. user_agent.name : "Chrome"',
 });
 
+/**
+ * The ad hoc data view of the OTel indices per data views service, kept for the page's life: the
+ * Overview mounts the bar again when it is back from another tab, and a data view asks Elasticsearch
+ * for the fields of every index. Nothing is kept when there is no data view to make yet.
+ */
+const dataViewsOfService = new WeakMap<
+  DataPublicPluginStart['dataViews'],
+  Promise<AdHocDataView | undefined>
+>();
+
+const getOtelDataView = (
+  dataViews: DataPublicPluginStart['dataViews']
+): Promise<AdHocDataView | undefined> => {
+  const cached = dataViewsOfService.get(dataViews);
+  if (cached) {
+    return cached;
+  }
+  const created = dataViews
+    .create({ title: OTEL_INDEX_PATTERN, timeFieldName: '@timestamp' }, undefined, false)
+    // No matching indices yet: there is nothing to suggest, and the next mount tries again.
+    .catch(() => undefined)
+    .then((dataView) => {
+      if (!dataView) {
+        dataViewsOfService.delete(dataViews);
+      }
+      return dataView;
+    });
+  dataViewsOfService.set(dataViews, created);
+  return created;
+};
+
 const kueryErrorOf = (kuery: string): string | undefined => {
   try {
     fromKueryExpression(kuery);
@@ -53,15 +84,11 @@ export function OverviewSearchBar({ onRefresh }: { onRefresh: () => void }) {
 
   useEffect(() => {
     let isCurrent = true;
-    data.dataViews
-      .create({ title: OTEL_INDEX_PATTERN, timeFieldName: '@timestamp' }, undefined, false)
-      // No matching indices yet: there is nothing to suggest.
-      .catch(() => undefined)
-      .then((dataView) => {
-        if (isCurrent) {
-          setDataViewState({ dataView });
-        }
-      });
+    getOtelDataView(data.dataViews).then((dataView) => {
+      if (isCurrent) {
+        setDataViewState({ dataView });
+      }
+    });
     return () => {
       isCurrent = false;
     };
@@ -102,7 +129,7 @@ export function OverviewSearchBar({ onRefresh }: { onRefresh: () => void }) {
 
   // While the bar has the focus it takes the whole row, over the filters and the date picker next
   // to it, which wait under it; the row's space for the bar stays, so nothing moves. The row is the
-  // nearest positioned ancestor (`otel_overview.tsx`).
+  // nearest positioned ancestor (`application_tab_toolbar.tsx`).
   const expandOnFocusCss = css({
     inlineSize: '100%',
     '&:focus-within': {

@@ -49,6 +49,20 @@ describe('useOverviewFilters', () => {
     expect(hasActiveFilters).toBe(true);
   });
 
+  it('gives the routes the filters a link means, without the repeats and values past the cap', () => {
+    const tooMany = Array.from({ length: 12 }, (_, index) => `b${index}`).join(',');
+    mockRoute({ browser: 'Chrome,Chrome,,!Chrome', os: tooMany });
+
+    const { filters, params } = renderHook(() => useOverviewFilters()).result.current;
+
+    expect(params).toEqual({
+      browser: 'Chrome',
+      os: 'b0,b1,b2,b3,b4,b5,b6,b7,b8,b9',
+    });
+    expect(filters.browser).toEqual([{ value: 'Chrome', exclude: false }]);
+    expect(filters.os).toHaveLength(10);
+  });
+
   it('has no active filters without any', () => {
     mockRoute({ environment: 'production' });
 

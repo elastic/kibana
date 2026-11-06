@@ -26,24 +26,26 @@ export const useOverviewFilters = () => {
   const { query } = useDigitalExperienceParams('/');
   const updateUrlQuery = useUpdateUrlQuery();
 
-  const params = useMemo<OverviewFilterParams>(
-    () =>
-      Object.fromEntries(
-        // An empty param, e.g. `?browser=`, counts as unset.
-        OVERVIEW_FILTER_NAMES.flatMap((name) => (query[name] ? [[name, query[name]]] : []))
-      ),
-    [query]
-  );
-
   const filters = useMemo<OverviewFilters>(
     () =>
       Object.fromEntries(
         OVERVIEW_FILTER_NAMES.flatMap((name) => {
-          const values = parseFilterValues(params[name]);
+          // An empty param, e.g. `?browser=`, counts as unset.
+          const values = parseFilterValues(query[name]);
           return values.length > 0 ? [[name, values]] : [];
         })
       ),
-    [params]
+    [query]
+  );
+
+  // Written out from the values read, so the routes, which reject a param the parser would repair
+  // (a repeated value, one past the cap), get the filter the URL means even when a link says it badly.
+  const params = useMemo<OverviewFilterParams>(
+    () =>
+      Object.fromEntries(
+        Object.entries(filters).map(([name, values]) => [name, formatFilterValues(values)])
+      ),
+    [filters]
   );
 
   /** Sets the values of the filters in `patch` at once, and removes a filter given none. */

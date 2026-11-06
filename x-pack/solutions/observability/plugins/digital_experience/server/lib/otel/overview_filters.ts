@@ -23,13 +23,25 @@ import { environmentFilter } from '../helpers/environment';
 import { ENVIRONMENT_FIELDS, eventCount } from './queries';
 
 /**
- * The fields each filter reads, in priority order. The first four are the sessions transform's
- * lists, so a browser, OS, device or country means the same in the Overview and the Sessions.
+ * Whether the browser runs on a mobile device. EDOT Browser records it even where no device model
+ * or type is, so the device falls back to "Mobile" or "Desktop" rather than to nothing.
+ */
+const MOBILE_FIELDS = ['resource.attributes.browser.mobile', 'attributes.browser.mobile'] as const;
+
+/** What a field that is not a name says, per value: the device name of `browser.mobile`. */
+const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
+  MOBILE_FIELDS.map((field) => [field, { true: 'Mobile', false: 'Desktop' }])
+);
+
+/**
+ * The fields each filter reads, in priority order. The sessions transform's lists come first, so a
+ * browser, OS, device or country means the same in the Overview and the Sessions where they have
+ * one; the device then falls back to `browser.mobile`.
  */
 const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
   os: SESSION_ATTRIBUTE_FIELDS.os,
-  device: SESSION_ATTRIBUTE_FIELDS.device,
+  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...MOBILE_FIELDS],
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
   pageUrl: [SOURCE_URL_FIELD],
 };
@@ -44,12 +56,17 @@ export const filterFieldOf = (name: OverviewFilterName): string =>
 /**
  * Takes the first non-empty value of the fields, like the sessions' dest pipeline does, so a
  * document with the same value in both scopes is counted once. Unmapped fields are skipped: the
- * OTel indices map only what their data had.
+ * OTel indices map only what their data had. A field with `params.labels` says its value in other
+ * words, e.g. `true` as "Mobile"; a value without a label is skipped.
  */
 const COALESCE_SCRIPT = `
   for (def field : params.fields) {
     if (doc.containsKey(field) && doc[field].size() > 0) {
       String value = doc[field].value.toString().trim();
+      def labels = params.labels.get(field);
+      if (labels != null) {
+        value = labels.getOrDefault(value, '');
+      }
       if (value != '' && value != 'null') {
         emit(value);
         break;
@@ -65,7 +82,10 @@ export const filterRuntimeMappings = (): estypes.MappingRuntimeFields =>
       runtimeFieldOf(name),
       {
         type: 'keyword' as const,
-        script: { source: COALESCE_SCRIPT, params: { fields: [...FILTER_SOURCE_FIELDS[name]] } },
+        script: {
+          source: COALESCE_SCRIPT,
+          params: { fields: [...FILTER_SOURCE_FIELDS[name]], labels: FIELD_VALUE_LABELS },
+        },
       },
     ])
   );

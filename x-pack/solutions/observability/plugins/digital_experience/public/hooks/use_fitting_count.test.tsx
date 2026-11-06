@@ -64,11 +64,36 @@ describe('useFittingCount', () => {
     expect(shown()).toBe(0);
   });
 
-  it('never goes below the minimum, even when the row still wraps', () => {
-    capacity = 1;
+  it('never goes below the minimum while taking items away helps', () => {
+    capacity = 3;
     render(<Harness total={4} min={3} />);
 
     expect(shown()).toBe(3);
+  });
+
+  it('brings every item back when the row still wraps at the minimum', () => {
+    capacity = 1;
+    render(<Harness total={4} min={3} />);
+
+    expect(shown()).toBe(4);
+  });
+
+  it('brings every item back when the row wraps without any, e.g. a control with no room', () => {
+    capacity = -1;
+    render(<Harness total={4} />);
+
+    expect(shown()).toBe(4);
+  });
+
+  it('fits again from the start after it gave up, when the items change', () => {
+    capacity = -1;
+    const { rerender } = render(<Harness total={4} resetKey="a" />);
+    expect(shown()).toBe(4);
+
+    capacity = 2;
+    rerender(<Harness total={4} resetKey="b" />);
+
+    expect(shown()).toBe(2);
   });
 
   it('starts over when what the items are changes, and fits again', () => {

@@ -6,23 +6,25 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
-import type { OverviewPercentile, OverviewSearchParams } from '../../../../common/overview_filters';
+import type {
+  OverviewPercentile,
+  OverviewPercentileParam,
+  OverviewSearchParams,
+} from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
 } from '../../../../common/types/overview';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
-import { ApplicationTabToolbar } from '../../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
 import { useApplicationData } from '../../../hooks/use_application_data';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
-import { useFittingCount } from '../../../hooks/use_fitting_count';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useOverviewFilters } from '../../../hooks/use_overview_filters';
 import { useOverviewPercentile, useOverviewSearchParams } from '../../../hooks/use_overview_search';
@@ -36,14 +38,9 @@ import { useApplicationErrors } from '../../errors/hooks/use_application_errors'
 import { AllFiltersFlyout } from './components/all_filters_flyout';
 import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
-import {
-  limitFilters,
-  OverviewFilterButtons,
-  OverviewFilterPills,
-  visibleFilters,
-} from './components/overview_filters';
+import { OverviewFilterPills } from './components/overview_filters';
 import { OverviewKpis } from './components/overview_kpis';
-import { OverviewSearchBar } from './components/overview_search_bar';
+import { OverviewToolbar } from './components/overview_toolbar';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
@@ -76,14 +73,13 @@ const TOP_ERRORS_ROWS = 5;
 /** The request for the Overview narrowed by `searchParams`; a change of them is a new request. */
 const overviewRequestOf = (
   searchParams: OverviewSearchParams,
-  percentile: string | undefined
+  percentile: OverviewPercentileParam | undefined
 ): ApplicationRequest<ApplicationOverviewResponse> => {
   return (apiClient, options) => {
-    const { signal, params } = withOverviewFilters(options, searchParams);
-    return apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/overview', {
-      signal,
-      params: { ...params, query: { ...params.query, ...(percentile ? { percentile } : {}) } },
-    });
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/overview',
+      withOverviewFilters(options, searchParams, { percentile })
+    );
   };
 };
 
@@ -227,8 +223,9 @@ function UsageAndErrorsPanels({
  * users load and do and their top errors, over the selected environment, filters and time range.
  */
 export function OtelOverview({ serviceName }: { serviceName: string }) {
+  const { euiTheme } = useEuiTheme();
   const { setTimeRange } = useTimeRange();
-  const { filters, setFilter, setFilters, clearFilters, hasActiveFilters } = useOverviewFilters();
+  const { filters, setFilter, setFilters, clearFilters } = useOverviewFilters();
   const { percentile, percentileParam, setPercentile } = useOverviewPercentile();
   const searchParams = useOverviewSearchParams();
   const formatters = useFormatters();
@@ -251,51 +248,24 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     topErrors.refresh();
   };
 
-  // The row of the query, the filters and the date picker keeps to one row: when it is too narrow,
-  // the filters give way, those without a selection first and the least important first. What
-  // they select stays in the pills below, and every filter in "All filters".
-  const pinnedFilters = visibleFilters(pickerOptions?.filters, filters);
-  const { count: fittingCount, containerRef: controlsRef } = useFittingCount({
-    total: pinnedFilters.length,
-    resetKey: `${pinnedFilters.join()}|${pinnedFilters
-      .filter((name) => (filters[name] ?? []).length > 0)
-      .join()}`,
-  });
-  const shownFilters = limitFilters(pinnedFilters, filters, fittingCount);
-
   return (
     <>
       <EuiSpacer size="m" />
       {/* The query, the filters and the date picker share a row, each as tall as the others. */}
-      <ApplicationTabToolbar
-        containerRef={controlsRef}
+      <OverviewToolbar
         environments={pickerOptions?.environments}
+        filterOptions={pickerOptions?.filters}
+        filters={filters}
+        setFilter={setFilter}
+        onOpenAllFilters={() => setIsFlyoutOpen(true)}
         isLoading={overview.isLoading}
         onRefresh={refreshAll}
-        leading={
-          // The bar is never narrower than 300px, which the row has to leave room for.
-          <EuiFlexItem grow css={{ minInlineSize: 300 }}>
-            <OverviewSearchBar onRefresh={refreshAll} />
-          </EuiFlexItem>
-        }
-        filters={
-          <OverviewFilterButtons
-            names={shownFilters}
-            options={pickerOptions?.filters}
-            filters={filters}
-            setFilter={setFilter}
-            onOpenAllFilters={() => setIsFlyoutOpen(true)}
-            isLoading={overview.isLoading}
-            formatters={formatters}
-          />
-        }
+        formatters={formatters}
       />
-      {hasActiveFilters && (
-        <>
-          <EuiSpacer size="s" />
-          <OverviewFilterPills filters={filters} setFilter={setFilter} onClear={clearFilters} />
-        </>
-      )}
+      {/* As tall as a row of pills even with none, so picking the first value moves nothing below. */}
+      <div css={{ marginBlockStart: euiTheme.size.s, minBlockSize: euiTheme.size.l }}>
+        <OverviewFilterPills filters={filters} setFilter={setFilter} onClear={clearFilters} />
+      </div>
       {isFlyoutOpen && (
         <AllFiltersFlyout
           options={pickerOptions?.filters}

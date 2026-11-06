@@ -38,10 +38,13 @@ const kueryNote = (kuery: string) =>
 export function ErrorsTab({ serviceName }: { serviceName: string }) {
   const { response, isLoading, error, refresh } = useApplicationErrors(serviceName);
   const environments = useLastEnvironments(serviceName, response);
-  const { filters, setFilter, clearFilters } = useOverviewFilters();
+  const { filters, setFilter, setFilters } = useOverviewFilters();
   const { kuery } = useOverviewKuery();
   // The page does not narrow the errors, so it is not shown as if it did.
   const errorFilters = omit(filters, 'pageUrl');
+  // Clears what shows here only: the page stays for the Overview, which shows it.
+  const clearErrorFilters = () =>
+    setFilters(Object.fromEntries(Object.keys(errorFilters).map((name) => [name, []])));
 
   return (
     <>
@@ -57,7 +60,7 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
           <OverviewFilterPills
             filters={errorFilters}
             setFilter={setFilter}
-            onClear={clearFilters}
+            onClear={clearErrorFilters}
           />
         </>
       )}

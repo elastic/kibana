@@ -38,7 +38,12 @@ describe('filterRuntimeMappings', () => {
         .fields;
     expect(fieldsOf('digital_experience_filter_browser')).toEqual(SESSION_ATTRIBUTE_FIELDS.browser);
     expect(fieldsOf('digital_experience_filter_os')).toEqual(SESSION_ATTRIBUTE_FIELDS.os);
-    expect(fieldsOf('digital_experience_filter_device')).toEqual(SESSION_ATTRIBUTE_FIELDS.device);
+    // The device then falls back to whether the browser is mobile, which EDOT Browser records.
+    expect(fieldsOf('digital_experience_filter_device')).toEqual([
+      ...SESSION_ATTRIBUTE_FIELDS.device,
+      'resource.attributes.browser.mobile',
+      'attributes.browser.mobile',
+    ]);
     expect(fieldsOf('digital_experience_filter_country')).toEqual(
       SESSION_ATTRIBUTE_FIELDS.countryIso
     );
@@ -52,6 +57,19 @@ describe('filterRuntimeMappings', () => {
     expect(source).toContain('doc.containsKey(field)');
     expect(source).toContain('emit(value)');
     expect(source).toContain('break;');
+  });
+
+  it('names the device "Mobile" or "Desktop" when only the browser says whether it is mobile', () => {
+    const { digital_experience_filter_device: device } = filterRuntimeMappings();
+    const { script } = device as unknown as {
+      script: { source: string; params: { labels: Record<string, Record<string, string>> } };
+    };
+
+    expect(script.source).toContain('params.labels.get(field)');
+    expect(script.params.labels).toEqual({
+      'resource.attributes.browser.mobile': { true: 'Mobile', false: 'Desktop' },
+      'attributes.browser.mobile': { true: 'Mobile', false: 'Desktop' },
+    });
   });
 
   it('has no runtime field for the page, which is one field', () => {

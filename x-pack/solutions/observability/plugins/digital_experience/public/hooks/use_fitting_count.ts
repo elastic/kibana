@@ -19,8 +19,10 @@ export const hasWrapped = (row: Element | null): boolean => {
 /**
  * How many of `total` optional items fit in a flex row without wrapping it. It starts from all of
  * them whenever the row's width or `resetKey` changes, then takes one away at a time until the row
- * no longer wraps, but never goes below `min`. `containerRef` goes on an element whose first child
- * is the flex row.
+ * no longer wraps, but never goes below `min`. If the row still wraps at `min`, something other
+ * than the items makes it (e.g. a control that has no room beside them), so taking items away does
+ * not help and all `total` come back. `containerRef` goes on an element whose first child is the
+ * flex row. Use the hook in a component of its own: every step renders the component that has it.
  *
  * It measures where the items are, so it needs no sizes of the items: the row wraps when its items
  * do not fit, whatever the language or the font.
@@ -37,8 +39,13 @@ export const useFittingCount = ({
 }): { count: number; containerRef: RefObject<HTMLDivElement> } => {
   const containerRef = useRef<HTMLDivElement>(null);
   // `token` changes with every start over, so the row is checked again even when `count` did not.
-  const [{ count, token }, setState] = useState({ count: total, token: 0 });
+  const [{ count, token, hasGivenUp }, setState] = useState({
+    count: total,
+    token: 0,
+    hasGivenUp: false,
+  });
   const [generation, setGeneration] = useState(0);
+  const floor = Math.max(min, 0);
 
   // A wider or narrower row starts the fitting over.
   useEffect(() => {
@@ -58,14 +65,19 @@ export const useFittingCount = ({
   }, []);
 
   useLayoutEffect(() => {
-    setState((current) => ({ count: total, token: current.token + 1 }));
+    setState((current) => ({ count: total, token: current.token + 1, hasGivenUp: false }));
   }, [total, resetKey, generation]);
 
   useLayoutEffect(() => {
-    if (count > Math.max(min, 0) && hasWrapped(containerRef.current?.firstElementChild ?? null)) {
-      setState((current) => ({ ...current, count: current.count - 1 }));
+    if (hasGivenUp || !hasWrapped(containerRef.current?.firstElementChild ?? null)) {
+      return;
     }
-  }, [count, token, min]);
+    setState((current) =>
+      current.count > floor
+        ? { ...current, count: current.count - 1 }
+        : { ...current, count: total, hasGivenUp: true }
+    );
+  }, [count, token, hasGivenUp, floor, total]);
 
-  return { count: Math.min(Math.max(count, min), total), containerRef };
+  return { count: hasGivenUp ? total : Math.min(Math.max(count, min), total), containerRef };
 };

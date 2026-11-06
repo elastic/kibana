@@ -15,16 +15,18 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { toggleFilterValue } from '../../common/filter_values';
+import { FILTER_VALUE_CAP, toggleFilterValue } from '../../common/filter_values';
 import type { FilterValue } from '../../common/filter_values';
 import type { FacetBucket } from '../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../ebt_constants';
 import type { Formatters } from '../hooks/use_formatters';
 import { FacetOptionRow } from './facet_option_row';
+import { FilterLimitNote } from './filter_limit_note';
 
 const listCss = css({ inlineSize: 320 });
 const optionsCss = css({ maxBlockSize: 288, overflowY: 'auto' });
@@ -81,9 +83,12 @@ export function MultiFacetFilter({
   ebtElement: string;
   'data-test-subj': string;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const popoverId = useGeneratedHtmlId({ prefix: dataTestSubj });
+  // A value past the cap would be dropped, so the values left cannot be picked.
+  const isFull = values.length >= FILTER_VALUE_CAP;
 
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -136,7 +141,7 @@ export function MultiFacetFilter({
         </EuiPopoverTitle>
         <div css={optionsCss}>
           {rows.length === 0 ? (
-            <EuiText size="s" color="subdued" css={css({ padding: 12 })}>
+            <EuiText size="s" color="subdued" css={css({ padding: euiTheme.size.m })}>
               {i18n.translate('xpack.digitalExperience.multiFacetFilter.noValues', {
                 defaultMessage: 'No values',
               })}
@@ -152,6 +157,7 @@ export function MultiFacetFilter({
                   count={count === undefined ? undefined : formatNumber(count)}
                   isIncluded={selection !== undefined && !selection.exclude}
                   isExcluded={selection?.exclude === true}
+                  isDisabled={isFull && selection === undefined}
                   onInclude={() => onChange(toggleFilterValue(values, value, false))}
                   onExclude={() => onChange(toggleFilterValue(values, value, true))}
                   ebtElement={ebtElement}
@@ -163,6 +169,7 @@ export function MultiFacetFilter({
         </div>
         {values.length > 0 && (
           <EuiPopoverFooter paddingSize="s">
+            {isFull && <FilterLimitNote data-test-subj={`${dataTestSubj}LimitNote`} />}
             <EuiButtonEmpty
               size="xs"
               flush="left"

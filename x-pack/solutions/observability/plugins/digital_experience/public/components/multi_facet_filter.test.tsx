@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiFilterGroup, EuiProvider } from '@elastic/eui';
+import { FILTER_VALUE_CAP } from '../../common/filter_values';
 import type { FilterValue } from '../../common/filter_values';
 import { facetRows, filterPillText, MultiFacetFilter } from './multi_facet_filter';
 
@@ -157,5 +158,26 @@ describe('MultiFacetFilter', () => {
     renderFilter();
 
     expect(screen.getByTestId('filter')).toHaveTextContent(/^Browser$/);
+  });
+
+  it('says why a value cannot be picked once the filter has all the values it takes', async () => {
+    const selected = include(
+      ...Array.from({ length: FILTER_VALUE_CAP }, (_, index) => `v${index}`)
+    );
+    renderFilter(selected);
+
+    expect(await screen.findByTestId('filterLimitNote')).toBeInTheDocument();
+    // Another value cannot be picked, nor left out; the ones picked can still be undone.
+    expect(screen.getByTestId('filterOption-Chrome')).toBeDisabled();
+    expect(screen.getByTestId('filterOption-Chrome-exclude')).toBeDisabled();
+    expect(screen.getByTestId('filterOption-v0')).toBeEnabled();
+    expect(screen.getByTestId('filterOption-v0-exclude')).toBeEnabled();
+  });
+
+  it('says nothing about a limit below the cap', async () => {
+    renderFilter(include('Chrome'));
+
+    expect(await screen.findByTestId('filterOption-Firefox')).toBeEnabled();
+    expect(screen.queryByTestId('filterLimitNote')).not.toBeInTheDocument();
   });
 });

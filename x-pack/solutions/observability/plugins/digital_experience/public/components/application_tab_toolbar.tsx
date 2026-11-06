@@ -19,7 +19,6 @@ export function ApplicationTabToolbar({
   onRefresh,
   leading,
   filters,
-  afterFilters,
   containerRef,
 }: {
   /** `undefined` until the tab has loaded once. */
@@ -33,8 +32,6 @@ export function ApplicationTabToolbar({
   leading?: ReactNode;
   /** Filter buttons that follow the environment picker in its group. */
   filters?: ReactNode;
-  /** Flex items between the filters and the time range, e.g. a button that clears the filters. */
-  afterFilters?: ReactNode;
   /** The positioned element around the row, to measure it or to place what grows over it. */
   containerRef?: Ref<HTMLDivElement>;
 }) {
@@ -56,7 +53,6 @@ export function ApplicationTabToolbar({
             {filters}
           </EuiFilterGroup>
         </EuiFlexItem>
-        {afterFilters}
         {/* At the end of the row, or of its own when the filters leave no room. */}
         <EuiFlexItem grow={false} css={{ flexBasis: 420, marginInlineStart: 'auto' }}>
           <TimeRangePicker onRefresh={onRefresh} />
