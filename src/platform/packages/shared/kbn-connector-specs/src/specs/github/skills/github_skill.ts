@@ -16,8 +16,8 @@ export const githubSkillFile = buildSkill(({ bt, fence }) => ({
   description:
     'Search and list GitHub issues and pull requests with compact results (no bodies, avatars, or URL clutter).',
   content: `
-**Connector:** Infer the connector from context. If none available, query based on type. Use its ID as
-${bt}connector_id${bt}.
+**Connector:** Call ${bt}list_connectors${bt} and use the ${bt}id${bt} of the connector of type ${bt}.github${bt} (GitHub) as
+${bt}connector_id${bt}. If several match, ask the user which one to use.
 
 Each attached file contains workflows. To run one, call ${bt}platform.core.execute_workflow${bt} with the workflow YAML as
 ${bt}yaml${bt} (it does not need to be saved first) and ${bt}connector_id${bt} plus any inputs from the file's table as ${bt}inputs${bt}.

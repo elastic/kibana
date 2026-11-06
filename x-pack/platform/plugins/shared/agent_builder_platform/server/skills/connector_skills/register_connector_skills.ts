@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { CONNECTORS_SKILLS_BASE_PATH } from '@kbn/agent-builder-server/skills';
@@ -14,10 +15,16 @@ import {
   getConnectorSkillRegistryId,
   type ConnectorTypeSkill,
 } from '@kbn/connector-specs';
+import { createListConnectorsTool } from '../connector_discovery/list_connectors_tool';
+
+interface ConnectorSkillsDeps {
+  getActionsStart: () => Promise<ActionsPluginStart>;
+}
 
 /** Builds the built-in skill definition for a skill defined by a connector spec. */
 export const createConnectorSkillDefinition = (
-  skill: ConnectorTypeSkill['skill']
+  skill: ConnectorTypeSkill['skill'],
+  { getActionsStart }: ConnectorSkillsDeps
 ): SkillDefinition => ({
   id: getConnectorSkillRegistryId(skill),
   name: skill.name,
@@ -34,11 +41,17 @@ export const createConnectorSkillDefinition = (
   hidden: true,
   excludeFromElasticCapabilities: true,
   getRegistryTools: () => [platformCoreTools.executeWorkflow],
+  // Lets the agent find the connector id to run the workflows with, without loading the connector
+  // discovery skill first.
+  getInlineTools: () => [createListConnectorsTool({ getActionsStart })],
 });
 
 /** Registers every skill defined by a connector spec as a built-in skill. */
-export const registerConnectorSkills = (agentBuilder: AgentBuilderPluginSetup) => {
+export const registerConnectorSkills = (
+  agentBuilder: AgentBuilderPluginSetup,
+  deps: ConnectorSkillsDeps
+) => {
   getAllConnectorSkills().forEach(({ skill }) => {
-    agentBuilder.skills.register(createConnectorSkillDefinition(skill));
+    agentBuilder.skills.register(createConnectorSkillDefinition(skill, deps));
   });
 };

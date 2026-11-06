@@ -16,8 +16,8 @@ export const pagerdutySkillFile = buildSkill(({ bt, fence }) => ({
   description:
     'Look up who is on call for a named PagerDuty schedule, and list incidents, escalation policies, and users, with compact results.',
   content: `
-**Connector:** Infer the connector from context. If none available, query based on type. Use its ID as
-${bt}connector_id${bt}.
+**Connector:** Call ${bt}list_connectors${bt} and use the ${bt}id${bt} of the connector of type ${bt}.pagerduty_mcp${bt} (PagerDuty) as
+${bt}connector_id${bt}. If several match, ask the user which one to use.
 
 Each attached file contains a workflow. To run one, call ${bt}platform.core.execute_workflow${bt} with the workflow YAML as
 ${bt}yaml${bt} (it does not need to be saved first) and ${bt}connector_id${bt} plus any inputs from the file's table as ${bt}inputs${bt}.

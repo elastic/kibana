@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { isAllowedSkillRegistration } from '@kbn/agent-builder-server/allow_lists';
 import { CONNECTORS_SKILLS_BASE_PATH } from '@kbn/agent-builder-server/skills';
@@ -15,7 +16,9 @@ import { registerConnectorSkills } from './register_connector_skills';
 
 const registerSkillsWith = () => {
   const register = jest.fn();
-  registerConnectorSkills({ skills: { register } } as unknown as AgentBuilderPluginSetup);
+  registerConnectorSkills({ skills: { register } } as unknown as AgentBuilderPluginSetup, {
+    getActionsStart: jest.fn() as unknown as () => Promise<ActionsPluginStart>,
+  });
   return register.mock.calls.map(([skill]) => skill);
 };
 
@@ -44,6 +47,13 @@ describe('registerConnectorSkills', () => {
   it('grants the workflow tool', async () => {
     for (const skill of registerSkillsWith()) {
       expect(await skill.getRegistryTools?.()).toEqual([platformCoreTools.executeWorkflow]);
+    }
+  });
+
+  it('lets the agent list its connectors to find the connector id', async () => {
+    for (const skill of registerSkillsWith()) {
+      const tools = await skill.getInlineTools?.();
+      expect((tools ?? []).map((tool: { id: string }) => tool.id)).toEqual(['list_connectors']);
     }
   });
 

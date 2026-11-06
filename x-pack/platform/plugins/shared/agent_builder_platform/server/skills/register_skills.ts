@@ -37,7 +37,7 @@ export const registerSkills = (
   agentBuilder.skills.register(aiIndexSourcesSkill);
   agentBuilder.skills.register(aiIndexAutomationsSkill);
 
-  registerConnectorSkills(agentBuilder);
+  registerConnectorSkills(agentBuilder, { getActionsStart });
 
   loadElasticSkills({ logger: logger.get('elastic-skills') }).forEach((skill) => {
     agentBuilder.skills.register(skill);
