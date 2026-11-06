@@ -29,6 +29,24 @@ export const getModelDefinition = (fullModelName: string): ModelDefinition | und
  */
 export const knownModels: ModelDefinition[] = [
   {
+    id: 'gpt-6-sol',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 1050000,
+  },
+  {
+    id: 'gpt-6-luna',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 1050000,
+  },
+  {
+    id: 'gpt-6-astra',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 1050000,
+  },
+  {
     id: 'gpt-4o-mini',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
@@ -166,6 +184,18 @@ export const knownModels: ModelDefinition[] = [
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
+  },
+  {
+    id: 'claude-5.5-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 1000000,
+  },
+  {
+    id: 'claude-5.5-sonnet',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 1000000,
   },
   // OpenAI o-series reasoning models
   {
