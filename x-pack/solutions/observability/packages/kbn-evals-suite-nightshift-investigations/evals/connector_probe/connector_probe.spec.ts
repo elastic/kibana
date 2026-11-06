@@ -30,6 +30,10 @@ evaluate.describe('Nightshift assistant: connector probes', { tag: suiteTags }, 
     'answers telemetry probes through the Elasticsearch connector',
     async ({ executorClient, connector, fetch, evaluators, concurrency, repetitions, log }) => {
       const dataset = readConnectorProbeDataset();
+      // Batches of `concurrency` probes run back to back; allow five minutes per batch plus slack.
+      evaluate.setTimeout(
+        Math.ceil((dataset.examples.length * repetitions) / concurrency) * 5 * 60_000 + 5 * 60_000
+      );
       // The agents are installed in the background at Kibana start.
       await expect
         .poll(

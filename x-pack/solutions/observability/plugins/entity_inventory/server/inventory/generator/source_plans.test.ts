@@ -7,16 +7,20 @@
 
 import type { DynamicSource, EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
+import { probeAllAs } from '../__fixtures__/source_probes';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
 import { planSources } from './source_plans';
-import type { QueryEngine } from './types';
+import type { SourceProbe } from './types';
 import { MAX_QUERY_PLANS } from './types';
 
 const withSources = (sources: DynamicSource[]): EntityDefinitionWithoutId => ({
   ...k8sNodeFixture,
   dynamic: { sources },
 });
+
+const TIME_SERIES: SourceProbe = { hasTimeSeries: true };
+const NO_TIME_SERIES: SourceProbe = { hasTimeSeries: false };
 
 const messageOf = (fn: () => void): string => {
   try {
@@ -28,8 +32,8 @@ const messageOf = (fn: () => void): string => {
 };
 
 describe('planSources', () => {
-  it('returns one plan per source of k8s.deployment, in definition order', () => {
-    expect(planSources(k8sDeploymentFixture, ['TS', 'FROM'])).toEqual([
+  it('gives a source with a time-series index a TS plan then a FROM plan, numbered across sources', () => {
+    expect(planSources(k8sDeploymentFixture, [TIME_SERIES, NO_TIME_SERIES])).toEqual([
       {
         index: 0,
         sourceIndex: 0,
@@ -39,6 +43,13 @@ describe('planSources', () => {
       },
       {
         index: 1,
+        sourceIndex: 0,
+        indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
+        attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
+        engine: 'FROM',
+      },
+      {
+        index: 2,
         sourceIndex: 1,
         indexPattern: 'metrics-kubernetes.state_deployment-*',
         filter: 'metricset.name == "state_deployment"',
@@ -51,16 +62,38 @@ describe('planSources', () => {
     ]);
   });
 
+  it('gives a source without a time-series index only a FROM plan', () => {
+    const plans = planSources(k8sDeploymentFixture, probeAllAs(k8sDeploymentFixture, false));
+    expect(plans.map(({ index, sourceIndex, engine }) => ({ index, sourceIndex, engine }))).toEqual(
+      [
+        { index: 0, sourceIndex: 0, engine: 'FROM' },
+        { index: 1, sourceIndex: 1, engine: 'FROM' },
+      ]
+    );
+  });
+
+  it('numbers the plans in order when a later source has a time-series index', () => {
+    const plans = planSources(k8sDeploymentFixture, [NO_TIME_SERIES, TIME_SERIES]);
+    expect(plans.map(({ index, sourceIndex, engine }) => ({ index, sourceIndex, engine }))).toEqual(
+      [
+        { index: 0, sourceIndex: 0, engine: 'FROM' },
+        { index: 1, sourceIndex: 1, engine: 'TS' },
+        { index: 2, sourceIndex: 1, engine: 'FROM' },
+      ]
+    );
+  });
+
   it('gives a source without attributes an empty attribute list', () => {
-    const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), ['FROM']);
+    const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [NO_TIME_SERIES]);
     expect(plan.attributes).toEqual([]);
     expect(plan).not.toHaveProperty('filter');
   });
 
-  it('throws when the engines do not match the sources', () => {
-    expect(() => planSources(k8sDeploymentFixture, ['TS'])).toThrow(InventoryDefinitionError);
-    expect(() => planSources(k8sDeploymentFixture, ['TS'])).toThrow(
-      'definition "k8s.deployment" has 2 sources but 1 engines were given'
+  it('throws when the probes do not match the sources', () => {
+    const probes = [TIME_SERIES];
+    expect(() => planSources(k8sDeploymentFixture, probes)).toThrow(InventoryDefinitionError);
+    expect(() => planSources(k8sDeploymentFixture, probes)).toThrow(
+      'definition "k8s.deployment" has 2 sources but 1 probes were given'
     );
   });
 
@@ -78,9 +111,9 @@ describe('planSources', () => {
       { length: MAX_QUERY_PLANS + 1 },
       (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
     );
-    const engines = sources.map((): QueryEngine => 'FROM');
-    expect(() => planSources(withSources(sources), engines)).toThrow(InventoryDefinitionError);
-    expect(() => planSources(withSources(sources), engines)).toThrow(
+    const probes = sources.map(() => NO_TIME_SERIES);
+    expect(() => planSources(withSources(sources), probes)).toThrow(InventoryDefinitionError);
+    expect(() => planSources(withSources(sources), probes)).toThrow(
       `definition "k8s.node" expands to 33 query plans; at most ${MAX_QUERY_PLANS} are allowed`
     );
   });
@@ -88,28 +121,55 @@ describe('planSources', () => {
   it('throws on an unsafe index pattern with the pattern rule message', () => {
     const indexPattern = 'metrics-* | DROP x';
     const expected = messageOf(() => assertSafeIndexPattern(indexPattern));
-    expect(() => planSources(withSources([{ indexPattern }]), ['FROM'])).toThrow(
+    expect(() => planSources(withSources([{ indexPattern }]), [NO_TIME_SERIES])).toThrow(
       InventoryDefinitionError
     );
-    expect(() => planSources(withSources([{ indexPattern }]), ['FROM'])).toThrow(expected);
+    expect(() => planSources(withSources([{ indexPattern }]), [NO_TIME_SERIES])).toThrow(expected);
+  });
+
+  it('stores the canonical form of a source filter on every plan of the source', () => {
+    const plans = planSources(
+      withSources([{ indexPattern: 'metrics-*', filter: '(state=="idle"  OR  a>1) // note' }]),
+      [TIME_SERIES]
+    );
+    expect(plans.map(({ filter }) => filter)).toEqual([
+      '(state == "idle" OR a > 1)',
+      '(state == "idle" OR a > 1)',
+    ]);
   });
 
   it('throws on a bad filter with the filter rule message, labelled by the source', () => {
     const indexPattern = 'metrics-*';
     const filter = 'true | LIMIT 1';
-    expect(() => planSources(withSources([{ indexPattern, filter }]), ['FROM'])).toThrow(
+    const expected = 'source metrics-* filter must be a single ES|QL expression: ';
+    const probes = [NO_TIME_SERIES];
+    expect(() => planSources(withSources([{ indexPattern, filter }]), probes)).toThrow(
       InventoryDefinitionError
     );
-    expect(() => planSources(withSources([{ indexPattern, filter }]), ['FROM'])).toThrow(
-      'source metrics-* filter must be a single ES|QL expression: '
-    );
+    expect(() => planSources(withSources([{ indexPattern, filter }]), probes)).toThrow(expected);
   });
 
-  it('stores the canonical form of a source filter on its plan', () => {
-    const [plan] = planSources(
-      withSources([{ indexPattern: 'metrics-*', filter: '(state=="idle"  OR  a>1) // note' }]),
-      ['FROM']
+  it('counts the plans after the split against the budget', () => {
+    const half = MAX_QUERY_PLANS / 2;
+    const sources = Array.from(
+      { length: half + 1 },
+      (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
     );
-    expect(plan.filter).toBe('(state == "idle" OR a > 1)');
+    expect(
+      planSources(
+        withSources(sources.slice(0, half)),
+        sources.slice(0, half).map(() => TIME_SERIES)
+      )
+    ).toHaveLength(MAX_QUERY_PLANS);
+    expect(() =>
+      planSources(
+        withSources(sources),
+        sources.map(() => TIME_SERIES)
+      )
+    ).toThrow(
+      `definition "k8s.node" expands to ${
+        MAX_QUERY_PLANS + 2
+      } query plans; at most ${MAX_QUERY_PLANS} are allowed`
+    );
   });
 });

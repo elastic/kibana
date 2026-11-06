@@ -32,6 +32,7 @@ import {
 } from '@xyflow/react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import {
   buildUnitCanvasGraph,
@@ -53,6 +54,8 @@ import { CanvasSearchOverlay } from './canvas_search_overlay';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { ConnectionTargetsProvider } from './nodes/connection_handle';
 import { CanvasToolbar } from './canvas_toolbar';
+import { CanvasReadOnlyProvider } from './canvas_read_only_context';
+import { UnitReadOnlyCallout } from '../../../streams_layout/unit_read_only_callout';
 import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
@@ -142,6 +145,8 @@ import { STATS_POLL_INTERVAL_MS } from '../../../unit_stats/state_management/con
 import { StatsManagerProvider } from '../../../unit_stats/state_management/use_stats_manager';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+
+const noop = () => {};
 const NO_DESTINATION_INDICES: ResolvedDestinationIndex[] = [];
 const canvasColumnStyles = css`
   display: flex;
@@ -209,6 +214,10 @@ export function StreamsCanvas() {
 function StreamsCanvasInner() {
   useSyncStatsWithSavedUnit();
   const { euiTheme } = useEuiTheme();
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
+  const readOnly = !canManage;
   const { flyoutName, flyoutKind, flyoutTab, query } = useCanvasUrlRef();
   const {
     openFlyout,
@@ -326,6 +335,15 @@ function StreamsCanvasInner() {
   const visible = useMemo(
     () => applyCanvasSearch(nodes, edges, searchedFlow),
     [nodes, edges, searchedFlow]
+  );
+  const canEditConnections = !readOnly && !isSaving;
+  // A per-edge `reconnectable` overrides the canvas-wide `edgesReconnectable`, so lock each edge.
+  const visibleEdges = useMemo(
+    () =>
+      canEditConnections
+        ? visible.edges
+        : visible.edges.map((edge) => ({ ...edge, reconnectable: false })),
+    [canEditConnections, visible.edges]
   );
   const restoreHistory = useCallback(
     (extra: CanvasEditSnapshot) => {
@@ -561,6 +579,9 @@ function StreamsCanvasInner() {
 
   const onReconnect = useCallback<OnReconnect>(
     (oldEdge, connection) => {
+      if (!canEditConnections) {
+        return;
+      }
       const previousOrigin = readConnectionOrigin(oldEdge.source, oldEdge.sourceHandle);
       const previousTarget = readConnectionTarget(oldEdge.target);
       const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
@@ -581,7 +602,14 @@ function StreamsCanvasInner() {
       record();
       changeUnitConnection(next);
     },
-    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
+    [
+      canEditConnections,
+      changeUnitConnection,
+      readConnectionOrigin,
+      readConnectionTarget,
+      record,
+      unitDefinition,
+    ]
   );
 
   const onReconnectEnd = useCallback<
@@ -590,7 +618,7 @@ function StreamsCanvasInner() {
     (_event, edge, _handleType, connectionState) => {
       reconnectingRef.current = null;
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
-      if (connectionState.toHandle) {
+      if (!canEditConnections || connectionState.toHandle) {
         return;
       }
       const origin = readConnectionOrigin(edge.source, edge.sourceHandle);
@@ -601,7 +629,14 @@ function StreamsCanvasInner() {
       record();
       changeUnitConnection(disconnectOrigin(unitDefinition, origin, target));
     },
-    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
+    [
+      canEditConnections,
+      changeUnitConnection,
+      readConnectionOrigin,
+      readConnectionTarget,
+      record,
+      unitDefinition,
+    ]
   );
 
   // Testing aid for the routing flyout: unset when the line cannot be routed. TO BE REMOVED
@@ -752,7 +787,12 @@ function StreamsCanvasInner() {
     }
   }, [nodes, openDestinationFlyout, openProcessingFlyout, openSourceFlyout]);
 
-  useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
+  useCanvasKeyboardShortcuts({
+    onUndo: readOnly ? noop : handleUndo,
+    onRedo: readOnly ? noop : handleRedo,
+    onEscape,
+    onEnter,
+  });
 
   // Hold the spinner until the unit, the source environment, and the first
   // unit.loaded sync have settled. Resolved indices refresh in the background.
@@ -792,7 +832,17 @@ function StreamsCanvasInner() {
   return (
     <div css={canvasColumnStyles}>
       {searchBar}
-      {(hasUnsavedChanges || isSaving) && (
+      {readOnly && (
+        <div
+          css={css`
+            flex: 0 0 auto;
+            padding: ${euiTheme.size.m};
+          `}
+        >
+          <UnitReadOnlyCallout />
+        </div>
+      )}
+      {!readOnly && (hasUnsavedChanges || isSaving) && (
         <EuiFlexGroup
           responsive={false}
           justifyContent="flexEnd"
@@ -817,131 +867,146 @@ function StreamsCanvasInner() {
           </EuiButton>
         </EuiFlexGroup>
       )}
-      <ConnectionTargetsProvider value={connectionTargetIds}>
-        <CanvasShell<ClassicCanvasNode>
-          nodes={visible.nodes}
-          edges={visible.edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodesDelete={onNodesDelete}
-          deleteKeyCode={
-            isSaving ||
-            sourcesController.isCreatingSource ||
-            destinationsController.isCreatingDestination
-              ? null
-              : ['Backspace', 'Delete']
-          }
-          onConnect={onConnect}
-          onConnectStart={onConnectStart}
-          onConnectEnd={clearConnectionTargets}
-          onReconnect={onReconnect}
-          onReconnectStart={onReconnectStart}
-          onReconnectEnd={onReconnectEnd}
-          isValidConnection={isValidConnection}
-          nodesConnectable={!isSaving}
-          edgesReconnectable={!isSaving}
-          connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
-          onNodeClick={onNodeClick}
-          onNodeContextMenu={onNodeContextMenu}
-          onPaneContextMenu={onPaneContextMenu}
-          onSelectionContextMenu={onSelectionContextMenu}
-          ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
-            defaultMessage: 'Streams map',
-          })}
-          ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
-        >
-          {resolvedIndicesStatus === 'loading' && (
-            <EuiProgress
-              size="xs"
-              color="primary"
-              position="absolute"
-              data-test-subj="streamsCanvasRefreshing"
-              aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
-                defaultMessage: 'Refreshing indices',
-              })}
-            />
-          )}
-          {nodes.length === 0 && <CanvasEmptyState />}
-          <CanvasSearchOverlay flow={searchedFlow} />
-          {flyoutDestination ? (
-            <UnitDestinationFlyout
-              destination={flyoutDestination}
-              indices={
-                resolvedIndicesByDestination.get(flyoutDestination.id) ?? NO_DESTINATION_INDICES
-              }
-              indicesStatus={resolvedIndicesStatus}
-              indicesError={resolvedIndicesError}
-              destinationDetailRef={destinationsController.destinationDetailRefs.get(
-                flyoutDestination.id
-              )}
-              onShowDestinationDetail={destinationsController.showDestinationDetail}
-              onHideDestinationDetail={destinationsController.hideDestinationDetail}
-              onClose={closeFlyout}
-              isDeleteDisabled={isSaving}
-              onIndexClick={openIndexFlyout}
-              onDelete={() => {
-                destinationsController.deleteDestination(flyoutDestination.id);
-                closeFlyout();
-              }}
-            />
-          ) : (
-            flyoutIndexName && (
-              <IndexInspectFlyout
-                indexName={flyoutIndexName}
-                onClose={closeFlyout}
-                selectedTab={flyoutTab}
-                onSelectTab={selectTab}
+      <CanvasReadOnlyProvider value={readOnly}>
+        <ConnectionTargetsProvider value={connectionTargetIds}>
+          <CanvasShell<ClassicCanvasNode>
+            nodes={visible.nodes}
+            edges={visibleEdges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodesDelete={onNodesDelete}
+            deleteKeyCode={
+              readOnly ||
+              isSaving ||
+              sourcesController.isCreatingSource ||
+              destinationsController.isCreatingDestination
+                ? null
+                : ['Backspace', 'Delete']
+            }
+            onConnect={onConnect}
+            onConnectStart={onConnectStart}
+            onConnectEnd={clearConnectionTargets}
+            onReconnect={onReconnect}
+            onReconnectStart={onReconnectStart}
+            onReconnectEnd={onReconnectEnd}
+            isValidConnection={isValidConnection}
+            nodesConnectable={canEditConnections}
+            edgesReconnectable={canEditConnections}
+            nodesDraggable={!readOnly}
+            connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
+            onNodeClick={onNodeClick}
+            onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
+            onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
+            onSelectionContextMenu={readOnly ? undefined : onSelectionContextMenu}
+            ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
+              defaultMessage: 'Streams map',
+            })}
+            ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
+          >
+            {resolvedIndicesStatus === 'loading' && (
+              <EuiProgress
+                size="xs"
+                color="primary"
+                position="absolute"
+                data-test-subj="streamsCanvasRefreshing"
+                aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
+                  defaultMessage: 'Refreshing indices',
+                })}
               />
-            )
-          )}
-          {selectedSource && (
-            <SourceDetailsFlyout
-              sources={sourcesController}
-              source={selectedSource}
-              onClose={closeSourceFlyout}
+            )}
+            {nodes.length === 0 && <CanvasEmptyState />}
+            <CanvasSearchOverlay flow={searchedFlow} />
+            {flyoutDestination ? (
+              <UnitDestinationFlyout
+                destination={flyoutDestination}
+                indices={
+                  resolvedIndicesByDestination.get(flyoutDestination.id) ?? NO_DESTINATION_INDICES
+                }
+                indicesStatus={resolvedIndicesStatus}
+                indicesError={resolvedIndicesError}
+                destinationDetailRef={destinationsController.destinationDetailRefs.get(
+                  flyoutDestination.id
+                )}
+                onShowDestinationDetail={destinationsController.showDestinationDetail}
+                onHideDestinationDetail={destinationsController.hideDestinationDetail}
+                onClose={closeFlyout}
+                isDeleteDisabled={isSaving}
+                readOnly={readOnly}
+                onIndexClick={openIndexFlyout}
+                onDelete={() => {
+                  destinationsController.deleteDestination(flyoutDestination.id);
+                  closeFlyout();
+                }}
+              />
+            ) : (
+              flyoutIndexName && (
+                <IndexInspectFlyout
+                  indexName={flyoutIndexName}
+                  onClose={closeFlyout}
+                  selectedTab={flyoutTab}
+                  onSelectTab={selectTab}
+                />
+              )
+            )}
+            {selectedSource && (
+              <SourceDetailsFlyout
+                sources={sourcesController}
+                source={selectedSource}
+                onClose={closeSourceFlyout}
+                readOnly={readOnly}
+              />
+            )}
+            {!readOnly && isCreateModalOpen && (
+              <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
+            )}
+            {!readOnly && isCreateDestinationModalOpen && (
+              <CreateDestinationModal
+                destinations={destinationsController}
+                onClose={closeCreateDestinationModal}
+              />
+            )}
+            {routingFlyout && mode === 'routing' ? (
+              <RoutingFlyout
+                edge={routingFlyout}
+                onCreateTestRouting={readOnly ? undefined : createTestRouting}
+              />
+            ) : null}
+            {processingFlyout ? (
+              <ProcessingFlyout
+                key={processingFlyout.ref.sessionId}
+                flyout={processingFlyout}
+                readOnly={readOnly}
+              />
+            ) : null}
+            <EuiScreenReaderOnly>
+              <p id={KEYBOARD_INSTRUCTIONS_ID}>
+                {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
+                  defaultMessage:
+                    'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Delete to remove a selected source or destination. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
+                })}
+              </p>
+            </EuiScreenReaderOnly>
+            {!readOnly && (
+              <CanvasToolbar
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                onAddSource={addSource}
+                onAddDestination={addDestination}
+                canUndo={canUndo && !isSaving}
+                canRedo={canRedo && !isSaving}
+                canAdd={!isSaving}
+              />
+            )}
+            <CanvasContextMenu
+              position={contextMenu?.position ?? null}
+              target={contextMenu?.target ?? 'pane'}
+              onTidyUp={onTidyUp}
+              onReopen={reopenContextMenu}
+              onClose={closeContextMenu}
             />
-          )}
-          {isCreateModalOpen && (
-            <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
-          )}
-          {isCreateDestinationModalOpen && (
-            <CreateDestinationModal
-              destinations={destinationsController}
-              onClose={closeCreateDestinationModal}
-            />
-          )}
-          {routingFlyout && mode === 'routing' ? (
-            <RoutingFlyout edge={routingFlyout} onCreateTestRouting={createTestRouting} />
-          ) : null}
-          {processingFlyout ? (
-            <ProcessingFlyout key={processingFlyout.ref.sessionId} flyout={processingFlyout} />
-          ) : null}
-          <EuiScreenReaderOnly>
-            <p id={KEYBOARD_INSTRUCTIONS_ID}>
-              {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
-                defaultMessage:
-                  'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Delete to remove a selected source or destination. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
-              })}
-            </p>
-          </EuiScreenReaderOnly>
-          <CanvasToolbar
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            onAddSource={addSource}
-            onAddDestination={addDestination}
-            canUndo={canUndo && !isSaving}
-            canRedo={canRedo && !isSaving}
-            canAdd={!isSaving}
-          />
-          <CanvasContextMenu
-            position={contextMenu?.position ?? null}
-            target={contextMenu?.target ?? 'pane'}
-            onTidyUp={onTidyUp}
-            onReopen={reopenContextMenu}
-            onClose={closeContextMenu}
-          />
-        </CanvasShell>
-      </ConnectionTargetsProvider>
+          </CanvasShell>
+        </ConnectionTargetsProvider>
+      </CanvasReadOnlyProvider>
     </div>
   );
 }
