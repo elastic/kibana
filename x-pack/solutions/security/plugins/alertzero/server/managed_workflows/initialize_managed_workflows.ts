@@ -23,9 +23,12 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
 
 /**
- * Global workflows install a few at a time. Starting all of them together kept Kibana and
- * Elasticsearch busy long enough that a login arriving in the first seconds after start-up
- * waited several seconds for its session write.
+ * Global workflows install a few at a time. Starting all of them together fills the small
+ * Elasticsearch thread pool that system-index writes share, so a login arriving in the first
+ * seconds after start-up waits several seconds for its session write.
+ *
+ * Do not pair this limit with `refresh: 'wait_for'` on serverless. See
+ * docs/managed_workflow_startup_install.md.
  */
 export const GLOBAL_WORKFLOW_INSTALL_CONCURRENCY = 4;
 
