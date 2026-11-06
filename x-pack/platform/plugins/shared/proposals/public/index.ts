@@ -26,6 +26,7 @@ export {
   useReopenProposal,
   useSettleDeclinedProposal,
   RETRY_WAIT_MS,
+  hasInFluxProposal,
   isInFlux,
 } from './hooks/use_proposals_api';
 

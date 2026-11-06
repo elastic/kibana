@@ -370,6 +370,34 @@ describe('useConversationProposals', () => {
       expect(result.current.data).toEqual({ pages: [convBProposals], pageParams: [undefined] })
     );
   });
+
+  it('clears the unseen decision of a later row while an earlier row is still in flux', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({
+      proposals: [
+        { id: 'run-1', decision: 'approved', status: 'executing' },
+        { id: 'done-1', decision: 'approved', status: 'succeeded' },
+      ],
+      total: 2,
+    });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    // The decision on `done-1` was sent from this page, and this list read already shows it.
+    inFlightDecisions.markUnseen('approve', 'done-1');
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        list: useConversationProposals('conv-42'),
+        approvingDone: useIsApprovingProposal('done-1'),
+      }),
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.list.isSuccess).toBe(true));
+
+    await waitFor(() => expect(result.current.approvingDone).toBe(false));
+  });
 });
 
 describe('useProposal', () => {

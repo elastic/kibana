@@ -78,8 +78,19 @@ export const isInFlux = (
   return Date.now() - since < RETRY_WAIT_MS;
 };
 
-const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
-  response?.proposals.some(isInFlux) ?? false;
+/**
+ * Whether any of the proposals is in flux. It checks every proposal and does not stop at the first
+ * match, because `isInFlux` also clears the unseen mark of the proposal that it checks.
+ */
+export const hasInFluxProposal = (
+  proposals: Iterable<Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>>
+): boolean => {
+  let found = false;
+  for (const proposal of proposals) {
+    found = isInFlux(proposal) || found;
+  }
+  return found;
+};
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -134,7 +145,7 @@ export const usePendingProposals = (conversationId?: string) => {
     // No baseline poll otherwise — only while a row is settling, so the badge notices the
     // action finish without the analyst having to reopen the modal to find out.
     refetchInterval: (data) =>
-      hasSettlingProposal(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      hasInFluxProposal(data?.proposals ?? []) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -188,7 +199,9 @@ export const useConversationProposals = (
     // — un-flagged as stale — while this one loads would let an approve/dismiss click land on a
     // proposal from the investigation the analyst just navigated away from.
     refetchInterval: (data) =>
-      (data?.pages ?? []).some(hasSettlingProposal) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      hasInFluxProposal((data?.pages ?? []).flatMap((page) => page.proposals))
+        ? PROPOSAL_SETTLING_POLL_INTERVAL_MS
+        : false,
     retry: retryOnTransientError,
   });
 };
