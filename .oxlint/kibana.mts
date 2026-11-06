@@ -17,6 +17,7 @@ const HOOK_FORM_LIB_DEPRECATION =
 
 export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_async_promise_body': 'error',
+  '@kbn/eslint/no_abort_signal_timeout': 'error',
   '@kbn/eslint/no_uncleared_race_timeout': 'error',
   '@kbn/eslint/no_async_foreach': 'error',
   '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
