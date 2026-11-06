@@ -18,9 +18,12 @@ export function ValueSourceToggle({
   source,
   fieldLabel,
   onChange,
+  labels,
   'data-test-subj': dataTestSubj,
 }: {
   readonly source: ValueSource;
+  /** Words for the two sides when "Fixed" and "Data" don't describe the control (a list). */
+  readonly labels?: { readonly fixed: string; readonly data: string };
   /** Label of the field the switch belongs to; names the group for screen readers. */
   readonly fieldLabel: string;
   readonly onChange: (next: ValueSource) => void;
@@ -42,16 +45,20 @@ export function ValueSourceToggle({
       options={[
         {
           id: fixedId,
-          label: i18n.translate('workflows.stepConfigPanel.valueSource.fixed', {
-            defaultMessage: 'Fixed',
-          }),
+          label:
+            labels?.fixed ??
+            i18n.translate('workflows.stepConfigPanel.valueSource.fixed', {
+              defaultMessage: 'Fixed',
+            }),
           'data-test-subj': fixedId,
         },
         {
           id: dataId,
-          label: i18n.translate('workflows.stepConfigPanel.valueSource.data', {
-            defaultMessage: 'Data',
-          }),
+          label:
+            labels?.data ??
+            i18n.translate('workflows.stepConfigPanel.valueSource.data', {
+              defaultMessage: 'Data',
+            }),
           'data-test-subj': dataId,
         },
       ]}

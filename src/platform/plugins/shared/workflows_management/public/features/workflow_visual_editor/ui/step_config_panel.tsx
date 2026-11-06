@@ -84,11 +84,13 @@ import type { StepScopeSchemas } from '../lib/build_data_reference_catalog';
 import {
   buildDataReferenceCatalog,
   formatDataReferenceToken,
+  formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
-import { isTagValue, toTags } from '../lib/list_value';
+import { fromTags, isTagValue, toTags } from '../lib/list_value';
 import { findReferenceTokens } from '../lib/reference_tokens';
 import type { ReferenceForm } from '../lib/reference_value';
 import {
+  isContainerReference,
   isSingleValueReference,
   lookupReferenceTypeLabel,
   parseWholeReference,
@@ -1626,6 +1628,33 @@ function StepFieldRow({
     const entry = formatDataReferenceToken(picked.expression);
     onChange(entries.includes(entry) ? entries : [...entries, entry]);
   };
+  // Data picked from the tags box. A known list or record is the whole list, which replaces the
+  // entries (after a confirmation when there are some); anything else is one more entry, written
+  // as text because that is what an entry of a text list is.
+  const [pendingWholeList, setPendingWholeList] = useState<string | undefined>();
+  const wholeListModalId = useGeneratedHtmlId({ prefix: 'workflowStepConfigWholeListModal' });
+  const handleEntryPick = (token: string) => {
+    const picked = parseWholeReference(token);
+    if (!picked) return;
+    if (
+      isContainerReference(
+        picked.expression,
+        lookupReferenceTypeLabel(referenceCatalog, picked.expression)
+      )
+    ) {
+      const wholeList = formatValueReferenceToken(picked.expression);
+      if (toTags(value).length > 0) setPendingWholeList(wholeList);
+      else handleDataChange(wholeList);
+      return;
+    }
+    const entries = toTags(value);
+    const entry = formatDataReferenceToken(picked.expression);
+    onChange(
+      entries.includes(entry)
+        ? entries
+        : fromTags([...entries, entry], field.acceptsSingle === true)
+    );
+  };
   // A list whose items aren't text (objects, numbers) stays in the JSON editor, as before.
   const listIsTags = field.kind === 'list' && isTagValue(value);
   // A JSON field takes Fixed | Data only when its schema says it usually holds a reference.
@@ -1642,6 +1671,18 @@ function StepFieldRow({
       source={source}
       fieldLabel={field.label}
       onChange={handleSourceChange}
+      labels={
+        listIsTags
+          ? {
+              fixed: i18n.translate('workflows.stepConfigPanel.valueSource.listEntries', {
+                defaultMessage: 'Entries',
+              }),
+              data: i18n.translate('workflows.stepConfigPanel.valueSource.listFromData', {
+                defaultMessage: 'From data',
+              }),
+            }
+          : undefined
+      }
       data-test-subj={`${testSubj}-source`}
     />
   ) : undefined;
@@ -1824,34 +1865,69 @@ function StepFieldRow({
   switch (field.kind === 'list' && !listIsTags ? 'code' : field.kind) {
     case 'list':
       return wrapRow(
-        <StepValidatedFormRow {...rowProps}>
-          {source === 'data' ? (
-            <ReferenceValueBox
-              catalog={referenceCatalog}
-              value={value}
-              form={referenceForm}
-              onChange={handleWholeListChange}
-              isInvalid={isInvalid}
-              onBlur={accuseIfInvalid}
-              ariaLabel={field.label}
-              // One string is a valid value too, so only a known list or record is flagged.
-              keepTypeFor="containers"
-              data-test-subj={testSubj}
-            />
-          ) : (
-            <ListField
-              value={value}
-              onChange={onChange}
-              options={field.options}
-              acceptsSingle={field.acceptsSingle === true}
-              catalog={referenceCatalog}
-              ariaLabel={field.label}
-              isInvalid={isInvalid}
-              onBlur={accuseIfInvalid}
-              data-test-subj={testSubj}
-            />
-          )}
-        </StepValidatedFormRow>
+        <>
+          <StepValidatedFormRow {...rowProps}>
+            {source === 'data' ? (
+              <ReferenceValueBox
+                catalog={referenceCatalog}
+                value={value}
+                form={referenceForm}
+                onChange={handleWholeListChange}
+                isInvalid={isInvalid}
+                onBlur={accuseIfInvalid}
+                ariaLabel={field.label}
+                // One string is a valid value too, so only a known list or record is flagged.
+                keepTypeFor="containers"
+                data-test-subj={testSubj}
+              />
+            ) : (
+              <ListField
+                value={value}
+                onChange={onChange}
+                options={field.options}
+                acceptsSingle={field.acceptsSingle === true}
+                catalog={referenceCatalog}
+                onInsertReference={field.options ? undefined : handleEntryPick}
+                ariaLabel={field.label}
+                isInvalid={isInvalid}
+                onBlur={accuseIfInvalid}
+                data-test-subj={testSubj}
+              />
+            )}
+          </StepValidatedFormRow>
+          {pendingWholeList ? (
+            <EuiConfirmModal
+              aria-labelledby={wholeListModalId}
+              title={i18n.translate('workflows.stepConfigPanel.list.replaceTitle', {
+                defaultMessage: 'Replace the entries with this list?',
+              })}
+              titleProps={{ id: wholeListModalId }}
+              onCancel={() => setPendingWholeList(undefined)}
+              onConfirm={() => {
+                handleDataChange(pendingWholeList);
+                setPendingWholeList(undefined);
+              }}
+              cancelButtonText={i18n.translate('workflows.stepConfigPanel.list.replaceCancel', {
+                defaultMessage: 'Cancel',
+              })}
+              confirmButtonText={i18n.translate('workflows.stepConfigPanel.list.replaceConfirm', {
+                defaultMessage: 'Replace',
+              })}
+              data-test-subj={`${testSubj}-replaceConfirm`}
+            >
+              <p>
+                {i18n.translate('workflows.stepConfigPanel.list.replaceBody', {
+                  defaultMessage:
+                    '{field} already has entries. Using the whole list from {reference} replaces them.',
+                  values: {
+                    field: field.label,
+                    reference: parseWholeReference(pendingWholeList)?.expression ?? '',
+                  },
+                })}
+              </p>
+            </EuiConfirmModal>
+          ) : null}
+        </>
       );
     case 'number':
       return wrapRow(

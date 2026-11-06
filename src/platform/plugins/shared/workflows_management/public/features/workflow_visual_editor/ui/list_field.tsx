@@ -8,10 +8,15 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-import React from 'react';
+import { EuiButtonIcon, EuiComboBox, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
+import { DataReferencePicker } from './data_reference_picker';
+import {
+  clearActiveDataReferenceInsertTarget,
+  setActiveDataReferenceInsertTarget,
+} from '../../../shared/lib/active_data_reference_insert_target';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { fromTags, toTags } from '../lib/list_value';
 import { findReferenceTokens } from '../lib/reference_tokens';
@@ -52,6 +57,7 @@ export function ListField({
   options,
   acceptsSingle,
   catalog,
+  onInsertReference,
   ariaLabel,
   isInvalid,
   onBlur,
@@ -64,15 +70,36 @@ export function ListField({
   readonly acceptsSingle: boolean;
   /** Gives a reference tag its type. */
   readonly catalog: DataReferenceCatalog;
+  /**
+   * Shows a data picker next to the tags and gets what was picked (`{{ steps.a.output }}`). The
+   * caller decides whether it becomes one more entry or the whole list.
+   */
+  readonly onInsertReference?: (token: string) => void;
   readonly ariaLabel: string;
   readonly isInvalid: boolean;
   readonly onBlur: () => void;
   readonly 'data-test-subj': string;
 }) {
+  const { euiTheme } = useEuiTheme();
   const tags = toTags(value);
   const commit = (next: readonly string[]) => onChange(fromTags(next, acceptsSingle));
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const pickButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  return (
+  const closePicker = useCallback(() => {
+    setIsPickerOpen(false);
+    pickButtonRef.current?.focus();
+  }, []);
+  const handleInsert = useCallback(
+    (token: string) => {
+      setIsPickerOpen(false);
+      onInsertReference?.(token);
+    },
+    [onInsertReference]
+  );
+  useEffect(() => () => clearActiveDataReferenceInsertTarget(handleInsert), [handleInsert]);
+
+  const tagsBox = (
     <EuiComboBox
       aria-label={ariaLabel}
       compressed
@@ -100,6 +127,40 @@ export function ListField({
       }
       onBlur={onBlur}
       data-test-subj={dataTestSubj}
+    />
+  );
+  if (!onInsertReference) return tagsBox;
+
+  const pickLabel = i18n.translate('workflows.stepConfigPanel.list.pick', {
+    defaultMessage: 'Add data from an earlier step to {field}',
+    values: { field: ariaLabel },
+  });
+  return (
+    <DataReferencePicker
+      catalog={catalog}
+      isOpen={isPickerOpen}
+      onClose={closePicker}
+      onInsert={handleInsert}
+      input={
+        <div
+          onFocusCapture={() => setActiveDataReferenceInsertTarget(handleInsert)}
+          css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}
+        >
+          <div css={{ flex: '1 1 auto', minWidth: 0 }}>{tagsBox}</div>
+          <EuiToolTip content={pickLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              buttonRef={pickButtonRef}
+              iconType="tokenObject"
+              size="s"
+              color={isPickerOpen ? 'primary' : 'text'}
+              aria-label={pickLabel}
+              aria-pressed={isPickerOpen}
+              onClick={() => setIsPickerOpen((open) => !open)}
+              data-test-subj={`${dataTestSubj}-pick`}
+            />
+          </EuiToolTip>
+        </div>
+      }
     />
   );
 }

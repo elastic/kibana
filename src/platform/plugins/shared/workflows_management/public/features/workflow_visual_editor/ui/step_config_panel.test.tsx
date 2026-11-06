@@ -1763,6 +1763,120 @@ with:
       );
     });
 
+    describe('data as an entry of a list field', () => {
+      const definition = {
+        version: '1',
+        name: 'demo',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        consts: { owner: 'ana', tags: ['a', 'b'] },
+        steps: [{ name: 'l', type: 'lister', with: {} }],
+      } as unknown as WorkflowYaml;
+      const testId = (field: string) => `workflowStepConfigField-with.${field}`;
+      const renderEntries = (withBlock: string) =>
+        renderPanel({
+          stepType: 'lister',
+          connectors: listConnectors,
+          workflowDefinition: definition,
+          initialFragment: `name: l\ntype: lister\nwith:${withBlock}\n`,
+        });
+      // Picks through the data button on the tags box, as the picker's insert would.
+      const pickEntry = (field: string, token: string) => {
+        fireEvent.focusIn(screen.getByTestId(`${testId(field)}-pick`));
+        act(() => {
+          insertIntoActiveDataReferenceTarget(token);
+        });
+      };
+
+      it('names the two sides of a list Entries and From data, and leaves the other fields alone', () => {
+        renderEntries('\n  tags: [a]');
+        const switchOf = (field: string) => screen.getByTestId(`${testId(field)}-source`);
+        expect(switchOf('tags')).toHaveTextContent('Entries');
+        expect(switchOf('tags')).toHaveTextContent('From data');
+        expect(switchOf('tags')).not.toHaveTextContent('Fixed');
+      });
+
+      it('adds a single value as an entry, as text, after the entries already there', () => {
+        const { onFragmentChange } = renderEntries('\n  tags: [a, b]');
+        pickEntry('tags', '{{ consts.owner }}');
+        const saved = lastFragment(onFragmentChange);
+        expect(saved).toMatch(/- a\n\s+- b\n\s+- "\{\{ consts\.owner \}\}"/);
+        expect(saved).not.toContain('${{');
+        expect(within(screen.getByTestId(testId('tags'))).getByText('consts.owner')).toBeVisible();
+        expect(screen.getByTestId(`${testId('tags')}-source-fixed`)).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+      });
+
+      it('adds a reference of unknown type as an entry too', () => {
+        const { onFragmentChange } = renderEntries('\n  tags: [a]');
+        pickEntry('tags', '{{ inputs.unknown }}');
+        expect(lastFragment(onFragmentChange)).toMatch(/- a\n\s+- "\{\{ inputs\.unknown \}\}"/);
+      });
+
+      it('does not add an entry that is already there', () => {
+        const { onFragmentChange } = renderEntries(
+          '\n  tags:\n    - "{{ consts.owner }}"\n    - plain'
+        );
+        pickEntry('tags', '{{ consts.owner }}');
+        const saved = lastFragment(onFragmentChange);
+        expect(saved.match(/consts\.owner/g) ?? []).toHaveLength(1);
+        expect(saved).toContain('- plain');
+      });
+
+      it('uses a known list as the whole list when there are no entries yet', () => {
+        // An empty optional list is hidden, so empty the only entry instead of starting empty.
+        const { onFragmentChange } = renderEntries('\n  tags: [a]');
+        fireEvent.keyDown(
+          within(screen.getByTestId(testId('tags'))).getByTestId('comboBoxSearchInput'),
+          {
+            key: 'Backspace',
+          }
+        );
+        pickEntry('tags', '{{ consts.tags }}');
+        expect(lastFragment(onFragmentChange)).toMatch(/tags: "?\$\{\{ consts\.tags \}\}"?/);
+        expect(screen.getByTestId(`${testId('tags')}-source-data`)).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(screen.queryByTestId(`${testId('tags')}-replaceConfirm`)).not.toBeInTheDocument();
+      });
+
+      it('asks before a known list replaces the entries, and keeps them on Cancel', () => {
+        const { onFragmentChange } = renderEntries('\n  tags: [a, b]');
+        const writes = onFragmentChange.mock.calls.length;
+        pickEntry('tags', '{{ consts.tags }}');
+        expect(screen.getByTestId(`${testId('tags')}-replaceConfirm`)).toBeInTheDocument();
+        expect(onFragmentChange.mock.calls.length).toBe(writes);
+
+        fireEvent.click(
+          within(screen.getByTestId(`${testId('tags')}-replaceConfirm`)).getByText('Cancel')
+        );
+        expect(screen.queryByTestId(`${testId('tags')}-replaceConfirm`)).not.toBeInTheDocument();
+        expect(onFragmentChange.mock.calls.length).toBe(writes);
+        expect(within(screen.getByTestId(testId('tags'))).getByText('b')).toBeInTheDocument();
+      });
+
+      it('replaces the entries with the known list once confirmed', () => {
+        const { onFragmentChange } = renderEntries('\n  tags: [a, b]');
+        pickEntry('tags', '{{ consts.tags }}');
+        fireEvent.click(
+          within(screen.getByTestId(`${testId('tags')}-replaceConfirm`)).getByText('Replace')
+        );
+        expect(lastFragment(onFragmentChange)).toMatch(/tags: "?\$\{\{ consts\.tags \}\}"?/);
+        expect(screen.getByTestId(`${testId('tags')}-source-data`)).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+      });
+
+      it('offers no data button on a list with fixed choices', () => {
+        renderEntries('\n  status: [open]');
+        expect(screen.queryByTestId(`${testId('status')}-pick`)).not.toBeInTheDocument();
+      });
+    });
+
     describe('the whole-list side of a list field', () => {
       const definition = {
         version: '1',
