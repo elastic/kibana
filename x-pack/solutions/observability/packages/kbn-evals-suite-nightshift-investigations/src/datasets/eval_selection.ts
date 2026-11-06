@@ -32,7 +32,10 @@ export interface EvalSelection {
   runInvestigations: boolean;
   runOrca: boolean;
   runConnectorProbes: boolean;
-  /** True only when `NIGHTSHIFT_DATASETS` lists `reinforcement`. Not part of an unset or `all` run. */
+  /**
+   * True only when `NIGHTSHIFT_DATASETS` lists `reinforcement` or `EVAL_SHARD_ID` is
+   * `reinforcement`. Not part of an unset or `all` run.
+   */
   runReinforcement: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
@@ -40,10 +43,29 @@ export interface EvalSelection {
   fellBackToSmoke: boolean;
 }
 
-/** Resolves which evals run from `NIGHTSHIFT_DATASETS` and the presence of sandbox credentials. */
+/**
+ * Resolves which evals run from the CI shard (`EVAL_SHARD_ID`), `NIGHTSHIFT_DATASETS` and the
+ * presence of sandbox credentials.
+ */
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
+  // The CI reinforcement shard runs on its own Scout server, which its scout hook starts with
+  // decision trees on.
+  if (env.EVAL_SHARD_ID === REINFORCEMENT_DATASET_ID) {
+    if (!env.SANDBOX_API_KEY) {
+      throw new Error('The reinforcement shard runs agent evals, so SANDBOX_API_KEY is required');
+    }
+    return {
+      runSmoke: false,
+      runInvestigations: false,
+      runOrca: false,
+      runConnectorProbes: false,
+      runReinforcement: true,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    };
+  }
   const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');

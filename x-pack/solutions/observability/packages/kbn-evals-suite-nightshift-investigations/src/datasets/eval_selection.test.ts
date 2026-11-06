@@ -199,3 +199,43 @@ describe('ORCA selection', () => {
     ).toThrow('own Scout server');
   });
 });
+
+describe('CI shard selection', () => {
+  it.each([undefined, 'trace-only'])(
+    'runs only the reinforcement micro-eval on the reinforcement shard (NIGHTSHIFT_DATASETS=%s)',
+    (datasets) => {
+      expect(
+        resolveEvalSelection({
+          ...WITH_SANDBOX,
+          EVAL_SHARD_ID: 'reinforcement',
+          NIGHTSHIFT_DATASETS: datasets,
+        })
+      ).toEqual({
+        runOrca: false,
+        runSmoke: false,
+        runInvestigations: false,
+        runConnectorProbes: false,
+        runReinforcement: true,
+        smokeDatasetsRequest: undefined,
+        fellBackToSmoke: false,
+      });
+    }
+  );
+
+  it('requires sandbox credentials on the reinforcement shard', () => {
+    expect(() => resolveEvalSelection({ EVAL_SHARD_ID: 'reinforcement' })).toThrow(
+      'SANDBOX_API_KEY is required'
+    );
+  });
+
+  it('keeps the customer0 shard on smoke and trace-only, without reinforcement', () => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, EVAL_SHARD_ID: 'customer0' })).toEqual(
+      resolveEvalSelection(WITH_SANDBOX)
+    );
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, EVAL_SHARD_ID: 'customer0' })).toMatchObject({
+      runSmoke: true,
+      runInvestigations: true,
+      runReinforcement: false,
+    });
+  });
+});

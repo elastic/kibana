@@ -337,6 +337,11 @@ workflow.
 `NIGHTSHIFT_DATASETS=reinforcement` replays four Customer-0 rounds through the reinforcement
 agent (`system-nightshift-agent-optimize`). Each round seeds its prior tree and includes the
 investigator's view of that file, so the agent merges into an existing tree instead of creating one.
+The run is started with `replay: true` under a fresh synthetic conversation id, so the reinforcement
+step builds the round from the supplied tool calls and results instead of reading a conversation.
+Afterward the eval rolls back only the trees that replay owns: the seeded tree, every tree its
+submissions name, and every tree committed under its conversation id. A tree another investigation
+writes in the same space meanwhile is left alone.
 The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and that
 round's `metadata.require_merge` makes an empty `merged_nodes` list score 0. The other three rounds
 may submit an empty list. The question and conclusion are the published
@@ -364,6 +369,10 @@ NIGHTSHIFT_DATASETS=reinforcement \
   --model eis-anthropic-claude-5-5-sonnet \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
+
+CI runs the micro-eval as its own `reinforcement` shard under the `evals:nightshift-investigations`
+label, on a Scout server whose hook turns decision trees on for `EVAL_SHARD_ID=reinforcement`. That
+shard runs only the committed replay rounds, and the `customer0` shard never includes them.
 
 A first investigation of `nightshift/customer0-manual-v2` creates a new tree. `merged_nodes` is
 rejected on a new tree, so that path cannot show a merge. Set `NIGHTSHIFT_REINFORCEMENT_DATASET`
@@ -616,7 +625,7 @@ The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
 - The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
   telemetry. Judge scores are advisory.
-- Both shards draw on one sandbox pool. When it runs out, investigations end without a
+- All three shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.
 
 Locally, start a fresh Scout server for ORCA; a reused server keeps its connector credentials:
@@ -635,8 +644,9 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** a `customer0` shard with the smoke and trace-only evals, and an `orcabench`
-  shard with the ORCA benchmark. The suite's ci-prod secret,
+- **What runs:** a `customer0` shard with the smoke and trace-only evals, an `orcabench` shard
+  with the ORCA benchmark, and a `reinforcement` shard with the
+  [reinforcement micro-eval](#reinforcement-micro-eval). The suite's ci-prod secret,
   `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block;
   `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
   before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able

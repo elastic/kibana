@@ -155,6 +155,10 @@
         {
           "id": "orcabench",
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "reinforcement",
+          "specFiles": ["evals/reinforcement/reinforcement.spec.ts"]
         }
       ]
     },
