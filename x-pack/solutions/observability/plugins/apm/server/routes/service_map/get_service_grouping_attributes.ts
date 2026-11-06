@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedServiceGroup } from '../../../common/service_groups';
@@ -16,8 +16,8 @@ import {
   SERVICE_NAMESPACE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { IEnvOptions } from './get_service_map';
+import type { ServiceStatsSource } from './get_enhanced_service_stats';
 import { extractEsQueryFilters } from './extract_es_query_filters';
 import { recordByService } from './record_by_service';
 
@@ -57,6 +57,8 @@ interface SavedGroupServicesBucket {
 
 type GetServiceGroupingAttributesOptions = IEnvOptions & {
   maxNumberOfServices: number;
+  /** Client-picked document type and rollup for the map when grouping is on. */
+  source: ServiceStatsSource;
   /** Saved groups to match. Empty or omitted skips that lookup (also when already on a group map). */
   savedServiceGroups?: SavedServiceGroup[];
 };
@@ -66,8 +68,8 @@ type GetServiceGroupingAttributesOptions = IEnvOptions & {
  * events, and which saved service groups match it. Metric rollups do not carry the
  * namespace fields. One value per namespace field per service. A service with neither
  * namespace is still listed. Services are read in pages so a large estate does not pass
- * Elasticsearch's bucket limit. Saved groups use one filters aggregation on
- * service-transaction metrics when available, like the service-group counts API.
+ * Elasticsearch's bucket limit. Saved groups use one filters aggregation on the
+ * client-picked map data source.
  */
 export async function getServiceGroupingAttributes(
   options: GetServiceGroupingAttributesOptions
@@ -193,8 +195,7 @@ async function getNamespaceAttributes({
 /**
  * Matches services to saved groups with one filters aggregation (filter key = group id).
  * Skipped when the caller passes no groups, or when the map is already a group map.
- * Uses service-transaction metrics when available — same fields as the counts API, and
- * cheaper than a second raw transaction scan next to the namespace composite.
+ * Uses the client-picked map data source.
  */
 async function getSavedGroupMembership({
   environment,
@@ -203,7 +204,7 @@ async function getSavedGroupMembership({
   end,
   maxNumberOfServices,
   serviceGroupKuery,
-  searchAggregatedTransactions,
+  source,
   kuery,
   esQuery,
   logger,
@@ -234,22 +235,14 @@ async function getSavedGroupMembership({
     }
 
     const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
-    const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
-    const useMetrics = processorEvent === ProcessorEvent.metric;
+    const { documentType, rollupInterval } = source;
 
-    const response = await apmEventClient.search(
-      'get_service_grouping_saved_groups_for_service_map',
-      {
-        apm: useMetrics
-          ? {
-              sources: [
-                {
-                  documentType: ApmDocumentType.ServiceTransactionMetric,
-                  rollupInterval: RollupInterval.OneMinute,
-                },
-              ],
-            }
-          : { events: [processorEvent] },
+    const searchMembership = async (
+      operationName: string,
+      searchDocumentType: ServiceStatsSource['documentType']
+    ) => {
+      const response = await apmEventClient.search(operationName, {
+        apm: getApmSource(searchDocumentType, rollupInterval),
         track_total_hits: false,
         size: 0,
         query: {
@@ -278,40 +271,89 @@ async function getSavedGroupMembership({
             },
           },
         },
-      }
+      });
+
+      return collectMembership(
+        (
+          response.aggregations as
+            | { service_groups?: { buckets?: Record<string, SavedGroupServicesBucket> } }
+            | undefined
+        )?.service_groups?.buckets,
+        groupById
+      );
+    };
+
+    let result = await searchMembership(
+      'get_service_grouping_saved_groups_for_service_map',
+      documentType
     );
 
-    const buckets = (
-      response.aggregations as
-        | { service_groups?: { buckets?: Record<string, SavedGroupServicesBucket> } }
-        | undefined
-    )?.service_groups?.buckets;
+    // `ServiceTransactionMetric` may not carry fields used in the map filters; retry
+    // against `TransactionMetric` at the same interval.
+    const hasKueryFilter = Boolean(kuery && kuery.trim() !== '');
+    const hasEsQueryFilter = esQueryFilters.length > 0;
+    const shouldRetry =
+      documentType === ApmDocumentType.ServiceTransactionMetric &&
+      result.size === 0 &&
+      (hasKueryFilter || hasEsQueryFilter);
 
-    if (!buckets) {
-      return membership;
+    if (shouldRetry) {
+      result = await searchMembership(
+        'get_service_grouping_saved_groups_for_service_map_fallback',
+        ApmDocumentType.TransactionMetric
+      );
     }
 
-    for (const [groupId, bucket] of Object.entries(buckets)) {
-      const group = groupById.get(groupId);
-      if (!group) {
-        continue;
-      }
-      const match = { id: group.id, name: group.groupName };
-      for (const serviceBucket of bucket.services?.buckets ?? []) {
-        if (serviceBucket.key == null) {
-          continue;
-        }
-        const serviceName = String(serviceBucket.key);
-        const current = membership.get(serviceName) ?? [];
-        current.push(match);
-        membership.set(serviceName, current);
-      }
-    }
-
-    return membership;
+    return result;
   } catch (error) {
     // Keep namespaces usable when membership fails (e.g. filters agg hits max_buckets).
     logger.debug(`Unable to retrieve saved group membership for service maps.`, { error });
     return new Map();
   }
+}
+
+function getApmSource(
+  documentType: ServiceStatsSource['documentType'],
+  rollupInterval: ServiceStatsSource['rollupInterval']
+):
+  | { events: [ProcessorEvent.transaction] }
+  | {
+      sources: Array<{
+        documentType: ServiceStatsSource['documentType'];
+        rollupInterval: typeof rollupInterval;
+      }>;
+    } {
+  if (documentType === ApmDocumentType.TransactionEvent) {
+    return { events: [ProcessorEvent.transaction] };
+  }
+  return { sources: [{ documentType, rollupInterval }] };
+}
+
+function collectMembership(
+  buckets: Record<string, SavedGroupServicesBucket> | undefined,
+  groupById: Map<string, SavedServiceGroup>
+): Map<string, ServiceGroupingSavedGroup[]> {
+  const membership = new Map<string, ServiceGroupingSavedGroup[]>();
+  if (!buckets) {
+    return membership;
+  }
+
+  for (const [groupId, bucket] of Object.entries(buckets)) {
+    const group = groupById.get(groupId);
+    if (!group) {
+      continue;
+    }
+    const match = { id: group.id, name: group.groupName };
+    for (const serviceBucket of bucket.services?.buckets ?? []) {
+      if (serviceBucket.key == null) {
+        continue;
+      }
+      const serviceName = String(serviceBucket.key);
+      const current = membership.get(serviceName) ?? [];
+      current.push(match);
+      membership.set(serviceName, current);
+    }
+  }
+
+  return membership;
 }

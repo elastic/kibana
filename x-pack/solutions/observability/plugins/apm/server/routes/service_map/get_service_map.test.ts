@@ -248,7 +248,10 @@ describe('getServiceMap grouping attributes', () => {
       servicesData,
       anomalies: DEFAULT_ANOMALIES,
     });
-    expect(getServiceGroupingAttributesMock).toHaveBeenCalledWith(options);
+    expect(getServiceGroupingAttributesMock).toHaveBeenCalledWith({
+      ...options,
+      source: enabledGrouping.source,
+    });
     expect(logger.info).not.toHaveBeenCalled();
   });
 

@@ -124,7 +124,7 @@ export function getServiceMap(
 
     const groupingAttributesPromise =
       grouping.enabled && !options.serviceName
-        ? getServiceGroupingAttributes(options).catch((error) => {
+        ? getServiceGroupingAttributes({ ...options, source: grouping.source }).catch((error) => {
             logger.debug(`Unable to retrieve grouping attributes for service maps.`, { error });
             return undefined;
           })

@@ -13,6 +13,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedServiceGroup } from '../../../common/service_groups';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
+import type { ServiceStatsSource } from './get_enhanced_service_stats';
 import type { IEnvOptions } from './get_service_map';
 
 type SearchMock = jest.Mock<Promise<unknown>>;
@@ -29,11 +30,18 @@ function makeLogger() {
   } as unknown as Logger;
 }
 
+const defaultSource: ServiceStatsSource = {
+  documentType: ApmDocumentType.ServiceTransactionMetric,
+  rollupInterval: RollupInterval.TenMinutes,
+  useDurationSummary: true,
+};
+
 function makeOptions(
   overrides: Partial<
     IEnvOptions & {
       maxNumberOfServices: number;
       savedServiceGroups?: SavedServiceGroup[];
+      source: ServiceStatsSource;
     }
   > = {}
 ) {
@@ -46,6 +54,7 @@ function makeOptions(
     maxNumberOfServices: 5000,
     searchAggregatedTransactions: true,
     config: {} as IEnvOptions['config'],
+    source: defaultSource,
     ...overrides,
   };
 }
@@ -302,7 +311,7 @@ describe('getServiceGroupingAttributes', () => {
       sources: [
         {
           documentType: ApmDocumentType.ServiceTransactionMetric,
-          rollupInterval: RollupInterval.OneMinute,
+          rollupInterval: RollupInterval.TenMinutes,
         },
       ],
     });
@@ -327,7 +336,7 @@ describe('getServiceGroupingAttributes', () => {
     });
   });
 
-  it('reads saved groups from transaction events when metrics are off', async () => {
+  it('reads saved groups from transaction events when the source is transaction events', async () => {
     const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: checkout');
     const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
       if (operationName === 'get_service_grouping_attributes_for_service_map') {
@@ -341,13 +350,58 @@ describe('getServiceGroupingAttributes', () => {
     await getServiceGroupingAttributes(
       makeOptions({
         apmEventClient: { search } as unknown as APMEventClient,
-        searchAggregatedTransactions: false,
+        source: {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.OneMinute,
+          useDurationSummary: false,
+        },
         savedServiceGroups: [frontend],
       })
     );
 
     const savedCall = findSearchCall(search, 'get_service_grouping_saved_groups_for_service_map');
     expect(savedCall.params.apm.events).toEqual([ProcessorEvent.transaction]);
+  });
+
+  it('retries saved groups on transaction metrics when the primary source is empty', async () => {
+    const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: checkout');
+    const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
+      if (operationName === 'get_service_grouping_attributes_for_service_map') {
+        return namespacesPage([bucket('checkout', 'shop')]);
+      }
+      if (operationName === 'get_service_grouping_saved_groups_for_service_map') {
+        return savedGroupsPage({
+          'g-frontend': { services: { buckets: [] } },
+        });
+      }
+      return savedGroupsPage({
+        'g-frontend': { services: { buckets: [{ key: 'checkout' }] } },
+      });
+    });
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({
+        apmEventClient: { search } as unknown as APMEventClient,
+        kuery: 'transaction.name: "POST /pay"',
+        savedServiceGroups: [frontend],
+      })
+    );
+
+    expect(
+      findSearchCall(search, 'get_service_grouping_saved_groups_for_service_map_fallback').params
+        .apm
+    ).toEqual({
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.TenMinutes,
+        },
+      ],
+    });
+    expect(attributes.checkout).toEqual({
+      serviceNamespace: 'shop',
+      savedGroups: [{ id: 'g-frontend', name: 'Frontend' }],
+    });
   });
 
   it('does not query saved groups when none are passed', async () => {
