@@ -2088,7 +2088,8 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: preview
+          serverless:
+            security: preview
 
       - setting: "securitySolution:refreshIntervalDefaults"
         id: securitysolution-refreshintervaldefaults
