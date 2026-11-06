@@ -6,15 +6,17 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, Subject, type Observable } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { createApplyQueue } from './apply_queue';
+import { createAttachmentLinks } from './attachment_links';
+import { createConversationTracker } from './conversation_tracker';
 
 /**
  * Tracks attachments applied to the dashboard app, so the state changes an apply causes
  * are not mistaken for manual changes.
  */
 export interface AppliedAttachmentsStore {
-  /** A new conversation that gets its id keeps its links. */
   setActiveConversationId: (conversationId: string | undefined) => void;
   /** The attachment of the active conversation the dashboard was applied from or staged as. */
   getLinkedAttachmentId: (api: DashboardApi) => string | undefined;
@@ -25,10 +27,6 @@ export interface AppliedAttachmentsStore {
   linkNextDashboard: (fromApi: DashboardApi, attachmentId: string) => void;
   /** Takes over the link `linkNextDashboard` left, when the dashboard is the unsaved one it opened. */
   claimNextDashboardLink: (api: DashboardApi) => void;
-  /**
-   * Runs the apply once the previous ones settled, so the dashboard is never compared while it
-   * is applying. An apply still queued when the active conversation changes is dropped.
-   */
   queueApply: (apply: () => Promise<void>) => Promise<void>;
   /** Whether an apply is queued or the dashboard is still settling after one. */
   isApplying: () => boolean;
@@ -43,81 +41,18 @@ export const toShownVersionKey = (attachmentId: string, version: number): string
   `${attachmentId}:${version}`;
 
 export const createAppliedAttachmentsStore = (): AppliedAttachmentsStore => {
-  const applyFinished$ = new Subject<void>();
-  let pendingApplies = 0;
-  let lastApply: Promise<void> = Promise.resolve();
+  const conversation = createConversationTracker();
+  const links = createAttachmentLinks(conversation);
   const shownVersions$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
-  // links per conversation id, where `undefined` is a new conversation
-  const linkedAttachmentIds = new Map<string | undefined, WeakMap<DashboardApi, string>>();
-  let activeConversationId: string | undefined;
-  // counts switches to another conversation, which a new conversation getting its id is not
-  let conversationSwitches = 0;
-  let nextDashboardLink:
-    | { fromApi: DashboardApi; conversationSwitch: number; attachmentId: string }
-    | undefined;
-
-  const setLinkedAttachmentId = (api: DashboardApi, attachmentId: string) => {
-    const links = linkedAttachmentIds.get(activeConversationId) ?? new WeakMap();
-    links.set(api, attachmentId);
-    linkedAttachmentIds.set(activeConversationId, links);
-  };
 
   return {
+    ...links,
+    ...createApplyQueue(conversation),
     setActiveConversationId: (conversationId) => {
-      // a new conversation gets its id once its first message is sent
-      const newConversationLinks = linkedAttachmentIds.get(undefined);
-      if (activeConversationId === undefined && conversationId !== undefined) {
-        linkedAttachmentIds.delete(undefined);
-        if (newConversationLinks && !linkedAttachmentIds.has(conversationId)) {
-          linkedAttachmentIds.set(conversationId, newConversationLinks);
-        }
-      } else if (conversationId !== activeConversationId) {
-        conversationSwitches++;
-      }
-      activeConversationId = conversationId;
-    },
-    getLinkedAttachmentId: (api) => linkedAttachmentIds.get(activeConversationId)?.get(api),
-    setLinkedAttachmentId,
-    isLinkedInOtherConversation: (api, draftAttachmentId) =>
-      [...linkedAttachmentIds].some(([conversationId, links]) => {
-        const linkedAttachmentId = links.get(api);
-        return (
-          conversationId !== activeConversationId &&
-          linkedAttachmentId !== undefined &&
-          linkedAttachmentId !== draftAttachmentId
-        );
-      }),
-    linkNextDashboard: (fromApi, attachmentId) => {
-      nextDashboardLink = { fromApi, conversationSwitch: conversationSwitches, attachmentId };
-    },
-    claimNextDashboardLink: (api) => {
-      // the dashboard that set the link is published again when the chat reopens
-      if (!nextDashboardLink || nextDashboardLink.fromApi === api) {
-        return;
-      }
-      const { conversationSwitch, attachmentId } = nextDashboardLink;
-      nextDashboardLink = undefined;
-      if (conversationSwitch === conversationSwitches && !api.savedObjectId$.getValue()) {
-        setLinkedAttachmentId(api, attachmentId);
+      if (conversation.setActiveId(conversationId) === 'identified' && conversationId) {
+        links.adoptNewConversationLinks(conversationId);
       }
     },
-    queueApply: (apply) => {
-      const conversationSwitch = conversationSwitches;
-      const applyInConversation = () =>
-        conversationSwitch === conversationSwitches ? apply() : Promise.resolve();
-      // an idle queue starts the apply right away, so the dashboard updates in the same tick
-      const isIdle = pendingApplies++ === 0;
-      const queuedApply = (
-        isIdle ? applyInConversation() : lastApply.then(applyInConversation)
-      ).finally(() => {
-        pendingApplies--;
-        applyFinished$.next();
-      });
-      lastApply = queuedApply.catch(() => undefined);
-      return queuedApply;
-    },
-    isApplying: () => pendingApplies > 0,
-    applyFinished$: applyFinished$.asObservable(),
     shownVersions$,
     setShownVersions: (shownVersions = new Set()) => {
       if (!isEqual(shownVersions, shownVersions$.getValue())) {
