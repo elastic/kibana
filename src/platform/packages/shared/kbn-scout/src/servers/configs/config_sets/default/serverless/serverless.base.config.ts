@@ -30,7 +30,15 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+// packages without `.sig` files, so opt out of upstream signature enforcement
+// (added in elastic/package-registry#1646).
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port
@@ -164,6 +172,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.projects_url=/projects/',
       `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
       '--xpack.cloud.users_and_roles_url=/account/members/',
+      // Clears `dataUsageDisabled` from config/serverless.yml, as the project controller does
+      '--xpack.dataUsage.enableExperimental=[]',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
       // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
@@ -181,6 +191,7 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      '--xpack.fleet.productVersionsApiTimeoutMs=5000',
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
           id: 'default-fleet-server',

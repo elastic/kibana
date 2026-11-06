@@ -47,12 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await PageObjects.common.waitForSaveModalToClose();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.dashboard.waitForRenderComplete();
       await checkData();

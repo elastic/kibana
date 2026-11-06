@@ -8,6 +8,12 @@
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import {
+  CustomResolutionRuleTypeName,
+  EngineDescriptorTypeName,
+  EntityResolutionRuleTypeName,
+  EntityStoreGlobalStateTypeName,
+} from '@kbn/entity-store/server';
+import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
   savedObjectTypes,
@@ -56,6 +62,14 @@ export const securityV5SavedObjects = [
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  // Entity Store v2 saved objects
+  EngineDescriptorTypeName,
+  EntityStoreGlobalStateTypeName,
+  // Entity resolution rules: built-in rule overrides and custom rules. Writes
+  // through the HTTP routes also need `securitySolution-entity-analytics-manage`;
+  // the maintainer reads both as its API key owner.
+  EntityResolutionRuleTypeName,
+  CustomResolutionRuleTypeName,
   ...savedObjectTypes.filter(
     (type) =>
       ![

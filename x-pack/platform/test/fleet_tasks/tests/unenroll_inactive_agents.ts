@@ -12,6 +12,9 @@ import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 const TASK_INTERVAL_MS = 11000; // Slightly longer than config to allow task to run
+// Unenrollment now uses two phases (schedule then execute), each on a separate tick.
+// With gracePeriodMs=1000 in tests the execute tick immediately follows the schedule tick.
+const TWO_TASK_INTERVALS_MS = TASK_INTERVAL_MS * 2;
 
 export default function (providerContext: FtrProviderContextWithServices) {
   const { getService } = providerContext;
@@ -54,7 +57,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      await apiClient.deleteAgentPolicy(policyIdSpace1, TEST_SPACE_1);
+      if (policyIdSpace1) {
+        await apiClient.deleteAgentPolicy(policyIdSpace1, TEST_SPACE_1);
+        await spaces.delete(TEST_SPACE_1);
+      }
     });
 
     afterEach(async () => {
@@ -71,6 +77,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await es.deleteByQuery({
         index: '.fleet-actions',
         ignore_unavailable: true,
+        refresh: true,
         query: {
           match_all: {},
         },
@@ -93,9 +100,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
         last_checkin: new Date(Date.now() - INACTIVITY_TIMEOUT_MS).toISOString(),
       });
 
-      await waitForTask();
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
 
-      await retry.tryForTime(15000, async () => {
+      await retry.tryForTime(60000, async () => {
         const agentRes = await es.search({
           index: '.fleet-agents',
           ignore_unavailable: true,
@@ -113,8 +120,49 @@ export default function (providerContext: FtrProviderContextWithServices) {
       });
     });
 
+    it('should unenroll inactive agents that are active with a stale unenrolled_at', async () => {
+      await supertest
+        .put(`/api/fleet/agent_policies/${policyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy for unenroll inactive',
+          namespace: 'default',
+          unenroll_timeout: UNENROLL_TIMEOUT_SECONDS,
+        })
+        .expect(200);
+
+      // legacy doc written by Fleet Server 8.16.0-8.17.0 audit/unenroll: active but unenrolled_at set
+      const staleUnenrolledAt = '2025-01-01T00:00:00.000Z';
+      await createAgentDoc(providerContext, 'inactive-agent-stale', policyId, '8.17.0', true, {
+        last_checkin: new Date(Date.now() - INACTIVITY_TIMEOUT_MS).toISOString(),
+        unenrolled_at: staleUnenrolledAt,
+        audit_unenrolled_reason: 'orphaned',
+        audit_unenrolled_time: staleUnenrolledAt,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
+
+      await retry.tryForTime(60000, async () => {
+        const agentRes = await es.search({
+          index: '.fleet-agents',
+          ignore_unavailable: true,
+          query: {
+            term: {
+              policy_id: policyId,
+            },
+          },
+        });
+
+        const agentDoc = agentRes.hits.hits[0]._source as any;
+        if (agentDoc?.active) {
+          throw new Error('Agent is still active');
+        }
+      });
+    });
+
     it('should unenroll inactive agents when policy has unenroll_timeout set in non-default space', async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
+      await spaces.createTestSpace(TEST_SPACE_1);
       const spaceResp = await apiClient.createAgentPolicy(TEST_SPACE_1, {
         name: 'Test policy for unenroll inactive in space1',
         namespace: 'default',
@@ -135,9 +183,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
         }
       );
 
-      await waitForTask();
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
 
-      await retry.tryForTime(15000, async () => {
+      await retry.tryForTime(30000, async () => {
         const agentRes = await es.search({
           index: '.fleet-agents',
           ignore_unavailable: true,

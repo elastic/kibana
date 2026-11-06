@@ -215,7 +215,7 @@ export const DynamicTreeView = ({
               <EuiBadge
                 css={styles.loadMoreBadge}
                 iconSide="right"
-                iconType={isFetchingNextPage ? EuiLoadingSpinner : 'arrowDown'}
+                iconType={isFetchingNextPage ? EuiLoadingSpinner : 'chevronSingleDown'}
               >
                 {isFetchingNextPage
                   ? TREE_NAVIGATION_LOADING
@@ -314,7 +314,7 @@ const DynamicTreeViewItem = ({
       icon={<TreeViewIcon {...tree[depth].iconProps} />}
       label={
         <EuiToolTip anchorClassName="eui-textTruncate" content={`${clusterLevel}: ${aggData.key}`}>
-          <span>{aggData.key_as_string || aggData.key}</span>
+          <span tabIndex={0}>{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       }
       buttonRef={(el: HTMLButtonElement) => (buttonRef.current[aggData.key] = el)}

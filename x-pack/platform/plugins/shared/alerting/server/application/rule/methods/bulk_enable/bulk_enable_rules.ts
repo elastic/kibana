@@ -15,6 +15,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -22,9 +23,10 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import type { RawRule } from '../../../../types';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import type { RawRule, RuleTypeParams } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { convertRuleIdsToKueryNode, authorizeRuleTypeParams } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
@@ -40,6 +42,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
   migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
@@ -49,7 +52,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -123,30 +126,35 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     taskManager: context.taskManager,
   });
 
-  const updatedRules = rules.map(({ id, attributes, references }) => {
-    // TODO (http-versioning): alertTypeId should never be null, but we need to
-    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk delete and this should fix itself
-    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RawRule,
-      {
-        id,
-        logger: context.logger,
-        ruleType,
-        references,
-        omitGeneratedValues: false,
-      },
-      (connectorId: string) => actionsClient.isSystemAction(connectorId)
-    );
+  const updatedRules = await withSpan(
+    { name: 'bulkEnableRules.toRuleDomain', type: 'rules' },
+    async () =>
+      rules.map(({ id, attributes, references }) => {
+        // TODO (http-versioning): alertTypeId should never be null, but we need to
+        // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+        // when we are doing the bulk delete and this should fix itself
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+        const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
+          attributes as RawRule,
+          {
+            id,
+            logger: context.logger,
+            ruleType,
+            references,
+          },
+          (connectorId: string) => actionsClient.isSystemAction(connectorId)
+        );
 
-    try {
-      ruleDomainSchema.validate(ruleDomain);
-    } catch (e) {
-      context.logger.warn(`Error validating bulk enable rule domain object for id: ${id}, ${e}`);
-    }
-    return ruleDomain;
-  });
+        try {
+          ruleDomainSchema.validate(ruleDomain);
+        } catch (e) {
+          context.logger.warn(
+            `Error validating bulk enable rule domain object for id: ${id}, ${e}`
+          );
+        }
+        return ruleDomain;
+      })
+  );
 
   // // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
   const updatePublicRules = updatedRules.map((rule: RuleDomain<Params>) => {
@@ -178,11 +186,15 @@ const bulkEnableRulesWithOCC = async (
 
   const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  let migratedRuleIds: string[] = [];
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
+  // UIAM keys held by rules that get a new key set below, keyed by rule id
+  const replacedUiamApiKeys = new Map<string, string>();
   let scheduleValidationError = '';
 
   await withSpan(
@@ -209,7 +221,7 @@ const bulkEnableRulesWithOCC = async (
         });
       }
 
-      await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
+      migratedRuleIds = await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
 
       await pMap(
         rulesFinderRules,
@@ -219,6 +231,14 @@ const bulkEnableRulesWithOCC = async (
           const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
           const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
           try {
+            // Re-authorize persisted params before activating them: they may have
+            // bypassed the authorizer entirely (e.g. via Saved Objects import).
+            await authorizeRuleTypeParams(
+              rule.attributes.params as RuleTypeParams,
+              ruleType.authorize?.params,
+              { request: context.request }
+            );
+
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
             }
@@ -241,13 +261,20 @@ const bulkEnableRulesWithOCC = async (
             }
 
             const nowIso = new Date().toISOString();
-            const newApiKeyAttributes = !rule.attributes.apiKey
+            // An enabled rule that holds only a UIAM key, such as one created by a UIAM service
+            // account, already runs on that key. Keep it rather than re-keying the rule as the caller.
+            const hasApiKeyInUse =
+              Boolean(rule.attributes.apiKey) ||
+              Boolean(rule.attributes.enabled && rule.attributes.uiamApiKey);
+            const newApiKeyAttributes = !hasApiKeyInUse
               ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
+                  profileUid,
                   shouldUpdateApiKey: true,
                   apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+                  refresh: false,
                 })
               : undefined;
 
@@ -260,6 +287,7 @@ const bulkEnableRulesWithOCC = async (
                 : rule.attributes),
               enabled: true,
               updatedBy: username,
+              updatedByProfileUid: profileUid,
               updatedAt: nowIso,
               ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {
@@ -304,6 +332,18 @@ const bulkEnableRulesWithOCC = async (
               ...rule,
               attributes: updatedAttributes,
             });
+
+            // A rule with only a UIAM key, such as one created by a UIAM service account, no
+            // longer uses that key once it gets a new key set. Invalidate it after the write.
+            // Recorded only once the rule is queued for the write, so a rule that fails before
+            // then keeps the key it still holds.
+            if (
+              newApiKeyAttributes &&
+              rule.attributes.uiamApiKey &&
+              !rule.attributes.apiKeyCreatedByUser
+            ) {
+              replacedUiamApiKeys.set(rule.id, rule.attributes.uiamApiKey);
+            }
 
             context.auditLogger?.log(
               ruleAuditEvent({
@@ -350,7 +390,6 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
-  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -366,12 +405,17 @@ const bulkEnableRulesWithOCC = async (
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToEnable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: bulkEnableTimestamp,
       metadata: { bulkCount: totalNumOfRules },
     },
   });
@@ -380,10 +424,21 @@ const bulkEnableRulesWithOCC = async (
   const ruleIdsFailedToEnable: Record<string, boolean> = {};
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error) {
+    if (isSavedObjectErrorResult(rule)) {
       ruleIdsFailedToEnable[rule.id] = true;
     }
   });
+
+  const uiamApiKeysToInvalidate = [...replacedUiamApiKeys.entries()]
+    .filter(([ruleId]) => !ruleIdsFailedToEnable[ruleId])
+    .map(([, uiamApiKey]) => uiamApiKey);
+  if (uiamApiKeysToInvalidate.length > 0) {
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: uiamApiKeysToInvalidate },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    );
+  }
 
   // Remove all failed to enable rule ids and rule type ids
   const ruleIdsToClearFlapping: string[] = [];
@@ -418,9 +473,13 @@ const bulkEnableRulesWithOCC = async (
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const taskIdsToEnable: string[] = [];
+  const savedMigratedRuleIds: string[] = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
+    if (!isSavedObjectErrorResult(rule)) {
+      if (migratedRuleIds.includes(rule.id)) {
+        savedMigratedRuleIds.push(rule.id);
+      }
       if (rule.attributes.scheduledTaskId) {
         taskIdsToEnable.push(rule.attributes.scheduledTaskId);
       }
@@ -436,6 +495,9 @@ const bulkEnableRulesWithOCC = async (
       });
     }
   });
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(context, savedMigratedRuleIds);
+
   return {
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api

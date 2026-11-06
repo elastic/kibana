@@ -10,9 +10,12 @@
 export {
   DocViewer,
   DOC_VIEWER_FLYOUT_HISTORY_KEY,
+  DOC_VIEWER_TABS_EBT_ELEMENT,
+  DOC_VIEWER_SHAREABLE_STATE_MAX_LENGTH,
   type DocViewerProps,
   type DocViewerApi,
   type DocViewerRestorableState,
+  type DocViewerShareableState,
   DocViewsRegistry,
   ElasticRequestState,
   FieldName,

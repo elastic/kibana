@@ -21,17 +21,21 @@ export const ALERTS = i18n.translate(
   }
 );
 
-export const ATTACK_CHAIN = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTab.attackChainLabel',
+export const SHOW_MATCHING_ALERTS_ONLY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.alertsFilteringMode.showMatchingAlertsOnlyLabel',
   {
-    defaultMessage: 'Attack Chain',
+    defaultMessage: 'Show matching alerts only',
   }
 );
 
-export const DETAILS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTab.detailsLabel',
+export const FILTERED_OUT_ALERTS_HIGHLIGHT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.alertsFilteringMode.filteredOutHighlightDescription',
   {
-    defaultMessage: 'Details',
+    defaultMessage:
+      'This filter applies to attacks, not individual alerts. {highlightedGreyRows} may not include the filtered field.',
+    values: {
+      highlightedGreyRows: '<strong>Grey rows</strong>',
+    },
   }
 );
 

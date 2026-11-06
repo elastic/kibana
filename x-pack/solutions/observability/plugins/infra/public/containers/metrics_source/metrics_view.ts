@@ -6,10 +6,12 @@
  */
 
 import createContainer from 'constate';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import type { ProjectRouting } from '@kbn/es-query';
 import { DEFAULT_METRICS_VIEW_ATTRIBUTES } from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { useProjectRouting } from '../../hooks/use_project_routing';
 import { resolveAdHocDataView } from '../../utils/data_view';
 import { useSourceContext } from './source';
 
@@ -19,6 +21,11 @@ export const useMetricsDataView = () => {
   } = useKibanaContextForPlugin();
 
   const { source } = useSourceContext();
+  const projectRouting = useProjectRouting();
+  // Routing under which fields were last resolved. `dataViews.create()` returns
+  // the cached ad-hoc instance, so a scope change must force a field caps
+  // refresh or the field list stays scoped to the previous projects.
+  const fieldsRoutingRef = useRef<{ value: ProjectRouting | undefined }>();
 
   const [state, refetch] = useAsyncFn(async () => {
     const indexPattern = source?.configuration.metricAlias;
@@ -26,7 +33,7 @@ export const useMetricsDataView = () => {
       return Promise.resolve(undefined);
     }
 
-    return resolveAdHocDataView({
+    const resolved = await resolveAdHocDataView({
       dataViewsService: dataViews,
       dataViewId: indexPattern,
       attributes: {
@@ -34,7 +41,16 @@ export const useMetricsDataView = () => {
         timeFieldName: DEFAULT_METRICS_VIEW_ATTRIBUTES.timeFieldName,
       },
     });
-  }, [dataViews, source?.configuration.metricAlias]);
+
+    if (fieldsRoutingRef.current && fieldsRoutingRef.current.value !== projectRouting) {
+      await dataViews.refreshFields(resolved.dataViewReference, false, true);
+    }
+    fieldsRoutingRef.current = { value: projectRouting };
+
+    // `refreshFields` mutates the data view's field list in place; return a
+    // fresh array so consumers memoizing on `fields` see the change.
+    return { ...resolved, fields: [...resolved.dataViewReference.fields] };
+  }, [dataViews, source?.configuration.metricAlias, projectRouting]);
 
   useEffect(() => {
     refetch();

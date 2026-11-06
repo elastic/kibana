@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useRef, useEffect } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { DataViewBase } from '@kbn/es-query';
 import { debounceAsync } from '@kbn/securitysolution-utils';
@@ -38,6 +38,19 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   onValidityChange,
 }: EsqlQueryEditProps): JSX.Element {
   const queryClient = useQueryClient();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isUnmountedRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      isUnmountedRef.current = true;
+      // reading .current in cleanup is intentional: we want to abort whichever controller
+      // is active at unmount time, not the one that existed when the effect was set up.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
   const componentProps = useMemo(
     () => ({
       isDisabled: disabled,
@@ -65,7 +78,10 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
             ]
           : []),
         {
-          validator: debounceAsync(esqlQueryValidatorFactory({ queryClient }), 300),
+          validator: debounceAsync(
+            esqlQueryValidatorFactory({ queryClient, abortControllerRef, isUnmountedRef }),
+            300
+          ),
           isAsync: true,
         },
       ],

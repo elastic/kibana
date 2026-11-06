@@ -6,24 +6,29 @@
  */
 import { z } from '@kbn/zod';
 import {
+  compositeSloDefinitionResponseSchema,
   compositeSloIdSchema,
-  compositeSloBaseDefinitionSchema,
-  compositeSloMemberSummarySchema,
-  compositeSloSummarySchema,
+  compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
-const getCompositeSLOParamsSchema = z.object({
+const getCompositeSLODefinitionParamsSchema = z.object({
   path: z.object({
     id: compositeSloIdSchema,
   }),
 });
 
-const getCompositeSLOResponseSchema = compositeSloBaseDefinitionSchema.extend({
-  summary: compositeSloSummarySchema,
-  members: z.array(compositeSloMemberSummarySchema),
-});
+const getCompositeSLOResponseSchema = compositeSloWithSummaryResponseSchema;
 
-type GetCompositeSLOResponse = z.infer<typeof getCompositeSLOResponseSchema>;
+const getCompositeSLOParamsSchema = getCompositeSLODefinitionParamsSchema;
 
-export { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema };
-export type { GetCompositeSLOResponse };
+const getCompositeSLODefinitionResponseSchema = compositeSloDefinitionResponseSchema;
+
+type GetCompositeSLOResponse = z.output<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLODefinitionResponse = z.output<typeof getCompositeSLODefinitionResponseSchema>;
+
+export {
+  getCompositeSLOParamsSchema,
+  getCompositeSLOResponseSchema,
+  getCompositeSLODefinitionResponseSchema,
+};
+export type { GetCompositeSLOResponse, GetCompositeSLODefinitionResponse };

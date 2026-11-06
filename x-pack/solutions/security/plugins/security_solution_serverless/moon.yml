@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/security_solution_serverless
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/config-schema'
   - '@kbn/management-plugin'
   - '@kbn/security-plugin'
@@ -26,6 +27,8 @@ dependsOn:
   - '@kbn/server-http-tools'
   - '@kbn/serverless'
   - '@kbn/security-solution-navigation'
+  - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/security-solution-upselling'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-chrome-browser'
@@ -53,14 +56,20 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/management-settings-ids'
   - '@kbn/ai-assistant-common'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/workflows'
   - '@kbn/usage-api-plugin'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/navigation-plugin'
+  - '@kbn/scout-security'
+  - '@kbn/deeplinks-security'
 tags:
   - plugin
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -68,5 +77,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

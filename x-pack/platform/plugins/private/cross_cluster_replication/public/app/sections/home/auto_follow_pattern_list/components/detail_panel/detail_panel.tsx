@@ -217,7 +217,7 @@ export class DetailPanel extends Component<DetailPanelProps> {
       <EuiFlyoutBody>
         <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="warning" color="danger" />
+            <EuiIcon size="m" type="warning" color="danger" aria-hidden={true} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -244,7 +244,7 @@ export class DetailPanel extends Component<DetailPanelProps> {
       <section data-test-subj="errors">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warning" color="danger" aria-hidden={true} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

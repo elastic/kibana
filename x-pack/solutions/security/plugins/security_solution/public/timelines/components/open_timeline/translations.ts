@@ -33,6 +33,13 @@ export const DELETE_SELECTED = i18n.translate(
   }
 );
 
+export const DELETE_TIMELINE_MODAL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.open.timeline.deleteTimelineModalAriaLabel',
+  {
+    defaultMessage: 'Delete Timeline',
+  }
+);
+
 export const DELETE_TIMELINE_WARNING = i18n.translate(
   'xpack.securitySolution.open.timeline.deleteWarningLabel',
   {
@@ -63,6 +70,13 @@ export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.open.timeline.exportFileNameTitle',
   {
     defaultMessage: 'timelines_export',
+  }
+);
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.securitySolution.open.timeline.removeFromCaseButton',
+  {
+    defaultMessage: 'Remove from case',
   }
 );
 
@@ -355,5 +369,12 @@ export const TIMELINE_TABLE_CAPTION = i18n.translate(
   'xpack.securitySolution.timelines.components.open.timeline.timelines.table.tableCaption',
   {
     defaultMessage: 'Timelines Table',
+  }
+);
+
+export const VIEW_SUPER_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.viewSuperTimeline',
+  {
+    defaultMessage: 'View Super Timeline',
   }
 );

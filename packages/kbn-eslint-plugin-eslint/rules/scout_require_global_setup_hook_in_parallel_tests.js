@@ -44,16 +44,16 @@ module.exports = {
     fixable: null,
     schema: [],
   },
-  create: (context) => {
-    const filename = context.getFilename();
-
-    if (!isGlobalSetupFile(filename)) {
-      return {};
-    }
-
+  createOnce(context) {
     let hasGlobalSetupHook = false;
 
     return {
+      before() {
+        hasGlobalSetupHook = false;
+        if (!isGlobalSetupFile(context.filename)) {
+          return false;
+        }
+      },
       CallExpression(node) {
         if (isGlobalSetupHookCall(node)) {
           hasGlobalSetupHook = true;

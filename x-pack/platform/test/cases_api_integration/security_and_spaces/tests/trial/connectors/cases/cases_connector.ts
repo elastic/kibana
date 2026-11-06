@@ -52,6 +52,7 @@ import {
   createConfiguration,
   createComment,
   elasticUserProfileId,
+  getCaseSavedObjectsFromES,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -372,6 +373,43 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
+        describe('extract_observables_source', () => {
+          it('stores "space_default" when the rule does not set extractObservables', async () => {
+            await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+            expect(await getStoredExtractObservablesSources(es)).to.eql(['space_default']);
+          });
+
+          it('stores "rule" when the rule override differs from the default', async () => {
+            const ruleReq = getRequest({ owner: 'securitySolution', extractObservables: false });
+
+            await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req: ruleReq });
+
+            expect(await getStoredExtractObservablesSources(es)).to.eql(['rule']);
+          });
+
+          it('stores "space_default" when the rule override equals the default', async () => {
+            const ruleReq = getRequest({ owner: 'securitySolution', extractObservables: true });
+
+            await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req: ruleReq });
+
+            expect(await getStoredExtractObservablesSources(es)).to.eql(['space_default']);
+          });
+
+          it('does not return the source in the case response', async () => {
+            await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+            const cases = await findCases({ supertest });
+
+            expect(cases.total).to.be(1);
+            expect(Object.keys(cases.cases[0])).not.to.contain('extract_observables_source');
+            expect(Object.keys(cases.cases[0].settings)).to.eql([
+              'syncAlerts',
+              'extractObservables',
+            ]);
+          });
+        });
+
         it('should create a case with template', async () => {
           const customFields = [
             {
@@ -458,6 +496,13 @@ export default ({ getService }: FtrProviderContext): void => {
                 value: 'this is a text field value',
               },
             ],
+            // The write-time adapter mirrors customFields into extended_fields when
+            // xpack.cases.templates.enabled is true (set in config_trial.ts). The mirrored
+            // key is the linked definition's label-derived friendly name ("text 1" ->
+            // "text_1"), not the raw v1 custom-field key.
+            extended_fields: {
+              text_1_as_keyword: 'this is a text field value',
+            },
             description: 'case desc',
             duration: null,
             external_service: null,
@@ -1060,11 +1105,11 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          it('sets rule info to null when `internallyManagedAlerts` is `true`', async () => {
+          it('sets rule info to null when `source` is `attack`', async () => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
               connectorId,
-              req: getRequest({ groupingBy: ['host.name'], internallyManagedAlerts: true }),
+              req: getRequest({ groupingBy: ['host.name'], source: 'attack' }),
             });
 
             const cases = await findCases({ supertest });
@@ -1235,7 +1280,7 @@ export default ({ getService }: FtrProviderContext): void => {
             grouping: { field_name_1: 'field_value_3' },
           },
         ];
-        const req = getRequest({ groupedAlerts, internallyManagedAlerts: true });
+        const req = getRequest({ groupedAlerts, source: 'attack' });
 
         describe('Oracle', () => {
           it('should create the oracle records correctly with grouping', async () => {
@@ -1546,7 +1591,7 @@ export default ({ getService }: FtrProviderContext): void => {
               connectorId,
               req: getRequest({
                 groupedAlerts: totalGroupedAlerts,
-                internallyManagedAlerts: true,
+                source: 'attack',
               }),
             });
 
@@ -1766,7 +1811,8 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
-      internallyManagedAlerts: null,
+      templateVersion: null,
+      source: 'rule',
       autoPushCase: null,
       ...params,
     },
@@ -1885,6 +1931,9 @@ const createCaseWithId = async ({
       ...getPostCaseRequest(),
       ...req,
       assignees: [],
+      // Creation-request template ref (version optional) vs. persisted shape (version pinned);
+      // this fixture never sets a template, so normalize to the persisted null.
+      template: null,
       connector: {
         name: 'none',
         type: ConnectorTypes.none,
@@ -1943,6 +1992,12 @@ const getAllOracleRecords = async ({ kibanaServer }: { kibanaServer: KbnClient }
     total: res.total,
     records: res.saved_objects.map((so) => ({ id: so.id, version: so.version, ...so.attributes })),
   };
+};
+
+const getStoredExtractObservablesSources = async (es: Client) => {
+  const res = await getCaseSavedObjectsFromES({ es });
+
+  return res.body.hits.hits.map((hit) => hit._source?.cases?.extract_observables_source);
 };
 
 const clearOracleRecords = async (es: Client, kibanaServer: KbnClient) => {

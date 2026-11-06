@@ -178,11 +178,16 @@ describe('resourceInstaller', () => {
           });
 
           const install = installer.installCommonResources();
+          let timeoutId: ReturnType<typeof setTimeout> | undefined;
           const timeout = new Promise((resolve) => {
-            setTimeout(resolve, 250);
+            timeoutId = setTimeout(resolve, 250);
           });
 
-          await Promise.race([install, timeout]);
+          try {
+            await Promise.race([install, timeout]);
+          } finally {
+            clearTimeout(timeoutId);
+          }
 
           expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
         });
@@ -563,7 +568,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -577,7 +582,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -607,7 +612,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -625,7 +630,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -707,7 +712,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -721,7 +726,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -751,7 +756,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })
@@ -769,7 +774,7 @@ describe('resourceInstaller', () => {
                     hidden: true,
                     'index.mapping.ignore_malformed': true,
                     'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                    'index.mapping.total_fields.limit': 2500,
+                    'index.mapping.total_fields.limit': 2800,
                   },
                 }),
               })

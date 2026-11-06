@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiCode, EuiTextColor } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
@@ -18,19 +18,23 @@ const StyledEuiCode = styled(EuiCode)`
 export interface UserCommandInputProps {
   input: string;
   isValid?: boolean;
+  'data-test-subj'?: string;
 }
 
-export const UserCommandInput = memo<UserCommandInputProps>(({ input, isValid = true }) => {
-  const getTestId = useTestIdGenerator(useDataTestSubj());
+export const UserCommandInput = memo<UserCommandInputProps>(
+  ({ input, isValid = true, 'data-test-subj': dataTestSubj }) => {
+    const defaultTestSubj = useDataTestSubj();
+    const getTestId = useTestIdGenerator(dataTestSubj ?? defaultTestSubj);
 
-  const displayInputValue = useMemo(() => {
-    return isValid ? input : <EuiTextColor>{input}</EuiTextColor>;
-  }, [input, isValid]);
+    const displayInputValue = useMemo(() => {
+      return isValid ? input : <EuiTextColor>{input}</EuiTextColor>;
+    }, [input, isValid]);
 
-  return (
-    <StyledEuiCode transparentBackground={true} data-test-subj={getTestId('userCommandText')}>
-      {displayInputValue}
-    </StyledEuiCode>
-  );
-});
+    return (
+      <StyledEuiCode transparentBackground={true} data-test-subj={getTestId('userCommandText')}>
+        {displayInputValue}
+      </StyledEuiCode>
+    );
+  }
+);
 UserCommandInput.displayName = 'UserCommandInput';

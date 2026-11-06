@@ -8,7 +8,10 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-eslint-plugin-eslint'],
+  moduleNameMapper: {
+    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
+  },
 };

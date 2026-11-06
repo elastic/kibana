@@ -35,27 +35,44 @@ export const FindPromptsRequestQuery = lazySchema(() =>
     /**
      * List of specific fields to include in each returned prompt.
      */
-    fields: ArrayFromString(z.string()).optional(),
+    fields: ArrayFromString(z.string())
+      .optional()
+      .describe('List of specific fields to include in each returned prompt.'),
     /**
      * Search query string to filter prompts by matching fields.
      */
-    filter: z.string().optional(),
+    filter: z
+      .string()
+      .optional()
+      .describe('Search query string to filter prompts by matching fields.'),
     /**
      * Field to sort prompts by.
      */
-    sort_field: FindPromptsSortField.optional(),
+    sort_field: FindPromptsSortField.optional().describe('Field to sort prompts by.'),
     /**
      * Sort order, either asc or desc.
      */
-    sort_order: SortOrder.optional(),
+    sort_order: SortOrder.optional().describe('Sort order, either asc or desc.'),
     /**
      * Page number for pagination.
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Page number for pagination.'),
     /**
      * Number of prompts per page.
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(20)
+      .describe('Number of prompts per page.'),
   })
 );
 export type FindPromptsRequestQuery = z.infer<typeof FindPromptsRequestQuery>;
@@ -66,19 +83,21 @@ export const FindPromptsResponse = lazySchema(() =>
     /**
      * Current page number.
      */
-    page: z.number().int(),
+    page: z.number().int().describe('Current page number.'),
     /**
      * Number of prompts per page.
      */
-    perPage: z.number().int(),
+    perPage: z.number().int().describe('Number of prompts per page.'),
     /**
      * Total number of prompts matching the query.
      */
-    total: z.number().int(),
+    total: z.number().int().describe('Total number of prompts matching the query.'),
     /**
      * The list of prompts returned based on the search query, sorting, and pagination.
      */
-    data: z.array(PromptResponse),
+    data: z
+      .array(PromptResponse)
+      .describe('The list of prompts returned based on the search query, sorting, and pagination.'),
   })
 );
 export type FindPromptsResponse = z.infer<typeof FindPromptsResponse>;

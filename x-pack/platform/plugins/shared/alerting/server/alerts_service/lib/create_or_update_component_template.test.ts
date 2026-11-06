@@ -42,7 +42,15 @@ describe('createOrUpdateComponentTemplate', () => {
     jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
-  it(`should call esClient to put component template`, async () => {
+  const stampedComponentTemplate = {
+    ...ComponentTemplate,
+    _meta: {
+      ...ComponentTemplate._meta,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
+    },
+  };
+
+  it(`should call esClient to put component template, stamped with a content hash`, async () => {
     await createOrUpdateComponentTemplate({
       logger,
       esClient: clusterClient,
@@ -50,7 +58,94 @@ describe('createOrUpdateComponentTemplate', () => {
       totalFieldsLimit: 2500,
     });
 
-    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(ComponentTemplate);
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+      stampedComponentTemplate
+    );
+  });
+
+  it(`should skip the PUT when the installed content hash matches`, async () => {
+    // First install to capture the hash this template stamps.
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+    const installedHash = (
+      clusterClient.cluster.putComponentTemplate.mock.calls[0][0] as unknown as {
+        _meta: { content_hash: string };
+      }
+    )._meta.content_hash;
+    clusterClient.cluster.putComponentTemplate.mockClear();
+
+    clusterClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        { name: 'test-mappings', component_template: { _meta: { content_hash: installedHash } } },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.cluster.getComponentTemplate>>);
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+  });
+
+  it(`should PUT when the installed content hash differs`, async () => {
+    clusterClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        { name: 'test-mappings', component_template: { _meta: { content_hash: 'stale-hash' } } },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.cluster.getComponentTemplate>>);
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+      stampedComponentTemplate
+    );
+  });
+
+  it(`should PUT when the installed template carries no content hash`, async () => {
+    clusterClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        { name: 'test-mappings', component_template: { _meta: { managed: true } } },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.cluster.getComponentTemplate>>);
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+  });
+
+  it(`should PUT when the installed template cannot be read`, async () => {
+    clusterClient.cluster.getComponentTemplate.mockRejectedValue(new Error('security_exception'));
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+      stampedComponentTemplate
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed component template test-mappings content hash; will install (security_exception)`
+    );
   });
 
   it(`should retry on transient ES errors`, async () => {

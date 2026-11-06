@@ -9,22 +9,48 @@
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionList } from './workflow_execution_list_stateful';
+import {
+  WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS,
+  WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
+} from '../../../hooks/polling_constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { createUseKibanaMockValue } from '../../../mocks';
-import { TestWrapper } from '../../../shared/test_utils';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 const mockSetSelectedExecution = jest.fn();
+const mockUpdateUrlState = jest.fn();
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
+const mockUrlState = {
+  selectedExecutionId: null as string | null,
+  lastViewedExecutionId: undefined as string | undefined,
+  executionListFilters: {
+    statuses: [] as ExecutionStatus[],
+    executionTypes: [] as ExecutionType[],
+    executedBy: [] as string[],
+  },
+  setSelectedExecution: mockSetSelectedExecution,
+  updateUrlState: mockUpdateUrlState,
+};
 
 const mockWorkflowApi = createMockWorkflowApi();
 const mockUseWorkflowsCapabilities = jest.fn(() => createMockWorkflowsCapabilities());
+const mockUseUiSetting = jest.fn();
 
 jest.mock('../../../hooks/use_kibana');
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: (settingId: string, defaultValue?: boolean) =>
+    mockUseUiSetting(settingId, defaultValue),
+}));
+
 jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  getIndexSelectionHandler: jest.fn(() => jest.fn()),
   useWorkflowsApi: () => mockWorkflowApi,
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
 }));
@@ -35,11 +61,14 @@ jest.mock('../../../hooks/use_telemetry', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_serial_polling', () => ({
+  useSerialPolling: jest.fn(),
+}));
+
+const mockUseSerialPolling = jest.mocked(useSerialPolling);
+
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => ({
-    selectedExecutionId: null,
-    setSelectedExecution: mockSetSelectedExecution,
-  }),
+  useWorkflowUrlState: () => mockUrlState,
 }));
 
 const mockWorkflowExecutions: WorkflowExecutionListDto = {
@@ -90,8 +119,16 @@ jest.mock('../../../entities/workflows/model/use_workflow_executions', () => ({
 describe('WorkflowExecutionList (stateful)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUrlState.selectedExecutionId = null;
+    mockUrlState.lastViewedExecutionId = undefined;
+    mockUrlState.executionListFilters = {
+      statuses: [],
+      executionTypes: [],
+      executedBy: [],
+    };
     mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockWorkflowApi.cancelAllWorkflowExecutions.mockResolvedValue(undefined);
+    mockUseUiSetting.mockReturnValue(true);
     (useKibana as jest.Mock).mockReturnValue(createUseKibanaMockValue());
 
     mockUseWorkflowExecutions.mockReturnValue({
@@ -106,9 +143,9 @@ describe('WorkflowExecutionList (stateful)', () => {
 
   const renderComponent = (workflowId: string | null = 'wf-1') => {
     return render(
-      <TestWrapper>
+      <TestProvider>
         <WorkflowExecutionList workflowId={workflowId} />
-      </TestWrapper>
+      </TestProvider>
     );
   };
 
@@ -151,15 +188,98 @@ describe('WorkflowExecutionList (stateful)', () => {
   it('calls useWorkflowExecutions with the workflowId', () => {
     renderComponent('wf-123');
     expect(mockUseWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ workflowId: 'wf-123' }),
-      expect.any(Object)
+      expect.objectContaining({ workflowId: 'wf-123' })
     );
   });
 
-  it('calls setSelectedExecution when an execution item is clicked', () => {
+  it('configures polling for the selected workflow', async () => {
+    renderComponent('wf-123');
+
+    expect(mockUseSerialPolling).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: true,
+        immediate: false,
+        pollKey: 'wf-123',
+        poll: expect.any(Function),
+        intervalMs: expect.any(Function),
+      })
+    );
+    const { intervalMs, poll } = mockUseSerialPolling.mock.calls[0][0];
+    if (typeof intervalMs !== 'function') {
+      throw new Error('Expected a dynamic polling interval');
+    }
+
+    expect(intervalMs()).toBe(WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS);
+    await poll();
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the active polling interval while an execution is running', () => {
+    mockUseWorkflowExecutions.mockReturnValue({
+      data: mockWorkflowExecutionsWithRunning,
+      isInitialLoading: false,
+      isLoadingMore: false,
+      error: null,
+      setPaginationObserver: jest.fn(),
+      refetch: mockRefetch,
+    });
+    renderComponent();
+
+    const { intervalMs } = mockUseSerialPolling.mock.calls[0][0];
+    if (typeof intervalMs !== 'function') {
+      throw new Error('Expected a dynamic polling interval');
+    }
+    expect(intervalMs()).toBe(WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS);
+  });
+
+  it('opens the execution on the executions tab when an item is clicked', () => {
     renderComponent();
     fireEvent.click(screen.getByTestId('workflowExecutionListItem'));
-    expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-1');
+    expect(mockUpdateUrlState).toHaveBeenCalledWith(
+      {
+        tab: 'executions',
+        executionId: 'exec-1',
+        lastViewedExecutionId: 'exec-1',
+        stepExecutionId: undefined,
+        stepId: undefined,
+      },
+      { replace: false }
+    );
+  });
+
+  it('restores filters and the last viewed row from the URL', () => {
+    mockUrlState.lastViewedExecutionId = 'exec-1';
+    mockUrlState.executionListFilters = {
+      statuses: [ExecutionStatus.COMPLETED],
+      executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: ['user-1'],
+    };
+    renderComponent();
+
+    expect(mockUseWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-1',
+        statuses: [ExecutionStatus.COMPLETED],
+        executionTypes: [ExecutionType.PRODUCTION],
+        executedBy: ['user-1'],
+      })
+    );
+    expect(screen.getByTestId('workflowExecutionListItem')).toHaveAttribute(
+      'data-last-viewed',
+      'true'
+    );
+  });
+
+  it('writes a filter change into the URL', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+    fireEvent.click(await screen.findByText('Production'));
+
+    expect(mockUpdateUrlState).toHaveBeenCalledWith({
+      executionStatuses: [],
+      executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: [],
+    });
   });
 
   it('footer cancel calls the bulk cancel API and refetches executions', async () => {
@@ -178,7 +298,7 @@ describe('WorkflowExecutionList (stateful)', () => {
     await waitFor(() =>
       expect(mockWorkflowApi.cancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1')
     );
-    await waitFor(() => expect(mockRefetch).toHaveBeenCalled());
+    await waitFor(() => expect(mockRefetch).toHaveBeenCalledTimes(1));
   });
 
   it('disables bulk cancel when the user lacks cancel capability', () => {

@@ -136,35 +136,35 @@ describe('Action List Route', () => {
       await callApiRoute({
         authz: { canReadActionsLogManagement: true },
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('allows user with `canAccessEndpointActionsLogManagement` access for API requests', async () => {
       await callApiRoute({
         authz: { canAccessEndpointActionsLogManagement: true },
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('does not allow user without `canReadActionsLogManagement` or `canAccessEndpointActionsLogManagement` access for API requests', async () => {
       await callApiRoute({
         authz: { canReadActionsLogManagement: false, canAccessEndpointActionsLogManagement: false },
       });
-      expect(mockResponse.forbidden).toBeCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalled();
     });
 
     it('does allow user access to API requests if license is at least platinum', async () => {
       await callApiRoute({
         license: Platinum,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('does not allow user access to API requests if license is below platinum', async () => {
       await callApiRoute({
         license: Gold,
       });
-      expect(mockResponse.forbidden).toBeCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalled();
     });
   });
 });

@@ -24,22 +24,28 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  AgentVisibility,
-  VISIBILITY_BADGE_COLOR,
-  VISIBILITY_ICON,
+  AgentAccessControlMode,
+  AGENT_BUILDER_UI_EBT,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
+  ACCESS_CONTROL_MODE_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useCanUpdateAgentApprovals } from '../../../../hooks/agents/use_can_update_agent_approvals';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { queryKeys } from '../../../../query_keys';
 import { labels } from '../../../../utils/i18n';
 import { FLYOUT_WIDTH } from '../../common/constants';
 import { AccessSection } from './access_section';
+import { AutoApprovedApisSection } from './auto_approved_apis_section';
 import { CustomInstructionsSection } from './custom_instructions_section';
 import { CustomizationSection } from './customization_section';
 import { IdentificationSection } from './identification_section';
+import { SubagentsSection } from './subagents_section';
 import { TagsSection } from './tags_section';
 import type { EditDetailsFormData } from './types';
 
@@ -48,14 +54,14 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  canChangeVisibility: boolean;
+  canChangeAccessControlMode: boolean;
   showWorkflowSection: boolean;
 }
 
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  canChangeVisibility,
+  canChangeAccessControlMode,
   showWorkflowSection,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -63,6 +69,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   const { agentService } = useAgentBuilderServices();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
+  const canUpdateAgentApprovals = useCanUpdateAgentApprovals(agent);
 
   const methods = useForm<EditDetailsFormData>({
     defaultValues: {
@@ -71,11 +78,18 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      visibility: agent.visibility ?? AgentVisibility.Private,
+      access_control: {
+        // Legacy agents without access control resolve to Public server-side.
+        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Public,
+      },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
+        post_execution_workflow_ids: agent.configuration?.post_execution_workflow_ids ?? [],
         instructions: agent.configuration?.instructions ?? '',
+        ai_indices: agent.configuration?.ai_indices ?? [],
+        subagent_ids: agent.configuration?.subagent_ids ?? [],
+        auto_approved_apis: agent.configuration?.approvals?.auto_approved_apis ?? {},
       },
     },
     mode: 'onBlur',
@@ -91,11 +105,19 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        visibility: data.visibility,
+        // Send only the access mode; the update endpoint's schema rejects `entries`, which
+        // are managed via the dedicated access-control endpoint.
+        access_control: { access_mode: data.access_control.access_mode },
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
+          post_execution_workflow_ids: data.configuration.post_execution_workflow_ids,
           instructions: data.configuration.instructions,
+          ai_indices: data.configuration.ai_indices,
+          subagent_ids: data.configuration.subagent_ids,
+          ...(canUpdateAgentApprovals && {
+            approvals: { auto_approved_apis: data.configuration.auto_approved_apis },
+          }),
         },
       }),
     onSuccess: () => {
@@ -104,12 +126,15 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       addSuccessToast({ title: flyoutLabels.successToast });
       onClose();
     },
-    onError: () => {
-      addErrorToast({ title: flyoutLabels.errorToast });
+    onError: (error: Error) => {
+      addErrorToast({
+        title: flyoutLabels.errorToast,
+        text: formatAgentBuilderErrorMessage(error),
+      });
     },
   });
 
-  const isShared = (agent.visibility as AgentVisibility) === AgentVisibility.Shared;
+  const isShared = agent.access_control?.access_mode === AgentAccessControlMode.Shared;
 
   const contentPadding = css`
     padding: ${euiTheme.size.s};
@@ -140,8 +165,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                   <span>
                     {flyoutLabels.sharedWarningPrefix}
                     <EuiBadge
-                      iconType={VISIBILITY_ICON[AgentVisibility.Shared]}
-                      color={VISIBILITY_BADGE_COLOR[AgentVisibility.Shared]}
+                      iconType={ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared]}
+                      color={ACCESS_CONTROL_MODE_BADGE_COLOR[AgentAccessControlMode.Shared]}
                     >
                       {flyoutLabels.sharedWarningBadge}
                     </EuiBadge>
@@ -157,10 +182,14 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <IdentificationSection />
 
             <EuiHorizontalRule margin="xl" />
-            <AccessSection canChangeVisibility={canChangeVisibility} />
+            <AccessSection canChangeAccessControlMode={canChangeAccessControlMode} />
 
             <EuiHorizontalRule margin="xl" />
-            <CustomizationSection showWorkflowSection={showWorkflowSection} />
+            <CustomizationSection showWorkflowSection={showWorkflowSection} agentId={agent.id} />
+
+            <SubagentsSection agentId={agent.id} />
+
+            <AutoApprovedApisSection agentId={agent.id} canEdit={canUpdateAgentApprovals} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />
@@ -173,7 +202,15 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} data-test-subj="editDetailsCancelButton">
+              <EuiButtonEmpty
+                onClick={onClose}
+                data-test-subj="editDetailsCancelButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.flyout,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_FLYOUT_CANCEL,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
+              >
                 {flyoutLabels.cancelButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -184,6 +221,11 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                 isLoading={updateMutation.isLoading}
                 isDisabled={!formState.isDirty}
                 data-test-subj="editDetailsSaveButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.flyout,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_FLYOUT_SAVE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               >
                 {flyoutLabels.saveButton}
               </EuiButton>

@@ -15,6 +15,11 @@ export const rxV2: SchemaBasedAggregations = {
         field: 'host.network.ingress.bytes',
       },
     },
+    rx_count: {
+      value_count: {
+        field: 'host.network.ingress.bytes',
+      },
+    },
     min_timestamp: {
       min: {
         field: '@timestamp',
@@ -29,11 +34,13 @@ export const rxV2: SchemaBasedAggregations = {
       bucket_script: {
         buckets_path: {
           value: 'rx_sum',
+          count: 'rx_count',
           minTime: 'min_timestamp',
           maxTime: 'max_timestamp',
         },
         script: {
-          source: 'params.value / ((params.maxTime - params.minTime) / 1000)',
+          source:
+            'params.count > 0 ? params.value / ((params.maxTime - params.minTime) / 1000) : null',
           lang: 'painless',
         },
         gap_policy: 'skip',

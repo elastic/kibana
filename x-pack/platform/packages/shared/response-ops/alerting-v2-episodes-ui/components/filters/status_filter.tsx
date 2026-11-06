@@ -5,62 +5,72 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiPopover, EuiFilterButton } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPopover, EuiFilterButton, EuiHealth, useEuiTheme } from '@elastic/eui';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { alertTimelineStatusColor } from '../../alert_timeline/alert_timeline_status_palette';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
 
-const EPISODE_STATUS_OPTIONS: Array<{ label: string; value: string }> = [
-  {
-    label: i18n.STATUS_FILTER_ACTIVE_LABEL,
-    value: 'active',
-  },
-  {
-    label: i18n.STATUS_FILTER_RECOVERING_LABEL,
-    value: 'recovering',
-  },
-  {
-    label: i18n.STATUS_FILTER_PENDING_LABEL,
-    value: 'pending',
-  },
-  {
-    label: i18n.STATUS_FILTER_INACTIVE_LABEL,
-    value: 'inactive',
-  },
+// The dot uses a resolved theme color so it keeps its color when its row is
+// highlighted/selected: `EuiIcon` applies custom color values inline, which
+// beats `EuiSelectable`'s highlighted-row recolor. Colors match the Lifecycle lane.
+const EPISODE_STATUS_OPTIONS: Array<{
+  label: string;
+  value: AlertEpisodeStatus;
+}> = [
+  { label: i18n.STATUS_FILTER_ACTIVE_LABEL, value: ALERT_EPISODE_STATUS.ACTIVE },
+  { label: i18n.STATUS_FILTER_RECOVERING_LABEL, value: ALERT_EPISODE_STATUS.RECOVERING },
+  { label: i18n.STATUS_FILTER_PENDING_LABEL, value: ALERT_EPISODE_STATUS.PENDING },
+  { label: i18n.STATUS_FILTER_INACTIVE_LABEL, value: ALERT_EPISODE_STATUS.INACTIVE },
 ];
 
 interface AlertEpisodesStatusFilterProps {
-  selectedStatus?: string | null;
-  onStatusChange: (status: string | undefined) => void;
+  selectedStatuses?: string[] | null;
+  onStatusesChange: (statuses: string[] | undefined) => void;
   'data-test-subj'?: string;
 }
 
 export function AlertEpisodesStatusFilter({
-  selectedStatus,
-  onStatusChange,
+  selectedStatuses,
+  onStatusesChange,
   'data-test-subj': dataTestSubj = 'statusFilter',
 }: AlertEpisodesStatusFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+
+  const options = useMemo(
+    () =>
+      EPISODE_STATUS_OPTIONS.map(({ label, value }) => ({
+        label,
+        value,
+        prepend: <EuiHealth color={alertTimelineStatusColor(euiTheme, value)} />,
+      })),
+    [euiTheme]
+  );
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
-      onStatusChange(values.length > 0 ? values[0] : undefined);
+      onStatusesChange(values.length > 0 ? values : undefined);
     },
-    [onStatusChange]
+    [onStatusesChange]
   );
+
+  const selectedValues = selectedStatuses ?? [];
+  const activeCount = selectedValues.length;
 
   return (
     <EuiPopover
       aria-label={i18n.STATUS_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}
-          hasActiveFilters={!!selectedStatus}
-          numFilters={EPISODE_STATUS_OPTIONS.length}
-          numActiveFilters={selectedStatus ? 1 : undefined}
+          hasActiveFilters={activeCount > 0}
+          numFilters={options.length}
+          numActiveFilters={activeCount > 0 ? activeCount : undefined}
           data-test-subj={`${dataTestSubj}-button`}
         >
           {i18n.STATUS_FILTER_LABEL}
@@ -72,9 +82,9 @@ export function AlertEpisodesStatusFilter({
       panelPaddingSize="none"
     >
       <InlineFilterPopover
-        options={EPISODE_STATUS_OPTIONS}
-        selectedValues={selectedStatus ? [selectedStatus] : []}
-        singleSelect
+        options={options}
+        selectedValues={selectedValues}
+        singleSelect={false}
         onSelectionChange={handleSelectionChange}
         emptyMessage={i18n.STATUS_FILTER_NO_MATCH}
         data-test-subj={`${dataTestSubj}-popover`}

@@ -8,6 +8,11 @@
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { ENTITY_FIELDS } from '../constants';
 
+const fieldsRequiringSortMissingLast: string[] = [
+  ENTITY_FIELDS.ENTITY_RISK,
+  ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
+];
+
 export const getRuntimeMappingsFromSort = (fields: string[], sort: string[][]) => {
   return sort
     .filter(([field]) => fields.includes(field))
@@ -45,6 +50,9 @@ const getSortField = ({ field, direction }: { field: string; direction: string }
         },
       },
     };
+  }
+  if (fieldsRequiringSortMissingLast.includes(field)) {
+    return { [field]: { order: direction, missing: '_last' } };
   }
   return { [field]: direction };
 };

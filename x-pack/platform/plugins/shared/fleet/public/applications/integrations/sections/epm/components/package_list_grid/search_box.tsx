@@ -133,7 +133,7 @@ export const SearchBox: FunctionComponent<Props> = ({
               aria-label="Remove filter"
               data-test-subj="epmList.categoryBadge.closeBtn"
             >
-              <EuiIcon type="cross" color="text" size="s" />
+              <EuiIcon type="cross" color="text" size="s" aria-hidden={true} />
             </button>
           </EuiFormPrepend>
         ) : undefined

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { Cookie } from 'tough-cookie';
 import type { UserProfile } from '@kbn/security-plugin/common';
-import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
+import { GetCaseUsersResponseSchema } from '@kbn/cases-plugin/common/types/api';
 import type { Client } from '@elastic/elasticsearch';
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext): void => {
               uid: userProfile.uid,
             };
 
-            GetCaseUsersResponseRt.encode({
+            GetCaseUsersResponseSchema.parse({
               assignees: [userToValidate],
               unassignedUsers: [userToValidate],
               participants: [userToValidate],
@@ -474,9 +474,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await updateUserProfileAvatar({
             supertest,
             req: {
-              // @ts-expect-error: types are not correct
               initials: null,
-              // @ts-expect-error: types are not correct
               color: null,
               imageUrl: null,
             },
@@ -504,9 +502,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await updateUserProfileAvatar({
             supertest,
             req: {
-              // @ts-expect-error: types are not correct
               initials: null,
-              // @ts-expect-error: types are not correct
               color: null,
               imageUrl: null,
             },

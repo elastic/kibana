@@ -169,6 +169,13 @@ export function registerGetStepDefinitionsTool(
   agentBuilder.tools.register({
     id: workflowTools.getStepDefinitions,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Step Definitions',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Get available workflow step types, their parameters, and usage examples.
 
 **When to use:** Before generating step YAML, to discover available step types, their input params (\`with\` block), config params (step-level fields like \`connector-id\`), and usage examples.
@@ -215,7 +222,6 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
         ),
     }),
     tags: ['workflows', 'yaml', 'steps'],
-    experimental: true,
     handler: async (
       { stepType, search, category, includeDeprecated, includeOutputSummary, includeFullSchema },
       { spaceId, request }

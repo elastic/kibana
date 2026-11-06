@@ -9,11 +9,15 @@ import { useQuery } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { WorkflowsApi } from '../services/workflows_api';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { workflowKeys } from './query_key_factory';
 
-export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
-  const workflowsApi = useService(WorkflowsApi);
+export const useFetchWorkflow = (
+  id: string | undefined,
+  isEnabled = true,
+  { notifyOnError = true }: { notifyOnError?: boolean } = {}
+) => {
+  const workflowsApi = useService(WorkflowApi);
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<WorkflowDetailDto, Error>({
@@ -22,6 +26,9 @@ export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
     enabled: !!id && isEnabled,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
+      if (!notifyOnError) {
+        return;
+      }
       toasts.addError(error, {
         title: i18n.translate('xpack.alertingV2.workflow.fetchError', {
           defaultMessage: 'Failed to load workflow',

@@ -75,13 +75,33 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...originalModule,
+    createKbnUrlStateStorage: jest.fn(() => ({
+      get: jest.fn(() => null),
+      set: jest.fn(() => null),
+    })),
+  };
+});
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
 }));
 
 jest.mock('../../../lib/capabilities', () => ({
@@ -137,9 +157,8 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/152521
-describe.skip('Rules list Bulk Delete', () => {
-  beforeEach(async () => {
+describe('Rules list Bulk Delete', () => {
+  beforeAll(async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
@@ -205,7 +224,7 @@ describe.skip('Rules list Bulk Delete', () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     });
-    expect(bulkDeleteRules).not.toBeCalled();
+    expect(bulkDeleteRules).not.toHaveBeenCalled();
   });
 
   it('should have warning toast message after Bulk Delete', async () => {

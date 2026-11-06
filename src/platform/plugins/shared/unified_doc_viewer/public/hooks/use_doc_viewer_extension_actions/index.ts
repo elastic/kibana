@@ -8,13 +8,19 @@
  */
 import createContainer from 'constate';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
+import { useMemo, useRef } from 'react';
 
 interface UseDocViewerExtensionActionsParams {
   actions?: DocViewActions;
 }
 
 const useDocViewerExtensionActions = ({ actions }: UseDocViewerExtensionActionsParams) => {
-  return actions;
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
+
+  const hasActions = actions != null;
+
+  return useMemo(() => (hasActions ? actionsRef.current : undefined), [hasActions]);
 };
 
 export const [DocViewerExtensionActionsProvider, useDocViewerExtensionActionsContext] =

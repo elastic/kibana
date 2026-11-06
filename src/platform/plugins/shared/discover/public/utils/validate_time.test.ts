@@ -15,6 +15,8 @@ describe('discover validate time', () => {
     expect(isTimeRangeValid({ from: '2020-06-02T13:36:13.689Z', to: 'now' })).toEqual(true);
     expect(isTimeRangeValid({ from: 'now', to: 'now+1h' })).toEqual(true);
     expect(isTimeRangeValid({ from: '', to: '' })).toEqual(false);
+    expect(isTimeRangeValid({ from: 1, to: 'now' } as unknown as TimeRange)).toEqual(false);
+    expect(isTimeRangeValid({ from: 'now', to: true } as unknown as TimeRange)).toEqual(false);
     expect(isTimeRangeValid({} as unknown as TimeRange)).toEqual(false);
     expect(isTimeRangeValid(undefined)).toEqual(false);
   });

@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/i18n'
   - '@kbn/inference-plugin'
-  - '@kbn/inference-common'
   - '@kbn/actions-plugin'
   - '@kbn/utility-types'
   - '@kbn/spaces-plugin'
@@ -41,6 +40,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -49,6 +49,4 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

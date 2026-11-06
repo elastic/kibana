@@ -7,7 +7,7 @@
 
 import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
@@ -21,6 +21,7 @@ import type {
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type { KibanaAssetType } from '../../../../../../../common/types/models';
+import { KibanaSavedObjectType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -189,6 +190,42 @@ describe('When on integration detail', () => {
       // Reset to default
       ExperimentalFeaturesService.init(allowedExperimentalValues);
     });
+
+    it('should show Alerting tab for pre-installed packages with alerting assets in installationInfo', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithInstalledAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+        installationInfo: {
+          install_source: 'bundled' as const,
+          installed_kibana: [
+            {
+              id: 'nginx-inactivity-rule',
+              type: KibanaSavedObjectType.alertingRuleTemplate,
+            },
+          ],
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithInstalledAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+    });
   });
 
   function mockGAAndPrereleaseVersions(pkgVersion: string) {
@@ -196,11 +233,20 @@ describe('When on integration detail', () => {
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
 
+    const isViewingPrerelease = pkgVersion.includes('-');
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };
         gaPackage.item.version = '1.0.0';
+        gaPackage.item.latestVersion = '1.0.0';
         return gaPackage;
+      }
+      if (query?.prerelease === true) {
+        // The prerelease query uses a specific version; latestVersion reflects newest prerelease.
+        const pkg = { item: { ...unInstalledPackage.item } };
+        pkg.item.latestVersion = isViewingPrerelease ? pkgVersion : '1.0.0';
+        return pkg;
       }
       return unInstalledPackage;
     });
@@ -237,6 +283,54 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package is not installed while viewing an old pinned version with prerelease enabled', () => {
+    // Reproduces the bug from https://github.com/elastic/ingest-dev/issues/7934:
+    // URL is pinned to an old version (0.3.7) after uninstall; GA=1.0.0 and prerelease=1.0.0-beta exist.
+    // Before the fix, showVersionSelect was false (version ≠ latestGA or latestPrerelease) → no dropdown.
+    // After the fix, notInstalled status also reveals the dropdown.
+    beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: true, id: '' },
+      });
+
+      // URL is pinned to 0.3.7 (old). GA=1.0.0, prerelease=1.0.0-beta. Package is not installed.
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const notInstalledOldVersion = {
+        ...baseResponse.item,
+        status: 'not_installed' as const,
+        version: '0.3.7',
+        latestVersion: '1.0.0',
+      };
+
+      mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
+        if (query?.prerelease === false) {
+          // GA query (version=0.3.7, prerelease=false): latestVersion = latest GA
+          return { item: { ...notInstalledOldVersion, version: '0.3.7', latestVersion: '1.0.0' } };
+        }
+        if (query?.prerelease === true) {
+          // Prerelease query (version=0.3.7, prerelease=true): latestVersion = latest prerelease
+          return {
+            item: { ...notInstalledOldVersion, version: '0.3.7', latestVersion: '1.0.0-beta' },
+          };
+        }
+        // main query (version=0.3.7, prerelease=true from settings)
+        return { item: notInstalledOldVersion };
+      });
+
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    }, TESTS_TIMEOUT);
+
+    it('should display the version selector even when viewing an old pinned version after uninstall', async () => {
+      const versionSelect = renderResult.queryByTestId('versionSelect');
+      expect(versionSelect).toBeInTheDocument();
+      expect(renderResult.queryByTestId('versionText')).not.toBeInTheDocument();
+    });
+  });
+
   describe('and the package is not installed and prerelease disabled', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0');
@@ -259,8 +353,10 @@ describe('When on integration detail', () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
-    it('should display version text and no callout if prerelease setting disabled', async () => {
-      expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
+    it('should display static version text and no callout if prerelease setting disabled and only one version available', async () => {
+      // Only one version available (no newer GA, no prerelease) → selector collapses to static text.
+      expect(renderResult.queryByTestId('versionSelect')).toBeNull();
+      expect(renderResult.queryByTestId('versionText')).toBeInTheDocument();
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
   });
@@ -329,16 +425,20 @@ describe('When on integration detail', () => {
       });
 
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
     afterEach(() => {
       // @ts-ignore
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "custom" tab in navigation', () => {
-      expect(renderResult.getByTestId('tab-custom'));
-    });
+    it(
+      'should display "custom" tab in navigation',
+      async () => {
+        expect(await renderResult.findByTestId('tab-custom')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
     it('should display custom content when tab is clicked', async () => {
       act(() => {
@@ -404,6 +504,70 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package has non FIPS policy templates', () => {
+    const renderWithFips = async ({
+      isFipsEnabled,
+      fipsCompatible,
+    }: {
+      isFipsEnabled: boolean;
+      fipsCompatible: boolean;
+    }) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          policy_templates: baseResponse.item.policy_templates?.map((template) => ({
+            ...template,
+            fips_compatible: fipsCompatible,
+          })),
+        },
+      });
+      mockedApi.responseProvider.fleetSetup.mockReturnValue({
+        isReady: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+        is_fips_enabled: isFipsEnabled,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should hide the Configs tab when FIPS is enabled and all policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: false });
+
+        await renderResult.findByTestId('tab-settings');
+        expect(renderResult.queryByTestId('tab-configs')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is enabled and the policy templates are FIPS compatible',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: true });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is not enabled even if the policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: false, fipsCompatible: false });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
@@ -417,9 +581,277 @@ describe('When on integration detail', () => {
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
       expect(addButton.href).toEqual(
-        'http://localhost/mock/app/fleet/integrations/nginx-0.3.7/add-integration'
+        'http://localhost/mock/app/integrations/detail/nginx-0.3.7/add-integration'
       );
     });
+  });
+
+  describe('and the package has nothing to configure on an agent', () => {
+    interface AssetOnlyOptions {
+      name?: string;
+      status?: 'installed' | 'not_installed';
+      dataStreams?: Array<{ name: string }>;
+      installSource?: string;
+    }
+
+    const buildAssetOnlyInfo = ({
+      name = 'corelight',
+      status = 'not_installed',
+      dataStreams = [],
+      installSource,
+    }: AssetOnlyOptions = {}) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      return {
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name,
+          title: name,
+          // narrowed so the spread keeps matching the not_installed variant of the package info type
+          status: status as 'not_installed',
+          policy_templates: [],
+          data_streams: dataStreams as any,
+          ...(installSource ? { installationInfo: { install_source: installSource } as any } : {}),
+        },
+      };
+    };
+
+    const renderAssetOnlyDetail = async (options: AssetOnlyOptions = {}) => {
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue(buildAssetOnlyInfo(options));
+
+      await render();
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should show "Install assets" instead of "Add integration" for an integration with assets only',
+      async () => {
+        await renderAssetOnlyDetail();
+
+        const installButton = await renderResult.findByTestId('installAssetsHeaderButton');
+        expect(installButton).toHaveTextContent('Install corelight Assets');
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+        // the divider between the version and the button
+        expect(renderResult.getAllByTestId('headerDivider')).toHaveLength(1);
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the README as the landing tab',
+      async () => {
+        await renderAssetOnlyDetail();
+
+        await renderResult.findByTestId('installAssetsHeaderButton');
+        expect(renderResult.getByTestId('tab-overview')).toHaveAttribute('aria-selected', 'true');
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show "Install assets" for packages with data streams but no inputs, like awsfirehose',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'awsfirehose', dataStreams: [{ name: 'logs' }] });
+
+        expect(await renderResult.findByTestId('installAssetsHeaderButton')).toHaveTextContent(
+          'Install awsfirehose Assets'
+        );
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show any header button once the package is installed',
+      async () => {
+        await renderAssetOnlyDetail({ status: 'installed' });
+
+        await renderResult.findByTestId('tab-overview');
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show the install button, nor a dangling header divider, without the privilege to install',
+      async () => {
+        const { integrations } = testRenderer.startServices.authz;
+        const canInstallPackages = integrations.installPackages;
+        integrations.installPackages = false;
+        try {
+          await renderAssetOnlyDetail();
+
+          await renderResult.findByTestId('tab-overview');
+          expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+          expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+          // only the version is left in the header, no empty slot with a divider next to it
+          expect(renderResult.queryByTestId('headerDivider')).toBeNull();
+        } finally {
+          integrations.installPackages = canInstallPackages;
+        }
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should install the assets without creating any policy, then remove the CTA',
+      async () => {
+        const { http, notifications } = testRenderer.startServices;
+        http.post.mockImplementation((async () => {
+          // the package info reflects the installation from now on
+          mockedApi.responseProvider.epmGetInfo.mockReturnValue(
+            buildAssetOnlyInfo({ status: 'installed' })
+          );
+          return { items: [], _meta: { install_source: 'registry' } };
+        }) as any);
+        await renderAssetOnlyDetail();
+
+        await act(async () => {
+          (await renderResult.findByTestId('installAssetsHeaderButton')).click();
+        });
+        await act(async () => {
+          (await renderResult.findByTestId('confirmModalConfirmButton')).click();
+        });
+
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull()
+        );
+        // the package install is the only request sent: no agent policy, no package policy
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith(
+          epmRouteService.getInstallPath('corelight', '0.3.7'),
+          expect.anything()
+        );
+        expect(notifications.toasts.addSuccess).toHaveBeenCalled();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the edit action for an uploaded package once its assets are installed',
+      async () => {
+        await renderAssetOnlyDetail({ status: 'installed', installSource: 'upload' });
+
+        expect(await renderResult.findByLabelText('Edit')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the edit action next to the install button for an uploaded package',
+      async () => {
+        await renderAssetOnlyDetail({ installSource: 'upload' });
+
+        expect(await renderResult.findByTestId('installAssetsHeaderButton')).toBeInTheDocument();
+        expect(renderResult.getByLabelText('Edit')).toBeInTheDocument();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep "Add integration" for an integration with data streams',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'okta', dataStreams: [{ name: 'system' }] });
+
+        expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep "Add integration" for cribl, which has a custom UI',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'cribl' });
+
+        expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
+  describe('and the AWS onboarding flow is enabled', () => {
+    const renderAwsDetail = async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name: 'aws',
+          title: 'AWS',
+          status: 'not_installed' as const,
+        },
+      });
+      testRenderer.startServices.featureFlags.useBooleanValue.mockReturnValue(true);
+      testRenderer.startServices.application.getUrlForApp.mockReturnValue(
+        '/mock/app/onboarding/aws'
+      );
+
+      await render();
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should link the Add button to the onboarding flow',
+      async () => {
+        await renderAwsDetail();
+        const addButton = (await renderResult.findByTestId(
+          'addIntegrationPolicyButton'
+        )) as HTMLAnchorElement;
+        expect(addButton.href).toEqual('http://localhost/mock/app/onboarding/aws');
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should start a new onboarding session when the Add button is clicked',
+      async () => {
+        await renderAwsDetail();
+        await act(async () => {
+          (await renderResult.findByTestId('addIntegrationPolicyButton')).click();
+        });
+
+        expect(testRenderer.startServices.application.navigateToApp).toHaveBeenCalledWith(
+          'onboarding',
+          { path: '/aws', state: { newSession: true, returnUrl: window.location.href } }
+        );
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the Fleet flow when an agent policy is preselected',
+      async () => {
+        act(() =>
+          testRenderer.mountHistory.push(detailPageUrlPath, {
+            forAgentPolicyId: 'agent-policy-1',
+          })
+        );
+        await renderAwsDetail();
+        await act(async () => {
+          (await renderResult.findByTestId('addIntegrationPolicyButton')).click();
+        });
+
+        expect(testRenderer.startServices.application.navigateToApp).not.toHaveBeenCalledWith(
+          'onboarding',
+          expect.anything()
+        );
+      },
+      TESTS_TIMEOUT
+    );
   });
 
   describe('and on the Policies Tab', () => {
@@ -427,22 +859,28 @@ describe('When on integration detail', () => {
     beforeEach(async () => {
       testRenderer.mountHistory.push(policiesTabURLPath);
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
-    it('should display policies list', () => {
-      const table = renderResult.getByTestId('integrationPolicyTable');
-      expect(table).not.toBeNull();
-    });
+    it(
+      'should display policies list',
+      async () => {
+        expect(await renderResult.findByTestId('integrationPolicyTable')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
-    it('should link to integration policy detail when an integration policy is clicked', async () => {
-      await mockedApi.waitForApi();
-      const firstPolicy = renderResult.getAllByTestId(
-        'integrationNameLink'
-      )[0] as HTMLAnchorElement;
-      expect(firstPolicy.href).toEqual(
-        'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
-      );
-    });
+    it(
+      'should link to integration policy detail when an integration policy is clicked',
+      async () => {
+        const [firstPolicy] = (await renderResult.findAllByTestId(
+          'integrationNameLink'
+        )) as HTMLAnchorElement[];
+        expect(firstPolicy.href).toEqual(
+          'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+        );
+      },
+      TESTS_TIMEOUT
+    );
   });
 });
 
@@ -982,7 +1420,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
-        return mockedApiInterface.responseProvider.epmGetInfo('nginx');
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx', '0.3.7', options.query);
       }
       if (path === epmRouteService.getInfoPath(`nginx`)) {
         markApiCallAsHandled();

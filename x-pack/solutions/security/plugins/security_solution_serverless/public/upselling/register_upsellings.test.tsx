@@ -9,7 +9,8 @@ import { registerUpsellings } from './register_upsellings';
 import { upsellingMessages, upsellingPages, upsellingSections } from './upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS, ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { of } from 'rxjs';
@@ -80,6 +81,14 @@ describe('registerUpsellings', () => {
     );
     expect(setMessages).toHaveBeenCalledTimes(1);
     expect(setMessages).toHaveBeenCalledWith(expectedMessagesObject);
+  });
+
+  it('should gate the Attacks page behind the attackDiscovery product feature', () => {
+    const attacksPage = upsellingPages.find(
+      ({ pageName }) => pageName === SecurityPageName.attacks
+    );
+
+    expect(attacksPage?.pli).toEqual(ProductFeatureKey.attackDiscovery);
   });
 
   it('should set the unavailable workflows when the workflows feature is disabled', () => {

@@ -11,19 +11,21 @@ import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiScreenReaderOnly,
   EuiTable,
+  EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
-  EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiButtonIcon,
-  EuiScreenReaderOnly,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -59,6 +61,7 @@ interface Props extends LogEntryExample {
   timeRange: TimeRange;
   anomaly: LogEntryAnomaly;
   euiTheme: EuiThemeComputed;
+  projectRouting?: ProjectRouting;
 }
 
 export const LogEntryExampleMessageRow: React.FC<Props> = ({
@@ -70,6 +73,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
   timeRange,
   anomaly,
   euiTheme,
+  projectRouting,
 }) => {
   const {
     services: { ml, http, application },
@@ -137,7 +141,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
       {
         label: VIEW_DETAILS_LABEL,
         onClick: () => {
-          openLogEntryFlyout(id);
+          openLogEntryFlyout(id, projectRouting);
           setIsMenuOpen(false);
         },
       },
@@ -155,6 +159,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
   }, [
     id,
     openLogEntryFlyout,
+    projectRouting,
     viewInStreamLinkProps,
     viewAnomalyInMachineLearningLink,
     handleMlLinkClick,
@@ -168,20 +173,23 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
       <EuiTableRowCell width="150px" css={{ color: euiTheme.colors.textSubdued }}>
         {moment(timestamp).format('HH:mm:ss.SSS')}
       </EuiTableRowCell>
-      <EuiTableRowCell>{message}</EuiTableRowCell>
+      <EuiTableRowCell truncateText>{message}</EuiTableRowCell>
 
       <EuiTableRowCell width="250px">{humanFriendlyDataset}</EuiTableRowCell>
 
       <EuiTableRowCell width="48px">
         <EuiPopover
+          aria-label={MENU_LABEL}
           button={
-            <EuiButtonIcon
-              data-test-subj="infraLogEntryExampleMessageRowButton"
-              aria-label={MENU_LABEL}
-              iconType="boxesVertical"
-              size="s"
-              onClick={toggleMenu}
-            />
+            <EuiToolTip content={MENU_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="infraLogEntryExampleMessageRowButton"
+                aria-label={MENU_LABEL}
+                iconType="boxesVertical"
+                size="s"
+                onClick={toggleMenu}
+              />
+            </EuiToolTip>
           }
           isOpen={isMenuOpen}
           closePopover={closeMenu}
@@ -212,7 +220,8 @@ export const LogEntryExampleMessageTable: React.FC<{
   examples: LogEntryExample[];
   timeRange: TimeRange;
   anomaly: LogEntryAnomaly;
-}> = ({ examples, timeRange, anomaly }) => {
+  projectRouting?: ProjectRouting;
+}> = ({ examples, timeRange, anomaly, projectRouting }) => {
   const { euiTheme } = useEuiTheme();
 
   const dateTime = examples.length > 0 ? examples[0].timestamp : Date.now();
@@ -285,6 +294,7 @@ export const LogEntryExampleMessageTable: React.FC<{
             timeRange={timeRange}
             anomaly={anomaly}
             euiTheme={euiTheme}
+            projectRouting={projectRouting}
           />
         ))}
       </EuiTableBody>

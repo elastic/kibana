@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-user-storage-browser-internal",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

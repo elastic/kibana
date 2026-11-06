@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/stage_by_owner');
+require('@kbn/dev/stage_by_owner');

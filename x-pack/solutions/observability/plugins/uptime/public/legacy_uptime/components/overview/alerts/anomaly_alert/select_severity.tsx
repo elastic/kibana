@@ -126,7 +126,6 @@ export const SelectSeverity: FC<Props> = ({ onChange, value }) => {
 
   return (
     <EuiSuperSelect
-      hasDividers
       style={{ width: 200 }}
       options={getSeverityOptions()}
       valueOfSelected={severity.display}

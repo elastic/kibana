@@ -5,58 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import type { Mixed } from 'io-ts';
-import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
+import type { SchemaOutput } from '../schema_output';
+import type {
+  FetchMonitorManagementListQueryArgsCodec,
+  FetchMonitorOverviewQueryArgsCodec,
+  MonitorManagementEnablementResultCodec,
+} from '../schemas/state';
 
-const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
-  Mixed,
-  Mixed,
-  ...Mixed[]
-];
-
-const FetchMonitorQueryArgsCommon = {
-  query: t.string,
-  searchFields: t.array(t.string),
-  tags: t.array(t.string),
-  locations: t.array(t.string),
-  monitorTypes: t.array(t.string),
-  projects: t.array(t.string),
-  schedules: t.array(t.string),
-  monitorQueryIds: t.array(t.string),
-  configIds: t.array(t.string),
-  sortField: t.string,
-  sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
-  showFromAllSpaces: t.boolean,
-  useLogicalAndFor: t.array(t.union(useLogicalAndFileLiteral)),
-};
-
-export const FetchMonitorManagementListQueryArgsCodec = t.partial({
-  ...FetchMonitorQueryArgsCommon,
-  page: t.number,
-  perPage: t.number,
-  internal: t.boolean,
-});
-
-export type FetchMonitorManagementListQueryArgs = t.TypeOf<
+export type FetchMonitorManagementListQueryArgs = SchemaOutput<
   typeof FetchMonitorManagementListQueryArgsCodec
 >;
 
-export const FetchMonitorOverviewQueryArgsCodec = t.partial({
-  ...FetchMonitorQueryArgsCommon,
-});
+export type FetchMonitorOverviewQueryArgs = SchemaOutput<typeof FetchMonitorOverviewQueryArgsCodec>;
 
-export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;
-
-export const MonitorManagementEnablementResultCodec = t.type({
-  isEnabled: t.boolean,
-  canEnable: t.boolean,
-  canManageApiKeys: t.boolean,
-  areApiKeysEnabled: t.boolean,
-  isValidApiKey: t.boolean,
-  isServiceAllowed: t.boolean,
-});
-
-export type MonitorManagementEnablementResult = t.TypeOf<
+export type MonitorManagementEnablementResult = SchemaOutput<
   typeof MonitorManagementEnablementResultCodec
 >;

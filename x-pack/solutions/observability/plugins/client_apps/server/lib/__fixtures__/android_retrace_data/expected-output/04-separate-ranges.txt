@@ -1,0 +1,3 @@
+java.lang.RuntimeException: Separate ranges for same method
+	at co.elastic.otel.android.integration.Crasher.deepCrash(Crasher.kt:29)
+	at co.elastic.otel.android.integration.Crasher.deepCrash(Crasher.kt:31)

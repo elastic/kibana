@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from './ftr_provider_context';
 
-export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext) {
+export function SearchIndexDetailPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const pageObjects = getPageObjects(['appMenu']);
 
   const expectIndexDetailPageHeader = async function () {
-    await testSubjects.existOrFail('indexDetailsHeader', { timeout: 2000 });
+    await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
   };
   const expectSearchIndexDetailsTabsExists = async function () {
     await testSubjects.existOrFail('indexDetailsTab-overview');
@@ -50,10 +51,13 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     },
     async expectSizeDocCountToHaveDocumentCount(count: number) {
       await testSubjects.existOrFail('indexDetailsSizeDocCount', { timeout: 2000 });
-      const cardElem = await testSubjects.find('indexDetailsSizeDocCount');
-      const visibleText = await cardElem.getVisibleText();
       const label = count === 1 ? 'Document' : 'Documents';
-      expect(visibleText).to.contain(`${count}\n${label}`);
+      // The document count is fetched separately and renders a spinner until it resolves.
+      await retry.try(async () => {
+        const cardElem = await testSubjects.find('indexDetailsSizeDocCount');
+        const visibleText = await cardElem.getVisibleText();
+        expect(visibleText).to.contain(`${count}\n${label}`);
+      });
     },
 
     async expectQuickStatsToHaveIndexStatus() {
@@ -83,13 +87,13 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     },
 
     async expectManageIndexButtonExists() {
-      await testSubjects.existOrFail('indexActionsContextMenuButton');
+      await pageObjects.appMenu.existOrFail('indexActionsContextMenuButton');
     },
     async clickManageIndexButton() {
-      await testSubjects.click('indexActionsContextMenuButton');
+      await pageObjects.appMenu.clickMenuItem('indexActionsContextMenuButton');
     },
     async expectManageIndexContextMenuIsShown() {
-      await testSubjects.existOrFail('indexContextMenu');
+      await testSubjects.existOrFail('deleteIndexMenuButton');
     },
     async expectDeleteIndexButtonExists() {
       await testSubjects.existOrFail('deleteIndexMenuButton');
@@ -155,39 +159,24 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     },
     async expectEditSettingsToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
-      const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
-        'indexDetailsSettingsEditModeSwitch'
-      );
-      expect(isEditSettingsButtonDisabled).to.be(true);
+      // The switch renders disabled until the index privileges request resolves.
+      await retry.waitFor('edit settings switch to be enabled', async () => {
+        return (await testSubjects.isEnabled('indexDetailsSettingsEditModeSwitch')) === true;
+      });
     },
 
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
-      await retry.waitFor('index details page title to show up', async () => {
-        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+      await retry.waitFor('index details page content to show up', async () => {
+        return (await testSubjects.isDisplayed('indexDetailsContent')) === true;
       });
     },
 
-    async expectBreadcrumbsToBeAvailable(breadcrumbsName: string) {
-      const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
-      let isBreadcrumbShown: boolean = false;
-      for (const breadcrumb of breadcrumbs) {
-        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
-          isBreadcrumbShown = true;
-        }
-      }
-      expect(isBreadcrumbShown).to.eql(true, `Breadcrumb ${breadcrumbsName} was not found`);
-    },
-
-    async clickOnBreadcrumb(breadcrumbsName: string) {
-      const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
-      for (const breadcrumb of breadcrumbs) {
-        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
-          await breadcrumb.click();
-          return;
-        }
-      }
+    async clickBackToIndicesList() {
+      // The index details page registers a single "Indices" back target on the shared
+      // AppHeader, which replaced header breadcrumbs in the solution navigation.
+      await testSubjects.click('appHeaderBack');
     },
 
     async expectAddFieldToBeDisabled() {
@@ -200,8 +189,10 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
 
     async expectAddFieldToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
-      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
-      expect(isMappingsFieldEnabled).to.be(true);
+      // The button renders disabled until the index privileges request resolves.
+      await retry.waitFor('mappings add field button to be enabled', async () => {
+        return (await testSubjects.isEnabled('indexDetailsMappingsAddField')) === true;
+      });
     },
 
     async expectDiscoverLinkExists() {

@@ -33,12 +33,14 @@ function createPlugin(
   {
     required = [],
     optional = [],
+    runtime = [],
     server = true,
     ui = true,
     type = PluginType.standard,
   }: {
     required?: string[];
     optional?: string[];
+    runtime?: string[];
     server?: boolean;
     ui?: boolean;
     type?: PluginType;
@@ -54,7 +56,7 @@ function createPlugin(
       type,
       requiredPlugins: required,
       optionalPlugins: optional,
-      runtimePluginDependencies: [],
+      runtimePluginDependencies: runtime,
       requiredBundles: [],
       server,
       ui,
@@ -553,6 +555,26 @@ test('`uiPlugins` returns only ui plugin dependencies', async () => {
   expect(plugin.optionalPlugins).toEqual(['opt-ui']);
 });
 
+test('`uiPlugins` filters out missing plugin dependencies', async () => {
+  const plugins = [
+    createPlugin('ui-plugin', {
+      optional: ['available', 'missing'],
+      runtime: ['available', 'missing'],
+      ui: true,
+      server: false,
+    }),
+    createPlugin('available', { ui: true, server: false }),
+  ];
+
+  plugins.forEach((plugin) => {
+    pluginsSystem.addPlugin(plugin);
+  });
+
+  const plugin = pluginsSystem.uiPlugins().get('ui-plugin')!;
+  expect(plugin.optionalPlugins).toEqual(['available']);
+  expect(plugin.runtimePluginDependencies).toEqual(['available', 'missing']);
+});
+
 test('can start without plugins', async () => {
   await pluginsSystem.setupPlugins(setupDeps);
   const pluginsStart = await pluginsSystem.startPlugins(startDeps);
@@ -863,7 +885,7 @@ describe('normalizeCycle', () => {
     [['c', 'a', 'b', 'c']],
     [['a', 'c', 'b', 'a']],
   ])("throws error for invalid cycle format '%s'", (plugins: PluginName[]) => {
-    expect(() => normalizeCycle(plugins)).toThrowError();
+    expect(() => normalizeCycle(plugins)).toThrow();
   });
 });
 

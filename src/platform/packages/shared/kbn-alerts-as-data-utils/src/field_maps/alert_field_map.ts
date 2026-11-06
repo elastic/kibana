@@ -48,6 +48,8 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   EVENT_ACTION,
@@ -60,6 +62,8 @@ import {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   ALERT_MUTED,
+  ALERT_SNOOZED,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
@@ -336,6 +340,16 @@ export const alertFieldMap = {
     array: true,
     required: true,
   },
+  [CPS_SCOPE_EXPRESSION]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [CPS_SCOPE_LINKED_PROJECTS]: {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
   // ignore_above: 1024 matches ECS definition to prevent composite mapping conflicts
   [TAGS]: {
     type: 'keyword',
@@ -359,6 +373,16 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_MUTED]: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  [ALERT_SNOOZED]: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  [ALERT_TRACKED]: {
     type: 'boolean',
     array: false,
     required: false,

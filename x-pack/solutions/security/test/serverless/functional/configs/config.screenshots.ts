@@ -19,4 +19,7 @@ export default createTestConfig({
   },
 
   esServerArgs: [],
+  // Pin the Cases templates flag ON so the case-settings docs screenshots capture
+  // the v2 templates / field-library pages regardless of the plugin default.
+  kbnServerArgs: [`--xpack.cases.templates.enabled=true`],
 });

@@ -12,6 +12,7 @@ import type { UnifiedHistogramFetch$Arguments } from '@kbn/unified-histogram/typ
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -21,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
+import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import {
   useCurrentTabAction,
   useInternalStateDispatch,
@@ -29,7 +30,7 @@ import {
 import { internalStateActions } from '../../../../../application/main/state_management/redux';
 
 interface ChartWithCustomButtonsProps extends ChartSectionProps {
-  actions: ChartSectionConfigurationExtensionParams['actions'];
+  actions: Pick<ContextAwarenessToolkitActions, 'openInNewTab' | 'updateESQLQuery'>;
 }
 
 export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomButtonsProps) => {
@@ -50,9 +51,10 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
   );
 
   const lensAttributes = useMemo(() => {
-    const { dataView, query, timeInterval } = fetchParams;
+    const { dataSource, query, timeInterval } = fetchParams;
+    const dataView = dataSource instanceof DataViewSource ? dataSource.getDataView() : undefined;
 
-    if (!dataView.isTimeBased() || !dataView.timeFieldName) return null;
+    if (!dataView?.isTimeBased() || !dataView.timeFieldName) return null;
 
     const LAYER_ID = 'exampleHistogramLayer';
     const columns = {
@@ -191,7 +193,7 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
             <EuiFlexItem grow={false}>
               <UnifiedBreakdownFieldSelector
                 breakdown={fetchParams.breakdown}
-                dataView={fetchParams.dataView}
+                dataSource={fetchParams.dataSource}
                 onBreakdownFieldChange={handleBreakdownFieldChange}
               />
             </EuiFlexItem>

@@ -9,7 +9,7 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RequestOptions } from '@kbn/workflows';
@@ -79,29 +79,20 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
 
       if (notifications) {
         notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.successTitle',
-            {
-              defaultMessage: 'Copied to clipboard',
-            }
-          ),
-          text: i18n.translate(
-            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.successText',
-            {
-              defaultMessage: 'Devtools command copied successfully',
-            }
-          ),
+          title: i18n.translate('workflows.copyDevToolsSnippetToClipboard.successTitle', {
+            defaultMessage: 'Copied to clipboard',
+          }),
+          text: i18n.translate('workflows.copyDevToolsSnippetToClipboard.successText', {
+            defaultMessage: 'Devtools command copied successfully',
+          }),
         });
       }
     } catch (error) {
       if (notifications) {
         notifications.toasts.addError(error as Error, {
-          title: i18n.translate(
-            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.errorTitle',
-            {
-              defaultMessage: 'Failed to copy',
-            }
-          ),
+          title: i18n.translate('workflows.copyDevToolsSnippetToClipboard.errorTitle', {
+            defaultMessage: 'Failed to copy',
+          }),
         });
       }
     }
@@ -116,7 +107,7 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
       icon="copy"
     >
       <FormattedMessage
-        id="plugins.workflowsManagement.copyDevToolsSnippetToClipboard.buttonLabel"
+        id="workflows.copyDevToolsSnippetToClipboard.buttonLabel"
         defaultMessage="Copy as devtools snippet"
       />
     </EuiContextMenuItem>

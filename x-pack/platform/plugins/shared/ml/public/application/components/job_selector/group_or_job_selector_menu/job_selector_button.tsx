@@ -18,6 +18,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES, type MlPages } from '@kbn/ml-common-types/locator_ml_pages';
 import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout';
@@ -118,6 +119,9 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.ml.jobSelectorButton.popoverAriaLabel', {
+        defaultMessage: 'Job selector',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

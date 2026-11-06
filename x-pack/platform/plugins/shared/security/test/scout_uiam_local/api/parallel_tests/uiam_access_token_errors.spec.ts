@@ -69,12 +69,19 @@ apiTest.describe('[NON-MKI] UIAM access token errors', { tag: tags.serverless.al
   apiTest('invalid token error should include appropriate `reason`', async ({ esClient }) => {
     const tokens = await sessionTokensFactory();
 
+    // Replace the first character of the token body with one that is not part of the base64
+    // alphabet, so that decoding the token always fails with `TOKEN_BASE64_DECODE` (0xD00DF3).
+    // Dropping the trailing character instead would not do that reliably: whenever the base64
+    // body ends with `=` padding, a truncated string still decodes to the very same bytes and
+    // the token remains valid.
+    const prefix = 'essu_dev_';
+    const invalidToken = `${prefix}!${tokens.accessToken.slice(prefix.length + 1)}`;
+
     let authenticationError: errors.ResponseError | undefined;
     try {
       await esClient.security.authenticate(undefined, {
         headers: {
-          // Let's remove the last character from the token to make it invalid.
-          authorization: `Bearer ${tokens.accessToken.slice(0, -1)}`,
+          authorization: `Bearer ${invalidToken}`,
           [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
         },
       });

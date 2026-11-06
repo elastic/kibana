@@ -46,6 +46,9 @@ components:
         entityCount:
           type: number
           description: Number of entities in the watchlist
+        hasManualEntities:
+          type: boolean
+          description: Indicates whether the watchlist contains manually assigned entities
         createdAt:
           type: string
           format: date-time

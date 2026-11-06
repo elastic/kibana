@@ -7,15 +7,14 @@
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClientOptions, ReqOptions } from '@kbn/kbn-client';
+import type { KbnClientOptions, KbnClientResponse, ReqOptions } from '@kbn/kbn-client';
 import { KbnClient } from '@kbn/kbn-client';
 import pRetry from 'p-retry';
-import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { omit } from 'lodash';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { enableFleetSpaceAwareness } from './fleet_services';
 import {
   fetchKibanaStatus,
@@ -92,7 +91,7 @@ class KbnClientExtended extends KbnClient {
     this.apiKey = apiKey;
   }
 
-  async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
+  async request<T>(options: ReqOptions): Promise<KbnClientResponse<T>> {
     const headers: ReqOptions['headers'] = {
       ...(options.headers ?? {}),
     };
@@ -334,15 +333,9 @@ export const createKbnClient = ({
  */
 export const buildUrlWithSpaceId = (url: string, spaceId: string): string => {
   const newUrl = new URL(url);
-  let requestPath = newUrl.pathname;
-  const currentUrlSpace = getSpaceIdFromPath(requestPath); // NOTE: we are not currently supporting a Kibana base path prefix
+  const { pathname } = getSpaceIdFromPath(newUrl.pathname);
 
-  if (currentUrlSpace.pathHasExplicitSpaceIdentifier) {
-    // Get the request path (if any) from the url
-    requestPath = requestPath.substring(`/s/${currentUrlSpace.spaceId}`.length) || '/';
-  }
-
-  newUrl.pathname = addSpaceIdToPath('/', spaceId, requestPath);
+  newUrl.pathname = addSpaceIdToPath('/', spaceId, pathname);
 
   return newUrl.href;
 };

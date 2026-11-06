@@ -74,7 +74,7 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
     const indexPattern = this.filterManager.getIndexPattern();
     const field = this.filterManager.getField();
     if (field && indexPattern) {
-      return indexPattern.getFormatterForField(field).convert(value);
+      return indexPattern.getFormatterForField(field).convertToText(value);
     }
 
     return value;

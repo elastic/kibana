@@ -7,25 +7,17 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { i18n } from '@kbn/i18n';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../../../../../../../common/components';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import * as i18nTranslations from './translations';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 import { MigrationSource } from '../../../../../../../common/types';
-import type { SentinelArmResource } from '../../../../../../../../../common/siem_migrations/model/vendor/rules/sentinel.gen';
-
-const SENTINEL_UPLOAD_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.sentinel.description',
-  {
-    defaultMessage:
-      'Upload the Microsoft Sentinel ARM template JSON export containing your Analytics Rules.',
-  }
-);
+import {
+  CreateSentinelRulesBody,
+  type SentinelArmResource,
+} from '../../../../../../../../../common/siem_migrations/model/vendor/rules/sentinel.gen';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface SentinelRulesJsonFileUploadProps {
   createMigration: CreateMigration;
@@ -54,15 +46,14 @@ const extractResources = (parsed: unknown): SentinelArmResource[] => {
   ) {
     return (parsed as { resources: SentinelArmResource[] }).resources;
   }
-  throw new Error(
-    'Unrecognized Sentinel export format. Expected an ARM template with a "resources" array or a direct array of rule objects.'
-  );
+  throw new Error(FILE_UPLOAD_ERROR.INVALID_SENTINEL_RESOURCES);
 };
 
 export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [resourcesToUpload, setResourcesToUpload] = useState<SentinelArmResource[]>();
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
+    const { rulesFileUpload } = useRuleMigrationVendorCopy(MigrationSource.SENTINEL);
 
     const createRules = useCallback(() => {
       if (migrationName && resourcesToUpload) {
@@ -76,8 +67,17 @@ export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploa
     }, [createMigration, migrationName, resourcesToUpload]);
 
     const onJsonFileParsed = useCallback((content: string) => {
-      const parsed = JSON.parse(content);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(content);
+      } catch {
+        throw new Error(FILE_UPLOAD_ERROR.INVALID_JSON);
+      }
       const resources = extractResources(parsed);
+      const result = CreateSentinelRulesBody.safeParse({ resources });
+      if (!result.success) {
+        throw new Error(FILE_UPLOAD_ERROR.INVALID_SENTINEL_RESOURCES);
+      }
       setResourcesToUpload(resources);
     }, []);
 
@@ -106,18 +106,18 @@ export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploa
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiText size="s">{SENTINEL_UPLOAD_DESCRIPTION}</EuiText>
+          <EuiText size="s">{rulesFileUpload.description}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow isInvalid={validationError != null} fullWidth error={validationError}>
             <EuiFilePicker
               isInvalid={validationError != null}
               id="rulesFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18nTranslations.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SENTINEL}
+                  {rulesFileUpload.prompt}
                 </EuiText>
               }
               accept={'.json'}

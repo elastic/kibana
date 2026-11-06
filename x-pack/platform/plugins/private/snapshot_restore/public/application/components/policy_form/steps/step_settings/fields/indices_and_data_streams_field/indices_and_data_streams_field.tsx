@@ -311,6 +311,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                   </EuiSelectable>
                 ) : (
                   <EuiComboBox
+                    data-test-subj="indexPatternsComboBox"
                     options={orderDataStreamsAndIndices({
                       indices: indices.map((index) => ({
                         label: index,

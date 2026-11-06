@@ -13,6 +13,7 @@
       "preference": "",
       "realtime": "__flag__",
       "routing": [],
+      "_slice": "",
       "term_statistics": "__flag__",
       "version": "",
       "version_type": [
@@ -20,6 +21,61 @@
         "external",
         "external_gte"
       ]
+    },
+    "data_autocomplete_rules": {
+      "doc": "",
+      "filter": {
+        "max_doc_freq": "",
+        "max_num_terms": "",
+        "max_term_freq": "",
+        "max_word_length": "",
+        "min_doc_freq": "",
+        "min_term_freq": "",
+        "min_word_length": ""
+      },
+      "per_field_analyzer": {
+        "*": ""
+      },
+      "fields": [],
+      "field_statistics": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "offsets": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "payloads": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "positions": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "term_statistics": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "routing": "",
+      "version": "",
+      "version_type": {
+        "__one_of": [
+          "internal",
+          "external",
+          "external_gte"
+        ]
+      }
     },
     "methods": [
       "GET",

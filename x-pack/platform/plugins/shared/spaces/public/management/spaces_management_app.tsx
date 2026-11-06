@@ -121,9 +121,13 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
+              http={http}
+              overlays={overlays}
+              navigateToUrl={application.navigateToUrl}
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
               eventTracker={eventTracker}
+              isCpsTierEligible={cps?.isTierEligible ?? false}
             />
           );
         };

@@ -17,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-execution-context-common",
     "@kbn/embeddable-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",

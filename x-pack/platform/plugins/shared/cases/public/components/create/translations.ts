@@ -35,7 +35,7 @@ export const ADDITIONAL_FIELDS = i18n.translate('xpack.cases.create.additionalFi
 });
 
 export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLabel', {
-  defaultMessage: 'Sync alert status with case status',
+  defaultMessage: 'Sync detection status with case status',
 });
 
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself', {
@@ -93,7 +93,3 @@ export const TEMPLATE_NOT_SELECTED_DESCRIPTION = i18n.translate(
     defaultMessage: 'Select a template in the first step above to edit extended fields.',
   }
 );
-
-export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.create.extendedFieldsTitle', {
-  defaultMessage: 'Extended fields',
-});

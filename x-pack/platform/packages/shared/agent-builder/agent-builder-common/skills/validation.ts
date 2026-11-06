@@ -83,7 +83,7 @@ const toolIdsSchema = z
   .array(z.string().min(1, 'Tool ID must be non-empty'))
   .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`);
 
-const skillCreateRequestObjectSchema = z.object({
+export const skillCreateRequestObjectSchema = z.object({
   id: z
     .string()
     .min(1, 'ID must be non-empty')

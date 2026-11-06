@@ -18,6 +18,8 @@ project:
   sourceRoot: src/platform/plugins/private/kibana_overview
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
+  - '@kbn/scout'
   - '@kbn/navigation-plugin'
   - '@kbn/home-plugin'
   - '@kbn/newsfeed-plugin'
@@ -44,11 +46,12 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
     - common/**/*
+    - test/scout/**/*
+    - test/scout_shared_ux_no_data/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

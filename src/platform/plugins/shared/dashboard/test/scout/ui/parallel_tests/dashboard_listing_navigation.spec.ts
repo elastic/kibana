@@ -12,6 +12,8 @@ import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const DASHBOARD_NAME = 'Navigation Test Dashboard';
+// booting the dashboards app is part of navigating to it, so allow Scout's navigation budget
+const APP_BOOT_TIMEOUT = 20_000;
 
 spaceTest.describe(
   'Dashboard listing navigation',
@@ -39,7 +41,10 @@ spaceTest.describe(
           'clicking create new dashboard button navigates to the editor',
           async () => {
             await pageObjects.dashboard.goto();
-            await page.testSubj.click('newItemButton');
+            await expect(page.testSubj.locator('dashboardListingCreateButton')).toBeVisible({
+              timeout: APP_BOOT_TIMEOUT,
+            });
+            await page.testSubj.click('dashboardListingCreateButton');
             await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
               timeout: 20_000,
             });
@@ -48,7 +53,7 @@ spaceTest.describe(
 
         await spaceTest.step('navigating back to listing page from a new dashboard', async () => {
           await page.goBack();
-          await expect(page.testSubj.locator('newItemButton')).toBeVisible();
+          await expect(page.testSubj.locator('dashboardListingCreateButton')).toBeVisible();
         });
       }
     );
@@ -57,7 +62,10 @@ spaceTest.describe(
       'saving a dashboard and returning to the listing page shows it',
       async ({ page, pageObjects }) => {
         await pageObjects.dashboard.goto();
-        await page.testSubj.click('newItemButton');
+        await expect(page.testSubj.locator('dashboardListingCreateButton')).toBeVisible({
+          timeout: APP_BOOT_TIMEOUT,
+        });
+        await page.testSubj.click('dashboardListingCreateButton');
         await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
           timeout: 20_000,
         });

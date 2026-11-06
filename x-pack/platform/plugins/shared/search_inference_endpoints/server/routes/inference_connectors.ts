@@ -7,22 +7,26 @@
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { APIRoutes } from '../../common/types';
 import { ROUTE_VERSIONS } from '../../common/constants';
 import type { ResolvedInferenceEndpoints } from '../types';
+import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { errorHandler } from '../utils/error_handler';
 import { resolveModelsForFeature } from '../lib/resolve_models_for_feature';
 
 export const defineInferenceConnectorsRoute = ({
   logger,
   router,
+  featureRegistry,
   getForFeature,
   getConnectorList,
   getConnectorById,
 }: {
   logger: Logger;
   router: IRouter;
+  featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
@@ -34,7 +38,8 @@ export const defineInferenceConnectorsRoute = ({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
+          reason:
+            'This route intentionally lists connectors for LLM features using the Kibana internal ES user',
         },
       },
     })
@@ -43,7 +48,8 @@ export const defineInferenceConnectorsRoute = ({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route delegates authorization to the scoped ES client',
+            reason:
+              'This route intentionally lists connectors for LLM features using the Kibana internal ES user',
           },
         },
         validate: {
@@ -58,6 +64,7 @@ export const defineInferenceConnectorsRoute = ({
       errorHandler(logger)(async (context, request, response) => {
         const { featureId } = request.query;
         const uiSettingsClient = (await context.core).uiSettings.client;
+        const feature = featureRegistry.get(featureId);
 
         const result = await resolveModelsForFeature({
           getForFeature: (fId) => getForFeature(fId, request),
@@ -65,12 +72,20 @@ export const defineInferenceConnectorsRoute = ({
           getConnectorById: (id) => getConnectorById(id, request),
           uiSettingsClient,
           featureId,
+          ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
           logger,
         });
 
+        // A template feature lists only template endpoints. Every other selector
+        // hides them, because a template-only endpoint fails a messages call.
+        const templateOnly = feature?.allowTemplateRequiredModels === true;
+        const connectors = result.connectors.filter(
+          (connector) => isTemplateRequiredConnector(connector) === templateOnly
+        );
+
         return response.ok({
           body: {
-            connectors: result.connectors,
+            connectors,
             soEntryFound: result.soEntryFound,
           },
         });

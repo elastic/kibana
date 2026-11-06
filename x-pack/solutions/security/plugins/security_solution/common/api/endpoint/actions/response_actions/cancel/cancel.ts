@@ -7,20 +7,37 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { validateNonEmptyString } from '../../../schema_utils';
 import { BaseActionRequestSchema } from '../../common/base';
+
+const IdParameterSchema = {
+  id: schema.string({
+    minLength: 1,
+    maxLength: 50,
+    validate: validateNonEmptyString,
+  }),
+};
+
+const MSDefenderEndpointCancelActionRequestParamsSchema = schema.object(IdParameterSchema);
+
+const EndpointCancelActionRequestParamsSchema = schema.object({
+  ...IdParameterSchema,
+  force: schema.maybe(schema.boolean()),
+});
 
 const CancelActionRequestBodySchema = schema.object({
   ...BaseActionRequestSchema,
-  parameters: schema.object({
-    id: schema.string({
-      minLength: 1,
-      validate: (value) => {
-        if (!value.trim().length) {
-          return 'id cannot be an empty string';
-        }
-      },
-    }),
-  }),
+  parameters: schema.conditional(
+    schema.siblingRef('agent_type'),
+    'microsoft_defender_endpoint',
+    MSDefenderEndpointCancelActionRequestParamsSchema,
+    schema.conditional(
+      schema.siblingRef('agent_type'),
+      'endpoint',
+      EndpointCancelActionRequestParamsSchema,
+      schema.never()
+    )
+  ),
 });
 
 export const CancelActionRequestSchema = {

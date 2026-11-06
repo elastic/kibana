@@ -12,8 +12,10 @@ import { ContainerModule } from 'inversify';
 import { Main } from './main';
 import { EchoService } from './service';
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(Main).toSelf().inRequestScope();
   bind(EchoService).toSelf().inSingletonScope();
   bind(Application).toConstantValue(Main);
 });
+
+export { pluginModule as module };

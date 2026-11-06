@@ -70,5 +70,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests (Security Basic)',
     },
+    security: {
+      cookieLogin: false, // these tests verify the login form itself
+    },
   };
 }

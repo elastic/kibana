@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { FollowerIndexWithPausedStatus } from '../../../../common/types';
 import { objectToArray } from '../../services/utils';
 import { API_STATUS } from '../../constants';

@@ -9,16 +9,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import {
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFocusTrap,
-  type UseEuiTheme,
+  EuiTitle,
+  EuiToolTip,
   euiBreakpoint,
+  type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -53,6 +54,7 @@ export function FlyoutContainer({
   customFooter,
   isInlineEditing,
   overrideContainerCss,
+  dataTestSubj,
 }: {
   isOpen: boolean;
   handleClose: () => void;
@@ -64,6 +66,7 @@ export function FlyoutContainer({
   customFooter?: React.ReactElement;
   isInlineEditing?: boolean;
   overrideContainerCss?: Interpolation<Theme>;
+  dataTestSubj?: string;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const euiThemeContext = useEuiTheme();
@@ -110,6 +113,7 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
+          data-test-subj={dataTestSubj}
           css={[
             css`
               box-shadow: ${hideShadow ? 'none !important' : 'inherit'};
@@ -130,16 +134,26 @@ export function FlyoutContainer({
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-dimensionContainerBack"
-                    className="lnsDimensionContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="sortLeft"
-                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
                       defaultMessage: 'Close configuration',
                     })}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      data-test-subj="lns-indexPattern-dimensionContainerBack"
+                      className="lnsDimensionContainer__backIcon"
+                      onClick={closeFlyout}
+                      iconType="sortLeft"
+                      aria-label={i18n.translate(
+                        'xpack.lens.dimensionContainer.closeConfiguration',
+                        {
+                          defaultMessage: 'Close configuration',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={true}>
@@ -150,16 +164,26 @@ export function FlyoutContainer({
 
               {!isInlineEditing && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-dimensionContainerBack"
-                    className="lnsDimensionContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="cross"
-                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
                       defaultMessage: 'Close configuration',
                     })}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      data-test-subj="lns-indexPattern-dimensionContainerBack"
+                      className="lnsDimensionContainer__backIcon"
+                      onClick={closeFlyout}
+                      iconType="cross"
+                      aria-label={i18n.translate(
+                        'xpack.lens.dimensionContainer.closeConfiguration',
+                        {
+                          defaultMessage: 'Close configuration',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

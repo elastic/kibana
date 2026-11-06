@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { buildPath } from '@kbn/core-http-browser';
 import type { InspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction } from '../../common/search_strategy';
@@ -18,6 +19,9 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
+  total: number;
+  // Scheduled route derives these from agent cardinality; the live route uses
+  // `doc_count`, correct only because live queries emit one doc per agent.
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -101,7 +105,10 @@ export const useActionResults = ({
     () => {
       if (isScheduled) {
         return http.get<ActionResultsResponse>(
-          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+          buildPath('/api/osquery/scheduled_results/{scheduleId}/{executionCount}', {
+            scheduleId,
+            executionCount,
+          }),
           {
             version: API_VERSIONS.public.v1,
             query: {
@@ -115,27 +122,31 @@ export const useActionResults = ({
         );
       }
 
-      return http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
-        version: API_VERSIONS.public.v1,
-        query: {
-          page: activePage,
-          pageSize: limit,
-          sort: sortField,
-          sortOrder: direction,
-          ...(kuery && { kuery }),
-          ...(startDate && { startDate }),
-          ...(currentPageAgentIds.length > 0 && {
-            agentIds: currentPageAgentIds.join(','),
-          }),
-          totalAgents: agentIds?.length ?? 0,
-        },
-      });
+      return http.get<ActionResultsResponse>(
+        buildPath('/api/osquery/action_results/{actionId}', { actionId }),
+        {
+          version: API_VERSIONS.public.v1,
+          query: {
+            page: activePage,
+            pageSize: limit,
+            sort: sortField,
+            sortOrder: direction,
+            ...(kuery && { kuery }),
+            ...(startDate && { startDate }),
+            ...(currentPageAgentIds.length > 0 && {
+              agentIds: currentPageAgentIds.join(','),
+            }),
+            totalAgents: agentIds?.length ?? 0,
+          },
+        }
+      );
     },
     {
       select: (response) => {
         if (isScheduled) {
           return {
             edges: response.edges as ResultEdges,
+            total: response.total ?? response.edges.length,
             aggregations: response.aggregations,
             inspect: response.inspect || { dsl: [], response: [] },
           };
@@ -160,13 +171,14 @@ export const useActionResults = ({
 
         return {
           edges: mergedEdges,
+          total: agentIds?.length ?? 0,
           aggregations: response.aggregations,
           inspect: response.inspect || { dsl: [], response: [] },
         };
       },
       initialData: {
         edges: [],
-        total: 0,
+        total: isScheduled ? 0 : agentIds?.length ?? 0,
         currentPage: 0,
         pageSize: limit,
         totalPages: 0,

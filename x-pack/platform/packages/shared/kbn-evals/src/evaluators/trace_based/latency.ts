@@ -22,6 +22,7 @@ export function createLatencyEvaluator({
     log,
     config: {
       name: 'Latency',
+      direction: 'minimize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
 | STATS total_duration_ns = MAX(duration)
@@ -34,23 +35,38 @@ export function createLatencyEvaluator({
   });
 }
 
+type SpanLatencyFilter =
+  | { spanName: string; spanNamePattern?: undefined; operationName?: undefined }
+  /** Matched with ES|QL `LIKE`, so wildcards are `*` and `?` rather than SQL's `%` and `_`. */
+  | { spanNamePattern: string; spanName?: undefined; operationName?: undefined }
+  | { operationName: string; spanName?: undefined; spanNamePattern?: undefined };
+
 export function createSpanLatencyEvaluator({
   traceEsClient,
   log,
   spanName,
+  spanNamePattern,
+  operationName,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
-  spanName: string;
-}): Evaluator {
+} & SpanLatencyFilter): Evaluator {
+  const spanFilter = spanName
+    ? `name == "${spanName}"`
+    : spanNamePattern
+    ? `name LIKE "${spanNamePattern}"`
+    : `attributes.gen_ai.operation.name == "${operationName}"`;
+
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Latency',
+      direction: 'minimize',
       buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND name == "${spanName}"
-| EVAL latency_seconds = TO_DOUBLE(duration) / 1000000000
+| WHERE trace.id == "${traceId}" AND ${spanFilter}
+| STATS total_duration_ns = SUM(duration)
+| EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {
         return response.values[0][0];

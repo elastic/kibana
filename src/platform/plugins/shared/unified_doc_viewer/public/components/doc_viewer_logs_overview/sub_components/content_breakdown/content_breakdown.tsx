@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 
 import {
-  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
@@ -33,13 +33,13 @@ export const ContentBreakdown = ({
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
-  renderCpsWarning,
+  cpsHasLinkedProjects,
 }: {
   dataView: DataView;
   formattedDoc: LogDocumentOverview;
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }) => {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
@@ -68,6 +68,26 @@ export const ContentBreakdown = ({
   );
   const hasMessageField = field && value;
 
+  const badges = (
+    <Badges
+      dataView={dataView}
+      hasMessageField={Boolean(hasMessageField)}
+      hit={hit}
+      formattedDoc={formattedDoc}
+      renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+      cpsHasLinkedProjects={cpsHasLinkedProjects}
+    />
+  );
+
+  if (!hasMessageField) {
+    return (
+      <>
+        {badges}
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
+
   return (
     <>
       <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
@@ -85,35 +105,24 @@ export const ContentBreakdown = ({
             <EuiText color="subdued" size="xs">
               {field}
             </EuiText>
-            <EuiFlexItem grow={false}>
-              <Badges
-                dataView={dataView}
-                hasMessageField={Boolean(hasMessageField)}
-                hit={hit}
-                formattedDoc={formattedDoc}
-                renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-                renderCpsWarning={renderCpsWarning}
-              />
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
           </EuiFlexGroup>
-          {hasMessageField && (
-            <HoverActionPopover
-              value={value}
-              formattedValue={formattedValue}
-              field={field}
-              rawFieldValue={rawFieldValue}
-              anchorPosition="downCenter"
-              display="block"
-            >
-              <EuiCodeBlock
-                overflowHeight={100}
-                paddingSize="s"
-                isCopyable
-                fontSize="s"
-                {...messageCodeBlockProps}
-              />
-            </HoverActionPopover>
-          )}
+          <HoverActionPopover
+            value={value}
+            formattedValue={formattedValue}
+            field={field}
+            rawFieldValue={rawFieldValue}
+            anchorPosition="downCenter"
+            display="block"
+          >
+            <EuiCodeBlock
+              overflowHeight={100}
+              paddingSize="s"
+              isCopyable
+              fontSize="s"
+              {...messageCodeBlockProps}
+            />
+          </HoverActionPopover>
         </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="s" />

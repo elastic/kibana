@@ -6,14 +6,18 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: jest.fn(),
   useDispatch: jest.fn(),
+}));
+
+jest.mock('../../../contexts', () => ({
+  useSyntheticsRefreshContext: jest.fn().mockReturnValue({ lastRefresh: 0 }),
 }));
 
 jest.mock('../../../state/monitor_management/api', () => ({
@@ -21,7 +25,16 @@ jest.mock('../../../state/monitor_management/api', () => ({
   resetMonitorBulkAPI: jest.fn(),
 }));
 
+jest.mock('../../../state/private_locations/api', () => ({
+  resetSyntheticsPrivateLocation: jest.fn(),
+}));
+
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
+import { resetSyntheticsPrivateLocation } from '../../../state/private_locations/api';
+
+const mockedResetPrivateLocation = resetSyntheticsPrivateLocation as jest.MockedFunction<
+  typeof resetSyntheticsPrivateLocation
+>;
 
 const mockedResetMonitorAPI = resetMonitorAPI as jest.MockedFunction<typeof resetMonitorAPI>;
 const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as jest.MockedFunction<
@@ -89,6 +102,23 @@ describe('useMonitorIntegrationHealth', () => {
     jest.clearAllMocks();
     dispatchSpy = jest.fn();
     (reactRedux.useDispatch as jest.Mock).mockReturnValue(dispatchSpy);
+  });
+
+  it('does not re-fetch health when configIds is a new array reference with the same ids', () => {
+    setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+
+    const { rerender } = renderHook(
+      ({ configIds }: { configIds: string[] }) => useMonitorIntegrationHealth({ configIds }),
+      { initialProps: { configIds: ['mon-2'] } }
+    );
+
+    rerender({ configIds: ['mon-2'] });
+    rerender({ configIds: ['mon-2'] });
+
+    const healthDispatches = dispatchSpy.mock.calls.filter(
+      ([action]: [{ type: string }]) => action.type === '[MONITOR HEALTH] GET'
+    );
+    expect(healthDispatches).toHaveLength(1);
   });
 
   describe('status helpers', () => {
@@ -230,6 +260,62 @@ describe('useMonitorIntegrationHealth', () => {
       expect(resetResult).toEqual({});
       expect(mockedResetMonitorBulkAPI).toHaveBeenCalledWith({ ids: ['mon-2'] });
       expect(result.current.isResetting).toBe(false);
+    });
+  });
+
+  describe('resetPrivateLocation', () => {
+    it('resets the location and re-fetches health', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetPrivateLocation.mockResolvedValue({ created: 1, failed: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ locationIds: ['loc-1'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetPrivateLocation('loc-1');
+      });
+
+      expect(resetResult).toEqual({});
+      expect(mockedResetPrivateLocation).toHaveBeenCalledWith('loc-1');
+      const healthDispatches = dispatchSpy.mock.calls.filter(
+        ([action]: any) => action.type === '[MONITOR HEALTH] GET'
+      );
+      expect(healthDispatches).toHaveLength(2);
+    });
+
+    it('returns an error when some package policies fail to be created', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetPrivateLocation.mockResolvedValue({
+        created: 0,
+        failed: [{ id: 'mon-2-loc-1', error: 'conflict' }],
+      });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ locationIds: ['loc-1'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetPrivateLocation('loc-1');
+      });
+
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(result.current.isResetting).toBe(false);
+    });
+  });
+
+  describe('locationIds', () => {
+    it('fetches health by location without loading the monitor list', () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+
+      const { result } = renderHook(() =>
+        useMonitorIntegrationHealth({ locationIds: ['loc-1', 'loc-2'] })
+      );
+
+      const actionTypes = dispatchSpy.mock.calls.map(([action]: any) => action.type);
+      expect(actionTypes).toEqual(['[MONITOR HEALTH] GET']);
+      expect(dispatchSpy.mock.calls[0][0].payload).toEqual({ locationIds: ['loc-1', 'loc-2'] });
+      expect(result.current.getUnhealthyMonitorsForLocation('loc-1')).toEqual([
+        { configId: 'mon-2', name: 'Monitor 2' },
+      ]);
     });
   });
 });

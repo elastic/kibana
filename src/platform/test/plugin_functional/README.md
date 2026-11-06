@@ -28,13 +28,13 @@ In case you want to start Kibana with one of the test plugins (e.g. for developi
 test plugin), you can just run:
 
 ```
-yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
+pnpm start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
 ```
 
 If you wish to start Kibana with multiple test plugins, you can run:
 
 ```
-yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder1> --plugin-path=test/plugin_functional/plugins/<plugin_folder2> ...
+pnpm start --plugin-path=test/plugin_functional/plugins/<plugin_folder1> --plugin-path=test/plugin_functional/plugins/<plugin_folder2> ...
 ```
 
 If you wish to load up specific es archived data for your test, you can do so via the `es_archiver` script detailed in the [Scripts README.md](../../../../scripts/README.md#es-archiver)

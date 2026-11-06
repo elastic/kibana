@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useChildWorkflowExecutions } from './use_child_workflow_executions';
+import { CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: jest.fn(),
 }));
 const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+const mockIsExecuteSyncStepType = isExecuteSyncStepType as jest.MockedFunction<
+  typeof isExecuteSyncStepType
+>;
 
 jest.mock('@kbn/workflows', () => ({
   ...jest.requireActual('@kbn/workflows'),
@@ -55,6 +59,9 @@ describe('useChildWorkflowExecutions', () => {
   let mockGetChildrenExecutions: jest.Mock;
   let queryClient: QueryClient;
 
+  const executeStep = (id: string, status: ExecutionStatus) =>
+    ({ id, stepType: 'workflow.execute', status } as never);
+
   const childExecutionResponse = [
     {
       parentStepExecutionId: 'step-exec-1',
@@ -71,6 +78,7 @@ describe('useChildWorkflowExecutions', () => {
     mockUseWorkflowsApi.mockReturnValue({
       getChildrenExecutions: mockGetChildrenExecutions,
     } as any);
+    mockIsExecuteSyncStepType.mockReturnValue(false);
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -167,5 +175,169 @@ describe('useChildWorkflowExecutions', () => {
 
     expect(result.current.childExecutions.has('step-a')).toBe(true);
     expect(result.current.childExecutions.has('step-b')).toBe(true);
+  });
+
+  it('keeps resolved children while a child step status changes the query key', async () => {
+    mockIsExecuteSyncStepType.mockReturnValue(true);
+    const { result, rerender } = renderHook(
+      ({ execution }: { execution: WorkflowExecutionDto }) => useChildWorkflowExecutions(execution),
+      {
+        initialProps: {
+          execution: createMockExecution({
+            status: ExecutionStatus.RUNNING,
+            stepExecutions: [executeStep('step-exec-1', ExecutionStatus.COMPLETED)],
+          }),
+        },
+        wrapper: createWrapper(queryClient),
+      }
+    );
+
+    await waitFor(() => expect(result.current.childExecutions.size).toBe(1));
+
+    let resolveSecondFetch: (items: unknown[]) => void = () => {};
+    mockGetChildrenExecutions.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSecondFetch = resolve;
+      })
+    );
+
+    rerender({
+      execution: createMockExecution({
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: [
+          executeStep('step-exec-1', ExecutionStatus.COMPLETED),
+          executeStep('step-exec-2', ExecutionStatus.COMPLETED),
+        ],
+      }),
+    });
+
+    expect(result.current.childExecutions.get('step-exec-1')).toBeDefined();
+
+    await act(async () => {
+      resolveSecondFetch(childExecutionResponse);
+    });
+
+    expect(result.current.childExecutions.size).toBe(1);
+  });
+
+  it('refetches as soon as a workflow.execute step starts, before it is terminal', async () => {
+    mockIsExecuteSyncStepType.mockReturnValue(true);
+    const { rerender } = renderHook(
+      ({ execution }: { execution: WorkflowExecutionDto }) => useChildWorkflowExecutions(execution),
+      {
+        initialProps: {
+          execution: createMockExecution({ status: ExecutionStatus.RUNNING, stepExecutions: [] }),
+        },
+        wrapper: createWrapper(queryClient),
+      }
+    );
+
+    await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+    rerender({
+      execution: createMockExecution({
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: [executeStep('step-exec-1', ExecutionStatus.WAITING_FOR_CHILD)],
+      }),
+    });
+
+    await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(2));
+  });
+
+  describe('serial polling', () => {
+    const runningParent = () =>
+      createMockExecution({
+        status: ExecutionStatus.RUNNING,
+        finishedAt: undefined,
+      });
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
+    it('refetches on interval while parent execution is non-terminal', async () => {
+      const execution = runningParent();
+
+      renderHook(() => useChildWorkflowExecutions(execution), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS);
+        await Promise.resolve();
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+      expect(mockGetChildrenExecutions).toHaveBeenCalledWith('exec-1');
+    });
+
+    it('does not schedule serial refetches when parent is already terminal', async () => {
+      const execution = createMockExecution();
+
+      renderHook(() => useChildWorkflowExecutions(execution), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS * 3);
+        await Promise.resolve();
+      });
+
+      expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
+    });
+
+    it('stops serial polling when parent execution becomes terminal', async () => {
+      const { rerender } = renderHook(
+        ({ execution }: { execution: WorkflowExecutionDto }) =>
+          useChildWorkflowExecutions(execution),
+        {
+          initialProps: { execution: runningParent() },
+          wrapper: createWrapper(queryClient),
+        }
+      );
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      rerender({ execution: createMockExecution() });
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS * 3);
+        await Promise.resolve();
+      });
+
+      expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
+    });
+
+    it('clears pending poll timer on unmount', async () => {
+      const execution = runningParent();
+
+      const { unmount } = renderHook(() => useChildWorkflowExecutions(execution), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      unmount();
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS * 3);
+        await Promise.resolve();
+      });
+
+      expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
+    });
   });
 });

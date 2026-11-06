@@ -6,19 +6,6 @@ Array [
     "actions": Object {
       "additional": Array [
         Object {
-          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
-          "iconProps": Object {
-            "size": "m",
-          },
-          "iconType": "copy",
-          "label": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Copy name"
-            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-          />,
-          "onClick": [Function],
-          "size": "xs",
-        },
-        Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
@@ -29,7 +16,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -40,8 +26,10 @@ Array [
       "showMoveLeft": true,
       "showMoveRight": true,
     },
-    "cellActions": Array [],
-    "display": <Memo(UnifiedDataTableSummaryColumnHeader)
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(UnifiedDataTableSourceColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
     />,
@@ -50,6 +38,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "_source",
+    "isResizable": true,
     "isSortable": false,
     "schema": "kibana-json",
     "visibleCellActions": undefined,
@@ -73,7 +62,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -86,7 +74,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -110,6 +97,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -128,7 +116,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -141,7 +128,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -160,15 +146,28 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
-      columnsMeta={
+      dataSource={
         Object {
-          "extension": Object {
-            "type": "string",
-          },
-          "message": Object {
-            "esType": "keyword",
-            "type": "string",
-          },
+          "datasetId": "esql-mock-",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "toFilterableSource": [Function],
+          "withColumns": [Function],
         }
       }
       dataView={
@@ -313,6 +312,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -336,7 +336,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -349,7 +348,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -524,6 +522,7 @@ Array [
     },
     "id": "timestamp",
     "initialWidth": 212,
+    "isResizable": true,
     "isSortable": true,
     "schema": "datetime",
     "visibleCellActions": undefined,
@@ -542,7 +541,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -555,7 +553,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -717,6 +714,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -735,7 +733,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -748,7 +745,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -908,6 +904,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": false,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -931,7 +928,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -944,7 +940,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -963,15 +958,28 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
-      columnsMeta={
+      dataSource={
         Object {
-          "extension": Object {
-            "type": "string",
-          },
-          "message": Object {
-            "esType": "keyword",
-            "type": "string",
-          },
+          "datasetId": "esql-mock-",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "toFilterableSource": [Function],
+          "withColumns": [Function],
         }
       }
       dataView={
@@ -1117,6 +1125,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1135,7 +1144,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1148,7 +1156,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -1167,15 +1174,28 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
-      columnsMeta={
+      dataSource={
         Object {
-          "extension": Object {
-            "type": "string",
-          },
-          "message": Object {
-            "esType": "keyword",
-            "type": "string",
-          },
+          "datasetId": "esql-mock-",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "toFilterableSource": [Function],
+          "withColumns": [Function],
         }
       }
       dataView={
@@ -1321,7 +1341,8 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
-    "isSortable": false,
+    "isResizable": true,
+    "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
   },
@@ -1344,7 +1365,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1357,7 +1377,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1514,6 +1533,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1532,7 +1552,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1545,7 +1564,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1700,6 +1718,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": false,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1723,7 +1742,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1736,7 +1754,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1911,6 +1928,7 @@ Array [
     },
     "id": "timestamp",
     "initialWidth": 212,
+    "isResizable": true,
     "isSortable": true,
     "schema": "datetime",
     "visibleCellActions": undefined,
@@ -1929,7 +1947,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1942,7 +1959,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2103,6 +2119,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -2121,7 +2138,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2134,7 +2150,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2293,6 +2308,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": false,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -2316,7 +2332,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2329,7 +2344,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -2506,6 +2520,7 @@ Array [
     },
     "id": "timestamp",
     "initialWidth": 212,
+    "isResizable": true,
     "isSortable": true,
     "schema": "datetime",
     "visibleCellActions": undefined,
@@ -2524,7 +2539,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2537,7 +2551,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2556,19 +2569,28 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
-      columnsMeta={
+      dataSource={
         Object {
-          "extension": Object {
-            "type": "string",
-          },
-          "message": Object {
-            "esType": "keyword",
-            "type": "string",
-          },
-          "timestamp": Object {
-            "esType": "dateTime",
-            "type": "date",
-          },
+          "datasetId": "esql-mock-",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "toFilterableSource": [Function],
+          "withColumns": [Function],
         }
       }
       dataView={
@@ -2713,6 +2735,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -2731,7 +2754,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2744,7 +2766,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2763,19 +2784,28 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
-      columnsMeta={
+      dataSource={
         Object {
-          "extension": Object {
-            "type": "string",
-          },
-          "message": Object {
-            "esType": "keyword",
-            "type": "string",
-          },
-          "timestamp": Object {
-            "esType": "dateTime",
-            "type": "date",
-          },
+          "datasetId": "esql-mock-",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "toFilterableSource": [Function],
+          "withColumns": [Function],
         }
       }
       dataView={
@@ -2920,6 +2950,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,

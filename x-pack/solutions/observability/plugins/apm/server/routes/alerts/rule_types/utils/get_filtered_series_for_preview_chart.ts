@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Coordinate } from '../../../../../typings/timeseries';
+import type { Coordinate } from '@kbn/apm-types';
 
 export type BarSeriesDataMap = Record<string, Coordinate[]>;
 type BarSeriesData = Array<{ name: string; data: Coordinate[] }>;

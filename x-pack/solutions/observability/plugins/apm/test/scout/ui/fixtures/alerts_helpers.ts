@@ -26,6 +26,8 @@ interface ApmAlertDocumentParams {
   environment: string;
   processorEvent: string;
   transactionType?: string;
+  alertSeverity?: string;
+  anomalyDetectorType?: string;
 }
 
 export interface AlertTestConfig {
@@ -38,6 +40,8 @@ export interface AlertTestConfig {
   evaluationValue: number;
   primaryChartTitle: string;
   secondaryChartTitles: [string, string];
+  alertSeverity?: string;
+  anomalyDetectorType?: string;
 }
 
 export const LATENCY_THRESHOLD_CONFIG: AlertTestConfig = {
@@ -79,6 +83,28 @@ export const FAILED_TRANSACTION_RATE_CONFIG: AlertTestConfig = {
   secondaryChartTitles: ['Throughput', 'Latency'],
 };
 
+export const ANOMALY_LATENCY_CONFIG: AlertTestConfig = {
+  ruleTypeId: 'apm.anomaly',
+  ruleNamePrefix: 'APM Anomaly',
+  ruleParams: {
+    serviceName: SERVICE_NAME,
+    transactionType: TRANSACTION_TYPE,
+    environment: ENVIRONMENT,
+    anomalySeverityType: 'critical',
+    windowSize: 30,
+    windowUnit: 'm',
+    anomalyDetectorTypes: ['txLatency'],
+  },
+  ruleCategory: 'APM Anomaly',
+  reason: `critical latency anomaly with a score of 82, was detected in the last 30 minutes for ${SERVICE_NAME}.`,
+  evaluationThreshold: 75,
+  evaluationValue: 82,
+  primaryChartTitle: 'Latency',
+  secondaryChartTitles: ['Throughput', 'Failed transaction rate'],
+  alertSeverity: 'critical',
+  anomalyDetectorType: 'txLatency',
+};
+
 export function createApmAlertDocument({
   alertUuid,
   ruleId,
@@ -92,6 +118,8 @@ export function createApmAlertDocument({
   environment,
   processorEvent,
   transactionType,
+  alertSeverity,
+  anomalyDetectorType,
 }: ApmAlertDocumentParams) {
   const now = new Date().toISOString();
 
@@ -109,6 +137,8 @@ export function createApmAlertDocument({
     'kibana.alert.reason': reason,
     'kibana.alert.evaluation.threshold': evaluationThreshold,
     'kibana.alert.evaluation.value': evaluationValue,
+    ...(alertSeverity && { 'kibana.alert.severity': alertSeverity }),
+    ...(anomalyDetectorType && { 'anomaly.detector_type': anomalyDetectorType }),
     'kibana.alert.duration.us': 0,
     'kibana.alert.time_range': { gte: now },
     'kibana.alert.instance.id': '*',
@@ -196,6 +226,8 @@ export async function setupAlertForTest({
       environment: ENVIRONMENT,
       processorEvent: 'transaction',
       transactionType: TRANSACTION_TYPE,
+      alertSeverity: config.alertSeverity,
+      anomalyDetectorType: config.anomalyDetectorType,
     }),
   });
 

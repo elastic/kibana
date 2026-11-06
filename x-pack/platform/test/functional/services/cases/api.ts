@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import type { Case, Configuration } from '@kbn/cases-plugin/common/types/domain';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
@@ -33,6 +34,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const retry = getService('retry');
 
   const getSuperTest = (hasAuth: boolean) => (hasAuth ? supertestWithoutAuth : kbnSupertest);
 
@@ -64,8 +66,24 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    /**
+     * `deleteAllCaseItems` deletes by query and only reports success: it deletes what its own
+     * search matched and skips (`conflicts: 'proceed'`).
+     */
     async deleteAllCases() {
-      await deleteAllCaseItems(es);
+      await retry.try(async () => {
+        await deleteAllCaseItems(es);
+
+        const { count } = await es.count({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: 'type:cases',
+          ignore_unavailable: true,
+        });
+
+        if (count > 0) {
+          throw new Error(`Expected all cases to be deleted but ${count} are still present`);
+        }
+      });
     },
 
     createAttachment: createApiFunction(createComment),

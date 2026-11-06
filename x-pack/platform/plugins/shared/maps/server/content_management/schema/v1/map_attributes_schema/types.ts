@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   adhocDataViewSchema,
   mapAttributesSchema,
@@ -13,11 +13,11 @@ import type {
 } from './map_attributes_schema';
 import type { customIconSchema, settingsSchema } from './settings_schema';
 
-export type AdhocDataView = TypeOf<typeof adhocDataViewSchema>;
-export type CustomIcon = TypeOf<typeof customIconSchema>;
+export type AdhocDataView = z.output<typeof adhocDataViewSchema>;
+export type CustomIcon = z.output<typeof customIconSchema>;
 /**
  * Shape of map attributes in REST APIs
  */
-export type MapAttributes = TypeOf<typeof mapAttributesSchema>;
-export type MapCenter = TypeOf<typeof mapCenterSchema>;
-export type MapSettings = Required<TypeOf<typeof settingsSchema>>;
+export type MapAttributes = z.output<typeof mapAttributesSchema>;
+export type MapCenter = z.output<typeof mapCenterSchema>;
+export type MapSettings = Required<z.output<typeof settingsSchema>>;

@@ -10,10 +10,9 @@ import { noop } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 
+import type { HostEntity, ListEntitiesResponse } from '@kbn/entity-store/common';
 import type { InspectResponse } from '../../../../types';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
-import type { HostEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import type { ListEntitiesResponse } from '../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts/common';
 import type { HostsEdges } from '../../../../../common/search_strategy/security_solution/hosts/all';
 import type { RiskSeverity } from '../../../../../common/search_strategy/security_solution/risk_score/all';
@@ -23,6 +22,10 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { inputsModel, State } from '../../../../common/store';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';
@@ -31,6 +34,11 @@ import { HOSTS_ALL_TABLE_QUERY_ID } from './hosts_table_query_types';
 import * as i18n from './translations';
 
 const ENTITY_STORE_HOSTS_LIST_QUERY_KEY = 'ENTITY_STORE_HOSTS_LIST';
+
+const HOSTS_ENTITY_STORE_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'hosts_entity_store_list'
+);
 
 const isHostEntityRecord = (
   record: ListEntitiesResponse['records'][number]
@@ -49,8 +57,8 @@ const mapHostEntityRecordToHostsEdge = (record: HostEntity): HostsEdges | null =
     return null;
   }
 
-  const lastSeenIso = record.entity.lifecycle?.last_seen;
-  const riskLevel = record.host?.risk?.calculated_level as RiskSeverity | undefined;
+  const lastSeenIso = record.entity?.lifecycle?.last_seen;
+  const riskLevel = record.entity?.risk?.calculated_level as RiskSeverity | undefined;
 
   const node: HostItem = {
     host: {
@@ -63,12 +71,12 @@ const mapHostEntityRecordToHostsEdge = (record: HostEntity): HostsEdges | null =
     lastSeen: lastSeenIso != null ? [lastSeenIso] : undefined,
     risk: riskLevel,
     criticality: record.asset?.criticality,
-    entityId: record.entity.id,
+    entityId: record.entity?.id,
   };
 
   return {
     node,
-    cursor: { value: record.entity.id ?? hostName, tiebreaker: null },
+    cursor: { value: record.entity?.id ?? hostName, tiebreaker: null },
   };
 };
 
@@ -172,6 +180,7 @@ export const useAllEntityStoreHosts = (
           sortField: sortFieldForApi,
           sortOrder: direction,
         },
+        context: HOSTS_ENTITY_STORE_LIST_CONTEXT,
       }),
     enabled: !skip,
     cacheTime: 0,

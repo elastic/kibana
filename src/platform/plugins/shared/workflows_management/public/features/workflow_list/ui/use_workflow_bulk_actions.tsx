@@ -19,6 +19,8 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import { ExportReferencesModal } from './export_references_modal';
 import { useExportWithReferences } from './use_export_with_references';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
+import { useDisableWorkflowsConfirmation } from '../../linked_rules/model/use_disable_workflows_confirmation';
+import { LinkedRulesWarning } from '../../linked_rules/ui/linked_rules_warning';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
@@ -44,6 +46,7 @@ export const useWorkflowBulkActions = ({
 }: UseWorkflowBulkActionsProps): UseWorkflowBulkActionsReturn => {
   const { application, notifications } = useKibana().services;
   const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -69,15 +72,30 @@ export const useWorkflowBulkActions = ({
   const canReadWorkflow = application?.capabilities.workflowsManagement.readWorkflow;
 
   const isDisabled = selectedWorkflows.length === 0;
+  const hasManagedWorkflows = selectedWorkflows.some((workflow) => workflow.managed === true);
+  const canEditSelection = selectedWorkflows.every(
+    (workflow) => workflow.permissions?.edit !== false
+  );
+  const canDeleteSelectedWorkflows = canDeleteWorkflow && !hasManagedWorkflows && canEditSelection;
 
   const handleDeleteWorkflows = useCallback(() => {
+    if (!canDeleteSelectedWorkflows) {
+      return;
+    }
     onAction();
     setShowDeleteModal(true);
-  }, [onAction]);
+  }, [canDeleteSelectedWorkflows, onAction]);
 
   const confirmDelete = useCallback(() => {
-    const ids = selectedWorkflows.map((workflow) => workflow.id);
+    const ids = selectedWorkflows
+      .filter((workflow) => workflow.managed !== true)
+      .map((workflow) => workflow.id);
     const count = ids.length;
+    if (count === 0) {
+      setShowDeleteModal(false);
+      deselectWorkflows();
+      return;
+    }
 
     setShowDeleteModal(false);
     deselectWorkflows();
@@ -124,6 +142,7 @@ export const useWorkflowBulkActions = ({
           {
             id: workflow.id,
             workflow: updateData,
+            workflowDefinition: workflow.definition ?? undefined,
             isBulkAction: true,
             bulkActionCount: totalCount,
             skipRefetch: true,
@@ -175,10 +194,14 @@ export const useWorkflowBulkActions = ({
     bulkUpdateWorkflows(disabledWorkflows, { enabled: true });
   }, [selectedWorkflows, bulkUpdateWorkflows]);
 
-  const handleDisableWorkflows = useCallback(() => {
+  const handleDisableWorkflows = useCallback(async () => {
     const enabledWorkflows = selectedWorkflows.filter((workflow) => workflow.enabled);
+    onAction();
+    if (!(await confirmDisable(enabledWorkflows.map(({ id }) => id)))) {
+      return;
+    }
     bulkUpdateWorkflows(enabledWorkflows, { enabled: false });
-  }, [selectedWorkflows, bulkUpdateWorkflows]);
+  }, [selectedWorkflows, onAction, confirmDisable, bulkUpdateWorkflows]);
 
   const handleExportWorkflows = useCallback(() => {
     onAction();
@@ -191,7 +214,7 @@ export const useWorkflowBulkActions = ({
     const hasDisabledWorkflows = selectedWorkflows.some((workflow) => !workflow.enabled);
     const hasEnabledWorkflows = selectedWorkflows.some((workflow) => workflow.enabled);
 
-    if (canUpdateWorkflow && hasDisabledWorkflows) {
+    if (canUpdateWorkflow && canEditSelection && hasDisabledWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.enable', {
           defaultMessage: 'Enable',
@@ -204,7 +227,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canUpdateWorkflow && hasEnabledWorkflows) {
+    if (canUpdateWorkflow && canEditSelection && hasEnabledWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.disable', {
           defaultMessage: 'Disable',
@@ -223,7 +246,7 @@ export const useWorkflowBulkActions = ({
         name: i18n.translate('workflows.bulkActions.export', {
           defaultMessage: 'Export',
         }),
-        icon: 'exportAction',
+        icon: 'upload',
         disabled: isDisabled,
         onClick: handleExportWorkflows,
         'data-test-subj': 'workflows-bulk-action-export',
@@ -231,7 +254,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (mainPanelItems.length > 0 && canDeleteWorkflow) {
+    if (mainPanelItems.length > 0 && canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         isSeparator: true as const,
         key: 'bulk-actions-separator',
@@ -239,7 +262,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canDeleteWorkflow) {
+    if (canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         name: (
           <EuiTextColor color="danger">
@@ -268,7 +291,8 @@ export const useWorkflowBulkActions = ({
   }, [
     selectedWorkflows,
     canUpdateWorkflow,
-    canDeleteWorkflow,
+    canEditSelection,
+    canDeleteSelectedWorkflows,
     canReadWorkflow,
     isDisabled,
     handleEnableWorkflows,
@@ -307,8 +331,10 @@ export const useWorkflowBulkActions = ({
                 values: { count: selectedWorkflows.length },
               })}
             </p>
+            <LinkedRulesWarning workflowIds={selectedWorkflows.map(({ id }) => id)} />
           </EuiConfirmModal>
         )}
+        {disableConfirmModal}
         {exportModalState && (
           <ExportReferencesModal
             missingWorkflows={exportModalState.missingWorkflows}
@@ -322,7 +348,8 @@ export const useWorkflowBulkActions = ({
     );
   }, [
     showDeleteModal,
-    selectedWorkflows.length,
+    selectedWorkflows,
+    disableConfirmModal,
     cancelDelete,
     confirmDelete,
     modalTitleId,

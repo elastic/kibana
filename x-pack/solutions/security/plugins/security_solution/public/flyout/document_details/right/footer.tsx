@@ -13,7 +13,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useDocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
-import { FooterAiActions } from '../../../flyout_v2/document/components/footer_ai_actions';
+import { FooterAiActions } from '../../../flyout_v2/document/main/components/footer_ai_actions';
 
 interface PanelFooterProps {
   /**

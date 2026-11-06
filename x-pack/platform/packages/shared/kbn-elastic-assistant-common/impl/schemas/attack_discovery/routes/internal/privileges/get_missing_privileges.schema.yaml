@@ -25,10 +25,22 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                description: The missing index privileges required for Attack discovery
-                items:
-                  $ref: '#/components/schemas/AttackDiscoveryMissingPrivileges'
+                type: object
+                description: The missing privileges required for Attack discovery
+                required:
+                  - index_privileges
+                  - feature_privileges
+                properties:
+                  index_privileges:
+                    type: array
+                    description: The missing index privileges required for Attack discovery
+                    items:
+                      $ref: '#/components/schemas/AttackDiscoveryMissingPrivileges'
+                  feature_privileges:
+                    type: array
+                    description: The missing Kibana feature privileges required for Attack discovery
+                    items:
+                      $ref: '#/components/schemas/AttackDiscoveryMissingFeaturePrivileges'
         400:
           description: Bad Request response.
           content:
@@ -59,3 +71,17 @@ components:
           items:
             type: string
           description: The index privileges level missing
+    AttackDiscoveryMissingFeaturePrivileges:
+      type: object
+      required:
+        - feature_id
+        - privileges
+      properties:
+        feature_id:
+          type: string
+          description: The Kibana feature id of the missing privileges
+        privileges:
+          type: array
+          items:
+            type: string
+          description: The Kibana feature privileges that are missing

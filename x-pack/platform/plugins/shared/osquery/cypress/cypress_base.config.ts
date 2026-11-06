@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import path from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 import { readFileSync } from 'fs';
 import { samlAuthentication } from '@kbn/cypress-test-helper/src/auth/saml_auth';
 import type { YamlRoleDefinitions } from './lib';
@@ -32,7 +32,6 @@ export const getCypressBaseConfig = (
 
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
-      pageLoadTimeout: 12000,
       // Limit per-test DOM snapshots retained in memory. The long response-actions
       // workflow spec accumulates enough state to crash the browser at the Cypress
       // default of 50. Combined with `experimentalMemoryManagement` below, this

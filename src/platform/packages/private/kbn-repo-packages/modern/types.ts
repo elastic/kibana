@@ -47,6 +47,7 @@ export interface ParsedPackageJson {
 export type KibanaPackageType =
   | 'core'
   | 'plugin'
+  | 'tooling'
   | 'shared-browser'
   | 'shared-server'
   | 'shared-common'
@@ -145,7 +146,7 @@ export interface SharedBrowserPackageManifest extends PackageManifestBaseFields 
 }
 
 export interface BasePackageManifest extends PackageManifestBaseFields {
-  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core';
+  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core' | 'tooling';
 }
 
 export type KibanaPackageManifest =
@@ -171,11 +172,17 @@ export interface PluginSelector {
    */
   testPlugins?: boolean;
   /**
-   * Absolute paths to specific plugin package which will always be included, regardless of the other settings
+   * Set to `true` to include `devOnly` plugins
+   */
+  devOnly?: boolean;
+  /**
+   * Absolute paths to specific plugin packages which will be included even when
+   * `examples` / `testPlugins` are off. `devOnly` plugins still require `devOnly: true`.
    */
   paths?: readonly string[];
   /**
-   * Absolute paths to parent directories of plugin packages which will always be included, regardless of the other settings
+   * Absolute paths to parent directories of plugin packages which will be included
+   * even when `examples` / `testPlugins` are off. `devOnly` plugins still require `devOnly: true`.
    */
   parentDirs?: readonly string[];
   /**

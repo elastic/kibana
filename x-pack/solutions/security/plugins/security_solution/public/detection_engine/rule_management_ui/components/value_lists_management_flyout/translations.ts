@@ -179,6 +179,13 @@ export const REFERENCE_MODAL_CONFIRM_BUTTON = i18n.translate(
   }
 );
 
+export const VALUE_LISTS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.lists.valueListsTableCaption',
+  {
+    defaultMessage: 'Value lists',
+  }
+);
+
 export const referenceErrorMessage = (referenceCount: number) =>
   i18n.translate('xpack.securitySolution.lists.referenceModalDescription', {
     defaultMessage:

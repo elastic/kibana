@@ -81,15 +81,17 @@ const getTestRule = (overrides?: { consumer?: string }) => {
       status: attributes.executionStatus.status,
     },
     id: ruleSo.id,
+    isSnoozedUntil: null,
     notifyWhen: attributes.notifyWhen,
     params: {
       ...attributes.params,
       parameterThatIsSavedObjectId: '9',
     },
     schedule: attributes.schedule,
+    snoozeSchedule: [],
     systemActions: [],
     updatedAt: new Date(attributes.updatedAt),
-    consumer: ruleSo.attributes.consumer,
+    ...(overrides?.consumer !== undefined ? { consumer: overrides.consumer } : {}),
   };
 
   return {
@@ -101,8 +103,6 @@ const getTestRule = (overrides?: { consumer?: string }) => {
 let rulesClientContext: RulesClientContext;
 let expectedSanitizedRule: ReturnType<typeof getTestRule>['sanitized'];
 let result: Awaited<ReturnType<typeof transformRuleSoToSanitizedRule>>;
-
-const options = { includeLegacyId: true, includeSnoozeData: true, excludeFromPublicApi: true };
 
 describe('transformRuleSoToSanitizedRule', () => {
   beforeEach(async () => {
@@ -141,7 +141,7 @@ describe('transformRuleSoToSanitizedRule', () => {
     const { so, sanitized } = getTestRule();
     expectedSanitizedRule = sanitized;
 
-    result = await transformRuleSoToSanitizedRule(rulesClientContext, so, options);
+    result = await transformRuleSoToSanitizedRule(rulesClientContext, so);
   });
 
   it('should transform the rule saved object to a SanitizedRule', () => {
@@ -165,7 +165,7 @@ describe('transformRuleSoToSanitizedRule', () => {
       sanitizedRule = sanitized;
       expectedSanitizedRule = {} as typeof expectedSanitizedRule;
       formatLegacyActionsMock.mockResolvedValueOnce([expectedSanitizedRule]);
-      result = await transformRuleSoToSanitizedRule(rulesClientContext, so, options);
+      result = await transformRuleSoToSanitizedRule(rulesClientContext, so);
     });
     it('should attempt to format legacy actions', () => {
       expect(formatLegacyActionsMock).toHaveBeenCalledTimes(1);

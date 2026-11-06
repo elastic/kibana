@@ -12,10 +12,10 @@ import {
   EuiSuperSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiHealth,
   EuiFormPrepend,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -160,17 +160,21 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
       {error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            {error?.message ?? (
-              <FormattedMessage
-                id="xpack.fleet.debug.healthCheckPanel.fetchError"
-                defaultMessage="Message: {errorMessage}"
-                values={{
-                  errorMessage: error?.message,
-                }}
-              />
-            )}
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            title="Error"
+            text={
+              error?.message ?? (
+                <FormattedMessage
+                  id="xpack.fleet.debug.healthCheckPanel.fetchError"
+                  defaultMessage="Message: {errorMessage}"
+                  values={{
+                    errorMessage: error?.message,
+                  }}
+                />
+              )
+            }
+          />
         </>
       )}
     </>

@@ -13,6 +13,10 @@ import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
 export const DASHBOARD_API_PATH = '/api/dashboards';
 export const DASHBOARD_API_VERSION = '2023-10-31';
 
+/** Change history actions the UI treats specially. */
+export const DASHBOARD_UNSAVED_CHANGES_ACTION = 'dashboard_unsaved_changes';
+export const DASHBOARD_DELETE_ACTION = 'dashboard_delete';
+
 /** The base API path for internal dashboard endpoints. */
 export const DASHBOARD_INTERNAL_API_PATH = '/internal/dashboards';
 export const DASHBOARD_APP_API_PATH = `${DASHBOARD_INTERNAL_API_PATH}/app`;
@@ -24,15 +28,13 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 
 export const DEFAULT_DASHBOARD_OPTIONS = {
-  hide_panel_titles: false,
-  hide_panel_borders: false,
-  use_margins: true,
   auto_apply_filters: true,
+  hide_panel_borders: false,
+  hide_panel_titles: false,
   sync_colors: false,
   sync_cursor: true,
   sync_tooltips: false,
+  use_margins: true,
 } as const;
 
-export const UI_SETTINGS = {
-  ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
-};
+export const DASHBOARD_CHANGE_HISTORY_API_PATH = '/internal/dashboard/change_history' as const;

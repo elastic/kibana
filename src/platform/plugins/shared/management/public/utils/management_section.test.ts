@@ -43,4 +43,27 @@ describe('ManagementSection', () => {
 
     expect(section.getAppsEnabled().length).toEqual(0);
   });
+
+  test('registerApp stores mainPaddingSize on ManagementApp', () => {
+    const section = createSection();
+    const app = section.registerApp({
+      id: 'no-padding-app',
+      title: 'No Padding',
+      mount: () => () => {},
+      mainPaddingSize: 'none',
+    });
+
+    expect(app.mainPaddingSize).toBe('none');
+  });
+
+  test('registerApp leaves mainPaddingSize undefined by default', () => {
+    const section = createSection();
+    const app = section.registerApp({
+      id: 'default-padding-app',
+      title: 'Default Padding',
+      mount: () => () => {},
+    });
+
+    expect(app.mainPaddingSize).toBeUndefined();
+  });
 });

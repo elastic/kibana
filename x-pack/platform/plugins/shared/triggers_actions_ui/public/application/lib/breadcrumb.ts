@@ -6,28 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeStart } from '@kbn/core/public';
 import {
   routeToHome,
   routeToConnectors,
   routeToRules,
   routeToLogs,
+  routeToSettings,
   legacyRouteToAlerts,
 } from '../constants';
-
-/**
- * Wraps chrome.setBreadcrumbs so that project-style (solution nav) breadcrumbs
- * are set alongside classic breadcrumbs. Without this, apps that are not part of
- * a solution's navigation tree only show the root deployment crumb.
- */
-export const createSetBreadcrumbs =
-  (setBreadcrumbs: ChromeStart['setBreadcrumbs']): ChromeStart['setBreadcrumbs'] =>
-  (breadcrumbs, params) => {
-    setBreadcrumbs(breadcrumbs, {
-      ...params,
-      project: params?.project ?? { value: breadcrumbs, absolute: true },
-    });
-  };
 
 export const getAlertingSectionBreadcrumb = (
   type: string,
@@ -43,6 +29,17 @@ export const getAlertingSectionBreadcrumb = (
         ...(returnHref
           ? {
               href: `${routeToLogs}`,
+            }
+          : {}),
+      };
+    case 'settings':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.rulesSettings.breadcrumbTitle', {
+          defaultMessage: 'Settings',
+        }),
+        ...(returnHref
+          ? {
+              href: `${routeToSettings}`,
             }
           : {}),
       };
@@ -105,17 +102,8 @@ export const getAlertingSectionBreadcrumb = (
   }
 };
 
-/**
- * Get the rules breadcrumb with the appropriate href based on feature flag
- */
-export const getRulesBreadcrumbWithHref = (
-  getUrlForApp: (appId: string, options?: { path?: string }) => string
-) => {
-  const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-  const breadcrumbHref = getUrlForApp('rules', { path: '/' });
-
-  return {
-    ...rulesBreadcrumb,
-    href: breadcrumbHref,
-  };
-};
+export const getRulesBreadcrumbWithHref = () => ({
+  ...getAlertingSectionBreadcrumb('rules'),
+  // Management scopes breadcrumb hrefs to the mounted app.
+  href: routeToHome,
+});

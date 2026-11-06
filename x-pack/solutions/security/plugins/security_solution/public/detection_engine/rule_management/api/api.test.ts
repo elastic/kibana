@@ -530,7 +530,7 @@ describe('Detections Rules API', () => {
 
     test('sends structured filter, legacy search, and sort_field / sort_order', async () => {
       await fetchSearchRules({
-        filter: 'alert.attributes.params.immutable: false',
+        filter: { term: 'alert.attributes.params.immutable: false', mode: 'KQL' },
         search: { term: 'hello', mode: 'legacy' },
         sort_field: 'name',
         sort_order: 'asc',
@@ -545,7 +545,7 @@ describe('Detections Rules API', () => {
             per_page: 20,
             sort_field: 'name',
             sort_order: 'asc',
-            filter: 'alert.attributes.params.immutable: false',
+            filter: { term: 'alert.attributes.params.immutable: false', mode: 'KQL' },
             search: { term: 'hello', mode: 'legacy' },
           }),
         })
@@ -572,8 +572,8 @@ describe('Detections Rules API', () => {
       );
     });
 
-    test('omits filter from the JSON body when the filter is empty or whitespace', async () => {
-      await fetchSearchRules({ filter: '   ' });
+    test('omits filter from the JSON body when the filter term is empty or whitespace', async () => {
+      await fetchSearchRules({ filter: { term: '   ', mode: 'KQL' } });
       const [, options] = fetchMock.mock.calls[0];
       expect(JSON.parse(options.body as string)).not.toHaveProperty('filter');
     });

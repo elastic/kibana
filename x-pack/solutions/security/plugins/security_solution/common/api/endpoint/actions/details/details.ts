@@ -9,6 +9,6 @@ import { schema } from '@kbn/config-schema';
 
 export const ActionDetailsRequestSchema = {
   params: schema.object({
-    action_id: schema.string(),
+    action_id: schema.string({ minLength: 1, maxLength: 256 }),
   }),
 };

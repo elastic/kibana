@@ -150,7 +150,7 @@ export function TipsAndResources() {
                 })}
               </h3>
             </EuiTitle>
-            <EuiListGroup listItems={resourcesListItems} color="primary" size="s" />
+            <EuiListGroup listItems={resourcesListItems} color="primary" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>

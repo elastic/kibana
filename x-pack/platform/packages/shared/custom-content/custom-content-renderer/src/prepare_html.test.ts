@@ -1,0 +1,300 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import DOMPurify from 'dompurify';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
+import * as internalLink from './internal_link';
+
+describe('injectStyleTag', () => {
+  it('injects a <style> tag after <head>', () => {
+    const result = injectStyleTag('<html><head></head><body></body></html>', ':root{--x:red}');
+    expect(result).toContain('<head><style>:root{--x:red}</style>');
+  });
+
+  it('prepends when there is no <head>', () => {
+    const result = injectStyleTag('<p>hello</p>', ':root{--x:red}');
+    expect(result.startsWith('<style>:root{--x:red}</style>')).toBe(true);
+  });
+});
+
+describe('injectCsp', () => {
+  it('injects CSP and color-scheme meta into an existing <head>', () => {
+    const result = injectCsp('<html><head></head><body></body></html>', 'DARK');
+    expect(result).toContain('<head><meta http-equiv="Content-Security-Policy"');
+    expect(result).toContain('color-scheme" content="dark"');
+  });
+
+  it('uses light color-scheme by default', () => {
+    const result = injectCsp('<p>hello</p>');
+    expect(result).toContain('color-scheme" content="light"');
+  });
+
+  it('prepends CSP when there is no <head>', () => {
+    const result = injectCsp('<p>hello</p>', 'LIGHT');
+    expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
+  });
+
+  it('is idempotent — does not double-inject', () => {
+    const once = injectCsp('<p>hello</p>');
+    const twice = injectCsp(once);
+    expect(twice.split('Content-Security-Policy').length).toBe(2);
+  });
+
+  it('forbids form submissions to any destination', () => {
+    expect(injectCsp('<p>hello</p>')).toContain("form-action 'none'");
+  });
+});
+
+describe('applyHtmlTheme', () => {
+  const euiTheme = {
+    colors: {
+      textParagraph: '#111',
+      emptyShade: '#fff',
+      lightestShade: '#eee',
+      primary: '#06c',
+      accentSecondary: '#0a8',
+      accent: '#e6a',
+      warning: '#fc0',
+      danger: '#b00',
+      borderBasePlain: '#ccc',
+    },
+    size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
+    border: { radius: { medium: '6px', small: '4px' } },
+    font: {
+      family: 'Inter, sans-serif',
+    },
+    animation: {
+      fast: '150ms',
+      normal: '250ms',
+      slow: '350ms',
+      resistance: 'cubic-bezier(.32,.72,0,1)',
+    },
+  } as unknown as EuiThemeComputed;
+
+  // A meta CSP only governs resources fetched after it is parsed, so it must precede the
+  // theme <style> tag — otherwise CSS injected ahead of it would be ungoverned.
+  // Without this a bare-markup template renders with browser defaults and reads as pasted in from
+  // another product — the reason the feature was hidden.
+  it('gives markup-only templates a themed baseline', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('font-family:var(--cc-font-family)');
+    expect(result).toContain('padding:var(--cc-space-l)');
+    expect(result).toContain('color:var(--cc-color-text)');
+  });
+
+  it('emits the baseline before the template so author CSS still wins', () => {
+    const authored = '<html><head><style>body{padding:0}</style></head><body></body></html>';
+
+    const result = applyHtmlTheme(authored, 'LIGHT', euiTheme);
+
+    expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
+  });
+
+  // Everything else in the baseline is a floor the template can override. These two are not, so
+  // the count is pinned: a third `!important` should be a deliberate decision, not a drive-by.
+  it('locks the body background and the reduced-motion guard, and nothing else', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('body{background:var(--cc-color-background)!important}');
+    expect(result).toContain(
+      '@media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}'
+    );
+    expect(result.match(/!important/g)).toHaveLength(3);
+  });
+
+  it('exposes the motion tokens', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('--cc-motion-fast:150ms');
+    expect(result).toContain('--cc-ease:cubic-bezier(.32,.72,0,1)');
+  });
+
+  it('places the CSP meta before the injected theme style tag', () => {
+    const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
+    expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
+  });
+
+  it('places the CSP meta first when there is no <head>', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+    expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
+    expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
+  });
+
+  it('still injects the theme CSS custom properties', () => {
+    const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
+    expect(result).toContain('--cc-color-text:#111');
+    expect(result).toContain('--cc-color-border:#ccc');
+  });
+
+  // Pins the light/dark branch in `buildThemeCss`. Inverting it would paint a dark background in
+  // light mode, and no other test would catch it — every other case here runs in LIGHT.
+  it('resolves the background variable per theme', () => {
+    const markup = '<html><head></head><body></body></html>';
+
+    expect(applyHtmlTheme(markup, 'LIGHT', euiTheme)).toContain(
+      '--cc-color-background:transparent'
+    );
+
+    const dark = applyHtmlTheme(markup, 'DARK', euiTheme);
+    expect(dark).toContain('--cc-color-background:#fff');
+    expect(dark).not.toContain('--cc-color-background:transparent');
+  });
+
+  it('sets the color-scheme meta per theme', () => {
+    expect(applyHtmlTheme('<p>hi</p>', 'DARK', euiTheme)).toContain('content="dark"');
+    expect(applyHtmlTheme('<p>hi</p>', 'LIGHT', euiTheme)).toContain('content="light"');
+  });
+});
+
+describe('sanitizeHtml', () => {
+  it('strips inline event handlers', () => {
+    const result = sanitizeHtml('<img src="x" onerror="alert(1)">');
+    expect(result).not.toContain('onerror');
+  });
+
+  describe('links', () => {
+    const anchorOf = (html: string, basePath = { requestBasePath: '', serverBasePath: '' }) => {
+      const doc = new DOMParser().parseFromString(sanitizeHtml(html, basePath), 'text/html');
+      return doc.querySelector('a');
+    };
+
+    it('keeps an internal app link, forcing top-window navigation', () => {
+      const a = anchorOf('<a href="/app/dashboards#/view/abc">go</a>');
+      expect(a?.getAttribute('href')).toBe('/app/dashboards#/view/abc');
+      expect(a?.getAttribute('target')).toBe('_top');
+      expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of every link when Kibana is framed by another page', () => {
+      const framed = jest.spyOn(internalLink, 'isKibanaFramed').mockReturnValue(true);
+      const a = anchorOf('<a href="/app/dashboards" target="_top">go</a>');
+      framed.mockRestore();
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of every link in a non-interactive view', () => {
+      const html = sanitizeHtml(
+        '<a href="/app/dashboards" target="_top">go</a>',
+        { requestBasePath: '', serverBasePath: '' },
+        false
+      );
+      const a = new DOMParser().parseFromString(html, 'text/html').querySelector('a');
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of a link to an app that is not allowed', () => {
+      expect(anchorOf('<a href="/app/dev_tools">go</a>')?.hasAttribute('href')).toBe(false);
+    });
+
+    it('prepends the base path', () => {
+      expect(
+        anchorOf('<a href="/app/discover">go</a>', {
+          requestBasePath: '/kbn',
+          serverBasePath: '/kbn',
+        })?.getAttribute('href')
+      ).toBe('/kbn/app/discover');
+    });
+
+    it('overrides an author-supplied target and rel', () => {
+      const a = anchorOf('<a href="/app/dashboards" target="_blank" rel="opener">go</a>');
+      expect(a?.getAttribute('target')).toBe('_top');
+      expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+    });
+
+    it.each([
+      'https://example.com',
+      `${['java', 'script'].join('')}:alert(1)`,
+      '//example.com/app/x',
+      '/api/status',
+      '/logout',
+      '/app/%2e%2e/api/status',
+    ])('drops the href of a link to %s', (href) => {
+      const a = anchorOf(`<a href="${href}" target="_blank">go</a>`);
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('strips attributes that can trigger requests or downloads', () => {
+      const a = anchorOf(
+        '<a href="/app/dashboards" ping="https://example.com/p" download="x" referrerpolicy="unsafe-url" hreflang="en">go</a>'
+      );
+      expect(a?.getAttributeNames().sort()).toEqual(['href', 'rel', 'target']);
+    });
+
+    it('strips the href from SVG links, including xlink:href', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="https://example.com"><text>x</text></a><a xlink:href="https://example.com"><text>y</text></a></svg>'
+      );
+      expect(html).not.toContain('example.com');
+    });
+
+    it('keeps same-document references on SVG elements', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="arc" d="M0 0"/><linearGradient id="base"/><linearGradient id="derived" href="#base"/></defs><text><textPath href="#arc">x</textPath></text><rect fill="url(#derived)" xlink:href="#base"/></svg>'
+      );
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      expect(doc.querySelector('textPath')?.getAttribute('href')).toBe('#arc');
+      expect(doc.querySelector('#derived')?.getAttribute('href')).toBe('#base');
+      expect(html).toContain('#base');
+    });
+
+    it('strips even a same-document href from an SVG link, since a click navigates', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="#x"><text>x</text></a><a xlink:href="#y"><text>y</text></a></svg>'
+      );
+      expect(html).not.toContain('#x');
+      expect(html).not.toContain('#y');
+    });
+
+    it('strips an external reference from an SVG element that also has fragment references', () => {
+      const html = sanitizeHtml(
+        '<svg><linearGradient id="g" href="https://example.com/x.svg#base"/><text><textPath href="/app/dashboards#a">x</textPath></text></svg>'
+      );
+      expect(html).not.toContain('example.com');
+      expect(html).not.toContain('/app/dashboards');
+    });
+
+    it('strips href and xlink:href from every element that is not an HTML link', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><use href="/app/dashboards"/><image xlink:href="/app/dashboards"/></svg><div href="/app/dashboards">x</div>'
+      );
+      expect(html).not.toContain('href');
+    });
+
+    it('validates hrefs filled in from data after templating', () => {
+      expect(sanitizeHtml('<a href="//example.com/app/x">go</a>')).not.toContain('example.com');
+    });
+
+    it('does not leave its hook behind for other DOMPurify callers', () => {
+      sanitizeHtml('<a href="/app/x">go</a>');
+      const foreign = DOMPurify.sanitize('<a href="https://example.com">x</a>');
+      expect(foreign).toContain('https://example.com');
+    });
+  });
+
+  it('removes image-map links, which would otherwise bypass the <a> ban', () => {
+    const result = sanitizeHtml(
+      '<img usemap="#m" src="x"><map name="m"><area shape="rect" coords="0,0,9,9" href="https://example.com"></map>'
+    );
+    expect(result).not.toContain('<area');
+    expect(result).not.toContain('<map');
+    expect(result).not.toContain('example.com');
+  });
+
+  it('leaves safe HTML unchanged', () => {
+    const safe = '<div class="card"><p>hello</p></div>';
+    expect(sanitizeHtml(safe)).toContain('hello');
+  });
+});

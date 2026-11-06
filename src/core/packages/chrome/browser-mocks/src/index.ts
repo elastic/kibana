@@ -8,3 +8,4 @@
  */
 
 export { chromeServiceMock } from './chrome_service.mock';
+export { createChromeStorybookStart } from './chrome_service.storybook_mock';

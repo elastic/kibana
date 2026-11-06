@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { deflate } from 'zlib';
+import type { SourceMap } from '@kbn/apm-api-shared';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 import { promisify } from 'util';
-import type { SourceMap } from './route';
+import { deflate } from 'zlib';
 
 const deflateAsync = promisify(deflate);
 

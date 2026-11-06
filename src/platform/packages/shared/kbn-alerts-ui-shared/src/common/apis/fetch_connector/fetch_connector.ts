@@ -33,6 +33,8 @@ export const transformConnectorResponse = (
     is_missing_secrets: isMissingSecrets,
     is_system_action: isSystemAction,
     is_connector_type_deprecated: isConnectorTypeDeprecated,
+    auth_mode: authMode,
+    is_inbound_events_enabled: isInboundEventsEnabled,
     ...res
   } = result;
   return {
@@ -43,6 +45,8 @@ export const transformConnectorResponse = (
     isMissingSecrets,
     isSystemAction,
     isConnectorTypeDeprecated,
+    ...(authMode !== undefined ? { authMode } : {}),
+    ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
     ...res,
   };
 };

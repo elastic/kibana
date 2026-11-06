@@ -7,10 +7,16 @@
 
 import { createTestConfig } from '../common/config';
 
+// Note: the attachments-framework API tests run under their own flag-pinned
+// configs (`config_trial_attachments.ts` =true, `config_trial_attachments_legacy.ts`
+// =false), not this config. The rest of the common suite runs under `config_trial_common.ts`.
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
   testFiles: [require.resolve('./tests/trial')],
   publicBaseUrl: true,
-  kbnServerArgs: ['--xpack.cases.templates.enabled=true'],
+  kbnServerArgs: [
+    '--xpack.cases.templates.enabled=true',
+    '--xpack.cases.runWorkflows.enabled=true',
+  ],
 });

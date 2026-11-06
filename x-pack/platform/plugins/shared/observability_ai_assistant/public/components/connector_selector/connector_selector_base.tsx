@@ -50,7 +50,7 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
     return (
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" className={wrapperClassName}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" size="s" />
+          <EuiIcon type="warning" color="danger" size="s" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="danger">

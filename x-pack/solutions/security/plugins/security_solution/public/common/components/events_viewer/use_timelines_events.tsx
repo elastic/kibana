@@ -8,7 +8,7 @@ import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -16,22 +16,21 @@ import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
-  TimelineEdges,
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
   TimelineEventsAllStrategyResponse,
-  TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import type { TimelineEdges, TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   EntityType,
+  RunTimeMappings,
   TimelineFactoryQueryTypes,
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction } from '@kbn/securitysolution-data-table';
 import { DETECTIONS_TABLE_IDS } from '../../../detections/constants';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';

@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
 import type { Logger as ILogger, LoggerFactory as ILoggerFactory } from '@kbn/logging';
+import { createToken } from '../token';
 
 /**
  * Plugin's default logger instance.
  * @public
  */
-export const Logger = Symbol.for('Logger') as ServiceIdentifier<ILogger>;
+export const Logger = createToken<ILogger>('Logger');
 
 /**
  * Plugin's logger factory.
  * @public
  */
-export const LoggerFactory = Symbol.for('LoggerFactory') as ServiceIdentifier<ILoggerFactory>;
+export const LoggerFactory = createToken<ILoggerFactory>('LoggerFactory');

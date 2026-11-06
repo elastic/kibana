@@ -15,10 +15,13 @@ import type {
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
+  AlertingServerStart,
 } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
+import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
 import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
@@ -53,6 +56,12 @@ export interface WorkflowsServerPluginSetupDeps {
   spaces: SpacesPluginSetup;
   serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /**
+   * Optional Inbox plugin. When present, Workflows registers itself as the
+   * `workflows` source so paused `waitForInput` steps surface in the
+   * cross-cutting Inbox UI / MCP / API.
+   */
+  inbox?: InboxPluginSetup;
 }
 
 export interface WorkflowsServerPluginStartDeps {
@@ -63,13 +72,18 @@ export interface WorkflowsServerPluginStartDeps {
   spaces: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
+  dataViews: DataViewsServerPluginStart;
+  alerting?: AlertingServerStart;
 }
+
+export type WorkflowsManagementRequestHandlerContext = Promise<void>;
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
   workflows: WorkflowsApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
+  workflowsManagement: WorkflowsManagementRequestHandlerContext;
 }>;
 
 export type WorkflowsRouter = IRouter<WorkflowsRequestHandlerContext>;

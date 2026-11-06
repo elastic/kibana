@@ -10,7 +10,15 @@ components:
       type: string
       format: nonempty
       minLength: 1
+      maxLength: 100000
       description: A string that does not contain only whitespace characters
+
+    NonEmptyIngestPipeline:
+      type: string
+      format: nonempty
+      minLength: 1
+      maxLength: 10485760
+      description: A JSON string that contains a valid ingest pipeline up to 10MiB
 
     SafeIdentifier:
       type: string
@@ -29,4 +37,5 @@ components:
     UUID:
       type: string
       format: uuid
+      maxLength: 36
       description: A universally unique identifier

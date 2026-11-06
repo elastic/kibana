@@ -24,6 +24,10 @@ import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/se
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 
+import {
+  attackDiscoveryAlertFieldMap,
+  ATTACK_DISCOVERY_ALERTS_CONTEXT,
+} from '@kbn/attack-discovery-schedules-common';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   securityParentInferenceFeature,
@@ -31,6 +35,7 @@ import {
 } from './inference_feature';
 import type {
   AssistantTool,
+  AttackDiscoveryWorkflowExecutorFactory,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -49,8 +54,6 @@ import { appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 import type { ConfigSchema } from './config_schema';
-import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
-import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
 
 interface FeatureFlagDefinition {
@@ -79,6 +82,8 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
   private readonly isDev: boolean;
+  private inferencePlugin?: ElasticAssistantPluginStartDependencies['inference'];
+  private workflowExecutorFactory?: AttackDiscoveryWorkflowExecutorFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -102,6 +107,11 @@ export class ElasticAssistantPlugin
     registerEventLogProvider(plugins.eventLog);
     const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
 
+    const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
+      core,
+      plugins,
+    });
+
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
       ml: plugins.ml,
@@ -118,11 +128,7 @@ export class ElasticAssistantPlugin
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
       pluginStop$: this.pluginStop$,
-    });
-
-    const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
-      core,
-      plugins,
+      adhocAttackDiscoveryDataClient,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -190,6 +196,11 @@ export class ElasticAssistantPlugin
       getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
+      registerAttackDiscoveryWorkflowExecutor: (
+        factory: AttackDiscoveryWorkflowExecutorFactory
+      ) => {
+        this.workflowExecutorFactory = factory;
+      },
     };
   }
 
@@ -199,6 +210,7 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+    this.inferencePlugin = plugins.inference;
 
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
@@ -276,7 +288,8 @@ export class ElasticAssistantPlugin
     // Register the Attack Discovery Schedule type
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
-        core,
+        getInference: () => this.inferencePlugin,
+        getWorkflowExecutorFactory: () => this.workflowExecutorFactory,
         logger: this.logger,
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         telemetry: core.analytics,

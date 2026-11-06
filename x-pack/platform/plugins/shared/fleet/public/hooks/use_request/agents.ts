@@ -30,6 +30,9 @@ import type {
   PostAgentRollbackResponse,
   PostBulkAgentRollbackRequest,
   PostBulkAgentRollbackResponse,
+  PostAgentRestartResponse,
+  PostBulkAgentRestartRequest,
+  PostBulkAgentRestartResponse,
   PostGenerateAgentsReportRequest,
   PostGenerateAgentsReportResponse,
 } from '../../../common/types';
@@ -44,6 +47,9 @@ import type {
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
   PostAgentUnenrollResponse,
+  PostBulkRemoveCollectorsRequest,
+  PostBulkRemoveCollectorsResponse,
+  PostRemoveCollectorResponse,
   PostAgentReassignRequest,
   PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
@@ -96,10 +102,17 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
 }
 export function useGetAgentsQuery(
   query: GetAgentsRequest['query'],
-  options: Partial<{ enabled: boolean }> = {}
+  options: Partial<{
+    enabled: boolean;
+    refetchInterval: number | false;
+    keepPreviousData: boolean;
+  }> = {}
 ) {
   return useQuery(['agents', query], () => sendGetAgents(query), {
     enabled: options.enabled,
+    refetchInterval: options.refetchInterval,
+    refetchIntervalInBackground: false,
+    keepPreviousData: options.keepPreviousData,
   });
 }
 
@@ -144,6 +157,25 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     ...options,
   });
 }
+
+export function useGetAgentStatusQuery(
+  query: GetAgentStatusRequest['query'],
+  options: { enabled?: boolean; refetchInterval?: number | false } = {}
+) {
+  const { enabled, refetchInterval } = options;
+  return useQuery(
+    ['agent-status', query],
+    () =>
+      sendRequestForRq<GetAgentStatusResponse>({
+        method: 'get',
+        path: agentRouteService.getStatusPath(),
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    { enabled, refetchInterval, refetchIntervalInBackground: false }
+  );
+}
+
 export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
   return sendRequest<GetAgentIncomingDataResponse>({
     method: 'get',
@@ -227,6 +259,23 @@ export function sendPostBulkAgentUnenroll(
     body,
     version: API_VERSIONS.public.v1,
     ...options,
+  });
+}
+
+export function sendPostRemoveCollector(agentId: string) {
+  return sendRequestForRq<PostRemoveCollectorResponse>({
+    path: agentRouteService.getRemoveCollectorPath(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkRemoveCollectors(body: PostBulkRemoveCollectorsRequest['body']) {
+  return sendRequestForRq<PostBulkRemoveCollectorsResponse>({
+    path: agentRouteService.getBulkRemoveCollectorsPath(),
+    method: 'post',
+    body,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -470,6 +519,23 @@ export function sendPostAgentRollback(agentId: string) {
 export function sendPostBulkAgentRollback(body: PostBulkAgentRollbackRequest['body']) {
   return sendRequestForRq<PostBulkAgentRollbackResponse>({
     path: agentRouteService.postBulkAgentRollback(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostAgentRestart(agentId: string) {
+  return sendRequestForRq<PostAgentRestartResponse>({
+    path: agentRouteService.postAgentRestart(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkAgentRestart(body: PostBulkAgentRestartRequest['body']) {
+  return sendRequestForRq<PostBulkAgentRestartResponse>({
+    path: agentRouteService.postBulkAgentRestart(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body,

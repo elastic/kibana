@@ -1,6 +1,25 @@
 {
-  "sha1": "9e50fa3aff1e4cce1056db7fdd85b823ae2f65b7",
+  "sha1": "720c1a2c1c09aaa0329bb07e6144f5c26c782851",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "e66cc9bfbd9ee66-1ee1a6fa01b4fd7",
+      "title": "Setup shared data and feature flags for SLO API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "f68be9083a5aaaa-c0035bbeaed0391",
       "title": "SLO Alerts Embeddable creates a dashboard with an SLO alerts embeddable panel via REST API",
@@ -13,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 35,
+        "column": 13
       }
     },
     {
@@ -29,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 78,
+        "column": 16
       }
     },
     {
@@ -46,7 +65,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
         "line": 125,
-        "column": 12
+        "column": 7
       }
     },
     {
@@ -62,7 +81,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
         "line": 157,
-        "column": 12
+        "column": 7
       }
     },
     {
@@ -77,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 188,
-        "column": 12
+        "line": 192,
+        "column": 17
       }
     },
     {
@@ -93,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 74,
+        "column": 60
       }
     },
     {
@@ -110,7 +129,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
         "line": 170,
-        "column": 12
+        "column": 14
       }
     },
     {
@@ -125,13 +144,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 201,
+        "column": 6
       }
     },
     {
-      "id": "d0c4190d5fea69f-04ec28a0ac6f015",
-      "title": "Create SLOs creates instanceId for SLOs with multi groupBy",
+      "id": "d0c4190d5fea69f-6604f4669a3c2a5",
+      "title": "Create SLOs writes rollup documents with the instanceId through the transform and pipeline",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -142,12 +161,12 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
         "line": 223,
-        "column": 12
+        "column": 25
       }
     },
     {
-      "id": "d0c4190d5fea69f-2b103718bf239aa",
-      "title": "Create SLOs creates instanceId for SLOs with single groupBy",
+      "id": "d0c4190d5fea69f-ac22aa227223535",
+      "title": "Create SLOs installs a rollup pipeline that computes the instanceId for multi groupBy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -157,13 +176,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 248,
-        "column": 12
+        "line": 284,
+        "column": 29
       }
     },
     {
-      "id": "d0c4190d5fea69f-c57ee55e9cd236c",
-      "title": "Create SLOs creates instanceId for SLOs without groupBy ([])",
+      "id": "d0c4190d5fea69f-6022d48190999ab",
+      "title": "Create SLOs installs a rollup pipeline that computes the instanceId for single groupBy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -173,13 +192,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 273,
-        "column": 12
+        "line": 284,
+        "column": 29
       }
     },
     {
-      "id": "d0c4190d5fea69f-796e0139a736fbf",
-      "title": "Create SLOs creates instanceId for SLOs without groupBy ([\"*\"])",
+      "id": "d0c4190d5fea69f-dad506dbcca2c79",
+      "title": "Create SLOs installs a rollup pipeline that computes the instanceId for groupBy []",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -189,13 +208,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 298,
-        "column": 12
+        "line": 284,
+        "column": 29
       }
     },
     {
-      "id": "d0c4190d5fea69f-d6d0d14d21963ed",
-      "title": "Create SLOs creates instanceId for SLOs without groupBy (\"\")",
+      "id": "d0c4190d5fea69f-7c416348b87d935",
+      "title": "Create SLOs installs a rollup pipeline that computes the instanceId for groupBy [\"*\"]",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -205,8 +224,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 326,
-        "column": 12
+        "line": 284,
+        "column": 29
+      }
+    },
+    {
+      "id": "d0c4190d5fea69f-64a023b245873e7",
+      "title": "Create SLOs installs a rollup pipeline that computes the instanceId for groupBy \"\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
+        "line": 284,
+        "column": 29
       }
     },
     {
@@ -221,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_delete.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 41,
+        "column": 64
       }
     },
     {
@@ -237,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_delete.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 101,
+        "column": 13
       }
     },
     {
@@ -253,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_find.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 27,
+        "column": 84
       }
     },
     {
@@ -269,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_get.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 31
       }
     },
     {
@@ -285,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 29,
+        "column": 22
       }
     },
     {
@@ -301,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 60,
+        "column": 14
       }
     },
     {
@@ -317,8 +352,568 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
+        "line": 88,
+        "column": 15
+      }
+    },
+    {
+      "id": "da625884041568a-865ce304c77001d",
+      "title": "SLO CRUD request validation create: returns 400 on an invalid time window duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 29,
+        "column": 84
+      }
+    },
+    {
+      "id": "da625884041568a-c3a479f5d6a1602",
+      "title": "SLO CRUD request validation create: returns 400 on an invalid custom id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 38,
+        "column": 69
+      }
+    },
+    {
+      "id": "da625884041568a-419e71911058f85",
+      "title": "SLO CRUD request validation create: returns 400 on a missing required field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 47,
+        "column": 16
+      }
+    },
+    {
+      "id": "da625884041568a-733a4ae23521f86",
+      "title": "SLO CRUD request validation create: returns 400 on an unknown body key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "da625884041568a-6e4f5605ea3897d",
+      "title": "SLO CRUD request validation update: returns 400 on an invalid path id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "da625884041568a-3ef2c4b2a634ead",
+      "title": "SLO CRUD request validation update: returns 400 on an unknown body key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 69,
+        "column": 59
+      }
+    },
+    {
+      "id": "da625884041568a-11fa8bf87e2cae3",
+      "title": "SLO CRUD request validation get returns 400 on an invalid path id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 79,
+        "column": 15
+      }
+    },
+    {
+      "id": "da625884041568a-13411521a623a35",
+      "title": "SLO CRUD request validation delete returns 400 on an invalid path id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 86,
+        "column": 13
+      }
+    },
+    {
+      "id": "da625884041568a-9f1b0fa42a251ea",
+      "title": "SLO CRUD request validation find: returns 400 on an invalid searchAfter value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 90,
+        "column": 23
+      }
+    },
+    {
+      "id": "da625884041568a-5a4a542d3be3501",
+      "title": "SLO CRUD request validation find: returns 400 on an unknown sortBy value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 99,
+        "column": 23
+      }
+    },
+    {
+      "id": "da625884041568a-0cf8447298faf1d",
+      "title": "SLO CRUD request validation find: returns 400 on an unknown query key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 108,
+        "column": 23
+      }
+    },
+    {
+      "id": "da625884041568a-bd264a5ad4189a0",
+      "title": "SLO CRUD request validation find: accepts hideStale as a boolean string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 117,
+        "column": 9
+      }
+    },
+    {
+      "id": "da625884041568a-ad198b6cb7dde00",
+      "title": "SLO CRUD request validation find: accepts a valid searchAfter JSON array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 123,
+        "column": 86
+      }
+    },
+    {
+      "id": "cac624d6868eb12-aa680defac0ca2a",
+      "title": "Create Composite SLOs creates a composite SLO and applies defaults",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
+        "line": 21,
+        "column": 25
+      }
+    },
+    {
+      "id": "cac624d6868eb12-8deb3ab250dcbaa",
+      "title": "Create Composite SLOs persists a custom id, enabled=false and member instanceIds in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
+        "line": 50,
+        "column": 14
+      }
+    },
+    {
+      "id": "cac624d6868eb12-9dd9dc49b45f201",
+      "title": "Create Composite SLOs returns 409 when creating with a duplicate id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
+        "line": 78,
+        "column": 31
+      }
+    },
+    {
+      "id": "cac624d6868eb12-02741008fd1c887",
+      "title": "Create Composite SLOs returns 400 when the body fails schema validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
+        "line": 96,
+        "column": 58
+      }
+    },
+    {
+      "id": "88f3b896f014c79-dca78c418ebe799",
+      "title": "Delete Composite SLOs deletes only the targeted composite SLO and removes it from find results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "88f3b896f014c79-c2bb808408bd337",
+      "title": "Delete Composite SLOs returns 404 for a non-existent composite SLO and on double delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
+        "line": 64,
+        "column": 10
+      }
+    },
+    {
+      "id": "88f3b896f014c79-e8f985a234727c3",
+      "title": "Delete Composite SLOs can recreate a composite SLO with the same id after deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
+        "line": 85,
+        "column": 28
+      }
+    },
+    {
+      "id": "6e1771d6d77367a-71c8489cf3c2c8f",
+      "title": "Find Composite SLOs returns all composite SLOs with default pagination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
+        "line": 74,
+        "column": 27
+      }
+    },
+    {
+      "id": "6e1771d6d77367a-7922ee66f219389",
+      "title": "Find Composite SLOs paginates results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
+        "line": 75,
+        "column": 65
+      }
+    },
+    {
+      "id": "6e1771d6d77367a-15abf816ca7e040",
+      "title": "Find Composite SLOs filters by tags with OR semantics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
+        "line": 89,
+        "column": 61
+      }
+    },
+    {
+      "id": "6e1771d6d77367a-0a7641ba2b0015f",
+      "title": "Find Composite SLOs searches by name, alone and combined with tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
+        "line": 109,
+        "column": 24
+      }
+    },
+    {
+      "id": "6e1771d6d77367a-cb03265f33907f8",
+      "title": "Find Composite SLOs sorts by name in both directions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
+        "line": 126,
+        "column": 82
+      }
+    },
+    {
+      "id": "6e1771d6d77367a-a8ec1a9580f2adf",
+      "title": "Find Composite SLOs sorts by createdAt descending by default and ascending on request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
+        "line": 140,
+        "column": 16
+      }
+    },
+    {
+      "id": "5636375bc516ba7-f83436e78e22af1",
+      "title": "Get Composite SLO returns the definition with a NO_DATA summary when member SLOs do not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
+        "line": 21,
+        "column": 25
+      }
+    },
+    {
+      "id": "5636375bc516ba7-41e6427b7ae2db9",
+      "title": "Get Composite SLO returns a NO_DATA summary for the maximum number of unresolved members with mixed instanceIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
+        "line": 46,
+        "column": 46
+      }
+    },
+    {
+      "id": "5636375bc516ba7-b957a3be95f75cf",
+      "title": "Get Composite SLO returns the definition without summary from the definitions endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
+        "line": 82,
+        "column": 22
+      }
+    },
+    {
+      "id": "5636375bc516ba7-29f40d5e0ace501",
+      "title": "Get Composite SLO returns 404 for a non-existent composite SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
         "line": 98,
-        "column": 12
+        "column": 17
+      }
+    },
+    {
+      "id": "1bedec0603aa20e-a35414dde8de666",
+      "title": "Update Composite SLOs applies a partial update and preserves the other fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
+        "line": 37,
+        "column": 25
+      }
+    },
+    {
+      "id": "1bedec0603aa20e-6aeb0ef427c64ef",
+      "title": "Update Composite SLOs updates all mutable fields at once and persists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
+        "line": 57,
+        "column": 22
+      }
+    },
+    {
+      "id": "1bedec0603aa20e-0dac2f7d2cad66a",
+      "title": "Update Composite SLOs reflects the updated name, tags and enabled flag in find results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
+        "line": 95,
+        "column": 8
+      }
+    },
+    {
+      "id": "1bedec0603aa20e-e806e895b51e053",
+      "title": "Update Composite SLOs returns 404 when updating a non-existent composite SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
+        "line": 144,
+        "column": 38
+      }
+    },
+    {
+      "id": "1bedec0603aa20e-abb24ff8d75005f",
+      "title": "Update Composite SLOs returns 400 when the body fails schema validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
+        "line": 151,
+        "column": 16
       }
     },
     {
@@ -333,8 +928,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/burn_rate.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 34,
+        "column": 13
       }
     },
     {
@@ -349,8 +944,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/burn_rate.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 77,
+        "column": 16
       }
     },
     {
@@ -365,8 +960,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/error_budget.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 29,
+        "column": 13
       }
     },
     {
@@ -381,8 +976,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/error_budget.spec.ts",
-        "line": 78,
-        "column": 12
+        "line": 70,
+        "column": 16
       }
     },
     {
@@ -397,8 +992,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 34,
+        "column": 13
       }
     },
     {
@@ -413,8 +1008,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 77,
+        "column": 16
       }
     },
     {
@@ -429,8 +1024,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 110,
+        "column": 11
       }
     },
     {
@@ -445,8 +1040,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 169,
+        "column": 16
       }
     },
     {
@@ -461,8 +1056,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 200,
-        "column": 12
+        "line": 201,
+        "column": 16
       }
     },
     {
@@ -477,8 +1072,104 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 233,
-        "column": 12
+        "line": 235,
+        "column": 29
+      }
+    },
+    {
+      "id": "ef91d9997601086-09a34757d767b4d",
+      "title": "SLOs on exponential_histogram fields computes a histogram indicator with range and value_count aggregations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 236,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef91d9997601086-0be8fdfa9f8b2ff",
+      "title": "SLOs on exponential_histogram fields computes a custom metric indicator with a sum aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 242,
+        "column": 24
+      }
+    },
+    {
+      "id": "ef91d9997601086-0d93defd07604d6",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (avg) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
+      }
+    },
+    {
+      "id": "ef91d9997601086-c9af89dee5cd4ce",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (max) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
+      }
+    },
+    {
+      "id": "ef91d9997601086-a070120315f2af3",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (min) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
+      }
+    },
+    {
+      "id": "ef91d9997601086-4ecfc8daf553801",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (percentile) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
       }
     },
     {
@@ -491,8 +1182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings_serverless.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -505,8 +1196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings_stateful.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 13,
+        "column": 92
       }
     },
     {
@@ -521,8 +1212,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings.spec.ts",
-        "line": 17,
-        "column": 12
+        "line": 18,
+        "column": 7
       }
     },
     {
@@ -537,8 +1228,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_bulk_delete.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 21,
+        "column": 84
       }
     },
     {
@@ -553,8 +1244,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_bulk_delete.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 66,
+        "column": 92
       }
     },
     {
@@ -569,8 +1260,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_definitions.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 27,
+        "column": 84
       }
     },
     {
@@ -586,7 +1277,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_definitions.spec.ts",
         "line": 72,
-        "column": 12
+        "column": 45
       }
     },
     {
@@ -601,8 +1292,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_definitions.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 129,
+        "column": 7
       }
     },
     {
@@ -617,8 +1308,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 40,
+        "column": 13
       }
     },
     {
@@ -633,8 +1324,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 76,
+        "column": 9
       }
     },
     {
@@ -649,8 +1340,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 111,
+        "column": 63
       }
     },
     {
@@ -665,8 +1356,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 108,
-        "column": 12
+        "line": 121,
+        "column": 34
       }
     },
     {
@@ -681,8 +1372,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 129,
-        "column": 12
+        "line": 160,
+        "column": 17
       }
     },
     {
@@ -697,8 +1388,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 227,
+        "column": 27
       }
     },
     {
@@ -713,8 +1404,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_template_tags.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 22
       }
     },
     {
@@ -729,8 +1420,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_template_tags.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 77,
+        "column": 11
       }
     },
     {
@@ -745,8 +1436,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_templates.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 22
       }
     },
     {
@@ -761,8 +1452,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_templates.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 50,
+        "column": 53
       }
     },
     {
@@ -777,8 +1468,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_get_template.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 22
       }
     },
     {
@@ -794,7 +1485,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_get_template.spec.ts",
         "line": 77,
-        "column": 12
+        "column": 82
       }
     },
     {
@@ -809,8 +1500,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 28,
+        "column": 7
       }
     },
     {
@@ -825,8 +1516,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 37,
+        "column": 15
       }
     },
     {
@@ -841,8 +1532,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 79,
+        "column": 16
+      }
+    },
+    {
+      "id": "e36a4d37497fb1d-6779c15cbf79f5c",
+      "title": "Get SLO Grouped Stats buckets grouped-by-service.name instances using slo.groupings.service.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
+        "line": 109,
+        "column": 7
       }
     },
     {
@@ -857,8 +1564,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 157,
+        "column": 62
       }
     },
     {
@@ -873,8 +1580,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 165,
+        "column": 7
       }
     },
     {
@@ -889,8 +1596,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_health_scan.spec.ts",
-        "line": 21,
-        "column": 12
+        "line": 19,
+        "column": 18
       }
     },
     {
@@ -905,8 +1612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_overview_cluster_filter.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 33,
+        "column": 7
       }
     },
     {
@@ -921,8 +1628,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 31,
+        "column": 7
       }
     },
     {
@@ -937,8 +1644,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 86,
+        "column": 7
       }
     },
     {
@@ -953,8 +1660,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 159,
+        "column": 26
       }
     },
     {
@@ -969,8 +1676,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 203,
-        "column": 12
+        "line": 216,
+        "column": 26
       }
     },
     {
@@ -985,8 +1692,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 246,
-        "column": 12
+        "line": 280,
+        "column": 27
       }
     },
     {
@@ -1001,8 +1708,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 30,
+        "column": 22
       }
     },
     {
@@ -1017,8 +1724,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 62,
+        "column": 31
       }
     },
     {
@@ -1033,8 +1740,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 95,
+        "column": 11
       }
     },
     {
@@ -1049,8 +1756,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 128,
+        "column": 30
       }
     },
     {
@@ -1065,8 +1772,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 175,
-        "column": 12
+        "line": 160,
+        "column": 25
       }
     },
     {
@@ -1081,8 +1788,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 215,
-        "column": 12
+        "line": 198,
+        "column": 24
       }
     },
     {
@@ -1097,8 +1804,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 264,
-        "column": 12
+        "line": 255,
+        "column": 14
       }
     },
     {
@@ -1113,8 +1820,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_reset.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 21,
+        "column": 31
       }
     },
     {
@@ -1129,8 +1836,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -1145,8 +1852,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 58,
+        "column": 14
       }
     },
     {
@@ -1161,8 +1868,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 79,
+        "column": 16
       }
     },
     {
@@ -1177,8 +1884,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 95,
+        "column": 8
       }
     },
     {
@@ -1193,8 +1900,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 134,
-        "column": 12
+        "line": 126,
+        "column": 18
       }
     },
     {
@@ -1209,8 +1916,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 161,
-        "column": 12
+        "line": 154,
+        "column": 22
       }
     },
     {
@@ -1225,8 +1932,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 177,
+        "column": 29
       }
     },
     {
@@ -1241,8 +1948,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 199,
-        "column": 12
+        "line": 190,
+        "column": 24
+      }
+    },
+    {
+      "id": "46bd35f0297462e-c09d29a96b51851",
+      "title": "Teardown shared data and feature flags for SLO API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

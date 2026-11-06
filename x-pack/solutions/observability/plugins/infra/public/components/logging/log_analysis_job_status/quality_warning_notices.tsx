@@ -64,14 +64,22 @@ export const CategoryQualityWarnings: React.FC<{
                   <EuiDescriptionListTitle data-test-subj={`title-${qualityWarning.dataset}`}>
                     {getFriendlyNameForPartitionId(qualityWarning.dataset)}
                   </EuiDescriptionListTitle>
-                  {qualityWarning.reasons.map((reason) => (
+                  {qualityWarning.reasons.length > 0 ? (
+                    qualityWarning.reasons.map((reason) => (
+                      <QualityWarningReasonDescription
+                        key={`description-${reason.type}-${qualityWarning.dataset}`}
+                        data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
+                      >
+                        <CategoryQualityWarningReasonDescription reason={reason} />
+                      </QualityWarningReasonDescription>
+                    ))
+                  ) : (
                     <QualityWarningReasonDescription
-                      key={`description-${reason.type}-${qualityWarning.dataset}`}
-                      data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
+                      data-test-subj={`description-unknown-${qualityWarning.dataset}`}
                     >
-                      <CategoryQualityWarningReasonDescription reason={reason} />
+                      <GenericQualityWarningReasonDescription />
                     </QualityWarningReasonDescription>
-                  ))}
+                  )}
                 </Fragment>
               ))}
             </EuiDescriptionList>
@@ -144,5 +152,14 @@ export const CategoryQualityWarningReasonDescription: React.FC<{
           }}
         />
       );
+    default:
+      return <GenericQualityWarningReasonDescription />;
   }
 };
+
+export const GenericQualityWarningReasonDescription: React.FC = () => (
+  <FormattedMessage
+    id="xpack.infra.logs.logEntryCategories.genericQualityWarningReasonDescription"
+    defaultMessage="The analysis produced results of reduced quality. Consider recreating the job over a time range containing more log data."
+  />
+);

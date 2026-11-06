@@ -14,7 +14,8 @@
       "destination.geo.country_name",
       "destination.as.organization.name",
       "source.ip",
-      "destination.port"
+      "destination.port",
+      "source.geo.country_name"
     ]
   },
   "allow_lazy_open": true,
@@ -28,6 +29,6 @@
     "created_by": "ml-module-security-network",
     "security_app_display_name": "Spike in Firewall Denies",
     "managed": true,
-    "job_revision": 4
+    "job_revision": 5
   }
 }

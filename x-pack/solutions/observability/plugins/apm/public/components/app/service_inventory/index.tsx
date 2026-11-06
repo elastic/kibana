@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmDocumentType } from '../../../../common/document_type';
+import { type APIReturnType } from '@kbn/apm-api-shared';
 import type { ServiceListItem } from '../../../../common/service_inventory';
 import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
@@ -20,16 +20,15 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
-import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
+import { usePreferredServicesDataSource } from '../../../hooks/use_preferred_services_data_source';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
-import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { type ApmPluginStartDeps, type ApmServices } from '../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -58,13 +57,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
+  const preferred = usePreferredServicesDataSource({ start, end, kuery });
 
   const shouldUseDurationSummary = !!preferred?.source?.hasDurationSummaryField;
 
@@ -125,13 +118,7 @@ function useServicesDetailedStatisticsFetcher({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
+  const dataSourceOptions = usePreferredServicesDataSource({ start, end, kuery });
   const itemsToFetch = useMemo(
     () => renderedItems.map(({ serviceName }) => serviceName),
     [renderedItems]

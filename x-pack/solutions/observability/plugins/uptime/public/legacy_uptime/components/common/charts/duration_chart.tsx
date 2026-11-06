@@ -11,7 +11,7 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { BrushEndListener, LegendItemListener } from '@elastic/charts';
 import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import type { LocationDurationLine } from '../../../../../common/types';

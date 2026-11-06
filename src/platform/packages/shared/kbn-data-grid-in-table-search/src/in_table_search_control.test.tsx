@@ -9,8 +9,20 @@
 
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import type { InTableSearchControlProps } from './in_table_search_control';
-import { InTableSearchControl } from './in_table_search_control';
+import type { UseInTableSearchControlProps } from './in_table_search_control';
+import { useInTableSearchControl } from './in_table_search_control';
+
+type InTableSearchControlProps = UseInTableSearchControlProps;
+
+const InTableSearchControl = (props: UseInTableSearchControlProps) => {
+  const { searchButton, searchInput } = useInTableSearchControl(props);
+  return (
+    <>
+      {searchButton}
+      {searchInput}
+    </>
+  );
+};
 import {
   CELL_MATCH_INDEX_ATTRIBUTE,
   COUNTER_TEST_SUBJ,

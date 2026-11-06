@@ -15,9 +15,9 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
   EuiButtonEmpty,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
@@ -107,7 +107,7 @@ const ColorModeGroup: FC<{
       {colorMode === 'space_default' && (
         <>
           <EuiSpacer />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             title={i18n.translate(
               'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
@@ -115,19 +115,14 @@ const ColorModeGroup: FC<{
                 defaultMessage: 'Space default settings will be removed in a future version',
               }
             )}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultDescr',
-                {
-                  defaultMessage:
-                    'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultDescr',
+              {
+                defaultMessage:
+                  'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
+              }
+            )}
+          />
           <EuiSpacer />
         </>
       )}
@@ -194,7 +189,8 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
     onChange,
   } = useAppearance({
     uiSettingsClient,
-    defaultColorMode: isServerless ? 'system' : 'space_default',
+    // Default new users (no persisted preference) to "System" so the UI follows their OS appearance.
+    defaultColorMode: 'system',
     defaultContrastMode: 'standard',
   });
 

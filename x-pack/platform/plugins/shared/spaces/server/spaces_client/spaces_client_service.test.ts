@@ -28,6 +28,8 @@ const createMockCpsStart = (): CPSServerStart => {
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(true),
     }),
+    getLinkedProjects: jest.fn().mockResolvedValue([]),
+    isCpsActive: jest.fn().mockResolvedValue(false),
   };
 };
 

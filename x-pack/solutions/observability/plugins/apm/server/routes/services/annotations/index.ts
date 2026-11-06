@@ -7,14 +7,10 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import type { Annotation } from '../../../../common/annotations';
+import type { ServiceAnnotationResponse } from '@kbn/apm-api-shared';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { getStoredAnnotations } from './get_stored_annotations';
-
-export interface ServiceAnnotationResponse {
-  annotations: Annotation[];
-}
 
 export async function getServiceAnnotations({
   apmEventClient,
@@ -36,7 +32,7 @@ export async function getServiceAnnotations({
   logger: Logger;
   start: number;
   end: number;
-}) {
+}): Promise<ServiceAnnotationResponse> {
   // Variable to store any error happened on getDerivedServiceAnnotations other than RequestAborted
   let derivedAnnotationError: Error | undefined;
 

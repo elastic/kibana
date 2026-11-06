@@ -30,6 +30,6 @@ Be sure to check out provided helpers
 ## Storybook
 
 General look of the component can be checked visually running the following storybook:
-`yarn storybook security_solution_data_table`
+`pnpm storybook security_solution_data_table`
 
 Note that all the interactions are mocked.

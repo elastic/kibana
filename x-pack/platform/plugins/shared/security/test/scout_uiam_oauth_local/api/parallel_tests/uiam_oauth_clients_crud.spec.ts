@@ -21,9 +21,8 @@ apiTest.describe(
   () => {
     let authHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+    apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       const samlResponse = await createSAMLResponse({
-        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
         username: '1234567890',
         email: 'elastic_admin@elastic.co',
         roles: ['admin'],
@@ -43,10 +42,9 @@ apiTest.describe(
     });
 
     apiTest(
-      'creates, reads, lists, patches (incl. redirect_uris), and revokes a client',
+      'creates, reads, lists, patches (incl. redirect_uris), and deletes a client',
       async ({ apiClient }) => {
         const clientName = `scout-crud-${Date.now()}`;
-        const resource = `https://scout-crud-${Date.now()}.kb.us-central1.gcp.elastic.cloud`;
         const initialRedirectUri = 'https://example.com/callback';
         const secondRedirectUri = 'https://example.com/callback-2';
 
@@ -58,7 +56,6 @@ apiTest.describe(
               headers: authHeaders,
               responseType: 'json',
               body: {
-                resource,
                 client_name: clientName,
                 client_type: 'public',
                 client_metadata: { owner: 'scout-crud' },
@@ -116,14 +113,28 @@ apiTest.describe(
             expect(patchedUris).toContain(initialRedirectUri);
             expect(patchedUris).toContain(secondRedirectUri);
           });
+
+          await apiTest.step('delete client', async () => {
+            const deleteResponse = await apiClient.delete(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders }
+            );
+            expect(deleteResponse.statusCode).toBe(204);
+
+            const getResponse = await apiClient.get(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders, responseType: 'json' }
+            );
+            expect(getResponse.statusCode).toBe(404);
+
+            clientId = undefined;
+          });
         } finally {
-          // Best-effort cleanup (only if the client was successfully created above).
+          // Best-effort cleanup for a client that was created but not reached by the delete step.
           // eslint-disable-next-line playwright/no-conditional-in-test
           if (clientId) {
-            await apiClient.post(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`, {
+            await apiClient.delete(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}`, {
               headers: authHeaders,
-              responseType: 'json',
-              body: { reason: 'scout cleanup' },
             });
           }
         }
@@ -137,7 +148,6 @@ apiTest.describe(
           headers: authHeaders,
           responseType: 'json',
           body: {
-            resource: 'https://scout-crud-bad.kb.us-central1.gcp.elastic.cloud',
             client_name: 'scout-bad',
             client_type: 'not-a-valid-type',
           },
@@ -148,7 +158,6 @@ apiTest.describe(
           headers: authHeaders,
           responseType: 'json',
           body: {
-            resource: 'https://scout-crud-bad2.kb.us-central1.gcp.elastic.cloud',
             client_name: 'scout-bad2',
             client_type: 'public',
             client_logo: { media_type: 'application/json', data: 'abc' },

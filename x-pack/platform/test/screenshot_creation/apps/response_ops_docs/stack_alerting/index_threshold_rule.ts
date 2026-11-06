@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
+  const retry = getService('retry');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
@@ -60,10 +61,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1300
       );
       await ofComboBox.type('bytes');
-      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
-      const ofOptions = ofOptionsString.trim().split('\n');
-      expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
+      // Selecting a field closes the popover and unmounts the combo box, so comboBox.set can't be used.
+      await retry.try(async () => {
+        const [firstOfOption] = await comboBox.getOptions('availableFieldsOptionsComboBox');
+        expect(firstOfOption).not.to.be(undefined);
+        await firstOfOption.clickMouseButton();
+      });
+      await testSubjects.missingOrFail('availableFieldsOptionsComboBox');
 
       await testSubjects.click('groupByExpression');
       await testSubjects.click('overExpressionSelect');
@@ -143,7 +147,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.setValue('ruleSearchField', ruleName);
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${ruleName}"]`
+      );
       await alertRule.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(

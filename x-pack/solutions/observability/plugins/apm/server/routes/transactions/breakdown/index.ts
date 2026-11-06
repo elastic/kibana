@@ -8,6 +8,7 @@
 import { orderBy, last, clamp, round } from 'lodash';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { TransactionBreakdownResponse } from '@kbn/apm-api-shared';
 import { asPercent } from '../../../../common/utils/formatters';
 import {
   SERVICE_NAME,
@@ -22,16 +23,6 @@ import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface TransactionBreakdownResponse {
-  timeseries: Array<{
-    title: string;
-    type: string;
-    data: Array<{ x: number; y: number | null }>;
-    hideLegend: boolean;
-    legendValue: any;
-  }>;
-}
 
 export async function getTransactionBreakdown({
   environment,

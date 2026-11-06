@@ -149,6 +149,70 @@ describe('AgentDashboardLink', () => {
     expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
 
+  it('should link to the agent policy settings tab if only traces are enabled for that policy', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            id: 'policy123',
+            monitoring_enabled: ['traces'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
+  });
+
+  it('should link to the agent policy settings tab if only logs are enabled (no metrics)', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            id: 'policy123',
+            monitoring_enabled: ['logs'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
+  });
+
   it('it should disable the button if the agent policy is managed', async () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
@@ -177,7 +241,41 @@ describe('AgentDashboardLink', () => {
     );
 
     expect(
-      result.getByTestId('agentDetails.enableLogsAndMetricsButton').hasAttribute('disabled')
+      result.getByTestId('agentDetails.enableMetricsButton').hasAttribute('disabled')
+    ).toBeTruthy();
+  });
+
+  it('should disable the metrics button for an agentless agent, even if the policy has metrics monitoring', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            monitoring_enabled: ['logs', 'metrics'],
+            is_managed: false,
+            supports_agentless: true,
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    expect(result.queryByText('View more agent metrics')).not.toBeInTheDocument();
+    expect(
+      result.getByTestId('agentDetails.enableMetricsButton').hasAttribute('disabled')
     ).toBeTruthy();
   });
 

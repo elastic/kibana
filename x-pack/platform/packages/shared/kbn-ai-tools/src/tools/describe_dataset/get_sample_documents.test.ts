@@ -6,6 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
+import objectHash from 'object-hash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
@@ -31,17 +32,21 @@ const createResponse = ({
   values?: unknown[][];
 } = {}) => ({ columns, values });
 
+const TIME_RANGE =
+  '@timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
+
 describe('getSampleDocumentsEsql', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('builds a simple ES|QL sample query with a time range filter', async () => {
+  it('builds a simple ES|QL sample query with an inline time range', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(createResponse());
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
@@ -49,25 +54,13 @@ describe('getSampleDocumentsEsql', () => {
     });
 
     expect(query).toHaveBeenCalledTimes(1);
-    expect(query).toHaveBeenCalledWith({
-      query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
-      filter: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 100,
-                  lte: 200,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
-        },
+    expect(query).toHaveBeenCalledWith(
+      {
+        query: `FROM logs-a, logs-b METADATA _id, _source | WHERE ${TIME_RANGE} | LIMIT 2`,
+        drop_null_columns: true,
       },
-      drop_null_columns: true,
-    });
+      { signal: expect.any(AbortSignal) }
+    );
     expect(result).toEqual({
       hits: [
         { _index: '', _id: 'doc-1', _source: { message: 'first' } },
@@ -95,6 +88,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -110,23 +104,68 @@ describe('getSampleDocumentsEsql', () => {
     });
   });
 
+  it('reconstructs documents from row columns when a view drops _id and _source metadata', async () => {
+    const { esClient, query } = createEsClient();
+    // ES|QL views silently drop outer `METADATA _id, _source`, so the response
+    // only contains the view's projected columns.
+    query.mockResolvedValueOnce(
+      createResponse({
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'message', type: 'text' },
+          { name: 'service.name', type: 'keyword' },
+        ],
+        values: [
+          ['2026-04-28T08:00:00.000Z', 'first', 'checkout'],
+          ['2026-04-28T08:01:00.000Z', 'second', null],
+        ],
+      })
+    );
+
+    const result = await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: '$.query',
+      start: 100,
+      end: 200,
+      size: 2,
+    });
+
+    // Views expose no `_id`, so a stable content hash of the reconstructed
+    // source is synthesized (enables cross-bucket sample dedup for query streams).
+    const firstSource = {
+      '@timestamp': '2026-04-28T08:00:00.000Z',
+      message: 'first',
+      'service.name': 'checkout',
+    };
+    const secondSource = { '@timestamp': '2026-04-28T08:01:00.000Z', message: 'second' };
+    expect(result).toEqual({
+      hits: [
+        { _index: '', _id: objectHash(firstSource), _source: firstSource },
+        { _index: '', _id: objectHash(secondSource), _source: secondSource },
+      ],
+      total: 2,
+    });
+  });
+
   it('combines KQL and ES|QL where conditions and enables unmapped field loading', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(createResponse({ values: [] }));
 
     await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
       kql: 'log.level:"error"',
       whereCondition: esql.exp`NOT ${esql.col(['service', 'name'])} == ${esql.str('checkout')}`,
-      loadUnmappedFields: true,
+      unmappedFields: 'LOAD',
       size: 5,
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND NOT service.name == "checkout" | LIMIT 5'
+      `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND NOT service.name == "checkout" | LIMIT 5`
     );
   });
 
@@ -147,19 +186,45 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
       sampleSize: 2,
     });
 
-    expect(query.mock.calls[0][0].query).toBe('FROM logs-* | STATS total = COUNT(*)');
-    expect(query.mock.calls[1][0].query).toBe(
-      'FROM logs-* METADATA _id, _source | SAMPLE 0.06 | LIMIT 20'
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
     );
-    expect(query.mock.calls[0][0].filter).toEqual(query.mock.calls[1][0].filter);
+    expect(query.mock.calls[1][0].query).toBe(
+      `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | SAMPLE 0.06 | LIMIT 20`
+    );
+    expect(query.mock.calls[0][0]).not.toHaveProperty('filter');
     expect(result.hits).toHaveLength(2);
     expect(result.total).toBe(3);
+  });
+
+  it('sends dslFilter as the request filter while keeping the time range inline', async () => {
+    const { esClient, query } = createEsClient();
+    query
+      .mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[10]] })
+      .mockResolvedValueOnce(createResponse());
+
+    const dslFilter = { term: { 'service.name': 'checkout' } };
+    await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      sampleSize: 2,
+      dslFilter,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
+    );
+    expect(query.mock.calls[0][0].filter).toEqual({ bool: { filter: [dslFilter] } });
   });
 
   it('uses the same KQL, where condition, LOAD, and time filter for random count and sample queries', async () => {
@@ -170,22 +235,63 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
       kql: 'log.level:"error"',
       whereCondition: esql.exp`${esql.col(['service', 'name'])} == ${esql.str('checkout')}`,
-      loadUnmappedFields: true,
+      unmappedFields: 'LOAD',
       sampleSize: 2,
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "LOAD"; FROM logs-* | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)'
+      `SET unmapped_fields = "LOAD"; FROM logs-* | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)`
     );
     expect(query.mock.calls[1][0].query).toBe(
-      'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20'
+      `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20`
     );
-    expect(query.mock.calls[0][0].filter).toEqual(query.mock.calls[1][0].filter);
+  });
+
+  it('omits METADATA when any index is an ES|QL view', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce(
+      createResponse({ columns: [{ name: 'message', type: 'text' }], values: [['boom']] })
+    );
+
+    await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: ['$.logs', 'logs-*'],
+      start: 100,
+      end: 200,
+      whereCondition: esql.exp`QSTR(${esql.str('log.level:error')})`,
+      size: 2,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM $.logs, logs-* | WHERE ${TIME_RANGE} AND QSTR("log.level:error") | LIMIT 2`
+    );
+  });
+
+  it('emits SET unmapped_fields = "NULLIFY" when unmappedFields is NULLIFY', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce(createResponse({ values: [] }));
+
+    await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      whereCondition: esql.exp`MATCH_PHRASE(${esql.col('message')}, ${esql.str('error')})`,
+      unmappedFields: 'NULLIFY',
+      size: 5,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      `SET unmapped_fields = "NULLIFY"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND MATCH_PHRASE(message, "error") | LIMIT 5`
+    );
   });
 
   it('omits SAMPLE when the calculated probability reaches one', async () => {
@@ -196,13 +302,16 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
       sampleSize: 2,
     });
 
-    expect(query.mock.calls[1][0].query).toBe('FROM logs-* METADATA _id, _source | LIMIT 20');
+    expect(query.mock.calls[1][0].query).toBe(
+      `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | LIMIT 20`
+    );
   });
 
   it('short-circuits random sampling when the count query returns zero', async () => {
@@ -211,6 +320,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -226,6 +336,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      abortSignal: AbortSignal.timeout(30_000),
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -236,15 +347,16 @@ describe('getSampleDocumentsEsql', () => {
     expect(result).toEqual({ hits: [], total: 0 });
   });
 
-  it('returns an empty result when metadata columns are missing', async () => {
+  it('returns an empty result when a view row has no non-null projected columns', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(
-      createResponse({ columns: [{ name: 'message', type: 'keyword' }], values: [['hello']] })
+      createResponse({ columns: [{ name: 'message', type: 'keyword' }], values: [[null]] })
     );
 
     const result = await getSampleDocumentsEsql({
       esClient,
-      index: 'logs-*',
+      abortSignal: AbortSignal.timeout(30_000),
+      index: '$.query',
       start: 100,
       end: 200,
     });

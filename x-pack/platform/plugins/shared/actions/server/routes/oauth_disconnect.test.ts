@@ -8,19 +8,21 @@
 jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
-jest.mock('../lib/user_connector_token_client');
+jest.mock('../lib/connector_token_client');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthDisconnectRoute } from './oauth_disconnect';
-import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { ConnectorTokenClient } from '../lib/connector_token_client';
 
-const MockUserConnectorTokenClient = UserConnectorTokenClient as jest.MockedClass<
-  typeof UserConnectorTokenClient
+const MockConnectorTokenClient = ConnectorTokenClient as jest.MockedClass<
+  typeof ConnectorTokenClient
 >;
 
 const mockLogger = loggingSystemMock.create().get();
+const configurationUtilities = actionsConfigMock.create();
 
 const mockConnectorTokenClientInstance = {
   deleteConnectorTokens: jest.fn(),
@@ -32,6 +34,7 @@ const mockEncryptedSavedObjectsClient = {
 
 const mockActionsClient = {
   get: jest.fn(),
+  evictClientPool: jest.fn(),
 };
 
 const createMockCoreSetup = () => ({
@@ -53,7 +56,7 @@ const createMockContext = (
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({}),
+      getClient: jest.fn().mockReturnValue({ getCurrentNamespace: jest.fn() }),
     },
   }),
   actions: Promise.resolve({
@@ -72,14 +75,18 @@ describe('oauthDisconnectRoute', () => {
     (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({});
 
-    MockUserConnectorTokenClient.mockImplementation(
-      () => mockConnectorTokenClientInstance as never
-    );
+    MockConnectorTokenClient.mockImplementation(() => mockConnectorTokenClientInstance as never);
   });
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
     const licenseState = licenseStateMock.create();
-    oauthDisconnectRoute(router, licenseState, mockLogger, coreSetup as never);
+    oauthDisconnectRoute(
+      router,
+      licenseState,
+      mockLogger,
+      coreSetup as never,
+      configurationUtilities
+    );
     return router.post.mock.calls[0];
   };
 
@@ -128,8 +135,16 @@ describe('oauthDisconnectRoute', () => {
   });
 
   it('returns 204 on successful disconnect', async () => {
+    const callOrder: string[] = [];
     mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
+    mockActionsClient.evictClientPool.mockImplementation(async () => {
+      callOrder.push('evictClientPoolStarted');
+      await Promise.resolve();
+      callOrder.push('evictClientPoolFinished');
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockImplementation(async () => {
+      callOrder.push('deleteConnectorTokens');
+    });
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -141,6 +156,12 @@ describe('oauthDisconnectRoute', () => {
     await handler(context, req, res);
 
     expect(res.noContent).toHaveBeenCalled();
+    expect(mockActionsClient.evictClientPool).toHaveBeenCalledWith('connector-1');
+    expect(callOrder).toEqual([
+      'evictClientPoolStarted',
+      'evictClientPoolFinished',
+      'deleteConnectorTokens',
+    ]);
   });
 
   it('verifies the connector exists before deleting tokens', async () => {
@@ -194,6 +215,33 @@ describe('oauthDisconnectRoute', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('OAuth tokens deleted for connector: connector-1');
   });
 
+  it('passes authType from config when absent in secrets', async () => {
+    const mockDecryptedClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: { authType: 'ears' },
+          secrets: { provider: 'google' },
+        },
+      }),
+    };
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue(mockDecryptedClient);
+    mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-1' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ authType: 'ears', provider: 'google' })
+    );
+  });
+
   it('propagates the error when the connector is not found', async () => {
     mockActionsClient.get.mockRejectedValue(new Error('Not found'));
 
@@ -225,7 +273,7 @@ describe('oauthDisconnectRoute', () => {
     await expect(handler(context, req, res)).rejects.toThrow('Deletion failed');
   });
 
-  it('creates UserConnectorTokenClient with the correct saved objects clients', async () => {
+  it('creates ConnectorTokenClient with the correct saved objects clients', async () => {
     const mockEncryptedClient = { getDecryptedAsInternalUser: jest.fn() };
     const mockUnsecuredClient = { find: jest.fn() };
 
@@ -259,18 +307,25 @@ describe('oauthDisconnectRoute', () => {
     await handler(mockContext, req, res);
 
     expect(mockEncryptedSavedObjectsClient.getClient).toHaveBeenCalledWith({
-      includedHiddenTypes: ['user_connector_token'],
+      includedHiddenTypes: ['action', 'user_connector_token'],
     });
-    expect(MockUserConnectorTokenClient).toHaveBeenCalledWith({
+    expect(MockConnectorTokenClient).toHaveBeenCalledWith({
       encryptedSavedObjectsClient: mockEncryptedClient,
       unsecuredSavedObjectsClient: mockUnsecuredClient,
       logger: mockLogger,
+      configurationUtilities,
     });
   });
 
   it('calls verifyAccessAndContext with the license state', () => {
     const licenseState = licenseStateMock.create();
-    oauthDisconnectRoute(router, licenseState, mockLogger, createMockCoreSetup() as never);
+    oauthDisconnectRoute(
+      router,
+      licenseState,
+      mockLogger,
+      createMockCoreSetup() as never,
+      configurationUtilities
+    );
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });

@@ -15,6 +15,9 @@ import {
   transformAttackDiscoveryScheduleCreatePropsToApi,
   transformAttackDiscoveryScheduleUpdatePropsToApi,
   ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
@@ -24,6 +27,9 @@ import {
 
 import {
   ALERTING_RULE_TYPES_URL,
+  bulkDeleteAttackDiscoverySchedules,
+  bulkDisableAttackDiscoverySchedules,
+  bulkEnableAttackDiscoverySchedules,
   createAttackDiscoverySchedule,
   deleteAttackDiscoverySchedule,
   disableAttackDiscoverySchedule,
@@ -145,6 +151,39 @@ describe('Schedule API', () => {
     expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
       replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
       expect.objectContaining({ version: API_VERSIONS.public.v1 })
+    );
+  });
+
+  it('should send a bulk enable schedules POST request to the public API', async () => {
+    await bulkEnableAttackDiscoverySchedules({ ids: ['test-id-1', 'test-id-2'] });
+    expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
+      expect.objectContaining({
+        body: JSON.stringify({ ids: ['test-id-1', 'test-id-2'] }),
+        version: API_VERSIONS.public.v1,
+      })
+    );
+  });
+
+  it('should send a bulk disable schedules POST request to the public API', async () => {
+    await bulkDisableAttackDiscoverySchedules({ ids: ['test-id-1', 'test-id-2'] });
+    expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+      expect.objectContaining({
+        body: JSON.stringify({ ids: ['test-id-1', 'test-id-2'] }),
+        version: API_VERSIONS.public.v1,
+      })
+    );
+  });
+
+  it('should send a bulk delete schedules POST request to the public API', async () => {
+    await bulkDeleteAttackDiscoverySchedules({ ids: ['test-id-1', 'test-id-2'] });
+    expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+      expect.objectContaining({
+        body: JSON.stringify({ ids: ['test-id-1', 'test-id-2'] }),
+        version: API_VERSIONS.public.v1,
+      })
     );
   });
 

@@ -13,6 +13,7 @@ describe('generateParamsSchema', () => {
   const mockActions: ConnectorSpec['actions'] = {
     action1: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         message: z.string(),
         foobar: z.number(),
@@ -21,6 +22,7 @@ describe('generateParamsSchema', () => {
     },
     action2: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         bool: z.boolean(),
       }),
@@ -28,6 +30,7 @@ describe('generateParamsSchema', () => {
     },
     action3: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => null,
     },
@@ -44,6 +47,12 @@ describe('generateParamsSchema', () => {
                 message: z.string(),
                 foobar: z.number(),
               }),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
           z
@@ -52,12 +61,24 @@ describe('generateParamsSchema', () => {
               subActionParams: z.object({
                 bool: z.boolean(),
               }),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
           z
             .object({
               subAction: z.literal('action3'),
               subActionParams: z.object({}),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
         ]),
@@ -66,7 +87,7 @@ describe('generateParamsSchema', () => {
   });
 
   it('throws if actions has no keys', () => {
-    expect(() => generateParamsSchema({})).toThrowError('No actions defined');
+    expect(() => generateParamsSchema({})).toThrow('No actions defined');
   });
 
   describe('runtime parse behavior', () => {
@@ -79,6 +100,20 @@ describe('generateParamsSchema', () => {
       expect(parsed).toEqual({
         subAction: 'action1',
         subActionParams: { message: 'hello', foobar: 42 },
+      });
+    });
+
+    it('parses reserved fetchOptions', () => {
+      const result = generateParamsSchema(mockActions);
+      const parsed = result.schema.parse({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+        fetchOptions: { max_content_length: 1024 },
+      });
+      expect(parsed).toEqual({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+        fetchOptions: { max_content_length: 1024 },
       });
     });
 
@@ -137,6 +172,17 @@ describe('generateParamsSchema', () => {
           extraTopLevel: true,
         })
       ).toThrow(/extraTopLevel|Unrecognized/);
+    });
+
+    it('rejects unknown fetchOptions fields', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() =>
+        result.schema.parse({
+          subAction: 'action1',
+          subActionParams: { message: 'x', foobar: 1 },
+          fetchOptions: { unknown: true },
+        })
+      ).toThrow(/unknown|Unrecognized/);
     });
   });
 });

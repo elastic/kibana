@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useCanvasCheckeredStyles } from '../../lib/use_canvas_checkered_styles';
 import { useNotifyService } from '../../services';
 
 import { ConfirmModal } from '../confirm_modal';
@@ -73,6 +74,7 @@ export interface Props {
 
 export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
   const { success } = useNotifyService();
+  const checkeredStyles = useCanvasCheckeredStyles();
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const onCopy = (result: boolean) => result && success(`Copied '${asset.id}' to clipboard`);
@@ -137,7 +139,7 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
   );
 
   const thumbnail = (
-    <div className="canvasAsset__thumb canvasCheckered">
+    <div className="canvasAsset__thumb canvasCheckered" css={checkeredStyles}>
       <EuiImage
         className="canvasAsset__img"
         size="original"

@@ -49,9 +49,13 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
+  const dataSource = useObservable(deps.indexUpdateService.dataSource$);
 
   const totalHits = useObservable(deps.indexUpdateService.totalHits$);
-  const searchQuery = useObservable(deps.indexUpdateService.qstr$, '');
+  const searchQuery = useObservable(deps.indexUpdateService.filterQuery$, {
+    query: '',
+    language: 'kuery',
+  });
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, false);
@@ -65,6 +69,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           fileUpload: deps.fileUpload,
           http: coreStart.http,
           notifications: coreStart.notifications,
+          capabilities: coreStart.application.capabilities,
         },
         null,
         false,
@@ -74,7 +79,14 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         'lookup-index-editor'
       );
     },
-    [coreStart.analytics, coreStart.http, coreStart.notifications, deps.data, deps.fileUpload]
+    [
+      coreStart.analytics,
+      coreStart.http,
+      coreStart.notifications,
+      deps.data,
+      deps.fileUpload,
+      coreStart.application.capabilities,
+    ]
   );
 
   const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>
@@ -101,8 +113,8 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const noResults = useMemo(() => {
     const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
-    return !isLoading && !rowsWithValues && searchQuery.length === 0;
-  }, [isLoading, rows, searchQuery.length]);
+    return !isLoading && !rowsWithValues && searchQuery.query.length === 0;
+  }, [isLoading, rows, searchQuery.query]);
 
   return (
     <KibanaContextProvider
@@ -171,11 +183,12 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             }}
           >
             <FileDropzone noResults={noResults}>
-              {dataView && dataViewColumns ? (
+              {dataView && dataViewColumns && dataSource ? (
                 <DataGridLazy
                   {...props}
                   dataView={dataView}
                   columns={dataViewColumns}
+                  dataSource={dataSource}
                   rows={rows}
                   totalHits={totalHits}
                   onOpenIndexInDiscover={props.onOpenIndexInDiscover}

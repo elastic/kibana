@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
-import Url from 'url';
 
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -15,26 +14,13 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export function SamlToolsProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
-  const config = getService('config');
 
   return {
     async login(username: string) {
-      const kibanaUrl = Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: config.get('servers.kibana.port'),
-        pathname: '/api/security/saml/callback',
-      });
       const samlAuthenticationResponse = await supertestWithoutAuth
         .post('/api/security/saml/callback')
         .set(svlCommonApi.getCommonRequestHeader())
-        .send({
-          SAMLResponse: await createSAMLResponse({
-            username,
-            roles: [],
-            kibanaUrl,
-          }),
-        });
+        .send({ SAMLResponse: await createSAMLResponse({ username, roles: [] }) });
       expect(samlAuthenticationResponse.status).to.equal(302);
       expect(samlAuthenticationResponse.header.location).to.equal('/');
       const sessionCookie = parseCookie(samlAuthenticationResponse.header['set-cookie'][0])!;

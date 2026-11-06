@@ -10,7 +10,7 @@
 /**
  * This file is intended to be required before Playwright runs. It is responsible
  * for:
- * - Calling setup_node_env which registers babel transforms, source map support,
+ * - Calling setup_node_env which registers swc transforms, source map support,
  * hardening etc
  * - Initializing APM/OpenTelemetry
  * - Transforming logging-related command-line flags into an environment variable
@@ -26,15 +26,15 @@
 process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION = 'true';
 
 /**
- * Propagate Kibana's babel-register hook to Playwright worker processes via
+ * Propagate Kibana's swc-register hook to Playwright worker processes via
  * NODE_OPTIONS. @kbn/setup-node-env installs the require hook in this process,
  * but Playwright forks fresh Node processes for its workers which only inherit
  * env vars, not in-memory require hooks. Appending --require to NODE_OPTIONS
- * ensures the workers transpile through Kibana's Babel config too.
+ * ensures the workers transpile through Kibana's SWC config too.
  */
-var babelRegisterRequire = '--require=@kbn/babel-register/install';
-if ((process.env.NODE_OPTIONS || '').indexOf(babelRegisterRequire) === -1) {
-  process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, babelRegisterRequire]
+var swcRegisterRequire = '--require=@kbn/swc-register/install';
+if ((process.env.NODE_OPTIONS || '').indexOf(swcRegisterRequire) === -1) {
+  process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, swcRegisterRequire]
     .filter(Boolean)
     .join(' ');
 }

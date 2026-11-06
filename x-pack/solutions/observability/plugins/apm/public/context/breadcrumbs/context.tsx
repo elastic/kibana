@@ -14,7 +14,8 @@ import { useKibana } from '../kibana_context/use_kibana';
 
 export interface Breadcrumb {
   title: string;
-  href: string;
+  /** Omit for the current entity so Chrome Next compatibility Back does not self-link. */
+  href?: string;
 }
 
 interface BreadcrumbApi {
@@ -67,13 +68,10 @@ export function BreadcrumbsContextProvider({ children }: { children: React.React
   const formattedBreadcrumbs: ChromeBreadcrumb[] = api
     .getBreadcrumbs(matches)
     .map((breadcrumb, index, array) => {
+      const isLast = index === array.length - 1;
       return {
         text: breadcrumb.title,
-        ...(index === array.length - 1
-          ? {}
-          : {
-              href: breadcrumb.href,
-            }),
+        ...(!isLast && breadcrumb.href ? { href: breadcrumb.href } : {}),
       };
     });
 

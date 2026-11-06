@@ -10,13 +10,14 @@
 import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   EsWorkflowExecution,
   WorkflowDetailDto,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
@@ -26,7 +27,11 @@ import {
   getEventChainDepthFromHeaders,
 } from './event_context/event_chain_context';
 import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
-import { classifyWorkflowTriggerMatch } from './filter_workflows_by_trigger_condition';
+import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_data_stream';
+import {
+  classifyWorkflowTriggerMatch,
+  findMatchingWorkflowTrigger,
+} from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import {
   createEmptyTriggerResolutionStats,
@@ -41,15 +46,14 @@ import {
   normalizeEventChainVisitedWorkflowIds,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { ScheduleWorkflow } from '../types';
-
-const SCHEDULE_CONCURRENCY = 20;
 
 export interface EmitEventParams {
   triggerId: string;
   payload: Record<string, unknown>;
   request: KibanaRequest;
+  authenticatedUser?: string;
 }
 
 export type EmitEvent = (params: EmitEventParams) => Promise<void>;
@@ -62,7 +66,11 @@ export interface TriggerEventHandlerDeps {
   scheduleWorkflow: ScheduleWorkflow;
   config: EventTriggersConfig;
   logger: Logger;
+  triggerEventsClientPromise?: Promise<TriggerEventsDataStreamClient | undefined>;
+  workflowExecutionRepository: WorkflowExecutionRepository;
 }
+
+const SCHEDULE_CONCURRENCY = 20;
 
 interface ScheduleEventParams {
   payload: Record<string, unknown>;
@@ -109,24 +117,27 @@ function isWorkflowSourcedChainContext(context: EventChainContext | undefined): 
   return context !== undefined;
 }
 
+function isConnectorSourcedEvent(payload: Record<string, unknown>): boolean {
+  return typeof payload.connectorId === 'string' && payload.connectorId.length > 0;
+}
+
 function getMatchingTriggerOn(
   workflow: WorkflowDetailDto,
-  triggerId: string
+  triggerId: string,
+  payload: Record<string, unknown>,
+  requiresConnectorId: boolean
 ): Record<string, unknown> | null {
-  const matchingTrigger = workflow.definition?.triggers?.find(
-    (t) => t != null && typeof t === 'object' && 'type' in t && t.type === triggerId
+  const matchingTrigger = findMatchingWorkflowTrigger(
+    workflow.definition?.triggers,
+    triggerId,
+    payload,
+    requiresConnectorId
   );
-  if (
-    matchingTrigger == null ||
-    typeof matchingTrigger !== 'object' ||
-    !('on' in matchingTrigger) ||
-    matchingTrigger.on == null ||
-    typeof matchingTrigger.on !== 'object' ||
-    Array.isArray(matchingTrigger.on)
-  ) {
+  const onBlock = matchingTrigger?.on;
+  if (onBlock == null || typeof onBlock !== 'object' || Array.isArray(onBlock)) {
     return null;
   }
-  return matchingTrigger.on as Record<string, unknown>;
+  return onBlock as Record<string, unknown>;
 }
 
 function buildNextVisitedWorkflowIds(
@@ -136,8 +147,15 @@ function buildNextVisitedWorkflowIds(
   return normalizeEventChainVisitedWorkflowIds(context?.visitedWorkflowIds, maxEventChainDepth);
 }
 
-function getWorkflowEventsMode(workflow: WorkflowDetailDto, triggerId: string) {
-  return resolveWorkflowEventsModeFromOn(getMatchingTriggerOn(workflow, triggerId));
+function getWorkflowEventsMode(
+  workflow: WorkflowDetailDto,
+  triggerId: string,
+  payload: Record<string, unknown>,
+  requiresConnectorId: boolean
+) {
+  return resolveWorkflowEventsModeFromOn(
+    getMatchingTriggerOn(workflow, triggerId, payload, requiresConnectorId)
+  );
 }
 
 type ScheduleContextSkipReason = 'workflow_events_ignore' | 'depth' | 'cycle';
@@ -155,7 +173,7 @@ export class TriggerEventHandler {
   private readonly spaces: SpacesServiceStart | undefined;
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
-  private readonly triggerEventsClientPromise: ReturnType<typeof initializeTriggerEventsClient>;
+  private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient | undefined>;
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
@@ -168,9 +186,9 @@ export class TriggerEventHandler {
     const coreStart = deps.coreStart;
     this.telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, deps.logger);
 
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-    this.triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
+    this.workflowExecutionRepository = deps.workflowExecutionRepository;
+    this.triggerEventsClientPromise =
+      deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }
 
   async handleEvent(params: EmitEventParams): Promise<void> {
@@ -180,7 +198,7 @@ export class TriggerEventHandler {
       );
       return;
     }
-    const { triggerId, payload, request } = params;
+    const { triggerId, payload, request, authenticatedUser } = params;
 
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -233,7 +251,17 @@ export class TriggerEventHandler {
     }
 
     let scheduleStats: TriggerEventScheduleStats;
-    if (this.config.enabled && workflows.length > 0) {
+    if (
+      this.config.enabled &&
+      workflows.length > 0 &&
+      isConnectorSourcedEvent(payload) &&
+      !request.headers?.authorization
+    ) {
+      this.logger.warn(
+        `Skipping schedule for connector event ${triggerId}: request has no Authorization header`
+      );
+      scheduleStats = createEmptyTriggerScheduleStats();
+    } else if (this.config.enabled && workflows.length > 0) {
       const eventParams: ScheduleEventParams = {
         payload,
         timestamp,
@@ -242,7 +270,12 @@ export class TriggerEventHandler {
         eventChainContext,
         triggerId,
       };
-      scheduleStats = await this.scheduleMatchingWorkflows(workflows, request, eventParams);
+      scheduleStats = await this.scheduleMatchingWorkflows(
+        workflows,
+        request,
+        eventParams,
+        authenticatedUser
+      );
       this.logger.trace(
         `Workflows trigger schedule outcomes: triggerId=${triggerId} ${JSON.stringify(
           scheduleStats
@@ -264,8 +297,8 @@ export class TriggerEventHandler {
   }
 
   /**
-   * Ensures the trigger is registered and, when defined, `eventSchema` matches the same event object
-   * used for KQL resolution and scheduling (`timestamp`, `spaceId`, `eventChainDepth` included).
+   * Ensures the trigger is registered and validates the raw emitted payload against `eventSchema`.
+   * Runtime context fields are added only after validation for KQL resolution and scheduling.
    */
   private validateTrigger(
     triggerId: string,
@@ -365,15 +398,22 @@ export class TriggerEventHandler {
       spaceId
     );
 
+    const requiresConnectorId =
+      this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
     const stats = createEmptyTriggerResolutionStats();
     stats.subscribedCount = allWorkflows.length;
     const workflows: WorkflowDetailDto[] = [];
 
     for (const workflow of allWorkflows) {
-      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger);
+      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger, {
+        requiresConnectorId,
+      });
       switch (outcome) {
         case 'disabled':
           stats.disabledCount += 1;
+          break;
+        case 'connector_id_mismatch':
+          stats.connectorIdMismatchCount += 1;
           break;
         case 'kql_false':
           stats.kqlFalseCount += 1;
@@ -423,7 +463,14 @@ export class TriggerEventHandler {
     | { outcome: 'scheduled'; event: Record<string, unknown> }
     | { outcome: 'skipped'; reason: ScheduleContextSkipReason } {
     const { payload, timestamp, spaceId, eventChainContext, triggerId } = eventParams;
-    const workflowEventsMode = getWorkflowEventsMode(workflow, triggerId);
+    const requiresConnectorId =
+      this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
+    const workflowEventsMode = getWorkflowEventsMode(
+      workflow,
+      triggerId,
+      payload,
+      requiresConnectorId
+    );
 
     if (workflowEventsMode === 'ignore' && isWorkflowSourcedChainContext(eventChainContext)) {
       this.logger.warn(
@@ -473,7 +520,8 @@ export class TriggerEventHandler {
   private async scheduleMatchingWorkflows(
     workflows: WorkflowDetailDto[],
     request: KibanaRequest,
-    eventParams: ScheduleEventParams
+    eventParams: ScheduleEventParams,
+    authenticatedUser?: string
   ): Promise<TriggerEventScheduleStats> {
     if (workflows.length === 0) {
       return createEmptyTriggerScheduleStats();
@@ -504,13 +552,8 @@ export class TriggerEventHandler {
           }
           try {
             validateWorkflowForExecution(workflow, workflow.id);
-            const workflowToRun: WorkflowExecutionEngineModel = {
-              id: workflow.id,
-              name: workflow.name,
-              enabled: workflow.enabled,
-              definition: workflow.definition,
-              yaml: workflow.yaml,
-            };
+            const workflowToRun: WorkflowExecutionEngineModel =
+              toWorkflowExecutionEngineModel(workflow);
             const context: Record<string, unknown> = {
               event: scheduleResult.event,
               spaceId: eventParams.spaceId,
@@ -522,7 +565,11 @@ export class TriggerEventHandler {
                 eventId: eventParams.eventId,
               },
             };
-            await this.scheduleWorkflow(workflowToRun, context, request);
+            if (authenticatedUser) {
+              await this.scheduleWorkflow(workflowToRun, context, request, { authenticatedUser });
+            } else {
+              await this.scheduleWorkflow(workflowToRun, context, request);
+            }
             return 'success';
           } catch (reason) {
             const message = reason instanceof Error ? reason.message : String(reason);

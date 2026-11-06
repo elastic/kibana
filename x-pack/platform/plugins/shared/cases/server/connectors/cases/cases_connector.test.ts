@@ -43,13 +43,14 @@ describe('CasesConnector', () => {
     ruleUrl: 'https://example.com/rules/rule-test-id',
   };
   const groupedAlerts = null;
-  const internallyManagedAlerts = false;
+  const source = 'rule' as const;
 
   const owner = 'cases';
   const timeWindow = '7d';
   const reopenClosedCases = false;
   const maximumCasesToOpen = 5;
   const templateId = null;
+  const templateVersion = null;
   const autoPushCase = null;
 
   const mockExecute = jest.fn();
@@ -69,10 +70,13 @@ describe('CasesConnector', () => {
 
   const casesParams = {
     getCasesClient,
+    getActionsClient: jest.fn().mockResolvedValue({}),
     getSpaceId,
     getUnsecuredSavedObjectsClient,
     getUiSettingsClient,
     isCasesAttachmentsEnabled: false,
+    isTemplatesEnabled: false,
+    isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
   };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
@@ -115,21 +119,77 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
-    expect(CasesConnectorExecutorMock).toBeCalledWith({
+    expect(CasesConnectorExecutorMock).toHaveBeenCalledWith({
       logger,
       casesClient: { foo: 'bar' },
+      actionsClient: {},
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
       spaceId: 'default',
-      isCasesAttachmentsEnabled: false,
+      isTemplatesEnabled: false,
+      isAtLeastPlatinum: casesParams.isAtLeastPlatinum,
     });
+  });
+
+  it('threads isTemplatesEnabled through to the CasesConnectorExecutor', async () => {
+    const connectorWithTemplatesEnabled = new CasesConnector({
+      casesParams: { ...casesParams, isTemplatesEnabled: true },
+      connectorParams,
+    });
+
+    await connectorWithTemplatesEnabled.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      source,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toHaveBeenCalledWith(
+      expect.objectContaining({ isTemplatesEnabled: true })
+    );
+  });
+
+  it('threads isAtLeastPlatinum through to the CasesConnectorExecutor', async () => {
+    const isAtLeastPlatinum = jest.fn().mockResolvedValue(false);
+    const connectorWithLicenseCheck = new CasesConnector({
+      casesParams: { ...casesParams, isAtLeastPlatinum },
+      connectorParams,
+    });
+
+    await connectorWithLicenseCheck.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      source,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toBeCalledWith(
+      expect.objectContaining({ isAtLeastPlatinum })
+    );
   });
 
   it('executes the CasesConnectorExecutor correctly', async () => {
@@ -140,24 +200,26 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
-    expect(mockExecute).toBeCalledWith({
+    expect(mockExecute).toHaveBeenCalledWith({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
   });
@@ -170,10 +232,11 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -191,10 +254,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen: 11,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toMatchObject({
@@ -217,16 +281,17 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts: true,
+      source: 'attack',
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
-    expect(mockExecute).toBeCalledWith(
+    expect(mockExecute).toHaveBeenCalledWith(
       expect.objectContaining({
-        internallyManagedAlerts: true,
+        source: 'attack',
         maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       })
     );
@@ -243,10 +308,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen: 10,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toMatchObject({
@@ -262,14 +328,59 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
-    expect(getCasesClient).toBeCalled();
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'rule', id: rule.id, name: rule.name },
+    });
+  });
+
+  it('creates the cases client with an attack source for internally managed alerts', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      source: 'attack',
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'attack', id: rule.id, name: rule.name },
+    });
+  });
+
+  it('maps a pre-upgrade internallyManagedAlerts payload to an attack source', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts: true,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'attack', id: rule.id, name: rule.name },
+    });
   });
 
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {
@@ -282,10 +393,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (error) {
@@ -310,10 +422,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (error) {
@@ -338,10 +451,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
@@ -364,10 +478,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (err) {
@@ -395,15 +510,16 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
-    expect(nextBackOff).toBeCalledTimes(2);
-    expect(mockExecute).toBeCalledTimes(3);
+    expect(nextBackOff).toHaveBeenCalledTimes(2);
+    expect(mockExecute).toHaveBeenCalledTimes(3);
   });
 
   it('throws if the kibana request is not defined', async () => {
@@ -419,10 +535,11 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (err) {
@@ -436,8 +553,8 @@ describe('CasesConnector', () => {
       '[CasesConnector][run] Execution of case connector failed. Message: Kibana request is not defined. Status code: 400'
     );
 
-    expect(nextBackOff).toBeCalledTimes(0);
-    expect(mockExecute).toBeCalledTimes(0);
+    expect(nextBackOff).toHaveBeenCalledTimes(0);
+    expect(mockExecute).toHaveBeenCalledTimes(0);
   });
 
   it('does not execute with no alerts', async () => {
@@ -448,16 +565,17 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
-    expect(getCasesClient).not.toBeCalled();
-    expect(CasesConnectorExecutorMock).not.toBeCalled();
-    expect(mockExecute).not.toBeCalled();
-    expect(nextBackOff).not.toBeCalled();
+    expect(getCasesClient).not.toHaveBeenCalled();
+    expect(CasesConnectorExecutorMock).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 });

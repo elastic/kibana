@@ -97,6 +97,20 @@ describe('ServerShortUrlClient', () => {
       expect(data.accessDate).toBeGreaterThan(Date.now() - 1000000);
       expect(data.accessCount).toBe(0);
     });
+
+    test('rejects a custom slug with invalid characters', async () => {
+      const { client, locator } = setup();
+
+      await expect(
+        client.create({
+          locator,
+          slug: 'pipe|is-not-allowed',
+          params: {
+            url: '/foo/bar',
+          },
+        })
+      ).rejects.toThrow('Invalid [slug = pipe|is-not-allowed].');
+    });
   });
 
   describe('.resolve()', () => {
@@ -151,7 +165,7 @@ describe('ServerShortUrlClient', () => {
             url: '/app/test#foo/bar/baz',
           },
         })
-      ).rejects.toThrowError(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
+      ).rejects.toThrow(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
     });
 
     test('updates "accessCount" and "accessDate" on URL resolution by slug', async () => {
@@ -199,7 +213,7 @@ describe('ServerShortUrlClient', () => {
     test('throws when fetching non-existing short URL', async () => {
       const { client } = setup();
 
-      await expect(() => client.get('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')).rejects.toThrowError(
+      await expect(() => client.get('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')).rejects.toThrow(
         new Error(`No short url with id "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"`)
       );
     });
@@ -216,7 +230,7 @@ describe('ServerShortUrlClient', () => {
       });
       await client.delete(shortUrl1.data.id);
 
-      await expect(() => client.get(shortUrl1.data.id)).rejects.toThrowError(
+      await expect(() => client.get(shortUrl1.data.id)).rejects.toThrow(
         new Error(`No short url with id "${shortUrl1.data.id}"`)
       );
     });

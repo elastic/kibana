@@ -39,7 +39,7 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
-    defaultMessage: 'Create new rule',
+    defaultMessage: 'Create rule',
   }
 );
 
@@ -640,7 +640,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
     defaultMessage:
-      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE tactic or technique (e.g., "Defense Evasion", "TA0005" or "AML.T0044")',
   }
 );
 
@@ -702,6 +702,13 @@ export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlRulesDisabledMessageTitle',
   {
     defaultMessage: 'ML rules require Platinum License and ML Admin Permissions',
+  }
+);
+
+export const RULE_CHANGES_HISTORY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleChangesHistoryDescription',
+  {
+    defaultMessage: 'History',
   }
 );
 
@@ -1194,6 +1201,41 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   }
 );
 
+export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
+  {
+    defaultMessage: 'Auto refresh settings',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_ON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOnAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOffAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: Off',
+  }
+);
+
 export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
@@ -1534,8 +1576,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
 export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
-    defaultMessage:
-      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+    defaultMessage: 'Check the bulk update dialog for changes on rules containing data views.',
   }
 );
 
@@ -1670,5 +1711,59 @@ export const RULE_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
   {
     defaultMessage: 'Settings',
+  }
+);
+
+export const UPGRADE_PREBUILT_RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradePrebuiltRulesTableCaption',
+  {
+    defaultMessage: 'Prebuilt rules available for upgrade',
+  }
+);
+
+/**
+ * AI rule creation save handler
+ */
+
+export const SAVE_RULE_FAILED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.saveFailedTitle',
+  {
+    defaultMessage: 'Failed to save rule',
+  }
+);
+
+export const RULE_UPDATED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.updatedTitle',
+  {
+    defaultMessage: 'Rule updated',
+  }
+);
+
+export const RULE_SAVED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.savedTitle',
+  {
+    defaultMessage: 'Rule saved',
+  }
+);
+
+export const ORIGIN_LINK_FAILED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.originLinkFailedTitle',
+  {
+    defaultMessage: 'Rule saved, but the chat card could not be linked to it',
+  }
+);
+
+export const ORIGIN_LINK_FAILED_TEXT = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.originLinkFailedText',
+  {
+    defaultMessage:
+      'The rule was saved successfully. Refresh the conversation before saving from this card again to avoid creating a duplicate.',
+  }
+);
+
+export const UNKNOWN_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.unknownErrorMessage',
+  {
+    defaultMessage: 'Unknown error',
   }
 );

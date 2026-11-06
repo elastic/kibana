@@ -11,6 +11,10 @@ import type { Entity } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 
+export type EntityStoreRefresh = NonNullable<
+  Parameters<EntityUpdateClient['bulkUpdateEntity']>[0]['refresh']
+>;
+
 const scoreToEntityDoc = (
   entityType: EntityType,
   score: EntityRiskScoreRecord
@@ -46,11 +50,14 @@ export const persistRiskScoresToEntityStore = async ({
   crudClient,
   logger,
   scores,
+  refresh,
 }: {
   crudClient: EntityUpdateClient;
   logger: Pick<Logger, 'debug' | 'warn'>;
   scores: Partial<Record<EntityType, EntityRiskScoreRecord[]>>;
-}): Promise<string[]> => {
+  /** Omit to wait for a refresh, as the entity store does by default. */
+  refresh?: EntityStoreRefresh;
+}) => {
   const allObjects: BulkObject[] = [];
   for (const [entityType, entityScores] of Object.entries(scores)) {
     if (entityScores && entityScores.length > 0) {
@@ -61,12 +68,13 @@ export const persistRiskScoresToEntityStore = async ({
   }
 
   if (allObjects.length === 0) {
-    return [];
+    return { docsWritten: 0, unexpectedErrors: [] };
   }
 
   const errors = await crudClient.bulkUpdateEntity({
     objects: allObjects,
     force: true,
+    refresh,
   });
 
   const missingEntityErrors = errors.filter(isMissingEntityUpdateError);
@@ -84,7 +92,10 @@ export const persistRiskScoresToEntityStore = async ({
     );
   }
 
-  return unexpectedErrors.map((e) => `[${e._id}] ${e.reason}`);
+  return {
+    docsWritten: allObjects.length - errors.length,
+    unexpectedErrors: unexpectedErrors.map((e) => `[${e._id}] ${e.reason}`),
+  };
 };
 
 const isMissingEntityUpdateError = ({ status, type }: { status: number; type?: string }): boolean =>

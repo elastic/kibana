@@ -19,9 +19,11 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   type EuiSelectOption,
 } from '@elastic/eui';
 import { HTTP_METHODS, type ActionParamsType, type HttpMethod } from '@kbn/connector-schemas/http';
+import type { QueryParamValue } from '@kbn/connector-schemas/http/schemas/v1';
 
 const HTTP_METHOD_OPTIONS: EuiSelectOption[] = HTTP_METHODS.map((method) => ({
   value: method,
@@ -32,9 +34,9 @@ const methodExpectsBody = (method: HttpMethod): boolean => {
   return !['GET', 'DELETE'].includes(method);
 };
 
-interface KeyValuePair {
+interface KeyValuePair<TValue = string> {
   key: string;
-  value: string;
+  value: TValue;
 }
 
 function formatHttpBodyForEditor(body: ActionParamsType['body']): string | undefined {
@@ -56,9 +58,11 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
 }) => {
   const { path, method = 'GET', body, query, headers } = actionParams;
 
-  const [queryParams, setQueryParams] = useState<KeyValuePair[]>(() => {
+  const [queryParams, setQueryParams] = useState<KeyValuePair<string>[]>(() => {
     if (!query) return [{ key: '', value: '' }];
-    return Object.entries(query).map(([key, value]) => ({ key, value }));
+    return Object.entries(query)
+      .filter(([_, value]) => typeof value === 'string')
+      .map(([key, value]) => ({ key, value: value as string }));
   });
 
   const [headerParams, setHeaderParams] = useState<KeyValuePair[]>(() => {
@@ -71,7 +75,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
 
   // Sync query params with actionParams
   useEffect(() => {
-    const queryRecord: Record<string, string> = {};
+    const queryRecord: Record<string, QueryParamValue> = {};
     queryParams.forEach(({ key, value }) => {
       if (key && key.trim()) {
         queryRecord[key] = value || '';
@@ -265,18 +269,25 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={() => removeQueryParam(idx)}
-                aria-label={i18n.translate(
-                  'xpack.stackConnectors.components.http.removeQueryParam',
-                  {
-                    defaultMessage: 'Remove query parameter',
-                  }
-                )}
-                data-test-subj={`httpQueryRemoveButton-${idx}`}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.stackConnectors.components.http.removeQueryParam', {
+                  defaultMessage: 'Remove query parameter',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => removeQueryParam(idx)}
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.http.removeQueryParam',
+                    {
+                      defaultMessage: 'Remove query parameter',
+                    }
+                  )}
+                  data-test-subj={`httpQueryRemoveButton-${idx}`}
+                />
+              </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -344,15 +355,22 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={() => removeHeader(idx)}
-                aria-label={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
+              <EuiToolTip
+                content={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
                   defaultMessage: 'Remove header',
                 })}
-                data-test-subj={`httpHeaderRemoveButton-${idx}`}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => removeHeader(idx)}
+                  aria-label={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
+                    defaultMessage: 'Remove header',
+                  })}
+                  data-test-subj={`httpHeaderRemoveButton-${idx}`}
+                />
+              </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>

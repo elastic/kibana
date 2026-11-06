@@ -10,9 +10,11 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { TrustedDeviceValidator } from './trusted_device_validator';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 describe('Endpoint Trusted Device API validations', () => {
@@ -180,6 +182,63 @@ describe('Endpoint Trusted Device API validations', () => {
           expect(error.message).not.toContain('Trusted devices feature is not enabled');
         }
       });
+    });
+  });
+
+  describe('entry value length bounds', () => {
+    beforeEach(() => {
+      (
+        mockEndpointAppContextService.experimentalFeatures as unknown as {
+          trustedDevices: boolean;
+        }
+      ).trustedDevices = true;
+    });
+
+    const buildItem = (value: string | string[]): CreateExceptionListItemOptions =>
+      ({
+        listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+        name: 'Test trusted device',
+        description: '',
+        namespaceType: 'agnostic',
+        osTypes: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [{ field: 'host.name', type: 'match', operator: 'included', value }],
+      } as unknown as CreateExceptionListItemOptions);
+
+    it('accepts a scalar value at the 4096 character limit', async () => {
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem('a'.repeat(4096)))
+      ).resolves.toBeDefined();
+    });
+
+    it('accepts an array value within the 4096 character limit', async () => {
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem(['host-a', 'host-b']))
+      ).resolves.toBeDefined();
+    });
+
+    it('accepts an array value element at the 4096 character limit', async () => {
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem(['a'.repeat(4096)]))
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects a string value over the 4096 character limit', async () => {
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem('a'.repeat(4097)))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem('a'.repeat(4097)))
+      ).rejects.toThrow(/maximum length of \[4096\]/);
+    });
+
+    it('rejects an array value element over the 4096 character limit', async () => {
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem(['a'.repeat(4097)]))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem(['a'.repeat(4097)]))
+      ).rejects.toThrow(/maximum length of \[4096\]/);
     });
   });
 

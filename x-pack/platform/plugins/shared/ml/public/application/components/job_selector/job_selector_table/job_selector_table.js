@@ -180,6 +180,9 @@ export function JobSelectorTable({
 
     return (
       <CustomSelectionTable
+        aria-label={i18n.translate('xpack.ml.jobSelector.jobsTable.ariaLabel', {
+          defaultMessage: 'Jobs',
+        })}
         columns={columns}
         filters={filters}
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
@@ -233,6 +236,9 @@ export function JobSelectorTable({
 
     return (
       <CustomSelectionTable
+        aria-label={i18n.translate('xpack.ml.jobSelector.groupsTable.ariaLabel', {
+          defaultMessage: 'Groups',
+        })}
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}

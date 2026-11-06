@@ -14,16 +14,11 @@ const workflowTool = <TName extends string>(
 };
 
 export const workflowTools = {
-  insertStep: workflowTool('workflow_insert_step'),
-  modifyStep: workflowTool('workflow_modify_step'),
-  modifyStepProperty: workflowTool('workflow_modify_step_property'),
-  modifyProperty: workflowTool('workflow_modify_property'),
-  deleteStep: workflowTool('workflow_delete_step'),
-  setYaml: workflowTool('workflow_set_yaml'),
   getStepDefinitions: workflowTool('get_step_definitions'),
   getTriggerDefinitions: workflowTool('get_trigger_definitions'),
   validateWorkflow: workflowTool('validate_workflow'),
   getExamples: workflowTool('get_examples'),
   getConnectors: workflowTool('get_connectors'),
+  getWorkflow: workflowTool('get_workflow'),
   executeStep: workflowTool('workflow_execute_step'),
 } as const;

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { State, FilterField, PositionedElement } from '../../../types';
 import { groupFiltersBy, getFiltersExprsFromExpression } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';

@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -32,7 +33,7 @@ import { collectDescendantStepIds } from '../../../state_management/utils';
 import { getStepPanelColour } from '../../../utils';
 import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { BlockDisableOverlay } from '../../../../../../draggable_steps';
 import { CreateStepButton } from '../../../create_step_button';
 import { EmptyBranchDropTarget } from '../../empty_branch_drop_target';
 import { WhereBlockConfiguration } from './configuration';
@@ -175,16 +176,26 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                       margin-left: -${euiTheme.size.xxs};
                     `}
                   >
-                    <EuiButtonIcon
-                      iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                      onClick={toggle}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
                         {
                           defaultMessage: 'Toggle nested steps',
                         }
                       )}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                        onClick={toggle}
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
+                          {
+                            defaultMessage: 'Toggle nested steps',
+                          }
+                        )}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem

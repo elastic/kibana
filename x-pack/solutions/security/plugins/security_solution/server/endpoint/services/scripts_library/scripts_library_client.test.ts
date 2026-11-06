@@ -808,7 +808,7 @@ describe('scripts library client', () => {
 
     it('should complete successfully even if rules check fails', async () => {
       rulesClient.find.mockRejectedValue(
-        new Error('Unauthorized to find rules for any rule types')
+        new Error('Unauthorized to find rules for any rule types.')
       );
       await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
     });

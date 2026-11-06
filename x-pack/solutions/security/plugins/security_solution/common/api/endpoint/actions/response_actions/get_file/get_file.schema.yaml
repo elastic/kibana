@@ -76,3 +76,5 @@ components:
                 path:
                   type: string
                   description: The full file path to retrieve from the endpoint.
+                  minLength: 1
+                  maxLength: 4096

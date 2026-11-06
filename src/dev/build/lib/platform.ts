@@ -7,34 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { dashSuffix } from './util';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
-export type Variant = 'serverless';
-
-export type SolutionArtifact = Exclude<KibanaSolution, 'search'> | 'elasticsearch';
-export interface Solution {
-  id: KibanaSolution;
-  artifact: SolutionArtifact;
-}
-
-export const SOLUTION_BUILDS: Solution[] = [
-  { id: 'workplaceai', artifact: 'workplaceai' },
-  { id: 'observability', artifact: 'observability' },
-  { id: 'search', artifact: 'elasticsearch' },
-  { id: 'security', artifact: 'security' },
-  { id: 'vectordb', artifact: 'vectordb' },
-];
+export type Variant = 'serverless' | 'cloud';
 
 export class Platform {
   constructor(
     private name: PlatformName,
     private architecture: PlatformArchitecture,
     private buildName: string,
-    private variant?: Variant,
-    private solution?: Solution
+    private variant?: Variant
   ) {}
 
   getName() {
@@ -57,14 +41,6 @@ export class Platform {
     return this.variant;
   }
 
-  getSolutionId() {
-    return this.solution?.id;
-  }
-
-  getSolutionArtifact() {
-    return this.solution?.artifact;
-  }
-
   isWindows() {
     return this.name === 'win32';
   }
@@ -81,10 +57,12 @@ export class Platform {
     return this.variant === 'serverless';
   }
 
+  isCloud() {
+    return this.variant === 'cloud';
+  }
+
   toString() {
-    return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}${dashSuffix(
-      this.getSolutionArtifact()
-    )}`;
+    return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}`;
   }
 }
 
@@ -97,14 +75,14 @@ export const DOWNLOAD_PLATFORMS = [
   new Platform('win32', 'arm64', 'windows-arm64'),
 ];
 
+export const CLOUD_PLATFORMS = [
+  new Platform('linux', 'x64', 'linux-x86_64', 'cloud'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'cloud'),
+];
+
 export const SERVERLESS_PLATFORMS = [
   new Platform('linux', 'x64', 'linux-x86_64', 'serverless'),
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless'),
-
-  ...SOLUTION_BUILDS.flatMap((solution) => [
-    new Platform('linux', 'x64', 'linux-x86_64', 'serverless', solution),
-    new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', solution),
-  ]),
 ];
 
-export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];
+export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS, ...SERVERLESS_PLATFORMS];

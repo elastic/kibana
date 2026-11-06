@@ -34,7 +34,15 @@ describe('resetToZero', () => {
     dataClient = riskScoreDataClientMock.create();
     writerBulkMock = jest.fn().mockResolvedValue({ errors: [], docs_written: 1 });
     (dataClient.getWriter as jest.Mock).mockResolvedValue({ bulk: writerBulkMock });
-    (persistRiskScoresToEntityStore as jest.Mock).mockResolvedValue([]);
+    (persistRiskScoresToEntityStore as jest.Mock).mockImplementation(
+      async ({ scores }: { scores: Partial<Record<string, unknown[]>> }) => {
+        const count = Object.values(scores).reduce(
+          (sum, arr) => sum + ((arr as unknown[] | undefined)?.length ?? 0),
+          0
+        );
+        return { docsWritten: count, unexpectedErrors: [] };
+      }
+    );
     privmonUserCrudService = {
       create: jest.fn(),
       get: jest.fn(),

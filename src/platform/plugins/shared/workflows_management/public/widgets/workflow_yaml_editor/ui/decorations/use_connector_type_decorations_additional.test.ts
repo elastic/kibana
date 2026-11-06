@@ -21,6 +21,7 @@ const mockConnectorsMap = new Map<string, { stability?: string }>([
 ]);
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
   getBuiltInStepStability: (type: string) => {
     if (type === 'if') return 'tech_preview';
@@ -40,7 +41,7 @@ jest.mock('../../../../../common/schema', () => ({
   getCachedAllConnectorsMap: () => mockConnectorsMap,
 }));
 
-jest.mock('../../../../shared/ui/step_icons/get_base_connector_type', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
   getBaseConnectorType: (type: string) => {
     if (type.startsWith('elasticsearch.')) return 'elasticsearch';
     if (type.startsWith('kibana.')) return 'kibana';

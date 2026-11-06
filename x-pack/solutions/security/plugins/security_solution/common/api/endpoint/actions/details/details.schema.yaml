@@ -17,6 +17,8 @@ paths:
           description: The ID of the response action to retrieve.
           schema:
             type: string
+            minLength: 1
+            maxLength: 256
             example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
       responses:
         '200':

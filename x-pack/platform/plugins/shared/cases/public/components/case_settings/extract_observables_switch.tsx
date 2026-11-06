@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiSwitch } from '@elastic/eui';
 
 import * as i18n from '../../common/translations';
@@ -39,12 +39,21 @@ const ExtractObservablesSwitchComponent: React.FC<Props> = ({
   onSwitchChange,
 }) => {
   const [isOn, setIsOn] = useState(isEnabled);
+
+  // Keeps this switch in sync with the setting when it is changed from elsewhere,
+  // e.g. the redesigned case details page also exposes this toggle in the Case Settings popover.
+  useEffect(() => {
+    setIsOn(isEnabled);
+  }, [isEnabled]);
+
   const onChange = useCallback(() => {
+    const newIsOn = !isOn;
+
     if (onSwitchChange) {
-      onSwitchChange(isOn);
+      onSwitchChange(newIsOn);
     }
 
-    setIsOn(!isOn);
+    setIsOn(newIsOn);
   }, [isOn, onSwitchChange]);
 
   return (

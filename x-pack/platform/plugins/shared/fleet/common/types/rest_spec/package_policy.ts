@@ -45,7 +45,7 @@ export interface GetOnePackagePolicyResponse {
 }
 
 export interface CreatePackagePolicyRequest {
-  body: NewPackagePolicy & { force?: boolean };
+  body: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean };
   query: {
     format?: typeof inputsFormat.Simplified | typeof inputsFormat.Legacy;
   };
@@ -62,6 +62,9 @@ export type UpdatePackagePolicyRequest = GetOnePackagePolicyRequest & {
 export type UpdatePackagePolicyResponse = CreatePackagePolicyResponse;
 
 export interface DeletePackagePoliciesRequest {
+  query?: {
+    onboarding_deployment_id?: string;
+  };
   body: {
     packagePolicyIds: string[];
     force?: boolean;

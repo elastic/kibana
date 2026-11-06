@@ -1,0 +1,216 @@
+{
+  "sha1": "a44eebb12cb9053d37be4a080cd8b7da128bb84c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2c9741297369a34-45aa113632afa53",
+      "title": "Spaces CPS project routing - capabilities hides the section when the user lacks project_routing privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_capabilities.spec.ts",
+        "line": 24,
+        "column": 1
+      }
+    },
+    {
+      "id": "2c9741297369a34-bdaacddbf848c54",
+      "title": "Spaces CPS project routing - capabilities shows a read-only picker when the user can read but not manage project routing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_capabilities.spec.ts",
+        "line": 44,
+        "column": 24
+      }
+    },
+    {
+      "id": "e89d96e045ed383-bc893c42a545147",
+      "title": "Spaces CPS project routing - eligible tier shows the Cross-project search section on the create space page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
+        "line": 25,
+        "column": 68
+      }
+    },
+    {
+      "id": "e89d96e045ed383-b0b65c4900e456f",
+      "title": "Spaces CPS project routing - eligible tier shows the Cross-project search section on the edit space page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
+        "line": 27,
+        "column": 23
+      }
+    },
+    {
+      "id": "e89d96e045ed383-202970cbfc81d27",
+      "title": "Spaces CPS project routing - eligible tier creates a space with default all-projects routing and persists it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
+        "line": 40,
+        "column": 16
+      }
+    },
+    {
+      "id": "e89d96e045ed383-fc0b6e0757df0f5",
+      "title": "Spaces CPS project routing - eligible tier creates a space with origin-only project routing and persists it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
+        "line": 53,
+        "column": 16
+      }
+    },
+    {
+      "id": "e89d96e045ed383-5e85bf5bc9231a5",
+      "title": "Spaces CPS project routing - eligible tier updates project routing on edit and persists after reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
+        "line": 75,
+        "column": 16
+      }
+    },
+    {
+      "id": "e89d96e045ed383-9c9ebe30aa01ba2",
+      "title": "Spaces CPS project routing - eligible tier updates the chrome project picker when the active space routing is saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
+        "line": 115,
+        "column": 24
+      }
+    },
+    {
+      "id": "5232a7bd6640ad4-c4a93fbb134a105",
+      "title": "Spaces CPS project routing - ineligible tier hides the Cross-project search section on the create space page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
+        "line": 28,
+        "column": 10
+      }
+    },
+    {
+      "id": "5232a7bd6640ad4-31968c854c8654b",
+      "title": "Spaces CPS project routing - ineligible tier hides the Cross-project search section on edit when space has default routing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
+        "line": 31,
+        "column": 25
+      }
+    },
+    {
+      "id": "5232a7bd6640ad4-1e93af98dda434f",
+      "title": "Spaces CPS project routing - ineligible tier hides the Cross-project search section on edit when project routing is unset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "5232a7bd6640ad4-0b7a4a30571ea87",
+      "title": "Spaces CPS project routing - ineligible tier shows the Cross-project search section on edit when space has custom project routing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
+        "line": 57,
+        "column": 13
+      }
+    },
+    {
+      "id": "5232a7bd6640ad4-f4cbe88a9372f9c",
+      "title": "Spaces CPS project routing - ineligible tier allows unsetting custom project routing on edit so the section can hide after save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
+        "line": 70,
+        "column": 23
+      }
+    }
+  ]
+}

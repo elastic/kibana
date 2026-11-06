@@ -13,17 +13,12 @@ import {
   exportSingleWorkflow,
   exportWorkflows,
   findMissingReferencedIds,
-  prepareSingleWorkflowExport,
   resolveAllReferences,
 } from './export_workflows';
 
 const mockDownloadFileAs = jest.fn();
 jest.mock('@kbn/share-plugin/public', () => ({
   downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-}));
-
-jest.mock('@kbn/workflows-yaml', () => ({
-  stringifyWorkflowDefinition: (def: unknown) => `stringified:${JSON.stringify(def)}`,
 }));
 
 const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
@@ -45,15 +40,17 @@ jest.mock('./export/generate_zip_archive', () => ({
   generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
 }));
 
-const createMockWorkflowApi = (): jest.Mocked<WorkflowApi> =>
+const createMockWorkflowApi = (
+  yamlEntries: Array<{ id: string; yaml: string }> = [
+    { id: 'w-1', yaml: 'name: First\nsteps: []' },
+    { id: 'w-2', yaml: 'name: Second\nsteps: []' },
+  ]
+): jest.Mocked<WorkflowApi> =>
   ({
     exportWorkflows: jest.fn().mockResolvedValue({
-      entries: [
-        { id: 'w-1', yaml: 'name: First\nsteps: []' },
-        { id: 'w-2', yaml: 'name: Second\nsteps: []' },
-      ],
+      entries: yamlEntries,
       manifest: {
-        exportedCount: 2,
+        exportedCount: yamlEntries.length,
         exportedAt: '2026-01-01T00:00:00.000Z',
         version: '1',
       },
@@ -65,63 +62,65 @@ describe('export_workflows', () => {
     jest.clearAllMocks();
   });
 
-  describe('prepareSingleWorkflowExport', () => {
-    it('should return filename and payload for a workflow with a definition', () => {
-      const result = prepareSingleWorkflowExport(createWorkflow({ name: 'My Workflow' }));
-
-      expect(result).not.toBeNull();
-      expect(result!.filename).toBe('My_Workflow.yml');
-      expect(result!.content.type).toBe('text/yaml');
-      // the content property is exposed for testing puroposes
-      expect((result!.content as { content: string }).content).toContain('stringified:');
-    });
-
-    it('should sanitize special characters in workflow name', () => {
-      const result = prepareSingleWorkflowExport(createWorkflow({ name: 'Hello World! @#$%' }));
-
-      expect(result!.filename).toBe('Hello_World.yml');
-    });
-
-    it('should fall back to workflow_export.yml when name is all special chars', () => {
-      const result = prepareSingleWorkflowExport(createWorkflow({ name: '!@#$%^&*()' }));
-
-      expect(result!.filename).toBe('workflow_export.yml');
-    });
-
-    it('should return null when definition is null', () => {
-      const result = prepareSingleWorkflowExport(createWorkflow({ definition: null }));
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('exportSingleWorkflow', () => {
-    it('should call downloadFileAs with .yml extension and yaml content', () => {
-      exportSingleWorkflow(createWorkflow({ name: 'My Workflow' }));
+    it('should call api.exportWorkflows with the workflow id and download stored yaml as .yml', async () => {
+      const storedYaml = '# comment\nname: My_Workflow\nenabled: true\nsteps: []';
+      const api = createMockWorkflowApi([{ id: 'w-1', yaml: storedYaml }]);
+      await exportSingleWorkflow(createWorkflow({ id: 'w-1', name: 'My Workflow' }), api);
 
+      expect(api.exportWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
       expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
-      const [filename, opts] = mockDownloadFileAs.mock.calls[0];
+      const [filename, content] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toBe('My_Workflow.yml');
-      expect(opts.type).toBe('text/yaml');
-      expect(opts.content).toContain('stringified:');
+      expect(content.type).toBe('text/yaml');
+      // The stored yaml (with comment + enabled: true) must be preserved verbatim
+      expect(content.content).toBe(storedYaml);
     });
 
-    it('should no-op when definition is null', () => {
-      exportSingleWorkflow(createWorkflow({ definition: null }));
+    it('should sanitize special characters in workflow name', async () => {
+      const api = createMockWorkflowApi([{ id: 'w-1', yaml: 'name: w' }]);
+      await exportSingleWorkflow(createWorkflow({ name: 'Hello World! @#$%' }), api);
+
+      const [filename] = mockDownloadFileAs.mock.calls[0];
+      expect(filename).toBe('Hello_World.yml');
+    });
+
+    it('should fall back to workflow_export.yml when name is all special chars', async () => {
+      const api = createMockWorkflowApi([{ id: 'w-1', yaml: 'name: w' }]);
+      await exportSingleWorkflow(createWorkflow({ name: '!@#$%^&*()' }), api);
+
+      const [filename] = mockDownloadFileAs.mock.calls[0];
+      expect(filename).toBe('workflow_export.yml');
+    });
+
+    it('should no-op when definition is null', async () => {
+      const api = createMockWorkflowApi();
+      await exportSingleWorkflow(createWorkflow({ definition: null }), api);
+
+      expect(api.exportWorkflows).not.toHaveBeenCalled();
+      expect(mockDownloadFileAs).not.toHaveBeenCalled();
+    });
+
+    it('should no-op when the server returns no entries', async () => {
+      const api = createMockWorkflowApi([]);
+      await exportSingleWorkflow(createWorkflow({ id: 'w-1' }), api);
 
       expect(mockDownloadFileAs).not.toHaveBeenCalled();
     });
   });
 
   describe('exportWorkflows', () => {
-    it('should export single workflow as YAML when array has length 1', async () => {
-      const api = createMockWorkflowApi();
-      const result = await exportWorkflows([createWorkflow()], api);
+    it('should call api.exportWorkflows and download as .yml for a single workflow', async () => {
+      const storedYaml = 'name: Test Workflow\nenabled: true\nsteps: []';
+      const api = createMockWorkflowApi([{ id: 'w-1', yaml: storedYaml }]);
+      const result = await exportWorkflows([createWorkflow({ id: 'w-1' })], api);
 
       expect(result).toBe(1);
-      const [filename] = mockDownloadFileAs.mock.calls[0];
+      expect(api.exportWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
+      const [filename, content] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/\.yml$/);
-      expect(api.exportWorkflows).not.toHaveBeenCalled();
+      expect(content.type).toBe('text/yaml');
+      expect(content.content).toBe(storedYaml);
     });
 
     it('should fetch entries from API and build ZIP client-side for multiple workflows', async () => {
@@ -165,7 +164,7 @@ describe('export_workflows', () => {
     });
 
     it('should only export workflows with non-null definitions', async () => {
-      const api = createMockWorkflowApi();
+      const api = createMockWorkflowApi([{ id: 'w-1', yaml: 'name: Has Def\nsteps: []' }]);
       const workflows = [
         createWorkflow({ id: 'w-1', name: 'Has Def' }),
         createWorkflow({ id: 'w-2', name: 'No Def', definition: null }),

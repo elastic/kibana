@@ -13,6 +13,7 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 import type { ActionBarProps } from './action_bar';
 import { ActionBar } from './action_bar';
+import { ActionBarWarning } from './action_bar_warning';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 import { SurrDocType } from '../../services/context';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
@@ -34,7 +35,6 @@ describe('Test Discover Context ActionBar', () => {
     const props: ActionBarProps = {
       defaultStepSize: 5,
       docCount: 20,
-      docCountAvailable: 0,
       isDisabled: false,
       isLoading: false,
       onChangeCount,
@@ -134,9 +134,18 @@ describe('Test Discover Context ActionBar', () => {
       expect(onChangeCount).toHaveBeenCalledTimes(1);
     });
   });
+});
+
+describe('Test Discover Context ActionBarWarning', () => {
+  const renderWarning = (type: SurrDocType) =>
+    renderWithKibanaRenderContext(
+      <DiscoverTestProvider>
+        <ActionBarWarning docCount={0} type={type} />
+      </DiscoverTestProvider>
+    );
 
   test('shows the predecessors warning message', () => {
-    renderComponent(SurrDocType.PREDECESSORS);
+    renderWarning(SurrDocType.PREDECESSORS);
 
     expect(screen.getByTestId('predecessorsWarningMsg')).toHaveTextContent(
       'No documents newer than the anchor could be found.'
@@ -144,7 +153,7 @@ describe('Test Discover Context ActionBar', () => {
   });
 
   test('shows the successors warning message', () => {
-    renderComponent(SurrDocType.SUCCESSORS);
+    renderWarning(SurrDocType.SUCCESSORS);
 
     expect(screen.getByTestId('successorsWarningMsg')).toHaveTextContent(
       'No documents older than the anchor could be found.'

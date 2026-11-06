@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { INDEX, TIMESTAMP, _IGNORED } from '../../../../common/es_fields';
-import { createDatasetQualityESClient } from '../../../utils';
+import { createDatasetQualityESClient, isFieldAggregatable } from '../../../utils';
 import { existsQuery, rangeQuery } from '../../../utils/queries';
 import { getFieldIntervalInSeconds } from '../../../utils/get_interval';
 
@@ -26,6 +26,20 @@ export async function getDegradedFields({
 }): Promise<DegradedFieldResponse> {
   const fieldInterval = getFieldIntervalInSeconds({ start, end });
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+  // _ignored is not always aggregatable, skip the search to avoid fielddata errors.
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
+    index: dataStream,
+    fields: [_IGNORED],
+    include_unmapped: false,
+    index_filter: {
+      ...rangeQuery(start, end)[0],
+    },
+  });
+
+  if (!isFieldAggregatable(fieldCapsResponse, _IGNORED)) {
+    return { degradedFields: [] };
+  }
 
   const filterQuery = [...rangeQuery(start, end)];
 

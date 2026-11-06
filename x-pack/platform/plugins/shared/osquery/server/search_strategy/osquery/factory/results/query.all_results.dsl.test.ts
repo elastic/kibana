@@ -42,8 +42,9 @@ describe('buildResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index: 'logs-osquery_manager.result*',
+        index: ['logs-osquery_manager.result*'],
         ignore_unavailable: true,
+        preference: 'action-123',
         aggs: {
           count_by_agent_id: {
             terms: {
@@ -61,8 +62,8 @@ describe('buildResultsQuery', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'action_id: action-123',
+                term: {
+                  action_id: 'action-123',
                 },
               },
             ],
@@ -78,6 +79,7 @@ describe('buildResultsQuery', () => {
               order: 'desc',
             },
           },
+          '_doc',
         ],
       });
     });
@@ -106,8 +108,13 @@ describe('buildResultsQuery', () => {
         bool: {
           filter: [
             {
-              query_string: {
-                query: 'action_id: action-456 AND agent.id: agent-789',
+              term: {
+                action_id: 'action-456',
+              },
+            },
+            {
+              term: {
+                'agent.id': 'agent-789',
               },
             },
           ],
@@ -135,8 +142,13 @@ describe('buildResultsQuery', () => {
         bool: {
           filter: [
             {
+              term: {
+                action_id: 'action-abc',
+              },
+            },
+            {
               query_string: {
-                query: 'action_id: action-abc AND osquery.calendarTime: *',
+                query: 'osquery.calendarTime: *',
               },
             },
           ],
@@ -180,8 +192,8 @@ describe('buildResultsQuery', () => {
               },
             },
             {
-              query_string: {
-                query: 'action_id: action-time',
+              term: {
+                action_id: 'action-time',
               },
             },
           ],
@@ -209,9 +221,10 @@ describe('buildResultsQuery', () => {
 
       const result = buildResultsQuery(options);
 
-      expect(result.index).toBe(
-        'logs-osquery_manager.result-namespace1,logs-osquery_manager.result-namespace2'
-      );
+      expect(result.index).toEqual([
+        'logs-osquery_manager.result-namespace1',
+        'logs-osquery_manager.result-namespace2',
+      ]);
     });
 
     it('should build query with all options combined', () => {
@@ -245,8 +258,9 @@ describe('buildResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index: 'logs-osquery_manager.result-prod,logs-osquery_manager.result-staging',
+        index: ['logs-osquery_manager.result-prod', 'logs-osquery_manager.result-staging'],
         ignore_unavailable: true,
+        preference: 'action-full',
         aggs: {
           count_by_agent_id: {
             terms: {
@@ -272,9 +286,18 @@ describe('buildResultsQuery', () => {
                 },
               },
               {
+                term: {
+                  action_id: 'action-full',
+                },
+              },
+              {
+                term: {
+                  'agent.id': 'agent-complete',
+                },
+              },
+              {
                 query_string: {
-                  query:
-                    'action_id: action-full AND agent.id: agent-complete AND agent.name: "test-agent" AND osquery.action: "executed"',
+                  query: 'agent.name: "test-agent" AND osquery.action: "executed"',
                 },
               },
             ],
@@ -295,6 +318,7 @@ describe('buildResultsQuery', () => {
               order: 'asc',
             },
           },
+          '_doc',
         ],
       });
     });
@@ -314,7 +338,10 @@ describe('buildResultsQuery', () => {
 
       const result = buildResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.result*,*:logs-osquery_manager.result*');
+      expect(result.index).toEqual([
+        'logs-osquery_manager.result*',
+        '*:logs-osquery_manager.result*',
+      ]);
     });
 
     it('should include remote cluster patterns for each namespace when ccsEnabled is true', () => {
@@ -328,9 +355,12 @@ describe('buildResultsQuery', () => {
 
       const result = buildResultsQuery(options);
 
-      expect(result.index).toBe(
-        'logs-osquery_manager.result-default,logs-osquery_manager.result-ns1,*:logs-osquery_manager.result-default,*:logs-osquery_manager.result-ns1'
-      );
+      expect(result.index).toEqual([
+        'logs-osquery_manager.result-default',
+        'logs-osquery_manager.result-ns1',
+        '*:logs-osquery_manager.result-default',
+        '*:logs-osquery_manager.result-ns1',
+      ]);
     });
 
     it('should not modify index when ccsEnabled is false', () => {
@@ -343,7 +373,7 @@ describe('buildResultsQuery', () => {
 
       const result = buildResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.result*');
+      expect(result.index).toEqual(['logs-osquery_manager.result*']);
     });
   });
 
@@ -422,13 +452,14 @@ describe('buildResultsQuery', () => {
       };
 
       const result = buildResultsQuery(options);
-      const filterQuery = result.query as any;
-      const queryString = filterQuery.bool.filter.find((f: any) => f.query_string)?.query_string
-        ?.query;
+      const filter = (result.query as { bool: { filter: Array<Record<string, unknown>> } }).bool
+        .filter;
 
-      expect(queryString).toContain('schedule_id: sched-uuid-123');
-      expect(queryString).toContain('osquery_meta.schedule_execution_count: 7');
-      expect(queryString).not.toContain('action_id');
+      expect(filter).toContainEqual({ term: { schedule_id: 'sched-uuid-123' } });
+      expect(filter).toContainEqual({
+        term: { 'osquery_meta.schedule_execution_count': 7 },
+      });
+      expect(JSON.stringify(filter)).not.toContain('action_id');
     });
 
     it('should filter by action_id when scheduleId is not provided', () => {
@@ -443,12 +474,68 @@ describe('buildResultsQuery', () => {
       };
 
       const result = buildResultsQuery(options);
-      const filterQuery = result.query as any;
-      const queryString = filterQuery.bool.filter.find((f: any) => f.query_string)?.query_string
-        ?.query;
+      const filter = (result.query as { bool: { filter: Array<Record<string, unknown>> } }).bool
+        .filter;
 
-      expect(queryString).toContain('action_id: action-456');
-      expect(queryString).not.toContain('schedule_id');
+      expect(filter).toContainEqual({ term: { action_id: 'action-456' } });
+      expect(JSON.stringify(filter)).not.toContain('schedule_id');
+    });
+
+    it('builds term filters for identifiers', () => {
+      const result = buildResultsQuery({
+        actionId: 'action id',
+        agentId: 'agent id',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [{ field: '@timestamp', direction: Direction.desc }],
+      });
+      const filter = (result.query as { bool: { filter: Array<Record<string, unknown>> } }).bool
+        .filter;
+
+      expect(filter).toEqual([
+        { term: { action_id: 'action id' } },
+        { term: { 'agent.id': 'agent id' } },
+      ]);
+    });
+  });
+
+  describe('shard preference', () => {
+    const baseOptions: ResultsRequestOptions = {
+      actionId: 'action-123',
+      pagination: { activePage: 0, querySize: 100, cursorStart: 0 },
+      sort: [{ field: '@timestamp', direction: Direction.desc }],
+    };
+
+    it('pins an action read to one set of shard copies so offset pages stay disjoint', () => {
+      expect(buildResultsQuery(baseOptions).preference).toBe('action-123');
+    });
+
+    it('pins a scheduled-execution read to its own execution', () => {
+      const result = buildResultsQuery({
+        ...baseOptions,
+        scheduleId: 'schedule-1',
+        executionCount: 7,
+      });
+
+      expect(result.preference).toBe('osquery:schedule-1:7');
+    });
+  });
+
+  describe('space_id scoping', () => {
+    const baseOptions: ResultsRequestOptions = {
+      actionId: 'action-123',
+      pagination: { activePage: 0, querySize: 100, cursorStart: 0 },
+      sort: [{ field: '@timestamp', direction: Direction.desc }],
+      kuery: '',
+    };
+
+    it('does not scope space_id in the builder (centralized in the search strategy)', () => {
+      const result = buildResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      const filter = (result.query as any).bool.filter;
+      expect(JSON.stringify(filter)).not.toContain('space_id');
     });
   });
 });

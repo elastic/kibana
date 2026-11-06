@@ -11,18 +11,20 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiLink,
-  EuiFlexItem,
-  useEuiTheme,
   EuiBadge,
-  EuiText,
-  EuiLoadingSpinner,
   EuiButtonIcon,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
 import type { AlertsByStatusAgg } from '../../../../../overview/components/detection_response/alerts_by_status/types';
 import { getRowItemsWithActions } from '../../../../../common/components/tables/helpers';
@@ -38,7 +40,6 @@ import {
 } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
-import { formatPageFilterSearchParam } from '../../../../../../common/utils/format_page_filter_search_param';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/constants';
 import {
   OPEN_IN_ALERTS_TITLE_STATUS,
@@ -46,7 +47,7 @@ import {
 } from '../../../../../overview/components/detection_response/translations';
 import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../../../common/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { getFormattedAlertStats } from '../../../../../flyout/document_details/shared/components/alert_count_insight';
+import { getFormattedAlertStats } from '../../../../../flyout_v2/document/main/components/alert_count_insight';
 import { SCOPE_ID } from '../../constants';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
@@ -81,18 +82,28 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   ),
   render: (record: { 'user.name': string }) => {
     return (
-      <EuiButtonIcon
-        iconType="maximize"
-        onClick={() => {
-          openUserFlyout(record['user.name']);
-        }}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.expand.ariaLabel',
           {
             defaultMessage: 'Open user flyout',
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="maximize"
+          onClick={() => {
+            openUserFlyout(record['user.name']);
+          }}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.expand.ariaLabel',
+            {
+              defaultMessage: 'Open user flyout',
+            }
+          )}
+        />
+      </EuiToolTip>
     );
   },
   width: COLUMN_WIDTHS.actions,

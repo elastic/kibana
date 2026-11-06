@@ -7,15 +7,19 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonIcon,
   EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TemplatesSearch } from './templates_search';
-import { MultiSelectFilter, mapToMultiSelectOption } from '../../all_cases/multi_select_filter';
+import {
+  MultiSelectFilter,
+  mapToMultiSelectOption,
+} from '../../all_cases/components/multi_select_filter';
 import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
 import * as i18n from '../translations';
 
@@ -134,15 +138,17 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="refresh"
-          onClick={onRefresh}
-          isLoading={isLoading}
-          aria-label={i18n.REFRESH_TEMPLATES}
-          data-test-subj="templates-refresh-button"
-          display="base"
-          size="m"
-        />
+        <EuiToolTip content={i18n.REFRESH_TEMPLATES} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="refresh"
+            onClick={onRefresh}
+            isLoading={isLoading}
+            aria-label={i18n.REFRESH_TEMPLATES}
+            data-test-subj="templates-refresh-button"
+            display="base"
+            size="m"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

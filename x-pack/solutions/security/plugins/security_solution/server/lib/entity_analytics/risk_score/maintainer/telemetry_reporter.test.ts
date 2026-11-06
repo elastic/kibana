@@ -6,10 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import {
-  RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
-  RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
-} from '../../../telemetry/event_based/events';
+import { RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT } from '../../../telemetry/event_based/events';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
 
 describe('createRiskScoreMaintainerTelemetryReporter', () => {
@@ -19,88 +16,85 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
     jest.clearAllMocks();
   });
 
-  it('reports run completion with resolution and lookup counters', () => {
+  it('sums base, resolution, and reset-to-zero counters into scoresWrittenTotal', () => {
     const reporter = createRiskScoreMaintainerTelemetryReporter({
       telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
     });
 
-    const runTelemetry = reporter.forRun({
-      namespace: 'default',
-      entityType: 'host',
-      idBasedRiskScoringEnabled: true,
+    reporter
+      .forRun({ namespace: 'default', entityType: 'host', idBasedRiskScoringEnabled: true })
+      .completionSummary({
+        runStatus: 'success',
+        scoresWrittenBase: 3,
+        scoresWrittenResolution: 2,
+        scoresWrittenResetToZero: 1,
+        pagesProcessed: 4,
+        lookupPrunedDocs: 9,
+      });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType,
+      expect.objectContaining({ scoresWrittenTotal: 6 })
+    );
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('baseScoreDistribution');
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('resolutionScoreDistribution');
+  });
+
+  it('adds base and resolution risk score distributions to the completion summary', () => {
+    const reporter = createRiskScoreMaintainerTelemetryReporter({
+      telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
     });
 
-    runTelemetry.completionSummary({
-      runStatus: 'success',
-      scoresWrittenBase: 3,
-      scoresWrittenResolution: 2,
-      scoresWrittenResetToZero: 1,
-      pagesProcessed: 4,
-      deferToPhase2Count: 5,
-      notInStoreCount: 6,
-      lookupDocsUpserted: 7,
-      lookupDocsDeleted: 8,
-      lookupPrunedDocs: 9,
-    });
+    reporter
+      .forRun({ namespace: 'default', entityType: 'host', idBasedRiskScoringEnabled: true })
+      .completionSummary({
+        runStatus: 'success',
+        scoresWrittenBase: 1,
+        scoresWrittenResolution: 0,
+        scoresWrittenResetToZero: 0,
+        pagesProcessed: 1,
+        lookupPrunedDocs: 0,
+        baseScoreDistribution: {
+          Critical: 1,
+          High: 2,
+          Moderate: 3,
+          Low: 4,
+          Unknown: 5,
+          normP50: 40,
+          normP90: 90,
+        },
+        resolutionScoreDistribution: {
+          Critical: 6,
+          High: 0,
+          Moderate: 1,
+          Low: 0,
+          Unknown: 0,
+          normP50: 12,
+          normP90: 70,
+        },
+      });
 
     expect(reportEvent).toHaveBeenCalledWith(
       RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType,
       expect.objectContaining({
-        namespace: 'default',
-        entityType: 'host',
-        status: 'success',
-        scoresWrittenTotal: 6,
-        scoresWrittenBase: 3,
-        scoresWrittenResolution: 2,
-        scoresWrittenResetToZero: 1,
-        lookupDocsUpserted: 7,
-        lookupDocsDeleted: 8,
-        lookupPrunedDocs: 9,
-      })
-    );
-  });
-
-  it('reports lookup sync success and resolution skipped stages', () => {
-    const reporter = createRiskScoreMaintainerTelemetryReporter({
-      telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
-    });
-
-    const runTelemetry = reporter.forRun({
-      namespace: 'default',
-      entityType: 'user',
-      idBasedRiskScoringEnabled: false,
-    });
-
-    runTelemetry.startLookupSyncStage().success({
-      lookupDocsUpserted: 2,
-      lookupDocsDeleted: 1,
-    });
-    runTelemetry.startResolutionStage().skipped('lookup_empty');
-
-    expect(reportEvent).toHaveBeenNthCalledWith(
-      1,
-      RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType,
-      expect.objectContaining({
-        namespace: 'default',
-        entityType: 'user',
-        stage: 'phase1_lookup_sync',
-        status: 'success',
-        lookupDocsUpserted: 2,
-        lookupDocsDeleted: 1,
-        durationMs: expect.any(Number),
-      })
-    );
-
-    expect(reportEvent).toHaveBeenNthCalledWith(
-      2,
-      RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType,
-      expect.objectContaining({
-        namespace: 'default',
-        entityType: 'user',
-        stage: 'phase2_resolution_scoring',
-        status: 'skipped',
-        skipReason: 'lookup_empty',
-        durationMs: expect.any(Number),
+        baseScoreDistribution: {
+          critical: 1,
+          high: 2,
+          moderate: 3,
+          low: 4,
+          unknown: 5,
+          normP50: 40,
+          normP90: 90,
+        },
+        resolutionScoreDistribution: {
+          critical: 6,
+          high: 0,
+          moderate: 1,
+          low: 0,
+          unknown: 0,
+          normP50: 12,
+          normP90: 70,
+        },
       })
     );
   });
@@ -128,10 +122,10 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
         status: 'skipped',
         skipReason: 'feature_disabled',
         scoresWrittenResolution: 0,
-        lookupDocsUpserted: 0,
-        lookupDocsDeleted: 0,
         lookupPrunedDocs: 0,
       })
     );
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('baseScoreDistribution');
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('resolutionScoreDistribution');
   });
 });

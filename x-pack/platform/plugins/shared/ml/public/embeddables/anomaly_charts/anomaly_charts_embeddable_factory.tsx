@@ -11,8 +11,15 @@ import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { Subscription, map, merge } from 'rxjs';
-import { fetch$, timeRangeComparators, titleComparators } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subscription, map, merge } from 'rxjs';
+import {
+  fetch$,
+  getViewModeSubject,
+  timeRangeComparators,
+  titleComparators,
+  useStateFromPublishingSubject,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -20,18 +27,18 @@ import {
   initializeTimeRangeManager,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { AnomalyChartsEmbeddableApi } from '..';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import {
   anomalyChartsComparators,
@@ -47,7 +54,10 @@ export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
 ) => {
-  const factory: EmbeddableFactory<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    AnomalyChartsEmbeddableState,
+    AnomalyChartsEmbeddableApi
+  > = {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);
@@ -74,18 +84,14 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         parentApi
       );
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<AnomalyChartsEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...chartsManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<AnomalyChartsEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -98,10 +104,10 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             ...anomalyChartsComparators,
           };
         },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) chartsManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          chartsManager.reinitializeState(nextState);
         },
       });
 
@@ -139,8 +145,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...timeRangeManager.api,
         ...chartsManager.api,
         ...chartsManager.dataLoadingApi,
-        ...unsavedChangesApi,
-        dataViews$: buildDataViewPublishingApi(
+        ...stateApi,
+        dataSources$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: mlServices.anomalyDetectorService,
             dataViewsService: pluginsStartServices.data.dataViews,
@@ -148,7 +154,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           { jobIds: chartsManager.api.jobIds$ },
           subscriptions
         ),
-        serializeState,
       });
 
       const appliedTimeRange$: Observable<TimeRange | undefined> = fetch$(api).pipe(
@@ -164,6 +169,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...coreStartServices,
         ...pluginsStartServices,
       };
+
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       return {
         api,
@@ -185,6 +192,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           });
           const { euiTheme } = useEuiTheme();
 
+          const viewMode = useStateFromPublishingSubject(viewMode$);
+
           return (
             <KibanaRenderContextProvider {...coreStartServices}>
               <KibanaContextProvider services={contextServices}>
@@ -198,13 +207,14 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                 >
                   <LazyAnomalyChartsContainer
                     id={uuid}
-                    severityThreshold={initialState.severityThreshold}
+                    severityThreshold={initialState.severity_threshold}
                     api={api}
                     services={anomalyChartsDependencies}
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     timeRange$={appliedTimeRange$}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </div>
               </KibanaContextProvider>

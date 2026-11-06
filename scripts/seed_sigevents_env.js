@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/streams-plugin/scripts/seed_sigevents_env');
+require('@kbn/significant-events-plugin/scripts/seed_sigevents_env');

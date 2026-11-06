@@ -50,6 +50,7 @@
     "@kbn/home-sample-data-tab",
     "@kbn/agent-builder-browser",
     "@kbn/controls-constants",
+    "@kbn/apm-types",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

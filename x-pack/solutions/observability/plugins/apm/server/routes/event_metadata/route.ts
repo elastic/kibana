@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { routeDefinitions, type EventMetadataResponse } from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getEventMetadata } from './get_event_metadata';
-import { processorEventRt } from '../../../common/processor_event';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { rangeRt } from '../default_api_types';
 
 const eventMetadataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+  endpoint: routeDefinitions.eventMetadata.eventMetadata.endpoint,
+  params: routeDefinitions.eventMetadata.eventMetadata.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    path: t.type({
-      processorEvent: processorEventRt,
-      id: t.string,
-    }),
-    query: rangeRt,
-  }),
-  handler: async (resources): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
+  handler: async (resources): Promise<EventMetadataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { start, end } = params.query;

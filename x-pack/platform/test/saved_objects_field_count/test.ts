@@ -29,6 +29,10 @@ const IGNORED_FIELDS = [
   'migrationVersion',
 ];
 
+const SAVED_OBJECTS_FIELD_COUNT_GROUP = 'Saved Objects .kibana field count';
+/** Proves the FTR capture ran; lets ci-stats distinguish skipped tests from empty results. */
+const CI_STATS_CAPTURED_METRIC_ID = '__ci_stats_captured__';
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -53,13 +57,20 @@ export default function ({ getService }: FtrProviderContext) {
           return accumulator;
         }, new Map());
 
-      const metrics = Array.from(fieldCountPerTypeMap.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([fieldType, count]) => ({
-          group: 'Saved Objects .kibana field count',
-          id: fieldType,
-          value: count,
-        }));
+      const metrics = [
+        {
+          group: SAVED_OBJECTS_FIELD_COUNT_GROUP,
+          id: CI_STATS_CAPTURED_METRIC_ID,
+          value: 1,
+        },
+        ...Array.from(fieldCountPerTypeMap.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([fieldType, count]) => ({
+            group: SAVED_OBJECTS_FIELD_COUNT_GROUP,
+            id: fieldType,
+            value: count,
+          })),
+      ];
 
       log.debug(
         'Saved Objects field count metrics:\n',

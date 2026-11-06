@@ -21,7 +21,7 @@ interface Props {
 export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
   return (
     <>
-      {darkMode !== 'system' && <InlineStyles darkMode={darkMode} themeName={themeName} />}
+      <InlineStyles darkMode={darkMode} themeName={themeName} />
       {stylesheetPaths.map((path) => (
         <link key={path} rel="stylesheet" type="text/css" href={path} />
       ))}
@@ -29,52 +29,109 @@ export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
   );
 };
 
-const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMode, themeName }) => {
-  const getThemeStyles = (theme: ThemeName) => {
-    if (theme === 'borealis') {
-      return {
-        pageBackground: darkMode ? '#07101F' : '#F6F9FC', // colors.body
-        welcomeText: darkMode ? '#8E9FBC' : '#5A6D8C', // colors.subduedText
-        progress: darkMode ? '#172336' : '#ECF1F9', // colors.lightestShade
-        progressBefore: darkMode ? '#599DFF' : '#0B64DD', // colors.primary
-      };
-    }
+interface SplashColors {
+  pageBackground: string;
+  welcomeText: string;
+  progress: string;
+  progressBefore: string;
+  errorTitleText: string;
+  errorButtonText: string;
+}
 
+const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashColors } => {
+  if (theme === 'borealis') {
     return {
-      pageBackground: darkMode ? '#141519' : '#F8FAFD',
-      welcomeText: darkMode ? '#98A2B3' : '#69707D',
-      progress: darkMode ? '#25262E' : '#F5F7FA',
-      progressBefore: darkMode ? '#1BA9F5' : '#006DE4',
+      light: {
+        // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
+        pageBackground: '#ECF1F9', // colors.body
+        welcomeText: '#516381', // colors.subduedText
+        progress: '#E3E8F2', // shade20, a step darker than the page so the track stays visible
+        progressBefore: '#0B64DD', // colors.primary
+        errorTitleText: '#111C2C', // colors.textHeading
+        errorButtonText: '#FFFFFF', // colors.textInverse
+      },
+      dark: {
+        // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
+        pageBackground: '#07101F', // colors.body
+        welcomeText: '#98A8C3',
+        progress: '#172336', // colors.lightestShade
+        progressBefore: '#61A2FF',
+        errorTitleText: '#E3E8F2', // colors.textHeading
+        errorButtonText: '#07101F', // colors.textInverse
+      },
     };
+  }
+
+  return {
+    light: {
+      pageBackground: '#F8FAFD',
+      welcomeText: '#69707D',
+      progress: '#F5F7FA',
+      progressBefore: '#006DE4',
+      errorTitleText: '#1a1c21',
+      errorButtonText: '#FFFFFF',
+    },
+    dark: {
+      pageBackground: '#141519',
+      welcomeText: '#98A2B3',
+      progress: '#25262E',
+      progressBefore: '#1BA9F5',
+      errorTitleText: '#DFE5EF',
+      errorButtonText: '#FFFFFF',
+    },
   };
+};
 
-  const themeStyles = getThemeStyles(themeName);
-
-  /* eslint-disable react/no-danger */
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: `
-
+const splashRules = (colors: SplashColors) => `
           html {
-            background-color: ${themeStyles.pageBackground}
+            background-color: ${colors.pageBackground};
           }
 
           .kbnWelcomeText {
-            color: ${themeStyles.welcomeText};
+            color: ${colors.welcomeText};
           }
 
           .kbnProgress {
-            background-color: ${themeStyles.progress};
+            background-color: ${colors.progress};
           }
 
           .kbnProgress:before {
-            background-color: ${themeStyles.progressBefore};
+            background-color: ${colors.progressBefore};
           }
 
-        `,
-      }}
-    />
-  );
+          .kbnBootstrapErrorTitle {
+            color: ${colors.errorTitleText};
+          }
+
+          .kbnBootstrapErrorText {
+            color: ${colors.welcomeText};
+          }
+
+          .kbnBootstrapErrorButton {
+            background-color: ${colors.progressBefore};
+            color: ${colors.errorButtonText};
+          }
+`;
+
+const InlineStyles: FC<{ darkMode: DarkModeValue; themeName: ThemeName }> = ({
+  darkMode,
+  themeName,
+}) => {
+  const { light, dark } = getThemeStyles(themeName);
+
+  // For `system` we can't know the OS preference at render time, so inline both
+  // variants and let the CSS engine pick via `@media (prefers-color-scheme)`.
+  // This resolves the correct splash colors at first paint — no JS round-trip and
+  // no flash-of-light before the dark theme is applied.
+  const css =
+    darkMode === 'system'
+      ? `${splashRules(light)}
+          @media (prefers-color-scheme: dark) {
+            ${splashRules(dark)}
+          }`
+      : splashRules(darkMode ? dark : light);
+
+  /* eslint-disable react/no-danger */
+  return <style dangerouslySetInnerHTML={{ __html: css }} />;
   /* eslint-enable react/no-danger */
 };

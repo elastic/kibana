@@ -15,8 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -25,18 +24,17 @@ import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
 import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { getServiceLocations, cleanMonitorListState } from '../../state';
-import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
-import { SimpleMonitorForm } from './simple_monitor_form';
+import { GettingStartedWithLocations } from './getting_started_with_locations';
 import type { NewLocation } from '../settings/private_locations/add_or_edit_location_flyout';
 import { AddOrEditLocationFlyout } from '../settings/private_locations/add_or_edit_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
 import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
 import { selectPrivateLocationFlyoutVisible } from '../../state/private_locations/selectors';
+import { MonitorsListingPage } from '../common/app_header';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
 
   const { observabilityAIAssistant } = useKibana<ClientPluginsStart>().services;
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
@@ -85,41 +83,20 @@ export const GettingStartedPage = () => {
     });
   }, [setScreenContext, hasNoLocations, locations]);
 
-  return !loading ? (
-    <Wrapper>
-      {hasNoLocations ? (
-        <GettingStartedOnPrem />
+  return (
+    <MonitorsListingPage>
+      {!loading ? (
+        hasNoLocations ? (
+          <Wrapper>
+            <GettingStartedOnPrem />
+          </Wrapper>
+        ) : (
+          <GettingStartedWithLocations footer={<GettingStartedLink />} />
+        )
       ) : (
-        <EuiEmptyPrompt
-          title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
-          layout="horizontal"
-          color="plain"
-          body={
-            <>
-              <EuiText size="s">
-                {OR_LABEL}{' '}
-                <EuiLink
-                  data-test-subj="syntheticsGettingStartedPageLink"
-                  href={history.createHref({
-                    pathname: MONITOR_ADD_ROUTE,
-                  })}
-                >
-                  {SELECT_DIFFERENT_MONITOR}
-                </EuiLink>
-                {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
-                  defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
-                })}
-              </EuiText>
-              <EuiSpacer />
-              <SimpleMonitorForm />
-            </>
-          }
-          footer={<GettingStartedLink />}
-        />
+        <LoadingState />
       )}
-    </Wrapper>
-  ) : (
-    <LoadingState />
+    </MonitorsListingPage>
   );
 };
 
@@ -221,13 +198,6 @@ const GETTING_STARTED_LABEL = i18n.translate(
   }
 );
 
-const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
-  'xpack.synthetics.gettingStarted.createSinglePageLabel',
-  {
-    defaultMessage: 'Create a single page browser monitor',
-  }
-);
-
 const GET_STARTED_LABEL = i18n.translate('xpack.synthetics.gettingStarted.createLocationHeading', {
   defaultMessage: 'Get started with synthetic monitoring',
 });
@@ -296,17 +266,6 @@ const PUBLIC_LOCATION_DESCRIPTION = (
     }}
   />
 );
-
-const SELECT_DIFFERENT_MONITOR = i18n.translate(
-  'xpack.synthetics.gettingStarted.gettingStartedLabel.selectDifferentMonitor',
-  {
-    defaultMessage: 'select a different monitor type',
-  }
-);
-
-const OR_LABEL = i18n.translate('xpack.synthetics.gettingStarted.orLabel', {
-  defaultMessage: 'Or',
-});
 
 const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.synthetics.overview.heading', {
   defaultMessage: 'Monitors',

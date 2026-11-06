@@ -16,6 +16,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 interface DragHandleProps {
   isEditable: boolean;
   controlTitle?: string;
+  highContrast?: boolean; // If true, set the icon color to higher contrast instead of subdued
   [key: string]: any; // Allows passing additional props (like drag info)
 }
 
@@ -37,12 +38,19 @@ const dragHandleStyles = {
         pointerEvents: 'none', // Prevent label from blocking drag events
       },
     }),
+  dragHandleHighContrast: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.euiIcon': {
+        color: euiTheme.colors.textParagraph,
+      },
+    }),
 };
 
 export const DragHandle = ({
   isEditable,
   controlTitle = '',
   children,
+  highContrast,
   ...rest
 }: DragHandleProps) => {
   const styles = useMemoCss(dragHandleStyles);
@@ -56,7 +64,7 @@ export const DragHandle = ({
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle },
       })}
-      css={styles.dragHandle}
+      css={[styles.dragHandle, highContrast ? styles.dragHandleHighContrast : null]}
     >
       <EuiIcon type="dragHorizontal" aria-hidden={true} />
       {children}

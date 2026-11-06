@@ -258,6 +258,9 @@ export function TableSortSelect({
           options={options}
           onChange={onSelectChange}
           data-test-subj="sortSelect"
+          listProps={{
+            paddingSize: 's',
+          }}
         >
           {(list) => list}
         </EuiSelectable>

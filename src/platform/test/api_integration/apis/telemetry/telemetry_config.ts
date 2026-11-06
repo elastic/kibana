@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -29,8 +28,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
           try {
             await kbnClient.savedObjects.delete({ type: TELEMETRY_SO_TYPE, id: TELEMETRY_SO_ID });
           } catch (err) {
-            const is404Error = err instanceof AxiosError && err.response?.status === 404;
-            if (!is404Error) {
+            if (err.status !== 404) {
               throw err;
             }
           }

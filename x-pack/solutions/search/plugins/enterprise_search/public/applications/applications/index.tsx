@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { NotFound } from './components/not_found';
-import { PlaygroundRedirect } from './components/playground_redirect';
 import { SearchApplicationsRouter } from './components/search_applications/search_applications_router';
-import { OLD_PLAYGROUND_PATH, ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
+import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
 export const Applications = () => {
   return (
     <Routes>
-      <Route exact path={ROOT_PATH} component={PlaygroundRedirect} />
-      <Route exact path={OLD_PLAYGROUND_PATH} component={PlaygroundRedirect} />
+      <Route exact path={ROOT_PATH}>
+        <Redirect to={SEARCH_APPLICATIONS_PATH} />
+      </Route>
       <Route path={SEARCH_APPLICATIONS_PATH} component={SearchApplicationsRouter} />
       <Route>
         <NotFound />

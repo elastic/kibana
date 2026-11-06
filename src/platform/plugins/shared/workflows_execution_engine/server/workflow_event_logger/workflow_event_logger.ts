@@ -15,15 +15,15 @@ import type {
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
-import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import type { WorkflowEventQueue } from './workflow_event_queue';
+import type { WorkflowLogEvent } from '../repositories/logs_repository';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
-  private eventQueue: WorkflowLogEvent[] = [];
   private timings: Map<string, Date> = new Map();
 
   constructor(
-    private logsRepository: LogsRepository,
     private logger: Logger,
+    private eventQueue: WorkflowEventQueue,
     private context: WorkflowEventLoggerContext = {},
     private options: WorkflowEventLoggerOptions = {}
   ) {}
@@ -39,7 +39,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
       this.logToConsole(event);
     }
 
-    this.queueEvent(event);
+    this.eventQueue.push(event);
   }
 
   public logInfo(message: string, additionalData: Partial<WorkflowLogEvent> = {}): void {
@@ -160,8 +160,8 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     stepType?: string
   ): IWorkflowEventLogger {
     return new WorkflowEventLogger(
-      this.logsRepository,
       this.logger,
+      this.eventQueue,
       {
         ...this.context,
         stepExecutionId,
@@ -237,30 +237,5 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     return `${this.context.executionId || 'unknown'}-${event.event?.action || 'unknown'}-${
       this.context.stepId || 'workflow'
     }`;
-  }
-
-  private queueEvent(event: WorkflowLogEvent): void {
-    this.eventQueue.push(event);
-  }
-
-  public async flushEvents(): Promise<void> {
-    if (this.eventQueue.length === 0) return;
-
-    const events = [...this.eventQueue];
-    this.eventQueue = [];
-
-    try {
-      await this.logsRepository.createLogs(events);
-
-      this.logger.debug(`Successfully indexed ${events.length} workflow events`);
-    } catch (error) {
-      this.logger.error(`Failed to index workflow events: ${error.message}`, {
-        eventsCount: events.length,
-        error: error.stack,
-      });
-
-      // Re-queue events for retry (optional)
-      this.eventQueue.unshift(...events);
-    }
   }
 }

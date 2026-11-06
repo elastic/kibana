@@ -20,16 +20,18 @@ import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { IOCRightPanelKey } from '../../ioc_details/constants/panel_keys';
-import { EasePanelKey } from '../../ease/constants/panel_keys';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
-import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import {
+  getAlertTitle,
+  getEventTitle,
+} from '../../../flyout_v2/document/main/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
-import { useRuleDetails } from '../../../flyout_v2/rule/hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/main/hooks/use_rule_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
@@ -71,7 +73,6 @@ export interface FlyoutHistoryRowProps {
 export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
   switch (item.panel.id) {
     case DocumentDetailsRightPanelKey:
-    case EasePanelKey:
       return <DocumentDetailsHistoryRow item={item} index={index} />;
     case RulePanelKey:
       return <RuleHistoryRow item={item} index={index} />;
@@ -210,6 +211,7 @@ export const AttackDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, 
   const { data: attackData, isLoading } = useFindAttackDiscoveries({
     ids: attackId ? [attackId] : [],
     http,
+    includeAllAuthors: true,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
     perPage: 1,
   });

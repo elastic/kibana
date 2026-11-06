@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HeatmapVisualizationState } from '@kbn/lens-common';
+/*
+ * Test-only heatmap (`lnsHeatmap`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
+import { LENS_HEATMAP_DEFAULT_COLOR_STEPS, type HeatmapVisualizationState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
@@ -46,17 +50,6 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
     // Align deprecated naming conventions
     attributes.state.visualization.gridConfig.type = 'heatmap_grid';
     attributes.state.visualization.legend.type = 'heatmap_legend';
-
-    // Remove transform-added column properties not in the original
-    for (const layer of Object.values(attributes.state.datasourceStates.formBased?.layers ?? {})) {
-      layer.columnOrder = [...layer.columnOrder].sort();
-      for (const col of Object.values(layer.columns)) {
-        delete (col as any).params?.parentFormat;
-        if (col.operationType === 'count') {
-          delete (col as any).params;
-        }
-      }
-    }
 
     return attributes;
   },
@@ -100,5 +93,8 @@ export const normalizeHeatmap = mergeNormalizers([
   })),
   alignId,
   alignLegacyTypes,
-  getPaletteNormalizer<HeatmapAttributes>('state.visualization.palette'),
+  getPaletteNormalizer<HeatmapAttributes>(
+    'state.visualization.palette',
+    LENS_HEATMAP_DEFAULT_COLOR_STEPS
+  ),
 ]);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dateMath from '@elastic/datemath';
 import { textToTimeRange, matchPreset, getNamedRangeAlias } from './parse_text';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
 import { getOptionInputText, toLocalPreciseString } from '../utils';
@@ -165,8 +166,11 @@ describe('textToTimeRange', () => {
       ['tmr', 'now+1d/d', 'now+1d/d'],
       ['td', 'now/d', 'now/d'],
       ['this week', 'now/w', 'now/w'],
+      ['this week until now', 'now/w', 'now'],
       ['this month', 'now/M', 'now/M'],
+      ['this month until now', 'now/M', 'now'],
       ['this year', 'now/y', 'now/y'],
+      ['this year until now', 'now/y', 'now'],
       ['last week', 'now-1w/w', 'now-1w/w'],
       ['last month', 'now-1M/M', 'now-1M/M'],
       ['last year', 'now-1y/y', 'now-1y/y'],
@@ -370,21 +374,21 @@ describe('textToTimeRange', () => {
 
     describe('RFC 2822 variants', () => {
       it.each([
-        ['Sun, 23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
-        ['Sun, 23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
-        ['23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
-        ['23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
+        ['Sun, 23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }, true],
+        ['Sun, 23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }, true],
+        ['23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }, true],
+        ['23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }, true],
         ['Sun, 23 Jan 2000 01:23:45', { year: 2000, month: 0, day: 23 }],
         ['23 Jan 2000 01:23', { year: 2000, month: 0, day: 23 }],
-      ])('parses "%s"', (text, expected) => {
+      ])('parses "%s"', (text, expected, hasUTCOffset = false) => {
         const range = textToTimeRange(text);
 
         expect(range.isInvalid).toBe(false);
 
         const d = range.startDate!;
-        expect(d.getFullYear()).toBe(expected.year);
-        expect(d.getMonth()).toBe(expected.month);
-        expect(d.getDate()).toBe(expected.day);
+        expect(hasUTCOffset ? d.getUTCFullYear() : d.getFullYear()).toBe(expected.year);
+        expect(hasUTCOffset ? d.getUTCMonth() : d.getMonth()).toBe(expected.month);
+        expect(hasUTCOffset ? d.getUTCDate() : d.getDate()).toBe(expected.day);
       });
 
       it('parses RFC 2822 with timezone abbreviation via forgiving mode', () => {
@@ -516,13 +520,12 @@ describe('textToTimeRange', () => {
   describe('roundRelativeTime', () => {
     const opts = (round: boolean) => ({ roundRelativeTime: round });
 
-    describe('true — adds rounding', () => {
+    describe('true — adds rounding one unit finer than the offset unit', () => {
       it.each([
-        ['last 7 days', 'now-7d/d', 'now'],
         ['last 2 weeks', 'now-2w/d', 'now'],
         ['last 3 months', 'now-3M/d', 'now'],
         ['last 1 year', 'now-1y/d', 'now'],
-      ])('natural duration (day+) "%s" → start=%s', (text, start, end) => {
+      ])('natural duration (week+) "%s" → start=%s', (text, start, end) => {
         const range = textToTimeRange(text, opts(true));
 
         expect(range.start).toBe(start);
@@ -531,11 +534,12 @@ describe('textToTimeRange', () => {
       });
 
       it.each([
-        ['last 30 minutes', 'now-30m/m', 'now'],
-        ['last 3 hours', 'now-3h/h', 'now'],
-        ['last 10 seconds', 'now-10s/m', 'now'],
+        ['last 7 days', 'now-7d/h', 'now'],
+        ['last 3 hours', 'now-3h/m', 'now'],
+        ['last 30 minutes', 'now-30m/s', 'now'],
+        ['last 10 seconds', 'now-10s/s', 'now'],
         ['last 500 milliseconds', 'now-500ms/s', 'now'],
-      ])('natural duration (sub-day) "%s" → start=%s', (text, start, end) => {
+      ])('natural duration (sub-week) "%s" → start=%s', (text, start, end) => {
         const range = textToTimeRange(text, opts(true));
 
         expect(range.start).toBe(start);
@@ -544,10 +548,10 @@ describe('textToTimeRange', () => {
       });
 
       it.each([
-        ['-7d', 'now-7d/d'],
-        ['7d', 'now-7d/d'],
-        ['30m', 'now-30m/m'],
-        ['3h', 'now-3h/h'],
+        ['-7d', 'now-7d/h'],
+        ['7d', 'now-7d/h'],
+        ['30m', 'now-30m/s'],
+        ['3h', 'now-3h/m'],
         ['500ms', 'now-500ms/s'],
       ])('shorthand "%s" → start=%s', (text, start) => {
         const range = textToTimeRange(text, opts(true));
@@ -558,9 +562,9 @@ describe('textToTimeRange', () => {
       });
 
       it.each([
-        ['now-30m to now', 'now-30m/m', 'now'],
-        ['-7d to now', 'now-7d/d', 'now'],
-        ['now-3h to now-1h', 'now-3h/h', 'now-1h'],
+        ['now-30m to now', 'now-30m/s', 'now'],
+        ['-7d to now', 'now-7d/h', 'now'],
+        ['now-3h to now-1h', 'now-3h/m', 'now-1h/m'],
       ])('delimiter-split "%s" → start=%s end=%s', (text, start, end) => {
         const range = textToTimeRange(text, opts(true));
 
@@ -579,11 +583,40 @@ describe('textToTimeRange', () => {
         expect(range.start).toBe(start);
       });
 
-      it('rounds future start in delimiter-split path', () => {
+      it('rounds future start and end in delimiter-split path', () => {
         const range = textToTimeRange('now+3d to now+7d', opts(true));
 
-        expect(range.start).toBe('now+3d/d');
-        expect(range.end).toBe('now+7d');
+        expect(range.start).toBe('now+3d/h');
+        expect(range.end).toBe('now+7d/h');
+      });
+
+      it('rounds future natural duration end (start is bare "now")', () => {
+        const range = textToTimeRange('next 7 days', opts(true));
+
+        expect(range.start).toBe('now');
+        expect(range.end).toBe('now+7d/h');
+      });
+
+      it('rounds both bounds based on their own offset units', () => {
+        const range = textToTimeRange('now-7d to now-1d', opts(true));
+
+        expect(range.start).toBe('now-7d/h');
+        expect(range.end).toBe('now-1d/h');
+      });
+
+      it('rounds bounds independently when their units differ', () => {
+        const range = textToTimeRange('now-1h to now-30m', opts(true));
+
+        expect(range.start).toBe('now-1h/m');
+        expect(range.end).toBe('now-30m/s');
+      });
+
+      it('applies rounding to preset matches (bare "now" end stays as-is)', () => {
+        const presets = [{ label: 'Last 15 Minutes', start: 'now-15m', end: 'now' }];
+        const range = textToTimeRange('Last 15 Minutes', { presets, roundRelativeTime: true });
+
+        expect(range.start).toBe('now-15m/s');
+        expect(range.end).toBe('now');
       });
     });
 
@@ -592,14 +625,7 @@ describe('textToTimeRange', () => {
         const range = textToTimeRange('+7d', opts(true));
 
         expect(range.start).toBe('now');
-        expect(range.end).toBe('now+7d');
-      });
-
-      it('does not round future natural duration start', () => {
-        const range = textToTimeRange('next 7 days', opts(true));
-
-        expect(range.start).toBe('now');
-        expect(range.end).toBe('now+7d');
+        expect(range.end).toBe('now+7d/h');
       });
 
       it('does not affect named ranges', () => {
@@ -608,33 +634,34 @@ describe('textToTimeRange', () => {
         expect(range.start).toBe('now/d');
         expect(range.end).toBe('now/d');
       });
-
-      it('applies rounding to preset matches', () => {
-        const presets = [{ label: 'Last 15 Minutes', start: 'now-15m', end: 'now' }];
-        const range = textToTimeRange('Last 15 Minutes', { presets, roundRelativeTime: true });
-
-        expect(range.start).toBe('now-15m/m');
-        expect(range.end).toBe('now');
-      });
-
-      it('never modifies end', () => {
-        const range = textToTimeRange('now-7d to now-1d', opts(true));
-
-        expect(range.end).toBe('now-1d');
-      });
     });
 
-    describe('false — strips rounding', () => {
-      it('removes existing rounding suffix', () => {
+    describe('false — preserves input (does not add or strip rounding)', () => {
+      it('preserves an existing rounding suffix on shorthand input', () => {
         const range = textToTimeRange('-7d/d', opts(false));
 
-        expect(range.start).toBe('now-7d');
+        expect(range.start).toBe('now-7d/d');
       });
 
       it('is a no-op when no rounding is present', () => {
         const range = textToTimeRange('-7d', opts(false));
 
         expect(range.start).toBe('now-7d');
+      });
+
+      it('preserves rounding baked into a preset on both bounds', () => {
+        const presets = [{ label: 'Last 24 hours', start: 'now-24h/h', end: 'now' }];
+        const range = textToTimeRange('Last 24 hours', { ...opts(false), presets });
+
+        expect(range.start).toBe('now-24h/h');
+        expect(range.end).toBe('now');
+      });
+
+      it('preserves user-typed rounding on both sides of a range', () => {
+        const range = textToTimeRange('-1h/h to now-30m/m', opts(false));
+
+        expect(range.start).toBe('now-1h/h');
+        expect(range.end).toBe('now-30m/m');
       });
     });
 
@@ -689,6 +716,38 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe(bounds.end);
       }
     });
+  });
+});
+
+describe('"now" anchoring', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // Regression test for https://github.com/elastic/kibana/issues/276537:
+  // "-15m to now" resolves the start and end bounds via two separate
+  // dateMath.parse calls, each defaulting "now" to the real clock. On a
+  // loaded CI runner enough wall-clock time can elapse between those two
+  // calls to skew the window away from a clean 15 minutes. This reproduces
+  // that skew deterministically by advancing the faked clock between the
+  // first ("now-15m") and second ("now") dateMath.parse call.
+  it('resolves relative start/end bounds against the same instant, even if the real clock advances in between', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
+
+    let callCount = 0;
+    const realParse = dateMath.parse.bind(dateMath);
+    jest.spyOn(dateMath, 'parse').mockImplementation((text, options) => {
+      callCount += 1;
+      if (callCount === 2) {
+        jest.setSystemTime(new Date('2025-07-15T12:00:01.500Z'));
+      }
+      return realParse(text, options);
+    });
+
+    const range = textToTimeRange('-15m to now', { roundRelativeTime: false });
+
+    expect(range.endDate!.getTime() - range.startDate!.getTime()).toBe(15 * 60 * 1000);
   });
 });
 

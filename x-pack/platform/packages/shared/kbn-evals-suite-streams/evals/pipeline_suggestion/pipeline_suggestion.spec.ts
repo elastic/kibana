@@ -43,17 +43,19 @@ const evaluate = baseEvaluate.extend<{
     await use(async ({ example, datasetName, datasetDescription }) => {
       await executorClient.runExperiment(
         {
-          dataset: {
-            name: datasetName,
-            description: datasetDescription,
-            examples: [
-              {
-                input: example.input,
-                output: example.output as unknown as Record<string, unknown>,
-                metadata: example.metadata,
-              },
-            ],
-          },
+          datasets: [
+            {
+              name: datasetName,
+              description: datasetDescription,
+              examples: [
+                {
+                  input: example.input,
+                  output: example.output as unknown as Record<string, unknown>,
+                  metadata: example.metadata,
+                },
+              ],
+            },
+          ],
           task: () => runPipelineSuggestion(example, kbnClient, esClient, connector),
         },
         selectEvaluators([

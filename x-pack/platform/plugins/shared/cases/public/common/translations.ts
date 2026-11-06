@@ -64,6 +64,13 @@ export const APPLY_TEMPLATE_MODAL_APPLY = i18n.translate(
   }
 );
 
+export const APPLY_TEMPLATE_MODAL_CONNECTOR_NOTICE = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.connectorNotice',
+  {
+    defaultMessage: "Applying a template does not change this case's connector.",
+  }
+);
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -134,6 +141,14 @@ export const EDIT = i18n.translate('xpack.cases.caseView.edit', {
 
 export const OPTIONAL = i18n.translate('xpack.cases.caseView.optional', {
   defaultMessage: 'Optional',
+});
+
+export const REQUIRED_ON_CLOSE = i18n.translate('xpack.cases.caseView.requiredOnClose', {
+  defaultMessage: 'Required on close',
+});
+
+export const REQUIRED = i18n.translate('xpack.cases.caseView.required', {
+  defaultMessage: 'Required',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
@@ -239,6 +254,10 @@ export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCases
   defaultMessage: 'Settings',
 });
 
+export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templatesButton', {
+  defaultMessage: 'Templates',
+});
+
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {
   defaultMessage: 'Add comment',
 });
@@ -309,11 +328,12 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
 );
 
 export const SYNC_ALERTS = i18n.translate('xpack.cases.settings.syncAlerts', {
-  defaultMessage: 'Sync alerts',
+  defaultMessage: 'Sync detections',
 });
 
 export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.syncAlertHelpText', {
-  defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
+  defaultMessage:
+    'Enabling this option will sync the statuses of attached alerts and attacks with the case status.',
 });
 
 export const EXTRACT_OBSERVABLES_SWITCH_LABEL_ON = i18n.translate(

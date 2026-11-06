@@ -73,9 +73,9 @@ const StartStep: React.FC<StartStepProps> = ({
     isGenerateLoading,
     isCreateLoading,
     isFormDirty,
-  } = useValues(NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl }));
+  } = useValues(NewConnectorLogic({ http, navigateToApp: application?.navigateToApp }));
   const { setRawName, createConnector, generateConnectorName, setFormDirty } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { connector } = useValues(ConnectorViewLogic({ http }));
 

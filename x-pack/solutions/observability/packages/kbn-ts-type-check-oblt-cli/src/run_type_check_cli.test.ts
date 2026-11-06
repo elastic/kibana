@@ -211,7 +211,7 @@ describe('type_check orchestration', () => {
     });
   });
 
-  describe('smart restore (local, no --project)', () => {
+  describe('smart restore (local)', () => {
     it('calls resolveRestoreStrategy and restores when shouldRestore is true', async () => {
       resolveRestoreStrategy.mockResolvedValueOnce({
         shouldRestore: true,
@@ -265,7 +265,17 @@ describe('type_check orchestration', () => {
       );
     });
 
-    it('skips resolveRestoreStrategy when --project filter is set', async () => {
+    it('still resolves the restore strategy and restores when a --project filter is set', async () => {
+      // A scoped run can face a cold cache too (e.g. a fresh worktree). The
+      // restore decision is repo-wide and project-agnostic, so it must run
+      // regardless of --project; otherwise a heavy closure rebuilds from scratch.
+      resolveRestoreStrategy.mockResolvedValueOnce({
+        shouldRestore: true,
+        bestSha: 'abc123def456',
+        staleProjects: [],
+        cacheServerAvailable: true,
+      });
+
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader({
@@ -274,8 +284,13 @@ describe('type_check orchestration', () => {
 
       await runCallback({ log, flagsReader, procRunner });
 
-      expect(resolveRestoreStrategy).not.toHaveBeenCalled();
-      expect(restoreTSBuildArtifacts).not.toHaveBeenCalled();
+      expect(resolveRestoreStrategy).toHaveBeenCalledWith(log, expect.any(Array));
+      expect(restoreTSBuildArtifacts).toHaveBeenCalledWith(log, 'abc123def456', {
+        staleProjects: [],
+        prNumber: undefined,
+        prTipSha: undefined,
+        skipCacheServer: false,
+      });
     });
   });
 

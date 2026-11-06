@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const getWatchlistRiskLevelsQueryBodyV2 = (watchlistName?: string) => `
+export const getWatchlistRiskLevelsQueryBodyV2 = (watchlistId?: string) => `
 | WHERE  entity.EngineMetadata.Type IN ("user", "host", "service")${
-  watchlistName ? ` AND entity.attributes.watchlists == "${watchlistName}"` : ''
+  watchlistId ? ` AND MV_CONTAINS(entity.attributes.watchlists, "${watchlistId}")` : ''
 }
 | STATS count = COUNT(*) BY entity.risk.calculated_level
 | RENAME entity.risk.calculated_level AS level`;

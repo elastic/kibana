@@ -117,11 +117,23 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
       after(async () => {
+        // Agents get reassigned to version-specific policy variants during the tests, so their
+        // policy_id no longer exactly matches agentPolicyWithPPId — delete them explicitly first
+        // (deleting the policy directly would otherwise correctly fail while agents remain assigned).
+        await supertest.delete(`/api/fleet/agents/${agentId}`).set('kbn-xsrf', 'xxxx').expect(200);
         await supertest
-          .post(`/api/fleet/agent_policies/delete`)
+          .delete(`/api/fleet/agents/${upgradedAgentId}`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
+        // Retry to tolerate the unenroll updates above not being immediately visible to the
+        // policy delete guard's search.
+        await retry.tryForTime(20000, async () => {
+          await supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId: agentPolicyWithPPId })
+            .expect(200);
+        });
       });
       it('should include agents on version-specific policies in agent count when getting policy', async () => {
         const { body } = await supertest
@@ -302,11 +314,23 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
       after(async () => {
+        // Agents get reassigned to version-specific policy variants during the tests, so their
+        // policy_id no longer exactly matches agentPolicyWithPPId — delete them explicitly first
+        // (deleting the policy directly would otherwise correctly fail while agents remain assigned).
+        await supertest.delete(`/api/fleet/agents/${agentId}`).set('kbn-xsrf', 'xxxx').expect(200);
         await supertest
-          .post(`/api/fleet/agent_policies/delete`)
+          .delete(`/api/fleet/agents/${upgradedAgentId}`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
+        // Retry to tolerate the unenroll updates above not being immediately visible to the
+        // policy delete guard's search.
+        await retry.tryForTime(20000, async () => {
+          await supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId: agentPolicyWithPPId })
+            .expect(200);
+        });
       });
       it('should create version specific policies with common agent versions and template level agent version condition', async () => {
         const { body } = await supertest
@@ -493,9 +517,18 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
-        await es.delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-1' }).catch(() => {});
-        await es.delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-2' }).catch(() => {});
-        await es.delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-3' }).catch(() => {});
+        // refresh: true ensures these deletes are visible to the agent policy delete guard's
+        // search below — otherwise it can still see these agents (assigned via their versioned
+        // policy_id) and correctly refuse to delete the policy while they appear assigned.
+        await es
+          .delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-1', refresh: true })
+          .catch(() => {});
+        await es
+          .delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-2', refresh: true })
+          .catch(() => {});
+        await es
+          .delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-3', refresh: true })
+          .catch(() => {});
         await supertest
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')

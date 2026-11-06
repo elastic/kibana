@@ -6,13 +6,12 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import type { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
@@ -20,7 +19,7 @@ import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 const fetchEndpointPolicies = (
   kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
+): Promise<KbnClientResponse<GetPolicyListResponse>> => {
   return kbnClient
     .request<GetPolicyListResponse>({
       method: 'GET',
@@ -30,7 +29,7 @@ const fetchEndpointPolicies = (
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 // Setup a list of real endpoint policies and return a method to randomly select one

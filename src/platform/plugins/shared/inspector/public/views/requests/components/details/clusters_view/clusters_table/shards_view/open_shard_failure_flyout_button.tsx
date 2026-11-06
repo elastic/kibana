@@ -7,45 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { ShardFailureFlyout } from './shard_failure_flyout';
+import { useShardFailureFlyout } from './use_shard_failure_flyout';
 
 interface Props {
   failures: estypes.ShardFailure[];
 }
 
 export function OpenShardFailureFlyoutButton({ failures }: Props) {
-  const [showFailures, setShowFailures] = useState(false);
+  const { triggerLabel, flyout, toggleFlyout } = useShardFailureFlyout(failures);
 
-  return (
+  return failures.length ? (
     <>
-      {failures.length ? (
-        <EuiButtonEmpty
-          flush="both"
-          onClick={() => {
-            setShowFailures(!showFailures);
-          }}
-          size="xs"
-        >
-          {i18n.translate('inspector.requests.clusters.shards.openShardFailureFlyoutButtonLabel', {
-            defaultMessage:
-              'View {failedShardCount} failed {failedShardCount, plural, one {shard} other {shards}}',
-            values: { failedShardCount: failures.length },
-          })}
-        </EuiButtonEmpty>
-      ) : null}
+      <EuiButtonEmpty flush="both" onClick={toggleFlyout} size="xs">
+        {triggerLabel}
+      </EuiButtonEmpty>
 
-      {showFailures ? (
-        <ShardFailureFlyout
-          failures={failures}
-          onClose={() => {
-            setShowFailures(false);
-          }}
-        />
-      ) : null}
+      {flyout}
     </>
-  );
+  ) : null;
 }

@@ -24,14 +24,14 @@ export const AgentlessFilter: React.FC<AgentlessFilterProps> = ({
         <>
           <FormattedMessage
             id="xpack.fleet.epm.agentlessFilter.label"
-            defaultMessage="Only agentless integrations"
+            defaultMessage="Only managed integrations"
           />
           &nbsp;
           <EuiIconTip
             content={
               <FormattedMessage
                 id="xpack.fleet.epm.agentlessFilter.tooltip"
-                defaultMessage="Agentless integrations run in Elastic Cloud without requiring you to deploy Elastic Agents"
+                defaultMessage="Managed integrations run in Elastic Cloud without requiring you to deploy Elastic Agents"
               />
             }
             position="right"

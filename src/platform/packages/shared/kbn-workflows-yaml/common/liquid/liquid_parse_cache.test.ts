@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getLiquidInstance, parseTemplateString } from './liquid_parse_cache';
+import {
+  getLiquidInstance,
+  MAX_PARSE_CACHE_CHARS,
+  parseTemplateString,
+} from './liquid_parse_cache';
 
 describe('getLiquidInstance', () => {
   it('returns a Liquid engine instance', () => {
@@ -32,6 +36,19 @@ describe('getLiquidInstance', () => {
     expect(result).toBeDefined();
   });
 
+  it('parses templates using built-in sha256 and hmac_sha256 filters', () => {
+    const engine = getLiquidInstance();
+    const shaTemplate = engine.parse('{{ val | sha256 }}');
+    expect(engine.renderSync(shaTemplate, { val: 'Polyjuice' })).toBe(
+      '44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0'
+    );
+
+    const hmacTemplate = engine.parse('{{ val | hmac_sha256: key }}');
+    expect(engine.renderSync(hmacTemplate, { val: 'Polyjuice', key: 'Polina' })).toBe(
+      '8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20'
+    );
+  });
+
   describe('json_parse filter behavior', () => {
     it('parses valid JSON strings', () => {
       const engine = getLiquidInstance();
@@ -52,6 +69,25 @@ describe('getLiquidInstance', () => {
       const template = engine.parse('{{ val | json_parse }}');
       const result = engine.renderSync(template, { val: 'not json' });
       expect(result).toBe('not json');
+    });
+  });
+
+  describe('pick filter behavior', () => {
+    it('registers pick so a template using it parses and renders (strictFilters)', () => {
+      const engine = getLiquidInstance();
+      const template = engine.parse('{{ val | pick: fields | json }}');
+      const result = engine.renderSync(template, { val: { a: 1, b: 2 }, fields: ['a'] });
+      expect(JSON.parse(result as string)).toEqual({ a: 1 });
+    });
+
+    it('keeps nested dotted-path fields', () => {
+      const engine = getLiquidInstance();
+      const template = engine.parse('{{ val | pick: fields | json }}');
+      const result = engine.renderSync(template, {
+        val: { host: { name: 'h1', ip: '10.0.0.1' } },
+        fields: ['host.name'],
+      });
+      expect(JSON.parse(result as string)).toEqual({ host: { name: 'h1' } });
     });
   });
 });
@@ -81,16 +117,24 @@ describe('parseTemplateString', () => {
     expect(Array.isArray(result)).toBe(true);
   });
 
-  describe('LRU eviction', () => {
-    it('evicts the least recently used entry when cache exceeds max size', () => {
-      // The MAX_PARSE_CACHE_SIZE is 64. We fill the cache beyond that to trigger eviction.
-      // First, parse a "canary" template that should be evicted once we add 64+ more entries.
+  it('caches an empty string', () => {
+    expect(parseTemplateString('')).toBe(parseTemplateString(''));
+  });
+
+  describe('size-bounded eviction', () => {
+    // Distinct per `id`, `length` characters long, and cheap to parse.
+    const buildTemplate = (id: string, length: number): string =>
+      `${id}-{{ x }}`.padEnd(length, 'x');
+    const ENTRY_LENGTH = MAX_PARSE_CACHE_CHARS / 4;
+
+    it('evicts the least recently used entry when the cache exceeds its character budget', () => {
+      // First, parse a "canary" template that should be evicted once more than the budget has been added.
       const canaryTemplate = 'eviction-canary-{{ x }}';
       const canaryResult = parseTemplateString(canaryTemplate);
 
-      // Add enough unique entries to push the canary out
-      for (let i = 0; i < 65; i++) {
-        parseTemplateString(`eviction-test-${i}-{{ y }}`);
+      // Five entries of a quarter of the budget each are more than the budget holds
+      for (let i = 0; i < 5; i++) {
+        parseTemplateString(buildTemplate(`eviction-test-${i}`, ENTRY_LENGTH));
       }
 
       // The canary should have been evicted, so a new call should return a fresh parse
@@ -105,21 +149,36 @@ describe('parseTemplateString', () => {
       const promotedResult = parseTemplateString(promotedTemplate);
 
       // Add entries but keep accessing the promoted template to keep it alive
-      for (let i = 0; i < 40; i++) {
-        parseTemplateString(`lru-fill-${i}-{{ w }}`);
+      for (let i = 0; i < 2; i++) {
+        parseTemplateString(buildTemplate(`lru-fill-${i}`, ENTRY_LENGTH));
       }
 
       // Access the promoted template to move it to the end (most recently used)
       parseTemplateString(promotedTemplate);
 
-      // Add more entries to fill past the limit
-      for (let i = 40; i < 80; i++) {
-        parseTemplateString(`lru-fill-${i}-{{ w }}`);
+      // Add more entries to fill past the budget
+      for (let i = 2; i < 5; i++) {
+        parseTemplateString(buildTemplate(`lru-fill-${i}`, ENTRY_LENGTH));
       }
 
       // The promoted template should still be cached (same reference)
       const afterPromotion = parseTemplateString(promotedTemplate);
       expect(afterPromotion).toBe(promotedResult);
+    });
+
+    it('does not retain a template longer than the whole budget', () => {
+      const oversized = buildTemplate('oversized', MAX_PARSE_CACHE_CHARS + 1);
+
+      expect(parseTemplateString(oversized)).not.toBe(parseTemplateString(oversized));
+    });
+
+    it('keeps every one of more than 64 distinct templates that fit the budget', () => {
+      const templates = Array.from({ length: 100 }, (_, i) => buildTemplate(`many-${i}`, 500));
+      const parsed = templates.map(parseTemplateString);
+
+      templates.forEach((template, i) => {
+        expect(parseTemplateString(template)).toBe(parsed[i]);
+      });
     });
   });
 });

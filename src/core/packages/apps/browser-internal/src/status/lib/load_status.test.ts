@@ -11,7 +11,16 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { StatusResponse } from '@kbn/core-status-common';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mocked } from '@kbn/core-metrics-collectors-server-mocks';
-import { loadStatus } from './load_status';
+import { loadStatus, type ProcessedServerResponse } from './load_status';
+
+type FullProcessedResponse = Extract<ProcessedServerResponse, { redacted: false }>;
+
+const expectFullResponse = (data: ProcessedServerResponse): FullProcessedResponse => {
+  if (data.redacted) {
+    throw new Error('Expected a full (non-redacted) response');
+  }
+  return data;
+};
 
 const mockedResponse: StatusResponse = {
   name: 'My computer',
@@ -138,7 +147,7 @@ describe('response processing', () => {
   });
 
   test('includes the name', async () => {
-    const data = await loadStatus({ http, notifications });
+    const data = expectFullResponse(await loadStatus({ http, notifications }));
     expect(data.name).toEqual('My computer');
   });
 
@@ -147,7 +156,7 @@ describe('response processing', () => {
 
     http.get.mockRejectedValue(new Error());
 
-    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    await expect(loadStatus({ http, notifications })).rejects.toThrow();
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
@@ -159,7 +168,7 @@ describe('response processing', () => {
     http.get.mockReset();
     http.get.mockRejectedValue(error);
 
-    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    await expect(loadStatus({ http, notifications })).rejects.toThrow();
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
@@ -171,7 +180,7 @@ describe('response processing', () => {
     http.get.mockReset();
     http.get.mockRejectedValue(error);
 
-    const data = await loadStatus({ http, notifications });
+    const data = expectFullResponse(await loadStatus({ http, notifications }));
     expect(data.name).toEqual('My computer');
   });
 
@@ -183,12 +192,12 @@ describe('response processing', () => {
     http.get.mockReset();
     http.get.mockRejectedValue(error);
 
-    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    await expect(loadStatus({ http, notifications })).rejects.toThrow();
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
   test('includes core statuses', async () => {
-    const data = await loadStatus({ http, notifications });
+    const data = expectFullResponse(await loadStatus({ http, notifications }));
     expect(data.coreStatus).toEqual([
       {
         id: 'elasticsearch',
@@ -214,7 +223,7 @@ describe('response processing', () => {
   });
 
   test('includes the plugin statuses', async () => {
-    const data = await loadStatus({ http, notifications });
+    const data = expectFullResponse(await loadStatus({ http, notifications }));
 
     expect(data.pluginStatus).toEqual([
       {
@@ -246,7 +255,7 @@ describe('response processing', () => {
   });
 
   test('builds the metrics', async () => {
-    const data = await loadStatus({ http, notifications });
+    const data = expectFullResponse(await loadStatus({ http, notifications }));
     const names = data.metrics.map((m) => m.name);
     expect(names).toEqual([
       'Heap used out of 976.56 KB',
@@ -261,7 +270,7 @@ describe('response processing', () => {
   });
 
   test('adds meta details to Load, Delay and Response time', async () => {
-    const data = await loadStatus({ http, notifications });
+    const data = expectFullResponse(await loadStatus({ http, notifications }));
     const metricNames = data.metrics.filter((met) => met.meta);
     expect(metricNames.map((item) => item.name)).toEqual(['Load', 'Delay', 'Response time avg']);
     expect(metricNames.map((item) => item.meta!.description)).toEqual([
@@ -269,5 +278,22 @@ describe('response processing', () => {
       'Percentiles',
       'Response time max',
     ]);
+  });
+
+  test('returns a redacted response when the body lacks core and plugins', async () => {
+    http.get.mockReset();
+    http.get.mockResolvedValue({ status: { overall: { level: 'available' } } });
+
+    const data = await loadStatus({ http, notifications });
+
+    expect(data).toEqual({
+      redacted: true,
+      serverState: {
+        id: 'available',
+        title: 'Green',
+        message: '',
+        uiColor: 'success',
+      },
+    });
   });
 });

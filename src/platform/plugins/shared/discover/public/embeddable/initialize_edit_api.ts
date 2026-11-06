@@ -7,34 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   FetchContext,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import { getAllEsqlControls } from '@kbn/esql-utils';
+import { getAllEsqlControls } from '@kbn/esql-controls-utils';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
-import type { DiscoverSessionByValueInput } from '../plugin_imports/embeddable_editor_service';
+import type { DiscoverSessionEditorInput } from '../plugin_imports/embeddable_editor_service';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
+  PublishesDataSources<DataView> & { fetchContext$: PublishingSubject<FetchContext | undefined> };
 
 export async function getAppTarget(
   partialApi: SavedSearchPartialApi,
   discoverServices: DiscoverServices
 ) {
   const savedObjectId = partialApi.savedObjectId$.getValue();
-  const dataViews = partialApi.dataViews$.getValue();
+  const dataViews = partialApi.dataSources$.getValue();
   const locatorParams = getDiscoverLocatorParams(partialApi);
 
   // We need to use a redirect URL if this is a by value saved search using
@@ -69,7 +70,7 @@ export function initializeEditApi({
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
     PublishesSelectedTabId &
-    PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
+    PublishesDataSources<DataView> & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
   discoverServices: DiscoverServices;
@@ -84,26 +85,23 @@ export function initializeEditApi({
 
   const parentApiContext = parentApi.getAppContext();
 
+  const displayName = i18n.translate('discover.embeddable.search.displayName', {
+    defaultMessage: 'Discover session',
+  });
+
   return {
-    getTypeDisplayName: () =>
-      i18n.translate('discover.embeddable.search.displayName', {
-        defaultMessage: 'Discover session',
-      }),
+    getTypeDisplayName: () => displayName,
     onEdit: async () => {
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
       const locatorParams = getDiscoverLocatorParams({ ...partialApi, parentApi });
-      const valueInput: DiscoverSessionByValueInput | undefined = isByReference
-        ? undefined
-        : {
-            discoverSessionTab: fromSavedSearchToSavedObjectTab({
+      const valueInput: DiscoverSessionEditorInput = {
+        discoverSessionTab: isByReference
+          ? undefined
+          : fromSavedSearchToSavedObjectTab({
               tab: {
                 id: uuid,
-                label:
-                  getTitle() ||
-                  i18n.translate('discover.embeddable.byValueTabName', {
-                    defaultMessage: 'By-value Discover session',
-                  }),
+                label: getTitle() || displayName,
               },
               savedSearch: {
                 ...partialApi.savedSearch$.getValue(),
@@ -113,10 +111,12 @@ export function initializeEditApi({
               },
               services: discoverServices,
             }),
-            dashboardControlGroupState: apiIsPresentationContainer(parentApi)
-              ? (getAllEsqlControls(parentApi) as ControlPanelsState<OptionsListESQLControlState>)
-              : undefined,
-          };
+        // Passed for by-reference panels too, so controls created in Discover can be added to the
+        // dashboard without duplicating the ones it already has
+        dashboardControlGroupState: apiIsPresentationContainer(parentApi)
+          ? (getAllEsqlControls(parentApi) as ControlPanelsState<OptionsListESQLControlState>)
+          : undefined,
+      };
 
       let app: string;
       let path: string | undefined;

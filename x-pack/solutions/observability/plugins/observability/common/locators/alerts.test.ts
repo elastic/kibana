@@ -11,7 +11,7 @@ import { ALERTS_PATH, AlertsLocatorDefinition } from './alerts';
 describe('RuleDetailsLocator', () => {
   const locator = new AlertsLocatorDefinition();
   const baseUrlMock = 'https://kibana.dev';
-  const spaceIdMock = 'mockedSpaceId';
+  const spaceIdMock = 'mocked-space-id';
 
   it('should return correct url when only baseUrl and spaceId are provided', async () => {
     const location = await locator.getLocation({ baseUrl: baseUrlMock, spaceId: spaceIdMock });
@@ -53,5 +53,30 @@ describe('RuleDetailsLocator', () => {
     expect(location.path).toEqual(
       `${baseUrlMock}/s/${spaceIdMock}${ALERTS_PATH}?_a=(kuery:mockedKuery%2CrangeFrom:mockedRangeTo%2CrangeTo:mockedRangeFrom%2Cstatus:active)`
     );
+  });
+
+  it('should return the absolute details page url when an alertId is provided', async () => {
+    const location = await locator.getLocation({
+      baseUrl: baseUrlMock,
+      spaceId: spaceIdMock,
+      alertId: 'alert/1',
+      kuery: 'ignored',
+    });
+    expect(location.app).toEqual('observability');
+    expect(location.path).toEqual(`${baseUrlMock}/s/${spaceIdMock}${ALERTS_PATH}/alert%2F1`);
+  });
+
+  it('should return an app-relative details page location without baseUrl and spaceId', async () => {
+    const location = await locator.getLocation({ alertId: 'alert-1' });
+    expect(location).toEqual({ app: 'observability-overview', path: '/alerts/alert-1', state: {} });
+  });
+
+  it('should return an app-relative alerts list location without baseUrl and spaceId', async () => {
+    const location = await locator.getLocation({ kuery: 'mockedKuery' });
+    expect(location).toEqual({
+      app: 'observability-overview',
+      path: '/alerts?_a=(kuery:mockedKuery%2CrangeFrom:now-15m%2CrangeTo:now%2Cstatus:all)',
+      state: {},
+    });
   });
 });

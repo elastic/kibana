@@ -80,6 +80,21 @@ describe('defaultGroupTitleRenderers', () => {
     expect(getByTestId('source-ip-group-renderer')).toBeInTheDocument();
   });
 
+  it('should render correctly for destination.ip field', () => {
+    const { getByTestId } = render(
+      defaultGroupTitleRenderers(
+        'destination.ip',
+        {
+          key: '1.2.3.4',
+          doc_count: 5,
+        },
+        'This is a null group!'
+      )!
+    );
+
+    expect(getByTestId('destination-ip-group-renderer')).toBeInTheDocument();
+  });
+
   it('should return undefined when the renderer does not exist', () => {
     const wrapper = defaultGroupTitleRenderers(
       'process.name',

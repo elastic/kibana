@@ -28,7 +28,6 @@ export const usePacks = ({
   search,
   createdBy,
   enabled,
-  skip = false,
 }: {
   isLive?: boolean;
   pageIndex?: number;
@@ -38,7 +37,6 @@ export const usePacks = ({
   search?: string;
   createdBy?: string;
   enabled?: string;
-  skip?: boolean;
 }) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -60,7 +58,6 @@ export const usePacks = ({
         },
       }),
     {
-      enabled: !skip,
       keepPreviousData: true,
       refetchInterval: isLive ? 10000 : false,
       onError: (error) => {

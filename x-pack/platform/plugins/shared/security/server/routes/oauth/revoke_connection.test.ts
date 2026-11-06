@@ -22,7 +22,9 @@ describe('Revoke OAuth Connection route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
+    const coreContext = coreMock.createRequestHandlerContext();
     return coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
@@ -81,7 +83,6 @@ describe('Revoke OAuth Connection route', () => {
 
     expect(response.status).toBe(404);
   });
-
   it('returns error from service', async () => {
     oauthMock.revokeConnection.mockRejectedValue(Boom.badRequest('Connection not found'));
 

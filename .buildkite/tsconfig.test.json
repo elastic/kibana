@@ -3,6 +3,7 @@
     "strict": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "noEmit": true,
     "lib": ["es2020"]

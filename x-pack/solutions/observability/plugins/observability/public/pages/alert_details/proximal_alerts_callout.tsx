@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useFindProximalAlerts } from './hooks/use_find_proximal_alerts';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 
@@ -16,8 +16,6 @@ interface Props {
 }
 
 export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
-  const { euiTheme } = useEuiTheme();
-
   const { data, isError, isLoading } = useFindProximalAlerts(alertDetail);
 
   const count = data?.total;
@@ -27,27 +25,29 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
   }
 
   return (
-    <EuiCallOut>
-      {i18n.translate('xpack.observability.alertDetails.proximalAlert.description', {
+    <KbnInfoCallout
+      title={i18n.translate('xpack.observability.alertDetails.proximalAlert.description', {
         defaultMessage:
           '{count, plural, one {# alert was} other {# alerts were}} triggered around the same time.',
         values: {
           count,
         },
       })}
-      {count > 0 && (
-        <EuiLink
-          data-test-id="see-proximal-alerts"
-          data-test-subj="see-proximal-alerts"
-          css={{ marginLeft: euiTheme.size.s }}
-          onClick={() => switchTabs()}
-        >
-          {i18n.translate('xpack.observability.alertDetails.proximalAlert.action', {
-            defaultMessage: 'See related alerts',
-          })}{' '}
-          <EuiIcon type={'chevronSingleRight'} fontSize={'xs'} />
-        </EuiLink>
-      )}
-    </EuiCallOut>
+      actionProps={
+        count > 0
+          ? {
+              primary: {
+                'data-test-subj': 'see-proximal-alerts',
+                onClick: () => switchTabs(),
+                children: i18n.translate('xpack.observability.alertDetails.proximalAlert.action', {
+                  defaultMessage: 'See related alerts',
+                }),
+                iconType: 'chevronSingleRight',
+                iconSide: 'right',
+              },
+            }
+          : undefined
+      }
+    />
   );
 }

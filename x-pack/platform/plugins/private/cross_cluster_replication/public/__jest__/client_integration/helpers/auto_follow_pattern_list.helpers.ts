@@ -56,7 +56,7 @@ export const setup = (
         await result.user.click(btn);
 
         const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
-        const deleteBtn = within(contextMenu).getAllByRole('button')[1];
+        const deleteBtn = within(contextMenu).getAllByRole('menuitem')[1];
         await result.user.click(deleteBtn);
       },
 

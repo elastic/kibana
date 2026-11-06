@@ -29,6 +29,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
   const aceEditor = getService('aceEditor');
   const comboBox = getService('comboBox');
+  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -559,7 +560,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
-      const validationCallouts = await testSubjects.findAll('~mlValidationCallout');
+      const validationCallouts = await find.allByCssSelector(
+        '.euiCallOut[data-test-subj~="mlValidationCallout"]'
+      );
       expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 
@@ -722,7 +725,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async getHeaderText() {
-      return await testSubjects.getVisibleText('mlDataFrameAnalyticsWizardHeaderTitle');
+      return await testSubjects.getVisibleText('appHeaderTitle');
     },
 
     async assertInitialCloneJobConfigStep(job: DataFrameAnalyticsConfig) {

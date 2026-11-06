@@ -110,6 +110,12 @@ export const EventSchema = schema.maybe(
             type: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(
@@ -234,6 +240,7 @@ export const EventSchema = schema.maybe(
           })
         ),
         saved_objects: schema.maybe(
+          // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
           schema.arrayOf(
             schema.object({
               rel: ecsString(),
@@ -242,9 +249,12 @@ export const EventSchema = schema.maybe(
               type: ecsString(),
               type_id: ecsString(),
               space_agnostic: ecsBoolean(),
-            })
+            }),
+            { maxSize: 1000 }
           )
         ),
+        cps_scope_expression: ecsString(),
+        cps_scope_linked_projects: ecsFlattened(),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
         action: schema.maybe(
@@ -301,13 +311,15 @@ export const EventSchema = schema.maybe(
                   })
                 ),
                 results: schema.maybe(
+                  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
                   schema.arrayOf(
                     schema.object({
                       rule_id: ecsString(),
                       processed_gaps: ecsStringOrNumber(),
                       status: ecsString(),
                       error: ecsString(),
-                    })
+                    }),
+                    { maxSize: 1000 }
                   )
                 ),
               })
@@ -318,8 +330,9 @@ export const EventSchema = schema.maybe(
           schema.object({
             dispatcher: schema.maybe(
               schema.object({
-                episode_count: ecsStringOrNumber(),
-                episode_ids: ecsStringMulti(),
+                failure_reason: ecsString(),
+                alert_count: ecsStringOrNumber(),
+                alert_ids: ecsStringMulti(),
                 rule_count: ecsStringOrNumber(),
                 rule_ids: ecsStringMulti(),
                 action_group_count: ecsStringOrNumber(),
@@ -341,6 +354,7 @@ export const EventSchema = schema.maybe(
 );
 
 function ecsStringMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(schema.string()));
 }
 
@@ -373,7 +387,12 @@ function ecsDateRange() {
 }
 
 function ecsDateRangeMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
+}
+
+function ecsFlattened() {
+  return schema.maybe(schema.any());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;

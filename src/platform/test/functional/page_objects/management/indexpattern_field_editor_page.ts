@@ -15,6 +15,6 @@ export class IndexPatternFieldEditorPageObject extends FtrService {
 
   public async isFieldPreviewVisible() {
     this.log.debug('isFieldPreviewVisible');
-    return await this.testSubjects.exists('fieldPreviewItem', { timeout: 1500 });
+    return await this.testSubjects.exists('fieldPreviewItem');
   }
 }

@@ -19,6 +19,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const toasts = getService('toasts');
+  const browser = getService('browser');
+  const header = getPageObject('header');
 
   const updateConnector = async (id: string, req: Record<string, unknown>) => {
     const { body: connector } = await supertest
@@ -82,7 +84,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the title correctly', async () => {
-        const title = await testSubjects.find('editable-title-header-value');
+        const title = await testSubjects.find('appHeaderTitle');
         expect(await title.getVisibleText()).equal('Upgrade test in Kibana');
       });
 
@@ -234,8 +236,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the status correctly', async () => {
-        const severity = await testSubjects.find('case-view-status-dropdown');
-        expect(await severity.getVisibleText()).equal('Open');
+        const status = await testSubjects.find('case-view-status-badge');
+        expect(await status.getVisibleText()).equal('Open');
       });
 
       it('shows the refresh button', async () => {
@@ -247,24 +249,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the reporter correctly', async () => {
-        const reporter = await find.byCssSelector(
-          '[data-test-subj="case-view-user-list-reporter"] [data-test-subj="user-profile-username"]'
-        );
-
-        expect(await reporter.getVisibleText()).equal('elastic');
+        const reportedBy = await testSubjects.getVisibleText('case-view-reported-by');
+        expect(reportedBy).contain('elastic');
       });
 
       it('shows the participants correctly', async () => {
-        const participant = await find.byCssSelector(
-          '[data-test-subj="case-view-user-list-participants"] [data-test-subj="user-profile-username"]'
-        );
-
-        expect(await participant.getVisibleText()).equal('elastic');
+        await testSubjects.existOrFail('case-view-participants-field-panel');
+        await testSubjects.existOrFail('case-user-profile-avatar-elastic');
       });
 
       it('shows the tags correctly', async () => {
-        const tags = await testSubjects.find('case-tags');
-        expect(replaceNewLinesWithSpace(await tags.getVisibleText())).equal('upgrade test kibana');
+        const tagsText = replaceNewLinesWithSpace(
+          await (await testSubjects.find('case-tags')).getVisibleText()
+        );
+        expect(tagsText).to.contain('upgrade');
+        expect(tagsText).to.contain('test');
+        expect(tagsText).to.contain('kibana');
       });
 
       it('shows the connector fields', async () => {
@@ -276,23 +276,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the change status button', async () => {
-        await testSubjects.exists('case-view-status-action-button');
+        await testSubjects.existOrFail('case-view-status-badge');
       });
 
       it('shows the add comment button', async () => {
-        await testSubjects.exists('submit-comment');
+        await testSubjects.existOrFail('submit-comment');
       });
 
       it('shows the assignees section', async () => {
-        await testSubjects.exists('case-view-assignees');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
       });
     });
 
     describe('Cases table', function () {
       before(async () => {
         await cases.navigation.navigateToApp();
+        // Expand time filter so the 2022 migrated case is visible.
         await testSubjects.click('superDatePickerToggleQuickMenuButton');
         await testSubjects.click('show-all-cases-link');
+        await header.waitUntilLoadingHasFinished();
+        // Default view is 'list'; switch to table so case-table-column-* selectors render.
+        await testSubjects.click('table');
+        await header.waitUntilLoadingHasFinished();
+        // Ensure all columns are visible regardless of prior localStorage state.
+        await testSubjects.click('column-selection-popover-button');
+        await testSubjects.click('column-selection-popover-show-all-button');
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await header.waitUntilLoadingHasFinished();
       });
 
       it('does not show any error toasters', async () => {
@@ -319,7 +329,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the severity correctly', async () => {
-        const severity = await testSubjects.find('case-table-column-severity-low');
+        const severity = await testSubjects.find('case-severity-badge-low');
         expect(await severity.getVisibleText()).equal('Low');
       });
 

@@ -17,3 +17,4 @@ export { getRowAdditionalLeadingControls } from './get_row_additional_leading_co
 export { getPaginationConfig } from './get_pagination_config';
 export { getColumnsConfiguration } from './get_columns_configuration';
 export { createRecommendedFields } from './get_recommended_fields';
+export { getDeepAnalysisPlaybook } from './get_deep_analysis_playbook';

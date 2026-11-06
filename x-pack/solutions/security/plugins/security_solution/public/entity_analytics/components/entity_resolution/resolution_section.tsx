@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiAccordion, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -16,6 +17,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useResolutionGroup } from './hooks/use_resolution_group';
 import { ResolutionGroupTable } from './resolution_group_table';
 import {
@@ -30,7 +34,24 @@ interface ResolutionSectionProps {
   entityId: string;
   entityType: EntityType;
   scopeId: string;
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** When omitted, the header renders as plain, non-clickable text (no link, no arrow). */
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
+  /**
+   * When provided, clicking a related entity name is delegated to this callback (used by the
+   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /** When true, hides the chevron icon in the resolution group header. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
+  /**
+   * View mode of the flyout the section sits in. In `resolved` mode the flyout shows the whole
+   * group, so the target entity's row stays linkable and opens its own single-entity view.
+   */
+  mode?: EntityViewMode;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
@@ -38,6 +59,9 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   entityType,
   scopeId,
   openDetailsPanel,
+  onShowEntity,
+  hideHeaderIcons = false,
+  mode = 'single',
 }) => {
   const {
     data: group,
@@ -48,37 +72,54 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
     enabled: !!entityId,
   });
 
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
 
   const handleOpenResolutionTab = useCallback(() => {
-    openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
+    openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
   }, [openDetailsPanel]);
 
   const handleEntityNameClick = useCallback(
     (entity: Record<string, unknown>) => {
       const clickedEntityId = getEntityId(entity);
       const clickedEntityName = getEntityName(entity);
+
+      if (onShowEntity) {
+        onShowEntity({
+          engineType: entityType as string,
+          entityId: clickedEntityId,
+          entityName: clickedEntityName,
+        });
+        return;
+      }
+
+      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
+
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: entityType,
+          entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+          ...sharedParams,
+        });
+        return;
+      }
+
       const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-
-      if (!panelKey || !panelParam) return;
-
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: clickedEntityName,
-            entityId: clickedEntityId,
-            contextID: scopeId,
-            scopeId,
-          },
-        },
-      });
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, entityType, scopeId]
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
   );
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
+  // In the group view no single entity is "open", so every row (the target included) can be opened.
+  const currentEntityId = mode === 'resolved' ? undefined : entityId;
 
   return (
     <EuiAccordion
@@ -95,11 +136,14 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       <ExpandablePanel
         header={{
           title: RESOLUTION_GROUP_LINK_TITLE,
-          link: {
-            callback: handleOpenResolutionTab,
-            tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
-          },
-          iconType: 'arrowStart',
+          // link only when navigation is wired up; arrow icon hidden for the v2 flyout
+          ...(openDetailsPanel && {
+            link: {
+              callback: handleOpenResolutionTab,
+              tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
+            },
+            iconType: hideHeaderIcons ? undefined : 'chevronLimitLeft',
+          }),
         }}
         expand={{ expandable: false }}
         data-test-subj={RESOLUTION_GROUP_LINK_TEST_ID}
@@ -110,7 +154,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
           isError={isError}
           targetEntityId={targetEntityId}
           onEntityNameClick={handleEntityNameClick}
-          currentEntityId={entityId}
+          currentEntityId={currentEntityId}
         />
       </ExpandablePanel>
     </EuiAccordion>

@@ -6,14 +6,13 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, Fragment, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { PageTitle } from '../../../../components/page_title';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -38,9 +37,9 @@ import { useDataSource } from '../../../../contexts/ml';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { getIsMlCpsEnabled, getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { MlPageHeader } from '../../../../components/page_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -55,11 +54,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {
-    services: { maps: mapsPlugin, uiSettings },
+    services: { maps: mapsPlugin, uiSettings, cps },
   } = useMlKibana();
   const mlApi = useMlApi();
   const newJobCapsService = useNewJobCapsService();
-
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
   const chartInterval = useTimeBuckets(uiSettings);
 
   const jobCreator = useMemo(
@@ -152,6 +152,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
+  if (dataSourceContext.projectRouting) {
+    jobCreator.projectRouting = dataSourceContext.projectRouting;
+  } else if (isMlCpsEnabled && cps?.cpsManager && jobCreator.projectRouting === null) {
+    jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
+  }
+
   if (autoSetTimeRange) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
@@ -213,17 +219,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreatorTitle = getJobCreatorTitle(jobCreator);
 
   return (
-    <Fragment>
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
-              <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
-              {jobCreatorTitle}
-            </div>
-          }
-        />
-      </MlPageHeader>
+    <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+      <MlAppHeader
+        title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
+          defaultMessage: 'Create job',
+        })}: ${jobCreatorTitle}`}
+        back={anomalyDetectionJobsBack}
+      />
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
@@ -240,6 +242,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           )}
+          {jobCreator.projectRouting !== null ? (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.projectScope"
+              defaultMessage=", project scope: {projectScope}"
+              values={{ projectScope: jobCreator.projectRouting }}
+            />
+          ) : null}
         </EuiText>
 
         <Wizard
@@ -253,6 +262,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
           firstWizardStep={firstWizardStep}
         />
       </div>
-    </Fragment>
+    </div>
   );
 };

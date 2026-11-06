@@ -22,7 +22,7 @@ import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plug
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import type { createDeprecatedRuleAssetSavedObject } from '../../helpers/rules';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../../env_var_names_constants';
 import { refreshSavedObjectIndices, rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
@@ -159,14 +159,20 @@ export const preventPrebuiltRulesPackageInstallation = () => {
       return;
     }
 
-    // Forward only non-package flows to the server
+    // Forward only non-package flows to the server, then merge mock package
+    // results into the real response. `req.on('response')` is used instead of
+    // `req.continue(callback)` because the callback form raises a test failure
+    // when the upstream connection is canceled mid-response (e.g., the test
+    // navigates away before init finishes) — see cypress-io/cypress#26248. The
+    // event-emitter style simply does not fire on cancellation, absorbing the
+    // transient error silently.
     req.body.flows = serverFlows;
-    req.continue((res) => {
-      // Merge mock package results into the real server response
-      for (const id of mockedFlows) {
-        res.body.flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+    req.on('response', (res) => {
+      if (res.body && typeof res.body === 'object' && res.body.flows) {
+        for (const id of mockedFlows) {
+          res.body.flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+        }
       }
-      res.send();
     });
   });
 };
@@ -199,9 +205,25 @@ const installByUploadPrebuiltRulesPackage = (packagePath: string): Cypress.Chain
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
+ *
+ * On MKI (`CLOUD_SERVERLESS`) Fleet rejects that upload because the name exists in
+ * the registry, and `kbnTestServerArgs` are not applied. Leave the environment
+ * package in place. Specs that need mock-specific assets are tagged
+ * `@skipInServerlessMKI`.
  */
 export const installMockPrebuiltRulesPackage = (): Cypress.Chainable => {
+  if (Cypress.env(CLOUD_SERVERLESS)) {
+    cy.log('Skipping mock prebuilt rules package upload on MKI');
+    return cy.wrap(undefined);
+  }
+
   cy.log('Install mock prebuilt rules package');
+
+  // On shared stacks a previous spec may have installed the real package from
+  // the registry (e.g. install_via_fleet.cy.ts). Fleet rejects uploads that
+  // would replace a registry-installed package, so remove any existing
+  // installation before uploading the mock.
+  deletePrebuiltRulesFleetPackage();
 
   return installByUploadPrebuiltRulesPackage(
     'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'

@@ -26,7 +26,13 @@ import type {
   SimulationInput,
   SimulationMachineDeps,
 } from './types';
-import { getSchemaFieldsFromSimulation, mapField, stageDocOnlyOverride, unmapField } from './utils';
+import {
+  getSchemaFieldsFromSimulation,
+  mapField,
+  stageDocOnlyOverride,
+  stripMetadataFields,
+  unmapField,
+} from './utils';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -320,9 +326,11 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples
-            .map((doc) => doc.document)
-            .map(flattenObjectNestedLast) as FlattenRecord[],
+          documents: stripMetadataFields(
+            context.samples
+              .map((doc) => doc.document)
+              .map(flattenObjectNestedLast) as FlattenRecord[]
+          ),
           steps: getValidSteps(context.steps),
           detectedFields: context.detectedSchemaFields,
         }),

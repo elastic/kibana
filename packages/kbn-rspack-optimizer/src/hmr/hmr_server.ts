@@ -8,6 +8,7 @@
  */
 
 import http from 'http';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const DEFAULT_HMR_PORT = 5678;
 
@@ -15,11 +16,13 @@ export class HmrServer {
   private readonly server: http.Server;
   private readonly clients = new Set<http.ServerResponse>();
   private readonly basePath: string;
+  private readonly log?: ToolingLog;
   private assignedPort = 0;
   private lastState: Record<string, unknown> | null = null;
 
-  constructor(basePath?: string) {
+  constructor(basePath?: string, log?: ToolingLog) {
     this.basePath = basePath ?? '';
+    this.log = log;
 
     this.server = http.createServer((req, res) => {
       if (req.method === 'OPTIONS') {
@@ -53,16 +56,52 @@ export class HmrServer {
     });
   }
 
+  /**
+   * Start the HMR server.
+   *
+   * Tries to bind to the requested port (KBN_HMR_PORT or 5678). If that port
+   * is already in use — typically a zombie optimizer from a previous dev
+   * session — falls back to an OS-assigned ephemeral port and logs a warning
+   * so the new dev session can proceed instead of failing the whole build.
+   *
+   * The bundled HMR client always uses the port returned here (via the
+   * compile config) so any port is safe at the network layer.
+   */
   start(): Promise<number> {
-    const port = Number(process.env.KBN_HMR_PORT) || DEFAULT_HMR_PORT;
+    const envPort = process.env.KBN_HMR_PORT;
+    const requestedPort =
+      envPort !== undefined && envPort !== '' ? Number(envPort) : DEFAULT_HMR_PORT;
 
+    return this.tryListen(requestedPort).catch((err: NodeJS.ErrnoException) => {
+      if (err.code !== 'EADDRINUSE') {
+        throw err;
+      }
+      this.log?.warning(
+        `HMR port ${requestedPort} is already in use ` +
+          `(likely a leftover @kbn/rspack-optimizer worker — check \`lsof -i :${requestedPort}\`). ` +
+          `Falling back to an ephemeral port.`
+      );
+      return this.tryListen(0);
+    });
+  }
+
+  private tryListen(port: number): Promise<number> {
     return new Promise((resolve, reject) => {
-      this.server.once('error', reject);
-      this.server.listen(port, '127.0.0.1', () => {
+      const onError = (err: Error) => {
+        this.server.removeListener('listening', onListening);
+        reject(err);
+      };
+      const onListening = () => {
+        this.server.removeListener('error', onError);
         const addr = this.server.address();
         this.assignedPort = typeof addr === 'object' && addr ? addr.port : port;
         resolve(this.assignedPort);
-      });
+      };
+      this.server.once('error', onError);
+      this.server.once('listening', onListening);
+      // Loopback by default; set KBN_HMR_HOST (e.g. 0.0.0.0) to reach the dev server from a
+      // container, VM or another host.
+      this.server.listen(port, process.env.KBN_HMR_HOST || '127.0.0.1');
     });
   }
 
@@ -81,6 +120,15 @@ export class HmrServer {
   broadcastBuilding(): void {
     this.lastState = { building: true };
     const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;
+    for (const client of this.clients) {
+      client.write(payload);
+    }
+  }
+
+  broadcastReload(files?: string[]): void {
+    // Not replayed: pages connecting after a reload already load the current shared bundles.
+    this.lastState = null;
+    const payload = `data: ${JSON.stringify({ reload: true, files })}\n\n`;
     for (const client of this.clients) {
       client.write(payload);
     }

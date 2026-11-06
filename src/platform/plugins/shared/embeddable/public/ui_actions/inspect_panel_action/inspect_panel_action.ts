@@ -12,14 +12,15 @@ import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   EmbeddableApiContext,
-  PublishesTitle,
   HasParentApi,
+  PublishesTitle,
 } from '@kbn/presentation-publishing';
-import { getTitle, apiHasUniqueId } from '@kbn/presentation-publishing';
+import { apiHasUniqueId, getTitle } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ACTION_INSPECT_PANEL } from './constants';
 import { inspector } from '../../kibana_services';
+import { EXPORT_ACTION_GROUP } from '../constants';
+import { ACTION_INSPECT_PANEL } from './constants';
 
 export type InspectPanelActionApi = HasInspectorAdapters & Partial<PublishesTitle & HasParentApi>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
@@ -30,6 +31,8 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_INSPECT_PANEL;
   public readonly id = ACTION_INSPECT_PANEL;
   public order = 19; // right after Explore in Discover which is 20
+
+  public grouping = [EXPORT_ACTION_GROUP];
 
   constructor() {}
 

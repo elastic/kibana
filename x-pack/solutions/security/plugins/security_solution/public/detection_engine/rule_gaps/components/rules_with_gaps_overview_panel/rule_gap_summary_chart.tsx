@@ -228,6 +228,7 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
             items={tableData}
             columns={columns}
             tableLayout="auto"
+            tableCaption={i18n.RULE_GAP_SUMMARY_TABLE_CAPTION}
             data-test-subj="rule-gap-summary-table"
           />
         </EuiFlexItem>

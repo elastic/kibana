@@ -13,15 +13,18 @@ import moment from 'moment';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   ACTION_RESPONSES_INDEX,
+  EXACT_RESPONDING_AGENTS_LIMIT,
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
-import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
+import { buildIndexNamesWithNamespaces } from '../../../../../utils/build_index_name_with_namespace';
+import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 
 export const buildActionResultsQuery = ({
   actionId,
   agentIds,
+  agentsCount,
   kuery,
   startDate,
   sort,
@@ -30,11 +33,15 @@ export const buildActionResultsQuery = ({
   ccsEnabled,
   useNewDataStream,
   integrationNamespaces,
-}: ActionResultsRequestOptions): ISearchRequestParams => {
-  let filter = `action_id: ${actionId}`;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
+  spaceId,
+  matchMissingSpaceId,
+  matchActionDataSpaceId,
+  skipSpaceFilter,
+}: ActionResultsRequestOptions & {
+  matchActionDataSpaceId?: boolean;
+  skipSpaceFilter?: boolean;
+}): ISearchRequestParams => {
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
@@ -65,10 +72,35 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
+  // Hit-level scoping is enforced centrally in the search strategy
+  // (enforceSpaceScope). The aggregation below is a separate filter context that
+  // the top-level query does not constrain, so it is scoped explicitly here.
+  //
+  // This read is bound to a single `action_id`, which the caller can only have
+  // learned from a space-stamped, Kibana-written action document. That binding is
+  // the authorization gate that makes honouring the agent-carried
+  // `action_data.space_id` safe here — see buildSpaceIdFilter. The strategy
+  // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
+  // aggregation cannot drift from the hit filter. Default off: omitting the
+  // flag must not enable the less-trusted field in aggregations only.
+  //
+  // `skipSpaceFilter` means the strategy already found this `action_id` on the
+  // Kibana-written action document in the active space and omitted the hit-level
+  // filter, so the aggregation omits it too and counts match the hits.
+  const spaceIdFilters: estypes.QueryDslQueryContainer[] = skipSpaceFilter
+    ? []
+    : [
+        buildSpaceIdFilter(spaceId, {
+          matchMissingSpaceId: matchMissingSpaceId ?? true,
+          matchActionDataSpaceId: matchActionDataSpaceId ?? false,
+        }),
+      ];
+
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
     ...agentIdsFilter,
-    getQueryFilter({ filter }),
+    { term: { action_id: actionId } },
+    ...kueryFilter,
   ];
 
   let baseIndex: string;
@@ -80,16 +112,10 @@ export const buildActionResultsQuery = ({
     baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
   }
 
-  let index: string;
-  if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces
-      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-      .join(',');
-  } else {
-    index = baseIndex;
-  }
-
-  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,
@@ -104,10 +130,11 @@ export const buildActionResultsQuery = ({
               bool: {
                 must: [
                   {
-                    match: {
+                    term: {
                       action_id: actionId,
                     },
                   },
+                  ...spaceIdFilters,
                 ],
               },
             },
@@ -117,6 +144,21 @@ export const buildActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
+              // Fleet delivers responses at least once, so `doc_count` can exceed the number of
+              // agents that answered. Completion is decided on distinct agents. A `terms` agg sized
+              // to the targeted agents is exact, which `cardinality` is not (it estimated wrong in
+              // about 1 of 2 runs at 10k agents and left answered queries `running`). Fleets past
+              // the bucket limit keep counting response documents (`doc_count`), as before.
+              ...(agentsCount &&
+              Number.isInteger(agentsCount) &&
+              agentsCount > 0 &&
+              agentsCount <= EXACT_RESPONDING_AGENTS_LIMIT
+                ? {
+                    responding_agent_ids: {
+                      terms: { field: 'agent_id', size: agentsCount },
+                    },
+                  }
+                : {}),
               responses: {
                 terms: {
                   script: {

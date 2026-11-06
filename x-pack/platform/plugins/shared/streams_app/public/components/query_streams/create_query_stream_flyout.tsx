@@ -5,43 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
 import { QueryStreamFlyout } from './query_stream_flyout';
 
-interface CreateQueryStreamFlyoutProps {
-  onQueryStreamCreated: () => void;
-}
-
-export function CreateQueryStreamFlyout({ onQueryStreamCreated }: CreateQueryStreamFlyoutProps) {
-  const [isFlyoutOpen, { toggle: toggleFlyout, off: closeFlyout }] = useBoolean(false);
-
-  return (
-    <>
-      <EuiButton
-        onClick={toggleFlyout}
-        size="s"
-        fill
-        data-test-subj="streamsAppCreateQueryStreamButton"
-      >
-        {i18n.translate('xpack.streams.streamsListView.createQueryStreamButtonLabel', {
-          defaultMessage: 'Create Query stream',
-        })}
-      </EuiButton>
-      {isFlyoutOpen && (
-        <CreateQueryStreamFlyoutContent
-          onClose={closeFlyout}
-          onQueryStreamCreated={onQueryStreamCreated}
-        />
-      )}
-    </>
-  );
-}
-
-const CreateQueryStreamFlyoutContent = ({
+export const CreateQueryStreamFlyoutContent = ({
   onClose,
   onQueryStreamCreated,
 }: {

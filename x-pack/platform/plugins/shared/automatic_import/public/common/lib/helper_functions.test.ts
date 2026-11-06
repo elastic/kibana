@@ -197,11 +197,11 @@ describe('helper_functions', () => {
 
     it('should return true for names within limit', () => {
       expect(meetsMaxLength('ab')).toBe(true);
-      expect(meetsMaxLength('a'.repeat(256))).toBe(true);
+      expect(meetsMaxLength('a'.repeat(150))).toBe(true);
     });
 
-    it('should return false for names exceeding 256 characters', () => {
-      expect(meetsMaxLength('a'.repeat(257))).toBe(false);
+    it('should return false for names exceeding 150 characters', () => {
+      expect(meetsMaxLength('a'.repeat(151))).toBe(false);
     });
   });
 
@@ -211,7 +211,7 @@ describe('helper_functions', () => {
     });
 
     it('should have correct MAX_NAME_LENGTH', () => {
-      expect(MAX_NAME_LENGTH).toBe(256);
+      expect(MAX_NAME_LENGTH).toBe(150);
     });
   });
 });

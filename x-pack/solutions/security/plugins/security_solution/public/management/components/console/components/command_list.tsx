@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
+import React, { memo, useCallback, useMemo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
+  EuiCallOut,
   EuiDescriptionList,
-  EuiFlexGroup,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
-  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sortBy } from 'lodash';
+import { consoleTranslations } from './translations';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
-import { getCommandNameWithArgs } from '../service/utils';
+import { buildCommandUsageList } from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -50,32 +51,32 @@ export const convertToTestId = (value: string): string => {
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
-  margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
+  margin-top: ${({ theme }) => theme.euiTheme.size.s};
   .euiTableHeaderCell {
     .euiTableCellContent__text {
-      color: ${({ theme: { eui } }) => eui.euiTextColor};
-      font-size: ${({ theme: { eui } }) => eui.euiFontSize};
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeS};
-      padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
+      color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
+      font-size: ${({ theme }) => theme.euiTheme.font.scale[theme.euiTheme.font.body.scale]}rem;
+      padding-bottom: ${({ theme }) => theme.euiTheme.size.s};
+      padding-left: ${({ theme }) => theme.euiTheme.size.s};
     }
   }
 `;
 
 const StyledEuiCallOut = styled(EuiCallOut)`
-  margin: ${({ theme: { eui } }) => eui.euiSize};
-  padding: ${({ theme: { eui } }) => eui.euiSize};
-  border-radius: ${({ theme: { eui } }) => eui.euiSizeXS};
+  margin: ${({ theme }) => theme.euiTheme.size.base};
+  padding: ${({ theme }) => theme.euiTheme.size.base};
+  border-radius: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
+  padding-left: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const StyledEuiFlexGrid = styled(EuiFlexGrid)`
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
+  @media only screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.l}px) {
     max-width: 75%;
   }
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
+  @media only screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.xl}px) {
     max-width: 50%;
   }
 `;
@@ -83,7 +84,7 @@ const StyledEuiFlexGrid = styled(EuiFlexGrid)`
 const StyledEuiBadge = styled(EuiBadge)`
   font-size: 10px !important;
   span {
-    color: ${({ theme: { eui } }) => eui.euiShadowColor} !important;
+    color: ${({ theme }) => theme.euiTheme.colors.shadow} !important;
   }
 `;
 
@@ -227,7 +228,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
           field: groupLabel,
           name: <div data-test-subj={getTestId('group')}>{groupLabel}</div>,
           render: (command: CommandDefinition) => {
-            const commandNameWithArgs = getCommandNameWithArgs(command);
+            const commandNameWithArgs = buildCommandUsageList(command, {
+              includeOptionalArgs: false,
+            }).shift();
             return (
               <StyledEuiFlexGroup
                 alignItems="center"
@@ -303,10 +306,10 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
   if (display === 'table') {
     const calloutItems = [
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.callout.escapeDoubleDashes"
-        defaultMessage="Escape values with double dashes (--) as \-\-, unless they are command arguments; otherwise the console interprets them as arguments."
-      />,
+      consoleTranslations.escapeDoubleDashesInfo,
+      consoleTranslations.keyTabInfo,
+      consoleTranslations.keyUpArrowInfo,
+      consoleTranslations.keyAltSpaceInfo,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.multipleResponses"
         defaultMessage="You can enter consecutive response actions — no need to wait for previous actions to complete."
@@ -392,7 +395,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             direction="column"
           >
             {filteredCommands.map((command) => {
-              const commandNameWithArgs = getCommandNameWithArgs(command);
+              const commandNameWithArgs = buildCommandUsageList(command, {
+                includeOptionalArgs: false,
+              }).shift();
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList

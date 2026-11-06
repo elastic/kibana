@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiText } from '@elastic/eui';
 import type { OverviewTrend } from '../../../../../../../../../common/types';
 import { formatDuration } from '../../../../../../utils/formatting';

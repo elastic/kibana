@@ -9,11 +9,17 @@ import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
+  type KibanaRequest,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import {
+  INBOX_API_PRIVILEGE_READ,
+  INBOX_API_PRIVILEGE_RESPOND,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+} from '../common';
 import type { InboxConfig } from './config';
 import type {
   InboxPluginSetup,
@@ -22,6 +28,16 @@ import type {
   InboxStartDependencies,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
+import { InboxActionRegistry } from './services/inbox_action_registry';
+import type { InboxActionProvider } from './services/inbox_action_provider';
+
+/**
+ * Resolves the active space id for a request. The routes accept this as a
+ * dependency so that (a) we never silently default to `'default'` and leak
+ * cross-space rows, and (b) tests can inject a fixed resolver without
+ * pulling in the full spaces plugin.
+ */
+export type InboxSpaceIdResolver = (request: KibanaRequest) => string;
 
 export class InboxPlugin
   implements
@@ -41,7 +57,11 @@ export class InboxPlugin
   ): InboxPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Inbox plugin is disabled');
-      return {};
+      return {
+        registerActionProvider: (_provider: InboxActionProvider) => {
+          // No-op so providers can unconditionally call this in their own setup().
+        },
+      };
     }
 
     this.logger.info('Setting up Inbox plugin');
@@ -52,19 +72,23 @@ export class InboxPlugin
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
       app: ['kibana', PLUGIN_ID],
+      // `all` grants both the read (list) and the respond (write) API
+      // privileges; `read` grants only the read privilege. This prevents a
+      // read-only user from invoking the POST respond route — before the
+      // split both privileges shared a single `api: [PLUGIN_ID]` entry.
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [INBOX_API_PRIVILEGE_READ, INBOX_API_PRIVILEGE_RESPOND],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: ['show', 'respond'],
         },
         read: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [INBOX_API_PRIVILEGE_READ],
           savedObject: {
             all: [],
             read: [],
@@ -74,17 +98,34 @@ export class InboxPlugin
       },
     });
 
+    const registry = new InboxActionRegistry(this.logger);
+
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
       router,
       logger: this.logger,
+      registry,
+      getSpaceId: (request) => this.getSpaceId(request),
     });
 
-    return {};
+    return {
+      registerActionProvider: (provider) => registry.register(provider),
+    };
   }
 
-  start(_core: CoreStart, _plugins: InboxStartDependencies): InboxPluginStart {
+  private spaces?: InboxStartDependencies['spaces'];
+
+  private getSpaceId(request: KibanaRequest): string {
+    // When the spaces plugin is available (default in Kibana / serverless)
+    // resolve the active space for this request. When it isn't, Kibana is
+    // running single-space so `'default'` is the only possible answer and
+    // providers will receive a truthful value.
+    return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+  }
+
+  start(_core: CoreStart, plugins: InboxStartDependencies): InboxPluginStart {
+    this.spaces = plugins.spaces;
     return {};
   }
 

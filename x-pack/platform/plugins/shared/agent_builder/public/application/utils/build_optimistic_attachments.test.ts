@@ -125,4 +125,33 @@ describe('buildOptimisticAttachments', () => {
     ]);
     expect(result.attachmentRefs).toHaveLength(1);
   });
+
+  it('preserves group_id on fallback attachment', () => {
+    const attachments: AttachmentInput[] = [
+      { type: 'security.alerts', data: { alertIds: ['a1'] }, group_id: 'group-1' },
+    ];
+
+    const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
+
+    expect(result.fallbackAttachments[0].groupId).toBe('group-1');
+  });
+
+  it('preserves description on fallback attachment', () => {
+    const attachments: AttachmentInput[] = [
+      { type: 'security.alerts', data: { alertIds: ['a1'] }, description: '5 Alerts' },
+    ];
+
+    const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
+
+    expect(result.fallbackAttachments[0].description).toBe('5 Alerts');
+  });
+
+  it('omits group_id and description from fallback when not set on input', () => {
+    const attachments: AttachmentInput[] = [{ type: 'text', data: { value: 'hello' } }];
+
+    const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
+
+    expect(result.fallbackAttachments[0]).not.toHaveProperty('groupId');
+    expect(result.fallbackAttachments[0]).not.toHaveProperty('description');
+  });
 });

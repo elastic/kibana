@@ -11,12 +11,11 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SuggestUserProfilesRequest } from '../../../common/types/api';
-import { SuggestUserProfilesRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { SuggestUserProfilesRequestSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
@@ -76,7 +75,7 @@ export class UserProfileService {
     request: KibanaRequest<{}, {}, SuggestUserProfilesRequest>
   ): Promise<UserProfile[]> {
     try {
-      const params = decodeWithExcessOrThrow(SuggestUserProfilesRequestRt)(request.body);
+      const params = decodeWithExcessOrThrowZod(SuggestUserProfilesRequestSchema)(request.body);
 
       const { name, size, owners } = params;
 

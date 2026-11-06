@@ -7,16 +7,19 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { labels } from '../../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
 import toolsImage from './assets/wrench_gear.svg';
+import connectorsImage from './assets/handshake.svg';
+
 const { agentOverview: overviewLabels } = labels;
 
 export interface CapabilitiesSectionProps {
   skillsCount: number;
   pluginsCount: number;
+  connectorsCount: number;
   toolsCount: number;
   skillsCountLoading: boolean;
   pluginsCountLoading: boolean;
@@ -25,15 +28,18 @@ export interface CapabilitiesSectionProps {
   isExperimentalFeaturesEnabled: boolean;
   skillsHref: string;
   pluginsHref: string;
+  connectorsHref: string;
   toolsHref: string;
   onNavigateToSkills: () => void;
   onNavigateToPlugins: () => void;
+  onNavigateToConnectors: () => void;
   onNavigateToTools: () => void;
 }
 
 export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   skillsCount,
   pluginsCount,
+  connectorsCount,
   toolsCount,
   skillsCountLoading,
   pluginsCountLoading,
@@ -41,9 +47,11 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   isExperimentalFeaturesEnabled,
   skillsHref,
   pluginsHref,
+  connectorsHref,
   toolsHref,
   onNavigateToSkills,
   onNavigateToPlugins,
+  onNavigateToConnectors,
   onNavigateToTools,
 }) => (
   <>
@@ -80,6 +88,19 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
           />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
+        <CapabilityCard
+          dataTestSubj="agentOverviewCapabilityCardConnectors"
+          count={connectorsCount}
+          title={overviewLabels.connectorsLabel(connectorsCount)}
+          betaBadgeProps={connectorsTechPreviewBadgeProps}
+          description={overviewLabels.connectorsDescription}
+          emptyDescription={overviewLabels.connectorsOnboardingDescription}
+          image={connectorsImage}
+          href={connectorsHref}
+          onClick={onNavigateToConnectors}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
         <CapabilityCard
           dataTestSubj="agentOverviewCapabilityCardTools"

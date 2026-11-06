@@ -15,5 +15,6 @@
     "@kbn/data-views-plugin",
     "@kbn/slo-schema",
     "@kbn/unified-doc-viewer",
+    "@kbn/core-execution-context-common",
   ]
 }

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { FC } from 'react';
+import type { FC, Ref } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiResizeObserver } from '@elastic/eui';
@@ -35,6 +35,7 @@ import {
   useTimeseriesExplorerStyles,
   useAnnotationStyles,
 } from '../../application/timeseriesexplorer/styles';
+import { useDefaultSeverity } from '../../application/components/controls/select_severity/select_severity';
 
 const containerPadding = 20;
 const minElemAndChartDiff = 20;
@@ -69,6 +70,8 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 
 export interface SingleMetricViewerProps {
   shouldShowForecastButton?: boolean;
+  isInteractive?: boolean;
+
   bounds?: TimeRangeBounds;
   forecastId?: string;
   selectedEntities?: MlEntity;
@@ -80,9 +83,15 @@ export interface SingleMetricViewerProps {
    */
   lastRefresh?: number;
   onRenderComplete?: () => void;
+  onLoading?: (loading: boolean) => void;
   onError?: (error?: Error) => void;
   onForecastIdChange?: (forecastId: string | undefined) => void;
   uuid: string;
+  /**
+   * Reporting readiness for screenshotting. Defaults to false so PDF/PNG waits.
+   */
+  isRenderComplete?: boolean;
+  wrapperRef?: Ref<HTMLDivElement>;
 }
 
 type Zoom = AppStateZoom | undefined;
@@ -100,16 +109,21 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   lastRefresh,
   onError,
   onForecastIdChange,
+  onLoading,
   onRenderComplete,
   forecastId,
   selectedDetectorIndex,
   selectedEntities,
   selectedJobId,
   shouldShowForecastButton,
+  isInteractive = true,
   uuid,
+  isRenderComplete,
+  wrapperRef,
 }) => {
   const timeseriesExplorerStyles = useTimeseriesExplorerStyles();
   const annotationStyles = useAnnotationStyles();
+  const { val: defaultSeverity } = useDefaultSeverity();
   const [chartDimensions, setChartDimensions] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -253,10 +267,15 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
             padding: '8px',
           }}
           data-test-subj={`mlSingleMetricViewer_${uuid}`}
-          ref={resizeRef}
+          ref={(el) => {
+            resizeRef(el);
+            if (typeof wrapperRef === 'function') {
+              wrapperRef(el);
+            } else if (wrapperRef) {
+              (wrapperRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            }
+          }}
           css={[timeseriesExplorerStyles, annotationStyles]}
-          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
-          data-rendering-count={1}
         >
           <KibanaRenderContextProvider {...startServices}>
             <KibanaContextProvider
@@ -289,14 +308,16 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       selectedEntities={selectedEntities}
                       selectedForecastId={selectedForecastId}
                       tableInterval="auto"
-                      tableSeverity={[{ min: 0 }]}
+                      tableSeverity={defaultSeverity}
                       zoom={zoom}
                       functionDescription={functionDescription}
                       selectedJob={selectedJobWrapper.job}
                       selectedJobStats={selectedJobWrapper.stats}
+                      onLoading={onLoading}
                       onRenderComplete={onRenderComplete}
                       onForecastComplete={onForecastComplete}
                       shouldShowForecastButton={shouldShowForecastButton}
+                      isInteractive={isInteractive}
                     />
                   )}
               </DatePickerContextProvider>

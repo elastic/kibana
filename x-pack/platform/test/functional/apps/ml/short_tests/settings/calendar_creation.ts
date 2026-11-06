@@ -10,14 +10,12 @@ import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const esArchiver = getService('esArchiver');
 
   const calendarId = 'test_calendar_id';
   const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
 
   describe('calendar creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
 
       await asyncForEach(jobConfigs, async (jobConfig) => {

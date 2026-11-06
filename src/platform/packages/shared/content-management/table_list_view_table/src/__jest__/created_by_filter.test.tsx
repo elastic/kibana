@@ -140,7 +140,7 @@ describe('created_by filter', () => {
   test('filtering by one creator shows correct item count', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    expect(await screen.findByTestId('listingTable-isLoaded')).toBeVisible();
 
     await user.click(screen.getByTestId('userFilterPopoverButton'));
 
@@ -155,7 +155,7 @@ describe('created_by filter', () => {
   test('filtering by multiple creators shows correct item count', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    expect(await screen.findByTestId('listingTable-isLoaded')).toBeVisible();
 
     await user.click(screen.getByTestId('userFilterPopoverButton'));
 

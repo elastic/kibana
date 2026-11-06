@@ -17,5 +17,38 @@ export const createPublicAgentsContract = ({
     list: async () => {
       return agentService.list();
     },
+    get: async (agentId) => {
+      return agentService.get(agentId);
+    },
+    addSkillToAgent: async ({ agentId, skillId }) => {
+      const agent = await agentService.get(agentId);
+      const currentSkillIds = agent.configuration.skill_ids ?? [];
+      if (currentSkillIds.includes(skillId)) {
+        return agent;
+      }
+      return agentService.update(agentId, {
+        configuration: { skill_ids: [...currentSkillIds, skillId] },
+      });
+    },
+    addConnectorToAgent: async ({ agentId, connectorId }) => {
+      const agent = await agentService.get(agentId);
+      const currentConnectorIds = agent.configuration.connector_ids ?? [];
+      if (currentConnectorIds.includes(connectorId)) {
+        return agent;
+      }
+      return agentService.update(agentId, {
+        configuration: { connector_ids: [...currentConnectorIds, connectorId] },
+      });
+    },
+    removeConnectorFromAgent: async ({ agentId, connectorId }) => {
+      const agent = await agentService.get(agentId);
+      const currentConnectorIds = agent.configuration.connector_ids ?? [];
+      if (!currentConnectorIds.includes(connectorId)) {
+        return agent;
+      }
+      return agentService.update(agentId, {
+        configuration: { connector_ids: currentConnectorIds.filter((id) => id !== connectorId) },
+      });
+    },
   };
 };

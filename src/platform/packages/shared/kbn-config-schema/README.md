@@ -11,6 +11,7 @@ Kibana configuration entries providing developers with a fully typed model of th
   - [Base concepts](#base-concepts)
   - [Basic types](#basic-types)
     - [`schema.string()`](#schemastring)
+      - [Built-in string helpers](#built-in-string-helpers)
     - [`schema.number()`](#schemanumber)
     - [`schema.boolean()`](#schemaboolean)
     - [`schema.literal()`](#schemaliteral)
@@ -128,6 +129,32 @@ const valueSchema = schema.string({ maxLength: 10 });
 __Notes:__
 * By default `schema.string()` allows empty strings, to prevent that use non-zero value for `minLength` option.
 * To validate a string using a regular expression use a custom validator function, see [Custom validation](#custom-validation) section for more details.
+
+### Built-in string helpers
+
+Prefer semantic helpers over a hand-picked `maxLength` for HTTP request string
+fields. Each is available on `schema` and as a named export.
+
+```typescript
+import { schema, savedObjectId, spaceId } from '@kbn/config-schema';
+
+schema.object({
+  // strict, default bounds
+  spaceId: spaceId(),
+  // override a default bound
+  id: savedObjectId({ maxLength: 250 }),
+  // reporting mode: accept overlong input, record it, don't reject
+  panelId: savedObjectId.warn({ label: 'dashboard.panelId' }),
+  // optional field
+  description: schema.maybe(schema.description()),
+  // explicit opt-out, reason required
+  blob: schema.unboundedString({ reason: 'Size is enforced upstream' }),
+});
+```
+
+Refer to [Bounded string schemas](../../../../../docs/extend/key-concepts/security/bounded-string-schemas.md)
+for the full list of helpers and their default bounds, length semantics,
+reporting-mode telemetry and adoption guidance.
 
 ### `schema.number()`
 

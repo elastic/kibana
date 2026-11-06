@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
+
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -25,6 +27,27 @@ import { agentPolicyService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
 import type { NewPackagePolicyInputStream } from '../../../../common';
+
+// The subset of the given ids that belong to an agentless agent policy. Shared by
+// the legacy-API blocks so parent detection can't drift between sites.
+export async function getAgentlessAgentPolicyIds(
+  soClient: SavedObjectsClientContract,
+  agentPolicyIds: string[]
+): Promise<string[]> {
+  const ids = uniq(agentPolicyIds);
+  if (ids.length === 0) {
+    return [];
+  }
+  const agentPolicies = await agentPolicyService.getByIds(soClient, ids, { ignoreMissing: true });
+  return agentPolicies.filter((agentPolicy) => agentPolicy.supports_agentless).map(({ id }) => id);
+}
+
+export async function haveAgentlessAgentPolicies(
+  soClient: SavedObjectsClientContract,
+  agentPolicyIds: string[]
+): Promise<boolean> {
+  return (await getAgentlessAgentPolicyIds(soClient, agentPolicyIds)).length > 0;
+}
 
 export function isSimplifiedCreatePackagePolicyRequest(
   body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>

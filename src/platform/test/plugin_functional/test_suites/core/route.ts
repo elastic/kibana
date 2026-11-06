@@ -122,7 +122,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               throw new Error('Expected idle socket timeout error but request succeeded');
             },
             (err) => {
-              expect(err.message).to.be('socket hang up');
+              // The server closing the socket surfaces as either 'socket hang up'
+              // or 'read ECONNRESET' depending on the client's read/write timing.
+              expect(err.message).to.match(/^(socket hang up|read ECONNRESET)$/);
             }
           );
         });
@@ -154,7 +156,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Content-Type', 'application/json')
             .set('kbn-xsrf', 'true')
             .then(() => expect('to throw').to.be('but it did NOT'))
-            .catch((error) => expect(error.message).to.be('socket hang up'));
+            .catch((error) => expect(error.message).to.match(/^(socket hang up|read ECONNRESET)$/));
         });
 
         it('should not timeout if servers response is fast enough', async () => {

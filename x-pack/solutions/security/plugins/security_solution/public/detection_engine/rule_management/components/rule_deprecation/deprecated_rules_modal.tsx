@@ -97,7 +97,7 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
           {isLoading ? (
             <EuiLoadingSpinner size="m" />
           ) : (
-            <EuiListGroup flush maxWidth={false} listItems={deprecatedRules} />
+            <EuiListGroup maxWidth={false} listItems={deprecatedRules} />
           )}
         </EuiModalBody>
         <EuiModalFooter>

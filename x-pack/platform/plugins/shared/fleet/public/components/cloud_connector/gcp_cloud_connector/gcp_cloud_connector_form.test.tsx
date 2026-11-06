@@ -21,6 +21,19 @@ import type { CloudConnectorFormProps } from '../types';
 
 import { GCPCloudConnectorForm } from './gcp_cloud_connector_form';
 
+jest.mock('../../../hooks', () => ({
+  ...jest.requireActual('../../../hooks'),
+  useStartServices: jest.fn().mockReturnValue({
+    docLinks: {
+      links: {
+        securitySolution: {
+          cspmGcpAgentless: 'https://www.elastic.co/docs/mock',
+        },
+      },
+    },
+  }),
+}));
+
 // Mock the LazyPackagePolicyInputVarField
 jest.mock('../../..', () => ({
   LazyPackagePolicyInputVarField: jest.fn(({ varDef, onChange, value }) => {

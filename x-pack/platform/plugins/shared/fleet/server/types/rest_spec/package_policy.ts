@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   CreatePackagePolicyRequestBodySchema,
   DryRunPackagePolicySchema,
+  OnboardingDeploymentIdQuerySchema,
   PackagePolicyPackageSchema,
   PackagePolicyResponseSchema,
   PackagePolicyStatusResponseSchema,
@@ -17,7 +18,7 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { inputsFormat } from '../../../common/constants';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, inputsFormat } from '../../../common/constants';
 
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -35,7 +36,12 @@ export const GetPackagePoliciesRequestSchema = {
     perPage: schema.maybe(
       schema.number({ defaultValue: 20, meta: { description: 'Number of results per page' } })
     ),
-    sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+    sortField: schema.maybe(
+      schema.querySortField.warn({
+        label: 'fleet.package_policies.sortField',
+        meta: { description: 'Field to sort results by' },
+      })
+    ),
     sortOrder: schema.maybe(
       schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
         meta: { description: 'Sort order, ascending or descending' },
@@ -47,7 +53,8 @@ export const GetPackagePoliciesRequestSchema = {
       })
     ),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.package_policies.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(
@@ -86,13 +93,18 @@ export const BulkGetPackagePoliciesRequestSchema = {
   }),
 };
 
-export const BulkGetPackagePoliciesResponseBodySchema = schema.object({
-  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }),
-});
+export const BulkGetPackagePoliciesResponseBodySchema = schema.object(
+  { items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }) },
+  { meta: { id: 'bulk_get_package_policies_response' } }
+);
 
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
+    packagePolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.package_policies.packagePolicyId',
+      meta: { description: 'The ID of the package policy' },
+    }),
   }),
   query: schema.object({
     format: schema.maybe(
@@ -121,9 +133,10 @@ export const CreatePackagePolicyRequestSchema = {
   }),
 };
 
-export const CreatePackagePolicyResponseSchema = schema.object({
-  item: PackagePolicyResponseSchema,
-});
+export const CreatePackagePolicyResponseSchema = schema.object(
+  { item: PackagePolicyResponseSchema },
+  { meta: { id: 'create_package_policy_response' } }
+);
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
@@ -137,39 +150,64 @@ export const UpdatePackagePolicyRequestSchema = {
         meta: { description: 'Format for the response: simplified or legacy' },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
 };
 
 export const DeletePackagePoliciesRequestSchema = {
-  body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-    force: schema.maybe(schema.boolean()),
+  query: schema.object({
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
+  body: schema.object(
+    {
+      packagePolicyIds: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.package_policies.bulk_delete.packagePolicyIds',
+        }),
+        { maxSize: 1000 }
+      ),
+      force: schema.maybe(schema.boolean()),
+    },
+    { meta: { id: 'delete_package_policies_request' } }
+  ),
 };
 
 export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
-  PackagePolicyStatusResponseSchema.extends({
-    policy_id: schema.maybe(
-      schema.oneOf([
-        schema.literal(null),
-        schema.string({
-          meta: {
-            description: 'Use `policy_ids` instead',
-            deprecated: true,
-          },
-        }),
-      ])
-    ),
-    policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-    output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    package: PackagePolicyPackageSchema,
-  }),
+  PackagePolicyStatusResponseSchema.extends(
+    {
+      policy_id: schema.maybe(
+        schema.oneOf([
+          schema.literal(null),
+          schema.string({
+            meta: {
+              description: 'Use `policy_ids` instead',
+              deprecated: true,
+            },
+          }),
+        ])
+      ),
+      policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+      package: PackagePolicyPackageSchema,
+    },
+    // Distinct meta.id so this extension does not collide with the base
+    // `package_policy_status_response` component in the OAS shared schemas
+    // map. Without this, the OAS bundler's last-write-wins semantics on the
+    // shared schemas registry cause this extension's keys to be dropped when
+    // another route registers the bare base under the same id.
+    { meta: { id: 'delete_package_policies_response_item' } }
+  ),
   { maxSize: 10000 }
 );
 
 export const DeleteOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
+    packagePolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.package_policies.delete.packagePolicyId',
+      meta: { description: 'The ID of the package policy' },
+    }),
   }),
   query: schema.object({
     force: schema.maybe(
@@ -177,17 +215,35 @@ export const DeleteOnePackagePolicyRequestSchema = {
         meta: { description: 'When true, delete the package policy even if it is managed' },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
 };
 
-export const DeleteOnePackagePolicyResponseSchema = schema.object({
-  id: schema.string(),
-});
+export const DeleteOnePackagePolicyResponseSchema = schema.object(
+  { id: schema.string() },
+  { meta: { id: 'delete_one_package_policy_response' } }
+);
 
 export const UpgradePackagePoliciesRequestSchema = {
-  body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-  }),
+  body: schema.object(
+    {
+      packagePolicyIds: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.package_policies.upgrade.packagePolicyIds',
+        }),
+        { maxSize: 1000 }
+      ),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
+    },
+    { meta: { id: 'upgrade_package_policies_request' } }
+  ),
 };
 
 export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
@@ -196,10 +252,19 @@ export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
 );
 
 export const DryRunPackagePoliciesRequestSchema = {
-  body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-    packageVersion: schema.maybe(schema.string()),
-  }),
+  body: schema.object(
+    {
+      packagePolicyIds: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.package_policies.upgrade_dryrun.packagePolicyIds',
+        }),
+        { maxSize: 1000 }
+      ),
+      packageVersion: schema.maybe(schema.string()),
+    },
+    { meta: { id: 'dry_run_package_policies_request' } }
+  ),
 };
 
 export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
@@ -211,9 +276,12 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
     diff: schema.maybe(
       schema.arrayOf(
         schema.oneOf([
-          PackagePolicyResponseSchema.extends({
-            id: schema.maybe(schema.string()),
-          }),
+          PackagePolicyResponseSchema.extends(
+            {
+              id: schema.maybe(schema.string({ maxLength: 255 })),
+            },
+            { meta: { id: 'dry_run_package_policy_response' } }
+          ),
           DryRunPackagePolicySchema,
         ]),
         { maxSize: 2 }

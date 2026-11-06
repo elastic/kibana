@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applyDagreLayout } from '../../shared/service_map/layout';
+import { applyServiceMapLayout } from '../../shared/service_map/layout';
 import {
   applyServiceMapVisibility,
   type ServiceMapViewFilters,
@@ -15,8 +15,9 @@ import type { ServiceMapEdge, ServiceMapNode } from '../../../../common/service_
 /**
  * After the full graph is laid out, filters may hide nodes while leaving the rest at their
  * **global** positions—so two visible but disconnected services stay far apart. When any
- * node is hidden, re-run Dagre on the **visible** subgraph so remaining nodes are laid out
- * together (same behavior as when the subgraph is the full map and no filter is active).
+ * node is hidden, re-run the service map layout on the **visible** subgraph so remaining nodes
+ * are laid out together (same behavior as when the subgraph is the full map and no filter is
+ * active). If that visible subgraph is itself a long chain it is laid out compactly.
  */
 export function applyServiceMapRelayoutForFilteredView(
   nodesFromFullMapLayout: ServiceMapNode[],
@@ -38,7 +39,7 @@ export function applyServiceMapRelayoutForFilteredView(
     return visibilityResult;
   }
 
-  const subgraphLaidOutNodes = applyDagreLayout(
+  const subgraphLaidOutNodes = applyServiceMapLayout(
     visibleNodesOnly,
     visibleEdgesOnly,
     {

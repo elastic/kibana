@@ -9,9 +9,10 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiTitle,
   EuiFlexItem,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -166,13 +167,15 @@ export const StepsList = ({
       mobileOptions: { show: false },
       render: (_val: string, item) =>
         compactView ? (
-          <EuiButtonIcon
-            data-test-subj="observabilitySolutionColumnsButton"
-            href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
-            target="_blank"
-            iconType="chartArea"
-            aria-label={VIEW_PERFORMANCE}
-          />
+          <EuiToolTip content={VIEW_PERFORMANCE} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="observabilitySolutionColumnsButton"
+              href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
+              target="_blank"
+              iconType="chartArea"
+              aria-label={VIEW_PERFORMANCE}
+            />
+          </EuiToolTip>
         ) : (
           <StepDetailLink
             checkGroupId={item.monitor.check_group!}
@@ -188,12 +191,17 @@ export const StepsList = ({
       isExpander: true,
       render: (journeyStep: JourneyStep) => {
         return (
-          <EuiButtonIcon
-            data-test-subj="uptimeStepListExpandBtn"
-            onClick={() => toggleExpand({ journeyStep })}
-            aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
-          />
+          <EuiToolTip
+            content={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="uptimeStepListExpandBtn"
+              onClick={() => toggleExpand({ journeyStep })}
+              aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
+              iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
+            />
+          </EuiToolTip>
         );
       },
     },

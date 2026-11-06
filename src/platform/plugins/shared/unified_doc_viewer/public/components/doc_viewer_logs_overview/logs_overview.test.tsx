@@ -72,8 +72,8 @@ const dataView = {
   },
   metaFields: ['_index', '_score'],
   getFormatterForField: jest.fn(() => ({
-    convert: (value: unknown) => value,
-    reactConvert: (value: unknown) => value,
+    convertToText: (value: unknown) => value,
+    convertToReact: (value: unknown) => value,
   })),
 } as unknown as DataView;
 
@@ -437,6 +437,24 @@ describe('LogsOverview content breakdown', () => {
     const codeBlock = screen.queryByTestId('codeBlock');
     expect(codeBlock).toBeInTheDocument();
     expect(codeBlock?.textContent).toBe(JSON.stringify(json, null, 2));
+  });
+});
+
+describe('LogsOverview with OTel severity_text', () => {
+  it('should display the log level badge from severity_text when log.level is missing', async () => {
+    await act(async () => {
+      renderLogsOverview({
+        hit: buildHit({
+          log: { file: { path: '/logs.overview.log' } },
+          severity_text: 'ERROR',
+          'body.text': 'Payment failed',
+        }),
+      });
+    });
+
+    const badge = screen.getByTestId(/^unifiedDocViewLogsOverviewLogLevel/);
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent('ERROR');
   });
 });
 

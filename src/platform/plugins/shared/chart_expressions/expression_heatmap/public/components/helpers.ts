@@ -147,7 +147,7 @@ export const getFormattedRow = (
         !isPrimitive(record)
       ) {
         return {
-          row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convert(record) },
+          row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convertToText(record) },
           formattedColumns: { ...formattedInfo.formattedColumns, [id]: true },
         };
       }

@@ -62,5 +62,19 @@ describe('string_utils', () => {
     it('returns a string array for multiple values', () => {
       expect(toStringOrStringArray(['logs-1', 'logs-2'])).toEqual(['logs-1', 'logs-2']);
     });
+
+    describe('preserveArray', () => {
+      it('keeps a single-item array as an array', () => {
+        expect(toStringOrStringArray(['logs-1'], { preserveArray: true })).toEqual(['logs-1']);
+      });
+
+      it('still returns a scalar for a scalar input', () => {
+        expect(toStringOrStringArray('logs-1', { preserveArray: true })).toBe('logs-1');
+      });
+
+      it('returns undefined for no values', () => {
+        expect(toStringOrStringArray([], { preserveArray: true })).toBeUndefined();
+      });
+    });
   });
 });

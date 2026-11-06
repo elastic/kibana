@@ -10,3 +10,8 @@ export {
   getTacticMetadata,
   replaceNewlineLiterals,
 } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+
+export const getOriginalAlertIds = (alertIds: string[], replacements?: Replacements): string[] => {
+  return alertIds.map((id) => replacements?.[id] ?? id);
+};

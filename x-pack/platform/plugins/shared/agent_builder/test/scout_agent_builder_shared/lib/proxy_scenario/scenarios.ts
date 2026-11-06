@@ -9,8 +9,8 @@ import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import {
   mockTitleGeneration,
   mockTitleGenerationWithError,
-  mockHandoverToAnswer,
   mockFinalAnswer,
+  mockHangingFinalAnswer,
   mockAgentToolCall,
   mockAgentParallelToolCalls,
   mockSearchToolCallWithNaturalLanguageGen,
@@ -33,7 +33,6 @@ export const setupAgentDirectAnswer = async ({
   if (!continueConversation) {
     mockTitleGeneration(proxy, title);
   }
-  mockHandoverToAnswer(proxy, 'ready to answer');
   mockFinalAnswer(proxy, response);
 };
 
@@ -54,7 +53,74 @@ export const setupAgentDirectError = async ({
   if (!continueConversation) {
     mockTitleGenerationWithError(proxy, titleError ?? error);
   }
-  mockHandoverToAnswer(proxy, error);
+  mockFinalAnswer(proxy, error);
+};
+
+/**
+ * Simple request scenario - generates a title then leaves the final answer request hanging so
+ * the execution can be aborted while it is running. Resolves once the agent has issued the
+ * (hanging) final answer request.
+ */
+export const setupAgentHangingAnswer = ({
+  proxy,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  title?: string;
+  proxy: LlmProxy;
+  continueConversation?: boolean;
+}): Promise<void> => {
+  if (!continueConversation) {
+    mockTitleGeneration(proxy, title);
+  }
+  return mockHangingFinalAnswer(proxy);
+};
+
+/**
+ * Tool call scenario without a final answer: the agent calls `toolName` and nothing else is
+ * mocked. Used when the tool call pauses the execution (e.g. a confirmation prompt), so the
+ * final answer is only mocked once the execution resumes.
+ */
+export const setupAgentCallTool = ({
+  proxy,
+  toolName,
+  toolArg,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  proxy: LlmProxy;
+  toolName: string;
+  toolArg: Record<string, any>;
+  title?: string;
+  continueConversation?: boolean;
+}) => {
+  if (!continueConversation) {
+    mockTitleGeneration(proxy, title);
+  }
+  mockAgentToolCall({ llmProxy: proxy, toolName, toolArg });
+};
+
+/**
+ * Tool call scenario with a final answer: the agent calls `toolName`, gets its result back (the
+ * tool's own output, or the auto-declined error of a non-interactive run) and answers `response`.
+ */
+export const setupAgentCallToolThenAnswer = ({
+  proxy,
+  toolName,
+  toolArg,
+  response,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  proxy: LlmProxy;
+  toolName: string;
+  toolArg: Record<string, any>;
+  response: string;
+  title?: string;
+  continueConversation?: boolean;
+}) => {
+  setupAgentCallTool({ proxy, toolName, toolArg, title, continueConversation });
+  mockFinalAnswer(proxy, response);
 };
 
 /**
@@ -91,8 +157,6 @@ export const setupAgentCallSearchToolWithEsqlThenAnswer = async ({
     resource: { name: resourceName, type: resourceType },
   });
 
-  mockHandoverToAnswer(proxy, 'ready to answer');
-
   mockFinalAnswer(proxy, response);
 };
 
@@ -119,8 +183,6 @@ export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
     },
   });
 
-  mockHandoverToAnswer(proxy, 'ready to answer');
-
   mockFinalAnswer(proxy, response);
 };
 
@@ -144,8 +206,6 @@ export const setupAgentParallelToolCallsThenAnswer = async ({
     llmProxy: proxy,
     toolCalls,
   });
-
-  mockHandoverToAnswer(proxy, 'ready to answer');
 
   mockFinalAnswer(proxy, response);
 };

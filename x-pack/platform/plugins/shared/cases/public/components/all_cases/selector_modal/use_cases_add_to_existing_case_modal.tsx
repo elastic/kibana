@@ -15,14 +15,14 @@ import type { CaseUI } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
+import type { CreateCaseFlyoutProps } from '../../create/flyout/create_case_flyout';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 import { NO_ATTACHMENTS_ADDED } from '../translations';
-import { useBulkPostObservables } from '../../../containers/use_bulk_post_observables';
-import type { ObservablePost } from '../../../../common/types/api';
 
 export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
+  createCaseFlyout?: Pick<CreateCaseFlyoutProps, 'headerContent' | 'initialValue'>;
   successToaster?: {
     title?: string;
     content?: string;
@@ -31,12 +31,13 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     title?: string;
     content?: string;
   };
-  onSuccess?: (theCase: CaseUI) => void;
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
 };
 
 export type GetAttachments = ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
 
 export const useCasesAddToExistingCaseModal = ({
+  createCaseFlyout,
   successToaster,
   noAttachmentsToaster,
   onSuccess,
@@ -46,12 +47,13 @@ export const useCasesAddToExistingCaseModal = ({
   const handleSuccess = useCallback(
     (theCase?: CaseUI) => {
       if (onSuccess && theCase) {
-        return onSuccess(theCase);
+        return onSuccess(theCase, true);
       }
     },
     [onSuccess]
   );
   const { open: openCreateNewCaseFlyout } = useCasesAddToNewCaseFlyout({
+    initialValue: createCaseFlyout?.initialValue,
     onClose,
     onSuccess: handleSuccess,
     toastTitle: successToaster?.title,
@@ -62,7 +64,6 @@ export const useCasesAddToExistingCaseModal = ({
   const { appId } = useApplication();
   const casesToasts = useCasesToast();
   const { mutateAsync: createAttachments } = useCreateAttachments();
-  const { mutateAsync: bulkPostObservables } = useBulkPostObservables();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
 
   const closeModal = useCallback(() => {
@@ -81,19 +82,23 @@ export const useCasesAddToExistingCaseModal = ({
   const handleOnRowClick = useCallback(
     async (
       theCase: CaseUI | undefined,
-      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner,
-      getObservables?: ({ theCase }: { theCase?: CaseUI }) => ObservablePost[]
+      getAttachments: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
-      const attachments = getAttachments?.({ theCase }) ?? [];
-      const observables = getObservables?.({ theCase }) ?? [];
-
       // when the case is undefined in the modal
-      // the user clicked "create new case"
+      // the user clicked "create new case". The case (and its owner) doesn't exist yet,
+      // so resolve owner-dependent attachments lazily once the flyout creates it instead
+      // of eagerly resolving here, which would lock in an empty array for callers whose
+      // getAttachments depends on theCase.owner.
       if (theCase === undefined) {
         closeModal();
-        openCreateNewCaseFlyout({ attachments, observables });
+        openCreateNewCaseFlyout({
+          getAttachments: (owner: string) => getAttachments({ theCase: { owner } as CaseUI }) ?? [],
+          headerContent: createCaseFlyout?.headerContent,
+        });
         return;
       }
+
+      const attachments = getAttachments?.({ theCase }) ?? [];
 
       try {
         // add attachments to the case
@@ -115,16 +120,11 @@ export const useCasesAddToExistingCaseModal = ({
 
         trackAttachEvents(window.location.pathname, attachments);
 
-        if (theCase.settings?.extractObservables && observables.length > 0) {
-          await bulkPostObservables({ caseId: theCase.id, observables });
-        }
-
-        onSuccess?.(theCase);
+        onSuccess?.(theCase, false);
 
         casesToasts.showSuccessAttach({
           theCase,
           attachments,
-          observables,
           title: successToaster?.title,
           content: successToaster?.content,
         });
@@ -135,6 +135,7 @@ export const useCasesAddToExistingCaseModal = ({
     },
     [
       closeModal,
+      createCaseFlyout?.headerContent,
       openCreateNewCaseFlyout,
       startTransaction,
       appId,
@@ -146,18 +147,11 @@ export const useCasesAddToExistingCaseModal = ({
       successToaster?.content,
       noAttachmentsToaster?.title,
       noAttachmentsToaster?.content,
-      bulkPostObservables,
     ]
   );
 
   const openModal = useCallback(
-    ({
-      getAttachments,
-      getObservables,
-    }: {
-      getAttachments?: GetAttachments;
-      getObservables?: ({ theCase }: { theCase?: CaseUI }) => ObservablePost[];
-    } = {}) => {
+    ({ getAttachments }: { getAttachments: GetAttachments }) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
@@ -165,7 +159,7 @@ export const useCasesAddToExistingCaseModal = ({
           onCreateCaseClicked,
           getAttachments,
           onRowClick: (theCase?: CaseUI) => {
-            handleOnRowClick(theCase, getAttachments, getObservables);
+            handleOnRowClick(theCase, getAttachments);
           },
           onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();

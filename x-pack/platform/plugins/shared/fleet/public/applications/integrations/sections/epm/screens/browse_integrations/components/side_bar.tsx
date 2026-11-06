@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiNotificationBadge,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -75,7 +76,7 @@ export const UPDATE_FAILED_CATEGORY = {
 export interface Props {
   isLoading?: boolean;
   categories: CategoryFacet[];
-  selectedCategory: string;
+  selectedCategories: string[];
   onCategoryChange: (category: CategoryFacet) => void;
 }
 
@@ -93,35 +94,45 @@ const StickySidebar = styled(EuiFlexItem)`
 `;
 
 export interface SidebarProps extends Props {
+  /** Whether the user may see created integrations at all (Automatic Import read or all). */
+  showCreatedIntegrations?: boolean;
+  /** Rendered when the user may create integrations and has none yet. */
   CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
+  createdIntegrationsCount?: number;
   isLoadingCreatedIntegrations?: boolean;
+  manageIntegrationsHref?: string;
   onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isLoading,
   categories,
-  selectedCategory,
+  selectedCategories,
   onCategoryChange,
+  showCreatedIntegrations = false,
   CreateIntegrationCardButton,
   hasCreatedIntegrations,
+  createdIntegrationsCount,
   isLoadingCreatedIntegrations,
+  manageIntegrationsHref,
   onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <StickySidebar>
-      {CreateIntegrationCardButton && !isLoadingCreatedIntegrations && (
+      {showCreatedIntegrations && !isLoadingCreatedIntegrations && (
         <>
           {hasCreatedIntegrations ? (
             <EuiLink
               color="text"
+              href={manageIntegrationsHref}
               onClick={onManageIntegrationsClick}
               data-test-subj="manageCreatedIntegrationsLink"
               css={{
-                display: 'inline-flex',
+                display: 'flex',
+                width: '100%',
                 alignItems: 'center',
                 gap: euiTheme.size.s,
                 textDecoration: 'none',
@@ -133,23 +144,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   color: euiTheme.colors.text,
                   fontSize: euiTheme.size.m,
                   fontWeight: euiTheme.font.weight.bold,
+                  flexGrow: 1,
                 }}
               >
                 {i18n.translate('xpack.fleet.epmList.manageCreatedIntegrationsLinkLabel', {
                   defaultMessage: 'Manage my integrations',
                 })}
               </span>
+              {createdIntegrationsCount ? (
+                <EuiNotificationBadge
+                  size="m"
+                  color="accent"
+                  className="euiFacetButton__quantity"
+                  data-test-subj="manageCreatedIntegrationsCount"
+                >
+                  {createdIntegrationsCount}
+                </EuiNotificationBadge>
+              ) : null}
             </EuiLink>
-          ) : (
+          ) : CreateIntegrationCardButton ? (
             <CreateIntegrationCardButton />
+          ) : null}
+          {(hasCreatedIntegrations || CreateIntegrationCardButton) && (
+            <EuiHorizontalRule margin="m" />
           )}
-          <EuiHorizontalRule margin="m" />
         </>
       )}
       <CategoryFacets
         isLoading={isLoading}
         categories={categories}
-        selectedCategory={selectedCategory}
+        selectedCategories={selectedCategories}
         onCategoryChange={onCategoryChange}
       />
     </StickySidebar>
@@ -159,7 +183,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 export function CategoryFacets({
   isLoading,
   categories,
-  selectedCategory,
+  selectedCategories,
   onCategoryChange,
 }: Props) {
   const controls = (
@@ -175,7 +199,11 @@ export function CategoryFacets({
           return (
             <EuiFacetButton
               data-test-subj={`epmList.categories.${category.id}`}
-              isSelected={category.id === selectedCategory}
+              isSelected={
+                selectedCategories.length === 0
+                  ? category.id === ''
+                  : selectedCategories.includes(category.id)
+              }
               key={category.id}
               id={category.id}
               style={{

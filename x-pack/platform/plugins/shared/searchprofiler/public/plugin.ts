@@ -59,6 +59,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           initialLicenseStatus,
           el: params.element,
           notifications: notifications.toasts,
+          history: params.history,
           location: params.location,
           startServices,
         });

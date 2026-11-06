@@ -53,7 +53,7 @@ describe('MetricInsightsFlyout', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem =>
     ({
       metricName: 'test.metric',
-      dataStream: 'test-index',
+      indexName: 'test-index',
       units: ['count'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],

@@ -112,7 +112,7 @@ export const UserFieldFilterRenderer = ({
         <EuiAvatar
           name={option.label}
           size="s"
-          iconType={option.key === MANAGED_USER_FILTER ? 'package' : 'userAvatar'}
+          iconType={option.key === MANAGED_USER_FILTER ? 'package' : 'user'}
           color="subdued"
           data-test-subj={testSubj}
         />

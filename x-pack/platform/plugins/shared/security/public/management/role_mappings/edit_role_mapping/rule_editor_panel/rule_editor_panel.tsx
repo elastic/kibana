@@ -194,7 +194,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                 id="xpack.security.management.editRoleMapping.switchToJSONEditorLink"
                 defaultMessage="Switch to JSON editor"
               />{' '}
-              <EuiIcon type="inputOutput" size="s" />
+              <EuiIcon type="inputOutput" size="s" aria-hidden={true} />
             </Fragment>
           </EuiLink>
         );
@@ -211,7 +211,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                 id="xpack.security.management.editRoleMapping.switchToVisualEditorLink"
                 defaultMessage="Switch to visual editor"
               />{' '}
-              <EuiIcon type="inputOutput" size="s" />
+              <EuiIcon type="inputOutput" size="s" aria-hidden={true} />
             </Fragment>
           </EuiLink>
         );

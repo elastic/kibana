@@ -67,6 +67,11 @@ export class UnifiedTabsPageObject extends FtrService {
     );
   }
 
+  public async getTabsBarHeight() {
+    const tabsBar = await this.testSubjects.find('unifiedTabs_tabsBar');
+    return (await tabsBar.getSize()).height;
+  }
+
   public async getTabLabels() {
     const tabElements = await this.getTabElements();
     return await Promise.all(
@@ -86,6 +91,10 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.testSubjects.moveMouseTo('breadcrumbs');
   }
 
+  /**
+   * Opens a new tab without running a query. Discover new tabs stay uninitialized;
+   * use `discover.createNewTabAndSearch()` when the test needs results.
+   */
   public async createNewTab() {
     const numberOfTabs = await this.getNumberOfTabs();
     await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');

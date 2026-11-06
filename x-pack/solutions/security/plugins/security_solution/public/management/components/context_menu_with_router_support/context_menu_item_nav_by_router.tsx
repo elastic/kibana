@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
-import type { MouseEventHandler } from 'react';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import type { MouseEventHandler, Attributes } from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -20,33 +20,37 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   /** Additional options for the navigation action via react-router */
   navigateOptions?: NavigateToAppOptions;
   /**
-   * if `true`, the `children` will be wrapped in a `div` that contains CSS Classname `eui-textTruncate`.
+   * if `true`, the `children` will be wrapped in a truncate wrapper.
    * **NOTE**: When this component is used in combination with `ContextMenuWithRouterSupport` and `maxWidth`
    * is set on the menu component, this prop will be overridden
    */
   textTruncate?: boolean;
-  /** Displays an additional info when hover an item */
-  hoverInfo?: React.ReactNode;
   /** Disables navigation */
   isNavigationDisabled?: boolean;
   children: React.ReactNode;
+  key?: Attributes['key'];
 }
 
-const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
-  .additional-info {
-    display: none;
-    max-width: 50%;
-  }
-  &:hover {
-    .additional-info {
-      display: block !important;
+/**
+ * Keep truncated labels on one line with EUI's auto-injected external-link icon.
+ * `EuiContextMenuItem` appends that icon as a sibling of `children` inside
+ * `.euiContextMenuItem__text`, which otherwise wraps because the truncate wrapper is block-level.
+ */
+const truncatedItemCss = css`
+  .euiContextMenuItem__text {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+
+    > * + * {
+      margin-block-start: 0;
     }
   }
 `;
 
-const StyledEuiFlexItem = styled('div')`
-  max-width: 50%;
-  padding-right: ${(props) => props.theme.eui.euiSizeS};
+const truncatedLabelCss = css`
+  flex: 1;
+  min-width: 0;
 `;
 
 /**
@@ -59,10 +63,10 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     navigateOptions,
     onClick,
     textTruncate,
-    hoverInfo,
     children,
     href,
     isNavigationDisabled = false,
+    css: cssProp,
     ...otherMenuItemProps
   }) => {
     const handleOnClickViaNavigateToApp = useNavigateToAppEventHandler(navigateAppId ?? '', {
@@ -70,19 +74,6 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       onClick,
     });
     const getTestId = useTestIdGenerator(otherMenuItemProps['data-test-subj']);
-
-    const hoverComponentInstance = useMemo(() => {
-      // If the `hoverInfo` is not an object (ex. text, number), then auto-add the text truncation className.
-      // Adding this when the `hoverInfo` is a react component could cause issue, thus in those cases, we
-      // assume the component will handle how the data is truncated (if applicable)
-      const cssClassNames = `additional-info ${
-        'object' !== typeof hoverInfo ? 'eui-textTruncate' : ''
-      }`;
-
-      return hoverInfo ? (
-        <StyledEuiFlexItem className={cssClassNames}>{hoverInfo}</StyledEuiFlexItem>
-      ) : null;
-    }, [hoverInfo]);
 
     const handleItemClick = useCallback<MouseEventHandler>(
       (ev) => {
@@ -99,37 +90,29 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       [handleOnClickViaNavigateToApp, isNavigationDisabled, navigateAppId, onClick]
     );
 
-    const content = textTruncate ? (
-      <>
-        <div
-          className="eui-textTruncate"
-          data-test-subj={getTestId('truncateWrapper')}
-          {
-            /* Add the html `title` prop if children is a string */
-            ...('string' === typeof children ? { title: children } : {})
-          }
-        >
-          {children}
-        </div>
-        {hoverComponentInstance}
-      </>
-    ) : (
-      <>
-        <EuiFlexItem>{children}</EuiFlexItem>
-        {hoverComponentInstance}
-      </>
-    );
-
     return (
-      <StyledEuiContextMenuItem
+      <EuiContextMenuItem
         {...otherMenuItemProps}
+        css={[cssProp, textTruncate ? truncatedItemCss : undefined]}
         onClick={handleItemClick}
         href={isNavigationDisabled ? undefined : href}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          {content}
-        </EuiFlexGroup>
-      </StyledEuiContextMenuItem>
+        {textTruncate ? (
+          <span
+            css={truncatedLabelCss}
+            className="eui-textTruncate"
+            data-test-subj={getTestId('truncateWrapper')}
+            {
+              /* Add the html `title` prop if children is a string */
+              ...('string' === typeof children ? { title: children } : {})
+            }
+          >
+            {children}
+          </span>
+        ) : (
+          children
+        )}
+      </EuiContextMenuItem>
     );
   }
 );

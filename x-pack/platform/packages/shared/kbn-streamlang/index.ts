@@ -24,6 +24,7 @@ export {
   conditionToESQLAst,
 } from './src/transpilers/esql';
 export * from './types/processors';
+export { URI_PARTS_DEFAULT_TARGET } from './types/processors/uri_parts';
 export * from './types/conditions';
 export type * from './types/ui';
 export * from './src/conditions/helpers';

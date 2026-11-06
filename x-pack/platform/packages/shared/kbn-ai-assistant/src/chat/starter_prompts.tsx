@@ -58,7 +58,7 @@ export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: st
           >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={icon} size="m" />
+                <EuiIcon type={icon} size="m" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">

@@ -169,7 +169,13 @@ const ConnectorAddModal = ({
        */
 
       const { actionTypeId, name, config, secrets, id } = data;
-      const validConnector = { actionTypeId, name: name ?? '', config, secrets, id: id ?? '' };
+      const validConnector = {
+        actionTypeId,
+        name: name ?? '',
+        config,
+        secrets,
+        id: id ?? '',
+      };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
@@ -257,7 +263,7 @@ const ConnectorAddModal = ({
           <EuiFlexGroup gutterSize="m" alignItems="center">
             {actionTypeModel && actionTypeModel.iconClass ? (
               <EuiFlexItem grow={false}>
-                <EuiIcon type={actionTypeModel.iconClass} size="xl" />
+                <EuiIcon type={actionTypeModel.iconClass} size="xl" aria-hidden={true} />
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
@@ -302,7 +308,6 @@ const ConnectorAddModal = ({
                   <EuiButtonGroup
                     isFullWidth
                     buttonSize="m"
-                    color="primary"
                     legend=""
                     options={groupActionButtons}
                     idSelected={actionType.id}
@@ -318,6 +323,7 @@ const ConnectorAddModal = ({
                 isEdit={false}
                 onChange={setFormState}
                 setResetForm={setResetForm}
+                showInboundEvents={false}
               />
               {preSubmitValidationErrorMessage}
             </>

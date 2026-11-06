@@ -33,7 +33,7 @@ export const transformStateSchema = schema.oneOf([
 
 export const dataViewTitleSchema = schema.object({
   /** Title of the data view for which to return stats. */
-  dataViewTitle: schema.string(),
+  dataViewTitle: schema.string({ maxLength: 1000 }),
 });
 
 export type DataViewTitleSchema = TypeOf<typeof dataViewTitleSchema>;

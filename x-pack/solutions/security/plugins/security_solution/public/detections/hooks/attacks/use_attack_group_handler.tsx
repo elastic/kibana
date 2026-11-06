@@ -51,6 +51,7 @@ export const useAttackGroupHandler = ({
 
   const { data: attacksData, isLoading } = useFindAttackDiscoveries({
     ids: attackIds,
+    includeAllAuthors: true,
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
     perPage: Math.max(attackIds?.length ?? 1, 1),

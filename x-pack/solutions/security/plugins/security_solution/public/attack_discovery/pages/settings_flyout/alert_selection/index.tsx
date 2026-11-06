@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { AssistantSpaceIdProvider, ConnectorSelectorInline } from '@kbn/elastic-assistant';
-import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { css } from '@emotion/react';
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
+import { ConnectorField } from './connector_field';
 import { getMaxAlerts } from './helpers/get_max_alerts';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface Props {
   alertsPreviewStackBy0: string;
@@ -45,8 +42,6 @@ const AlertSelectionComponent: React.FC<Props> = ({
   connectorId,
   onConnectorIdSelected,
 }) => {
-  const spaceId = useSpaceId();
-
   const tabs = useMemo(
     () =>
       getTabs({
@@ -85,30 +80,8 @@ const AlertSelectionComponent: React.FC<Props> = ({
 
   return (
     <EuiForm data-test-subj="alertSelection" fullWidth>
-      {showConnectorSelector && spaceId && (
-        <AssistantSpaceIdProvider spaceId={spaceId}>
-          <EuiText data-test-subj="customizeAlerts" size="s">
-            <p>{i18n.CUSTOMIZE_THE_CONNECTOR_AND_ALERTS}</p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiFormRow
-            label={i18n.CONNECTOR}
-            css={css`
-              flex-grow: 1;
-            `}
-          >
-            <ConnectorSelectorInline
-              fullWidth={true}
-              onConnectorSelected={noop}
-              onConnectorIdSelected={onConnectorIdSelected}
-              selectedConnectorId={connectorId}
-              loadConnectorFeatureId="attack_discovery"
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </AssistantSpaceIdProvider>
+      {showConnectorSelector && (
+        <ConnectorField connectorId={connectorId} onConnectorIdSelected={onConnectorIdSelected} />
       )}
 
       <EuiFormRow label={i18n.CUSTOM_QUERY}>

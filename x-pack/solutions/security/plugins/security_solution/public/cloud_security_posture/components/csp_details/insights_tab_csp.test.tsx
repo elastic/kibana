@@ -14,26 +14,76 @@ import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 
-// Mock the child components
+const mockOpenPreviewPanel = jest.fn();
+
+// Mock the child components. Each exposes a clickable element that invokes the navigation
+// callback owned by `InsightsTabCsp`, so the lifted `openPreviewPanel` logic can be asserted.
 jest.mock('./misconfiguration_findings_details_table', () => ({
-  MisconfigurationFindingsDetailsTable: () => (
-    <div data-test-subj="misconfiguration-table">{'Misconfiguration Table'}</div>
+  MisconfigurationFindingsDetailsTable: ({
+    onShowFinding,
+  }: {
+    onShowFinding: (resourceId: string, ruleId: string) => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="misconfiguration-table"
+      onClick={() => onShowFinding('resource-1', 'rule-1')}
+    >
+      {'Misconfiguration Table'}
+    </button>
   ),
 }));
 
 jest.mock('./vulnerabilities_findings_details_table', () => ({
-  VulnerabilitiesFindingsDetailsTable: () => (
-    <div data-test-subj="vulnerabilities-table">{'Vulnerabilities Table'}</div>
+  VulnerabilitiesFindingsDetailsTable: ({
+    onShowVulnerability,
+  }: {
+    onShowVulnerability: (params: {
+      vulnerabilityId: string;
+      resourceId: string;
+      packageName: string;
+      packageVersion: string;
+      eventId: string;
+    }) => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="vulnerabilities-table"
+      onClick={() =>
+        onShowVulnerability({
+          vulnerabilityId: 'CVE-1',
+          resourceId: 'resource-1',
+          packageName: 'pkg',
+          packageVersion: '1.0.0',
+          eventId: 'event-1',
+        })
+      }
+    >
+      {'Vulnerabilities Table'}
+    </button>
   ),
 }));
 
 jest.mock('./alerts_findings_details_table', () => ({
-  AlertsDetailsTable: () => <div data-test-subj="alerts-table">{'Alerts Table'}</div>,
+  AlertsDetailsTable: ({
+    onShowAlert,
+  }: {
+    onShowAlert: (eventId: string, indexName: string) => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="alerts-table"
+      onClick={() => onShowAlert('alert-1', 'index-1')}
+    >
+      {'Alerts Table'}
+    </button>
+  ),
 }));
 
-// Mock the expandable flyout state hook
+// Mock the expandable flyout hooks
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(() => ({ openPreviewPanel: mockOpenPreviewPanel })),
 }));
 
 const mockUseExpandableFlyoutState = useExpandableFlyoutState as jest.MockedFunction<
@@ -76,7 +126,7 @@ describe('InsightsTabCsp', () => {
   });
 
   describe('when only one tab is available', () => {
-    it('should render button group as disabled for misconfigurations only', () => {
+    it('should hide button group for misconfigurations only', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
@@ -94,15 +144,11 @@ describe('InsightsTabCsp', () => {
         </TestProviders>
       );
 
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toBeInTheDocument();
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Should show misconfiguration table
+      expect(screen.queryByTestId('insightButtonGroupsTestId')).not.toBeInTheDocument();
       expect(screen.getByTestId('misconfiguration-table')).toBeInTheDocument();
     });
 
-    it('should render button group as disabled for vulnerabilities only', () => {
+    it('should hide button group for vulnerabilities only', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
@@ -120,15 +166,11 @@ describe('InsightsTabCsp', () => {
         </TestProviders>
       );
 
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toBeInTheDocument();
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Should show vulnerabilities table
+      expect(screen.queryByTestId('insightButtonGroupsTestId')).not.toBeInTheDocument();
       expect(screen.getByTestId('vulnerabilities-table')).toBeInTheDocument();
     });
 
-    it('should render button group as disabled for alerts only', () => {
+    it('should hide button group for alerts only', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
@@ -146,41 +188,8 @@ describe('InsightsTabCsp', () => {
         </TestProviders>
       );
 
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toBeInTheDocument();
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Should show alerts table
+      expect(screen.queryByTestId('insightButtonGroupsTestId')).not.toBeInTheDocument();
       expect(screen.getByTestId('alerts-table')).toBeInTheDocument();
-    });
-
-    it('should not allow tab changes when disabled', () => {
-      mockUseExpandableFlyoutState.mockReturnValue({
-        left: {
-          params: {
-            hasMisconfigurationFindings: true,
-            hasVulnerabilitiesFindings: false,
-            hasNonClosedAlerts: false,
-            path: { subTab: undefined },
-          },
-        },
-      } as unknown as ExpandableFlyoutState);
-
-      render(
-        <TestProviders>
-          <InsightsTabCsp {...defaultProps} />
-        </TestProviders>
-      );
-
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Clicking should not change the active tab (no state change)
-      const misconfigurationButton = screen.getByTestId('misconfigurationTabDataTestId');
-      fireEvent.click(misconfigurationButton);
-
-      // Should still show misconfiguration table (no change)
-      expect(screen.getByTestId('misconfiguration-table')).toBeInTheDocument();
     });
   });
 
@@ -324,13 +333,111 @@ describe('InsightsTabCsp', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('should have proper legend for screen readers', () => {
+  describe('navigation callbacks', () => {
+    it('opens the alert preview panel when the alerts table requests navigation', () => {
+      mockUseExpandableFlyoutState.mockReturnValue({
+        left: {
+          params: {
+            hasMisconfigurationFindings: false,
+            hasVulnerabilitiesFindings: false,
+            hasNonClosedAlerts: true,
+            path: { subTab: undefined },
+          },
+        },
+      } as unknown as ExpandableFlyoutState);
+
+      render(
+        <TestProviders>
+          <InsightsTabCsp {...defaultProps} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('alerts-table'));
+
+      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            id: 'alert-1',
+            indexName: 'index-1',
+            isPreviewMode: true,
+          }),
+        })
+      );
+    });
+
+    it('opens the misconfiguration preview panel with the scopeId when requested', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
             hasMisconfigurationFindings: true,
             hasVulnerabilitiesFindings: false,
+            hasNonClosedAlerts: false,
+            path: { subTab: undefined },
+          },
+        },
+      } as unknown as ExpandableFlyoutState);
+
+      render(
+        <TestProviders>
+          <InsightsTabCsp {...defaultProps} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('misconfiguration-table'));
+
+      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            resourceId: 'resource-1',
+            ruleId: 'rule-1',
+            scopeId: 'test-scope',
+            isPreviewMode: true,
+          }),
+        })
+      );
+    });
+
+    it('opens the vulnerability preview panel with the scopeId when requested', () => {
+      mockUseExpandableFlyoutState.mockReturnValue({
+        left: {
+          params: {
+            hasMisconfigurationFindings: false,
+            hasVulnerabilitiesFindings: true,
+            hasNonClosedAlerts: false,
+            path: { subTab: undefined },
+          },
+        },
+      } as unknown as ExpandableFlyoutState);
+
+      render(
+        <TestProviders>
+          <InsightsTabCsp {...defaultProps} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('vulnerabilities-table'));
+
+      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            vulnerabilityId: 'CVE-1',
+            resourceId: 'resource-1',
+            eventId: 'event-1',
+            scopeId: 'test-scope',
+            isPreviewMode: true,
+          }),
+        })
+      );
+    });
+  });
+
+  describe('accessibility', () => {
+    it('should have proper legend for screen readers when multiple tabs are available', () => {
+      mockUseExpandableFlyoutState.mockReturnValue({
+        left: {
+          params: {
+            hasMisconfigurationFindings: true,
+            hasVulnerabilitiesFindings: true,
             hasNonClosedAlerts: false,
             path: { subTab: undefined },
           },
@@ -346,28 +453,6 @@ describe('InsightsTabCsp', () => {
       const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
       // EuiButtonGroup uses legend prop which creates a fieldset with legend element
       expect(buttonGroup).toBeInTheDocument();
-    });
-
-    it('should maintain disabled state accessibility when single tab', () => {
-      mockUseExpandableFlyoutState.mockReturnValue({
-        left: {
-          params: {
-            hasMisconfigurationFindings: true,
-            hasVulnerabilitiesFindings: false,
-            hasNonClosedAlerts: false,
-            path: { subTab: undefined },
-          },
-        },
-      } as unknown as ExpandableFlyoutState);
-
-      render(
-        <TestProviders>
-          <InsightsTabCsp {...defaultProps} />
-        </TestProviders>
-      );
-
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toHaveAttribute('disabled');
     });
   });
 });

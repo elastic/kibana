@@ -125,7 +125,6 @@ export class IconMapSelect extends Component<Props, State> {
           options={mapOptionsWithCustom}
           onChange={this._onMapSelect}
           valueOfSelected={valueOfSelected}
-          hasDividers={true}
           compressed
           aria-label={i18n.translate('xpack.maps.styles.icon.iconPaletteSelectAriaLabel', {
             defaultMessage: 'Icon palette',

@@ -9,6 +9,9 @@ import React from 'react';
 import hash from 'object-hash';
 import { createMemoryHistory } from 'history';
 import { render, screen, waitFor } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { MigrationRulesPage, type MigrationRulesPageProps } from '.';
 import * as useLatestStatsModule from '../service/hooks/use_latest_stats';
 import * as useNavigationModule from '@kbn/security-solution-navigation/src/navigation';
@@ -119,7 +122,9 @@ const startServicesMock = {
 };
 
 const TestProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <TestProviders startServices={startServicesMock}>{children}</TestProviders>
+  <MockAppHeaderProvider>
+    <TestProviders startServices={startServicesMock}>{children}</TestProviders>
+  </MockAppHeaderProvider>
 );
 
 function renderTestComponent(args?: { migrationId?: string; wrapper?: React.ComponentType }) {
@@ -257,6 +262,66 @@ describe('Migrations: Translated Rules Page', () => {
     });
   });
 
+  describe('App header', () => {
+    test('should render the page title', () => {
+      renderTestComponent();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Translated rules'
+      );
+    });
+
+    test('should not render a vendor badge in the header', () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      expect(screen.queryByTestId('migrationVendorBadge')).toBeNull();
+    });
+
+    test('should render the add another migration menu action', async () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addAnotherMigrationButton')).toBeInTheDocument();
+      expect(screen.getByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+    });
+
+    test('should render integrations and documentation when no migrations exist', async () => {
+      renderTestComponent();
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+      expect(screen.queryByTestId('addAnotherMigrationButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Migration selector', () => {
+    test('should render the migration selector combo box when migrations exist', () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      expect(screen.getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
+    });
+
+    test('should not render the migration selector when no migrations exist', () => {
+      renderTestComponent();
+
+      expect(screen.queryByTestId('siemMigrationsSelectMigrationButton')).toBeNull();
+    });
+
+    test('should render the migration selector combo box when a migration is selected', () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      expect(screen.getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
+    });
+  });
+
   describe('With MigrationId', () => {
     test('should render migration table successfully if migrationId is provided', async () => {
       useLatestStatsSpy.mockReturnValue(mockedLatestStats);
@@ -272,8 +337,8 @@ describe('Migrations: Translated Rules Page', () => {
       expect(screen.getAllByTestId(/ruleName/)).toHaveLength(2);
       expect(screen.getAllByTestId(/ruleName/)[0]).toHaveTextContent(/Converted Splunk Rule -/);
       // only successful is selectable
-      expect(screen.getAllByTitle(/Select row 1/)).toHaveLength(1);
-      expect(screen.getByTitle(/Not fully translated migration rule/)).toBeDisabled();
+      expect(screen.getAllByLabelText(/Select row 1/)).toHaveLength(1);
+      expect(screen.getByLabelText(/Not fully translated migration rule/)).toBeDisabled();
     });
   });
 });

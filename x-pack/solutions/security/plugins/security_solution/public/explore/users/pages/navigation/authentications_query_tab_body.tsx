@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { AuthStackByField } from '../../../../../common/api/search_strategy/users/authentications';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';
@@ -29,8 +28,6 @@ export const AuthenticationsQueryTabBody = ({
   deleteQuery,
   userName,
 }: AuthenticationsUserTableProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const histogramFilterQuery = useMemo(() => {
     const existsClause = {
       exists: { field: userName ? AuthStackByField.hostName : AuthStackByField.userName },
@@ -55,7 +52,7 @@ export const AuthenticationsQueryTabBody = ({
         startDate={startDate}
         {...histogramConfigs}
         applyPageAndTabsFilters={false}
-        sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+        pageScope={PageScope.explore}
       />
 
       <AuthenticationsUserTable

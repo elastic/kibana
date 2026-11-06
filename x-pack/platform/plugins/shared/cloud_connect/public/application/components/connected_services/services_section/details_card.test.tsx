@@ -190,7 +190,7 @@ describe('ServiceCard', () => {
       await userEvent.click(moreActionsButton);
 
       // Find the button within the popover that has the "Disable service" text
-      const disableMenuItem = await screen.findByRole('button', { name: /disable service/i });
+      const disableMenuItem = await screen.findByRole('menuitem', { name: /disable service/i });
       await userEvent.click(disableMenuItem);
 
       expect(onDisable).toHaveBeenCalledTimes(1);
@@ -215,7 +215,7 @@ describe('ServiceCard', () => {
       const moreActionsButton = screen.getByRole('button', { name: /more actions/i });
       await userEvent.click(moreActionsButton);
 
-      const rotateMenuItem = await screen.findByRole('button', { name: /rotate api key/i });
+      const rotateMenuItem = await screen.findByRole('menuitem', { name: /rotate api key/i });
       await userEvent.click(rotateMenuItem);
 
       expect(onRotateApiKey).toHaveBeenCalledTimes(1);

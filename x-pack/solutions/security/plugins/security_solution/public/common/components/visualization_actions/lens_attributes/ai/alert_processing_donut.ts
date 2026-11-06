@@ -7,6 +7,12 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { ExtraOptions, LensAttributes } from '../../types';
+
+interface RuntimeFieldScriptWithParams {
+  source: string;
+  params: { attackAlertIds: string[] };
+}
+
 export type MyGetLensAttributes = (params: {
   stackByField?: string;
   euiTheme: EuiThemeComputed;
@@ -19,6 +25,19 @@ export const getAlertProcessingDonutAttributes: MyGetLensAttributes = ({
   attackAlertIds,
   spaceId,
 }) => {
+  // `attackAlertIds` is passed as a script param (rather than interpolated into `source`) so the
+  // compiled script stays a small, constant size.
+  const processingAnalyticsScript: RuntimeFieldScriptWithParams = {
+    source: `
+        if (params.attackAlertIds.contains(doc['kibana.alert.uuid'].value)) {
+          emit("Escalated");
+        } else {
+          emit("AI Filtered");
+        }
+      `,
+    params: { attackAlertIds },
+  };
+
   return {
     title: 'Alerts',
     description: '',
@@ -165,15 +184,7 @@ export const getAlertProcessingDonutAttributes: MyGetLensAttributes = ({
           name: `.alerts-security.alerts-${spaceId}`,
           runtimeFieldMap: {
             processing_analytics_rtf: {
-              script: {
-                source: `
-        if (${JSON.stringify(attackAlertIds)}.contains(doc['kibana.alert.uuid'].value)) {
-          emit("Escalated");
-        } else {
-          emit("AI Filtered");
-        }
-      `,
-              },
+              script: processingAnalyticsScript,
               type: 'keyword',
             },
           },

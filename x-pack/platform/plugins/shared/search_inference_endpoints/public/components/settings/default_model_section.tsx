@@ -31,6 +31,7 @@ import {
 interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
   validation: DefaultModelValidationResult;
+  disabled?: boolean;
 }
 
 const ENABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.enabled', {
@@ -40,7 +41,11 @@ const DISABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.t
   defaultMessage: 'Disabled',
 });
 
-export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, validation }) => {
+export const DefaultModelSection: React.FC<Props> = ({
+  defaultModelSettings,
+  validation,
+  disabled = false,
+}) => {
   const { state, setEnableAi, setDefaultModelId, setFeatureSpecificModels } = defaultModelSettings;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const usageTracker = useUsageTracker();
@@ -96,6 +101,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
             label={state.enableAi ? ENABLED_LABEL : DISABLED_LABEL}
             checked={state.enableAi}
             onChange={(e) => setEnableAi(e.target.checked)}
+            disabled={disabled}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -151,6 +157,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
                 isLoading={connectorsLoading}
                 isInvalid={validation.errors.length > 0}
                 isClearable={false}
+                isDisabled={disabled}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -198,6 +205,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
                 label={state.featureSpecificModels ? ENABLED_LABEL : DISABLED_LABEL}
                 checked={state.featureSpecificModels}
                 onChange={(e) => setFeatureSpecificModels(e.target.checked)}
+                disabled={disabled}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

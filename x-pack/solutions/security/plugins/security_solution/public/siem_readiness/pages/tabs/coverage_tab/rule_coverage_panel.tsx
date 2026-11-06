@@ -18,8 +18,9 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDetectionRulesByIntegration, useSiemReadinessApi } from '@kbn/siem-readiness';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDetectionRulesByIntegration } from '../../../hooks/use_get_detection_rules_by_integration';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath, useKibana } from '../../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../../common/lib/telemetry/events/siem_readiness/types';

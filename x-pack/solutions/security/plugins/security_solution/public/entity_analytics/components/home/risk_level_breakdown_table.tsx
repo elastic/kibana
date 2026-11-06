@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -80,12 +80,18 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
     [entityDataView]
   );
 
-  const cellActionsMetadata = useMemo(
-    () => (entityDataView?.id ? { dataViewId: entityDataView.id } : undefined),
-    [entityDataView]
+  const getCellActionsMetadata = useCallback(
+    (level: RiskSeverity) =>
+      entityDataView?.id
+        ? {
+            dataViewId: entityDataView.id,
+            ...(level === RiskSeverity.Unknown ? { includeNullValues: true } : {}),
+          }
+        : undefined,
+    [entityDataView?.id]
   );
 
-  const showCellActions = !!riskLevelFieldSpec && !!cellActionsMetadata;
+  const showCellActions = !!riskLevelFieldSpec && !!entityDataView?.id;
 
   const columns: Array<EuiBasicTableColumn<RiskLevelBreakdownItem>> = useMemo(() => {
     const baseColumns: Array<EuiBasicTableColumn<RiskLevelBreakdownItem>> = [
@@ -138,7 +144,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
       },
     ];
 
-    if (showCellActions && riskLevelFieldSpec && cellActionsMetadata) {
+    if (showCellActions && riskLevelFieldSpec) {
       baseColumns.push({
         field: 'level',
         name: '',
@@ -150,7 +156,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
             visibleCellActions={0}
             triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{ field: riskLevelFieldSpec, value: level }}
-            metadata={cellActionsMetadata}
+            metadata={getCellActionsMetadata(level)}
             disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
             extraActionsIconType="boxesVertical"
             extraActionsColor="text"
@@ -160,7 +166,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
     }
 
     return baseColumns;
-  }, [euiTheme, showCellActions, riskLevelFieldSpec, cellActionsMetadata]);
+  }, [euiTheme, showCellActions, riskLevelFieldSpec, getCellActionsMetadata]);
 
   return (
     <EuiInMemoryTable

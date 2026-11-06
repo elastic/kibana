@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/performance/run_scalability_cli');
+require('@kbn/dev/performance/run_scalability_cli');

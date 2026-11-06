@@ -58,7 +58,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       }),
       app: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
       alerting: alertingFeatures,
@@ -80,7 +80,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             read: [],
           },
           management: {
-            insightsAndAlerting: ['triggersActions'],
+            insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
           },
           ui: [],
         },
@@ -98,7 +98,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             read: [],
           },
           management: {
-            insightsAndAlerting: ['triggersActions'],
+            insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
           },
           ui: [],
         },

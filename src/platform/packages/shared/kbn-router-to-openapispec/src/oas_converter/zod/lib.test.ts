@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod';
+import { z as z4, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import {
@@ -109,6 +109,177 @@ describe('zod', () => {
           name: { type: 'string' },
           condition: { $ref: expect.stringContaining('#/components/schemas/_zod_v4_') },
         },
+      });
+    });
+
+    describe('.nullable()', () => {
+      test('collapses a nullable scalar into nullable: true', () => {
+        const result = convert(
+          z.object({ createdBy: z.string().nullable().describe('Who created it.') }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            createdBy: { type: 'string', nullable: true, description: 'Who created it.' },
+          },
+        });
+      });
+
+      test('collapses .nullish() to nullable: true', () => {
+        const result = convert(z.object({ count: z.number().nullish() }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: { count: { type: 'number', nullable: true } },
+        });
+      });
+
+      test('preserves anyOf and marks nullable when multiple non-null union members remain', () => {
+        const result = convert(
+          z.object({ value: z.union([z.string(), z.number(), z.boolean()]).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: {
+              nullable: true,
+              anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+            },
+          },
+        });
+      });
+
+      test('collapses a nullable enum', () => {
+        const result = convert(
+          z.object({ criticality: z.enum(['low', 'high']).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: { criticality: { type: 'string', enum: ['low', 'high'], nullable: true } },
+        });
+      });
+
+      test('collapses nullable properties inside a nullable object', () => {
+        const result = convert(
+          z.object({
+            throttle: z.object({ interval: z.string().nullable() }).nullable(),
+          }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            throttle: {
+              type: 'object',
+              nullable: true,
+              properties: { interval: { type: 'string', nullable: true } },
+            },
+          },
+        });
+      });
+
+      test('wraps a nullable named component in allOf so nullable is not a $ref sibling', () => {
+        const groupingMode = z.enum(['per_episode', 'per_alert']);
+        registerZodV4Component(groupingMode, 'GroupingMode');
+
+        const result = convert(z.object({ groupingMode: groupingMode.nullable() }) as any);
+
+        expect(result.shared).toHaveProperty('GroupingMode');
+        expect(result.shared.GroupingMode).not.toHaveProperty('nullable');
+        expect(result.schema).toMatchObject({
+          properties: {
+            groupingMode: {
+              allOf: [{ $ref: '#/components/schemas/GroupingMode' }],
+              nullable: true,
+            },
+          },
+        });
+      });
+
+      test('wraps a nullable recursive $ref in allOf', () => {
+        const condition: z.ZodType = z.lazy(() =>
+          z.object({ field: z.string(), and: z.array(condition).optional() })
+        );
+        registerZodV4Component(condition, 'Condition');
+
+        const result = convert(z.object({ condition: condition.nullable() }) as any);
+
+        expect(result.shared).toHaveProperty('Condition');
+        expect(result.shared.Condition).not.toHaveProperty('nullable');
+        expect(result.schema).toMatchObject({
+          properties: {
+            condition: { allOf: [{ $ref: '#/components/schemas/Condition' }], nullable: true },
+          },
+        });
+      });
+
+      test('fully collapses nullable across scalars, arrays, and nested objects', () => {
+        const result = convert(
+          z.object({
+            a: z.string().nullable(),
+            b: z.array(z.string()).nullable(),
+            c: z.object({ d: z.number().nullable() }).nullable(),
+          }) as any
+        );
+
+        expect(JSON.stringify(result)).not.toContain('{"nullable":true}');
+      });
+    });
+
+    describe('Zod 4.5+ JSON Schema type arrays', () => {
+      test('maps a nullable primitive type array to nullable: true', () => {
+        const result = convert(z.object({ flag: z.boolean().nullable() }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: { flag: { type: 'boolean', nullable: true } },
+        });
+        expect(result.schema.properties!.flag).not.toHaveProperty('type', expect.any(Array));
+      });
+
+      test('maps a primitive union type array to anyOf', () => {
+        const result = convert(z.object({ value: z.union([z.string(), z.number()]) }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+          },
+        });
+        expect(result.schema.properties!.value).not.toHaveProperty('type');
+      });
+
+      test('maps a nullable primitive union type array to anyOf with nullable: true', () => {
+        const result = convert(
+          z.object({ value: z.union([z.string(), z.number()]).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: {
+              nullable: true,
+              anyOf: [{ type: 'string' }, { type: 'number' }],
+            },
+          },
+        });
+      });
+
+      test('maps type arrays nested under properties and array items', () => {
+        const result = convert(
+          z.object({
+            meta: z.object({ note: z.string().nullable() }),
+            tags: z.array(z.union([z.string(), z.number()])),
+          }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            meta: {
+              type: 'object',
+              properties: { note: { type: 'string', nullable: true } },
+            },
+            tags: {
+              type: 'array',
+              items: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+            },
+          },
+        });
       });
     });
 
@@ -329,6 +500,82 @@ describe('zod', () => {
       });
     });
 
+    test.each([
+      [
+        'schema > optional > meta',
+        z
+          .string()
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .optional(),
+      ],
+      [
+        'schema > default > meta',
+        z
+          .string()
+          .default('foo')
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo'),
+      ],
+      [
+        'schema > default > optional > meta',
+        z
+          .string()
+          .default('foo')
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo')
+          .optional(),
+      ],
+    ])('applies openapi availability x-state regardless of modifier order (%s)', (_name, tags) => {
+      const result = convertQuery(z.object({ tags }));
+      expect(result.query.at(0)?.schema).toHaveProperty(
+        'x-state',
+        'Generally available; added in 9.5.0'
+      );
+    });
+
+    test('omits availability since from query param x-state in serverless mode', () => {
+      const result = convertQuery(
+        z.object({
+          tags: z
+            .string()
+            .optional()
+            .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+        }),
+        { env: { serverless: true } }
+      );
+      expect(result.query).toEqual([
+        {
+          in: 'query',
+          name: 'tags',
+          required: false,
+          schema: {
+            type: 'string',
+            'x-state': 'Generally available',
+          },
+        },
+      ]);
+    });
+
     test('handles transform schemas (like dateFromString)', () => {
       const dateFromString = z.string().transform((input) => new Date(input));
       const schema = z.object({ from: dateFromString, to: dateFromString });
@@ -445,6 +692,22 @@ describe('zod', () => {
       expect(outputStr).not.toContain('x-kbn-oas-component-id');
     });
 
+    test('component named like an Object.prototype member keeps its definition', () => {
+      const ctor = z.object({ a: z.string() });
+      registerZodV4Component(ctor, 'constructor');
+
+      const result = convert(z.object({ ctor }) as any);
+
+      expect(result.schema).toMatchObject({
+        properties: { ctor: { $ref: '#/components/schemas/constructor' } },
+      });
+      expect(Object.hasOwn(result.shared, 'constructor')).toBe(true);
+      expect(result.shared.constructor).toMatchObject({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+    });
+
     test('registered schema passed directly to convert() produces $ref', () => {
       const tag = z.object({ id: z.string(), label: z.string() });
       registerZodV4Component(tag, 'Tag');
@@ -525,7 +788,7 @@ describe('zod', () => {
         id: 'TagWithAvailability',
         openapi: {
           availability: {
-            stability: 'beta',
+            stability: 'tech_preview',
             since: '9.4.0',
           },
         },
@@ -535,7 +798,7 @@ describe('zod', () => {
 
       expect(result.shared.TagWithAvailability).toMatchObject({
         type: 'object',
-        'x-state': 'Beta; added in 9.4.0',
+        'x-state': 'Technical Preview; added in 9.4.0',
       });
 
       const outputStr = JSON.stringify(result);
@@ -670,5 +933,82 @@ describe('zod', () => {
         expect(result.shared.AutoDiscPlain_Stream).not.toHaveProperty('discriminator');
       });
     });
+
+    describe('lazySchema-wrapped schemas', () => {
+      type Wrap = <T extends object>(factory: () => T) => T;
+      const eager: Wrap = (factory) => factory();
+
+      const convertBoth = (build: (wrap: Wrap) => z.ZodType) => {
+        resetDefsCounter();
+        const expected = convert(build(eager) as any);
+        resetDefsCounter();
+        const actual = convert(build(lazySchema) as any);
+        return { expected, actual };
+      };
+
+      test('references an id-ed lazy schema by its stable name when its .meta() clone is also used', () => {
+        const { expected, actual } = convertBoth((wrap) => {
+          const operation = wrap(() =>
+            z.object({ op: z.string() }).meta({ id: 'LazyOperation', title: 'Operation' })
+          );
+          return z.object({
+            annotated: operation.meta({ title: 'Annotated operation' }),
+            operations: z.union([operation, z.string()]),
+          });
+        });
+
+        expect(actual).toEqual(expected);
+        expect(actual.shared).toHaveProperty('LazyOperation');
+        expect(JSON.stringify(actual.schema)).toContain('#/components/schemas/LazyOperation');
+      });
+
+      test('keeps the full component when a lazy schema and its .meta() clone are both used', () => {
+        const { expected, actual } = convertBoth((wrap) => {
+          const colorMapping = wrap(() =>
+            z
+              .union([
+                z.object({ mode: z.literal('categorical') }),
+                z.object({ mode: z.literal('gradient') }),
+              ])
+              .meta({ id: 'LazyColorMapping', title: 'Color mapping' })
+          );
+          const bucket = wrap(() =>
+            z.object({ operation: z.literal('terms') }).meta({ id: 'LazyBucket' })
+          );
+          return z.object({
+            color: z.union([colorMapping, z.literal('auto')]),
+            rows: z.array(z.object({ color: z.union([colorMapping, z.literal('auto')]) })),
+            buckets: z.array(z.union([bucket.meta({ title: 'Bucket' }), bucket])),
+          });
+        });
+
+        expect(actual).toEqual(expected);
+        expect(actual.shared.LazyColorMapping).toHaveProperty('anyOf');
+        expect(actual.shared.LazyBucket).toHaveProperty('additionalProperties', false);
+      });
+    });
+  });
+
+  test('isoDateTime converts to format date-time', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+
+    expect(result.schema.properties?.createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
+    });
+  });
+
+  test('isoDateTime OpenAPI schema bounds length and omits pattern', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+    const createdAt = result.schema.properties?.createdAt;
+
+    expect(createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
+      maxLength: 64,
+    });
+    expect(createdAt).not.toHaveProperty('pattern');
   });
 });

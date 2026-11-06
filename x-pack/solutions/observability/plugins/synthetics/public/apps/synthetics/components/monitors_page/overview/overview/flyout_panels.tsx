@@ -7,8 +7,6 @@
 
 import React from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
@@ -23,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Ping } from '../../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../../contexts';
@@ -57,11 +56,15 @@ export const FlyoutLastTestRun = ({
   loading,
   configId,
   locationId,
+  remoteName,
+  spaceId,
 }: {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
   locationId: string;
+  remoteName?: string;
+  spaceId?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
@@ -120,33 +123,29 @@ export const FlyoutLastTestRun = ({
       {latestPing.error ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount
             data-test-subj="flyoutLastTestRunErrorCallout"
             title={latestPing.error.message}
             size="s"
-            color="danger"
-            iconType="warning"
-            css={{
-              borderRadius: euiTheme.border.radius.medium,
-              fontWeight: euiTheme.font.weight.semiBold,
-            }}
-          >
-            {latestPing.state?.id && (
-              <EuiButton
-                data-test-subj="flyoutViewErrorDetails"
-                color="danger"
-                size="s"
-                href={getErrorDetailsUrl({
-                  basePath,
-                  configId,
-                  locationId,
-                  stateId: latestPing.state.id,
-                })}
-              >
-                {VIEW_ERROR_DETAILS_LABEL}
-              </EuiButton>
-            )}
-          </EuiCallOut>
+            actionProps={
+              latestPing.state?.id && !remoteName
+                ? {
+                    primary: {
+                      'data-test-subj': 'flyoutViewErrorDetails',
+                      href: getErrorDetailsUrl({
+                        basePath,
+                        configId,
+                        locationId,
+                        spaceId,
+                        stateId: latestPing.state.id,
+                      }),
+                      children: VIEW_ERROR_DETAILS_LABEL,
+                    },
+                  }
+                : undefined
+            }
+          />
         </>
       ) : null}
     </EuiPageSection>
@@ -165,18 +164,21 @@ export const FlyoutSummaryKPIs = ({
   from,
   to,
   dateLabel,
+  remoteName,
 }: {
   monitorId: string;
   locationLabel: string;
   from: string;
   to: string;
   dateLabel: string;
+  remoteName?: string;
 }) => {
   const { data, loading } = useMonitorSummaryStats({
     monitorId,
     locationLabel,
     from,
     to,
+    remoteName,
   });
 
   const availabilityColor =
@@ -398,8 +400,8 @@ const DURATION_LABEL = i18n.translate('xpack.synthetics.flyout.durationLabel', {
   defaultMessage: 'Duration (median)',
 });
 
-const ERRORS_LABEL = i18n.translate('xpack.synthetics.flyout.errorsLabel', {
-  defaultMessage: 'Errors',
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.flyout.failedTestsLabel', {
+  defaultMessage: 'Failed tests',
 });
 
 const ALERTS_LABEL = i18n.translate('xpack.synthetics.flyout.alertsLabel', {

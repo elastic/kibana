@@ -400,7 +400,7 @@ describe('helpers', () => {
         requestItems,
       });
 
-      expect(mockFetch).toBeCalledWith(
+      expect(mockFetch).toHaveBeenCalledWith(
         '/internal/ecs_data_quality_dashboard/unallowed_field_values',
         {
           body: JSON.stringify(requestItems),
@@ -490,7 +490,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           requestItems,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Error loading unallowed values for index auditbeat-custom-index-1: simulated error'
       );
     });

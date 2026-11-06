@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { createRequestBodySchema, createResponseBodySchema } from './schemas';
 
-export type MarkdownCreateRequestBody = TypeOf<typeof createRequestBodySchema>;
-export type MarkdownCreateResponseBody = TypeOf<typeof createResponseBodySchema>;
+export type MarkdownCreateRequestBody = z.output<typeof createRequestBodySchema>;
+export type MarkdownCreateResponseBody = z.output<typeof createResponseBodySchema>;

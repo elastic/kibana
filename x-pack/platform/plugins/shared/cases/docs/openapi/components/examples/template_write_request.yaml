@@ -1,0 +1,10 @@
+summary: Create or fully replace a case template.
+value:
+  {
+    "name": "Security incident",
+    "owner": "cases",
+    "definition": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n",
+    "description": "Default template for security incidents.",
+    "tags": ["security"],
+    "isEnabled": true
+  }

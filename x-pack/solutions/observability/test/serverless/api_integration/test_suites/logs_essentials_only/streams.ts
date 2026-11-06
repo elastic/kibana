@@ -47,15 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(403);
       });
-
-      it('GET /api/streams/{name}/significant_events is not authorized', async () => {
-        await supertestAdminWithCookieCredentials
-          .get(
-            '/api/streams/{name}/significant_events?from=2025-06-17T00:00:00.000Z&to=2025-06-17T00:00:00.000Z&bucketSize=1m'
-          )
-          .set(svlCommonApi.getInternalRequestHeader())
-          .expect(403);
-      });
     });
   });
 }

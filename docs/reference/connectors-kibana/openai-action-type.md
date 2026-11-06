@@ -1,13 +1,17 @@
 ---
 navigation_title: "OpenAI"
+description: "Documentation for the deprecated OpenAI connector, used to send requests to OpenAI and Azure OpenAI from Kibana."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/openai-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: deprecated 9.5
+  serverless: deprecated
 ---
 
 # OpenAI connector and action [openai-action-type]
+
+:::{include} _snippets/deprecated-llm-connector-note.md
+:::
 
 The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider: 
 
@@ -17,12 +21,12 @@ The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST
 
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+```{applies_to}
+stack: deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
 
-:::{image} ../images/gen-ai-connector.png
-:alt: OpenAI connector
-:screenshot:
-:::
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [openai-connector-configuration]
 
@@ -65,12 +69,7 @@ When using the `Other` provider (for example, to [connect a local LLM](#connect-
 
 ## Test connectors [gen-ai-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}. For example:
-
-:::{image} ../images/gen-ai-params-test.png
-:alt: OpenAI params test
-:screenshot:
-:::
+You can test connectors as you're creating or editing the connector in {{kib}}.
 
 The OpenAI actions have the following configuration properties.
 
@@ -92,6 +91,10 @@ Body
 ## Connector networking configuration [openai-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+::::{note}
+These settings don't apply to {{es}} {{infer}} endpoints. To connect an {{infer}} endpoint to a service that uses a private certificate authority, refer to [Trust a private certificate authority for external {{infer}} endpoints](docs-content://explore-analyze/elastic-inference/external-inference-private-ca.md).
+::::
 
 ## Token usage dashboard [openai-connector-token-dashboard]
 
@@ -153,4 +156,4 @@ Ensure your local LLM is running and accessible via an OpenAI-compatible API end
 
 ### Example
 
-For a concrete example, refer to [Connect to your own local LLM](docs-content://solutions/security/ai/connect-to-own-local-llm.md) in the Elastic Security solution documentation.
+For setup guides, refer to [Self-managed custom LLMs](docs-content://explore-analyze/ai-features/llm-guides/local-llms-overview.md) in the Elastic documentation.

@@ -11,6 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { Global } from '@emotion/react';
 import React from 'react';
 import { getBaseTypeIconsStyles } from './get_base_type_icons_styles';
+import { getCodeActionWidgetStyles } from './get_code_action_widget_styles';
 import { getMonacoWorkflowOverridesStyles } from './get_monaco_workflow_overrides_styles';
 import { getProposedChangesStyles } from './get_proposed_changes_styles';
 
@@ -20,6 +21,7 @@ export const GlobalWorkflowEditorStyles = React.memo(function GlobalWorkflowEdit
     <Global
       styles={[
         getBaseTypeIconsStyles(euiThemeContext),
+        getCodeActionWidgetStyles(euiThemeContext),
         getMonacoWorkflowOverridesStyles(euiThemeContext),
         getProposedChangesStyles(euiThemeContext),
       ]}

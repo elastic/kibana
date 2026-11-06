@@ -38,13 +38,13 @@ jest.mock('../../hooks/use_attack_details', () => ({
   }),
 }));
 
-jest.mock('../../../../flyout_v2/notes/components/notes_details_content', () => ({
+jest.mock('../../../../flyout_v2/shared/tools/notes/components/notes_details_content', () => ({
   NotesDetailsContent: jest.fn(() => (
     <div data-test-subj="notes-details-content">{'Notes details content'}</div>
   )),
 }));
 
-jest.mock('../../../../flyout_v2/notes/hooks/use_timeline_config', () => ({
+jest.mock('../../../../flyout_v2/shared/tools/notes/hooks/use_timeline_config', () => ({
   useTimelineConfig: jest.fn().mockReturnValue(undefined),
 }));
 
@@ -70,7 +70,7 @@ describe('NotesTab', () => {
 
   it('passes hideTimelineIcon=false to NotesDetailsContent', () => {
     const { NotesDetailsContent } = jest.requireMock(
-      '../../../../flyout_v2/notes/components/notes_details_content'
+      '../../../../flyout_v2/shared/tools/notes/components/notes_details_content'
     );
 
     renderNotesTab();

@@ -32,21 +32,119 @@ export function CasesTableServiceProvider(
     }
   };
 
+  const FILTER_OPTION_SELECTION_TIMEOUT = 5000;
+
+  // The filter popovers render each option as a `role="option"` item whose `aria-checked` reflects
+  // the current selection.
+  const isFilterOptionSelected = async (optionSubj: string) => {
+    const option = await testSubjects.find(optionSubj, FILTER_OPTION_SELECTION_TIMEOUT);
+    return (await option.getAttribute('aria-checked')) === 'true';
+  };
+
+  // Clicks a filter option until the popover reports it as selected
+  const selectFilterOption = async (optionSubj: string) => {
+    await retry.try(async () => {
+      if (!(await isFilterOptionSelected(optionSubj))) {
+        await testSubjects.click(optionSubj);
+      }
+
+      await retry.waitForWithTimeout(
+        `the filter option ${optionSubj} to be selected`,
+        FILTER_OPTION_SELECTION_TIMEOUT,
+        () => isFilterOptionSelected(optionSubj)
+      );
+    });
+  };
+
+  // Matches a single element per case in both view modes: the table view (`cases-table-row-{id}`)
+  // and the card list (`cases-list-item-clickable-{id}`), so row counts work regardless of which
+  // view the test leaves the list in.
+  const CASE_ROWS_SELECTOR =
+    '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
+
+  const getCaseIdByRowIndex = async (index: number) => {
+    const actionButtons = await find.allByCssSelector(
+      '[data-test-subj^="case-action-popover-button-"]',
+      100
+    );
+
+    assertCaseExists(index, actionButtons.length);
+
+    const dataTestSubj = await actionButtons[index].getAttribute('data-test-subj');
+    if (dataTestSubj === null) {
+      throw new Error(`Cannot determine the id of case at index ${index}.`);
+    }
+
+    return dataTestSubj.replace('case-action-popover-button-', '');
+  };
+
+  const waitForStatusOptionToStopMoving = async (status: CaseStatuses) => {
+    const optionSubj = `cases-bulk-action-status-${status}`;
+    let stableSamples = 0;
+    let previousPosition = await (await testSubjects.find(optionSubj)).getPosition();
+
+    await retry.waitFor(`status option ${status} to stop animating`, async () => {
+      const currentPosition = await (await testSubjects.find(optionSubj)).getPosition();
+      stableSamples =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y
+          ? stableSamples + 1
+          : 0;
+      previousPosition = currentPosition;
+      return stableSamples >= 2;
+    });
+  };
+
   return {
     /**
-     * Goes to the first case listed on the table.
+     * Whether the card list view is currently rendered (as opposed to the table view which reuses `cases-table`).
+     */
+    async isCardListView() {
+      return await testSubjects.exists('cases-list-view');
+    },
+
+    /**
+     * Ensures the cases list is showing the table view. The app defaults to a card list whose table
+     * view reuses the `cases-table` DOM and bulk/row controls, so switching to it lets the
+     * table-based helpers below work unchanged.
+     */
+    async ensureTableView() {
+      await header.waitUntilLoadingHasFinished();
+      if (!(await this.isCardListView())) {
+        return;
+      }
+      await retry.waitFor('the cases list to switch to the table view', async () => {
+        if (await testSubjects.exists('cases-table')) {
+          return true;
+        }
+        // `table` is the EuiButtonGroup option id for the list view toggle.
+        if (await testSubjects.exists('table')) {
+          await testSubjects.click('table');
+          await header.waitUntilLoadingHasFinished();
+        }
+        return await testSubjects.exists('cases-table');
+      });
+    },
+
+    /**
+     * Goes to the first case listed on the cases list.
      *
-     * This will fail if the table doesn't have any case
+     * This will fail if the list doesn't have any case
      */
     async goToFirstListedCase() {
-      await testSubjects.existOrFail('cases-table');
-      await testSubjects.existOrFail('case-details-link', {
-        timeout: config.get('timeouts.waitFor'),
-      });
-      await testSubjects.click('case-details-link');
-      await testSubjects.existOrFail('case-view-title', {
-        timeout: config.get('timeouts.waitFor'),
-      });
+      if (await this.isCardListView()) {
+        const firstCase = await find.byCssSelector(
+          '[data-test-subj^="cases-list-item-clickable-"]'
+        );
+        await firstCase.click();
+      } else {
+        await testSubjects.existOrFail('cases-table');
+        await testSubjects.existOrFail('case-details-link', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.click('case-details-link');
+      }
+
+      await casesCommon.waitForCaseViewToLoad();
     },
 
     async deleteCase(index: number = 0) {
@@ -58,7 +156,7 @@ export function CasesTableServiceProvider(
         timeout: config.get('timeouts.waitFor'),
       });
       await testSubjects.click('confirmModalConfirmButton');
-      await testSubjects.existOrFail('euiToastHeader', {
+      await testSubjects.existOrFail('euiToastHeader__title', {
         timeout: config.get('timeouts.waitFor'),
       });
     },
@@ -75,7 +173,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAndDeleteAllCases() {
-      await header.waitUntilLoadingHasFinished();
+      await this.ensureTableView();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       let rows: WebElementWrapper[];
       do {
@@ -90,17 +188,29 @@ export function CasesTableServiceProvider(
 
     async validateCasesTableHasNthRows(nrRows: number) {
       await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
+        const rows = await find.allByCssSelector(CASE_ROWS_SELECTOR);
         return rows.length === nrRows;
       });
 
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForCaseToBeListed(caseId: string) {
+      await this.ensureTableView();
+      await retry.waitFor(`case ${caseId} to appear in the cases table`, async () => {
+        return await find.existsByCssSelector(`[data-test-subj*="cases-table-row-${caseId}"]`);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeListed() {
-      await retry.waitFor('cases to appear on the all cases table', async () => {
-        await this.refreshTable();
-        return await testSubjects.exists('case-details-link');
+      await this.refreshTable();
+      await retry.waitFor('cases to appear on the all cases list', async () => {
+        return (
+          (await testSubjects.exists('case-details-link')) ||
+          (await testSubjects.exists('cases-list-item-title'))
+        );
       });
       await header.waitUntilLoadingHasFinished();
     },
@@ -115,9 +225,9 @@ export function CasesTableServiceProvider(
     },
 
     async waitForCasesToBeDeleted() {
-      await retry.waitFor('the cases table to be empty', async () => {
-        await this.refreshTable();
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+      await this.refreshTable();
+      await retry.waitFor('the cases list to be empty', async () => {
+        const rows = await find.allByCssSelector(CASE_ROWS_SELECTOR, 100);
         return rows.length === 0;
       });
     },
@@ -127,6 +237,8 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseById(caseId: string) {
+      await this.ensureTableView();
+
       const targetCase = await find.allByCssSelector(
         `[data-test-subj*="cases-table-row-${caseId}"`,
         100
@@ -140,6 +252,8 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseByIndex(index: number) {
+      await this.ensureTableView();
+
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
       assertCaseExists(index, rows.length);
@@ -201,20 +315,14 @@ export function CasesTableServiceProvider(
     },
 
     async filterByOwner(owner: string) {
-      const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
-
-      if (isAlreadyOpen) {
-        await testSubjects.click(`options-filter-popover-item-${owner}`);
-        await header.waitUntilLoadingHasFinished();
-        return;
+      if (!(await testSubjects.exists('options-filter-popover-panel-owner'))) {
+        await testSubjects.click('options-filter-popover-button-owner');
+        await retry.waitFor('the solution filter popover to open', async () => {
+          return await testSubjects.exists('options-filter-popover-panel-owner');
+        });
       }
 
-      await testSubjects.click('options-filter-popover-button-owner');
-      await retry.waitFor(`filterByOwner popover opened`, async () => {
-        return await testSubjects.exists('options-filter-popover-panel-owner');
-      });
-
-      await testSubjects.click(`options-filter-popover-item-${owner}`);
+      await selectFilterOption(`options-filter-popover-item-${owner}`);
       await header.waitUntilLoadingHasFinished();
     },
 
@@ -223,6 +331,7 @@ export function CasesTableServiceProvider(
     },
 
     async openRowActions(index: number) {
+      await this.ensureTableView();
       const rows = await find.allByCssSelector(
         '[data-test-subj*="case-action-popover-button-"',
         100
@@ -249,11 +358,13 @@ export function CasesTableServiceProvider(
     },
 
     async selectAllCasesAndOpenBulkActions() {
+      await this.ensureTableView();
       await testSubjects.setCheckbox('checkboxSelectAll', 'check');
       await this.openBulkActions();
     },
 
     async changeStatus(status: CaseStatuses, index: number) {
+      const caseId = await getCaseIdByRowIndex(index);
       await this.openRowActions(index);
 
       await retry.waitFor('status panel exists', async () => {
@@ -265,8 +376,13 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await waitForStatusOptionToStopMoving(status);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
       await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
+      await find.byCssSelector(
+        `[data-test-subj="cases-table-row-${caseId}"] [data-test-subj="case-status-badge-${status}"]`
+      );
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
@@ -285,6 +401,8 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
+      await testSubjects.existOrFail(`case-severity-badge-${severity}`);
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
@@ -326,6 +444,8 @@ export function CasesTableServiceProvider(
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
+      await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkAddNewTag(selectedCases: number[], tag: string) {
@@ -354,6 +474,8 @@ export function CasesTableServiceProvider(
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
+      await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkEditAssignees(selectedCases: number[], assigneesToClick: string[]) {
@@ -410,7 +532,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
-      await header.waitUntilLoadingHasFinished();
+      await this.ensureTableView();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
@@ -418,7 +540,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAndChangeSeverityOfAllCases(severity: CaseSeverity) {
-      await header.waitUntilLoadingHasFinished();
+      await this.ensureTableView();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });

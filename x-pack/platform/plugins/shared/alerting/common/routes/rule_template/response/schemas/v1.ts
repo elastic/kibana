@@ -8,35 +8,38 @@
 import { schema } from '@kbn/config-schema';
 import { ruleResponseSchemaV1 } from '../../../rule/response';
 
-export const ruleTemplateResponseSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the rule.',
-    },
-  }),
-  name: schema.string({
-    meta: {
-      description: ' The name of the rule.',
-    },
-  }),
-  tags: schema.arrayOf(
-    schema.string({
-      meta: { description: 'The tags for the rule.' },
-    })
-  ),
-  rule_type_id: schema.string({
-    meta: { description: 'The rule type identifier.' },
-  }),
+export const ruleTemplateResponseSchema = schema.object(
+  {
+    id: schema.string({
+      meta: {
+        description: 'The identifier for the rule.',
+      },
+    }),
+    name: schema.string({
+      meta: {
+        description: ' The name of the rule.',
+      },
+    }),
+    tags: schema.arrayOf(
+      schema.string({
+        meta: { description: 'The tags for the rule.' },
+      })
+    ),
+    rule_type_id: schema.string({
+      meta: { description: 'The rule type identifier.' },
+    }),
 
-  schedule: ruleResponseSchemaV1.getPropSchemas().schedule,
-  params: ruleResponseSchemaV1.getPropSchemas().params,
+    schedule: ruleResponseSchemaV1.getPropSchemas().schedule,
+    params: ruleResponseSchemaV1.getPropSchemas().params,
 
-  alert_delay: ruleResponseSchemaV1.getPropSchemas().alert_delay,
-  flapping: ruleResponseSchemaV1.getPropSchemas().flapping,
-  description: schema.maybe(
-    schema.string({
-      meta: { description: 'The description of the rule template.' },
-    })
-  ),
-  artifacts: ruleResponseSchemaV1.getPropSchemas().artifacts,
-});
+    alert_delay: ruleResponseSchemaV1.getPropSchemas().alert_delay,
+    flapping: ruleResponseSchemaV1.getPropSchemas().flapping,
+    description: schema.maybe(
+      schema.string({
+        meta: { description: 'The description of the rule template.' },
+      })
+    ),
+    artifacts: ruleResponseSchemaV1.getPropSchemas().artifacts,
+  },
+  { meta: { id: 'rule_template_response' } }
+);

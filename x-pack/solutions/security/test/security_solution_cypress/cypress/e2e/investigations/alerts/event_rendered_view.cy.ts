@@ -26,6 +26,7 @@ import {
   waitForAlerts,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -37,11 +38,20 @@ import {
 
 describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    deleteAlertsAndRules();
     login();
     createRule(getNewRule());
+    // Set up intercept before visiting the page so it captures all search
+    // requests, including those triggered by switchAlertTableToEventRenderedView.
+    // This avoids a race condition where the request completes before the alias
+    // is registered, causing cy.wait('@alertsSearch') to time out.
+    cy.intercept('POST', '/internal/search/privateRuleRegistryAlertsSearchStrategy').as(
+      'alertsSearch'
+    );
     visit(ALERTS_URL);
     waitForAlerts();
     switchAlertTableToEventRenderedView();
+    cy.wait('@alertsSearch');
     waitForAlerts();
   });
 

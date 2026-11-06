@@ -39,6 +39,9 @@ const mockDefinition = {
     name: 'test-stream',
   },
   index_mode: 'time_series',
+  privileges: {
+    read_failure_store: true,
+  },
   effective_failure_store: {
     lifecycle: {
       enabled: {
@@ -331,6 +334,54 @@ describe('useDataStreamStats', () => {
       });
     });
 
+    it('skips the failure store aggregation and still resolves successful data without read_failure_store privilege', async () => {
+      const failureStoreSearchError = new Error(
+        'action [indices:data/read/search] is unauthorized for the failure store'
+      );
+
+      mockDataSearch.search.mockImplementation((request: { params: { index: string } }) => {
+        if (request.params.index.includes('::failures')) {
+          throw failureStoreSearchError;
+        }
+        return of({
+          rawResponse: {
+            aggregations: {
+              sampler: { docs_count: { buckets: [{ key: 1, doc_count: 100 }] } },
+              interval: '30m',
+            },
+          },
+        });
+      });
+
+      const definitionWithoutFsPrivilege = {
+        ...mockDefinition,
+        privileges: { read_failure_store: false },
+      };
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: definitionWithoutFsPrivilege,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+
+      expect(result.current.error).toBeUndefined();
+      expect(result.current.stats?.ds.aggregations).toEqual({
+        buckets: [{ key: 1, doc_count: 100 }],
+        interval: '30m',
+      });
+      expect(result.current.stats?.fs.aggregations).toBeUndefined();
+      // The failure store `::failures` index must never be queried without the privilege.
+      const queriedIndices = mockDataSearch.search.mock.calls.map(
+        ([request]) => request.params.index
+      );
+      expect(queriedIndices.some((index: string) => index.includes('::failures'))).toBe(false);
+    });
+
     it('should handles disabled failure store', async () => {
       mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
@@ -428,6 +479,7 @@ describe('useDataStreamStats', () => {
     });
 
     it('should handle errors', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
       const mockError = new Error('Failed to fetch data stream stats');
       mockDataStreamsClient.getDataStreamsStats.mockRejectedValue(mockError);
 
@@ -442,6 +494,7 @@ describe('useDataStreamStats', () => {
         expect(result.current.error).toBeDefined();
       });
       expect(result.current.error).toBe(mockError);
+      consoleSpy.mockRestore();
     });
 
     it('exposes time series count error without failing overall stats', async () => {

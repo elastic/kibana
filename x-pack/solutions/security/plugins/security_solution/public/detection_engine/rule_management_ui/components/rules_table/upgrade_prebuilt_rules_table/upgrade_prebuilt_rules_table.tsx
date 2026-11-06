@@ -122,6 +122,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
 
               <EuiBasicTable
                 loading={isFetching}
+                tableCaption={i18n.UPGRADE_PREBUILT_RULES_TABLE_CAPTION}
                 items={ruleUpgradeStates}
                 pagination={{
                   totalItemCount: pagination.total,

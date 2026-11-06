@@ -5,38 +5,19 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { InPortal } from 'react-reverse-portal';
-import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { css } from '@emotion/react';
-import { MigrationMessageCallout } from './migration_message_callout';
-import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
-import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
-import {
-  type TimelineStatus,
-  TimelineStatusEnum,
-  TimelineTypeEnum,
-} from '../../../../../../../common/api/timeline';
+import { useSelector } from 'react-redux-v7';
+import type { TimelineStatus } from '../../../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
-import { timelineSelectors } from '../../../../../store';
-import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
-import { timelineDefaults } from '../../../../../store/defaults';
-import * as i18n from './translations';
-import { StatefulSearchOrFilter } from '../../../search_or_filter';
-import { DataProviders } from '../../../data_providers';
-import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
+import { selectIsSuperTimeline } from '../../../../../store/selectors';
+import type { State } from '../../../../../../common/store';
+import { SuperTimelineQueryTabHeader } from './super_timeline_query_tab_header';
+import { RegularQueryTabHeader } from './regular_query_tab_header';
 
 interface Props {
   activeTab: TimelineTabs;
-  /**
-   * The currently selected timeline indices
-   */
   currentIndices: string[];
-  /**
-   * The id of the dataview
-   */
   dataViewId: string | null;
   filterManager: FilterManager;
   show: boolean;
@@ -47,28 +28,6 @@ interface Props {
   totalCount: number;
 }
 
-const useStyles = (shouldShowQueryBuilder: boolean) => {
-  const { euiTheme } = useEuiTheme();
-
-  return css`
-    position: relative;
-    width: 100%;
-    transition: 0.5s ease-in-out;
-    overflow: hidden;
-    display: block;
-    max-height: ${shouldShowQueryBuilder ? '300px' : '0'};
-    visibility: ${shouldShowQueryBuilder ? 'visible' : 'hidden'};
-    margin-block-start: ${shouldShowQueryBuilder ? '0' : `calc(-1 * ${euiTheme.size.s})`};
-
-    . ${IS_DRAGGING_CLASS_NAME} & {
-      display: block;
-      max-height: 300px;
-      visibility: visible;
-      margin-block-start: 0;
-    }
-  `;
-};
-
 const QueryTabHeaderComponent: React.FC<Props> = ({
   activeTab,
   currentIndices,
@@ -76,89 +35,38 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   filterManager,
   show,
   showCallOutUnauthorizedMsg,
+  showEventsCountBadge,
   status,
   timelineId,
-  showEventsCountBadge,
   totalCount,
 }) => {
-  const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
 
-  const getIsDataProviderVisible = useMemo(
-    () => timelineSelectors.dataProviderVisibilitySelector(),
-    []
-  );
-
-  const timelineType = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
-  );
-  const isDataProviderVisible = useDeepEqualSelector(
-    (state) => getIsDataProviderVisible(state, timelineId) ?? timelineDefaults.isDataProviderVisible
-  );
-  const shouldShowQueryBuilder = useMemo(
-    () => isDataProviderVisible || timelineType === TimelineTypeEnum.template,
-    [isDataProviderVisible, timelineType]
-  );
-  const dataProviderStyles = useStyles(shouldShowQueryBuilder);
-
-  const showAlertsOnlyMigrationMessage = useShouldShowAlertsOnlyMigrationMessage({
-    currentTimelineIndices: currentIndices,
-    dataViewId,
-  });
+  if (isSuperTimeline) {
+    return (
+      <SuperTimelineQueryTabHeader
+        activeTab={activeTab}
+        filterManager={filterManager}
+        showEventsCountBadge={showEventsCountBadge}
+        timelineId={timelineId}
+        totalCount={totalCount}
+      />
+    );
+  }
 
   return (
-    <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
-      <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? (
-          <EventsCountBadge data-test-subj="query-events-count">{totalCount}</EventsCountBadge>
-        ) : null}
-      </InPortal>
-      <EuiFlexGroup gutterSize="s" direction="column">
-        <EuiFlexItem data-test-subj="timeline-date-picker-container">
-          <TabHeaderContainer data-test-subj="timelineHeader">
-            <EuiFlexGroup gutterSize="s" direction="column">
-              <EuiFlexItem>
-                <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
-              </EuiFlexItem>
-              {showAlertsOnlyMigrationMessage && (
-                <EuiFlexItem>
-                  <MigrationMessageCallout timelineId={timelineId} />
-                </EuiFlexItem>
-              )}
-              {showCallOutUnauthorizedMsg && (
-                <EuiFlexItem>
-                  <EuiCallOut
-                    announceOnMount={false}
-                    data-test-subj="timelineCallOutUnauthorized"
-                    title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
-                    color="warning"
-                    iconType="warning"
-                    size="s"
-                  />
-                </EuiFlexItem>
-              )}
-              {status === TimelineStatusEnum.immutable && (
-                <EuiFlexItem>
-                  <EuiCallOut
-                    announceOnMount={false}
-                    data-test-subj="timelineImmutableCallOut"
-                    title={i18n.CALL_OUT_IMMUTABLE}
-                    color="primary"
-                    iconType="warning"
-                    size="s"
-                  />
-                </EuiFlexItem>
-              )}
-              {show ? (
-                <div css={dataProviderStyles} className="data-providers-container">
-                  <DataProviders timelineId={timelineId} />
-                </div>
-              ) : null}
-            </EuiFlexGroup>
-          </TabHeaderContainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </StyledEuiFlyoutHeader>
+    <RegularQueryTabHeader
+      activeTab={activeTab}
+      currentIndices={currentIndices}
+      dataViewId={dataViewId}
+      filterManager={filterManager}
+      show={show}
+      showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+      showEventsCountBadge={showEventsCountBadge}
+      status={status}
+      timelineId={timelineId}
+      totalCount={totalCount}
+    />
   );
 };
 

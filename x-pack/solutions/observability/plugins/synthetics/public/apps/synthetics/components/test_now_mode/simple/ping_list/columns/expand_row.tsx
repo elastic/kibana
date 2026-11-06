@@ -8,7 +8,7 @@
 import type { Dispatch, SetStateAction, MouseEvent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { Ping } from '../../../../../../../../common/runtime_types';
 import { PingListExpandedRowComponent } from '../expanded_row';
 type PingExpandedRowMap = Record<string, JSX.Element>;
@@ -55,22 +55,33 @@ interface Props {
 }
 export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) => {
   return (
-    <EuiButtonIcon
-      data-test-subj="uptimePingListExpandBtn"
-      onClick={(evt: MouseEvent<HTMLButtonElement>) => {
-        // for table row click
-        evt.stopPropagation();
-        toggleDetails(item, expandedRows, setExpandedRows);
-      }}
-      isDisabled={!rowShouldExpand(item)}
-      aria-label={
+    <EuiToolTip
+      content={
         expandedRows[item.docId]
           ? i18n.translate('xpack.synthetics.pingList.collapseRow', {
               defaultMessage: 'Collapse',
             })
           : i18n.translate('xpack.synthetics.pingList.expandRow', { defaultMessage: 'Expand' })
       }
-      iconType={expandedRows[item.docId] ? 'chevronSingleUp' : 'chevronSingleDown'}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        data-test-subj="uptimePingListExpandBtn"
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
+          // for table row click
+          evt.stopPropagation();
+          toggleDetails(item, expandedRows, setExpandedRows);
+        }}
+        isDisabled={!rowShouldExpand(item)}
+        aria-label={
+          expandedRows[item.docId]
+            ? i18n.translate('xpack.synthetics.pingList.collapseRow', {
+                defaultMessage: 'Collapse',
+              })
+            : i18n.translate('xpack.synthetics.pingList.expandRow', { defaultMessage: 'Expand' })
+        }
+        iconType={expandedRows[item.docId] ? 'chevronSingleUp' : 'chevronSingleDown'}
+      />
+    </EuiToolTip>
   );
 };

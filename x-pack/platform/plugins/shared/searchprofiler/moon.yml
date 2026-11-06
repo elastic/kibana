@@ -34,18 +34,20 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -10,24 +10,35 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTemporalStateModule } from './temporal_state_module';
 import type { LeadEntity } from '../types';
 import { PRIVILEGED_USER_WATCHLIST_ID } from './utils';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../utils/elasticsearch_terms_limits';
 
-const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
+const createPrivilegedEntity = (
+  type: string,
+  name: string,
+  id: string = `${type}:${name}`
+): LeadEntity => ({
   record: {
     entity: {
-      id: `${type}:${name}`,
+      id,
       name,
       type,
       attributes: { watchlists: [PRIVILEGED_USER_WATCHLIST_ID] },
     },
   } as never,
+  id,
   type,
   name,
 });
 
-const createNonPrivilegedEntity = (type: string, name: string): LeadEntity => ({
+const createNonPrivilegedEntity = (
+  type: string,
+  name: string,
+  id: string = `${type}:${name}`
+): LeadEntity => ({
   record: {
-    entity: { id: `${type}:${name}`, name, type, attributes: { watchlists: [] } },
+    entity: { id, name, type, attributes: { watchlists: [] } },
   } as never,
+  id,
   type,
   name,
 });
@@ -76,13 +87,13 @@ describe('TemporalStateModule', () => {
 
   it('exposes module weight for weighted scoring', () => {
     const module = createTemporalStateModule({ esClient, logger, spaceId });
-    expect(module.config.weight).toBe(0.25);
+    expect(module.config.weight).toBe(0.5);
   });
 
   it('detects privilege escalation when entity was not privileged historically', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
-      mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
+      mockSnapshotResponse([{ key: 'user:alice', wasPrivileged: false }]) as never
     );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -94,10 +105,10 @@ describe('TemporalStateModule', () => {
     expect(observations[0].entityId).toBe('user:alice');
   });
 
-  it('queries by entity type name field (e.g. user.name)', async () => {
+  it('queries the history snapshot by entity.id, not by `${type}.name`', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
-      mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
+      mockSnapshotResponse([{ key: 'user:alice', wasPrivileged: false }]) as never
     );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -105,13 +116,16 @@ describe('TemporalStateModule', () => {
 
     const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
     const query = searchCall.query as { bool: { filter: Array<Record<string, unknown>> } };
-    expect(query.bool.filter).toEqual([{ terms: { 'user.name': ['alice'] } }]);
+    expect(query.bool.filter).toEqual([{ terms: { 'entity.id': ['user:alice'] } }]);
+
+    const aggs = searchCall.aggs as { by_entity: { terms: { field: string } } };
+    expect(aggs.by_entity.terms.field).toBe('entity.id');
   });
 
   it('does not produce observation when entity was already privileged', async () => {
     const entity = createPrivilegedEntity('user', 'always-admin');
     esClient.search.mockResolvedValue(
-      mockSnapshotResponse([{ key: 'always-admin', wasPrivileged: true }]) as never
+      mockSnapshotResponse([{ key: 'user:always-admin', wasPrivileged: true }]) as never
     );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -136,10 +150,10 @@ describe('TemporalStateModule', () => {
 
     esClient.search
       .mockResolvedValueOnce(
-        mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
+        mockSnapshotResponse([{ key: 'user:alice', wasPrivileged: false }]) as never
       )
       .mockResolvedValueOnce(
-        mockSnapshotResponse([{ key: 'server-01', wasPrivileged: false }]) as never
+        mockSnapshotResponse([{ key: 'host:server-01', wasPrivileged: false }]) as never
       );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -149,6 +163,25 @@ describe('TemporalStateModule', () => {
     expect(observations).toHaveLength(2);
     expect(observations[0].entityId).toBe('user:alice');
     expect(observations[1].entityId).toBe('host:server-01');
+  });
+
+  it('keeps escalations separate for two same-named entities with distinct EUIDs', async () => {
+    const aliceA = createPrivilegedEntity('user', 'alice', 'user:alice@hosta');
+    const aliceB = createPrivilegedEntity('user', 'alice', 'user:alice@hostb');
+
+    // Only aliceA was previously non-privileged; aliceB was always privileged.
+    esClient.search.mockResolvedValueOnce(
+      mockSnapshotResponse([
+        { key: 'user:alice@hosta', wasPrivileged: false },
+        { key: 'user:alice@hostb', wasPrivileged: true },
+      ]) as never
+    );
+
+    const module = createTemporalStateModule({ esClient, logger, spaceId });
+    const observations = await module.collect([aliceA, aliceB]);
+
+    expect(observations).toHaveLength(1);
+    expect(observations[0].entityId).toBe('user:alice@hosta');
   });
 
   it('logs warning and returns empty when ES query fails', async () => {
@@ -162,5 +195,49 @@ describe('TemporalStateModule', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to query privilege history')
     );
+  });
+
+  describe('large entity volumes (P90+ scale)', () => {
+    it('batches the terms query so a single type never exceeds the ES max_terms_count limit', async () => {
+      const totalEntities = DEFAULT_MAX_TERMS_QUERY_COUNT + 3000;
+      const entities: LeadEntity[] = Array.from({ length: totalEntities }, (_, i) =>
+        createPrivilegedEntity('user', `user-${i}`)
+      );
+
+      esClient.search.mockImplementation((params) => {
+        const query = (params as Record<string, unknown>).query as {
+          bool: { filter: Array<Record<string, unknown>> };
+        };
+        const termsFilter = query.bool.filter[0] as { terms: Record<string, string[]> };
+        const chunk = termsFilter.terms['entity.id'];
+
+        // Report the first EUID in this chunk as an escalation, proving every
+        // chunk was queried and merged (not just the last one).
+        return Promise.resolve(
+          mockSnapshotResponse([{ key: chunk[0], wasPrivileged: false }]) as never
+        );
+      });
+
+      const module = createTemporalStateModule({ esClient, logger, spaceId });
+      const observations = await module.collect(entities);
+
+      // ceil(68535 / 65535) = 2 queries for the single 'user' type
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+
+      for (const [params] of esClient.search.mock.calls) {
+        const query = (params as Record<string, unknown>).query as {
+          bool: { filter: Array<Record<string, unknown>> };
+        };
+        const termsFilter = query.bool.filter[0] as { terms: Record<string, string[]> };
+        expect(termsFilter.terms['entity.id'].length).toBeLessThanOrEqual(
+          DEFAULT_MAX_TERMS_QUERY_COUNT
+        );
+      }
+
+      expect(observations.some((o) => o.entityId === 'user:user-0')).toBe(true);
+      expect(
+        observations.some((o) => o.entityId === `user:user-${DEFAULT_MAX_TERMS_QUERY_COUNT}`)
+      ).toBe(true);
+    });
   });
 });

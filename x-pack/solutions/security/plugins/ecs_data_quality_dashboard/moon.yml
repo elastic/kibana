@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-security-common'
   - '@kbn/datemath'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
@@ -45,6 +46,4 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

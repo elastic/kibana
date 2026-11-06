@@ -31,7 +31,7 @@ export function MitigationAccordion({
   initialIsOpen = false,
 }: MitigationAccordionProps) {
   const accordionId = useGeneratedHtmlId({
-    prefix: title,
+    prefix: dataTestSubjPrefix,
   });
 
   return (
@@ -51,7 +51,6 @@ export function MitigationAccordion({
           paddingSize="none"
           initialIsOpen={initialIsOpen}
           data-test-subj={`${dataTestSubjPrefix}Accordion`}
-          arrowProps={{ color: 'primary' }}
         >
           <EuiHorizontalRule margin="s" />
           {children}

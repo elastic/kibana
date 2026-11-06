@@ -18,11 +18,18 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalInjectedMetadataSetup> = lazyObject({
     getBasePath: jest.fn().mockReturnValue('/base-path'),
     getServerBasePath: jest.fn().mockReturnValue('/server-base-path'),
+    getSpaceId: jest.fn().mockReturnValue('default'),
     getAssetsHrefBase: jest.fn().mockReturnValue('/assets-base-path'),
     getPublicBaseUrl: jest.fn(),
     getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
     getKibanaBranch: jest.fn(),
     getElasticsearchInfo: jest.fn(),
+    getI18nInfo: jest.fn().mockReturnValue({
+      locale: 'en',
+      browserPreferredLocale: undefined,
+      localeSource: 'default',
+      configDefaultLocale: 'en',
+    }),
     getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
     getExternalUrlConfig: jest.fn().mockReturnValue({ policy: [] }),
     getAnonymousStatusPage: jest.fn().mockReturnValue(false),
@@ -54,6 +61,7 @@ const createSetupContractMock = () => {
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
     getFeatureFlags: jest.fn(),
+    getUserStorage: jest.fn().mockReturnValue({ available: false, values: {} }),
   });
 
   return setupContract;

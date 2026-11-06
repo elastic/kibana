@@ -9,7 +9,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as yaml from 'yaml';
 import { processSemconvYaml, extractFirstExample } from '../src/lib/generate_semconv';
 import type { ResolvedSemconvYaml, YamlGroup } from '../src/types/semconv_types';
 
@@ -30,7 +30,7 @@ describe('OpenTelemetry Semantic Conventions Processing', () => {
 
   const createYamlFile = (groups: YamlGroup[]) => {
     const yamlContent: ResolvedSemconvYaml = { groups };
-    fs.writeFileSync(tempYamlFile, yaml.dump(yamlContent), 'utf8');
+    fs.writeFileSync(tempYamlFile, yaml.stringify(yamlContent), 'utf8');
   };
 
   describe('Deterministic Ordering for PR Diffs', () => {
@@ -135,7 +135,7 @@ describe('OpenTelemetry Semantic Conventions Processing', () => {
     });
 
     it('handles missing groups property', () => {
-      fs.writeFileSync(tempYamlFile, yaml.dump({ notGroups: [] }), 'utf8');
+      fs.writeFileSync(tempYamlFile, yaml.stringify({ notGroups: [] }), 'utf8');
 
       expect(() => processSemconvYaml(tempYamlFile)).toThrow(
         /missing or invalid "groups" property/

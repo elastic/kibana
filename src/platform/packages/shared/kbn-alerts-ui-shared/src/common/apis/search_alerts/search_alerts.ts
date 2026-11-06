@@ -198,8 +198,11 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
 const parseFailure = (
   rawResponse: RuleRegistrySearchResponse['rawResponse']
 ): Error | undefined => {
-  const failures = rawResponse._shards.failures ?? [];
-  return failures.length && failures[0].reason.reason
+  // `_shards` is absent when the search strategy short-circuits with an empty
+  // response (e.g. internally managed rule types, which never expose alert
+  // indices to this strategy), so it must be guarded before dereferencing.
+  const failures = rawResponse._shards?.failures ?? [];
+  return failures.length && failures[0].reason?.reason
     ? new Error(failures[0].reason.reason)
     : undefined;
 };

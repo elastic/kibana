@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { Environment } from '../../../common/environment_rt';
-import type { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
+import type { Environment, IndexLifecyclePhaseSelectOption } from '@kbn/apm-types';
+import type { StorageDetailsResponse } from '@kbn/apm-api-shared';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import type { ApmPluginRequestHandlerContext } from '../typings';
@@ -15,23 +14,6 @@ import {
   getStorageDetailsPerIndex,
   getStorageDetailsPerProcessorEvent,
 } from './get_storage_details_per_service';
-
-export interface StorageDetailsResponse {
-  processorEventStats: Array<{
-    processorEvent: ProcessorEvent;
-    docs: number;
-    size: number;
-  }>;
-  indicesStats: Array<{
-    indexName: string;
-    numberOfDocs: number;
-    primary: string | number | undefined;
-    replica: string | number | undefined;
-    size: number | undefined;
-    dataStream: string | undefined;
-    lifecyclePhase: string | undefined;
-  }>;
-}
 
 export async function getStorageDetails({
   apmEventClient,

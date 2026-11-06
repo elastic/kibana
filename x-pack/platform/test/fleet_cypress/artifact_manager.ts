@@ -19,7 +19,6 @@ export async function getLatestVersion(): Promise<string> {
     {
       timeout: 60_000,
       methodName: name,
-      retryCount: 20,
       block: () => axios('https://artifacts-api.elastic.co/v1/versions'),
     }
   )

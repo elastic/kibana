@@ -49,7 +49,11 @@ export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
 
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
-    uninstallTokenId: schema.string({ meta: { description: 'The ID of the uninstall token' } }),
+    uninstallTokenId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.uninstall_tokens.get.uninstallTokenId',
+      meta: { description: 'The ID of the uninstall token' },
+    }),
   }),
 };
 
@@ -57,4 +61,17 @@ export const GetUninstallTokenResponseSchema = schema.object({
   item: UninstallTokenMetadataSchema.extends({
     token: schema.string(),
   }),
+});
+
+export const RotateUninstallTokenRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string({
+      maxLength: 255,
+      meta: { description: 'The ID of the agent policy whose uninstall token should be rotated' },
+    }),
+  }),
+};
+
+export const RotateUninstallTokenResponseSchema = schema.object({
+  message: schema.string(),
 });

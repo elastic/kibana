@@ -41,6 +41,26 @@ export interface ConnectorAggRes {
   connectorTypes: Record<string, number>;
 }
 
+interface ExecutionsPerDayAggregations {
+  totalExecutions?: { refs?: { byConnectorTypeId?: { buckets?: ByActionTypeIdAgg[] } } };
+  failedExecutions?: {
+    actionSavedObjects?: { refs?: { byConnectorTypeId?: { buckets?: ByActionTypeIdAgg[] } } };
+  };
+  avgDuration?: { value?: number | null };
+  avgDurationByType?: {
+    actionSavedObjects?: {
+      byTypeId?: {
+        buckets?: Array<{ key: string; refs?: { avgDuration?: { value?: number | null } } }>;
+      };
+    };
+  };
+  count_connector_types_by_action_run_outcome_per_day?: {
+    actionSavedObjects?: {
+      connector_types?: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
+    };
+  };
+}
+
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
@@ -445,7 +465,7 @@ export async function getExecutionsPerDayCount(
   countRunOutcomeByConnectorType: Record<string, Record<string, number>>;
 }> {
   try {
-    const actionResults = await esClient.search({
+    const actionResults = await esClient.search<unknown, ExecutionsPerDayAggregations>({
       index: eventLogIndex,
       size: 0,
       query: {
@@ -579,43 +599,31 @@ export async function getExecutionsPerDayCount(
       },
     });
 
+    const { aggregations } = actionResults;
+
     const aggsExecutions = getActionExecutions(
-      // @ts-expect-error aggregation type is not specified
-      actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId.buckets
+      aggregations?.totalExecutions?.refs?.byConnectorTypeId?.buckets
     );
 
     // convert nanoseconds to milliseconds
     const aggsAvgExecutionTime = Math.round(
-      // @ts-expect-error aggregation type is not specified
-      actionResults.aggregations.avgDuration.value / (1000 * 1000)
+      (aggregations?.avgDuration?.value ?? 0) / (1000 * 1000)
     );
 
     const aggsFailedExecutions = getActionExecutions(
-      // @ts-expect-error aggregation type is not specified
-      actionResults.aggregations.failedExecutions?.actionSavedObjects?.refs?.byConnectorTypeId
-        .buckets
+      aggregations?.failedExecutions?.actionSavedObjects?.refs?.byConnectorTypeId?.buckets
     );
 
     const avgDurationByType =
-      // @ts-expect-error aggregation type is not specified
-      actionResults.aggregations.avgDurationByType?.actionSavedObjects?.byTypeId?.buckets;
+      aggregations?.avgDurationByType?.actionSavedObjects?.byTypeId?.buckets ?? [];
 
-    const avgExecutionTimeByType: Record<string, number> = avgDurationByType.reduce(
-      // @ts-expect-error aggregation type is not specified
-      (res: Record<string, number>, bucket) => {
-        res[replaceFirstAndLastDotSymbols(bucket.key)] = bucket?.refs.avgDuration.value;
+    const avgExecutionTimeByType = avgDurationByType.reduce<Record<string, number>>(
+      (res, bucket) => {
+        res[replaceFirstAndLastDotSymbols(bucket.key)] = bucket?.refs?.avgDuration?.value ?? 0;
         return res;
       },
       {}
     );
-
-    const aggsCountConnectorTypeByActionRun = actionResults.aggregations as {
-      count_connector_types_by_action_run_outcome_per_day: {
-        actionSavedObjects: {
-          connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
-        };
-      };
-    };
 
     return {
       hasErrors: false,
@@ -638,8 +646,8 @@ export async function getExecutionsPerDayCount(
       avgExecutionTime: aggsAvgExecutionTime,
       avgExecutionTimeByType,
       countRunOutcomeByConnectorType: parseActionRunOutcomeByConnectorTypesBucket(
-        aggsCountConnectorTypeByActionRun.count_connector_types_by_action_run_outcome_per_day
-          .actionSavedObjects.connector_types.buckets
+        aggregations?.count_connector_types_by_action_run_outcome_per_day?.actionSavedObjects
+          ?.connector_types?.buckets
       ),
     };
   } catch (err) {

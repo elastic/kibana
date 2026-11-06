@@ -38,6 +38,10 @@ import type {
   AnyMetricLensStateColumn,
 } from './types';
 
+/**
+ * @param columns Visible API metrics only — not internal reference columns (e.g. max for
+ * counter_rate). Terms rank_by.metric_index indexes into this array.
+ */
 export function fromBucketLensApiToLensState(
   options: LensApiBucketOperations,
   columns: { column: AnyMetricLensStateColumn; id: string }[]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sha256 } from 'js-sha256';
+import { createHash } from 'crypto';
 import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
 import { toValidIndexName } from '@kbn/utils';
@@ -68,7 +68,7 @@ export class SiemMigrationsDataLookupsClient {
   }
 
   private generateDocumentHash(document: object): string {
-    return sha256.create().update(JSON.stringify(document)).hex(); // document need to be created in a deterministic way
+    return createHash('sha256').update(JSON.stringify(document)).digest('hex'); // document need to be created in a deterministic way
   }
 
   private getSanitizedLookupName(lookupName: string): string {

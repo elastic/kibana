@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
@@ -184,6 +185,60 @@ describe('PackagePolicyInputConfig', () => {
 
     expect(utils.queryByText('Auth Var')).toBeInTheDocument();
     expect(utils.queryByText('Authentication')).not.toBeInTheDocument();
+  });
+
+  describe('condition field', () => {
+    const baseInput = { enabled: true, type: 'logfile', streams: [] };
+
+    const renderCondition = (
+      inputOverrides: Record<string, unknown> = {},
+      showConditionField = true
+    ) => {
+      const renderer = createFleetTestRendererMock();
+      const mockOnChange = jest.fn();
+      const utils = renderer.render(
+        <PackagePolicyInputConfig
+          hasInputStreams={false}
+          inputValidationResults={{}}
+          packagePolicyInput={{ ...baseInput, ...inputOverrides }}
+          updatePackagePolicyInput={mockOnChange}
+          packageInputVars={[]}
+          showConditionField={showConditionField}
+        />
+      );
+      return { utils, mockOnChange };
+    };
+
+    it('shows condition field in advanced options when showConditionField is true', () => {
+      const { utils } = renderCondition();
+      fireEvent.click(utils.getByText('Advanced options'));
+      expect(utils.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+    });
+
+    it('hides condition field when showConditionField is false', () => {
+      const { utils } = renderCondition({}, false);
+      expect(utils.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    });
+
+    it('calls updatePackagePolicyInput with condition value on change', () => {
+      const { utils, mockOnChange } = renderCondition();
+      fireEvent.click(utils.getByText('Advanced options'));
+      fireEvent.change(utils.getByTestId('packagePolicyInputConditionInput'), {
+        target: { value: "${host.os.type} == 'linux'" },
+      });
+      expect(mockOnChange).toHaveBeenCalledWith({ condition: "${host.os.type} == 'linux'" });
+    });
+
+    it('calls updatePackagePolicyInput with null when field is cleared', () => {
+      const { utils, mockOnChange } = renderCondition({
+        condition: "${host.os.type} == 'linux'",
+      });
+      fireEvent.click(utils.getByText('Advanced options'));
+      fireEvent.change(utils.getByTestId('packagePolicyInputConditionInput'), {
+        target: { value: '' },
+      });
+      expect(mockOnChange).toHaveBeenCalledWith({ condition: null });
+    });
   });
 
   it('should show deprecated vars on edit page (isEditPage=true)', () => {

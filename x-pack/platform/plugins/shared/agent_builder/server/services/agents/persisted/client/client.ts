@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry, { AbortError } from 'p-retry';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -13,15 +14,30 @@ import type {
 } from '@kbn/core/server';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
+  agentApprovalsEqual,
+  agentBuilderDefaultAgentId,
+  chatAgentTypeId,
   createAgentNotFoundError,
   createBadRequestError,
+  createForbiddenError,
   isAgentNotFoundError,
+  getAccessControlEntryKey,
+  isAgentAccessControlRole,
+  isEntryCoveredByOwner,
+  serviceAccountUserId,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  type AgentAccessControl,
+  type AgentAccessControlEntry,
+  type AgentApprovals,
+  type CurrentUser,
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
-import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
+import { getUserFromRequest } from '../../../utils';
 import type {
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentDeleteRequest,
   AgentListOptions,
@@ -29,34 +45,143 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
+import { isVersionConflictError } from '../../../../utils/is_version_conflict_error';
 import type {
   AgentsUsingSkillsResult,
   AgentsUsingToolsResult,
-  PersistedAgentDefinition,
+  PersistedAgentDefinitionWithPermissions,
 } from '../types';
-import type { AgentProfileStorage } from './storage';
+import type { AgentAccess, GetAgentOptions } from '../../agent_source';
+import type { AgentProfileStorage, AgentProperties } from './storage';
 import { createStorage } from './storage';
-import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
+import {
+  accessControlUpdateToEs,
+  createRequestToEs,
+  type Document,
+  fromEs,
+  updateRequestToEs,
+  withPermissions,
+} from './converters';
 import { validateToolSelection } from './utils/tools';
 import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
-  buildVisibilityReadFilter,
+  hasConfigureApprovalsAccess,
+  hasDeleteAccess,
+  hasManageAccessControlAccess,
   hasReadAccess,
-  validateVisibilityUpdateAccess,
+  hasUseAccess,
   hasWriteAccess,
-} from './utils/access_control';
+  normalizeAccessControl,
+  redactAccessControlForCaller,
+  validateAccessControlUpdateAccess,
+  buildReadAccessFilter,
+  sourceToOwner,
+} from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
+import {
+  AGENT_WORKLOAD_TYPE,
+  assertCanConfigureExecutionIdentity,
+  assertCanDeleteBoundAgent,
+  assertCanEditBoundAgent,
+  unbindDeletedAgent,
+  type ServiceAccountBindingDeps,
+} from '../../service_account_binding';
+
+export interface GetAgentAccessControlResult {
+  /** Always present; entries[] may be empty for default agents. */
+  access_control: AgentAccessControl;
+  permissions: {
+    update_access_control: boolean;
+  };
+}
+
+const workflowIdsEqual = (a: string[], b: string[]): boolean =>
+  a.length === b.length && a.every((id, index) => id === b[index]);
+
+/**
+ * Guards changes to an agent's workflow IDs (pre-execution or post-execution).
+ */
+const assertCanConfigureWorkflows = ({
+  nextWorkflowIds,
+  currentWorkflowIds,
+  isAdmin,
+  errorMessage,
+}: {
+  nextWorkflowIds: string[] | undefined;
+  currentWorkflowIds: string[] | undefined;
+  isAdmin: boolean;
+  errorMessage: string;
+}): void => {
+  if (isAdmin || nextWorkflowIds === undefined) {
+    return;
+  }
+  if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
+    throw createBadRequestError(errorMessage);
+  }
+};
+
+/**
+ * Guards changes to an agent's auto-approval defaults.
+ *
+ * @param source - The stored agent on update, or the agent being created.
+ * @param currentApprovals - The defaults stored before the write, or `undefined` on create.
+ * @param nextApprovals - The defaults supplied by the write, or `undefined` to keep them.
+ * @throws {Error} a bad request error when the write changes the defaults and the user is not
+ * allowed to configure them.
+ */
+const assertCanConfigureApprovals = ({
+  source,
+  currentApprovals,
+  nextApprovals,
+  user,
+}: {
+  source: AgentProperties;
+  currentApprovals: AgentApprovals | undefined;
+  nextApprovals: AgentApprovals | undefined;
+  user: CurrentUser;
+}): void => {
+  if (nextApprovals === undefined || agentApprovalsEqual(currentApprovals, nextApprovals)) {
+    return;
+  }
+  if (hasConfigureApprovalsAccess({ source, user })) {
+    return;
+  }
+  throw createBadRequestError(
+    source.id === agentBuilderDefaultAgentId
+      ? `Only administrators can configure auto-approved APIs on the default agent (${agentBuilderDefaultAgentId}).`
+      : 'Only the agent owner, managers, and administrators can configure auto-approved APIs.'
+  );
+};
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<PersistedAgentDefinition>;
-  create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
-  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
-  update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
-  list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
+  get(agentId: string): Promise<PersistedAgentDefinitionWithPermissions>;
+  /** Get the agent and assert the caller has at least `access` rights on it. */
+  getWithAccess(
+    agentId: string,
+    options: Required<Pick<GetAgentOptions, 'access'>> & Pick<GetAgentOptions, 'runAs'>
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
+  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
+  update(
+    agentId: string,
+    profile: AgentUpdateRequest
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  /** Binds the agent to a service account, or unbinds it with `null`. */
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  getIds(options?: AgentListOptions): Promise<string[]>;
+  list(options?: AgentListOptions): Promise<PersistedAgentDefinitionWithPermissions[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
+  getAccessControl(agentId: string): Promise<GetAgentAccessControlResult>;
+  updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl>;
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
@@ -64,6 +189,96 @@ export interface AgentClient {
   getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
   removeSkillRefsFromAgents(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
 }
+
+export interface SystemAgentClient {
+  ensureAgent(profile: AgentCreateRequest): Promise<void>;
+}
+
+const getAgentDocument = async ({
+  storage,
+  space,
+  agentId,
+}: {
+  storage: AgentProfileStorage;
+  space: string;
+  agentId: string;
+}): Promise<Document | undefined> => {
+  const response = await storage.getClient().search({
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: [
+          createSpaceDslFilter(space),
+          {
+            bool: {
+              // BWC compatibility with M1 - agentId was stored as the _id
+              should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
+};
+
+/**
+ * Ensures a system agent exists, treating a concurrent create as success. Guarantees
+ * existence, not searchability: the document may not be visible to searches yet when
+ * this resolves.
+ */
+const ensureSystemAgent = async ({
+  storage,
+  space,
+  profile,
+}: {
+  storage: AgentProfileStorage;
+  space: string;
+  profile: AgentCreateRequest;
+}): Promise<void> => {
+  // System-installed agents may use protected platform namespaces even though they are
+  // persisted (and therefore editable) rather than registered as built-in agents.
+  const validationError = validateAgentId({ agentId: profile.id, builtIn: true });
+  if (validationError) {
+    throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
+  }
+
+  const expectedType = profile.type ?? chatAgentTypeId;
+  const existingAgent = await getAgentDocument({ storage, space, agentId: profile.id });
+  if (existingAgent) {
+    const existingType = fromEs(existingAgent).type;
+    if (existingType !== expectedType) {
+      throw createBadRequestError(
+        `Cannot ensure agent "${profile.id}": the id is already used by an agent of type "${existingType}"`
+      );
+    }
+    return;
+  }
+
+  const creationDate = new Date();
+  const document = createRequestToEs({
+    profile,
+    space,
+    creationDate,
+    user: { username: SYSTEM_USER_ID },
+  });
+
+  try {
+    await storage.getClient().index({
+      id: `${space}_${profile.id}`,
+      op_type: 'create',
+      document,
+    });
+  } catch (error) {
+    if (!isVersionConflictError(error)) {
+      throw error;
+    }
+  }
+};
 
 export const createClient = async ({
   space,
@@ -86,21 +301,34 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
-  const isAdmin = await isAdminFromRequest({
-    esClient: scopedClient.asCurrentUser,
-  });
   const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 
   return new AgentClientImpl({
     storage,
     user,
-    isAdmin,
     request,
     space,
     toolsService,
     logger,
+    bindings: { serviceAccounts: security.serviceAccounts },
   });
+};
+
+export const createSystemClient = ({
+  space,
+  elasticsearch,
+  logger,
+}: {
+  space: string;
+  elasticsearch: ElasticsearchServiceStart;
+  logger: Logger;
+}): SystemAgentClient => {
+  const storage = createStorage({ logger, esClient: elasticsearch.client.asInternalUser });
+
+  return {
+    ensureAgent: (profile) => ensureSystemAgent({ storage, space, profile }),
+  };
 };
 
 class AgentClientImpl implements AgentClient {
@@ -108,34 +336,34 @@ class AgentClientImpl implements AgentClient {
   private readonly request: KibanaRequest;
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
-  private readonly user: UserIdAndName;
-  private readonly isAdmin: boolean;
+  private readonly user: CurrentUser;
   private readonly logger: Logger;
+  private readonly bindings: ServiceAccountBindingDeps;
 
   constructor({
     storage,
     toolsService,
     user,
-    isAdmin,
     request,
     space,
     logger,
+    bindings,
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
-    user: UserIdAndName;
-    isAdmin: boolean;
+    user: CurrentUser;
     request: KibanaRequest;
     space: string;
     logger: Logger;
+    bindings: ServiceAccountBindingDeps;
   }) {
     this.storage = storage;
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
-    this.isAdmin = isAdmin;
     this.space = space;
     this.logger = logger;
+    this.bindings = bindings;
   }
 
   async getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult> {
@@ -199,10 +427,18 @@ class AgentClientImpl implements AgentClient {
     });
   }
 
-  async get(agentId: string): Promise<PersistedAgentDefinition> {
+  async get(agentId: string): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
-    return fromEs(document);
+    return withPermissions({ document, user: this.user });
+  }
+
+  async getWithAccess(
+    agentId: string,
+    { access, runAs }: Required<Pick<GetAgentOptions, 'access'>> & Pick<GetAgentOptions, 'runAs'>
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
+    const document = await this.getDocumentWithAccess({ agentId, access, runAs });
+    return withPermissions({ document, user: this.user });
   }
 
   async has(agentId: string): Promise<boolean> {
@@ -217,11 +453,27 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
-  async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
-    const filters = [createSpaceDslFilter(this.space)];
-    if (!this.isAdmin) {
-      filters.push(buildVisibilityReadFilter({ user: this.user }));
-    }
+  async getIds(options: AgentListOptions = {}): Promise<string[]> {
+    const filters = this.getListFilters();
+
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1000,
+      _source: ['id'],
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source?.id ?? hit._id)
+      .filter((id): id is string => typeof id === 'string');
+  }
+
+  async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinitionWithPermissions[]> {
+    const filters = this.getListFilters();
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -233,10 +485,22 @@ class AgentClientImpl implements AgentClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+    return response.hits.hits.map((hit) => {
+      const document = hit as Document;
+      return withPermissions({ document: document as Required<Document>, user: this.user });
+    });
   }
 
-  async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
+  private getListFilters() {
+    const filters = [createSpaceDslFilter(this.space)];
+    if (!this.user.isAdmin) {
+      filters.push(buildReadAccessFilter({ user: this.user }));
+    }
+
+    return filters;
+  }
+
+  async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions> {
     const now = new Date();
 
     const validationError = validateAgentId({ agentId: profile.id, builtIn: false });
@@ -250,6 +514,19 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
 
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure pre-execution workflows.',
+    });
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.post_execution_workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure post-execution workflows.',
+    });
+
     await this.validateAgentToolSelection(profile.configuration.tools);
 
     const attributes = createRequestToEs({
@@ -258,72 +535,135 @@ class AgentClientImpl implements AgentClient {
       space: this.space,
       creationDate: now,
     });
-
-    await this.storage.getClient().index({
-      document: attributes,
+    assertCanConfigureApprovals({
+      source: attributes,
+      currentApprovals: undefined,
+      nextApprovals: profile.configuration.approvals,
+      user: this.user,
     });
+    await this.storage.getClient().index({ document: attributes });
 
     return this.get(profile.id);
   }
 
-  async ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
-    // Intentionally skipping access checks when ensuring an agent exists
-    const defaultAgent = await this._get(profile.id);
-    if (defaultAgent) {
-      return fromEs(defaultAgent);
-    }
+  /**
+   * A concurrently created agent may not be searchable right away,
+   * so the read is retried until it becomes visible.
+   */
+  async ensureDefaultAgent(
+    profile: AgentCreateRequest
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
+    await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
 
-    const now = new Date();
-    const documentId = `${this.space}_${profile.id}`;
-    const attributes = createRequestToEs({
-      profile,
-      space: this.space,
-      creationDate: now,
-      user: {
-        username: SYSTEM_USER_ID,
+    return pRetry(
+      async () => {
+        try {
+          return await this.get(profile.id);
+        } catch (error) {
+          if (isAgentNotFoundError(error)) {
+            throw error;
+          }
+          throw new AbortError(error);
+        }
       },
-    });
-
-    await this.storage.getClient().index({
-      id: documentId,
-      document: attributes,
-    });
-
-    return this.get(profile.id);
+      { retries: 9, factor: 1, minTimeout: 300 }
+    );
   }
 
   async update(
     agentId: string,
     profileUpdate: AgentUpdateRequest
-  ): Promise<PersistedAgentDefinition> {
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
     const source = document._source;
+    assertCanEditBoundAgent({ source, user: this.user });
 
     if (
-      !validateVisibilityUpdateAccess({
+      !validateAccessControlUpdateAccess({
         source,
         update: profileUpdate,
         user: this.user,
-        isAdmin: this.isAdmin,
       })
     ) {
       throw createAgentNotFoundError({ agentId });
     }
 
+    // Only admins may change workflow configurations
+    const currentConfig = source.config ?? source.configuration;
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
+      currentWorkflowIds: currentConfig?.workflow_ids,
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure pre-execution workflows.',
+    });
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.post_execution_workflow_ids,
+      currentWorkflowIds: currentConfig?.post_execution_workflow_ids,
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure post-execution workflows.',
+    });
+    assertCanConfigureApprovals({
+      source,
+      currentApprovals: currentConfig?.approvals,
+      nextApprovals: profileUpdate.configuration?.approvals,
+      user: this.user,
+    });
+
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
     }
 
-    const updatedConversation = updateRequestToEs({
+    const updatedAgent = updateRequestToEs({
       agentId,
       currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
+      user: this.user,
     });
 
+    await this.storage.getClient().index({ id: document._id, document: updatedAgent });
+
+    return this.get(agentId);
+  }
+
+  /**
+   * Core's binding is the authority a run is minted against; the id stored on the agent only
+   * tells the dispatcher and the UI that the agent is bound. A write failing between the two
+   * leaves the agent either not dispatched as the account or refused at mint, never run as an
+   * account it is not bound to, and a retry settles it.
+   */
+  async setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
+    const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
+    const source = document._source;
+    assertCanConfigureExecutionIdentity({ source, user: this.user, bindings: this.bindings });
+
+    const { serviceAccounts } = this.bindings;
+    if (serviceAccountId) {
+      await serviceAccounts.bindWorkload(this.request, {
+        workloadType: AGENT_WORKLOAD_TYPE,
+        workloadId: agentId,
+        serviceAccountId,
+      });
+    } else {
+      await serviceAccounts.unbindWorkload(this.request, {
+        workloadType: AGENT_WORKLOAD_TYPE,
+        workloadId: agentId,
+      });
+    }
+
+    const { service_account_id: _previous, ...rest } = source;
     await this.storage.getClient().index({
       id: document._id,
-      document: updatedConversation,
+      document: {
+        ...rest,
+        ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+        updated_by_id: this.user.id,
+        updated_by_name: this.user.username,
+        updated_at: new Date().toISOString(),
+      },
     });
 
     return this.get(agentId);
@@ -332,10 +672,76 @@ class AgentClientImpl implements AgentClient {
   async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
 
-    const document = await this.getDocumentWithAccess({ agentId: id, access: 'write' });
+    const document = await this.getDocumentWithAccess({ agentId: id, access: 'delete' });
+    const source = document._source;
+    assertCanDeleteBoundAgent({ source, user: this.user });
 
     const deleteResponse = await this.storage.getClient().delete({ id: document._id });
+    await unbindDeletedAgent({
+      bindings: this.bindings,
+      request: this.request,
+      source,
+      logger: this.logger,
+    });
     return deleteResponse.result === 'deleted';
+  }
+
+  async getAccessControl(agentId: string): Promise<GetAgentAccessControlResult> {
+    // Caller must at least have read access on the agent.
+    const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
+    const source = document._source;
+    const canManage = hasManageAccessControlAccess({
+      source,
+      user: this.user,
+    });
+    const definition = redactAccessControlForCaller({
+      definition: { access_control: normalizeAccessControl(source) },
+      source,
+      user: this.user,
+    });
+    return {
+      access_control: definition.access_control,
+      permissions: {
+        update_access_control: canManage,
+      },
+    };
+  }
+
+  async updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl> {
+    if (agentId === agentBuilderDefaultAgentId) {
+      throw createBadRequestError(
+        `The default agent (${agentBuilderDefaultAgentId}) does not support custom access controls.`
+      );
+    }
+
+    const document = await this.getDocumentWithAccess({ agentId, access: 'manageAccessControl' });
+    const source = document._source;
+    assertCanEditBoundAgent({ source, user: this.user });
+
+    const currentAccessControl = normalizeAccessControl(source);
+
+    const nextAccessControl: AgentAccessControl = {
+      ...currentAccessControl,
+      entries: validateAccessControlEntries({
+        entries: update.entries,
+        currentEntries: currentAccessControl.entries,
+        owner: sourceToOwner(source),
+      }),
+    };
+
+    const next = accessControlUpdateToEs({
+      currentProps: source,
+      access_control: nextAccessControl,
+      updateDate: new Date(),
+      user: this.user,
+    });
+
+    await this.storage.getClient().index({ id: document._id, document: next });
+
+    return nextAccessControl;
   }
 
   // Agent tool selection validation helper
@@ -355,29 +761,59 @@ class AgentClientImpl implements AgentClient {
   private async getDocumentWithAccess({
     agentId,
     access,
+    runAs,
   }: {
     agentId: string;
-    access: 'read' | 'write';
+    access: AgentAccess;
+    runAs?: string;
   }): Promise<Required<Document>> {
     const document = await this._get(agentId);
     if (!hasRequiredDocumentFields(document)) {
       throw createAgentNotFoundError({ agentId });
     }
 
-    const hasRequestedAccess =
-      access === 'read'
-        ? hasReadAccess({
-            source: document._source,
-            user: this.user,
-            isAdmin: this.isAdmin,
-          })
-        : hasWriteAccess({
-            source: document._source,
-            user: this.user,
-            isAdmin: this.isAdmin,
-          });
+    const source = document._source;
+    // A run was authorized for its caller when it was dispatched and executes under the account's
+    // credentials, which hold no access to the agent themselves; it only has to be the agent the
+    // account was bound to run. Only a request that actually carries that credential may skip the
+    // access check, so `runAs` cannot be used to borrow an account from a user request.
+    if (runAs !== undefined) {
+      if (this.user.type !== 'service_account' || this.user.id !== serviceAccountUserId(runAs)) {
+        throw createForbiddenError(
+          `Agent "${agentId}" can only be resolved as service account "${runAs}" by a request running as that account.`
+        );
+      }
+      if (source.service_account_id !== runAs) {
+        throw createForbiddenError(
+          `Agent "${agentId}" is no longer bound to service account "${runAs}".`
+        );
+      }
+      return document;
+    }
 
-    if (!hasRequestedAccess) {
+    let allowed = false;
+    switch (access) {
+      case 'read':
+        allowed = hasReadAccess({ source, user: this.user });
+        break;
+      case 'use':
+        allowed = hasUseAccess({ source, user: this.user });
+        break;
+      case 'write':
+        allowed = hasWriteAccess({ source, user: this.user });
+        break;
+      case 'delete':
+        allowed = hasDeleteAccess({ source, user: this.user });
+        break;
+      case 'manageAccessControl':
+        allowed = hasManageAccessControlAccess({
+          source,
+          user: this.user,
+        });
+        break;
+    }
+
+    if (!allowed) {
       throw createAgentNotFoundError({ agentId });
     }
 
@@ -389,29 +825,85 @@ class AgentClientImpl implements AgentClient {
    * It doesn't check for access. Please use {@link getDocumentWithAccess} instead.
    */
   private async _get(agentId: string): Promise<Document | undefined> {
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: [
-            createSpaceDslFilter(this.space),
-            {
-              bool: {
-                // BWC compatibility with M1 - agentId was stored as the _id
-                should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-    });
-    if (response.hits.hits.length === 0) {
-      return undefined;
-    } else {
-      return response.hits.hits[0] as Document;
-    }
+    return getAgentDocument({ storage: this.storage, space: this.space, agentId });
   }
 }
+
+const validatePrincipal = (entry: AgentAccessControlEntry): string | undefined => {
+  const hasId = entry.id !== undefined;
+  const hasName = entry.name !== undefined;
+  if (!hasId && !hasName) {
+    return 'Each ACL entry requires a non-empty id or name';
+  }
+
+  const field = hasId ? 'id' : 'name';
+  const value = hasId ? entry.id : entry.name;
+  if (typeof value !== 'string' || value.length === 0) {
+    return `Each ACL entry requires a non-empty ${field}`;
+  }
+  if (value.length > AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+    return `ACL principal ${field} exceeds maximum length of ${AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`;
+  }
+
+  return undefined;
+};
+
+export const validateAccessControlEntries = ({
+  entries,
+  currentEntries,
+  owner,
+}: {
+  entries: AgentAccessControlEntry[];
+  currentEntries: AgentAccessControlEntry[];
+  owner: UserIdAndName | undefined;
+}): AgentAccessControlEntry[] => {
+  if (entries.length > AGENT_ACCESS_CONTROL_MAX_ENTRIES) {
+    throw createBadRequestError(
+      `ACL entries exceed maximum of ${AGENT_ACCESS_CONTROL_MAX_ENTRIES}`
+    );
+  }
+
+  const currentByKey = new Map(
+    currentEntries.map((entry) => [getAccessControlEntryKey(entry), entry])
+  );
+
+  const now = new Date().toISOString();
+  const seen = new Set<string>();
+  const normalizedEntries: AgentAccessControlEntry[] = [];
+
+  for (const entry of entries) {
+    if (!entry || entry.type !== 'user') {
+      throw createBadRequestError('Each ACL entry requires a type of "user"');
+    }
+
+    const principalError = validatePrincipal(entry);
+    if (principalError) {
+      throw createBadRequestError(principalError);
+    }
+
+    if (!isAgentAccessControlRole(entry.role)) {
+      throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
+    }
+
+    if (isEntryCoveredByOwner(entry, owner)) {
+      continue;
+    }
+
+    const key = getAccessControlEntryKey(entry);
+
+    const current = currentByKey.get(key);
+    if (seen.has(key)) {
+      throw createBadRequestError(
+        `Duplicate ACL entry for ${entry.type} "${entry.id ?? entry.name}"`
+      );
+    }
+    seen.add(key);
+
+    normalizedEntries.push({
+      ...entry,
+      added_at: current?.added_at ?? now,
+    });
+  }
+
+  return normalizedEntries;
+};

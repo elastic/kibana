@@ -5,22 +5,29 @@
  * 2.0.
  */
 
+import { AttachmentType } from './attachment_types';
 import {
   getLatestVersion,
   getVersion,
+  toAttachment,
   createVersionId,
   parseVersionId,
   isAttachmentActive,
   getActiveAttachments,
   isVersionedAttachmentWithOrigin,
+  isVersionedAttachmentOfType,
   hashContent,
   estimateTokens,
   attachmentVersionSchema,
   versionedAttachmentSchema,
   attachmentVersionRefSchema,
   attachmentDiffSchema,
+  attachmentGroupSchema,
+  isAttachmentGroup,
   type VersionedAttachment,
   type AttachmentVersion,
+  type AttachmentGroup,
+  type AttachmentInput,
   attachmentInputSchema,
 } from './versioned_attachment';
 
@@ -119,6 +126,35 @@ describe('versioned_attachment', () => {
 
       const result = getVersion(attachment, 5);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('toAttachment', () => {
+    it('returns the attachment at the given version, without its other versions', () => {
+      const v1 = createTestVersion({ version: 1, data: { content: 'v1' } });
+      const v2 = createTestVersion({
+        version: 2,
+        data: { content: 'v2' },
+        created_at: '2025-01-02T00:00:00Z',
+      });
+      const attachment = createTestAttachment({
+        versions: [v1, v2],
+        current_version: 2,
+        description: 'A note',
+        hidden: true,
+        origin: 'origin-1',
+        client_id: 'client-1',
+      });
+
+      expect(toAttachment(attachment, v1)).toEqual({
+        id: 'test-attachment-1',
+        type: 'text',
+        data: { content: 'v1' },
+        description: 'A note',
+        hidden: true,
+        origin: 'origin-1',
+        versionData: { version: 1, versionCount: 2, createdAt: '2025-01-01T00:00:00Z' },
+      });
     });
   });
 
@@ -346,6 +382,31 @@ describe('versioned_attachment', () => {
     });
   });
 
+  describe('isVersionedAttachmentOfType', () => {
+    it('returns false when attachment.type does not match', () => {
+      const attachment = createTestAttachment({ type: AttachmentType.text });
+      expect(isVersionedAttachmentOfType(attachment, AttachmentType.image)).toBe(false);
+    });
+
+    it('returns true when attachment.type matches and narrows the data type', () => {
+      const attachment = createTestAttachment({
+        type: AttachmentType.image,
+        versions: [
+          {
+            version: 1,
+            data: { file_id: 'file-1', name: 'photo.png', mime_type: 'image/png' },
+            created_at: '2025-01-01T00:00:00Z',
+            content_hash: 'abc123',
+          },
+        ],
+      });
+      expect(isVersionedAttachmentOfType(attachment, AttachmentType.image)).toBe(true);
+      if (isVersionedAttachmentOfType(attachment, AttachmentType.image)) {
+        expect(getVersion(attachment, 1)?.data.name).toBe('photo.png');
+      }
+    });
+  });
+
   describe('Zod schemas', () => {
     describe('attachmentVersionRefSchema', () => {
       it('validates correct data', () => {
@@ -526,6 +587,76 @@ describe('versioned_attachment', () => {
         const result = attachmentDiffSchema.safeParse(invalid);
         expect(result.success).toBe(false);
       });
+    });
+
+    describe('attachmentGroupSchema', () => {
+      const validGroup = {
+        type: 'group',
+        id: 'g1',
+        label: '3 Alerts',
+        items: [
+          { type: 'security.alerts', data: { alertIds: ['a', 'b'] } },
+          { type: 'security.alerts', data: { alertIds: ['c'] } },
+        ],
+      };
+
+      it('validates a correct AttachmentGroup', () => {
+        expect(attachmentGroupSchema.safeParse(validGroup).success).toBe(true);
+      });
+
+      it('rejects when type is not "group"', () => {
+        const result = attachmentGroupSchema.safeParse({ ...validGroup, type: 'text' });
+        expect(result.success).toBe(false);
+      });
+
+      it('rejects when id is missing', () => {
+        const { id: _omit, ...rest } = validGroup;
+        expect(attachmentGroupSchema.safeParse(rest).success).toBe(false);
+      });
+
+      it('rejects when label is missing', () => {
+        const { label: _omit, ...rest } = validGroup;
+        expect(attachmentGroupSchema.safeParse(rest).success).toBe(false);
+      });
+
+      it('accepts an empty items array', () => {
+        expect(attachmentGroupSchema.safeParse({ ...validGroup, items: [] }).success).toBe(true);
+      });
+    });
+
+    describe('attachmentInputSchema — no groupId field', () => {
+      it('parses a minimal attachment input', () => {
+        const result = attachmentInputSchema.safeParse({ type: 'text' });
+        expect(result.success).toBe(true);
+      });
+
+      it('strips unknown fields including groupId', () => {
+        const parsed = attachmentInputSchema.safeParse({
+          type: 'text',
+          groupId: 'should-be-stripped',
+        });
+        expect(parsed.success).toBe(true);
+        if (parsed.success) {
+          expect(parsed.data).not.toHaveProperty('groupId');
+        }
+      });
+    });
+  });
+
+  describe('isAttachmentGroup', () => {
+    it('returns true for an AttachmentGroup', () => {
+      const g: AttachmentGroup = {
+        type: 'group',
+        id: 'g1',
+        label: '2 Alerts',
+        items: [{ type: 'security.alerts', data: {} }],
+      };
+      expect(isAttachmentGroup(g)).toBe(true);
+    });
+
+    it('returns false for an AttachmentInput', () => {
+      const a: AttachmentInput = { type: 'text', data: {} };
+      expect(isAttachmentGroup(a)).toBe(false);
     });
   });
 });

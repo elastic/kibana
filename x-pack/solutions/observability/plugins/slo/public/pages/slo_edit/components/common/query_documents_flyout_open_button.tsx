@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -25,16 +25,23 @@ export function QueryDocumentsFlyoutOpenButton({ name, dataView, searchBarProps 
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        css={{ marginTop: 27 }}
-        isDisabled={!Boolean(dataView)}
-        data-test-subj="o11yQueryBuilderButton"
-        iconType="documents"
-        onClick={() => setIsFlyoutOpen(true)}
-        aria-label={i18n.translate('xpack.slo.queryBuilder.documentsButtonLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.slo.queryBuilder.documentsButtonLabel', {
           defaultMessage: 'View documents',
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          css={{ marginTop: 27 }}
+          isDisabled={!Boolean(dataView)}
+          data-test-subj="o11yQueryBuilderButton"
+          iconType="documents"
+          onClick={() => setIsFlyoutOpen(true)}
+          aria-label={i18n.translate('xpack.slo.queryBuilder.documentsButtonLabel', {
+            defaultMessage: 'View documents',
+          })}
+        />
+      </EuiToolTip>
       {isFlyoutOpen && dataView && (
         <QueryDocumentsFlyout
           dataView={dataView}

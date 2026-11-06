@@ -17,7 +17,8 @@ project:
   owner: '@elastic/kibana-operations'
   sourceRoot: src/setup_node_env
 dependsOn:
-  - '@kbn/babel-register'
+  - '@kbn/repo-info'
+  - '@kbn/swc-register'
   - '@kbn/security-hardening'
 tags:
   - shared-common
@@ -33,6 +34,4 @@ fileGroups:
     - '*.js'
     - '*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

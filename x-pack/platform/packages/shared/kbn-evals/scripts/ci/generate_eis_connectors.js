@@ -7,14 +7,15 @@
  */
 
 /**
- * Generate `KIBANA_TESTING_AI_CONNECTORS` payload entries for Elastic Inference Service (EIS) models.
+ * Generate `KIBANA_TESTING_INFERENCE_ENDPOINTS` payload entries for Elastic Inference Service (EIS) models.
  *
  * Input: `target/eis_models.json` created by `node scripts/discover_eis_models.js`
- * Output: base64-encoded JSON (default) matching the expected connectors schema
+ * Output: base64-encoded JSON (default) matching the InferenceEndpointDefinition schema
  */
 
 const Fs = require('fs');
 const Path = require('path');
+const { slugifyId } = require('./slugify_id');
 
 function parseArgs(argv, { defaults = {} } = {}) {
   const out = { ...defaults };
@@ -60,14 +61,6 @@ function die(message) {
   process.exit(1);
 }
 
-function sanitizeId(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 function main() {
   const argv = parseArgs(process.argv.slice(2), {
     defaults: {
@@ -106,20 +99,16 @@ function main() {
       continue;
     }
 
-    const connectorId = `${connectorIdPrefix}${sanitizeId(modelId)}`;
+    const connectorId = `${connectorIdPrefix}${slugifyId(modelId)}`;
     connectors[connectorId] = {
       name: `EIS ${modelId}`,
-      actionTypeId: '.inference',
-      config: {
-        provider: 'elastic',
-        taskType: 'chat_completion',
-        inferenceId,
-        // For selection/metadata only; not used by the connector to route requests (inferenceId does that).
-        providerConfig: {
-          model_id: modelId,
-        },
+      inferenceId,
+      provider: 'elastic',
+      taskType: 'chat_completion',
+      // For selection/metadata only; not used to route requests (inferenceId does that).
+      providerConfig: {
+        model_id: modelId,
       },
-      secrets: {},
     };
   }
 

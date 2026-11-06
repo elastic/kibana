@@ -46,6 +46,26 @@ describe('agent_policy_settings', () => {
     });
   });
 
+  describe('include_tags_in_events setting', () => {
+    it('should include agent.features.include_tags_in_events.enabled in AGENT_POLICY_ADVANCED_SETTINGS', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.features.include_tags_in_events.enabled'
+      );
+      expect(setting).toBeDefined();
+      expect(setting?.api_field.name).toBe('agent_features_include_tags_in_events_enabled');
+    });
+
+    it('should accept boolean values and default to false', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.features.include_tags_in_events.enabled'
+      )!;
+      expect(setting.schema.safeParse(true).success).toBe(true);
+      expect(setting.schema.safeParse(false).success).toBe(true);
+      expect(setting.schema.safeParse(undefined).success).toBe(true);
+      expect(setting.schema.parse(undefined)).toBe(false);
+    });
+  });
+
   describe('disable_policy_change_acks setting', () => {
     it('should include agent.features.disable_policy_change_acks.enabled in AGENT_POLICY_ADVANCED_SETTINGS', () => {
       const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(

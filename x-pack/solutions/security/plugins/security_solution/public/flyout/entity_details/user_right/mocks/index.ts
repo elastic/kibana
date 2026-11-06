@@ -13,7 +13,7 @@ import {
 } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { UserItem } from '../../../../../common/search_strategy';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../../flyout_v2/entity/shared/components/observed_entity/types';
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 
 const anomaly = mockAnomalies.anomalies[0];

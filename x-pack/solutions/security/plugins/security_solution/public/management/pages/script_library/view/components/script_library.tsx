@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButton } from '@elastic/eui';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type {
   ScriptLibraryAllowedFileType,
   ScriptTagKey,
@@ -24,6 +24,7 @@ import type {
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
+import { SCRIPT_LIBRARY } from '../../../../../app/translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
 import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import { ScriptLibraryTable, type ScriptLibraryTableProps } from './script_library_table';
@@ -34,11 +35,7 @@ import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
-import { NewPageBanner } from './new_page_banner/new_page_banner';
 import { ScriptLibraryFilters } from './data_filters';
-
-export const SCRIPT_LIBRARY_PAGE_STORAGE_KEY =
-  'securitySolution.endpointManagement.scriptLibrary.showNewPageBanner';
 
 interface ScriptLibraryProps {
   'data-test-subj'?: string;
@@ -48,11 +45,11 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
   const getTestId = useTestIdGenerator(dataTestSubj ?? 'ScriptLibraryPage');
   const history = useHistory();
   const toasts = useToasts();
-  const { storage } = useKibana().services;
-
-  const [showNewPageBanner, setShowNewPageBanner] = useState(
-    storage.get(SCRIPT_LIBRARY_PAGE_STORAGE_KEY) ?? true
-  );
+  const {
+    docLinks: {
+      links: { securitySolution: securitySolutionDocLinks },
+    },
+  } = useKibana().services;
 
   const { pagination: paginationFromUrlParams } = useUrlPagination();
   const {
@@ -75,11 +72,6 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
       showFromUrl === 'details'
     );
   }, [canWriteScriptsLibrary, showFromUrl]);
-
-  const onBannerDismiss = useCallback(() => {
-    setShowNewPageBanner(false);
-    storage.set(SCRIPT_LIBRARY_PAGE_STORAGE_KEY, false);
-  }, [storage]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -280,6 +272,23 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     setSelectedItemForDelete(undefined);
   }, []);
 
+  // Only shown once there's data to manage - the `NoDataEmptyPrompt` renders its own equivalent
+  // "Upload script" call-to-action, so surfacing the header's primary action too would duplicate it.
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!canWriteScriptsLibrary || !doesDataExist) {
+      return undefined;
+    }
+    return {
+      primaryActionItem: {
+        id: 'uploadScript',
+        label: pageLabels.pageAddButtonTitle,
+        iconType: 'upload',
+        run: () => onClickAction({ show: 'create' }),
+        testId: getTestId('upload-script-button'),
+      },
+    };
+  }, [canWriteScriptsLibrary, doesDataExist, onClickAction, getTestId]);
+
   const onSuccessCreateOrEdit = useCallback(() => {
     onConfirmCloseFlyout();
     setSelectedItemForFlyout(undefined);
@@ -297,32 +306,20 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
   }, [scriptsLibraryFetchError, toasts, isFetching]);
 
   if (isPageInitializing) {
-    return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
+    return (
+      <AdministrationListPage data-test-subj={getTestId()} title={SCRIPT_LIBRARY} isHeaderLoading>
+        <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />
+      </AdministrationListPage>
+    );
   }
 
   return (
     <>
-      {showNewPageBanner && (
-        <NewPageBanner onDismiss={onBannerDismiss} data-test-subj={getTestId()} />
-      )}
-
       <AdministrationListPage
         data-test-subj={getTestId()}
-        title={pageLabels.pageTitle}
-        subtitle={pageLabels.pageAboutInfo}
-        hideHeader={!doesDataExist}
-        actions={
-          canWriteScriptsLibrary ? (
-            <EuiButton
-              fill
-              iconType="upload"
-              onClick={() => onClickAction({ show: 'create' })}
-              data-test-subj={getTestId('upload-script-button')}
-            >
-              {pageLabels.pageAddButtonTitle}
-            </EuiButton>
-          ) : null
-        }
+        title={SCRIPT_LIBRARY}
+        docLink={securitySolutionDocLinks.scriptLibrary}
+        menu={menu}
       >
         {shouldShowFlyoutForm && (
           <EndpointScriptFlyout

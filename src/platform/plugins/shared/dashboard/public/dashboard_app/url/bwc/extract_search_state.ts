@@ -11,12 +11,12 @@ import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilter, isAsCodeFilter } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import { isQuery } from '@kbn/data-plugin/public';
-import type { DashboardState } from '../../../../common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { migrateLegacyQuery } from '../../../../common';
 
 type DashboardSearchState = Pick<
   DashboardState,
-  'filters' | 'query' | 'refresh_interval' | 'time_range'
+  'filters' | 'query' | 'refresh_interval' | 'time_range' | 'esql_approximation'
 >;
 
 export function extractSearchState(state: {
@@ -72,6 +72,10 @@ export function extractSearchState(state: {
 
   if (state.time_range && typeof state.time_range === 'object') {
     searchState.time_range = state.time_range as DashboardState['time_range'];
+  }
+
+  if (typeof state.esql_approximation === 'boolean') {
+    searchState.esql_approximation = state.esql_approximation;
   }
 
   return searchState;

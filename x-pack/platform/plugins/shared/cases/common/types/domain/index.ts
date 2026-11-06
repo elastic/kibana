@@ -16,6 +16,7 @@ export * from './connector/latest';
 export * from './attachment/latest';
 export * from './observable/latest';
 export * from './template/latest';
+export * from './field_definition/latest';
 
 // V1
 export * as configureDomainV1 from './configure/v1';
@@ -28,5 +29,6 @@ export * as connectorDomainV1 from './connector/v1';
 export * as attachmentDomainV1 from './attachment/v1';
 export * as observableDomainV1 from './observable/v1';
 export * as templateDomainV1 from './template/v1';
+export * as fieldDefinitionDomainV1 from './field_definition/v1';
 // V2
 export * as attachmentDomainV2 from './attachment/v2';

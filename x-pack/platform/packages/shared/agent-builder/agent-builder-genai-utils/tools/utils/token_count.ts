@@ -21,3 +21,22 @@ export const estimateTokens = (data: unknown): number => {
 export const truncateTokens = (data: string, maxTokens: number): string => {
   return data.slice(0, maxTokens * 4);
 };
+
+/**
+ * Truncates a string so its UTF-8 encoding is at most `maxBytes`, without splitting a
+ * multi-byte character across the boundary. Returns the input unchanged when already within
+ * the limit.
+ */
+export const truncateBytes = (data: string, maxBytes: number): string => {
+  const buf = Buffer.from(data, 'utf8');
+  if (buf.length <= maxBytes) {
+    return data;
+  }
+  let end = maxBytes;
+  // Back off past any UTF-8 continuation byte (0b10xxxxxx) so we never cut mid-character.
+  // eslint-disable-next-line no-bitwise
+  while (end > 0 && (buf[end] & 0xc0) === 0x80) {
+    end--;
+  }
+  return buf.toString('utf8', 0, end);
+};

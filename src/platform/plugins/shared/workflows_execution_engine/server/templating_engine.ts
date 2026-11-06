@@ -7,11 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Template } from 'liquidjs';
+import type { Liquid, Template } from 'liquidjs';
+import { toValue } from 'liquidjs';
+import { encodeKqlTemplateValue } from '@kbn/eval-kql';
+import { i18n } from '@kbn/i18n';
+import type { LiquidSettings } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 
 type TemplateVariableSegment = string | number;
 type TemplateVariableSegments = TemplateVariableSegment[];
+
+interface WorkflowTemplatingEngineOptions {
+  liquidSettings?: LiquidSettings;
+}
+
+/**
+ * Tags that would let a value reach a KQL condition unescaped (`echo`, `cycle`) or encoded twice
+ * (`capture` encodes its body, and the captured variable is encoded again when it is output).
+ */
+const KQL_CONDITION_UNSUPPORTED_TAGS = ['echo', 'cycle', 'capture'];
 
 export class WorkflowTemplatingEngine {
   /**
@@ -21,40 +36,67 @@ export class WorkflowTemplatingEngine {
   private static readonly TEMPLATE_SYNTAX_PATTERN = /\{\{|\{%/;
   private static readonly PARSED_TEMPLATE_CACHE_SIZE = 64;
   private static readonly VARIABLE_SEGMENTS_CACHE_SIZE = 64;
+  private static readonly LIQUID_LIMIT_ERRORS = new Set([
+    'memory alloc limit exceeded',
+    'parse length limit exceeded',
+    'render limit exceeded',
+    'template render limit exceeded',
+  ]);
+  private static readonly LIQUID_LIMIT_ERROR_MESSAGE = i18n.translate(
+    'workflowsExecutionEngine.templatingEngine.liquidLimitExceededErrorMessage',
+    {
+      defaultMessage:
+        'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.',
+    }
+  );
 
   private readonly engine;
+  private readonly liquidSettings?: LiquidSettings;
+  private kqlConditionEngine?: Liquid;
   private readonly parsedTemplateCache = new Map<string, Template[]>();
+  private readonly parsedKqlConditionCache = new Map<string, Template[]>();
   private readonly variableSegmentsCache = new Map<string, TemplateVariableSegments[] | null>();
 
-  constructor() {
+  constructor(options?: WorkflowTemplatingEngineOptions) {
+    const { liquidSettings } = options ?? {};
+    this.liquidSettings = liquidSettings;
+
     this.engine = createWorkflowLiquidEngine({
       strictFilters: true,
       strictVariables: false,
-    });
-
-    // register json_parse filter that converts JSON string to object
-    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        return value;
-      }
-    });
-
-    // register entries filter that converts an object into an array of {key, value} pairs
-    this.engine.registerFilter('entries', (value: unknown): unknown => {
-      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return value;
-      }
-      return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+      parseLimit: liquidSettings?.parseLimit,
+      renderLimit: liquidSettings?.renderLimit,
+      memoryLimit: liquidSettings?.memoryLimit,
     });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {
     return this.renderValueRecursively(obj, context) as T;
+  }
+
+  /**
+   * Same as {@link render}, but yields to the event loop before each value at any depth.
+   */
+  public async renderAsync<T>(obj: T, context: Record<string, unknown>): Promise<T> {
+    return (await this.renderValueRecursivelyAsync(obj, context)) as T;
+  }
+
+  /**
+   * Renders a condition that is going to be parsed as KQL. Every `{{ }}` output is replaced by a
+   * token (see `parseKqlTemplate`) so that the value can only ever be a literal in the condition;
+   * `{{ value | raw }}` opts out and splices the value in as KQL. `${{ }}` expressions are
+   * evaluated as usual.
+   */
+  public renderCondition<T>(condition: T, context: Record<string, unknown>): T {
+    if (typeof condition !== 'string' || this.isExpressionTemplate(condition)) {
+      return this.render(condition, context);
+    }
+    return this.renderString(
+      condition,
+      context,
+      this.getKqlConditionEngine(),
+      this.parsedKqlConditionCache
+    ) as T;
   }
 
   public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
@@ -73,7 +115,9 @@ export class WorkflowTemplatingEngine {
       .trim();
 
     try {
-      return this.engine.evalValueSync(resolvedExpression, context);
+      // Liquid literals such as `nil`, `empty` and `blank` evaluate to Drop instances; unwrap them so
+      // `${{ value | default: nil }}` yields `null` rather than an opaque object.
+      return toValue(this.engine.evalValueSync(resolvedExpression, context));
     } catch (err) {
       throw new Error(`The provided expression is invalid. Got: ${template}.`);
     }
@@ -91,7 +135,7 @@ export class WorkflowTemplatingEngine {
       return value;
     }
 
-    if (typeof value === 'string' && value.startsWith('${{') && value.endsWith('}}')) {
+    if (typeof value === 'string' && this.isExpressionTemplate(value)) {
       // remove the first $ only as the evaluateExpression removes the {{ and }} later
       return this.evaluateExpression(value.substring(1), context);
     }
@@ -119,6 +163,56 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
+  private async renderValueRecursivelyAsync(
+    value: unknown,
+    context: Record<string, unknown>
+  ): Promise<unknown> {
+    await yieldToEventLoop();
+
+    if (typeof value === 'string') {
+      return this.renderValueRecursively(value, context);
+    }
+
+    if (Array.isArray(value)) {
+      const renderedArray: unknown[] = [];
+      for (const item of value) {
+        renderedArray.push(await this.renderValueRecursivelyAsync(item, context));
+      }
+      return renderedArray;
+    }
+
+    if (value !== null && typeof value === 'object') {
+      const renderedObject: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value)) {
+        renderedObject[key] = await this.renderValueRecursivelyAsync(val, context);
+      }
+      return renderedObject;
+    }
+
+    return value;
+  }
+
+  private isExpressionTemplate(value: string): boolean {
+    return value.startsWith('${{') && value.endsWith('}}');
+  }
+
+  private getKqlConditionEngine(): Liquid {
+    if (!this.kqlConditionEngine) {
+      const { liquidSettings } = this;
+      const engine = createWorkflowLiquidEngine({
+        strictFilters: true,
+        strictVariables: false,
+        parseLimit: liquidSettings?.parseLimit,
+        renderLimit: liquidSettings?.renderLimit,
+        memoryLimit: liquidSettings?.memoryLimit,
+        outputEscape: encodeKqlTemplateValue,
+      });
+      KQL_CONDITION_UNSUPPORTED_TAGS.forEach((tag) => delete engine.tags[tag]);
+      this.kqlConditionEngine = engine;
+    }
+    return this.kqlConditionEngine;
+  }
+
   /**
    * Validates that a template string does not use unsupported Liquid tags.
    */
@@ -128,15 +222,24 @@ export class WorkflowTemplatingEngine {
     }
   }
 
-  private renderString(template: string, context: Record<string, unknown>): string {
+  private renderString(
+    template: string,
+    context: Record<string, unknown>,
+    engine: Liquid = this.engine,
+    cache: Map<string, Template[]> = this.parsedTemplateCache
+  ): string {
     try {
       this.validateTemplate(template);
-      return this.engine.renderSync(this.getParsedTemplate(template), context);
+      return engine.renderSync(this.getParsedTemplate(template, engine, cache), context);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       // customer-facing error message without the default line number and column number
       const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
-      throw new Error(customerFacingErrorMessage);
+      throw new Error(
+        WorkflowTemplatingEngine.LIQUID_LIMIT_ERRORS.has(customerFacingErrorMessage)
+          ? WorkflowTemplatingEngine.LIQUID_LIMIT_ERROR_MESSAGE
+          : customerFacingErrorMessage
+      );
     }
   }
 
@@ -214,20 +317,24 @@ export class WorkflowTemplatingEngine {
     }
   }
 
-  private getParsedTemplate(template: string): Template[] {
-    const cached = this.parsedTemplateCache.get(template);
+  private getParsedTemplate(
+    template: string,
+    engine: Liquid = this.engine,
+    cache: Map<string, Template[]> = this.parsedTemplateCache
+  ): Template[] {
+    const cached = cache.get(template);
     if (cached) {
-      this.parsedTemplateCache.delete(template);
-      this.parsedTemplateCache.set(template, cached);
+      cache.delete(template);
+      cache.set(template, cached);
       return cached;
     }
 
-    const parsedTemplate = this.engine.parse(template);
-    this.parsedTemplateCache.set(template, parsedTemplate);
-    if (this.parsedTemplateCache.size > WorkflowTemplatingEngine.PARSED_TEMPLATE_CACHE_SIZE) {
-      const oldestKey = this.parsedTemplateCache.keys().next().value;
+    const parsedTemplate = engine.parse(template);
+    cache.set(template, parsedTemplate);
+    if (cache.size > WorkflowTemplatingEngine.PARSED_TEMPLATE_CACHE_SIZE) {
+      const oldestKey = cache.keys().next().value;
       if (oldestKey !== undefined) {
-        this.parsedTemplateCache.delete(oldestKey);
+        cache.delete(oldestKey);
       }
     }
 

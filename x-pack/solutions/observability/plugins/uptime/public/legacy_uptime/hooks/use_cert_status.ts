@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { selectDynamicSettings } from '../state/selectors';
 import { CERT_STATUS } from '../../../common/constants';
 

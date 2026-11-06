@@ -39,6 +39,10 @@ export type {
   SearchSessionInfoProvider,
   ISessionsClient,
   WaitUntilNextSessionCompletesOptions,
+  ISearchSessionEBTManager,
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
 } from './session';
 export {
   SessionService,
@@ -47,6 +51,10 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
+  ACTION,
+  SearchSessionEBTManager,
+  getInProgressSessionIds,
+  setInProgressSessionIds,
 } from './session';
 
 export type { SearchInterceptorDeps } from './search_interceptor';

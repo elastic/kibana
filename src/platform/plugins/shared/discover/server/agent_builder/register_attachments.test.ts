@@ -16,7 +16,10 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
+import {
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
+} from '../../common/agent_builder';
 import { registerAttachments } from './register_attachments';
 
 const createMockAgentBuilder = () => {
@@ -30,7 +33,14 @@ const createMockAgentBuilder = () => {
       },
       skills: { register: jest.fn() },
     } as unknown as AgentBuilderPluginSetup,
-    getRegisteredType: () => registeredTypes[0],
+    getRegisteredType: (id: string) => {
+      const attachmentType = registeredTypes.find((type) => type.id === id);
+      if (!attachmentType) {
+        throw new Error(`Attachment type ${id} was not registered`);
+      }
+      return attachmentType;
+    },
+    getRegisteredTypes: () => registeredTypes,
   };
 };
 
@@ -56,7 +66,16 @@ describe('registerAttachments', () => {
   beforeAll(() => {
     const { mock, getRegisteredType } = createMockAgentBuilder();
     registerAttachments(mock);
-    attachmentType = getRegisteredType();
+    attachmentType = getRegisteredType(ESQL_QUERY_RESULTS_ATTACHMENT_TYPE);
+  });
+
+  it('registers esql.query_results and discover.session', () => {
+    const { mock, getRegisteredTypes } = createMockAgentBuilder();
+    registerAttachments(mock);
+    expect(getRegisteredTypes().map((type) => type.id)).toEqual([
+      ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
+      DISCOVER_SESSION_ATTACHMENT_TYPE,
+    ]);
   });
 
   it('registers the attachment type with the correct id', () => {
@@ -182,6 +201,50 @@ describe('registerAttachments', () => {
       expect(() => attachmentType.format(attachment, context)).toThrow(
         'Invalid ES|QL query results attachment data'
       );
+    });
+
+    it('emits a Shape Profile block when playbookContribution is present, intersected against columns', () => {
+      const attachment = createAttachment({
+        query: 'FROM logs-* | LIMIT 10',
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'log.level', type: 'keyword' },
+          { name: 'service.name', type: 'keyword' },
+        ],
+        sampleRows: [],
+        totalHits: 1,
+        playbookContribution: {
+          shapeId: 'logs',
+          shapeLabel: 'Application & infrastructure logs',
+          characteristicFields: ['log.level', 'service.name', 'host.name'],
+          guidance: 'Prefer STATS BY log.level and service.name.',
+          interestingSignals: ['spikes in log.level=error'],
+        },
+      });
+
+      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
+      const text = getFormattedText(formatted);
+
+      expect(text).toContain('Shape Profile:');
+      expect(text).toContain('Application & infrastructure logs (logs)');
+      expect(text).toContain('Characteristic fields present: log.level, service.name');
+      expect(text).not.toContain('host.name');
+      expect(text).toContain('Guidance: Prefer STATS BY log.level and service.name.');
+      expect(text).toContain('- spikes in log.level=error');
+    });
+
+    it('omits the Shape Profile block when no playbookContribution is provided', () => {
+      const attachment = createAttachment({
+        query: 'FROM logs-*',
+        columns: [{ name: 'status', type: 'keyword' }],
+        sampleRows: [],
+        totalHits: 0,
+      });
+
+      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
+      const text = getFormattedText(formatted);
+
+      expect(text).not.toContain('Shape Profile');
     });
   });
 

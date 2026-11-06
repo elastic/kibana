@@ -76,6 +76,9 @@ describe('EmailActionConnectorFields', () => {
     const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
     expect(emailServiceSelectInput).toBeInTheDocument();
 
+    const emailAllowHtmlSwitch = await screen.findByTestId('emailAllowHtmlSwitch');
+    expect(emailAllowHtmlSwitch).toBeInTheDocument();
+
     const emailHostInput = await screen.findByTestId('emailHostInput');
     expect(emailHostInput).toBeInTheDocument();
 
@@ -188,6 +191,97 @@ describe('EmailActionConnectorFields', () => {
     const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
     expect(emailServiceSelectInput).toBeInTheDocument();
     expect(emailServiceSelectInput).toHaveValue('gmail');
+  });
+
+  it('allow HTML field is checked when configured', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'other',
+        allowHtml: true,
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailAllowHtmlSwitch = await screen.findByTestId('emailAllowHtmlSwitch');
+    expect(emailAllowHtmlSwitch).toBeChecked();
+  });
+
+  it('allow HTML field is read-only when connector fields are read-only', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'other',
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <EmailActionConnectorFields
+          readOnly={true}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailAllowHtmlSwitch = await screen.findByTestId('emailAllowHtmlSwitch');
+    expect(emailAllowHtmlSwitch).toBeDisabled();
+  });
+
+  it('allow HTML field is not rendered for elastic_cloud service', async () => {
+    const actionConnector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: false,
+        service: 'elastic_cloud',
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await screen.findByTestId('emailServiceSelectInput');
+    expect(screen.queryByTestId('emailAllowHtmlSwitch')).not.toBeInTheDocument();
   });
 
   it('host, port and secure fields should be disabled when service field is set to well known service', async () => {
@@ -360,7 +454,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -370,6 +464,71 @@ describe('EmailActionConnectorFields', () => {
               port: 2323,
               secure: false,
               service: 'other',
+              allowHtml: false,
+            },
+            id: 'email',
+            isDeprecated: false,
+            name: 'email',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+
+    it('submits the connector with HTML allowed', async () => {
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: 'pass',
+          clientSecret: null,
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        name: 'email',
+        config: {
+          from: 'test@test.com',
+          port: 2323,
+          host: 'localhost',
+          hasAuth: true,
+          service: 'other',
+          allowHtml: true,
+        },
+        isDeprecated: false,
+      };
+
+      appMockRenderer.render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
+        >
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      const submitButton = await screen.findByTestId('form-test-provide-submit');
+      await userEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.email',
+            config: {
+              from: 'test@test.com',
+              hasAuth: true,
+              host: 'localhost',
+              port: 2323,
+              secure: false,
+              service: 'other',
+              allowHtml: true,
             },
             id: 'email',
             isDeprecated: false,
@@ -423,7 +582,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -433,6 +592,7 @@ describe('EmailActionConnectorFields', () => {
               hasAuth: false,
               service: 'other',
               secure: false,
+              allowHtml: false,
             },
             id: 'email',
             isDeprecated: false,
@@ -484,7 +644,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -494,6 +654,7 @@ describe('EmailActionConnectorFields', () => {
               port: 80,
               secure: false,
               service: 'gmail',
+              allowHtml: false,
             },
             id: 'email',
             isDeprecated: false,
@@ -546,7 +707,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
         });
@@ -593,7 +754,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
         });
@@ -635,11 +796,13 @@ describe('EmailActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
+      // Wait for the lazily-loaded Exchange fields to mount so their validators register before submit.
+      await screen.findByTestId('emailClientId');
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
         });
@@ -684,7 +847,7 @@ describe('EmailActionConnectorFields', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
 
         await waitFor(() => {
-          expect(onSubmit).toBeCalledWith({
+          expect(onSubmit).toHaveBeenCalledWith({
             data: {},
             isValid: false,
           });
@@ -729,7 +892,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -739,6 +902,7 @@ describe('EmailActionConnectorFields', () => {
               port,
               secure: false,
               service: 'other',
+              allowHtml: false,
             },
             id: 'email',
             isDeprecated: false,

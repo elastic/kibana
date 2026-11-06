@@ -1,0 +1,206 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * B5 refactor: custom filters (base64_decode_bytes, json_parse, entries, pick, chunk) are now registered
+ * once inside createWorkflowLiquidEngine, not separately in each consumer.
+ *
+ * These tests verify:
+ * 1. Every engine returned by the factory includes all custom filters.
+ * 2. The `entries` filter is the *real* object-to-array implementation — not the
+ *    no-op identity stub that previously existed in liquid_parse_cache.ts.
+ * 3. The `json_parse` and `pick` filter behaviours are correct.
+ * 4. Filters work correctly regardless of whether strictFilters is set.
+ */
+
+import { createWorkflowLiquidEngine } from './create_workflow_liquid_engine';
+
+describe('createWorkflowLiquidEngine — built-in custom filters (B5)', () => {
+  describe('base64_decode_bytes filter', () => {
+    it('preserves arbitrary binary data', () => {
+      const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      const result = engine.evalValueSync('val | base64_decode_bytes', {
+        val: bytes.toString('base64'),
+      });
+
+      expect(Buffer.isBuffer(result)).toBe(true);
+      expect(result).toEqual(bytes);
+    });
+
+    it('checks the memory limit before decoding', () => {
+      const engine = createWorkflowLiquidEngine({ memoryLimit: 1 });
+
+      expect(() => engine.evalValueSync('"iVBORw==" | base64_decode_bytes')).toThrow(
+        'memory alloc limit exceeded'
+      );
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // json_parse
+  // -----------------------------------------------------------------------
+  describe('json_parse filter', () => {
+    it('parses a valid JSON string to an object (rendered via | json)', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ val | json_parse | json }}', {
+        val: '{"a":1}',
+      });
+      expect(JSON.parse(result)).toEqual({ a: 1 });
+    });
+
+    it('returns the input unchanged for non-string values', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ val | json_parse }}', { val: 42 });
+      expect(result).toBe('42');
+    });
+
+    it('returns the original string when JSON is invalid', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ val | json_parse }}', { val: 'not-json' });
+      expect(result).toBe('not-json');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // entries — key fix: the former no-op stub in liquid_parse_cache.ts is gone
+  // -----------------------------------------------------------------------
+  describe('entries filter', () => {
+    it('converts a plain object to an array of { key, value } pairs', () => {
+      // Previously, the engine returned by getLiquidInstance() (liquid_parse_cache.ts)
+      // had a no-op entries filter that simply returned the input unchanged.
+      // After B5, every engine shares the same real implementation.
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const result = engine.parseAndRenderSync(
+        '{% assign pairs = obj | entries %}{% for p in pairs %}{{ p.key }}={{ p.value }} {% endfor %}',
+        { obj: { x: 1, y: 2 } }
+      );
+      // Order is insertion order (Object.entries guarantee)
+      expect(result.trim()).toBe('x=1 y=2');
+    });
+
+    it('returns a non-object value unchanged (array passthrough)', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ val | entries | json }}', {
+        val: [1, 2, 3],
+      });
+      expect(JSON.parse(result)).toEqual([1, 2, 3]);
+    });
+
+    it('returns null unchanged', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ val | entries }}', { val: null });
+      expect(result).toBe('');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // pick
+  // -----------------------------------------------------------------------
+  describe('pick filter', () => {
+    it('keeps only the requested dotted-path fields', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ obj | pick: "a", "b.c" | json }}', {
+        obj: { a: 1, b: { c: 2, d: 99 }, z: 42 },
+      });
+      expect(JSON.parse(result)).toEqual({ a: 1, b: { c: 2 } });
+    });
+
+    it('accepts a single array of paths passed as argument', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const result = engine.parseAndRenderSync(
+        '{% assign paths = "a,b" | split: "," %}{{ obj | pick: paths | json }}',
+        { obj: { a: 1, b: 2, c: 3 } }
+      );
+      expect(JSON.parse(result)).toEqual({ a: 1, b: 2 });
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // chunk — lets a foreach iterate batches of items instead of single items
+  // -----------------------------------------------------------------------
+  describe('chunk filter', () => {
+    const chunkOf = (engine: ReturnType<typeof createWorkflowLiquidEngine>, template: string) =>
+      JSON.parse(engine.parseAndRenderSync(template, { items: [1, 2, 3, 4, 5] }));
+
+    it('splits an array into consecutive groups of the requested size', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(chunkOf(engine, '{{ items | chunk: 2 | json }}')).toEqual([[1, 2], [3, 4], [5]]);
+    });
+
+    it('returns a single group when the size is larger than the array', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(chunkOf(engine, '{{ items | chunk: 50 | json }}')).toEqual([[1, 2, 3, 4, 5]]);
+    });
+
+    it('returns an empty list of groups for an empty array', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ items | chunk: 3 | json }}', { items: [] });
+      expect(JSON.parse(result)).toEqual([]);
+    });
+
+    it('keeps every item in one group when the size is not a usable number', () => {
+      // A misconfigured size must never silently drop items.
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      expect(chunkOf(engine, '{{ items | chunk: 0 | json }}')).toEqual([[1, 2, 3, 4, 5]]);
+      expect(chunkOf(engine, '{{ items | chunk: missing | json }}')).toEqual([[1, 2, 3, 4, 5]]);
+    });
+
+    it('coerces a numeric string size (workflow templates render numbers as strings)', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(chunkOf(engine, '{{ items | chunk: "2" | json }}')).toEqual([[1, 2], [3, 4], [5]]);
+    });
+
+    it('passes non-array values through unchanged', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ value | chunk: 2 }}', { value: 'abc' });
+      expect(result).toBe('abc');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Availability under strictFilters (regression: filters must be registered
+  // before the engine is used, regardless of the strictFilters option)
+  // -----------------------------------------------------------------------
+  describe('filter availability with strictFilters: true', () => {
+    it('json_parse does not throw with strictFilters: true', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(() =>
+        engine.parseAndRenderSync('{{ v | json_parse }}', { v: '"hello"' })
+      ).not.toThrow();
+    });
+
+    it('entries does not throw with strictFilters: true', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(() =>
+        engine.parseAndRenderSync('{{ v | entries | json }}', { v: { k: 1 } })
+      ).not.toThrow();
+    });
+
+    it('chunk does not throw with strictFilters: true', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(() =>
+        engine.parseAndRenderSync('{{ v | chunk: 2 | json }}', { v: [1, 2, 3] })
+      ).not.toThrow();
+    });
+
+    it('pick does not throw with strictFilters: true', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(() =>
+        engine.parseAndRenderSync('{{ v | pick: "k" | json }}', { v: { k: 1 } })
+      ).not.toThrow();
+    });
+
+    it('still rejects genuinely unknown filters with strictFilters: true', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(() => engine.parseAndRenderSync('{{ v | no_such_filter }}', { v: 1 })).toThrow();
+    });
+  });
+});

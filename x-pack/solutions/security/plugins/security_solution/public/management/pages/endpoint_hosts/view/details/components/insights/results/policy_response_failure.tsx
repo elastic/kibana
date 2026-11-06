@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import type { SecurityWorkflowInsight } from '../../../../../../../../../common/endpoint/types/workflow_insights';
+import { toExternalDocLink } from '../../../../../../../../../common/endpoint/utils/external_doc_link';
 import { WORKFLOW_INSIGHTS } from '../../../../translations';
 
 interface WorkflowInsightsPolicyResponseFailureResultProps {
@@ -33,9 +34,14 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     WORKFLOW_INSIGHTS.issues.remediationButton.policyResponseFailure;
 
   const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
-    (insight.remediation.descriptive ?? '').replace(/\\\\/g, '\\').replace(/\\n/g, '\n'),
+    // Single pass so an escaped backslash followed by `n` (e.g. `C:\\new`) is not turned into a newline.
+    (insight.remediation.descriptive ?? '').replace(/\\([\\n])/g, (_match, char: string) =>
+      char === 'n' ? '\n' : '\\'
+    ),
     120
   );
+
+  const safeLink = toExternalDocLink(insight.remediation.link);
 
   return (
     <EuiPanel
@@ -47,7 +53,13 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     >
       <EuiFlexGroup alignItems={'flexStart'} gutterSize={'m'}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="globe" size="l" color="warning" css={{ marginTop: '18px' }} />
+          <EuiIcon
+            type="globe"
+            size="l"
+            color="warning"
+            aria-hidden={true}
+            css={{ marginTop: '18px' }}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -72,10 +84,11 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
             data-test-subj={`workflowInsightsResult-${index}-remediation`}
             aria-label={ariaLabel}
             iconType="external"
-            href={insight.remediation.link}
+            href={safeLink}
             target="_blank"
+            rel="noopener noreferrer"
             css={{
-              visibility: insight.remediation.link ? 'visible' : 'hidden',
+              visibility: safeLink ? 'visible' : 'hidden',
               marginTop: '10px',
             }}
           >

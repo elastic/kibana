@@ -17,6 +17,7 @@ import { useConnectors } from '../../hooks/use_connectors';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
+import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
 
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
@@ -33,6 +34,40 @@ jest.mock('./add_model_popover', () => ({
     </button>
   ),
 }));
+jest.mock('./copy_to_modal', () => ({
+  CopyToModal: ({ onApply }: { onApply: (selectedFeatureIds: string[]) => void }) => (
+    <button data-test-subj="copy-to-apply" onClick={() => onApply(['sibling'])} type="button">
+      Apply
+    </button>
+  ),
+}));
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiDragDropContext: ({
+      onDragEnd,
+      children,
+    }: {
+      onDragEnd: (result: {
+        source: { index: number };
+        destination: { index: number } | null;
+      }) => void;
+      children: React.ReactNode;
+    }) => (
+      <actual.EuiDragDropContext onDragEnd={onDragEnd}>
+        {children}
+        <button
+          data-test-subj="drag-first-to-second"
+          onClick={() => onDragEnd({ source: { index: 0 }, destination: { index: 1 } })}
+          type="button"
+        >
+          Drag
+        </button>
+      </actual.EuiDragDropContext>
+    ),
+  };
+});
 
 const mockUseConnectors = useConnectors as jest.Mock;
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
@@ -141,7 +176,8 @@ describe('SubFeatureCard', () => {
       hasSavedObject: boolean;
       isFeatureDirty: boolean;
       globalDefaultId: string;
-    }>
+    }>,
+    deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = new Map()
   ) =>
     render(
       <Wrapper>
@@ -152,6 +188,7 @@ describe('SubFeatureCard', () => {
           effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
           onEndpointsChange={onEndpointsChange}
           invalidEndpointIds={invalidEndpointIds}
+          deprecatedEndpointsMap={deprecatedEndpointsMap}
           {...defaultGlobalRowProps}
           {...globalRowOverrides}
         />
@@ -201,6 +238,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -233,6 +271,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -253,6 +292,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -278,6 +318,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -298,6 +339,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -319,6 +361,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set(['ep-1'])}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -365,6 +408,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -418,6 +462,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             hasSavedObject={false}
             isFeatureDirty={false}
             globalDefaultId="ep-3"
@@ -461,15 +506,6 @@ describe('SubFeatureCard', () => {
 
       expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
       expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
-    });
-
-    it('shows Default badge only on the first endpoint', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      fireEvent.click(screen.getByTestId('show-more-test_feature'));
-
-      const badges = screen.getAllByText('Default');
-      expect(badges).toHaveLength(1);
     });
 
     it('disables remove button when only one endpoint', () => {
@@ -543,6 +579,242 @@ describe('SubFeatureCard', () => {
       expect(
         screen.getByText('Inference endpoint Claude is no longer available')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('ignoreGlobalDefault — globalDefaultId set to NO_DEFAULT_MODEL', () => {
+    it('does not render the global default locked row when globalDefaultId is NO_DEFAULT_MODEL', () => {
+      renderCard(['ep-1'], undefined, new Set(), ['__different__'], {
+        hasSavedObject: false,
+        globalDefaultId: NO_DEFAULT_MODEL,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('deprecation badges', () => {
+    const deprecatedInfo: EndpointDeprecationInfo = {
+      name: 'Claude 2',
+      status: EisModelStatus.Deprecated,
+      metadata: {
+        heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' },
+      },
+    };
+    const eolInfo: EndpointDeprecationInfo = {
+      name: 'Claude 2',
+      status: EisModelStatus.DeprecatedEOL,
+      metadata: {
+        heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
+      },
+    };
+
+    it('renders the deprecated badge for an assigned deprecated endpoint', () => {
+      renderCard(
+        ['ep-2'],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        new Map([['ep-2', deprecatedInfo]])
+      );
+
+      expect(screen.getByTestId('modelDeprecatedBadge-ep-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelEolBadge-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('renders the EOL badge for an assigned EOL endpoint', () => {
+      renderCard(
+        ['ep-2'],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        new Map([['ep-2', eolInfo]])
+      );
+
+      expect(screen.getByTestId('modelEolBadge-ep-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelDeprecatedBadge-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('renders the deprecated badge on the global default locked row', () => {
+      renderCard(
+        ['ep-1', 'ep-2'],
+        undefined,
+        new Set(),
+        ['__different__'],
+        { hasSavedObject: false, isFeatureDirty: false, globalDefaultId: 'ep-3' },
+        new Map([['ep-3', deprecatedInfo]])
+      );
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('modelDeprecatedBadge-ep-3')).toBeInTheDocument();
+    });
+  });
+
+  describe('region preferences', () => {
+    const recommendedEndpointIds = ['ep-1', 'ep-2', 'ep-missing'];
+    const regionDeniedConnectors = mockConnectors.map((connector) =>
+      connector.connectorId === 'ep-2' || connector.connectorId === 'ep-3'
+        ? { ...connector, metadata: { denied_by_region_policy: true } }
+        : connector
+    );
+
+    const renderRecommendedCard = (globalDefaultId: string = NO_DEFAULT_MODEL) =>
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={recommendedEndpointIds}
+            effectiveRecommendedEndpoints={recommendedEndpointIds}
+            onEndpointsChange={onEndpointsChange}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            hasSavedObject={false}
+            isFeatureDirty={false}
+            globalDefaultId={globalDefaultId}
+          />
+        </Wrapper>
+      );
+
+    beforeEach(() => {
+      mockUseConnectors.mockReturnValue({ data: regionDeniedConnectors });
+    });
+
+    it('hides recommended models that are denied by region policy and keeps the rest', () => {
+      renderRecommendedCard();
+
+      expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
+      expect(screen.getByTestId('endpoint-row-ep-missing')).toBeInTheDocument();
+      expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('hides the global default row when the global model is denied by region policy', () => {
+      renderRecommendedCard('ep-3');
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('shows the global default row when the global model is allowed by region policy', () => {
+      renderRecommendedCard('ep-4');
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+    });
+
+    it('seeds the editable list without denied models when turning off recommended defaults', () => {
+      renderRecommendedCard();
+
+      fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1', 'ep-missing']);
+    });
+
+    describe('when editing a list that has denied models assigned', () => {
+      beforeEach(() => {
+        mockUseConnectors.mockReturnValue({
+          data: mockConnectors.map((connector) =>
+            connector.connectorId === 'ep-3'
+              ? { ...connector, metadata: { denied_by_region_policy: true } }
+              : connector
+          ),
+        });
+      });
+
+      it('drops denied models when removing a visible model', () => {
+        renderCard(['ep-1', 'ep-3', 'ep-4']);
+
+        fireEvent.click(screen.getByTestId('remove-endpoint-ep-1'));
+
+        expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-4']);
+      });
+
+      it('drops denied models when adding a model', () => {
+        renderCard(['ep-1', 'ep-3']);
+
+        fireEvent.click(screen.getByTestId('add-model-button'));
+
+        expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1', 'ep-2']);
+      });
+
+      it('drops denied models when adding a model while every assigned model is denied', () => {
+        renderCard(['ep-3']);
+
+        expect(screen.getByTestId('no-models-available-test_feature')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('add-model-button'));
+
+        expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-2']);
+      });
+
+      it('drops denied models when reordering visible models', () => {
+        renderCard(['ep-1', 'ep-3', 'ep-4']);
+
+        fireEvent.click(screen.getByTestId('drag-first-to-second'));
+
+        expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-4', 'ep-1']);
+      });
+
+      it('copies only visible models to other features', () => {
+        mockUseRegisteredFeatures.mockReturnValue({
+          features: [feature, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],
+          isLoading: false,
+        });
+        renderCard(['ep-1', 'ep-3']);
+
+        fireEvent.click(screen.getByTestId('copy-to-test_feature'));
+        fireEvent.click(screen.getByTestId('copy-to-apply'));
+
+        expect(onEndpointsChange).toHaveBeenCalledWith('sibling', ['ep-1']);
+      });
+
+      it('counts only visible models toward maxNumberOfEndpoints', () => {
+        renderCard(['ep-1', 'ep-3'], { maxNumberOfEndpoints: 2 });
+
+        expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
+      });
+
+      it('disables removing the last visible model', () => {
+        renderCard(['ep-1', 'ep-3']);
+
+        expect(screen.getByTestId('remove-endpoint-ep-1')).toBeDisabled();
+      });
+    });
+
+    it('turns off and disables recommended defaults when every recommended model is denied by region policy', () => {
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: [feature, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],
+        isLoading: false,
+      });
+      const deniedRecommendedEndpointIds = ['ep-2', 'ep-3'];
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={deniedRecommendedEndpointIds}
+            effectiveRecommendedEndpoints={deniedRecommendedEndpointIds}
+            onEndpointsChange={onEndpointsChange}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            hasSavedObject={false}
+            isFeatureDirty={false}
+            globalDefaultId={NO_DEFAULT_MODEL}
+          />
+        </Wrapper>
+      );
+
+      const toggle = screen.getByTestId('useRecommendedDefaultsToggle-test_feature');
+      expect(toggle).not.toBeChecked();
+      expect(toggle).toBeDisabled();
+      expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
+      expect(screen.getByTestId('copy-to-test_feature')).toBeDisabled();
+      expect(screen.getByTestId('no-models-available-test_feature')).toHaveTextContent(
+        'No models available'
+      );
+      expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('endpoint-row-ep-3')).not.toBeInTheDocument();
     });
   });
 });

@@ -62,7 +62,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     }
 
     const formatter = this._indexPattern.getFormatterForField(indexPatternField);
-    return formatter.reactConvert(this.getRawValue());
+    return formatter.convertToReact(this.getRawValue());
   }
 
   isFilterable(): boolean {

@@ -16,11 +16,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, useEuiTheme } from '@elastic/eui'
 
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
-import { resolveSeverityFormat } from './severity_format_resolver';
+import {
+  applyCustomOpenEndedFloorToSelection,
+  getCanonicalBandsOverlappingFloor,
+  getSeverityRangeDisplay,
+  getSeverityThresholdMax,
+  isOpenEndedSeverityThreshold,
+  resolveSeverityFormat,
+} from '../../../../../common/util/severity_threshold';
 
 export interface TableSeverityPageUrlState {
   pageKey: 'mlSelectSeverity';
@@ -70,26 +76,6 @@ export const useTableSeverity = () => {
   );
 
   return [resolvedUrlState, setUrlState, urlStateService] as const;
-};
-
-/**
- * Helper function to get severity range display value
- */
-export const getSeverityRangeDisplay = (val: number): string => {
-  switch (val) {
-    case ML_ANOMALY_THRESHOLD.CRITICAL:
-      return '75-100';
-    case ML_ANOMALY_THRESHOLD.MAJOR:
-      return '50-75';
-    case ML_ANOMALY_THRESHOLD.MINOR:
-      return '25-50';
-    case ML_ANOMALY_THRESHOLD.WARNING:
-      return '3-25';
-    case ML_ANOMALY_THRESHOLD.LOW:
-      return '0-3';
-    default:
-      return val.toString();
-  }
 };
 
 const useFormattedSeverityOptions = (selectedSeverities: TableSeverity[] = []) => {
@@ -147,31 +133,66 @@ export const SelectSeverityUI: FC<
 > = ({ classNames = '', severity, onChange }) => {
   const { euiTheme } = useEuiTheme();
   const allSeverityOptions = useSeverityOptions();
-  const selectedSeverities = useMemo(
-    () =>
-      allSeverityOptions.filter((option) =>
-        severity.some(
-          (threshold) =>
-            threshold.min === option.threshold.min && threshold.max === option.threshold.max
+  const selectedSeverities = useMemo(() => {
+    if (severity.length === 1 && isOpenEndedSeverityThreshold(severity[0])) {
+      const floor = severity[0].min;
+      const exactCanonical = allSeverityOptions.find(
+        (option) =>
+          option.threshold.min === floor && getSeverityThresholdMax(option.threshold) === undefined
+      );
+      if (exactCanonical) {
+        return [exactCanonical];
+      }
+      const overlapping = getCanonicalBandsOverlappingFloor(
+        floor,
+        allSeverityOptions.map((option) => option.threshold)
+      );
+      return allSeverityOptions.filter((option) =>
+        overlapping.some(
+          (band) =>
+            band.min === option.threshold.min &&
+            getSeverityThresholdMax(band) === getSeverityThresholdMax(option.threshold)
         )
-      ),
-    [allSeverityOptions, severity]
-  );
+      );
+    }
+
+    return allSeverityOptions.filter((option) =>
+      severity.some(
+        (threshold) =>
+          threshold.min === option.threshold.min &&
+          getSeverityThresholdMax(threshold) === getSeverityThresholdMax(option.threshold)
+      )
+    );
+  }, [allSeverityOptions, severity]);
 
   // Create a display string for the selected severities
   const inputDisplay = useMemo(() => {
     if (severity.length === 1) {
-      const selectedSeverity = selectedSeverities[0];
-      if (selectedSeverity && typeof selectedSeverity.val === 'number') {
-        const rangeDisplay = getSeverityRangeDisplay(selectedSeverity.val);
+      const [threshold] = severity;
+      const exactSelected = selectedSeverities.find(
+        (selectedSeverity) =>
+          selectedSeverity.threshold.min === threshold.min &&
+          getSeverityThresholdMax(selectedSeverity.threshold) === getSeverityThresholdMax(threshold)
+      );
+      if (exactSelected && typeof exactSelected.val === 'number') {
+        const rangeDisplay = getSeverityRangeDisplay(exactSelected.val);
         return (
           <Fragment>
-            <EuiHealth color={selectedSeverity.color} css={{ lineHeight: 'inherit' }}>
+            <EuiHealth color={exactSelected.color} css={{ lineHeight: 'inherit' }}>
               {rangeDisplay}
             </EuiHealth>
           </Fragment>
         );
       }
+      const max = getSeverityThresholdMax(threshold);
+      const color = selectedSeverities[0]?.color;
+      return (
+        <Fragment>
+          <EuiHealth color={color} css={{ lineHeight: 'inherit' }}>
+            {`${threshold.min}-${max ?? 100}`}
+          </EuiHealth>
+        </Fragment>
+      );
     }
 
     // For multiple selections, show "Multiple" with horizontally overlapping health icons
@@ -209,7 +230,7 @@ export const SelectSeverityUI: FC<
         </EuiFlexGroup>
       </Fragment>
     );
-  }, [euiTheme.border.radius.medium, euiTheme.size.s, selectedSeverities, severity.length]);
+  }, [euiTheme.border.radius.medium, euiTheme.size.s, selectedSeverities, severity]);
 
   // Get the options for the multi-select component
   const multiSelectOptions = useFormattedSeverityOptions(selectedSeverities);
@@ -231,10 +252,31 @@ export const SelectSeverityUI: FC<
       const newSelectedSeverities = allSeverityOptions.filter((option) =>
         selectedOptionKeys.includes(option.val.toString())
       );
+      const adjustedThresholds = applyCustomOpenEndedFloorToSelection(
+        newSelectedSeverities.map((option) => option.threshold),
+        severity
+      );
 
-      onChange(newSelectedSeverities);
+      onChange(
+        adjustedThresholds.map((threshold) => {
+          const match = allSeverityOptions.find(
+            (option) =>
+              option.threshold.min === threshold.min &&
+              getSeverityThresholdMax(option.threshold) === getSeverityThresholdMax(threshold)
+          );
+          if (match) {
+            return match;
+          }
+          return {
+            val: threshold.min,
+            display: `${threshold.min}-100`,
+            color: selectedSeverities[0]?.color ?? allSeverityOptions[0].color,
+            threshold,
+          };
+        })
+      );
     },
-    [onChange, allSeverityOptions]
+    [onChange, allSeverityOptions, selectedSeverities, severity]
   );
 
   const anomalyScoreLabel = i18n.translate('xpack.ml.explorer.severityThresholdLabel', {

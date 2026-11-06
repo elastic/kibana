@@ -26,7 +26,7 @@ export interface UsageReportingConfig {
   tls?: {
     certificate: string;
     key: string;
-    ca: string;
+    ca?: string;
   };
 }
 

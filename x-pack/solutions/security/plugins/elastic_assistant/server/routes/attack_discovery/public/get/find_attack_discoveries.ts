@@ -79,6 +79,14 @@ export const findAttackDiscoveriesRoute = (
 
         try {
           const { query } = request;
+
+          if (query.shared !== undefined && query.include_all_authors !== undefined) {
+            return resp.error({
+              body: 'The parameters "shared" and "include_all_authors" are mutually exclusive.',
+              statusCode: 400,
+            });
+          }
+
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           if (!dataClient) {
@@ -100,6 +108,7 @@ export const findAttackDiscoveriesRoute = (
               alertIds: query.alert_ids,
               includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
               ids: query.ids,
+              includeAllAuthors: query.include_all_authors,
               search: query.search,
               shared: query.shared,
               status: query.status,

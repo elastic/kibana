@@ -435,7 +435,7 @@ describe('ConnectorFields renders', () => {
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: openAiConnector,
           isValid: true,
         });

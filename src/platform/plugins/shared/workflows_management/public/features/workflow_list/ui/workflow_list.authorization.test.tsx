@@ -15,7 +15,7 @@ import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
-import { useWorkflows } from '@kbn/workflows-ui';
+import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowList } from './workflow_list';
 import { createWorkflowListItem } from '../../../connectors/workflows/workflows_params.test_fixtures';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
@@ -30,6 +30,7 @@ jest.mock('@kbn/workflows-ui', () => {
   return {
     ...actual,
     useWorkflows: jest.fn(),
+    useWorkflowsCapabilities: jest.fn(),
   };
 });
 
@@ -69,6 +70,9 @@ jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
 const defaultSearch: WorkflowsSearchParams = {
   page: 1,
@@ -76,6 +80,12 @@ const defaultSearch: WorkflowsSearchParams = {
 };
 
 const defaultWorkflow = createWorkflowListItem({ id: 'workflow-matrix-1' });
+const noWorkflowCapabilities = {
+  createWorkflow: false,
+  updateWorkflow: false,
+  deleteWorkflow: false,
+  executeWorkflow: false,
+};
 
 const workflowsQueryResult = {
   data: {
@@ -89,12 +99,26 @@ const workflowsQueryResult = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof useWorkflows>;
 
-function setKibanaCapabilities(workflowsManagement: {
-  createWorkflow: boolean;
-  updateWorkflow: boolean;
-  deleteWorkflow: boolean;
-  executeWorkflow: boolean;
-}): void {
+function setKibanaCapabilities(
+  workflowsManagement: {
+    createWorkflow: boolean;
+    updateWorkflow: boolean;
+    deleteWorkflow: boolean;
+    executeWorkflow: boolean;
+  },
+  hookCapabilities = workflowsManagement
+): void {
+  mockUseWorkflowsCapabilities.mockReturnValue({
+    canReadWorkflow: true,
+    canReadManagedWorkflow: true,
+    canReadWorkflowExecution: true,
+    canReadManagedWorkflowExecution: true,
+    canCancelWorkflowExecution: false,
+    canCreateWorkflow: hookCapabilities.createWorkflow,
+    canUpdateWorkflow: hookCapabilities.updateWorkflow,
+    canDeleteWorkflow: hookCapabilities.deleteWorkflow,
+    canExecuteWorkflow: hookCapabilities.executeWorkflow,
+  });
   mockUseKibana.mockReturnValue({
     services: {
       application: {
@@ -174,11 +198,9 @@ const renderList = (options?: { item?: typeof defaultWorkflow }) =>
 
 function expectControlDisabled(testId: string, disabled: boolean): void {
   const el = screen.getByTestId(testId);
-  if (disabled) {
-    expect(el).toBeDisabled();
-  } else {
-    expect(el).not.toBeDisabled();
-  }
+  const isDisabled = el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
+
+  expect(isDisabled).toBe(disabled);
 }
 
 /** Clone / export / delete live in the collapsed “All actions” popover when there are >2 actions. */
@@ -187,9 +209,38 @@ async function openFirstRowCollapsedActions(): Promise<void> {
 }
 
 describe('Authorization matrix', () => {
+  // The first EUI table render exceeds Jest's 5s default on a loaded CI worker.
+  jest.setTimeout(20_000);
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseWorkflows.mockReturnValue(workflowsQueryResult);
+  });
+
+  it.each([
+    { role: 'viewer', execute: false, edit: false },
+    { role: 'executor', execute: true, edit: false },
+    { role: 'editor', execute: true, edit: true },
+  ])('applies $role ACL permissions to list actions', async ({ execute, edit }) => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    const item = createWorkflowListItem({
+      id: 'private-workflow',
+      enabled: true,
+      valid: true,
+      permissions: { read: true, execute, edit, manage: false },
+    });
+    renderList({ item });
+
+    expectControlDisabled('runWorkflowAction', !execute);
+    expectControlDisabled(`workflowToggleSwitch-${item.id}`, !edit);
+    expectControlDisabled('editWorkflowAction', !edit);
+    await openFirstRowCollapsedActions();
+    expectControlDisabled('deleteWorkflowAction', !edit);
   });
 
   it.each<{
@@ -265,7 +316,7 @@ describe('Authorization matrix', () => {
       expectCloneDisabled,
       expectDeleteDisabled,
     }) => {
-      setKibanaCapabilities({
+      setKibanaCapabilities(noWorkflowCapabilities, {
         createWorkflow,
         updateWorkflow,
         deleteWorkflow,
@@ -284,8 +335,65 @@ describe('Authorization matrix', () => {
     }
   );
 
+  it('disables the edit row action for managed workflows', () => {
+    setKibanaCapabilities(noWorkflowCapabilities, {
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    expectControlDisabled('editWorkflowAction', true);
+  });
+
+  it('explains why managed workflows cannot be edited', async () => {
+    setKibanaCapabilities(noWorkflowCapabilities, {
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    const editAction = screen.getByTestId('editWorkflowAction');
+    await userEvent.hover(editAction.parentElement ?? editAction);
+
+    expect(await screen.findByText('Managed workflows cannot be edited')).toBeInTheDocument();
+  });
+
+  it('disables the delete row action for managed workflows', async () => {
+    setKibanaCapabilities(noWorkflowCapabilities, {
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    await openFirstRowCollapsedActions();
+
+    expect(screen.getByTestId('deleteWorkflowAction')).toBeDisabled();
+  });
+
+  it('explains why managed workflows cannot be deleted', async () => {
+    setKibanaCapabilities(noWorkflowCapabilities, {
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    await openFirstRowCollapsedActions();
+    const deleteAction = screen.getByTestId('deleteWorkflowAction');
+    await userEvent.hover(deleteAction.parentElement ?? deleteAction);
+
+    expect(await screen.findByText('Managed workflows cannot be deleted')).toBeInTheDocument();
+  });
+
   it('disables the enabled switch when the workflow is invalid even if update is granted', () => {
-    setKibanaCapabilities({
+    setKibanaCapabilities(noWorkflowCapabilities, {
       createWorkflow: false,
       updateWorkflow: true,
       deleteWorkflow: false,
@@ -307,13 +415,37 @@ describe('Bulk actions menu', () => {
     await userEvent.click(boxes[boxes.length - 1]);
   }
 
-  it('shows disable + export but not enable when the selected workflow is enabled', async () => {
+  it('omits bulk mutations when the selected workflow denies edit access', async () => {
     setKibanaCapabilities({
-      createWorkflow: false,
+      createWorkflow: true,
       updateWorkflow: true,
       deleteWorkflow: true,
-      executeWorkflow: false,
+      executeWorkflow: true,
     });
+    renderList({
+      item: createWorkflowListItem({
+        permissions: { read: true, execute: true, edit: false, manage: false },
+      }),
+    });
+    await selectFirstDataRow();
+    await userEvent.click(screen.getByTestId('workflows-table-bulk-actions-button'));
+
+    expect(screen.queryByTestId('workflows-bulk-action-enable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflows-bulk-action-disable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflows-bulk-action-delete')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflows-bulk-action-export')).toBeInTheDocument();
+  });
+
+  it('shows disable + export but not enable when the selected workflow is enabled', async () => {
+    setKibanaCapabilities(
+      {
+        createWorkflow: false,
+        updateWorkflow: true,
+        deleteWorkflow: true,
+        executeWorkflow: false,
+      },
+      noWorkflowCapabilities
+    );
     renderList({
       item: createWorkflowListItem({ id: 'bulk-enabled', enabled: true, valid: true }),
     });
@@ -327,12 +459,15 @@ describe('Bulk actions menu', () => {
   });
 
   it('omits bulk enable/disable when update is not granted but still shows export', async () => {
-    setKibanaCapabilities({
-      createWorkflow: false,
-      updateWorkflow: false,
-      deleteWorkflow: false,
-      executeWorkflow: false,
-    });
+    setKibanaCapabilities(
+      {
+        createWorkflow: false,
+        updateWorkflow: false,
+        deleteWorkflow: false,
+        executeWorkflow: false,
+      },
+      noWorkflowCapabilities
+    );
     renderList({
       item: createWorkflowListItem({ id: 'bulk-readonly', enabled: true, valid: true }),
     });
@@ -346,12 +481,15 @@ describe('Bulk actions menu', () => {
   });
 
   it('omits bulk delete when delete is not granted', async () => {
-    setKibanaCapabilities({
-      createWorkflow: false,
-      updateWorkflow: true,
-      deleteWorkflow: false,
-      executeWorkflow: false,
-    });
+    setKibanaCapabilities(
+      {
+        createWorkflow: false,
+        updateWorkflow: true,
+        deleteWorkflow: false,
+        executeWorkflow: false,
+      },
+      noWorkflowCapabilities
+    );
     renderList();
     await selectFirstDataRow();
     await userEvent.click(screen.getByTestId('workflows-table-bulk-actions-button'));

@@ -300,6 +300,23 @@ describe('Exception helpers', () => {
       expect(result).toEqual(payload);
     });
 
+    test('should not update wildcard entry values with backslashes', () => {
+      const payload = [
+        getExceptionListItemSchemaMock({
+          entries: [
+            {
+              field: 'process.executable.caseless',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'C:\\Users\\*\\app.exe',
+            },
+          ],
+        }),
+      ];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result[0].entries[0]).toEqual(payload[0].entries[0]);
+    });
+
     test("should update entry fields when they start with 'event.'", () => {
       const payload = [
         {
@@ -1297,7 +1314,7 @@ describe('Exception helpers', () => {
             sha256: 'some hash',
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'signature',
         },
@@ -1349,7 +1366,7 @@ describe('Exception helpers', () => {
             sha256: 'some hash',
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'signature',
         },
@@ -1390,7 +1407,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'shellcode_thread',
           self_injection: true,
@@ -1471,7 +1488,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'shellcode_thread',
           self_injection: true,

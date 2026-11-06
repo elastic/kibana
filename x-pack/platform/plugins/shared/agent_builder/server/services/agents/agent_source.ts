@@ -7,26 +7,53 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentAccessControl } from '@kbn/agent-builder-common';
+import type { GetAgentAccessControlResponse } from '../../../common/http_api/agents';
 import type {
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type { InternalAgentDefinition } from './agent_registry';
 
+export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAccessControl';
+
+export interface GetAgentOptions {
+  access?: AgentAccess;
+  /**
+   * Resolves the agent for an execution running as this service account. The caller's access
+   * control is not consulted, the run having been authorized at dispatch; the agent must still be
+   * bound to that account.
+   */
+  runAs?: string;
+}
+
+export type AgentAccessControlResult = GetAgentAccessControlResponse;
+
 export interface ReadonlyAgentProvider {
   id: string;
   readonly: true;
   has(agentId: string): MaybePromise<boolean>;
-  get(agentId: string): MaybePromise<InternalAgentDefinition>;
+  get(agentId: string, opts?: GetAgentOptions): MaybePromise<InternalAgentDefinition>;
   list(opts: AgentListOptions): MaybePromise<InternalAgentDefinition[]>;
 }
 
 export interface WritableAgentProvider extends Omit<ReadonlyAgentProvider, 'readonly'> {
   readonly: false;
+  getIds(opts: AgentListOptions): MaybePromise<string[]>;
   create(createRequest: AgentCreateRequest): MaybePromise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): MaybePromise<InternalAgentDefinition>;
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): MaybePromise<InternalAgentDefinition>;
   delete(agentId: string): MaybePromise<boolean>;
+  getAccessControl(agentId: string): MaybePromise<AgentAccessControlResult>;
+  updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): MaybePromise<AgentAccessControl>;
 }
 
 export type AgentProvider = ReadonlyAgentProvider | WritableAgentProvider;

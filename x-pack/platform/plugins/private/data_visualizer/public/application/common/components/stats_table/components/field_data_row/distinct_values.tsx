@@ -43,7 +43,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampleCount)}
+                .convertToText(sampleCount)}
             </strong>
           ),
         }}

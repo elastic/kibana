@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { render, renderHook, waitFor } from '@testing-library/react';
+import { act, render, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useGroupTakeActionsItems } from './use_group_take_action_items';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn(),
 }));
+jest.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
@@ -36,6 +38,7 @@ describe('useGroupTakeActionsItems', () => {
 
   beforeEach(() => {
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+    (updateAlertStatus as jest.Mock).mockResolvedValue({ updated: 5, version_conflicts: 0 });
   });
 
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
@@ -50,9 +53,9 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   it('returns all take actions items if currentStatus is []', async () => {
@@ -67,9 +70,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   it('returns all take actions items if currentStatus.length > 1', async () => {
@@ -84,9 +87,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   it('returns acknowledged & closed take actions items if currentStatus === ["open"]', async () => {
@@ -102,11 +105,11 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
-    expect(buttons[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
+    expect(items.length).toBe(2);
+    expect(items[0].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
+    expect(items[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
   });
 
   it('returns open & acknowledged take actions items if currentStatus === ["closed"]', async () => {
@@ -122,11 +125,11 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].getAttribute('data-test-subj')).toBe('open-alert-status');
-    expect(buttons[1].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
+    expect(items.length).toBe(2);
+    expect(items[0].getAttribute('data-test-subj')).toBe('open-alert-status');
+    expect(items[1].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
   });
 
   it('returns open & closed take actions items if currentStatus === ["acknowledged"]', async () => {
@@ -142,11 +145,11 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].getAttribute('data-test-subj')).toBe('open-alert-status');
-    expect(buttons[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
+    expect(items.length).toBe(2);
+    expect(items[0].getAttribute('data-test-subj')).toBe('open-alert-status');
+    expect(items[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
   });
 
   it('returns empty take actions items if showAlertStatusActions is false', async () => {
@@ -160,9 +163,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(0);
+    expect(items.length).toBe(0);
   });
 
   it('returns array take actions items if showAlertStatusActions is true', async () => {
@@ -176,9 +179,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   describe('when the user does not have alert edit privileges', () => {
@@ -197,6 +200,80 @@ describe('useGroupTakeActionsItems', () => {
         }
       );
       await waitFor(() => expect(result.current(getActionItemsParams)).toBeUndefined());
+    });
+  });
+
+  describe('runtimeMappings forwarding (group take-actions fix)', () => {
+    // These tests assert that runtimeMappings is passed through to updateAlertStatus
+    // so the group-level status update can resolve data view runtime fields that are
+    // not natively mapped on the alerts index (including scripted fields).
+
+    const scriptedMappings = {
+      display_name: {
+        type: 'keyword' as const,
+        script: { source: "emit(doc['first'].value + ' ' + doc['last'].value)" },
+      },
+    };
+
+    const paramsWithQuery = { ...getActionItemsParams, query: '{"bool":{"filter":[]}}' };
+
+    it('forwards runtimeMappings (with script) to updateAlertStatus when the open action is clicked', async () => {
+      const { result } = renderHook(
+        () => useGroupTakeActionsItems({ showAlertStatusActions: true }),
+        { wrapper: wrapperContainer }
+      );
+
+      const { getByTestId } = render(
+        result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })!
+      );
+
+      await act(async () => {
+        getByTestId('open-alert-status').click();
+      });
+
+      expect(updateAlertStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runtimeMappings: scriptedMappings,
+        })
+      );
+    });
+
+    it('forwards runtimeMappings to updateAlertStatus when the acknowledged action is clicked', async () => {
+      const { result } = renderHook(
+        () => useGroupTakeActionsItems({ showAlertStatusActions: true }),
+        { wrapper: wrapperContainer }
+      );
+
+      const { getByTestId } = render(
+        result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })!
+      );
+
+      await act(async () => {
+        getByTestId('acknowledged-alert-status').click();
+      });
+
+      expect(updateAlertStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runtimeMappings: scriptedMappings,
+        })
+      );
+    });
+
+    it('passes runtimeMappings as undefined when not provided', async () => {
+      const { result } = renderHook(
+        () => useGroupTakeActionsItems({ showAlertStatusActions: true }),
+        { wrapper: wrapperContainer }
+      );
+
+      const { getByTestId } = render(result.current(paramsWithQuery)!);
+
+      await act(async () => {
+        getByTestId('open-alert-status').click();
+      });
+
+      expect(updateAlertStatus).toHaveBeenCalledWith(
+        expect.objectContaining({ runtimeMappings: undefined })
+      );
     });
   });
 });

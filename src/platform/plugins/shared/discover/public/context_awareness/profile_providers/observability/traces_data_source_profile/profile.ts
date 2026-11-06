@@ -14,8 +14,14 @@ import {
   type DataSourceProfileProvider,
 } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { isSolutionProfileEnabled } from '../../is_solution_profile_enabled';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getCellRenderers, getDefaultAppState, getChartSectionConfiguration } from './accessors';
+import {
+  getCellRenderers,
+  getDefaultAppState,
+  getChartSectionConfiguration,
+  getDeepAnalysisPlaybook,
+} from './accessors';
 import { isValidNonTransformationalESQLQuery } from '../../../utils/is_valid_non_transformational_esql_query';
 import { DataSourceType } from '../../../../../common/data_sources';
 
@@ -24,6 +30,7 @@ export const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID =
 
 export const createTracesDataSourceProfileProvider = ({
   apmContextService,
+  uiSettings,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
@@ -31,10 +38,11 @@ export const createTracesDataSourceProfileProvider = ({
     getDefaultAppState,
     getCellRenderers,
     getChartSectionConfiguration: getChartSectionConfiguration(),
+    getDeepAnalysisPlaybook,
   },
   resolve: (params) => {
     if (
-      params.rootContext.solutionType === SolutionType.Observability &&
+      isSolutionProfileEnabled(params.rootContext, SolutionType.Observability, uiSettings) &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
       (params.dataSource?.type === DataSourceType.DataView ||
         isValidNonTransformationalESQLQuery(params.query))

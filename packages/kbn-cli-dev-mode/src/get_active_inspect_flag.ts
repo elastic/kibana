@@ -8,11 +8,11 @@
  */
 
 import getopts from 'getopts';
-// @ts-expect-error no types available, very simple module https://github.com/evanlucas/argsplit
-import argsplit from 'argsplit';
 
 const execOpts = getopts(process.execArgv);
-const envOpts = getopts(process.env.NODE_OPTIONS ? argsplit(process.env.NODE_OPTIONS) : []);
+const envOpts = getopts(
+  process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.trim().split(/\s+/) : []
+);
 
 export function getActiveInspectFlag() {
   if (execOpts.inspect) {

@@ -11,7 +11,7 @@ import { AlertsField } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
 import { createCasesServiceMock, getCasesMapMock } from './cases.mock';
 import { getMaintenanceWindowsMock } from './maintenance_windows.mock';
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { identity } from 'lodash';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
@@ -29,12 +29,13 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { createPartialObjectMock } from '../utils/test';
 
 export const mockFieldFormatsRegistry = {
   deserialize: jest.fn(() => ({
     id: 'string',
-    convert: jest.fn().mockImplementation(identity),
+    convertToText: jest.fn().mockImplementation(identity),
   })),
 } as unknown as FieldFormatsRegistry;
 
@@ -158,14 +159,16 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   }),
   renderActionsCell: () => (
     <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="analyzeEvent"
-        color="primary"
-        onClick={() => {}}
-        size="s"
-        data-test-subj="testAction"
-        aria-label="Test action"
-      />
+      <EuiToolTip content="Test action" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="analyzeEvent"
+          color="primary"
+          onClick={() => {}}
+          size="s"
+          data-test-subj="testAction"
+          aria-label="Test action"
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   ),
   services: {
@@ -173,6 +176,7 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
     data: dataPluginMock.createStartContract(),
     fieldFormats: mockFieldFormatsRegistry,
     notifications: notificationServiceMock.createStartContract(),
+    rendering: renderingServiceMock.create(),
     application: applicationServiceMock.createStartContract(),
     settings: settingsServiceMock.createStartContract(),
     licensing: licensingMock.createStart(),

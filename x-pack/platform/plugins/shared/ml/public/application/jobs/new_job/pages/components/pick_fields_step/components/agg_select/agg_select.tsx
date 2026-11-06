@@ -48,6 +48,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
           key: f.name,
           searchableLabel: f.name,
           isEmpty,
+          // NOTE from EUI: Ignoring the type error here is clearly misuse. The component does not expect custom JSX content,
+          // `label` is typed as `string`. Use a string label and the appropriate prepend/append slots to place your content.
           // @ts-ignore Purposefully passing label as element instead of string
           // for more robust rendering
           label: (

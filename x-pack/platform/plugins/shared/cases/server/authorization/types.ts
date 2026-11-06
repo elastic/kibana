@@ -28,6 +28,7 @@ export enum ReadOperations {
   FindCases = 'findCases',
   BulkGetCases = 'bulkGetCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
+  GetCaseIDsByAttachmentIDs = 'getCaseIDsByAttachmentIDs',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
   BulkGetAttachments = 'bulkGetAttachments',
@@ -46,6 +47,9 @@ export enum ReadOperations {
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
   GetUserActionUsers = 'getUserActionUsers',
+  GetFieldDefinitions = 'getFieldDefinitions',
+  GetTemplate = 'getTemplate',
+  FindTemplates = 'findTemplates',
 }
 
 /**

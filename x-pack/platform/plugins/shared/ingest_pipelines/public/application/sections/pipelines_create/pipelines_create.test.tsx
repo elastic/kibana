@@ -48,6 +48,7 @@ jest.mock('../../components', () => ({
       <div data-test-subj="canEditName">{String(props.canEditName)}</div>
     </div>
   ),
+  PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
 }));
 
 const renderWithPath = (path: string, services: DeepPartialMockServices) => {

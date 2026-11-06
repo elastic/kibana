@@ -21,9 +21,10 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/agent-builder-common'
   - '@kbn/tooling-log'
-  - '@kbn/core'
   - '@kbn/test'
   - '@kbn/security-solution-plugin'
+  - '@kbn/fleet-plugin'
+  - '@kbn/securitysolution-list-constants'
 tags:
   - functional-tests
   - package
@@ -35,6 +36,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -11,8 +11,10 @@ import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
+  type RelatedEpisodesScope,
 } from '../queries/related_episodes_query';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchSameRuleEpisodesQuery } from './use_fetch_same_rule_episodes_query';
 
 jest.mock('../apis/fetch_related_episodes');
@@ -25,6 +27,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 describe('useFetchSameRuleEpisodesQuery', () => {
   const mockToastDanger = jest.fn();
   const mockExpressions = {} as ExpressionsStart;
+  const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,11 +41,11 @@ describe('useFetchSameRuleEpisodesQuery', () => {
     const { result } = renderHook(
       () =>
         useFetchSameRuleEpisodesQuery({
-          ruleId: 'r1',
+          scope: { type: 'rule', ruleId: 'r1' },
           excludeEpisodeId: undefined,
           pageSize: 5,
           currentGroupHash: 'gh-1',
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }
@@ -55,21 +58,21 @@ describe('useFetchSameRuleEpisodesQuery', () => {
   it('uses buildRelatedBaseQuery + finishRelatedEpisodesQuery when currentGroupHash is undefined', async () => {
     fetchRelatedEpisodesMock.mockResolvedValue([]);
 
-    const ruleId = 'rule-1';
+    const scope: RelatedEpisodesScope = { type: 'rule', ruleId: 'rule-1' };
     const excludeEpisodeId = 'ep-current';
     const pageSize = 5;
     const expectedQuery = finishRelatedEpisodesQuery(
-      buildRelatedBaseQuery(ruleId, excludeEpisodeId)
+      buildRelatedBaseQuery(DEFAULT_SPACE_ID, scope, excludeEpisodeId)
     ).print('basic');
 
     const { result } = renderHook(
       () =>
         useFetchSameRuleEpisodesQuery({
-          ruleId,
+          scope,
           excludeEpisodeId,
           pageSize,
           currentGroupHash: undefined,
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }
@@ -88,22 +91,22 @@ describe('useFetchSameRuleEpisodesQuery', () => {
   it('adds group_hash != when currentGroupHash is set', async () => {
     fetchRelatedEpisodesMock.mockResolvedValue([]);
 
-    const ruleId = 'rule-1';
+    const scope: RelatedEpisodesScope = { type: 'rule', ruleId: 'rule-1' };
     const excludeEpisodeId = 'ep-current';
     const currentGroupHash = 'gh-1';
     const pageSize = 5;
-    const otherGroupsQuery = buildRelatedBaseQuery(ruleId, excludeEpisodeId);
+    const otherGroupsQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, scope, excludeEpisodeId);
     otherGroupsQuery.where`group_hash != ${currentGroupHash}`;
     const expectedQuery = finishRelatedEpisodesQuery(otherGroupsQuery).print('basic');
 
     const { result } = renderHook(
       () =>
         useFetchSameRuleEpisodesQuery({
-          ruleId,
+          scope,
           excludeEpisodeId,
           pageSize,
           currentGroupHash,
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }
@@ -118,5 +121,33 @@ describe('useFetchSameRuleEpisodesQuery', () => {
       })
     );
     expect(result.current.data).toEqual([]);
+  });
+
+  it('scopes the query to the source when the episode has no rule', async () => {
+    fetchRelatedEpisodesMock.mockResolvedValue([]);
+
+    const scope: RelatedEpisodesScope = { type: 'source', source: 'zabbix' };
+    const otherGroupsQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, scope, 'ep-current');
+    otherGroupsQuery.where`group_hash != ${'gh-1'}`;
+    const expectedQuery = finishRelatedEpisodesQuery(otherGroupsQuery).print('basic');
+
+    const { result } = renderHook(
+      () =>
+        useFetchSameRuleEpisodesQuery({
+          scope,
+          excludeEpisodeId: 'ep-current',
+          pageSize: 5,
+          currentGroupHash: 'gh-1',
+          services: { expressions: mockExpressions, spaces: mockSpaces },
+          toastDanger: mockToastDanger,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchRelatedEpisodesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ query: expectedQuery })
+    );
   });
 });

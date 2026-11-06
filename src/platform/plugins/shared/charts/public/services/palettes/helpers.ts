@@ -77,7 +77,7 @@ const getNormalizedMaxRange = (
     return Number.POSITIVE_INFINITY;
   }
 
-  return stops.length ? rangeMax : max - (max - min) / colors.length;
+  return stops.length ? rangeMax : max;
 };
 
 const getNormalizedMinRange = (

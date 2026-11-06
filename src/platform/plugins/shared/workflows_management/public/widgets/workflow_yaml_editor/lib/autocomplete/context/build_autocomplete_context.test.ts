@@ -14,13 +14,14 @@ import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
+import { createMockWorkflowContextRegistry } from '../../../../../../common/lib/create_workflow_context_registry.mock';
 import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
 import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
 import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 
-jest.mock('../../../../../features/workflow_context/lib/get_output_schema_for_step_type');
+jest.mock('@kbn/workflows-yaml/common/validation/context/get_output_schema_for_step_type');
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
@@ -61,6 +62,7 @@ export function getFakeAutocompleteContextParams(
   } as WorkflowDetailState;
 
   return {
+    registry: createMockWorkflowContextRegistry(),
     model: mockModel as unknown as monaco.editor.ITextModel,
     position: position as monaco.Position,
     completionContext: {
@@ -199,6 +201,7 @@ steps: []
   it('should detect triggers[i].on.condition and resolve registered trigger definition', () => {
     const mockDefinition: PublicTriggerDefinition = {
       id: 'example.custom_trigger',
+      stability: 'tech_preview',
       title: 'Example',
       description: 'Example trigger',
       eventSchema: z.object({ severity: z.string() }),
@@ -253,5 +256,73 @@ steps: []
     expect(result?.triggerConditionDefinition).toBeUndefined();
 
     getDef.mockRestore();
+  });
+
+  describe('ES|QL region detection', () => {
+    it('detects when the cursor sits inside an elasticsearch.esql.query body', () => {
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* | |<-
+`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(true);
+      expect(result?.esqlRegion).not.toBeNull();
+      expect(result?.esqlOffsetInQuery).not.toBeNull();
+      expect(result?.esqlOffsetInQuery).toBeGreaterThan(0);
+    });
+
+    it('keeps the cursor inside the region when it sits in trailing whitespace', () => {
+      // Reproduces the bug where a 500ms-debounced store yamlDocument made the
+      // cursor land outside `contentEndInFile` on every keystroke. The build
+      // context now re-parses model.getValue() directly AND treats trailing
+      // whitespace immediately after the trimmed region content as in-region,
+      // so the cursor at the very end of an in-progress ES|QL line still
+      // resolves as in-region.
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* |<-`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(true);
+      expect(result?.esqlRegion?.esql).toBe('        FROM logs-*');
+      // Cursor offset is past the trimmed end, into the trailing whitespace.
+      expect(result?.esqlOffsetInQuery).toBeGreaterThan(result!.esqlRegion!.esql.length);
+    });
+
+    it('returns isInEsqlQueryField=false outside an ES|QL query body', () => {
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs
+    name: "|<-"
+`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(false);
+      expect(result?.esqlRegion).toBeNull();
+      expect(result?.esqlOffsetInQuery).toBeNull();
+    });
+
+    it('skips the YAML walk when no elasticsearch.esql.query step exists', () => {
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: console
+    with:
+      message: "|<-"
+`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(false);
+      expect(result?.esqlRegion).toBeNull();
+    });
   });
 });

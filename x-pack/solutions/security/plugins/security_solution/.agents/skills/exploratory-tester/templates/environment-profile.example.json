@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "Exploratory-tester environment profile.",
+    "Save filled copies to .exploratory-session/environments/<name>.json",
+    "That directory is gitignored (.gitignore:41) — secrets never reach git.",
+    "",
+    "SECURITY: Prefer $VAR references (e.g. '$KIBANA_API_KEY') over inline secrets.",
+    "$VAR values are resolved from shell environment variables at load time.",
+    "",
+    "Usage: add 'Environment: profile <name>' to your invocation or session.example.yaml.",
+    "The agent loads this file, resolves $VAR fields, and skips re-prompting credentials."
+  ],
+
+  "name": "staging",
+
+  "type": "user-provided",
+
+  "url": "$KIBANA_TEST_URL",
+
+  "es_url": "$KIBANA_ES_URL",
+
+  "username": "$KIBANA_TEST_USERNAME",
+
+  "password": "$KIBANA_TEST_PASSWORD",
+
+  "api_key": "$KIBANA_API_KEY",
+
+  "_note_api_key": "Field name uses underscore (api_key); YAML invocation uses api-key (hyphen). Same concept, different syntax.",
+
+  "space": "exploratory-testing",
+
+  "role": "platform_engineer",
+
+  "validated_at": null
+}

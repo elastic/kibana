@@ -18,18 +18,24 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
+import { isHistogramHeatmapVisualization } from '@kbn/discover-utils';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
-import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
+import { isLegacyHistogram } from '../../../common/utils/histogram_metric';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from '../../pagination';
-import { usePagination } from './hooks';
+import { useFetchHistogramBounds, usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { extractUsedMetadataFields } from '../../../utils/extract_used_metadata_fields';
+import { useEsqlQueryInfo } from '../../../hooks';
+import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -39,12 +45,39 @@ export interface MetricsExperienceGridContentProps
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   activeDimensions: Dimension[];
+  /**
+   * Fetch params captured when the current `metricItems` landed. The histogram bounds fetch is
+   * built from these so it never runs for stale items against new Discover inputs.
+   */
+  loadedFetchParams?: UnifiedMetricsGridProps['fetchParams'];
   isDiscoverLoading?: boolean;
+  isTabSelected: boolean;
+  isComponentVisible: boolean;
 }
+
+const useEsqlQueryParts = (query: Query | AggregateQuery | undefined) => {
+  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
+  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
+  const userSource = useMemo(
+    () => (esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) || undefined : undefined),
+    [esqlQuery]
+  );
+  const { metadataFields: declaredMetadataFields } = useEsqlQueryInfo({ query: esqlQuery ?? '' });
+  const metadataFields = useMemo(
+    () =>
+      extractUsedMetadataFields({
+        metadataFields: declaredMetadataFields,
+        filters: whereStatements,
+      }),
+    [declaredMetadataFields, whereStatements]
+  );
+  return { whereStatements, metadataFields, userSource };
+};
 
 export const MetricsExperienceGridContent = ({
   metricItems,
   activeDimensions,
+  loadedFetchParams,
   services,
   discoverFetch$,
   fetchParams,
@@ -53,16 +86,22 @@ export const MetricsExperienceGridContent = ({
   actions,
   histogramCss,
   isDiscoverLoading = false,
+  isTabSelected,
+  isComponentVisible,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
+  const { whereStatements, metadataFields, userSource } = useEsqlQueryParts(query);
+  const {
+    whereStatements: loadedWhereStatements,
+    metadataFields: loadedMetadataFields,
+    userSource: loadedUserSource,
+  } = useEsqlQueryParts(loadedFetchParams?.query);
 
-  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
-
-  const { searchTerm, currentPage, onPageChange } = useMetricsExperienceState();
+  const { searchTerm, currentPage, onPageChange, profileId, gridSettings } =
+    useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -73,6 +112,18 @@ export const MetricsExperienceGridContent = ({
     pageSize: PAGE_SIZE,
     currentPage,
   }) ?? {};
+
+  const { loading: histogramBoundsLoading, bounds: histogramBounds } = useFetchHistogramBounds({
+    enabled:
+      isComponentVisible && isHistogramHeatmapVisualization(gridSettings.histogramVisualization),
+    metricItems: currentPageFields,
+    fetchParams: loadedFetchParams,
+    services,
+    whereStatements: loadedWhereStatements,
+    metadataFields: loadedMetadataFields,
+    originalSource: loadedUserSource,
+    profileId,
+  });
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
@@ -88,6 +139,20 @@ export const MetricsExperienceGridContent = ({
         ? LEGACY_HISTOGRAM_USER_MESSAGES
         : undefined,
     []
+  );
+
+  const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
+
+  const getDescription = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      duplicateMetricNames.has(metricItem.metricName)
+        ? i18n.translate('metricsExperience.grid.duplicateMetricIndexDescription', {
+            defaultMessage:
+              'This metric exists in multiple data streams. This chart shows data from {indexName} only.',
+            values: { indexName: metricItem.indexName },
+          })
+        : undefined,
+    [duplicateMetricNames]
   );
 
   return (
@@ -129,7 +194,14 @@ export const MetricsExperienceGridContent = ({
           fetchParams={fetchParams}
           searchTerm={searchTerm}
           whereStatements={whereStatements}
+          metadataFields={metadataFields}
+          userSource={userSource}
           getUserMessages={getUserMessages}
+          getDescription={getDescription}
+          isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
+          histogramBounds={histogramBounds}
+          histogramBoundsLoading={histogramBoundsLoading}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

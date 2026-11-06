@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { EntitySummaryGrid } from './entity_summary_grid';
 import { mockEntityRecord } from '../../mocks';
@@ -25,7 +25,7 @@ const entityWithSource: Entity = {
   ...mockEntityRecord,
   entity: {
     ...mockEntityRecord.entity,
-    source: 'logs-endpoint',
+    source: ['logs-endpoint'],
   },
 } as Entity;
 
@@ -62,13 +62,14 @@ describe('EntitySummaryGrid', () => {
   });
 
   it('displays entity id', () => {
-    const { getByText } = render(
+    const { getByText, queryByTestId } = render(
       <TestProviders>
         <EntitySummaryGrid entityRecord={entityWithSource} />
       </TestProviders>
     );
 
     expect(getByText('test-entity-id-host-abc123')).toBeInTheDocument();
+    expect(queryByTestId('entityIdCell-more')).not.toBeInTheDocument();
   });
 
   it('displays data source formatted (capitalized, separators replaced with spaces)', () => {
@@ -116,7 +117,7 @@ describe('EntitySummaryGrid', () => {
       </TestProviders>
     );
 
-    expect(container.querySelector('[data-euiicon-type="arrowDown"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
   });
 
   it('does not show arrow down icon when onCriticalitySave is not provided', () => {
@@ -126,7 +127,9 @@ describe('EntitySummaryGrid', () => {
       </TestProviders>
     );
 
-    expect(container.querySelector('[data-euiicon-type="arrowDown"]')).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-euiicon-type="chevronSingleDown"]')
+    ).not.toBeInTheDocument();
   });
 
   it('opens criticality modal on click', () => {
@@ -163,5 +166,153 @@ describe('EntitySummaryGrid', () => {
     );
 
     expect(getByTestId('entityWatchlistsCell-more')).toHaveTextContent('+1');
+  });
+
+  describe('group view (aliasRecords supplied)', () => {
+    const target = {
+      ...entityWithSource,
+      asset: { criticality: 'low_impact' },
+      entity: { ...entityWithSource.entity, attributes: { watchlists: ['watchlist-1'] } },
+    } as unknown as Entity;
+    const alias = {
+      ...entityWithSource,
+      asset: { criticality: 'extreme_impact' },
+      entity: {
+        ...entityWithSource.entity,
+        id: 'alias-id',
+        attributes: { watchlists: ['watchlist-2', 'watchlist-1'] },
+      },
+    } as unknown as Entity;
+
+    it('shows the primary record entity id inline with the alias ids behind a +N badge', () => {
+      const secondAlias = {
+        ...alias,
+        entity: { ...alias.entity, id: 'second-alias-id' },
+      } as unknown as Entity;
+      const { getByText, queryByText, getByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid entityRecord={target} aliasRecords={[alias, secondAlias]} />
+        </TestProviders>
+      );
+
+      expect(getByText('test-entity-id-host-abc123')).toBeInTheDocument();
+      expect(queryByText('alias-id')).not.toBeInTheDocument();
+      expect(getByTestId('entityIdCell-more')).toHaveTextContent('+2');
+    });
+
+    it('lists the alias ids in the badge tooltip', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid entityRecord={target} aliasRecords={[alias]} />
+        </TestProviders>
+      );
+
+      fireEvent.mouseOver(getByTestId('entityIdCell-more'));
+
+      await waitFor(() => {
+        expect(screen.getByText('alias-id')).toBeInTheDocument();
+      });
+      expect(screen.getByText('Additional entity IDs')).toBeInTheDocument();
+    });
+
+    it('counts each alias id once and never counts the target itself', () => {
+      const duplicateAlias = { ...alias } as unknown as Entity;
+      const targetLookalike = {
+        ...alias,
+        entity: { ...alias.entity, id: target.entity?.id },
+      } as unknown as Entity;
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid
+            entityRecord={target}
+            aliasRecords={[alias, duplicateAlias, targetLookalike]}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('entityIdCell-more')).toHaveTextContent('+1');
+    });
+
+    it('shows the most severe criticality across the group, ignoring criticalityLevel', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid
+            entityRecord={target}
+            aliasRecords={[alias]}
+            criticalityLevel="medium_impact"
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('asset-criticality-badge')).toHaveTextContent('Extreme Impact');
+    });
+
+    it('is read-only even when onCriticalitySave is provided', () => {
+      const onCriticalitySave = jest.fn();
+      const { container, getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid
+            entityRecord={target}
+            aliasRecords={[alias]}
+            onCriticalitySave={onCriticalitySave}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        container.querySelector('[data-euiicon-type="chevronSingleDown"]')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('asset-criticality-badge'));
+
+      expect(queryByTestId('asset-criticality-modal-title')).not.toBeInTheDocument();
+      expect(onCriticalitySave).not.toHaveBeenCalled();
+    });
+
+    it('shows the union of data sources across the group', () => {
+      const aliasWithOtherSource = {
+        ...alias,
+        entity: { ...alias.entity, source: ['logs-endpoint', 'entityanalytics_okta'] },
+      } as unknown as Entity;
+
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid entityRecord={target} aliasRecords={[aliasWithOtherSource]} />
+        </TestProviders>
+      );
+
+      expect(getByText('Logs Endpoint')).toBeInTheDocument();
+      // logs-endpoint is de-duplicated across both records, so only entityanalytics_okta overflows.
+      expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
+    });
+
+    it('shows the union of watchlists across the group', () => {
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <EntitySummaryGrid entityRecord={target} aliasRecords={[alias]} />
+        </TestProviders>
+      );
+
+      expect(getByText('First Watchlist')).toBeInTheDocument();
+      // watchlist-1 is de-duplicated across both records, so only watchlist-2 overflows.
+      expect(getByTestId('entityWatchlistsCell-more')).toHaveTextContent('+1');
+    });
+
+    it('falls back to single-record behaviour when aliasRecords is empty', () => {
+      const { container } = render(
+        <TestProviders>
+          <EntitySummaryGrid
+            entityRecord={target}
+            aliasRecords={[]}
+            criticalityLevel="high_impact"
+            onCriticalitySave={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        container.querySelector('[data-euiicon-type="chevronSingleDown"]')
+      ).toBeInTheDocument();
+    });
   });
 });

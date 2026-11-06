@@ -8,6 +8,7 @@
 import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchClient,
@@ -15,15 +16,40 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
   CoreRequestHandlerContext,
+  IUiSettingsClient,
 } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import { enableInspectEsQueries, searchExcludedDataTiers } from '@kbn/observability-plugin/common';
+import { getInspectResponse, type DataTier } from '@kbn/observability-shared-plugin/common';
+import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import type { SyntheticsServerSetup } from './types';
+
+/**
+ * Combines an existing query with a filter that excludes the configured data
+ * tiers (see the `observability:searchExcludedDataTiers` advanced setting).
+ *
+ * Excluding tiers such as `data_frozen` keeps Synthetics searches from fanning
+ * out to slow, throttled searchable-snapshot shards, which otherwise drives up
+ * latency and search thread pool pressure on clusters with long retention.
+ */
+export const applyExcludedDataTiersToQuery = (
+  query: QueryDslQueryContainer | undefined,
+  excludedDataTiers: DataTier[]
+): QueryDslQueryContainer | undefined => {
+  if (!excludedDataTiers.length) {
+    return query;
+  }
+
+  return {
+    bool: {
+      filter: [...(query ? [query] : []), ...excludeTiersQuery(excludedDataTiers)],
+    },
+  };
+};
 
 export interface CountResponse {
   result: {
@@ -47,8 +73,11 @@ export class SyntheticsEsClient {
   isInspectorEnabled?: Promise<boolean | undefined>;
   inspectableEsQueries: InspectResponse = [];
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
+  uiSettingsClient?: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   heartbeatIndices: string;
+  projectRouting?: string;
+  private excludedDataTiers?: Promise<DataTier[]>;
 
   constructor(
     savedObjectsClient: SavedObjectsClientContract,
@@ -56,19 +85,54 @@ export class SyntheticsEsClient {
     options?: {
       isDev?: boolean;
       uiSettings?: CoreRequestHandlerContext['uiSettings'];
+      uiSettingsClient?: IUiSettingsClient;
       request?: KibanaRequest;
       heartbeatIndices?: string;
+      projectRouting?: string;
     }
   ) {
-    const { isDev = false, uiSettings, request, heartbeatIndices } = options ?? {};
+    const {
+      isDev = false,
+      uiSettings,
+      uiSettingsClient,
+      request,
+      heartbeatIndices,
+      projectRouting,
+    } = options ?? {};
     this.uiSettings = uiSettings;
+    // Alerting rule executors only have access to a plain `IUiSettingsClient`,
+    // whereas route handlers pass the full `uiSettings` context. Support both so
+    // every caller can resolve advanced settings such as the excluded data tiers.
+    this.uiSettingsClient = uiSettingsClient ?? uiSettings?.client;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
     this.request = request;
     this.isDev = isDev;
     this.heartbeatIndices = heartbeatIndices ?? SYNTHETICS_INDEX_PATTERN;
+    this.projectRouting = projectRouting;
     this.inspectableEsQueries = [];
     this.getInspectEnabled().catch(() => {});
+  }
+
+  private withProjectRouting<T extends object>(params: T): T {
+    if (!this.projectRouting) {
+      return params;
+    }
+    return { ...params, project_routing: this.projectRouting };
+  }
+
+  async getExcludedDataTiers(): Promise<DataTier[]> {
+    if (!this.uiSettingsClient) {
+      return [];
+    }
+
+    if (this.excludedDataTiers === undefined) {
+      this.excludedDataTiers = this.uiSettingsClient
+        .get<DataTier[]>(searchExcludedDataTiers)
+        .catch(() => [] as DataTier[]);
+    }
+
+    return this.excludedDataTiers;
   }
 
   async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
@@ -78,7 +142,15 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: this.heartbeatIndices, ignore_unavailable: true, ...params };
+    const esParams = this.withProjectRouting({
+      index: this.heartbeatIndices,
+      ignore_unavailable: true,
+      ...params,
+    });
+    const excludedDataTiers = await this.getExcludedDataTiers();
+    if (excludedDataTiers.length) {
+      esParams.query = applyExcludedDataTiersToQuery(esParams.query, excludedDataTiers);
+    }
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -126,10 +198,15 @@ export class SyntheticsEsClient {
     requests: SearchSearchRequestBody[],
     operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+    const excludedDataTiers = await this.getExcludedDataTiers();
     const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
       searches.push({ index: this.heartbeatIndices, ignore_unavailable: true });
-      searches.push(request);
+      searches.push(
+        excludedDataTiers.length
+          ? { ...request, query: applyExcludedDataTiersToQuery(request.query, excludedDataTiers) }
+          : request
+      );
     }
 
     const startTimeNow = Date.now();
@@ -139,9 +216,9 @@ export class SyntheticsEsClient {
 
     try {
       res = await this.baseESClient.msearch(
-        {
+        this.withProjectRouting({
           searches,
-        },
+        }),
         { meta: true }
       );
     } catch (e) {
@@ -158,6 +235,9 @@ export class SyntheticsEsClient {
               index: this.heartbeatIndices,
               ignore_unavailable: true,
               ...request,
+              ...(excludedDataTiers.length
+                ? { query: applyExcludedDataTiersToQuery(request.query, excludedDataTiers) }
+                : {}),
             },
             esRequestStatus: RequestStatus.OK,
             esResponse: res?.body.responses[index],
@@ -181,7 +261,20 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: this.heartbeatIndices, ignore_unavailable: true, ...params };
+    const esParams: {
+      index: string;
+      ignore_unavailable: boolean;
+      query?: QueryDslQueryContainer;
+      project_routing?: string;
+    } = this.withProjectRouting({
+      index: this.heartbeatIndices,
+      ignore_unavailable: true,
+      ...params,
+    });
+    const excludedDataTiers = await this.getExcludedDataTiers();
+    if (excludedDataTiers.length) {
+      esParams.query = applyExcludedDataTiersToQuery(esParams.query, excludedDataTiers);
+    }
 
     try {
       res = await this.baseESClient.count(esParams, {

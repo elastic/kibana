@@ -279,12 +279,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (testData.fieldSelectorApplyAvailable) {
           await ml.testExecution.logTestStep('regroup results');
           await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
+
+          // Applying the field filter resets the results and re-runs the whole analysis.
+          // Wait for it to complete before reading the regrouped table.
+          await aiops.logRateAnalysisPage.assertAnalysisComplete(
+            testData.analysisType,
+            testData.dataGenerator
+          );
+
           const expectedFilteredAnalysisGroupsTable = orderBy(
             testData.expected.filteredAnalysisGroupsTable,
             'group'
           );
 
-          await retry.tryForTime(30 * 1000, async () => {
+          await retry.tryForTime(60 * 1000, async () => {
             const filteredAnalysisGroupsTable =
               await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
 

@@ -100,7 +100,7 @@ export function getPoint(
     point.series = series
       .map((s) => {
         const fieldFormatter = getFormatService().deserialize(s.format);
-        return fieldFormatter.convert(row[s.accessor]);
+        return fieldFormatter.convertToText(row[s.accessor]);
       })
       .join(' - ');
   } else if (y) {

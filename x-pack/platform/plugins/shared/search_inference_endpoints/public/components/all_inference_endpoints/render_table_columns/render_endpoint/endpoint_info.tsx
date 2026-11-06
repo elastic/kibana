@@ -91,18 +91,8 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
               )}
             >
               {(copy) => (
-                <EuiButtonIcon
-                  size="xs"
-                  display="empty"
-                  onClick={() => handleCopy(copy)}
-                  iconType={isCopied ? 'check' : 'copy'}
-                  color={isCopied ? 'success' : 'text'}
-                  data-test-subj={
-                    isCopied
-                      ? 'inference-endpoint-copy-id-button-copied'
-                      : 'inference-endpoint-copy-id-button'
-                  }
-                  aria-label={
+                <EuiToolTip
+                  content={
                     isCopied
                       ? i18n.translate(
                           'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
@@ -113,7 +103,32 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
                           { defaultMessage: 'Copy endpoint ID to clipboard' }
                         )
                   }
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="xs"
+                    display="empty"
+                    onClick={() => handleCopy(copy)}
+                    iconType={isCopied ? 'check' : 'copy'}
+                    color={isCopied ? 'success' : 'text'}
+                    data-test-subj={
+                      isCopied
+                        ? 'inference-endpoint-copy-id-button-copied'
+                        : 'inference-endpoint-copy-id-button'
+                    }
+                    aria-label={
+                      isCopied
+                        ? i18n.translate(
+                            'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
+                            { defaultMessage: 'Copied' }
+                          )
+                        : i18n.translate(
+                            'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdToClipboard',
+                            { defaultMessage: 'Copy endpoint ID to clipboard' }
+                          )
+                    }
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           </EuiFlexItem>

@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { lazySchema, z } from '@kbn/zod/v4';
+
+export interface TuningConfigFieldBounds {
+  min: number;
+  max?: number;
+  /** UI hint: field should be a whole number. config-schema's schema.number() does not enforce this. */
+  integer?: boolean;
+}
+
+// Shape-only schema — no bounds or cross-field checks. Bounds and validation
+// logic live exclusively in SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS and
+// validateSignificantEventsTuningConfig to avoid drift between two sources.
+export const significantEventsTuningConfigSchema = lazySchema(() =>
+  z.object({
+    feature_ttl_days: z.number(),
+    semantic_min_score: z.number(),
+    rrf_rank_constant: z.number(),
+    query_validation_timeout_ms: z.number(),
+  })
+);
+
+export type SignificantEventsTuningConfig = z.infer<typeof significantEventsTuningConfigSchema>;
+
+export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
+  keyof SignificantEventsTuningConfig,
+  TuningConfigFieldBounds
+> = {
+  feature_ttl_days: { min: 1, integer: true },
+  semantic_min_score: { min: 0, max: 1 },
+  rrf_rank_constant: { min: 1, max: 100, integer: true },
+  query_validation_timeout_ms: { min: 1000, max: 240_000, integer: true },
+};
+
+export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
+  feature_ttl_days: 30,
+  semantic_min_score: 0.15,
+  rrf_rank_constant: 20,
+  query_validation_timeout_ms: 10_000,
+};
+
+/**
+ * Validates a partial config object and returns user-facing error strings.
+ * Missing keys are allowed and fall back to defaults at runtime.
+ */
+export function validateSignificantEventsTuningConfig(parsed: Record<string, unknown>): string[] {
+  const errors: string[] = [];
+
+  const knownKeys = new Set(Object.keys(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS));
+  for (const key of Object.keys(parsed)) {
+    if (!knownKeys.has(key)) {
+      errors.push(`Unknown key: "${key}"`);
+    }
+  }
+
+  for (const [key, bounds] of Object.entries(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS)) {
+    const value = parsed[key];
+    if (value === undefined) continue;
+
+    if (typeof value !== 'number') {
+      errors.push(`"${key}" must be a number, got ${typeof value}`);
+      continue;
+    }
+    if (Number.isNaN(value)) {
+      errors.push(`"${key}" must be a number, got NaN`);
+      continue;
+    }
+    if (bounds.integer && !Number.isInteger(value)) {
+      errors.push(`"${key}" must be an integer`);
+    }
+    if (value < bounds.min || (typeof bounds.max === 'number' && value > bounds.max)) {
+      if (typeof bounds.max === 'number') {
+        errors.push(`"${key}" must be between ${bounds.min} and ${bounds.max}`);
+      } else {
+        errors.push(`"${key}" must be at least ${bounds.min}`);
+      }
+    }
+  }
+
+  return errors;
+}
+
+/** Resolves a stored settings value into a full, validated config; shared by server and client so both derive identical values (e.g. KI expiry). */
+export function resolveSignificantEventsTuningConfig(
+  stored: unknown,
+  logger?: { warn: (message: string) => void }
+): SignificantEventsTuningConfig {
+  const source = stored && typeof stored === 'object' ? (stored as Record<string, unknown>) : {};
+
+  const knownKeys = new Set(Object.keys(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS));
+  const safeStored = Object.fromEntries(
+    Object.entries(source).filter(([key]) => knownKeys.has(key))
+  ) as Partial<SignificantEventsTuningConfig>;
+
+  const merged = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...safeStored };
+
+  if (merged.semantic_min_score < 0 || merged.semantic_min_score > 1) {
+    logger?.warn(
+      `semantic_min_score=${merged.semantic_min_score} is outside the valid [0, 1] range ` +
+        `(likely a pre-upgrade value on the old 0-100 scale). Resetting to default ` +
+        `${DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score}.`
+    );
+    merged.semantic_min_score = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score;
+  }
+
+  const errors = validateSignificantEventsTuningConfig(merged as Record<string, unknown>);
+  if (errors.length > 0) {
+    logger?.warn(
+      `Significant Events tuning config is invalid (${errors.join(', ')}). ` +
+        `Falling back to default config. Fix the config in the Settings page.`
+    );
+    return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG };
+  }
+
+  return merged;
+}

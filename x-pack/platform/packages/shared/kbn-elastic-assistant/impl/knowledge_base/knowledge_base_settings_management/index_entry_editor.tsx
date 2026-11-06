@@ -76,6 +76,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
               color="subdued"
               style={{ lineHeight: 'inherit', marginRight: '4px' }}
               type="lock"
+              aria-hidden={true}
             />
             {i18n.SHARING_PRIVATE_OPTION_LABEL}
           </EuiText>
@@ -90,6 +91,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
               color="subdued"
               style={{ lineHeight: 'inherit', marginRight: '4px' }}
               type="globe"
+              aria-hidden={true}
             />
             {i18n.SHARING_GLOBAL_OPTION_LABEL}
           </EuiText>

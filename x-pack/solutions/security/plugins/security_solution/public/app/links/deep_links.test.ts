@@ -37,7 +37,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -59,7 +59,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -82,12 +82,12 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
 
-  it('should include unavailable links with sideNav visibility only', () => {
+  it('should include unavailable links with projectSideNav visibility only', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
@@ -105,13 +105,49 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
       {
         id: id2,
         path: `/path/${id2}`,
         title: `Title for ${id2}`,
-        visibleIn: ['sideNav'],
+        visibleIn: ['projectSideNav'],
+      },
+    ]);
+  });
+
+  it('should keep unavailable links hidden when they are also disabled from the side nav', () => {
+    // Mirrors the legacy Attack Discovery link once the new Attacks page is enabled: it is kept
+    // in the links (for route authorization/redirect) but disabled from the side nav. On upsell
+    // tiers it becomes `unavailable`, and it must NOT resurface in the side nav.
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [{ id }, { id: id2 }],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+      [id2]: createMockLink(id2, {
+        unavailable: true,
+        sideNavDisabled: true,
+        globalSearchDisabled: true,
+      }),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
+      },
+      {
+        id: id2,
+        path: `/path/${id2}`,
+        title: `Title for ${id2}`,
+        visibleIn: [],
       },
     ]);
   });
@@ -137,7 +173,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -164,7 +200,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });

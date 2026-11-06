@@ -91,7 +91,7 @@ export function registerDeprecationLoggingRoutes({
       },
       validate: {
         query: schema.object({
-          from: schema.string(),
+          from: schema.string({ maxLength: 64 }),
         }),
       },
     },

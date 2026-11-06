@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { Space } from '@kbn/spaces-plugin/common';
 import {
@@ -107,6 +107,9 @@ const SelectablePopover = ({ space }: { space: Space }) => {
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.showAllSpaces.popoverAriaLabel', {
+        defaultMessage: 'Spaces menu',
+      })}
     >
       <EuiContextMenu
         initialPanelId={0}

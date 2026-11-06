@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
+import { Subject } from 'rxjs';
 import {
   SyntheticsRefreshContextProvider,
   useSyntheticsRefreshContext,
@@ -107,5 +108,25 @@ describe('SyntheticsRefreshContextProvider', () => {
 
       expect(result.current.lastRefresh).toBeGreaterThan(initialLastRefresh);
     });
+  });
+
+  it('notifies an embeddable only for automatic refreshes', () => {
+    const onAutoRefresh = jest.fn();
+    const reload$ = new Subject<boolean>();
+    const embeddableWrapper = ({ children }: React.PropsWithChildren) =>
+      React.createElement(SyntheticsRefreshContextProvider, { reload$, onAutoRefresh }, children);
+    const { result } = renderHook(() => useSyntheticsRefreshContext(), {
+      wrapper: embeddableWrapper,
+    });
+
+    act(() => {
+      reload$.next(true);
+    });
+    expect(onAutoRefresh).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.refreshApp();
+    });
+    expect(onAutoRefresh).toHaveBeenCalledTimes(1);
   });
 });

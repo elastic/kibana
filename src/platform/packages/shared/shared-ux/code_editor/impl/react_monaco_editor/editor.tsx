@@ -28,15 +28,23 @@
  */
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
-import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
+import {
+  initializeRegisteredLanguagesTheme,
+  initializeSupportedLanguages,
+  monaco,
+  HoverParticipantRegistry,
+} from '@kbn/monaco';
 import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  type KbnCodeEditorChromeOverrides,
+} from './utils/chrome_overrides';
 
 if (process.env.NODE_ENV !== 'production') {
-  import(
-    'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
-  );
+  // @ts-expect-error — internal Monaco module without type declarations
+  import('monaco-editor/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess.js');
 }
 
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;
@@ -94,6 +102,12 @@ export interface MonacoEditorProps {
   theme?: string | null;
 
   /**
+   * Chrome colors for this editor instance, applied as CSS custom properties on the editor root
+   * and its overflow-widgets container. Re-applied whenever the overrides or the EUI theme change.
+   */
+  chromeOverrides?: KbnCodeEditorChromeOverrides;
+
+  /**
    * Optional string classname to append to the editor.
    */
   className?: string | null;
@@ -126,7 +140,40 @@ export interface MonacoEditorProps {
    * Optional z-index to override the default z-index of the overflow widgets container.
    */
   overflowWidgetsContainerZIndexOverride?: number;
+
+  /**
+   * Identifies this editor instance on the DOM nodes it owns — the container and the portaled
+   * overflow-widgets node — as `data-kbn-code-editor-id`, so CSS can be scoped to one editor.
+   * See {@link getCodeEditorScope}.
+   */
+  editorInstanceId?: string;
 }
+
+const KBN_CODE_EDITOR_ID_ATTRIBUTE = 'data-kbn-code-editor-id';
+
+/** Selectors that reach exactly one editor instance's nodes, for styles that need a selector. */
+interface CodeEditorScope {
+  /** The container of the inline editor; `.monaco-editor` and its widgets are descendants. */
+  editor: string;
+  /** The overflow-widgets node portaled to `body`: suggest, hover and similar widgets. */
+  overflowWidgets: string;
+}
+
+const getCodeEditorScope = (editorInstanceId: string): CodeEditorScope => {
+  const instance = `[${KBN_CODE_EDITOR_ID_ATTRIBUTE}="${editorInstanceId}"]`;
+  return {
+    editor: `${instance}:not(.${OVERFLOW_WIDGETS_CONTAINER_CLASS})`,
+    overflowWidgets: `${instance}.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`,
+  };
+};
+
+export {
+  applyKbnCodeEditorChromeOverrides,
+  getCodeEditorScope,
+  type CodeEditorScope,
+  type KbnCodeEditorChromeOverrides,
+  KBN_CODE_EDITOR_ID_ATTRIBUTE,
+};
 
 const applyModelContentChanges = (
   prevValue: string,
@@ -145,6 +192,38 @@ const applyModelContentChanges = (
   }, prevValue);
 };
 
+const ALL_LINE_ENDINGS = /\r\n|\r|\n/g;
+// For CRLF models, this separates values that are already safe to leave untouched
+// (`foo\r\nbar`) from values whose offsets would not line up with Monaco's CRLF model
+// text (`foo\nbar`, `foo\rbar`).
+const HAS_NON_CRLF_LINE_ENDING = /(^|[^\r])\n|\r(?!\n)/;
+
+/**
+ * Keep the shadow value's line endings aligned with Monaco before applying
+ * `IModelContentChangedEvent.changes`.
+ *
+ * Monaco applies edits against its text buffer: it normalizes edit text to the buffer
+ * EOL, then records `rangeOffset` / `rangeLength` from that same buffer:
+ * https://github.com/microsoft/vscode/blob/e7e037083ff4455cf320e344325dacb480062c3c/src/vs/editor/common/model/pieceTreeTextBuffer/pieceTreeTextBuffer.ts#L276-L290
+ *
+ * Without this, an LF shadow is one `\r` shorter per preceding line break than a CRLF
+ * Monaco model, so model offsets replace the wrong character.
+ */
+const normalizeEndOfLine = (value: string, eol: string): string => {
+  if (eol === '\n' && !value.includes('\r')) {
+    return value;
+  }
+
+  if (eol === '\r\n' && !HAS_NON_CRLF_LINE_ENDING.test(value)) {
+    return value;
+  }
+
+  return value.replace(ALL_LINE_ENDINGS, eol);
+};
+
+export const getEditorInputSurface = (editorDomNode: HTMLElement | null): HTMLElement | null =>
+  editorDomNode?.querySelector<HTMLElement>('textarea[aria-roledescription="editor"]') ?? null;
+
 // initialize supported languages
 initializeSupportedLanguages();
 
@@ -162,6 +241,7 @@ export function MonacoEditor({
   defaultValue = '',
   language = 'javascript',
   theme,
+  chromeOverrides,
   options,
   editorWillMount,
   editorDidMount,
@@ -169,6 +249,7 @@ export function MonacoEditor({
   onChange,
   className,
   overflowWidgetsContainerZIndexOverride,
+  editorInstanceId,
 }: MonacoEditorProps) {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const overflowWidgetsDomNode = useRef<HTMLDivElement | null>(null);
@@ -196,8 +277,9 @@ export function MonacoEditor({
    */
   const lastKnownValueRef = useRef<string>(value ?? defaultValue);
   useEffect(() => {
-    if (typeof value === 'string') {
-      lastKnownValueRef.current = value;
+    if (typeof value === 'string' && value !== lastKnownValueRef.current) {
+      const modelEol = editor.current?.getModel()?.getEOL();
+      lastKnownValueRef.current = modelEol ? normalizeEndOfLine(value, modelEol) : value;
     }
   }, [value]);
 
@@ -230,6 +312,11 @@ export function MonacoEditor({
         onChangeHandler(nextValue, event);
       }
     });
+
+    // Disable copy button for all hover participants
+    HoverParticipantRegistry.getAll().forEach((ctor) => {
+      ctor.prototype.hideCopyButton = true;
+    });
   };
 
   const handleEditorWillUnmount = () => {
@@ -237,18 +324,7 @@ export function MonacoEditor({
   };
 
   useEffect(() => {
-    // register default theme code editor theme
-    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
-      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
-    });
-
-    // register theme configurations for supported languages
-    monaco.languages.getLanguages().forEach(({ id: languageId }) => {
-      let languageThemeResolver;
-      if (Boolean((languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId)))) {
-        monaco.editor.defineTheme(languageId, languageThemeResolver!(euiTheme));
-      }
-    });
+    initializeRegisteredLanguagesTheme(euiTheme);
   }, [euiTheme]);
 
   const initMonaco = () => {
@@ -262,6 +338,13 @@ export function MonacoEditor({
       // for applying styles specific to the overflow widgets container
       overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
+
+      if (editorInstanceId) {
+        overflowWidgetsDomNode.current?.setAttribute(
+          KBN_CODE_EDITOR_ID_ATTRIBUTE,
+          editorInstanceId
+        );
+      }
 
       // handle special case of editor being rendered inside a container with a high z-index, like an EUI flyout
       // if this is the case by default we will just raise the overflow widgets container z-index above the flyout (1000)
@@ -281,6 +364,7 @@ export function MonacoEditor({
       const finalOptions = { ...options, ...handleEditorWillMount() };
 
       const model = monaco.editor.createModel(finalValue!, language);
+      lastKnownValueRef.current = normalizeEndOfLine(finalValue!, model.getEOL());
 
       editor.current = monaco.editor.create(containerElement.current, {
         model,
@@ -313,7 +397,7 @@ export function MonacoEditor({
 
         const $editor = currentEditor.getDomNode();
         if ($editor) {
-          const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
+          const textbox = getEditorInputSurface($editor);
           textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
         }
       });
@@ -326,6 +410,22 @@ export function MonacoEditor({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(initMonaco, []);
 
+  // Declared after `initMonaco` so the editor exists on the first run. The cleanup removes the
+  // previous application before the next one, so a theme switch never leaves stale properties.
+  useEffect(() => {
+    if (!chromeOverrides || !editor.current) {
+      return;
+    }
+
+    const applied = applyKbnCodeEditorChromeOverrides(
+      [editor.current.getDomNode(), overflowWidgetsDomNode.current],
+      chromeOverrides,
+      euiTheme
+    );
+
+    return applied.dispose;
+  }, [chromeOverrides, euiTheme]);
+
   // useLayoutEffect instead of useEffect to mitigate https://github.com/facebook/react/issues/31023 in React@18 Legacy Mode
   useLayoutEffect(() => {
     if (editor.current) {
@@ -336,15 +436,24 @@ export function MonacoEditor({
       }
 
       const model = editor.current.getModel();
+      if (!model) {
+        return;
+      }
+
+      const valueInModelEol = normalizeEndOfLine(value, model.getEOL());
+      if (valueInModelEol === lastKnownValueRef.current) {
+        return;
+      }
+
       __preventTriggerChangeEvent.current = true;
       editor.current.pushUndoStop();
       // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
-      model!.pushEditOperations(
+      model.pushEditOperations(
         [],
         [
           {
-            range: model!.getFullModelRange(),
-            text: value!,
+            range: model.getFullModelRange(),
+            text: valueInModelEol,
           },
         ],
         // @ts-expect-error
@@ -354,7 +463,7 @@ export function MonacoEditor({
       __preventTriggerChangeEvent.current = false;
 
       // Keep shadow state in sync for programmatic updates where we suppress onDidChangeModelContent.
-      lastKnownValueRef.current = value;
+      lastKnownValueRef.current = valueInModelEol;
     }
   }, [value]);
 
@@ -417,7 +526,12 @@ export function MonacoEditor({
 
   return (
     <>
-      <div ref={containerElement} style={style} className="react-monaco-editor-container" />
+      <div
+        ref={containerElement}
+        style={style}
+        className="react-monaco-editor-container"
+        {...{ [KBN_CODE_EDITOR_ID_ATTRIBUTE]: editorInstanceId }}
+      />
       {/** @ts-expect-error -- we are using the portal component to render elements produced by monaco here, so no need to provide the expected children prop  */}
       <EuiPortal portalRef={setOverflowWidgetsDomNode} />
     </>

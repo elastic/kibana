@@ -15,6 +15,7 @@ import { SearchSecureService } from '../services/search_secure';
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
 import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
+import { MitreAttackApiProvider } from '../services/mitre_attack_api';
 
 export const services = {
   ...serverlessServices,
@@ -27,4 +28,5 @@ export const services = {
   entityAnalyticsApi: EntityAnalyticsApiProvider,
   exceptionsApi: ExceptionsApiProvider,
   rolesUsersProvider: RolesUsersProvider,
+  mitreAttackApi: MitreAttackApiProvider,
 };

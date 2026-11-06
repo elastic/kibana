@@ -12,7 +12,7 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { RuleBootstrapResults } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { RuleBootstrapResults } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { installPromotionRules } from '../../logic/integrations/install_promotion_rules';

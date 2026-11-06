@@ -18,12 +18,14 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import { getRequestSavedObjectClient } from '../../../shared/utils';
 import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 
 export const listEntitySourcesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .get({
@@ -58,26 +60,26 @@ export const listEntitySourcesRoute = (
           try {
             const secSol = await context.securitySolution;
             const core = await context.core;
+            const soClient = getWatchlistSavedObjectClient(core);
             const client = new WatchlistEntitySourceClient({
-              soClient: getRequestSavedObjectClient(core),
+              soClient,
               namespace: secSol.getSpaceId(),
+              esClient: core.elasticsearch.client.asCurrentUser,
+              getStartServices,
+              logger,
+              hasEncryptionKey,
             });
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
               namespace: secSol.getSpaceId(),
-              soClient: getRequestSavedObjectClient(core),
+              soClient,
               esClient: core.elasticsearch.client.asCurrentUser,
             });
             const linkedSourceIds = await watchlistClient.getEntitySourceIds(
               request.params.watchlist_id
             );
-
-            const allSources = await client.list(request.query);
-            const body = {
-              ...allSources,
-              sources: allSources.sources.filter((source) => linkedSourceIds.includes(source.id)),
-            };
+            const body = await client.list(request.query, linkedSourceIds);
 
             return response.ok({ body });
           } catch (e) {

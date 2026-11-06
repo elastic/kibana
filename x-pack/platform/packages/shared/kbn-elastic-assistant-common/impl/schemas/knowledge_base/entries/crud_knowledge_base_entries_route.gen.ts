@@ -40,7 +40,9 @@ export const DeleteKnowledgeBaseEntryRequestParams = lazySchema(() =>
     /**
      * The unique identifier (`id`) of the Knowledge Base Entry to delete.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (`id`) of the Knowledge Base Entry to delete.'
+    ),
   })
 );
 export type DeleteKnowledgeBaseEntryRequestParams = z.infer<
@@ -58,7 +60,9 @@ export const ReadKnowledgeBaseEntryRequestParams = lazySchema(() =>
     /**
      * The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (`id`) of the Knowledge Base Entry to retrieve.'
+    ),
   })
 );
 export type ReadKnowledgeBaseEntryRequestParams = z.infer<
@@ -76,7 +80,9 @@ export const UpdateKnowledgeBaseEntryRequestParams = lazySchema(() =>
     /**
      * The unique identifier (`id`) of the Knowledge Base Entry to update.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (`id`) of the Knowledge Base Entry to update.'
+    ),
   })
 );
 export type UpdateKnowledgeBaseEntryRequestParams = z.infer<

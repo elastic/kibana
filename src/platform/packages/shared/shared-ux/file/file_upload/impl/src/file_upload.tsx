@@ -8,7 +8,8 @@
  */
 
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
-import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { skip } from 'rxjs';
+import type { EuiFilePickerRef } from '@elastic/eui';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
@@ -79,6 +80,12 @@ export interface Props<Kind extends string = string> {
   onDone: (files: UploadedFile[]) => void;
 
   /**
+   * Called on every picker selection change (empty array on clear). Wrap in
+   * `useCallback` — changing the identity re-subscribes.
+   */
+  onFilesSelected?: (files: File[]) => void;
+
+  /**
    * Called when an error occurs during upload
    */
   onError?: (e: Error) => void;
@@ -124,6 +131,7 @@ export const FileUpload = <Kind extends string = string>({
   meta,
   onDone,
   onError,
+  onFilesSelected,
   fullWidth,
   allowClear,
   onUploadEnd,
@@ -137,7 +145,7 @@ export const FileUpload = <Kind extends string = string>({
   className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { client } = useFilesContext();
-  const ref = useRef<null | EuiFilePickerClass>(null);
+  const ref = useRef<EuiFilePickerRef | null>(null);
   const fileKind = client.getFileKind(kindId);
   const repeatedUploads = compressed || allowRepeatedUploads;
   const uploadState = useMemo(
@@ -163,9 +171,17 @@ export const FileUpload = <Kind extends string = string>({
       uploadState.uploading$.subscribe((uploading) =>
         uploading ? onUploadStart?.() : onUploadEnd?.()
       ),
+      ...(onFilesSelected
+        ? [
+            // Skip the seeded `[]` emission so mount is not treated as a change.
+            uploadState.files$
+              .pipe(skip(1))
+              .subscribe((files) => onFilesSelected(files.map((f) => f.file))),
+          ]
+        : []),
     ];
     return () => subs.forEach((sub) => sub.unsubscribe());
-  }, [uploadState, onDone, onError, onUploadStart, onUploadEnd]);
+  }, [uploadState, onDone, onError, onFilesSelected, onUploadStart, onUploadEnd]);
 
   useEffect(() => uploadState.dispose, [uploadState]);
 

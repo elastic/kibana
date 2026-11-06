@@ -5,8 +5,10 @@
  * 2.0.
  */
 import type React from 'react';
+import qs from 'query-string';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useRouteBreadcrumb } from '../components/contexts/route_breadcrumbs_context/use_route_breadcrumb';
+import { useSchemaQueryParam } from '../hooks/use_schema_query_param';
 
 export const RouteBreadcrumb = ({
   title,
@@ -20,7 +22,15 @@ export const RouteBreadcrumb = ({
   const {
     start: { core },
   } = useProfilingDependencies();
-  useRouteBreadcrumb({ title, href: core.http.basePath.prepend('/app/profiling/' + href) });
+  const schema = useSchemaQueryParam();
+
+  useRouteBreadcrumb({
+    title,
+    // Keep the selected schema, merged into any query `href` already has
+    href: core.http.basePath.prepend(
+      qs.stringifyUrl({ url: '/app/profiling' + href, query: schema ? { schema } : {} })
+    ),
+  });
 
   return children;
 };

@@ -10,8 +10,12 @@
 export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
 
-export { APP_STATE_URL_KEY, EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY } from './constants';
+export { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from './constants';
 export { DISCOVER_APP_LOCATOR } from './app_locator';
+export {
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  CHANGE_POINT_GRID_MAX_SERIES,
+} from './embeddable/change_point_grid';
 export type {
   DiscoverAppLocator,
   DiscoverAppLocatorParams,
@@ -20,4 +24,10 @@ export type {
 
 export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';
 
-export type { NonPersistedDisplayOptions, SearchEmbeddableState } from './embeddable/types';
+export type {
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableState,
+  NonPersistedDisplayOptions,
+  SearchEmbeddableState,
+} from './embeddable/types';

@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/attack-discovery-schedules-common",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "security",
+  "visibility": "shared"
+}

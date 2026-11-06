@@ -33,18 +33,20 @@ export const TooltipOrPopoverIcon = ({
 
   return mode === 'popover' ? (
     <EuiPopover
+      aria-label={title}
       css={popoverCss}
       attachToAnchor={true}
       anchorPosition="downCenter"
       button={
-        <EuiButtonIcon
-          data-test-subj={dataTestSubj}
-          aria-label={title}
-          title={title}
-          iconType={icon}
-          color={iconColor}
-          onClick={handleButtonClick}
-        />
+        <EuiToolTip content={title} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={dataTestSubj}
+            aria-label={title}
+            iconType={icon}
+            color={iconColor}
+            onClick={handleButtonClick}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={togglePopover}

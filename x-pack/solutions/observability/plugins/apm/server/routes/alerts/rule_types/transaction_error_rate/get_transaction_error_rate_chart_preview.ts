@@ -7,6 +7,7 @@
 
 import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { AlertParams, PreviewChartResponse } from '@kbn/apm-api-shared';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -14,7 +15,6 @@ import {
   EVENT_OUTCOME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import type { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,

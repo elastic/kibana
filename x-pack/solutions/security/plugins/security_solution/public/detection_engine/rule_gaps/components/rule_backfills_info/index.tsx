@@ -207,6 +207,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
 
       <EuiBasicTable
         data-test-subj="rule-backfills-table"
+        tableCaption={i18n.RULE_BACKFILLS_TABLE_CAPTION}
         items={backfills}
         columns={columns}
         pagination={pagination}

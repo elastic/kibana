@@ -54,7 +54,7 @@ describe('filter manager utilities', () => {
 
     test('with formatter', () => {
       const filter = { meta: { params: ['hello', 1, 'world'] } } as PhrasesFilter;
-      const formatter = { convert: (val) => `formatted ${val}` } as FieldFormat;
+      const formatter = { convertToText: (val) => `formatted ${val}` } as FieldFormat;
       const result = getPhrasesDisplayValue(filter, formatter);
       expect(result).toMatchInlineSnapshot(`"formatted hello, formatted 1, formatted world"`);
     });

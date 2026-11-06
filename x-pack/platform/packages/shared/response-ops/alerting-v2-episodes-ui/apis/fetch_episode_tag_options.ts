@@ -6,8 +6,6 @@
  */
 
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   buildEpisodeTagOptionsQuery,
   type EpisodeTagOptionRow,
@@ -15,38 +13,27 @@ import {
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchEpisodeTagOptionsParams {
-  timeRange?: TimeRange | null;
+  spaceId: string;
   abortSignal?: AbortSignal;
   services: { expressions: ExpressionsStart };
 }
 
 /**
- * Returns tag option rows from `.alert-actions` tag events in the given time range.
+ * Returns tag option rows from the `.alert-actions` tag events, regardless of
+ * the time picker: the episodes list reads its tags from every action too, so
+ * any tag shown in a row can also be picked in the filter.
  */
 export const fetchEpisodeTagOptions = ({
+  spaceId,
   abortSignal,
-  timeRange,
   services: { expressions },
 }: FetchEpisodeTagOptionsParams): Promise<EpisodeTagOptionRow[]> => {
-  const query = buildEpisodeTagOptionsQuery().print('basic');
-
-  const input: {
-    type: 'kibana_context';
-    esqlVariables: ESQLControlVariable[];
-    timeRange?: TimeRange;
-  } = {
-    type: 'kibana_context',
-    esqlVariables: [],
-  };
-
-  if (timeRange) {
-    input.timeRange = timeRange;
-  }
+  const query = buildEpisodeTagOptionsQuery(spaceId).print('basic');
 
   return executeEsqlQuery<EpisodeTagOptionRow>({
     expressions,
     query,
-    input,
+    input: { type: 'kibana_context', esqlVariables: [] },
     abortSignal,
   });
 };

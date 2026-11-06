@@ -172,10 +172,10 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
   );
 
   apiTest(
-    'should fail if field is missing and ignore_missing is false',
+    'should filter out if field is missing and ignore_missing is false',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-grok-fail-missing';
+      const indexName = 'stream-e2e-test-grok-filter-out-missing';
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -189,7 +189,10 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       const { query } = await transpile(streamlangDSL);
       const docs = [{ log: { level: 'info' } }];
       await testBed.ingest(indexName, docs);
-      await expect(esql.queryOnIndex(indexName, query)).rejects.toThrow('Unknown column [message]');
+
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+
+      expect(esqlResult.documents).toHaveLength(0);
     }
   );
 

@@ -21,26 +21,10 @@ export async function deleteConnectorById(
   });
 }
 
-export async function deleteAllConnectors(kbnClient: KbnClient): Promise<void> {
-  const list = await kbnClient.request<Array<{ id: string }>>({
-    method: 'GET',
-    path: '/api/actions/connectors',
-  });
-  const connectors = Array.isArray(list.data) ? list.data : [];
-  await Promise.all(
-    connectors.map((connector) =>
-      kbnClient.request({
-        method: 'DELETE',
-        path: `/api/actions/connector/${encodeURIComponent(connector.id)}`,
-        headers: XSFR,
-      })
-    )
-  );
-}
-
 export async function createGenAiConnectorForProxy(
   kbnClient: KbnClient,
-  proxy: LlmProxy
+  proxy: LlmProxy,
+  { defaultModel = 'gpt-4' }: { defaultModel?: string } = {}
 ): Promise<{ id: string }> {
   const res = await kbnClient.request<{ id: string }>({
     method: 'POST',
@@ -51,7 +35,7 @@ export async function createGenAiConnectorForProxy(
       config: {
         apiProvider: 'OpenAI',
         apiUrl: `http://localhost:${proxy.getPort()}`,
-        defaultModel: 'gpt-4',
+        defaultModel,
       },
       secrets: { apiKey: 'myApiKey' },
       connector_type_id: '.gen-ai',

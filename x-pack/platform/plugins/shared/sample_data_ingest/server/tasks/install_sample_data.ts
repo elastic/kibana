@@ -42,7 +42,7 @@ export const registerInstallSampleDataTaskDefinition = ({
       title: `Install sample data ${INSTALL_SAMPLE_DATA_TASK_TYPE}`,
       timeout: '10m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance, abortController }) => {
+      createTaskRunner: ({ taskInstance, signal }) => {
         const sampleType = taskInstance?.params?.sampleType;
 
         return {
@@ -64,7 +64,7 @@ export const registerInstallSampleDataTaskDefinition = ({
                 esClient,
                 soClient,
                 soImporter,
-                abortController,
+                signal,
               });
 
               return {

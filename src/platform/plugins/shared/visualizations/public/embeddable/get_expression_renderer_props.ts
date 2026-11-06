@@ -8,11 +8,19 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type {
+  AggregateQuery,
+  ExecutionContextSearch,
+  Filter,
+  ProjectRouting,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import type {
   ExpressionRendererEvent,
   ExpressionRendererParams,
 } from '@kbn/expressions-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { toExpressionAst } from './to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';
@@ -24,8 +32,11 @@ interface GetExpressionRendererPropsParams {
     query?: Query | AggregateQuery;
   };
   projectRouting?: ProjectRouting;
+  isApproximate: boolean;
+  esqlVariables?: ExecutionContextSearch['esqlVariables'];
   timeRange?: TimeRange;
   disableTriggers?: boolean;
+  viewMode?: ViewMode;
   settings: {
     syncColors?: boolean;
     syncCursor?: boolean;
@@ -47,8 +58,11 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
 }> = async ({
   unifiedSearch: { query, filters },
   projectRouting,
+  isApproximate,
+  esqlVariables,
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
+  viewMode = 'edit',
   parentExecutionContext,
   searchSessionId,
   vis,
@@ -66,9 +80,9 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     description: vis.title,
   };
 
-  const executionContext = {
+  const executionContext: KibanaExecutionContext = {
     ...parentContext,
-    childContext,
+    child: childContext,
   };
 
   const timefilter = getTimeFilter();
@@ -85,6 +99,8 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
       filters,
       disableWarningToasts: true,
       projectRouting,
+      isApproximate,
+      esqlVariables,
     },
     variables: {
       embeddableTitle: vis.title,
@@ -95,7 +111,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     syncTooltips,
     syncCursor,
     uiState: vis.uiState,
-    interactive: !disableTriggers,
+    interactive: !disableTriggers && viewMode !== 'non-interactive',
     inspectorAdapters,
     executionContext,
     onRender$: onRender,

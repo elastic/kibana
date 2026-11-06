@@ -12,7 +12,7 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
@@ -23,7 +23,7 @@ jest.mock('../../common/components/user_privileges/user_privileges_context', () 
 
 const mockOverviewTab = jest.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
 
-jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
+jest.mock('../../flyout_v2/document/main/tabs/overview_tab', () => ({
   OverviewTab: (props: unknown) => mockOverviewTab(props),
 }));
 
@@ -43,6 +43,9 @@ jest.mock('../../cases/components/provider/provider', () => ({
 jest.mock('../../assistant/provider', () => ({
   AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => ({
+  MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 const mockUseInitDataViewManager = jest.fn();
 jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
@@ -60,6 +63,11 @@ jest.mock('../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: () => mockUseIsInSecurityApp(),
 }));
 
+const mockUseFlyoutV2DocViewerState = jest.fn();
+jest.mock('../../flyout_v2/shared/url_state/use_flyout_v2_doc_viewer_state', () => ({
+  useFlyoutV2DocViewerState: (params: unknown) => mockUseFlyoutV2DocViewerState(params),
+}));
+
 describe('AlertFlyoutOverviewTab', () => {
   const onAlertUpdated = jest.fn();
   const servicesMock = {
@@ -73,13 +81,30 @@ describe('AlertFlyoutOverviewTab', () => {
       },
     },
     upselling: {},
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getAbsoluteTime: jest.fn().mockReturnValue({
+              from: '2023-01-01T00:00:00.000Z',
+              to: '2023-12-31T23:59:59.999Z',
+            }),
+          },
+        },
+      },
+    },
+    notifications: {
+      toasts: { addError: jest.fn(), addDanger: jest.fn(), addSuccess: jest.fn() },
+    },
   } as unknown as StartServices;
 
   beforeEach(() => {
     mockOverviewTab.mockClear();
     mockUseInitDataViewManager.mockReset();
+    mockUseInitDataViewManager.mockReturnValue(jest.fn());
     mockUseIsExperimentalFeatureEnabled.mockReset();
     mockUseIsInSecurityApp.mockReturnValue(false);
+    mockUseFlyoutV2DocViewerState.mockClear();
   });
 
   it('wraps the overview tab in KibanaContextProvider and ReactQueryClientProvider', async () => {
@@ -205,7 +230,7 @@ describe('AlertFlyoutOverviewTab', () => {
     expect(initSpy).toHaveBeenCalledWith([]);
   });
 
-  it('does not initialize when feature flag disabled', async () => {
+  it('initializes when status is pristine', async () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
@@ -233,7 +258,8 @@ describe('AlertFlyoutOverviewTab', () => {
       await Promise.resolve();
     });
 
-    expect(initSpy).not.toHaveBeenCalled();
+    expect(initSpy).toHaveBeenCalledTimes(1);
+    expect(initSpy).toHaveBeenCalledWith([]);
   });
 
   it('does not initialize when status is loading or ready', async () => {
@@ -403,5 +429,49 @@ describe('AlertFlyoutOverviewTab', () => {
     });
 
     expect(initSpy).not.toHaveBeenCalled();
+  });
+
+  describe('doc viewer flyout state', () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const initialState = { flyoutV2: [{ kind: 'host' as const, hostName: 'web-01' }] };
+    const onInitialStateChange = jest.fn();
+
+    const renderTab = async () => {
+      const store = createStore(() => ({ dataViewManager: { shared: { status: 'ready' } } }));
+
+      await act(async () => {
+        TestRenderer.create(
+          <AlertFlyoutOverviewTab
+            hit={hit}
+            servicesPromise={Promise.resolve(servicesMock)}
+            storePromise={Promise.resolve(store as never)}
+            onAlertUpdated={onAlertUpdated}
+            initialState={initialState}
+            onInitialStateChange={onInitialStateChange}
+          />
+        );
+        await Promise.resolve();
+      });
+    };
+
+    it('syncs the flyout chain with the doc view state when not in the Security app', async () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+
+      await renderTab();
+
+      expect(mockUseFlyoutV2DocViewerState).toHaveBeenCalledWith({
+        hit,
+        initialState,
+        onInitialStateChange,
+      });
+    });
+
+    it('leaves the flyout chain in the URL when in the Security app', async () => {
+      mockUseIsInSecurityApp.mockReturnValue(true);
+
+      await renderTab();
+
+      expect(mockUseFlyoutV2DocViewerState).not.toHaveBeenCalled();
+    });
   });
 });

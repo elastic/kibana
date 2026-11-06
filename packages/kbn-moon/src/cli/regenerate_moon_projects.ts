@@ -20,16 +20,19 @@ import type { PackageManifestBaseFields } from '@kbn/repo-packages/modern/types'
 import { getPackages } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import { createFailError } from '@kbn/dev-cli-errors';
+
 import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
+import { findNestedProjects } from './nested_projects';
 import {
   compactFilePathsToGlobs,
   filterPackages,
   readFile,
   readJsonWithComments,
-  resolveFirstExisting,
   sortObjectByKeyPriority,
   writeYaml,
+  yamlMatchesFile,
 } from '../util';
 
 const scriptName = path.relative(REPO_ROOT, process.argv[1]);
@@ -40,7 +43,7 @@ const cliOptions = {
       `,
   flags: {
     string: ['filter'],
-    boolean: ['update', 'dependencies', 'dry-run', 'clear'],
+    boolean: ['update', 'dependencies', 'dry-run', 'clear', 'check'],
     default: {
       dependencies: true,
     },
@@ -50,6 +53,7 @@ const cliOptions = {
           --update                    Update existing project configuration(s)
           --no-dependencies           Do not include dependsOn section in the project configuration
           --dry-run                   Do not write to disk
+          --check                     Fail (exit 1) if any project configuration is out of date; never writes
           --clear                     Clear the project configuration
         `,
   },
@@ -62,8 +66,9 @@ export function regenerateMoonProjects() {
     logger = log;
 
     const filter = flagsReader.arrayOfStrings('filter');
-    const update = flags.update as boolean | undefined;
-    const dryRun = flags['dry-run'] as boolean | undefined;
+    const check = flags.check as boolean | undefined;
+    const update = (flags.update as boolean | undefined) || check;
+    const dryRun = (flags['dry-run'] as boolean | undefined) || check;
     const clear = flags.clear as boolean | undefined;
     const includeDependencies = !!flags.dependencies;
 
@@ -81,6 +86,15 @@ export function regenerateMoonProjects() {
     const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const allPackageIds = allPackages.map((pkg) => pkg.name);
 
+    const nestedProjects = findNestedProjects(
+      allPackages.map((pkg) => pkg.normalizedRepoRelativeDir)
+    );
+    if (nestedProjects.length > 0) {
+      throw createFailError(
+        `Moon projects must not be nested inside other projects:\n  ${nestedProjects.join('\n  ')}`
+      );
+    }
+
     for (const pkg of packages) {
       log.verbose(`Generating project configuration for ${pkg.name}`);
       const pathInPackage = (fileName: string) =>
@@ -96,7 +110,7 @@ export function regenerateMoonProjects() {
 
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
-      applyJestTaskConfig(projectConfig);
+      applyTestTaskTags(projectConfig);
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -125,6 +139,17 @@ export function regenerateMoonProjects() {
         ` ${projectResults.skip.length} exists (use --update to update)`,
       ].join('\n')
     );
+
+    if (check) {
+      const outOfDate = [...projectResults.create, ...projectResults.update];
+      if (outOfDate.length > 0) {
+        throw createFailError(
+          `${outOfDate.length} Moon project configuration(s) out of date: ${outOfDate.join(
+            ', '
+          )}\nRun 'node ${scriptName} --update' to regenerate.`
+        );
+      }
+    }
   }, cliOptions);
 }
 
@@ -259,25 +284,26 @@ function applyTsConfigSettings(
   }
 }
 
-function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
+function applyTestTaskTags(projectConfig: MoonProjectConfig) {
   if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping jest task config - no sourceRoot found in project config');
+    logger.warning('Skipping test task tags - no sourceRoot found in project config');
     return;
   }
 
-  const jestConfigName = resolveFirstExisting(
-    projectConfig.project.sourceRoot,
-    MOON_CONST.JEST_CONFIG_FILES
-  );
+  const sourceRoot = projectConfig.project.sourceRoot;
+  const hasConfig = (pattern: string) =>
+    fs.globSync(pattern, {
+      cwd: sourceRoot,
+      exclude: (filePath) => filePath.includes('__fixtures__'),
+    }).length > 0;
+  const tags = [
+    hasConfig('**/jest.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_UNIT,
+    hasConfig('**/jest.integration.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_INTEGRATION,
+    hasConfig('**/test/scout*/**/*playwright.config.ts') && MOON_CONST.TAG_SCOUT,
+  ].filter((tag): tag is string => Boolean(tag));
 
-  if (!jestConfigName) {
-    logger.warning(
-      `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
-    );
-  } else {
-    projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
-
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
+  if (tags.length > 0) {
+    projectConfig.tags = [...new Set([...(projectConfig.tags || []), ...tags])];
   }
 }
 
@@ -299,17 +325,17 @@ function writeProjectConfigFile(
   sortObjectByKeyPriority(projectConfig, MOON_CONFIG_KEY_ORDER);
 
   const name = projectConfig.id;
+  const preamble = getGeneratedPreambleForProject(projectConfig.id);
   const projectExists = fs.existsSync(targetPath);
   if (projectExists) {
     if (update) {
       if (dryRun) {
+        if (yamlMatchesFile(targetPath, projectConfig, preamble)) {
+          return 'intact';
+        }
         logger.info(`Would update ${name} project configuration.`);
       } else {
-        const didUpdate = writeYaml(
-          targetPath,
-          projectConfig,
-          getGeneratedPreambleForProject(projectConfig.id)
-        );
+        const didUpdate = writeYaml(targetPath, projectConfig, preamble);
         logger.info(`Updated ${name} project configuration.`);
         if (!didUpdate) {
           return 'intact';
@@ -335,7 +361,7 @@ function writeProjectConfigFile(
       logger.info(`Would create ${name} project configuration.`);
     } else {
       logger.info(`Creating ${name} project configuration @ ${targetPath}`);
-      writeYaml(targetPath, projectConfig, getGeneratedPreambleForProject(projectConfig.id));
+      writeYaml(targetPath, projectConfig, preamble);
     }
     return 'create';
   }

@@ -12,8 +12,11 @@ import { schema } from '@kbn/config-schema';
 
 import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { Parser } from '@elastic/esql';
 import {
   DEFAULT_COLUMNS_SETTING,
+  DEFAULT_ESQL_QUERY_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -29,11 +32,15 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
+import {
+  MAX_DISCOVER_SESSION_COLUMNS,
+  MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
+} from '@kbn/saved-search-plugin/common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
-  enableValidations: boolean
+  enableValidations: boolean // More strict validation used for serverless
 ) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup,
   enableValidations: boolean
@@ -49,8 +56,37 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: enableValidations
-      ? schema.arrayOf(schema.string(), { maxSize: 50 })
-      : schema.arrayOf(schema.string()),
+      ? schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS })
+      : schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS }),
+  },
+  [DEFAULT_ESQL_QUERY_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.defaultEsqlQueryTitle', {
+      defaultMessage: 'Default ES|QL query',
+    }),
+    value: '',
+    sensitive: true,
+    description: i18n.translate('discover.advancedSettings.defaultEsqlQueryText', {
+      defaultMessage:
+        'The ES|QL query Discover starts with when opening in ES|QL mode. When set, it takes precedence over the query Discover would otherwise derive from your data sources. Leave empty to use the default behavior.',
+    }),
+    category: ['discover'],
+    schema: schema.string({
+      maxLength: 5000,
+      validate: (value) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) {
+          return;
+        }
+
+        const errors = Parser.parseErrors(trimmedValue);
+        if (errors.length > 0) {
+          return i18n.translate('discover.advancedSettings.defaultEsqlQueryValidationError', {
+            defaultMessage: 'Invalid ES|QL query: {error}',
+            values: { error: errors[0].message },
+          });
+        }
+      },
+    }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
@@ -123,6 +159,22 @@ export const getUiSettings: (
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.enableSolutionProfilesInClassicTitle', {
+      defaultMessage: 'Contextual profiles in Classic navigation',
+    }),
+    value: true,
+    type: 'boolean',
+    description: i18n.translate('discover.advancedSettings.enableSolutionProfilesInClassicText', {
+      defaultMessage:
+        'When enabled, Discover adapts to Observability and Security data in Classic navigation by ' +
+        'loading contextual profiles with tailored columns, cell renderers, and document views. ' +
+        'Turn this off to always use the default Discover experience.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
   [DOC_HIDE_TIME_COLUMN_SETTING]: {
     name: i18n.translate('discover.advancedSettings.docTableHideTimeColumnTitle', {
       defaultMessage: "Hide 'Time' column",
@@ -178,7 +230,7 @@ export const getUiSettings: (
         'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: schema.arrayOf(schema.string(), { maxSize: 20 }),
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {

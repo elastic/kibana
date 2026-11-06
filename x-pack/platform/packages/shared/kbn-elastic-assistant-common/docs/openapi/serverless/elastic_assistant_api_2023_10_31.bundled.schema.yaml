@@ -13,10 +13,9 @@ servers:
 paths:
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
-      description: >-
-        Apply a bulk action to multiple anonymization fields. The bulk action is
-        applied to all anonymization fields that match the filter or to the list
-        of anonymization fields by their IDs.
+      description: Apply a bulk action to multiple anonymization fields. The bulk
+        action is applied to all anonymization fields that match the filter or
+        to the list of anonymization fields by their IDs.
       operationId: PerformAnonymizationFieldsBulkAction
       requestBody:
         content:
@@ -72,9 +71,8 @@ paths:
                     $ref: '#/components/schemas/AnonymizationFieldCreateProps'
                   type: array
                 delete:
-                  description: >-
-                    Object containing the query to filter anonymization fields
-                    and/or an array of anonymization field IDs to delete.
+                  description: Object containing the query to filter anonymization fields and/or
+                    an array of anonymization field IDs to delete.
                   type: object
                   properties:
                     ids:
@@ -88,7 +86,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -236,8 +234,7 @@ paths:
             default: 20
             minimum: 0
             type: integer
-        - description: >-
-            If true, additionally fetch all anonymization fields, otherwise
+        - description: If true, additionally fetch all anonymization fields, otherwise
             fetch only the provided page
           in: query
           name: all_data
@@ -501,8 +498,7 @@ paths:
                   totalDeleted:
                     example: 10
                     type: number
-          description: >-
-            Indicates a successful call. The conversations were deleted
+          description: Indicates a successful call. The conversations were deleted
             successfully.
         '400':
           content:
@@ -540,10 +536,9 @@ paths:
              --header "Content-Type: application/json" \
              --data '{"excludedIds":["abc123"]}'
     post:
-      description: >-
-        Create a new Security AI Assistant conversation. This endpoint allows
-        the user to initiate a conversation with the Security AI Assistant by
-        providing the required parameters.
+      description: Create a new Security AI Assistant conversation. This endpoint
+        allows the user to initiate a conversation with the Security AI
+        Assistant by providing the required parameters.
       operationId: CreateConversation
       requestBody:
         content:
@@ -595,8 +590,7 @@ paths:
                         name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: >-
-            Indicates a successful call. The conversation was created
+          description: Indicates a successful call. The conversation was created
             successfully.
         '400':
           content:
@@ -635,14 +629,12 @@ paths:
              --data '{"title":"Security Discussion","category":"assistant","messages":[{"content":"Hello","role":"system","timestamp":"2023-10-31T12:00:00Z"}],"apiConfig":{"connectorId":"12345","actionTypeId":"67890"},"replacements":{},"excludeFromLastConversationStorage":false}'
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
-      description: >-
-        Get a list of all conversations for the current user. This endpoint
+      description: Get a list of all conversations for the current user. This endpoint
         allows users to search, filter, sort, and paginate through their
         conversations.
       operationId: FindConversations
       parameters:
-        - description: >-
-            A list of fields to include in the response. If omitted, all fields
+        - description: A list of fields to include in the response. If omitted, all fields
             are returned.
           in: query
           name: fields
@@ -655,8 +647,7 @@ paths:
             items:
               type: string
             type: array
-        - description: >-
-            A search query to filter the conversations. Can match against
+        - description: A search query to filter the conversations. Can match against
             titles, messages, or other conversation attributes.
           in: query
           name: filter
@@ -664,8 +655,7 @@ paths:
           schema:
             example: Security Issue
             type: string
-        - description: >-
-            The field by which to sort the results. Valid fields are
+        - description: The field by which to sort the results. Valid fields are
             `created_at`, `title`, and `updated_at`.
           in: query
           name: sort_field
@@ -673,8 +663,7 @@ paths:
           schema:
             $ref: '#/components/schemas/FindConversationsSortField'
             example: created_at
-        - description: >-
-            The order in which to sort the results. Can be either `asc` for
+        - description: The order in which to sort the results. Can be either `asc` for
             ascending or `desc` for descending.
           in: query
           name: sort_order
@@ -700,9 +689,8 @@ paths:
             example: 20
             minimum: 0
             type: integer
-        - description: >-
-            Whether to return conversations that the current user owns. If true,
-            only conversations owned by the user are returned.
+        - description: Whether to return conversations that the current user owns. If
+            true, only conversations owned by the user are returned.
           in: query
           name: is_owner
           required: false
@@ -753,9 +741,7 @@ paths:
                     example: 20
                     type: integer
                   total:
-                    description: >-
-                      The total number of conversations matching the filter
-                      criteria.
+                    description: The total number of conversations matching the filter criteria.
                     example: 100
                     type: integer
                 required:
@@ -763,8 +749,7 @@ paths:
                   - perPage
                   - total
                   - data
-          description: >-
-            Successful response, returns a paginated list of conversations
+          description: Successful response, returns a paginated list of conversations
             matching the specified criteria.
         '400':
           content:
@@ -801,9 +786,8 @@ paths:
              --header "Authorization: $API_KEY"
   /api/security_ai_assistant/current_user/conversations/{id}:
     delete:
-      description: >-
-        Delete an existing conversation using the conversation ID. This endpoint
-        allows users to permanently delete a conversation.
+      description: Delete an existing conversation using the conversation ID. This
+        endpoint allows users to permanently delete a conversation.
       operationId: DeleteConversation
       parameters:
         - description: The conversation's `id` value.
@@ -843,8 +827,7 @@ paths:
                         name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: >-
-            Indicates a successful call. The conversation was deleted
+          description: Indicates a successful call. The conversation was deleted
             successfully.
         '400':
           content:
@@ -880,14 +863,12 @@ paths:
              --request DELETE 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
              --header "Authorization: $API_KEY"
     get:
-      description: >-
-        Get the details of an existing conversation using the conversation ID.
-        This allows users to fetch the specific conversation data by its unique
-        ID.
+      description: Get the details of an existing conversation using the conversation
+        ID. This allows users to fetch the specific conversation data by its
+        unique ID.
       operationId: ReadConversation
       parameters:
-        - description: >-
-            The conversation's `id` value, a unique identifier for the
+        - description: The conversation's `id` value, a unique identifier for the
             conversation.
           example: abc123
           in: path
@@ -960,9 +941,8 @@ paths:
              --request GET 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
              --header "Authorization: $API_KEY"
     put:
-      description: >-
-        Update an existing conversation using the conversation ID. This endpoint
-        allows users to modify the details of an existing conversation.
+      description: Update an existing conversation using the conversation ID. This
+        endpoint allows users to modify the details of an existing conversation.
       operationId: UpdateConversation
       parameters:
         - description: The conversation's `id` value.
@@ -1022,8 +1002,7 @@ paths:
                         name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: >-
-            Indicates a successful call. The conversation was updated
+          description: Indicates a successful call. The conversation was updated
             successfully.
         '400':
           content:
@@ -1070,9 +1049,7 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseReadResponse200Example2:
-                  summary: >-
-                    A response that returns information about the knowledge
-                    base.
+                  summary: A response that returns information about the knowledge base.
                   value:
                     defend_insights_exists: true
                     elser_exists: false
@@ -1108,13 +1085,11 @@ paths:
              --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base' \
              --header "Authorization: $API_KEY"
     post:
-      description: >-
-        Create a knowledge base. Use this endpoint when no specific resource
-        identifier is needed.
+      description: Create a knowledge base. Use this endpoint when no specific
+        resource identifier is needed.
       operationId: PostKnowledgeBase
       parameters:
-        - description: >-
-            ELSER modelId to use when setting up the Knowledge Base. If not
+        - description: ELSER modelId to use when setting up the Knowledge Base. If not
             provided, a default model will be used.
           example: elser-model-001
           in: query
@@ -1122,9 +1097,8 @@ paths:
           required: false
           schema:
             type: string
-        - description: >-
-            Indicates whether we should or should not install Security Labs docs
-            when setting up the Knowledge Base. Defaults to `false`.
+        - description: Indicates whether we should or should not install Security Labs
+            docs when setting up the Knowledge Base. Defaults to `false`.
           example: true
           in: query
           name: ignoreSecurityLabs
@@ -1149,9 +1123,8 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseResponse400Example2:
-                  summary: >-
-                    A response for a request that failed due to an invalid query
-                    parameter value.
+                  summary: A response for a request that failed due to an invalid query parameter
+                    value.
                   value: >
                     statusCode: 400 error: Bad Request message: "[request
                     query]: ignoreSecurityLabs: Invalid enum value. Expected
@@ -1189,9 +1162,7 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseReadResponse200Example1:
-                  summary: >-
-                    A response that returns information about the knowledge
-                    base.
+                  summary: A response that returns information about the knowledge base.
                   value:
                     defend_insights_exists: true
                     elser_exists: false
@@ -1237,8 +1208,7 @@ paths:
           required: true
           schema:
             type: string
-        - description: >-
-            ELSER modelId to use when setting up the Knowledge Base. If not
+        - description: ELSER modelId to use when setting up the Knowledge Base. If not
             provided, a default model will be used.
           example: elser-model-001
           in: query
@@ -1246,9 +1216,8 @@ paths:
           required: false
           schema:
             type: string
-        - description: >-
-            Indicates whether we should or should not install Security Labs docs
-            when setting up the Knowledge Base. Defaults to `false`.
+        - description: Indicates whether we should or should not install Security Labs
+            docs when setting up the Knowledge Base. Defaults to `false`.
           example: true
           in: query
           name: ignoreSecurityLabs
@@ -1273,9 +1242,8 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseResponse400Example1:
-                  summary: >-
-                    A response for a request that failed due to an invalid query
-                    parameter value.
+                  summary: A response for a request that failed due to an invalid query parameter
+                    value.
                   value: >
                     statusCode: 400 error: Bad Request message: "[request
                     query]: ignoreSecurityLabs: Invalid enum value. Expected
@@ -1308,9 +1276,8 @@ paths:
                   kbResource: user
                   name: How to reset a password
                   source: manual
-                  text: >-
-                    To reset your password, go to the settings page and click
-                    'Reset Password'.
+                  text: To reset your password, go to the settings page and click 'Reset
+                    Password'.
                   type: document
             schema:
               $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
@@ -1330,9 +1297,8 @@ paths:
                     name: How to reset a password
                     namespace: default
                     source: manual
-                    text: >-
-                      To reset your password, go to the settings page and click
-                      'Reset Password'.
+                    text: To reset your password, go to the settings page and click 'Reset
+                      Password'.
                     type: document
                     updatedAt: '2024-01-15T10:00:00.000Z'
                     updatedBy: user@example.com
@@ -1365,9 +1331,8 @@ paths:
              --data '{"name":"How to reset a password","type":"document","kbResource":"user","source":"manual","text":"To reset your password, go to the settings page and click Reset Password."}'
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
-      description: >-
-        The bulk action is applied to all Knowledge Base Entries that match the
-        filter or to the list of Knowledge Base Entries by their IDs.
+      description: The bulk action is applied to all Knowledge Base Entries that match
+        the filter or to the list of Knowledge Base Entries by their IDs.
       operationId: PerformKnowledgeBaseEntryBulkAction
       requestBody:
         content:
@@ -1514,8 +1479,7 @@ paths:
       description: Finds Knowledge Base Entries that match the given query.
       operationId: FindKnowledgeBaseEntries
       parameters:
-        - description: >-
-            A list of fields to include in the response. If not provided, all
+        - description: A list of fields to include in the response. If not provided, all
             fields will be included.
           in: query
           name: fields
@@ -1582,9 +1546,8 @@ paths:
                         name: How to reset a password
                         namespace: default
                         source: manual
-                        text: >-
-                          To reset your password, go to the settings page and
-                          click 'Reset Password'.
+                        text: To reset your password, go to the settings page and click 'Reset
+                          Password'.
                         type: document
                         updatedAt: '2024-01-15T10:00:00.000Z'
                         updatedBy: user@example.com
@@ -1676,8 +1639,7 @@ paths:
                     message: Knowledge Base Entry successfully deleted.
               schema:
                 $ref: '#/components/schemas/DeleteResponseFields'
-          description: >-
-            Successful request returning the `id` of the deleted Knowledge Base
+          description: Successful request returning the `id` of the deleted Knowledge Base
             Entry.
         '400':
           content:
@@ -1705,9 +1667,7 @@ paths:
       description: Retrieve a Knowledge Base Entry by its unique `id`.
       operationId: ReadKnowledgeBaseEntry
       parameters:
-        - description: >-
-            The unique identifier (`id`) of the Knowledge Base Entry to
-            retrieve.
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
           example: '12345'
           in: path
           name: id
@@ -1729,9 +1689,8 @@ paths:
                     name: How to reset a password
                     namespace: default
                     source: manual
-                    text: >-
-                      To reset your password, go to the settings page and click
-                      'Reset Password'.
+                    text: To reset your password, go to the settings page and click 'Reset
+                      Password'.
                     type: document
                     updatedAt: '2024-01-15T10:00:00.000Z'
                     updatedBy: user@example.com
@@ -1780,9 +1739,8 @@ paths:
                   kbResource: user
                   name: How to reset a password (updated)
                   source: manual
-                  text: >-
-                    Updated: go to settings and click Reset Password, then
-                    follow the on-screen instructions.
+                  text: 'Updated: go to settings and click Reset Password, then follow the
+                    on-screen instructions.'
                   type: document
             schema:
               $ref: '#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
@@ -1802,9 +1760,8 @@ paths:
                     name: How to reset a password (updated)
                     namespace: default
                     source: manual
-                    text: >-
-                      Updated: go to settings and click Reset Password, then
-                      follow the on-screen instructions.
+                    text: 'Updated: go to settings and click Reset Password, then follow the
+                      on-screen instructions.'
                     type: document
                     updatedAt: '2024-01-15T10:05:00.000Z'
                     updatedBy: user@example.com
@@ -1837,9 +1794,8 @@ paths:
              --data '{"name":"How to reset a password (updated)","type":"document","kbResource":"user","source":"manual","text":"Updated: go to settings and click Reset Password, then follow the on-screen instructions."}'
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
-      description: >-
-        Apply a bulk action to multiple prompts. The bulk action is applied to
-        all prompts that match the filter or to the list of prompts by their
+      description: Apply a bulk action to multiple prompts. The bulk action is applied
+        to all prompts that match the filter or to the list of prompts by their
         IDs. This action allows for bulk create, update, or delete operations.
       operationId: PerformPromptsBulkAction
       requestBody:
@@ -1882,7 +1838,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -1968,8 +1924,7 @@ paths:
              --data '{"delete":{"query":"name: test","ids":[]}}'
   /api/security_ai_assistant/prompts/_find:
     get:
-      description: >-
-        Get a list of all prompts based on optional filters, sorting, and
+      description: Get a list of all prompts based on optional filters, sorting, and
         pagination.
       operationId: FindPrompts
       parameters:
@@ -2082,9 +2037,8 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: >-
-                      The list of prompts returned based on the search query,
-                      sorting, and pagination.
+                    description: The list of prompts returned based on the search query, sorting,
+                      and pagination.
                     items:
                       $ref: '#/components/schemas/PromptResponse'
                     type: array
@@ -2494,9 +2448,7 @@ components:
           $ref: '#/components/schemas/MessageData'
           description: Metadata to attach to the context of the message.
         fields_to_anonymize:
-          description: >-
-            List of field names within the data object that should be
-            anonymized.
+          description: List of field names within the data object that should be anonymized.
           example:
             - user.name
             - source.ip
@@ -2676,8 +2628,7 @@ components:
               example: default
               type: string
             users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
+              description: Users who have access to the Knowledge Base Entry, defaults to
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
@@ -2706,8 +2657,7 @@ components:
               example: default
               type: string
             users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
+              description: Users who have access to the Knowledge Base Entry, defaults to
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
@@ -2772,8 +2722,7 @@ components:
               example: default
               type: string
             users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
+              description: Users who have access to the Knowledge Base Entry, defaults to
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
@@ -2826,8 +2775,7 @@ components:
         - updated_at
       type: string
     FindConversationsSortField:
-      description: >-
-        The field by which to sort the conversations. Possible values are
+      description: The field by which to sort the conversations. Possible values are
         `created_at`, `title`, and `updated_at`.
       enum:
         - created_at
@@ -2889,8 +2837,7 @@ components:
               example: default
               type: string
             users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
+              description: Users who have access to the Knowledge Base Entry, defaults to
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
@@ -2919,8 +2866,7 @@ components:
               example: default
               type: string
             users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
+              description: Users who have access to the Knowledge Base Entry, defaults to
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
@@ -2935,8 +2881,7 @@ components:
         inputSchema:
           $ref: '#/components/schemas/InputSchema'
         outputFields:
-          description: >-
-            Fields to extract from the query result, defaults to all fields if
+          description: Fields to extract from the query result, defaults to all fields if
             not provided or empty.
           example:
             - title
@@ -2948,9 +2893,8 @@ components:
       type: object
       properties:
         description:
-          description: >-
-            Description for when this index or data stream should be queried for
-            Knowledge Base content. Passed to the LLM as a tool description.
+          description: Description for when this index or data stream should be queried
+            for Knowledge Base content. Passed to the LLM as a tool description.
           example: Query this index for general knowledge base content.
           type: string
         field:
@@ -2962,8 +2906,7 @@ components:
           example: knowledge_base_index
           type: string
         queryDescription:
-          description: >-
-            Description of query field used to fetch Knowledge Base content.
+          description: Description of query field used to fetch Knowledge Base content.
             Passed to the LLM as part of the tool input schema.
           example: Search for documents containing the specified keywords.
           type: string
@@ -3002,8 +2945,7 @@ components:
               example: default
               type: string
             users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
+              description: Users who have access to the Knowledge Base Entry, defaults to
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
@@ -3012,9 +2954,8 @@ components:
             - id
         - $ref: '#/components/schemas/IndexEntryCreateFields'
     InputSchema:
-      description: >-
-        Array of objects defining the input schema, allowing the LLM to extract
-        structured data to be used in retrieval.
+      description: Array of objects defining the input schema, allowing the LLM to
+        extract structured data to be used in retrieval.
       items:
         type: object
         properties:
@@ -3174,17 +3115,14 @@ components:
             $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           type: array
         deleted:
-          description: >-
-            List of IDs of Knowledge Base Entries that were successfully
-            deleted.
+          description: List of IDs of Knowledge Base Entries that were successfully deleted.
           example:
             - '789'
           items:
             type: string
           type: array
         skipped:
-          description: >-
-            List of Knowledge Base Entries that were skipped during the bulk
+          description: List of Knowledge Base Entries that were skipped during the bulk
             action.
           example:
             - id: '123'
@@ -3218,14 +3156,12 @@ components:
           example: 2
           type: integer
         skipped:
-          description: >-
-            Number of Knowledge Base Entries that were skipped during the bulk
+          description: Number of Knowledge Base Entries that were skipped during the bulk
             action.
           example: 1
           type: integer
         succeeded:
-          description: >-
-            Number of Knowledge Base Entries that were successfully processed
+          description: Number of Knowledge Base Entries that were successfully processed
             during the bulk action.
           example: 5
           type: integer
@@ -3334,8 +3270,7 @@ components:
       type: object
       properties:
         defend_insights_exists:
-          description: >-
-            Indicates if Defend Insights documentation exists in the
+          description: Indicates if Defend Insights documentation exists in the
             KnowledgeBase.
           example: true
           type: boolean
@@ -3356,9 +3291,7 @@ components:
           example: complete
           type: string
         security_labs_exists:
-          description: >-
-            Indicates if Security Labs documentation exists in the
-            KnowledgeBase.
+          description: Indicates if Security Labs documentation exists in the KnowledgeBase.
           example: true
           type: boolean
         user_data_exists:
@@ -3366,9 +3299,8 @@ components:
           example: false
           type: boolean
     KnowledgeBaseResource:
-      description: >-
-        Knowledge Base resource name for grouping entries, e.g. 'security_labs',
-        'user', etc.
+      description: Knowledge Base resource name for grouping entries, e.g.
+        'security_labs', 'user', etc.
       enum:
         - security_labs
         - defend_insights
@@ -3456,13 +3388,11 @@ components:
           description: Data referred to by the message content.
         interruptResumeValue:
           $ref: '#/components/schemas/InterruptResumeValue'
-          description: >-
-            When the agent is resumed after an interrupt, this field is
+          description: When the agent is resumed after an interrupt, this field is
             populated with the details of the resume value.
         interruptValue:
           $ref: '#/components/schemas/InterruptValue'
-          description: >-
-            When the agent is interrupted (for example, when user input is
+          description: When the agent is interrupted (for example, when user input is
             required), this field is populated with the details of the
             interrupt. Messages containing interruptValues in the metadata are
             excluded from the LLM context.
@@ -3481,9 +3411,8 @@ components:
       minLength: 1
       type: string
     NonEmptyTimestamp:
-      description: >-
-        A string that represents a timestamp in ISO 8601 format and does not
-        contain only whitespace characters.
+      description: A string that represents a timestamp in ISO 8601 format and does
+        not contain only whitespace characters.
       example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
@@ -3929,9 +3858,7 @@ components:
               example: SELECT_OPTION
               type: string
             value:
-              description: >-
-                The value of the selected option to resume the graph execution
-                with
+              description: The value of the selected option to resume the graph execution with
               example: option_1
               type: string
           required:
@@ -3997,9 +3924,8 @@ components:
           example: John Doe
           type: string
     Vector:
-      description: >-
-        Object containing Knowledge Base Entry text embeddings and modelId used
-        to create the embeddings.
+      description: Object containing Knowledge Base Entry text embeddings and modelId
+        used to create the embeddings.
       type: object
       properties:
         modelId:

@@ -107,7 +107,6 @@ export function IndexLifecyclePhaseSelect() {
           query: { indexLifecyclePhase: value },
         });
       }}
-      hasDividers
       style={{ minWidth: 200 }}
       data-test-subj="storageExplorerLifecyclePhaseSelect"
       aria-label={indexLifecyclePhaseLabel}

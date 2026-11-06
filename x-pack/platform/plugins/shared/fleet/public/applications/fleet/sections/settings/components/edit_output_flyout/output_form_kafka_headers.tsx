@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -172,16 +173,23 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} style={{ marginTop: 28 }}>
-                <EuiButtonIcon
-                  data-test-subj={`settingsOutputsFlyout.kafkaHeadersDeleteButton${index}`}
-                  color="text"
-                  onClick={() => deleteKeyValuePair(index)}
-                  iconType="cross"
-                  disabled={deleteButtonDisabled}
-                  aria-label={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
                     defaultMessage: 'Delete row',
                   })}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj={`settingsOutputsFlyout.kafkaHeadersDeleteButton${index}`}
+                    color="text"
+                    onClick={() => deleteKeyValuePair(index)}
+                    iconType="cross"
+                    disabled={deleteButtonDisabled}
+                    aria-label={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
+                      defaultMessage: 'Delete row',
+                    })}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

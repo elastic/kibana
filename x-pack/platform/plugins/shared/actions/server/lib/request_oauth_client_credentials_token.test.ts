@@ -33,6 +33,27 @@ describe('requestOAuthClientCredentialsToken', () => {
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
 
+  test.each(['client_secret_post', 'client_secret_basic'] as const)(
+    'applies an explicit token type with %s without changing the default',
+    async (authMethod) => {
+      for (const tokenType of [undefined, 'Bearer']) {
+        axiosInstanceMock.mockResolvedValueOnce({
+          status: 200,
+          data: { token_type: 'bearer', access_token: 'token' },
+        });
+        const result = await requestOAuthClientCredentialsToken(
+          'https://test',
+          mockLogger,
+          { clientId: 'client', clientSecret: 'secret' },
+          actionsConfigMock.create(),
+          authMethod,
+          tokenType
+        );
+        expect(result.tokenType).toBe(tokenType ?? 'bearer');
+      }
+    }
+  );
+
   test('making a token request with required options only', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
@@ -207,6 +228,43 @@ describe('requestOAuthClientCredentialsToken', () => {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       })
     );
+  });
+
+  test('omits client_secret from body when clientSecret is absent (assertion-based auth)', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        token_type: 'Bearer',
+        access_token: 'assertion-token',
+        expires_in: 600,
+      },
+    });
+
+    await requestOAuthClientCredentialsToken(
+      'https://test-assertion',
+      mockLogger,
+      {
+        scope: 'https://graph.microsoft.com/.default',
+        clientId: 'client-cert',
+        client_assertion: 'signed.jwt.assertion',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      },
+      configurationUtilities
+    );
+
+    const receivedDataString = axiosInstanceMock.mock.calls[0][1].data;
+    const receivedParams = new URLSearchParams(receivedDataString);
+    const paramsObject = paramsToObject(receivedParams);
+
+    expect(paramsObject).not.toHaveProperty('client_secret');
+    expect(paramsObject).toEqual({
+      client_id: 'client-cert',
+      client_assertion: 'signed.jwt.assertion',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      grant_type: 'client_credentials',
+      scope: 'https://graph.microsoft.com/.default',
+    });
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {

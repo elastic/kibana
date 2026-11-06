@@ -85,6 +85,7 @@ const MlAnomalyDetectionHealthAlertOptional = rt.partial({
       end_timestamp: schemaDate,
       job_id: schemaString,
       missed_docs_count: schemaStringOrNumber,
+      missed_docs_percentage: schemaNumber,
     })
   ),
   'kibana.alert.job_errors_results': rt.array(

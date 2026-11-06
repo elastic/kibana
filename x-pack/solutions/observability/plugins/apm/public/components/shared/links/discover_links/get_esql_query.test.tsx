@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { getESQLQuery } from './get_esql_query';
+import { Parser, Walker, isStringLiteral } from '@elastic/esql';
+import { getESQLQuery, getESQLQueryFromIndexPattern, getApmIndexPattern } from './get_esql_query';
+import {
+  EXCEPTION_MESSAGE,
+  EXCEPTION_TYPE,
+  EVENT_NAME,
+  OTEL_EVENT_NAME,
+  PROCESSOR_EVENT,
+} from '@kbn/apm-types';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
@@ -208,14 +216,14 @@ describe('getESQLQuery', () => {
       expect(result).not.toContain(SERVICE_ENVIRONMENT);
     });
 
-    it('should skip environment filter for ENVIRONMENT_NOT_DEFINED_VALUE', () => {
+    it('should add a NOT exists KQL predicate for ENVIRONMENT_NOT_DEFINED_VALUE', () => {
       const result = getESQLQuery({
         indexType: 'traces',
         params: { environment: ENVIRONMENT_NOT_DEFINED_VALUE },
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).not.toContain(SERVICE_ENVIRONMENT);
+      expect(result).toContain(`NOT ${SERVICE_ENVIRONMENT} : *`);
     });
   });
 
@@ -336,6 +344,104 @@ describe('getESQLQuery', () => {
       });
 
       expect(result).toContain('WHERE KQL("user.id: \\"123\\"")');
+    });
+
+    // Inline on purpose: `getKqlSearchQueries` in @kbn/esql-utils does the same, but it trims the
+    // values (which would hide whitespace changes), drops parse errors, and would add a package
+    // dependency to the APM plugin just for this test.
+    const getKqlLiterals = (query: string) => {
+      const { root, errors } = Parser.parse(query);
+      const literals: string[] = [];
+      Walker.walk(root, {
+        visitFunction: (fn) => {
+          const [arg] = fn.args;
+          if (fn.name.toLowerCase() === 'kql' && isStringLiteral(arg)) {
+            literals.push(arg.valueUnquoted);
+          }
+        },
+      });
+      return { errors, literals };
+    };
+
+    /**
+     * The kuery comes from the user's query bar and is embedded in an ES|QL string literal.
+     * The printed query must parse cleanly AND the literal must decode back to exactly the
+     * kuery the user typed, so no character is lost or reinterpreted along the way.
+     */
+    it.each([
+      [
+        'nested/unbalanced double quotes',
+        'url.query: "filter=+type:"INDIVIDUAL"+AND+NOT+status:"NNA""',
+      ],
+      ['wildcard inside a quoted phrase', 'status.message : "Last loaded AES TIK for*"'],
+      ['plain quoted value', 'error.exception.type:"AppExceptionsServiceException"'],
+      ['escaped colon', 'labels.in\\:correlationid :"abc"'],
+      ['wildcards and escaped colons', '* \\:* \\:"* "'],
+      ['escaped quote inside a phrase', 'message: "say \\"hi\\""'],
+      ['trailing backslash', 'path: C\\\\'],
+      ['lone double quote', '"'],
+      ['lone backslash', '\\'],
+      ['ES|QL placeholder characters', 'a: ?param and b: ??ident'],
+      ['backticks and dollar signs', 'a: `b` and c: $d'],
+      ['comment markers inside a phrase', 'a: "/* x */" or b: "// y"'],
+      ['a pipe followed by another command', 'a: 1 | LIMIT 1'],
+      ['tab and newline', 'a: x\tand\nb: y'],
+      ['leading and trailing whitespace', '  a: 1  '],
+      ['non-ASCII characters', 'name: "żółć ü é 日本"'],
+      ['KQL ranges and boolean operators', 'a > 5 and not (b < 3 or c: *)'],
+    ])('keeps a kuery with %s intact as a single KQL string literal', (_, kuery) => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toBeNull();
+      const { errors, literals } = getKqlLiterals(result!);
+      expect(errors).toHaveLength(0);
+      expect(literals).toEqual([kuery]);
+    });
+
+    it('emits one KQL command per kuery source, in order, each parseable', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: {
+          environment: ENVIRONMENT_NOT_DEFINED_VALUE,
+          exceptionsOnly: true,
+          kuery: 'url.query: "a"b""',
+        },
+      });
+
+      const { errors, literals } = getKqlLiterals(result);
+      expect(errors).toHaveLength(0);
+      expect(literals).toHaveLength(3);
+      expect(literals[0]).toContain(SERVICE_ENVIRONMENT);
+      expect(literals[1]).toContain(OTEL_EVENT_NAME);
+      expect(literals[2]).toBe('url.query: "a"b""');
+    });
+
+    it('does not add a KQL command for an empty kuery', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery: '' },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toContain('KQL(');
+    });
+
+    it('does not let a kuery break out of the string literal to inject another command', () => {
+      const kuery = '") | DROP service.name | WHERE KQL("';
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      // The payload must stay inside the escaped literal: one FROM and one WHERE, nothing else.
+      const { root } = Parser.parse(result!);
+      expect(root.commands.map((command) => command.name)).toEqual(['from', 'where']);
+      expect(getKqlLiterals(result!).literals).toEqual([kuery]);
     });
   });
 
@@ -473,6 +579,162 @@ describe('getESQLQuery', () => {
       expect(result).toContain(`\`${ERROR_GROUP_ID}\` == "error-123"`);
       expect(result).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
       expect(result).toContain('SORT @timestamp DESC');
+    });
+  });
+});
+
+describe('getApmIndexPattern', () => {
+  it('returns null for empty indexSettings', () => {
+    expect(getApmIndexPattern({ indexType: 'traces', indexSettings: [] })).toBeNull();
+  });
+
+  it('resolves the correct indices for traces', () => {
+    const result = getApmIndexPattern({
+      indexType: 'traces',
+      indexSettings: createMockIndexSettings(),
+    });
+    expect(result).toBe(MOCK_TRACES_INDEX);
+  });
+
+  it('resolves the error index', () => {
+    const result = getApmIndexPattern({
+      indexType: 'error',
+      indexSettings: createMockIndexSettings(),
+    });
+    expect(result).toBe(MOCK_ERROR_INDEX);
+  });
+});
+
+describe('getESQLQueryFromIndexPattern', () => {
+  describe('logs index pattern and exception filters', () => {
+    /**
+     * These tests are regression guards for the EVENT_NAME vs OTEL_EVENT_NAME bug class.
+     * event.name (EVENT_NAME) is for OTel-native data streams; event_name (OTEL_EVENT_NAME)
+     * is the flattened field used in generic log streams and by the server-side
+     * getUnprocessedOtelErrors query. Using the wrong one produces no results.
+     */
+    it('filters on the flattened event_name field (OTEL_EVENT_NAME), never event.name (EVENT_NAME)', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true },
+      });
+
+      // The flattened field must be present.
+      expect(result).toContain(OTEL_EVENT_NAME); // 'event_name'
+      // The wrong field must never appear — 'event.name' is NOT a substring of 'event_name',
+      // so this is a clean discriminator.
+      expect(result).not.toContain(EVENT_NAME); // 'event.name'
+    });
+
+    it('ORs the event_name, exception.type and exception.message discriminators (not ANDs them)', () => {
+      // A doc with exception.type but no event_name must still match. If they were ANDed,
+      // such docs would be silently excluded.
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { exceptionsOnly: true },
+      });
+
+      // All three discriminators must be present — they mirror the `should` clauses of the
+      // server-side getUnprocessedOtelErrors query. A narrower predicate here means rows the
+      // endpoint returns have a Discover link that resolves to nothing.
+      expect(result).toContain(OTEL_EVENT_NAME); // 'event_name'
+      expect(result).toContain(EXCEPTION_TYPE); // 'exception.type'
+      expect(result).toContain(`${EXCEPTION_MESSAGE} : *`); // 'exception.message : *'
+
+      // They must be connected by OR, not AND.
+      // Find the KQL clause. The esql composer may format as KQL("...") on one line or
+      // KQL(\n  "...") across multiple lines — search for 'KQL(' and check what follows.
+      const kqlStart = result.indexOf('KQL(');
+      expect(kqlStart).toBeGreaterThan(-1);
+      // Slice everything after 'KQL(' — the OR must appear somewhere inside the expression.
+      const kqlContent = result.slice(kqlStart + 4);
+      expect(kqlContent.toLowerCase()).toMatch(/ or /);
+    });
+
+    it('excludes documents that were already processed into APM errors', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { exceptionsOnly: true },
+      });
+
+      // processor.event must appear in a "not ... : *" clause inside the KQL string.
+      expect(result).toContain(PROCESSOR_EVENT);
+      expect(result).toContain(`not ${PROCESSOR_EVENT} : *`);
+    });
+
+    it('narrows to a single document by _id when documentId is set', () => {
+      // exception.message and exception.type are both optional on these documents, so `_id` is
+      // the only field that reliably identifies one row.
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: {
+          traceId: 't1',
+          spanId: 's1',
+          exceptionsOnly: true,
+          documentId: 'doc-abc',
+        },
+      });
+
+      // `_id` is only addressable when requested as a METADATA field on FROM.
+      expect(result).toContain('METADATA _id');
+      expect(result).toContain('_id == "doc-abc"');
+    });
+
+    it('does not request the _id metadata field when documentId is absent', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true },
+      });
+
+      expect(result).not.toContain('METADATA');
+    });
+
+    it('does not include the exception clause when exceptionsOnly is false or absent', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { traceId: 't1' },
+      });
+
+      expect(result).not.toContain(OTEL_EVENT_NAME);
+      expect(result).not.toContain(EVENT_NAME);
+    });
+
+    it('handles a comma-separated log-sources pattern as FROM', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-synth-default,logs-generic.otel-default',
+        params: {},
+      });
+
+      expect(result).toContain('FROM logs-synth-default');
+      expect(result).toContain('logs-generic.otel-default');
+    });
+
+    it('places SORT after the exception KQL clause', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { exceptionsOnly: true, sortDirection: 'DESC' },
+      });
+
+      const sortIndex = result.indexOf('SORT');
+      const kqlIndex = result.indexOf('KQL');
+      expect(sortIndex).toBeGreaterThan(kqlIndex);
+    });
+
+    it('two rows with different documentId produce two distinct queries', () => {
+      // This guards against a regression where all rows share the same non-narrowed query —
+      // including rows that carry no exception.message at all.
+      const result1 = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true, documentId: 'doc-a' },
+      });
+      const result2 = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true, documentId: 'doc-b' },
+      });
+
+      expect(result1).not.toBe(result2);
+      expect(result1).toContain('doc-a');
+      expect(result2).toContain('doc-b');
     });
   });
 });

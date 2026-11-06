@@ -24,6 +24,8 @@ import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
+import { NEW_RULE_ATTACHMENT_LABEL } from '../../pages/rule_creation/translations';
+import { stripServerFields } from '../../../common/ai_rule_creation_handler';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface AddRuleAttachmentFromFormProps {
@@ -32,6 +34,8 @@ interface AddRuleAttachmentFromFormProps {
   scheduleStepData: ScheduleStepRule;
   actionsStepData: ActionsStepRule;
   actionTypeRegistry: ActionTypeRegistryContract;
+  /** Existing rule id — marks the attachment as an 'update' linked to this rule so chat shows "Update rule". */
+  existingRuleId?: string;
   rule?: never;
 }
 
@@ -42,6 +46,7 @@ interface AddRuleAttachmentFromRuleResponseProps {
   scheduleStepData?: never;
   actionsStepData?: never;
   actionTypeRegistry?: never;
+  existingRuleId?: never;
 }
 
 export type AddRuleAttachmentToChatButtonProps = (
@@ -55,15 +60,15 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   pathway,
   ...props
 }) => {
-  const {
-    services: { aiRuleCreation },
-  } = useKibana();
+  const { services } = useKibana();
+  const { aiRuleCreation } = services;
   const {
     defineStepData,
     aboutStepData,
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry,
+    existingRuleId,
     rule,
   } = props;
 
@@ -76,25 +81,32 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     actionTypeRegistry != null;
 
   const ruleAttachment = useMemo(() => {
-    const formattedRule = isFormBased
-      ? formatRule<RuleCreateProps>(
-          defineStepData,
-          aboutStepData,
-          scheduleStepData,
-          actionsStepData,
-          actionTypeRegistry
-        )
-      : rule;
-    const attachmentLabel = formattedRule?.name;
-    const attachmentData = JSON.stringify(formattedRule);
+    let formattedRule: RuleCreateProps | Partial<RuleResponse> | null | undefined;
+    if (isFormBased) {
+      formattedRule = formatRule<RuleCreateProps>(
+        defineStepData,
+        aboutStepData,
+        scheduleStepData,
+        actionsStepData,
+        actionTypeRegistry
+      );
+    } else {
+      formattedRule = rule ? stripServerFields(rule) : rule;
+    }
+    const attachmentLabel =
+      formattedRule?.name ||
+      (isFormBased && !existingRuleId ? NEW_RULE_ATTACHMENT_LABEL : undefined);
+    const linkedRuleId = rule?.id ?? existingRuleId;
 
     return {
       attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
-        text: attachmentData,
+        text: JSON.stringify(formattedRule),
         attachmentLabel,
       },
+      ...(linkedRuleId ? { origin: linkedRuleId } : {}),
+      attachmentDescription: attachmentLabel,
       attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     };
   }, [
@@ -104,15 +116,19 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry,
+    existingRuleId,
     rule,
   ]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   const handleClick = useCallback(() => {
-    aiRuleCreation.activateFormSync();
+    if (isFormBased) {
+      aiRuleCreation.activateFormSync();
+    }
+    aiRuleCreation.releaseBind();
     openAgentBuilderFlyout();
-  }, [aiRuleCreation, openAgentBuilderFlyout]);
+  }, [isFormBased, aiRuleCreation, openAgentBuilderFlyout]);
 
   return (
     <NewAgentBuilderAttachment

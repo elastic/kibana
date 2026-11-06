@@ -41,20 +41,19 @@ import {
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
+import { DEFEND_INSIGHTS_GRAPH_RUN_NAME, getDefaultDefendInsightsGraph } from '@kbn/discoveries';
 
+import type { DefendInsightsGraphState } from '@kbn/discoveries';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../ai_assistant_data_clients/knowledge_base';
-import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
 import type { CallbackIds, GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
 import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import { appContextService } from '../../services/app_context';
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/prompts';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
 } from '../../lib/telemetry/event_based_telemetry';
-import { getDefaultDefendInsightsGraph } from '../../lib/defend_insights/graphs/default_defend_insights_graph';
-import { DEFEND_INSIGHTS_GRAPH_RUN_NAME } from '../../lib/defend_insights/graphs/default_defend_insights_graph/constants';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLlmType } from '../utils';
 import { MAX_GENERATION_ATTEMPTS, MAX_HALLUCINATION_FAILURES } from './translations';

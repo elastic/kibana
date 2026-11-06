@@ -221,6 +221,7 @@ export function JobSelector({
               <EuiButtonEmpty
                 size="s"
                 color="primary"
+                iconType="gear"
                 onClick={redirectToADJobManagement}
                 disabled={!canGetJobs}
                 data-test-subj="mlJobSelectorManageJobsButton"

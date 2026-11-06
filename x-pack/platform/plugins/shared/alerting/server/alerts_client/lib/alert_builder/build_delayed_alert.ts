@@ -17,6 +17,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_SNOOZED,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
@@ -27,6 +28,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_DELAYED,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
@@ -43,6 +45,7 @@ import { stripFrameworkFields } from '../strip_framework_fields';
 import { nanosToMicros } from '../nanos_to_micros';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
+import { getAlertSnoozedStatus } from '../get_alert_snoozed_status';
 
 interface BuildDelayedAlertOpts<
   AlertData extends RuleAlertData,
@@ -102,6 +105,7 @@ export const buildDelayedAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isSnoozed = getAlertSnoozedStatus(alertInstanceId, ruleData);
 
   return deepmerge.all(
     [
@@ -122,7 +126,9 @@ export const buildDelayedAlert = <
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
         [ALERT_MUTED]: isMuted,
+        [ALERT_SNOOZED]: isSnoozed,
         [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+        [ALERT_TRACKED]: true,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
         ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),

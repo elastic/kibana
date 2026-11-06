@@ -76,6 +76,7 @@ function buildFocusedStepInfo(workflowId: string) {
     stepId: 'step1',
     stepType: 'workflow.execute',
     stepYamlNode,
+    path: ['steps', 0],
     lineStart: 1,
     lineEnd: 5,
     propInfos,

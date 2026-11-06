@@ -26,8 +26,8 @@ export interface EmptyListContent {
 interface IndexDetailsTab {
   // a unique key to identify the tab
   id: IndexDetailsTabId;
-  // a text that is displayed on the tab label, usually a Formatted message component
-  name: ReactNode;
+  // a string displayed on the tab label
+  name: string;
   // a function that renders the content of the tab
   renderTabContent: (args: {
     index: Index;
@@ -195,7 +195,7 @@ This plugin uses Storybook to develop and showcase stateless UI components in an
 To start the Storybook, run the following command:
 
 ```
-yarn storybook index_management
+pnpm storybook index_management
 ```
 
 This will launch the Storybook instance for this plugin, allowing you to view and interact with the components in your browser.

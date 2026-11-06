@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
@@ -32,6 +32,7 @@ import {
 import { DefaultConnectorField } from './connector_field';
 import type { DynamicSettings } from '../../../../../../common/runtime_types';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
+import { DisableDefaultRuleModal, getDisableDefaultRuleKind } from './disable_default_rule_modal';
 
 interface FormFields extends Omit<DynamicSettings, 'defaultEmail'> {
   defaultEmail: Partial<DynamicSettings['defaultEmail']>;
@@ -43,6 +44,7 @@ export const AlertDefaultsForm = () => {
   const { settings, loading } = useSelector(selectDynamicSettings);
 
   const [formFields, setFormFields] = useState<FormFields>(DYNAMIC_SETTINGS_DEFAULTS as FormFields);
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
 
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
@@ -66,8 +68,23 @@ export const AlertDefaultsForm = () => {
       formFields.defaultConnectors?.includes(connector.id) && connector.actionTypeId === '.email'
   );
 
+  const disableDefaultRuleKind = getDisableDefaultRuleKind(
+    (settings?.defaultStatusRuleEnabled ?? true) && formFields.defaultStatusRuleEnabled === false,
+    (settings?.defaultTLSRuleEnabled ?? true) && formFields.defaultTLSRuleEnabled === false
+  );
+
   const onApply = () => {
     dispatch(setDynamicSettingsAction.get(formFields as DynamicSettings));
+    setShowDisableConfirm(false);
+  };
+
+  const onApplyClick = (evt: React.FormEvent) => {
+    evt.preventDefault();
+    if (disableDefaultRuleKind) {
+      setShowDisableConfirm(true);
+      return;
+    }
+    onApply();
   };
 
   const isFormDirty = !isEqual(formFields, settings);
@@ -86,20 +103,21 @@ export const AlertDefaultsForm = () => {
         title={
           <h4>
             <FormattedMessage
-              id="xpack.synthetics.settings.defaultConnectors"
+              id="xpack.synthetics.settings.defaultRulesTitle"
               defaultMessage="Default rules"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.synthetics.settings.defaultConnectors.description"
-            defaultMessage="Default rules are automatically created. You can disable creation of default rules here."
+            id="xpack.synthetics.settings.defaultRulesDescription"
+            defaultMessage="Default status and TLS rules are created automatically. Turning a default rule off deletes it, and its active alerts become untracked. Custom synthetics rules are not affected."
           />
         }
       >
         <EuiSpacer size="s" />
         <EuiSwitch
+          data-test-subj="syntheticsAlertDefaultsFormStatusRuleSwitch"
           label={i18n.translate('xpack.synthetics.ruleStatusDefaultsForm.euiSwitch.enabledLabel', {
             defaultMessage: 'Status rule enabled',
           })}
@@ -114,6 +132,7 @@ export const AlertDefaultsForm = () => {
         />
         <EuiSpacer size="m" />
         <EuiSwitch
+          data-test-subj="syntheticsAlertDefaultsFormTlsRuleSwitch"
           label={i18n.translate('xpack.synthetics.ruleTLSDefaultsForm.euiSwitch.enabledLabel', {
             defaultMessage: 'TLS rule enabled',
           })}
@@ -164,10 +183,11 @@ export const AlertDefaultsForm = () => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="syntheticsAlertDefaultsFormButton"
+            data-test-subj="syntheticsAlertDefaultsFormDiscardButton"
             iconType="cross"
             onClick={() => {
               setFormFields((settings ?? DYNAMIC_SETTINGS_DEFAULTS) as FormFields);
+              setShowDisableConfirm(false);
             }}
             flush="left"
             isDisabled={!isFormDirty}
@@ -178,11 +198,8 @@ export const AlertDefaultsForm = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            data-test-subj="syntheticsAlertDefaultsFormButton"
-            onClick={(evt: React.FormEvent) => {
-              evt.preventDefault();
-              onApply();
-            }}
+            data-test-subj="syntheticsAlertDefaultsFormApplyButton"
+            onClick={onApplyClick}
             fill
             isLoading={loading}
             isDisabled={!isFormDirty || isDisabled || !isFormValid()}
@@ -191,6 +208,13 @@ export const AlertDefaultsForm = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {showDisableConfirm && disableDefaultRuleKind && (
+        <DisableDefaultRuleModal
+          ruleKind={disableDefaultRuleKind}
+          onCancel={() => setShowDisableConfirm(false)}
+          onConfirm={onApply}
+        />
+      )}
     </EuiForm>
   );
 };

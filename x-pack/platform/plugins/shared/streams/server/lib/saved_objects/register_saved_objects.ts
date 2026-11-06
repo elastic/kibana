@@ -6,9 +6,29 @@
  */
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { getStreamsPromptsSavedObject } from '../sig_events/saved_objects/prompts_config';
+import {
+  streamsConfigurationEncryptedType,
+  streamsConfigurationSavedObjectType,
+  streamsUiMetadataSavedObjectType,
+} from './streams_configuration';
 
-export const registerStreamsSavedObjects = (savedObjectsService: SavedObjectsServiceSetup) => {
-  savedObjectsService.registerType(getStreamsPromptsSavedObject());
+export const registerStreamsSavedObjects = (
+  savedObjects: SavedObjectsServiceSetup,
+  {
+    isStreamsCanvasEnabled,
+    encryptedSavedObjects,
+  }: {
+    isStreamsCanvasEnabled: boolean;
+    encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  }
+) => {
+  if (isStreamsCanvasEnabled) {
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove once streams-configuration graduates from WIP
+    savedObjects.registerType(streamsConfigurationSavedObjectType);
+    encryptedSavedObjects.registerType(streamsConfigurationEncryptedType);
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove once streams-ui-metadata graduates from WIP
+    savedObjects.registerType(streamsUiMetadataSavedObjectType);
+  }
 };

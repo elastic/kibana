@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useStartServices } from '../../../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
 
 interface Props {
@@ -26,6 +27,7 @@ export const AddIntegrationFlyoutConfigureHeader: React.FC<Props> = ({
   integration,
 }) => {
   const theme = useEuiTheme();
+  const { docLinks } = useStartServices();
   return (
     <>
       <EuiText size="m" color="subdued">
@@ -55,7 +57,7 @@ export const AddIntegrationFlyoutConfigureHeader: React.FC<Props> = ({
           values={{
             readMoreLink: (
               <EuiLink
-                href={`https://www.elastic.co/docs/reference/integrations/${pkgName}${
+                href={`${docLinks.links.fleet.integrationsReference}/${pkgName}${
                   integration ? '/' + integration : ''
                 }`}
                 external

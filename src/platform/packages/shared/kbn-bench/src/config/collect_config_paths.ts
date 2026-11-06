@@ -8,7 +8,7 @@
  */
 import Path from 'path';
 import execa from 'execa';
-import { minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 
 export async function collectConfigPaths({
   patterns,
@@ -18,6 +18,7 @@ export async function collectConfigPaths({
   cwd: string;
 }): Promise<string[]> {
   const filename = 'benchmark.config.ts';
+  const filenameSuffix = '.benchmark.config.ts';
 
   // get all the benchmark files first, this is much faster than globbing directly
   const { stdout: lsFilesStdout } = await execa(
@@ -32,22 +33,24 @@ export async function collectConfigPaths({
       '--exclude-standard',
       filename,
       `**/${filename}`,
+      `*${filenameSuffix}`,
+      `**/*${filenameSuffix}`,
     ],
     { cwd }
   );
 
   const files = lsFilesStdout
     .split('\0')
-    .filter((f) => f.endsWith(filename))
+    .filter((f) => f.endsWith(filename) || f.endsWith(filenameSuffix))
     .map((file) => Path.resolve(cwd, file));
 
   const matchers = patterns.filter(Boolean).map((pattern) => {
-    return minimatch.makeRe(Path.isAbsolute(pattern) ? pattern : Path.join(cwd, pattern));
+    return new Minimatch(Path.isAbsolute(pattern) ? pattern : Path.join(cwd, pattern));
   });
 
   const matchingFiles = matchers.length
     ? files.filter((file) => {
-        return matchers.some((matcher) => matcher && matcher.test(file));
+        return matchers.some((matcher) => matcher.match(file));
       })
     : files;
 

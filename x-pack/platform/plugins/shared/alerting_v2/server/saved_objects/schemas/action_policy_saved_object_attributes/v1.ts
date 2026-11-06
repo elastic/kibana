@@ -42,7 +42,7 @@ export const actionPolicySavedObjectAttributesSchema = schema.object({
             schema.literal('every_time'),
           ])
         ),
-        interval: schema.maybe(schema.string()),
+        interval: schema.maybe(schema.nullable(schema.string())),
       })
     )
   ),
@@ -53,9 +53,7 @@ export const actionPolicySavedObjectAttributesSchema = schema.object({
     createdByUser: schema.boolean(),
   }),
   createdBy: schema.nullable(schema.string()),
-  createdByUsername: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
-  updatedByUsername: schema.nullable(schema.string()),
   createdAt: schema.string(),
   updatedAt: schema.string(),
 });

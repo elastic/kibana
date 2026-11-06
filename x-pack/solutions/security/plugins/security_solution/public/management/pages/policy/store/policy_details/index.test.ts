@@ -6,12 +6,15 @@
  */
 
 import type { PolicyDetailsState } from '../../types';
-import type { Dispatch, Store } from 'redux';
-import { applyMiddleware, createStore } from 'redux';
+import type { Dispatch, Store } from 'redux-v4';
+import { applyMiddleware, createStore } from 'redux-v4';
 import type { PolicyDetailsAction } from '.';
 import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
-import { policyConfig } from './selectors';
-import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyConfig, policyDetails } from './selectors';
+import {
+  DefaultPolicyNotificationMessage,
+  policyFactory,
+} from '../../../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig, PolicyData } from '../../../../../../common/endpoint/types';
 import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test_utils';
 import { createSpyMiddleware } from '../../../../../common/store/test_utils';
@@ -20,6 +23,9 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import type { AppAction } from '../../../../../common/store/actions';
 
 describe('policy details: ', () => {
   let store: Store;
@@ -194,6 +200,39 @@ describe('policy details: ', () => {
         expect(config.windows.popup.malware.message).not.toEqual(CustomMessage);
       });
     });
+
+    describe('when the user edits linux settings through the legacy (non per-OS) policyConfig action', () => {
+      const Platinum = licenseMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum' },
+      });
+
+      beforeEach(() => {
+        dispatch({ type: 'licenseChanged', payload: Platinum });
+      });
+
+      // `policyConfig`'s `linux` section (selectors/policy_settings_selectors.ts) has no
+      // `ransomware` key in its object literal at all -- Linux ransomware is only editable
+      // through the per-OS form. Because the key is genuinely absent (not set to `undefined`),
+      // the reducer's `{ ...currentOsPolicy, ...newSettings }` merge leaves the existing
+      // `linux.ransomware` branch untouched. If the selector ever added an unconditional
+      // `ransomware: linux.ransomware`, an absent branch would become an explicit `undefined`
+      // own-property and this merge would instead erase it.
+      it('does not drop an existing linux.ransomware branch when saving an unrelated linux change', () => {
+        const config = policyConfig(getState());
+        const newPayload = cloneDeep(config);
+        newPayload.linux.events.file = true;
+
+        dispatch({
+          type: 'userChangedPolicyConfig',
+          payload: { policyConfig: newPayload },
+        });
+
+        const savedPolicy = policyDetails(getState())?.inputs[0].config.policy
+          .value as PolicyConfig;
+        expect(savedPolicy.linux.events.file).toEqual(true);
+        expect(savedPolicy.linux.ransomware).toEqual({ mode: 'prevent', supported: true });
+      });
+    });
   });
 
   describe('when saving policy data', () => {
@@ -294,7 +333,11 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
-                    memory_protection: { mode: 'off', supported: false },
+                    memory_protection: {
+                      mode: 'off',
+                      supported: false,
+                      custom_yara_signatures: false,
+                    },
                     behavior_protection: {
                       mode: 'off',
                       supported: false,
@@ -309,7 +352,11 @@ describe('policy details: ', () => {
                       credential_hardening: {
                         enabled: false,
                       },
+                      registry_credential_hardening: {
+                        enabled: false,
+                      },
                     },
+                    ai_data_collection: { enabled: true },
                     popup: {
                       malware: {
                         enabled: true,
@@ -350,7 +397,11 @@ describe('policy details: ', () => {
                       enabled: false,
                       usb_storage: 'audit',
                     },
-                    memory_protection: { mode: 'off', supported: false },
+                    memory_protection: {
+                      mode: 'off',
+                      supported: false,
+                      custom_yara_signatures: false,
+                    },
                     ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -379,6 +430,7 @@ describe('policy details: ', () => {
                       capture_env_vars:
                         'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
                     },
+                    ai_data_collection: { enabled: true },
                   },
                   linux: {
                     events: {
@@ -396,7 +448,12 @@ describe('policy details: ', () => {
                       supported: false,
                       reputation_service: false,
                     },
-                    memory_protection: { mode: 'off', supported: false },
+                    memory_protection: {
+                      mode: 'off',
+                      supported: false,
+                      custom_yara_signatures: false,
+                    },
+                    ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
@@ -410,10 +467,15 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      ransomware: {
+                        enabled: false,
+                        message: '',
+                      },
                     },
                     advanced: {
                       capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
+                    ai_data_collection: { enabled: true },
                   },
                 } as PolicyConfig,
               },
@@ -435,6 +497,115 @@ describe('policy details: ', () => {
       const failureAction = await waitForAction('serverReturnedPolicyDetailsUpdateFailure');
       expect(failureAction.payload?.error).toBeInstanceOf(Error);
       expect(failureAction.payload?.error?.message).toEqual('not found');
+    });
+  });
+
+  describe('when loading policy data', () => {
+    let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
+    let http: AppContextTestRender['coreStart']['http'];
+
+    const setPerOsFlag = (perOsPolicySettings: boolean) => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, perOsPolicySettings },
+      });
+    };
+
+    beforeEach(() => {
+      let actionSpyMiddleware: MiddlewareActionSpyHelper<PolicyDetailsState>['actionSpyMiddleware'];
+      const { coreStart, depsStart } = createAppRootMockRenderer();
+      ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<PolicyDetailsState>());
+      http = coreStart.http;
+
+      store = createStore(
+        policyDetailsReducer,
+        undefined,
+        applyMiddleware(policyDetailsMiddlewareFactory(coreStart, depsStart), actionSpyMiddleware)
+      );
+      getState = store.getState;
+      dispatch = store.dispatch;
+    });
+
+    afterEach(() => {
+      setPerOsFlag(allowedExperimentalValues.perOsPolicySettings);
+    });
+
+    const loadPolicyWithMessages = async (windowsMessage: string, macMessage: string) => {
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.policy_ids = [];
+      loadedPolicy.inputs[0].config.policy.value.windows.popup.malware.message = windowsMessage;
+      loadedPolicy.inputs[0].config.policy.value.mac.popup.malware.message = macMessage;
+
+      http.get.mockResolvedValueOnce({ item: loadedPolicy, success: true });
+
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      // userChangedUrl is an app-level action, outside this store's own action union.
+      (dispatch as Dispatch<AppAction>)({
+        type: 'userChangedUrl',
+        payload: { pathname: '/administration/policy/policy-1/settings', search: '', hash: '' },
+      });
+      await serverReturnedPolicy;
+
+      return policyDetails(getState())?.inputs[0].config.policy.value;
+    };
+
+    it('keeps a per-OS malware message when the flag is on and the Windows one is empty', async () => {
+      setPerOsFlag(true);
+
+      const loaded = await loadPolicyWithMessages('', 'Custom macOS malware notification');
+
+      expect(loaded?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loaded?.mac.popup.malware.message).toEqual('Custom macOS malware notification');
+    });
+
+    it('defaults an empty macOS ransomware message when the flag is on', async () => {
+      setPerOsFlag(true);
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.policy_ids = [];
+      loadedPolicy.inputs[0].config.policy.value.mac.popup.ransomware.message = '';
+
+      http.get.mockResolvedValueOnce({ item: loadedPolicy, success: true });
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      (dispatch as Dispatch<AppAction>)({
+        type: 'userChangedUrl',
+        payload: { pathname: '/administration/policy/policy-1/settings', search: '', hash: '' },
+      });
+      await serverReturnedPolicy;
+
+      expect(
+        policyDetails(getState())?.inputs[0].config.policy.value.mac.popup.ransomware.message
+      ).toEqual(DefaultPolicyNotificationMessage);
+    });
+
+    it('loads a policy whose macOS ransomware popup branch is absent', async () => {
+      setPerOsFlag(true);
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.policy_ids = [];
+      const macPopup = loadedPolicy.inputs[0].config.policy.value.mac.popup as Partial<
+        PolicyConfig['mac']['popup']
+      >;
+      delete macPopup.ransomware;
+
+      http.get.mockResolvedValueOnce({ item: loadedPolicy, success: true });
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      (dispatch as Dispatch<AppAction>)({
+        type: 'userChangedUrl',
+        payload: { pathname: '/administration/policy/policy-1/settings', search: '', hash: '' },
+      });
+
+      await expect(serverReturnedPolicy).resolves.toBeDefined();
+    });
+
+    it('defaults every OS from the Windows message when the flag is off', async () => {
+      setPerOsFlag(false);
+
+      const loaded = await loadPolicyWithMessages('', 'Custom macOS malware notification');
+
+      expect(loaded?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loaded?.mac.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loaded?.linux.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
     });
   });
 });

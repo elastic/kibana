@@ -14,6 +14,10 @@ import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_ap
 import { expectTextsInDocument } from '../../../utils/test_helpers';
 import type { SectionDescriptor } from './types';
 
+jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({ dataView: undefined, apmIndices: undefined }),
+}));
+
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <MemoryRouter>

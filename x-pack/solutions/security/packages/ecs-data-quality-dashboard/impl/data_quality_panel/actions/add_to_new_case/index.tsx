@@ -43,7 +43,7 @@ const AddToNewCaseActionComponent: React.FC<Props> = ({ markdownComment }) => {
       onClick={addToNewCaseContextMenuOnClick}
     >
       <span css={linkTextCss}>
-        <EuiIcon type="plusCircle" />
+        <EuiIcon type="plusCircle" aria-hidden={true} />
         {ADD_TO_NEW_CASE}
       </span>
     </EuiLink>

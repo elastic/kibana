@@ -61,7 +61,7 @@ describe('export_csv', () => {
       renderResult.result.current(agents, columns, sortOptions);
     });
 
-    expect(jest.mocked(sendPostGenerateAgentsReport)).toBeCalledWith({
+    expect(jest.mocked(sendPostGenerateAgentsReport)).toHaveBeenCalledWith({
       agents: ['agent1', 'agent2'],
       fields: ['agent.id'],
       timezone: 'America/Los_Angeles',
@@ -77,7 +77,7 @@ describe('export_csv', () => {
       renderResult.result.current(agents, columns, undefined);
     });
 
-    expect(jest.mocked(sendPostGenerateAgentsReport)).toBeCalledWith({
+    expect(jest.mocked(sendPostGenerateAgentsReport)).toHaveBeenCalledWith({
       agents,
       fields: ['agent.id'],
       timezone: 'America/Los_Angeles',

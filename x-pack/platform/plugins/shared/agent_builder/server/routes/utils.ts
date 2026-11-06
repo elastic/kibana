@@ -6,7 +6,12 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import type { ConnectorItem, OAuthStatus } from '../../common/http_api/tools';
+import {
+  filterActionsBySelection,
+  getConnectorSpec,
+  type SelectedActions,
+} from '@kbn/connector-specs';
+import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
   return `${featureName} is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.`;
@@ -19,18 +24,27 @@ export const AGENT_SOCKET_TIMEOUT_MS = 15 * 60 * 1000;
 
 /**
  * Returns the headers needed for SSE streaming responses.
- * On cloud, uses `application/octet-stream` to avoid proxy compression breaking chunked encoding.
  */
-export const getSSEResponseHeaders = (isCloud: boolean): Record<string, string> => ({
-  // Cloud proxies compress text/* types, losing chunking capabilities needed for SSE
-  'Content-Type': isCloud ? 'application/octet-stream' : 'text/event-stream',
+export const getSSEResponseHeaders = (): Record<string, string> => ({
+  'Content-Type': 'text/event-stream',
   'Content-Encoding': 'identity',
   'Cache-Control': 'no-cache',
-  Connection: 'keep-alive',
-  'Transfer-Encoding': 'chunked',
   'X-Content-Type-Options': 'nosniff',
   'X-Accel-Buffering': 'no',
 });
+
+export const getConnectorSubActions = (
+  actionTypeId: string,
+  selectedActions?: SelectedActions
+): ConnectorSubAction[] => {
+  const spec = getConnectorSpec(actionTypeId);
+  if (!spec) return [];
+
+  return filterActionsBySelection(spec.actions, selectedActions).map(([name, action]) => ({
+    name,
+    description: action.description,
+  }));
+};
 
 export const toConnectorItem = (
   connector: Connector,
@@ -38,6 +52,7 @@ export const toConnectorItem = (
     oauthStatus?: OAuthStatus;
   }
 ): ConnectorItem => {
+  const selectedActions = connector.config?.selectedActions as SelectedActions;
   return {
     id: connector.id,
     name: connector.name,
@@ -50,5 +65,6 @@ export const toConnectorItem = (
     config: connector.config,
     authMode: connector.authMode,
     oauthStatus: options?.oauthStatus,
+    subActions: getConnectorSubActions(connector.actionTypeId, selectedActions),
   };
 };

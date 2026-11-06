@@ -1221,9 +1221,9 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
 
     it('should just return the same document for XY, partition and metric visualization types', () => {
-      for (const vizType of ['lnsXY', 'lnsPie', 'lnsMetric']) {
+      for (const visType of ['lnsXY', 'lnsPie', 'lnsMetric']) {
         const exampleCopy = cloneDeep(example);
-        exampleCopy.attributes.visualizationType = vizType;
+        exampleCopy.attributes.visualizationType = visType;
         // add datatable state here, even with another viz (manual change?)
         (exampleCopy.attributes as LensDocShape715<VisState716>).state.visualization = {
           columns: [

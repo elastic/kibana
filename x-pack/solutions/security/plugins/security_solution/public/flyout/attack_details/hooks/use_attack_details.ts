@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   type AttackDiscoveryAlert,
@@ -74,7 +75,7 @@ export const useAttackDetails = ({
   // https://github.com/elastic/kibana/issues/244205
   const pageScope = PageScope.attacks;
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 

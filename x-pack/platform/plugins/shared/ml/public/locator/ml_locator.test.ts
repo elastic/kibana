@@ -181,18 +181,6 @@ describe('ML locator', () => {
         });
       });
 
-      it('should generate valid URL for the Index Data Visualizer select data view or saved search page', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: '/datavisualizer_index_select',
-          state: {},
-        });
-      });
-
       it('should generate valid URL for the Index Data Visualizer Viewer page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
@@ -216,30 +204,38 @@ describe('ML locator', () => {
     });
 
     describe('AIOps labs', () => {
-      it('should throw an error for invalid Change point detection page state', async () => {
-        await expect(
-          definition.getLocation({
-            page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
-            pageState: {
-              index: '123123',
-            },
-          })
-        ).rejects.toThrow('Field configs are required to create a change point detection URL');
+      it('should fall back to generic URL when only index is provided (no fieldConfigs)', async () => {
+        const location = await definition.getLocation({
+          page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+          pageState: {
+            index: '123123',
+          },
+        });
 
-        await expect(
-          definition.getLocation({
-            page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
-            pageState: {
-              fieldConfigs: [
-                {
-                  fn: 'max',
-                  metricField: 'CPUUtilization',
-                  splitField: 'instance',
-                },
-              ],
-            },
-          })
-        ).rejects.toThrow('Data view is required to create a change point detection URL');
+        expect(location).toMatchObject({
+          app: 'ml',
+          path: '/aiops/change_point_detection?index=123123',
+          state: {},
+        });
+      });
+
+      it('should fall back to generic URL when only fieldConfigs is provided (no index)', async () => {
+        const location = await definition.getLocation({
+          page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+          pageState: {
+            fieldConfigs: [
+              {
+                fn: 'max',
+                metricField: 'CPUUtilization',
+                splitField: 'instance',
+              },
+            ],
+          },
+        });
+
+        expect(location.app).toBe('ml');
+        expect(location.path).toMatch(/^\/aiops\/change_point_detection/);
+        expect(location.state).toEqual({});
       });
 
       it('should generate valid URL for the Change point detection page', async () => {

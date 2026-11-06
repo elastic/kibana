@@ -81,7 +81,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const identityFieldsStable =
     identityFields != null && Object.keys(identityFields).length > 0
@@ -109,7 +109,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
     if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
       // Use the entity record to generate a DSL query fragment
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
-        storeEntityType ?? 'generic',
+        euidApi.getBuiltInEntityDefinition(storeEntityType ?? 'generic'),
         entityRecord ?? entityRecordInput
       );
       return filter != null ? [filter] : [];
@@ -120,7 +120,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       : [];
   }, [
     entityStoreV2Enabled,
-    euidApi?.euid,
+    euidApi,
     entityRecord,
     entityRecordInput,
     identityFieldsStable,

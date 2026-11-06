@@ -6,10 +6,29 @@
  */
 
 import {
+  classifyPolicyId,
+  AGENT_VERSION_SUFFIX_ES_REGEXP,
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
+  buildVersionVariantsKueryFragment,
+  buildAgentVersionVariantsKueryFragment,
+  buildAgentVersionVariantsEsFilter,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+  buildVersionVariantsEsFilter,
+  buildPolicyIdOrVariantsEsFilter,
+  buildPolicyIdsOrVariantsEsFilter,
+  buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+import { POLICY_ID_FIXTURES } from './version_specific_policy_id_fixtures';
 
 describe('removeVersionSuffixFromPolicyId', () => {
   it('should remove version suffix from policy ID', () => {
@@ -73,6 +92,73 @@ describe('splitVersionSuffixFromPolicyId', () => {
   });
 });
 
+describe('classifyPolicyId', () => {
+  it.each(POLICY_ID_FIXTURES)('classifies $policyId as $kind', ({ policyId, ...expected }) => {
+    expect(classifyPolicyId(policyId)).toEqual(expected);
+  });
+
+  it('classifies an empty policy id as base', () => {
+    expect(classifyPolicyId('')).toEqual({ kind: 'base', baseId: '', version: null });
+  });
+
+  it.each(POLICY_ID_FIXTURES)(
+    'has consistent helpers for $policyId',
+    ({ policyId, kind, baseId }) => {
+      expect(hasVersionSuffix(policyId)).toBe(kind !== 'base');
+      expect(hasSentinelVersionSuffix(policyId)).toBe(kind === 'sentinel');
+      expect(hasAgentVersionSuffix(policyId)).toBe(kind === 'agentVersion');
+      expect(removeVersionSuffixFromPolicyId(policyId)).toBe(baseId);
+    }
+  );
+
+  // The telemetry query counts agents on policies with an agent version suffix with this regexp.
+  // Lucene regexps match the whole value, like an anchored JS regexp.
+  it.each(POLICY_ID_FIXTURES)(
+    'matches the telemetry regexp as expected for $policyId',
+    ({ policyId, kind }) => {
+      expect(new RegExp(`^(?:${AGENT_VERSION_SUFFIX_ES_REGEXP})$`).test(policyId)).toBe(
+        kind === 'agentVersion'
+      );
+    }
+  );
+});
+
+describe('sentinel version suffix', () => {
+  it('is a version suffix', () => {
+    expect(hasVersionSuffix('policy123#sentinel')).toBe(true);
+    expect(hasSentinelVersionSuffix('policy123#sentinel')).toBe(true);
+    expect(hasAgentVersionSuffix('policy123#sentinel')).toBe(false);
+  });
+
+  it('is not matched when it is not the suffix', () => {
+    expect(hasVersionSuffix('policy123#sentinel#other')).toBe(false);
+    expect(hasVersionSuffix('policy123#sentinelx')).toBe(false);
+    expect(hasSentinelVersionSuffix('policy123')).toBe(false);
+    expect(hasSentinelVersionSuffix('')).toBe(false);
+  });
+
+  it('is distinguished from an agent version suffix', () => {
+    expect(hasAgentVersionSuffix('policy123#9.2')).toBe(true);
+    expect(hasAgentVersionSuffix('policy123')).toBe(false);
+  });
+
+  it('is removed by removeVersionSuffixFromPolicyId', () => {
+    expect(removeVersionSuffixFromPolicyId('policy123#sentinel')).toBe('policy123');
+    expect(removeVersionSuffixFromPolicyId('policy#123#sentinel')).toBe('policy#123');
+  });
+
+  it('is split by splitVersionSuffixFromPolicyId', () => {
+    expect(splitVersionSuffixFromPolicyId('policy123#sentinel')).toEqual({
+      baseId: 'policy123',
+      version: 'sentinel',
+    });
+  });
+
+  it('is built by getSentinelVersionPolicyId', () => {
+    expect(getSentinelVersionPolicyId('policy123')).toBe('policy123#sentinel');
+  });
+});
+
 describe('hasVersionSuffix', () => {
   it('should return true if policy ID has version suffix', () => {
     const policyIdWithVersion = 'policy123#9.2';
@@ -101,5 +187,319 @@ describe('hasVersionSuffix', () => {
     const policyIdWithHashButNoVersion = 'policy#123';
     const result = hasVersionSuffix(policyIdWithHashButNoVersion);
     expect(result).toBe(false);
+  });
+});
+
+describe('buildVersionVariantsKueryFragment', () => {
+  it('should build a kuery fragment matching only version-suffixed variants', () => {
+    expect(buildVersionVariantsKueryFragment('my-policy')).toBe('policy_id:my-policy#*');
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildVersionVariantsKueryFragment('my-policy', 'fleet-agents.policy_id')).toBe(
+      'fleet-agents.policy_id:my-policy#*'
+    );
+  });
+
+  it('should escape special KQL characters in the base id', () => {
+    expect(buildVersionVariantsKueryFragment('my policy:1')).toBe('policy_id:my policy\\:1#*');
+  });
+});
+
+describe('buildPolicyIdOrVariantsKuery', () => {
+  it('should build a kuery matching the base id or any version-suffixed variant', () => {
+    expect(buildPolicyIdOrVariantsKuery('my-policy')).toBe(
+      '(policy_id:"my-policy" or policy_id:my-policy#*)'
+    );
+  });
+
+  it('should use the provided field name for both clauses', () => {
+    expect(buildPolicyIdOrVariantsKuery('my-policy', 'fleet-agents.policy_id')).toBe(
+      '(fleet-agents.policy_id:"my-policy" or fleet-agents.policy_id:my-policy#*)'
+    );
+  });
+
+  it('should escape quotes in both the exact-match and variant clauses', () => {
+    expect(buildPolicyIdOrVariantsKuery('my"policy')).toBe(
+      '(policy_id:"my\\"policy" or policy_id:my\\"policy#*)'
+    );
+  });
+});
+
+describe('buildPolicyIdsOrVariantsKuery', () => {
+  it('should build a kuery matching any of the exact ids or their version-suffixed variants', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1', 'policy-2'])).toBe(
+      '(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)'
+    );
+  });
+
+  it('should work with a single id', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1'])).toBe(
+      '(policy_id:(policy-1) or policy_id:policy-1#*)'
+    );
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1'], 'fleet-agents.policy_id')).toBe(
+      '(fleet-agents.policy_id:(policy-1) or fleet-agents.policy_id:policy-1#*)'
+    );
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1', 'policy-1', 'policy-2'])).toBe(
+      '(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)'
+    );
+  });
+
+  it('should return a valid, never-matching kuery for an empty array instead of invalid syntax', () => {
+    expect(buildPolicyIdsOrVariantsKuery([])).toBe('policy_id:""');
+  });
+});
+
+describe('buildAgentVersionVariantsKueryFragment', () => {
+  it('matches the variants but not the sentinel', () => {
+    expect(buildAgentVersionVariantsKueryFragment('my-policy')).toBe(
+      '(policy_id:my-policy#* and not policy_id:"my-policy#sentinel")'
+    );
+  });
+
+  it('uses the given field name and escapes the policy id', () => {
+    expect(buildAgentVersionVariantsKueryFragment('my policy:1', 'agent.policy_id')).toBe(
+      '(agent.policy_id:my policy\\:1#* and not agent.policy_id:"my policy:1#sentinel")'
+    );
+  });
+});
+
+describe('buildAgentVersionVariantsEsFilter', () => {
+  it('matches the variants but not the sentinel', () => {
+    expect(buildAgentVersionVariantsEsFilter('my-policy')).toEqual({
+      bool: {
+        filter: [{ prefix: { policy_id: 'my-policy#' } }],
+        must_not: [{ term: { policy_id: 'my-policy#sentinel' } }],
+      },
+    });
+  });
+});
+
+describe('buildVersionVariantsEsFilter', () => {
+  it('should build a prefix filter matching only version-suffixed variants', () => {
+    expect(buildVersionVariantsEsFilter('my-policy')).toEqual({
+      prefix: { policy_id: 'my-policy#' },
+    });
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildVersionVariantsEsFilter('my-policy', 'other_field')).toEqual({
+      prefix: { other_field: 'my-policy#' },
+    });
+  });
+});
+
+describe('buildPolicyIdOrVariantsEsFilter', () => {
+  it('should build a bool.should filter matching the exact id or any variant', () => {
+    expect(buildPolicyIdOrVariantsEsFilter('my-policy')).toEqual({
+      bool: {
+        should: [{ term: { policy_id: 'my-policy' } }, { prefix: { policy_id: 'my-policy#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdOrVariantsEsFilter('my-policy', 'other_field')).toEqual({
+      bool: {
+        should: [{ term: { other_field: 'my-policy' } }, { prefix: { other_field: 'my-policy#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('buildPolicyIdsOrVariantsEsFilter', () => {
+  it('should build a bool.should filter matching any of the exact ids or their variants', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a', 'policy-b'])).toEqual({
+      bool: {
+        should: [
+          { terms: { policy_id: ['policy-a', 'policy-b'] } },
+          { prefix: { policy_id: 'policy-a#' } },
+          { prefix: { policy_id: 'policy-b#' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a'], 'other_field')).toEqual({
+      bool: {
+        should: [
+          { terms: { other_field: ['policy-a'] } },
+          { prefix: { other_field: 'policy-a#' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a', 'policy-a'])).toEqual({
+      bool: {
+        should: [{ terms: { policy_id: ['policy-a'] } }, { prefix: { policy_id: 'policy-a#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should return match_none for an empty array instead of an empty terms clause', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter([])).toEqual({ match_none: {} });
+  });
+});
+
+describe('buildPolicyBaseIdWithFallbackKuery', () => {
+  it('should match migrated docs via policy_base_id term', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my-policy')).toContain('policy_base_id:"my-policy"');
+  });
+
+  it('should include fallback branch for docs missing policy_base_id', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my-policy')).toContain(
+      'policy_id:"my-policy" and not policy_base_id:*'
+    );
+  });
+
+  it('should use custom field names when provided', () => {
+    expect(
+      buildPolicyBaseIdWithFallbackKuery(
+        'my-policy',
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )
+    ).toBe(
+      '(fleet-agents.policy_base_id:"my-policy" or (fleet-agents.policy_id:"my-policy" and not fleet-agents.policy_base_id:*))'
+    );
+  });
+
+  it('should escape quotes in the base id', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my"policy')).toContain(
+      'policy_base_id:"my\\"policy"'
+    );
+  });
+});
+
+describe('buildPolicyBaseIdWithFallbackEsFilter', () => {
+  it('should match on policy_base_id for migrated docs', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter('my-policy');
+    expect(filter.bool.should[0]).toEqual({ term: { policy_base_id: 'my-policy' } });
+  });
+
+  it('should include a fallback branch for docs missing policy_base_id', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter('my-policy');
+    expect(filter.bool.should[1]).toEqual({
+      bool: {
+        filter: [{ term: { policy_id: 'my-policy' } }],
+        must_not: [{ exists: { field: 'policy_base_id' } }],
+      },
+    });
+  });
+
+  it('should use custom field names when provided', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter(
+      'my-policy',
+      'united.agent.policy_base_id',
+      'united.agent.policy_id'
+    );
+    expect(filter.bool.should[0]).toEqual({ term: { 'united.agent.policy_base_id': 'my-policy' } });
+    expect(filter.bool.should[1]).toEqual({
+      bool: {
+        filter: [{ term: { 'united.agent.policy_id': 'my-policy' } }],
+        must_not: [{ exists: { field: 'united.agent.policy_base_id' } }],
+      },
+    });
+  });
+
+  it('should require minimum_should_match: 1', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter('my-policy');
+    expect(filter.bool.minimum_should_match).toBe(1);
+  });
+});
+
+describe('buildPolicyBaseIdsWithFallbackEsFilter', () => {
+  it('should match on policy_base_id terms for migrated docs', () => {
+    const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-b']);
+    expect((filter as any).bool.should[0]).toEqual({
+      terms: { policy_base_id: ['policy-a', 'policy-b'] },
+    });
+  });
+
+  it('should include a fallback branch for docs missing policy_base_id', () => {
+    const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-b']);
+    expect((filter as any).bool.should[1]).toEqual({
+      bool: {
+        filter: [{ terms: { policy_id: ['policy-a', 'policy-b'] } }],
+        must_not: [{ exists: { field: 'policy_base_id' } }],
+      },
+    });
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-a']);
+    expect((filter as any).bool.should[0]).toEqual({ terms: { policy_base_id: ['policy-a'] } });
+  });
+
+  it('should return match_none for an empty array', () => {
+    expect(buildPolicyBaseIdsWithFallbackEsFilter([])).toEqual({ match_none: {} });
+  });
+});
+
+describe('buildPolicyBaseIdsWithFallbackKuery', () => {
+  it('should match migrated docs via policy_base_id terms', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery(['policy-a', 'policy-b'])).toContain(
+      'policy_base_id:(policy-a or policy-b)'
+    );
+  });
+
+  it('should include fallback branch for docs missing policy_base_id', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery(['policy-a', 'policy-b'])).toContain(
+      'policy_id:(policy-a or policy-b) and not policy_base_id:*'
+    );
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    const result = buildPolicyBaseIdsWithFallbackKuery(['policy-a', 'policy-a', 'policy-b']);
+    expect(result).toBe(
+      '(policy_base_id:(policy-a or policy-b) or (policy_id:(policy-a or policy-b) and not policy_base_id:*))'
+    );
+  });
+
+  it('should return a never-matching kuery for an empty array', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery([])).toBe('policy_id:""');
+  });
+
+  it('should use custom field names when provided', () => {
+    expect(
+      buildPolicyBaseIdsWithFallbackKuery(
+        ['my-policy'],
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )
+    ).toBe(
+      '(fleet-agents.policy_base_id:(my-policy) or (fleet-agents.policy_id:(my-policy) and not fleet-agents.policy_base_id:*))'
+    );
+  });
+
+  it('should escape special KQL characters in ids', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery(['my policy:1'])).toContain(
+      'policy_base_id:(my policy\\:1)'
+    );
+  });
+});
+
+describe('hasSentinelVersionPolicy', () => {
+  it.each([
+    [{ is_managed: false, supports_agentless: false }, true],
+    [{ is_managed: false }, true],
+    [{ is_managed: true, supports_agentless: false }, false],
+    [{ is_managed: false, supports_agentless: true }, false],
+  ])('%j -> %s', (policy, expected) => {
+    expect(hasSentinelVersionPolicy(policy)).toBe(expected);
   });
 });

@@ -12,7 +12,10 @@ import { merge } from 'lodash';
 import type {
   DateMapping,
   KeywordMapping,
+  WildcardMapping,
   TextMapping,
+  MatchOnlyTextMapping,
+  SemanticTextMapping,
   DateNanosMapping,
   IntegerMapping,
   LongMapping,
@@ -29,6 +32,28 @@ export function object<T>(def: WithoutTypeField<ObjectMapping<T>>): ObjectMappin
     {
       type: 'object',
       dynamic: false,
+    },
+    def
+  );
+
+  return merge(defaults, def);
+}
+
+export function matchOnlyText(def?: WithoutTypeField<MatchOnlyTextMapping>): MatchOnlyTextMapping {
+  const defaults: MatchOnlyTextMapping = omitUnsetKeys(
+    {
+      type: 'match_only_text',
+    },
+    def
+  );
+
+  return merge(defaults, def);
+}
+
+export function semanticText(def?: WithoutTypeField<SemanticTextMapping>): SemanticTextMapping {
+  const defaults: SemanticTextMapping = omitUnsetKeys(
+    {
+      type: 'semantic_text',
     },
     def
   );
@@ -58,6 +83,16 @@ export function keyword(def?: WithoutTypeField<KeywordMapping>): KeywordMapping 
     {
       type: 'keyword',
       ignore_above: 1024,
+    },
+    def
+  );
+  return merge(defaults, def);
+}
+
+export function wildcard(def?: WithoutTypeField<WildcardMapping>): WildcardMapping {
+  const defaults: WildcardMapping = omitUnsetKeys(
+    {
+      type: 'wildcard',
     },
     def
   );

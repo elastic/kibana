@@ -8,8 +8,8 @@
 import type { FunctionComponent, ChangeEvent } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
+import { set, del } from '../../../../common/lib/object_path_immutable';
 import type { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import type { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';

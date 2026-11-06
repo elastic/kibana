@@ -95,7 +95,36 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
         .then((resp: any) => {
           const { status: runStatus, message } = resp.body;
           expect(runStatus).to.eql('error');
-          expect(message).to.eql('HTML email can only be sent via notifications');
+          expect(message).to.eql(
+            'HTML email can only be sent when the connector is configured to allow HTML'
+          );
+        });
+    });
+
+    it('succeeds as http execution when connector allows HTML', async () => {
+      const { body: connBody, status: connStatus } = await createConnector(
+        supertest,
+        objectRemover,
+        from,
+        true
+      );
+      expect(connStatus).to.be(200);
+      const connId = connBody.id;
+
+      await supertest
+        .post(`/api/actions/connector/${connId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to,
+            subject: 'HTML message check',
+            message: '_italic_ **bold** https://elastic.co link',
+            messageHTML: '<html><body>Hallo!</body></html>',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body.status).to.eql('ok');
         });
     });
 
@@ -155,7 +184,9 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
 
       const event = events[0];
       expect(event?.event?.outcome).to.be('failure');
-      expect(event?.error?.message).to.be('HTML email can only be sent via notifications');
+      expect(event?.error?.message).to.be(
+        'HTML email can only be sent when the connector is configured to allow HTML'
+      );
     });
   });
 }
@@ -163,7 +194,8 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
 async function createConnector(
   supertest: Agent,
   objectRemover: ObjectRemover,
-  from: string
+  from: string,
+  allowHtml = false
 ): Promise<{ status: number; body: any }> {
   const connector: any = {
     name: `An email connector from ${__filename}`,
@@ -172,6 +204,7 @@ async function createConnector(
       service: '__json',
       from,
       hasAuth: false,
+      allowHtml,
     },
   };
   const { status, body } = await supertest

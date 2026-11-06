@@ -34,7 +34,7 @@ const CopyToClipboardActionComponent: React.FC<Props> = ({ markdownComment }) =>
       onClick={onCopy}
     >
       <span css={linkTextCss}>
-        <EuiIcon type="copy" />
+        <EuiIcon type="copy" aria-hidden={true} />
         {COPY_TO_CLIPBOARD}
       </span>
     </EuiLink>

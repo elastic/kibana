@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { useMemo, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
@@ -15,9 +15,11 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useHostsPageReady } from './use_hosts_page_ready';
 
 export const useHostCount = () => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const isReady = useHostsPageReady();
   const { data: timeRangeMetadata, status: timeRangeMetadataStatus } =
     useTimeRangeMetadataContext();
   const {
@@ -41,15 +43,19 @@ export const useHostCount = () => {
   );
 
   const { data, status, error } = useFetcher(
-    async (callApi) => {
-      const response = await callApi('/api/infra/host/count', {
-        method: 'POST',
-        body: payload,
-      });
+    // Returning `undefined` until ready skips useFetcher's initial double-fire.
+    (callApi) => {
+      if (!isReady) return;
+      return (async () => {
+        const response = await callApi('/api/infra/host/count', {
+          method: 'POST',
+          body: payload,
+        });
 
-      return decodeOrThrow(GetInfraEntityCountResponsePayloadRT)(response);
+        return decodeOrThrow(GetInfraEntityCountResponsePayloadRT)(response);
+      })();
     },
-    [payload]
+    [isReady, payload]
   );
 
   useEffect(() => {
@@ -67,9 +73,11 @@ export const useHostCount = () => {
     }
   }, [data, error, payload, searchCriteria, telemetry, timeRangeMetadataStatus, schemas]);
 
+  const loading = isPending(status);
+
   return {
     errors: error,
-    loading: isPending(status),
+    loading,
     count: data?.count ?? 0,
   };
 };

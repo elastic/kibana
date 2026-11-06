@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
 import { getUntitledWorkpadLabel, setDocTitle } from '../../lib/doc_title';
@@ -15,6 +15,7 @@ import { getWorkpad } from '../../state/selectors/workpad';
 import { useFullscreenPresentationHelper } from './hooks/use_fullscreen_presentation_helper';
 import { useAutoplayHelper } from './hooks/use_autoplay_helper';
 import { useRefreshHelper } from './hooks/use_refresh_helper';
+import { useThemeRefresh } from './hooks/use_theme_refresh';
 import { coreServices, spacesService } from '../../services/kibana_services';
 
 const getWorkpadLabel = () =>
@@ -27,6 +28,7 @@ export const WorkpadPresentationHelper: FC<PropsWithChildren<unknown>> = ({ chil
   useFullscreenPresentationHelper();
   useAutoplayHelper();
   useRefreshHelper();
+  useThemeRefresh();
   const history = useHistory();
 
   useEffect(() => {

@@ -32,11 +32,11 @@ export const InboxAction = lazySchema(() =>
     description: z.string().nullable().optional(),
     status: z.enum(['pending', 'approved', 'rejected']),
     /**
-     * App id of the system that produced the action (e.g. security_solution, attack_discovery)
+     * App id of the system that produced the action (e.g. security_solution, attack_discovery, workflows)
      */
     source_app: z.string(),
     /**
-     * Stable id of the originating entity (task/agent/run)
+     * Stable id of the originating entity (task/agent/run/step execution)
      */
     source_id: z.string(),
     /**
@@ -47,6 +47,63 @@ export const InboxAction = lazySchema(() =>
      * ISO 8601 timestamp of when the action was created
      */
     created_at: z.string(),
+    /**
+     * JSON Schema for the shape of the response input (string/number/boolean/enum/array-of-enum supported in v1)
+     */
+    input_schema: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+     * Rendered prompt to show the responder (Liquid-evaluated upstream)
+     */
+    input_message: z.string().nullable().optional(),
+    /**
+     * ISO 8601 timestamp after which the step auto-resolves with its default response
+     */
+    timeout_at: z.string().nullable().optional(),
+    /**
+     * Elastic user id of the responder (null until resolved)
+     */
+    responded_by: z.string().nullable().optional(),
+    /**
+     * ISO 8601 timestamp of the resolution
+     */
+    responded_at: z.string().nullable().optional(),
+    /**
+     * Surface the response was submitted through (inbox, kibana_execution_view, agent_builder, slack, or another slug-shaped client id)
+     */
+    channel: z
+      .string()
+      .max(64)
+      .regex(/^[a-z0-9][a-z0-9_-]*$/)
+      .nullable()
+      .optional(),
+    /**
+     * Distinguishes a human response from a timeout-default resolution
+     */
+    response_mode: z.enum(['pending', 'responded', 'timed_out']).nullable().optional(),
+    /**
+     * Payload submitted by the responder (echoed back so audit-log surfaces can render what was submitted). Null while the action is still pending.
+     */
+    response_input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+      * Soft-interface context resolved server-side from the `output` of the
+step that ran immediately before the `waitForInput` (i.e. the work the
+agent did before pausing). Free-form; the UI renders a loose shape
+(`{ summary?, details?, sections?: [{ title, body }] }`) when present
+and tolerates extra keys. Not searchable; null when no preceding
+step output is available.
+
+      */
+    reasoning: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+      * True when the originating entity (e.g. the workflow that produced
+this action) has since been deleted. Only set on history/audit rows
+— the audit trail intentionally retains processed actions for
+deleted sources, and the UI flags them so it's clear the source is
+gone. Pending actions for deleted sources are filtered out (they
+can no longer be acted on) so this is never `true` there.
+
+      */
+    source_deleted: z.boolean().nullable().optional(),
   })
 );
 export type InboxAction = z.infer<typeof InboxAction>;
@@ -60,8 +117,8 @@ export const ListInboxActionsRequestQuery = lazySchema(() =>
     /**
      * Filter actions by the originating app id
      */
-    source_app: z.string().optional(),
-    page: z.coerce.number().int().min(1).optional().default(1),
+    source_app: z.string().max(256).optional(),
+    page: z.coerce.number().int().min(1).max(100).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })
 );

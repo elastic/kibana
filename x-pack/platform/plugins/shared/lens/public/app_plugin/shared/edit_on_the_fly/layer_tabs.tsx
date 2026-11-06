@@ -10,8 +10,9 @@ import { css } from '@emotion/react';
 
 import { useEuiTheme } from '@elastic/eui';
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LayerAction, Visualization } from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
+import { i18n } from '@kbn/i18n';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -33,7 +34,7 @@ import { useEditorFrameService } from '../../../editor_frame_service/editor_fram
 import type { LayerPanelProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { LayerActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
 import { getSharedActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
-import { getRemoveOperation } from '../../../utils';
+import { getRemoveOperation, isEsqlChart } from '../../../utils';
 
 import type { LayerTabsProps } from './types';
 import { useGetLayerTabsLabel } from './use_layer_tabs_labels';
@@ -55,7 +56,6 @@ export const LayerTabsWrapper = memo(function LayerTabsWrapper(props: LayerTabsP
 
 export function LayerTabs({
   activeVisualization,
-  attributes,
   coreStart,
   framePublicAPI,
   uiActions,
@@ -66,10 +66,6 @@ export function LayerTabs({
   const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates } = useLensSelector((state) => state.lens);
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
-
-  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() || isOfAggregateQueryType(attributes?.state.query) || false;
 
   const dispatchLens = useLensDispatch();
 
@@ -90,6 +86,17 @@ export function LayerTabs({
     return layerIds.map((layerId) => ({
       layerId,
       layerType: activeVisualization.getLayerType(layerId, visualization.state),
+      tabLabel:
+        activeVisualization.getLayerType(layerId, visualization.state) ===
+          LENS_LAYER_TYPES.REFERENCELINE && isEsqlChart(framePublicAPI.datasourceLayers)
+          ? framePublicAPI.datasourceLayers[layerId]?.isTextBasedLanguage()
+            ? i18n.translate('xpack.lens.layerTabs.esqlReferenceLinesLabel', {
+                defaultMessage: 'ES|QL reference lines',
+              })
+            : i18n.translate('xpack.lens.layerTabs.staticReferenceLinesLabel', {
+                defaultMessage: 'Static reference lines',
+              })
+          : undefined,
       config: activeVisualization.getConfiguration({
         layerId,
         frame: framePublicAPI,
@@ -168,7 +175,8 @@ export function LayerTabs({
             visualizationState,
             updateVisualization,
             registerLibraryAnnotationGroupFunction,
-            isSaveable
+            isSaveable,
+            framePublicAPI
           )
           .map((action) => ({
             ...action,
@@ -190,7 +198,6 @@ export function LayerTabs({
               layerConfig.layerId,
               layerIds.length
             ) === 'clear',
-          isTextBasedLanguage,
           onCloneLayer: () => {
             dispatchLens(
               cloneLayer({
@@ -222,8 +229,8 @@ export function LayerTabs({
     activeVisualization,
     coreStart,
     dispatchLens,
+    framePublicAPI,
     isSaveable,
-    isTextBasedLanguage,
     layerIds.length,
     getLayerTabsLabel,
     onRemoveLayer,

@@ -128,7 +128,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
               <EuiFlexItem>{i18n.SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={isNewConversationDefault ? 'starFill' : 'star'} />
+                <EuiIcon type={isNewConversationDefault ? 'starFill' : 'star'} aria-hidden={true} />
               </EuiFlexItem>
             </EuiFlexGroup>
           }

@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should expose the grouping switch in Mosaic', async () => {
       await lens.openDimensionEditor('lnsPie_verticalAxisDimensionPanel > lns-dimensionTrigger');
 
-      expect(await testSubjects.exists('indexPattern-nesting-switch')).to.eql(true);
+      await testSubjects.existOrFail('indexPattern-nesting-switch', { timeout: 5000 });
 
       await lens.closeDimensionEditor();
     });

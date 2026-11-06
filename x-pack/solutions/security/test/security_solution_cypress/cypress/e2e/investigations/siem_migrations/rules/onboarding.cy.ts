@@ -9,9 +9,9 @@ import {
   ONBOARDING_SIEM_MIGRATIONS_LIST,
   ONBOARDING_TRANSLATIONS_RESULT_TABLE,
   RULE_MIGRATIONS_GROUP_PANEL,
-  RULE_MIGRATION_PROGRESS_BAR,
 } from '../../../../screens/siem_migrations';
-import { deleteConnectors, suppressGlobalAnnouncements } from '../../../../tasks/api_calls/common';
+import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { suppressGlobalAnnouncements } from '../../../../tasks/api_calls/suppress_global_announcements';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { cleanMigrationData } from '../../../../tasks/api_calls/siem_migrations';
 import { visit } from '../../../../tasks/navigation';
@@ -127,7 +127,6 @@ describe(
           .should('have.property', 'skip_prebuilt_rules_matching', false);
         cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
           cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
-          cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
         });
       });
     });

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "s2",
+  "original_class": "com.example.synthetic.OutlineHelper",
+  "source_file": "OutlineHelper.kt",
+  "methods": {
+    "a": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            2
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "outline",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.outline"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

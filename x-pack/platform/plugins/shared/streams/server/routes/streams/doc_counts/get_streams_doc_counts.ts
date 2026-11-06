@@ -13,8 +13,11 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
+import type { StreamsClient } from '../../../lib/streams/client';
 import {
+  getAllBackingIndicesByStream,
   getDataStreamsMeteringStats,
+  getDataStreamsWithIndexNames,
   getLastBackingIndexByStream,
   processAsyncInChunks,
 } from './utils';
@@ -40,17 +43,19 @@ export async function getDocCountsForStreams(options: {
    * When omitted, doc counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
   if (!streams.length) {
     return [];
   }
-  const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
-  const allBackingIndices = Array.from(new Set(lastBackingIndexByStream.values()));
+  // Count across all backing indices, not just the write index, so docs that have rolled
+  // over into e.g. frozen backing indices are included in the stream total.
+  const backingIndicesByStream = getAllBackingIndicesByStream(streams);
+  const allBackingIndices = Array.from(new Set(Array.from(backingIndicesByStream.values()).flat()));
 
   if (!allBackingIndices.length) {
     return [];
@@ -99,8 +104,8 @@ export async function getDocCountsForStreams(options: {
 
   const results: StreamDocsStat[] = [];
 
-  for (const [stream, index] of lastBackingIndexByStream.entries()) {
-    const docsCount = docsByBackingIndex[index] ?? 0;
+  for (const [stream, indices] of backingIndicesByStream.entries()) {
+    const docsCount = indices.reduce((total, index) => total + (docsByBackingIndex[index] ?? 0), 0);
 
     if (docsCount > 0) {
       results.push({
@@ -128,12 +133,12 @@ export async function getDegradedDocCountsForStreams(options: {
    * When omitted, degraded counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamName } = options;
+  const { esClient, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
@@ -214,6 +219,127 @@ export async function getDegradedDocCountsForStreams(options: {
   return results;
 }
 
+export async function getIngestionDocCountsForStreams(options: {
+  esClient: ElasticsearchClient;
+  streamsClient: StreamsClient;
+  start: number;
+  end: number;
+  streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
+}): Promise<StreamDocsStat[]> {
+  const { esClient, streamsClient, start, end, streamName, streamNames } = options;
+
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
+
+  if (!streams.length) {
+    return [];
+  }
+
+  const resolvedStreamNames = streams.map((stream) => stream.name);
+  const privilegeChunks = await processAsyncInChunks<
+    string,
+    Record<string, { read_failure_store: boolean }>
+  >({
+    items: resolvedStreamNames,
+    processChunk: (chunk) => streamsClient.getPrivilegesPerStream(chunk),
+  });
+  const readFailureStoreByStream: Record<string, { read_failure_store: boolean }> = Object.assign(
+    {},
+    ...privilegeChunks
+  );
+
+  const indexToStream = new Map<string, string>();
+  for (const stream of streams) {
+    for (const index of stream.indices ?? []) {
+      indexToStream.set(index.index_name, stream.name);
+    }
+    if (readFailureStoreByStream[stream.name]?.read_failure_store) {
+      for (const index of stream.failure_store?.indices ?? []) {
+        indexToStream.set(index.index_name, stream.name);
+      }
+    }
+  }
+
+  const allIndices = Array.from(indexToStream.keys());
+  if (!allIndices.length) {
+    return [];
+  }
+
+  interface PerIndexAggs {
+    per_index: { buckets: Record<string, { doc_count: number }> };
+  }
+
+  const chunkResponses = await processAsyncInChunks<
+    string,
+    { indices: string[]; buckets: Record<string, { doc_count: number }> }
+  >({
+    items: allIndices,
+    processChunk: async (indicesInChunk) => {
+      // Build a filters aggregation keyed by index name so we get per-index counts in a single search.
+      const filters: Record<string, QueryDslQueryContainer> = {};
+      for (const index of indicesInChunk) {
+        filters[index] = {
+          term: {
+            _index: index,
+          },
+        };
+      }
+
+      const response = await esClient.search<unknown, PerIndexAggs>({
+        index: indicesInChunk,
+        ignore_unavailable: true,
+        size: 0,
+        track_total_hits: false,
+        query: {
+          range: {
+            '@timestamp': {
+              gte: start,
+              lte: end,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        aggs: {
+          per_index: {
+            filters: {
+              filters,
+            },
+          },
+        },
+      });
+
+      const buckets = response.aggregations?.per_index?.buckets ?? {};
+
+      return { indices: indicesInChunk, buckets };
+    },
+  });
+
+  const countsByStream = new Map<string, number>();
+
+  for (const { indices, buckets } of chunkResponses) {
+    for (const index of indices) {
+      const docCount = buckets[index]?.doc_count ?? 0;
+
+      if (docCount <= 0) {
+        continue;
+      }
+
+      const stream = indexToStream.get(index);
+      if (stream) {
+        countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + docCount);
+      }
+    }
+  }
+
+  return Array.from(countsByStream.entries()).map(
+    ([stream, count]): StreamDocsStat => ({
+      stream,
+      count,
+    })
+  );
+}
+
 /**
  * Fetches failed document counts for one or all streams.
  *
@@ -231,12 +357,12 @@ export async function getFailedDocCountsForStreams(options: {
    * When omitted, failed counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, start, end, streamName } = options;
+  const { esClient, start, end, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];

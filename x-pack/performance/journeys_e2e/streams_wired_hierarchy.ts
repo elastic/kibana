@@ -227,7 +227,9 @@ export const journey = new Journey({
   })
   .step('Verify retention page loads after complex update', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/streams/${WIRED_SCALE_PARENT_STREAM}/management/retention`));
-    await page.waitForSelector(subj('streamsAppRetentionMetadataEditDataRetentionButton'), {
+    // The retention metric renders once the lifecycle summary has loaded, so use it as the
+    // page-ready signal (present regardless of lifecycle-edit privileges).
+    await page.waitForSelector(subj('retention-metric'), {
       timeout: 120000,
     });
   })

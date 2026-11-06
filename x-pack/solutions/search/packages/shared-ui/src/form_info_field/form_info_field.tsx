@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -114,18 +115,8 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
             })}
           >
             {(copy) => (
-              <EuiButtonIcon
-                size="s"
-                display="empty"
-                onClick={() => handleCopy(copy)}
-                iconType={isCopied ? 'check' : 'copy'}
-                color={isCopied ? 'success' : 'text'}
-                data-test-subj={
-                  isCopied && copyValueDataTestSubj
-                    ? `${copyValueDataTestSubj}-copied`
-                    : copyValueDataTestSubj
-                }
-                aria-label={
+              <EuiToolTip
+                content={
                   isCopied
                     ? i18n.translate('xpack.searchSharedUI.formInfoField.copiedAriaLabel', {
                         defaultMessage: 'Copied',
@@ -134,7 +125,30 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
                         defaultMessage: 'Copy to clipboard',
                       })
                 }
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  size="s"
+                  display="empty"
+                  onClick={() => handleCopy(copy)}
+                  iconType={isCopied ? 'check' : 'copy'}
+                  color={isCopied ? 'success' : 'text'}
+                  data-test-subj={
+                    isCopied && copyValueDataTestSubj
+                      ? `${copyValueDataTestSubj}-copied`
+                      : copyValueDataTestSubj
+                  }
+                  aria-label={
+                    isCopied
+                      ? i18n.translate('xpack.searchSharedUI.formInfoField.copiedAriaLabel', {
+                          defaultMessage: 'Copied',
+                        })
+                      : i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
+                          defaultMessage: 'Copy to clipboard',
+                        })
+                  }
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>
         </EuiFlexItem>

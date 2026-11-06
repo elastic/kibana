@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import { inputsSelectors } from '../../store/inputs';
 import { useUpdateUrlParam } from '../../utils/global_query_string';

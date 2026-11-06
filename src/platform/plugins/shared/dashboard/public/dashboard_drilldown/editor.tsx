@@ -53,12 +53,18 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
         }
 
         setOptions(
-          results.dashboards.map(({ id, data }) => ({
+          results.data.map(({ id, data }) => ({
             value: id,
             label: data.title,
           }))
         );
-        setIsLoadingOptions(false);
+      })
+      .catch((err) => {
+        if (canceled) return;
+        setError(err.message);
+      })
+      .finally(() => {
+        if (!canceled) setIsLoadingOptions(false);
       });
 
     return () => {

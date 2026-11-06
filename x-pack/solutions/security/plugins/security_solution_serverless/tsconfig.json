@@ -9,11 +9,13 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/config-schema",
     "@kbn/management-plugin",
     "@kbn/security-plugin",
@@ -22,6 +24,8 @@
     "@kbn/server-http-tools",
     "@kbn/serverless",
     "@kbn/security-solution-navigation",
+    "@kbn/alertzero-common",
+    "@kbn/alertzero-plugin",
     "@kbn/security-solution-upselling",
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
@@ -49,8 +53,12 @@
     "@kbn/connector-schemas",
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-common",
+    "@kbn/deeplinks-workflows",
     "@kbn/workflows",
     "@kbn/usage-api-plugin",
     "@kbn/workflows-management-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/scout-security",
+    "@kbn/deeplinks-security",
   ]
 }

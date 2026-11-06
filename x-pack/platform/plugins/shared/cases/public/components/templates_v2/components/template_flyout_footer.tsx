@@ -57,7 +57,7 @@ export const TemplateFlyoutFooter = React.memo<TemplateFlyoutFooterProps>(
           ) : (
             <EuiButtonEmpty
               color="primary"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onBack}
               data-test-subj="template-flyout-back"
             >

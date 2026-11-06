@@ -6,7 +6,7 @@
  */
 
 import { isFinite } from 'lodash';
-import type { Maybe } from '@kbn/apm-plugin/typings/common';
+import type { Maybe } from '@kbn/apm-types-shared';
 
 // _.isNumber() returns true for NaN, _.isFinite() does not refine
 export function isFiniteNumber(value: any): value is number {

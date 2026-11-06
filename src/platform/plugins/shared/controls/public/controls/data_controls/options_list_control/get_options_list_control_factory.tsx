@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   BehaviorSubject,
   Subject,
@@ -21,14 +21,23 @@ import {
   skip,
 } from 'rxjs';
 
-import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import {
+  ControlValuesSource,
+  OPTIONS_LIST_CONTROL,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+} from '@kbn/controls-constants';
 import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
-  initializeUnsavedChanges,
+  panelIsRelatedByGlobalFilters,
+  initializeRelatedPanels,
+  initializeStateApi,
   type PublishingSubject,
+  getViewModeSubject,
+  type ViewMode,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -59,16 +68,17 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getOptionsListControlFactory = (): EmbeddableFactory<
+export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   OptionsListDSLControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState;
-
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
+    buildEmbeddable: async ({ initialState: state, finalizeApi, uuid, parentApi }) => {
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
@@ -124,8 +134,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const fieldChangedSubscription = combineLatest([
         dataControlManager.api.fieldName$,
         dataControlManager.api.dataViewId$,
+        dataControlManager.api.valuesSource$,
       ])
         .pipe(
+          filter(([, , valuesSource]) => valuesSource === ControlValuesSource.FIELD),
+          distinctUntilChanged(
+            ([fieldNameA, dataViewIdA], [fieldNameB, dataViewIdB]) =>
+              fieldNameA === fieldNameB && dataViewIdA === dataViewIdB
+          ),
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {
@@ -140,7 +156,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
-      const fetchSubscription = fetchAndValidate$({
+      const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
           ...dataControlManager.api,
           loadMoreSubject,
@@ -154,7 +170,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$: selectionsManager.api.sort$,
-      }).subscribe((result) => {
+      });
+      const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           suggestionLoadError$.next((result as { error: Error }).error);
@@ -171,6 +188,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
+        temporaryStateManager.api.setIsPartial(successResponse.isPartial);
 
         // reset the request size back to the minimum (if it's not already)
         if (temporaryStateManager.api.requestSize$.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
@@ -208,7 +226,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
-        dataControlManager.api.dataViews$,
+        dataControlManager.api.dataSources$,
         dataControlManager.api.fieldName$,
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,
@@ -232,21 +250,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
-        return {
+      const stateApi = initializeStateApi<OptionsListDSLControlState>({
+        uuid,
+        parentApi,
+        serializeState: (): OptionsListDSLControlState => ({
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),
-
           // serialize state that cannot be changed to keep it consistent
           display_settings: state.display_settings,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -267,11 +280,17 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           exclude: false,
           exists_selected: false,
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          selectionsManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          selectionsManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
         },
+      });
+
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -287,15 +306,17 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        cancelRequests,
+        ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-        serializeState,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
+        supportsJsonExport: true,
       });
 
       const componentApi: DSLOptionsListComponentApi = {
@@ -315,6 +336,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             key,
             showOnlySelected,
           }),
+        viewMode$: getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
       };
@@ -324,6 +346,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       return {
         api,
         Component: () => {
+          const viewMode = useStateFromPublishingSubject(componentApi.viewMode$);
+
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -341,13 +365,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             };
           }, []);
 
+          const displaySettings = useMemo(
+            () => ({
+              ...(state.display_settings ?? {}),
+              isInteractive: viewMode !== 'non-interactive',
+            }),
+            [viewMode]
+          );
+
           return (
-            <OptionsListControlContext.Provider
-              value={{
-                componentApi,
-                displaySettings: state.display_settings ?? {},
-              }}
-            >
+            <OptionsListControlContext.Provider value={{ componentApi, displaySettings }}>
               <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );

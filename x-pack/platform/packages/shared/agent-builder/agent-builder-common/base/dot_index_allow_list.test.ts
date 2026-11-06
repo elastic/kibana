@@ -28,7 +28,8 @@ describe('isVisibleSearchSource', () => {
       ['.alerts-observability.apm.alerts-default'],
       ['.alerts-stack.alerts-default'],
       ['.alerts-streams.alerts-default'],
-      // `.ml-anomalies-*`.
+      // `.ml-anomalies` materialized view and `.ml-anomalies-*` result indices.
+      ['.ml-anomalies'],
       ['.ml-anomalies-shared'],
       ['.ml-anomalies-my_custom_job'],
       // `.slo-observability.*`.
@@ -48,6 +49,10 @@ describe('isVisibleSearchSource', () => {
       // `.monitoring-*`.
       ['.monitoring-es-8-mb-2024.01.01'],
       ['.monitoring-kibana-8-2024.01.01'],
+      // Endpoint/Fleet troubleshooting resources.
+      ['.fleet-agents'],
+      ['.fleet-agents-000001'],
+      ['.metrics-endpoint.metadata_united_default'],
     ])('allows %p', (name) => {
       expect(isVisibleSearchSource(name)).toBe(true);
     });
@@ -116,10 +121,13 @@ describe('isVisibleSearchSource', () => {
   it('exports at least one pattern for every documented category', () => {
     const patterns = DOT_INDEX_ALLOW_LIST_PATTERNS.join(',');
     expect(patterns).toContain('.alerts-*');
+    expect(patterns).toContain('.ml-anomalies');
     expect(patterns).toContain('.ml-anomalies-*');
     expect(patterns).toContain('.slo-observability.*');
     expect(patterns).toContain('.entities.*');
     expect(patterns).toContain('.siem-signals-*');
     expect(patterns).toContain('.monitoring-*');
+    expect(patterns).toContain('.fleet-agents*');
+    expect(patterns).toContain('.metrics-endpoint.metadata_united_*');
   });
 });

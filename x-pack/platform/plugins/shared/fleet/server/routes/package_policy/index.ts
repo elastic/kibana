@@ -8,30 +8,30 @@ import path from 'path';
 
 import { schema } from '@kbn/config-schema';
 
+import type { FleetAuthzRouter } from '../../services/security';
 import { getRouteRequiredAuthz } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
-import type { FleetAuthzRouter } from '../../services/security';
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
-  CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
-  DeletePackagePoliciesRequestSchema,
-  UpgradePackagePoliciesRequestSchema,
-  DryRunPackagePoliciesRequestSchema,
-  DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
-  PackagePolicyResponseSchema,
   BulkGetPackagePoliciesResponseBodySchema,
-  DeletePackagePoliciesResponseBodySchema,
-  DeleteOnePackagePolicyResponseSchema,
-  UpgradePackagePoliciesResponseBodySchema,
-  DryRunPackagePoliciesResponseBodySchema,
-  OrphanedPackagePoliciesResponseSchema,
+  CreatePackagePolicyRequestSchema,
   CreatePackagePolicyResponseSchema,
+  DeleteOnePackagePolicyRequestSchema,
+  DeleteOnePackagePolicyResponseSchema,
+  DeletePackagePoliciesRequestSchema,
+  DeletePackagePoliciesResponseBodySchema,
+  DryRunPackagePoliciesRequestSchema,
+  DryRunPackagePoliciesResponseBodySchema,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  OrphanedPackagePoliciesResponseSchema,
+  PackagePolicyResponseSchema,
+  UpdatePackagePolicyRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
+  UpgradePackagePoliciesResponseBodySchema,
 } from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
 
@@ -40,16 +40,16 @@ import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 import { ListResponseSchema } from '../schema/utils';
 
 import {
-  getPackagePoliciesHandler,
-  getOnePackagePolicyHandler,
-  createPackagePolicyHandler,
-  updatePackagePolicyHandler,
-  deletePackagePolicyHandler,
-  upgradePackagePolicyHandler,
-  dryRunUpgradePackagePolicyHandler,
-  getOrphanedPackagePolicies,
-  deleteOnePackagePolicyHandler,
   bulkGetPackagePoliciesHandler,
+  createPackagePolicyHandler,
+  deleteOnePackagePolicyHandler,
+  deletePackagePolicyHandler,
+  dryRunUpgradePackagePolicyHandler,
+  getOnePackagePolicyHandler,
+  getOrphanedPackagePolicies,
+  getPackagePoliciesHandler,
+  updatePackagePolicyHandler,
+  upgradePackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {

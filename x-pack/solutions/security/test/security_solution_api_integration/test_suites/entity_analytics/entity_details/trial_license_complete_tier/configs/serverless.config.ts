@@ -16,7 +16,13 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'disable:entityAnalyticsEntityStoreV2',
+    ])}`,
+    '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

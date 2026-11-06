@@ -9,37 +9,79 @@ import type { SearchRulesRequestBodyInput } from '../../../../../../../common/ap
 import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
-  validateSearchRulesKqlFilter,
+  validateSearchRulesFields,
+  validateSearchRulesFilter,
   validateSearchRulesRequestBody,
 } from './request_schema_validation';
 
 const gapParamsTogetherMessage =
   'Query fields "gap_fill_statuses", "gaps_range_start" and "gaps_range_end" has to be specified together';
 
-describe('validateSearchRulesKqlFilter', () => {
-  it('accepts empty and whitespace filter', () => {
-    expect(validateSearchRulesKqlFilter(undefined)).toEqual([]);
-    expect(validateSearchRulesKqlFilter('')).toEqual([]);
-    expect(validateSearchRulesKqlFilter('   ')).toEqual([]);
+describe('validateSearchRulesFilter', () => {
+  it('accepts empty and whitespace term', () => {
+    expect(validateSearchRulesFilter(undefined)).toEqual([]);
+    expect(validateSearchRulesFilter({ term: '', mode: 'KQL' })).toEqual([]);
+    expect(validateSearchRulesFilter({ term: '   ', mode: 'KQL' })).toEqual([]);
   });
 
-  it('accepts valid KQL with alert.attributes prefix', () => {
-    expect(validateSearchRulesKqlFilter('alert.attributes.enabled: true')).toEqual([]);
-    expect(validateSearchRulesKqlFilter('alert.attributes.name: "My rule"')).toEqual([]);
+  it('defaults to KQL mode when omitted', () => {
+    expect(validateSearchRulesFilter({ term: 'alert.attributes.enabled: true' })).toEqual([]);
   });
 
   it('returns an error for syntactically invalid KQL', () => {
-    const errors = validateSearchRulesKqlFilter('alert.attributes.name: (');
+    const errors = validateSearchRulesFilter({
+      term: 'alert.attributes.name: (',
+      mode: 'KQL',
+    });
     expect(errors).toHaveLength(1);
     expect(errors[0]).toContain('invalid KQL filter');
   });
 
   it('returns an error when filter exceeds max length', () => {
     const filler = 'a'.repeat(MAX_SEARCH_RULES_FILTER_KQL_LENGTH);
-    const errors = validateSearchRulesKqlFilter(`${filler}x`);
+    const errors = validateSearchRulesFilter({ term: `${filler}x`, mode: 'KQL' });
     expect(errors).toEqual([
       `filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`,
     ]);
+  });
+
+  it('returns an error for unsupported mode', () => {
+    const errors = validateSearchRulesFilter(
+      JSON.parse('{"term":"alert.attributes.enabled:true","mode":"esql"}')
+    );
+    expect(errors).toEqual(['unsupported filter.mode "esql"']);
+  });
+});
+
+describe('validateSearchRulesFields', () => {
+  it('returns no errors for undefined or empty input', () => {
+    expect(validateSearchRulesFields(undefined)).toEqual([]);
+    expect(validateSearchRulesFields([])).toEqual([]);
+  });
+
+  it('accepts valid RuleResponse field names', () => {
+    expect(validateSearchRulesFields(['name', 'severity', 'risk_score', 'tags'])).toEqual([]);
+  });
+
+  it('rejects unknown field names', () => {
+    const errors = validateSearchRulesFields(['name', 'not_a_real_field']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"not_a_real_field"');
+  });
+
+  it('rejects Alerting Framework internal names that are not in RuleResponse', () => {
+    const errors = validateSearchRulesFields(['rule_type_id', 'params', 'snooze_schedule']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"rule_type_id"');
+    expect(errors[0]).toContain('"params"');
+    expect(errors[0]).toContain('"snooze_schedule"');
+  });
+
+  it('reports all invalid fields in a single error message', () => {
+    const errors = validateSearchRulesFields(['bad_one', 'bad_two']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"bad_one"');
+    expect(errors[0]).toContain('"bad_two"');
   });
 });
 
@@ -96,9 +138,17 @@ describe('validateSearchRulesRequestBody', () => {
   it('rejects invalid filter KQL', () => {
     const errors = validateSearchRulesRequestBody({
       ...defaultInput,
-      filter: 'not kql :',
+      filter: { term: 'not kql :', mode: 'KQL' },
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
+  });
+
+  it('rejects unsupported filter.mode', () => {
+    const errors = validateSearchRulesRequestBody({
+      ...defaultInput,
+      filter: JSON.parse('{"term":"x","mode":"esql"}'),
+    });
+    expect(errors).toContain('unsupported filter.mode "esql"');
   });
 
   it('rejects search_after without sort_field and sort_order', () => {
@@ -222,5 +272,22 @@ describe('validateSearchRulesRequestBody', () => {
         gaps_range_end: '2024-01-02T00:00:00Z',
       })
     ).toEqual([]);
+  });
+
+  it('accepts valid fields', () => {
+    expect(
+      validateSearchRulesRequestBody({
+        ...defaultInput,
+        fields: ['name', 'severity', 'enabled'],
+      })
+    ).toEqual([]);
+  });
+
+  it('rejects unknown fields', () => {
+    const errors = validateSearchRulesRequestBody({
+      ...defaultInput,
+      fields: ['name', 'not_a_real_field'],
+    });
+    expect(errors.some((e) => e.includes('"not_a_real_field"'))).toBe(true);
   });
 });

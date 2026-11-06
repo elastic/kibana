@@ -7,8 +7,8 @@
 
 import type { ComponentType } from 'react';
 import type { History, Location } from 'history';
-import { connect } from 'react-redux';
-import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux-v7';
+import type { ConnectedProps } from 'react-redux-v7';
 import type { Query } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {

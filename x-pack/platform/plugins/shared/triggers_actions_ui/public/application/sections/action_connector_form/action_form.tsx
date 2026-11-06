@@ -59,7 +59,6 @@ export interface ActionAccordionFormProps {
   defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number, connector?: ActionConnector) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActions: (actions: RuleUiAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
@@ -98,7 +97,6 @@ export const ActionForm = ({
   defaultActionGroupId,
   setActionIdByIndex,
   setActionGroupIdByIndex,
-  setActionUseAlertDataForTemplate,
   setActions,
   setActionParamsProperty,
   setActionFrequencyProperty,
@@ -344,6 +342,7 @@ export const ActionForm = ({
                   ? item.iconClass
                   : suspendedComponentWithProps(item.iconClass as React.ComponentType)
               }
+              aria-hidden={true}
             />
           </EuiKeyPadMenuItem>
         );
@@ -440,7 +439,11 @@ export const ActionForm = ({
                 onSelectConnector={(connectorId: string) => {
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
                   setActionIdByIndex(connectorId, index, newConnector);
-                  if (newConnector && newConnector.actionTypeId) {
+                  if (
+                    newConnector &&
+                    newConnector.actionTypeId &&
+                    actionTypeRegistry.has(newConnector.actionTypeId)
+                  ) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                     if (actionTypeRegistered.convertParamsBetweenGroups) {
                       const updatedActions = actions.map((_item: RuleUiAction, i: number) => {
@@ -495,7 +498,6 @@ export const ActionForm = ({
               actionConnector={actionConnector}
               index={index}
               key={`action-form-action-at-${actionItem.uuid}`}
-              setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
@@ -519,7 +521,8 @@ export const ActionForm = ({
                 if (
                   newConnector &&
                   actionConnector &&
-                  newConnector.actionTypeId !== actionConnector.actionTypeId
+                  newConnector.actionTypeId !== actionConnector.actionTypeId &&
+                  actionTypeRegistry.has(newConnector.actionTypeId)
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                   if (actionTypeRegistered.convertParamsBetweenGroups) {

@@ -16,7 +16,7 @@ All APIs accept an optional `resourceType` parameter. When omitted, it defaults 
 | Resource Type   | Description                   | Versioning                    |
 | --------------- | ----------------------------- | ----------------------------- |
 | `product_doc`   | Elastic product documentation | Kibana version (e.g., 8.18)   |
-| `security_labs` | Elastic Security Labs content | Date-based (e.g., 2024.12.11) |
+| `security_labs` | Elastic Security Labs content | UTC timestamp (`YYYY.MM.DD-HHMMSS`; legacy `YYYY.MM.DD` still accepted for 9.3/9.4 BWC) |
 | `openapi_spec`  | Elastic open api spec         |                               |
 
 ### To install
@@ -121,18 +121,48 @@ xpack.productDocBase.artifactRepositoryUrl: 'https://kibana-knowledge-base-artif
 Artifact naming conventions:
 
 - Product docs: `kb-product-doc-{product}-{version}.zip`
-- Security Labs: `security-labs-{YYYY.MM.DD}.zip`
+- Security Labs: `security-labs-{YYYY.MM.DD-HHMMSS}.zip`. Publishes also write a same-bytes ELSER alias `security-labs-{YYYY.MM.DD}.zip` for Kibana **9.3 / 9.4** BWC — those releases only parse date-only names from the original Security Labs ship ([#246099](https://github.com/elastic/kibana/pull/246099)). The alias can be dropped once 9.3/9.4 are out of support.
 
 ## Run tests
 
-Set up test server
+### Unit tests
+
+Unit tests cover the artifact-builder processing pipeline (`processDocuments`) — no running
+Kibana or Elasticsearch required.
+
+```
+node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/tasks/process_documents.test.ts
+```
+
+### Functional tests
+
+Functional tests live in the `functional_gen_ai` inference suite. There are two suites:
+
+| Suite | `--grep` pattern | What it tests |
+|---|---|---|
+| Installation lifecycle | `product docs base` | install / update / uninstall flows for ELSER and Jina |
+| Search quality | `product docs search quality` | document counts + query relevance after install |
+
+The installation suite tests both ELSER (always available) and Jina via EIS (requires Cloud
+Connected Mode). The Jina tests read `KIBANA_EIS_CCM_API_KEY` from the environment — set by CI
+from Vault, or locally from your team's secret store. Without it, only the ELSER tests pass; the
+`Jina (via EIS)` describe block fails immediately.
+
+**Step 1 — start the test server** (terminal 1):
 
 ```
 node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts
 ```
 
-Run tests on different terminal
+**Step 2 — run a suite** (terminal 2):
 
 ```
-node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
+# Installation lifecycle only
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
+
+# Search quality only
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs search quality'
+
+# Both suites
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs'
 ```

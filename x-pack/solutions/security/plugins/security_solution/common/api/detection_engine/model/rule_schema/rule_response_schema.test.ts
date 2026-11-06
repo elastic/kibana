@@ -40,7 +40,9 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"type: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+    );
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {

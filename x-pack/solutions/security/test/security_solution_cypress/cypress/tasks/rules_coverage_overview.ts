@@ -20,7 +20,7 @@ export const toggleTechniquePanelByName = (label: string) => {
   cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL).contains(label).click();
 };
 
-export const openTechniquePanelByNameAndTacticId = (label: string, tacticId: string) => {
+export const toggleTechniquePanelByNameAndTacticId = (label: string, tacticId: string) => {
   cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL_IN_TACTIC_GROUP(tacticId)).contains(label).click();
 };
 

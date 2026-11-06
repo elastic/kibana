@@ -17,9 +17,13 @@ interface SemconvHostDocument extends Fields {
   'host.hostname': string;
   'host.name': string;
   'host.os.name'?: string;
+  'host.os.version'?: string;
   'host.ip'?: string;
+  'host.type'?: string;
   'cloud.provider'?: string;
   'cloud.region'?: string;
+  'cloud.availability_zone'?: string;
+  'cloud.resource_id'?: string;
   'resource.attributes.host.name'?: string;
   'resource.attributes.os.type'?: string;
   'data_stream.dataset'?: string;
@@ -31,6 +35,9 @@ export interface SemconvHostMetricsDocument extends SemconvHostDocument {
   'metricset.name'?: string;
   state?: string;
   direction?: string;
+  'system.cpu.utilization'?: number;
+  'system.cpu.logical.count'?: number;
+  'system.cpu.load_average.1m'?: number;
   'metrics.system.cpu.utilization'?: number;
   'metrics.system.cpu.logical.count'?: number;
   'metrics.system.cpu.load_average.1m'?: number;
@@ -57,6 +64,10 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
           ...this.fields,
           state,
           'metricset.name': 'cpu',
+          'system.cpu.utilization': utilization,
+          'system.cpu.logical.count': 4,
+          'system.cpu.load_average.1m': loadAvg1m,
+          // Lens formulas still target the OTel metrics-prefixed fields.
           'metrics.system.cpu.utilization': utilization,
           'metrics.system.cpu.logical.count': 4,
           'metrics.system.cpu.load_average.1m': loadAvg1m,
@@ -130,10 +141,18 @@ export function semconvHost(name: string): SemconvHost {
     'agent.id': `agent-${name}`,
     'host.hostname': name,
     'host.name': name,
+    // Elasticsearch exposes these OpenTelemetry resource attributes under their ECS aliases on OTel
+    // data streams (`os.name` -> `host.os.name`, `host.arch` -> `host.architecture`) or at the root
+    // through the `resource.attributes` passthrough object (`host.ip`, `cloud.provider`).
+    // There is deliberately no `host.os.kernel`: no semantic conventions attribute maps to it.
     'host.os.name': 'linux',
+    'host.os.version': '6.12.76-linuxkit',
     'host.ip': '122.122.122.122',
+    'host.type': 'm5.large',
     'cloud.provider': 'aws',
     'cloud.region': 'us-east-1',
+    'cloud.availability_zone': 'us-east-1a',
+    'cloud.resource_id': `instance-${name}`,
     'resource.attributes.host.name': name,
     'resource.attributes.os.type': 'linux',
     'data_stream.dataset': 'hostmetricsreceiver.otel',

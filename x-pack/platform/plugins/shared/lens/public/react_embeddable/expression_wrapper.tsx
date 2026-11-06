@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type {
   ExpressionRendererEvent,
+  IExpressionLoaderParams,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { Global } from '@emotion/react';
 import type { UserMessage, LensInspector } from '@kbn/lens-common';
@@ -28,10 +29,7 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  onData$: ReactExpressionRendererProps['onData$'];
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
@@ -76,6 +74,14 @@ export function ExpressionWrapper({
   paddingTop,
   abortController,
 }: ExpressionWrapperProps) {
+  const handleRenderError = useCallback<NonNullable<IExpressionLoaderParams['onRenderError']>>(
+    (_domNode, error) => {
+      addUserMessages(getOriginalRequestErrorMessages(error));
+      onRuntimeError(error.original ?? error);
+    },
+    [addUserMessages, onRuntimeError]
+  );
+
   if (!expression) return null;
   return (
     <>
@@ -95,7 +101,6 @@ export function ExpressionWrapper({
           interactive={interactive}
           searchContext={searchContext}
           searchSessionId={searchSessionId}
-          // @ts-expect-error upgrade typescript v4.9.5
           onData$={onData$}
           onRender$={onRender$}
           inspectorAdapters={lensInspector.getInspectorAdapters()}
@@ -105,12 +110,8 @@ export function ExpressionWrapper({
           syncCursor={syncCursor}
           executionContext={executionContext}
           abortController={abortController}
-          renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error || null);
-            addUserMessages(messages);
-            onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
-            return <></>; // the embeddable will take care of displaying the messages
-          }}
+          renderError={() => <></>} // the embeddable will take care of displaying the messages
+          onRenderError={handleRenderError}
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}

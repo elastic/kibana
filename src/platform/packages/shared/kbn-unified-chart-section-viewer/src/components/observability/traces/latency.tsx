@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getLatencyChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
@@ -22,11 +24,11 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
     services,
     fetchParams,
     discoverFetch$,
-    indexes,
     onBrushEnd,
     onFilter,
     actions,
     profileId,
+    breakdownField,
   } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
@@ -34,18 +36,30 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       metricName: 'duration_ms',
       metricTypes: ['histogram'],
       units: ['ms'],
-      dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [],
     },
     color,
     seriesType,
+    customFunction: 'AVG',
+    dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
+
+  const lensConfig = useMemo(
+    () =>
+      buildXySeriesConfig({
+        query: esqlQuery,
+        title,
+        chartLayers,
+        legend: breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined,
+      }),
+    [esqlQuery, title, chartLayers, breakdownField]
+  );
 
   return (
     <Chart
       id="latency"
-      esqlQuery={esqlQuery}
+      isSelected={false}
+      lensConfig={lensConfig}
       size="s"
       discoverFetch$={discoverFetch$}
       fetchParams={fetchParams}
@@ -53,10 +67,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
       onExploreInDiscoverTab={actions.openInNewTab}
-      title={title}
-      chartLayers={chartLayers}
       syncCursor
-      syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
     />
@@ -64,12 +75,13 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
 };
 
 export const LatencyChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
 
   const latencyChart = getLatencyChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!latencyChart) {

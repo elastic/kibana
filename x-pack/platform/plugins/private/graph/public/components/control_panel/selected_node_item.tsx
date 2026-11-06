@@ -41,6 +41,7 @@ export const SelectedNodeItem = ({
   return (
     <button
       className="gphSelectionList__field"
+      data-test-subj={`graphSelectionListField-${node.label}`}
       aria-label={i18n.translate('xpack.graph.sidebar.selections.selectedNodeItemButtonLabel', {
         defaultMessage: 'Select {nodeLabel}',
         values: { nodeLabel: node.label },
@@ -72,7 +73,10 @@ export const SelectedNodeItem = ({
           cx="12"
           cy="12"
           style={{ fill: node.color }}
-          onClick={() => onDeselectNode(node)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDeselectNode(node);
+          }}
           data-test-subj={`graph-selected-${node.label}`}
         />
         <IconRenderer

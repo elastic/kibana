@@ -54,7 +54,7 @@ describe('initializeStateManager', () => {
     expect(stateManager.api.setSnakeCaseKey).toBeDefined();
     expect(stateManager.api.snakeCaseKey$).toBeDefined();
     expect(
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       (stateManager.api as unknown as { setSnake_case_key: unknown }).setSnake_case_key
     ).not.toBeDefined();
     expect(
@@ -98,12 +98,22 @@ describe('initializeStateManager', () => {
     stateManager.api.setSnakeCaseKey('updated snake');
   });
 
-  it('should emit anyStateChange$ when any state changes', (done) => {
+  it('anyStateChange$ should not emit on subscribe and emit when any state changes', (done) => {
     const stateManager = initializeStateManager<TestState>({}, defaultState);
     let emitCount = 0;
     stateManager.anyStateChange$.subscribe(() => {
       emitCount++;
       if (emitCount === 2) {
+        try {
+          const { title, count } = stateManager.getLatestState();
+          expect(title).toBe('new title');
+          expect(count).toBe(5);
+        } catch (error) {
+          // title and count assertions fail when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
         done();
       }
     });

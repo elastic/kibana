@@ -7,9 +7,11 @@
 
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { InternalFindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
+import type { UserActionFindRequestSources } from '../../common/types/api';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
+import { hasNonTypeActivityFilter } from '../components/user_actions_activity_bar/utils';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
@@ -19,11 +21,19 @@ export const useInfiniteFindCaseUserActions = (
     type: CaseUserActionTypeWithAll;
     sortOrder: 'asc' | 'desc';
     perPage: number;
+    search?: string;
+    authors?: string[];
+    sources?: UserActionFindRequestSources[];
   },
   isEnabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
+
+  // When a non-type filter is set, `useLastPage` doesn't fetch a
+  // separate last page (its totals aren't reliable for filtered results), so
+  // the infinite query needs to fetch every page itself, including the last.
+  const shouldFetchAllPages = hasNonTypeActivityFilter(params);
 
   return useInfiniteQuery<InternalFindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
@@ -38,7 +48,8 @@ export const useInfiniteFindCaseUserActions = (
       getNextPageParam: (lastPage, pages) => {
         const lastPageNumber = Math.ceil(lastPage.total / lastPage.perPage);
         // here last page fetching is skipped because last page is fetched separately using useQuery hook
-        if (lastPage.page < lastPageNumber - 1) {
+        const lastFetchablePage = shouldFetchAllPages ? lastPageNumber : lastPageNumber - 1;
+        if (lastPage.page < lastFetchablePage) {
           return lastPage.page + 1;
         }
         return undefined;

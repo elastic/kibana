@@ -23,15 +23,19 @@ export const RiskScoresEntityCalculationRequest = lazySchema(() =>
     /**
      * Used to identify the entity.
      */
-    identifier: z.string(),
+    identifier: z.string().describe('Used to identify the entity.'),
     /**
      * Used to define the type of entity.
      */
-    identifier_type: IdentifierType,
+    identifier_type: IdentifierType.describe('Used to define the type of entity.'),
     /**
-     * If 'wait_for' the request will wait for the index refresh.
+     * V2-only, the canonical Entity Store EUID.
      */
-    refresh: z.literal('wait_for').optional(),
+    entity_id: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe('V2-only, the canonical Entity Store EUID.'),
   })
 );
 export type RiskScoresEntityCalculationRequest = z.infer<typeof RiskScoresEntityCalculationRequest>;

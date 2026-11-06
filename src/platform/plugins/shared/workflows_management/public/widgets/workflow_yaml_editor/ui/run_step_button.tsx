@@ -9,7 +9,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { getRunStepTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';

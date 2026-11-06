@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
+import {
+  acceptAllActiveProposals,
+  carryConversationToWorkflow,
+  isSidebarOpen,
+  requestSidebarRestore,
+} from '../../../../../features/ai_integration';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
@@ -23,7 +29,7 @@ import {
   selectWorkflowId,
   selectYamlString,
 } from '../selectors';
-import { setWorkflow } from '../slice';
+import { setWorkflow, setYamlString } from '../slice';
 
 export type SaveYamlParams = void;
 export type SaveYamlResponse = void;
@@ -51,6 +57,14 @@ export const saveYamlThunk = createAsyncThunk<
         });
 
     const isAiAssisted = selectAiAssisted(getState());
+
+    // Save implicitly accepts any pending AI diff decorations. Dispatch the
+    // post-accept YAML into Redux explicitly — the Monaco→Redux sync is
+    // debounced and may not have flushed by the read below.
+    const postAcceptYaml = acceptAllActiveProposals();
+    if (postAcceptYaml != null) {
+      dispatch(setYamlString(postAcceptYaml));
+    }
 
     try {
       const state = getState();
@@ -98,6 +112,17 @@ export const saveYamlThunk = createAsyncThunk<
           origin: 'workflow_detail',
           aiAssisted: isAiAssisted,
         });
+
+        // Migrate the create-session chat onto the saved workflow's tag
+        // BEFORE `dispatch(setWorkflow)` — the resulting re-render of the
+        // agent-builder integration would otherwise race the consume.
+        carryConversationToWorkflow(workflow.id);
+
+        // If the sidebar was open at save time, ask the destination editor
+        // to re-open it — the `navigateToApp` below remounts the app.
+        if (isSidebarOpen()) {
+          requestSidebarRestore(workflow.id);
+        }
 
         // Update the workflow in the store
         dispatch(setWorkflow(workflow));

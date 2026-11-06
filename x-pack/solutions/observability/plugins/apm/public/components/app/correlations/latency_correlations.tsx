@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CORRELATIONS_EBT_ELEMENTS } from './ebt_constants';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -361,6 +362,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               sampleRangeTo,
               sortDirection: 'DESC',
             }}
+            ebt={{ element: CORRELATIONS_EBT_ELEMENTS.LATENCY }}
           />
         </EuiFlexItem>
 

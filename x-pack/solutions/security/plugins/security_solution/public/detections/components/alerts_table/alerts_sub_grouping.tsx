@@ -21,16 +21,14 @@ import type {
 } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { estypes } from '@elastic/elasticsearch';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { GroupTakeActionItems } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { InspectButton } from '../../../common/components/inspect';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -79,7 +77,7 @@ interface OwnProps {
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
-  runtimeMappings: RunTimeMappings;
+  runtimeMappings?: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
@@ -158,25 +156,16 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(pageScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(pageScope);
-  const experimentalBrowserFields = useBrowserFields(pageScope);
-
-  const sourcererDataView = oldSourcererDataView;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && sourcererDataView) {
+      if (browserFields != null) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          dataViewSpec: sourcererDataView,
-          dataView: experimentalDataView,
+          dataView,
           browserFields,
           filters: [
             ...defaultFilters,
@@ -193,9 +182,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     },
     [
       browserFields,
-      sourcererDataView,
       uiSettings,
-      experimentalDataView,
+      dataView,
       defaultFilters,
       globalFilters,
       parentGroupingFilter,
@@ -345,11 +333,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         tableId,
         groupBucket,
         closePopover,
+        // Forward the page-scoped data view runtime mappings so the group-level
+        // status update can resolve fields not natively mapped on the alerts index.
+        runtimeMappings,
       };
 
       return groupTakeActionItems?.(takeActionParams);
     },
-    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
+    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId, runtimeMappings]
   );
 
   const onChangeGroupsItemsPerPage = useCallback(

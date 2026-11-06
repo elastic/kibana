@@ -22,7 +22,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
-  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -34,11 +33,15 @@ import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import { useConnectors } from '../../hooks/use_connectors';
+import { useRegionAvailableEndpoints } from '../../hooks/use_region_available_endpoints';
+import type { EndpointDeprecationInfo } from '../../types';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
+import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
 import { ResetDefaultsModal } from './reset_defaults_modal';
-import { useConnectors } from '../../hooks/use_connectors';
 
 const COLLAPSED_COUNT = 5;
 
@@ -52,9 +55,11 @@ interface SubFeatureCardProps {
   effectiveRecommendedEndpoints: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
   globalDefaultId: string;
+  canManage?: boolean;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -64,9 +69,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   effectiveRecommendedEndpoints,
   onEndpointsChange,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   hasSavedObject,
   isFeatureDirty,
   globalDefaultId,
+  canManage = true,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -81,10 +88,22 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const listRef = useRef<HTMLDivElement>(null);
   const { isTechPreview, isBeta } = feature;
 
-  const useRecommendedDefaults = useMemo(
+  const { regionDeniedEndpointIds, availableEndpointIds } =
+    useRegionAvailableEndpoints(endpointIds);
+  const availableRecommendedEndpointIds = useMemo(
+    () =>
+      effectiveRecommendedEndpoints.filter(
+        (endpointId) => !regionDeniedEndpointIds.has(endpointId)
+      ),
+    [effectiveRecommendedEndpoints, regionDeniedEndpointIds]
+  );
+  const hasAvailableRecommendedEndpoints = availableRecommendedEndpointIds.length > 0;
+
+  const matchesRecommendedDefaults = useMemo(
     () => !hasOptedIntoCustomMode && arraysEqual(endpointIds, effectiveRecommendedEndpoints),
     [hasOptedIntoCustomMode, endpointIds, effectiveRecommendedEndpoints]
   );
+  const isUsingRecommendedDefaults = hasAvailableRecommendedEndpoints && matchesRecommendedDefaults;
 
   useEffect(() => {
     const el = listRef.current;
@@ -92,7 +111,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     const ro = new ResizeObserver(([entry]) => setListWidth(entry.contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
-  }, [useRecommendedDefaults]);
+  }, [isUsingRecommendedDefaults]);
 
   const endpointDisplayMap = useMemo(
     () =>
@@ -112,31 +131,40 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     (f) => f.featureId !== featureId && f.parentFeatureId !== undefined
   );
 
-  const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
-  const visibleEndpoints = isExpanded ? endpointIds : endpointIds.slice(0, COLLAPSED_COUNT);
-  const hiddenCount = endpointIds.length - COLLAPSED_COUNT;
+  const hasOverflow = availableEndpointIds.length > COLLAPSED_COUNT;
+  const visibleEndpoints = isExpanded
+    ? availableEndpointIds
+    : availableEndpointIds.slice(0, COLLAPSED_COUNT);
+  const hiddenCount = availableEndpointIds.length - COLLAPSED_COUNT;
   const canAddMore =
-    !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
+    !feature.maxNumberOfEndpoints || availableEndpointIds.length < feature.maxNumberOfEndpoints;
 
-  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
-  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+  const isGlobalDefaultAvailable =
+    globalDefaultId !== NO_DEFAULT_MODEL && !regionDeniedEndpointIds.has(globalDefaultId);
+  const showGlobalDefaultRow = !hasSavedObject && isGlobalDefaultAvailable;
+  const hasAssignedRows = availableEndpointIds.length > 0 || showGlobalDefaultRow;
+  const { icon: globalDefaultIcon = 'processor', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
+  const globalDefaultDeprecationInfo =
+    !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
+      ? deprecatedEndpointsMap.get(globalDefaultId)
+      : undefined;
 
   const handleRemove = useCallback(
     (index: number) => {
       onEndpointsChange(
         featureId,
-        endpointIds.filter((_, i) => i !== index)
+        availableEndpointIds.filter((_, i) => i !== index)
       );
     },
-    [endpointIds, featureId, onEndpointsChange]
+    [availableEndpointIds, featureId, onEndpointsChange]
   );
 
   const handleAdd = useCallback(
     (endpointId: string) => {
-      onEndpointsChange(featureId, [...endpointIds, endpointId]);
+      onEndpointsChange(featureId, [...availableEndpointIds, endpointId]);
     },
-    [endpointIds, featureId, onEndpointsChange]
+    [availableEndpointIds, featureId, onEndpointsChange]
   );
 
   const handleDragEnd = useCallback(
@@ -150,33 +178,33 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
       if (destination && source.index !== destination.index) {
         onEndpointsChange(
           featureId,
-          euiDragDropReorder(endpointIds, source.index, destination.index)
+          euiDragDropReorder(availableEndpointIds, source.index, destination.index)
         );
       }
     },
-    [endpointIds, featureId, onEndpointsChange]
+    [availableEndpointIds, featureId, onEndpointsChange]
   );
 
   const handleCopyApply = useCallback(
     (selectedFeatureIds: string[]) => {
       for (const targetId of selectedFeatureIds) {
-        onEndpointsChange(targetId, [...endpointIds]);
+        onEndpointsChange(targetId, [...availableEndpointIds]);
       }
     },
-    [endpointIds, onEndpointsChange]
+    [availableEndpointIds, onEndpointsChange]
   );
 
   const handleToggleRecommendedDefaults = useCallback(
     (checked: boolean) => {
       if (checked) {
-        if (!useRecommendedDefaults) {
+        if (!isUsingRecommendedDefaults) {
           setIsResetModalOpen(true);
         }
         return;
       }
       setIsDisableModalOpen(true);
     },
-    [useRecommendedDefaults]
+    [isUsingRecommendedDefaults]
   );
 
   const confirmResetToDefaults = useCallback(() => {
@@ -187,9 +215,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
 
   const confirmDisableRecommendedDefaults = useCallback(() => {
     setHasOptedIntoCustomMode(true);
-    onEndpointsChange(featureId, [...effectiveRecommendedEndpoints]);
+    onEndpointsChange(featureId, [...availableRecommendedEndpointIds]);
     setIsDisableModalOpen(false);
-  }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
+  }, [featureId, availableRecommendedEndpointIds, onEndpointsChange]);
+
+  const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
+  const showCopyToButton = canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures;
 
   return (
     <>
@@ -236,14 +267,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             <p>{feature.featureDescription}</p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiSwitch
-            data-test-subj={`useRecommendedDefaultsToggle-${featureId}`}
-            label={i18n.translate(
-              'xpack.searchInferenceEndpoints.settings.useRecommendedDefaults.label',
-              { defaultMessage: 'Use recommended defaults' }
-            )}
-            checked={useRecommendedDefaults}
-            onChange={(e) => handleToggleRecommendedDefaults(e.target.checked)}
+          <RecommendedDefaultsSwitch
+            featureId={featureId}
+            checked={isUsingRecommendedDefaults}
+            hasAvailableRecommendedEndpoints={hasAvailableRecommendedEndpoints}
+            canManage={canManage}
+            onChange={handleToggleRecommendedDefaults}
           />
         </EuiFlexItem>
 
@@ -252,7 +281,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             min-inline-size: min(20rem, 50%);
           `}
         >
-          <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
+          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiText size="xs" color="subdued">
               <strong>
                 {i18n.translate('xpack.searchInferenceEndpoints.settings.assignedModels', {
@@ -262,19 +291,21 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             </EuiText>
             <EuiSpacer size="s" />
 
-            {useRecommendedDefaults ? (
+            {isUsingRecommendedDefaults ? (
               <RecommendedEndpointsList
                 featureId={featureId}
-                endpointIds={endpointIds}
+                endpointIds={availableEndpointIds}
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
+                deprecatedEndpointsMap={deprecatedEndpointsMap}
                 globalDefaultRow={
-                  showGlobalDefaultRow
+                  showGlobalDefaultRow && globalDefaultId
                     ? {
                         icon: globalDefaultIcon,
                         label: globalDefaultLabel,
                         showBadge: !isFeatureDirty,
                         globalDefaultId,
+                        deprecationInfo: globalDefaultDeprecationInfo,
                       }
                     : undefined
                 }
@@ -282,14 +313,15 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             ) : (
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
-                  <EuiSplitPanel.Outer hasBorder>
-                    {showGlobalDefaultRow && (
+                  <EuiSplitPanel.Outer hasBorder={hasAssignedRows}>
+                    {showGlobalDefaultRow && globalDefaultId && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
                         icon={globalDefaultIcon}
                         label={globalDefaultLabel}
                         showBadge={!isFeatureDirty}
                         globalDefaultId={globalDefaultId}
+                        deprecationInfo={globalDefaultDeprecationInfo}
                       />
                     )}
                     <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
@@ -302,9 +334,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                           hasInteractiveChildren
                         >
                           {(provided) => {
-                            const { icon = 'compute', label = endpointId } =
+                            const { icon = 'processor', label = endpointId } =
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
+                            const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
                             return (
                               <div>
                                 <EuiSplitPanel.Inner
@@ -312,19 +345,26 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   data-test-subj={`endpoint-row-${endpointId}`}
                                 >
                                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                                    <EuiFlexItem grow={false}>
-                                      <EuiPanel
-                                        color="transparent"
-                                        paddingSize="none"
-                                        {...provided.dragHandleProps}
-                                        aria-label={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                          { defaultMessage: 'Drag to reorder' }
-                                        )}
-                                      >
-                                        <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
-                                      </EuiPanel>
-                                    </EuiFlexItem>
+                                    {canManage && (
+                                      <EuiFlexItem grow={false}>
+                                        <EuiPanel
+                                          color="transparent"
+                                          paddingSize="none"
+                                          {...provided.dragHandleProps}
+                                          aria-label={i18n.translate(
+                                            'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                            { defaultMessage: 'Drag to reorder' }
+                                          )}
+                                        >
+                                          <EuiIcon
+                                            type="dragVertical"
+                                            size="s"
+                                            color="subdued"
+                                            aria-hidden
+                                          />
+                                        </EuiPanel>
+                                      </EuiFlexItem>
+                                    )}
                                     <EuiFlexItem grow={false}>
                                       {isInvalid ? (
                                         <EuiIconTip
@@ -371,32 +411,41 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         </EuiText>
                                       </EuiToolTip>
                                     </EuiFlexItem>
-                                    {index === 0 && !showGlobalDefaultRow && (
+                                    {deprecationInfo && (
+                                      <ModelStatusBadge
+                                        id={endpointId}
+                                        status={deprecationInfo.status}
+                                        metadata={deprecationInfo.metadata}
+                                      />
+                                    )}
+                                    {canManage && (
                                       <EuiFlexItem grow={false}>
-                                        <EuiBadge color="hollow">
-                                          {i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.defaultBadge',
-                                            { defaultMessage: 'Default' }
+                                        <EuiToolTip
+                                          content={i18n.translate(
+                                            'xpack.searchInferenceEndpoints.settings.removeModel',
+                                            {
+                                              defaultMessage: 'Remove model',
+                                            }
                                           )}
-                                        </EuiBadge>
+                                          disableScreenReaderOutput
+                                        >
+                                          <EuiButtonIcon
+                                            iconType="cross"
+                                            aria-label={i18n.translate(
+                                              'xpack.searchInferenceEndpoints.settings.removeModel',
+                                              {
+                                                defaultMessage: 'Remove model',
+                                              }
+                                            )}
+                                            size="s"
+                                            color="text"
+                                            onClick={() => handleRemove(index)}
+                                            isDisabled={availableEndpointIds.length <= 1}
+                                            data-test-subj={`remove-endpoint-${endpointId}`}
+                                          />
+                                        </EuiToolTip>
                                       </EuiFlexItem>
                                     )}
-                                    <EuiFlexItem grow={false}>
-                                      <EuiButtonIcon
-                                        iconType="cross"
-                                        aria-label={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.removeModel',
-                                          {
-                                            defaultMessage: 'Remove model',
-                                          }
-                                        )}
-                                        size="s"
-                                        color="text"
-                                        onClick={() => handleRemove(index)}
-                                        isDisabled={endpointIds.length <= 1}
-                                        data-test-subj={`remove-endpoint-${endpointId}`}
-                                      />
-                                    </EuiFlexItem>
                                   </EuiFlexGroup>
                                 </EuiSplitPanel.Inner>
                                 {index !== visibleEndpoints.length - 1 && (
@@ -409,18 +458,32 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       ))}
                     </EuiDroppable>
                   </EuiSplitPanel.Outer>
+                  {!hasAssignedRows && (
+                    <EuiText
+                      size="s"
+                      color="subdued"
+                      data-test-subj={`no-models-available-${featureId}`}
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.searchInferenceEndpoints.settings.assignedModels.noModelsAvailable',
+                          { defaultMessage: 'No models available' }
+                        )}
+                      </p>
+                    </EuiText>
+                  )}
                 </div>
               </EuiDragDropContext>
             )}
 
-            {!useRecommendedDefaults && (
+            {!isUsingRecommendedDefaults && (
               <>
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
                   {hasOverflow && !isExpanded && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         size="s"
                         onClick={() => setIsExpanded(true)}
                         data-test-subj={`show-more-${featureId}`}
@@ -433,23 +496,25 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
-                  {(!hasOverflow || isExpanded) && canAddMore && (
+                  {showAddModelPopover && (
                     <EuiFlexItem grow={false}>
                       <AddModelPopover
-                        existingEndpointIds={endpointIds}
+                        existingEndpointIds={availableEndpointIds}
                         onAdd={handleAdd}
                         taskType={feature.taskType}
                         panelWidth={listWidth}
+                        allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
                       />
                     </EuiFlexItem>
                   )}
-                  {(!hasOverflow || isExpanded) && hasOtherSubFeatures && (
+                  {showCopyToButton && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         iconType="copy"
                         size="s"
                         color="text"
                         onClick={() => setIsCopyModalOpen(true)}
+                        isDisabled={availableEndpointIds.length === 0}
                         data-test-subj={`copy-to-${featureId}`}
                       >
                         {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.button', {
@@ -470,6 +535,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           sourceFeatureName={feature.featureName}
           currentFeatureId={featureId}
           taskType={feature.taskType}
+          allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
           onApply={handleCopyApply}
           onClose={() => setIsCopyModalOpen(false)}
         />
@@ -496,6 +562,7 @@ interface GlobalDefaultLockedRowProps {
   label: string;
   showBadge: boolean;
   globalDefaultId: string;
+  deprecationInfo?: EndpointDeprecationInfo;
 }
 
 const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
@@ -504,13 +571,10 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
   label,
   showBadge,
   globalDefaultId,
+  deprecationInfo,
 }) => (
   <>
-    <EuiSplitPanel.Inner
-      paddingSize="s"
-      color="subdued"
-      data-test-subj={`global-default-row-${featureId}`}
-    >
+    <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`global-default-row-${featureId}`}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiPanel color="transparent" paddingSize="none">
@@ -550,6 +614,15 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
             </EuiBadge>
           </EuiFlexItem>
         )}
+        {deprecationInfo && (
+          <EuiFlexItem grow={false}>
+            <ModelStatusBadge
+              id={globalDefaultId}
+              status={deprecationInfo.status}
+              metadata={deprecationInfo.metadata}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>
     <EuiHorizontalRule margin="none" />
@@ -561,11 +634,13 @@ interface RecommendedEndpointsListProps {
   endpointIds: string[];
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   globalDefaultRow?: {
     icon: string;
     label: string;
     showBadge: boolean;
     globalDefaultId: string;
+    deprecationInfo?: EndpointDeprecationInfo;
   };
 }
 
@@ -574,6 +649,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
   endpointIds,
   endpointDisplayMap,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   globalDefaultRow,
 }) => {
   return (
@@ -585,18 +661,16 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
           label={globalDefaultRow.label}
           showBadge={globalDefaultRow.showBadge}
           globalDefaultId={globalDefaultRow.globalDefaultId}
+          deprecationInfo={globalDefaultRow.deprecationInfo}
         />
       )}
       {endpointIds.map((endpointId, index) => {
-        const { icon = 'compute', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
+        const { icon = 'processor', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);
+        const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
         return (
           <div key={endpointId}>
-            <EuiSplitPanel.Inner
-              paddingSize="s"
-              data-test-subj={`endpoint-row-${endpointId}`}
-              color="subdued"
-            >
+            <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   {isInvalid ? (
@@ -623,6 +697,13 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
                     <span>{label}</span>
                   </EuiText>
                 </EuiFlexItem>
+                {deprecationInfo && (
+                  <ModelStatusBadge
+                    id={endpointId}
+                    status={deprecationInfo.status}
+                    metadata={deprecationInfo.metadata}
+                  />
+                )}
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
             {index !== endpointIds.length - 1 && <EuiHorizontalRule margin="none" />}

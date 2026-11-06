@@ -18,6 +18,29 @@
         "chat_completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "mistral"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "max_input_tokens": "",
+        "model": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

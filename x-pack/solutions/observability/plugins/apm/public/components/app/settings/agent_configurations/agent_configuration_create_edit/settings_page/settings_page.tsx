@@ -160,7 +160,7 @@ export function SettingsPage({
           updatedSettings = { ['']: '', ...prev.settings };
         } else {
           // Handle value change
-          updatedSettings = { ...prev.settings, [key]: value };
+          updatedSettings = { ...prev.settings, [key]: value ?? '' };
         }
 
         return {
@@ -300,7 +300,8 @@ export function SettingsPage({
               {!isEditMode && isOtelCentralConfigAgent && (
                 <>
                   <EuiCallOut
-                    iconType="iInCircle"
+                    announceOnMount={false}
+                    iconType="info"
                     title={i18n.translate(
                       'xpack.apm.agentConfig.settingsPage.otelCentralConfigDocumentation.title',
                       {

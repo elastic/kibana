@@ -6,21 +6,28 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import { formatResourceWithSampledValues } from '../utils/resources';
 import type { Action } from './actions';
-import { formatAction } from './actions';
+import { formatAction, isRequestDocumentationAction } from './actions';
 import { getEsqlInstructions } from './prompts/instructions_template';
+import type { EsqlLoadedDocumentation } from './documentation';
+import { EsqlDocEntry } from './documentation';
+
+// followed by a blank line, so that the prompt is unchanged when there is no additional context
+const formatAdditionalContext = (additionalContext?: string): string =>
+  additionalContext ? `<additional-context>\n${additionalContext}\n</additional-context>\n\n` : '';
 
 export const createRequestDocumentationPrompt = ({
   nlQuery,
   resource,
-  prompts,
+  documentation,
+  additionalContext,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
-  prompts: EsqlPrompts;
+  documentation: EsqlLoadedDocumentation;
+  additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
@@ -31,17 +38,7 @@ Your current task is to examine the information provided by the user, and to req
 from the ES|QL handbook to help you get the right information needed to generate a query.
 That documentation will be used in a later step to actually generate the query.
 
-## Documentation
-
-Below are the ES|QL syntax and some examples from the official ES|QL documentation.
-
-<syntax-overview>
-${prompts.syntax}
-</syntax-overview>
-
-<esql-examples>
-${prompts.examples}
-</esql-examples>`,
+${getDocumentationSection({ resource, documentation })}`,
     ],
     [
       'user',
@@ -51,9 +48,45 @@ ${prompts.examples}
 ${nlQuery}
 </user-query>
 
-${formatResourceWithSampledValues({ resource })}
+${formatAdditionalContext(additionalContext)}${formatResourceWithSampledValues({ resource })}
 
 Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
+    ],
+  ];
+};
+
+// Variant used when the resource (field stats) is not yet available — e.g. when pre-fetching
+// docs in parallel with index discovery. Keyword selection is based on NL query alone.
+export const createRequestDocumentationPromptNoResource = ({
+  nlQuery,
+  documentation,
+  additionalContext,
+}: {
+  nlQuery: string;
+  documentation: EsqlLoadedDocumentation;
+  additionalContext?: string;
+}): BaseMessageLike[] => {
+  return [
+    [
+      'system',
+      `You are an Elasticsearch assistant that helps with writing ES|QL queries.
+
+Your current task is to examine the user's query and request documentation
+from the ES|QL handbook that will be needed to generate a valid ES|QL query.
+
+${getDocumentationSection({ documentation })}`,
+    ],
+    [
+      'user',
+      `Your task is to write a single, valid ES|QL query based on the following information:
+
+<user-query>
+${nlQuery}
+</user-query>
+
+${formatAdditionalContext(
+  additionalContext
+)}Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
     ],
   ];
 };
@@ -61,8 +94,8 @@ Now, based on that information, request documentation from the ES|QL handbook to
 export const createGenerateEsqlPrompt = ({
   nlQuery,
   resource,
+  documentation,
   previousActions,
-  prompts,
   additionalInstructions,
   additionalContext,
   rowLimit,
@@ -70,13 +103,21 @@ export const createGenerateEsqlPrompt = ({
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
-  prompts: EsqlPrompts;
+  documentation: EsqlLoadedDocumentation;
   previousActions: Action[];
   additionalInstructions?: string;
   additionalContext?: string;
   rowLimit?: number;
   disableNamedParams?: boolean;
 }): BaseMessageLike[] => {
+  // always add the extended documentation of a command if the agent requested doc about it
+  const isDocRequested = (command: string) =>
+    previousActions.some(
+      (a) => isRequestDocumentationAction(a) && a.requestedKeywords.includes(command)
+    );
+  const tsDocRequested = isDocRequested('TS');
+  const promqlDocRequested = isDocRequested('PROMQL');
+
   return [
     [
       'system',
@@ -89,15 +130,12 @@ Your current task is to respond to the user's question by providing a valid ES|Q
 
 Please use the information accessible from your past actions when relevant.
 
-## Documentation
-
-<syntax-overview>
-${prompts.syntax}
-</syntax-overview>
-
-<esql-examples>
-${prompts.examples}
-</esql-examples>
+${getDocumentationSection({
+  resource,
+  documentation,
+  tsDocRequested,
+  promqlDocRequested,
+})}
 
 ## Instructions
 
@@ -137,4 +175,41 @@ Now, based on that information, please generate the ES|QL query.`,
     ],
     ...previousActions.flatMap((a) => formatAction(a)),
   ];
+};
+
+const getDocumentationSection = ({
+  resource,
+  documentation,
+  tsDocRequested = false,
+  promqlDocRequested = false,
+}: {
+  resource?: ResolvedResourceWithSampling;
+  documentation: EsqlLoadedDocumentation;
+  tsDocRequested?: boolean;
+  promqlDocRequested?: boolean;
+}): string => {
+  const isTsdb = resource?.isTsdb || tsDocRequested;
+
+  return `# ES|QL Documentation
+
+<syntax-overview>
+${documentation.getDocContent(EsqlDocEntry.syntax)}
+</syntax-overview>
+${
+  isTsdb
+    ? `\n<tsds-documentation>
+${documentation.getDocContent(EsqlDocEntry.tsQueries)}
+</tsds-documentation>`
+    : ''
+}${
+    promqlDocRequested
+      ? `\n<promql-documentation>
+${documentation.getDocContent(EsqlDocEntry.promqlQueries)}
+</promql-documentation>`
+      : ''
+  }
+
+<esql-examples>
+${documentation.getDocContent(EsqlDocEntry.examples)}
+</esql-examples>`;
 };

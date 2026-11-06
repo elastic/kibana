@@ -20,7 +20,7 @@ const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
 const DOCKER_START_TIMEOUT = 6 * 60 * 1000; // 6 minutes
 // This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-verify-and-promote
-// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
+// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite-slim
 const DOCKER_IMAGE =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
   'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
@@ -76,7 +76,15 @@ export function useDockerRegistry() {
 
   let dockerProcess: ChildProcess | undefined;
   async function startDockerRegistryServer() {
-    const args = ['run', '--rm', '-p', `${packageRegistryPort}:8080`, DOCKER_IMAGE];
+    const args = [
+      'run',
+      '--rm',
+      '-p',
+      `${packageRegistryPort}:8080`,
+      '-e',
+      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+      DOCKER_IMAGE,
+    ];
 
     dockerProcess = execa('docker', args, {
       stdio: ['ignore', 'pipe', 'pipe'],

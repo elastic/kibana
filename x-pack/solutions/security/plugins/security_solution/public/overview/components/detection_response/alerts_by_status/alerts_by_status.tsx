@@ -115,7 +115,7 @@ export const AlertsByStatus = ({
   entityRecord,
 }: AlertsByStatusProps) => {
   const { euiTheme } = useEuiTheme();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
   const entityIdentifiersResolved = useMemo(
     () => resolveEntityIdentifiers(identityFields, entityFilter),
@@ -132,12 +132,12 @@ export const AlertsByStatus = ({
         : null;
     } else {
       kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
-        entityType as EntityType,
+        euidApi.getBuiltInEntityDefinition(entityType as EntityType),
         entityRecord
       );
     }
     return kqlFilter && kqlFilter.length > 0 ? `(${kqlFilter}) AND event.kind: "signal"` : '';
-  }, [euidApi?.euid, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
+  }, [euidApi, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { investigateInTimeline } = useInvestigateInTimeline();

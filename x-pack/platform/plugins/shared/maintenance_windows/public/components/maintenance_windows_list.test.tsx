@@ -180,6 +180,54 @@ describe('MaintenanceWindowsList', () => {
       />
     );
     fireEvent.click(screen.getByTestId('refresh-button'));
-    await waitFor(() => expect(refreshData).toBeCalled());
+    await waitFor(() => expect(refreshData).toHaveBeenCalled());
+  });
+
+  describe('scope column', () => {
+    const scopedItems: MaintenanceWindowUI[] = [
+      {
+        ...items[0],
+        scope: {
+          alerting: { enabled: true, kql: '', filters: [] },
+          alertingV2: { enabled: true, kql: 'rule.id: "a"' },
+        },
+      },
+    ];
+
+    const renderScopedList = (isUniversalAlertingEnabled: boolean) => {
+      const globalClient = appMockRenderer.coreStart.settings.globalClient;
+      (globalClient.isDeclared as jest.Mock).mockReturnValue(true);
+      (globalClient.get as jest.Mock).mockReturnValue(isUniversalAlertingEnabled);
+
+      appMockRenderer.render(
+        <MaintenanceWindowsList
+          refreshData={() => {}}
+          isLoading={false}
+          items={scopedItems}
+          readOnly={false}
+          page={1}
+          perPage={10}
+          total={1}
+          onPageChange={() => {}}
+          onStatusChange={() => {}}
+          selectedStatus={[]}
+          onSearchChange={() => {}}
+        />
+      );
+    };
+
+    test('it renders both scope badges when Universal Alerting is enabled', () => {
+      renderScopedList(true);
+
+      expect(screen.getByText('Classic Alerting')).toBeInTheDocument();
+      expect(screen.getByText('Universal Alerting')).toBeInTheDocument();
+    });
+
+    test('it hides the Universal Alerting badge when Universal Alerting is disabled', () => {
+      renderScopedList(false);
+
+      expect(screen.getByText('Classic Alerting')).toBeInTheDocument();
+      expect(screen.queryByText('Universal Alerting')).not.toBeInTheDocument();
+    });
   });
 });

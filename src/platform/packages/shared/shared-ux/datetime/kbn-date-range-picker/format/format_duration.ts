@@ -29,6 +29,7 @@ export const MS_PER = {
 } as const;
 
 type RoundedUnit = 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes';
+type DurationUnit = RoundedUnit | 'seconds' | 'milliseconds';
 
 const DEVIATION_THRESHOLDS_MS: Record<RoundedUnit, number> = {
   years: 3 * MS_PER.day,
@@ -66,31 +67,71 @@ const UNIT_THRESHOLDS: Array<{ unit: RoundedUnit; threshold: number; divisor: nu
 
 const roundToHalf = (value: number) => Math.round(value * 2) / 2;
 
+interface ResolvedDuration {
+  unit: DurationUnit;
+  value: number;
+  isApproximate: boolean;
+}
+
+/** Picks the best display unit for a duration and rounds its value, flagging lossy rounding. */
+function resolveDurationUnit(diffMs: number): ResolvedDuration {
+  if (diffMs <= 0) {
+    return { unit: 'seconds', value: 0, isApproximate: false };
+  }
+  if (diffMs < MS_PER.second) {
+    return { unit: 'milliseconds', value: Math.round(diffMs), isApproximate: false };
+  }
+
+  const matched = UNIT_THRESHOLDS.find((entry) => diffMs >= entry.threshold);
+  if (!matched) {
+    return { unit: 'seconds', value: Math.floor(diffMs / MS_PER.second), isApproximate: false };
+  }
+
+  const { unit } = matched;
+  const rawValue = diffMs / matched.divisor;
+
+  const allowHalfStepDecimal = rawValue < 10 && unit === 'years';
+  const value = allowHalfStepDecimal ? roundToHalf(rawValue) : Math.round(rawValue);
+  const deviationMs = Math.abs(diffMs - value * UNIT_MS[unit]);
+  const isApproximate = deviationMs >= DEVIATION_THRESHOLDS_MS[unit];
+
+  return { unit, value, isApproximate };
+}
+
 /**
  * Converts a duration between two dates into a short display string.
  * For example: "20min", "3d", "~1h"
  */
 export function durationToDisplayShortText(startDate: Date, endDate: Date): string {
   const diff = Math.abs(endDate.getTime() - startDate.getTime());
-  if (diff <= 0) {
-    return `0${UNIT_ABBREV.seconds}`;
-  }
-  if (diff < MS_PER.second) {
-    return `${Math.round(diff)}${UNIT_ABBREV.milliseconds}`;
-  }
+  const { unit, value, isApproximate } = resolveDurationUnit(diff);
 
-  const matched = UNIT_THRESHOLDS.find((entry) => diff >= entry.threshold);
-  if (!matched) {
-    return `${Math.floor(diff / MS_PER.second)}${UNIT_ABBREV.seconds}`;
-  }
+  return `${isApproximate ? '~' : ''}${value}${UNIT_ABBREV[unit]}`;
+}
 
-  const { unit } = matched;
-  const value = diff / matched.divisor;
+const UNIT_SINGULAR: Record<DurationUnit, string> = {
+  years: 'year',
+  months: 'month',
+  weeks: 'week',
+  days: 'day',
+  hours: 'hour',
+  minutes: 'minute',
+  seconds: 'second',
+  milliseconds: 'millisecond',
+};
 
-  const allowHalfStepDecimal = value < 10 && unit === 'years';
-  const formattedValue = allowHalfStepDecimal ? roundToHalf(value) : Math.round(value);
-  const deviationMs = Math.abs(diff - formattedValue * UNIT_MS[unit]);
-  const showAsApproximation = deviationMs >= DEVIATION_THRESHOLDS_MS[unit];
+/**
+ * Converts a duration between two dates into a full-words display string.
+ * For example: "20 minutes", "3 days", "~1 hour"
+ *
+ * TODO: translate the output of this function using @kbn/i18n with ICU plural
+ * syntax for each unit, same as the relative time text in `format_time_range.ts`.
+ * https://github.com/elastic/eui-private/issues/534
+ */
+export function durationToDisplayFullText(startDate: Date, endDate: Date): string {
+  const diff = Math.abs(endDate.getTime() - startDate.getTime());
+  const { unit, value, isApproximate } = resolveDurationUnit(diff);
+  const unitName = value === 1 ? UNIT_SINGULAR[unit] : unit;
 
-  return `${showAsApproximation ? '~' : ''}${formattedValue}${UNIT_ABBREV[unit]}`;
+  return `${isApproximate ? '~' : ''}${value} ${unitName}`;
 }

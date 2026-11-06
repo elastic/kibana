@@ -47,8 +47,7 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/246204
-  describe.skip('Package Policy - upgrade', function () {
+  describe('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
@@ -1174,6 +1173,199 @@ export default function (providerContext: FtrProviderContext) {
               packagePolicyIds: [packagePolicyId],
             })
             .expect(400);
+        });
+      });
+    });
+
+    // The following two describe blocks require a package-spec release that includes
+    // migrate_from as a valid var field. The registry image must be updated before
+    // these tests will pass locally or in CI.
+    describe('when upgrading to a version where a stream-level variable moves to input scope', function () {
+      withTestPackage('package_policy_upgrade', '0.9.0-stream-var-to-input');
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'Test policy', namespace: 'default' })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'package_policy_upgrade_1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'package_policy_upgrade.test_stream',
+                    },
+                    vars: {
+                      test_var: { value: 'carried-value' },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'package_policy_upgrade',
+              title: 'Tests package policy upgrades',
+              version: '0.2.0-add-non-required-test-var',
+            },
+          });
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+      });
+
+      describe('dry run', function () {
+        it('returns a valid diff with no errors', async function () {
+          const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyId] })
+            .expect(200);
+
+          expect(body[0].hasErrors).to.be(false);
+          const proposed = body[0].diff?.[1];
+          expect(proposed?.inputs[0].vars?.test_var?.value).to.be('carried-value');
+          expect(proposed?.inputs[0].streams[0].vars?.test_var).to.be(undefined);
+        });
+      });
+
+      describe('upgrade', function () {
+        it('carries the stream-level value to the new input-level var', async function () {
+          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyId] })
+            .expect(200);
+
+          expect(body[0].success).to.be(true);
+
+          const { body: policyBody } = await supertest
+            .get(`/api/fleet/package_policies/${packagePolicyId}`)
+            .expect(200);
+
+          const input = policyBody.item.inputs[0];
+          expect(input.vars?.test_var?.value).to.be('carried-value');
+          expect(input.streams[0].vars?.test_var).to.be(undefined);
+        });
+      });
+    });
+
+    describe('when upgrading to a version where an input-level variable moves to stream scope', function () {
+      withTestPackage('package_policy_upgrade', '0.10.0-input-var-to-stream');
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'Test policy', namespace: 'default' })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'package_policy_upgrade_1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                vars: {
+                  test_var: { value: 'carried-value' },
+                },
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'package_policy_upgrade.test_stream',
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'package_policy_upgrade',
+              title: 'Tests package policy upgrades',
+              version: '0.9.0-stream-var-to-input',
+            },
+          });
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+      });
+
+      describe('dry run', function () {
+        it('returns a valid diff with no errors', async function () {
+          const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyId] })
+            .expect(200);
+
+          expect(body[0].hasErrors).to.be(false);
+          const proposed = body[0].diff?.[1];
+          expect(proposed?.inputs[0].streams[0].vars?.test_var?.value).to.be('carried-value');
+          expect(proposed?.inputs[0].vars?.test_var).to.be(undefined);
+        });
+      });
+
+      describe('upgrade', function () {
+        it('carries the input-level value to the new stream-level var', async function () {
+          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyId] })
+            .expect(200);
+
+          expect(body[0].success).to.be(true);
+
+          const { body: policyBody } = await supertest
+            .get(`/api/fleet/package_policies/${packagePolicyId}`)
+            .expect(200);
+
+          const input = policyBody.item.inputs[0];
+          expect(input.streams[0].vars?.test_var?.value).to.be('carried-value');
+          expect(input.vars?.test_var).to.be(undefined);
         });
       });
     });

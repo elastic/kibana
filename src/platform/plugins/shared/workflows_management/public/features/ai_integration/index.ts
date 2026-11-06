@@ -14,3 +14,17 @@ export { AttachmentBridge, baseProposalId } from './attachment_bridge';
 
 export { ProposalTracker } from './proposal_tracker';
 export type { ProposalStatus, ProposalRecord } from './proposal_tracker';
+
+export { setActiveProposalManager, acceptAllActiveProposals } from './active_proposal_manager';
+
+export { findLinkedWorkflowAttachment, WORKFLOW_EDITOR_ATTACHMENT_ID } from './attachment_link';
+
+export {
+  setLastCreateSessionId,
+  carryConversationToWorkflow,
+  hasPersistedConversation,
+  setSidebarOpen,
+  isSidebarOpen,
+  requestSidebarRestore,
+  consumeSidebarRestoreFor,
+} from './conversation_handoff';

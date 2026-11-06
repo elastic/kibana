@@ -10,6 +10,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import {
   combineFiltersWithInternalRuleTypeFilter,
@@ -24,17 +25,14 @@ import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
 } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type {
-  BulkOperationError,
-  BulkDeleteRulesResult,
-  BulkDeleteRulesRequestBody,
-} from './types';
+import type { BulkOperationError, BulkDeleteRulesResult, BulkDeleteRulesParams } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -42,12 +40,12 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
-import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
-  options: BulkDeleteRulesRequestBody
+  options: BulkDeleteRulesParams
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
     validateBulkDeleteRulesBody(options);
@@ -60,25 +58,15 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-  const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
-  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
-    ruleTypes: context.ruleTypeRegistry.list(),
+
+  const { searchFilterWithAuth, searchFilterWithoutAuth } = await buildSearchFilters(context, {
+    kueryNodeFilter,
+    ignoreInternalRuleTypes,
   });
 
-  const kueryNodeFilterWithAuth =
-    authorizationFilter && kueryNodeFilter
-      ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
-      : kueryNodeFilter;
-
-  const finalFilter = ignoreInternalRuleTypes
-    ? combineFiltersWithInternalRuleTypeFilter({
-        filter: kueryNodeFilterWithAuth,
-        internalRuleTypeFilter,
-      })
-    : kueryNodeFilterWithAuth;
-
   const { total } = await checkAuthorizationAndGetTotal(context, {
-    filter: finalFilter,
+    filter: searchFilterWithAuth,
+    baseFilter: searchFilterWithoutAuth,
     action: 'DELETE',
   });
 
@@ -89,8 +77,13 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDeleteWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
-        filter: finalFilter,
+          bulkDeleteWithOCC(context, {
+            filter: filterKueryNode,
+            changeTracking: {
+              metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+            },
+          }),
+        filter: searchFilterWithAuth,
       })
   );
 
@@ -116,30 +109,35 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     ),
   ]);
 
-  const deletedRules = rules.map(({ id, attributes, references }) => {
-    // TODO (http-versioning): alertTypeId should never be null, but we need to
-    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk delete and this should fix itself
-    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RawRule,
-      {
-        id,
-        logger: context.logger,
-        ruleType,
-        references,
-        omitGeneratedValues: false,
-      },
-      (connectorId: string) => actionsClient.isSystemAction(connectorId)
-    );
+  const deletedRules = await withSpan(
+    { name: 'bulkDeleteRules.toRuleDomain', type: 'rules' },
+    async () =>
+      rules.map(({ id, attributes, references }) => {
+        // TODO (http-versioning): alertTypeId should never be null, but we need to
+        // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+        // when we are doing the bulk delete and this should fix itself
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+        const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+          attributes as RawRule,
+          {
+            id,
+            logger: context.logger,
+            ruleType,
+            references,
+          },
+          (connectorId: string) => actionsClient.isSystemAction(connectorId)
+        );
 
-    try {
-      ruleDomainSchema.validate(ruleDomain);
-    } catch (e) {
-      context.logger.warn(`Error validating bulk deleted rule domain object for id: ${id}, ${e}`);
-    }
-    return ruleDomain;
-  });
+        try {
+          ruleDomainSchema.validate(ruleDomain);
+        } catch (e) {
+          context.logger.warn(
+            `Error validating bulk deleted rule domain object for id: ${id}, ${e}`
+          );
+        }
+        return ruleDomain;
+      })
+  );
 
   // // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
   const deletedPublicRules = deletedRules.map((rule: RuleDomain<Params>) => {
@@ -153,9 +151,45 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   }
 };
 
+const buildSearchFilters = async (
+  context: RulesClientContext,
+  {
+    kueryNodeFilter,
+    ignoreInternalRuleTypes,
+  }: {
+    kueryNodeFilter: KueryNode | null;
+    ignoreInternalRuleTypes: boolean;
+  }
+): Promise<{
+  searchFilterWithAuth: KueryNode | null;
+  searchFilterWithoutAuth: KueryNode | null;
+}> => {
+  const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
+
+  const withInternalType = (f: KueryNode | null) =>
+    ignoreInternalRuleTypes
+      ? combineFiltersWithInternalRuleTypeFilter({ filter: f, internalRuleTypeFilter })
+      : f;
+
+  return {
+    searchFilterWithAuth: withInternalType(
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter
+    ),
+    searchFilterWithoutAuth: withInternalType(kueryNodeFilter),
+  };
+};
+
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
-  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
+  {
+    filter,
+    changeTracking,
+  }: { filter: KueryNode | null; changeTracking: RuleChangeTracking<never> }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -172,6 +206,7 @@ const bulkDeleteWithOCC = async (
   );
 
   const rulesToDelete: Array<SavedObject<RawRule>> = [];
+  const migratedRuleIds = new Set<string>();
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const uiamApiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
@@ -181,11 +216,13 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({
+        // the deleted rules are returned with their legacy actions
+        const migratedIds = await bulkMigrateLegacyActions({
           context,
           rules: response.saved_objects,
           skipActionsValidation: true,
         });
+        migratedIds.forEach((id) => migratedRuleIds.add(id));
         for (const rule of response.saved_objects) {
           const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
 
@@ -225,23 +262,6 @@ const bulkDeleteWithOCC = async (
     await untrackRuleAlerts(context, id, attributes as RawRule);
   }
 
-  const ruleIds = rulesToDelete.map((rule) => rule.id);
-  try {
-    const eventLogClient = await context.getEventLogClient();
-    await softDeleteGaps({
-      ruleIds,
-      logger: context.logger,
-      eventLogClient,
-      eventLogger: context.eventLogger,
-    });
-  } catch (error) {
-    // Failing to soft delete gaps should not block the rule deletion
-    context.logger.error(
-      `delete(): Failed to soft delete gaps for rules: ${ruleIds.join(',')}: ${error.message}`
-    );
-  }
-
-  const deletionTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
     () =>
@@ -250,6 +270,7 @@ const bulkDeleteWithOCC = async (
         ids: rulesToDelete.map(({ id }) => id),
       })
   );
+  const deletionTimestamp = Date.now();
 
   const deletedRuleIds: string[] = [];
   const apiKeysToInvalidate = new Set<string>();
@@ -281,13 +302,37 @@ const bulkDeleteWithOCC = async (
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
-  await logBulkRuleChanges({
+  // Legacy actions are deleted only once the rules are deleted
+  await deleteLegacyActionsForRules(
+    context,
+    deletedRuleIds.filter((id) => migratedRuleIds.has(id))
+  );
+
+  if (deletedRuleIds.length > 0) {
+    try {
+      const eventLogClient = await context.getEventLogClient();
+      await softDeleteGapsByQuery({
+        ruleIds: deletedRuleIds,
+        eventLogClient,
+        logger: context.logger,
+      });
+    } catch (error) {
+      // Failing to soft delete gaps should not block the rule deletion
+      context.logger.error(
+        `delete(): Failed to soft delete gaps for rules: ${deletedRuleIds.join(',')}: ${
+          error.message
+        }`
+      );
+    }
+  }
+
+  await logRuleChanges({
     ruleSOs: rules,
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleDelete,
       timestamp: deletionTimestamp,
-      metadata: { bulkCount: totalNumOfRules },
+      metadata: changeTracking?.metadata,
     },
   });
 

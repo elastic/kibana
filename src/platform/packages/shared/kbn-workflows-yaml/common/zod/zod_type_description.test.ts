@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { getZodTypeName } from './get_zod_type_name';
 import {
+  clearDescriptionCache,
   getCompactTypeDescription,
   getDetailedTypeDescription,
   getJsonSchemaDescription,
@@ -533,6 +534,61 @@ describe('zod_type_description', () => {
       const schema = z.union([z.string(), z.number(), z.boolean()]);
       const result = getZodTypeName(schema);
       expect(result).toBe('(string | number | boolean)');
+    });
+  });
+
+  describe('caching + recursive workflow-step schemas', () => {
+    beforeEach(() => {
+      clearDescriptionCache();
+    });
+
+    it('returns the same string instance from the cache on repeated calls', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            type: z.string(),
+            with: z.record(z.string(), z.unknown()).optional(),
+          })
+        ),
+      });
+
+      const first = getDetailedTypeDescription(schema);
+      const second = getDetailedTypeDescription(schema);
+      expect(second).toBe(first);
+    });
+
+    it('descends a recursive lazy union in linear time', () => {
+      const stepSchema: z.ZodType = z.lazy(() =>
+        z.discriminatedUnion(
+          'type',
+          Array.from({ length: 80 }, (_, i) =>
+            z.object({
+              type: z.literal(`conn.${i}`),
+              with: z.object({ message: z.string().optional() }).optional(),
+              'on-failure': z
+                .object({
+                  fallback: z.array(stepSchema),
+                })
+                .optional(),
+            })
+          ) as unknown as [z.ZodObject, z.ZodObject, ...z.ZodObject[]]
+        )
+      );
+
+      // maxDepth=3 matches `getTypeDescriptionForError`, the call path that
+      // previously triggered exponential allocation on paste.
+      const start = Date.now();
+      const result = getDetailedTypeDescription(stepSchema, {
+        detailed: true,
+        maxDepth: 3,
+        showOptional: false,
+        includeDescriptions: false,
+      });
+      const elapsed = Date.now() - start;
+
+      expect(elapsed).toBeLessThan(500);
+      expect(result).toContain('"conn.0"');
+      expect(result).toContain('"conn.79"');
     });
   });
 });

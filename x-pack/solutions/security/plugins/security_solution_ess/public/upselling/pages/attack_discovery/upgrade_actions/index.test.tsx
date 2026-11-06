@@ -8,23 +8,28 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { useKibana } from '../../../../common/services';
 import * as i18n from './translations';
 import { UpgradeActions } from '.';
 
+const mockGetUrlForApp = jest
+  .fn()
+  .mockReturnValue('http://localhost:5601/app/management/stack/license_management');
+
 jest.mock('../../../../common/services', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        getUrlForApp: jest
-          .fn()
-          .mockReturnValue('http://localhost:5601/app/management/stack/license_management'),
-      },
-    },
-  }),
+  useKibana: jest.fn(),
 }));
 
 describe('UpgradeActions', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+        },
+      },
+    });
     render(<UpgradeActions />);
   });
 
@@ -48,6 +53,9 @@ describe('UpgradeActions', () => {
     });
 
     it('links to the license management page', () => {
+      expect(mockGetUrlForApp).toHaveBeenCalledWith('management', {
+        deepLinkId: 'license_management',
+      });
       expect(screen.getByTestId('upgradeCta')).toHaveAttribute(
         'href',
         'http://localhost:5601/app/management/stack/license_management'

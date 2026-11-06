@@ -82,7 +82,14 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
 
       return (
         <>
-          {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
+          {hasRightArrow && (
+            <EuiIcon
+              css={styles.breadcrumbRightIcon}
+              type="chevronSingleRight"
+              size="s"
+              aria-hidden={true}
+            />
+          )}
           <EuiToolTip content={tooltip}>
             <EuiButtonIcon
               data-test-subj={`kubernetesSecurityBreadcrumbIcon-${collectionType}`}

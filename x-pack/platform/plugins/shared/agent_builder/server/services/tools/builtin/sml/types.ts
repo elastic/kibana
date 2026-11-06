@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginStart } from '@kbn/agent-builder-sml-plugin/server';
 
 /**
  * Options for creating SML tools.
  * Uses a getter for lazy resolution — the start contract is not available until after plugin start.
  */
 export interface SmlToolsOptions {
-  getAgentContextLayer: () => AgentContextLayerPluginStart;
+  getAgentBuilderSml: () => AgentBuilderSmlPluginStart;
 }

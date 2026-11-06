@@ -1,0 +1,746 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-31
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 280493.yaml
+    checksum: bde6954ac6d68ad7ae794007f96f134df1cd27c2
+  type: bug-fix
+  title: Fix field definition deletion breaking active case templates
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Deleting a field definition referenced by an active case template now returns HTTP 409 with the blocking templates listed instead of succeeding and breaking template rendering.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/280493
+- file:
+    name: 277293.yaml
+    checksum: 85880300607b191f2fc42b796eeff9177d2121d0
+  type: bug-fix
+  title: Fix incorrect grouping in ES|QL rules when STATS BY renames columns
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: ES|QL rules now correctly identify group-by fields when the STATS BY clause uses inline column renames or unnamed expressions.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/277293
+  issues:
+  - https://github.com/elastic/kibana/issues/267816
+- file:
+    name: 280364.yaml
+    checksum: 7dfa32c5a4809201bb5a7a706fc8d5cff1bbccdb
+  type: enhancement
+  title: Add public conversation option to Agent Builder workflow steps
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Workflow steps can create public conversations that authorized users can view and continue after the workflow runs.
+  prs:
+  - https://github.com/elastic/kibana/pull/280364
+- file:
+    name: 275922.yaml
+    checksum: faaab6ab344bd35315e0496a7184d38c44e56c65
+  type: feature
+  title: Add Kubernetes connector for alerting and automation workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Introduces a Technical Preview Kubernetes connector for reading and modifying cluster resources through the Kubernetes REST API, with authentication for generic clusters (service account token) and managed clusters (GKE, Amazon EKS, and AKS).
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/275922
+- file:
+    name: 280430.yaml
+    checksum: 6d0bd88f3659aa954b58c6c1c85656678b9dc9e7
+  type: bug-fix
+  title: Fix response actions RBAC bypass through Alerting API rule writes
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Users with Rules and Exceptions privileges can no longer attach Elastic Defend or osquery response actions to rules through the generic Alerting API without Endpoint or osquery permissions.
+  prs:
+  - https://github.com/elastic/kibana/pull/280430
+- file:
+    name: 280959.yaml
+    checksum: 87d822a516db077a811608952405fdcd857e8b67
+  type: breaking-change
+  title: Remove support for managing agentless integrations through package and agent policy APIs
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs receive a 400 error.
+  impact: Affects automation and API clients that manage agentless Fleet integrations through legacy package policy or agent policy endpoints.
+  action: Update integrations to use the managed integrations API instead of legacy package policy and agent policy endpoints for agentless integrations.
+  subtype: api
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/280959
+- file:
+    name: 280580.yaml
+    checksum: 5b44d3d26909f0a3449a122bc91c9cd3a0dd2443
+  type: bug-fix
+  title: Fix cascade drilldown failures for ES|QL TS queries in Discover
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Discover cascade drilldown no longer fails on TS queries that cannot reuse the original TS command, and skips drilldown for TS_INFO and METRICS_INFO results with no documents to open.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/280580
+  issues:
+  - https://github.com/elastic/kibana/issues/280402
+- file:
+    name: 280538.yaml
+    checksum: c694782b0566904446d94712ca421bb16e2fdb5f
+  type: bug-fix
+  title: Fix missing value columns after PromQL queries in ES|QL
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: ES|QL autocomplete after PromQL pipes now includes value columns, not just grouping labels.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/280538
+- file:
+    name: 280105.yaml
+    checksum: 877680375897d935fb50869b504cfd03f0f23bf0
+  type: bug-fix
+  title: Fix rounding units for `roundRelativeTime` setting
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Relative time ranges, for example "last 15 minutes", are no longer rounded by default in the time range selector in Discover and Dashboards. You can enable automatic rounding of relative ranges again in the time range selector settings.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/280105
+  issues:
+  - '# PRIVATE: https://github.com/elastic/eui-private/issues/681'
+- file:
+    name: 277197.yaml
+    checksum: ad0f993f4819e044eaefe769dc7e1e514677e0d4
+  type: bug-fix
+  title: Fix unauthorized access in Machine Learning annotation and anomaly search APIs
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Machine Learning APIs now verify that requested job IDs belong to jobs the user can access in the current space.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/277197
+- file:
+    name: 273576.yaml
+    checksum: c8e3b9c879f680ecc9e5814b0890186a170ece78
+  type: bug-fix
+  title: Fix stale Cross-Cluster Replication follower index selection after manage actions
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fixes follower index rows staying selected after pause, resume, or unfollow actions, which left invalid options in the Manage menu.
+  prs:
+  - https://github.com/elastic/kibana/pull/273576
+  issues:
+  - https://github.com/elastic/kibana/issues/63765
+- file:
+    name: 277149.yaml
+    checksum: 3a43afdf22bf54485dd8c80f51a6ebd50fac3858
+  type: enhancement
+  title: Add animated transitions to Streams lifecycle phase previews
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Streams lifecycle bars animate smoothly when you add, edit, switch phases, or switch policies, instead of snapping between states.
+  prs:
+  - https://github.com/elastic/kibana/pull/277149
+  issues:
+  - https://github.com/elastic/kibana/issues/275730
+- file:
+    name: 278195.yaml
+    checksum: 9311594a9fc992cf5999dc5c97908d9da00c7290
+  type: bug-fix
+  title: Fix unauthorized access to other users' draft timelines
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Draft timeline list, read, update, delete, and bulk copy or export operations now enforce user-scoped access so one user cannot access another user's drafts.
+  prs:
+  - https://github.com/elastic/kibana/pull/278195
+- file:
+    name: 280319.yaml
+    checksum: ca3ebd7771b3039aedd583096625292e8961390c
+  type: bug-fix
+  title: Fix Agent Builder trace guidance to use span attributes instead of trace events
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Agent Builder tracing guidance, assistant queries, and the Gen AI Settings UI now point to chat span attributes instead of removed trace events and the empty logs index.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/280319
+- file:
+    name: 280026.yaml
+    checksum: 24308333694bd32d20300c95d32036f226216440
+  type: bug-fix
+  title: Fix Agent Builder attachment reference labels in conversations
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Attachment references now use UI display labels when available, truncate long titles with a hover tooltip, and no longer appear blank when a description was not generated.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/280026
+- file:
+    name: 280143.yaml
+    checksum: 3583349ea6a0a036fc953a883c29b09ea109770f
+  type: feature
+  title: Apply case template defaults automatically when creating cases via API
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: When you create a case with a template through the Cases API, the server applies the template's severity, category, tags, assignees, settings, connector, and extended field defaults. Values you send in the request still take precedence.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/280143
+- file:
+    name: 279874.yaml
+    checksum: d2d50928ab45695cb5f33f663a697f566a67a304
+  type: bug-fix
+  title: Fix Fleet Elastic Agent tag checkbox list
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fixes the checkbox list for adding and removing tags on Fleet-managed Elastic Agents.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/279874
+  issues:
+  - https://github.com/elastic/kibana/issues/276015
+- file:
+    name: 280894.yaml
+    checksum: ee7beb2a1a09fa0cc06c2428a678e154df348708
+  type: bug-fix
+  title: Fix cursor jumping when editing Inference Endpoint ID
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/280894
+- file:
+    name: 280251.yaml
+    checksum: 4ad2de689e23d302bb875cd6e7e8581731853657
+  type: bug-fix
+  title: Fix failed audit logs when Entity Store install lacks privileges
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Read-only Security Solution users no longer trigger failed Entity Store install or init requests that record unauthorized write attempts in audit logs.
+  prs:
+  - https://github.com/elastic/kibana/pull/280251
+  issues:
+  - https://github.com/elastic/kibana/issues/278587
+- file:
+    name: 280986.yaml
+    checksum: e668489cddef31ea0bb01b957b1c8123ab23ba4e
+  type: bug-fix
+  title: Fix custom workflow steps calling Kibana APIs in the wrong space
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Custom workflow steps in non-default spaces now send Kibana API requests to the workflow's space instead of the default space.
+  prs:
+  - https://github.com/elastic/kibana/pull/280986
+- file:
+    name: 279822.yaml
+    checksum: 83b2d0d23d9fb2fa1c80a54b0590616b2754050a
+  type: bug-fix
+  title: Fix collapsed actions column width in Entity Analytics
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/279822
+  issues:
+  - https://github.com/elastic/kibana/issues/278711
+- file:
+    name: 280816.yaml
+    checksum: 2398e022f07a9ede4e72be0c17e81dbb90eb54b5
+  type: bug-fix
+  title: Fix metric chart text color when values are outside the color range
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Value text in Metric charts now uses the default readable color when color-by-value is applied and the value falls outside the scale domain.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/280816
+  issues:
+  - https://github.com/elastic/kibana/issues/277163
+- file:
+    name: 280070.yaml
+    checksum: 8450e8a4ed7ab133761bf3d1f0245ef6574fce56
+  type: bug-fix
+  title: Fix Vega visualizations ignoring the global time filter for ES|QL data sources
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Vega charts using ES|QL now respect the global time picker the same way Lens and Discover do, including implicit time filtering when `%timefield%` is omitted.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/280070
+- file:
+    name: 278614.yaml
+    checksum: a16aabf6bc2c540e40526482e3a7196dd0b4c287
+  type: bug-fix
+  title: Fix "Similar errors" panel failures in Discover when field mappings differ
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Discover no longer fails to load the Similar errors panel when the logs index pattern includes fields that are unmapped for the current document.
+  prs:
+  - https://github.com/elastic/kibana/pull/278614
+  issues:
+  - https://github.com/elastic/kibana/issues/276345
+- file:
+    name: 280524.yaml
+    checksum: 160c1e27f0b68c31c0f4a1a6eb92a647d264a145
+  type: bug-fix
+  title: Fix ES|QL autocomplete after TS_INFO and METRICS_INFO commands
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Autocomplete now suggests columns that match the metadata rows returned by `TS_INFO` and `METRICS_INFO`, not the original time series table.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/280524
+  issues:
+  - https://github.com/elastic/kibana/issues/280403
+- file:
+    name: 278141.yaml
+    checksum: f48f1aa44693c728d8632713dfb6a4674c8f4941
+  type: bug-fix
+  title: Fix Synthetics remote monitor queries searching unrelated remote clusters
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Cross-cluster Synthetics remote monitor pages now query only the target remote cluster instead of fanning out to every linked cluster.
+  prs:
+  - https://github.com/elastic/kibana/pull/278141
+- file:
+    name: 279707.yaml
+    checksum: ea3db56c0d23ad793477529a4e64ea8d9ab66a4c
+  type: feature
+  title: Add Sublime Security connector
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: 'Adds a Sublime Security connector (tech preview) for Workflows and Agent Builder: search flagged email, retrieve verdicts, and quarantine, trash, or restore message groups.'
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279707
+- file:
+    name: 279838.yaml
+    checksum: dd5072004f88e366bf412c3bbae87bc43881059c
+  type: bug-fix
+  title: Fix SentinelOne and Microsoft Defender response action failures for large responses
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: SentinelOne and Microsoft Defender for Endpoint response actions no longer fail when API responses exceed default HTTP size limits. SentinelOne run script actions can now require a passcode to open returned zip files.
+  prs:
+  - https://github.com/elastic/kibana/pull/279838
+- file:
+    name: 279712.yaml
+    checksum: b628515ea8b90e62aa8908d433b88a6b5c6b1f3f
+  type: enhancement
+  title: Expand ES|QL editor height automatically for long queries
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: The ES|QL editor now grows to fit pasted or AI-generated queries that exceed the current viewport. The editor only expands; it does not shrink afterward.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/279712
+- file:
+    name: 276849.yaml
+    checksum: 0ba63d4a9f666b69413c5fd2a1f0d14017bc7ce7
+  type: bug-fix
+  title: Fix token expired errors in Lens visualizations
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Lens now retries streamed Elasticsearch requests after authentication tokens expire instead of failing with a token expired error.
+  prs:
+  - https://github.com/elastic/kibana/pull/276849
+  issues:
+  - https://github.com/elastic/kibana/issues/276660
+- file:
+    name: 279909.yaml
+    checksum: 55c0722eebc8466a3915f5e9bb6751dd347fed88
+  type: bug-fix
+  title: Fix intermittent Fleet integration install failures during asset verification
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fleet now retries Elasticsearch asset checks briefly before failing an integration install, avoiding false failures caused by read-after-write delays on busy clusters.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/279909
+- file:
+    name: 276594.yaml
+    checksum: 06b5a0b2d5178fd3b234290211ec301b9945ba52
+  type: enhancement
+  title: Improve line break and JSON formatting in Discover cell popovers
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Discover table cell popovers now preserve line breaks and format JSON blocks inside string fields.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/276594
+  issues:
+  - https://github.com/elastic/kibana/issues/208224
+- file:
+    name: 273578.yaml
+    checksum: 2f4013f6eadb061e52d59f2973d7ce5c7b1a23cd
+  type: bug-fix
+  title: Fix redundant version label in APM annotation popups
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: APM chart annotation popups no longer prepend a Version label to custom annotation text.
+  prs:
+  - https://github.com/elastic/kibana/pull/273578
+  issues:
+  - https://github.com/elastic/kibana/issues/66138
+- file:
+    name: 279837.yaml
+    checksum: c0e0bce126d32225c98e2c7509ce2fb4f748d69f
+  type: enhancement
+  title: Clarify API key field state when a key was already created
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/279837
+- file:
+    name: 279421.yaml
+    checksum: d0cae86bcd908337ae6c42981c96efef2d8f5ca8
+  type: enhancement
+  title: Allow Discover and Dashboards to proceed when federated data sources are available
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Discover and Dashboards no longer stop on the no-data screen when only federated or external data sources exist. Slow data checks now fall back gracefully so you can start working with ES|QL.
+  feature-id: data-federation
+  areas:
+  - Discover and ES|QL
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/279421
+  issues:
+  - https://github.com/elastic/kibana/issues/279194
+- file:
+    name: 279532.yaml
+    checksum: 5852950e69987b55746faaec53844dd0c645c5d2
+  type: bug-fix
+  title: Fix lost filters when adding a Lens panel to a case
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279532
+- file:
+    name: 280603.yaml
+    checksum: a6c85cc56622f04ce63b09e700ad38eb6b03bcc2
+  type: bug-fix
+  title: Fix incorrect project routing scope on alerts in origin-routed spaces
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: "Fixed a bug where alerts in an origin-routed space were incorrectly stamped with `kibana.cps_scope.expression: \"_alias:*\"` instead of the space's actual routing expression."
+  prs:
+  - https://github.com/elastic/kibana/pull/280603
+  issues:
+  - https://github.com/elastic/kibana/issues/279328
+- file:
+    name: 280253.yaml
+    checksum: 53c8d1047e0fef391bc6b19b54724055d1bda3b6
+  type: bug-fix
+  title: Fix unclickable region count text in manage region preferences modal
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fixes the region count text in the manage region preferences modal so clicking it, not just the icon next to it, expands or collapses the zone.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/280253
+- file:
+    name: 280316.yaml
+    checksum: b74bdae54bc7bd5f88489beba4f471942ea7934d
+  type: enhancement
+  title: Add `allow_outdated_version` flag for pinned Fleet package installs
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fleet package install APIs accept an `allow_outdated_version` option to install a specific registry version older than the latest release without using the broader `force` flag.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/280316
+  issues:
+  - https://github.com/elastic/kibana/issues/275183
+- file:
+    name: 279142.yaml
+    checksum: 01380eeccd19f44b57ea641d108786eb5b287000
+  type: feature
+  title: Support federated data sources in the threshold rule builder
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  feature-id: data-federation
+  prs:
+  - https://github.com/elastic/kibana/pull/279142
+  issues:
+  - https://github.com/elastic/kibana/issues/281331
+- file:
+    name: 280242.yaml
+    checksum: 50d93cf22fae9413ee9694d725dc4a4c8f554c55
+  type: bug-fix
+  title: Fix region preferences modal resizing when callout is dismissed
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fixes the region preferences modal shrinking unexpectedly when the model availability notice is dismissed.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/280242
+- file:
+    name: 280311.yaml
+    checksum: 84c9488f886f4af87725be2adcec1f84b900f42d
+  type: bug-fix
+  title: Fix workflow input validation failing on Liquid-like text
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fixed workflow input validation failing or corrupting caller-provided values containing Liquid-like text. Provided values now remain literal unless they use the explicit `${{ ... }}` whole-expression form; schema defaults continue to support Liquid templates.
+  prs:
+  - https://github.com/elastic/kibana/pull/280311
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18402'
+- file:
+    name: 279489.yaml
+    checksum: ab8626bbf4ea633143063843570420779c822773
+  type: bug-fix
+  title: 'Fix missing small percentage tick values on Y axis '
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/279489
+  issues:
+  - https://github.com/elastic/kibana/issues/275622
+- file:
+    name: 280669.yaml
+    checksum: a2f1da97a465c4b5fa7c8183f7a4fc88b8bf6ca2
+  type: bug-fix
+  title: Fix agent policy download failing with unresolved YAML alias errors
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Downloading an agent policy no longer returns HTTP 500 when the policy reuses shared object references during YAML serialization.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/280669
+- file:
+    name: 279903.yaml
+    checksum: f5c6cd63347abcbcc2703ca23558a7e14bc214dd
+  type: bug-fix
+  title: Fix ES|QL failures when fast mode is enabled on Basic or Platinum licenses
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Saved Discover sessions and dashboards with Fast mode enabled now return results after a license downgrade, and the Fast mode toggle is disabled when your license is not Enterprise.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/279903
+  issues:
+  - https://github.com/elastic/kibana/issues/279718
+- file:
+    name: 279684.yaml
+    checksum: 1f0df7917959e4ec5af2612ba980eb244ad1a908
+  type: feature
+  title: Add public API to discover applicable case extended fields
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Adds public Cases API routes that return the extended fields you can apply when creating or updating a case for a given owner and optional template, including the exact storage keys for the `extended_fields` map.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279684
+- file:
+    name: 280576.yaml
+    checksum: 75629694182b9db23bc7215d84a1818008db1f25
+  type: bug-fix
+  title: Fix case list metrics bar ignoring search and date filters
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: The Cases list metrics bar now reflects the same search, filters, and date range applied to the case table below it.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/280576
+- file:
+    name: 278294.yaml
+    checksum: d91cea5c82d77c1b4475a6b8c5377a2b2be6d65c
+  type: bug-fix
+  title: Fix Discover navigation errors from APM traces with mixed log and trace data
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: The View in Discover link from APM trace flyouts no longer fails when log and trace indices differ in field mappings.
+  prs:
+  - https://github.com/elastic/kibana/pull/278294
+  issues:
+  - https://github.com/elastic/kibana/issues/275078
+- file:
+    name: 277822.yaml
+    checksum: 4998107ede660ca1372a8016d9d7425741bed5bb
+  type: enhancement
+  title: Make Attacks API generally available with public OpenAPI documentation
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: The Attacks API (`/api/detection_engine/attacks/*`) is now generally available and documented in the public Kibana OpenAPI specification.
+  prs:
+  - https://github.com/elastic/kibana/pull/277822
+- file:
+    name: 279312.yaml
+    checksum: 3e855f75077b081ca14170f36fb07101e0fc89b0
+  type: bug-fix
+  title: Fix Entity Analytics navigation from Agent Builder Preview
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Hyperlinks that open Entity Analytics flyouts now work when an entity flyout is already open behind the Agent Builder canvas.
+  prs:
+  - https://github.com/elastic/kibana/pull/279312
+  issues:
+  - https://github.com/elastic/kibana/issues/278034
+- file:
+    name: 280189.yaml
+    checksum: 1675ac69a7e6f5f9b20173023b8d5d7d61d6a776
+  type: bug-fix
+  title: Fix Agent Builder conversations being overwritten during auto-create
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Auto-create no longer replaces an existing Agent Builder conversation when the same conversation ID is requested again.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/280189
+- file:
+    name: 278305.yaml
+    checksum: ed018bf98e5292a91a81d7b15272cd4af5183a53
+  type: bug-fix
+  title: Fix relative time mismatch in CSV exports
+  products:
+  - product: cloud-serverless
+    target: 2026-07-28
+  - product: kibana
+  description: Fixes CSV exports covering a different time window than what was shown in Discover for relative time ranges. For scheduled reports, the corrected behavior applies only to reports created or re-saved after upgrading; existing schedules keep their previous time-window behavior until they are recreated.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/278305
+  issues:
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/3635'

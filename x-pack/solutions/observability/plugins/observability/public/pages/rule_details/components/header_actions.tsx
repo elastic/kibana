@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -198,6 +199,9 @@ export function HeaderActions({
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"
+            aria-label={i18n.translate('xpack.observability.ruleDetails.actionsPopoverAriaLabel', {
+              defaultMessage: 'Rule actions',
+            })}
             panelPaddingSize="none"
             isOpen={isRuleEditPopoverOpen}
             closePopover={togglePopover}
@@ -240,17 +244,24 @@ export function HeaderActions({
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={1}>
-          <EuiButtonIcon
-            className="snoozeButton"
-            data-test-subj="snoozeRuleButton"
-            iconType={getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
-            onClick={() => {
-              setSnoozeModalOpen(true);
-            }}
-            aria-label={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
               defaultMessage: 'Manage rule snooze',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              className="snoozeButton"
+              data-test-subj="snoozeRuleButton"
+              iconType={getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
+              onClick={() => {
+                setSnoozeModalOpen(true);
+              }}
+              aria-label={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
+                defaultMessage: 'Manage rule snooze',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 

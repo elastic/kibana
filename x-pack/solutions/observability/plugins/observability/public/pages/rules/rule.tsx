@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -125,21 +126,19 @@ export function RulePage() {
     return (
       <ObservabilityPageTemplate data-test-subj="rulePage">
         <HeaderMenu />
-        <EuiCallOut
+        <KbnDangerCallout
+          announceOnMount
           title={i18n.translate('xpack.observability.ruleForm.templateError.title', {
             defaultMessage: 'Error loading rule template',
           })}
-          color="danger"
-          iconType="error"
-        >
-          <p>
-            {(ruleTemplateError as any)?.body?.message ??
-              (ruleTemplateError as Error)?.message ??
-              i18n.translate('xpack.observability.ruleForm.templateError.description', {
-                defaultMessage: 'There was an error loading the rule template. Please try again.',
-              })}
-          </p>
-        </EuiCallOut>
+          text={
+            (ruleTemplateError as any)?.body?.message ??
+            (ruleTemplateError as Error)?.message ??
+            i18n.translate('xpack.observability.ruleForm.templateError.description', {
+              defaultMessage: 'There was an error loading the rule template. Please try again.',
+            })
+          }
+        />
       </ObservabilityPageTemplate>
     );
   }

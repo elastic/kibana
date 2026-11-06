@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { UpstreamServicesForDependencyResponse } from '@kbn/apm-api-shared';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import type { ConnectionStats, Node } from '../../../common/connections';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
@@ -53,14 +53,6 @@ async function getUpstreamServicesForDependencyForTimeRange({
   });
 
   return getConnectionStatsItemsWithRelativeImpact(statsItems);
-}
-
-export interface UpstreamServicesForDependencyResponse {
-  services: Array<{
-    location: Node;
-    currentStats: ConnectionStats & { impact: number };
-    previousStats: (ConnectionStats & { impact: number }) | null;
-  }>;
 }
 
 export async function getUpstreamServicesForDependency(

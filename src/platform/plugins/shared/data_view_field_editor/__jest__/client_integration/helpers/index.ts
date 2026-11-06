@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TestBed } from '@kbn/test-jest-helpers';
-export { findTestSubject } from '@kbn/test-jest-helpers';
-
 export {
   setupEnvironment,
   WithFieldEditorDependencies,
@@ -20,12 +17,6 @@ export {
   indexPatternNameForTest,
   setSearchResponseLatency,
 } from './setup_environment';
-
-export {
-  getCommonActions,
-  waitForUpdates,
-  waitForDocumentsAndPreviewUpdate,
-} from './common_actions';
 
 export type { EsDoc, TestDoc } from './mocks';
 export { mockDocuments } from './mocks';

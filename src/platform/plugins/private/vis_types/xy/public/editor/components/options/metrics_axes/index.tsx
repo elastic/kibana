@@ -290,7 +290,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     updateAxisTitle(updatedSeries);
   }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
 
-  const isTimeViz = aggs?.aggs.some(
+  const isTimeVis = aggs?.aggs.some(
     (agg) =>
       agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
   );
@@ -300,7 +300,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
   const linearOrStackedBars = stateParams.seriesParams.every(
     ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
   );
-  const disableAxisControls = xAxisIsHorizontal && isTimeViz && linearOrStackedBars;
+  const disableAxisControls = xAxisIsHorizontal && isTimeVis && linearOrStackedBars;
 
   return isTabSelected ? (
     <>

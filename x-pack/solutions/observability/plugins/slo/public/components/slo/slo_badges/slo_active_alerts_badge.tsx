@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { MouseEvent } from 'react';
@@ -18,12 +18,17 @@ export interface Props {
   viewMode?: 'compact' | 'default';
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
+  isInteractive?: boolean;
 }
 
-export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
+export function SloActiveAlertsBadge({
+  slo,
+  activeAlerts,
+  viewMode = 'default',
+  isInteractive = true,
+}: Props) {
   const {
-    application: { navigateToUrl },
-    http: { basePath },
+    application: { navigateToApp },
   } = useKibana().services;
 
   const handleActiveAlertsClick = () => {
@@ -37,7 +42,10 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         rangeTo: 'now',
         status: 'active',
       });
-      navigateToUrl(`${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`);
+      void navigateToApp(observabilityAppId, {
+        path: `/alerts?_a=${encodedKuery}`,
+        openInNewTab: true,
+      });
     }
   };
 
@@ -45,37 +53,53 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
     return null;
   }
 
+  const label =
+    viewMode !== 'default'
+      ? activeAlerts
+      : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
+          defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+          values: { count: activeAlerts },
+        });
+
+  const handleMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // stops propagation of metric onElementClick
+  };
+
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.slo.slo.activeAlertsBadge.tooltip', {
           defaultMessage:
-            '{count, plural, one {# burn rate alert} other {# burn rate alerts}}, click to view.',
+            '{count, plural, one {# burn rate alert} other {# burn rate alerts}}. Opens in a new browser tab.',
           values: { count: activeAlerts },
         })}
         display="block"
       >
-        <EuiBadge
-          iconType="warning"
-          color="danger"
-          onClick={handleActiveAlertsClick}
-          onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
-            defaultMessage: 'active alerts badge',
-          })}
-          data-test-subj="o11ySloActiveAlertsBadge"
-          onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation(); // stops propagation of metric onElementClick
-          }}
-          css={{ cursor: 'pointer' }}
-        >
-          {viewMode !== 'default'
-            ? activeAlerts
-            : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
-                defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
-                values: { count: activeAlerts },
-              })}
-        </EuiBadge>
+        {isInteractive ? (
+          <EuiBadge
+            iconType="warning"
+            color="danger"
+            data-test-subj="o11ySloActiveAlertsBadge"
+            onMouseDown={handleMouseDown}
+            css={{ cursor: 'pointer' }}
+            onClick={handleActiveAlertsClick}
+            onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
+              defaultMessage: 'View active alerts in a new browser tab',
+            })}
+          >
+            {label}
+          </EuiBadge>
+        ) : (
+          <EuiBadge
+            iconType="warning"
+            color="danger"
+            data-test-subj="o11ySloActiveAlertsBadge"
+            onMouseDown={handleMouseDown}
+          >
+            {label}
+          </EuiBadge>
+        )}
       </EuiToolTip>
     </EuiFlexItem>
   );

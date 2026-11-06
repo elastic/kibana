@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 import React from 'react';
+import { truncate, unit } from '@kbn/apm-common';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -34,7 +35,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useServiceMetricChartsFetcher } from '../../../../hooks/use_service_metric_charts_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { truncate, unit } from '../../../../utils/style';
 import { MetricsChart } from '../../../shared/charts/metrics_chart';
 
 const INITIAL_DATA = {

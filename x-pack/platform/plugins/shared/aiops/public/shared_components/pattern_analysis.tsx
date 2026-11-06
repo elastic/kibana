@@ -59,6 +59,7 @@ export interface PatternAnalysisProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
@@ -79,6 +80,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   lastReloadRequestTime,
   onChange,
   filtersApi,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const {
@@ -138,10 +140,8 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddablePatternAnalysis"
       css={{
         width: '100%',
@@ -157,6 +157,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
             >
               <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                 <PatternAnalysisEmbeddableWrapper
+                  parentApi={parentApi}
                   dataViewId={dataViewId}
                   timeRange={timeRange}
                   fieldName={fieldName}

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useContext, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { EventStats } from '../../../common/endpoint/types';
 import { useColors } from './use_colors';
 import { useLinkProps } from './use_link_props';
@@ -29,7 +29,7 @@ export const NodeSubMenuComponents = React.memo(
   }: {
     id: string;
     className?: string;
-    // eslint-disable-next-line react/no-unused-prop-types
+    // eslint-disable-next-line @kbn/compat/react-no-unused-prop-types
     buttonFill: string;
     /**
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.

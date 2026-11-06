@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates, DatatableVisualizationState } from '@kbn/lens-common';
-import type { ColumnState } from '../../../../../common/expressions';
+import type {
+  ColumnState,
+  GeneralDatasourceStates,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,

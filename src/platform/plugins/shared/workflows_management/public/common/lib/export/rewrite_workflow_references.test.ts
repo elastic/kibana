@@ -165,33 +165,24 @@ describe('rewriteWorkflowReferences', () => {
     expect(result).toContain('workflow-id: workflow-new-else');
   });
 
-  it('should handle parallel branches', () => {
+  it('should handle a parallel branch body', () => {
     const yaml = [
       'name: Parent',
       'steps:',
       '  - name: fan-out',
       '    type: parallel',
-      '    branches:',
-      '      - steps:',
-      '          - name: branch-a',
-      '            type: workflow.execute',
-      '            with:',
-      '              workflow-id: branch-a-target',
-      '      - steps:',
-      '          - name: branch-b',
-      '            type: workflow.executeAsync',
-      '            with:',
-      '              workflow-id: branch-b-target',
+      '    foreach: "{{ steps.list.output }}"',
+      '    steps:',
+      '      - name: branch-a',
+      '        type: workflow.execute',
+      '        with:',
+      '          workflow-id: branch-a-target',
     ].join('\n');
 
-    const mapping = new Map([
-      ['branch-a-target', 'workflow-new-a'],
-      ['branch-b-target', 'workflow-new-b'],
-    ]);
+    const mapping = new Map([['branch-a-target', 'workflow-new-a']]);
     const result = rewriteWorkflowReferences(yaml, mapping);
 
     expect(result).toContain('workflow-id: workflow-new-a');
-    expect(result).toContain('workflow-id: workflow-new-b');
   });
 
   it('should return the original YAML when mapping is empty', () => {

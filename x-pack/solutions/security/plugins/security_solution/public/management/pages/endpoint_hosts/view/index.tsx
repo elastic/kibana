@@ -27,14 +27,16 @@ import {
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { createStructuredSelector } from 'reselect';
-import { useDispatch } from 'react-redux';
+import { createStructuredSelector } from 'reselect-v4';
+import { useDispatch } from 'react-redux-v7';
 import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { isPolicyOutOfDate } from '../utils';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
+import { useAppHeaderBack } from '../../../hooks/use_app_header_back';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
@@ -61,7 +63,7 @@ import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointDetailsPath, getEndpointListPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
-import { useAppUrl } from '../../../../common/lib/kibana/hooks';
+import { useAppUrl, useKibana } from '../../../../common/lib/kibana';
 import type { EndpointAction } from '../store/action';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -69,7 +71,6 @@ import { TableRowActions } from './components/table_row_actions';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { BackToPolicyListButton } from './components/back_to_policy_list_button';
 import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 
 const MAX_PAGINATED_ITEM = 9999;
@@ -352,6 +353,7 @@ export const EndpointList = () => {
   const { search: searchParams } = useLocation();
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
   const { getAppUrl } = useAppUrl();
+  const { docLinks } = useKibana().services;
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -421,10 +423,10 @@ export const EndpointList = () => {
   );
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
+    INTEGRATIONS_PLUGIN_ID,
     {
-      path: `/integrations/${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
+      path: `/detail/${
+        endpointPackageVersion ? `endpoint-${endpointPackageVersion}` : 'endpoint'
       }/add-integration`,
       state: stateHandleCreatePolicyClick,
     }
@@ -440,12 +442,16 @@ export const EndpointList = () => {
           path: endpointListPath,
         },
       ],
-      label: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
-        defaultMessage: 'View all endpoints',
+      label: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToEndpointsLabel', {
+        defaultMessage: 'Endpoints',
       }),
       href: getAppUrl({ path: endpointListPath }),
     };
   }, [getAppUrl, searchParams]);
+
+  // Satellite-origin back link: only shown when the route was entered with an explicit back
+  // link in route state (e.g. navigated here from the Policy list's endpoint count link).
+  const appHeaderBack = useAppHeaderBack(routeState.backLink);
 
   const onRefresh = useCallback(() => {
     if (autoRefreshInterval <= 0) {
@@ -690,25 +696,14 @@ export const EndpointList = () => {
     handleCreatePolicyClick,
   ]);
 
-  const hideHeader = !(endpointsExist && isInitialized && !listError);
-
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={hideHeader}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.list.pageTitle"
-          defaultMessage="Endpoints"
-        />
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running Elastic Defend"
-        />
-      }
-      headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
+      title={i18n.translate('xpack.securitySolution.endpoint.list.pageTitle', {
+        defaultMessage: 'Endpoints',
+      })}
+      back={appHeaderBack}
+      docLink={docLinks.links.securitySolution.endpoints}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       {isInitialized && !listError && (

@@ -39,7 +39,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/pages',
-        { params: { limit: 25 } }
+        { params: { limit: 25 }, paramsSerializer: { indexes: null } }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -64,6 +64,7 @@ describe('ConfluenceCloudConnector', () => {
             'space-id': ['789'],
             title: 'test',
           },
+          paramsSerializer: { indexes: null },
         }
       );
     });
@@ -81,6 +82,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith('https://acme.atlassian.net/wiki/api/v2/pages', {
         params: { limit: 25 },
+        paramsSerializer: { indexes: null },
       });
     });
   });
@@ -138,7 +140,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/spaces',
-        { params: { limit: 25 } }
+        { params: { limit: 25 }, paramsSerializer: { indexes: null } }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -161,6 +163,7 @@ describe('ConfluenceCloudConnector', () => {
             cursor: 'xyz',
             keys: ['DEMO'],
           },
+          paramsSerializer: { indexes: null },
         }
       );
     });
@@ -187,6 +190,32 @@ describe('ConfluenceCloudConnector', () => {
         'https://mycompany.atlassian.net/wiki/api/v2/spaces/456'
       );
       expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    const testSpec = ConfluenceCloudConnector.test;
+
+    it('should call /wiki/api/v2/spaces and return {}', async () => {
+      mockClient.get.mockResolvedValue({ data: { results: [] } });
+
+      const result = await testSpec.handler(mockContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/wiki/api/v2/spaces',
+        { params: { limit: 1 } }
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Unauthorized');
     });
   });
 });

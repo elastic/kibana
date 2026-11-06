@@ -50,8 +50,7 @@ export class HttpMonacoConnectorStepHandler extends BaseMonacoConnectorHandler {
         return null;
       }
 
-      // Create basic hover content
-      const content = [
+      const bodyLines = [
         `**Workflow Connector**: \`${connectorType}\``,
         '',
         this.createConnectorOverview(
@@ -68,9 +67,14 @@ export class HttpMonacoConnectorStepHandler extends BaseMonacoConnectorHandler {
         this.generateParameterHelp(connectorType),
         '',
         '_💡 Tip: Use configured connectors to securely manage authentication credentials_',
-      ].join('\n');
+      ];
 
-      return this.createMarkdownContent(content);
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(
+          this.getConnectorStabilityFromCache(connectorType),
+          bodyLines
+        )
+      );
     } catch (error) {
       // console.warn('HttpMonacoConnectorStepHandler: Error generating hover content', error);
       return null;

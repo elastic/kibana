@@ -7,63 +7,94 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
 const WORKFLOW_POPOVER_WIDTH = 215;
 
+type WorkflowFilterValue = string | number | boolean;
+
 interface WorkflowFilterPopoverProps {
   filter: string;
   title: string;
-  selectedValues: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  selectedValues: WorkflowFilterValue[];
   values: EuiSelectableOption[];
-  onSelectedValuesChanged: (newValues: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  singleSelection?: boolean;
+  onSelectedValuesChanged: (newValues: WorkflowFilterValue[]) => void;
 }
+
+const normalizeFilterValue = (value: EuiSelectableOption['key'] | WorkflowFilterValue): string =>
+  String(value);
+
+const getSelectableOptions = ({
+  values,
+  selectedValues,
+}: {
+  values: EuiSelectableOption[];
+  selectedValues: WorkflowFilterValue[];
+}): EuiSelectableOption[] => {
+  const selectedValuesMap = new Map(
+    selectedValues.map((value) => [normalizeFilterValue(value), value])
+  );
+  const optionKeys = new Set<string>();
+
+  const options = values.map(({ label, key }): EuiSelectableOption => {
+    const optionKey = key ?? label;
+    const normalizedOptionKey = normalizeFilterValue(optionKey);
+    optionKeys.add(normalizedOptionKey);
+
+    return {
+      label: label ?? normalizedOptionKey,
+      key: normalizedOptionKey,
+      checked: selectedValuesMap.has(normalizedOptionKey) ? 'on' : undefined,
+    };
+  });
+
+  const selectedOptionsMissingFromValues = selectedValues
+    .filter((value) => !optionKeys.has(normalizeFilterValue(value)))
+    .map((value): EuiSelectableOption => {
+      const normalizedValue = normalizeFilterValue(value);
+      return {
+        label: normalizedValue,
+        key: normalizedValue,
+        checked: 'on',
+      };
+    });
+
+  return [...options, ...selectedOptionsMissingFromValues];
+};
 
 const WorkflowsFilterPopoverComponent = ({
   filter,
   title,
   values,
   selectedValues,
+  singleSelection = false,
   onSelectedValuesChanged,
 }: WorkflowFilterPopoverProps) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => {
-    const selectedValuesSet = new Set(selectedValues);
-
-    return values.map(
-      ({ label, key }): EuiSelectableOption => ({
-        label,
-        key,
-        checked: selectedValuesSet.has(key!) ? 'on' : undefined,
-      })
-    );
-  });
+  const popoverTitleId = useGeneratedHtmlId();
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() =>
+    getSelectableOptions({ values, selectedValues })
+  );
 
   const handleSelectableOptionsChange = (newOptions: EuiSelectableOption[]) => {
     onSelectedValuesChanged(
       newOptions
-        .map(({ key, checked }: any): string | number | boolean | null => (checked ? key : null)) // eslint-disable-line @typescript-eslint/no-explicit-any
-        .filter((value) => value !== null)
+        .map(({ key, checked }): WorkflowFilterValue | null => (checked ? key ?? null : null))
+        .filter((value): value is WorkflowFilterValue => value !== null)
     );
   };
 
   useEffect(() => {
-    const selectedValuesSet = new Set(selectedValues);
-    const newSelectableOptions: EuiSelectableOption[] = values.map(
-      ({ label, key }): EuiSelectableOption => {
-        return {
-          label: label ?? key,
-          key,
-          checked: selectedValuesSet.has(key!) ? 'on' : undefined,
-        };
-      }
-    );
-
-    setSelectableOptions(newSelectableOptions);
+    setSelectableOptions(getSelectableOptions({ values, selectedValues }));
   }, [values, selectedValues]);
 
   const triggerButton = (
@@ -84,6 +115,7 @@ const WorkflowsFilterPopoverComponent = ({
   return (
     <EuiPopover
       ownFocus
+      aria-labelledby={popoverTitleId}
       button={triggerButton}
       isOpen={isFilterPopoverOpen}
       closePopover={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
@@ -100,12 +132,13 @@ const WorkflowsFilterPopoverComponent = ({
         aria-label="Search"
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
+        singleSelection={singleSelection}
         emptyMessage="No items available"
         noMatchesMessage="No items available"
       >
         {(list, search) => (
           <div css={{ width: WORKFLOW_POPOVER_WIDTH }}>
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>{search}</EuiPopoverTitle>
             {list}
           </div>
         )}

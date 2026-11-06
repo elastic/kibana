@@ -19,7 +19,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorIcon } from '@kbn/search-shared-ui';
 import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
-import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors/components';
 import { docLinks } from '../../../../common/doc_links';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
@@ -69,7 +69,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                           <React.Fragment key={connector.serviceType}>
                             {index === Math.floor(connectorExamples.length / 2) && (
                               <EuiFlexItem grow={false}>
-                                <EuiIcon color="primary" size="l" type="documents" />
+                                <EuiIcon color="primary" size="l" type="documents" aria-hidden />
                               </EuiFlexItem>
                             )}
                             <EuiFlexItem grow={false}>
@@ -108,13 +108,13 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                       justifyContent="center"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type="plugs" />
+                        <EuiIcon color="primary" size="l" type="plugs" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon size="m" type="sortRight" />
+                        <EuiIcon size="m" type="sortRight" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon color="primary" size="l" type="rocket" />
+                        <EuiIcon color="primary" size="l" type="rocket" aria-hidden />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem>
@@ -165,19 +165,19 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="documents" />
+                          <EuiIcon color="primary" size="l" type="documents" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon size="m" type="sortRight" />
+                          <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="plugs" />
+                          <EuiIcon color="primary" size="l" type="plugs" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon size="m" type="sortRight" />
+                          <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElasticsearch" />
+                          <EuiIcon color="primary" size="l" type="logoElasticsearch" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

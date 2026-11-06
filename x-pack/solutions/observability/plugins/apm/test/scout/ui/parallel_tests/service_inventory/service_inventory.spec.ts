@@ -49,9 +49,7 @@ test.describe(
     test('loads the service overview for a service when clicking on it', async ({ page }) => {
       await page.getByText(testData.SERVICE_OPBEANS_NODE).click();
       expect(page.url()).toContain(`/apm/services/${testData.SERVICE_OPBEANS_NODE}/overview`);
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-        testData.SERVICE_OPBEANS_NODE
-      );
+      await expect(page.getByTestId('appHeaderTitle')).toHaveText(testData.SERVICE_OPBEANS_NODE);
     });
 
     test('shows the correct environment when changing the environment', async ({ page }) => {
@@ -59,10 +57,21 @@ test.describe(
       await page
         .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
         .waitFor({ timeout: EXTENDED_TIMEOUT });
-      await page.getByRole('option', { name: PRODUCTION_ENVIRONMENT }).click();
+      await page
+        .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
+        .click({ timeout: EXTENDED_TIMEOUT });
       await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT, {
         timeout: EXTENDED_TIMEOUT,
       });
+    });
+
+    test('navigates to the next page when clicking the pagination button', async ({ page }) => {
+      await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await page.getByTestId('pagination-button-1').click({ timeout: EXTENDED_TIMEOUT });
+      await expect(page).toHaveURL(/page=1/);
     });
 
     test('shows the filtered services when using the service name fast filter', async ({

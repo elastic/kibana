@@ -11,14 +11,14 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './types';
-import type { MarkdownAttributes } from '../../markdown_saved_object';
+import type { StoredMarkdownState } from '../../markdown_saved_object';
 
 export async function search(
   requestCtx: RequestHandlerContext,
   searchQuery: MarkdownSearchRequestQuery
 ): Promise<MarkdownSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const soResponse = await core.savedObjects.client.find<MarkdownAttributes>({
+  const soResponse = await core.savedObjects.client.find<StoredMarkdownState>({
     type: MARKDOWN_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
     fields: ['description', 'title'],
@@ -29,7 +29,7 @@ export async function search(
   });
 
   return {
-    markdowns: soResponse.saved_objects.map((so) => {
+    data: soResponse.saved_objects.map((so) => {
       const { description, title } = so.attributes;
 
       return {
@@ -41,7 +41,10 @@ export async function search(
         meta: getMeta(so),
       };
     }),
-    page: soResponse.page,
-    total: soResponse.total,
+    meta: {
+      page: soResponse.page,
+      per_page: soResponse.per_page,
+      total: soResponse.total,
+    },
   };
 }

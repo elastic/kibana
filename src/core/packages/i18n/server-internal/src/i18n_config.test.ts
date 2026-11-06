@@ -37,11 +37,13 @@ const applyI18nDeprecations = (settings: Record<string, any> = {}) => {
 
 describe('i18n config', () => {
   describe('schema', () => {
-    it('defaults to the five bundled locales and English defaultLocale', () => {
+    it('defaults to the six bundled locales and English defaultLocale', () => {
       const validated = config.schema.validate({});
       expect(validated).toEqual({
-        locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'],
+        locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR'],
         defaultLocale: 'en',
+        allowLocaleCookie: true,
+        detectBrowserLocale: true,
       });
     });
 
@@ -94,6 +96,26 @@ describe('i18n config', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[locales]: array size is [11], but cannot be greater than [10]"`
       );
+    });
+
+    it('defaults allowLocaleCookie to true', () => {
+      const validated = config.schema.validate({});
+      expect(validated.allowLocaleCookie).toBe(true);
+    });
+
+    it('accepts allowLocaleCookie: false', () => {
+      const validated = config.schema.validate({ allowLocaleCookie: false });
+      expect(validated.allowLocaleCookie).toBe(false);
+    });
+
+    it('defaults detectBrowserLocale to true', () => {
+      const validated = config.schema.validate({});
+      expect(validated.detectBrowserLocale).toBe(true);
+    });
+
+    it('accepts detectBrowserLocale: false', () => {
+      const validated = config.schema.validate({ detectBrowserLocale: false });
+      expect(validated.detectBrowserLocale).toBe(false);
     });
   });
 

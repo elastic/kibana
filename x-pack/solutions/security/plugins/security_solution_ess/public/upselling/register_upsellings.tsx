@@ -21,6 +21,7 @@ import type {
   PageUpsellings,
   SectionUpsellings,
   UpsellingMessageId,
+  UpsellingPageComponent,
   UpsellingSectionId,
   UpsellingService,
 } from '@kbn/security-solution-upselling/service';
@@ -29,7 +30,9 @@ import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AttacksUpsellingPageLazy,
   AIValueUpsellingPageLazy,
+  AlertAnalysisWorkflowUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   GraphVisualizationUpsellingSectionLazy,
@@ -48,7 +51,12 @@ interface UpsellingsMessageConfig {
   id: UpsellingMessageId;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingPages = Array<
+  Omit<UpsellingsConfig, 'component'> & {
+    pageName: SecurityPageName;
+    component: UpsellingPageComponent;
+  }
+>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 
@@ -106,9 +114,19 @@ export const upsellingPages: UpsellingPages = [
     component: AttackDiscoveryUpsellingPageLazy,
   },
   {
+    pageName: SecurityPageName.attacks,
+    minimumLicenseRequired: 'enterprise',
+    component: AttacksUpsellingPageLazy,
+  },
+  {
     pageName: SecurityPageName.aiValue,
     minimumLicenseRequired: 'enterprise',
     component: AIValueUpsellingPageLazy,
+  },
+  {
+    pageName: SecurityPageName.alertAnalysisWorkflow,
+    minimumLicenseRequired: 'enterprise',
+    component: AlertAnalysisWorkflowUpsellingPageLazy,
   },
 
   {

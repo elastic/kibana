@@ -137,6 +137,7 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2022-11-21T12:26:24Z',
           active: true,
           policy_id: 'policy1',
+          policy_base_id: 'policy1',
           local_metadata: {
             os: {
               name: 'Ubuntu',
@@ -175,6 +176,7 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2022-11-21T12:27:24Z',
           active: true,
           policy_id: 'policy1',
+          policy_base_id: 'policy1',
           local_metadata: {
             os: {
               name: 'Ubuntu',
@@ -213,6 +215,7 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2021-11-21T12:27:24Z',
           active: false,
           policy_id: 'policy1',
+          policy_base_id: 'policy1',
           local_metadata: {
             os: {
               name: 'Ubuntu',
@@ -243,6 +246,7 @@ describe('fleet usage telemetry', () => {
           last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
           active: true,
           policy_id: 'policy2',
+          policy_base_id: 'policy2',
           upgrade_details: {
             target_version: '8.11.0',
             state: 'UPG_ROLLBACK',
@@ -262,6 +266,7 @@ describe('fleet usage telemetry', () => {
           last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
           active: true,
           policy_id: 'policy3',
+          policy_base_id: 'policy3',
         },
       ],
       refresh: 'wait_for',
@@ -393,10 +398,18 @@ describe('fleet usage telemetry', () => {
         version: '1.2.0',
       },
       enabled: true,
+      revision: 1,
+      created_at: new Date().toISOString(),
+      created_by: 'system',
+      updated_at: new Date().toISOString(),
+      updated_by: 'system',
       policy_id: 'fleet-server-policy',
       policy_ids: ['fleet-server-policy'],
       inputs: [
         {
+          type: 'fleet-server',
+          enabled: true,
+          streams: [],
           compiled_input: {
             server: {
               port: 8220,
@@ -421,6 +434,11 @@ describe('fleet usage telemetry', () => {
         version: '1.0.0',
       },
       enabled: true,
+      revision: 1,
+      created_at: new Date().toISOString(),
+      created_by: 'system',
+      updated_at: new Date().toISOString(),
+      updated_by: 'system',
       policy_id: 'policy2',
       policy_ids: ['policy2', 'policy3'],
       inputs: [],
@@ -529,7 +547,11 @@ describe('fleet usage telemetry', () => {
   });
 
   it('should fetch usage telemetry', async () => {
-    const usage = await fetchFleetUsage(core, { agents: { enabled: true } }, new AbortController());
+    const usage = await fetchFleetUsage(
+      core,
+      { agents: { enabled: true } },
+      new AbortController().signal
+    );
 
     expect(usage).toEqual(
       expect.objectContaining({

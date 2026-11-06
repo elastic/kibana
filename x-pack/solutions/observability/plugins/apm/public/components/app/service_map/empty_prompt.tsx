@@ -26,7 +26,7 @@ export function EmptyPrompt() {
         <p>
           {i18n.translate('xpack.apm.serviceMap.noServicesPromptDescription', {
             defaultMessage:
-              'We can’t find any services to map within the currently selected time range and environment. Please try another range or check the environment selected. If you don’t have any services, please use our setup instructions to get started.',
+              'We can’t find any services to map within the currently selected time range, search query and environment. Please try another range, search query or check the environment selected. If you don’t have any services, please use our setup instructions to get started.',
           })}
         </p>
       }

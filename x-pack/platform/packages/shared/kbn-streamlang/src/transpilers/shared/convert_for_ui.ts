@@ -76,6 +76,9 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
   };
 };
 
+const stripUndefinedValues = <T extends object>(obj: T): T =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
+
 type StreamlangStepWithUIProps = StreamlangStep & {
   parentId: string | null;
   branch?: StreamlangUIBranch;
@@ -157,7 +160,10 @@ export const convertUIStepsToDSL = (
         : { ...whereRest, customIdentifier, condition };
     } else {
       const { parentId, branch, customIdentifier, ...actionRest } = step;
-      return removeCustomIdentifiers ? actionRest : { ...actionRest, customIdentifier };
+      const actionRestSanitised = stripUndefinedValues(actionRest);
+      return removeCustomIdentifiers
+        ? actionRestSanitised
+        : { ...actionRestSanitised, customIdentifier };
     }
   }
 

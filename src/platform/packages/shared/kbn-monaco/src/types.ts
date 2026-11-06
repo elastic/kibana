@@ -8,8 +8,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { UseEuiTheme } from '@elastic/eui';
 import type { monaco } from './monaco_imports';
+import type { KbnMonacoLanguageThemeResolver } from './languages/theming';
 
 export interface LangModuleType {
   ID: string;
@@ -18,7 +18,7 @@ export interface LangModuleType {
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
   onLanguage?: () => void | Promise<void>;
-  languageThemeResolver?: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
+  languageThemeResolver?: KbnMonacoLanguageThemeResolver;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {
@@ -33,7 +33,8 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
     model: monaco.editor.ITextModel,
     code: string,
     callbacks?: Deps,
-    options?: { invalidateColumnsCache?: boolean }
+    options?: { invalidateColumnsCache?: boolean },
+    token?: monaco.CancellationToken
   ) => Promise<{ errors: MarkerDataType[]; warnings: MarkerDataType[] }>;
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;

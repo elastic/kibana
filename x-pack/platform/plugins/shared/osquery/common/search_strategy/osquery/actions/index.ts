@@ -14,6 +14,7 @@ import type { RequestOptions, RequestOptionsPaginated } from '../..';
 export type ActionEdges = estypes.SearchResponse<object>['hits']['hits'];
 
 export type ActionResultEdges = estypes.SearchResponse<object>['hits']['hits'];
+
 export interface ActionsStrategyResponse extends IEsSearchResponse {
   edges: ActionEdges;
   inspect?: Maybe<Inspect>;
@@ -107,7 +108,10 @@ export interface ActionResultsStrategyResponse
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
   agentIds?: string[];
+  /** Targeted agents; sizes the exact distinct-responder count of the response aggregation. */
+  agentsCount?: number;
   startDate?: string;
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];
+  spaceId: string;
 }

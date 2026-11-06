@@ -10,12 +10,17 @@ import {
   type Observable,
   type Subscription,
   EMPTY,
+  catchError,
   debounceTime,
+  defaultIfEmpty,
+  filter,
   map,
   switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
+
+const FOCUS_PIPELINE_EMPTY = Symbol('focusPipelineEmpty');
 
 export interface ContextChartSelection {
   from: Date;
@@ -56,6 +61,16 @@ export interface ContextChartZoomHandlers<TFocus = unknown, TTable = unknown> {
   ) => Observable<[TFocus, TTable] | TFocus> | null;
   /** Merge focus + optional table payload into component state. */
   onFocusPipelineResult: (data: [TFocus, TTable], selection: ContextChartSelection) => void;
+  /**
+   * Focus load started but produced no result (null pipeline / empty completion).
+   * Opt-in for hosts that defer reporting until focus settles.
+   */
+  onFocusPipelineEmpty?: (selection: ContextChartSelection) => void;
+  /**
+   * Focus load started and then failed.
+   * Opt-in for hosts that defer reporting until focus settles.
+   */
+  onFocusPipelineError?: (error: unknown) => void;
 }
 
 function hasContextChartData(state: ContextChartZoomChartState): boolean {
@@ -64,6 +79,12 @@ function hasContextChartData(state: ContextChartZoomChartState): boolean {
   const hasCtx = Array.isArray(ctx) && ctx.length > 0;
   const hasFc = Array.isArray(fc) && fc.length > 0;
   return hasCtx || hasFc;
+}
+
+function hasFocusTerminalHandlers<TFocus, TTable>(
+  handlers: ContextChartZoomHandlers<TFocus, TTable>
+): boolean {
+  return handlers.onFocusPipelineEmpty !== undefined || handlers.onFocusPipelineError !== undefined;
 }
 
 /**
@@ -82,30 +103,58 @@ export function createContextChartZoomSubscription<TFocus = unknown, TTable = un
         handlers.onZoomPreview(selection);
       }),
       debounceTime(500),
-      tap((selection) => {
+      map((selection) => {
         const state = handlers.getChartState();
-        if (!hasContextChartData(state)) {
-          return;
-        }
-        if (handlers.shouldTriggerFocusLoad(selection, state)) {
+        // Track whether we entered the focus-load path so empty/error can settle that wait later.
+        let focusLoadStarted = false;
+        if (hasContextChartData(state) && handlers.shouldTriggerFocusLoad(selection, state)) {
           handlers.onFocusLoadInit();
           handlers.onFocusLoadStart();
+          focusLoadStarted = true;
         }
+        return { selection, focusLoadStarted };
       }),
-      switchMap((selection) => {
+      switchMap(({ selection, focusLoadStarted }) => {
         const pipeline$ = handlers.getFocusPipeline$(selection);
         if (pipeline$ === null) {
+          // Load was promised but there is no observable — treat as empty, not failure.
+          if (focusLoadStarted) {
+            handlers.onFocusPipelineEmpty?.(selection);
+          }
           return EMPTY;
         }
-        if (handlers.includeAnomaliesTable) {
-          return pipeline$ as Observable<[TFocus, TTable]>;
+
+        const normalized$: Observable<[TFocus, TTable]> = handlers.includeAnomaliesTable
+          ? (pipeline$ as Observable<[TFocus, TTable]>)
+          : pipeline$.pipe(
+              map((emission) => {
+                if (Array.isArray(emission)) {
+                  return emission as [TFocus, TTable];
+                }
+                return [emission as TFocus, { tableData: undefined } as TTable];
+              })
+            );
+
+        // Without terminal handlers (full-page SMV), keep the original success-only path.
+        if (!focusLoadStarted || !hasFocusTerminalHandlers(handlers)) {
+          return normalized$;
         }
-        return pipeline$.pipe(
-          map((emission) => {
-            if (Array.isArray(emission)) {
-              return emission as [TFocus, TTable];
+
+        // Ensure every started focus load reaches a terminal: success, empty, or error.
+        return normalized$.pipe(
+          // Completing with no emission is a valid empty result for reporting.
+          defaultIfEmpty(FOCUS_PIPELINE_EMPTY),
+          tap((result) => {
+            if (result === FOCUS_PIPELINE_EMPTY) {
+              handlers.onFocusPipelineEmpty?.(selection);
             }
-            return [emission as TFocus, { tableData: undefined } as TTable];
+          }),
+          // Drop the sentinel so subscribers only see real focus payloads.
+          filter((result): result is [TFocus, TTable] => result !== FOCUS_PIPELINE_EMPTY),
+          catchError((error) => {
+            // Swallow after notifying the host so the subscription stays alive for later brushes.
+            handlers.onFocusPipelineError?.(error);
+            return EMPTY;
           })
         );
       }),

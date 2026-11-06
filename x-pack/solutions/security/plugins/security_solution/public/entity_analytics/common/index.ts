@@ -6,6 +6,7 @@
  */
 
 export { userHasRiskEngineReadPermissions } from './user_has_risk_engine_read_permissions';
+export { userHasEntityStoreStopPrivileges } from './user_has_entity_store_stop_privileges';
 export type { SnakeToCamelCase } from './utils';
 export {
   RISK_SCORE_RANGES,

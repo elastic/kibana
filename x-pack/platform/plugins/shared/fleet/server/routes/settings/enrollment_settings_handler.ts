@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { omit, pick } from 'lodash';
 
 import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
@@ -24,6 +24,7 @@ import type {
 } from '../../../common/types';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
+import { isBeatsOutput } from '../../../common/services/output_helpers';
 import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
 import { getFleetProxy } from '../../services/fleet_proxies';
 import { getFleetServerPolicies, hasFleetServersForPolicies } from '../../services/fleet_server';
@@ -223,21 +224,13 @@ function sanitizeEnrollmentFleetServerHost(host: FleetServerHost): FleetServerHo
   };
 }
 
-function sanitizeEnrollmentOutput(output: Output): Output {
+function sanitizeEnrollmentOutput<T extends Output = Output>(output: T): T {
   return {
     ...omit(output, ['secrets']),
-    ssl: output.ssl ? omit(output.ssl, ['key']) : output.ssl,
-    ...(output.type === 'kafka'
-      ? {
-          password: undefined,
-        }
-      : {}),
-    ...(output.type === 'remote_elasticsearch'
-      ? {
-          service_token: undefined,
-        }
-      : {}),
-  };
+    ...(isBeatsOutput(output) ? { ssl: output.ssl ? omit(output.ssl, ['key']) : output.ssl } : {}),
+    ...(output.type === 'kafka' ? { password: undefined } : {}),
+    ...(output.type === 'remote_elasticsearch' ? { service_token: undefined } : {}),
+  } as T;
 }
 
 function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {

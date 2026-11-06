@@ -7,7 +7,19 @@
 
 jest.mock('@kbn/i18n', () => ({
   i18n: {
-    translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+    translate: (
+      _id: string,
+      {
+        defaultMessage,
+        values,
+      }: { defaultMessage: string; values?: Record<string, string | number> }
+    ) => {
+      if (!values) return defaultMessage;
+      return Object.entries(values).reduce(
+        (msg, [key, value]) => msg.replace(`{${key}}`, String(value)),
+        defaultMessage
+      );
+    },
   },
 }));
 
@@ -15,6 +27,7 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import {
+  connectorToGlobalModelComboOption,
   getGlobalModelComboOptions,
   getGlobalModelSelectedOptions,
 } from './default_model_section_combo';
@@ -63,6 +76,44 @@ describe('default_model_section_combo', () => {
 
       expect(opts.map((g) => g.label)).toEqual(['Pre-configured', 'Custom models']);
     });
+
+    it('excludes connectors that are denied by region policy', () => {
+      const opts = getGlobalModelComboOptions(
+        [
+          ...connectors,
+          {
+            ...baseMockConnector,
+            connectorId: 'pre-denied',
+            name: 'Denied Model',
+            isPreconfigured: true,
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+        false
+      );
+
+      expect(opts[0]?.options?.map((option) => option.value)).toEqual(['pre-1']);
+      expect(opts[1]?.options?.map((option) => option.value)).toEqual(['custom-1']);
+    });
+
+    it('omits endpoints that accept only a prompt template', () => {
+      const opts = getGlobalModelComboOptions(
+        [
+          ...connectors,
+          {
+            ...baseMockConnector,
+            connectorId: 'template-only',
+            name: 'Cyber template model',
+            isPreconfigured: true,
+            metadata: { capabilities: { templates: { policy: 'required' } } },
+          },
+        ],
+        false
+      );
+
+      const labels = opts.flatMap((group) => group.options?.map((option) => option.label) ?? []);
+      expect(labels).toEqual(['Elastic Model', 'My Connector']);
+    });
   });
 
   describe('getGlobalModelSelectedOptions', () => {
@@ -89,6 +140,48 @@ describe('default_model_section_combo', () => {
     it('returns empty array when the value does not match any option', () => {
       const opts = getGlobalModelComboOptions(connectors, true);
       expect(getGlobalModelSelectedOptions('nonexistent-id', opts, true)).toEqual([]);
+    });
+  });
+
+  describe('connectorToGlobalModelComboOption', () => {
+    const baseConnector: InferenceConnector = {
+      ...baseMockConnector,
+      connectorId: 'ep-1',
+      name: 'My Model',
+      isPreconfigured: true,
+    };
+
+    it('returns the plain connector name when metadata is undefined', () => {
+      const option = connectorToGlobalModelComboOption(baseConnector);
+      expect(option).toEqual({ label: 'My Model', value: 'ep-1' });
+    });
+
+    it('returns the plain connector name for a GA model', () => {
+      const option = connectorToGlobalModelComboOption({
+        ...baseConnector,
+        metadata: { heuristics: { status: 'ga' } },
+      });
+      expect(option.label).toBe('My Model');
+    });
+
+    it('appends " - Deprecated" when the model is deprecated but not yet EOL', () => {
+      const option = connectorToGlobalModelComboOption({
+        ...baseConnector,
+        metadata: {
+          heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' },
+        },
+      });
+      expect(option.label).toBe('My Model - Deprecated');
+    });
+
+    it('appends " - End of Life" when the EOL date is in the past', () => {
+      const option = connectorToGlobalModelComboOption({
+        ...baseConnector,
+        metadata: {
+          heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
+        },
+      });
+      expect(option.label).toBe('My Model - End of Life');
     });
   });
 });

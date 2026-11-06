@@ -24,6 +24,7 @@ import {
   EuiPopover,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -51,24 +52,22 @@ import {
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type {
-  ContrastModeValue,
-  DarkModeValue,
-  LocaleValue,
-  UserProfileData,
+import {
+  type ContrastModeValue,
+  type DarkModeValue,
+  getUserAvatarColor,
+  getUserAvatarInitials,
+  type LocaleValue,
+  UserAvatar,
+  type UserProfileData,
+  useUpdateUserProfile,
 } from '@kbn/user-profile-components';
-import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
 import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
-import {
-  canUserChangeDetails,
-  canUserChangePassword,
-  getUserAvatarColor,
-  getUserAvatarInitials,
-} from '../../../common/model';
+import { canUserChangeDetails, canUserChangePassword } from '../../../common/model';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
@@ -127,6 +126,7 @@ export interface UserProfileFormValues {
       darkMode: DarkModeValue;
       contrastMode: ContrastModeValue;
       locale: LocaleValue;
+      rememberSelectedSpace: boolean;
     };
   };
   avatarType: 'initials' | 'image';
@@ -660,6 +660,73 @@ function UserPasswordEditor({
   );
 }
 
+function UserSpacePreferenceEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+  const rememberSelectedSpaceLabelId = useGeneratedHtmlId({
+    prefix: 'rememberSelectedSpace',
+  });
+
+  if (!formik.values.data) {
+    return null;
+  }
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupTitle"
+            defaultMessage="Spaces preferences"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupDescription"
+          defaultMessage="Spaces related preferences for Kibana."
+        />
+      }
+    >
+      <FormRow
+        name="data.userSettings.rememberSelectedSpace"
+        label={
+          <FormLabel for="data.userSettings.rememberSelectedSpace">
+            <span id={rememberSelectedSpaceLabelId}>
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceLabel"
+                defaultMessage="Remember last selected space"
+              />
+            </span>
+          </FormLabel>
+        }
+        fullWidth
+      >
+        <FormField
+          label={
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceSwitchDescription"
+                  defaultMessage="Kibana will open the last accessed space when logging in."
+                />
+              </p>
+            </EuiText>
+          }
+          as={EuiSwitch}
+          id={rememberSelectedSpaceLabelId}
+          name="data.userSettings.rememberSelectedSpace"
+          checked={formik.values.data.userSettings.rememberSelectedSpace ?? true}
+          aria-describedby={rememberSelectedSpaceLabelId}
+          onChange={async (e) => {
+            await formik.setFieldTouched('data.userSettings.rememberSelectedSpace', true);
+            await formik.setFieldValue('data.userSettings.rememberSelectedSpace', e.target.checked);
+          }}
+        />
+      </FormRow>
+    </EuiDescribedFormGroup>
+  );
+}
+
 const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -852,6 +919,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   )}
                   {/* Cloud users change language via the Language modal in the user menu */}
                   {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
+                  {/* Cloud users modify space configuration via the space configuration modal in the user menu */}
+                  {isCloudUser ? null : <UserSpacePreferenceEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
@@ -892,11 +961,12 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             imageUrl: data.avatar?.imageUrl || '',
           },
           userSettings: {
-            darkMode: data.userSettings?.darkMode || 'space_default',
+            darkMode: data.userSettings?.darkMode || 'system',
             contrastMode: data.userSettings?.contrastMode || 'system',
             locale:
               data.userSettings?.locale ||
               toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
+            rememberSelectedSpace: data.userSettings?.rememberSelectedSpace ?? true,
           },
         }
       : undefined,
@@ -922,11 +992,19 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       // Update profile only if it's available for the current user.
       if (values.data) {
+        // The route can reject a stored locale, or the form's fallback for a profile without one,
+        // when the deployment does not allow switching to it. Send the locale only when changed.
+        const { locale, ...userSettingsWithoutLocale } = values.data.userSettings;
+        let userSettings: Partial<typeof values.data.userSettings> = values.data.userSettings;
+        if (locale === initialValues.data?.userSettings.locale) {
+          userSettings = userSettingsWithoutLocale;
+        }
+        const profileData = { ...values.data, userSettings };
         submitActions.push(
           update(
             values.avatarType === 'image'
-              ? values.data
-              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
+              ? profileData
+              : { ...profileData, avatar: { ...profileData.avatar, imageUrl: null } }
           )
         );
       }
@@ -956,6 +1034,17 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       ) {
         isRefreshRequired = true;
       }
+
+      if (
+        values.data &&
+        initialValues.data?.userSettings.locale !== values.data.userSettings.locale
+      ) {
+        services.analytics.reportEvent('display_language_changed', {
+          from: initialValues.data?.userSettings.locale ?? '',
+          to: values.data.userSettings.locale,
+        });
+      }
+
       showSuccessNotification({ isRefreshRequired });
     },
     initialValues,

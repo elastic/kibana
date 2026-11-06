@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useMutation } from '@kbn/react-query';
+import { buildPath } from '@kbn/core-http-browser';
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { ToastNotificationText } from '../components';
+import { useToastNotificationText } from '../components';
 
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
@@ -33,9 +31,10 @@ interface CreateTransformArgs {
 }
 
 export const useCreateTransform = () => {
-  const { http, ...startServices } = useAppDependencies();
+  const { http } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
+  const getToastNotificationText = useToastNotificationText();
 
   function errorToast(error: unknown, { transformId }: CreateTransformArgs) {
     toastNotifications.addDanger({
@@ -43,7 +42,7 @@ export const useCreateTransform = () => {
         defaultMessage: 'An error occurred creating the transform {transformId}:',
         values: { transformId },
       }),
-      text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
+      ...getToastNotificationText(getErrorMessage(error)),
     });
   }
 
@@ -56,7 +55,7 @@ export const useCreateTransform = () => {
       deferValidation,
     }: CreateTransformArgs) => {
       return http.put<PutTransformsResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}`),
+        buildPath('/internal/transform/transforms/{transformId}', { transformId }),
         {
           query: { createDataView, timeFieldName, deferValidation },
           body: JSON.stringify(transformConfig),

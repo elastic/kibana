@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingSettingsPage {
@@ -13,24 +14,27 @@ export class ProfilingSettingsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);
-    await this.page.getByTestId('profilingPageTemplate').waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
+      .getByText('Settings')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
+  }
+
+  async getPageTitle() {
+    return this.page.getByTestId(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   // Settings Form methods
-  async getSettingsForm() {
-    return this.page.testSubj.locator('profilingSettingsForm');
-  }
-
   async getCo2PerKWHField() {
-    return this.page.testSubj.locator('management-settings-editField-profiling.co2PerKWH');
+    return this.page.getByTestId('management-settings-editField-profiling.co2PerKWH');
   }
 
   async getDatacenterPUEField() {
-    return this.page.testSubj.locator('management-settings-editField-profiling.datacenterPUE');
+    return this.page.getByTestId('management-settings-editField-profiling.datacenterPUE');
   }
 
   async getPerCPUWattX86Field() {
-    return this.page.testSubj.locator('management-settings-editField-profiling.perCPUWattX86');
+    return this.page.getByTestId('management-settings-editField-profiling.perCPUWattX86');
   }
 
   async updateCo2PerKWH(value: number) {
@@ -61,12 +65,12 @@ export class ProfilingSettingsPage {
   }
 
   async confirmReset() {
-    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await this.page.getByTestId('confirmModalConfirmButton').click();
   }
 
   // Validation methods
   async getValidationError(fieldName: string) {
-    return this.page.testSubj.locator(`profilingSettingsError-${fieldName}`);
+    return this.page.getByTestId(`profilingSettingsError-${fieldName}`);
   }
 
   async isSaveButtonEnabled() {
@@ -80,46 +84,32 @@ export class ProfilingSettingsPage {
   }
 
   async getAdvancedSettingsSection() {
-    return this.page.testSubj.locator('profilingAdvancedSettings');
+    return this.page.getByTestId('profilingAdvancedSettings');
   }
 
   // Data Collection methods
   async getDataCollectionSection() {
-    return this.page.testSubj.locator('profilingDataCollection');
+    return this.page.getByTestId('profilingDataCollection');
   }
 
   async enableDataCollection() {
-    await this.page.testSubj.locator('profilingEnableDataCollection').click();
+    await this.page.getByTestId('profilingEnableDataCollection').click();
   }
 
   async disableDataCollection() {
-    await this.page.testSubj.locator('profilingDisableDataCollection').click();
-  }
-
-  // Setup Status methods
-  async getSetupStatus() {
-    return this.page.testSubj.locator('profilingSetupStatus');
-  }
-
-  async getSetupStatusIndicator() {
-    return this.page.testSubj.locator('profilingSetupStatusIndicator');
-  }
-
-  async isSetupComplete() {
-    const status = await this.getSetupStatusIndicator();
-    return (await status.getAttribute('data-status')) === 'complete';
+    await this.page.getByTestId('profilingDisableDataCollection').click();
   }
 
   // Help and Documentation methods
   async clickHelpButton() {
-    await this.page.testSubj.locator('profilingSettingsHelp').click();
+    await this.page.getByTestId('profilingSettingsHelp').click();
   }
 
   async getHelpModal() {
-    return this.page.testSubj.locator('profilingSettingsHelpModal');
+    return this.page.getByTestId('profilingSettingsHelpModal');
   }
 
   async closeHelpModal() {
-    await this.page.testSubj.locator('profilingSettingsHelpModalClose').click();
+    await this.page.getByTestId('profilingSettingsHelpModalClose').click();
   }
 }

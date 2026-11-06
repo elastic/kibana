@@ -13,6 +13,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...baseConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseConfig.get('kbnTestServer.serverArgs'),
+        // Pin the templates flag ON explicitly so this suite is deterministic
+        // regardless of the plugin default.
+        '--xpack.cases.templates.enabled=true',
+      ],
+    },
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Cases - group 2',
     },

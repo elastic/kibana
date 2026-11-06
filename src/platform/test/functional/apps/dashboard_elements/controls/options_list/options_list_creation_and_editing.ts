@@ -25,6 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
+  /**
+   * Purpose: Dashboard integration smoke test
+   *
+   * Migration: migrate to scout
+   */
   describe('Dashboard options list creation and editing', () => {
     before(async () => {
       await dashboard.clickNewDashboard();

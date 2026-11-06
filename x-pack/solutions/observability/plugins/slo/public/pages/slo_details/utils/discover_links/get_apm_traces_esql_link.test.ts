@@ -86,9 +86,9 @@ describe('getApmTracesEsqlLink', () => {
   | WHERE \`transaction.name\` == "GET /slow"
   | EVAL event_type = CASE(\`transaction.duration.us\` <= 500000, "Good", "Bad")
   | WHERE
-      ?event_type == "Bad" AND \`transaction.duration.us\` > 500000 OR
-        ?event_type == "Good" AND \`transaction.duration.us\` <= 500000 OR
-        ?event_type == "All"`
+      ?event_type == "Bad" AND \`transaction.duration.us\` > 500000
+        OR ?event_type == "Good" AND \`transaction.duration.us\` <= 500000
+        OR ?event_type == "All"`
       );
     });
 
@@ -114,9 +114,9 @@ describe('getApmTracesEsqlLink', () => {
   | WHERE \`processor.event\` == "transaction"
   | EVAL event_type = CASE(\`transaction.duration.us\` <= 500000, "Good", "Bad")
   | WHERE
-      ?event_type == "Bad" AND \`transaction.duration.us\` > 500000 OR
-        ?event_type == "Good" AND \`transaction.duration.us\` <= 500000 OR
-        ?event_type == "All"`
+      ?event_type == "Bad" AND \`transaction.duration.us\` > 500000
+        OR ?event_type == "Good" AND \`transaction.duration.us\` <= 500000
+        OR ?event_type == "All"`
       );
     });
 
@@ -144,9 +144,9 @@ describe('getApmTracesEsqlLink', () => {
   | WHERE \`http.status_code\` == 200
   | EVAL event_type = CASE(\`transaction.duration.us\` <= 500000, "Good", "Bad")
   | WHERE
-      ?event_type == "Bad" AND \`transaction.duration.us\` > 500000 OR
-        ?event_type == "Good" AND \`transaction.duration.us\` <= 500000 OR
-        ?event_type == "All"`
+      ?event_type == "Bad" AND \`transaction.duration.us\` > 500000
+        OR ?event_type == "Good" AND \`transaction.duration.us\` <= 500000
+        OR ?event_type == "All"`
       );
     });
   });
@@ -172,9 +172,9 @@ describe('getApmTracesEsqlLink', () => {
   | WHERE \`event.outcome\` IN ("success", "failure")
   | EVAL event_type = CASE(\`event.outcome\` == "success", "Good", "Bad")
   | WHERE
-      ?event_type == "Bad" AND \`event.outcome\` == "failure" OR
-        ?event_type == "Good" AND \`event.outcome\` == "success" OR
-        ?event_type == "All"`
+      ?event_type == "Bad" AND \`event.outcome\` == "failure"
+        OR ?event_type == "Good" AND \`event.outcome\` == "success"
+        OR ?event_type == "All"`
       );
     });
 
@@ -201,9 +201,9 @@ describe('getApmTracesEsqlLink', () => {
   | WHERE \`event.outcome\` IN ("success", "failure")
   | EVAL event_type = CASE(\`event.outcome\` == "success", "Good", "Bad")
   | WHERE
-      ?event_type == "Bad" AND \`event.outcome\` == "failure" OR
-        ?event_type == "Good" AND \`event.outcome\` == "success" OR
-        ?event_type == "All"`
+      ?event_type == "Bad" AND \`event.outcome\` == "failure"
+        OR ?event_type == "Good" AND \`event.outcome\` == "success"
+        OR ?event_type == "All"`
       );
     });
 
@@ -231,9 +231,9 @@ describe('getApmTracesEsqlLink', () => {
   | WHERE \`event.outcome\` IN ("success", "failure")
   | EVAL event_type = CASE(\`event.outcome\` == "success", "Good", "Bad")
   | WHERE
-      ?event_type == "Bad" AND \`event.outcome\` == "failure" OR
-        ?event_type == "Good" AND \`event.outcome\` == "success" OR
-        ?event_type == "All"`
+      ?event_type == "Bad" AND \`event.outcome\` == "failure"
+        OR ?event_type == "Good" AND \`event.outcome\` == "success"
+        OR ?event_type == "All"`
       );
     });
   });

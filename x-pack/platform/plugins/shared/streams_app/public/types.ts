@@ -34,6 +34,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -76,6 +77,7 @@ export interface StreamsAppStartDependencies {
   spaces?: SpacesPluginStart;
   console: ConsolePluginStart;
   evals?: EvalsPublicStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

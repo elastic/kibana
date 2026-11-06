@@ -7,8 +7,11 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
+import { isTemplateRequiredConnector, type InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
+import { getModelStatus } from '../../utils/eis_utils';
+import { isConnectorUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
+import { EisModelStatus } from '../../types';
 
 export const noDefaultModelOption = (): EuiComboBoxOptionOption<string> => ({
   label: i18n.translate(
@@ -20,19 +23,55 @@ export const noDefaultModelOption = (): EuiComboBoxOptionOption<string> => ({
   value: NO_DEFAULT_MODEL,
 });
 
+export const connectorToGlobalModelComboOption = (
+  c: InferenceConnector
+): EuiComboBoxOptionOption<string> => {
+  let label = c.name;
+  if (c.metadata) {
+    const modelStatus = getModelStatus(c.metadata);
+    if (modelStatus === EisModelStatus.DeprecatedEOL) {
+      label = i18n.translate(
+        'xpack.searchInferenceEndpoints.settings.globalModel.eolSelectionOption',
+        {
+          defaultMessage: '{modelName} - End of Life',
+          values: {
+            modelName: c.name,
+          },
+        }
+      );
+    } else if (modelStatus === EisModelStatus.Deprecated) {
+      label = i18n.translate(
+        'xpack.searchInferenceEndpoints.settings.globalModel.deprecatedSelectionOption',
+        {
+          defaultMessage: '{modelName} - Deprecated',
+          values: {
+            modelName: c.name,
+          },
+        }
+      );
+    }
+  }
+  return { label, value: c.connectorId };
+};
+
 export const getGlobalModelComboOptions = (
   connectors: InferenceConnector[] | undefined,
   includeNoDefaultOption: boolean
 ): EuiComboBoxOptionOption<string>[] => {
-  const preconfigured =
-    connectors
-      ?.filter((c) => c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
+  const selectable =
+    connectors?.filter(
+      (connector) =>
+        !isTemplateRequiredConnector(connector) &&
+        !isConnectorUnavailableUnderRegionPolicy(connector)
+    ) ?? [];
 
-  const custom =
-    connectors
-      ?.filter((c) => !c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
+  const preconfigured = selectable
+    .filter((c) => c.isPreconfigured)
+    .map(connectorToGlobalModelComboOption);
+
+  const custom = selectable
+    .filter((c) => !c.isPreconfigured)
+    .map((c) => ({ label: c.name, value: c.connectorId }));
 
   const connectorGroups: EuiComboBoxOptionOption<string>[] = [
     {

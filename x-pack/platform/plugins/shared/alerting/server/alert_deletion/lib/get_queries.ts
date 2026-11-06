@@ -6,12 +6,13 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { SPACE_IDS } from '@kbn/rule-data-utils';
 
 export const getActiveAlertsQuery = (
   threshold: number,
-  spaceId: string
+  spaceId: SpaceId
 ): QueryDslQueryContainer => {
   const filterClauses = [
     `kibana.alert.status: "active"`,
@@ -27,7 +28,7 @@ export const getActiveAlertsQuery = (
 
 export const getInactiveAlertsQuery = (
   threshold: number,
-  spaceId: string
+  spaceId: SpaceId
 ): QueryDslQueryContainer => {
   const closedFilter = `(kibana.alert.workflow_status: "closed" OR kibana.alert.workflow_status: "acknowledged")`;
   const closedThreshold = `kibana.alert.workflow_status_updated_at < "now-${threshold}d"`;

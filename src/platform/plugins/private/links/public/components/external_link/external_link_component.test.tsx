@@ -11,11 +11,11 @@ import React from 'react';
 
 import userEvent from '@testing-library/user-event';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
@@ -35,7 +35,13 @@ describe('external link component', () => {
   });
 
   test('by default opens in new tab and renders external icon', async () => {
-    render(<ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={defaultLinkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        viewMode="view"
+      />
+    );
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toBeInTheDocument();
@@ -50,7 +56,9 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
     const link = await screen.findByTestId('externalLink--https://example.com');
     const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
@@ -61,7 +69,9 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toHaveTextContent('https://example.com');
@@ -76,12 +86,31 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     await userEvent.click(link);
-    expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
-    expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledTimes(1);
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('https://example.com');
+  });
+
+  test('viewMode non-interactive disables the link and prevents navigation', async () => {
+    render(
+      <ExternalLinkComponent
+        link={defaultLinkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        viewMode="non-interactive"
+      />
+    );
+
+    const link = await screen.findByTestId('externalLink--https://example.com');
+    expect(link).toBeDisabled();
+
+    fireEvent.click(link);
+    expect(window.open).not.toHaveBeenCalled();
+    expect(coreServices.application.navigateToUrl).not.toHaveBeenCalled();
   });
 
   test('disables link when url validation fails', async () => {
@@ -90,7 +119,9 @@ describe('external link component', () => {
       destination: 'file://buzz',
       error: new Error('URL not supported'),
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
 
     const link = screen.getByTestId('externalLink--https://example.com--error');
     expect(link).toBeDisabled();

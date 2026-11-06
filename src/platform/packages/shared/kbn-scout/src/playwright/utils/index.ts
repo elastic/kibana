@@ -11,8 +11,8 @@ export {
   isValidUTCDate,
   formatTime,
   getPlaywrightGrepTag,
-  execPromise,
-  withKibanaBabelRegister,
+  execFilePromise,
+  withKibanaSwcRegister,
 } from './runner_utils';
 export { resolveSelector, type SelectorInput } from './locator_helper';
 export { keyTo } from './a11y_utils';

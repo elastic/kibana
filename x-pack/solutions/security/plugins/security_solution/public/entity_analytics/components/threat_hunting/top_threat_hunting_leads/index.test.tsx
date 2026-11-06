@@ -6,10 +6,19 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { AIConnector } from '@kbn/inference-connectors';
 
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
+
+const mockUseInferenceConnectorAccess = jest.fn();
+jest.mock('../../../hooks/use_inference_connector_access', () => ({
+  useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
+}));
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -19,6 +28,33 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     },
   }),
+  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+  useTimeZone: jest.fn(() => 'UTC'),
+}));
+
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openFlyout: mockOpenFlyout,
+  }),
+}));
+
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
+  }),
+}));
+
+jest.mock('@kbn/elastic-assistant', () => ({
+  ConnectorSelectorInline: () => (
+    <button type="button" data-test-subj="connector-selector">
+      {'Connector'}
+    </button>
+  ),
 }));
 
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
@@ -38,7 +74,7 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   title: 'Multi-Tactic Attack',
   byline: 'User admin@example.com on host server-01',
   description: 'Evidence chain and investigation guide',
-  entities: [{ type: 'user', name: 'admin@example.com' }],
+  entity: { type: 'user', name: 'admin@example.com', id: 'user:admin@example.com' },
   tags: ['malware', 'lateral-movement'],
   priority: 8,
   chatRecommendations: ['What happened?', 'Show timeline'],
@@ -47,6 +83,9 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   status: 'active',
   observations: [createMockObservation()],
   sourceType: 'adhoc',
+  topRelatedEntities: [],
+  relatedEntityCounts: {},
+  origin: 'observations',
   ...overrides,
 });
 
@@ -62,7 +101,9 @@ const defaultProps = {
   onHuntInChat: jest.fn(),
   onGenerate: jest.fn(),
   connectorId: 'test-connector-id',
-  hasValidConnector: true,
+  availableConnectors: [
+    { id: 'test-connector-id', name: 'Test Connector', actionTypeId: '.gen-ai' },
+  ] as unknown as AIConnector[],
   isAgentChatExperienceEnabled: true,
   onConnectorIdSelected: jest.fn(),
 };
@@ -70,6 +111,11 @@ const defaultProps = {
 describe('TopThreatHuntingLeads', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: true,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: false,
+    });
   });
 
   it('renders cards with mock leads data (shows card for each lead, max 5)', () => {
@@ -120,15 +166,44 @@ describe('TopThreatHuntingLeads', () => {
     render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
 
     expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
-    expect(screen.getByText('No data found')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No entities, risk scores, or alerts were found in the Entity Store. Check that your entity data is available and try again.'
+      )
+    ).toBeInTheDocument();
   });
 
-  it('renders loading state (spinner visible)', () => {
+  it('renders the "generating" banner with the correct copy while actively generating leads', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} isGenerating />);
+
+    expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(
+      screen.getByText('Generating leads. This may take up to two minutes.')
+    ).toBeInTheDocument();
+  });
+
+  it('renders the no-connector banner with the "Enable AI Agent" copy', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} isAgentChatExperienceEnabled={false} />);
+
+    expect(
+      screen.getByText('Enable AI Agent as your default chat experience to start generating leads')
+    ).toBeInTheDocument();
+  });
+
+  it('renders skeleton loading state while leads are being fetched', () => {
     render(<TopThreatHuntingLeads {...defaultProps} isLoading />);
 
     expect(screen.getByTestId('topThreatHuntingLeads')).toBeInTheDocument();
-    expect(screen.getByTestId('leadsLoadingSpinner')).toBeInTheDocument();
+    expect(screen.getByTestId('leadsLoadingSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('leadsLoadingSpinner')).not.toBeInTheDocument();
     expect(screen.queryByTestId('leadsEmptyPrompt')).not.toBeInTheDocument();
+  });
+
+  it('renders the animated spinner while actively generating leads for the first time', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} isGenerating />);
+
+    expect(screen.getByTestId('leadsLoadingSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('leadsLoadingSkeleton')).not.toBeInTheDocument();
   });
 
   it('"See All" button calls onSeeAll', () => {
@@ -163,7 +238,6 @@ describe('TopThreatHuntingLeads', () => {
         {...defaultProps}
         isAgentChatExperienceEnabled={false}
         connectorId=""
-        hasValidConnector={false}
       />
     );
 
@@ -171,13 +245,81 @@ describe('TopThreatHuntingLeads', () => {
     expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
   });
 
-  it('disables "Generate" button under Agent experience when no valid connector is selected', () => {
-    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" hasValidConnector={false} />);
+  it('shows disabled "Generate" and Options under Agent experience when no connector is available', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
+
+    expect(
+      screen.getByText(
+        'No AI connector configured. Add a connector in Options to start generating leads'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('openGenAiSettingsButton')).not.toBeInTheDocument();
 
     const generateButton = screen.getByTestId('generateLeadsButton');
     expect(generateButton).toBeInTheDocument();
     expect(generateButton).toBeDisabled();
-    expect(screen.queryByTestId('openGenAiSettingsButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('leadsOptionsButton')).toBeInTheDocument();
+  });
+
+  it('does not claim a connector is missing while the privilege check is still loading', () => {
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: true,
+      missingInferencePrivilege: false,
+    });
+
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    expect(
+      screen.queryByText(
+        'No AI connector configured. Add a connector in Options to start generating leads'
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Generate leads to surface proactive threat hunting opportunities from your entity data.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
+  it('shows a neutral tooltip while the privilege check is still loading', async () => {
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: true,
+      missingInferencePrivilege: false,
+    });
+
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    fireEvent.mouseOver(screen.getByTestId('generateLeadsButton'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Checking connector permissions…')).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText('Add a connector in Options to enable lead generation')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows disabled "Generate" with a privilege-specific message when the selected connector requires monitor_inference', () => {
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: true,
+    });
+
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    expect(
+      screen.getByText(
+        'Not enough privileges to use the selected connector. Select a different connector to start generating leads'
+      )
+    ).toBeInTheDocument();
+
+    const generateButton = screen.getByTestId('generateLeadsButton');
+    expect(generateButton).toBeInTheDocument();
+    expect(generateButton).toBeDisabled();
   });
 
   it('shows "Generate" button when no leads exist and calls onGenerate', () => {
@@ -187,16 +329,20 @@ describe('TopThreatHuntingLeads', () => {
 
     const generateButton = screen.getByTestId('generateLeadsButton');
     expect(generateButton).toBeInTheDocument();
+    expect(generateButton).toHaveTextContent('Generate');
     expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
 
     fireEvent.click(generateButton);
     expect(onGenerate).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps "Generate" button when generation produced no leads', () => {
+  it('shows a link-style "Regenerate" action (not "Generate") in the no-data banner when generation produced no leads', () => {
     render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
 
-    expect(screen.getByTestId('generateLeadsButton')).toBeInTheDocument();
+    const button = screen.getByTestId('generateLeadsButton');
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent('Regenerate');
+    expect(button.className).toContain('euiButtonEmpty');
     expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
   });
 
@@ -260,5 +406,101 @@ describe('TopThreatHuntingLeads', () => {
 
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
+  });
+
+  it('clicking an entity badge opens the entity flyout and does not trigger onLeadClick', () => {
+    const onLeadClick = jest.fn();
+    const lead = createMockLead({
+      id: 'lead-badge',
+      byline: 'User admin@example.com on host server-01',
+      entity: { type: 'user', name: 'admin@example.com', id: 'user:admin@example.com' },
+    });
+
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        leads={[lead]}
+        totalCount={1}
+        onLeadClick={onLeadClick}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('leadEntityBadge-admin@example.com'));
+
+    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: 'user-panel',
+        params: {
+          userName: 'admin@example.com',
+          entityId: 'user:admin@example.com',
+          contextID: 'entity-analytics-threat-hunting-leads',
+          scopeId: 'entity-analytics-threat-hunting-leads',
+        },
+      },
+    });
+    expect(onLeadClick).not.toHaveBeenCalled();
+  });
+
+  it('renders a non-interactive badge for entities with an unrecognized type, and clicking it still opens the card (Agent Builder)', () => {
+    const onLeadClick = jest.fn();
+    const lead = createMockLead({
+      id: 'lead-generic',
+      byline: 'Service payment-api on host server-01',
+      entity: { type: 'generic', name: 'payment-api', id: 'generic:payment-api' },
+    });
+
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        leads={[lead]}
+        totalCount={1}
+        onLeadClick={onLeadClick}
+      />
+    );
+
+    expect(screen.queryByTestId('leadEntityBadge-payment-api')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('payment-api'));
+
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(onLeadClick).toHaveBeenCalledTimes(1);
+    expect(onLeadClick).toHaveBeenCalledWith(lead);
+  });
+
+  it('toggles collapse and expand more than once without requiring a page refresh', () => {
+    const storageKey = 'securitySolution.entityAnalytics.topThreatHuntingLeads.expanded';
+    window.localStorage.removeItem(storageKey);
+
+    const leads = [createMockLead({ id: 'lead-1', title: 'Lead One' })];
+    render(<TopThreatHuntingLeads {...defaultProps} leads={leads} totalCount={1} />);
+
+    expect(screen.getByTestId('leadCard-lead-1')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+    expect(screen.queryByTestId('leadCard-lead-1')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem(storageKey)).toBe('false');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
+    expect(screen.getByTestId('leadCard-lead-1')).toBeInTheDocument();
+    expect(window.localStorage.getItem(storageKey)).toBe('true');
+
+    // Second collapse must still work — previously the react-use functional
+    // updater stuck on a stale closed-over value after the first toggle.
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+    expect(screen.queryByTestId('leadCard-lead-1')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem(storageKey)).toBe('false');
+  });
+
+  it('renders the Options popover as a focus-owning dialog so keyboard users land inside it', async () => {
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('leadsOptionsButton'));
+
+    const popoverPanel = await screen.findByRole('dialog', { name: 'Options' });
+    expect(popoverPanel).toHaveAttribute('tabindex', '0');
+    expect(popoverPanel).toHaveAccessibleDescription(
+      'You are in a dialog. Press Escape, or tap/click outside the dialog to close.'
+    );
   });
 });

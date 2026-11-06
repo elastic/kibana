@@ -95,22 +95,7 @@ export const mockAgentParallelToolCalls = ({
   });
 };
 
-export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string | LLmError) => {
-  void llmProxy
-    .intercept({
-      name: 'handover-to-answer',
-      when: ({ messages }) => {
-        const systemMessage = messages.find((message) => message.role === 'system');
-        return (systemMessage?.content as string).includes(
-          'This response will serve as a handover note for the answering agent'
-        );
-      },
-      responseMock: answer,
-    })
-    .completeAfterIntercept();
-};
-
-export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
+export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string | LLmError) => {
   void llmProxy
     .intercept({
       name: 'final-assistant-response',
@@ -121,6 +106,22 @@ export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
     })
     .completeAfterIntercept();
 };
+
+/**
+ * Intercepts the final assistant response but never completes it, leaving the LLM request
+ * hanging so the execution can be aborted while it is in flight. Resolves once the request
+ * has been intercepted, signalling that the agent execution is running.
+ */
+export const mockHangingFinalAnswer = (llmProxy: LlmProxy): Promise<void> =>
+  llmProxy
+    .intercept({
+      name: 'final-assistant-response',
+      when: (_body) => {
+        return true;
+      },
+    })
+    .waitForIntercept()
+    .then(() => undefined);
 
 export const mockSearchToolCallWithNaturalLanguageGen = ({
   resource,
@@ -163,8 +164,10 @@ export const mockNlToEsql = ({
     }),
   });
 
-  // generate esql - generate query call
-  void llmProxy.interceptors.toolMessage({
+  // generate esql - generate query call.
+  // The documentation round is replayed into this request as an [assistant, user] exchange rather
+  // than a tool call (see `formatAction`), so the last message is a user message, not a tool one.
+  void llmProxy.interceptors.userMessage({
     name: 'generate_esql:generate_query',
     when: ({ messages }) => {
       const systemMessage = messages.find((message) => message.role === 'system');

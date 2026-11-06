@@ -44,6 +44,17 @@ export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
                 defaultValue: false,
                 meta: { description: 'Whether to overwrite existing workflows.' },
               }),
+              dryRun: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, performs a preflight conflict check only. ' +
+                    'Returns the subset of the supplied workflow IDs that already exist ' +
+                    '(including soft-deleted tombstones and cross-space documents) without ' +
+                    'writing anything. The response body is `{ existingIds: string[] }` ' +
+                    'instead of the normal `{ created, failed }` shape.',
+                },
+              }),
             }),
             body: BulkCreateWorkflowsCommandSchema,
           },
@@ -52,7 +63,18 @@ export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
-          const { overwrite } = request.query;
+          const { overwrite, dryRun } = request.query;
+
+          if (dryRun) {
+            // Preflight conflict check — index-wide, includes soft-deleted tombstones.
+            // No write occurs, no audit event is emitted (nothing is created).
+            const candidateIds = request.body.workflows
+              .map((w) => w.id)
+              .filter((id): id is string => id !== undefined);
+            const existingIds = await api.findExistingWorkflowIds(candidateIds);
+            return response.ok({ body: { existingIds } });
+          }
+
           const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
             overwrite,
           });

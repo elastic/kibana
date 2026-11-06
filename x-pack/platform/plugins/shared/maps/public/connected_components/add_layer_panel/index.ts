@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import { connect } from 'react-redux-v7';
 import { AddLayerPanel } from './view';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import {

@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_context';
 
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToManagementMlLink: jest.fn(),
@@ -83,6 +84,10 @@ jest.mock('./utils', () => ({
 const mockAddDanger = jest.fn();
 const mockKibanaContext = {
   services: {
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/calendars_list'),
+    },
     docLinks: { links: { ml: { calendars: 'test' } } },
     notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
     mlServices: {
@@ -105,6 +110,8 @@ const mockKibanaContext = {
 
 const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  __esModule: true,
+  useKibana: () => mockKibanaContext,
   withKibana: (type) => {
     const EnhancedType = (props) => {
       return mockReact.createElement(type, {
@@ -116,25 +123,22 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   },
 }));
 
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => mockKibanaContext,
+  useNavigateToPath: () => jest.fn(),
+}));
+
 import { NewCalendar } from './new_calendar';
 
 describe('NewCalendar', () => {
   test('Renders new calendar form', () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
-    );
+    const { getByTestId } = renderWithMlI18nContext(<NewCalendar isDst={false} />);
 
     expect(getByTestId('mlPageCalendarEdit')).toBeInTheDocument();
   });
 
   test('Import modal button is disabled', () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
-    );
+    const { getByTestId } = renderWithMlI18nContext(<NewCalendar isDst={false} />);
 
     const importEventsButton = getByTestId('mlCalendarImportEventsButton');
     expect(importEventsButton).toBeInTheDocument();
@@ -142,11 +146,7 @@ describe('NewCalendar', () => {
   });
 
   test('New event modal button is disabled', async () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
-    );
+    const { getByTestId } = renderWithMlI18nContext(<NewCalendar isDst={false} />);
 
     const newEventButton = getByTestId('mlCalendarNewEventButton');
     expect(newEventButton).toBeInTheDocument();
@@ -154,10 +154,8 @@ describe('NewCalendar', () => {
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {
-    const { getByTestId, queryByTestId, getByText } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
+    const { getByTestId, queryByTestId, getByText } = renderWithMlI18nContext(
+      <NewCalendar isDst={false} />
     );
 
     const mlCalendarIdFormRow = getByText('Calendar ID');

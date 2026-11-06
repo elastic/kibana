@@ -21,7 +21,6 @@ const testDataList = [
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const from = 'Feb 7, 2016 @ 00:00:00.000';
@@ -31,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags(['ml']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();

@@ -38,7 +38,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 const screenshottingMock = createMockScreenshottingStart();
@@ -57,9 +56,7 @@ beforeEach(async () => {
 
   mockPdfExportType = new PdfV1ExportType(mockCoreSetup, configType, mockLogger, context);
 
-  mockPdfExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockPdfExportType.setup({});
   mockPdfExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,

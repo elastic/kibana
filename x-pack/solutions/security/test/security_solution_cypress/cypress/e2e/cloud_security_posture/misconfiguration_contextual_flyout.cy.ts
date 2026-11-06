@@ -26,7 +26,7 @@ const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
 );
 
-const CSP_INSIGHT_TAB_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutInsightInputsTab');
+const CSP_INSIGHT_TOOL = getDataTestSubjectSelector('misconfigurationInsightsTool');
 const CSP_INSIGHT_TABLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutMisconfigurationFindingsTable'
 );
@@ -223,9 +223,9 @@ describe(
         cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
       });
 
-      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+      it('should display the insights tool and findings table upon clicking on misconfiguration accordion', () => {
         clickMisconfigurationTitle();
-        cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
+        cy.get(CSP_INSIGHT_TOOL).should('be.visible');
         cy.get(CSP_INSIGHT_TABLE).should('be.visible');
       });
     });
@@ -270,9 +270,9 @@ describe(
         cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
       });
 
-      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+      it('should display the insights tool and findings table upon clicking on misconfiguration accordion', () => {
         clickMisconfigurationTitle();
-        cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
+        cy.get(CSP_INSIGHT_TOOL).should('be.visible');
         cy.get(CSP_INSIGHT_TABLE).should('be.visible');
       });
     });

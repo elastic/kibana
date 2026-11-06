@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkAction } from 'redux-thunk';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkAction } from 'redux-thunk-v2';
 import { i18n } from '@kbn/i18n';
 import { getToasts } from '../../services/notifications';
 import { SECTIONS, API_STATUS } from '../../constants';

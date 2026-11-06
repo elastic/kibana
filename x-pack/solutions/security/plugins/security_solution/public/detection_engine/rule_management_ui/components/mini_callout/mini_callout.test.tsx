@@ -13,7 +13,6 @@ import { MiniCallout } from './mini_callout';
 describe('MiniCallout', () => {
   const defaultProps: MiniCalloutProps = {
     color: 'primary',
-    iconType: 'info',
     title: 'Mini Callout Title',
   };
 
@@ -23,11 +22,11 @@ describe('MiniCallout', () => {
     expect(screen.getByText(defaultProps.title as string)).toBeInTheDocument();
   });
 
-  it('renders the MiniCallout component with the provided iconType and color', () => {
+  it('renders the MiniCallout component with the provided color and a default icon', () => {
     const { container } = render(<MiniCallout {...defaultProps} />);
 
     const miniCallout = screen.getByTestId('mini-callout');
-    const icon = container.querySelector('[data-euiicon-type="info"]');
+    const icon = container.querySelector('[data-euiicon-type="infoFill"]');
     expect(icon).not.toBeNull();
     expect(miniCallout).toHaveAttribute(
       'class',
@@ -35,29 +34,29 @@ describe('MiniCallout', () => {
     );
   });
 
-  it('renders the MiniCallout component with no icon if not provided', () => {
+  it('renders the MiniCallout component with default icon if no custom icon is provided', () => {
     const { container } = render(<MiniCallout {...{ ...defaultProps, iconType: undefined }} />);
 
-    const icon = container.querySelector('[data-euiicon-type]');
-    expect(icon).toBeNull();
+    const icon = container.querySelector('[data-euiicon-type="infoFill"]');
+    expect(icon).not.toBeNull();
   });
 
   it('renders the dismiss link when dismissible is true', () => {
     render(<MiniCallout {...defaultProps} dismissible />);
 
-    expect(screen.getByText('Dismiss')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeInTheDocument();
   });
 
   it('does not render the dismiss link when dismissible is false', () => {
     render(<MiniCallout {...defaultProps} dismissible={false} />);
 
-    expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Dismiss' })).not.toBeInTheDocument();
   });
 
   it('removes the MiniCallout component from the DOM when the dismiss link is clicked', () => {
     render(<MiniCallout {...defaultProps} />);
 
-    fireEvent.click(screen.getByText('Dismiss'));
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
 
     expect(screen.queryByText(defaultProps.title as string)).not.toBeInTheDocument();
   });

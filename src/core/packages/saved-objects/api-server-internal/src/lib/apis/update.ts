@@ -313,6 +313,11 @@ export const executeUpdate = async <T>(
       ...(Array.isArray(references) && { references }),
     });
 
+    validationHelper.validateObjectForUpdate(
+      type,
+      migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
+    );
+
     const docToSend = serializer.savedObjectToRaw(
       migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
     );

@@ -9,17 +9,32 @@
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { tryPollutingPrototypes } from '../common/pollute';
+import { tryCodeGeneration } from '../common/code_generation';
 
 export class HardeningPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
-    core.http.createRouter().get(
+    const router = core.http.createRouter();
+
+    router.get(
       {
-        path: '/api/hardening/_pollute_prototypes',
+        path: '/internal/hardening/_pollute_prototypes',
         validate: false,
         security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         const result = tryPollutingPrototypes();
+        return response.ok({ body: result });
+      }
+    );
+
+    router.get(
+      {
+        path: '/internal/hardening/_try_code_generation',
+        validate: false,
+        security: { authz: { enabled: false, reason: '' } },
+      },
+      async (context, request, response) => {
+        const result = tryCodeGeneration();
         return response.ok({ body: result });
       }
     );

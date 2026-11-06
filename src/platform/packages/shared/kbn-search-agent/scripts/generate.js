@@ -118,6 +118,14 @@ function findFiles(dir, filename) {
 // ---------------------------------------------------------------------------
 // Skill generation
 // ---------------------------------------------------------------------------
+
+// Mirrors the validation limits enforced server-side by Kibana Agent Builder:
+//   x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts
+//   x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/type_definition.ts
+// Exceeding these makes the skill fail to register and can crash Kibana at startup.
+const SKILL_NAME_MAX_LENGTH = 64;
+const SKILL_DESCRIPTION_MAX_LENGTH = 1024;
+
 function generateSkills() {
   const skillsDir = path.join(ELASTIC_AGENT_DIR, 'skills');
   const skillFiles = findFiles(skillsDir, 'SKILL.md');
@@ -125,6 +133,7 @@ function generateSkills() {
   fs.mkdirSync(outDir, { recursive: true });
 
   const exports = [];
+  const validationErrors = [];
 
   for (const filePath of skillFiles) {
     const { meta, body } = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
@@ -138,6 +147,25 @@ function generateSkills() {
     const id = skillName;
     const description = meta.description || '';
     const content = escapeTemplateLiteral(body);
+
+    const relPath = path.relative(PKG_ROOT, filePath);
+    if (skillName.length > SKILL_NAME_MAX_LENGTH) {
+      validationErrors.push(
+        `${relPath}: name is ${skillName.length} chars (max ${SKILL_NAME_MAX_LENGTH}).`
+      );
+    }
+    if (description.length === 0) {
+      validationErrors.push(`${relPath}: description is empty.`);
+    } else if (description.length > SKILL_DESCRIPTION_MAX_LENGTH) {
+      validationErrors.push(
+        `${relPath}: description is ${description.length} chars (max ${SKILL_DESCRIPTION_MAX_LENGTH}). ` +
+          `Trim the frontmatter "description:" block — Kibana rejects skills with longer descriptions ` +
+          `and the plugin will fail to start.`
+      );
+    }
+    if (content.length === 0) {
+      validationErrors.push(`${relPath}: content body is empty.`);
+    }
 
     const fileContent = [
       LICENSE_HEADER,
@@ -169,6 +197,14 @@ function generateSkills() {
         console.log('Removed stale', path.relative(PKG_ROOT, fullPath));
       }
     }
+  }
+
+  if (validationErrors.length > 0) {
+    console.error('\nSkill validation failed:');
+    for (const message of validationErrors) {
+      console.error(`  - ${message}`);
+    }
+    process.exit(1);
   }
 
   return exports;

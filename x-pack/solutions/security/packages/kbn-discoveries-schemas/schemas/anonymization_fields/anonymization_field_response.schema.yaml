@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Anonymization Field Response
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    # NOTE: This schema is used internally (workflow-step configuration),
+    # so we keep the original (camelCase) property names.
+    AnonymizationFieldResponse:
+      type: object
+      required:
+        - id
+        - field
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          description: The ID of the anonymization field.
+        timestamp:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
+          description: Timestamp when the anonymization field was initially created.
+        field:
+          type: string
+          description: Name of the anonymization field.
+          example: "url.domain"
+        allowed:
+          type: boolean
+          description: Whether this field is allowed to be sent to the model.
+          example: true
+        anonymized:
+          type: boolean
+          description: Whether this field should be anonymized.
+          example: false
+        updatedAt:
+          type: string
+          description: Timestamp of the last update.
+          example: "2023-10-31T12:00:00Z"
+        updatedBy:
+          type: string
+          description: Username of the person who last updated the field.
+          example: "user1"
+        createdAt:
+          type: string
+          description: Timestamp of when the field was created.
+          example: "2023-10-31T12:00:00Z"
+        createdBy:
+          type: string
+          description: Username of the person who created the field.
+          example: "user1"
+        namespace:
+          type: string
+          description: Kibana namespace (space id).
+          example: "default"
+

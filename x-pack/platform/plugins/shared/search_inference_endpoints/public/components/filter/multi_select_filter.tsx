@@ -67,13 +67,12 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
       aria-label={ariaLabel}
       button={
         <EuiFilterButton
-          iconType={'arrowDown'}
+          iconType={'chevronSingleDown'}
           onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
           numFilters={options.length}
           hasActiveFilters={selectedOptionKeys.length > 0}
           numActiveFilters={selectedOptionKeys.length}
-          aria-label={buttonLabel}
         >
           <EuiText size="s" className="eui-textTruncate">
             {buttonLabel}
@@ -101,6 +100,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
         }}
         singleSelection={false}
         renderOption={renderOption}
+        listProps={{ paddingSize: 's' }}
       >
         {(list, search) => (
           <div>

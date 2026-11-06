@@ -16,8 +16,8 @@ import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = (): jest.Mocked<InternalUserSettingsServiceSetup> => {
   return {
+    getUserSettings: jest.fn(),
     getUserSettingDarkMode: jest.fn(),
-    getUserSettingLocale: jest.fn(),
   };
 };
 

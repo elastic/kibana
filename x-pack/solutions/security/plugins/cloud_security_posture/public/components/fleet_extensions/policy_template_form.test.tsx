@@ -65,6 +65,8 @@ import {
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { getPosturePolicy, POLICY_TEMPLATE_FORM_DTS } from './utils';
 
+const AGENTLESS_OPTION_LABEL = /elastic managed integration/i;
+
 // mock useParams
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -1580,7 +1582,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = await queryByLabelText(/agentless/i);
+      const agentlessOption = await queryByLabelText(AGENTLESS_OPTION_LABEL);
       if (agentlessOption) {
         await userEvent.click(agentlessOption);
 
@@ -1631,7 +1633,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       await waitFor(() =>
         expect(getByTestId(AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ)).toBeInTheDocument()
@@ -1684,7 +1686,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1733,7 +1735,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1785,7 +1787,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1837,7 +1839,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1889,7 +1891,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1905,14 +1907,15 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for GCP for organisation account type', async () => {
+    it('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
       const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={{ version: '1.6.0' } as PackageInfo}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
 
@@ -1929,7 +1932,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
       expect(orgIdField).toBeInTheDocument();
       expect(credentialsJsonField).toBeInTheDocument();
       expect(projectIdField).not.toBeInTheDocument();
@@ -1948,7 +1951,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for GCP for single-account', async () => {
+    it('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: SINGLE_ACCOUNT, type: 'text' },
       });
@@ -1957,7 +1960,8 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={{ version: '1.6.0' } as PackageInfo}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
 
@@ -1974,7 +1978,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
       expect(orgIdField).not.toBeInTheDocument();
       expect(credentialsJsonField).toBeInTheDocument();
       expect(projectIdField).toBeInTheDocument();
@@ -2009,7 +2013,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
@@ -2019,7 +2023,7 @@ describe('<CspPolicyTemplateForm />', () => {
       const manualSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
       expect(tenantIdField).toBeInTheDocument();
       expect(clientIdField).toBeInTheDocument();
       expect(clientSecretField).toBeInTheDocument();
@@ -2049,7 +2053,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agentless and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
@@ -2060,7 +2064,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // default state for Azure with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
 
       expect(tenantIdField).toBeInTheDocument();
       expect(clientIdField).toBeInTheDocument();

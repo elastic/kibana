@@ -43,7 +43,7 @@ export interface EventsServiceStartContract {
    * in-flight conversations are interleaved here and consumers cannot reliably
    * attribute an event to its source conversation. Use `getChatEvents$(conversationId)`
    * to scope a subscription to a single conversation. Will be removed in a future
-   * release once known consumers (dashboard_agent, workflows_management) have migrated.
+   * release once known consumers (agent_builder_dashboards, workflows_management) have migrated.
    */
   chat$: Observable<BrowserChatEvent>;
 

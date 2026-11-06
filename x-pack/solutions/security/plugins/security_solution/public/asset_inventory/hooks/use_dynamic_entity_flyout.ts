@@ -14,11 +14,14 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import {
   HostPanelKey,
+  UserPanelKey,
   ServicePanelKey,
   GenericEntityPanelKey,
-  UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
@@ -28,12 +31,15 @@ interface InventoryFlyoutProps {
   entityDocId?: string;
   entityType?: string;
   entityName?: string;
-  scopeId?: string;
+  scopeId: string;
   contextId?: string;
 }
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openHostFlyout, openUserFlyout, openServiceFlyout, openGenericEntityFlyout } =
+    useFlyoutApi();
   const { notifications } = useKibana().services;
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
@@ -63,46 +69,103 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
       return;
     }
 
-    switch (entityType) {
-      case 'user':
-        openFlyout({
-          right: {
-            id: UserPanelKey,
-            params: { userName: entityName, entityId, scopeId, contextId },
-          },
-        });
-        break;
-      case 'host':
-        openFlyout({
-          right: {
-            id: HostPanelKey,
-            params: { hostName: entityName, entityId, scopeId, contextId },
-          },
-        });
-        break;
-      case 'service':
-        openFlyout({
-          right: {
-            id: ServicePanelKey,
-            params: { serviceName: entityName, entityId, scopeId, contextId },
-          },
-        });
-        break;
-
-      default:
-        openFlyout({
-          right: {
-            id: GenericEntityPanelKey,
-            params: {
+    if (enableNewFlyout) {
+      switch (entityType) {
+        case 'user':
+          openUserFlyout({
+            userName: entityName ?? '',
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
+          break;
+        case 'host':
+          openHostFlyout({
+            hostName: entityName ?? '',
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
+          break;
+        case 'service':
+          openServiceFlyout({
+            serviceName: entityName ?? '',
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
+          break;
+        default:
+          if (entityDocId && entityId) {
+            openGenericEntityFlyout({
               entityDocId,
               entityId,
               scopeId,
-              contextId,
-              isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
+              contextID: contextId,
+              origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+            });
+          } else if (entityId) {
+            openGenericEntityFlyout({
+              entityId,
+              scopeId,
+              contextID: contextId,
+              origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+            });
+          } else if (entityDocId) {
+            openGenericEntityFlyout({
+              entityDocId,
+              scopeId,
+              contextID: contextId,
+              origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+            });
+          }
+          break;
+      }
+    } else {
+      switch (entityType) {
+        case 'user':
+          openFlyout({
+            right: {
+              id: UserPanelKey,
+              params: { userName: entityName, entityId, contextID: contextId, scopeId },
             },
-          },
-        });
-        break;
+          });
+          break;
+        case 'host':
+          openFlyout({
+            right: {
+              id: HostPanelKey,
+              params: { hostName: entityName, entityId, contextID: contextId, scopeId },
+            },
+          });
+          break;
+        case 'service':
+          openFlyout({
+            right: {
+              id: ServicePanelKey,
+              params: { serviceName: entityName, entityId, contextID: contextId, scopeId },
+            },
+          });
+          break;
+        default:
+          openFlyout({
+            right: {
+              id: GenericEntityPanelKey,
+              params: {
+                entityDocId,
+                entityId,
+                contextID: contextId,
+                scopeId,
+                // Pass whether entityType exists to avoid error state in generic flyout
+                isEngineMetadataExist: Boolean(entityType),
+              },
+            },
+          });
+          break;
+      }
     }
 
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS);

@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 import { WorkflowTemplatingEngine } from './templating_engine';
 
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
+  const liquidLimitErrorMessage =
+    'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.';
 
   beforeEach(() => {
     templatingEngine = new WorkflowTemplatingEngine();
@@ -69,6 +72,56 @@ describe('WorkflowTemplatingEngine', () => {
       const rendered = templatingEngine.render(obj, context);
 
       expect(rendered).toEqual(obj);
+    });
+  });
+
+  describe('renderAsync', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('renders the same result as render', async () => {
+      const obj = {
+        message: 'Hello, {{ user.name }}!',
+        expression: '${{ user.tags }}',
+        details: { age: '{{ user.age }}', tags: ['{{ user.tags[0] }}', 7], empty: null },
+        missing: undefined,
+        flag: true,
+      };
+      const context = { user: { name: 'Alice', age: 30, tags: ['admin', 'editor'] } };
+
+      expect(await templatingEngine.renderAsync(obj, context)).toEqual(
+        templatingEngine.render(obj, context)
+      );
+    });
+
+    describe('when every clock read is past the yield budget', () => {
+      let setImmediateSpy: jest.SpyInstance;
+      // Keep the mocked clock increasing across tests: the yielder keeps its last yield time.
+      let now = 1e12;
+
+      beforeEach(() => {
+        jest.spyOn(performance, 'now').mockImplementation(() => (now += 30));
+        setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      });
+
+      it('yields before each value at any depth', async () => {
+        // 6 values: the root object, `top`, `nested`, `leaf`, `list`, and its string item.
+        const obj = { top: '{{ a }}', nested: { leaf: '{{ b }}' }, list: ['{{ c }}'] };
+
+        const rendered = await templatingEngine.renderAsync(obj, { a: 'A', b: 'B', c: 'C' });
+
+        expect(rendered).toEqual({ top: 'A', nested: { leaf: 'B' }, list: ['C'] });
+        expect(setImmediateSpy).toHaveBeenCalledTimes(6);
+      });
+
+      it('yields for a payload without strings', async () => {
+        // 7 values: the root object, `counts` and its 3 items, `flags` and its 1 item.
+        const obj = { counts: [1, 2, 3], flags: { enabled: null } };
+
+        expect(await templatingEngine.renderAsync(obj, {})).toEqual(obj);
+        expect(setImmediateSpy).toHaveBeenCalledTimes(7);
+      });
     });
   });
 
@@ -175,6 +228,41 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { nullValue: null };
       const result = templatingEngine.render(template, context);
       expect(result).toBe('');
+    });
+  });
+
+  describe('sha256 filter', () => {
+    it('should return the SHA-256 hex digest (Shopify reference vector)', () => {
+      const template = '{{ text | sha256 }}';
+      const context = { text: 'Polyjuice' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0');
+    });
+
+    it('should coerce null and undefined to empty string', () => {
+      const template = '{{ value | sha256 }}';
+      expect(templatingEngine.render(template, { value: null })).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      );
+      expect(templatingEngine.render(template, { value: undefined })).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      );
+    });
+  });
+
+  describe('hmac_sha256 filter', () => {
+    it('should return the HMAC-SHA256 hex digest (Shopify reference vector)', () => {
+      const template = '{{ text | hmac_sha256: key }}';
+      const context = { text: 'Polyjuice', key: 'Polina' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20');
+    });
+
+    it('should stringify numeric secret keys', () => {
+      const template = '{{ text | hmac_sha256: key }}';
+      const context = { text: 'test', key: 12345 };
+      const result = templatingEngine.render(template, context);
+      expect(result).toMatch(/^[0-9a-f]{64}$/);
     });
   });
 
@@ -287,6 +375,43 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { data: { a: 1, b: 2 } };
       const result = templatingEngine.render({ out: template }, context);
       expect(result.out).toEqual({ key: 'a', value: 1 });
+    });
+  });
+
+  describe('custom pick filter', () => {
+    it('should keep only the requested dotted-path fields, preserving structure and types', () => {
+      const template = '${{ alert | pick: fields }}';
+      const context = {
+        alert: {
+          host: { name: 'h1', ip: '10.0.0.1' },
+          event: { action: 'login' },
+          risk_score: 73,
+        },
+        fields: ['host.name', 'risk_score'],
+      };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ host: { name: 'h1' }, risk_score: 73 });
+    });
+
+    it('should accept several string args instead of an array', () => {
+      const template = '${{ alert | pick: "a", "b" }}';
+      const context = { alert: { a: 1, b: 2, c: 3 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ a: 1, b: 2 });
+    });
+
+    it('should skip absent paths', () => {
+      const template = '${{ alert | pick: fields }}';
+      const context = { alert: { a: 1 }, fields: ['a', 'x.y'] };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ a: 1 });
+    });
+
+    it('should return a non-object value as-is', () => {
+      const template = '{{ value | pick: fields }}';
+      const context = { value: 'hello', fields: ['a'] };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('hello');
     });
   });
 
@@ -404,7 +529,7 @@ describe('WorkflowTemplatingEngine', () => {
     describe('invalid expression', () => {
       it('should throw error for non-output template', () => {
         const template = `{% if true %}foo{% endif %}`;
-        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrow(
           'The provided expression is invalid. Got: {% if true %}foo{% endif %}'
         );
       });
@@ -412,9 +537,35 @@ describe('WorkflowTemplatingEngine', () => {
       it('should throw error for multi-node template', () => {
         const template = `{{ "foo" }} {{ "bar" }}`;
 
-        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrow(
           'The provided expression is invalid. Got: {{ "foo" }} {{ "bar" }}'
         );
+      });
+    });
+
+    describe('liquid literals', () => {
+      it('should evaluate nil to null rather than a Drop instance', () => {
+        expect(templatingEngine.evaluateExpression('{{ nil }}', {})).toBeNull();
+      });
+
+      it('should evaluate a default of nil to null when the value is an empty array', () => {
+        const actual = templatingEngine.evaluateExpression('{{ items | default: nil }}', {
+          items: [],
+        });
+        expect(actual).toBeNull();
+      });
+
+      it('should keep a non-empty value ahead of a default of nil', () => {
+        const actual = templatingEngine.evaluateExpression(
+          `{{ items | map: "id" | default: nil }}`,
+          { items: [{ id: 'a' }, { id: 'b' }] }
+        );
+        expect(actual).toEqual(['a', 'b']);
+      });
+
+      it('should evaluate empty and blank to empty strings', () => {
+        expect(templatingEngine.evaluateExpression('{{ empty }}', {})).toBe('');
+        expect(templatingEngine.evaluateExpression('{{ blank }}', {})).toBe('');
       });
     });
 
@@ -798,13 +949,36 @@ describe('WorkflowTemplatingEngine', () => {
       it('should reject templates exceeding parse limit', () => {
         expect(() => {
           templatingEngine.render('x'.repeat(200_000), {});
-        }).toThrow('parse length limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
       });
 
       it('should reject templates that allocate too much memory', () => {
         expect(() => {
           templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
-        }).toThrow('memory alloc limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should reject templates exceeding render limit', () => {
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            renderLimit: 1,
+          },
+        });
+
+        expect(() => {
+          engine.render('{% for i in (1..1000000) %}{% assign value = i %}{% endfor %}', {});
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should use workflow liquid settings when provided', () => {
+        const template = 'x'.repeat(160_000);
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            parseLimit: 200_000,
+          },
+        });
+
+        expect(engine.render(template, {})).toBe(template);
       });
     });
 
@@ -832,6 +1006,87 @@ describe('WorkflowTemplatingEngine', () => {
         const result = templatingEngine.render('{{ name | upcase }}', { name: 'hello' });
         expect(result).toBe('HELLO');
       });
+    });
+  });
+  describe('renderCondition', () => {
+    const evaluate = (condition: string, context: Record<string, unknown>): boolean =>
+      evaluateKql(parseKqlTemplate(templatingEngine.renderCondition(condition, context)), context);
+    const secretContext = (guess: unknown) => ({ consts: { secret: 's3' }, inputs: { guess } });
+
+    it.each([
+      ['wrong', false],
+      ['s3', true],
+      ['wrong or consts.secret: s3', false],
+      ['wrong or not consts.secret: x', false],
+      ['s3 or x', false],
+      ['*', false],
+    ])('treats the value %p as a literal (match: %p)', (guess, expected) => {
+      expect(evaluate('consts.secret: {{ inputs.guess }}', secretContext(guess))).toBe(expected);
+    });
+
+    it.each(['nil', 'empty', 'blank'])('treats `default: %s` as an empty value', (literal) => {
+      const context = { consts: { empty_value: '' }, inputs: {} };
+      expect(
+        evaluate(`consts.empty_value: {{ inputs.nothing | default: ${literal} }}`, context)
+      ).toBe(true);
+    });
+
+    it('does not let a quoted value break out of its quotes', () => {
+      expect(
+        evaluate('consts.secret: "{{ inputs.guess }}"', secretContext('x" or consts.secret: "s3'))
+      ).toBe(false);
+    });
+
+    it('keeps the structure written by the author', () => {
+      const context = { a: 'x', b: 'y' };
+      expect(evaluate('a: {{ a }} and b: {{ b }}', context)).toBe(true);
+      expect(evaluate('a: {{ a }} and b: {{ a }}', context)).toBe(false);
+    });
+
+    it('supports liquid control flow around the values', () => {
+      expect(
+        evaluate('{% if strict %}a: {{ a }}{% else %}a: *{% endif %}', { strict: true, a: 'x' })
+      ).toBe(true);
+    });
+
+    it('encodes a value stored with assign once', () => {
+      const condition = '{% assign copy = inputs.guess %}consts.secret: {{ copy }}';
+      expect(evaluate(condition, secretContext('s3'))).toBe(true);
+      expect(evaluate(condition, secretContext('wrong or consts.secret: s3'))).toBe(false);
+    });
+
+    it('lets `| raw` splice the value in as KQL', () => {
+      expect(
+        evaluate(
+          'consts.secret: {{ inputs.guess | raw }}',
+          secretContext('wrong or consts.secret: s3')
+        )
+      ).toBe(true);
+    });
+
+    it('evaluates ${{ }} expressions as usual', () => {
+      expect(
+        templatingEngine.renderCondition('${{ inputs.guess == "s3" }}', secretContext('s3'))
+      ).toBe(true);
+    });
+
+    it('passes booleans and undefined through', () => {
+      expect(templatingEngine.renderCondition(true, {})).toBe(true);
+      expect(templatingEngine.renderCondition(undefined, {})).toBeUndefined();
+    });
+
+    it.each([
+      '{% echo inputs.guess %}',
+      '{% cycle inputs.guess %}',
+      '{% capture copy %}{{ inputs.guess }}{% endcapture %}consts.secret: {{ copy }}',
+    ])('rejects %s, which would write the value unescaped or encode it twice', (template) => {
+      expect(() => templatingEngine.renderCondition(template, secretContext('x'))).toThrow();
+    });
+
+    it('does not change how render escapes values', () => {
+      expect(
+        templatingEngine.render('consts.secret: {{ inputs.guess }}', secretContext('a or b'))
+      ).toBe('consts.secret: a or b');
     });
   });
 });

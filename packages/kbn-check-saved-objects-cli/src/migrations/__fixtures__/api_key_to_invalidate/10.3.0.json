@@ -1,0 +1,18 @@
+{
+  "10.2.0": [
+    {
+      "apiKeyId": "string",
+      "createdAt": "string",
+      "uiamApiKey": "string?"
+    }
+  ],
+  "10.3.0": [
+    {
+      "apiKeyId": "string",
+      "createdAt": "string",
+      "uiamApiKey": "string?",
+      "taskId": "string?",
+      "taskStartedAt": "string?"
+    }
+  ]
+}

@@ -337,6 +337,23 @@ export const deleteObservableOutputFixture = {
   observable_id: observableIdFixture,
 };
 
+export const deleteAttachmentsInputFixture = {
+  case_id: caseIdFixture,
+  ids: ['attachment-1', 'attachment-2'],
+};
+
+export const deleteAttachmentsOutputFixture = deleteAttachmentsInputFixture;
+
+export const bulkDeleteObservablesInputFixture = {
+  case_id: caseIdFixture,
+  observable_ids: ['obs-id-1'],
+};
+
+export const bulkDeleteObservablesOutputFixture = {
+  case_id: caseIdFixture,
+  observable_ids: ['obs-id-1'],
+};
+
 export const getCasesInputFixture = {
   case_ids: [caseIdFixture, 'case-2'],
 };
@@ -344,4 +361,12 @@ export const getCasesInputFixture = {
 export const getCasesOutputFixture = {
   cases: [createCaseResponseFixture],
   errors: [],
+};
+
+export const pushCasesInputFixture = {
+  case_ids: [caseIdFixture],
+};
+
+export const pushCasesOutputFixture = {
+  cases: [createCaseResponseFixture],
 };

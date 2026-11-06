@@ -46,23 +46,30 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
+export const runCAISynchronizationTask = async (
+  supertest: SuperTest.Agent,
+  spaceId: string = 'default'
+) => {
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
+    .send({ taskId: getSynchronizationTaskId(spaceId, 'securitySolution') })
     .expect(200);
 };
 
-export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => {
+export const runAttachmentsBackfillTask = async (
+  supertest: SuperTest.Agent,
+  spaceId: string = 'default',
+  owner: 'cases' | 'observability' | 'securitySolution' = 'securitySolution'
+) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAIAttachmentsBackfillTaskId('default', 'securitySolution'),
+      taskId: getCAIAttachmentsBackfillTaskId(spaceId, owner),
       sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-      destIndex: getAttachmentsDestinationIndexName('default', 'securitySolution'),
-      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolution')),
+      destIndex: getAttachmentsDestinationIndexName(spaceId, owner),
+      sourceQuery: JSON.stringify(getAttachmentsSourceQuery(spaceId, owner)),
     })
     .expect(200);
 };

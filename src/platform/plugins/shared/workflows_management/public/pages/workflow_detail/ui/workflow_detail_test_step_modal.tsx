@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -35,7 +35,7 @@ import type { ContextOverrideData } from '../../../shared/utils/build_step_conte
 export const WorkflowDetailTestStepModal = React.memo(() => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
-  const { setSelectedExecution } = useWorkflowUrlState();
+  const { selectEditorRun } = useWorkflowUrlState();
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
@@ -86,7 +86,7 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
           executionContext,
           triggerTab,
         });
-        setSelectedExecution(response.workflowExecutionId);
+        selectEditorRun(response.workflowExecutionId);
         closeModal();
       } catch (error) {
         const errorMessage =
@@ -104,7 +104,7 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
       testStepModalOpenStepId,
       runIndividualStep,
       editorYaml,
-      setSelectedExecution,
+      selectEditorRun,
       closeModal,
       notifications.toasts,
       workflowId,

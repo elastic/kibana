@@ -6,7 +6,7 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { parse as parseCookie } from 'tough-cookie';
+import { type Cookie, parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
 
@@ -14,6 +14,13 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+
+  const getSessionInfo = (cookie: Cookie) =>
+    supertest
+      .get('/internal/security/session')
+      .set('kbn-system-request', 'true')
+      .set('Cookie', cookie.cookieString())
+      .expect(200);
 
   function extractSessionCookie(response: { headers: Record<string, string[]> }) {
     const cookie = (response.headers['set-cookie'] || []).find((header) =>
@@ -178,10 +185,11 @@ export default function ({ getService }: FtrProviderContext) {
       // so we don't have `authentication_realm` information available.
       expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
       expect(defaultResponse.body).to.have.property('authentication_realm');
+      expect(minimalResponse.headers['set-cookie']).to.be(undefined);
     });
 
     it('should support minimal authentication even when access token is expired', async function () {
-      this.timeout(60000);
+      this.timeout(90000);
 
       const loginResponse = await supertest
         .post('/internal/security/login')
@@ -201,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Access token expiration is set to 15s for API integration tests.
       // Let's wait for 20s to make sure token expires.
+      const initialSessionInfo = await getSessionInfo(sessionCookie);
       await setTimeoutAsync(20000);
 
       // Access the minimal auth endpoint with the session cookie. The minimal route relies on
@@ -216,6 +225,40 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'token',
         name: 'token',
       });
+
+      expect(minimalResponse.headers['set-cookie']).to.not.be(undefined);
+      const refreshedSessionCookie = extractSessionCookie(minimalResponse);
+      if (!refreshedSessionCookie) {
+        throw new Error('No session cookie set after token refresh');
+      }
+
+      const refreshedSessionInfo = await getSessionInfo(refreshedSessionCookie);
+      expect(refreshedSessionInfo.body.expiresInMs).to.be.lessThan(
+        initialSessionInfo.body.expiresInMs - 15000
+      );
+
+      // Wait for the refreshed access token to expire. A second successful request with the
+      // original session cookie proves that the refreshed token pair was persisted in the session.
+      await setTimeoutAsync(20000);
+
+      const secondMinimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(secondMinimalResponse.body.principal.username).to.eql('elastic');
+      expect(secondMinimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'token',
+        name: 'token',
+      });
+      const secondRefreshedSessionCookie = extractSessionCookie(secondMinimalResponse);
+      if (!secondRefreshedSessionCookie) {
+        throw new Error('No session cookie set after second token refresh');
+      }
+      const secondRefreshedSessionInfo = await getSessionInfo(secondRefreshedSessionCookie);
+      expect(secondRefreshedSessionInfo.body.expiresInMs).to.be.lessThan(
+        refreshedSessionInfo.body.expiresInMs - 15000
+      );
     });
 
     it('should support minimal authentication with `kbn-auth-full` header forcing full authentication', async () => {

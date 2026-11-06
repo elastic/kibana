@@ -9,6 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { SharedGlobalConfig } from '@kbn/core/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -23,6 +24,7 @@ export interface VegaSavedObjectAttributes {
 }
 
 export interface VisTypeVegaPluginSetupDependencies {
+  embeddable: EmbeddableSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }

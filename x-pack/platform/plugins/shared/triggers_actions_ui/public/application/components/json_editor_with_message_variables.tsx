@@ -16,6 +16,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
+import { hasMustacheTemplate } from '@kbn/actions-plugin/common';
 import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { templateActionVariable } from '../lib';
 
@@ -187,7 +188,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
         <CodeEditor
           languageId={XJsonLang.ID}
           options={{
-            renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
+            // Disable the error underline when empty or when the content contains templates
+            renderValidationDecorations: xJson && !hasMustacheTemplate(xJson) ? 'on' : 'off',
             lineNumbers: 'on',
             fontSize: 14,
             minimap: {

@@ -12,27 +12,32 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { redactSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 export const registerGetDatasetRoute = ({
   router,
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
+  getAccessibleSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_DATASET_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'Get evaluation dataset',
     })
@@ -77,10 +82,9 @@ export const registerGetDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
-          const coreContext = await context.core;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
           const dataset = await datasetClient.get(datasetId);
 
           if (!dataset) {
@@ -90,7 +94,13 @@ export const registerGetDatasetRoute = ({
           }
 
           return response.ok({
-            body: dataset,
+            body: {
+              ...dataset,
+              space_ids: redactSpaceIds(
+                dataset.space_ids,
+                getAccessibleSpaceIds ? await getAccessibleSpaceIds(request) : undefined
+              ),
+            },
           });
         } catch (error) {
           if (error instanceof RemoteDecryptionError) {
@@ -101,7 +111,15 @@ export const registerGetDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to get evaluation dataset: ${error}`);
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get evaluation dataset',
+          });
+          if (tooLarge) return tooLarge;
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to get evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get evaluation dataset' },

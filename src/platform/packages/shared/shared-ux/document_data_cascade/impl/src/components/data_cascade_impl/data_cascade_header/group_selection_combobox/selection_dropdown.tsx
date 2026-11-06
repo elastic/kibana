@@ -118,7 +118,6 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
       )}
     >
       <EuiContextMenu
-        size="m"
         initialPanelId={0}
         css={{ minWidth: 300 }}
         panels={[

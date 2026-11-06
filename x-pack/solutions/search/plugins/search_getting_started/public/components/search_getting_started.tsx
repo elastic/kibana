@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,11 +16,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 import { useKibana } from '../hooks/use_kibana';
-import { useUsageTracker } from '../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../../common';
+import { useGettingStartedLoaded } from '../hooks/use_getting_started_loaded';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { AgentInstallSection } from './agent_install/agent_install';
@@ -31,11 +29,7 @@ export const SearchGettingStartedPage: React.FC = () => {
   const {
     services: { application },
   } = useKibana();
-  const usageTracker = useUsageTracker();
-  useEffect(() => {
-    usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
-    sessionStorage.setItem(GETTING_STARTED_SESSIONSTORAGE_KEY, 'true');
-  }, [usageTracker]);
+  useGettingStartedLoaded();
 
   return (
     <SearchGettingStartedPageTemplate>
@@ -45,13 +39,18 @@ export const SearchGettingStartedPage: React.FC = () => {
         <EuiSpacer size="xl" />
         <EuiPanel color="subdued" paddingSize="none">
           <AgentInstallSection />
-          <EuiPanel color="transparent" paddingSize="none" css={SampleDataPanelStyle}>
+          <EuiPanel
+            color="transparent"
+            paddingSize="none"
+            css={SampleDataPanelStyle}
+            hasBorder={false}
+          >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
                   <p>
                     {i18n.translate(
-                      'xpack.search.gettingStarted.searchGettingStartedPage.description',
+                      'xpack.searchGettingStarted.searchGettingStartedPage.description',
                       { defaultMessage: 'Start with some sample data:' }
                     )}
                   </p>
@@ -72,7 +71,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       }}
                     >
                       {i18n.translate(
-                        'xpack.search.gettingStarted.searchGettingStartedPage.uploadFilesBtn',
+                        'xpack.searchGettingStarted.searchGettingStartedPage.uploadFilesBtn',
                         { defaultMessage: 'Upload files' }
                       )}
                     </EuiButtonEmpty>
@@ -92,7 +91,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       }}
                     >
                       {i18n.translate(
-                        'xpack.search.gettingStarted.searchGettingStartedPage.viewSampleDataButton',
+                        'xpack.searchGettingStarted.searchGettingStartedPage.viewSampleDataButton',
                         { defaultMessage: 'View sample data' }
                       )}
                     </EuiButtonEmpty>

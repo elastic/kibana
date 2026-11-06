@@ -57,13 +57,16 @@ export const entityDetailsHighlightsRoute = ({
         ): Promise<IKibanaResponse<EntityDetailsHighlightsResponse>> => {
           const siemResponse = buildSiemResponse(response);
           try {
-            const entityType = request.body.entityType;
-            const entityIdentifier = request.body.entityIdentifier;
-            const anonymizationFields = request.body.anonymizationFields;
-            const connectorId = request.body.connectorId;
+            const {
+              entityType,
+              entityIdentifier,
+              anonymizationFields,
+              connectorId,
+              from: fromDate,
+              to: toDate,
+              mode,
+            } = request.body;
             const entityField = EntityTypeToIdentifierField[entityType];
-            const fromDate = request.body.from;
-            const toDate = request.body.to;
 
             const [coreStart, { entityStore, inference }] = await getStartServices();
             const securitySolution = await context.securitySolution;
@@ -82,13 +85,18 @@ export const entityDetailsHighlightsRoute = ({
               spaceId,
             });
 
+            const mitreDataClient = securitySolution.getMitreDataClient();
+
             const { getV1Data, getV2Data, getLocalReplacements } =
               entityDetailsHighlightsServiceFactory({
                 riskEngineClient,
                 entityStoreClient,
+                experimentalFeatures: config.experimentalFeatures,
+                mitreDataClient,
                 spaceId,
                 logger,
                 esClient,
+                request,
                 assetCriticalityClient,
                 soClient,
                 uiSettingsClient: coreContext.uiSettings.client,
@@ -96,9 +104,17 @@ export const entityDetailsHighlightsRoute = ({
                 anonymizationFields,
               });
 
+            const getDataOpts = {
+              entityType,
+              entityIdentifier,
+              anomalyFromDate: fromDate,
+              anomalyToDate: toDate,
+              mode,
+            };
+
             const entitySummary = config.experimentalFeatures.entityAnalyticsEntityStoreV2
-              ? await getV2Data({ request, entityType, entityIdentifier, fromDate, toDate })
-              : await getV1Data({ request, entityType, entityIdentifier, fromDate, toDate });
+              ? await getV2Data(getDataOpts)
+              : await getV1Data(getDataOpts);
 
             const prompt = await getPrompt({
               getInferenceConnectorById: (id) => inference.getConnectorById(id, request),

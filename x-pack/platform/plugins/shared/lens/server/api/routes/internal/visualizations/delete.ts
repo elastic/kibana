@@ -11,7 +11,7 @@ import {
   LENS_INTERNAL_VIS_API_PATH,
   LENS_INTERNAL_API_VERSION,
 } from '../../../../../common/constants';
-import type { LensSavedObject } from '../../../../content_management';
+import type { LensSavedObject } from '../../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
 

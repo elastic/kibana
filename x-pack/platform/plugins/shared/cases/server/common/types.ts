@@ -23,6 +23,15 @@ export interface AlertInfo {
   index: string;
 }
 
+/**
+ * A claim that an alert attached to a case lives in `index`, to be checked through the index its
+ * attachment stores.
+ */
+export interface AlertIndexClaim extends AlertInfo {
+  /** The index the case attachment stores for the alert, possibly an alias. Only it is searched. */
+  attachedIndex: string;
+}
+
 export type FindOptions = Pick<
   SavedObjectsFindOptions,
   | 'defaultSearchOperator'
@@ -51,7 +60,11 @@ export type FileAttachmentRequest = Omit<
 
 export type AttachmentSavedObject = SavedObject<AttachmentAttributes>;
 
-export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes' | 'error'> & {
+export type SOWithErrors<T> = Partial<
+  Omit<SavedObject<T>, 'attributes' | 'error' | 'id' | 'type'>
+> & {
+  id: string;
+  type: string;
   error: SavedObjectError | DecoratedError;
 };
 

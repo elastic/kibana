@@ -5,37 +5,24 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EuiSpacer, EuiPageHeader, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
 
 import { documentationLinks } from '../services/documentation_links';
 
 interface Props {
-  title: ReactNode;
+  title: string;
+  back: AppHeaderBack;
 }
 
-export const AutoFollowPatternPageTitle = ({ title }: Props) => (
+export const AutoFollowPatternPageTitle = ({ title, back }: Props) => (
   <>
-    <EuiPageHeader
-      bottomBorder
-      pageTitle={<span data-test-subj="pageTitle">{title}</span>}
-      rightSideItems={[
-        <EuiButtonEmpty
-          size="s"
-          flush="right"
-          href={documentationLinks.apis.createAutoFollowPattern}
-          target="_blank"
-          iconType="question"
-          data-test-subj="docsButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.readDocsAutoFollowPatternButtonLabel"
-            defaultMessage="Auto-follow pattern docs"
-          />
-        </EuiButtonEmpty>,
-      ]}
+    <AppHeader
+      title={title}
+      back={back}
+      docLink={documentationLinks.apis.createAutoFollowPattern}
+      spacing="bleed"
     />
 
     <EuiSpacer size="l" />

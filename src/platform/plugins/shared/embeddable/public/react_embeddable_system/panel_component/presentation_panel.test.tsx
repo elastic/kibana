@@ -10,7 +10,11 @@
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
-import type { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import type {
+  PublishesDataSources,
+  PublishesViewMode,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -28,6 +32,9 @@ describe('Presentation panel', () => {
       <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
     ),
     componentApi: { uuid: 'test' },
+    componentInternalApi: {
+      setVisibility: () => {},
+    },
   };
 
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
@@ -97,10 +104,6 @@ describe('Presentation panel', () => {
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {
         embeddable: api,
       });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
-        'PANEL_NOTIFICATION_TRIGGER',
-        { embeddable: api }
-      );
     });
 
     it('calls the custom getActions function when one is provided', async () => {
@@ -109,7 +112,7 @@ describe('Presentation panel', () => {
         ...defaultProps,
         getActions,
       });
-      expect(getActions).toHaveBeenCalledTimes(3);
+      expect(getActions).toHaveBeenCalledTimes(2);
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledTimes(0);
     });
 
@@ -134,7 +137,7 @@ describe('Presentation panel', () => {
       expect(screen.queryByTestId('embeddablePanelAction-actionA')).not.toBeInTheDocument();
     });
 
-    it('shows badges and notifications', async () => {
+    it('shows badges', async () => {
       const testAction = mockAction('testAction');
       const getActions = jest.fn().mockReturnValue([testAction]);
       await renderPresentationPanel({
@@ -142,7 +145,6 @@ describe('Presentation panel', () => {
         getActions,
       });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
-      expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
     });
 
     it('does not show badges when showBadges is false', async () => {
@@ -154,21 +156,6 @@ describe('Presentation panel', () => {
         showBadges: false,
       });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
-    });
-
-    it('does not show notifications when showNotifications is false', async () => {
-      const testAction = mockAction('testAction');
-      const getActions = jest.fn().mockReturnValue([testAction]);
-      await renderPresentationPanel({
-        ...defaultProps,
-        getActions,
-        showNotifications: false,
-      });
-      expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('embeddablePanelNotification-testAction')
-      ).not.toBeInTheDocument();
     });
   });
 
@@ -260,11 +247,11 @@ describe('Presentation panel', () => {
     });
 
     it('does not render a title when in edit mode and the provided title is blank', async () => {
-      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
+      const api: DefaultPresentationPanelApi & PublishesDataSources & PublishesViewMode = {
         uuid: 'test',
         title$: new BehaviorSubject<string | undefined>(''),
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
-        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+        dataSources$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({
         ...defaultProps,
@@ -276,12 +263,12 @@ describe('Presentation panel', () => {
     it('opens customize panel flyout on title click when in edit mode', async () => {
       editPanelSpy.mockClear();
 
-      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
+      const api: DefaultPresentationPanelApi & PublishesDataSources & PublishesViewMode = {
         uuid: 'test',
         isCustomizable: true,
         title$: new BehaviorSubject<string | undefined>('TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
-        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+        dataSources$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({
         ...defaultProps,
@@ -301,12 +288,12 @@ describe('Presentation panel', () => {
     it('does not open customize panel flyout on title click when panel is not customizable', async () => {
       editPanelSpy.mockClear();
 
-      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
+      const api: DefaultPresentationPanelApi & PublishesDataSources & PublishesViewMode = {
         uuid: 'test',
         isCustomizable: false,
         title$: new BehaviorSubject<string | undefined>('TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
-        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+        dataSources$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({
         ...defaultProps,
@@ -326,12 +313,12 @@ describe('Presentation panel', () => {
     it('does not show title customize link in view mode', async () => {
       editPanelSpy.mockClear();
 
-      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
+      const api: DefaultPresentationPanelApi & PublishesDataSources & PublishesViewMode = {
         uuid: 'test',
         isCustomizable: true,
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('view'),
-        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+        dataSources$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({
         ...defaultProps,

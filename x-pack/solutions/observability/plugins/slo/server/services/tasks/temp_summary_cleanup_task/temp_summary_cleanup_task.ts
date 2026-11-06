@@ -44,14 +44,14 @@ export class TempSummaryCleanupTask {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
           };
         },
@@ -99,11 +99,7 @@ export class TempSummaryCleanupTask {
     return `${TYPE}:${VERSION}`;
   }
 
-  public async runTask(
-    taskInstance: ConcreteTaskInstance,
-    core: CoreSetup,
-    abortController: AbortController
-  ) {
+  public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup, signal: AbortSignal) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -122,7 +118,7 @@ export class TempSummaryCleanupTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
     try {
-      const cleanUpTempSummary = new CleanUpTempSummary(esClient, this.logger, abortController);
+      const cleanUpTempSummary = new CleanUpTempSummary(esClient, this.logger, signal);
       await cleanUpTempSummary.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {

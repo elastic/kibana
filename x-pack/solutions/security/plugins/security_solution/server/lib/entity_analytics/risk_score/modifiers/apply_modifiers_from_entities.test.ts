@@ -90,6 +90,24 @@ describe('extractModifiersFromEntity', () => {
       const [crit] = extractModifiersFromEntity(entity, 0.5);
       expect(crit?.modifier_value).toBe(0.75); // 1.5 * 0.5
     });
+
+    it('records the contributor EUID in metadata when the entity carries attribution', () => {
+      const entity: RiskScoreModifierEntity = {
+        ...buildTestEntity({ id: 'user:target-1', criticality: 'high_impact' }),
+        criticalityContributorEUID: 'user:alias-1',
+      };
+      const [crit] = extractModifiersFromEntity(entity);
+      expect(crit?.metadata).toEqual({
+        criticality_level: 'high_impact',
+        contributor_euid: 'user:alias-1',
+      });
+    });
+
+    it('omits the contributor EUID from metadata when attribution is absent', () => {
+      const entity = buildTestEntity({ id: 'host:h1', criticality: 'high_impact' });
+      const [crit] = extractModifiersFromEntity(entity);
+      expect(crit?.metadata).toEqual({ criticality_level: 'high_impact' });
+    });
   });
 
   describe('watchlist modifier', () => {
@@ -252,6 +270,28 @@ describe('applyScoreModifiersFromEntities', () => {
     expect(doc.calculated_score_norm).toBeGreaterThan(75);
     expect(doc.criticality_level).toBe('extreme_impact');
     expect(doc.criticality_modifier).toBe(2.0);
+  });
+
+  it('keeps a saturated score at 100 and Critical, with and without modifiers', () => {
+    const entities = new Map([
+      ['host:h1', buildTestEntity({ id: 'host:h1', criticality: 'high_impact' })],
+    ]);
+
+    const results = applyScoreModifiersFromEntities({
+      now,
+      page: {
+        scores: [
+          buildScore('host:h1', { normalized_score: 100 }),
+          buildScore('host:h2', { normalized_score: 100 }),
+        ],
+        identifierField,
+      },
+      entities,
+    });
+
+    expect(results.map((doc) => doc.calculated_score_norm)).toEqual([100, 100]);
+    expect(results.map((doc) => doc.calculated_level)).toEqual(['Critical', 'Critical']);
+    expect(results[0].modifiers?.[0].contribution).toBe(0);
   });
 
   it('returns empty array with empty scores', () => {

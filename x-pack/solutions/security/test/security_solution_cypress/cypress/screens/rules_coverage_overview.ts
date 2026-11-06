@@ -37,3 +37,18 @@ export const COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS =
 
 export const COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS =
   '[data-test-subj="ruleStatsDisabledRulesCount"]';
+
+export const COVERAGE_OVERVIEW_INVALID_MITRE_CALLOUT =
+  '[data-test-subj="coverageOverviewInvalidMitreRulesCallout"]';
+
+export const COVERAGE_OVERVIEW_INVALID_MITRE_VIEW_BUTTON =
+  '[data-test-subj="coverageOverviewInvalidMitreRulesViewButton"]';
+
+export const COVERAGE_OVERVIEW_INVALID_MITRE_MODAL =
+  '[data-test-subj="coverageOverviewInvalidMitreRulesModal"]';
+
+export const COVERAGE_OVERVIEW_INVALID_MITRE_MODAL_CLOSE_BUTTON =
+  '[data-test-subj="coverageOverviewInvalidMitreRulesModalCloseButton"]';
+
+export const COVERAGE_OVERVIEW_INVALID_MITRE_BADGE = (id: string) =>
+  `[data-test-subj="coverageOverviewInvalidMitreBadge-${id}"]`;

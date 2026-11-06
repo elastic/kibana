@@ -113,6 +113,7 @@ export const GetAgentsSetupResponseSchema = schema.object(
     is_secrets_storage_enabled: schema.maybe(schema.boolean()),
     is_ssl_secrets_storage_enabled: schema.maybe(schema.boolean()),
     is_action_secrets_storage_enabled: schema.maybe(schema.boolean()),
+    is_fips_enabled: schema.maybe(schema.boolean()),
   },
   {
     meta: {

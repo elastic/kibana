@@ -13,6 +13,11 @@
 export interface YamlModule {
   Document: new (data: unknown, options?: any) => { toString(): string };
   isScalar: (node: unknown) => boolean;
+
+  visit: (
+    node: any,
+    visitor: { Scalar(key: unknown, node: { value?: unknown; type?: string }): void }
+  ) => void;
 }
 
 /**
@@ -58,8 +63,20 @@ export function createYamlKeysSorter(
 /**
  * Converts data to YAML string using the yaml package Document API.
  * This is the standard toYaml implementation used across Fleet.
+ *
+ * Multi-line strings are forced to literal block scalar style (`|`) so that
+ * newlines are preserved verbatim. Without this, the yaml package may choose
+ * folded (`>`) or double-quoted style for strings containing embedded newlines,
+ * collapsing lines and corrupting config values like CEL programs or scripts.
  */
 export function toYaml(data: unknown, options: unknown, yaml: YamlModule): string {
   const doc = new yaml.Document(data, options);
+  yaml.visit(doc, {
+    Scalar(_key, node) {
+      if (typeof node.value === 'string' && node.value.includes('\n')) {
+        node.type = 'BLOCK_LITERAL';
+      }
+    },
+  });
   return doc.toString();
 }

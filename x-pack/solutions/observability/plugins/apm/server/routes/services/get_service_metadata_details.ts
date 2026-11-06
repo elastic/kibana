@@ -11,6 +11,7 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getAgentName } from '@kbn/elastic-agent-utils';
 import type { SortOptions } from '@elastic/elasticsearch/lib/api/types';
+import type { ServiceMetadataDetails } from '@kbn/apm-api-shared';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   CLOUD_AVAILABILITY_ZONE,
@@ -41,52 +42,6 @@ import type { APMEventClient } from '../../lib/helpers/create_es_client/create_a
 import { should } from './get_service_metadata_icons';
 import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
 import { maybe } from '../../../common/utils/maybe';
-
-export interface ServiceMetadataDetails {
-  service?: {
-    versions?: string[];
-    runtime?: {
-      name?: string;
-      version?: string;
-    };
-    framework?: string;
-    agent: {
-      name: string;
-      version: string;
-    };
-  };
-  opentelemetry?: {
-    language?: string;
-    sdkVersion?: string;
-    autoVersion?: string;
-  };
-  container?: {
-    ids?: string[];
-    image?: string;
-    os?: string;
-    totalNumberInstances?: number;
-  };
-  serverless?: {
-    type?: string;
-    functionNames?: string[];
-    faasTriggerTypes?: string[];
-    hostArchitecture?: string;
-  };
-  cloud?: {
-    provider?: string;
-    availabilityZones?: string[];
-    regions?: string[];
-    machineTypes?: string[];
-    projectName?: string;
-    serviceName?: string;
-  };
-  kubernetes?: {
-    deployments?: string[];
-    namespaces?: string[];
-    replicasets?: string[];
-    containerImages?: string[];
-  };
-}
 
 export async function getServiceMetadataDetails({
   serviceName,

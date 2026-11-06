@@ -64,8 +64,8 @@ parse('1 + random()')
 
 ### Building kbn-tinymath
 
-This package is rebuilt when running `yarn kbn bootstrap`, but can also be build directly
-using `yarn build` from the `src/platform/packages/private/kbn-tinymath` directory.
+This package is rebuilt when running `pnpm kbn bootstrap`, but can also be build directly
+using `pnpm build` from the `src/platform/packages/private/kbn-tinymath` directory.
 
 ### Running tests
 

@@ -37,6 +37,7 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   indices: Record<string, string>;
@@ -46,8 +47,17 @@ export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   all: Record<string, Alert & AlertData>;
   seqNo: Record<string, number | undefined>;
   primaryTerm: Record<string, number | undefined>;
-  get: (uuid: string) => Alert & AlertData;
+  // Alert instance id -> alert uuid, per status. When several documents share an
+  // instance id within a status, the one with the most recent start wins.
+  instanceIdIndex: TrackedAlertsInstanceIdIndex;
+  get: (uuid: string) => (Alert & AlertData) | undefined;
   getById: (id: string) => (Alert & AlertData) | undefined;
+}
+
+export interface TrackedAlertsInstanceIdIndex {
+  active: Record<string, string>;
+  recovered: Record<string, string>;
+  delayed: Record<string, string>;
 }
 
 export interface AlertRuleData {
@@ -62,6 +72,7 @@ export interface AlertRuleData {
   alertDelay: number;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  snoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface AlertRule {
@@ -108,6 +119,7 @@ export interface IAlertsClient<
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<void>;
+  clearSnoozedStatusForAlerts(conditionExpiredInstanceIds: string[]): Promise<void>;
   getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows>;
   getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions;
   updatePersistedAlerts({
@@ -118,6 +130,7 @@ export interface IAlertsClient<
     alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
   }): Promise<void>;
   isTrackedAlert(id: string): boolean;
+  getBuiltActiveAlertDataByInstanceId(instanceId: string): Record<string, unknown> | undefined;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
     rawActiveAlerts: Record<string, RawAlertInstance>;
@@ -164,6 +177,7 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  snoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface TrackedAlerts<

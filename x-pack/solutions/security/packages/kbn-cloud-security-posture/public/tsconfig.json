@@ -40,6 +40,7 @@
     "@kbn/std",
     "@kbn/react-query",
     "@kbn/kql",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
+    "@kbn/core-spaces-common"
   ]
 }

@@ -14,16 +14,46 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import imageUrl from './background.svg';
+import illustrationUrl from './hero_illustration.svg';
 
-export const LandingHeader = (): JSX.Element => {
+const ILLUSTRATION_WIDTH = 120;
+const HEADER_CONTENT_MIN_HEIGHT = '140px';
+
+export const LandingHeader = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
+    <EuiPageTemplate.Header
+      paddingSize="none"
+      restrictWidth
+      bottomBorder={false}
+      css={css`
+        padding: ${euiTheme.size.l} ${euiTheme.size.xl} 0;
+      `}
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xl"
+        css={css`
+          min-height: ${HEADER_CONTENT_MIN_HEIGHT};
+        `}
+      >
+        <EuiHideFor sizes={['xs', 's', 'm']}>
+          <EuiFlexItem grow={false}>
+            <EuiImage
+              src={illustrationUrl}
+              alt=""
+              width={ILLUSTRATION_WIDTH}
+              data-test-subj="obltOnboardingHomeIllustration"
+            />
+          </EuiFlexItem>
+        </EuiHideFor>
+        <EuiFlexItem grow={false}>
           <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
             <h1>
               <FormattedMessage
@@ -40,12 +70,7 @@ export const LandingHeader = (): JSX.Element => {
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiHideFor sizes={['xs', 's']}>
-          <EuiFlexItem grow={false}>
-            <EuiImage src={imageUrl} alt="" size="l" />
-          </EuiFlexItem>
-        </EuiHideFor>
       </EuiFlexGroup>
-    </EuiPageTemplate.Section>
+    </EuiPageTemplate.Header>
   );
 };

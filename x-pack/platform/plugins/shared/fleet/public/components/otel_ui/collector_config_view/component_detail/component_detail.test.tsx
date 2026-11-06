@@ -15,6 +15,10 @@ import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common
 
 import { OTelComponentDetail } from './component_detail';
 
+jest.mock('../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
+
 const config: OTelCollectorConfig = {
   receivers: {
     otlp: {
@@ -238,6 +242,35 @@ describe('OTelComponentDetail', () => {
     expect(healthPanel.textContent).toContain('StatusPermanentError');
   });
 
+  it('shows unhealthy status badge when component is stopped', () => {
+    const health: ComponentHealth = {
+      healthy: false,
+      status: 'StatusStopped',
+      component_health_map: {
+        'receiver:otlp': {
+          healthy: false,
+          status: 'StatusStopped',
+          status_time_unix_nano: 1_714_500_000_000_000_000,
+        },
+      },
+    };
+
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        health={health}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.getByTestId('otelComponentHealthStatus').textContent).toContain('Unhealthy');
+    const healthPanel = result.getByTestId('otelComponentDetailHealth');
+    expect(healthPanel.textContent).toContain('Unhealthy');
+    expect(healthPanel.textContent).toContain('StatusStopped');
+  });
+
   it('finds component health in nested health map', () => {
     const health: ComponentHealth = {
       healthy: true,
@@ -300,5 +333,59 @@ describe('OTelComponentDetail', () => {
     );
 
     expect(result.queryByTestId('otelComponentDetailTab-metrics')).not.toBeInTheDocument();
+  });
+
+  it('renders a documentation link for a known component', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
+    const docLink = result.getByTestId('otelComponentDocLink');
+    expect(docLink).toBeInTheDocument();
+    expect(docLink.getAttribute('href')).toBe(
+      'https://opentelemetry.io/docs/collector/components/receiver/'
+    );
+  });
+
+  it('does not render a documentation link for pipeline type', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="logs/default"
+        componentType="pipeline"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.queryByTestId('otelComponentDocLink')).not.toBeInTheDocument();
+  });
+
+  it('renders a documentation link for any component of a supported type', () => {
+    const unknownConfig: OTelCollectorConfig = {
+      receivers: { unknown_nonexistent: { endpoint: 'localhost:1234' } },
+      service: { pipelines: {} },
+    };
+
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="unknown_nonexistent"
+        componentType="receiver"
+        config={unknownConfig}
+        onClose={jest.fn()}
+      />
+    );
+
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
+    const docLink = result.getByTestId('otelComponentDocLink');
+    expect(docLink).toBeInTheDocument();
+    expect(docLink.getAttribute('href')).toBe(
+      'https://opentelemetry.io/docs/collector/components/receiver/'
+    );
   });
 });

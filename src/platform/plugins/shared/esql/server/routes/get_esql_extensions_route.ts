@@ -60,7 +60,6 @@ export const registerESQLExtensionsRoute = (
               schema.literal('es'),
               schema.literal('oblt'),
               schema.literal('security'),
-              schema.literal('workplaceai'),
               schema.literal('vectordb'),
               schema.literal('classic'),
             ],
@@ -68,7 +67,8 @@ export const registerESQLExtensionsRoute = (
               defaultValue: 'classic',
             }
           ),
-          query: schema.string(),
+          // query is passed as a URL path segment, so keep it well under typical URL length limits.
+          query: schema.string({ maxLength: 10000 }),
         }),
       },
     },

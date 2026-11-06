@@ -35,7 +35,6 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       label: monitorUrl,
       href: monitorUrl,
       iconType: 'globe',
-      size: 's',
       target: '_blank',
       extraAction: {
         color: 'text',
@@ -54,7 +53,6 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       label: url,
       href: url,
       iconType: 'sortDown',
-      size: 's',
       target: '_blank',
       extraAction: {
         color: 'text',
@@ -93,7 +91,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         </EuiText>
       }
       <EuiSpacer size="s" />
-      <ListGroup gutterSize={'none'} listItems={listOfRedirects} />
+      <ListGroup listItems={listOfRedirects} />
     </Panel>
   ) : null;
 };

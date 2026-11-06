@@ -11,13 +11,21 @@ import { join } from 'path';
 
 // Docker image to use for Fleet API integration tests.
 // This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
-// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
+// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite-slim
 export const fleetPackageRegistryDockerImage =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
   'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: opt out of upstream signature enforcement
+// added in elastic/package-registry#1646; the throwaway test registry serves the
+// `:lite` distribution which ships some packages without `.sig` files.
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port

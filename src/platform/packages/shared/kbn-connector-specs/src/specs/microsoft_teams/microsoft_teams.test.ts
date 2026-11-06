@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { MicrosoftTeams } from './microsoft_teams';
 
 interface GraphCollectionResponse<T = unknown> {
@@ -31,15 +32,11 @@ interface SearchResponse {
   }>;
 }
 
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('MicrosoftTeams', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
+    patch: jest.fn(),
   };
 
   const mockContext = {
@@ -60,20 +57,56 @@ describe('MicrosoftTeams', () => {
       expect(MicrosoftTeams.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('should support workflows feature', () => {
+    it('should support workflows and contextEngine features', () => {
       expect(MicrosoftTeams.metadata.supportedFeatureIds).toContain('workflows');
+      expect(MicrosoftTeams.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 
   describe('auth', () => {
-    it('should support bearer, oauth_authorization_code, oauth_client_credentials, and ears', () => {
+    it('should support ears, oauth_authorization_code, oauth_client_credentials, and oauth_client_credentials_private_key_jwt as visible options', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
-      expect(auth?.types).toHaveLength(4);
-      expect(auth?.types[0]).toEqual(expect.objectContaining({ type: 'bearer' }));
-      expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
-      expect(auth?.types[2]).toEqual(expect.objectContaining({ type: 'oauth_client_credentials' }));
-      expect(auth?.types[3]).toEqual(expect.objectContaining({ type: 'ears' }));
+      const visibleTypes = auth?.types.filter(
+        (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
+      );
+      expect(visibleTypes).toHaveLength(4);
+      expect(visibleTypes?.[0]).toEqual(
+        expect.objectContaining({ type: 'ears', isRecommended: true })
+      );
+      expect(visibleTypes?.[1]).toEqual(
+        expect.objectContaining({ type: 'oauth_authorization_code' })
+      );
+      expect(visibleTypes?.[2]).toEqual(
+        expect.objectContaining({ type: 'oauth_client_credentials' })
+      );
+      expect(visibleTypes?.[3]).toEqual(
+        expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt' })
+      );
+    });
+
+    it('marks only ears (Quick Connect) as recommended', () => {
+      const recommended = (MicrosoftTeams.auth?.types as Array<string | AuthTypeDef>)
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.isRecommended))
+        .map((t) => t.type);
+      expect(recommended).toEqual(['ears']);
+    });
+
+    it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+      const bearerDef = MicrosoftTeams.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerDef).toBeDefined();
+      expect(bearerDef?.isLegacy).toBe(true);
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(MicrosoftTeams.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
     });
 
     it('should have correct oauth_authorization_code defaults', () => {
@@ -119,6 +152,23 @@ describe('MicrosoftTeams', () => {
       expect(scope).toContain('Chat.Read');
       expect(scope).toContain('ChannelMessage.Read.All');
       expect(scope).toContain('offline_access');
+    });
+
+    it('app-only (client credentials) auth types default the Graph .default scope', () => {
+      // The scope field is hidden for these app-only types, so it must be defaulted —
+      // Microsoft's client-credentials grant rejects an empty scope (AADSTS900144).
+      const appOnlyTypes = (MicrosoftTeams.auth?.types as Array<string | AuthTypeDef>).filter(
+        (t): t is AuthTypeDef =>
+          typeof t === 'object' &&
+          (t.type === 'oauth_client_credentials' ||
+            t.type === 'oauth_client_credentials_private_key_jwt')
+      );
+      expect(appOnlyTypes).toHaveLength(2);
+      appOnlyTypes.forEach((t) => {
+        expect((t.defaults as { scope?: string }).scope).toBe(
+          'https://graph.microsoft.com/.default'
+        );
+      });
     });
   });
 
@@ -233,6 +283,20 @@ describe('MicrosoftTeams', () => {
       expect(mockClient.get).not.toHaveBeenCalled();
     });
 
+    it('should throw when using private_key_jwt auth without userId', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      await expect(
+        MicrosoftTeams.actions.listJoinedTeams.handler(pkjwtContext, {})
+      ).rejects.toThrow(
+        'listJoinedTeams requires a userId when using app-only (client credentials) auth.'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
     it('should not throw when using app-only auth with userId', async () => {
       const appOnlyContext = {
         ...mockContext,
@@ -248,6 +312,19 @@ describe('MicrosoftTeams', () => {
       ).resolves.not.toThrow();
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/users/user-abc/joinedTeams',
+        expect.any(Object)
+      );
+    });
+
+    it('should encode userId (UPN) in the /users path', async () => {
+      mockClient.get.mockResolvedValue({ data: { value: [] } });
+
+      await MicrosoftTeams.actions.listJoinedTeams.handler(mockContext, {
+        userId: 'alice@contoso.com',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/alice%40contoso.com/joinedTeams',
         expect.any(Object)
       );
     });
@@ -501,6 +578,18 @@ describe('MicrosoftTeams', () => {
       } as unknown as ActionContext;
 
       await expect(MicrosoftTeams.actions.listChats.handler(appOnlyContext, {})).rejects.toThrow(
+        'listChats requires a userId when using app-only (client credentials) auth.'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should throw when using private_key_jwt auth without userId', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      await expect(MicrosoftTeams.actions.listChats.handler(pkjwtContext, {})).rejects.toThrow(
         'listChats requires a userId when using app-only (client credentials) auth.'
       );
       expect(mockClient.get).not.toHaveBeenCalled();
@@ -822,6 +911,18 @@ describe('MicrosoftTeams', () => {
       expect(mockClient.post).not.toHaveBeenCalled();
     });
 
+    it('should throw when called with private_key_jwt (app-only) auth', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      await expect(
+        MicrosoftTeams.actions.searchMessages.handler(pkjwtContext, { query: 'test' })
+      ).rejects.toThrow('searchMessages requires delegated authentication');
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
     it('should not throw for delegated auth (bearer token)', async () => {
       const bearerContext = {
         ...mockContext,
@@ -861,7 +962,482 @@ describe('MicrosoftTeams', () => {
     });
   });
 
+  describe('sendChannelMessage action', () => {
+    it('should post a message to a channel', async () => {
+      const mockResponse = {
+        data: {
+          id: 'msg-new-1',
+          createdDateTime: '2025-06-01T10:00:00Z',
+          webUrl: 'https://teams.microsoft.com/l/message/msg-new-1',
+          from: { user: { id: 'user-1', displayName: 'Alice' } },
+          body: { contentType: 'text', content: 'Hello channel!' },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
+        teamId: 'team-123',
+        channelId: 'channel-456',
+        content: 'Hello channel!',
+        contentType: 'text',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/teams/team-123/channels/channel-456/messages',
+        { body: { contentType: 'text', content: 'Hello channel!' } }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'Microsoft Teams sending message to channel channel-456 in team team-123'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should include subject when provided', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'msg-2' } });
+
+      await MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
+        teamId: 'team-123',
+        channelId: 'channel-456',
+        content: 'Incident update',
+        contentType: 'text',
+        subject: 'SEV1 Alert',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/teams/team-123/channels/channel-456/messages',
+        { body: { contentType: 'text', content: 'Incident update' }, subject: 'SEV1 Alert' }
+      );
+    });
+
+    it('should send HTML content', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'msg-3' } });
+
+      await MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
+        teamId: 'team-123',
+        channelId: 'channel-456',
+        content: '<b>Alert fired!</b>',
+        contentType: 'html',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/teams/team-123/channels/channel-456/messages',
+        { body: { contentType: 'html', content: '<b>Alert fired!</b>' } }
+      );
+    });
+
+    it('should include contentType in body (schema default: text)', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'msg-4' } });
+
+      await MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
+        teamId: 'team-123',
+        channelId: 'channel-456',
+        content: 'No contentType field',
+        contentType: 'text',
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      expect(callArgs[1].body.contentType).toBe('text');
+    });
+
+    it('should encode special characters in teamId and channelId', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'msg-5' } });
+
+      await MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
+        teamId: 'team abc',
+        channelId: 'channel/xyz',
+        content: 'test',
+        contentType: 'text',
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      expect(callArgs[0]).toBe(
+        'https://graph.microsoft.com/v1.0/teams/team%20abc/channels/channel%2Fxyz/messages'
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Forbidden'));
+
+      await expect(
+        MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
+          teamId: 'team-123',
+          channelId: 'channel-456',
+          content: 'test',
+          contentType: 'text',
+        })
+      ).rejects.toThrow('Forbidden');
+    });
+  });
+
+  describe('sendChatMessage action', () => {
+    it('should send a message to a chat', async () => {
+      const mockResponse = {
+        data: {
+          id: 'chat-msg-1',
+          createdDateTime: '2025-06-01T10:00:00Z',
+          webUrl: 'https://teams.microsoft.com/l/message/chat-msg-1',
+          from: { user: { id: 'user-1', displayName: 'Alice' } },
+          body: { contentType: 'text', content: 'Hey there!' },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await MicrosoftTeams.actions.sendChatMessage.handler(mockContext, {
+        chatId: 'chat-789',
+        content: 'Hey there!',
+        contentType: 'text',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/chats/chat-789/messages',
+        { body: { contentType: 'text', content: 'Hey there!' } }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'Microsoft Teams sending message to chat chat-789'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should send HTML content', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'chat-msg-2' } });
+
+      await MicrosoftTeams.actions.sendChatMessage.handler(mockContext, {
+        chatId: 'chat-789',
+        content: '<b>Alert!</b>',
+        contentType: 'html',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/chats/chat-789/messages',
+        { body: { contentType: 'html', content: '<b>Alert!</b>' } }
+      );
+    });
+
+    it('should include contentType in body (schema default: text)', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'chat-msg-3' } });
+
+      await MicrosoftTeams.actions.sendChatMessage.handler(mockContext, {
+        chatId: 'chat-789',
+        content: 'Hello',
+        contentType: 'text',
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      expect(callArgs[1].body.contentType).toBe('text');
+    });
+
+    it('should encode special characters in chatId', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'chat-msg-4' } });
+
+      await MicrosoftTeams.actions.sendChatMessage.handler(mockContext, {
+        chatId: '19:abc@thread.v2',
+        content: 'test',
+        contentType: 'text',
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      expect(callArgs[0]).toBe(
+        'https://graph.microsoft.com/v1.0/chats/19%3Aabc%40thread.v2/messages'
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Chat not found'));
+
+      await expect(
+        MicrosoftTeams.actions.sendChatMessage.handler(mockContext, {
+          chatId: 'nonexistent',
+          content: 'test',
+          contentType: 'text',
+        })
+      ).rejects.toThrow('Chat not found');
+    });
+  });
+
+  describe('updateMessage action', () => {
+    const mockPatch = jest.fn();
+    const mockContextWithPatch = {
+      ...mockContext,
+      client: { ...mockClient, patch: mockPatch },
+    } as unknown as ActionContext;
+
+    beforeEach(() => {
+      mockPatch.mockReset();
+    });
+
+    it('should update a channel message', async () => {
+      mockPatch.mockResolvedValue({ data: '' });
+
+      const result = await MicrosoftTeams.actions.updateMessage.handler(mockContextWithPatch, {
+        messageId: 'msg-1',
+        teamId: 'team-123',
+        channelId: 'channel-456',
+        content: 'Updated content',
+        contentType: 'text',
+      });
+
+      expect(mockPatch).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/teams/team-123/channels/channel-456/messages/msg-1',
+        { body: { contentType: 'text', content: 'Updated content' } }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith('Microsoft Teams updating message msg-1');
+      expect(result).toEqual({ success: true });
+    });
+
+    it('should update a chat message', async () => {
+      mockPatch.mockResolvedValue({ data: '' });
+
+      const result = await MicrosoftTeams.actions.updateMessage.handler(mockContextWithPatch, {
+        messageId: 'msg-2',
+        chatId: 'chat-789',
+        content: 'Edited reply',
+        contentType: 'text',
+      });
+
+      expect(mockPatch).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/chats/chat-789/messages/msg-2',
+        { body: { contentType: 'text', content: 'Edited reply' } }
+      );
+      expect(result).toEqual({ success: true });
+    });
+
+    it('should send HTML update', async () => {
+      mockPatch.mockResolvedValue({ data: '' });
+
+      await MicrosoftTeams.actions.updateMessage.handler(mockContextWithPatch, {
+        messageId: 'msg-3',
+        chatId: 'chat-789',
+        content: '<b>Updated!</b>',
+        contentType: 'html',
+      });
+
+      const callArgs = mockPatch.mock.calls[0];
+      expect(callArgs[1].body.contentType).toBe('html');
+    });
+
+    it('should throw when neither channel nor chat context is provided', async () => {
+      await expect(
+        MicrosoftTeams.actions.updateMessage.handler(mockContextWithPatch, {
+          messageId: 'msg-1',
+          content: 'test',
+          contentType: 'text',
+        } as Parameters<typeof MicrosoftTeams.actions.updateMessage.handler>[1])
+      ).rejects.toThrow(
+        'updateMessage requires either teamId + channelId (channel message) or chatId (chat message).'
+      );
+      expect(mockPatch).not.toHaveBeenCalled();
+    });
+
+    it('should propagate patch errors', async () => {
+      mockPatch.mockRejectedValue(new Error('Not found'));
+
+      await expect(
+        MicrosoftTeams.actions.updateMessage.handler(mockContextWithPatch, {
+          messageId: 'msg-1',
+          chatId: 'chat-789',
+          content: 'test',
+          contentType: 'text',
+        })
+      ).rejects.toThrow('Not found');
+    });
+  });
+
+  describe('getUser action', () => {
+    it('should retrieve a user by ID', async () => {
+      const mockResponse = {
+        data: {
+          id: 'user-guid-123',
+          displayName: 'Alice Smith',
+          mail: 'alice@contoso.com',
+          userPrincipalName: 'alice@contoso.com',
+          jobTitle: 'Engineer',
+          department: 'Platform',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await MicrosoftTeams.actions.getUser.handler(mockContext, {
+        userId: 'alice@contoso.com',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/alice%40contoso.com',
+        { params: { $select: 'id,displayName,mail,userPrincipalName,jobTitle,department' } }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'Microsoft Teams getting user alice@contoso.com'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should retrieve a user by GUID', async () => {
+      const mockResponse = {
+        data: {
+          id: '00000000-0000-0000-0000-000000000001',
+          displayName: 'Bob Jones',
+          mail: 'bob@contoso.com',
+          userPrincipalName: 'bob@contoso.com',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await MicrosoftTeams.actions.getUser.handler(mockContext, {
+        userId: '00000000-0000-0000-0000-000000000001',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/00000000-0000-0000-0000-000000000001',
+        expect.any(Object)
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate user not found errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Resource not found'));
+
+      await expect(
+        MicrosoftTeams.actions.getUser.handler(mockContext, { userId: 'unknown@contoso.com' })
+      ).rejects.toThrow('Resource not found');
+    });
+  });
+
+  describe('createChat action', () => {
+    it('should create a oneOnOne chat', async () => {
+      const mockResponse = {
+        data: {
+          id: 'new-chat-id-19:abc@thread.v2',
+          chatType: 'oneOnOne',
+          webUrl: 'https://teams.microsoft.com/l/chat/new-chat-id',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await MicrosoftTeams.actions.createChat.handler(mockContext, {
+        chatType: 'oneOnOne',
+        memberIds: ['my-user-guid-123', 'user-guid-456'],
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/chats', {
+        chatType: 'oneOnOne',
+        members: [
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('my-user-guid-123')",
+          },
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('user-guid-456')",
+          },
+        ],
+      });
+      expect(mockContext.log.debug).toHaveBeenCalledWith('Microsoft Teams creating oneOnOne chat');
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should create a group chat with topic', async () => {
+      const mockResponse = {
+        data: {
+          id: 'group-chat-id',
+          chatType: 'group',
+          topic: 'Incident Response',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await MicrosoftTeams.actions.createChat.handler(mockContext, {
+        chatType: 'group',
+        memberIds: ['my-user-id', 'user-a', 'user-b'],
+        topic: 'Incident Response',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/chats', {
+        chatType: 'group',
+        members: [
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('my-user-id')",
+          },
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('user-a')",
+          },
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('user-b')",
+          },
+        ],
+        topic: 'Incident Response',
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should not include topic when not provided', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'chat-no-topic' } });
+
+      await MicrosoftTeams.actions.createChat.handler(mockContext, {
+        chatType: 'group',
+        memberIds: ['my-user-id', 'user-a', 'user-b'],
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      expect(callArgs[1]).not.toHaveProperty('topic');
+    });
+
+    it('should encode special characters in member user IDs', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: 'chat-encoded' } });
+
+      await MicrosoftTeams.actions.createChat.handler(mockContext, {
+        chatType: 'oneOnOne',
+        memberIds: ['me@contoso.com', 'alice@contoso.com'],
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      const member = callArgs[1].members[1];
+      expect(member['user@odata.bind']).toBe(
+        "https://graph.microsoft.com/v1.0/users('alice%40contoso.com')"
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('BadRequest'));
+
+      await expect(
+        MicrosoftTeams.actions.createChat.handler(mockContext, {
+          chatType: 'oneOnOne',
+          memberIds: ['my-user-id', 'user-x'],
+        })
+      ).rejects.toThrow('BadRequest');
+    });
+  });
+
+  describe('auth scope includes write permissions', () => {
+    it('ears scope includes ChannelMessage.Send and Chat.ReadWrite', () => {
+      const earsType = MicrosoftTeams.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'ears'
+      ) as { defaults?: { scope?: string } } | undefined;
+      const scope = earsType?.defaults?.scope ?? '';
+      expect(scope).toContain('ChannelMessage.Send');
+      expect(scope).toContain('Chat.ReadWrite');
+    });
+
+    it('oauth_authorization_code scope includes ChannelMessage.Send and Chat.ReadWrite', () => {
+      const oauthType = MicrosoftTeams.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      ) as { defaults?: { scope?: string } } | undefined;
+      const scope = oauthType?.defaults?.scope ?? '';
+      expect(scope).toContain('ChannelMessage.Send');
+      expect(scope).toContain('Chat.ReadWrite');
+    });
+  });
+
   describe('test handler', () => {
+    const testSpec = MicrosoftTeams.test;
+
     it('should use /me/joinedTeams for delegated auth (bearer)', async () => {
       const mockResponse = {
         data: {
@@ -874,19 +1450,13 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
         { params: { $select: 'id,displayName' } }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 3 teams',
-      });
+      expect(result).toEqual({});
     });
 
     it('should use /me/joinedTeams for oauth_authorization_code (delegated) auth', async () => {
@@ -902,19 +1472,13 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(oauthCodeContext)) as TestResult;
+      const result = await testSpec.handler(oauthCodeContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
         { params: { $select: 'id,displayName' } }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 1 teams',
-      });
+      expect(result).toEqual({});
     });
 
     it('should use /teams for app-only auth (oauth_client_credentials)', async () => {
@@ -933,18 +1497,28 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(appOnlyContext)) as TestResult;
+      const result = await testSpec.handler(appOnlyContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
         params: { $select: 'id,displayName' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 2 teams',
+      expect(result).toEqual({});
+    });
+
+    it('should use /teams for app-only auth (oauth_client_credentials_private_key_jwt)', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      mockClient.get.mockResolvedValue({ data: { value: [{ id: 'team-1' }] } });
+
+      const result = await testSpec.handler(pkjwtContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
+        params: { $select: 'id,displayName' },
       });
+      expect(result).toEqual({});
     });
 
     it('should handle zero teams', async () => {
@@ -953,75 +1527,35 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 0 teams',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw when Graph API response is missing value array', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow(
+        'Unexpected Graph API response: missing value array'
+      );
+    });
+
+    it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid credentials');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle network errors', async () => {
+    it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle non-Error exceptions', async () => {
+    it('should throw on non-Error rejection (plain string)', async () => {
       mockClient.get.mockRejectedValue('string error');
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unknown error');
-    });
-
-    it('should return failure when response is missing value array', async () => {
-      mockClient.get.mockResolvedValue({ data: { unexpected: true } });
-
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unexpected Graph API response: missing value array');
-    });
-
-    it('should return failure when response data is null', async () => {
-      mockClient.get.mockResolvedValue({ data: null });
-
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unexpected Graph API response: missing value array');
+      await expect(testSpec.handler(mockContext)).rejects.toBeDefined();
     });
   });
 });

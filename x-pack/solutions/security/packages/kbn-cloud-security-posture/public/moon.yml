@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/kql'
   - '@kbn/entity-store'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-browser
   - package
@@ -59,6 +60,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

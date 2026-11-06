@@ -11,11 +11,13 @@ import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod/v4';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
+import { MAX_STRING_LENGTH } from '../../../common';
 import { FIELD_MAPPING_TYPES } from '../state';
 
 const fieldMappingSchema = z.object({
   name: z
     .string()
+    .max(MAX_STRING_LENGTH.body)
     .describe('Flattened dot-notation path to the field (e.g. "myintegration.myds.src_port")'),
   type: z
     .enum(FIELD_MAPPING_TYPES)
@@ -28,9 +30,11 @@ export const submitReviewTool = (): DynamicStructuredTool => {
   const schema = z.object({
     content: z
       .string()
+      .max(MAX_STRING_LENGTH.body)
       .describe('The complete review with all issues, details, and recommendations'),
     summary: z
       .string()
+      .max(MAX_STRING_LENGTH.description)
       .describe(
         'A concise summary: PASSED or FAILED, number of issues, severity, and which agent should address them'
       ),

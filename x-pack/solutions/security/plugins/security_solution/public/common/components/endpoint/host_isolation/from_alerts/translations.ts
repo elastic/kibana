@@ -35,3 +35,10 @@ export const RETURN_TO_ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',
   { defaultMessage: 'Return to alert details' }
 );
+
+export const HOST_ON_LINKED_PROJECT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.hostIsolation.hostOnLinkedProject',
+  {
+    defaultMessage: 'Host isolation is not available for a host enrolled in a linked project.',
+  }
+);

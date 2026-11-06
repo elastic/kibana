@@ -15,6 +15,7 @@ import {
 import { MockRouter } from '../../__mocks__/router.mock';
 import { ROUTE_VERSIONS } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
+import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { defineInferenceConnectorsRoute } from './inference_connectors';
 
 const inferenceConnector = (connectorId: string) => ({
@@ -51,6 +52,15 @@ const createContext = ({
     }),
   } as unknown as jest.Mocked<RequestHandlerContext>);
 
+const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegistry =>
+  ({
+    get: jest.fn(() =>
+      ignoreGlobalDefault
+        ? { featureId: 'my_feature', ignoreGlobalDefault: true, recommendedEndpoints: [] }
+        : undefined
+    ),
+  } as unknown as InferenceFeatureRegistry);
+
 describe('GET /internal/search_inference_endpoints/connectors', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
@@ -58,7 +68,10 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
   let getConnectorList: jest.Mock;
   let getConnectorById: jest.Mock;
 
-  const registerRoute = (settings: SettingsValues = {}) => {
+  const registerRoute = (
+    settings: SettingsValues = {},
+    featureRegistry: InferenceFeatureRegistry = makeFeatureRegistry()
+  ) => {
     mockRouter = new MockRouter({
       context: createContext(settings),
       method: 'get',
@@ -68,6 +81,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     defineInferenceConnectorsRoute({
       logger: mockLogger,
       router: mockRouter.router,
+      featureRegistry,
       getForFeature,
       getConnectorList,
       getConnectorById,
@@ -119,6 +133,59 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [{ ...recommended, isRecommended: true }, other],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('hides a template-only connector from a feature that sends messages', async () => {
+    const messages = inferenceConnector('messages');
+    const templateOnly = {
+      ...inferenceConnector('daybreak'),
+      metadata: { capabilities: { templates: { policy: 'required' as const } } },
+    };
+    getForFeature.mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([messages, templateOnly]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [messages],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('lists only template connectors when the feature opts in', async () => {
+    const messages = inferenceConnector('gemini');
+    const templateOnly = {
+      ...inferenceConnector('daybreak'),
+      metadata: { capabilities: { templates: { policy: 'required' as const } } },
+    };
+    getForFeature.mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([messages, templateOnly]);
+    registerRoute({}, {
+      get: jest.fn(() => ({
+        featureId: 'alertzero_template_models',
+        allowTemplateRequiredModels: true,
+      })),
+    } as unknown as InferenceFeatureRegistry);
+
+    await mockRouter.callRoute({ query: { featureId: 'alertzero_template_models' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [templateOnly],
         soEntryFound: false,
       },
     });
@@ -207,6 +274,54 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('includes declared parameters on recommended connectors in the response body', async () => {
+    const parameters = { reasoning: { effort: 'high' as const } };
+    const recommended = { ...inferenceConnector('rec'), parameters };
+    const other = inferenceConnector('other');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([inferenceConnector('rec'), other]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [{ ...recommended, isRecommended: true }, other],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('returns the default connector without the parameters the feature declares when defaultConnectorOnly is set', async () => {
+    const parameters = { reasoning: { effort: 'medium' as const } };
+    const defaultConnector = inferenceConnector('default-id');
+    getConnectorById.mockResolvedValue(defaultConnector);
+    const featureRegistry = {
+      get: jest.fn(() => ({
+        featureId: 'my_feature',
+        recommendedEndpoints: [{ id: 'default-id', parameters }],
+      })),
+    } as unknown as InferenceFeatureRegistry;
+    registerRoute(
+      { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
+      featureRegistry
+    );
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [defaultConnector],
         soEntryFound: false,
       },
     });
@@ -348,6 +463,26 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('still returns only the default connector when ignoreGlobalDefault is true and defaultConnectorOnly is set', async () => {
+    const defaultConnector = inferenceConnector('default-id');
+    getConnectorById.mockResolvedValue(defaultConnector);
+    registerRoute(
+      { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
+      makeFeatureRegistry(true)
+    );
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(getConnectorList).not.toHaveBeenCalled();
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [defaultConnector],
         soEntryFound: false,
       },
     });

@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
@@ -156,21 +157,31 @@ export class FieldRuleEditor extends Component<Props, {}> {
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace={true}>
           {this.props.readOnly === false && renderAddValueButton ? (
-            <EuiButtonIcon
-              iconSize="s"
-              iconType="plusCircle"
-              onClick={this.onAddAlternateValue}
-              color="primary"
-              data-test-subj="addAlternateValueButton"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton',
                 {
                   defaultMessage: 'Add alternate value',
                 }
               )}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="plusCircle"
+                onClick={this.onAddAlternateValue}
+                color="primary"
+                data-test-subj="addAlternateValueButton"
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton',
+                  {
+                    defaultMessage: 'Add alternate value',
+                  }
+                )}
+              />
+            </EuiToolTip>
           ) : (
-            <EuiIcon size="s" type="empty" />
+            <EuiIcon size="s" type="empty" aria-hidden={true} />
           )}
         </EuiFormRow>
       </EuiFlexItem>
@@ -182,21 +193,31 @@ export class FieldRuleEditor extends Component<Props, {}> {
       <EuiFlexItem grow={1}>
         <EuiFormRow hasEmptyLabelSpace={true}>
           {this.props.readOnly === false ? (
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              iconSize="s"
-              data-test-subj={`fieldRuleEditorDeleteValue fieldRuleEditorDeleteValue-${valueIndex}`}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
                 {
                   defaultMessage: 'Delete value',
                 }
               )}
-              onClick={() => this.onRemoveAlternateValue(valueIndex)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                iconSize="s"
+                data-test-subj={`fieldRuleEditorDeleteValue fieldRuleEditorDeleteValue-${valueIndex}`}
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
+                  {
+                    defaultMessage: 'Delete value',
+                  }
+                )}
+                onClick={() => this.onRemoveAlternateValue(valueIndex)}
+              />
+            </EuiToolTip>
           ) : (
-            <EuiIcon size="s" type="empty" />
+            <EuiIcon size="s" type="empty" aria-hidden={true} />
           )}
         </EuiFormRow>
       </EuiFlexItem>

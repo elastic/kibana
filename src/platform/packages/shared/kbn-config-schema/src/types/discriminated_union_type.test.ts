@@ -148,7 +148,7 @@ describe('DiscriminatedUnionType', () => {
 
       expect(() => {
         catchAllType.validate(input);
-      }).toThrowError();
+      }).toThrow();
     });
 
     it('should invalidate bad fallback schema', () => {

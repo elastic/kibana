@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
@@ -18,6 +18,7 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -26,14 +27,15 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useEventFilterAction } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation';
+import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
-import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
+import { DocumentDetailsActionMenu, getDocumentActionGroups } from './document_details_action_menu';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyout.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -76,13 +78,9 @@ export interface TakeActionDropdownProps {
    */
   handleOnEventClosed: () => void;
   /**
-   * Callback to let the parent know if the isolation panel is opened or closed
-   */
-  isHostIsolationPanelOpen: boolean;
-  /**
    * Callback to let parent know when the user interacts with the exception panel
    */
-  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+  onAddIsolationStatusClick: (action: HostIsolationAction) => void;
   /**
    * Callback to let parent know when the user interacts with event filter
    */
@@ -121,7 +119,6 @@ export const TakeActionDropdown = memo(
     dataFormattedForFieldBrowser,
     dataAsNestedObject,
     handleOnEventClosed,
-    isHostIsolationPanelOpen,
     onAddEventFilterClick,
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
@@ -195,7 +192,7 @@ export const TakeActionDropdown = memo(
 
     // host isolation interaction
     const handleOnAddIsolationStatusClick = useCallback(
-      (action: 'isolateHost' | 'unisolateHost') => {
+      (action: HostIsolationAction) => {
         onAddIsolationStatusClick(action);
         setIsPopoverOpen(false);
       },
@@ -205,7 +202,6 @@ export const TakeActionDropdown = memo(
       closePopover: closePopoverHandler,
       detailsData: dataFormattedForFieldBrowser,
       onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
-      isHostIsolationPanelOpen,
     });
 
     // exception interaction
@@ -294,36 +290,11 @@ export const TakeActionDropdown = memo(
         }),
       [handleOnOsqueryClick]
     );
+    const osqueryItemsArray = useMemo(() => [osqueryActionItem], [osqueryActionItem]);
     const { osquery } = useKibana().services;
     const osqueryAvailable = osquery?.isOsqueryAvailable({
       agentId: osqueryAgentId,
     });
-
-    // alert action items
-    const alertsActionItems = useMemo(
-      () =>
-        !isEvent && alertSummaryData.ruleId
-          ? [
-              ...statusActionItems,
-              ...alertTagsItems,
-              ...alertAssigneesItems,
-              ...exceptionActionItems,
-            ]
-          : isEndpointEvent && canCreateEndpointEventFilters
-          ? eventFilterActionItems
-          : [],
-      [
-        eventFilterActionItems,
-        isEndpointEvent,
-        canCreateEndpointEventFilters,
-        exceptionActionItems,
-        statusActionItems,
-        isEvent,
-        alertSummaryData.ruleId,
-        alertTagsItems,
-        alertAssigneesItems,
-      ]
-    );
 
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData: dataAsNestedObject,
@@ -346,60 +317,64 @@ export const TakeActionDropdown = memo(
         ecsRowData: dataAsNestedObject,
       });
 
-    const documents = useMemo(
-      () => [
-        {
-          _id: dataAsNestedObject._id,
-          _index: dataAsNestedObject._index ?? '',
-          ...(searchHit?._source ?? {}),
-        },
-      ],
-      [dataAsNestedObject._id, dataAsNestedObject._index, searchHit]
+    const documentIds = useMemo(
+      () =>
+        toDocumentSelections([{ _id: dataAsNestedObject._id, _index: dataAsNestedObject._index }]),
+      [dataAsNestedObject._id, dataAsNestedObject._index]
     );
 
     const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
-        documents,
+        documentIds,
       });
 
-    // items to render in the dropdown
-    const items: AlertTableContextMenuItem[] = useMemo(
+    const showAlertActions = !isEvent && Boolean(alertSummaryData.ruleId);
+    const showEventFilter = Boolean(
+      !showAlertActions && isEndpointEvent && canCreateEndpointEventFilters
+    );
+    const osqueryAvailableFlag = Boolean(osqueryAvailable);
+    const hasItems = useMemo(
       () =>
-        isRemoteDocument
-          ? [...investigateInTimelineActionItems]
-          : [
-              ...addToCaseActionItems,
-              ...alertsActionItems,
-              ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
-              ...hostIsolationActionItems,
-              ...endpointResponseActionsConsoleItems,
-              ...(osqueryAvailable ? [osqueryActionItem] : []),
-              ...investigateInTimelineActionItems,
-            ],
+        getDocumentActionGroups({
+          addToCaseItems: addToCaseActionItems,
+          alertAssigneeItems: alertAssigneesItems,
+          alertTagItems: alertTagsItems,
+          documentWorkflowItems: documentWorkflowMenuItem,
+          endpointResponseItems: endpointResponseActionsConsoleItems,
+          eventFilterItems: eventFilterActionItems,
+          exceptionItems: exceptionActionItems,
+          hostIsolationItems: hostIsolationActionItems,
+          investigateInTimelineItems: investigateInTimelineActionItems,
+          isAlert,
+          isRemoteDocument,
+          osqueryAvailable: osqueryAvailableFlag,
+          osqueryItems: osqueryItemsArray,
+          runAlertWorkflowItems: alertWorkflowMenuItem,
+          showAlertActions,
+          showEventFilter,
+          statusItems: statusActionItems,
+        }).some((group) => group.length > 0),
       [
         addToCaseActionItems,
-        alertsActionItems,
+        alertAssigneesItems,
+        alertTagsItems,
+        documentWorkflowMenuItem,
+        endpointResponseActionsConsoleItems,
+        eventFilterActionItems,
+        exceptionActionItems,
+        hostIsolationActionItems,
+        investigateInTimelineActionItems,
         isAlert,
         isRemoteDocument,
+        osqueryAvailableFlag,
+        osqueryItemsArray,
         alertWorkflowMenuItem,
-        documentWorkflowMenuItem,
-        hostIsolationActionItems,
-        endpointResponseActionsConsoleItems,
-        osqueryAvailable,
-        osqueryActionItem,
-        investigateInTimelineActionItems,
+        showAlertActions,
+        showEventFilter,
+        statusActionItems,
       ]
     );
-
-    // panels rendered in the context menu
-    const panels = [
-      { id: 0, items },
-      ...(!isRemoteDocument ? alertTagsPanels : []),
-      ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
-      ...(!isRemoteDocument ? alertAssigneesPanels : []),
-      ...(!isRemoteDocument ? statusActionPanels : []),
-    ];
 
     const takeActionButton = useMemo(
       () => (
@@ -417,9 +392,10 @@ export const TakeActionDropdown = memo(
       [togglePopoverHandler]
     );
 
-    return items.length && dataAsNestedObject ? (
+    return hasItems && dataAsNestedObject ? (
       <EuiPopover
         id="AlertTakeActionPanel"
+        aria-label={TAKE_ACTION}
         button={takeActionButton}
         isOpen={isPopoverOpen}
         closePopover={closePopoverHandler}
@@ -427,11 +403,29 @@ export const TakeActionDropdown = memo(
         anchorPosition="downLeft"
         repositionOnScroll
       >
-        <EuiContextMenu
-          size="s"
-          initialPanelId={0}
-          panels={panels}
-          data-test-subj="takeActionPanelMenu"
+        <DocumentDetailsActionMenu
+          addToCaseItems={addToCaseActionItems}
+          alertAssigneeItems={alertAssigneesItems}
+          alertAssigneePanels={alertAssigneesPanels}
+          alertTagItems={alertTagsItems}
+          alertTagPanels={alertTagsPanels}
+          documentWorkflowItems={documentWorkflowMenuItem}
+          endpointResponseItems={endpointResponseActionsConsoleItems}
+          eventFilterItems={eventFilterActionItems}
+          exceptionItems={exceptionActionItems}
+          hostIsolationItems={hostIsolationActionItems}
+          investigateInTimelineItems={investigateInTimelineActionItems}
+          isAlert={isAlert}
+          isRemoteDocument={isRemoteDocument}
+          osqueryAvailable={Boolean(osqueryAvailable)}
+          osqueryItems={osqueryItemsArray}
+          runAlertWorkflowItems={alertWorkflowMenuItem}
+          runAlertWorkflowPanels={runAlertWorkflowPanel}
+          runDocumentWorkflowPanels={runDocumentWorkflowPanel}
+          showAlertActions={showAlertActions}
+          showEventFilter={showEventFilter}
+          statusItems={statusActionItems}
+          statusPanels={statusActionPanels}
         />
       </EuiPopover>
     ) : null;

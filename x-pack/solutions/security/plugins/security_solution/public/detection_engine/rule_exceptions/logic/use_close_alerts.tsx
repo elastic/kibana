@@ -6,14 +6,15 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { RuntimeFieldType } from '../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import {
   buildAlertsFilterByRuleIds,
   buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../utils/get_es_query_filter';
 import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { AlertClosingReason } from '../../../../common/types';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
@@ -23,18 +24,29 @@ import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actio
 /**
  * Closes alerts.
  *
- * @param ruleStaticIds static id of the rules (rule.ruleId, not rule.id) where the exception updates will be applied
+ * @param ruleStaticIds static id of the rules (rule.ruleId, not rule.id) whose
+ *   alerts the bulk close should be scoped to. Used to build a
+ *   `kibana.alert.rule.rule_id` filter — only alerts produced by these rules
+ *   are matched.
  * @param exceptionItems array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
+ * @param runtimeFields - optional map of field name to ES runtime field type
+ *   for any fields referenced by the exception that aren't natively mapped on
+ *   the alerts index (e.g. runtime fields on the rule's source index). The
+ *   server synthesizes `_source`-reading runtime mappings from this map.
+ * @param reason - optional structured reason recorded on every alert closed by
+ *   this call. When omitted, alerts are closed without a reason.
  *
  */
-export type AddOrUpdateExceptionItemsFunc = (
-  ruleStaticIds: string[],
-  exceptionItems: ExceptionListItemSchema[],
-  alertIdToClose?: string,
-  bulkCloseIndex?: IndexPatternArray
-) => Promise<void>;
+export type AddOrUpdateExceptionItemsFunc = (params: {
+  ruleStaticIds: string[];
+  exceptionItems: ExceptionListItemSchema[];
+  alertIdToClose?: string;
+  bulkCloseIndex?: IndexPatternArray;
+  runtimeFields?: Record<string, RuntimeFieldType>;
+  reason?: AlertClosingReason;
+}) => Promise<void>;
 
 export type ReturnUseCloseAlertsFromExceptions = [boolean, AddOrUpdateExceptionItemsFunc | null];
 
@@ -51,22 +63,27 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const onUpdateAlerts: AddOrUpdateExceptionItemsFunc = async (
+    const onUpdateAlerts: AddOrUpdateExceptionItemsFunc = async ({
       ruleStaticIds,
       exceptionItems,
       alertIdToClose,
-      bulkCloseIndex
-    ) => {
+      bulkCloseIndex,
+      runtimeFields,
+      reason,
+    }) => {
       try {
         setIsLoading(true);
-        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
-        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
+        let alertIdUpdated = 0;
+        let bulkUpdated = 0;
+        let bulkConflicts = 0;
         if (alertIdToClose != null) {
-          alertIdResponse = await updateAlertStatus({
+          const alertIdResponse = await updateAlertStatus({
             signalIds: [alertIdToClose],
             status: 'closed',
             signal: abortCtrl.signal,
+            reason,
           });
+          alertIdUpdated = alertIdResponse.updated;
         }
 
         if (bulkCloseIndex != null) {
@@ -87,11 +104,15 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             false
           );
 
-          bulkResponse = await updateAlertStatus({
+          const bulkResponse = await updateAlertStatus({
             query: filter,
             status: 'closed',
             signal: abortCtrl.signal,
+            runtimeFields,
+            reason,
           });
+          bulkUpdated = bulkResponse.updated;
+          bulkConflicts = bulkResponse.version_conflicts ?? 0;
         }
 
         // NOTE: there could be some overlap here... it's possible that the first response had conflicts
@@ -99,9 +120,8 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
         // though it was already resolved. I'm not sure that there's an easy way to solve this, but it should
         // have minimal impact on the user... they'd see a warning that indicates a possible conflict, but the
         // state of the alerts and their representation in the UI would be consistent.
-        const updated = (alertIdResponse?.updated ?? 0) + (bulkResponse?.updated ?? 0);
-        const conflicts =
-          alertIdResponse?.version_conflicts ?? 0 + (bulkResponse?.version_conflicts ?? 0);
+        const updated = alertIdUpdated + bulkUpdated;
+        const conflicts = bulkConflicts;
         if (isSubscribed) {
           setIsLoading(false);
           addSuccess(i18n.CLOSE_ALERTS_SUCCESS(updated));

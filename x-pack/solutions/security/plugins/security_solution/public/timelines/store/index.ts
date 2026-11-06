@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer } from 'redux';
+import type { AnyAction, Reducer } from 'redux-v4';
 import * as timelineActions from './actions';
 import * as timelineSelectors from './selectors';
 import type { TimelineState } from './types';

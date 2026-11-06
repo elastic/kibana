@@ -4,124 +4,158 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// Hosts page KPI strip: four headline tiles fed by a single client-side ES|QL
+// query (`useHostsKpisEsql`), rendered with the lightweight
+// `<MetricChartWrapper>` (plain Elastic Charts `Metric`) instead of Lens.
+
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
-import { HostKpiCharts } from '../../../../../components/asset_details';
-import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { useHostCountContext } from '../../hooks/use_host_count';
-import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import useAsync from 'react-use/lib/useAsync';
 import {
-  MAX_AS_FIRST_FUNCTION_PATTERN,
-  AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
-} from '../../../../../components/asset_details/constants';
+  findInventoryModel,
+  CPU_USAGE_LABEL,
+  MEMORY_USAGE_LABEL,
+  NORMALIZED_LOAD_LABEL,
+  DISK_USAGE_LABEL,
+} from '@kbn/metrics-data-access-plugin/common';
+import { KPI_CHART_HEIGHT, METRICS_TOOLTIP } from '../../../../../common/visualizations';
+import { TooltipContent } from '../../../../../components/lens';
+import { useHostsKpisEsql } from '../../hooks/use_hosts_kpis_esql';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { useHostCountContext } from '../../hooks/use_host_count';
+import { MetricChartWrapper } from '../chart/metric_chart_wrapper';
 
-export const getSubtitle = ({
-  formulaValue,
-  limit,
-  hostCount,
-}: {
-  formulaValue: string;
-  limit: number;
-  hostCount: number;
-}) => {
-  // Check if 'max' is the first word/function in the formula
-  // Handles: "max(...)", "1 - max(...)", "100 * max(...)", etc.
-  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(formulaValue)) {
-    return limit < hostCount
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
-          defaultMessage: 'Max (of {limit} hosts)',
-          values: {
-            limit,
-          },
-        })
-      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
-          defaultMessage: 'Max',
-        });
+type KpiKey = 'cpuUsage' | 'normalizedLoad1m' | 'memoryUsage' | 'diskUsage';
+
+const TILE_DEFS: ReadonlyArray<{
+  key: KpiKey;
+  id: string;
+  title: string;
+  tooltipKey: keyof typeof METRICS_TOOLTIP;
+}> = [
+  {
+    key: 'cpuUsage',
+    id: 'hostsViewKPI-cpuUsage',
+    title: CPU_USAGE_LABEL,
+    tooltipKey: 'cpuUsage',
+  },
+  {
+    key: 'normalizedLoad1m',
+    id: 'hostsViewKPI-normalizedLoad1m',
+    title: NORMALIZED_LOAD_LABEL,
+    tooltipKey: 'normalizedLoad1m',
+  },
+  {
+    key: 'memoryUsage',
+    id: 'hostsViewKPI-memoryUsage',
+    title: MEMORY_USAGE_LABEL,
+    tooltipKey: 'memoryUsage',
+  },
+  {
+    key: 'diskUsage',
+    id: 'hostsViewKPI-diskUsage',
+    title: DISK_USAGE_LABEL,
+    tooltipKey: 'diskUsage',
+  },
+] as const;
+
+const KPI_DECIMALS = 1;
+
+// Subtitle keys off the formula's outer aggregation (mirroring main): a leading
+// `max(...)` reads as "Max", `avg`/`average(...)` as "Average", anything else
+// (e.g. the semconv disk-usage `1 - sum/sum` ratio) gets no subtitle.
+type FormulaAggregation = 'max' | 'average';
+const getFormulaAggregation = (formulaValue?: string): FormulaAggregation | undefined => {
+  if (formulaValue == null) return undefined;
+  if (/^[\s(]*(?:1\s*-\s*)?max\s*\(/i.test(formulaValue)) return 'max';
+  if (/^[\s(]*(?:1\s*-\s*)?(?:avg|average)\s*\(/i.test(formulaValue)) return 'average';
+  return undefined;
+};
+
+const buildFormatter = (format: string | undefined): ((value: number) => string) => {
+  if (format === 'percent') {
+    return (value: number) => `${(value * 100).toFixed(KPI_DECIMALS)}%`;
   }
-  if (AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN.test(formulaValue)) {
-    return limit < hostCount
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-          defaultMessage: 'Average (of {limit} hosts)',
-          values: {
-            limit,
-          },
-        })
-      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
-          defaultMessage: 'Average',
-        });
-  }
-  return limit < hostCount
-    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-        defaultMessage: 'of {limit} hosts',
-        values: {
-          limit,
-        },
-      })
-    : '';
+  // `number` and any other/unknown format (e.g. `bytes`/`bits`) render the raw
+  // value rather than silently coercing it into a percentage.
+  return (value: number) => value.toFixed(KPI_DECIMALS);
 };
 
 export const KpiCharts = () => {
-  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
-  const { reloadRequestTime } = useReloadRequestTimeContext();
-  const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
-  const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
-  const { metricsView } = useMetricsDataViewContext();
+  const { euiTheme } = useEuiTheme();
+  const { searchCriteria } = useUnifiedSearchContext();
+  const { count: hostCount } = useHostCountContext();
+  const { kpis, loading, error } = useHostsKpisEsql();
 
-  const shouldUseSearchCriteria = hostNodes.length === 0;
-  const loading = hostsLoading || hostCountLoading;
+  const inventoryModel = findInventoryModel('host');
+  const schema = searchCriteria?.preferredSchema;
+  const { value: formulas } = useAsync(
+    () => inventoryModel.metrics.getFormulas(schema ? { schema } : undefined),
+    [schema, inventoryModel.metrics]
+  );
 
-  const filters = shouldUseSearchCriteria
-    ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
-    : [
-        buildCombinedAssetFilter({
-          field: 'host.name',
-          values: hostNodes.map((p) => p.name),
-          dataView: metricsView?.dataViewReference,
-        }),
-      ];
-
-  const getSubtitleFn = useMemo(() => {
-    return (formulaValue: string) =>
-      getSubtitle({
-        limit: searchCriteria.limit,
-        hostCount,
-        formulaValue,
-      });
-  }, [searchCriteria.limit, hostCount]);
-
-  // prevents requests and searchCriteria state from reloading the chart
-  // we want it to reload only once the table has finished loading.
-  // attributes passed to useAfterLoadedState don't need to be memoized.
-  //
-  // Use the resolved absolute timestamps (parsedDateRange) instead of the raw
-  // relative strings from searchCriteria.dateRange so that Lens queries the
-  // exact same window the table was populated from. This keeps KPIs consistent
-  // with the hosts table and prevents N/A when relative ranges drift between
-  // the two after the page has been idle.
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    dateRange: parsedDateRange,
-    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
-    filters,
-    reloadRequestTime,
-    getSubtitle: getSubtitleFn,
-  });
+  const limit = searchCriteria.limit;
+  const isTruncated = limit < hostCount;
+  const getSubtitle = useMemo(() => {
+    return (formulaValue?: string): string => {
+      if (error) {
+        return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.error', {
+          defaultMessage: 'Unable to load',
+        });
+      }
+      const aggregation = getFormulaAggregation(formulaValue);
+      if (aggregation === 'max') {
+        return isTruncated
+          ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.maxOfHosts', {
+              defaultMessage: 'Max (of {limit} hosts)',
+              values: { limit },
+            })
+          : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+              defaultMessage: 'Max',
+            });
+      }
+      if (aggregation === 'average') {
+        return isTruncated
+          ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.averageOfHosts', {
+              defaultMessage: 'Average (of {limit} hosts)',
+              values: { limit },
+            })
+          : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+              defaultMessage: 'Average',
+            });
+      }
+      return '';
+    };
+  }, [error, isTruncated, limit]);
 
   return (
-    <HostKpiCharts
-      dataView={metricsView?.dataViewReference}
-      dateRange={afterLoadedState.dateRange}
-      filters={afterLoadedState.filters}
-      query={afterLoadedState.query}
-      lastReloadRequestTime={afterLoadedState.reloadRequestTime}
-      getSubtitle={afterLoadedState.getSubtitle}
-      loading={loading}
-      error={error}
-      hasData={!!hostNodes.length}
-      schema={searchCriteria.preferredSchema}
-    />
+    <>
+      {TILE_DEFS.map((tile) => {
+        const formula = formulas?.get(tile.key);
+        const formatter = buildFormatter(formula?.format);
+        return (
+          <EuiFlexItem key={tile.id}>
+            <MetricChartWrapper
+              id={tile.id}
+              title={tile.title}
+              color={euiTheme.colors.lightestShade}
+              value={kpis[tile.key]}
+              valueFormatter={formatter}
+              subtitle={getSubtitle(formula?.value)}
+              loading={loading}
+              style={{ height: KPI_CHART_HEIGHT }}
+              toolTip={
+                <TooltipContent
+                  formula={formulas?.get(tile.key)?.value}
+                  description={METRICS_TOOLTIP[tile.tooltipKey]}
+                />
+              }
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </>
   );
 };

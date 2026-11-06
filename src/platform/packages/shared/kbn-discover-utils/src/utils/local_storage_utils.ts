@@ -12,6 +12,7 @@ import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 
 export const CHART_HIDDEN_KEY = 'chartHidden';
 export const TABLE_HIDDEN_KEY = 'tableHidden';
+export const SIDEBAR_HIDDEN_KEY = 'sidebarHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'histogramHeight';
 export const HISTOGRAM_BREAKDOWN_FIELD_KEY = 'histogramBreakdownField';
 
@@ -34,6 +35,15 @@ export const getTableHidden = (
   localStorageKeyPrefix: string
 ): boolean | undefined =>
   storage.get(getLocalStorageKey(localStorageKeyPrefix, TABLE_HIDDEN_KEY)) ?? undefined;
+
+/**
+ * Get the sidebar (field list) hidden state from local storage
+ */
+export const getSidebarHidden = (
+  storage: Storage,
+  localStorageKeyPrefix: string
+): boolean | undefined =>
+  storage.get(getLocalStorageKey(localStorageKeyPrefix, SIDEBAR_HIDDEN_KEY)) ?? undefined;
 
 /**
  * Get the top panel height from local storage
@@ -71,6 +81,15 @@ export const setTableHidden = (
   localStorageKeyPrefix: string,
   tableHidden: boolean | undefined
 ) => storage.set(getLocalStorageKey(localStorageKeyPrefix, TABLE_HIDDEN_KEY), tableHidden);
+
+/**
+ * Set the sidebar (field list) hidden state in local storage
+ */
+export const setSidebarHidden = (
+  storage: Storage,
+  localStorageKeyPrefix: string,
+  sidebarHidden: boolean | undefined
+) => storage.set(getLocalStorageKey(localStorageKeyPrefix, SIDEBAR_HIDDEN_KEY), sidebarHidden);
 
 /**
  * Set the top panel height in local storage

@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useEffect, useState } from 'react';
+import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiCallOut,
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiPageHeader,
-  EuiButton,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import type { Section } from '../../../constants';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
@@ -29,7 +24,7 @@ import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
 import type { ActionConnector } from '../../../../types';
-import { EditConnectorTabs } from '../../../../types';
+import type { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import type { EditConnectorProps } from './types';
@@ -130,32 +125,55 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tabs: Array<{
-    id: Section;
-    name: React.ReactNode;
-  }> = [];
-  tabs.push({
-    id: 'connectors',
-    name: (
-      <FormattedMessage
-        id="xpack.triggersActionsUI.connectors.home.connectorsTabTitle"
-        defaultMessage="Connectors"
-      />
-    ),
-  });
-  tabs.push({
-    id: 'logs',
-    name: (
-      <FormattedMessage
-        id="xpack.triggersActionsUI.connectors.home.logsTabTitle"
-        defaultMessage="Logs"
-      />
-    ),
-  });
+  const isConnectorsSection =
+    matchPath(location.pathname, {
+      path: routeToConnectors,
+      exact: true,
+    }) != null || matchPath(location.pathname, { path: routeToConnectorEdit, exact: true }) != null;
 
-  const onSectionChange = (newSection: Section) => {
-    history.push(`/${newSection}`);
-  };
+  const canSave = hasSaveActionsCapability(capabilities);
+
+  const tabs = useMemo<AppHeaderTab[]>(
+    () => [
+      {
+        id: 'connectors',
+        label: i18n.translate('xpack.triggersActionsUI.connectors.home.connectorsTabTitle', {
+          defaultMessage: 'Connectors',
+        }),
+        isSelected: section === 'connectors',
+        onClick: () => history.push('/connectors'),
+        'data-test-subj': 'connectorsTab',
+      },
+      {
+        id: 'logs',
+        label: i18n.translate('xpack.triggersActionsUI.connectors.home.logsTabTitle', {
+          defaultMessage: 'Logs',
+        }),
+        isSelected: section === 'logs',
+        onClick: () => history.push('/logs'),
+        'data-test-subj': 'logsTab',
+      },
+    ],
+    [history, section]
+  );
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem:
+        isConnectorsSection && canSave
+          ? {
+              id: 'createConnector',
+              label: i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
+                defaultMessage: 'Create connector',
+              }),
+              iconType: 'plusCircle',
+              testId: 'createConnectorButton',
+              run: () => setAddFlyoutVisibility(true),
+            }
+          : undefined,
+    }),
+    [canSave, isConnectorsSection]
+  );
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -194,74 +212,19 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     });
   };
 
-  const createConnectorButton = (
-    <EuiButton
-      data-test-subj="createConnectorButton"
-      fill
-      iconType="plusCircle"
-      iconSide="left"
-      onClick={() => setAddFlyoutVisibility(true)}
-      isLoading={false}
-    >
-      {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
-        defaultMessage: 'Create connector',
-      })}
-    </EuiButton>
-  );
-
-  const documentationButton = (
-    <EuiButtonEmpty
-      data-test-subj="documentationButton"
-      key="documentation-button"
-      target="_blank"
-      href={docLinks.links.alerting.actionTypes}
-      iconType="question"
-    >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
-        defaultMessage="Documentation"
-      />
-    </EuiButtonEmpty>
-  );
-
-  let topRightSideButtons: React.ReactNode[] = [];
-
-  if (
-    matchPath(location.pathname, {
-      path: routeToConnectors,
-      exact: true,
-    }) ||
-    matchPath(location.pathname, { path: routeToConnectorEdit, exact: true })
-  ) {
-    topRightSideButtons = [];
-    const canSave = hasSaveActionsCapability(capabilities);
-    if (canSave) {
-      topRightSideButtons.push(createConnectorButton);
-    }
-    topRightSideButtons.push(documentationButton);
-  } else if (matchPath(location.pathname, { path: routeToLogs, exact: true })) {
-    topRightSideButtons = [documentationButton];
-  }
-
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        paddingSize="none"
-        pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
+      <AppHeader
+        title={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
           defaultMessage: 'Connectors',
         })}
         description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
           defaultMessage: 'Connect third-party software with your alerting data.',
         })}
-        rightSideItems={topRightSideButtons}
-        tabs={tabs.map((tab) => ({
-          label: tab.name,
-          onClick: () => onSectionChange(tab.id),
-          isSelected: tab.id === section,
-          key: tab.id,
-          'data-test-subj': `${tab.id}Tab`,
-        }))}
+        tabs={tabs}
+        menu={menu}
+        docLink={docLinks.links.alerting.actionTypes}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />
@@ -292,9 +255,9 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
         <CreateConnectorFlyout
           onClose={() => {
             setAddFlyoutVisibility(false);
+            loadActions();
           }}
-          onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
-          onConnectorCreated={loadActions}
+          onTestConnector={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
       )}

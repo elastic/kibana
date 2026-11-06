@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
@@ -32,7 +32,7 @@ import { NonEmptyString } from '../../model/primitives.gen';
 export const RulePreviewParams = lazySchema(() =>
   z.object({
     invocationCount: z.number().int(),
-    timeframeEnd: z.string().datetime(),
+    timeframeEnd: isoDateTime(),
   })
 );
 export type RulePreviewParams = z.infer<typeof RulePreviewParams>;
@@ -54,7 +54,7 @@ export const RulePreviewLogs = lazySchema(() =>
     /**
      * Execution duration in milliseconds
      */
-    duration: z.number().int(),
+    duration: z.number().int().describe('Execution duration in milliseconds'),
     startedAt: NonEmptyString.optional(),
     requests: z.array(RulePreviewLoggedRequest).optional(),
   })
@@ -66,7 +66,9 @@ export const RulePreviewRequestQuery = lazySchema(() =>
     /**
      * Enables logging and returning in response ES queries, performed during rule execution
      */
-    enable_logged_requests: BooleanFromString.optional(),
+    enable_logged_requests: BooleanFromString.optional().describe(
+      'Enables logging and returning in response ES queries, performed during rule execution'
+    ),
   })
 );
 export type RulePreviewRequestQuery = z.infer<typeof RulePreviewRequestQuery>;

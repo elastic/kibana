@@ -13,8 +13,12 @@ import type {
   IndicesAutocompleteResult,
   IndexAutocompleteItem,
 } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
-import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
+import type { monaco } from '@kbn/code-editor';
+import {
+  BROWSER_POPOVER_WIDTH,
+  DataSourceSelectionChange,
+  type DataSourceSelectionDetails,
+} from '@kbn/esql-resource-browser';
 import {
   computeInsertionText,
   computeRemovalRange,
@@ -28,6 +32,7 @@ import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 import {
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
+  ViewSelectedSource,
   type ESQLEditorTelemetryService,
 } from '../telemetry/telemetry_service';
 
@@ -185,7 +190,11 @@ export function useDataSourceBrowser({
   );
 
   const handleDataSourceBrowserSelect = useCallback(
-    (sourceName: string, change: DataSourceSelectionChange) => {
+    (
+      sourceName: string,
+      change: DataSourceSelectionChange,
+      details: DataSourceSelectionDetails
+    ) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       const insertAtOffset = insertionOffsetRef.current;
@@ -221,6 +230,11 @@ export function useDataSourceBrowser({
               : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
           action: change,
         });
+
+        // Deselecting a view is not a selection, so only additions are reported.
+        if (change === DataSourceSelectionChange.Add && details.isView) {
+          telemetryService.trackViewSelected({ source: ViewSelectedSource.RESOURCE_BROWSER });
+        }
       }
 
       // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources

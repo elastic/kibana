@@ -15,3 +15,4 @@ export {
   stripRunCommand,
 } from './cli_processing';
 export { computeTestID, generateTestRunId } from './test_id_generator';
+export { getValidatedESClient } from './elasticsearch';

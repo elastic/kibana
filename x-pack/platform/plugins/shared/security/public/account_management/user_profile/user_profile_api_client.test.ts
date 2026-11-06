@@ -84,10 +84,81 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
+  it('does not post the stored locale on a partial update', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+
+    await apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } });
+
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
+      body: JSON.stringify({ userSettings: { darkMode: 'dark' } }),
+    });
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'dark' },
+    });
+  });
+
+  it('reverts the in-memory profile when a partial update fails', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+    coreStart.http.post.mockRejectedValueOnce(new Error('nope'));
+
+    await expect(apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } })).rejects.toThrow(
+      'nope'
+    );
+
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'light' },
+    });
+  });
+
   it('should get user profiles in bulk', async () => {
     await apiClient.bulkGet({ uids: new Set(['UID-1', 'UID-2']), dataPath: '*' });
     expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_bulk_get', {
       body: '{"uids":["UID-1","UID-2"],"dataPath":"*"}',
+    });
+  });
+
+  describe('getCurrent caching', () => {
+    it('dedupes concurrent calls for the same dataPath into a single request', async () => {
+      const [first, second] = await Promise.all([
+        apiClient.getCurrent({ dataPath: 'avatar,userSettings' }),
+        apiClient.getCurrent({ dataPath: 'avatar,userSettings' }),
+      ]);
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(first).toBe(second);
+    });
+
+    it('treats dataPath namespace order as equivalent for caching purposes', async () => {
+      await apiClient.getCurrent({ dataPath: 'avatar,userSettings' });
+      await apiClient.getCurrent({ dataPath: 'userSettings,avatar' });
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/user_profile', {
+        query: { dataPath: 'avatar,userSettings' },
+      });
+    });
+
+    it('does not cache a failed request, so a retry issues a new one', async () => {
+      coreStart.http.get.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(apiClient.getCurrent({ dataPath: 'avatar' })).rejects.toThrow('boom');
+      await apiClient.getCurrent({ dataPath: 'avatar' });
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('clears the cache on update, so a subsequent getCurrent re-fetches', async () => {
+      await apiClient.getCurrent({ dataPath: 'avatar' });
+      await apiClient.update({ avatar: { imageUrl: 'avatar.png' } });
+      await apiClient.getCurrent({ dataPath: 'avatar' });
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
     });
   });
 });

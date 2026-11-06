@@ -13,10 +13,14 @@ import type { UsePackageIconType } from '../../../../../hooks';
 import { usePackageIconType } from '../../../../../hooks';
 import { Loading } from '../../../../../components';
 
+// Width in px of the icon panel: a 6x base icon plus XL padding on both sides.
+// Exported so layouts that sit beside the panel can stay aligned with it.
+export const getIconPanelWidth = (sizeBase: string, sizeXL: string) =>
+  parseFloat(sizeBase) * 6 + parseFloat(sizeXL) * 2;
+
 const Panel = styled(EuiPanel)`
   padding: ${(props) => props.theme.eui.euiSizeXL};
-  width: ${(props) =>
-    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
+  width: ${(props) => getIconPanelWidth(props.theme.eui.euiSize, props.theme.eui.euiSizeXL)}px;
   svg,
   img {
     height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
@@ -38,7 +42,7 @@ export function IconPanel({
 
   return (
     <Panel>
-      <EuiIcon type={iconType} size="original" />
+      <EuiIcon type={iconType} size="original" aria-hidden={true} />
     </Panel>
   );
 }
@@ -54,7 +58,7 @@ export function LoadingIconPanel() {
 export function ErrorIconPanel() {
   return (
     <Panel>
-      <EuiIcon type="error" size="original" />
+      <EuiIcon type="error" size="original" aria-hidden={true} />
     </Panel>
   );
 }
@@ -67,5 +71,5 @@ export interface MiniIconProps
 export function MiniIcon({ packageName, integrationName, version, icons }: MiniIconProps) {
   const iconType = usePackageIconType({ packageName, integrationName, version, icons });
 
-  return <EuiIcon type={iconType} size="l" />;
+  return <EuiIcon type={iconType} size="l" aria-hidden={true} />;
 }

@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
 
 import { registerLensVisualizationsSearchAPIRoute } from './search';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
@@ -59,7 +60,11 @@ describe('Lens API - Visualizations Search Route', () => {
     const routeHandler = addVersionArgs[1];
 
     // Setup request and response mocks using core testing utilities
-    const mockCtx = {} as unknown as RequestHandlerContext;
+    const mockCtx = {
+      resolve: jest.fn().mockResolvedValue({
+        core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
+      }),
+    } as unknown as RequestHandlerContext;
     const mockReq = httpServerMock.createKibanaRequest({
       query: {
         query: 'search query',
@@ -101,5 +106,73 @@ describe('Lens API - Visualizations Search Route', () => {
 
     // 3. The response meta contains the correct `per_page` value
     expect(responsePayload.body.meta.per_page).toBe(50);
+  });
+
+  it('applies lensSearchResponseBodySchema defaults to data items via .parse()', async () => {
+    const mockRoute = { addVersion: jest.fn() };
+    const mockRouter = {
+      get: jest.fn().mockReturnValue(mockRoute),
+    } as unknown as VersionedRouter<RequestHandlerContext>;
+
+    // A minimal metric hit intentionally missing `ignore_global_filters` — a field that carries
+    // a Zod `.default(false)` inside lensApiConfigSchemaNoESQL. Without .parse() the field would
+    // be absent in the response body; with it the schema injects the default.
+    const hitWithoutDefault = {
+      id: 'vis-1',
+      data: {
+        type: 'metric',
+        data_source: { type: 'data_view_reference', ref_id: 'test-data-view' },
+        metrics: [{ type: 'primary', operation: 'count' }],
+        // ignore_global_filters intentionally omitted
+      },
+      meta: {},
+    };
+
+    const mockSearch = jest.fn().mockResolvedValue({
+      result: { hits: [hitWithoutDefault], pagination: { total: 1 } },
+    });
+    const mockFor = jest.fn().mockReturnValue({ search: mockSearch });
+    const mockGetForRequest = jest.fn().mockReturnValue({ for: mockFor });
+    const mockContentManagement = {
+      contentClient: { getForRequest: mockGetForRequest },
+    } as unknown as ContentManagementServerSetup;
+
+    const mockBuilder = {} as unknown as LensConfigBuilder;
+
+    registerLensVisualizationsSearchAPIRoute(mockRouter, {
+      contentManagement: mockContentManagement,
+      builder: mockBuilder,
+      logger: {} as unknown as Logger,
+      usageCounter: undefined,
+    });
+
+    const routeHandler = mockRoute.addVersion.mock.calls[0][1];
+
+    const mockCtx = {
+      resolve: jest.fn().mockResolvedValue({
+        core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
+      }),
+    } as unknown as RequestHandlerContext;
+
+    const mockReq = httpServerMock.createKibanaRequest({
+      query: { page: 1, per_page: PAGINATION_DEFAULT_PER_PAGE },
+    });
+
+    const mockRes = httpServerMock.createResponseFactory();
+    mockRes.ok = jest.fn().mockImplementation((payload) => payload);
+
+    await routeHandler(mockCtx, mockReq, mockRes);
+
+    expect(mockRes.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          data: [
+            expect.objectContaining({
+              data: expect.objectContaining({ ignore_global_filters: false }),
+            }),
+          ],
+        }),
+      })
+    );
   });
 });

@@ -69,6 +69,7 @@ export class OverlayService {
       banners,
       openFlyout: flyouts.open.bind(flyouts),
       openSystemFlyout: systemFlyouts.open.bind(systemFlyouts),
+      openFlyoutTemplate: systemFlyouts.openTemplate.bind(systemFlyouts),
       openModal: modals.open.bind(modals),
       openConfirm: modals.openConfirm.bind(modals),
     };

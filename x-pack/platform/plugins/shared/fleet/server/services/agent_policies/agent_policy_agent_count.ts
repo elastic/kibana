@@ -6,20 +6,26 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../../common';
+import { buildPolicyBaseIdWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Given a list of Agent Policy IDs (parent policy ids), returns the count of active agents
  * assigned to each policy or any of its version-specific policies (e.g. policy1 and policy1#9.3).
  * @param esClient
  * @param agentPolicyIds parent agent policy ids
+ * @param runtimeMappings when provided (from buildAgentStatusRuntimeField), also excludes
+ *   status:inactive and status:unenrolled agents via the runtime status field
  */
 export const getAgentCountForAgentPolicies = async (
   esClient: ElasticsearchClient,
-  agentPolicyIds: string[]
+  agentPolicyIds: string[],
+  { runtimeMappings }: { runtimeMappings?: MappingRuntimeFields } = {}
 ): Promise<Record<string, number>> => {
   if (agentPolicyIds.length === 0) {
     return {};
@@ -27,16 +33,19 @@ export const getAgentCountForAgentPolicies = async (
 
   const filters: Record<string, QueryDslQueryContainer> = {};
   for (const policyId of agentPolicyIds) {
-    filters[policyId] = {
-      bool: {
-        should: [
-          { term: { policy_id: policyId } },
-          { prefix: { policy_id: `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
-        ],
-        minimum_should_match: 1,
-      },
-    };
+    filters[policyId] = buildPolicyBaseIdWithFallbackEsFilter(policyId);
   }
+
+  const baseFilter: QueryDslQueryContainer[] = runtimeMappings
+    ? [
+        { term: { active: 'true' } },
+        {
+          bool: {
+            must_not: [{ term: { status: 'inactive' } }, { term: { status: 'unenrolled' } }],
+          },
+        },
+      ]
+    : [{ term: { active: 'true' } }];
 
   const searchPromise = esClient.search<
     unknown,
@@ -44,15 +53,10 @@ export const getAgentCountForAgentPolicies = async (
   >({
     index: AGENTS_INDEX,
     ignore_unavailable: true,
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
     query: {
       bool: {
-        filter: [
-          {
-            term: {
-              active: 'true',
-            },
-          },
-        ],
+        filter: baseFilter,
       },
     },
     aggs: {

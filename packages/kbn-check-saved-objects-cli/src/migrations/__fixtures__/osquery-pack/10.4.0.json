@@ -1,0 +1,44 @@
+{
+  "10.3.0": [
+    {
+      "name": "test-pack-1",
+      "description": "A test pack",
+      "queries": [
+        {
+          "id": "uptime",
+          "query": "select * from processes;",
+          "interval": 3600,
+          "timeout": 300,
+          "schedule_id": "3730bf67-45c1-4e2d-9eb1-6dc285099660",
+          "start_date": "2024-01-01T00:00:00.000Z"
+        }
+      ],
+      "enabled": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "created_by": "elastic",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "updated_by": "elastic"
+    }
+  ],
+  "10.4.0": [
+    {
+      "name": "test-pack-1",
+      "description": "A test pack",
+      "queries": [
+        {
+          "id": "uptime",
+          "query": "select * from processes;",
+          "interval": 3600,
+          "timeout": 300,
+          "schedule_id": "3730bf67-45c1-4e2d-9eb1-6dc285099660",
+          "start_date": "2024-01-01T00:00:00.000Z"
+        }
+      ],
+      "enabled": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "created_by": "elastic",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "updated_by": "elastic"
+    }
+  ]
+}

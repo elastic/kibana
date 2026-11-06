@@ -5,26 +5,34 @@
  * 2.0.
  */
 
+import { addTransactionLabels } from '@kbn/apm-utils';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
+import { getSloApmLabels } from './utils';
 
 export class ManageSLO {
   constructor(
     private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private userId: string
+    private userId: string,
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   async enable(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
     if (slo.enabled) {
       return;
     }
 
-    await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision));
-    await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
+    await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
+    await this.transformManager.start(getSLOTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
     slo.enabled = true;
     slo.updatedBy = this.userId;
     slo.updatedAt = new Date();
@@ -33,12 +41,17 @@ export class ManageSLO {
 
   async disable(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
     if (!slo.enabled) {
       return;
     }
 
-    await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision));
-    await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
+    await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
+    await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
     slo.enabled = false;
     slo.updatedBy = this.userId;
     slo.updatedAt = new Date();

@@ -14,7 +14,8 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         class="euiTitle emotion-euiTitle-m"
       >
         <span
-          class="css-t0tl5b-CollapsiblePanelTitle"
+          aria-hidden="true"
+          class="css-1196zwi-CollapsiblePanelTitle"
           data-euiicon-type="logoKibana"
         />
          
@@ -25,7 +26,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiLink emotion-euiLink-primary"
+        class="euiLink emotion-euiLink-text"
         data-test-subj="showHidePrivilege"
         type="button"
       >

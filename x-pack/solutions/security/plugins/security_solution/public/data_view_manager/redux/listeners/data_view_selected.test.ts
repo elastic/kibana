@@ -8,8 +8,7 @@
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { RootState } from '../reducer';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
@@ -84,7 +83,6 @@ const mockedState: RootState = {
     },
   },
 };
-const mockLogger = loggingSystemMock.createLogger();
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => mockedState);
@@ -118,7 +116,6 @@ describe('createDataViewSelectedListener', () => {
           addDanger: mockToastsDanger,
         },
       } as unknown as CoreStart['notifications'],
-      logger: mockLogger,
       scope: PageScope.default,
       spaces: mockSpaces,
       storage: mockStorage,
@@ -132,6 +129,53 @@ describe('createDataViewSelectedListener', () => {
     );
 
     expect(mockListenerApi.cancelActiveListeners).toHaveBeenCalled();
+  });
+
+  it('should still select a data view when two effects for the same scope run concurrently', async () => {
+    const fetchedDataView = { id: 'fetched-id' } as unknown as Awaited<
+      ReturnType<DataViewsServicePublic['getDataViewLazy']>
+    >;
+    // `mockResolvedValueOnce` per concurrent effect, so no implementation leaks into later tests.
+    jest
+      .mocked(mockDataViewsService.getDataViewLazy)
+      .mockResolvedValueOnce(fetchedDataView)
+      .mockResolvedValueOnce(fetchedDataView);
+
+    // Mimics the listener middleware: every running effect owns a signal, and
+    // `cancelActiveListeners` aborts the other in-flight effects for the scope.
+    const signals: Array<{ aborted: boolean }> = [];
+    const createListenerApi = () => {
+      const signal = { aborted: false };
+      signals.push(signal);
+
+      return {
+        dispatch: mockDispatch,
+        getState: mockGetState,
+        cancelActiveListeners: () => {
+          signals
+            .filter((otherSignal) => otherSignal !== signal)
+            .forEach((otherSignal) => {
+              otherSignal.aborted = true;
+            });
+        },
+        signal,
+      } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
+    };
+
+    const action = selectDataViewAsync({ id: 'fetched-id', scope: PageScope.default });
+
+    await Promise.all([
+      listener.effect(action, createListenerApi()),
+      listener.effect(action, createListenerApi()),
+    ]);
+
+    const selections = mockDispatch.mock.calls.filter(
+      ([dispatched]) =>
+        dispatched.type === 'x-pack/security_solution/dataViewManager/default/setSelectedDataView'
+    );
+
+    expect(selections).toHaveLength(1);
+    expect(selections[0][0]).toEqual(expect.objectContaining({ payload: 'fetched-id' }));
   });
 
   it('should return cached adhoc data view first', async () => {
@@ -204,7 +248,6 @@ describe('createDataViewSelectedListener', () => {
         } as unknown as CoreStart['notifications'],
         scope: PageScope.analyzer,
         spaces: mockSpaces,
-        logger: mockLogger,
         storage: mockStorage,
       });
 
@@ -238,7 +281,6 @@ describe('createDataViewSelectedListener', () => {
         } as unknown as CoreStart['notifications'],
         scope: PageScope.analyzer,
         spaces: mockSpaces,
-        logger: mockLogger,
         storage: mockStorage,
       });
 
@@ -285,7 +327,6 @@ describe('createDataViewSelectedListener', () => {
       } as unknown as CoreStart['notifications'],
       scope: PageScope.analyzer,
       spaces: mockSpaces,
-      logger: mockLogger,
       storage: mockStorage,
     });
     jest.mocked(mockDataViewsService.getDataViewLazy).mockRejectedValue(new Error('conflict'));

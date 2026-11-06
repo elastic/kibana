@@ -135,6 +135,7 @@ describe('tool_selection_utils', () => {
       { id: 'skill2', readonly: false },
       { id: 'skill3', readonly: true },
       { id: 'skill4', readonly: false },
+      { id: 'skill5', readonly: true, exclude_from_elastic_capabilities: true },
     ];
 
     it('should return only explicitly selected skills when elastic capabilities are disabled', () => {
@@ -165,6 +166,12 @@ describe('tool_selection_utils', () => {
       const result = getActiveSkills(mockSkills, undefined, true);
 
       expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3']);
+    });
+
+    it('should include an excluded built-in skill when explicitly selected', () => {
+      const result = getActiveSkills(mockSkills, ['skill5'], true);
+
+      expect(result.map((s) => s.id)).toEqual(['skill5', 'skill1', 'skill3']);
     });
 
     it('should return empty array when explicit ids is empty and capabilities are disabled', () => {

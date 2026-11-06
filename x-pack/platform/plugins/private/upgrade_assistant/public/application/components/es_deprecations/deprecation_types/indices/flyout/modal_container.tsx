@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 
 import { EuiModal } from '@elastic/eui';
 import type { IndicesResolutionType } from '../../../../../../../common/types';
@@ -166,6 +167,10 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
       data-test-subj="updateIndexModal"
       maxWidth={true}
       css={{ minWidth: 750 }}
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.flyout.modalAriaLabel',
+        { defaultMessage: 'Index migration' }
+      )}
     >
       {modalContent}
     </EuiModal>

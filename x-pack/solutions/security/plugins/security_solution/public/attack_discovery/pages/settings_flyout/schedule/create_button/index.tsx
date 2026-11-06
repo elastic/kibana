@@ -35,6 +35,8 @@ export const CreateButton: React.FC<CreateButtonProps> = React.memo(({ onClick }
     [onClick]
   );
 
-  return <WithMissingPrivileges>{createNewScheduleButton}</WithMissingPrivileges>;
+  return (
+    <WithMissingPrivileges requireWorkflowsExecute>{createNewScheduleButton}</WithMissingPrivileges>
+  );
 });
 CreateButton.displayName = 'CreateButton';

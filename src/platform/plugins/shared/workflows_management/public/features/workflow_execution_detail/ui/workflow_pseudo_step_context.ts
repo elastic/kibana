@@ -13,6 +13,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isFailedBeforeSteps,
+  isValidWorkflowDocumentVersion,
 } from '@kbn/workflows';
 
 export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document' | 'event';
@@ -40,16 +41,26 @@ export function buildTriggerContextFromExecution(
     const event = executionContext.event as Record<string, unknown>;
     if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
-    } else if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+    } else if (event.type === 'manual') {
+      triggerType = 'manual';
+    } else if (
+      isEventDrivenWorkflowTriggerSource({
+        triggeredBy,
+        context: executionContext,
+      })
+    ) {
       triggerType = 'event';
     } else {
       triggerType = 'document';
     }
   }
 
-  const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
-    ? executionContext.event
-    : executionContext.inputs;
+  // Manual runs store the payload on context.inputs. Older rows may still have
+  // event.type === 'manual'; keep classifying those as manual and show inputs.
+  const inputData =
+    triggerType === 'manual'
+      ? (executionContext as { inputs?: JsonValue }).inputs
+      : (executionContext as { event?: JsonValue }).event;
 
   return {
     triggerType,
@@ -74,13 +85,28 @@ export function buildTriggerStepExecutionFromContext(
     workflowExecution.stepExecutions
   );
 
+  // For non-manual triggers (alert/document/scheduled/event), manual inputs supplied alongside
+  // the event are stored in context.inputs and surfaced as the step's output field. The server
+  // always persists an `inputs` key (an empty object when no manual inputs were supplied), so we
+  // must check for a non-empty object rather than `!== undefined` to avoid surfacing an empty output.
+  const ctx = workflowExecution.context as Record<string, unknown> | undefined | null;
+  const manualInputs = ctx?.inputs;
+  const hasManualInputs =
+    manualInputs != null &&
+    typeof manualInputs === 'object' &&
+    Object.keys(manualInputs).length > 0;
+  const triggerOutput: JsonValue | undefined =
+    triggerContext.triggerType !== 'manual' && hasManualInputs
+      ? (manualInputs as JsonValue)
+      : (workflowExecution.context?.output as JsonValue | undefined) ?? undefined;
+
   return {
     id: 'trigger',
     stepId: triggerContext.triggerType,
     stepType: `trigger_${triggerContext.triggerType}`,
     status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: (workflowExecution.context?.output as JsonValue | undefined) ?? undefined,
+    output: triggerOutput,
     error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
@@ -92,6 +118,20 @@ export function buildTriggerStepExecutionFromContext(
   } as WorkflowStepExecutionDto;
 }
 
+/**
+ * Top-level keys that `buildOverviewStepExecutionFromContext` adds for display only. They are not
+ * in the workflow execution context, so they are not valid template paths.
+ */
+const OVERVIEW_DISPLAY_ONLY_FIELDS: ReadonlySet<string> = new Set([
+  'trace',
+  'executionError',
+  'skipReason',
+]);
+
+/** Whether a flattened Overview field path is a template path that exists in the workflow context. */
+export const isOverviewContextField = (fieldPath: string): boolean =>
+  !OVERVIEW_DISPLAY_ONLY_FIELDS.has(fieldPath.split('.')[0]);
+
 export function buildOverviewStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto {
@@ -99,6 +139,35 @@ export function buildOverviewStepExecutionFromContext(
   if (workflowExecution.context) {
     const { inputs, event, ...context } = workflowExecution.context;
     contextData = context as Record<string, unknown>;
+  }
+
+  if (workflowExecution.effectiveIdentity) {
+    const executionContext =
+      contextData.execution && typeof contextData.execution === 'object'
+        ? contextData.execution
+        : {};
+    contextData.execution = {
+      ...executionContext,
+      effectiveIdentity: workflowExecution.effectiveIdentity,
+      executedBy: workflowExecution.executedBy,
+    };
+  }
+
+  if (isValidWorkflowDocumentVersion(workflowExecution.version)) {
+    const workflowContext =
+      contextData.workflow != null && typeof contextData.workflow === 'object'
+        ? (contextData.workflow as Record<string, unknown>)
+        : {};
+
+    if (!isValidWorkflowDocumentVersion(workflowContext.version)) {
+      contextData = {
+        ...contextData,
+        workflow: {
+          ...workflowContext,
+          version: workflowExecution.version,
+        },
+      };
+    }
   }
 
   // Add trace information to the context data for display in the Overview table
@@ -128,6 +197,15 @@ export function buildOverviewStepExecutionFromContext(
     };
   }
 
+  const cancellationReason = (workflowExecution as { cancellationReason?: string })
+    .cancellationReason;
+  if (workflowExecution.status === ExecutionStatus.SKIPPED && cancellationReason) {
+    contextData = {
+      ...contextData,
+      skipReason: cancellationReason,
+    };
+  }
+
   return {
     id: '__overview',
     stepId: 'Overview',
@@ -135,6 +213,7 @@ export function buildOverviewStepExecutionFromContext(
     status: workflowExecution.status,
     stepExecutionIndex: 0,
     startedAt: workflowExecution.startedAt,
+    finishedAt: workflowExecution.finishedAt,
     input: contextData as JsonValue,
     scopeStack: [],
     workflowRunId: workflowExecution.id,

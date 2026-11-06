@@ -1,0 +1,18 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "public/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/apm-api-shared",
+    "@kbn/apm-ui-shared",
+    "@kbn/apm-types",
+    "@kbn/cps",
+    "@kbn/shared-ux-utility"
+  ],
+  "exclude": ["target/**/*"]
+}

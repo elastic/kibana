@@ -1,0 +1,470 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import { SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
+
+export enum Aggregation {
+  COUNT = 'count',
+  AVG = 'avg',
+  SUM = 'sum',
+  MIN = 'min',
+  MAX = 'max',
+  CARDINALITY = 'cardinality',
+  P95 = 'p95',
+  P99 = 'p99',
+}
+
+export enum Comparator {
+  GT = '>',
+  GTE = '>=',
+  LT = '<',
+  LTE = '<=',
+  BETWEEN = 'between',
+  NOT_BETWEEN = 'not_between',
+}
+
+export type ConditionOperator = 'AND' | 'OR';
+
+export interface StatDefinition {
+  id: string;
+  label: string;
+  aggregation: Aggregation;
+  field?: string;
+  filter?: string;
+}
+
+export interface EvaluationDefinition {
+  id: string;
+  label: string;
+  expression: string;
+}
+
+export interface AlertCondition {
+  id: string;
+  metric: string;
+  comparator: Comparator;
+  threshold: number[];
+}
+
+export type RecoveryCondition = AlertCondition;
+
+export interface RecoveryConfig {
+  conditions: RecoveryCondition[];
+  conditionOperator: ConditionOperator;
+}
+
+export type SeverityMode = 'single' | 'multi';
+
+/** A single severity level with its own threshold (multi-severity mode). */
+export interface SeverityLevel {
+  id: string;
+  severity: AlertEventSeverity;
+  threshold: number;
+}
+
+/**
+ * Optional severity configuration for the alert condition. Severity is only
+ * available for a single alert condition; multi mode additionally requires a
+ * non-range comparator (not `between`/`not_between`). The comparator is always
+ * inherited from the alert condition, so it is not stored here.
+ */
+export interface SeverityConfig {
+  mode: SeverityMode;
+  /** Level applied to all alerts in single mode. */
+  singleLevelSeverity: AlertEventSeverity;
+  /** Ordered from least to most severe in multi mode. */
+  levels: SeverityLevel[];
+}
+
+export interface ThresholdFormValues {
+  indexPattern: string;
+  timeField: string;
+  filterQuery?: string;
+  stats: StatDefinition[];
+  evaluations: EvaluationDefinition[];
+  alertConditions: AlertCondition[];
+  conditionOperator: ConditionOperator;
+  groupByFields: string[];
+  recovery?: RecoveryConfig;
+  severity?: SeverityConfig;
+}
+
+export const AGGREGATIONS_REQUIRING_FIELD: Aggregation[] = [
+  Aggregation.AVG,
+  Aggregation.SUM,
+  Aggregation.MIN,
+  Aggregation.MAX,
+  Aggregation.CARDINALITY,
+  Aggregation.P95,
+  Aggregation.P99,
+];
+
+export const deriveStatLabel = (agg: Aggregation, field?: string): string => {
+  if (agg === Aggregation.COUNT) return 'count';
+  if (!field) return agg;
+  const safe = field.replace(/[^a-zA-Z0-9_]/g, '_');
+  return `${agg}_${safe}`;
+};
+
+export const DEFAULT_STAT: Omit<StatDefinition, 'id'> = {
+  label: 'count',
+  aggregation: Aggregation.COUNT,
+};
+
+const EVAL_LABEL_CHARS = 'abcdefghijklmnopqrstuvwxyz';
+
+export const nextEvalLabel = (existingLabels: string[]): string => {
+  const used = new Set(existingLabels);
+  for (const ch of EVAL_LABEL_CHARS) {
+    const candidate = `eval_${ch}`;
+    if (!used.has(candidate)) return candidate;
+  }
+  return `eval_${existingLabels.length}`;
+};
+
+export const nextStatLabel = (
+  existingLabels: string[],
+  agg: Aggregation,
+  field?: string
+): string => {
+  const base = deriveStatLabel(agg, field);
+  const used = new Set(existingLabels);
+  if (!used.has(base)) {
+    return base;
+  }
+  let suffix = 2;
+  while (used.has(`${base}_${suffix}`)) {
+    suffix++;
+  }
+  return `${base}_${suffix}`;
+};
+
+export const getAvailableMetricLabels = (
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): string[] => [
+  ...stats.filter((s) => s.label.trim()).map((s) => s.label),
+  ...evaluations.filter((e) => e.label.trim()).map((e) => e.label),
+];
+
+/** Re-point conditions at the first available metric when their metric is missing. */
+export const reconcileAlertConditionMetrics = (
+  conditions: AlertCondition[],
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): AlertCondition[] => {
+  const availableLabels = getAvailableMetricLabels(stats, evaluations);
+  const defaultMetric = availableLabels[0] ?? '';
+  return conditions.map((c) => {
+    if (c.metric.trim() && availableLabels.includes(c.metric)) {
+      return c;
+    }
+    return { ...c, metric: defaultMetric };
+  });
+};
+
+export const shouldSyncConditionMetricOnLabelChange = (
+  labels: string[],
+  index: number,
+  oldLabel: string,
+  newLabel: string
+): boolean => {
+  if (oldLabel === newLabel) {
+    return false;
+  }
+  const owners = labels.filter((label) => label === oldLabel);
+  return owners.length === 1 && labels[index] === oldLabel;
+};
+
+export const syncConditionsForLabelChange = (
+  conditions: AlertCondition[],
+  labels: string[],
+  index: number,
+  oldLabel: string,
+  newLabel: string,
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): AlertCondition[] => {
+  const synced = shouldSyncConditionMetricOnLabelChange(labels, index, oldLabel, newLabel)
+    ? conditions.map((c) => (c.metric === oldLabel ? { ...c, metric: newLabel } : c))
+    : conditions;
+  return reconcileAlertConditionMetrics(synced, stats, evaluations);
+};
+
+export const clearConditionsForRemovedMetric = (
+  conditions: AlertCondition[],
+  removedLabel: string,
+  remainingStats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): AlertCondition[] => {
+  const remainingLabels = new Set([
+    ...remainingStats.filter((s) => s.label.trim()).map((s) => s.label),
+    ...evaluations.filter((e) => e.label.trim()).map((e) => e.label),
+  ]);
+  if (remainingLabels.has(removedLabel)) {
+    return conditions;
+  }
+  return conditions.map((c) => (c.metric === removedLabel ? { ...c, metric: '' } : c));
+};
+
+export const isStatLabelValid = (stat: StatDefinition): boolean => Boolean(stat.label.trim());
+
+export const isStatFieldValid = (stat: StatDefinition): boolean =>
+  !AGGREGATIONS_REQUIRING_FIELD.includes(stat.aggregation) || Boolean(stat.field?.trim());
+
+export const areAllStatsValid = (stats: StatDefinition[]): boolean =>
+  stats.length > 0 && stats.every((s) => isStatLabelValid(s) && isStatFieldValid(s));
+
+export const DEFAULT_ALERT_CONDITION: Omit<AlertCondition, 'id'> = {
+  metric: 'count',
+  comparator: Comparator.GT,
+  threshold: [100],
+};
+
+export const DEFAULT_RECOVERY_CONDITION: Omit<RecoveryCondition, 'id'> = {
+  metric: 'count',
+  comparator: Comparator.LTE,
+  threshold: [100],
+};
+
+let idCounter = 0;
+export const generateId = (): string => `_${Date.now()}_${++idCounter}`;
+
+export const DEFAULT_SINGLE_SEVERITY_LEVEL: AlertEventSeverity = 'info';
+
+/** Severity requires exactly one alert condition. */
+export const isSeveritySupported = (alertConditions: AlertCondition[]): boolean =>
+  alertConditions.length === 1;
+
+/** Multi-severity is unsupported for range comparators. */
+export const isMultiSeveritySupported = (comparator: Comparator): boolean =>
+  comparator !== Comparator.BETWEEN && comparator !== Comparator.NOT_BETWEEN;
+
+/** Whether the breach escalates upward (`>`/`>=`) rather than downward (`<`/`<=`). */
+export const isAscendingComparator = (comparator: Comparator): boolean =>
+  comparator === Comparator.GT || comparator === Comparator.GTE;
+
+/** The generated severity EVAL always emits this column name; the executor reads it. */
+export const SEVERITY_COLUMN = 'severity';
+
+/** Where a reserved `severity` label was found, so the UI can name the exact thing to fix. */
+export type ReservedSeverityLabelSource = 'stat' | 'evaluation' | 'groupBy';
+
+/**
+ * Which inputs are named `severity` and therefore collide with the generated severity column: the
+ * generated `EVAL severity` overwrites the user's column (and for a group-by field, the executor
+ * then hashes the overwritten value, collapsing distinct groups).
+ */
+export const getReservedSeverityLabelSources = (
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[],
+  groupByFields: string[]
+): ReservedSeverityLabelSource[] => {
+  const sources: ReservedSeverityLabelSource[] = [];
+  if (stats.some((s) => s.label.trim() === SEVERITY_COLUMN)) sources.push('stat');
+  if (evaluations.some((e) => e.label.trim() === SEVERITY_COLUMN)) sources.push('evaluation');
+  if (groupByFields.some((f) => f.trim() === SEVERITY_COLUMN)) sources.push('groupBy');
+  return sources;
+};
+
+/**
+ * Whether any input is named `severity`. When true, severity is not configurable, so
+ * {@link reconcileSeverity} clears any existing config.
+ */
+export const hasReservedSeverityLabel = (
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[],
+  groupByFields: string[]
+): boolean => getReservedSeverityLabelSources(stats, evaluations, groupByFields).length > 0;
+
+export const createDefaultSeverityConfig = (): SeverityConfig => ({
+  mode: 'single',
+  singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL,
+  levels: [],
+});
+
+/** Since duplicate severity levels are invalid, at most one level per severity can exist. */
+export const MAX_SEVERITY_LEVELS = SEVERITY_LEVELS.length;
+
+/**
+ * Suggest the severity for a newly added multi-severity level: the first unused
+ * level above the most severe one already used, falling back to the lowest unused
+ * level (filling gaps). Never returns a severity already in use unless all are
+ * taken, which the {@link MAX_SEVERITY_LEVELS} cap prevents.
+ */
+export const nextSeverityLevel = (levels: SeverityLevel[]): AlertEventSeverity => {
+  const used = new Set(levels.map((lvl) => lvl.severity));
+  const maxIndex = levels.length
+    ? Math.max(...levels.map((lvl) => SEVERITY_LEVELS.indexOf(lvl.severity)))
+    : -1;
+  const above = SEVERITY_LEVELS.slice(maxIndex + 1).find((severity) => !used.has(severity));
+  if (above) return above;
+  return SEVERITY_LEVELS.find((severity) => !used.has(severity)) ?? SEVERITY_LEVELS[0];
+};
+
+/** The most severe level in a set, or `undefined` when there are none. */
+export const mostSevereSeverity = (levels: SeverityLevel[]): AlertEventSeverity | undefined =>
+  levels.reduce<AlertEventSeverity | undefined>(
+    (max, lvl) =>
+      max === undefined || SEVERITY_LEVELS.indexOf(lvl.severity) > SEVERITY_LEVELS.indexOf(max)
+        ? lvl.severity
+        : max,
+    undefined
+  );
+
+/**
+ * Drop or downgrade severity config that is no longer applicable: severity is cleared for
+ * multiple conditions or when a stat/evaluation is named `severity` (it would collide with the
+ * generated column), and multi mode falls back to single mode when the comparator is range-based.
+ */
+export const reconcileSeverity = (
+  severity: SeverityConfig | undefined,
+  alertConditions: AlertCondition[],
+  hasReservedLabel = false
+): SeverityConfig | undefined => {
+  if (!severity || !isSeveritySupported(alertConditions) || hasReservedLabel) return undefined;
+  const [condition] = alertConditions;
+  if (severity.mode === 'multi' && !isMultiSeveritySupported(condition.comparator)) {
+    // Collapse the escalating bands into one level (the most severe).
+    return {
+      ...severity,
+      mode: 'single',
+      singleLevelSeverity: mostSevereSeverity(severity.levels) ?? severity.singleLevelSeverity,
+      levels: [],
+    };
+  }
+  return severity;
+};
+
+/** Order two severity levels by ascending severity (info < low < ... < critical). */
+export const compareSeverity = (a: AlertEventSeverity, b: AlertEventSeverity): number =>
+  SEVERITY_LEVELS.indexOf(a) - SEVERITY_LEVELS.indexOf(b);
+
+/** Sort a copy of the levels least-to-most severe, so index 0 is the least-severe level. */
+export const sortLevelsBySeverity = (levels: SeverityLevel[]): SeverityLevel[] =>
+  [...levels].sort((a, b) => compareSeverity(a.severity, b.severity));
+
+/**
+ * Suggest a valid threshold for a newly added band following the breach direction (ascending
+ * for `>`/`>=`, descending for `<`/`<=`): strictly more extreme than the neighbouring
+ * less-severe band and at least the condition threshold, and strictly less extreme than the
+ * neighbouring more-severe band. Falls back to the condition threshold for the first band, or
+ * one step beyond the current extreme when appending the most-severe band.
+ */
+export const nextSeverityThreshold = (
+  levels: SeverityLevel[],
+  severity: AlertEventSeverity,
+  condition: AlertCondition
+): number => {
+  const dir = isAscendingComparator(condition.comparator) ? 1 : -1;
+  const [conditionThreshold = 0] = condition.threshold;
+
+  // Work in "extremeness" space (larger = more severe breach) so both directions share logic.
+  const conditionExtremeness = dir * conditionThreshold;
+  const lessSevere = levels
+    .filter((lvl) => compareSeverity(lvl.severity, severity) < 0)
+    .map((lvl) => dir * lvl.threshold);
+  const moreSevere = levels
+    .filter((lvl) => compareSeverity(lvl.severity, severity) > 0)
+    .map((lvl) => dir * lvl.threshold);
+
+  const lowerBound = Math.max(conditionExtremeness, ...lessSevere);
+  if (moreSevere.length > 0) {
+    const upperBound = Math.min(...moreSevere);
+    // No room between the floor (condition threshold / less-severe band) and the next
+    // more-severe band: any midpoint would duplicate an existing threshold. Leave it empty
+    // (NaN) so the user picks a value, instead of seeding a guaranteed duplicate.
+    if (lowerBound >= upperBound) return NaN;
+    return dir * ((lowerBound + upperBound) / 2);
+  }
+  const nextExtremeness = lessSevere.length > 0 ? lowerBound + 1 : conditionExtremeness;
+  return dir * nextExtremeness;
+};
+
+export type SeverityValidationError =
+  | 'invalid_threshold'
+  | 'duplicate_level'
+  | 'duplicate_threshold'
+  | 'threshold_order'
+  | 'threshold_below_condition';
+
+/**
+ * Validate a multi-severity config. Every level is a band tested against its own threshold,
+ * which must sit beyond the alert condition threshold in the breach direction, be unique,
+ * and be strictly ordered by severity. Returns the first error, or `null` when valid. Single
+ * mode and disabled severity are always valid.
+ */
+export const getSeverityValidationError = (
+  severity: SeverityConfig | undefined,
+  condition: AlertCondition
+): SeverityValidationError | null => {
+  if (!severity || severity.mode === 'single') return null;
+
+  const { levels } = severity;
+  // Multi requires at least two levels (otherwise it is single severity).
+  if (levels.length < 2) return 'invalid_threshold';
+
+  const severities = levels.map((lvl) => lvl.severity);
+  if (new Set(severities).size !== severities.length) return 'duplicate_level';
+
+  const bands = sortLevelsBySeverity(levels);
+
+  if (bands.some((band) => !Number.isFinite(band.threshold))) return 'invalid_threshold';
+
+  const [conditionThreshold] = condition.threshold;
+  const ascending = isAscendingComparator(condition.comparator);
+
+  // A band cannot be less extreme than the breach threshold itself — that row never breaches.
+  if (
+    bands.some((band) =>
+      ascending ? band.threshold < conditionThreshold : band.threshold > conditionThreshold
+    )
+  ) {
+    return 'threshold_below_condition';
+  }
+
+  const thresholds = bands.map((band) => band.threshold);
+  if (new Set(thresholds).size !== thresholds.length) return 'duplicate_threshold';
+
+  // More severe bands must be more extreme: strictly increasing for ascending comparators
+  // (>, >=), strictly decreasing for descending ones (<, <=).
+  for (let i = 1; i < bands.length; i++) {
+    const prev = bands[i - 1].threshold;
+    const curr = bands[i].threshold;
+    if (ascending ? curr <= prev : curr >= prev) return 'threshold_order';
+  }
+
+  return null;
+};
+
+const FLIPPED_COMPARATOR: Record<Comparator, Comparator> = {
+  [Comparator.GT]: Comparator.LTE,
+  [Comparator.GTE]: Comparator.LT,
+  [Comparator.LT]: Comparator.GTE,
+  [Comparator.LTE]: Comparator.GT,
+  [Comparator.BETWEEN]: Comparator.NOT_BETWEEN,
+  [Comparator.NOT_BETWEEN]: Comparator.BETWEEN,
+};
+
+export const deriveRecoveryConditions = (alertConditions: AlertCondition[]): RecoveryCondition[] =>
+  alertConditions.map((c) => ({
+    id: generateId(),
+    metric: c.metric,
+    comparator: FLIPPED_COMPARATOR[c.comparator],
+    threshold: [...c.threshold],
+  }));
+
+export const DEFAULT_THRESHOLD_FORM_VALUES: ThresholdFormValues = {
+  indexPattern: '',
+  timeField: '@timestamp',
+  stats: [{ id: generateId(), ...DEFAULT_STAT }],
+  evaluations: [],
+  alertConditions: [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+  conditionOperator: 'AND',
+  groupByFields: [],
+};

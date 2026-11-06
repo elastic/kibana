@@ -11,6 +11,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -20,14 +21,18 @@ import type {
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE, RuleAttributesToEncrypt } from '../../../saved_objects';
 import type {
   ChangeTrackingServiceInitializeParams,
   IChangeTrackingService,
   IScopedChangeTrackingService,
   RuleChange,
 } from './types';
-import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
+import { ALERTING_RULE_DATASET } from './constants';
+
+const RULE_SO_FIELDS_TO_HASH = Object.fromEntries(
+  RuleAttributesToEncrypt.map((field) => [field, true] as [string, true])
+);
 
 export class ChangeTrackingService implements IChangeTrackingService {
   private clients: Record<RuleTypeSolution, ChangeHistoryClient>;
@@ -36,6 +41,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
   private modules: RuleTypeSolution[];
   private dataset = ALERTING_RULE_DATASET;
   private authService?: CoreAuthenticationService;
+  private userProfileService?: UserProfileServiceStart;
 
   constructor(logger: Logger, kibanaVersion: string) {
     this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
@@ -59,9 +65,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
     return !!this.clients[module]?.isInitialized();
   }
 
-  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams): void {
+  initialize({
+    elasticsearchClient,
+    authService,
+    userProfileService,
+  }: ChangeTrackingServiceInitializeParams): void {
     this.logger.debug(`Initializing change tracking..`);
     this.authService = authService;
+    this.userProfileService = userProfileService;
 
     void this.initializeAll(elasticsearchClient).catch((cause) => {
       const error = new Error(
@@ -104,7 +115,9 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Initialize each change history client (in sequence - better than in parallel)
     for (const [module, client] of Object.entries(this.clients)) {
       try {
-        await client.initialize(elasticsearchClient);
+        await client.initialize(elasticsearchClient, {
+          userProfileService: this.userProfileService,
+        });
         this.logger.info(`Change tracking initialized for [${module}, ${this.dataset}]`);
       } catch (cause) {
         const error = new Error(
@@ -151,7 +164,8 @@ export class ChangeTrackingService implements IChangeTrackingService {
           await client.logBulk(groupedChanges, {
             ...opts,
             correlationId,
-            fieldsToHash: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
+            fieldsToHash: RULE_SO_FIELDS_TO_HASH,
+            spanLabels: { solution: module, action: 'write' },
           });
           this.logger.trace(
             `Logged ${groupedChanges.length} change/s to history stream for [${module}, ${this.dataset}] correlationId=${correlationId}`
@@ -182,6 +196,9 @@ export class ChangeTrackingService implements IChangeTrackingService {
       this.logger.warn(error.message);
       throw error;
     }
-    return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, opts);
+    return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, {
+      ...opts,
+      spanLabels: { solution: module, action: 'read' },
+    });
   }
 }

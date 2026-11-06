@@ -13,6 +13,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
+import { createDiscoverSessionAttachmentType } from './create_discover_session_attachment';
 
 const columnSchema = z.object({
   name: z.string(),
@@ -24,12 +25,21 @@ const timeRangeSchema = z.object({
   to: z.string(),
 });
 
+const playbookContributionSchema = z.object({
+  shapeId: z.string(),
+  shapeLabel: z.string(),
+  characteristicFields: z.array(z.string()),
+  guidance: z.string().max(600),
+  interestingSignals: z.array(z.string()).max(5).optional(),
+});
+
 const esqlQueryResultsDataSchema = z.object({
   query: z.string(),
   columns: z.array(columnSchema),
   sampleRows: z.array(z.record(z.string(), z.unknown())),
   totalHits: z.number(),
   timeRange: timeRangeSchema.optional(),
+  playbookContribution: playbookContributionSchema.optional(),
 });
 
 type EsqlQueryResultsData = z.infer<typeof esqlQueryResultsDataSchema>;
@@ -100,9 +110,31 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
     lines.push(`  { ${entries} }`);
   }
 
+  if (data.playbookContribution) {
+    const columnNames = new Set(data.columns.map((col) => col.name));
+    const fields = data.playbookContribution.characteristicFields.filter((f) => columnNames.has(f));
+
+    lines.push('');
+    lines.push('Shape Profile:');
+    lines.push(
+      `  Shape: ${data.playbookContribution.shapeLabel} (${data.playbookContribution.shapeId})`
+    );
+    if (fields.length > 0) {
+      lines.push(`  Characteristic fields present: ${fields.join(', ')}`);
+    }
+    lines.push(`  Guidance: ${data.playbookContribution.guidance}`);
+    if (data.playbookContribution.interestingSignals?.length) {
+      lines.push('  Interesting signals:');
+      for (const signal of data.playbookContribution.interestingSignals) {
+        lines.push(`    - ${signal}`);
+      }
+    }
+  }
+
   return lines.join('\n');
 };
 
 export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
   agentBuilder.attachments.registerType(createEsqlQueryResultsAttachmentType());
+  agentBuilder.attachments.registerType(createDiscoverSessionAttachmentType());
 };

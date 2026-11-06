@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { ServiceAnomaliesResponse, ServiceMapServiceStats } from '@kbn/apm-types';
 import { MarkerType } from '@xyflow/react';
-import { transformToReactFlow } from './transform_to_react_flow';
-import type { ServiceMapRawResponse, ServiceMapSpan, ServicesResponse } from './types';
-import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
-import type { GroupedNodeData } from './types';
 import { DEFAULT_EDGE_COLOR } from './constants';
+import { transformToReactFlow } from './transform_to_react_flow';
+import type {
+  GroupedNodeData,
+  ServiceMapRawResponse,
+  ServiceMapSpan,
+  ServicesResponse,
+} from './types';
 
 // Helper to create a minimal raw response
 function createMockRawResponse(
@@ -156,6 +160,7 @@ describe('transformToReactFlow', () => {
             transactionType: 'request',
             actualValue: 100,
             anomalyScore: 75,
+            anomalyEnvironment: 'production',
           },
         ],
       };
@@ -172,9 +177,78 @@ describe('transformToReactFlow', () => {
         expect.objectContaining({
           serviceAnomalyStats: expect.objectContaining({
             anomalyScore: 75,
+            anomalyEnvironment: 'production',
           }),
         })
       );
+    });
+  });
+
+  describe('when the services carry stats (service map grouping enabled)', () => {
+    const javaStats: ServiceMapServiceStats = {
+      transactionType: 'request',
+      throughput: 12,
+      failedTransactionRate: 0.1,
+      latency: 2500,
+      requestCount: 180,
+    };
+    const pythonStats: ServiceMapServiceStats = { ...javaStats, throughput: 3, requestCount: 45 };
+
+    const withStats = (service: ServicesResponse, stats: ServiceMapServiceStats) => ({
+      ...service,
+      stats,
+    });
+
+    it('keeps the stats of a standalone service', () => {
+      const rawResponse = createMockRawResponse({
+        servicesData: [withStats(createServiceData('opbeans-java', 'java'), javaStats)],
+      });
+
+      const result = transformToReactFlow(rawResponse);
+
+      expect(result.nodes[0].data).toEqual(expect.objectContaining({ stats: javaStats }));
+    });
+
+    it('adds the stats to services that come from the connections', () => {
+      const rawResponse = createMockRawResponse({
+        servicesData: [
+          withStats(createServiceData('opbeans-java', 'java'), javaStats),
+          withStats(createServiceData('opbeans-python', 'python'), pythonStats),
+        ],
+        spans: [
+          createServiceSpan('opbeans-java', 'java', {
+            serviceName: 'opbeans-python',
+            agentName: 'python',
+          }),
+        ],
+      });
+
+      const result = transformToReactFlow(rawResponse);
+
+      const statsById = Object.fromEntries(
+        result.nodes.map(({ id, data }) => [id, 'stats' in data ? data.stats : undefined])
+      );
+      expect(statsById).toEqual({ 'opbeans-java': javaStats, 'opbeans-python': pythonStats });
+    });
+
+    it('leaves the stats out when the services have none', () => {
+      const rawResponse = createMockRawResponse({
+        servicesData: [
+          createServiceData('opbeans-java', 'java'),
+          createServiceData('opbeans-python', 'python'),
+        ],
+        spans: [
+          createServiceSpan('opbeans-java', 'java', {
+            serviceName: 'opbeans-python',
+            agentName: 'python',
+          }),
+        ],
+      });
+
+      const result = transformToReactFlow(rawResponse);
+
+      expect(result.nodes).toHaveLength(2);
+      result.nodes.forEach(({ data }) => expect(data).not.toHaveProperty('stats'));
     });
   });
 
@@ -413,6 +487,7 @@ describe('transformToReactFlow', () => {
               transactionType: 'request',
               actualValue: 500,
               anomalyScore: 95,
+              anomalyEnvironment: 'production',
             },
           ],
         },

@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
   getSelectedWorkflowDisabledError,
+  getWorkflowsListQueryParams,
   processWorkflowsToOptions,
   type WorkflowSelectorConfig,
 } from './workflow_utils';
@@ -17,7 +20,8 @@ import {
 const createMockWorkflow = (
   id: string,
   enabled: boolean,
-  tags?: string[]
+  tags?: string[],
+  managed?: boolean
 ): WorkflowListDto['results'][number] => ({
   id,
   name: `workflow-${id}`,
@@ -35,9 +39,40 @@ const createMockWorkflow = (
   history: [],
   valid: true,
   tags,
+  managed,
 });
 
 describe('workflow_utils', () => {
+  describe('getWorkflowsListQueryParams', () => {
+    it('returns the shared base query without managed workflow access', () => {
+      expect(
+        getWorkflowsListQueryParams({
+          visibility: { selectors: ['rule_action'] },
+          canReadManagedWorkflow: false,
+        })
+      ).toEqual({
+        size: 1000,
+        page: 1,
+        query: '',
+      });
+    });
+
+    it('includes the visibility context when managed workflows can be read', () => {
+      expect(
+        getWorkflowsListQueryParams({
+          visibility: { selectors: ['rule_action'] },
+          canReadManagedWorkflow: true,
+        })
+      ).toEqual({
+        size: 1000,
+        page: 1,
+        query: '',
+        managed: 'all',
+        visibilityContext: ['selector:rule_action'],
+      });
+    });
+  });
+
   describe('processWorkflowsToOptions', () => {
     it('converts workflows to options with correct structure', () => {
       const workflows = [
@@ -84,6 +119,16 @@ describe('workflow_utils', () => {
 
       const options = processWorkflowsToOptions(workflows, undefined, config);
       expect(options[0].validationResult).toEqual({ severity: 'error', message: 'Invalid' });
+    });
+
+    it('adds a managed badge for managed workflows', () => {
+      const workflows = [createMockWorkflow('1', true, undefined, true)];
+
+      const [option] = processWorkflowsToOptions(workflows);
+
+      render(<>{option.append}</>);
+
+      expect(screen.getByText('Managed')).toBeInTheDocument();
     });
   });
 

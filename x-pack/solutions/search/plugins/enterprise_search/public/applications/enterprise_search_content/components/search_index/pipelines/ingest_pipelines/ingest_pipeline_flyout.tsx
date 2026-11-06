@@ -10,7 +10,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -30,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { IngestPipelineParams } from '@kbn/search-connectors';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
@@ -91,7 +91,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             {extractionDisabled ? (
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={i18n.translate(
                   'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningTitle',
@@ -99,30 +99,26 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                     defaultMessage: 'Content extraction cannot be configured',
                   }
                 )}
-                color="warning"
-                iconType="warning"
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningContent',
-                    {
-                      defaultMessage:
-                        'Because local content extraction is enabled for this connector, pipeline content extraction settings cannot be used.',
-                    }
-                  )}
-                </p>
-                <EuiLink
-                  href={`${docLinks.connectorsContentExtraction}#connectors-content-extraction-local`}
-                  target="_blank"
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLocalExtractionLabel',
-                    {
-                      defaultMessage: 'Learn more about local content extraction.',
-                    }
-                  )}
-                </EuiLink>
-              </EuiCallOut>
+                text={i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningContent',
+                  {
+                    defaultMessage:
+                      'Because local content extraction is enabled for this connector, pipeline content extraction settings cannot be used.',
+                  }
+                )}
+                actionProps={{
+                  primary: {
+                    href: `${docLinks.connectorsContentExtraction}#connectors-content-extraction-local`,
+                    target: '_blank',
+                    children: i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLocalExtractionLabel',
+                      {
+                        defaultMessage: 'Learn more about local content extraction.',
+                      }
+                    ),
+                  },
+                }}
+              />
             ) : (
               <></>
             )}

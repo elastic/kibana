@@ -80,7 +80,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
   const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder={true} data-test-subj="apmServerlessSummary">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">

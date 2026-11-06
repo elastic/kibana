@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import type { EntityAnomalies } from './observed_entity/types';
+import type { EntityAnomalies } from '../../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { AnomalyScores } from '../../../../common/components/ml/score/anomaly_scores';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';

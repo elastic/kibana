@@ -57,7 +57,6 @@ export class SearchExamplesPlugin
           href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/data/README.mdx',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

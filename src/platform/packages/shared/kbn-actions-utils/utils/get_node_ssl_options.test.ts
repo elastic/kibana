@@ -51,6 +51,7 @@ describe('getNodeSSLOptions', () => {
     });
     expect(nodeOptionPFX).toMatchInlineSnapshot(`
       Object {
+        "allowPartialTrustChain": undefined,
         "ca": Object {
           "data": Array [
             72,
@@ -99,6 +100,7 @@ describe('getNodeSSLOptions', () => {
     });
     expect(nodeOptionCert).toMatchInlineSnapshot(`
       Object {
+        "allowPartialTrustChain": undefined,
         "ca": Object {
           "data": Array [
             72,
@@ -155,6 +157,17 @@ describe('getNodeSSLOptions', () => {
         "rejectUnauthorized": false,
       }
     `);
+  });
+
+  test('enables partial trust chains when explicitly configured', () => {
+    expect(
+      getNodeSSLOptions(logger, 'full', {
+        allowPartialTrustChain: true,
+      })
+    ).toMatchObject({
+      allowPartialTrustChain: true,
+      rejectUnauthorized: true,
+    });
   });
 });
 

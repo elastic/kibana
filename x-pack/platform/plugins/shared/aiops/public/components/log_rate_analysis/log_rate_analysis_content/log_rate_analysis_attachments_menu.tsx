@@ -24,6 +24,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -79,9 +80,9 @@ export const LogRateAnalysisAttachmentsMenu = ({
         serializedState: {
           title: newTitle,
           description: newDescription,
-          dataViewId: dataView.id,
-          hidePanelTitles: false,
-          ...(applyTimeRange && { timeRange }),
+          data_view_id: dataView.id,
+          hide_title: false,
+          ...(applyTimeRange && { time_range: timeRange }),
         },
         type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
       };
@@ -142,9 +143,9 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   onClick: () => {
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
-                      dataViewId: dataView.id,
+                      data_view_id: dataView.id,
                       time_range: absoluteTimeRange,
-                      ...(windowParameters && { windowParameters }),
+                      ...(windowParameters && { window_parameters: windowParameters }),
                     });
                   },
                 },
@@ -211,19 +212,32 @@ export const LogRateAnalysisAttachmentsMenu = ({
       {!!panels[0]?.items?.length && (
         <EuiFlexItem>
           <EuiPopover
+            aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsPopoverAriaLabel', {
+              defaultMessage: 'Attachments',
+            })}
             button={
-              <EuiButtonIcon
-                data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
-                aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
-                color="text"
-                display="base"
-                size="s"
-                isSelected={isActionMenuOpen}
-                iconType="boxesVertical"
-                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
+                  aria-label={i18n.translate(
+                    'xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Attachments',
+                    }
+                  )}
+                  color="text"
+                  display="base"
+                  size="s"
+                  isSelected={isActionMenuOpen}
+                  iconType="boxesVertical"
+                  onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                />
+              </EuiToolTip>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}

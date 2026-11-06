@@ -32,8 +32,8 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     this.log = this.ctx.logger.get();
   }
 
-  setup({ http, capabilities, elasticsearch }: CoreSetup, { cloud }: PluginsSetup) {
-    capabilities.registerProvider(() => ({
+  setup(core: CoreSetup, { cloud }: PluginsSetup) {
+    core.capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
         save: true,
@@ -41,13 +41,14 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     }));
     const globalConfig = this.ctx.config.legacy.get();
 
-    this.esLegacyConfigService.setup(elasticsearch.legacy.config$, cloud);
+    this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$, cloud);
 
-    const router = http.createRouter();
+    const router = core.http.createRouter();
 
     registerRoutes({
       router,
       log: this.log,
+      getStartServices: core.getStartServices,
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
         specDefinitionService: this.specDefinitionsService,

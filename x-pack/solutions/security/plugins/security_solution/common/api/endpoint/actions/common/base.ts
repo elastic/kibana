@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { MAX_COMMENT_LENGTH } from '../../../../constants';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../endpoint/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
 
@@ -31,7 +32,7 @@ export const HostOsTypeSchemaLiteral = SUPPORTED_HOST_OS_TYPE.map((osType) =>
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
+  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
     minSize: 1,
     maxSize: 250,
     validate: (endpointIds) => {
@@ -42,7 +43,7 @@ export const BaseActionRequestSchema = {
   }),
   /** If defined, any case associated with the given IDs will be updated */
   alert_ids: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1 }), {
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
       minSize: 1,
       maxSize: 50,
       validate: (alertIds) => {
@@ -54,7 +55,7 @@ export const BaseActionRequestSchema = {
   ),
   /** Case IDs to be updated */
   case_ids: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1 }), {
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
       minSize: 1,
       maxSize: 50,
       validate: (caseIds) => {
@@ -64,7 +65,7 @@ export const BaseActionRequestSchema = {
       },
     })
   ),
-  comment: schema.maybe(schema.string()),
+  comment: schema.maybe(schema.string({ maxLength: MAX_COMMENT_LENGTH })),
   parameters: schema.maybe(schema.object({})),
   agent_type: schema.maybe(
     schema.oneOf(

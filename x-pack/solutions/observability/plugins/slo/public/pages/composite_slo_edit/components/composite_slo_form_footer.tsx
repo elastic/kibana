@@ -25,15 +25,12 @@ export function CompositeSloFormFooter({ compositeSloId, isEditMode }: Props) {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { getValues, trigger } = useFormContext<CreateCompositeSLOForm>();
+  const { getValues, handleSubmit } = useFormContext<CreateCompositeSLOForm>();
 
   const { mutateAsync: createCompositeSlo, isLoading: isCreating } = useCreateCompositeSlo();
   const { mutateAsync: updateCompositeSlo, isLoading: isUpdating } = useUpdateCompositeSlo();
 
-  const handleSubmit = async () => {
-    const isValid = await trigger();
-    if (!isValid) return;
-
+  const onValid = async () => {
     const values = getValues();
 
     if (isEditMode && compositeSloId) {
@@ -43,6 +40,14 @@ export function CompositeSloFormFooter({ compositeSloId, isEditMode }: Props) {
     }
 
     navigateToUrl(basePath.prepend(paths.slosComposite));
+  };
+
+  const onInvalid = () => {
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>('[aria-invalid="true"], .euiFormErrorText');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.focus?.({ preventScroll: true });
+    });
   };
 
   const isLoading = isCreating || isUpdating;
@@ -55,7 +60,7 @@ export function CompositeSloFormFooter({ compositeSloId, isEditMode }: Props) {
           data-test-subj="compositeSloFormSubmitButton"
           fill
           isLoading={isLoading}
-          onClick={handleSubmit}
+          onClick={handleSubmit(onValid, onInvalid)}
         >
           {isEditMode
             ? i18n.translate('xpack.slo.compositeSloEdit.updateButton', {

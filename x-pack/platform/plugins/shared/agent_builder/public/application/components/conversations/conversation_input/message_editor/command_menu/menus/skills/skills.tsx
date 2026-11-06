@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useAgentSkills } from '../../../../../../../hooks/skills/use_agent_skills';
@@ -26,7 +26,7 @@ const descriptionStyles = css`
 `;
 
 export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
-  ({ query, onSelect }, ref) => {
+  ({ query, onSelect, onContentChange }, ref) => {
     const { euiTheme } = useEuiTheme();
     const agentId = useAgentId();
     const { skills, isLoading } = useAgentSkills({ agentId });
@@ -63,6 +63,14 @@ export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
           };
         });
     }, [skills, query, skillRowStyles]);
+
+    // Lets the popover stay closed once it's clear there's nothing to show,
+    // instead of leaving a "No matching results" panel open indefinitely as
+    // the user keeps typing past an unresolved mention.
+    const hasVisibleContent = isLoading || options.length > 0;
+    useEffect(() => {
+      onContentChange?.(hasVisibleContent, query);
+    }, [hasVisibleContent, query, onContentChange]);
 
     return (
       <CommandMenuList

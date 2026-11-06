@@ -6,6 +6,7 @@
  */
 
 import type { DetectionMetrics } from './types';
+import { get } from 'lodash';
 
 import {
   elasticsearchServiceMock,
@@ -23,6 +24,7 @@ import {
   getMockMlDatafeedStatsResponse,
   getMockRuleSearchResponse,
   getMockThreatMatchRuleSO,
+  getMockPrebuiltRuleAssetSearchResponse,
   getMockThreatMatchRuleSearchResponse,
 } from './ml_jobs/get_metrics.mocks';
 import {
@@ -33,11 +35,14 @@ import {
   getEventLogElasticRules,
   getElasticLogCustomRules,
   getAllEventLogTransform,
+  getMockChangesHistoryUsageResponse,
 } from './rules/get_metrics.mocks';
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
 import {
+  getInitialChangesHistoryUsage,
   getInitialRuleUpgradeStatus,
+  getInitialRuleCustomizationStatus,
   getInitialRulesUsage,
   initialAlertSuppression,
   initialResponseActionsUsage,
@@ -65,6 +70,16 @@ describe('Detections Usage and Metrics', () => {
       savedObjectsClient = savedObjectsClientMock.create();
       mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
       mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValue([]);
+      // by default every installed prebuilt rule has its base version asset available
+      savedObjectsClient.search.mockImplementation(async (options) => {
+        const soIds = get(options, 'query.bool.must.terms._id', []) as string[];
+        return getMockPrebuiltRuleAssetSearchResponse(
+          soIds.map((soId) => {
+            const [ruleId, version] = soId.replace('security-rule:', '').split(/_(?=\d+$)/);
+            return { rule_id: ruleId, version: Number(version) };
+          })
+        );
+      });
     });
 
     it('returns zeroed counts if calls are empty', async () => {
@@ -82,6 +97,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled non-customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -124,6 +142,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -223,6 +242,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled non-customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -271,6 +293,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -369,6 +392,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -417,6 +443,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -515,6 +542,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -563,6 +593,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -661,6 +692,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled non-customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -709,6 +743,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -821,6 +856,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled non-customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -869,6 +907,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -967,6 +1006,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1015,6 +1057,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -1113,6 +1156,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1161,6 +1207,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -1259,6 +1306,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information on custom rule', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1364,6 +1414,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with rule, no alerts and no cases, when no upgrades possible', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1403,6 +1456,7 @@ describe('Detections Usage and Metrics', () => {
               elastic_rule: true,
               enabled: false,
               is_customized: false,
+              has_base_version: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
               rule_type: 'query',
@@ -1511,6 +1565,9 @@ describe('Detections Usage and Metrics', () => {
     describe('threat match rules', () => {
       let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
       beforeEach(() => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+        );
         esClient.search.mockResponseOnce(getEventLogAllRules());
         esClient.search.mockResponseOnce(getEventLogElasticRules());
         esClient.search.mockResponseOnce(getElasticLogCustomRules()); // this is needed to get the custom rules
@@ -1605,11 +1662,129 @@ describe('Detections Usage and Metrics', () => {
           0
         );
       });
+
+      it('reports base version status for prebuilt rules', async () => {
+        savedObjectsClient.find.mockResolvedValueOnce(
+          getMockThreatMatchRuleSearchResponse([
+            getMockThreatMatchRuleSO({
+              ruleId: 'customized-with-base',
+              isElastic: true,
+              isCustomized: true,
+            }),
+            getMockThreatMatchRuleSO({
+              ruleId: 'customized-without-base',
+              isElastic: true,
+              isCustomized: true,
+            }),
+            getMockThreatMatchRuleSO({ ruleId: 'noncustomized-with-base-1', isElastic: true }),
+            getMockThreatMatchRuleSO({ ruleId: 'noncustomized-with-base-2', isElastic: true }),
+            getMockThreatMatchRuleSO({ ruleId: 'noncustomized-without-base', isElastic: true }),
+            // legacy prebuilt rules without a persisted `ruleSource` are still counted
+            getMockThreatMatchRuleSO({
+              ruleId: 'legacy-with-base',
+              isElastic: true,
+              hasRuleSource: false,
+            }),
+            getMockThreatMatchRuleSO({
+              ruleId: 'legacy-without-base',
+              isElastic: true,
+              hasRuleSource: false,
+            }),
+            // custom rules are excluded from the aggregates
+            getMockThreatMatchRuleSO({ ruleId: 'custom-rule' }),
+          ])
+        );
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+        // assets for rules without a base version are either absent or deprecated, so ES does not return them
+        savedObjectsClient.search.mockResolvedValueOnce(
+          getMockPrebuiltRuleAssetSearchResponse([
+            { rule_id: 'customized-with-base', version: 1 },
+            { rule_id: 'noncustomized-with-base-1', version: 1 },
+            { rule_id: 'noncustomized-with-base-2', version: 1 },
+            { rule_id: 'legacy-with-base', version: 1 },
+          ])
+        );
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(savedObjectsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'security-rule',
+            query: {
+              bool: {
+                must: {
+                  terms: {
+                    _id: [
+                      'security-rule:customized-with-base_1',
+                      'security-rule:customized-without-base_1',
+                      'security-rule:noncustomized-with-base-1_1',
+                      'security-rule:noncustomized-with-base-2_1',
+                      'security-rule:noncustomized-without-base_1',
+                      'security-rule:legacy-with-base_1',
+                      'security-rule:legacy-without-base_1',
+                    ],
+                  },
+                },
+                must_not: { term: { 'security-rule.deprecated': true } },
+              },
+            },
+          })
+        );
+        // customized mock rules have `tags`, `name` and `description` customized
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_customization_status',
+          {
+            ...getInitialRuleCustomizationStatus(),
+            tags: 2,
+            name: 2,
+            description: 2,
+          }
+        );
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_customization_status_missing_base_version',
+          {
+            ...getInitialRuleCustomizationStatus(),
+            tags: 1,
+            name: 1,
+            description: 1,
+          }
+        );
+        expect(result).toHaveProperty('detection_rules.detection_rule_detail.length', 7);
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_detail',
+          expect.arrayContaining([
+            expect.objectContaining({ rule_id: 'customized-with-base', has_base_version: true }),
+            expect.objectContaining({
+              rule_id: 'customized-without-base',
+              has_base_version: false,
+            }),
+            expect.objectContaining({
+              rule_id: 'noncustomized-with-base-1',
+              has_base_version: true,
+            }),
+            expect.objectContaining({
+              rule_id: 'noncustomized-with-base-2',
+              has_base_version: true,
+            }),
+            expect.objectContaining({
+              rule_id: 'noncustomized-without-base',
+              has_base_version: false,
+            }),
+            expect.objectContaining({ rule_id: 'legacy-with-base', has_base_version: true }),
+            expect.objectContaining({ rule_id: 'legacy-without-base', has_base_version: false }),
+          ])
+        );
+      });
     });
 
     describe('deprecated rules', () => {
       let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
       beforeEach(() => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+        );
         esClient.search.mockResponseOnce(getEventLogAllRules());
         esClient.search.mockResponseOnce(getEventLogElasticRules());
         esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1675,6 +1850,88 @@ describe('Detections Usage and Metrics', () => {
         expect(result).toHaveProperty(
           'detection_rules.elastic_detection_rule_deprecated_status.total',
           0
+        );
+      });
+    });
+
+    describe('changes history usage', () => {
+      it('reports revision_saved and rule_restored as returned by the change-history query', async () => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 3, ruleRestoredCount: 2 })
+        );
+        esClient.search.mockResponseOnce(getEventLogAllRules());
+        esClient.search.mockResponseOnce(getEventLogElasticRules());
+        esClient.search.mockResponseOnce(getElasticLogCustomRules());
+        esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
+        savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+
+        const logger = loggingSystemMock.createLogger();
+        const result = await getDetectionsMetrics({
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        });
+
+        expect(result).toHaveProperty('detection_rules.changes_history_usage', {
+          revision_saved: 3,
+          rule_restored: 2,
+        });
+      });
+
+      it('populates changes_history_usage even when the cluster has zero detection rules', async () => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 4, ruleRestoredCount: 0 })
+        );
+        // Let getDetectionRules() resolve to a genuinely empty rule list (not an
+        // unmocked-PIT exception) so the "zero rules" branch, not the outer catch, is exercised.
+        savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
+          id: 'changes-history-usage-test-pit',
+        });
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
+        const logger = loggingSystemMock.createLogger();
+        const result = await getDetectionsMetrics({
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        });
+
+        expect(result).toHaveProperty('detection_rules.changes_history_usage', {
+          revision_saved: 4,
+          rule_restored: 0,
+        });
+      });
+
+      it('degrades to false/false when the change-history query errors', async () => {
+        esClient.search.mockImplementationOnce(() => {
+          throw new Error('index_not_found_exception');
+        });
+
+        const logger = loggingSystemMock.createLogger();
+        const result = await getDetectionsMetrics({
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        });
+
+        expect(result).toHaveProperty(
+          'detection_rules.changes_history_usage',
+          getInitialChangesHistoryUsage()
         );
       });
     });

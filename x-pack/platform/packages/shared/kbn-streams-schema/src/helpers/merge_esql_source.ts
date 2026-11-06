@@ -21,7 +21,7 @@ import type { SampleDocument } from '../shared/record_types';
  */
 export function mergeSourceIntoDocuments(docs: SampleDocument[]): SampleDocument[] {
   return docs.map((doc) => {
-    const { _source, _id, ...columnFields } = doc;
+    const { _source, ...columnFields } = doc;
     if (!_source || typeof _source !== 'object') {
       return columnFields;
     }

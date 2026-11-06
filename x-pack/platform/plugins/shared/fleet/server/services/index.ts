@@ -22,10 +22,14 @@ export interface AgentPolicyServiceInterface {
   delete: (typeof agentPolicyService)['delete'];
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
   getByIds: (typeof agentPolicyService)['getByIds'];
+  bumpRevision: (typeof agentPolicyService)['bumpRevision'];
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
   deployPolicy: (typeof agentPolicyService)['deployPolicy'];
+  getSpacesForPoliciesUsingOutput: (typeof agentPolicyService)['getSpacesForPoliciesUsingOutput'];
+  getSpacesForPoliciesUsingFleetServerHost: (typeof agentPolicyService)['getSpacesForPoliciesUsingFleetServerHost'];
+  getSpacesForPoliciesUsingDownloadSource: (typeof agentPolicyService)['getSpacesForPoliciesUsingDownloadSource'];
 }
 
 // Agent services
@@ -66,6 +70,9 @@ export { checkAllowedPackages } from './check_allowed_packages';
 
 export { cloudConnectorService } from './cloud_connector';
 export type { CloudConnectorServiceInterface } from './cloud_connector';
+
+export { iacProvisionerService } from './iac_provisioner';
+export type { IacProvisionerService } from './iac_provisioner';
 
 export * from './cloud_connectors';
 

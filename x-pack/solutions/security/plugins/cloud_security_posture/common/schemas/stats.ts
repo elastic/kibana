@@ -7,8 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 
 // this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
+
+// Fleet data stream namespaces are limited to 100 bytes.
+const NAMESPACE_MAX_LENGTH = 100;
 
 export const getComplianceDashboardSchema = schema.object({
   policy_template: schema.oneOf([
@@ -18,5 +22,15 @@ export const getComplianceDashboardSchema = schema.object({
 });
 
 export const getComplianceDashboardQuerySchema = schema.object({
-  namespace: schema.maybe(schema.string()),
+  namespace: schema.maybe(
+    schema.string({
+      maxLength: NAMESPACE_MAX_LENGTH,
+      validate: (value) => {
+        const namespaceValidation = isValidNamespace(value);
+        if (!namespaceValidation.valid) {
+          return namespaceValidation.error;
+        }
+      },
+    })
+  ),
 });

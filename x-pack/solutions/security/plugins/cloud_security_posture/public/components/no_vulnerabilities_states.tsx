@@ -246,7 +246,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
   <EuiEmptyPrompt
     data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED}
     color="plain"
-    icon={<EuiIcon type="logoSecurity" size="xl" />}
+    icon={<EuiIcon type="logoSecurity" size="xl" aria-hidden={true} />}
     title={
       <h2>
         <FormattedMessage

@@ -8,8 +8,12 @@
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { getMonitorIdentityFilter } from '../../../../../../common/lib';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useGetUrlParams } from '../../../hooks';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -33,9 +37,14 @@ export const usePreviousObjectMetrics = () => {
 
   const timestamp = data?.details?.timestamp;
 
+  const { remoteName } = useGetUrlParams();
+  const index = getSyntheticsCcsIndex(remoteName);
+  const { monitor } = useSelectedMonitor();
+  const origin = isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined;
+
   const { data: prevObjectMetrics } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       track_total_hits: false,
       sort: [
         {
@@ -61,11 +70,7 @@ export const usePreviousObjectMetrics = () => {
                 },
               },
             },
-            {
-              term: {
-                config_id: monitorId,
-              },
-            },
+            getMonitorIdentityFilter({ monitorId, origin, remoteName }),
             {
               term: {
                 'synthetics.type': 'journey/network_info',
@@ -117,7 +122,7 @@ export const usePreviousObjectMetrics = () => {
         },
       },
     },
-    [stepIndex, monitorId, checkGroupId],
+    [stepIndex, monitorId, checkGroupId, remoteName, origin],
     {
       name: `previousObjectMetrics/${monitorId}/${checkGroupId}/${stepIndex}/`,
       isRequestReady: !!timestamp,

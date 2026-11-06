@@ -33,7 +33,7 @@ interface Props {
 export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) => {
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attack, attack.replacements);
-  const { disabled, showAssistantOverlay } = useViewInAiAssistant({
+  const { disabled, showAssistantOverlay, isAssistantVisible } = useViewInAiAssistant({
     attackDiscovery: attack,
     replacements: attack.replacements,
   });
@@ -44,10 +44,14 @@ export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) =
         onClick={openAgentBuilderFlyout}
         telemetry={{
           pathway,
-          attachments: ['alert'],
+          attachments: ['attack_discovery'],
         }}
       />
     );
+  }
+
+  if (!isAssistantVisible) {
+    return null;
   }
 
   return (

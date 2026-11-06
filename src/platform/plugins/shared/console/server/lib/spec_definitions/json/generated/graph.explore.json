@@ -11,6 +11,67 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "connections": {
+        "connections": {},
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        },
+        "vertices": [
+          {
+            "exclude": [],
+            "field": "",
+            "include": {
+              "__any_of": [
+                {
+                  "boost": "",
+                  "term": ""
+                },
+                ""
+              ]
+            },
+            "min_doc_count": "",
+            "shard_min_doc_count": "",
+            "size": ""
+          }
+        ]
+      },
+      "controls": {
+        "sample_diversity": {
+          "field": "",
+          "max_docs_per_value": ""
+        },
+        "sample_size": "",
+        "timeout": "",
+        "use_significance": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      },
+      "vertices": [
+        {
+          "exclude": [],
+          "field": "",
+          "include": {
+            "__any_of": [
+              {
+                "boost": "",
+                "term": ""
+              },
+              ""
+            ]
+          },
+          "min_doc_count": "",
+          "shard_min_doc_count": "",
+          "size": ""
+        }
+      ]
+    },
     "methods": [
       "GET",
       "POST"

@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import {
   type AppContextTestRender,
@@ -18,7 +19,7 @@ import { SCRIPT_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { useToasts } from '../../../../../common/lib/kibana';
-import { SCRIPT_LIBRARY_PAGE_STORAGE_KEY, ScriptLibrary } from './script_library';
+import { ScriptLibrary } from './script_library';
 import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
@@ -155,13 +156,13 @@ describe('ScriptLibrary', () => {
       expect(getByTestId('test-no-data-empty-prompt-title-no-entries')).toBeInTheDocument();
     });
 
-    it('renders the `Script Library` page', () => {
+    it('renders the `Script library` page', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
 
-    it('should show the page header when data is available and fetched', () => {
+    it('should show the page header with the correct title', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
       getScriptsListMock([script]);
@@ -169,73 +170,20 @@ describe('ScriptLibrary', () => {
       render();
       const { getByTestId } = renderResult;
 
-      expect(getByTestId('test-header')).toBeInTheDocument();
-      expect(getByTestId('header-page-title').textContent).toEqual('Script Library');
-      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
-        'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.'
-      );
-    });
-  });
-
-  describe('Page banner', () => {
-    it('should show new page banner', () => {
-      render();
-      const { getByTestId, getByText } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
-
-      expect(getByText('New: Script library')).toBeInTheDocument();
-      expect(
-        getByText(
-          'Upload and manage reusable scripts to run on endpoints protected by Elastic Defend.'
-        )
-      ).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toEqual('Script library');
     });
 
-    it('should show a `learn more` link within the banner', () => {
-      render();
-      const { getByTestId } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
-
-      const learnMoreLink = banner.querySelector('a');
-      expect(learnMoreLink).toBeInTheDocument();
-      expect(learnMoreLink?.getAttribute('href')).toContain('scripts-library');
-    });
-
-    it('should not show new page banner after it is dismissed', async () => {
+    it('should show the page header even when there is no data yet', () => {
+      // header title should always be announced for the route, even in the empty state -
+      // only the header's primary action is suppressed to avoid duplicating the empty
+      // prompt's own "Upload script" button
       render();
       const { getByTestId, queryByTestId } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
 
-      const dismissButton = getByTestId('euiDismissCalloutButton');
-      await userEvent.click(dismissButton);
-
-      await waitFor(() => {
-        expect(queryByTestId('test-new-page-banner')).not.toBeInTheDocument();
-      });
-
-      // Verify that the dismiss was recorded in storage
-      expect(mockStorageSet).toHaveBeenCalledWith(SCRIPT_LIBRARY_PAGE_STORAGE_KEY, false);
-    });
-
-    it('should not show the banner when storage value is set to false (dismissed)', () => {
-      mockStorageGet.mockReturnValue(false);
-
-      render();
-      const { queryByTestId } = renderResult;
-      const banner = queryByTestId('test-new-page-banner');
-      expect(banner).not.toBeInTheDocument();
-    });
-
-    it('should show the banner when storage value is cleared', () => {
-      mockStorageSet.mockReturnValue(undefined);
-
-      render();
-      const { getByTestId } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toEqual('Script library');
+      expect(queryByTestId('test-upload-script-button')).not.toBeInTheDocument();
     });
   });
 

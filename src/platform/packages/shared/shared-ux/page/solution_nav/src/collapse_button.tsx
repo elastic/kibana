@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 
 import type { EuiButtonIconPropsForButton } from '@elastic/eui';
-import { EuiButtonIcon, euiCanAnimate, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export type SolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {
@@ -90,15 +90,16 @@ export const SolutionNavCollapseButton = ({
   };
 
   return (
-    <EuiButtonIcon
-      className={className}
-      css={[styles.base, isCollapsed && styles.isCollapsed, !isCollapsed && styles.notCollapsed]}
-      size="s"
-      color="text"
-      iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
-      aria-label={isCollapsed ? openLabel : collapseLabel}
-      title={isCollapsed ? openLabel : collapseLabel}
-      {...rest}
-    />
+    <EuiToolTip content={isCollapsed ? openLabel : collapseLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        className={className}
+        css={[styles.base, isCollapsed && styles.isCollapsed, !isCollapsed && styles.notCollapsed]}
+        size="s"
+        color="text"
+        iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
+        aria-label={isCollapsed ? openLabel : collapseLabel}
+        {...rest}
+      />
+    </EuiToolTip>
   );
 };

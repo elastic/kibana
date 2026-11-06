@@ -36,6 +36,13 @@ describe('TruncatableText', () => {
     expect(wrapper).toHaveStyleRule('white-space', 'nowrap');
   });
 
+  test('it inherits link decoration from its parent', () => {
+    const wrapper = mount(<TruncatableText>{'A truncated link'}</TruncatableText>);
+
+    expect(wrapper).toHaveStyleRule('text-decoration', 'inherit');
+    expect(wrapper).toHaveStyleRule('text-decoration-thickness', 'inherit');
+  });
+
   test('it can add tooltip', () => {
     const testText = 'Some really really really really really long text.';
     const wrapper = mount(<TruncatableText tooltipContent={testText}>{testText}</TruncatableText>);

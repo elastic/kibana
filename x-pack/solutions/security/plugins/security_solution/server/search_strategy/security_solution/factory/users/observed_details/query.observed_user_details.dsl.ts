@@ -7,14 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEmpty } from 'lodash';
 import type { ObservedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { USER_FIELDS } from './helpers';
-
-const EUID_RUNTIME_FIELD = 'entity_id';
 
 export const buildObservedUserDetailsQuery = ({
   defaultIndex,
@@ -27,7 +25,9 @@ export const buildObservedUserDetailsQuery = ({
   const userNameFilter = isEmpty(filterQuery) ? { term: { 'user.name': userName } } : undefined;
 
   const filter: QueryDslQueryContainer[] = [
-    ...(entityStoreV2 ? [euid.dsl.getEuidDocumentsContainsIdFilter('user')] : []),
+    ...(entityStoreV2
+      ? [euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))]
+      : []),
     ...(userNameFilter ? [userNameFilter] : []),
     ...createQueryFilterClauses(filterQuery),
     {
@@ -46,9 +46,6 @@ export const buildObservedUserDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    ...(entityStoreV2
-      ? { runtime_mappings: { [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping('user') } }
-      : {}),
     aggregations: {
       ...buildFieldsTermAggregation(USER_FIELDS),
     },

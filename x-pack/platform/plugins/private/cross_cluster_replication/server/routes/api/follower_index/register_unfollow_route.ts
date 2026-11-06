@@ -17,7 +17,7 @@ export const registerUnfollowRoute = ({
   license,
   lib: { handleEsError },
 }: RouteDependencies) => {
-  const paramsSchema = schema.object({ id: schema.string() });
+  const paramsSchema = schema.object({ id: schema.string({ maxLength: 1000 }) });
 
   router.put(
     {

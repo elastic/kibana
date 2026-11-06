@@ -43,11 +43,10 @@ export const ViewAlertDetailsAlertAction = typedMemo(
         <EuiContextMenuItem
           data-test-subj="viewAlertDetailsPage"
           key="viewAlertDetailsPage"
-          size="s"
           href={linkToAlert}
           target={openLinksInNewTab ? '_blank' : undefined}
         >
-          {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
+          {i18n.translate('xpack.responseOpsAlertsTable.alertsTable.viewAlertDetails', {
             defaultMessage: 'View alert details',
           })}
         </EuiContextMenuItem>
@@ -58,13 +57,12 @@ export const ViewAlertDetailsAlertAction = typedMemo(
       <EuiContextMenuItem
         data-test-subj="viewAlertDetailsFlyout"
         key="viewAlertDetailsFlyout"
-        size="s"
         onClick={() => {
           onActionExecuted?.();
           onExpandedAlertIndexChange(rowIndex);
         }}
       >
-        {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
+        {i18n.translate('xpack.responseOpsAlertsTable.alertsTable.viewAlertDetails', {
           defaultMessage: 'View alert details',
         })}
       </EuiContextMenuItem>

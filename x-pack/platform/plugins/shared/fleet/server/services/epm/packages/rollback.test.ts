@@ -8,10 +8,15 @@
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
+import { getAgentsByKuery, reassignAgents } from '../../agents';
 
 import { sendTelemetryEvents } from '../../upgrade_sender';
 
 import { fetchInfo } from '../registry';
+import {
+  buildAgentVersionVariantsEsFilter,
+  buildAgentVersionVariantsKueryFragment,
+} from '../../../../common/services/version_specific_policies_utils';
 
 import { installPackage } from './install';
 import { removeInstallation } from './remove';
@@ -39,10 +44,17 @@ jest.mock('../..', () => ({
     restoreRollback: jest.fn(),
     cleanupRollbackSavedObjects: jest.fn(),
     bumpAgentPolicyRevisionAfterRollback: jest.fn(),
+    findAllForAgentPolicy: jest.fn().mockResolvedValue([]),
   },
   agentPolicyService: {
     getByIds: jest.fn().mockResolvedValue([]),
+    update: jest.fn().mockResolvedValue({ has_agent_version_conditions: false }),
   },
+}));
+
+jest.mock('../../agents', () => ({
+  getAgentsByKuery: jest.fn().mockResolvedValue({ total: 0, agents: [] }),
+  reassignAgents: jest.fn().mockResolvedValue({}),
 }));
 
 jest.mock('../../audit_logging');
@@ -916,6 +928,331 @@ describe('rollbackInstallation - feature flag disabled with existing snapshot', 
       pkgName,
       { previous_dependency_versions: null }
     );
+  });
+});
+
+describe('rollbackInstallation - version-specific policy cleanup (enableVersionSpecificPolicies=true)', () => {
+  const mockEsClient = {
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+  } as any;
+
+  beforeEach(() => {
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    });
+  });
+
+  afterEach(() => {
+    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
+    jest.clearAllMocks();
+  });
+
+  const buildSoClient = () =>
+    ({
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              install_source: 'registry',
+              previous_version: '1.0.0',
+              version: '1.5.0',
+            },
+          },
+        ],
+      }),
+    } as any);
+
+  it('triggers variant cleanup when no remaining version conditions after rollback', async () => {
+    const soClient = buildSoClient();
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      soClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.5.0' },
+            revision: 2,
+            latest_revision: true,
+            policy_ids: ['agent-policy-1'],
+          },
+        },
+        {
+          id: 'pp-1:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.0.0' },
+            revision: 1,
+            latest_revision: false,
+            policy_ids: ['agent-policy-1'],
+          },
+        },
+      ],
+    } as any);
+    packagePolicyServiceMock.rollback.mockResolvedValue({
+      updatedPolicies: {
+        default: [
+          {
+            id: 'pp-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            namespaces: ['default'],
+            attributes: {
+              policy_ids: ['agent-policy-1'],
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: { default: [] },
+      previousVersionPolicies: { default: [] },
+    } as any);
+    packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([]);
+    (agentPolicyService.update as jest.Mock).mockResolvedValue({
+      has_agent_version_conditions: false,
+    });
+
+    await rollbackInstallation({
+      esClient: mockEsClient,
+      currentUserPolicyIds: ['pp-1', 'pp-1:prev'],
+      pkgName,
+      spaceId,
+    });
+
+    expect(agentPolicyService.update).toHaveBeenCalledWith(
+      expect.anything(),
+      mockEsClient,
+      'agent-policy-1',
+      {},
+      { bumpRevision: false, skipValidation: true }
+    );
+    expect(mockEsClient.deleteByQuery).toHaveBeenCalled();
+  });
+
+  it('only matches the agent version variants of the policy, not #sentinel or other policies', async () => {
+    const soClient = buildSoClient();
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      soClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.5.0' },
+            revision: 2,
+            latest_revision: true,
+            policy_ids: ['policy-a'],
+          },
+        },
+        {
+          id: 'pp-1:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.0.0' },
+            revision: 1,
+            latest_revision: false,
+            policy_ids: ['policy-a'],
+          },
+        },
+      ],
+    } as any);
+    packagePolicyServiceMock.rollback.mockResolvedValue({
+      updatedPolicies: {
+        default: [
+          {
+            id: 'pp-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            namespaces: ['default'],
+            attributes: { policy_ids: ['policy-a'] },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: { default: [] },
+      previousVersionPolicies: { default: [] },
+    } as any);
+    packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([]);
+    (agentPolicyService.update as jest.Mock).mockResolvedValue({
+      has_agent_version_conditions: false,
+    });
+    (getAgentsByKuery as jest.Mock).mockResolvedValueOnce({ total: 2, agents: [] });
+
+    await rollbackInstallation({
+      esClient: mockEsClient,
+      currentUserPolicyIds: ['pp-1', 'pp-1:prev'],
+      pkgName,
+      spaceId,
+    });
+
+    // agents on the variants are moved back to the policy: `policy-a#*` but not `policy-a#sentinel`
+    const expectedKuery = buildAgentVersionVariantsKueryFragment('policy-a');
+    expect(expectedKuery).toBe('(policy_id:policy-a#* and not policy_id:"policy-a#sentinel")');
+    expect(getAgentsByKuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ kuery: expectedKuery })
+    );
+    expect(reassignAgents).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ kuery: expectedKuery }),
+      'policy-a'
+    );
+
+    // variant docs are deleted with the same matcher
+    const { query } = mockEsClient.deleteByQuery.mock.calls[0][0];
+    expect(query).toEqual(buildAgentVersionVariantsEsFilter('policy-a'));
+
+    // the delete filter does not match the sentinel or a policy sharing the prefix
+    const matches = (policyId: string) =>
+      query.bool.filter.every((f: any) => policyId.startsWith(f.prefix.policy_id)) &&
+      !query.bool.must_not.some((f: any) => f.term.policy_id === policyId);
+    expect(matches('policy-a#9.4')).toBe(true);
+    expect(matches('policy-a#sentinel')).toBe(false);
+    expect(matches('policy-a')).toBe(false);
+    expect(matches('policy-a-other#9.4')).toBe(false);
+    expect(matches('policy-a-other')).toBe(false);
+  });
+
+  it('skips variant deletion when rolled-back package still has version conditions', async () => {
+    const soClient = buildSoClient();
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      soClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.5.0' },
+            revision: 2,
+            latest_revision: true,
+            policy_ids: ['agent-policy-1'],
+          },
+        },
+        {
+          id: 'pp-1:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.0.0' },
+            revision: 1,
+            latest_revision: false,
+            policy_ids: ['agent-policy-1'],
+          },
+        },
+      ],
+    } as any);
+    packagePolicyServiceMock.rollback.mockResolvedValue({
+      updatedPolicies: {
+        default: [
+          {
+            id: 'pp-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            namespaces: ['default'],
+            attributes: {
+              policy_ids: ['agent-policy-1'],
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: { default: [] },
+      previousVersionPolicies: { default: [] },
+    } as any);
+    packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([]);
+    (agentPolicyService.update as jest.Mock).mockResolvedValue({
+      has_agent_version_conditions: true,
+    });
+
+    await rollbackInstallation({
+      esClient: mockEsClient,
+      currentUserPolicyIds: ['pp-1', 'pp-1:prev'],
+      pkgName,
+      spaceId,
+    });
+
+    expect(agentPolicyService.update).toHaveBeenCalled();
+    expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('skips cleanup for a policy that still has another package with version conditions', async () => {
+    const soClient = buildSoClient();
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      soClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.5.0' },
+            revision: 2,
+            latest_revision: true,
+            policy_ids: ['agent-policy-1'],
+          },
+        },
+        {
+          id: 'pp-1:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.0.0' },
+            revision: 1,
+            latest_revision: false,
+            policy_ids: ['agent-policy-1'],
+          },
+        },
+      ],
+    } as any);
+    packagePolicyServiceMock.rollback.mockResolvedValue({
+      updatedPolicies: {
+        default: [
+          {
+            id: 'pp-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            namespaces: ['default'],
+            attributes: { policy_ids: ['agent-policy-1'] },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: { default: [] },
+      previousVersionPolicies: { default: [] },
+    } as any);
+    // Another package policy on the same agent policy still has version conditions
+    packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([
+      { package_agent_version_condition: '^8.0.0' } as any,
+    ]);
+
+    await rollbackInstallation({
+      esClient: mockEsClient,
+      currentUserPolicyIds: ['pp-1', 'pp-1:prev'],
+      pkgName,
+      spaceId,
+    });
+
+    expect(agentPolicyService.update).not.toHaveBeenCalled();
+    expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    expect(getAgentsByKuery).not.toHaveBeenCalled();
   });
 });
 

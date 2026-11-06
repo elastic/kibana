@@ -15,7 +15,7 @@ import {
   MITRE_ATTACK_TITLE_TEST_ID,
   REASON_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -27,7 +27,7 @@ import {
   WORKFLOW_STATUS_TITLE_TEST_ID,
 } from './test_ids';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({

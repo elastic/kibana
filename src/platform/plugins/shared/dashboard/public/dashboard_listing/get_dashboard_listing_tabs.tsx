@@ -9,10 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  TableListTab,
-  TableListTabParentProps,
-} from '@kbn/content-management-tabbed-table-list-view';
+import type { KibanaContentListPageTab } from '@kbn/content-list-page';
+import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import {
   TableListViewTable,
   TableListViewKibanaProvider,
@@ -29,12 +27,18 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import type {
+  DashboardListingProps,
+  DashboardListingTab,
+  DashboardSavedObjectUserContent,
+} from './types';
 
-type GetDashboardListingTabsParams = Pick<
+export type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
   'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
->;
+> & {
+  refreshListBouncer?: boolean;
+};
 
 type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
   parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>;
@@ -52,6 +56,7 @@ const DashboardsTabContent = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   initialFilter,
+  refreshListBouncer,
   parentProps,
 }: TabContentProps) => {
   const {
@@ -64,6 +69,7 @@ const DashboardsTabContent = ({
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
+    showCreateDashboardButton: parentProps.showCreateButton,
   });
 
   const dashboardFavoritesClient = useMemo(() => {
@@ -90,6 +96,7 @@ const DashboardsTabContent = ({
         {...tableListViewTableProps}
         onFetchSuccess={parentProps.onFetchSuccess}
         setPageDataTestSubject={parentProps.setPageDataTestSubject}
+        refreshListBouncer={refreshListBouncer}
       />
     </TableListViewKibanaProvider>
   );
@@ -101,26 +108,41 @@ export const getDashboardListingTabs = ({
   useSessionStorageIntegration,
   initialFilter,
   getTabs,
-}: GetDashboardListingTabsParams): TableListTab<DashboardSavedObjectUserContent>[] => {
+  refreshListBouncer,
+}: GetDashboardListingTabsParams): DashboardListingTab[] => {
   const commonProps = {
     goToDashboard,
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
+    refreshListBouncer,
   };
 
-  const dashboardsTab: TableListTab<DashboardSavedObjectUserContent> = {
+  const dashboardsTab: DashboardListingTab = {
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
-    id: 'dashboards',
+    id: DASHBOARD_APP_ID,
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
   };
 
-  // Additional tabs (e.g., visualizations and annotation groups)
   const additionalTabs = getTabs ? getTabs() : [];
 
   return [dashboardsTab, ...additionalTabs];
 };
+
+/**
+ * Adapts the listing tabs to `KibanaContentListPage.ActiveTab`. The Dashboards tab renders
+ * synchronously; registered tabs resolve their legacy `getTableList` content asynchronously.
+ */
+export const toContentListPageTabs = (
+  tabs: DashboardListingTab[],
+  { parentProps, ...commonProps }: TabContentProps
+): KibanaContentListPageTab[] =>
+  tabs.map(({ id, getTableList }) =>
+    id === DASHBOARD_APP_ID
+      ? { id, render: () => <DashboardsTabContent {...commonProps} parentProps={parentProps} /> }
+      : { id, load: async () => getTableList(parentProps) }
+  );

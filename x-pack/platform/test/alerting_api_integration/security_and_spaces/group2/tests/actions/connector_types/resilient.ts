@@ -416,13 +416,13 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               id: resilientActionId,
               provider: 'actions',
               actions: new Map([
-                ['execute-start', { equal: 1 }],
+                ['execute-start', { gte: 1 }],
                 ['execute', { equal: 1 }],
               ]),
             });
           });
 
-          const executeEvent = events[1];
+          const executeEvent = events.find((event) => event?.event?.action === 'execute');
           expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(167);
         });
       });

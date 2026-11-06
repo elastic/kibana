@@ -6,13 +6,12 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import * as Registry from '../services/epm/registry';
 
@@ -115,23 +114,17 @@ describe('AutoInstallContentPackagesTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
+      const taskRunner = createTaskRunner(taskManagerMock.createRunContext({ taskInstance }));
       return taskRunner.run();
     };
 
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      (dataStreamService.getAllFleetDataStreams as jest.Mock).mockResolvedValue([
-        {
-          name: 'logs-system.cpu-default',
-        } as any,
-        {
-          name: 'logs-system.memory-default',
-        } as any,
-        {
-          name: 'logs-system.test-default',
-        } as any,
+      (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        'logs-system.cpu-default',
+        'logs-system.memory-default',
+        'logs-system.test-default',
       ]);
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
@@ -247,7 +240,36 @@ describe('AutoInstallContentPackagesTask', () => {
       await runTask();
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-      expect(dataStreamService.getAllFleetDataStreams).not.toHaveBeenCalled();
+      expect(dataStreamService.getAllFleetDataStreamNames).not.toHaveBeenCalled();
+    });
+
+    it('should not install package that has been rolled back', async () => {
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '1.0.0',
+            rolledBack: true,
+          },
+          {
+            name: 'test_package',
+            version: '1.0.0',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'test_package',
+        pkgVersion: '1.1.0',
+        useStreaming: true,
+        automaticInstall: true,
+      });
+      expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pkgName: 'kubernetes_otel' })
+      );
     });
 
     it('should not downgrade package when a newer prerelease version is installed', async () => {
@@ -299,6 +321,86 @@ describe('AutoInstallContentPackagesTask', () => {
       expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
         expect.objectContaining({ pkgName: 'kubernetes_otel' })
       );
+    });
+
+    describe('getDatasetsWithData', () => {
+      it('should deduplicate datasets when multiple data streams share the same dataset but have different namespaces', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'logs-system.cpu-production',
+        ]);
+
+        const result: string[] = await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect(result).toEqual(['system.cpu']);
+      });
+
+      it('should deduplicate datasets when multiple data streams share the same dataset but have different types', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'metrics-system.cpu-default',
+        ]);
+
+        const result: string[] = await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect(result).toEqual(['system.cpu']);
+      });
+
+      it('should log at INFO level on the first run', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.info).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+        expect((mockTask as any).logger.debug).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+      });
+
+      it('should log at DEBUG level on subsequent runs when dataset count is unchanged', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+        jest.clearAllMocks();
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.debug).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+        expect((mockTask as any).logger.info).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+      });
+
+      it('should log at INFO level on subsequent runs when dataset count changes', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+        jest.clearAllMocks();
+
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'logs-system.memory-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.info).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 2 datasets with data'
+        );
+        expect((mockTask as any).logger.debug).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 2 datasets with data'
+        );
+      });
     });
   });
 });

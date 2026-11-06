@@ -89,6 +89,42 @@ describe('UseFindCaseUserActions', () => {
     );
   });
 
+  it('calls the API with search and authors parameters', async () => {
+    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    renderHook(
+      () =>
+        useFindCaseUserActions(
+          basicCase.id,
+          {
+            type: 'all',
+            sortOrder: 'desc',
+            page: 1,
+            perPage: 5,
+            search: 'hello world',
+            authors: ['elastic'],
+          },
+          isEnabled
+        ),
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        {
+          type: 'all',
+          sortOrder: 'desc',
+          page: 1,
+          perPage: 5,
+          search: 'hello world',
+          authors: ['elastic'],
+        },
+        expect.any(AbortSignal)
+      )
+    );
+  });
+
   it('does not call API when not enabled', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 

@@ -8,7 +8,7 @@
  */
 
 import { once } from 'lodash';
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import React, {
   createContext,
   useContext,

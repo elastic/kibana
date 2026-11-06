@@ -17,12 +17,15 @@ import type {
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { apiKeysManagementApp } from './api_keys';
+import { applicationConnectionsManagementApp } from './application_connections';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
+import { serviceAccountsManagementApp } from './service_accounts';
 import { usersManagementApp } from './users';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
+import type { ServiceAccountsAPIClient } from '../service_accounts';
 
 export interface ManagementAppConfigType {
   userManagementEnabled?: boolean;
@@ -37,6 +40,7 @@ interface SetupParams {
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   buildFlavor: BuildFlavor;
+  serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 interface StartParams {
@@ -45,21 +49,33 @@ interface StartParams {
 
 export class ManagementService {
   private license!: SecurityLicense;
-  private licenseFeaturesSubscription?: Subscription;
+  private managementAppsSubscription?: Subscription;
   private securitySection?: ManagementSection;
+  private isUIAMEnabled: boolean = false;
   private readonly userManagementEnabled: boolean;
   private readonly roleManagementEnabled: boolean;
   private readonly roleMappingManagementEnabled: boolean;
+  private readonly serviceAccountsEnabled: boolean;
 
   constructor(config: ConfigType) {
     this.userManagementEnabled = config.ui?.userManagementEnabled !== false;
     this.roleManagementEnabled = config.roleManagementEnabled !== false;
     this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
+    this.serviceAccountsEnabled = config.serviceAccounts?.enabled === true;
   }
 
-  setup({ getStartServices, management, authc, license, fatalErrors, buildFlavor }: SetupParams) {
+  setup({
+    getStartServices,
+    management,
+    authc,
+    license,
+    fatalErrors,
+    buildFlavor,
+    serviceAccountsAPIClient,
+  }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
+    this.isUIAMEnabled = authc.isUIAMEnabled();
 
     if (this.userManagementEnabled) {
       this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
@@ -71,7 +87,24 @@ export class ManagementService {
       );
     }
 
+    if (this.isUIAMEnabled) {
+      this.securitySection.registerApp(
+        applicationConnectionsManagementApp.create({ authc, getStartServices })
+      );
+    }
+
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
+
+    if (this.serviceAccountsEnabled) {
+      this.securitySection.registerApp(
+        serviceAccountsManagementApp.create({
+          buildFlavor,
+          roleManagementEnabled: this.roleManagementEnabled,
+          getStartServices,
+          serviceAccountsAPIClient,
+        })
+      );
+    }
 
     if (this.roleMappingManagementEnabled) {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
@@ -79,7 +112,7 @@ export class ManagementService {
   }
 
   start({ capabilities }: StartParams) {
-    this.licenseFeaturesSubscription = this.license.features$.subscribe((features) => {
+    this.managementAppsSubscription = this.license.features$.subscribe((features) => {
       const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
@@ -107,6 +140,20 @@ export class ManagementService {
         ]);
       }
 
+      if (this.isUIAMEnabled) {
+        securityManagementAppsStatuses.push([
+          securitySection.getApp(applicationConnectionsManagementApp.id)!,
+          features.showLinks,
+        ]);
+      }
+
+      if (this.serviceAccountsEnabled) {
+        securityManagementAppsStatuses.push([
+          securitySection.getApp(serviceAccountsManagementApp.id)!,
+          features.showLinks,
+        ]);
+      }
+
       // Iterate over all registered apps and update their enable status depending on the available
       // license features.
       for (const [app, enableStatus] of securityManagementAppsStatuses) {
@@ -129,9 +176,9 @@ export class ManagementService {
   }
 
   stop() {
-    if (this.licenseFeaturesSubscription) {
-      this.licenseFeaturesSubscription.unsubscribe();
-      this.licenseFeaturesSubscription = undefined;
+    if (this.managementAppsSubscription) {
+      this.managementAppsSubscription.unsubscribe();
+      this.managementAppsSubscription = undefined;
     }
   }
 }

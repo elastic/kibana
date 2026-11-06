@@ -17,5 +17,16 @@ export const AUTOCOMPLETE_DEFINITIONS_FOLDER = resolve(
 export const GENERATED_SUBFOLDER = 'generated';
 export const OVERRIDES_SUBFOLDER = 'overrides';
 export const MANUAL_SUBFOLDER = 'manual';
+export const GENERATED_GLOBAL_PREFIX = '__generated_';
+// These constructs short-circuit body rule compilation, so their sibling keys
+// are ignored and a curated override must replace the generated rule wholesale.
+export const AUTOCOMPLETE_ATOMIC_RULE_KEYS = ['__scope_link', '__one_of', '__any_of'] as const;
 
 export const API_DOCS_LINK = 'https://www.elastic.co/docs/api';
+
+// Generated from the Kibana OpenAPI bundle by `node scripts/generate_kibana_api_doc_links.js`,
+// see `server/lib/spec_definitions/kibana_api_doc_links`.
+export const KIBANA_API_DOC_LINKS_FILE = resolve(
+  __dirname,
+  '../../server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json'
+);

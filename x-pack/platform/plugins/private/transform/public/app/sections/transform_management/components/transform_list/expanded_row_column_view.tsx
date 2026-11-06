@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import {
-  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export interface SectionItem {
   title: string | JSX.Element;
@@ -66,14 +66,16 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
       {showErrorCallout && (
         <>
           <EuiSpacer size={'s'} />
-          <EuiCallOut announceOnMount color="warning" iconType="warning" size="m">
-            <p>
+          <KbnWarningCallout
+            announceOnMount
+            size="m"
+            title={
               <FormattedMessage
                 id="xpack.transform.list.extendedStatsError"
                 defaultMessage="An error occurred fetching the extended stats for this transform. Basic stats are displayed instead."
               />
-            </p>
-          </EuiCallOut>
+            }
+          />
         </>
       )}
       <EuiFlexGroup>

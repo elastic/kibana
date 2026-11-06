@@ -130,7 +130,7 @@ function getColumns({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="dot" color={color} />
+                      <EuiIcon type="dot" color={color} aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">{label}</EuiText>
@@ -176,7 +176,7 @@ function getColumns({
                         time: change.time,
                       }),
                       color: getImpactProperties({ impact: change.impact, theme }).color,
-                      icon: <EuiIcon type="dot" />,
+                      icon: <EuiIcon type="dot" aria-hidden={true} />,
                     },
                   ]
                 : []
@@ -235,7 +235,14 @@ export function ChangeList({ title, items }: ChangeListProps) {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBasicTable items={items} columns={columns} tableLayout="auto" />
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.observabilityAiAssistant.changesList.tableCaption', {
+            defaultMessage: 'Changes',
+          })}
+          items={items}
+          columns={columns}
+          tableLayout="auto"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

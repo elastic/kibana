@@ -24,6 +24,7 @@ import {
   EuiSplitPanel,
   EuiCallOut,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
@@ -120,6 +121,9 @@ export const SystemActionTypeForm = ({
   const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, true);
 
   const getDefaultParams = useCallback(() => {
+    if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
+      return undefined;
+    }
     const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
 
     return connectorType.defaultActionParams;
@@ -177,18 +181,23 @@ export const SystemActionTypeForm = ({
         setActionParamsErrors({ errors: {} });
         return;
       }
-      const res: { errors: IErrorObject } = await actionTypeRegistry
-        .get(actionItem.actionTypeId)
-        ?.validateParams(
-          actionItem.params,
-          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
-        );
+      const res: { errors: IErrorObject } = actionTypeRegistry.has(actionItem.actionTypeId)
+        ? await actionTypeRegistry
+            .get(actionItem.actionTypeId)
+            .validateParams(
+              actionItem.params,
+              actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+            )
+        : { errors: {} };
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem, disableErrorMessages, actionConnector]);
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+  const actionTypeRegistered = actionTypeRegistry.has(actionConnector.actionTypeId)
+    ? actionTypeRegistry.get(actionConnector.actionTypeId)
+    : null;
+
   if (!actionTypeRegistered) return null;
 
   const showActionGroupErrorIcon = (): boolean => {
@@ -271,19 +280,29 @@ export const SystemActionTypeForm = ({
             />
           }
           extraAction={
-            <EuiButtonIcon
-              iconType="minusCircle"
-              color="danger"
-              className="actAccordionActionForm__extraAction"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
                 {
                   defaultMessage: 'Delete',
                 }
               )}
-              onClick={onDeleteAction}
-              data-test-subj="system-action-delete-button"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="minusCircle"
+                color="danger"
+                className="actAccordionActionForm__extraAction"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={onDeleteAction}
+                data-test-subj="system-action-delete-button"
+              />
+            </EuiToolTip>
           }
         >
           {accordionContent}
@@ -346,7 +365,7 @@ const ButtonContent: React.FC<{
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconClass} size="m" />
+          <EuiIcon type={iconClass} size="m" aria-hidden={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import * as i18n from '../translations';
 
 interface MapToolTipFooterProps {
@@ -33,22 +40,26 @@ export const ToolTipFooterComponent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span>
-            <EuiButtonIcon
-              data-test-subj={'previous-feature-button'}
-              color={'text'}
-              onClick={previousFeature}
-              iconType="chevronSingleLeft"
-              aria-label="Next"
-              isDisabled={featureIndex <= 0}
-            />
-            <EuiButtonIcon
-              data-test-subj={'next-feature-button'}
-              color={'text'}
-              onClick={nextFeature}
-              iconType="chevronSingleRight"
-              aria-label="Next"
-              isDisabled={featureIndex >= totalFeatures - 1}
-            />
+            <EuiToolTip content={i18n.PREVIOUS} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={'previous-feature-button'}
+                color={'text'}
+                onClick={previousFeature}
+                iconType="chevronSingleLeft"
+                aria-label={i18n.PREVIOUS}
+                isDisabled={featureIndex <= 0}
+              />
+            </EuiToolTip>
+            <EuiToolTip content={i18n.NEXT} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={'next-feature-button'}
+                color={'text'}
+                onClick={nextFeature}
+                iconType="chevronSingleRight"
+                aria-label={i18n.NEXT}
+                isDisabled={featureIndex >= totalFeatures - 1}
+              />
+            </EuiToolTip>
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -77,6 +77,34 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(retrievedProfiles[0]).to.eql(profile[0]);
       });
 
+      it('populates the assignee identity fields from the resolved profile', async () => {
+        const profile = await suggestUserProfiles({
+          supertest: supertestWithoutAuth,
+          req: {
+            name: 'delete',
+            owners: ['securitySolutionFixture'],
+            size: 1,
+          },
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            assignees: [{ uid: profile[0].uid }],
+          })
+        );
+
+        expect(postedCase.assignees).to.eql([
+          {
+            uid: profile[0].uid,
+            username: profile[0].user.username,
+            full_name: profile[0].user.full_name ?? null,
+            email: profile[0].user.email ?? null,
+          },
+        ]);
+      });
+
       it('assigns multiple users to a case and retrieves their profiles', async () => {
         const profiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,

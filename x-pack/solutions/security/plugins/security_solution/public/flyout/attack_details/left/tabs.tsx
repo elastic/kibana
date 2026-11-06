@@ -8,7 +8,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 import type { LeftPanelPaths } from '../constants/left_panel_paths';
 import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
 import { InsightsTab } from './tabs/insights_tab';

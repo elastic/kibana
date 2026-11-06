@@ -36,6 +36,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
       },
       airgapped: false,
       isCoreRenderingInReactConcurrentMode: true,
+      exposeNavDependencies: false,
     },
   });
 }

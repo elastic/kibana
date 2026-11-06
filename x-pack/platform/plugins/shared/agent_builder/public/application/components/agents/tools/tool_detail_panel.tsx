@@ -6,16 +6,9 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
 import { appPaths } from '../../../utils/app_paths';
@@ -36,7 +29,6 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
   isAutoIncluded,
   canEditAgent,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { tool, isLoading } = useToolService(toolId);
   const isReadOnly = tool?.readonly ?? false;
 
@@ -46,17 +38,6 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
       isEmpty={!tool}
       title={tool?.id ?? toolId}
       isReadOnly={isReadOnly}
-      headerContent={
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={css`
-            margin-top: ${euiTheme.size.xs};
-          `}
-        >
-          {tool?.id}
-        </EuiText>
-      }
       headerActions={(openConfirmRemove) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <ToolHeaderActions
@@ -121,13 +102,32 @@ const ToolHeaderActions = ({
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiLink href={editInLibraryUrl} target="_blank" external>
+          <EuiLink
+            href={editInLibraryUrl}
+            target="_blank"
+            external
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_EDIT_FROM_AGENT,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
+          >
             {labels.agentTools.editInLibraryLink}
           </EuiLink>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+        <EuiButtonEmpty
+          iconType="cross"
+          size="xs"
+          color="danger"
+          onClick={openConfirmRemove}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
+        >
           {labels.agentTools.removeToolButtonLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>

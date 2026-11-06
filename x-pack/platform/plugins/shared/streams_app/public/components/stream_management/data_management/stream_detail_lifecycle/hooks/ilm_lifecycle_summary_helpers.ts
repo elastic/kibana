@@ -10,7 +10,7 @@ import type { IlmPolicyPhases, IlmPolicyWithUsage, PhaseName } from '@kbn/stream
 import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
 import type { DataStreamStats } from './use_data_stream_stats';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
-import type { AffectedResource } from '../downsampling/edit_policy_modal/edit_policy_modal';
+import type { AffectedResource } from '../data_phases/edit_policy_modal/edit_policy_modal';
 import { formatBytes } from '../helpers/format_bytes';
 import { getILMRatios } from '../../../../../util/ilm_policy_phases';
 

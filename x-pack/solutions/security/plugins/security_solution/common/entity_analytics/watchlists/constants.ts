@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MAX_WATCHLIST_NAME_LENGTH = 256;
+export const MAX_WATCHLIST_DESCRIPTION_LENGTH = 1000;
+
 export const WATCHLISTS_URL = `/api/entity_analytics/watchlists` as const;
 
 /**
@@ -43,3 +46,14 @@ export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
 
 export const getWatchlistName = (watchlistId: string): string =>
   PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId;
+
+/**
+ * Real ES field names supported as the identifier field for index-type entity sources.
+ */
+export const WATCHLIST_IDENTIFIER_FIELDS = [
+  'host.name',
+  'user.name',
+  'service.name',
+  'host.id',
+  'user.email',
+] as const;

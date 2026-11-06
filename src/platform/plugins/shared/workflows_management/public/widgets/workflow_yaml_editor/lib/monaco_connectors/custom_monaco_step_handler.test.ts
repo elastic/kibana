@@ -10,6 +10,7 @@
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { CustomMonacoStepHandler } from './custom_monaco_step_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 const mockStepDefinitions: PublicStepDefinition[] = [
   {
@@ -42,6 +43,7 @@ describe('CustomMonacoStepHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockStabilityBadgeThemeForTests();
     stepSchemas.getAllRegisteredStepDefinitions.mockReturnValue(mockStepDefinitions);
     handler = new CustomMonacoStepHandler();
   });
@@ -77,6 +79,9 @@ describe('CustomMonacoStepHandler', () => {
       const result = await handler.generateHoverContent(context);
 
       expect(result).not.toBeNull();
+      expect(result?.value.indexOf('<img src="data:image/svg+xml,')).toBeLessThan(
+        result!.value.indexOf('**Workflow step**')
+      );
       expect(result?.value).toContain('My Custom Step');
       expect(result?.value).toContain('custom.myStep');
       expect(result?.value).toContain('A custom step for testing');

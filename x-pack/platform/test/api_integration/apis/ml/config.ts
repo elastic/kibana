@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           integrationKnowledge: false,
+          installIntegrationsKnowledge: false,
         })}`,
       ],
     },

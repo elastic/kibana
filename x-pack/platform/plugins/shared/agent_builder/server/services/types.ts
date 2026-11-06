@@ -7,27 +7,43 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type {
+  CallbacksSetup,
+  HooksServiceSetup,
+  HooksServiceStart,
+} from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
+import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { RendererServiceSetup, RendererServiceStart } from './renderers';
+import type {
+  ConversationEventsServiceSetup,
+  ConversationEventsServiceStart,
+} from './conversation_events';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
@@ -35,23 +51,37 @@ import type { AuditLogService } from '../audit';
 import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import type { CallbackDeliveryService } from './execution/callback';
+import type { SpaceSettingsService } from './space_settings';
+import type {
+  ConversationTemplatesServiceSetup,
+  ConversationTemplatesServiceStart,
+} from './conversation/templates';
+import type { DeploymentInfo } from '../utils/deployment_info';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
+  renderers: RendererServiceSetup;
+  conversationEvents: ConversationEventsServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
+  conversationTemplates: ConversationTemplatesServiceSetup;
+  callbacks: CallbacksSetup;
 }
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
+  renderers: RendererServiceStart;
+  conversationEvents: ConversationEventsServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  workspaces: WorkspaceService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
@@ -63,6 +93,11 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  inference: InferenceServerStart;
+  callbackDeliveryService: CallbackDeliveryService;
+  spaceSettings: SpaceSettingsService;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }
 
 export interface ServiceSetupDeps {
@@ -71,12 +106,14 @@ export interface ServiceSetupDeps {
   trackingService?: TrackingService;
   cloud?: CloudSetup;
   usageApi?: UsageApiSetup;
+  actions: ActionsPluginSetup;
 }
 
 export interface ServicesStartDeps {
   // core services
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
+  http: HttpServiceStart;
   security: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
@@ -91,4 +128,9 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  licensing: LicensingPluginStart;
+  deploymentInfo: DeploymentInfo;
+  isomer: IsomerPluginStart;
+  /** `xpack.agentBuilder.deductive.register` for this deployment. */
+  deductiveRegister: boolean;
 }

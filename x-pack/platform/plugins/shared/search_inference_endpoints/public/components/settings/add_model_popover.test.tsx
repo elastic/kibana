@@ -135,6 +135,54 @@ describe('AddModelPopover', () => {
     expect(screen.getByText('OpenAI GPT-4o-mini')).toBeInTheDocument();
   });
 
+  it('omits endpoints that accept only a prompt template', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        ...mockConnectors,
+        createConnector({
+          connectorId: 'ep-template-only',
+          name: 'Cyber template model',
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      ],
+    });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.queryByText('Cyber template model')).not.toBeInTheDocument();
+    expect(screen.getByText('OpenAI GPT-4o')).toBeInTheDocument();
+  });
+
+  it('lists only template endpoints when the feature opts in', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        ...mockConnectors,
+        createConnector({
+          connectorId: 'ep-template-only',
+          name: 'Cyber template model',
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      ],
+    });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} allowTemplateRequiredModels />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.getByText('Cyber template model')).toBeInTheDocument();
+    expect(screen.queryByText('OpenAI GPT-4o')).not.toBeInTheDocument();
+  });
+
   it('lists all connectors returned by useConnectors (stack OpenAI, Bedrock, Gemini, and chat_completion endpoints)', () => {
     render(
       <Wrapper>
@@ -220,6 +268,30 @@ describe('AddModelPopover', () => {
     expect(screen.getByText('My Connector (ep-b)')).toBeInTheDocument();
   });
 
+  it('excludes connectors that are denied by region policy', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        createConnector({ connectorId: 'ep-allowed', name: 'Allowed Model' }),
+        createConnector({
+          connectorId: 'ep-denied',
+          name: 'Denied Model',
+          metadata: { denied_by_region_policy: true },
+        }),
+      ],
+    });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.getByTestId('add-model-option-ep-allowed')).toBeInTheDocument();
+    expect(screen.queryByTestId('add-model-option-ep-denied')).not.toBeInTheDocument();
+  });
+
   it('handles empty connectors gracefully', () => {
     mockUseConnectors.mockReturnValue({ data: [] });
 
@@ -232,6 +304,87 @@ describe('AddModelPopover', () => {
     fireEvent.click(screen.getByTestId('add-model-button'));
 
     expect(screen.getByTestId('add-model-search')).toBeInTheDocument();
+  });
+
+  describe('deprecated connectors', () => {
+    const deprecatedConnector = createConnector({
+      connectorId: 'ep-dep',
+      name: 'Deprecated Model',
+      type: InferenceConnectorType.Inference,
+      config: { taskType: 'chat_completion', service: 'elastic' },
+      isInferenceEndpoint: true,
+      metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' } },
+    });
+    const eolConnector = createConnector({
+      connectorId: 'ep-eol',
+      name: 'EOL Model',
+      type: InferenceConnectorType.Inference,
+      config: { taskType: 'chat_completion', service: 'elastic' },
+      isInferenceEndpoint: true,
+      metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' } },
+    });
+    const gaConnector = createConnector({
+      connectorId: 'ep-ga',
+      name: 'GA Model',
+      type: InferenceConnectorType.Inference,
+      config: { taskType: 'chat_completion', service: 'elastic' },
+      isInferenceEndpoint: true,
+      metadata: { heuristics: { status: 'ga' } },
+    });
+
+    beforeEach(() => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector, eolConnector, gaConnector],
+      });
+    });
+
+    it('disables the EOL connector option', () => {
+      render(
+        <Wrapper>
+          <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('add-model-button'));
+
+      const eolOption = screen.getByText('EOL Model').closest('[role="option"]');
+      expect(eolOption).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(screen.getByText('EOL Model'));
+      expect(onAdd).not.toHaveBeenCalled();
+    });
+
+    it('keeps the deprecated connector option selectable', () => {
+      render(
+        <Wrapper>
+          <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('add-model-button'));
+
+      const deprecatedOption = screen.getByText('Deprecated Model').closest('[role="option"]');
+      expect(deprecatedOption).not.toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(screen.getByText('Deprecated Model'));
+      expect(onAdd).toHaveBeenCalledWith('ep-dep');
+    });
+
+    it('renders an icon-only status badge for deprecated and EOL connectors, but none for GA', () => {
+      render(
+        <Wrapper>
+          <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('add-model-button'));
+
+      expect(screen.getByTestId('modelDeprecatedBadge-ep-dep')).toBeInTheDocument();
+      expect(screen.getByTestId('modelEolBadge-ep-eol')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelDeprecatedBadge-ep-ga')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('modelEolBadge-ep-ga')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('modelPreviewBadge-ep-ga')).not.toBeInTheDocument();
+    });
   });
 
   it('has an accessible name for the model selection popover', () => {

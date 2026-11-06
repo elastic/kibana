@@ -11,7 +11,7 @@ import { TestProviders } from '../../../common/mock';
 import { AttackDetailsLeftPanel } from '.';
 import { AttackDetailsProvider } from '../context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
 jest.mock('../../shared/components/flyout_header', () => ({
   FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
@@ -66,7 +66,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
-jest.mock('../../../flyout_v2/notes/components/notes_details_content', () => ({
+jest.mock('../../../flyout_v2/shared/tools/notes/components/notes_details_content', () => ({
   NotesDetailsContent: () => (
     <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
   ),
@@ -76,10 +76,14 @@ jest.mock('../hooks/use_header_data', () => ({
   useHeaderData: jest.fn().mockReturnValue({ timestamp: '' }),
 }));
 
-jest.mock('../hooks/use_attack_entities_lists', () => ({
+jest.mock('../hooks/use_original_alert_ids', () => ({
+  useOriginalAlertIds: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => ({
   useAttackEntitiesLists: jest.fn().mockReturnValue({
-    userEntityIdentifiers: [],
-    hostEntityIdentifiers: [],
+    userEntityEntries: [],
+    hostEntityEntries: [],
     loading: false,
     error: false,
   }),

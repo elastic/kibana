@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
@@ -21,6 +22,10 @@ export class TaskManagerMock implements Partial<TaskManagerStartContract> {
   public static create(): jest.Mocked<TaskManagerStartContract> {
     return createPartialMock<TaskManagerStartContract>({
       schedule: jest.fn().mockImplementation(this.schedule),
+      removeIfExists: jest.fn().mockResolvedValue(undefined),
+      get: jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'missing')),
     });
   }
 

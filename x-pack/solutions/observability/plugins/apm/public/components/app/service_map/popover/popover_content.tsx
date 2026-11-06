@@ -11,32 +11,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../../../common/environment_rt';
-import {
-  isServiceNodeData,
-  isGroupedNodeData,
-  type ServiceMapNode,
-  type ServiceMapEdge,
-} from '../../../../../common/service_map';
-import { ServiceMapPopoverTitleBadges } from '../service_map_popover_title_badges';
-import { isEdge, type ServiceMapSelection } from './utils';
+import { isGroupedNodeData, type ServiceMapNode } from '../../../../../common/service_map';
 import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
-import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
-import { ServiceContents } from './service_contents';
-import { withDiagnoseButton } from './with_diagnose_button';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export type { ServiceMapSelection } from './utils';
-export { isEdge } from './utils';
-
 /**
- * Props for the popover content subcomponents (service, dependency, edge, etc.)
- * They receive the raw React Flow node or edge.
+ * Props for the popover content subcomponents (service, dependency, resource, etc.)
+ * They receive the raw React Flow node.
  */
 export interface ContentsProps {
-  selection: ServiceMapSelection;
+  selection: ServiceMapNode;
   environment: Environment;
   kuery: string;
   start: string;
@@ -45,26 +32,22 @@ export interface ContentsProps {
   showDiagnoseButton?: boolean;
   onDiagnoseClick?: () => void;
   isEmbedded?: boolean;
+  /** Override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnNavigation?: boolean;
 }
 
-export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
-
 /**
- * Returns the content component for the given selection (node or edge).
+ * Returns the content component for the given node selection.
  */
 export function getContentsComponent(
-  selection: ServiceMapSelection,
+  node: ServiceMapNode,
   isDiagnosticModeEnabled: boolean
 ): ComponentType<ContentsProps> | null {
-  if (isEdge(selection)) {
-    return EdgeContents;
-  }
-  const data = selection.data;
+  const data = node.data;
   if (isGroupedNodeData(data)) {
     return ExternalsListContents;
-  }
-  if (isServiceNodeData(data)) {
-    return isDiagnosticModeEnabled ? ServiceContentsWithDiagnose : ServiceContents;
   }
   if (data.spanType === 'resource') {
     return ResourceContents;
@@ -72,18 +55,12 @@ export function getContentsComponent(
   return DependencyContents;
 }
 
-function getPopoverTitle(selection: ServiceMapSelection): string {
-  if (isEdge(selection)) {
-    const source = selection.data?.sourceLabel ?? selection.source;
-    const target = selection.data?.targetLabel ?? selection.target;
-    return `${source} → ${target}`;
-  }
-  return selection.data.label ?? selection.id;
+function getPopoverTitle(node: ServiceMapNode): string {
+  return node.data.label ?? node.id;
 }
 
 interface PopoverContentProps {
   selectedNode: ServiceMapNode | null;
-  selectedEdge: ServiceMapEdge | null;
   environment: Environment;
   kuery: string;
   start: string;
@@ -93,6 +70,10 @@ interface PopoverContentProps {
   onOpenDiagnostic?: () => void;
   /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** When true, popover-built URLs (Service Details / Focus map) drop `kuery`. See `ContentsProps`. */
+  clearKueryOnNavigation?: boolean;
 }
 
 /**
@@ -100,7 +81,6 @@ interface PopoverContentProps {
  */
 export function PopoverContent({
   selectedNode,
-  selectedEdge,
   environment,
   kuery,
   start,
@@ -108,16 +88,17 @@ export function PopoverContent({
   onFocusClick,
   onOpenDiagnostic,
   isEmbedded,
+  showFocusMap,
+  clearKueryOnNavigation,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
 
-  const selection = selectedEdge ?? selectedNode;
-  if (selection == null) {
+  if (selectedNode == null) {
     return null;
   }
 
-  const ContentsComponent = getContentsComponent(selection, isDiagnosticModeEnabled);
+  const ContentsComponent = getContentsComponent(selectedNode, isDiagnosticModeEnabled);
   if (!ContentsComponent) {
     return null;
   }
@@ -134,7 +115,7 @@ export function PopoverContent({
           <EuiFlexItem grow style={{ minWidth: 0 }}>
             <EuiTitle size="xxs">
               <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-                {getPopoverTitle(selection)}
+                {getPopoverTitle(selectedNode)}
                 {kuery && (
                   <EuiIconTip
                     position="bottom"
@@ -147,16 +128,11 @@ export function PopoverContent({
               </h3>
             </EuiTitle>
           </EuiFlexItem>
-          {!isEdge(selection) && selection.data != null && isServiceNodeData(selection.data) && (
-            <EuiFlexItem grow={false}>
-              <ServiceMapPopoverTitleBadges nodeData={selection.data} />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
       <ContentsComponent
-        selection={selection}
+        selection={selectedNode}
         onFocusClick={onFocusClick}
         environment={environment}
         kuery={kuery}
@@ -165,6 +141,8 @@ export function PopoverContent({
         showDiagnoseButton={isDiagnosticModeEnabled}
         onDiagnoseClick={onOpenDiagnostic}
         isEmbedded={isEmbedded}
+        showFocusMap={showFocusMap}
+        clearKueryOnNavigation={clearKueryOnNavigation}
       />
     </EuiFlexGroup>
   );

@@ -9,7 +9,7 @@
 
 import type { Decorator, StoryContext, StoryObj } from '@storybook/react';
 import React, { useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
 import type { monaco } from '@kbn/monaco';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';

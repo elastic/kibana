@@ -9,7 +9,11 @@ properties:
     example: true
   extractObservables:
     description: >
-      When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments.
-      Optional; defaults to false when omitted.
+      When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments.
+      When omitted on create, the space configuration default is used. Falls back to the owner's default
+      when no space configuration exists: `true` for Security, `false` for Stack and Observability.
+      Precedence: explicit value > template setting > space config > owner default.
+      For owners that do not support observable extraction (currently Observability), an omitted
+      value resolves to `false` regardless of the space configuration.
     type: boolean
-    example: false
+    example: true

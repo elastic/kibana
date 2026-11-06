@@ -5,31 +5,8 @@
  * 2.0.
  */
 
-import type { FieldValuePair, HistogramItem } from '../types';
-
-import type { CORRELATIONS_IMPACT_THRESHOLD } from './constants';
-
-export interface FailedTransactionsCorrelation extends FieldValuePair {
-  doc_count: number;
-  bg_count: number;
-  score: number;
-  pValue: number | null;
-  normalizedScore: number;
-  failurePercentage: number;
-  successPercentage: number;
-  /** Present when histograms were requested (default for legacy p-values API). */
-  histogram?: HistogramItem[];
-}
-
-export type FailedTransactionsCorrelationsImpactThreshold =
-  (typeof CORRELATIONS_IMPACT_THRESHOLD)[keyof typeof CORRELATIONS_IMPACT_THRESHOLD];
-
-export interface FailedTransactionsCorrelationsResponse {
-  ccsWarning: boolean;
-  failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
-  percentileThresholdValue?: number | null;
-  overallHistogram?: HistogramItem[];
-  totalDocCount?: number;
-  errorHistogram?: HistogramItem[];
-  fallbackResult?: FailedTransactionsCorrelation;
-}
+export type {
+  FailedTransactionsCorrelation,
+  FailedTransactionsCorrelationsImpactThreshold,
+  FailedTransactionsCorrelationsResponse,
+} from '@kbn/apm-types';

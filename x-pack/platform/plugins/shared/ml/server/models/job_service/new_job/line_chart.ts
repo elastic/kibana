@@ -38,7 +38,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
     splitFieldName: string | null,
     splitFieldValue: string | null,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: IndicesOptions | undefined
+    indicesOptions: IndicesOptions | undefined,
+    projectRouting: string | undefined
   ) {
     const json: object = getSearchJsonFromConfig(
       indexPatternTitle,
@@ -51,7 +52,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
       splitFieldName,
       splitFieldValue,
       runtimeMappings,
-      indicesOptions
+      indicesOptions,
+      projectRouting
     );
 
     const body = await asCurrentUser.search(json, { maxRetries: 0 });
@@ -111,7 +113,8 @@ function getSearchJsonFromConfig(
   splitFieldName: string | null,
   splitFieldValue: string | null,
   runtimeMappings: RuntimeMappings | undefined,
-  indicesOptions: IndicesOptions | undefined
+  indicesOptions: IndicesOptions | undefined,
+  projectRouting: string | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -136,6 +139,7 @@ function getSearchJsonFromConfig(
       ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(indicesOptions ?? {}),
+    ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
   };
 
   if (query.bool === undefined) {

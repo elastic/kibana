@@ -21,6 +21,7 @@ import type {
 import { CustomizablePalette } from './palette_configuration';
 import { getPaletteRegistry } from './mocks/palettes_registry';
 import { act } from 'react-dom/test-utils';
+import type { PaletteConfigurationActions } from './types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -92,6 +93,40 @@ describe('palette panel', () => {
       });
     });
 
+    it('should preview non-active palettes with the default band count', () => {
+      const getCategoricalColors = paletteRegistry.get('custom').getCategoricalColors as jest.Mock;
+      getCategoricalColors.mockClear();
+      mountWithIntl(
+        <CustomizablePalette
+          {...props}
+          activePalette={{ type: 'palette', name: 'positive', params: { steps: 2 } }}
+          defaultBandCount={4}
+        />
+      );
+      expect(getCategoricalColors).toHaveBeenCalledWith(4, undefined);
+      expect(getCategoricalColors).not.toHaveBeenCalledWith(2, undefined);
+    });
+
+    it('should apply the default band count when switching to a named palette', () => {
+      const instance = mountWithIntl(
+        <CustomizablePalette
+          {...props}
+          activePalette={{ type: 'palette', name: 'positive', params: { steps: 2 } }}
+          defaultBandCount={4}
+        />
+      );
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({ name: 'negative', steps: 4 }),
+      });
+    });
+
     it('should set the colorStops and stops when selecting the Custom palette from the list', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
@@ -154,6 +189,84 @@ describe('palette panel', () => {
           rangeMax: Number.POSITIVE_INFINITY,
         }),
       });
+    });
+
+    it('persists palette-name changes immediately before the debounce window elapses', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({
+          name: 'negative',
+          reverse: false,
+        }),
+      });
+    });
+
+    it('allows switching back to the original palette before debounced props catch up', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+      instance.update();
+      act(() => {
+        changePaletteIn(instance, 'positive');
+      });
+      instance.update();
+
+      jest.advanceTimersByTime(250);
+
+      expect(props.setPalette).toHaveBeenLastCalledWith({
+        type: 'palette',
+        name: 'positive',
+        params: expect.objectContaining({
+          name: 'positive',
+          reverse: false,
+        }),
+      });
+    });
+
+    it('flushes local palette edits on unmount before the debounce window elapses', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      const dispatch = instance
+        .find('ColorRanges')
+        .prop('dispatch') as React.Dispatch<PaletteConfigurationActions>;
+
+      act(() => {
+        dispatch({
+          type: 'deleteColorRange',
+          payload: { index: 0, dataBounds: props.dataBounds, palettes: props.palettes },
+        });
+      });
+
+      expect(props.setPalette).not.toHaveBeenCalled();
+
+      act(() => {
+        instance.unmount();
+      });
+
+      expect(props.setPalette).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resync on semantically equal parent rerenders', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        instance.setProps({
+          activePalette: { type: 'palette', name: 'positive' },
+          dataBounds: { min: 0, max: 100 },
+        });
+      });
+
+      jest.advanceTimersByTime(250);
+
+      expect(props.setPalette).not.toHaveBeenCalled();
     });
   });
 
@@ -258,6 +371,27 @@ describe('palette panel', () => {
           .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]')
           .exists()
       ).toEqual(true);
+    });
+  });
+
+  describe('maxSteps', () => {
+    beforeEach(() => {
+      props = {
+        activePalette: { type: 'palette', name: 'positive' },
+        palettes: paletteRegistry,
+        setPalette: jest.fn(),
+        dataBounds: { min: 0, max: 100 },
+      };
+    });
+
+    it('forwards the maxSteps prop to ColorRanges', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} maxSteps={5} />);
+      expect(instance.find('ColorRanges').prop('maxSteps')).toBe(5);
+    });
+
+    it('leaves maxSteps undefined when not provided', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      expect(instance.find('ColorRanges').prop('maxSteps')).toBeUndefined();
     });
   });
 });

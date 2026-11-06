@@ -63,6 +63,14 @@ jest.mock('./use_export_with_references', () => ({
   }),
 }));
 
+const mockConfirmDisable = jest.fn();
+jest.mock('../../linked_rules/model/use_disable_workflows_confirmation', () => ({
+  useDisableWorkflowsConfirmation: () => ({
+    confirmDisable: mockConfirmDisable,
+    confirmModal: null,
+  }),
+}));
+
 // Mock ExportReferencesModal
 jest.mock('./export_references_modal', () => ({
   ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
@@ -101,6 +109,10 @@ describe('useWorkflowBulkActions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConfirmDisable.mockResolvedValue(true);
+    mockApplication.capabilities.workflowsManagement.deleteWorkflow = true;
+    mockApplication.capabilities.workflowsManagement.updateWorkflow = true;
+    mockApplication.capabilities.workflowsManagement.readWorkflow = true;
   });
 
   it('returns panels and modals', () => {
@@ -156,6 +168,25 @@ describe('useWorkflowBulkActions', () => {
         (item) => 'key' in item && item.key === 'workflows-bulk-action-delete'
       );
       expect(deleteItem).toBeDefined();
+    });
+
+    it('does not include delete action when a managed workflow is selected', () => {
+      const managedWorkflow = createMockWorkflow({ managed: true });
+      const { result } = renderHook(
+        () =>
+          useWorkflowBulkActions({
+            ...defaultProps,
+            selectedWorkflows: [managedWorkflow],
+            allWorkflows: [managedWorkflow],
+          }),
+        { wrapper }
+      );
+
+      const mainPanel = result.current.panels[0];
+      const deleteItem = mainPanel.items?.find(
+        (item) => 'key' in item && item.key === 'workflows-bulk-action-delete'
+      );
+      expect(deleteItem).toBeUndefined();
     });
 
     it('includes export action when there are exportable workflows', () => {
@@ -314,6 +345,7 @@ describe('useWorkflowBulkActions', () => {
         expect.objectContaining({
           id: 'wf-disabled',
           workflow: { enabled: true },
+          workflowDefinition: disabledWorkflow.definition,
         }),
         expect.any(Object)
       );
@@ -321,7 +353,7 @@ describe('useWorkflowBulkActions', () => {
   });
 
   describe('disable action', () => {
-    it('calls updateWorkflow.mutate for enabled workflows when disable is triggered', () => {
+    const triggerDisable = async () => {
       const enabledWorkflow = createMockWorkflow({ id: 'wf-enabled', enabled: true });
 
       const { result } = renderHook(
@@ -339,20 +371,36 @@ describe('useWorkflowBulkActions', () => {
         (item) => 'key' in item && item.key === 'workflows-bulk-action-disable'
       );
 
-      act(() => {
+      await act(async () => {
         if (disableItem && 'onClick' in disableItem && disableItem.onClick) {
-          (disableItem.onClick as () => void)();
+          await (disableItem.onClick as () => Promise<void>)();
         }
       });
 
+      return enabledWorkflow;
+    };
+
+    it('calls updateWorkflow.mutate for enabled workflows when disable is confirmed', async () => {
+      const enabledWorkflow = await triggerDisable();
+
       expect(defaultProps.onAction).toHaveBeenCalled();
+      expect(mockConfirmDisable).toHaveBeenCalledWith(['wf-enabled']);
       expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'wf-enabled',
           workflow: { enabled: false },
+          workflowDefinition: enabledWorkflow.definition,
         }),
         expect.any(Object)
       );
+    });
+
+    it('does not disable workflows when the user cancels the confirmation', async () => {
+      mockConfirmDisable.mockResolvedValue(false);
+
+      await triggerDisable();
+
+      expect(mockUpdateWorkflow.mutate).not.toHaveBeenCalled();
     });
   });
 });

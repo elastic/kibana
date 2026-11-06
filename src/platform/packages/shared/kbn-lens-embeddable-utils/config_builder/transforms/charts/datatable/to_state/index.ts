@@ -45,24 +45,18 @@ export function buildFormBasedLayer(
   const metricsConverted = config.metrics.map(
     (metric) => fromMetricAPItoLensState(metric, inferDatatypeFromColor(metric.color, 'number')) // Infer datatype from color config for last_value operations
   );
-  const allMetricColumnsWithIds = processMetricColumnsWithReferences(
+  const { metricColumns, referencesColumns } = processMetricColumnsWithReferences(
     metricsConverted,
     (index) => getAccessorName(METRIC_ACCESSOR_PREFIX, index),
     (index) => getAccessorName(`${METRIC_ACCESSOR_PREFIX}_ref`, index)
   );
 
-  // Add row columns
-  if (config.rows) {
-    config.rows.forEach((row, index) => {
-      const bucketColumn = fromBucketLensApiToLensState(row, allMetricColumnsWithIds);
-      addLayerColumn(defaultLayer, getAccessorName(ROW_ACCESSOR_PREFIX, index), bucketColumn);
-    });
-  }
-
-  // Add split_metrics_by columns
+  // Split metrics by columns must precede row columns in columnOrder so ES aggregation
+  // nesting matches the Lens datatable editor (nestingOrder: split=0, rows=1).
+  // fromBucketLensApiToLensState resolves rank_by.metric_index against visible metrics only.
   if (config.split_metrics_by) {
     config.split_metrics_by.forEach((splitBy, index) => {
-      const bucketColumn = fromBucketLensApiToLensState(splitBy, allMetricColumnsWithIds);
+      const bucketColumn = fromBucketLensApiToLensState(splitBy, metricColumns);
       addLayerColumn(
         defaultLayer,
         getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index),
@@ -71,7 +65,17 @@ export function buildFormBasedLayer(
     });
   }
 
-  for (const { id, column } of allMetricColumnsWithIds) {
+  if (config.rows) {
+    config.rows.forEach((row, index) => {
+      const bucketColumn = fromBucketLensApiToLensState(row, metricColumns);
+      addLayerColumn(defaultLayer, getAccessorName(ROW_ACCESSOR_PREFIX, index), bucketColumn);
+    });
+  }
+
+  for (const { id, column } of metricColumns) {
+    addLayerColumn(defaultLayer, id, column);
+  }
+  for (const { id, column } of referencesColumns) {
     addLayerColumn(defaultLayer, id, column);
   }
 
@@ -80,15 +84,15 @@ export function buildFormBasedLayer(
 
 export function getValueColumns(config: DatatableConfigESQL) {
   return [
+    ...(config.split_metrics_by ?? []).map((splitBy, index) =>
+      getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy)
+    ),
     ...(config.rows ?? []).map((row, index) =>
       getValueColumn(
         getAccessorName(ROW_ACCESSOR_PREFIX, index),
         row,
         inferDatatypeFromColor(row.color, 'string')
       )
-    ),
-    ...(config.split_metrics_by ?? []).map((splitBy, index) =>
-      getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy)
     ),
     ...(config.metrics ?? []).map((metric, index) =>
       getValueColumn(

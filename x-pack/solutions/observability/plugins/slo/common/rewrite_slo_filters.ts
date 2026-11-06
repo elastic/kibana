@@ -6,8 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-
-const SLO_GROUPINGS_PREFIX = 'slo.groupings.';
+import { SLO_GROUPINGS_PREFIX } from '@kbn/slo-schema';
 
 const SUMMARY_NATIVE_PREFIXES = ['slo.', 'service.', 'transaction.', 'monitor.', 'observer.'];
 

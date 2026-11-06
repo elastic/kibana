@@ -129,6 +129,9 @@ export const GroupSelectorMenu = ({
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.ml.groupSelectorMenu.popoverAriaLabel', {
+        defaultMessage: 'Group selector',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

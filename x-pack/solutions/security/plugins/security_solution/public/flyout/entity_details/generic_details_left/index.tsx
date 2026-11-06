@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-import {
-  LeftPanelHeader,
-  type CspInsightLeftPanelSubTab,
-  type EntityDetailsLeftPanelTab,
-  type LeftPanelTabsType,
+import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
+import type {
+  EntityDetailsPath,
+  EntityDetailsLeftPanelTab,
+  LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
 import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
 import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
@@ -29,10 +29,7 @@ interface BaseGenericEntityDetailsPanelProps {
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
   hasNonClosedAlerts?: boolean;
-  path?: {
-    tab?: EntityDetailsLeftPanelTab;
-    subTab?: CspInsightLeftPanelSubTab;
-  };
+  path?: Partial<EntityDetailsPath>;
 }
 
 export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &

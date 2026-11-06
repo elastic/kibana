@@ -33,8 +33,6 @@ mockGetUrlForApp.mockImplementation(
     `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`
 );
 
-jest.mock('../../../../common/hooks/use_get_field_spec');
-
 const mockHost: HostEcs = mockData.complete.host as HostEcs;
 
 describe('Field Renderers', () => {

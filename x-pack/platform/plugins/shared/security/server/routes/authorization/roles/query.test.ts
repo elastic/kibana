@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -21,7 +22,8 @@ interface TestOptions {
   licenseCheckResult?: LicenseCheck;
   apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any>; calledWith?: Record<string, any> };
-  query?: Record<string, unknown>;
+  body?: Record<string, unknown>;
+  buildFlavor?: BuildFlavor;
 }
 
 const application = 'kibana-.kibana';
@@ -141,10 +143,17 @@ const features: KibanaFeature[] = [
 describe('Query roles', () => {
   const queryRolesTest = (
     description: string,
-    { licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      asserts,
+      body,
+      buildFlavor = 'traditional',
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.buildFlavor = buildFlavor;
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
@@ -178,7 +187,7 @@ describe('Query roles', () => {
         method: 'post',
         path: '/api/security/role/_query',
         headers,
-        query,
+        body,
       });
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
@@ -189,6 +198,11 @@ describe('Query roles', () => {
         expect(
           mockCoreContext.elasticsearch.client.asCurrentUser.security.queryRole
         ).toHaveBeenCalled();
+      }
+      if (asserts.calledWith) {
+        expect(
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.queryRole
+        ).toHaveBeenCalledWith(asserts.calledWith);
       }
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
@@ -240,9 +254,10 @@ describe('Query roles', () => {
           },
         ],
       }),
-      query: {
+      body: {
         from: 0,
         size: 25,
+        filters: { showReservedRoles: true },
       },
       asserts: {
         statusCode: 200,
@@ -306,7 +321,6 @@ describe('Query roles', () => {
               must: [],
               must_not: [],
               should: [
-                { term: { 'metadata._reserved': true } },
                 {
                   bool: {
                     must_not: {
@@ -316,6 +330,7 @@ describe('Query roles', () => {
                     },
                   },
                 },
+                { term: { 'metadata._reserved': true } },
               ],
             },
           },
@@ -348,9 +363,11 @@ describe('Query roles', () => {
           },
         ],
       }),
-      query: {
+      body: {
         from: 0,
         size: 25,
+        sort: { field: 'name', direction: 'asc' },
+        filters: { showReservedRoles: false },
       },
       asserts: {
         statusCode: 200,
@@ -387,11 +404,6 @@ describe('Query roles', () => {
               must: [],
               should: [
                 {
-                  term: {
-                    'metadata._reserved': false,
-                  },
-                },
-                {
                   bool: {
                     must_not: {
                       exists: {
@@ -406,7 +418,7 @@ describe('Query roles', () => {
             },
           },
           from: 0,
-          size: 2,
+          size: 25,
           sort: [
             {
               name: {

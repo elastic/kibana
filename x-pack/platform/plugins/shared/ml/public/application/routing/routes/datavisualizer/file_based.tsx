@@ -27,8 +27,8 @@ export const fileBasedRouteFactory = (
 ): MlRoute => ({
   id: 'fileUpload',
   path: createPath(ML_PAGES.DATA_VISUALIZER_FILE),
-  title: i18n.translate('xpack.ml.dataVisualizer.file.docTitle', {
-    defaultMessage: 'File Data Visualizer',
+  title: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
+    defaultMessage: 'File upload',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
@@ -36,7 +36,7 @@ export const fileBasedRouteFactory = (
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
-        defaultMessage: 'File',
+        defaultMessage: 'File upload',
       }),
     },
   ],

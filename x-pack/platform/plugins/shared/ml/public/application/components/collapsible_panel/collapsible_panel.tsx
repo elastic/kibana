@@ -6,7 +6,6 @@
  */
 
 import {
-  useEuiTheme,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,6 +13,8 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { type FC } from 'react';
@@ -41,23 +42,14 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiSplitPanel.Outer
-      data-test-subj={dataTestSubj}
-      grow
-      hasShadow={false}
-      css={{
-        border: `${euiTheme.border.width.thin} solid ${
-          isOpen ? euiTheme.border.color : 'transparent'
-        }`,
-      }}
-    >
+    <EuiSplitPanel.Outer data-test-subj={dataTestSubj} grow hasShadow={false}>
       <EuiSplitPanel.Inner color={isOpen ? 'plain' : 'subdued'}>
         <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize={'xs'}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={
+                <EuiToolTip
+                  content={
                     isOpen
                       ? i18n.translate('xpack.ml.collapsiblePanel.toggleClose', {
                           defaultMessage: 'Close {ariaLabel}',
@@ -68,12 +60,27 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
                           values: { ariaLabel },
                         })
                   }
-                  color={'text'}
-                  iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
-                  onClick={() => {
-                    onToggle(!isOpen);
-                  }}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={
+                      isOpen
+                        ? i18n.translate('xpack.ml.collapsiblePanel.toggleClose', {
+                            defaultMessage: 'Close {ariaLabel}',
+                            values: { ariaLabel },
+                          })
+                        : i18n.translate('xpack.ml.collapsiblePanel.toggleOpen', {
+                            defaultMessage: 'Open {ariaLabel}',
+                            values: { ariaLabel },
+                          })
+                    }
+                    color={'text'}
+                    iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
+                    onClick={() => {
+                      onToggle(!isOpen);
+                    }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem css={{ minWidth: '67px' }} grow={false}>
                 <EuiTitle size="xxs">

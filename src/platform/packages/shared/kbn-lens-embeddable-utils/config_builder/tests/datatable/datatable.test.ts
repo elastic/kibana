@@ -8,10 +8,12 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 
 import type { DatatableConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
+import type { LensAttributes } from '../../types';
 import { validator } from '../utils/validator';
 import {
   singleMetricDatatableAttributes,
@@ -45,6 +47,32 @@ import {
   sortedByPivotedMetricColumnESQLDatatable,
   sortedByRowColumnESQLDatatable,
 } from './lens_api_config_esql.mock';
+
+type DatatableLensAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsDatatable' }
+>;
+
+function assertDatatableLensAttributes(
+  attributes: LensAttributes
+): asserts attributes is DatatableLensAttributes {
+  if (attributes.visualizationType !== 'lnsDatatable') {
+    throw new Error('Expected datatable Lens attributes');
+  }
+}
+
+function toDatatableApiConfig(
+  builder: LensConfigBuilder,
+  lensState: LensAttributes
+): DatatableConfig {
+  const apiConfig = builder.toAPIFormat(lensState);
+
+  if (apiConfig.type !== 'data_table') {
+    throw new Error('Expected datatable API config');
+  }
+
+  return apiConfig;
+}
 
 describe('Datatable', () => {
   describe('state transform validation', () => {
@@ -99,6 +127,29 @@ describe('Datatable', () => {
     it('should convert a selector color by value palette', () => {
       validator.data_table.fromState(selectorColorByValueAttributes);
     });
+
+    it.each([
+      ['DSL', singleMetricDatatableAttributes],
+      ['ESQL', singleMetricESQLDatatableAttributes],
+    ])(
+      'should reject progress decoration when exporting a %s datatable to Lens as code',
+      (_label, attributes) => {
+        const progressDatatableAttributes = structuredClone(attributes);
+        assertDatatableLensAttributes(progressDatatableAttributes);
+
+        progressDatatableAttributes.state.visualization.columns[0] = {
+          ...progressDatatableAttributes.state.visualization.columns[0],
+          colorMode: 'progress',
+          fillStyle: { fillMode: 'single', color: '#abcdef', valueRange: { mode: 'auto' } },
+        };
+
+        const builder = new LensConfigBuilder(undefined, true);
+
+        expect(() => builder.toAPIFormat(progressDatatableAttributes)).toThrow(
+          /unsupported 'progress' cell decoration/i
+        );
+      }
+    );
   });
 
   describe('api transform validation', () => {
@@ -158,7 +209,10 @@ describe('Datatable', () => {
       },
       sampling: 1,
       ignore_global_filters: false,
-    } as const;
+    } satisfies Pick<
+      DatatableConfig,
+      'type' | 'title' | 'data_source' | 'sampling' | 'ignore_global_filters'
+    >;
 
     it('should apply AUTO_COLOR on a metric with apply_color_to', () => {
       const config = {
@@ -174,7 +228,7 @@ describe('Datatable', () => {
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as DatatableConfig;
+      const apiOutput = toDatatableApiConfig(builder, lensState);
 
       expect(apiOutput.metrics?.[0].color).toEqual(AUTO_COLOR);
       expect(apiOutput.metrics?.[0].apply_color_to).toBe('value');
@@ -196,7 +250,7 @@ describe('Datatable', () => {
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as DatatableConfig;
+      const apiOutput = toDatatableApiConfig(builder, lensState);
 
       expect(apiOutput.rows?.[0].color).toEqual(AUTO_COLOR);
       expect(apiOutput.rows?.[0].apply_color_to).toBe('background');
@@ -215,7 +269,7 @@ describe('Datatable', () => {
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as DatatableConfig;
+      const apiOutput = toDatatableApiConfig(builder, lensState);
 
       expect(apiOutput.metrics?.[0].color).not.toBeDefined();
       expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();

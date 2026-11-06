@@ -10,7 +10,7 @@
 import { markdownClient } from './markdown_client';
 
 export const hasLibraryItemWithTitle = async (title: string) => {
-  const { markdowns } = await markdownClient.search({
+  const { data: markdowns } = await markdownClient.search({
     query: `"${title}"`,
   });
 

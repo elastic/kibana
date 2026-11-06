@@ -12,7 +12,7 @@ import { type BindingActivation, Container, type ServiceIdentifier } from 'inver
 /** @internal */
 export function cacheInScope<T>(serviceIdentifier: ServiceIdentifier<T>): BindingActivation<T> {
   return ({ get }, injectable) => {
-    get(Container).rebindSync(serviceIdentifier).toConstantValue(injectable);
+    get(Container).rebind(serviceIdentifier).toConstantValue(injectable);
 
     return injectable;
   };

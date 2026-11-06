@@ -60,27 +60,29 @@ const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
   ...overrides,
 });
 
+// Actor and targets are the EUIDs the flyout resolves from each document, so they carry the
+// entity type prefix and namespace rather than a friendly label or icon.
 const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
   itemType: DOCUMENT_TYPE_EVENT,
   id: 'event-1',
-  action: 'process_start',
+  action: 'google.iam.admin.v1.CreateRole',
   timestamp: new Date('2023-12-01T11:15:00Z'),
   ips: ['192.168.1.100'],
   countryCodes: ['CA'],
-  actor: { id: 'user-123', label: 'admin_user', icon: 'user' },
-  target: { id: 'process-456', label: 'notepad.exe', icon: 'document' },
+  actor: { id: 'user:admin@example.com@gcp' },
+  target: { ids: ['projects/acme-prod/roles/customRole'] },
   ...overrides,
 });
 
 const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
   itemType: DOCUMENT_TYPE_ALERT,
   id: 'alert-1',
-  action: 'malware_detected',
+  action: 'google.iam.admin.v1.SetIamPolicy',
   timestamp: new Date('2023-12-01T12:45:00Z'),
   ips: ['172.16.0.50'],
   countryCodes: ['GB'],
-  actor: { id: 'system-789', label: 'antivirus_scanner', icon: 'shield' },
-  target: { id: 'file-101', label: 'suspicious.exe', icon: 'warning' },
+  actor: { id: 'user:admin@example.com@gcp' },
+  target: { ids: ['projects/acme-prod'] },
   ...overrides,
 });
 
@@ -116,6 +118,8 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
         icon={icon}
         groupedItemsType={groupedItemsType}
         pagination={pagination}
+        onShowDocument={() => {}}
+        onShowEntity={() => {}}
       />
     </div>
   );
@@ -176,23 +180,24 @@ EntitiesGroup.parameters = {
 export const EventsGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 EventsGroup.args = {
   items: [
-    createEventItem({
-      id: 'event-1',
-      action: 'file_access',
-      actor: { id: 'user-001', label: 'john.doe', icon: 'user' },
-      target: { id: 'file-001', label: '/etc/passwd', icon: 'document' },
-    }),
+    createEventItem({ id: 'event-1' }),
     createEventItem({
       id: 'event-2',
-      action: 'network_connection',
-      actor: { id: 'process-002', label: 'chrome.exe', icon: 'globe' },
-      target: { id: 'endpoint-002', label: 'google.com:443', icon: 'network' },
+      action: 'AssumeRole',
+      actor: { id: 'user:alice@acme.com@aws' },
+      target: {
+        ids: ['service:sts.amazonaws.com', 'arn:aws:iam::123456789012:role/DataPipelineRole'],
+      },
+      ips: ['203.0.113.10'],
+      countryCodes: ['DE'],
     }),
     createEventItem({
       id: 'event-3',
-      action: 'process_execution',
-      actor: { id: 'user-003', label: 'admin', icon: 'user' },
-      target: { id: 'process-003', label: 'powershell.exe', icon: 'commandLine' },
+      action: 'google.compute.v1.Instances.start',
+      actor: { id: 'service:pipeline@acme-prod.iam.gserviceaccount.com' },
+      target: {
+        ids: ['host:web-01', 'host:web-02', 'host:web-03', 'host:db-01', 'host:db-02'],
+      },
     }),
   ],
 };
@@ -200,7 +205,7 @@ EventsGroup.parameters = {
   docs: {
     description: {
       story:
-        'Displays a group of event items with different actions and actor-target relationships.',
+        'Events with one, two and five targets: the row shows the first target and a +N badge whose tooltip lists the rest.',
     },
   },
 };
@@ -210,29 +215,28 @@ AlertsGroup.args = {
   items: [
     createAlertItem({
       id: 'alert-1',
-      action: 'suspicious_login',
-      actor: { id: 'user-suspicious', label: 'unknown_user', icon: 'user' },
-      target: { id: 'system-login', label: 'ssh_service', icon: 'lock' },
+      action: 'ConsoleLogin',
+      actor: { id: 'user:jane.smith@acme.com@okta' },
+      target: { ids: ['service:aws-console'] },
     }),
     createAlertItem({
       id: 'alert-2',
-      action: 'malware_execution',
-      actor: { id: 'process-malware', label: 'trojan.exe', icon: DOCUMENT_TYPE_ALERT },
-      target: { id: 'system-memory', label: 'system_memory', icon: 'memory' },
+      action: 'google.iam.admin.v1.SetIamPolicy',
+      actor: { id: 'user:unknown.user@gmail.com@gcp' },
+      target: { ids: ['projects/acme-prod', 'projects/acme-staging', 'projects/acme-dev'] },
     }),
     createAlertItem({
       id: 'alert-3',
-      action: 'data_exfiltration',
-      actor: { id: 'network-conn', label: 'unknown_endpoint', icon: 'globe' },
-      target: { id: 'sensitive-data', label: 'customer_db.sql', icon: 'database' },
+      action: 'DeleteBucket',
+      actor: { id: 'user:bob@acme.com@aws' },
+      target: { ids: ['arn:aws:s3:::acme-customer-data'] },
     }),
   ],
 };
 AlertsGroup.parameters = {
   docs: {
     description: {
-      story:
-        'Displays a group of alert items highlighting security threats and suspicious activities.',
+      story: 'Alerts, one of which has three targets.',
     },
   },
 };
@@ -240,29 +244,29 @@ AlertsGroup.parameters = {
 export const EventsAndAlertsGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 EventsAndAlertsGroup.args = {
   items: [
-    createEventItem({
-      id: 'event-mixed-1',
-      action: 'user_login',
-      actor: { id: 'user-normal', label: 'jane.smith', icon: 'user' },
-      target: { id: 'workstation-01', label: 'WS-001', icon: 'display' },
-    }),
+    createEventItem({ id: 'event-mixed-1' }),
     createAlertItem({
       id: 'alert-mixed-1',
-      action: 'privilege_escalation',
-      actor: { id: 'user-escalate', label: 'jane.smith', icon: 'user' },
-      target: { id: 'admin-group', label: 'administrators', icon: 'users' },
+      target: {
+        ids: [
+          'projects/acme-prod',
+          'projects/acme-staging',
+          'projects/acme-dev',
+          'projects/acme-sandbox',
+        ],
+      },
     }),
     createEventItem({
       id: 'event-mixed-2',
-      action: 'file_modification',
-      actor: { id: 'process-editor', label: 'notepad.exe', icon: 'document' },
-      target: { id: 'config-file', label: 'app.config', icon: 'gear' },
+      action: 'AssumeRole',
+      actor: { id: 'user:alice@acme.com@aws' },
+      target: { ids: ['arn:aws:iam::123456789012:role/DataPipelineRole'] },
     }),
     createAlertItem({
       id: 'alert-mixed-2',
-      action: 'unauthorized_access',
-      actor: { id: 'external-ip', label: '203.0.113.42', icon: 'globe' },
-      target: { id: 'secure-folder', label: '/secure/documents', icon: 'folderClosed' },
+      action: 'ConsoleLogin',
+      actor: { id: 'user:jane.smith@acme.com@okta' },
+      target: { ids: ['service:aws-console'] },
     }),
   ],
 };
@@ -270,7 +274,65 @@ EventsAndAlertsGroup.parameters = {
   docs: {
     description: {
       story:
-        'Displays a mixed group containing both events and alerts, showing how the component handles heterogeneous item types.',
+        'A mixed group of events and alerts, showing how the component handles heterogeneous item types.',
+    },
+  },
+};
+
+export const ManyTargets: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
+ManyTargets.args = {
+  items: [
+    createEventItem({ id: 'event-targets-1' }),
+    createEventItem({
+      id: 'event-targets-2',
+      target: { ids: ['host:web-01', 'host:web-02'] },
+    }),
+    createEventItem({
+      id: 'event-targets-3',
+      target: { ids: ['host:web-01', 'host:web-02', 'host:web-03'] },
+    }),
+    createEventItem({
+      id: 'event-targets-4',
+      target: {
+        ids: Array.from(
+          { length: 12 },
+          (_, index) => `host:web-${String(index + 1).padStart(2, '0')}`
+        ),
+      },
+    }),
+    createEventItem({
+      id: 'event-targets-5',
+      target: {
+        ids: [
+          'arn:aws:iam::123456789012:role/a-very-long-role-name-that-does-not-fit-in-the-badge',
+          'projects/acme-prod/serviceAccounts/pipeline@acme-prod.iam.gserviceaccount.com',
+        ],
+      },
+    }),
+  ],
+};
+ManyTargets.parameters = {
+  docs: {
+    description: {
+      story:
+        'Documents with 1, 2, 3 and 12 targets, and with ids too long for the badge. The +N badge counts the targets after the first.',
+    },
+  },
+};
+
+export const PartiallyResolved: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
+PartiallyResolved.args = {
+  items: [
+    createEventItem({ id: 'event-actor-only', target: undefined }),
+    createEventItem({ id: 'event-target-only', actor: undefined }),
+    createEventItem({ id: 'event-no-identity', actor: undefined, target: undefined }),
+  ],
+};
+PartiallyResolved.parameters = {
+  docs: {
+    description: {
+      story:
+        'Documents whose identity fields resolve only an actor, only targets, or nothing. A missing side shows a dash and the row is hidden when neither resolves.',
     },
   },
 };
@@ -300,8 +362,13 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
           return createEventItem({
             id: `event-${index}`,
             action: actions[index % actions.length],
-            actor: { id: `actor-${index}`, label: `user_${index}`, icon: 'user' },
-            target: { id: `target-${index}`, label: `resource_${index}`, icon: 'document' },
+            actor: { id: `user:user-${index}@acme.com@gcp` },
+            target: {
+              ids: Array.from(
+                { length: (index % 4) + 1 },
+                (_unused, targetIndex) => `host:web-${index}-${targetIndex}`
+              ),
+            },
           });
         } else {
           const actions = [
@@ -313,12 +380,8 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
           return createAlertItem({
             id: `alert-${index}`,
             action: actions[index % actions.length],
-            actor: {
-              id: `threat-${index}`,
-              label: `threat_actor_${index}`,
-              icon: DOCUMENT_TYPE_ALERT,
-            },
-            target: { id: `victim-${index}`, label: `target_${index}`, icon: 'warning' },
+            actor: { id: `user:threat-${index}@example.org@okta` },
+            target: { ids: [`service:victim-${index}`] },
           });
         }
       }) as PanelItems,
@@ -367,6 +430,8 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
         icon={icon}
         groupedItemsType={groupedItemsType}
         pagination={pagination}
+        onShowDocument={() => {}}
+        onShowEntity={() => {}}
       />
     </div>
   );

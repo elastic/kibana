@@ -12,7 +12,6 @@
 import { merge } from 'lodash';
 import type {
   EsWorkflowStepExecution,
-  LegacyWorkflowInput,
   StepContext,
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
@@ -29,6 +28,7 @@ import {
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { LegacyWorkflowInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
@@ -139,8 +139,8 @@ export function buildContextOverride(
       if (isLastPart) {
         // Set a default value for the final property
         current[part] =
-          current[part] ||
-          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
+          current[part] ??
+          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ??
           INPUT_STRING_PLACEHOLDER;
       } else {
         // Create nested object if it doesn't exist

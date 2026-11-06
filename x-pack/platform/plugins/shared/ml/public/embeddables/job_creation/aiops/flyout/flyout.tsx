@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -18,12 +18,15 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '@kbn/es-query';
+import { loadMlServerInfo } from '../../../../application/services/ml_server_info';
 import { CreateJob } from './create_job';
+import { useMlFromLensKibanaContext } from '../../common/context';
 
 interface Props {
   dataView: DataView;
@@ -40,6 +43,42 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
   query,
   timeRange,
 }) => {
+  const {
+    services: {
+      mlServices: { mlApi },
+    },
+  } = useMlFromLensKibanaContext();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchServerInfo() {
+      setIsLoading(true);
+      try {
+        await loadMlServerInfo(mlApi);
+        if (cancelled) {
+          return;
+        }
+        setIsLoading(false);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        // eslint-disable-next-line no-console
+        console.error('ML server info could not be loaded', error);
+        onClose();
+      }
+    }
+
+    void fetchServerInfo();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -61,7 +100,9 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <CreateJob dataView={dataView} field={field} query={query} timeRange={timeRange} />
+        <EuiSkeletonText lines={4} isLoading={isLoading}>
+          <CreateJob dataView={dataView} field={field} query={query} timeRange={timeRange} />
+        </EuiSkeletonText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

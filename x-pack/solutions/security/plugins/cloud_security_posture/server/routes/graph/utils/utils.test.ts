@@ -8,8 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
-import { checkIfEntitiesIndexLookupMode } from './enrichment_utils';
+import { resolveEntitiesIndexName } from './enrichment_utils';
+
+jest.mock('@kbn/entity-store/server', () => ({
+  resolveLatestEntitiesIndexName: jest.fn(),
+}));
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
@@ -83,7 +88,7 @@ describe('utils', () => {
     });
   });
 
-  describe('checkIfEntitiesIndexLookupMode', () => {
+  describe('resolveEntitiesIndexName', () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient();
     let logger: Logger;
 
@@ -100,84 +105,41 @@ describe('utils', () => {
       jest.resetAllMocks();
     });
 
-    it('should return true when index exists and is in lookup mode', async () => {
+    it('should return the resolved index name when the index exists', async () => {
       const indexName = getEntitiesLatestIndexName('default');
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(indexName);
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: { index: { mode: 'lookup' } },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
-      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
-      expect(result).toBe(true);
+      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
+      expect(result).toBe(indexName);
     });
 
-    it('should return false when index exists but is not in lookup mode', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
+    // Legacy vs neutral resolution itself is covered by the entity_store resolver
+    // tests (resolve_entity_store_indices.test.ts) — this suite only verifies the
+    // pass-through, existence check, and error handling around it.
 
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    it('should return null when the index does not exist', async () => {
+      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(
+        getEntitiesLatestIndexName('default')
+      );
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: { index: { mode: 'standard' } },
-          },
-        });
+        .mockResolvedValueOnce(false);
 
-      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
-      expect(result).toBe(false);
+      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
+      expect(result).toBeNull();
     });
 
-    it('should return false when index settings are not found', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
+    it('should return null and log error on unexpected errors', async () => {
+      (resolveLatestEntitiesIndexName as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
 
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockResolvedValueOnce({
-          [indexName]: undefined,
-        });
-
-      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
-      expect(result).toBe(false);
-    });
-
-    it('should return false when index does not exist (404)', async () => {
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockRejectedValueOnce({ statusCode: 404 });
-
-      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
-      expect(result).toBe(false);
-    });
-
-    it('should return false and log error on unexpected errors', async () => {
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockRejectedValueOnce({ statusCode: 500, message: 'Internal error' });
-
-      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
-      expect(result).toBe(false);
-    });
-
-    it('should use correct index name for the given spaceId', async () => {
-      const spaceId = 'custom-space';
-      const indexName = getEntitiesLatestIndexName(spaceId);
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: { index: { mode: 'lookup' } },
-          },
-        });
-
-      await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
-
-      expect(esClient.asInternalUser.indices.getSettings).toHaveBeenCalledWith({
-        index: indexName,
-      });
+      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
+      expect(result).toBeNull();
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 

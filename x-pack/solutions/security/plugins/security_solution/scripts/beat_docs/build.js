@@ -8,10 +8,10 @@
 require('@kbn/setup-node-env');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const extract = require('extract-zip');
+const AdmZip = require('adm-zip');
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const yaml = require('js-yaml');
+const { parse } = require('yaml');
 const https = require('https');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { get, isArray, isEmpty, isNumber, isString, pick } = require('lodash');
@@ -21,7 +21,13 @@ const tar = require('tar');
 const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
-const OUTPUT_SERVER_DIRECTORY = resolve('../timelines', 'server', 'utils', 'beat_schema');
+const OUTPUT_SERVER_DIRECTORY = resolve(
+  'server',
+  'lib',
+  'timelines_server',
+  'utils',
+  'beat_schema'
+);
 const BEATS_VERSION = '8.0.0-rc1';
 
 const beats = [
@@ -136,9 +142,10 @@ const convertSchemaToHash = (schema, beatFields) => {
 
 const manageZipFields = async (beat, filePath, beatFields) => {
   try {
-    await extract(filePath, { dir: beat.outputDir });
+    const zip = new AdmZip(filePath);
+    await zip.extractAllToAsync(beat.outputDir);
     console.log('building fields', beat.index);
-    const obj = yaml.load(
+    const obj = parse(
       fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {
         encoding: 'utf-8',
       })
@@ -172,9 +179,7 @@ const manageTarFields = async (beat, filePath, beatFields) =>
           return reject(new Error(err));
         }
         console.log('building fields', beat.index);
-        const obj = yaml.load(
-          fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' })
-        );
+        const obj = parse(fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' }));
         const ebeatFields = convertSchemaToHash(obj, beatFields);
         console.log('deleting files', beat.index);
         fs.rmSync(beat.outputDir, { recursive: true });

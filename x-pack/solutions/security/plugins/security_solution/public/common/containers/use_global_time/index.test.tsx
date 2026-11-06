@@ -11,8 +11,8 @@ import { useGlobalTime } from '.';
 
 const mockDispatch = jest.fn();
 
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const originalModule = jest.requireActual('react-redux-v7');
 
   return {
     ...originalModule,

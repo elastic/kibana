@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "scripts/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -19,6 +19,7 @@
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-browser",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/spaces-plugin"
   ]
 }

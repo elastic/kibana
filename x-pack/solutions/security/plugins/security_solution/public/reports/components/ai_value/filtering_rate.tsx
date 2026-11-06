@@ -13,6 +13,7 @@ import { formatPercent, getTimeRangeAsDays } from './metrics';
 import * as i18n from './translations';
 
 interface Props {
+  isSample: boolean;
   attackAlertIds: string[];
   filteredAlertsPerc: number;
   filteredAlertsPercCompare: number;
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export const FilteringRate: React.FC<Props> = ({
+  isSample,
   attackAlertIds,
   filteredAlertsPerc,
   filteredAlertsPercCompare,
@@ -36,6 +38,7 @@ export const FilteringRate: React.FC<Props> = ({
       `}
     >
       <AlertFilteringMetric
+        isSample={isSample}
         attackAlertIds={attackAlertIds}
         totalAlerts={totalAlerts}
         from={from}
@@ -46,7 +49,7 @@ export const FilteringRate: React.FC<Props> = ({
         currentCount={filteredAlertsPerc}
         previousCount={filteredAlertsPercCompare}
         stat={formatPercent(filteredAlertsPercCompare)}
-        statType={i18n.FILTERING_RATE}
+        statType={i18n.FILTERING_RATE_INLINE_DESCRIPTION}
         timeRange={getTimeRangeAsDays({ from, to })}
       />
     </span>

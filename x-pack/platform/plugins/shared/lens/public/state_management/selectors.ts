@@ -18,12 +18,15 @@ export const selectSearchSessionId = (state: LensState) => state.lens.searchSess
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 export const selectProjectRouting = (state: LensState) => state.lens.projectRouting;
-export const selectAdHocDataViews = (state: LensState) =>
-  Object.fromEntries(
-    Object.values(state.lens.dataViews.indexPatterns)
-      .filter((indexPattern) => !indexPattern.isPersisted)
-      .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
-  );
+export const selectAdHocDataViews = createSelector(
+  (state: LensState) => state.lens.dataViews.indexPatterns,
+  (indexPatterns) =>
+    Object.fromEntries(
+      Object.values(indexPatterns)
+        .filter((indexPattern) => !indexPattern.isPersisted)
+        .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
+    )
+);
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
@@ -59,12 +62,7 @@ export const selectHideTextBasedEditor = (state: LensState) => state.lens.hideTe
 export const selectCanEditTextBasedQuery = (state: LensState) =>
   !state.lens.hideTextBasedEditor && isOfAggregateQueryType(state.lens.query);
 
-let applyChangesCounter: number | undefined;
-export const selectTriggerApplyChanges = (state: LensState) => {
-  const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;
-  applyChangesCounter = state.lens.applyChangesCounter;
-  return shouldApply;
-};
+export const selectApplyChangesCounter = (state: LensState) => state.lens.applyChangesCounter;
 
 // TODO - is there any point to keeping this around since we have selectExecutionSearchContext?
 export const selectExecutionContext = createSelector(
@@ -135,9 +133,10 @@ export const selectDatasourceLayers = createSelector(
     selectDatasourceStates,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
     selectDataViews,
+    selectActiveData,
   ],
-  (datasourceStates, datasourceMap, dataViews) =>
-    getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
+  (datasourceStates, datasourceMap, dataViews, activeData) =>
+    getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns, activeData)
 );
 
 export const selectFramePublicAPI = createSelector(
@@ -153,7 +152,8 @@ export const selectFramePublicAPI = createSelector(
       datasourceLayers: getDatasourceLayers(
         datasourceStates,
         datasourceMap,
-        dataViews.indexPatterns
+        dataViews.indexPatterns,
+        activeData
       ),
       activeData,
       dataViews,

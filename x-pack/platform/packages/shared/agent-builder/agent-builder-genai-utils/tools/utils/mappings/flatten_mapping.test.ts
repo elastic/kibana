@@ -210,6 +210,65 @@ describe('flattenMapping', () => {
     ]);
   });
 
+  it('extracts tsDimension from a leaf field', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        'host.name': {
+          type: 'keyword',
+          time_series_dimension: true,
+        } as any,
+      },
+    };
+
+    const flattened = flattenMapping(mapping);
+
+    expect(flattened).toEqual([
+      {
+        path: 'host.name',
+        type: 'keyword',
+        meta: {},
+        searchable: true,
+        tsDimension: true,
+      },
+    ]);
+  });
+
+  it('extracts tsMetric from a leaf field', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        'system.cpu.pct': {
+          type: 'float',
+          time_series_metric: 'gauge',
+        } as any,
+      },
+    };
+
+    const flattened = flattenMapping(mapping);
+
+    expect(flattened).toEqual([
+      {
+        path: 'system.cpu.pct',
+        type: 'float',
+        meta: {},
+        searchable: true,
+        tsMetric: 'gauge',
+      },
+    ]);
+  });
+
+  it('omits tsDimension and tsMetric when absent', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        plain: { type: 'keyword' },
+      },
+    };
+
+    const flattened = flattenMapping(mapping);
+
+    expect(flattened[0]).not.toHaveProperty('tsDimension');
+    expect(flattened[0]).not.toHaveProperty('tsMetric');
+  });
+
   it('keeps internal fields', () => {
     const mapping: MappingTypeMapping = {
       properties: {

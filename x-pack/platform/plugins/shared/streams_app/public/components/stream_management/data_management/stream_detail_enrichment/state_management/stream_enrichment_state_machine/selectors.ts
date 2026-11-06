@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import moment from 'moment';
 import type { StreamEnrichmentActorSnapshot } from './stream_enrichment_state_machine';
 import { getStreamTypeFromDefinition } from '../../../../../../util/get_stream_type_from_definition';

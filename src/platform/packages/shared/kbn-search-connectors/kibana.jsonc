@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/search-connectors",
   "owner": [
-    "@elastic/search-kibana"
+    "@elastic/search-ml-ux"
   ],
   // FIXME? search-connectors-plugin depends on it
   "group": "platform",

@@ -51,7 +51,7 @@ export const FormLabel: FC<PropsWithChildren<FormLabelProps>> = (props) => {
 
       {!isEqual ? (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="dot" color="success" size="s" />
+          <EuiIcon type="dot" color="success" size="s" aria-hidden={true} />
         </EuiFlexItem>
       ) : undefined}
     </EuiFlexGroup>

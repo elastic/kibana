@@ -10,7 +10,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiText, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { JobDependencies } from './jobs_export_service';
 
 interface Props {
@@ -28,14 +29,15 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={getTitle(jobs, jobsWithCalendars.length, jobsWithFilters.length)}
-        color="warning"
+        text={
+          <FormattedMessage
+            id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarDependencies"
+            defaultMessage="When you export jobs, calendars and filter lists are not included. You must create the filter lists before you import jobs; otherwise, the import fails. If you want the new jobs to continue to ignore scheduled events, you must create the calendars."
+          />
+        }
       >
-        <FormattedMessage
-          id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarDependencies"
-          defaultMessage="When you export jobs, calendars and filter lists are not included. You must create the filter lists before you import jobs; otherwise, the import fails. If you want the new jobs to continue to ignore scheduled events, you must create the calendars."
-        />
         <EuiSpacer />
 
         {usingCalendars && (
@@ -79,7 +81,7 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
             <FilterJobList jobs={jobsWithFilters} />
           </EuiAccordion>
         )}
-      </EuiCallOut>
+      </KbnWarningCallout>
 
       <EuiSpacer size="m" />
     </>

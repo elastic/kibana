@@ -8,7 +8,16 @@
  */
 
 import { Readable } from 'stream';
-import { formatBytes, parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
+import { ExecutionError } from '@kbn/workflows/server';
+import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
+import {
+  formatBytes,
+  parseByteSize,
+  ResponseSizeLimitError,
+  safeOutputSize,
+  toExecutionError,
+} from './errors';
+import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 
 describe('formatBytes', () => {
   it('should format 0 bytes', () => {
@@ -85,10 +94,14 @@ describe('safeOutputSize', () => {
     expect(safeOutputSize(stream)).toBeGreaterThan(0);
   });
 
-  it('should return -1 for circular references', () => {
+  it('should return null for circular references', () => {
     const obj: any = { a: 1 };
     obj.self = obj;
-    expect(safeOutputSize(obj)).toBe(-1);
+    expect(safeOutputSize(obj)).toBeNull();
+  });
+
+  it('should return null for BigInt (non-serializable)', () => {
+    expect(safeOutputSize({ big: BigInt(1) })).toBeNull();
   });
 
   it('should return size for null', () => {
@@ -124,10 +137,174 @@ describe('ResponseSizeLimitError', () => {
     expect(error.details?.limitBytes).toBe(1024);
   });
 
+  it('is not retryable', () => {
+    expect(new ResponseSizeLimitError(1024, 'my_step').retryable).toBe(false);
+  });
+
   it('should include limit in message', () => {
     const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'es_step');
     expect(error.message).toContain('10 MB');
     expect(error.message).toContain('exceeded the');
     expect(error.details?.limitBytes).toBe(10 * 1024 * 1024);
+  });
+
+  it('should include actual output size', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'download_file', {
+      actualBytes: 12 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('Actual serialized output size was 12 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 12 MB");
+    expect(error.details).toEqual({
+      limitBytes: 10 * 1024 * 1024,
+      actualBytes: 12 * 1024 * 1024,
+      suggestedLimitBytes: 12 * 1024 * 1024,
+    });
+  });
+
+  it('should include advertised response content length when available', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'download_file', {
+      contentLengthBytes: 12 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('advertised a content length of 12 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 12 MB");
+    expect(error.details).toEqual({
+      limitBytes: 10 * 1024 * 1024,
+      contentLengthBytes: 12 * 1024 * 1024,
+      suggestedLimitBytes: 12 * 1024 * 1024,
+    });
+  });
+
+  it('should prefer estimated output size for max-step-size suggestions', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'download_file', {
+      contentLengthBytes: 12 * 1024 * 1024,
+      estimatedOutputBytes: 16 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('advertised a content length of 12 MB');
+    expect(error.message).toContain('Estimated step output size is 16 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 16 MB");
+    expect(error.details).toEqual({
+      limitBytes: 10 * 1024 * 1024,
+      contentLengthBytes: 12 * 1024 * 1024,
+      estimatedOutputBytes: 16 * 1024 * 1024,
+      suggestedLimitBytes: 16 * 1024 * 1024,
+    });
+  });
+});
+
+describe('toExecutionError', () => {
+  it('maps an oversized callKibanaApi response to a non-retryable size error', () => {
+    const error = toExecutionError(new CallKibanaApiResponseTooLargeError(2048));
+
+    expect(error).toBeInstanceOf(ExecutionError);
+    expect(error.toSerializableObject()).toEqual({
+      type: 'StepSizeLimitExceeded',
+      message: expect.stringContaining('2048 bytes'),
+      details: { limitBytes: 2048 },
+      retryable: false,
+    });
+  });
+
+  it('leaves the retryable flag of other errors unset', () => {
+    expect(toExecutionError(new Error('boom')).retryable).toBeUndefined();
+  });
+});
+
+describe('ActionsResponseContentLengthLimitError', () => {
+  it('is not retryable', () => {
+    expect(new ActionsResponseContentLengthLimitError('download_file').retryable).toBe(false);
+  });
+
+  it('should identify the actions response content length config as the source', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+    });
+
+    expect(error.type).toBe('ActionsResponseContentLengthExceeded');
+    expect(error.message).toContain('download_file');
+    expect(error.message).toContain('1 MB');
+    expect(error.message).toContain('xpack.actions.maxResponseContentLength');
+    expect(error.message).toContain('max-step-size');
+    expect(error.message).not.toContain('administrator');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+    });
+  });
+
+  it('should include advertised response content length when available', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('advertised a content length of 10 MB');
+    expect(error.message).toContain(
+      'Increase "xpack.actions.maxResponseContentLength" to at least 10 MB'
+    );
+    expect(error.message).toContain('Increasing "max-step-size" will not change this limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      suggestedLimitBytes: 10 * 1024 * 1024,
+    });
+  });
+
+  it('should suggest max-step-size when the connector can override the Actions limit', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      canOverrideWithMaxStepSize: true,
+    });
+
+    expect(error.message).toContain('exceeded the current Actions HTTP response limit');
+    expect(error.message).toContain("Set a larger 'max-step-size' on this step");
+    expect(error.message).toContain('to raise both the workflow output limit');
+    expect(error.message).not.toContain('Increasing "max-step-size" will not change this limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+    });
+  });
+
+  it('should suggest an exact max-step-size when response content length is available', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      canOverrideWithMaxStepSize: true,
+    });
+
+    expect(error.message).toContain("Set 'max-step-size' to at least 10 MB on this step");
+    expect(error.message).toContain('to raise both the workflow output limit');
+    expect(error.message).not.toContain('Increasing "max-step-size" will not change this limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      suggestedLimitBytes: 10 * 1024 * 1024,
+    });
+  });
+
+  it('should prefer estimated output size for max-step-size suggestions', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      estimatedOutputBytes: 14 * 1024 * 1024,
+      canOverrideWithMaxStepSize: true,
+    });
+
+    expect(error.message).toContain('advertised a content length of 10 MB');
+    expect(error.message).toContain('Estimated stored step output size is 14 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 14 MB on this step");
+    expect(error.message).toContain('to raise both the workflow output limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      estimatedOutputBytes: 14 * 1024 * 1024,
+      suggestedLimitBytes: 14 * 1024 * 1024,
+    });
   });
 });

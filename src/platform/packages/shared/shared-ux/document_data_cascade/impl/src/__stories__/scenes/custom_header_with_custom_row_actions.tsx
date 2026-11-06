@@ -86,7 +86,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
       headerTitle: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="securitySignal" size="xl" aria-hidden={true} />
+            <EuiIcon type="radar" size="xl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText>

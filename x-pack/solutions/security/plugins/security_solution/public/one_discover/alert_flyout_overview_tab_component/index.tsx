@@ -10,15 +10,17 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer } from '@elastic/eui';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
-import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
+import { OverviewTab } from '../../flyout_v2/document/main/tabs/overview_tab';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
 import { DiscoverCellActions } from '../cell_actions';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { FlyoutV2DocViewerStateProps } from '../../flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
+import { FlyoutV2DocViewerStateSync } from '../flyout_v2_doc_viewer_state_sync';
 
-export interface AlertFlyoutOverviewTabProps {
+export interface AlertFlyoutOverviewTabProps extends FlyoutV2DocViewerStateProps {
   /**
    * The document record that will be used to render the content of the overview tab in the alert details flyout.
    */
@@ -62,6 +64,8 @@ export const AlertFlyoutOverviewTab = ({
   filter,
   onAddColumn,
   onRemoveColumn,
+  initialState,
+  onInitialStateChange,
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -115,12 +119,14 @@ export const AlertFlyoutOverviewTab = ({
         hit={hit}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
       />
     ),
   });
 };
 
-interface AlertFlyoutOverviewTabContentProps {
+interface AlertFlyoutOverviewTabContentProps extends FlyoutV2DocViewerStateProps {
   /**
    * The document record that will be used to render the content of the overview tab in the alert details flyout.
    */
@@ -142,12 +148,19 @@ const AlertFlyoutOverviewTabContent = ({
   hit,
   renderCellActions,
   onAlertUpdated,
+  initialState,
+  onInitialStateChange,
 }: AlertFlyoutOverviewTabContentProps) => {
   const isInSecurityApp = useIsInSecurityApp();
 
   return (
     <>
       {!isInSecurityApp && <DataViewManagerBootstrap />}
+      <FlyoutV2DocViewerStateSync
+        hit={hit}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
+      />
       <EuiSpacer size="m" />
       <OverviewTab
         hit={hit}

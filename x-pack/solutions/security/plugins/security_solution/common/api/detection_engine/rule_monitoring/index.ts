@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './detection_engine_health/setup_health/setup_health_route';
 export * from './detection_engine_health/get_cluster_health/get_cluster_health_route';
 export * from './detection_engine_health/get_space_health/get_space_health_route';
 export * from './detection_engine_health/get_rule_health/get_rule_health_route';

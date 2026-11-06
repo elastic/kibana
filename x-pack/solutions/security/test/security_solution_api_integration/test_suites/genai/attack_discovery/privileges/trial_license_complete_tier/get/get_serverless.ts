@@ -27,6 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
         ROLES.soc_manager,
         ROLES.detections_admin,
         ROLES.platform_engineer,
+        ROLES.t1_analyst,
+        ROLES.t2_analyst,
+        ROLES.t3_analyst,
       ];
       roles.forEach((role) => {
         it(`should return empty missing privileges for the role "${role}"`, async () => {
@@ -35,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
           const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: testAgent });
           const missingPrivileges = await apis.get({});
 
-          expect(missingPrivileges).toEqual([]);
+          expect(missingPrivileges).toEqual({ feature_privileges: [], index_privileges: [] });
         });
       });
 
@@ -45,70 +48,24 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: testAgent });
         const missingPrivileges = await apis.get({});
 
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.alerts-security.attack.discovery.alerts-default',
-            privileges: ['write', 'maintenance'],
-          },
-          {
-            index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
-            privileges: ['write', 'maintenance'],
-          },
-        ]);
-      });
-
-      it(`should return missing privileges for the role "${ROLES.t1_analyst}"`, async () => {
-        const testAgent = await utils.createSuperTest(ROLES.t1_analyst);
-
-        const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: testAgent });
-        const missingPrivileges = await apis.get({});
-
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.alerts-security.attack.discovery.alerts-default',
-            privileges: ['view_index_metadata'],
-          },
-          {
-            index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-        ]);
-      });
-
-      it(`should return missing privileges for the role "${ROLES.t2_analyst}"`, async () => {
-        const testAgent = await utils.createSuperTest(ROLES.t2_analyst);
-
-        const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: testAgent });
-        const missingPrivileges = await apis.get({});
-
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.alerts-security.attack.discovery.alerts-default',
-            privileges: ['view_index_metadata'],
-          },
-          {
-            index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-        ]);
-      });
-
-      it(`should return missing privileges for the role "${ROLES.t3_analyst}"`, async () => {
-        const testAgent = await utils.createSuperTest(ROLES.t3_analyst);
-
-        const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: testAgent });
-        const missingPrivileges = await apis.get({});
-
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.alerts-security.attack.discovery.alerts-default',
-            privileges: ['view_index_metadata'],
-          },
-          {
-            index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-        ]);
+        expect(missingPrivileges).toEqual({
+          feature_privileges: [
+            {
+              feature_id: 'workflowsManagement',
+              privileges: ['execute'],
+            },
+          ],
+          index_privileges: [
+            {
+              index_name: '.alerts-security.attack.discovery.alerts-default',
+              privileges: ['write', 'maintenance'],
+            },
+            {
+              index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
+              privileges: ['write', 'maintenance'],
+            },
+          ],
+        });
       });
     });
 
@@ -119,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: superTest });
         const missingPrivileges = await apis.get({});
 
-        expect(missingPrivileges).toEqual([]);
+        expect(missingPrivileges).toEqual({ feature_privileges: [], index_privileges: [] });
       });
 
       it('should return missing privileges for the user with no access to adhoc indices', async () => {
@@ -128,12 +85,15 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: superTest });
         const missingPrivileges = await apis.get({});
 
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-        ]);
+        expect(missingPrivileges).toEqual({
+          feature_privileges: [],
+          index_privileges: [
+            {
+              index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
+              privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
+            },
+          ],
+        });
       });
 
       it('should return missing privileges for the user with no access to attacks indices', async () => {
@@ -142,12 +102,15 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: superTest });
         const missingPrivileges = await apis.get({});
 
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-        ]);
+        expect(missingPrivileges).toEqual({
+          feature_privileges: [],
+          index_privileges: [
+            {
+              index_name: '.alerts-security.attack.discovery.alerts-default',
+              privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
+            },
+          ],
+        });
       });
 
       it('should return missing privileges for the user with no access to adhoc and attacks indices', async () => {
@@ -156,16 +119,19 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoveryMissingPrivilegesApis({ supertest: superTest });
         const missingPrivileges = await apis.get({});
 
-        expect(missingPrivileges).toEqual([
-          {
-            index_name: '.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-          {
-            index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
-            privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
-          },
-        ]);
+        expect(missingPrivileges).toEqual({
+          feature_privileges: [],
+          index_privileges: [
+            {
+              index_name: '.alerts-security.attack.discovery.alerts-default',
+              privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
+            },
+            {
+              index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
+              privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
+            },
+          ],
+        });
       });
     });
   });

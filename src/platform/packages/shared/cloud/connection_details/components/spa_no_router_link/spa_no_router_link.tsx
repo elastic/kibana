@@ -26,7 +26,6 @@ export const SpaNoRouterLink: React.FC<React.PropsWithChildren<SpaNoRouterLinkPr
   ...rest
 }) => {
   return (
-    /* eslint-disable-next-line @elastic/eui/href-or-on-click */
     <EuiLink
       {...rest}
       href={url}

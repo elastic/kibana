@@ -74,7 +74,7 @@ export function SuggestionItem(props: Props) {
       onKeyDown={onKeyDown}
     >
       <div css={[suggestionItemFieldCss, suggestionItemIconFieldCss]}>
-        <EuiIcon type={getEuiIconType(suggestion.type)} />
+        <EuiIcon aria-hidden={true} type={getEuiIconType(suggestion.type)} />
       </div>
       <div css={[suggestionItemFieldCss, suggestionItemTextFieldCss]}>{suggestion.text}</div>
       <div css={[suggestionItemFieldCss, suggestionItemDescriptionFieldCss]}>
@@ -95,7 +95,7 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
     case QuerySuggestionTypes.Value:
       return 'queryValue';
     case QuerySuggestionTypes.RecentSearch:
-      return 'search';
+      return 'magnify';
     case QuerySuggestionTypes.Conjunction:
       return 'querySelector';
     case QuerySuggestionTypes.Operator:

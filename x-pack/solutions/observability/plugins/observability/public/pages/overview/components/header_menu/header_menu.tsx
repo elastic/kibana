@@ -32,7 +32,7 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
-            <EuiHeaderLink color="primary" href={href}>
+            <EuiHeaderLink color="primary" href={href} iconType="indexOpen">
               {i18n.translate('xpack.observability.home.addData', {
                 defaultMessage: 'Add data',
               })}

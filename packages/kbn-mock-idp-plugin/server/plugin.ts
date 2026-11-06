@@ -26,6 +26,7 @@ import {
   createSAMLResponse,
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
+  MOCK_IDP_SP_BASE_URL,
   projectTypeToAlias,
 } from '@kbn/mock-idp-utils';
 import { parseSAMLRequest } from '@kbn/mock-idp-utils/src/utils';
@@ -84,6 +85,30 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
       const logger = initializerContext.logger.get();
       const config = initializerContext.config.get<ConfigType>();
       const router = core.http.createRouter();
+
+      core.http.registerOnPreResponse((r, p, t) => {
+        // We only care about 302 redirects to the Mock IDP login/logout pages.
+        const location = p.headers?.location;
+        if (
+          p.statusCode !== 302 ||
+          typeof location !== 'string' ||
+          !location.startsWith(`${MOCK_IDP_SP_BASE_URL}/mock_idp/`)
+        ) {
+          return t.next();
+        }
+
+        // Rewrite to a path-only Location so the browser resolves the redirect against its own
+        // origin - that way the redirect just works regardless of where Kibana is actually served
+        // from (dev proxy with a random base path, custom port, HTTPS, a reverse proxy, …) and
+        // ES SAML realm config does not need to know the real Kibana URL.
+        return t.next({
+          headers: {
+            location: `${core.http.basePath.serverBasePath}${location.slice(
+              MOCK_IDP_SP_BASE_URL.length
+            )}`,
+          },
+        });
+      });
 
       core.http.resources.register(
         {
@@ -157,9 +182,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           },
         },
         async (context, request, response) => {
-          const { protocol, hostname, port } = core.http.getServerInfo();
-          const pathname = core.http.basePath.prepend('/api/security/saml/callback');
-
           const serverlessOptions = plugins.cloud?.serverless
             ? {
                 serverless: {
@@ -176,16 +198,19 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               logger.info(`Sending SAML response for request ID: ${samlRequestInfo.requestId}`);
             }
 
-            const kibanaAcsUrl = `${protocol}://${hostname}:${port}${pathname}`;
-            const destinationUrl = samlRequestInfo?.acsUrl ?? kibanaAcsUrl;
-
             const parsed = new URL(request.body.url, 'https://localhost');
             const relayState = parsed.searchParams.get('RelayState') ?? undefined;
+
+            // Kibana-bound ACS URLs are intentionally left to the `onPreResponse` rewrite above;
+            // we only override here for external SPs (e.g. UIAM).
+            const externalAcsUrl =
+              samlRequestInfo?.acsUrl && !samlRequestInfo.acsUrl.startsWith(MOCK_IDP_SP_BASE_URL)
+                ? samlRequestInfo.acsUrl
+                : undefined;
 
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
-                  kibanaUrl: destinationUrl,
                   username: request.body.username,
                   full_name: request.body.full_name ?? undefined,
                   email: request.body.email ?? undefined,
@@ -194,10 +219,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                     ? { authnRequestId: samlRequestInfo.requestId }
                     : {}),
                   ...(samlRequestInfo?.issuer ? { spEntityId: samlRequestInfo.issuer } : {}),
+                  ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
                   ...serverlessOptions,
                 }),
-                ...(samlRequestInfo?.acsUrl ? { acsUrl: samlRequestInfo.acsUrl } : {}),
                 ...(relayState ? { RelayState: relayState } : {}),
+                // Echoed alongside SAMLResponse so the browser's auto-submitted form posts to UIAM
+                // instead of the default Kibana ACS endpoint (see mock_idp_page form action).
+                ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
               },
             });
           } catch (err) {

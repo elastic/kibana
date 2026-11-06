@@ -9,10 +9,23 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-// Numeric type families for auto-casting precedence
-const FLOAT_FAMILY = ['float', 'half_float', 'scaled_float'];
-const INT_FAMILY = ['integer', 'short', 'byte'];
-const ALL_NUMERIC = ['double', ...FLOAT_FAMILY, 'long', ...INT_FAMILY];
+// Numeric type families for auto-casting precedence.
+// `counter_double` and `counter_long` are TSDB counter variants that live alongside
+// their non-counter counterparts in backing indices after rollover or reindex.
+// ES|QL can cast them via TO_DOUBLE / TO_LONG so they coexist with `double` / `long`.
+const DOUBLE_FAMILY: readonly string[] = [
+  'double',
+  'float',
+  'half_float',
+  'scaled_float',
+  'counter_double',
+];
+const LONG_FAMILY: readonly string[] = ['long', 'integer', 'short', 'byte', 'counter_long'];
+const ALL_NUMERIC: readonly string[] = [...DOUBLE_FAMILY, ...LONG_FAMILY];
+
+const isDoubleFamily = (type: string): boolean => DOUBLE_FAMILY.includes(type);
+const isLongFamily = (type: string): boolean => LONG_FAMILY.includes(type);
+const isNumeric = (type: string): boolean => ALL_NUMERIC.includes(type);
 
 /**
  * Resolves conflicting field types to a single compatible type for casting.
@@ -23,6 +36,13 @@ const ALL_NUMERIC = ['double', ...FLOAT_FAMILY, 'long', ...INT_FAMILY];
  * - double > float / half_float / scaled_float
  * - long > integer / short / byte
  * - double > long (mixed numeric types)
+ * - counter_double combines with any float/double family member as double
+ * - counter_long combines with any integer/long family member as long
+ * - counter_* combined with a non-matching numeric family widens to double
+ *
+ * Histogram-class types (histogram, exponential_histogram, tdigest) are intentionally
+ * not resolved here: ES|QL has no safe cast between them and the caller passes the
+ * field through uncast so the resulting ES verification_exception surfaces to Lens.
  *
  * @param fieldTypes - Array of field types (may contain duplicates or compatible types)
  * @returns The selected field type, or undefined if types are incompatible or non-numeric
@@ -34,27 +54,27 @@ export function resolveConflictingFieldTypes(
     return fieldTypes[0];
   }
 
-  // Filter out duplicates — no cast needed when all types are the same
+  // Filter out duplicates, no cast needed when all types are the same
   const uniqueTypes = Array.from(new Set(fieldTypes));
   if (uniqueTypes.length === 1) {
     return undefined;
   }
 
-  // Check if all types are in the float family (double is the widest)
-  if (uniqueTypes.every((type) => type === 'double' || FLOAT_FAMILY.includes(type as string))) {
+  // Check if all types are in the float family, including counter_double (double is the widest)
+  if (uniqueTypes.every(isDoubleFamily)) {
     return ES_FIELD_TYPES.DOUBLE;
   }
 
-  // Check if all types are in the integer family (long is the widest)
-  if (uniqueTypes.every((type) => type === 'long' || INT_FAMILY.includes(type as string))) {
+  // Check if all types are in the integer family, including counter_long (long is the widest)
+  if (uniqueTypes.every(isLongFamily)) {
     return ES_FIELD_TYPES.LONG;
   }
 
-  // Mixed numeric: if all types are numeric, prefer double
-  if (uniqueTypes.every((type) => ALL_NUMERIC.includes(type as string))) {
+  // Mixed numeric: if all types are numeric (including counter_*), prefer double
+  if (uniqueTypes.every(isNumeric)) {
     return ES_FIELD_TYPES.DOUBLE;
   }
 
-  // Incompatible types (e.g., keyword + double, text + long)
+  // Incompatible types (e.g., keyword + double, text + long, histogram + counter_long)
   return undefined;
 }

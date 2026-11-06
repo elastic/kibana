@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import controls from '@elastic/eui/lib/components/icon/svgs/controls.svg';
+import globe from '@elastic/eui/lib/components/icon/svgs/globe.svg';
+import beta from './icons/beta.svg';
+import bolt from './icons/bolt.svg';
+import branch from './icons/branch.svg';
+import clock from './icons/clock.svg';
+import consoleSvg from './icons/console.svg';
+import database from './icons/database.svg';
+import email from './icons/email.svg';
+import fail from './icons/fail.svg';
+import flask from './icons/flask.svg';
+import glyph from './icons/glyph.svg';
+import elasticsearchLogoSvg from './icons/logo_elasticsearch.svg';
+import kibanaLogoSvg from './icons/logo_kibana.svg';
+import slackLogoSvg from './icons/logo_slack.svg';
+import output from './icons/output.svg';
+import parallel from './icons/parallel.svg';
+import plugs from './icons/plugs.svg';
+import productStreamsWired from './icons/product_streams_wired.svg';
+import refresh from './icons/refresh.svg';
+import sparkles from './icons/sparkles.svg';
+import union from './icons/union.svg';
+import user from './icons/user.svg';
+import warning from './icons/warning.svg';
+
+export const HardcodedIcons: Record<string, string> = {
+  '.slack': 'logoSlack',
+  '.slack_api': 'logoSlack',
+  '.email': email,
+  '.inference': sparkles,
+  elasticsearch: elasticsearchLogoSvg,
+  kibana: kibanaLogoSvg,
+  console: 'commandLine',
+  http: 'globe',
+  'data.set': database,
+  foreach: 'refresh',
+  while: 'refresh',
+  switch: productStreamsWired,
+  parallel,
+  if: 'branch',
+  'loop.break': controls,
+  'loop.continue': controls,
+  wait: clock,
+  waitForInput: user,
+  waitForApproval: user,
+  alert: warning,
+  scheduled: clock,
+  manual: user,
+  'workflow.execute': glyph,
+  merge: union,
+  'workflow.executeAsync': union,
+  'workflow.output': output,
+  'workflow.fail': fail,
+  trigger: bolt,
+  flask,
+  beta,
+  default: plugs,
+};
+
+// Entries in HardcodedIcons that are EUI icon-name strings (valid for <EuiIcon type={...} />)
+// but cannot be used directly in CSS url(). This map replaces each one with its SVG data URL.
+const CSS_ICON_URL_OVERRIDES: Record<string, string> = {
+  '.slack': slackLogoSvg,
+  '.slack_api': slackLogoSvg,
+  console: consoleSvg,
+  http: globe,
+  foreach: refresh,
+  while: refresh,
+  if: branch,
+};
+
+/**
+ * Data URL variants of HardcodedIcons for CSS contexts (mask-image / background-image).
+ * Every value here is guaranteed to be a data URL — never a bare EUI icon-name string.
+ */
+export const HardcodedIconDataUrls: Record<string, string> = {
+  ...HardcodedIcons,
+  ...CSS_ICON_URL_OVERRIDES,
+};

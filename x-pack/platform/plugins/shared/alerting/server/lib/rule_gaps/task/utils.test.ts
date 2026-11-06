@@ -137,7 +137,7 @@ describe('gap auto fill task utils', () => {
     it('returns true when the abort controller is aborted', async () => {
       const abortController = new AbortController();
       abortController.abort();
-      const res = isCancelled(abortController);
+      const res = isCancelled(abortController.signal);
       expect(res).toBe(true);
     });
   });

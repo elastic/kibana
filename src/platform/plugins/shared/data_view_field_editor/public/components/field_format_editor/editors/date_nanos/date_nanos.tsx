@@ -59,7 +59,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
                   defaultMessage="Documentation"
                 />
                 &nbsp;
-                <EuiIcon type="link" />
+                <EuiIcon type="link" aria-hidden={true} />
               </EuiLink>
             </span>
           }

@@ -63,12 +63,32 @@ export default ({ getService }: FtrProviderContext): void => {
     },
   });
   const setEntityStoreV2Setting = async (enabled: boolean) => {
-    await supertest
-      .post('/internal/kibana/settings')
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': enabled } })
-      .expect(200);
+    // The preview route resolves securitySolution:entityStoreEnableV2 through the server-side
+    // uiSettings cache (getUserProvided, 10s TTL), which can briefly return the stale prior value
+    // after a write. Read it back until observed so the next request sees the new value. The GET
+    // primes the same shared namespaced cache, mirroring the enable-side enableEntityStoreV2 guard.
+    await retry.waitForWithTimeout(
+      `entityStoreEnableV2 uiSetting to read back as ${enabled}`,
+      30_000,
+      async () => {
+        await supertest
+          .post('/internal/kibana/settings')
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .send({ changes: { 'securitySolution:entityStoreEnableV2': enabled } })
+          .expect(200);
+
+        const settingsRes = await supertest
+          .get('/internal/kibana/settings')
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .expect(200);
+        return (
+          settingsRes.body?.settings?.['securitySolution:entityStoreEnableV2']?.userValue ===
+          enabled
+        );
+      }
+    );
   };
 
   const previewRiskScores = async ({

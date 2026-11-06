@@ -12,7 +12,7 @@
 .buildkite/scripts/steps/checks/test_projects.sh
 .buildkite/scripts/steps/checks/test_hardening.sh
 .buildkite/scripts/steps/checks/ftr_configs.sh
-.buildkite/scripts/steps/checks/yarn_deduplicate.sh
+.buildkite/scripts/steps/checks/deduplicate_dependencies.sh
 .buildkite/scripts/steps/checks/prettier_topology.sh
 .buildkite/scripts/steps/checks/renovate.sh
 .buildkite/scripts/steps/checks/native_modules.sh

@@ -68,29 +68,31 @@ export async function mountManagementSection({
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
-          <PolicyStatusContextProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-              <Router history={history}>
-                <Routes>
-                  <Route
-                    path={`/:section(${sectionsRegex})`}
-                    render={(routerProps) => {
-                      return (
-                        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-                          <ReportingTabs config={config} />
-                        </Suspense>
-                      );
-                    }}
-                  />
-                  <Redirect from={'/'} to="/exports" />
-                </Routes>
-              </Router>
-            </QueryClientProvider>
-          </PolicyStatusContextProvider>
-        </InternalApiClientProvider>
-      </KibanaContextProvider>
+      coreStart.chrome.withProvider(
+        <KibanaContextProvider services={services}>
+          <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
+            <PolicyStatusContextProvider config={config}>
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Routes>
+                    <Route
+                      path={`/:section(${sectionsRegex})`}
+                      render={() => {
+                        return (
+                          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+                            <ReportingTabs config={config} />
+                          </Suspense>
+                        );
+                      }}
+                    />
+                    <Redirect from={'/'} to="/exports" />
+                  </Routes>
+                </Router>
+              </QueryClientProvider>
+            </PolicyStatusContextProvider>
+          </InternalApiClientProvider>
+        </KibanaContextProvider>
+      )
     ),
     element
   );

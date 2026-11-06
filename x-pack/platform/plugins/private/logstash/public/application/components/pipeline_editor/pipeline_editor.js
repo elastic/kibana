@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
+import { MAX_PIPELINE_DESCRIPTION_LENGTH } from '../../../../common/constants/pipeline';
 import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
@@ -25,7 +26,6 @@ import {
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
-  EuiPageHeader,
 } from '@elastic/eui';
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
 import { FlexItemSetting } from './flex_item_setting';
@@ -231,37 +231,6 @@ class PipelineEditorUi extends React.Component {
       .catch(this.notifyOnError);
   };
 
-  getPipelineHeadingText = () => {
-    const { clone, id, isNewPipeline, intl } = this.props;
-
-    if (!!clone && id) {
-      return intl.formatMessage(
-        {
-          id: 'xpack.logstash.pipelineEditor.clonePipelineTitle',
-          defaultMessage: 'Clone Pipeline "{id}"',
-        },
-        {
-          id,
-        }
-      );
-    }
-    if (!isNewPipeline) {
-      return intl.formatMessage(
-        {
-          id: 'xpack.logstash.pipelineEditor.editPipelineTitle',
-          defaultMessage: 'Edit Pipeline "{id}"',
-        },
-        {
-          id: this.state.pipeline.id,
-        }
-      );
-    }
-    return intl.formatMessage({
-      id: 'xpack.logstash.pipelineEditor.createPipelineTitle',
-      defaultMessage: 'Create Pipeline',
-    });
-  };
-
   render() {
     const { intl } = this.props;
 
@@ -271,8 +240,6 @@ class PipelineEditorUi extends React.Component {
         restrictWidth
         data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
       >
-        <EuiPageHeader pageTitle={this.getPipelineHeadingText()} bottomBorder />
-        <EuiSpacer size="l" />
         <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
           {this.props.isNewPipeline && (
             <EuiFormRow
@@ -307,6 +274,7 @@ class PipelineEditorUi extends React.Component {
             <EuiFieldText
               data-test-subj="inputDescription"
               fullWidth
+              maxLength={MAX_PIPELINE_DESCRIPTION_LENGTH}
               name="pipelineDescription"
               onChange={this.onPipelineDescriptionChange}
               value={this.state.pipeline.description || ''}
@@ -397,6 +365,9 @@ class PipelineEditorUi extends React.Component {
                 onChange={(e) => this.handleSettingChange('queue.type', e.target.value)}
                 options={PIPELINE_EDITOR.QUEUE_TYPES}
                 value={this.state.pipeline.settings['queue.type']}
+                aria-label={i18n.translate('xpack.logstash.pipelineEditor.queueTypeAriaLabel', {
+                  defaultMessage: 'Queue type',
+                })}
               />
             </FlexItemSetting>
             <FlexItemSetting

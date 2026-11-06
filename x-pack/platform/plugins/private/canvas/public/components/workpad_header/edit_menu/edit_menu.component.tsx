@@ -13,6 +13,7 @@ import type { ClosePopoverFn } from '../../popover';
 import { Popover } from '../../popover';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { useCanvasContextMenuTopBorderStyles } from '../../../lib/use_canvas_context_menu_top_border_styles';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
 import type { PositionedElement } from '../../../../types';
@@ -237,6 +238,7 @@ export const EditMenu: FunctionComponent<Props> = ({
   redoHistory,
   hasPasteData,
 }) => {
+  const contextMenuTopBorderStyles = useCanvasContextMenuTopBorderStyles();
   const [isModalVisible, setModalVisible] = useState(false);
   const showModal = () => setModalVisible(true);
   const hideModal = () => setModalVisible(false);
@@ -497,6 +499,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           <EuiContextMenu
             initialPanelId={0}
             panels={flattenPanelTree(getPanelTree(closePopover))}
+            css={contextMenuTopBorderStyles}
           />
         )}
       </Popover>

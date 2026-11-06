@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { CreateRulesClientOptions } from './types';
 
-/**
- * Request-scoped space id for the current request (from Spaces).
- * Used by RulesClient, and can be overridden to bind a the RulesClient to an explicit space.
- */
-export const RulesClientSpaceIdToken = Symbol.for(
-  'alerting_v2.RulesClient.SpaceId'
-) as ServiceIdentifier<string>;
+/** Options the calling plugin passed when it asked for a rules client. Defaults to none. */
+export const RulesClientOptionsToken = createToken<CreateRulesClientOptions>(
+  'alerting_v2.RulesClientOptions'
+);

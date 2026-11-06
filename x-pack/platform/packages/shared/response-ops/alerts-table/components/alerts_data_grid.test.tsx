@@ -14,7 +14,7 @@ import { AlertsDataGrid } from './alerts_data_grid';
 import type { AlertsDataGridProps, BulkActionsState } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -181,6 +181,15 @@ describe('AlertsDataGrid', () => {
       expect(mockRenderContext.onPageIndexChange).toHaveBeenCalledWith(1);
     });
 
+    it('should hide the page size selector when not interactive', () => {
+      const { rerender } = render(<TestComponent {...mockDataGridProps} />);
+      expect(screen.getByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
+
+      rerender(<TestComponent {...mockDataGridProps} isInteractive={false} />);
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('pagination-button-1')).toBeInTheDocument();
+    });
+
     it('should show when it was updated', () => {
       render(<TestComponent {...mockDataGridProps} />);
       expect(screen.getByTestId('toolbar-updated-at')).not.toBe(null);
@@ -241,24 +250,28 @@ describe('AlertsDataGrid', () => {
               renderActionsCell: () => (
                 <>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="analyzeEvent"
-                      color="primary"
-                      onClick={() => {}}
-                      size="s"
-                      data-test-subj="testAction"
-                      aria-label="testActionLabel"
-                    />
+                    <EuiToolTip content="testActionLabel" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="analyzeEvent"
+                        color="primary"
+                        onClick={() => {}}
+                        size="s"
+                        data-test-subj="testAction"
+                        aria-label="testActionLabel"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="analyzeEvent"
-                      color="primary"
-                      onClick={() => {}}
-                      size="s"
-                      data-test-subj="testAction2"
-                      aria-label="testActionLabel2"
-                    />
+                    <EuiToolTip content="testActionLabel2" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="analyzeEvent"
+                        color="primary"
+                        onClick={() => {}}
+                        size="s"
+                        data-test-subj="testAction2"
+                        aria-label="testActionLabel2"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </>
               ),

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 const normalize = (value) => value.replace(/^@/, '').trim();
 
 const isHumanReviewer = (login) =>
@@ -8,56 +17,67 @@ const getOriginalPrNumber = ({ title, body }) => {
   const originalPrNumberFromMetadata =
     sourcePullRequestIndex === -1
       ? undefined
-      : body
-          .slice(sourcePullRequestIndex)
-          .match(/"number"\s*:\s*(\d+)/)?.[1];
+      : body.slice(sourcePullRequestIndex).match(/"number"\s*:\s*(\d+)/)?.[1];
   const originalPrNumberFromTitle = title.match(/\(#(\d+)\)\s*$/)?.[1];
 
   return Number(originalPrNumberFromMetadata ?? originalPrNumberFromTitle);
 };
 
-const getReviews = async ({ github, owner, repo, originalPrNumber }) => {
-  const reviewHistory = await github.graphql(
-    `query($owner: String!, $repo: String!, $number: Int!) {
-      repository(owner: $owner, name: $repo) {
-        pullRequest(number: $number) {
-          reviews(first: 100) {
-            nodes {
-              state
-              submittedAt
-              author {
-                login
-              }
-              onBehalfOf(first: 10) {
-                nodes {
-                  slug
-                  organization {
-                    login
-                  }
-                }
-              }
-            }
-          }
+const isInsufficientScopes = (error) =>
+  Array.isArray(error?.errors) &&
+  error.errors.some((entry) => entry?.type === 'INSUFFICIENT_SCOPES');
+
+const REVIEW_TEAM_FIELDS = `onBehalfOf(first: 10) {
+  nodes {
+    slug
+    organization { login }
+  }
+}`;
+
+const buildReviewHistoryQuery = ({
+  withTeams,
+}) => `query($owner: String!, $repo: String!, $number: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $number) {
+      reviews(first: 100) {
+        nodes {
+          state
+          submittedAt
+          author { login }
+          ${withTeams ? REVIEW_TEAM_FIELDS : ''}
         }
       }
-    }`,
-    {
-      owner,
-      repo,
-      number: originalPrNumber,
     }
-  );
+  }
+}`;
 
-  return (reviewHistory.repository.pullRequest?.reviews?.nodes ?? [])
+// `onBehalfOf` returns team `slug` and `organization.login`, both of which
+// require the `read:org` scope. GitHub rejects the entire query with
+// INSUFFICIENT_SCOPES when the configured token cannot read org/team data, so
+// retry once without those fields and skip team matching for that run.
+const getReviewHistory = async ({ github, core, owner, repo, originalPrNumber }) => {
+  const variables = { owner, repo, number: originalPrNumber };
+
+  let data;
+  try {
+    data = await github.graphql(buildReviewHistoryQuery({ withTeams: true }), variables);
+  } catch (error) {
+    if (!isInsufficientScopes(error)) throw error;
+    core.warning(
+      `Skipping team review matching, token cannot read org/team data: ${error.message}`
+    );
+    data = await github.graphql(buildReviewHistoryQuery({ withTeams: false }), variables);
+  }
+
+  const nodes = data.repository.pullRequest?.reviews?.nodes ?? [];
+
+  const reviews = nodes
     .filter((review) => Boolean(review.submittedAt))
     .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
-};
 
-const getReviewedTeams = (reviews) => {
   const reviewedTeams = [];
-
-  for (const review of reviews) {
-    for (const team of review.onBehalfOf.nodes ?? []) {
+  for (const review of nodes) {
+    for (const team of review.onBehalfOf?.nodes ?? []) {
       const combinedSlug = `${team.organization.login}/${team.slug}`;
       if (!reviewedTeams.includes(combinedSlug)) {
         reviewedTeams.push(combinedSlug);
@@ -65,10 +85,12 @@ const getReviewedTeams = (reviews) => {
     }
   }
 
-  return reviewedTeams;
+  return { reviews, reviewedTeams };
 };
 
 const getMatchedTeams = async ({ github, core, prAuthor, reviewedTeams }) => {
+  if (reviewedTeams.length === 0) return [];
+
   try {
     const result = await github.graphql(
       `query($login: String!) {
@@ -145,8 +167,13 @@ module.exports = async ({ github, context, core }) => {
     return;
   }
 
-  const reviews = await getReviews({ github, owner, repo, originalPrNumber });
-  const reviewedTeams = getReviewedTeams(reviews);
+  const { reviews, reviewedTeams } = await getReviewHistory({
+    github,
+    core,
+    owner,
+    repo,
+    originalPrNumber,
+  });
   const teamReviewers = await getMatchedTeams({
     github,
     core,

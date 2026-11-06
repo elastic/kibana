@@ -26,32 +26,52 @@ import { AssetCriticalityModal } from '../../../../entity_analytics/components/a
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
+import { EntitySourceValue, TruncatedBadgeList } from './entity_source_value';
+import {
+  getMaxCriticality,
+  getUnionEntitySources,
+  getUnionWatchlistIds,
+  isEntityGroupView,
+} from '../entity_store_group_utils';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
   { defaultMessage: 'Additional watchlists' }
 );
 
+const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowTitle',
+  { defaultMessage: 'Additional entity IDs' }
+);
+
 interface EntitySummaryGridProps {
+  /** Primary record: its id is the one shown (and copied) in the Entity ID panel. */
   entityRecord: Entity;
+  /**
+   * Other records that resolve to `entityRecord` (its aliases). When non-empty, the Entity ID panel
+   * lists the alias ids behind a `+N` badge, asset criticality shows the most severe level across
+   * the group, and data sources and watchlists are the union across the group; criticality is
+   * read-only in that mode because a single edit can't target all members.
+   */
+  aliasRecords?: readonly Entity[];
   criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
 }
 
 export const EntitySummaryGrid = memo(
-  ({ entityRecord, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
+  ({ entityRecord, aliasRecords, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     const entityId = entityRecord.entity?.id;
+    const isGroupView = isEntityGroupView(aliasRecords);
 
-    const watchlistIds = useMemo(() => {
-      const attrs = (entityRecord.entity as Record<string, unknown>)?.attributes as
-        | Record<string, unknown>
-        | undefined;
-      return (attrs?.watchlists as string[] | undefined) ?? [];
-    }, [entityRecord]);
+    const groupRecords = isGroupView ? [entityRecord, ...aliasRecords] : [entityRecord];
+    const aliasEntityIds = isGroupView ? getAliasEntityIds(aliasRecords, entityId) : [];
+    const dataSources = getUnionEntitySources(groupRecords);
+    const watchlistIds = getUnionWatchlistIds(groupRecords);
+    const displayedCriticality = isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel;
+
+    const criticalitySaveHandler = isGroupView ? undefined : onCriticalitySave;
 
     return (
       <>
@@ -63,40 +83,14 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Entity ID' }
             )}
           >
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-              <EuiFlexItem className="eui-textTruncate">
-                <EuiToolTip content={entityId}>
-                  <EuiText size="s" className="eui-textTruncate">
-                    {entityId ?? getEmptyTagValue()}
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-              {entityId && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
-                      { defaultMessage: 'Copy to clipboard' }
-                    )}
-                  >
-                    <EuiCopy textToCopy={entityId}>
-                      {(copy) => (
-                        <EuiButtonIcon
-                          iconType="copy"
-                          aria-label={i18n.translate(
-                            'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
-                            { defaultMessage: 'Copy to clipboard' }
-                          )}
-                          onClick={copy}
-                          iconSize="s"
-                          color="text"
-                        />
-                      )}
-                    </EuiCopy>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <TruncatedBadgeList
+              values={entityId ? [entityId, ...aliasEntityIds] : []}
+              overflowTooltipTitle={ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE}
+              showValueTooltip
+              trailing={entityId ? <CopyEntityIdButton entityId={entityId} /> : undefined}
+              data-test-subj="entityIdCell"
+              textSize="xs"
+            />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -104,7 +98,7 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Data source' }
             )}
           >
-            <EntitySourceValue values={toEntitySourceArray(entityRecord.entity?.source)} />
+            <EntitySourceValue values={dataSources} textSize="xs" />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -113,8 +107,8 @@ export const EntitySummaryGrid = memo(
             )}
           >
             <AssetCriticalityCell
-              criticalityLevel={criticalityLevel}
-              canEdit={!!onCriticalitySave}
+              criticalityLevel={displayedCriticality}
+              canEdit={!!criticalitySaveHandler}
               onOpenModal={() => setModalVisible(true)}
             />
           </SummaryPanel>
@@ -128,13 +122,13 @@ export const EntitySummaryGrid = memo(
           </SummaryPanel>
         </EuiFlexGrid>
         <EuiSpacer size="s" />
-        {modalVisible && onCriticalitySave && (
+        {modalVisible && criticalitySaveHandler && (
           <AssetCriticalityModal
             initialCriticalityLevel={
-              criticalityLevel === 'unassigned' ? undefined : criticalityLevel
+              displayedCriticality === 'unassigned' ? undefined : displayedCriticality
             }
             onSave={(value) => {
-              onCriticalitySave(value);
+              criticalitySaveHandler(value);
               setModalVisible(false);
             }}
             toggle={setModalVisible}
@@ -146,9 +140,64 @@ export const EntitySummaryGrid = memo(
 );
 EntitySummaryGrid.displayName = 'EntitySummaryGrid';
 
+/** Distinct `entity.id`s of the aliases, in the order they were loaded, never repeating the target's. */
+const getAliasEntityIds = (
+  aliasRecords: readonly Entity[],
+  targetEntityId: string | undefined
+): string[] =>
+  Array.from(
+    new Set(
+      aliasRecords
+        .map((record) => record.entity?.id)
+        .filter((id): id is string => !!id && id !== targetEntityId)
+    )
+  );
+
+const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
+  { defaultMessage: 'Copy to clipboard' }
+);
+
+const CopyEntityIdButton = memo(({ entityId }: { entityId: string }) => (
+  // Height 0 with visible overflow keeps the button from pushing the text down; the button is
+  // translated up by half its height to center it vertically.
+  <div
+    css={css`
+      height: 0;
+      overflow: visible;
+      align-self: center;
+    `}
+  >
+    <EuiCopy textToCopy={entityId}>
+      {(copy) => (
+        <EuiToolTip content={COPY_TO_CLIPBOARD} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="copy"
+            aria-label={COPY_TO_CLIPBOARD}
+            onClick={copy}
+            iconSize="s"
+            color="text"
+            css={css`
+              transform: translateY(-50%);
+            `}
+          />
+        </EuiToolTip>
+      )}
+    </EuiCopy>
+  </div>
+));
+CopyEntityIdButton.displayName = 'CopyEntityIdButton';
+
 const SummaryPanel = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
-  <EuiPanel hasBorder paddingSize="m" style={{ minWidth: 0 }}>
-    <EuiText size="s">
+  <EuiPanel
+    hasBorder
+    paddingSize="s"
+    css={css`
+      min-width: 0;
+      padding: 8px 12px 10px;
+    `}
+  >
+    <EuiText size="xs">
       <strong>{label}</strong>
     </EuiText>
     <EuiSpacer size="xs" />
@@ -181,11 +230,16 @@ const AssetCriticalityCell = memo(
       onClick={canEdit ? onOpenModal : undefined}
     >
       <EuiFlexItem grow={false}>
-        <AssetCriticalityBadge criticalityLevel={criticalityLevel ?? 'unassigned'} />
+        <AssetCriticalityBadge criticalityLevel={criticalityLevel ?? 'unassigned'} textSize="xs" />
       </EuiFlexItem>
       {canEdit && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="arrowDown" size="s" aria-hidden={true} />
+          <EuiIcon
+            type="chevronSingleDown"
+            size="s"
+            aria-hidden={true}
+            data-test-subj="asset-criticality-edit-chevron"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -222,6 +276,7 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
       values={resolvedNames}
       overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
       data-test-subj="entityWatchlistsCell"
+      textSize="xs"
     />
   );
 });

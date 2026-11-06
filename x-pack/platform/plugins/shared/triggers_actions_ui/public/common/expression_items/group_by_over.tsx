@@ -232,6 +232,10 @@ export const GroupByExpression = ({
                 <EuiFormRow
                   isInvalid={Number(errors.termField.length) > 0}
                   error={errors.termField as string}
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.common.expressionItems.groupByOver.termFieldAriaLabel',
+                    { defaultMessage: 'Group by field' }
+                  )}
                 >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}

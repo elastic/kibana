@@ -7,38 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
-  DEPRECATED_ALERTING_CONSUMERS,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { METRIC_ALERTING_FEATURES_WITH_SHARED } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import {
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '../common/alerting/metrics';
 import { METRICS_FEATURE_ID } from '../common/constants';
 
-const metricRuleTypes = [
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  ES_QUERY_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-];
-
 export const getMetricsFeature = (): KibanaFeatureConfig => {
-  const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => {
-    const consumers = [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
-
-    return {
-      ruleTypeId,
-      consumers,
-    };
-  });
+  const metricAlertingFeatures = METRIC_ALERTING_FEATURES_WITH_SHARED;
 
   const METRICS_FEATURE = {
     id: METRICS_FEATURE_ID,
@@ -50,14 +25,14 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
     app: ['infra', 'metrics', 'kibana'],
     catalogue: ['infraops', 'metrics'],
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     alerting: metricAlertingFeatures,
     privileges: {
       all: {
         app: ['infra', 'metrics', 'kibana'],
         catalogue: ['infraops', 'metrics'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: ['infrastructure-ui-source', metricsDataSourceSavedObjectName],
           read: ['index-pattern'],
@@ -74,14 +49,14 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
       read: {
         app: ['infra', 'metrics', 'kibana'],
         catalogue: ['infraops', 'metrics'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: [],
           read: ['infrastructure-ui-source', 'index-pattern', metricsDataSourceSavedObjectName],
@@ -95,7 +70,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show'],
       },

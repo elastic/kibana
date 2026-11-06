@@ -7,30 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from './constants';
 
-export const esqlDataSourceSchema = schema.object(
-  {
-    type: schema.literal(AS_CODE_ESQL_DATA_SOURCE_TYPE),
+export const esqlDataSourceSchema = z
+  .object({
+    type: z.literal(AS_CODE_ESQL_DATA_SOURCE_TYPE),
     /**
      * An ES|QL query that drives the data source. The query must produce a tabular result set;
      * column names from the result are used as field references.
      * Example: 'FROM logs-* | STATS count = COUNT(*) BY host.name'
      */
-    query: schema.string({
-      meta: {
-        description:
-          'An ES|QL query that drives the data source. The query must produce a tabular result set; column names are used as field references. Example: "FROM logs-* | STATS count = COUNT(*) BY host.name".',
-      },
-    }),
-  },
-  {
-    meta: {
-      id: 'esqlDataSource',
-      title: 'ES|QL Data Source',
+    query: z.string().meta({
       description:
-        'Uses an ES|QL query as the data source. The query is executed at render time; resulting columns are available as fields.',
-    },
-  }
-);
+        'An ES|QL query that drives the data source. The query must produce a tabular result set; column names are used as field references. Example: "FROM logs-* | STATS count = COUNT(*) BY host.name".',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'esqlDataSource',
+    title: 'ES|QL Data Source',
+    description:
+      'Uses an ES|QL query as the data source. The query is executed at render time; resulting columns are available as fields.',
+  });

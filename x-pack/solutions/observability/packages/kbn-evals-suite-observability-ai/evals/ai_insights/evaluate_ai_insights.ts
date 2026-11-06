@@ -44,7 +44,7 @@ export const evaluate = base.extend<
         }) => {
           await executorClient.runExperiment(
             {
-              dataset: { name, description, examples } satisfies EvaluationDataset,
+              datasets: [{ name, description, examples } satisfies EvaluationDataset],
               task: async ({ input, output, metadata }) => {
                 const response = await getInsight(input.requestPayload as TPayload);
                 const correctnessResult = await evaluators.correctnessAnalysis().evaluate({

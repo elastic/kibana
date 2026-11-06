@@ -13,6 +13,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import type { Moment } from 'moment';
 
+import type { AlertClosingReason } from '../../../../../common/types';
 import type { Rule } from '../../../rule_management/logic/types';
 
 export interface State {
@@ -28,6 +29,7 @@ export interface State {
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
+  closeAlertsReason: AlertClosingReason | undefined;
   selectedOs: OsTypeArray | undefined;
   exceptionListsToAddTo: ExceptionListSchema[];
   selectedRulesToAddTo: Rule[];
@@ -36,6 +38,8 @@ export interface State {
   expireErrorExists: boolean;
   wildcardWarningExists: boolean;
   partialCodeSignatureWarningExists: boolean;
+  malformedMatchesValueExists: boolean;
+  malformedMatchesFields: string[];
 }
 
 export const initialState: State = {
@@ -49,6 +53,7 @@ export const initialState: State = {
   bulkCloseAlerts: false,
   disableBulkClose: false,
   bulkCloseIndex: undefined,
+  closeAlertsReason: undefined,
   selectedOs: undefined,
   exceptionListsToAddTo: [],
   addExceptionToRadioSelection: 'add_to_rule',
@@ -59,6 +64,8 @@ export const initialState: State = {
   expireErrorExists: false,
   wildcardWarningExists: false,
   partialCodeSignatureWarningExists: false,
+  malformedMatchesValueExists: false,
+  malformedMatchesFields: [],
 };
 
 export type Action =
@@ -103,6 +110,10 @@ export type Action =
       bulkCloseIndex: string[] | undefined;
     }
   | {
+      type: 'setCloseAlertsReason';
+      reason: AlertClosingReason | undefined;
+    }
+  | {
       type: 'setSelectedOsOptions';
       selectedOs: OsTypeArray | undefined;
     }
@@ -141,11 +152,15 @@ export type Action =
   | {
       type: 'setPartialCodeSignature';
       warningExists: boolean;
+    }
+  | {
+      type: 'setMalformedMatchesValue';
+      fields: string[];
     };
 
 export const createExceptionItemsReducer =
   () =>
-  /* eslint complexity: ["error", 23]*/
+  /* eslint complexity: ["error", 25]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
@@ -197,6 +212,14 @@ export const createExceptionItemsReducer =
           partialCodeSignatureWarningExists: warningExists,
         };
       }
+      case 'setMalformedMatchesValue': {
+        const { fields } = action;
+        return {
+          ...state,
+          malformedMatchesValueExists: fields.length > 0,
+          malformedMatchesFields: fields,
+        };
+      }
       case 'setComment': {
         const { comment } = action;
 
@@ -235,6 +258,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           bulkCloseIndex,
+        };
+      }
+      case 'setCloseAlertsReason': {
+        const { reason } = action;
+
+        return {
+          ...state,
+          closeAlertsReason: reason,
         };
       }
       case 'setSelectedOsOptions': {
