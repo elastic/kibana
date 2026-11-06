@@ -9,7 +9,7 @@
 
 import { toResponseFixtures, vendorApiFixturesSchema } from './fixtures';
 import type { VendorApiManifest } from './manifest';
-import { parseManifest, serializeManifest } from './manifest';
+import { parseManifest, serializeManifest, SOURCE_NAME_PATTERN } from './manifest';
 
 const manifest: VendorApiManifest = {
   sources: {
@@ -85,6 +85,26 @@ describe('serializeManifest', () => {
     ['an unknown pagination value', withPagination('all')],
   ])('rejects %s', (_, invalid) => {
     expect(() => serializeManifest(invalid as VendorApiManifest)).toThrow();
+  });
+});
+
+describe('source names', () => {
+  it.each(['v1', 'users_v1beta1', 'rest_2022_11_28', 'cortex_search'])('accepts %s', (name) => {
+    expect(SOURCE_NAME_PATTERN.test(name)).toBe(true);
+  });
+
+  it.each(['actionGroups', 'prometheusV1', '2022-11-28', 'users__v1', '_v1', 'v1_', 'V1'])(
+    'rejects %s',
+    (name) => {
+      expect(SOURCE_NAME_PATTERN.test(name)).toBe(false);
+    }
+  );
+
+  it('rejects a manifest whose source is not snake_case', () => {
+    const { sources, ...rest } = manifest;
+    const camelCase = { ...rest, sources: { actionGroups: sources.v1 } };
+
+    expect(() => parseManifest(JSON.stringify(camelCase))).toThrow(/lowercase snake_case/);
   });
 });
 

@@ -110,6 +110,7 @@ export const queryKeys = {
     filterState: EpisodesFilterState,
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined,
+    bucketInterval: string,
     additionalSourceId?: string,
     queryV2Source?: boolean
   ) =>
@@ -119,6 +120,7 @@ export const queryKeys = {
       filterState,
       timeRange,
       breakdownField,
+      bucketInterval,
       additionalSourceId,
       queryV2Source,
     ] as const,

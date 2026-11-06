@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { applyChoice, getSelectedChoice } from './choice_groups';
+import { applyChoice, getDefaultChoice, getSelectedChoice } from './choice_groups';
 import {
   createChoiceValue,
   createInitialObject,
   fromConfigEntries,
   toConfigEntries,
+  trimItemScopes,
 } from './serialize';
 import { addFieldsDefinition, addFieldsItemField, testCatalogue } from './test_helpers';
 
@@ -18,6 +19,17 @@ const context = { metadata: testCatalogue.metadata, telemetry: ['logs' as const]
 
 describe('choice groups', () => {
   const [targetPath, valueSource] = addFieldsItemField().choice_groups ?? [];
+
+  it('starts a mandatory group with its default or first member, an optional one only with a named default', () => {
+    expect(getDefaultChoice(targetPath)).toBe('location');
+    expect(getDefaultChoice({ ...targetPath, default_field: undefined })).toBe(
+      targetPath.fields[0]
+    );
+    expect(getDefaultChoice({ ...valueSource, min_selected: 0 })).toBe('value');
+    expect(
+      getDefaultChoice({ ...valueSource, min_selected: 0, default_field: undefined })
+    ).toBeUndefined();
+  });
 
   it('selects the member present in the object, then the default', () => {
     expect(getSelectedChoice(targetPath, { context: 'log' })).toBe('context');
@@ -32,11 +44,61 @@ describe('choice groups', () => {
   });
 });
 
+describe('trimItemScopes', () => {
+  const item = { location: 'record', path: 'tier', action: 'upsert', value: 'gold' };
+
+  it('drops removed signals from item scopes, keeping scopes with nothing left as they are', () => {
+    const { fields } = addFieldsDefinition();
+    expect(
+      trimItemScopes(
+        fields,
+        {
+          fields: [
+            { ...item, telemetry: ['logs', 'metrics'] },
+            { ...item, telemetry: ['metrics'] },
+            item,
+          ],
+        },
+        ['logs']
+      )
+    ).toEqual({
+      fields: [{ ...item, telemetry: ['logs'] }, { ...item, telemetry: ['metrics'] }, item],
+    });
+  });
+});
+
 describe('initial values', () => {
   it('starts add_fields with one row preselecting location and action', () => {
     expect(createInitialObject(addFieldsDefinition().fields, undefined, context)).toEqual({
       fields: [{ location: 'record', action: 'upsert' }],
     });
+  });
+
+  it('opens the default member of an optional choice group, blank, and drops it when left so', () => {
+    const item = addFieldsItemField();
+    const optionalValue = (item.choice_groups ?? []).map((group) =>
+      group.id === 'value_source' ? { ...group, min_selected: 0 as const } : group
+    );
+    const initial = createInitialObject(item.fields, optionalValue, context);
+    expect(initial).toEqual({ location: 'record', value: '', action: 'upsert' });
+    expect(getSelectedChoice(optionalValue[1], initial)).toBe('value');
+
+    const { fields } = addFieldsDefinition();
+    const optionalDefinition = fields.map((field) =>
+      field.name === 'fields' && field.type === 'array' && field.items.type === 'object'
+        ? { ...field, items: { ...field.items, choice_groups: optionalValue } }
+        : field
+    );
+    expect(
+      toConfigEntries(
+        optionalDefinition,
+        { fields: [{ ...initial, path: 'tier' }] },
+        [],
+        context.telemetry
+      )
+    ).toEqual([
+      { name: 'fields', value: [{ location: 'record', path: 'tier', action: 'upsert' }] },
+    ]);
   });
 
   it('creates present-but-blank choice values', () => {

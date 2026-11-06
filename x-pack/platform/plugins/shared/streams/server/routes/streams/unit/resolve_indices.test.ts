@@ -59,7 +59,7 @@ const mixedDestinationUnit = {
         name: 'Mixed',
         type: 'elasticsearch',
         supported_telemetry: ['logs'],
-        config: [{ name: 'index_patterns', value: ['logs-*'] }],
+        config: [{ name: 'write_patterns', value: ['logs-*'] }],
       },
     ],
   },
@@ -67,6 +67,41 @@ const mixedDestinationUnit = {
 };
 
 describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
+  it('resolves telemetry-scoped indices of one destination', async () => {
+    getUnitOrEmpty.mockResolvedValue({
+      unit: {
+        destinations: [
+          {
+            id: 'es-app',
+            name: 'App',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs', 'traces'],
+            config: [
+              { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
+              { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
+            ],
+          },
+        ],
+      },
+      ui_metadata: {},
+    });
+    const resolveIndex = jest.fn().mockResolvedValue({
+      data_streams: [{ name: 'logs-app-default' }, { name: 'traces-app-default' }],
+      indices: [],
+    });
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [] });
+
+    const result = await callHandler({ resolveIndex, getDataStream });
+
+    expect(resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-app-default,traces-app-default' })
+    );
+    expect(result.destinations['es-app'].indices.map((index) => index.name)).toEqual([
+      'logs-app-default',
+      'traces-app-default',
+    ]);
+  });
+
   it('keys resolved indices by destination write patterns', async () => {
     getUnitOrEmpty.mockResolvedValue({
       unit: {
@@ -76,7 +111,7 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
             name: 'Logs',
             type: 'elasticsearch',
             supported_telemetry: ['logs'],
-            config: [{ name: 'index_patterns', value: ['logs-*-*'] }],
+            config: [{ name: 'write_patterns', value: ['logs-*-*'] }],
           },
           {
             id: 'es-metrics',
@@ -100,12 +135,17 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
           name: 'logs-nginx-default',
           next_generation_managed_by: 'Data stream lifecycle',
           lifecycle: { data_retention: '7d' },
-          failure_store: { enabled: true },
+          failure_store: {
+            enabled: true,
+            indices: [{ index_name: '.fs-logs-nginx-default-000001' }],
+          },
+          status: 'GREEN',
         },
         {
           name: 'metrics-host-default',
           next_generation_managed_by: 'Index Lifecycle Management',
           ilm_policy: 'metrics',
+          status: 'yellow',
         },
       ],
     });
@@ -134,10 +174,12 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
       is_data_stream: true,
       lifecycle: { dsl: { data_retention: '7d', downsample: undefined, frozen_after: undefined } },
       failure_store_enabled: true,
+      health: 'green',
       privileges: { read_failure_store: true },
     });
     expect(result.destinations['es-metrics'].indices[0]).toMatchObject({
       failure_store_enabled: false,
+      health: 'yellow',
       privileges: { read_failure_store: false },
     });
   });
