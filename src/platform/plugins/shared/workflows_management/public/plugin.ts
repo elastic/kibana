@@ -48,8 +48,7 @@ import { stepSchemas } from '../common/step_schemas';
 
 /** The server config the browser gets (`exposeToBrowser`). */
 interface WorkflowsManagementPublicConfig {
-  /** Missing in test contexts that pass no config. */
-  pages?: { enabled: boolean };
+  pages: { enabled: boolean };
 }
 
 export class WorkflowsPlugin
@@ -73,7 +72,7 @@ export class WorkflowsPlugin
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
-    this.pagesEnabled = initializerContext.config.get().pages?.enabled === true;
+    this.pagesEnabled = initializerContext.config.get().pages.enabled;
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();

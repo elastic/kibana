@@ -56,6 +56,7 @@ const createPlugin = () =>
       enabled: true,
       logging: { console: false },
       available: true,
+      pages: { enabled: false },
     })
   );
 
