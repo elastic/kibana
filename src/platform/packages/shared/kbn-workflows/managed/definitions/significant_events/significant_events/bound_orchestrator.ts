@@ -14,7 +14,8 @@ export const NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID = 'system-nightshift-orch
 
 /**
  * The space's entry point to detection and discovery, installed per space and bound to the
- * detection engine service account. It calls the shared orchestrator, which inherits its identity.
+ * detection engine service account. It runs detection and discovery itself, as child workflows
+ * that inherit its identity.
  */
 export const NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
