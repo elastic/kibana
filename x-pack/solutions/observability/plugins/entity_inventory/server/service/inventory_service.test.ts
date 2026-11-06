@@ -297,9 +297,10 @@ describe('InventoryService.list', () => {
     const listQueries = esClient.esql.query.mock.calls
       .map(([body]) => body)
       .filter(({ query }) => !isProbe(query));
+    // Every FROM plan excludes time-series indices, whether or not a TS plan reads them.
     expect(listQueries.map(({ query }) => query.split('\n')[1])).toEqual([
-      `FROM ${STATE_PATTERN}`,
-      `FROM ${OTEL_PATTERN}`,
+      `FROM ${STATE_PATTERN} METADATA _index_mode`,
+      `FROM ${OTEL_PATTERN} METADATA _index_mode`,
     ]);
     listQueries.forEach(({ query, params }) => {
       expect(query).toContain('| LIMIT 11');
@@ -324,7 +325,7 @@ describe('InventoryService.list', () => {
       .map(([body]) => body.query)
       .filter((query) => !isProbe(query));
     expect(listQueries.map((query) => query.split('\n')[1])).toEqual([
-      `FROM ${STATE_PATTERN}`,
+      `FROM ${STATE_PATTERN} METADATA _index_mode`,
       `TS ${OTEL_PATTERN}`,
       `FROM ${OTEL_PATTERN} METADATA _index_mode`,
     ]);
