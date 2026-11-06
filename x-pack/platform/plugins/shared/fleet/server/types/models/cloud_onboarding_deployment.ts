@@ -61,6 +61,8 @@ const EcfStackSchema = schema.object({
   ),
   /** Stack-relevant settings per service when the stack was last launched or updated. Used for settings drift detection on session resume. */
   serviceConfigs: schema.maybe(schema.arrayOf(EcfServiceConfigSchema, { maxSize: 1000 })),
+  /** `DataStreamNamespace` the stack was last launched or updated with. Used for namespace drift detection on session resume. */
+  namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 100 })),
 });
 
 const SharedFields = {
@@ -188,17 +190,4 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   /** @deprecated Replaced by agentPolicyIds (array) in V2. Retained for forward-compat reads of V1 docs. */
   agentPolicyId: schema.maybe(schema.string()),
   ...SharedFields,
-});
-
-// ── V8: ecfStacks[].namespace ────────────────────────────────────────────────
-// The `DataStreamNamespace` an ECF stack was last launched or updated with, used for namespace
-// drift detection on session resume. The nested stack schema is versioned so that earlier model
-// versions keep rejecting it. Not in mappings.properties (dynamic: false), so no mapping change is
-// needed.
-const EcfStackSchemaV8 = EcfStackSchema.extends({
-  namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 100 })),
-});
-
-export const CloudOnboardingDeploymentSchemaV8 = CloudOnboardingDeploymentSchemaV7.extends({
-  ecfStacks: schema.maybe(schema.arrayOf(EcfStackSchemaV8, { maxSize: 10 })),
 });
