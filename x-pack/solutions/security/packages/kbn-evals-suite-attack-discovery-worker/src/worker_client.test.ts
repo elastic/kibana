@@ -8,6 +8,7 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parse } from 'yaml';
+import { FLOOR_IDLE_WAIT_MS } from './constants';
 import { AttackDiscoveryWorkerClient, describeFloorDrift, usingClient } from './worker_client';
 
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
@@ -109,6 +110,8 @@ const fakeKibana = ({
   failFloorReadAfterPut,
   failListing = false,
   active = {},
+  floorBusyListings = 0,
+  floorRunningReads = 0,
   children = [{ workflowId: 'system-security-attack-discovery-review', executionId: 'review-9' }],
   initialYaml = FLOOR_YAML,
   floorStatus = 'failed',
@@ -127,6 +130,10 @@ const fakeKibana = ({
   failListing?: boolean;
   /** Ids of active executions per workflow id (the executions listing). */
   active?: Record<string, string[]>;
+  /** The floor's listing reports `floor-busy` for this many listings, then idle (a resume pending). */
+  floorBusyListings?: number;
+  /** The floor execution reads `running` this many times before its `floorStatus` (resume pending). */
+  floorRunningReads?: number;
   children?: Array<{ workflowId: string; executionId: string }>;
   initialYaml?: string;
   floorStatus?: string;
@@ -138,6 +145,8 @@ const fakeKibana = ({
   let version = 1;
   let enabled = true;
   let floorReadFailed = false;
+  let floorListings = 0;
+  let floorReads = 0;
   const store = (next: string) => {
     if (next.trim() !== yaml.trim()) version += 1;
     yaml = next;
@@ -169,6 +178,9 @@ const fakeKibana = ({
     }
     const listed = /workflow\/([^/]+)\/executions$/.exec(path)?.[1];
     if (listed && failListing) throw Object.assign(new Error('listing down'), { status: 503 });
+    if (listed === 'floor' && ++floorListings <= floorBusyListings) {
+      return { results: [{ id: 'floor-busy' }] };
+    }
     if (listed) return { results: (active[listed] ?? []).map((id) => ({ id })) };
     if (path.endsWith('/run')) {
       if (editOnRun) store(editOnRun(yaml));
@@ -191,7 +203,11 @@ const fakeKibana = ({
     if (execution === 'floor-1') {
       return {
         id: 'floor-1',
-        status: cancelled.has('floor-1') ? 'cancelled' : floorStatus,
+        status: cancelled.has('floor-1')
+          ? 'cancelled'
+          : ++floorReads <= floorRunningReads
+          ? 'running'
+          : floorStatus,
         stepExecutions: [],
       };
     }
@@ -398,17 +414,70 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
     expect(kibana.storedYaml()).toBe(FLOOR_YAML);
   });
 
-  it.each([
-    ['the floor', 'floor'],
-    ['the review', 'system-security-attack-discovery-review'],
-  ])('refuses to rewrite while %s has an active execution', async (_label, workflowId) => {
-    const kibana = fakeKibana({ active: { [workflowId]: ['busy-1'] } });
-    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
-    await expect(review(client)).rejects.toThrow(
-      new RegExp(`"${workflowId}" has active executions \\(busy-1\\)`)
+  describe('after the child ends while the floor parent is still resuming', () => {
+    beforeEach(() => jest.useFakeTimers({ doNotFake: ['nextTick'] }));
+    afterEach(() => jest.useRealTimers());
+
+    it('returns only once the floor execution is terminal', async () => {
+      const kibana = fakeKibana({ floorRunningReads: 3 });
+      const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+      const result = review(client);
+      await jest.advanceTimersByTimeAsync(60_000);
+      await expect(result).resolves.toBeDefined();
+      const floorReads = kibana.calls.filter(({ path }) => path.endsWith('/executions/floor-1'));
+      expect(floorReads.length).toBeGreaterThan(3);
+      expect(kibana.cancelled.size).toBe(0);
+    });
+
+    it('warns and still returns the child when the floor does not settle in time', async () => {
+      const kibana = fakeKibana({ floorRunningReads: Number.MAX_SAFE_INTEGER });
+      const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+      const result = review(client);
+      await jest.advanceTimersByTimeAsync(FLOOR_IDLE_WAIT_MS + 60_000);
+      const polled = await result;
+      expect(polled.execution.id).toBe('review-9');
+      expect(log.warning).toHaveBeenCalledWith(
+        expect.stringMatching(/Execution floor-1 did not settle/)
+      );
+    });
+  });
+
+  describe('while the floor is still resuming after an earlier run', () => {
+    beforeEach(() => jest.useFakeTimers({ doNotFake: ['nextTick'] }));
+    afterEach(() => jest.useRealTimers());
+
+    it('waits for the floor to go idle, then rewrites and runs', async () => {
+      const kibana = fakeKibana({ floorBusyListings: 3 });
+      const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+      const result = review(client);
+      await jest.advanceTimersByTimeAsync(60_000);
+      await expect(result).resolves.toBeDefined();
+      expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(2);
+      expect(kibana.cancelled.size).toBe(0);
+      expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+    });
+
+    it.each([
+      ['the floor', 'floor'],
+      ['the review', 'system-security-attack-discovery-review'],
+    ])(
+      'throws the busy error for %s once the wait is over, and changes nothing',
+      async (_label, workflowId) => {
+        const kibana = fakeKibana({ active: { [workflowId]: ['busy-1'] } });
+        const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+        const result = review(client).then(
+          () => undefined,
+          (thrown: unknown) => thrown
+        );
+        await jest.advanceTimersByTimeAsync(FLOOR_IDLE_WAIT_MS + 10_000);
+        expect(String(await result)).toMatch(
+          new RegExp(`"${workflowId}" has active executions \\(busy-1\\)`)
+        );
+        expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
+        expect(kibana.calls.some(({ path }) => path.endsWith('/run'))).toBe(false);
+        expect(kibana.cancelled.size).toBe(0);
+      }
     );
-    expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
-    expect(kibana.calls.some(({ path }) => path.endsWith('/run'))).toBe(false);
   });
 
   it('throws naming the floor when the restore PUT fails', async () => {

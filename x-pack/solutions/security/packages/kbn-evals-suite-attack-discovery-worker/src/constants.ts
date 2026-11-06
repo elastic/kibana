@@ -92,6 +92,11 @@ export const FLOOR_SCHEDULE_INTERVAL = '24h';
 /** How long enabling waits for the enable-time scheduled tick before assuming there is none. */
 export const FLOOR_TICK_WAIT_MS = 60_000;
 export const FLOOR_TICK_POLL_INTERVAL_MS = 2_000;
+/**
+ * How long a row waits for the floor worker (or its child) to go idle. When a child ends the
+ * engine only schedules the resume of its parent, so the parent is still active for a moment.
+ */
+export const FLOOR_IDLE_WAIT_MS = 120_000;
 /** How long a cancelled scheduled tick has to leave its concurrency slot. */
 export const FLOOR_TICK_CANCEL_TIMEOUT_MS = 60_000;
 export const SEED_WINDOW_MS = 20 * 60_000;

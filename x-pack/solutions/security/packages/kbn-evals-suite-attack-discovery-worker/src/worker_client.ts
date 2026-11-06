@@ -16,7 +16,9 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import {
+  FLOOR_IDLE_WAIT_MS,
   FLOOR_TICK_CANCEL_TIMEOUT_MS,
+  FLOOR_TICK_POLL_INTERVAL_MS,
   POLL_INTERVAL_MS,
   PUBLIC_API_VERSION,
   REVIEW_WORKFLOW_ID,
@@ -226,7 +228,15 @@ export class AttackDiscoveryWorkerClient {
     });
     if (isTerminal(polled.execution.status)) {
       this.forget(childExecutionId);
-      this.forget(floorExecutionId);
+      // The engine only schedules the parent's resume when its child ends, so the floor can still
+      // be active here. Leaving it unsettled would make the next floor-parent run see a busy floor.
+      const floor = await this.pollUntil({
+        spaceId,
+        executionId: floorExecutionId,
+        deadline: Date.now() + FLOOR_IDLE_WAIT_MS,
+        maxWaitMs: FLOOR_IDLE_WAIT_MS,
+      });
+      if (isTerminal(floor.execution.status)) this.forget(floorExecutionId);
     }
     return polled;
   }
@@ -260,8 +270,9 @@ export class AttackDiscoveryWorkerClient {
    * with 403 when started directly, so the floor is the parent: its stored YAML is rewritten to
    * dispatch the target with literal `inputs`, the floor is run, and the YAML is put back.
    *
-   * Only call this while no other floor run is active. After the one-time busy check, only the long
-   * schedule interval keeps a scheduled tick out (a PUT reschedules the task, it does not run it).
+   * Only call this while no other floor run is active. The floor and the target get
+   * `FLOOR_IDLE_WAIT_MS` to go idle (nothing is cancelled for that). After this busy check, only the
+   * long schedule interval keeps a scheduled tick out (a PUT reschedules the task, it does not run it).
    * The restore re-reads the floor first, but read and PUT are separate requests and the managed
    * route takes no precondition, so a concurrent edit is detected best-effort, not prevented.
    * When the floor ends without starting the target, the floor's own execution is returned.
@@ -292,7 +303,7 @@ export class AttackDiscoveryWorkerClient {
     });
     // The floor cancels in progress and the rewrite changes what a tick runs, so an execution of
     // either workflow that is still active would be cancelled or run on the wrong definition.
-    await this.assertNoActiveExecutions(spaceId, [floorWorkflowId, targetWorkflowId]);
+    await this.waitForIdle(spaceId, [floorWorkflowId, targetWorkflowId]);
 
     const errors: unknown[] = [];
     const started: string[] = [];
@@ -354,9 +365,18 @@ export class AttackDiscoveryWorkerClient {
     return polled;
   }
 
-  private async assertNoActiveExecutions(spaceId: string, workflowIds: string[]): Promise<void> {
+  /** Waits, within one `FLOOR_IDLE_WAIT_MS`, for the workflows to have no active execution. */
+  private async waitForIdle(spaceId: string, workflowIds: string[]): Promise<void> {
+    const deadline = Date.now() + FLOOR_IDLE_WAIT_MS;
     for (const workflowId of new Set(workflowIds)) {
-      const active = await listActiveExecutionIds(this.fetch, spaceId, workflowId);
+      let active = await listActiveExecutionIds(this.fetch, spaceId, workflowId);
+      if (active.length > 0) {
+        this.log.info(`Waiting for "${workflowId}" to go idle (${active.join(', ')})`);
+      }
+      while (active.length > 0 && Date.now() < deadline) {
+        await sleep(FLOOR_TICK_POLL_INTERVAL_MS);
+        active = await listActiveExecutionIds(this.fetch, spaceId, workflowId);
+      }
       if (active.length > 0) {
         throw new Error(
           `Workflow "${workflowId}" has active executions (${active.join(

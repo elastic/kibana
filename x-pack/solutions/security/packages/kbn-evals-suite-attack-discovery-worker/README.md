@@ -215,7 +215,9 @@ AD_WORKER_EVAL_COHORT=whole \
   of overwriting. This narrows the race window but does not close it: the read and the `PUT` are
   separate requests and the managed route takes no if-match, so a write landing between them is
   still overwritten.
-  Before the rewrite the floor and the review must have no active execution, or the run throws.
+  Before the rewrite the floor and the review get up to two minutes to have no active execution
+  (the engine only schedules a parent's resume when its child ends, so the floor can lag behind
+  the runner). Nothing is cancelled for that wait; if one is still active the run throws.
 - Every floor `PUT` re-schedules the floor's task and rotates its API key, so each seeded row
   rotates it twice (rewrite and restore), and the key afterwards belongs to the eval user (the
   caller of the `PUT`) until the worker is saved again by its real owner. This is documented, not
