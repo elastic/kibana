@@ -4,7 +4,6 @@
   "owner": "@elastic/kibana-dashboards",
   "group": "platform",
   "visibility": "private",
-  "devOnly": true,
   "plugin": {
     "id": "kbnTpCustomVisualizations",
     "server": false,

@@ -874,6 +874,7 @@
     "@kbn/json-schemas": "workspace:*",
     "@kbn/kbn-health-gateway-status-plugin": "workspace:*",
     "@kbn/kbn-top-nav-plugin": "workspace:*",
+    "@kbn/kbn-tp-custom-visualizations-plugin": "workspace:*",
     "@kbn/kbn-tp-run-pipeline-plugin": "workspace:*",
     "@kbn/key-value-metadata-table": "workspace:*",
     "@kbn/kibana-api-cli": "workspace:*",

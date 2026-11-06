@@ -2550,6 +2550,9 @@ importers:
       '@kbn/kbn-top-nav-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
+      '@kbn/kbn-tp-custom-visualizations-plugin':
+        specifier: workspace:*
+        version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
         version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
@@ -5713,9 +5716,6 @@ importers:
       '@kbn/kbn-genai-cli':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-genai-cli
-      '@kbn/kbn-tp-custom-visualizations-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kibana-manifest-schema':
         specifier: workspace:*
         version: link:packages/kbn-kibana-manifest-schema
