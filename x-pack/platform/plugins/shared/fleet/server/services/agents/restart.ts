@@ -56,7 +56,7 @@ export async function restartAgent(
     const pendingRestart = (await getPendingRestartActions(esClient, [agentId])).get(agentId);
     if (pendingRestart) {
       throw new AgentRestartPendingError(
-        `Agent ${agentId} already has a pending restart action ${pendingRestart.action_id} created at ${pendingRestart.created_at}. Use force to restart anyway.`
+        `Agent ${agentId} already has a pending restart action ${pendingRestart.action_id}. Use force to restart anyway.`
       );
     }
   }
