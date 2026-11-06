@@ -113,16 +113,22 @@ record_suite_failure() {
 export_token_usage() {
   [[ -f .scout/servers/local.json ]] || return 0
   command -v buildkite-agent >/dev/null 2>&1 || return 0
-  local es_url out_dir out_file scroll_id page hits pages=0
+  local es_url out_dir out_file scroll_id page hits pages=0 max_pages=500 name_part artifact_name=''
   es_url="$(jq -r '.hosts.elasticsearch // empty' .scout/servers/local.json | sed -E 's:/*$::; s:^([a-z]+\://)[^/@]*@:\1:')"
   [[ -n "$es_url" ]] || return 0
   out_dir="target/token_usage"
   mkdir -p "$out_dir"
-  out_file="$out_dir/token_usage_${EVAL_PROJECT:-all}.ndjson"
+  # Suite, model and shard in the name: shards and suites upload from separate steps, and a bare
+  # EVAL_PROJECT would collide across them.
+  for name_part in "$EVAL_SUITE_ID" "${EVAL_PROJECT:-all}" "${EVAL_SHARD_ID:-}"; do
+    [[ -n "$name_part" ]] || continue
+    artifact_name+="_$(printf '%s' "$name_part" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  done
+  out_file="$out_dir/token_usage${artifact_name}.ndjson"
   : >"$out_file"
   page="$(es_curl -sS --max-time 60 "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
     -H 'Content-Type: application/json' -d '{"sort":["_doc"]}' 2>/dev/null)" || page=""
-  while (( pages++ < 500 )); do
+  while (( pages++ < max_pages )); do
     hits="$(printf '%s' "$page" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || break
     [[ -n "$hits" ]] || break
     printf '%s\n' "$hits" >>"$out_file"
@@ -131,6 +137,13 @@ export_token_usage() {
     page="$(es_curl -sS --max-time 60 "$es_url/_search/scroll" -H 'Content-Type: application/json' \
       -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}" 2>/dev/null)" || break
   done
+  if (( pages > max_pages )); then
+    echo "--- Token usage export truncated at $max_pages pages; the artifact is incomplete"
+  fi
+  if [[ -n "${scroll_id:-}" ]]; then
+    es_curl -sS --max-time 30 -X DELETE "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+      -d "{\"scroll_id\":\"$scroll_id\"}" >/dev/null 2>&1 || true
+  fi
   if [[ ! -s "$out_file" ]]; then
     echo "--- Token usage docs: 0 (nothing to upload)"
     rm -f "$out_file"

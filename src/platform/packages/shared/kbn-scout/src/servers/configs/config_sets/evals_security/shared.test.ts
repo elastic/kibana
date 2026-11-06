@@ -17,6 +17,9 @@ const CONFIG_SETS_DIR = join(__dirname, '..');
 const STATEFUL_CONFIG = 'stateful/classic.stateful.config';
 const DEFAULT_CONFIG_SET = 'evals_tracing';
 const SECURITY_SUITES_DIR = 'x-pack/solutions/security/';
+// Security suites that live outside `x-pack/solutions/security/`. Empty today: every Security suite
+// is in that directory. Add an id here, not a path exception, when one is not.
+const EXTRA_SECURITY_SUITE_IDS: string[] = [];
 
 const TOKEN_USAGE_ARG = '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true';
 const INCLUDE_USER_DATA_ARG = '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true';
@@ -69,6 +72,9 @@ describe('evals config sets', () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    // `evals_tracing` only sets includeToolDetails when CI is set; pinning it keeps the
+    // "unconditional" assertion meaningful for a local run too.
+    process.env.CI = 'true';
     delete process.env.GCS_CREDENTIALS;
     delete process.env.TRACING_EXPORTERS;
     delete process.env.AGENT_BUILDER_TRACING_EXPORTERS;
@@ -120,7 +126,7 @@ describe('evals config sets', () => {
     });
 
     it('passes a valid value through to every Security config set', () => {
-      const exporters = '[{"grpc":{"url":"https://golden.example:4317"}}]';
+      const exporters = '[{"url":"https://golden.example/v1/traces"}]';
 
       securityConfigSets.forEach((configSet) => {
         const args = serverArgs(configSet, { AGENT_BUILDER_TRACING_EXPORTERS: exporters });
@@ -129,6 +135,25 @@ describe('evals config sets', () => {
           `${EXPORTERS_ARG_PREFIX}${exporters}`,
         ]);
       });
+    });
+
+    it('accepts exporter headers', () => {
+      const exporters = '[{"url":"https://golden.example/v1/traces","headers":{"x-key":"v"}}]';
+
+      expect(
+        serverArgs('evals_security', { AGENT_BUILDER_TRACING_EXPORTERS: exporters })
+      ).toContain(`${EXPORTERS_ARG_PREFIX}${exporters}`);
+    });
+
+    it.each([
+      ['the telemetry shape', '[{"grpc":{"url":"https://golden.example:4317"}}]'],
+      ['a non-array', '{"url":"https://golden.example/v1/traces"}'],
+      ['a non-string url', '[{"url":42}]'],
+      ['a null entry', '[null]'],
+    ])('throws on %s, which Kibana would reject at boot', (_name, exporters) => {
+      expect(() =>
+        loadServers('evals_security', { AGENT_BUILDER_TRACING_EXPORTERS: exporters })
+      ).toThrow(/AGENT_BUILDER_TRACING_EXPORTERS/);
     });
 
     it('throws on malformed JSON instead of starting a stack with a broken exporter', () => {
@@ -143,12 +168,14 @@ describe('evals config sets', () => {
       id: string;
       configPath: string;
       serverConfigSet?: string;
+      scoutArch?: string;
     }
     const { suites } = JSON.parse(
       readFileSync(join(REPO_ROOT, '.buildkite/pipelines/evals/evals.suites.json'), 'utf8')
     ) as { suites: SuiteEntry[] };
-    const securitySuites = suites.filter(({ configPath }) =>
-      configPath.startsWith(SECURITY_SUITES_DIR)
+    const securitySuites = suites.filter(
+      ({ id, configPath }) =>
+        configPath.startsWith(SECURITY_SUITES_DIR) || EXTRA_SECURITY_SUITE_IDS.includes(id)
     );
 
     it('has Security suites', () => {
@@ -163,6 +190,16 @@ describe('evals config sets', () => {
         expect(securityConfigSets).toContain(configSet);
       }
     );
+
+    it('never pairs a serverless suite with a Security set that has no serverless config', () => {
+      const serverlessSecuritySuites = securitySuites.filter(
+        ({ scoutArch }) => scoutArch === 'serverless'
+      );
+
+      serverlessSecuritySuites.forEach(({ serverConfigSet = DEFAULT_CONFIG_SET }) => {
+        expect(existsSync(join(CONFIG_SETS_DIR, serverConfigSet, 'serverless'))).toBe(true);
+      });
+    });
 
     it('only names config sets that exist', () => {
       suites.forEach(({ serverConfigSet }) => {

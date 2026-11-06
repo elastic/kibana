@@ -9,6 +9,23 @@
 
 import type { ScoutServerConfig } from '../../../../types';
 
+const assertAgentBuilderExporters = (exporters: unknown): void => {
+  const valid =
+    Array.isArray(exporters) &&
+    exporters.every(
+      (exporter) =>
+        typeof exporter === 'object' &&
+        exporter !== null &&
+        typeof (exporter as { url?: unknown }).url === 'string'
+    );
+  if (!valid) {
+    throw new Error(
+      'AGENT_BUILDER_TRACING_EXPORTERS must be a JSON array of objects with a string "url", ' +
+        'e.g. [{"url":"https://host/v1/traces"}]'
+    );
+  }
+};
+
 const argName = (arg: string): string => arg.slice(0, arg.indexOf('=') + 1);
 
 /**
@@ -23,6 +40,10 @@ const argName = (arg: string): string => arg.slice(0, arg.indexOf('=') + 1);
  * - `AGENT_BUILDER_TRACING_EXPORTERS`: Agent Builder keeps its own tracer provider whose spans back
  *   the trace-based evaluators and always exports to the local ES. Exporters set here are appended
  *   to that, so a remote destination (e.g. a golden cluster) is added without losing local fidelity.
+ *   The value is JSON in the shape of `xpack.agentBuilder.tracing.exporters`: an array of
+ *   `{ "url": "<http(s) OTLP traces URL>", "headers"?: { "<name>": "<value>" } }`. This is NOT the
+ *   `TRACING_EXPORTERS` telemetry shape (`[{ "grpc": { "url": ... } }]`), which Kibana would reject
+ *   at boot.
  *
  * Inherited copies of these args are dropped first, so the value is deterministic regardless of
  * arg ordering.
@@ -30,7 +51,7 @@ const argName = (arg: string): string => arg.slice(0, arg.indexOf('=') + 1);
 export const withEvalsSecurity = (baseConfig: ScoutServerConfig): ScoutServerConfig => {
   const { AGENT_BUILDER_TRACING_EXPORTERS: agentBuilderTracingExporters } = process.env;
   if (agentBuilderTracingExporters) {
-    JSON.parse(agentBuilderTracingExporters); // validate parseable JSON; throws early if malformed
+    assertAgentBuilderExporters(JSON.parse(agentBuilderTracingExporters));
   }
 
   const overrides = [
