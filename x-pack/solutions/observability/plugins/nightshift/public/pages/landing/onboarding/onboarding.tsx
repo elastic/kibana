@@ -220,20 +220,29 @@ export function NightshiftOnboarding({
     const index = ONBOARDING_STEP_IDS.indexOf(id);
     return index < currentIndex ? 'complete' : index > currentIndex ? 'disabled' : 'current';
   };
-  const backTo = (id: 'addData' | 'connectSources' | 'investigate') =>
-    statusOf(id) === 'complete' ? () => setStepOverride(id) : undefined;
+  // Links follow what the user has done, not position: a passed step stays reachable from a
+  // detour to an earlier one, and a step not done yet cannot be jumped to. Enable never links.
+  const isDone: Record<OnboardingStepId, boolean> = {
+    enable: isEnabled,
+    addData: isEnabled && (isConnected || hasTelemetrySource),
+    connectSources: isConnected,
+    investigate: latestInvestigation != null,
+    automate: false,
+  };
+  const linkTo = (id: 'addData' | 'connectSources' | 'investigate') =>
+    isDone[id] && step !== id ? () => setStepOverride(id) : undefined;
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: { status: statusOf('enable') },
-    addData: { status: statusOf('addData'), onClick: backTo('addData') },
+    addData: { status: statusOf('addData'), onClick: linkTo('addData') },
     connectSources: {
       status: statusOf('connectSources'),
-      onClick: backTo('connectSources'),
+      onClick: linkTo('connectSources'),
       hint: step === 'connectSources' ? OPTIONAL_HINT : undefined,
     },
     investigate: {
       status: statusOf('investigate'),
-      onClick: backTo('investigate'),
+      onClick: linkTo('investigate'),
       hint:
         step === 'investigate' && execution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {

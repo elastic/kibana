@@ -207,6 +207,24 @@ describe('NightshiftOnboarding', () => {
     });
   });
 
+  describe('while suggestions are shown, before any investigation', () => {
+    beforeEach(() => {
+      mockOnboarding({ explored: true });
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+    });
+
+    it('does not let the user jump ahead to a step not done yet', () => {
+      renderOnboarding();
+
+      expect(currentStep()).toBe('investigate');
+      expect(linkedSteps()).toEqual(['addData', 'connectSources']);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      expect(currentStep()).toBe('connectSources');
+      expect(linkedSteps()).toEqual(['addData']);
+    });
+  });
+
   describe('after the first investigation', () => {
     const investigation = { id: 'inv-1' } as InvestigationSummary;
 
@@ -241,8 +259,7 @@ describe('NightshiftOnboarding', () => {
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
       expect(currentStep()).toBe('connectSources');
-      // Later steps are not links, even though a run and an investigation exist.
-      expect(linkedSteps()).toEqual(['addData']);
+      expect(linkedSteps()).toEqual(['addData', 'investigate']);
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton'));
