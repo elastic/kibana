@@ -9,7 +9,7 @@ applies_to:
 
 # GitHub connector [github-action-type]
 
-The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It supports two authentication methods: Bearer token (personal access token) and OAuth Authorization Code. It can start a workflow from a repository webhook.
+The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It can start a workflow from a repository webhook.
 
 You can use this connector in **Agent Builder** and **Workflows**.
 
@@ -21,13 +21,35 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 GitHub connectors have the following configuration properties:
 
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
+
 MCP Server URL
 :   The URL of the GitHub MCP server. Defaults to `https://api.githubcopilot.com/mcp/`.
 
 Authentication
-:   Choose one of the following authentication methods:
-    - **Bearer Token**: A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials) for instructions.
-    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
+:   **Bearer token**. A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials). In {{kib}}, enter it in **Token**.
+
+:::
+:::{applies-item} stack: preview 9.5
+
+Authentication
+:   Choose one of the following. The picker lists **OAuth 2.0 Authorization Code** first. It does not show a **Recommended** badge.
+
+    - **OAuth 2.0 Authorization Code**. Uses a GitHub OAuth App. {{kib}} fills the authorization URL, token URL, and scope (`repo`). Enter **Client ID** and **Client secret**. Refer to [OAuth credentials](#github-oauth-credentials).
+    - **Personal Access Token (PAT)**. A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials). Enter it in **Token**.
+
+:::
+:::{applies-item} serverless: preview
+
+Authentication
+:   Choose one of the following. The picker lists **OAuth 2.0 Authorization Code** first.
+
+    - **OAuth 2.0 Authorization Code**. Uses a GitHub OAuth App. {{kib}} fills the authorization URL, token URL, and scope (`repo`). Enter **Client ID** and **Client secret**.
+    - **Personal Access Token (PAT)**. A GitHub personal access token. Enter it in **Token**.
+
+:::
+::::
 
 ## Receive GitHub events [github-inbound-events]
 ```{applies_to}
@@ -273,13 +295,36 @@ To use the GitHub connector with a personal access token:
      - **Write actions** (createIssue, addIssueComment, updateIssue, createPullRequest, updatePullRequest, mergePullRequest, addLabels, addAssignee, requestReviewers, createBranch, createOrUpdateFile, triggerWorkflow): grant **read and write** access to **Contents**, **Issues**, and **Pull requests**. For `triggerWorkflow`, also grant **read and write** access to **Actions**.
      - **Metadata** read access is always required.
 5. Select **Generate token**.
-6. Copy the token and store it securely. Use this value as the **Bearer Token** when configuring the GitHub connector in {{kib}}.
+6. Copy the token and store it securely. In {{kib}}, enter it in the **Token** field.
+
+   ::::{applies-switch}
+   :::{applies-item} stack: preview =9.4
+
+   Select **Bearer token** before you enter the token.
+
+   :::
+   :::{applies-item} stack: preview 9.5
+
+   Select **Personal Access Token (PAT)** before you enter the token.
+
+   :::
+   :::{applies-item} serverless: preview
+
+   Select **Personal Access Token (PAT)** before you enter the token.
+
+   :::
+   ::::
 
 ::::{note}
 Classic personal access tokens also work. When using a classic token, select the `repo` scope for full repository access, or `public_repo` for public repositories only.
 ::::
 
 ## Get OAuth credentials [github-oauth-credentials]
+
+```{applies_to}
+stack: preview 9.5
+serverless: preview
+```
 
 To use the GitHub connector with OAuth:
 
@@ -289,4 +334,4 @@ To use the GitHub connector with OAuth:
    - Set a descriptive name (for example, "Kibana GitHub Connector").
    - Set the **Authorization callback URL** to your Kibana OAuth redirect URI.
 4. After creating the app, copy the **Client ID** and generate a **Client Secret**.
-5. In {{kib}}, select **OAuth Authorization Code** as the authentication method and enter the Client ID and Client Secret.
+5. In {{kib}}, select **OAuth 2.0 Authorization Code** as the authentication method and enter the **Client ID** and **Client secret**.
