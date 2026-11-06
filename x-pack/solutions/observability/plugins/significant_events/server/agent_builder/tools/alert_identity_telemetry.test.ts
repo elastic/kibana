@@ -32,6 +32,21 @@ describe('eventsWriteResultEventId', () => {
       'stored',
     ],
     [
+      'a held automatic reopen, the closed series',
+      {
+        ...base,
+        event_id: 'generated',
+        written: false,
+        skipped: true,
+        reason: 'held_by_deactivation',
+        existing_event_id: 'stored',
+        assessment_note: 'known noise',
+        deactivated_at: '2026-11-06T10:00:00.000Z',
+      },
+      undefined,
+      'stored',
+    ],
+    [
       'an unchanged stored event',
       { ...base, event_id: 'stored', written: false, skipped: true, reason: 'unchanged_outcome' },
       undefined,

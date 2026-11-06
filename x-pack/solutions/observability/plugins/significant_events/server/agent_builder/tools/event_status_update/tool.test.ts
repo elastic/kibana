@@ -105,8 +105,12 @@ describe('event_status_update tool', () => {
       });
       const context = createMockToolContext();
       context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
-      await invokeHandler(tool as never, { event_id: 'event-1', status: 'inactive' }, context);
-      return trackAgentToolEventStatusUpdate.mock.calls[0]?.[0];
+      const result = await invokeHandler(
+        tool as never,
+        { event_id: 'event-1', status: 'inactive' },
+        context
+      );
+      return { payload: trackAgentToolEventStatusUpdate.mock.calls[0]?.[0], result };
     };
 
     const identity = {
@@ -120,15 +124,18 @@ describe('event_status_update tool', () => {
       (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
     });
 
-    it('reports the updated event identity', async () => {
+    it('reports the updated event identity and ignores telemetry failures', async () => {
       (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
         event_id: 'event-1',
         updated: 1,
         ignored: 0,
         status: 'inactive',
       });
+      const track = jest.fn().mockImplementation(() => {
+        throw new Error('telemetry unavailable');
+      });
 
-      const payload = await run();
+      const { payload, result } = await run(track);
 
       expect(payload).toEqual({
         ...identity,
@@ -136,11 +143,14 @@ describe('event_status_update tool', () => {
         event_id: 'event-1',
         status: 'inactive',
       });
+      expect(result).toMatchObject({ results: [{ type: 'other' }] });
     });
 
     it.each([
       ['not_found', false],
       ['already_in_state', true],
+      ['not_a_breach', true],
+      ['superseded', false],
     ] as const)('reports an ignored %s update with success=%s', async (reason, success) => {
       (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
         event_id: 'event-1',
@@ -150,7 +160,7 @@ describe('event_status_update tool', () => {
         reason,
       });
 
-      const payload = await run();
+      const { payload } = await run();
 
       expect(payload).toEqual({
         ...identity,
@@ -163,7 +173,7 @@ describe('event_status_update tool', () => {
     it('keeps the caller-named event as fingerprint when the update fails', async () => {
       (updateEventStatusToolHandler as jest.Mock).mockRejectedValue(new Error('index unavailable'));
 
-      const payload = await run();
+      const { payload } = await run();
 
       expect(payload).toEqual({
         ...identity,

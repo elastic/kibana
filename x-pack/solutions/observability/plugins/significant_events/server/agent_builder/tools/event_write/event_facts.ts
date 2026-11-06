@@ -318,7 +318,7 @@ export const applyWriteOutcomes = ({
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
-        ...(candidate.mode === 'snapshot' && candidate.reopensSeries !== undefined
+        ...('reopensSeries' in candidate && candidate.reopensSeries
           ? { existing_event_id: candidate.eventId }
           : {}),
         status,
