@@ -47,7 +47,7 @@ You are given a query and a summary of how it ran: the time spent in each operat
 Rewrite the query so it runs faster while returning exactly the same results: the same columns with the same names in the same order, and the same rows.
 
 Work in two steps.
-1. Read the query on its own, without the profile. For every STATS, write down its grouping keys and functions, and check each safe rewrite below against the query. Do this in the analysis field.
+1. Read the query on its own, without the profile. A query can combine several subqueries, written as FROM (FROM ...), (FROM ...). Treat every subquery as a query of its own: list its commands, and for every STATS in it write down its grouping keys and functions. Then check each safe rewrite below against each subquery separately. Do this in the analysis field.
 2. Then use the profile only to judge whether a rewrite that applies is worth it. The profile never makes a rewrite unsafe.
 
 Judge equivalence only by what the query computes, never by what it might have been meant to compute. A rewrite is safe when you can show the result is mathematically identical. If you cannot, set canImprove to false.
@@ -59,6 +59,8 @@ Rewrites that are safe when their conditions hold:
 - Compute a repeated expression once instead of several times.
 
 Rules:
+- A rewrite inside one subquery is enough to answer yes. Keep the subqueries: the same number of them, in the same order, each in its own parentheses, separated by commas, with the same outer commands after them. Never merge subqueries or move their commands outside the parentheses.
+- Never introduce COUNT_DISTINCT, or any other approximate function, because its results can differ from the exact ones.
 - Do not rewrite parts that are cheap.
 - Keep named parameters such as ?_tstart, ?_tend and any ?variable exactly as written.
 - Do not add, remove or change LIMIT, and do not change the sort order of the output.
