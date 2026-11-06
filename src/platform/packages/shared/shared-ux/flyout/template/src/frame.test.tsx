@@ -305,6 +305,30 @@ describe('a managed frame', () => {
     expect(mockEuiFlyoutMounts).toHaveBeenCalledTimes(1);
   });
 
+  it('shows its loading spinner while lazy content loads, even when the options set tabs', async () => {
+    const { Lazy, resolve } = deferredLazy(Loaded);
+    const value = managed({
+      props: {
+        session: 'never',
+        'data-test-subj': 'managedFlyout',
+        tabs: [{ id: 'overview', label: 'Overview' }],
+      },
+    });
+
+    render(
+      <FlyoutTemplateManagedProvider value={value}>
+        <Lazy />
+      </FlyoutTemplateManagedProvider>
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+
+    await resolve();
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
   it('takes the flyout menu title from the options, not from a declaration header', () => {
     render(
       <FlyoutTemplateManagedProvider value={managed()}>
