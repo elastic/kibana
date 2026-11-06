@@ -11,18 +11,31 @@ import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/cor
 import type { NightshiftSettingsLocator } from '../../../common/locators';
 import { consumeAutomationBudget } from '../automations/automation_budget';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflow_yaml';
+import { InvestigationQuotaDeniedError } from '../../client/errors';
+import type { InvestigationQuotaLimit } from '../../types';
 
-/** One marker per Slack channel and UTC day, kept in the automation budget saved object. */
-export const getQuotaNoticeId = (channel: string): string =>
-  `investigation-quota-notice:${channel}`;
-
-const QUOTA_REACHED = 'The daily limit for automatic investigations has been reached.';
+/**
+ * One marker per Slack channel, limit and UTC day, kept in the automation budget saved object. The
+ * automatic limit keeps the id it had before there were other limits.
+ */
+export const getQuotaNoticeId = (
+  channel: string,
+  deniedBy: InvestigationQuotaLimit = 'automatic'
+): string =>
+  deniedBy === 'automatic'
+    ? `investigation-quota-notice:${channel}`
+    : `investigation-quota-notice:${deniedBy}:${channel}`;
 
 /** Readers may lack the privilege to change settings, so the text addresses an admin. */
-export const getInvestigationQuotaReachedMessage = (settingsUrl?: string): string =>
-  settingsUrl
-    ? `${QUOTA_REACHED} An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
-    : `${QUOTA_REACHED} An admin can raise the limit in the Nightshift settings.`;
+export const getInvestigationQuotaReachedMessage = (
+  settingsUrl?: string,
+  deniedBy: InvestigationQuotaLimit = 'automatic'
+): string => {
+  const reached = `${new InvestigationQuotaDeniedError(deniedBy).message}.`;
+  return settingsUrl
+    ? `${reached} An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
+    : `${reached} An admin can raise the limit in the Nightshift settings.`;
+};
 
 /** Absolute settings URL in the workflow's space, or undefined when it can't be built. */
 export const getNightshiftSettingsUrl = ({
@@ -55,6 +68,7 @@ export const notifyInvestigationQuotaReached = async ({
   request,
   spaceId,
   slackThread,
+  deniedBy = 'automatic',
   settingsLocator,
   kibanaUrl,
   signal,
@@ -65,6 +79,8 @@ export const notifyInvestigationQuotaReached = async ({
   request: KibanaRequest;
   spaceId: string;
   slackThread: { channel: string; thread_ts: string };
+  /** The limit that denied the start. */
+  deniedBy?: InvestigationQuotaLimit;
   settingsLocator: Pick<NightshiftSettingsLocator, 'getRedirectUrl'>;
   kibanaUrl?: string;
   signal: AbortSignal;
@@ -74,7 +90,7 @@ export const notifyInvestigationQuotaReached = async ({
     // Claimed before posting, so a failed post is not retried.
     const claimed = await consumeAutomationBudget(
       getSoClient(),
-      getQuotaNoticeId(slackThread.channel),
+      getQuotaNoticeId(slackThread.channel, deniedBy),
       1
     );
     if (!claimed) return;
@@ -95,7 +111,8 @@ export const notifyInvestigationQuotaReached = async ({
         subActionParams: {
           channel: slackThread.channel,
           text: getInvestigationQuotaReachedMessage(
-            getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl })
+            getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl }),
+            deniedBy
           ),
           threadTs: slackThread.thread_ts,
         },

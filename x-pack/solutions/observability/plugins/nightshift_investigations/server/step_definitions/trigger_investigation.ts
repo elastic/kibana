@@ -323,6 +323,7 @@ export const triggerInvestigationStepDefinition = (
             await notifyInvestigationQuotaReached({
               getSoClient: () => getAutomationsSoClient(request, spaceId),
               getActions,
+              deniedBy: error.deniedBy,
               request,
               spaceId,
               slackThread: input.slack_thread,

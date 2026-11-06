@@ -142,6 +142,33 @@ export const isRunQuotaDraftValid = (
   draft: { limits: Record<RunQuotaGroup, number> };
 } => RUN_QUOTA_GROUPS.every((group) => isValidRunLimitDraft(state.draft.limits[group]));
 
+/**
+ * Turns `groups` on or off together, for a section with one switch. Turning them off remembers
+ * each finite limit, and a limit that was already unlimited as unlimited, so turning them back on
+ * restores exactly that; with nothing to restore, every group gets its default.
+ */
+export const setRunLimitsEnabled = (
+  state: RunQuotaDraftState,
+  groups: readonly RunQuotaGroup[],
+  enabled: boolean
+): RunQuotaDraftState => {
+  const limits = { ...state.draft.limits };
+  const restoreLimits = { ...state.draft.restoreLimits };
+  if (enabled) {
+    const nothingToRestore = groups.every((group) => restoreLimits[group] === MIN_RUN_LIMIT);
+    for (const group of groups) {
+      limits[group] = nothingToRestore ? DEFAULT_RUN_LIMITS[group] : restoreLimits[group];
+    }
+  } else {
+    for (const group of groups) {
+      const limit = limits[group];
+      restoreLimits[group] = isValidLimitedRunLimitDraft(limit) ? limit : MIN_RUN_LIMIT;
+      limits[group] = MIN_RUN_LIMIT;
+    }
+  }
+  return { ...state, draft: { ...state.draft, limits, restoreLimits } };
+};
+
 export const setRunLimitEnabled = (
   state: RunQuotaDraftState,
   group: RunQuotaGroup,

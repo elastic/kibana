@@ -334,6 +334,38 @@ describe('RunLimitsSection', () => {
     expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(6);
   });
 
+  it('brings back an unlimited limit as unlimited when the shared switch is turned back on', async () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    const limits = {
+      detection: 100,
+      investigation: 0,
+      manual_investigation: 6,
+      total_investigation: 9,
+      ki_extraction: 20,
+    };
+    setup(response({ limits }), groups, 'automations', true);
+    save.mockResolvedValueOnce(
+      response({ limits: { ...limits, manual_investigation: 0, total_investigation: 0 } })
+    );
+    const values = () =>
+      groups.map(
+        (group) =>
+          (screen.getByTestId(`nightshiftRunLimitInput-${group}`) as HTMLInputElement).value
+      );
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    expect(values()).toEqual(['', '6', '9']);
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftRunLimitsEnabledSwitch')).not.toBeChecked()
+    );
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    expect(values()).toEqual(['', '6', '9']);
+  });
+
   it('cancels run-limit changes through the shared save bar', () => {
     setup(response(), ['investigation']);
     fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {

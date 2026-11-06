@@ -57,6 +57,7 @@ export const RunLimitsSection = ({
     saveError,
     updateLimitDraft,
     setLimitEnabled,
+    setLimitsEnabled,
     showConfirmation,
     confirmationTitle,
     confirmationButtonText,
@@ -130,9 +131,7 @@ export const RunLimitsSection = ({
                       )}
                       checked={sharedSwitchOn}
                       disabled={!canManage || isSaving}
-                      onChange={(event) =>
-                        groups.forEach((group) => setLimitEnabled(group, event.target.checked))
-                      }
+                      onChange={(event) => setLimitsEnabled(groups, event.target.checked)}
                       data-test-subj="nightshiftRunLimitsEnabledSwitch"
                     />
                   </EuiFormRow>

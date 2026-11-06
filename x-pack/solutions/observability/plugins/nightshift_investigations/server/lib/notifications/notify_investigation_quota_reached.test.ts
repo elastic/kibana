@@ -43,13 +43,14 @@ describe('notifyInvestigationQuotaReached', () => {
     const getActions = jest.fn().mockReturnValue({
       getActionsClientWithRequestInSpace: jest.fn().mockResolvedValue({ execute }),
     });
-    const run = (channel = 'C1') =>
+    const run = (channel = 'C1', deniedBy?: 'automatic' | 'manual' | 'all') =>
       notifyInvestigationQuotaReached({
         getSoClient: () => soClient,
         getActions,
         request,
         spaceId: 'default',
         slackThread: { channel, thread_ts: '1700000000.000100' },
+        ...(deniedBy ? { deniedBy } : {}),
         settingsLocator,
         kibanaUrl,
         signal,
@@ -82,6 +83,21 @@ describe('notifyInvestigationQuotaReached', () => {
         },
       },
     });
+  });
+
+  it('names the limit that denied the start, with its own channel marker', async () => {
+    const { soClient, execute, run } = setup();
+
+    await run('C1', 'all');
+
+    expect(soClient.create).toHaveBeenCalledWith(
+      'nightshift-automation-budget',
+      expect.objectContaining({ automationId: 'investigation-quota-notice:all:C1' }),
+      { id: 'investigation-quota-notice:all:C1', overwrite: false }
+    );
+    expect(execute.mock.calls[0][0].params.subActionParams.text).toBe(
+      `The daily limit for all investigations has been reached. An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
+    );
   });
 
   it('links the settings page in the workflow space for an admin to follow', async () => {

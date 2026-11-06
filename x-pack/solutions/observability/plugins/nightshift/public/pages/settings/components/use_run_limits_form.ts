@@ -19,6 +19,7 @@ import {
   isLowerFiniteLimit,
   keepRestoreLimits,
   setRunLimitEnabled,
+  setRunLimitsEnabled,
   withEmptyLimitsAsUnlimited,
   type RunLimitDraft,
   type RunQuotaDraftState,
@@ -144,6 +145,16 @@ export const useRunLimitsForm = ({
     );
   }, []);
 
+  const setLimitsEnabled = useCallback(
+    (limitGroups: readonly RunQuotaGroup[], enabled: boolean) => {
+      setSaveError(undefined);
+      setDraftState((current) =>
+        current ? setRunLimitsEnabled(current, limitGroups, enabled) : current
+      );
+    },
+    []
+  );
+
   const setLimitEnabled = useCallback((group: RunQuotaGroup, enabled: boolean) => {
     setSaveError(undefined);
     setDraftState((current) => (current ? setRunLimitEnabled(current, group, enabled) : current));
@@ -183,6 +194,7 @@ export const useRunLimitsForm = ({
     saveError,
     updateLimitDraft,
     setLimitEnabled,
+    setLimitsEnabled,
     cancel,
     requestSave,
     confirmAndSave,
