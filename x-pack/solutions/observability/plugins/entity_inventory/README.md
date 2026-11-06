@@ -60,7 +60,9 @@ No body and no parameters. It returns one entry per definition the entity store 
 
 ### Access control (interim)
 
-The route sets `security.authz.enabled: false` with the reason: "Interim: this route is internal, reads only code-registered definitions, and the plugin is off by default. The privilege model is tracked in elastic/observability-dev#6244." Any authenticated user can call it until that issue defines the privileges. Tracked in [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244).
+Every inventory route requires the `entity_inventory_read` API privilege (`ENTITY_INVENTORY_API_PRIVILEGES.read` in `common/privileges.ts`). The plugin registers no Kibana feature yet, so no role grants that privilege and nothing appears in the role editor or the space feature settings: `superuser` gets through, every other role gets 403. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) will register an `entityInventory` feature that grants it.
+
+Errors thrown by the inventory service reach clients through `server/routes/create_server_route.ts`: `InventoryTypeNotFoundError` becomes 404, `InventoryRequestError` and `InventoryTypeDefinitionError` become 400, each with the error message only. Any other error is rethrown unchanged.
 
 There is no UI yet.
 
