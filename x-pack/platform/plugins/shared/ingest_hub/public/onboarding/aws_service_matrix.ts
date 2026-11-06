@@ -1148,6 +1148,24 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
   };
 }
 
+/**
+ * Data streams a never-configured instance collects from: every stream of a single-stream service,
+ * else only those the manifest enables by default, which is what the flyout shows switched on. In
+ * the ECF view the entry's `defaultEnabledInputs` is narrowed to the inputs ECF can route while the
+ * per-stream defaults stay at their agent-based values, so a stream counts only when one of its
+ * defaults survives that narrowing (as in `makeDsView`).
+ */
+export function getDefaultEnabledDataStreams(service: AwsServiceMatrixEntry): string[] {
+  if (service.dataStreams.length <= 1) return service.dataStreams;
+  const ecfDefaults = service.settingsScope === 'ecf' ? service.defaultEnabledInputs : undefined;
+  return service.dataStreams.filter((dsId) => {
+    const defaults = service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [];
+    return ecfDefaults
+      ? defaults.some((input) => ecfDefaults.includes(input))
+      : defaults.length > 0;
+  });
+}
+
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
 export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
 
