@@ -1685,6 +1685,49 @@ describe('actions schemas', () => {
           });
         }).not.toThrow();
       });
+
+      describe('and `force` parameter', () => {
+        it.each([true, false])('should accept `force` set to `%s`', (force) => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: 'C:\\locked.dat', force },
+            });
+          }).not.toThrow();
+        });
+
+        it('should accept `force` with agent type `endpoint`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              agent_type: 'endpoint',
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: 'C:\\locked.dat', force: true },
+            });
+          }).not.toThrow();
+        });
+
+        it('should reject a `force` that is not a boolean', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: 'C:\\locked.dat', force: 'yes' },
+            });
+          }).toThrow();
+        });
+
+        it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+          'should reject `force` with agent type `%s`',
+          (agentType) => {
+            expect(() => {
+              EndpointActionGetFileSchema.body.validate({
+                agent_type: agentType,
+                endpoint_ids: ['endpoint_id'],
+                parameters: { path: 'C:\\locked.dat', force: true },
+              });
+            }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+          }
+        );
+      });
     });
 
     describe('ExecuteActionRequestSchema', () => {

@@ -67,6 +67,7 @@ export const ENDPOINT_CAPABILITIES = [
   'memdump_kernel',
   'memdump_raw',
   'kill_process_descendants',
+  'get_file_force',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
