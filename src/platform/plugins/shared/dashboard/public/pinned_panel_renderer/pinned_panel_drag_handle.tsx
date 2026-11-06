@@ -33,7 +33,7 @@ const dragHandleStyles = {
         color: euiTheme.colors.textDisabled,
       },
       '&:hover > .euiIcon:first-of-type': {
-        color: euiTheme.colors.textParagraph,
+        color: euiTheme.colors.vis.euiColorVis0,
       },
       '.euiFormLabel': {
         pointerEvents: 'none', // Prevent label from blocking drag events

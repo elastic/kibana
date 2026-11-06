@@ -15,6 +15,7 @@ import {
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
+  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -213,6 +214,9 @@ const controlPanelStyles = {
         // editable
         '.euiFormControlLayout__prepend': {
           paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
+          '&:hover': {
+            backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
+          },
         },
       },
       '.controlPanel--label': {
