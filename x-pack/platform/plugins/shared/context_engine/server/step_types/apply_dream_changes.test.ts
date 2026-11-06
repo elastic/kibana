@@ -152,6 +152,62 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
   });
 
+  it('on a dry run, reports what it would write and writes nothing', async () => {
+    const stored: Record<string, Record<string, unknown>> = {
+      [existingCustomer.id]: existingCustomer,
+    };
+    const esClient = createEsClient(stored);
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          { id: 'mem-2', updated_at: '2026-11-02T18:40:12.000Z', title: 'Prefers mornings' },
+        ],
+        changes,
+        dry_run: true,
+      },
+      esClient,
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(esClient.index).not.toHaveBeenCalled();
+    expect(stored).toEqual({ [existingCustomer.id]: existingCustomer });
+    expect(output).toEqual(
+      expect.objectContaining({
+        created: 2,
+        updated: 2,
+        deleted: 0,
+        rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
+      })
+    );
+    expect(output?.would_write).toEqual([
+      {
+        id: existingCustomer.id,
+        change: 'updated',
+        type: existingCustomer.type,
+        title: existingCustomer.title,
+      },
+      { id: 'entity-city-montreal', change: 'created', type: 'entity.city', title: 'Montreal' },
+      {
+        id: expect.stringMatching(/^fact-/),
+        change: 'created',
+        type: expect.stringMatching(/^fact\./),
+        title: expect.any(String),
+      },
+    ]);
+    expect(output?.documents?.map(({ id }) => id)).toEqual(
+      output?.would_write?.map(({ id }) => id)
+    );
+    expect(output?.documents?.[0]).toEqual(
+      expect.objectContaining({
+        references: expect.arrayContaining([
+          { uri: 'ki://entity-city-montreal', relation: 'relates_to', description: 'lives_in' },
+        ]),
+      })
+    );
+  });
+
   it('writes nothing from a memory whose latest revision is a tombstone', async () => {
     const stored: Record<string, Record<string, unknown>> = {};
     const context = createMockStepContext({

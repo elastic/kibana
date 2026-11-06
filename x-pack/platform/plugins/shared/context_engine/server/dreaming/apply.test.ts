@@ -299,6 +299,101 @@ describe('applyOperations', () => {
       expect.objectContaining({ kiId: 'fact-1', writer, refresh: true })
     );
   });
+
+  describe('on a dry run', () => {
+    const operations = [
+      {
+        op: 'upsert_entity' as const,
+        id: 'entity-team-ops',
+        type: 'team',
+        name: 'Ops',
+        attributes: {},
+        sourceMemoryIds: ['m-2'],
+      },
+      {
+        op: 'relationship' as const,
+        sourceId: 'entity-team-ops',
+        targetId: 'entity-person-bob',
+        type: 'includes',
+        remove: false,
+        sourceMemoryIds: ['m-2'],
+      },
+      {
+        op: 'upsert_entity' as const,
+        id: 'entity-person-bob',
+        type: 'person',
+        name: 'Bob',
+        content: 'Bob is on the Ops team.',
+        attributes: {},
+        sourceMemoryIds: ['m-2'],
+      },
+      { op: 'delete' as const, id: 'fact-1' },
+      { op: 'delete' as const, id: 'fact-missing' },
+    ];
+
+    beforeEach(() => {
+      stored.set('entity-person-bob', {
+        id: 'entity-person-bob',
+        type: 'entity.person',
+        title: 'Bob',
+        references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+      });
+      stored.set('fact-1', { id: 'fact-1', type: 'fact.note', title: 'Old' });
+      jest.mocked(putKiRevision).mockImplementation(async ({ kiId, document }) => {
+        stored.set(kiId, document as DreamedKi);
+      });
+      jest.mocked(softDeleteKi).mockImplementation(async (_, { aiIndexId, kiId }) => {
+        if (!stored.has(kiId)) {
+          throw new KiNotFoundError(aiIndexId, kiId);
+        }
+        return { id: kiId };
+      });
+    });
+
+    it('writes nothing, and counts what a real run would', async () => {
+      const dryRun = new Map();
+
+      const counts = await applyOperations({ ...context(), dryRun }, operations);
+
+      expect(counts).toEqual(await applyOperations(context(), operations));
+      expect(counts).toEqual({ created: 1, updated: 2, deleted: 1 });
+      expect(jest.mocked(putKiRevision).mock.calls).toHaveLength(3);
+      expect(jest.mocked(softDeleteKi).mock.calls).toHaveLength(2);
+    });
+
+    it('reports each KI as it would be stored, including a relationship on a new entity', async () => {
+      const dryRun = new Map();
+
+      await applyOperations({ ...context(), dryRun }, operations);
+
+      expect(putKiRevision).not.toHaveBeenCalled();
+      expect(softDeleteKi).not.toHaveBeenCalled();
+      expect([...dryRun.keys()]).toEqual(['entity-team-ops', 'entity-person-bob', 'fact-1']);
+      expect(dryRun.get('entity-team-ops')).toEqual({
+        change: 'created',
+        ki: expect.objectContaining({
+          type: 'entity.team',
+          title: 'Ops',
+          references: [
+            { uri: 'ki://m-2', relation: 'derived_from' },
+            { uri: 'ki://entity-person-bob', relation: 'relates_to', description: 'includes' },
+          ],
+          governance: {
+            provenance: { created_by: writer, updated_by: writer },
+            lifecycle: { status: 'active' },
+          },
+        }),
+      });
+      expect(dryRun.get('entity-person-bob')).toEqual({
+        change: 'updated',
+        ki: expect.objectContaining({
+          content: 'Bob is on the Ops team.',
+          attributes: { 'memory.number_of_occurrences': 2 },
+        }),
+      });
+      expect(dryRun.get('fact-1')).toEqual({ change: 'deleted' });
+    });
+  });
 });
 
 describe('addReferences', () => {

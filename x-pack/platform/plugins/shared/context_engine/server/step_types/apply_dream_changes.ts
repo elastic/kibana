@@ -16,7 +16,7 @@ import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { findKiRevision, isKiDeleted } from '../ai_indices/ki_revision';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { createVerifyEsql, keepVerifiedPatterns } from '../dreaming/access_patterns';
-import { applyOperations } from '../dreaming/apply';
+import { applyOperations, type PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { referencedIds, resolveChangeSet, vocabularyOf } from '../dreaming/resolve_change_set';
 import type { KiStepDependencies } from './helpers';
@@ -47,7 +47,7 @@ export const getApplyDreamChangesStepDefinition = ({
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
       await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
-      const { ai_index_id: aiIndexId, memories } = context.input;
+      const { ai_index_id: aiIndexId, memories, dry_run: dryRun = false } = context.input;
       const parsed = dreamChangeSetSchema.safeParse(context.input.changes);
       if (!parsed.success) {
         throw new ExecutionError({
@@ -108,6 +108,7 @@ export const getApplyDreamChangesStepDefinition = ({
         resolved.operations,
         createVerifyEsql({ esClient, logger, abortSignal: context.abortSignal })
       );
+      const planned = dryRun ? new Map<string, PlannedWrite>() : undefined;
       const counts = await applyOperations(
         {
           esClient,
@@ -115,17 +116,33 @@ export const getApplyDreamChangesStepDefinition = ({
           dest: aiIndex.dest,
           writer: kiWriterFromContext(stepContext),
           abortSignal: context.abortSignal,
+          dryRun: planned,
         },
         operations
       );
 
       logger.debug(
-        `Dreaming in AI index '${aiIndexId}' created ${counts.created}, updated ${counts.updated} and deleted ${counts.deleted} KIs; rejected ${resolved.rejected.length} items and dropped ${dropped} access patterns`
+        `${dryRun ? 'Dry run: dreaming' : 'Dreaming'} in AI index '${aiIndexId}' created ${
+          counts.created
+        }, updated ${counts.updated} and deleted ${counts.deleted} KIs; rejected ${
+          resolved.rejected.length
+        } items and dropped ${dropped} access patterns`
       );
       const output: ApplyDreamChangesOutput = {
         ...counts,
         rejected: resolved.rejected,
         dropped_access_patterns: dropped,
+        ...(planned && {
+          would_write: [...planned].map(([id, { change, ki }]) => {
+            const document = ki as DreamedKi | undefined;
+            return {
+              id,
+              change,
+              ...(document && { type: document.type, title: document.title }),
+            };
+          }),
+          documents: [...planned.values()].flatMap(({ ki }) => (ki ? [ki as DreamedKi] : [])),
+        }),
       };
       return { output };
     },

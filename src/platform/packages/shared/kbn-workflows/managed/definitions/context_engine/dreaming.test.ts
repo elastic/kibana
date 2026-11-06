@@ -22,6 +22,7 @@ interface Step {
     collapse?: unknown;
     query?: { bool?: Record<string, unknown> };
     _source?: string[];
+    [key: string]: unknown;
   };
 }
 
@@ -81,8 +82,86 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     expect(workflow.enabled).toBe(false);
     expect(workflow.triggers).toEqual([
       { type: 'scheduled', with: { every: '90m' } },
-      { type: 'manual' },
+      expect.objectContaining({ type: 'manual' }),
     ]);
+  });
+
+  it('takes only optional inputs on demand, so a manual run needs no form', () => {
+    const [, manual] = render().triggers;
+
+    expect(Object.keys(manual.inputs.properties)).toEqual(['dry_run', 'since']);
+    expect(manual.inputs).not.toHaveProperty('required');
+  });
+
+  it('reads memories since the given time when there is one, else since the last run', () => {
+    const range = (
+      findStep(render().steps, 'read_memories').with?.query?.bool?.filter as Array<{
+        range?: { updated_at: { gte: string } };
+      }>
+    ).find((filter) => filter.range)?.range?.updated_at.gte;
+    const engine = createWorkflowLiquidEngine();
+    const steps = { last_run: { output: { since: '2026-11-01T00:00:00.000Z' } } };
+
+    expect(engine.parseAndRenderSync(range ?? '', { inputs: {}, steps })).toBe(
+      '2026-11-01T00:00:00.000Z'
+    );
+    expect(
+      engine.parseAndRenderSync(range ?? '', {
+        inputs: { since: '2026-10-01T00:00:00.000Z' },
+        steps,
+      })
+    ).toBe('2026-10-01T00:00:00.000Z');
+  });
+
+  it('ends a dry run cancelled, so it does not move the window the next run reads', () => {
+    const dryRun = findStep(render().steps, 'dry_run_result');
+
+    expect(dryRun.condition).toBe('${{ inputs.dry_run == true }}');
+    expect(dryRun.steps).toEqual([
+      expect.objectContaining({ type: 'workflow.output', status: 'cancelled' }),
+    ]);
+  });
+
+  it('passes dry_run to every write and totals what each batch did', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const apply = findStep(batches.steps ?? [], 'apply_changes');
+    const tally = findStep(batches.steps ?? [], 'tally');
+    const engine = createWorkflowLiquidEngine();
+    const earlier = { id: 'fact-1', change: 'created', type: 'fact.policy', title: 'Refunds' };
+    const later = { id: 'fact-2', change: 'deleted' };
+    const tallied = (output: Record<string, unknown>) => {
+      const scope = {
+        variables: { created: 1, updated: 2, deleted: 0, rejected: 1, would_write: [earlier] },
+        steps: { apply_changes: { output } },
+      };
+      return Object.fromEntries(
+        Object.entries(tally.with ?? {}).map(([key, value]) => [
+          key,
+          engine.evalValueSync(String(value).slice(3, -2).trim(), scope),
+        ])
+      );
+    };
+    const counts = { created: 2, updated: 1, deleted: 1, rejected: [{ item: 'x', reason: 'y' }] };
+
+    expect(apply.with).toEqual(
+      expect.objectContaining({ dry_run: '${{ inputs.dry_run == true }}' })
+    );
+    expect(tallied({ ...counts, would_write: [later] })).toEqual({
+      created: 3,
+      updated: 3,
+      deleted: 1,
+      rejected: 2,
+      would_write: [earlier, later],
+    });
+    expect(tallied(counts).would_write).toEqual([earlier]);
+  });
+
+  it('reports every batch of a dry run in one list', () => {
+    const [output] = findStep(render().steps, 'dry_run_result').steps ?? [];
+
+    expect(output.with).toEqual(
+      expect.objectContaining({ would_write: '${{ variables.would_write }}' })
+    );
   });
 
   it('keeps empty type lists as lists', () => {
@@ -101,6 +180,7 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       'read_memories',
       'active',
       'dream',
+      'dry_run_result',
       'output_result',
     ]);
     expect(steps[0].type).toBe('context-engine.getDreamingStatus');

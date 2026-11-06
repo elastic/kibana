@@ -21,6 +21,7 @@ import {
   findKiRevision,
   isKiDeleted,
   putKiRevision,
+  type KiRevision,
   type KiWriter,
   type StoredKi,
 } from '../ai_indices/ki_revision';
@@ -56,12 +57,20 @@ export interface ApplyCounts {
   deleted: number;
 }
 
+/** A KI a dry run would write, as it would be stored; `ki` is absent when it would be deleted. */
+export interface PlannedWrite {
+  change: 'created' | 'updated' | 'deleted';
+  ki?: StoredKi;
+}
+
 export interface ApplyContext {
   esClient: ElasticsearchClient;
   aiIndexId: string;
   dest: AiIndexDest;
   writer: KiWriter;
   abortSignal?: AbortSignal;
+  /** Collects the writes by KI id instead of storing them. */
+  dryRun?: Map<string, PlannedWrite>;
 }
 
 const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
@@ -94,12 +103,66 @@ const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReferenc
 
 type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
 
-const writeDocument = async (
+const activeSource = (revision: KiRevision | undefined): DreamedKi | undefined => {
+  const source = revision?.source as DreamedKi | undefined;
+  return source && !isKiDeleted(source) ? source : undefined;
+};
+
+const storedDocument = (
+  document: Omit<DreamedKi, 'governance'>,
+  kiId: string,
+  current: DreamedKi | undefined,
+  writer: KiWriter
+): StoredKi => {
+  const now = new Date().toISOString();
+  return {
+    ...document,
+    '@timestamp': now,
+    id: kiId,
+    updated_at: now,
+    governance: {
+      provenance: {
+        created_by: current?.governance?.provenance?.created_by ?? writer,
+        updated_by: writer,
+      },
+      lifecycle: { status: 'active' },
+    },
+  } satisfies StoredKi;
+};
+
+const planDocument = async (
   { esClient, aiIndexId, dest, writer, abortSignal }: ApplyContext,
+  planned: Map<string, PlannedWrite>,
   kiId: string,
   build: BuildDocument
-): Promise<'created' | 'updated' | 'skipped'> =>
-  pRetry(
+): Promise<'created' | 'updated' | 'skipped'> => {
+  const previous = planned.get(kiId);
+  const current = previous
+    ? (previous.ki as DreamedKi | undefined)
+    : activeSource(
+        await findKiRevision({ esClient, aiIndexId, dest, kiId, includeSource: true, abortSignal })
+      );
+  const document = build(current);
+  if (!document) {
+    return 'skipped';
+  }
+  planned.set(kiId, {
+    change: previous?.change === 'created' || (!previous && !current) ? 'created' : 'updated',
+    ki: storedDocument(document, kiId, current, writer),
+  });
+  return current ? 'updated' : 'created';
+};
+
+const writeDocument = async (
+  context: ApplyContext,
+  kiId: string,
+  build: BuildDocument
+): Promise<'created' | 'updated' | 'skipped'> => {
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+  if (dryRun) {
+    return planDocument(context, dryRun, kiId, build);
+  }
+  return pRetry(
     async () => {
       const revision = await findKiRevision({
         esClient,
@@ -109,31 +172,17 @@ const writeDocument = async (
         includeSource: true,
         abortSignal,
       });
-      const source = revision?.source as DreamedKi | undefined;
-      const current = source && !isKiDeleted(source) ? source : undefined;
+      const current = activeSource(revision);
       const document = build(current);
       if (!document) {
         return 'skipped' as const;
       }
-      const now = new Date().toISOString();
       await putKiRevision({
         esClient,
         aiIndexId,
         dest,
         kiId,
-        document: {
-          ...document,
-          '@timestamp': now,
-          id: kiId,
-          updated_at: now,
-          governance: {
-            provenance: {
-              created_by: current?.governance?.provenance?.created_by ?? writer,
-              updated_by: writer,
-            },
-            lifecycle: { status: 'active' },
-          },
-        } satisfies StoredKi,
+        document: storedDocument(document, kiId, current, writer),
         existing: dest.type === 'data_stream' ? undefined : revision,
         failIfExists: revision === undefined,
         refresh: true,
@@ -150,6 +199,7 @@ const writeDocument = async (
       },
     }
   );
+};
 
 const latest = (...dates: Array<string | undefined>): string | undefined =>
   dates
@@ -268,8 +318,25 @@ const applyRelationship = (context: ApplyContext, operation: RelationshipOperati
     };
   });
 
+const planDelete = async (
+  { esClient, aiIndexId, dest, abortSignal }: ApplyContext,
+  planned: Map<string, PlannedWrite>,
+  kiId: string
+): Promise<boolean> => {
+  const exists =
+    planned.has(kiId) ||
+    (await findKiRevision({ esClient, aiIndexId, dest, kiId, abortSignal })) !== undefined;
+  if (exists) {
+    planned.set(kiId, { change: 'deleted' });
+  }
+  return exists;
+};
+
 const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> => {
-  const { esClient, aiIndexId, dest, writer, abortSignal } = context;
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+  if (dryRun) {
+    return planDelete(context, dryRun, kiId);
+  }
   try {
     await softDeleteKi(esClient, { aiIndexId, dest, kiId, writer, refresh: true, abortSignal });
     return true;
