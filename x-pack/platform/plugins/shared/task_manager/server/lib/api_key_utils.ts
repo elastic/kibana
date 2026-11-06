@@ -262,8 +262,9 @@ export const createApiKey = async (
 
     return apiKeyByTaskIdMap;
   }
-  // The request carries no API key (a session or basic credential, on a real or a fake request),
-  // so grant one key per task type (due to naming requirements) from that credential.
+  // The request carries no API key (a session, basic, or service account credential, on a real
+  // or a fake request), so grant one key per task type (due to naming requirements) from that
+  // credential.
   return grantApiKeysForTaskTypes({
     taskInstances,
     user,
