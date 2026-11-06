@@ -21,6 +21,7 @@ import {
   ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { EPISODE_SOURCE_FILTER_CLASSIC } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodesFilterState, EpisodesSortState } from '../../queries/episodes_query';
 import {
@@ -97,8 +98,9 @@ const buildTimeRangeFilter = (
 
 /**
  * Translates the shared episodes filter state (plus time range) into an ES DSL
- * query for classic alerts. Filters without a classic equivalent (e.g. assignee)
- * intentionally exclude all classic rows.
+ * query for classic alerts. Filters without a classic equivalent (assignee, or a
+ * source selection that does not include Classic) intentionally exclude all
+ * classic rows.
  *
  * The authorized RAC alerts API adds the space + authorization filter on top of
  * this query, so this builder never needs to scope by space itself.
@@ -144,6 +146,13 @@ export const buildClassicAlertsQuery = (
   }
 
   if (filterState?.assigneeUid) {
+    filters.push(MATCH_NONE);
+  }
+
+  if (
+    filterState?.sources?.length &&
+    !filterState.sources.includes(EPISODE_SOURCE_FILTER_CLASSIC)
+  ) {
     filters.push(MATCH_NONE);
   }
 

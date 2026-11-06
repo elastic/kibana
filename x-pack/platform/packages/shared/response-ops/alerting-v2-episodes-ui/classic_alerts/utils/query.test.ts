@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { buildClassicAlertsQuery, buildClassicAlertsSort } from './query';
+import {
+  EPISODE_SOURCE_FILTER_CLASSIC,
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+} from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { buildClassicAlertsQuery, buildClassicAlertsSort } from './query';
 
 /** Extracts `bool.filter` from a query container, throwing if the shape is unexpected. */
 const getFilters = (query: unknown): unknown[] => {
@@ -133,6 +137,30 @@ describe('buildClassicAlertsQuery', () => {
     expect(getFilters(query)).toEqual(
       expect.arrayContaining([{ bool: { must_not: { match_all: {} } } }])
     );
+  });
+
+  it('keeps classic rows when Classic is included in sources', () => {
+    const query = buildClassicAlertsQuery({
+      sources: [EPISODE_SOURCE_FILTER_CLASSIC, 'zabbix'],
+    });
+
+    expect(getFilters(query)).not.toContainEqual({ bool: { must_not: { match_all: {} } } });
+  });
+
+  it('returns MATCH_NONE when sources omit Classic', () => {
+    const query = buildClassicAlertsQuery({
+      sources: [EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix'],
+    });
+
+    expect(getFilters(query)).toEqual(
+      expect.arrayContaining([{ bool: { must_not: { match_all: {} } } }])
+    );
+  });
+
+  it('does not exclude classic rows when sources is empty', () => {
+    const query = buildClassicAlertsQuery({ sources: [] });
+
+    expect(getFilters(query)).not.toContainEqual({ bool: { must_not: { match_all: {} } } });
   });
 
   it('translates KQL search text to Elasticsearch DSL', () => {
