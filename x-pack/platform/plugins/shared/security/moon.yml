@@ -123,6 +123,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -131,6 +132,4 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

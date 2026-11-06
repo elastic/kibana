@@ -71,6 +71,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -79,6 +81,4 @@ fileGroups:
     - common/**/*.ts
     - test/scout_automatic_import/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

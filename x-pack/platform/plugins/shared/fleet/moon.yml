@@ -137,6 +137,9 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*

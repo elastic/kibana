@@ -94,6 +94,9 @@ const StickySidebar = styled(EuiFlexItem)`
 `;
 
 export interface SidebarProps extends Props {
+  /** Whether the user may see created integrations at all (Automatic Import read or all). */
+  showCreatedIntegrations?: boolean;
+  /** Rendered when the user may create integrations and has none yet. */
   CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
   createdIntegrationsCount?: number;
@@ -107,6 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   categories,
   selectedCategories,
   onCategoryChange,
+  showCreatedIntegrations = false,
   CreateIntegrationCardButton,
   hasCreatedIntegrations,
   createdIntegrationsCount,
@@ -118,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <StickySidebar>
-      {CreateIntegrationCardButton && !isLoadingCreatedIntegrations && (
+      {showCreatedIntegrations && !isLoadingCreatedIntegrations && (
         <>
           {hasCreatedIntegrations ? (
             <EuiLink
@@ -158,10 +162,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </EuiNotificationBadge>
               ) : null}
             </EuiLink>
-          ) : (
+          ) : CreateIntegrationCardButton ? (
             <CreateIntegrationCardButton />
+          ) : null}
+          {(hasCreatedIntegrations || CreateIntegrationCardButton) && (
+            <EuiHorizontalRule margin="m" />
           )}
-          <EuiHorizontalRule margin="m" />
         </>
       )}
       <CategoryFacets
