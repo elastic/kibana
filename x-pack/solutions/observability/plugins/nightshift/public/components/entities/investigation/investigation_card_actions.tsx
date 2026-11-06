@@ -22,10 +22,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import {
-  useCanManageInvestigations,
-  useOpenInChat,
-} from '@kbn/agentic-investigations-plugin/public';
+import { useOpenInChat } from '@kbn/agentic-investigations-plugin/public';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -67,8 +64,7 @@ export interface InvestigationCardActionsProps {
 /**
  * Trailing controls for a Nightshift investigation list card: the assignees, open in chat (same
  * Agent Builder route as the flyout footer) and an overflow menu with Copy link (same share URL /
- * link icon as the investigation flyout menu action) and, for users who can manage
- * investigations, Delete.
+ * link icon as the investigation flyout menu action) and, for Agent Builder admins, Delete.
  */
 export const InvestigationCardActions = ({
   investigation,
@@ -76,9 +72,11 @@ export const InvestigationCardActions = ({
   ebtElement = NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
 }: InvestigationCardActionsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications } = useKibana().services;
+  const { application, http, notifications } = useKibana().services;
   const queryClient = useQueryClient();
-  const canManage = useCanManageInvestigations();
+  // Investigations are public conversations owned by the Nightshift service account, which Agent
+  // Builder lets only its admins delete.
+  const canDelete = Boolean(application.capabilities.agentBuilder?.isAdmin);
   const { getChatHref, openChat } = useOpenInChat();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -150,7 +148,7 @@ export const InvestigationCardActions = ({
       >
         {copyLinkLabel}
       </EuiContextMenuItem>,
-      ...(canManage
+      ...(canDelete
         ? [
             <EuiHorizontalRule key="deleteSeparator" margin="none" />,
             <EuiContextMenuItem
@@ -173,7 +171,7 @@ export const InvestigationCardActions = ({
           ]
         : []),
     ],
-    [canManage, ebtElement, handleCopyLink]
+    [canDelete, ebtElement, handleCopyLink]
   );
 
   return (

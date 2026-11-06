@@ -20,16 +20,16 @@ const getChatHref = jest.fn(
 const addSuccess = jest.fn();
 const addError = jest.fn();
 const httpDelete = jest.fn();
-let canManage = true;
+let isAgentBuilderAdmin = true;
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useOpenInChat: () => ({ getChatHref, openChat }),
-  useCanManageInvestigations: () => canManage,
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
+      application: { capabilities: { agentBuilder: { isAdmin: isAgentBuilderAdmin } } },
       http: { delete: httpDelete },
       notifications: { toasts: { addSuccess, addError } },
     },
@@ -75,7 +75,7 @@ describe('InvestigationCardActions', () => {
     addSuccess.mockReset();
     addError.mockReset();
     httpDelete.mockReset().mockResolvedValue({ success: true });
-    canManage = true;
+    isAgentBuilderAdmin = true;
     (copyToClipboard as jest.Mock).mockReturnValue(true);
   });
 
@@ -162,8 +162,8 @@ describe('InvestigationCardActions', () => {
     expect(addSuccess).not.toHaveBeenCalled();
   });
 
-  it('hides Delete from users who cannot manage investigations', () => {
-    canManage = false;
+  it('hides Delete from users who are not Agent Builder admins', () => {
+    isAgentBuilderAdmin = false;
     renderActions();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
