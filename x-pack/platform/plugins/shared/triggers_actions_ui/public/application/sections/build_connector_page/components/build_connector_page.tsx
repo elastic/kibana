@@ -49,7 +49,7 @@ import { formDataToRequest, getEmptyFormData, requestToFormData } from '../lib/f
 
 /** Router state the connectors list passes along when a draft was handed off from chat. */
 export interface BuildConnectorPageLocationState {
-  initialDefinition?: CreateConnectorTypeRequest;
+  initialDefinition?: CreateConnectorTypeRequest & { logoUrl?: string };
 }
 
 const TITLE = i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.title', {
@@ -138,7 +138,7 @@ export const BuildConnectorPage: React.FC = () => {
   const isEditMode = Boolean(editingConnectorType);
 
   const openEditorWithDefinition = useCallback(
-    (definition: Partial<CreateConnectorTypeRequest>) => {
+    (definition: Partial<CreateConnectorTypeRequest> & { logoUrl?: string }) => {
       onApplyDefinition(definition);
       setHasPrefilledDefinition(true);
       setShowEditor(true);

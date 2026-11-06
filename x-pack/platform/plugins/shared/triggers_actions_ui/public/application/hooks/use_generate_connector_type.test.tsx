@@ -7,6 +7,7 @@
 
 import { act, waitFor, renderHook } from '@testing-library/react';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
+import type { GenerateConnectorTypeResponse } from '../../../common/connector_type_generation';
 import { useKibana } from '../../common/lib/kibana';
 import { createConnectorType } from '../lib/action_connector_api';
 import { useGenerateConnectorType } from './use_generate_connector_type';
@@ -54,12 +55,12 @@ describe('useGenerateConnectorType', () => {
   it('returns the draft and does not create the connector type', async () => {
     const { result } = renderHook(() => useGenerateConnectorType());
 
-    let response: CreateConnectorTypeRequest | undefined;
+    let response: GenerateConnectorTypeResponse | undefined;
     await act(async () => {
       response = await result.current.generateConnectorType('https://docs.example.com/api');
     });
 
-    expect(response).toEqual(connectorType);
+    expect(response).toEqual({ connectorType });
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/internal/triggers_actions_ui/connector_types/_generate',
       { body: JSON.stringify({ url: 'https://docs.example.com/api' }) }

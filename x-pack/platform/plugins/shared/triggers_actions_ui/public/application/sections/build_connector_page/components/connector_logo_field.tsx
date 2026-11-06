@@ -96,7 +96,7 @@ const ConnectorLogoFieldComponent: React.FC = () => {
               'xpack.triggersActionsUI.sections.buildConnectorPage.logo.helpText',
               {
                 defaultMessage:
-                  'Optional. A public PNG, JPEG, GIF, WebP or SVG image of up to {maxKb} KB. It is read once and stored with the connector type.',
+                  'Optional. A public PNG, JPEG, GIF, WebP, SVG or ICO image of up to {maxKb} KB. It is read once and stored with the connector type.',
                 values: { maxKb: MAX_LOGO_KB },
               }
             )}

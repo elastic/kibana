@@ -39,6 +39,13 @@ const matchesMediaType = (mediaType: string, bytes: Buffer): boolean => {
       );
     case 'image/svg+xml':
       return /<svg[\s>]/i.test(bytes.toString('utf8'));
+    case 'image/x-icon':
+    case 'image/vnd.microsoft.icon':
+      return (
+        bytes.length >= 6 &&
+        startsWith(bytes, Buffer.from([0, 0, 1, 0])) &&
+        bytes.readUInt16LE(4) > 0
+      );
     default:
       return false;
   }

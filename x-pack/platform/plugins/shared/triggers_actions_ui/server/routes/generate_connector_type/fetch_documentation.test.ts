@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { extractText, fetchDocumentation } from './fetch_documentation';
+import { extractText, fetchDocumentation, findDocumentationLogoUrl } from './fetch_documentation';
 
 const fetchMock = jest.fn();
 
@@ -103,9 +103,26 @@ describe('fetchDocumentation', () => {
       url: 'https://docs.example.com/next',
       contentType: 'text/plain',
       text: 'hello',
+      logoUrl: 'https://docs.example.com/favicon.ico',
     });
     expect(fetchMock.mock.calls[0][1].dispatcher.destroyed).toBe(true);
     expect(fetchMock.mock.calls[1][1].dispatcher.destroyed).toBe(true);
+  });
+
+  it('returns an icon URL declared by the documentation page', async () => {
+    fetchMock.mockResolvedValue(
+      httpResponse(
+        '<html><head><link rel="icon" href="/brand.svg"></head><body>API</body></html>',
+        {
+          headers: { 'content-type': 'text/html' },
+        }
+      )
+    );
+
+    await expect(fetchDocumentation(fetchOpts())).resolves.toMatchObject({
+      text: 'API',
+      logoUrl: 'https://docs.example.com/brand.svg',
+    });
   });
 
   it('stops after max redirects', async () => {
@@ -221,5 +238,27 @@ describe('extractText', () => {
       'line 1\nline 2'
     );
     expect(extractText({ contentType: 'text/markdown', body: '# Title' })).toBe('# Title');
+  });
+});
+
+describe('findDocumentationLogoUrl', () => {
+  const documentationUrl = 'https://docs.example.com/api/reference';
+
+  it('uses a relative icon link from the documentation page', () => {
+    expect(
+      findDocumentationLogoUrl(
+        '<html><head><link rel="shortcut icon" href="../brand/icon.svg"></head></html>',
+        documentationUrl
+      )
+    ).toBe('https://docs.example.com/brand/icon.svg');
+  });
+
+  it('falls back to the site favicon for a missing or unsafe icon link', () => {
+    expect(findDocumentationLogoUrl('<html></html>', documentationUrl)).toBe(
+      'https://docs.example.com/favicon.ico'
+    );
+    expect(
+      findDocumentationLogoUrl('<link rel="icon" href="data:image/svg+xml,abc">', documentationUrl)
+    ).toBe('https://docs.example.com/favicon.ico');
   });
 });

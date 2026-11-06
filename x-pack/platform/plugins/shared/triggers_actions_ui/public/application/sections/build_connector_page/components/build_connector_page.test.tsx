@@ -140,6 +140,7 @@ describe('BuildConnectorPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    fetchConnectorTypeLogo.mockReset().mockRejectedValue(new Error('Favicon not found'));
     history.push('/connectors/build');
     appMockRenderer = createAppMockRenderer();
     createConnectorType.mockResolvedValue({ id: 'acme' });
@@ -166,10 +167,10 @@ describe('BuildConnectorPage', () => {
     renderStartPage();
 
     expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
-    expect(screen.getByText('Generate with AI')).toBeInTheDocument();
+    expect(screen.getByText('AI assistant')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-ai-generate-btn')).toHaveTextContent(
-      'Generate connector type'
+      'Generate draft'
     );
     expect(screen.getByTestId('build-connector-start-import-yaml')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-start-scratch')).toBeInTheDocument();
@@ -382,6 +383,8 @@ describe('BuildConnectorPage', () => {
           id: 'jsonplaceholder',
           displayName: 'JSONPlaceholder',
           description: 'Read posts',
+          icon: 'data:image/x-icon;base64,AAABAAE=',
+          logoUrl: 'https://jsonplaceholder.typicode.com/favicon.ico',
           config: [],
           auth: { type: 'none' },
           actions: {
@@ -400,6 +403,10 @@ describe('BuildConnectorPage', () => {
 
     expect(await screen.findByTestId('buildConnectorNameInput')).toHaveValue('JSONPlaceholder');
     expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('jsonplaceholder');
+    expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue(
+      'https://jsonplaceholder.typicode.com/favicon.ico'
+    );
+    expect(screen.getByTestId('buildConnectorLogoPreview')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorAction-0-name')).toHaveValue('getPosts');
     expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
       'https://jsonplaceholder.typicode.com/posts'
@@ -658,6 +665,10 @@ describe('BuildConnectorPage', () => {
       expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
         '{{config.baseUrl}}/ping'
       );
+      expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: 'https://docs.example.com/favicon.ico' })
+      );
+      expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue('');
       expect(screen.queryByTestId('buildConnectorAction-1')).not.toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
       expect(history.location.pathname).toBe('/connectors/build');
@@ -1000,6 +1011,66 @@ describe('BuildConnectorPage', () => {
       expect(screen.queryByTestId('build-connector-start')).not.toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
       expect(history.location.pathname).toBe('/connectors/build');
+    });
+
+    it('adds a valid documentation site favicon to the draft form', async () => {
+      const icon = 'data:image/x-icon;base64,AAABAAE=';
+      generateConnectorType.mockResolvedValue({
+        connectorType: generatedConnectorType,
+        logoUrl: 'https://docs.example.com/brand/icon.ico',
+      });
+      fetchConnectorTypeLogo.mockResolvedValue({ icon });
+      renderPage();
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-ai-url'),
+        'https://docs.example.com/api/reference'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue(
+          'https://docs.example.com/brand/icon.ico'
+        )
+      );
+      expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: 'https://docs.example.com/brand/icon.ico' })
+      );
+      expect(screen.getByTestId('buildConnectorLogoPreview')).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('tries the default favicon when the documented icon cannot be loaded', async () => {
+      generateConnectorType.mockResolvedValue({
+        connectorType: generatedConnectorType,
+        logoUrl: 'https://docs.example.com/brand.svg',
+      });
+      fetchConnectorTypeLogo
+        .mockRejectedValueOnce(new Error('Unsupported icon'))
+        .mockResolvedValueOnce({ icon: 'data:image/x-icon;base64,AAABAAE=' });
+      renderPage();
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue(
+          'https://docs.example.com/favicon.ico'
+        )
+      );
+      expect(fetchConnectorTypeLogo).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ url: 'https://docs.example.com/brand.svg' })
+      );
+      expect(fetchConnectorTypeLogo).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ url: 'https://docs.example.com/favicon.ico' })
+      );
     });
 
     it('keeps generated array item types when saving', async () => {
@@ -1347,7 +1418,7 @@ describe('BuildConnectorPage', () => {
       await applyYaml(`${yamlDefinition.trimEnd()}\nicon: https://cdn.example.com/logo.png\n`);
 
       expect(
-        await screen.findByText('Logo must be a base64 PNG, JPEG, GIF, WebP or SVG image.')
+        await screen.findByText('Logo must be a base64 PNG, JPEG, GIF, WebP, SVG or ICO image.')
       ).toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
     });

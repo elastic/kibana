@@ -24,6 +24,7 @@ const PNG_BYTES = Buffer.concat([
   Buffer.from('rest-of-the-image'),
 ]);
 const SVG_BYTES = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"/>');
+const ICO_BYTES = Buffer.from([0, 0, 1, 0, 1, 0, 16, 16]);
 
 const imageResponse = (bytes: Buffer, contentType: string, status = 200) => ({
   status,
@@ -63,6 +64,14 @@ describe('fetchConnectorTypeLogo', () => {
 
     await expect(fetchLogo('https://cdn.example.com/logo.svg')).resolves.toBe(
       `data:image/svg+xml;base64,${SVG_BYTES.toString('base64')}`
+    );
+  });
+
+  it.each(['image/x-icon', 'image/vnd.microsoft.icon'])('accepts a %s favicon', async (mime) => {
+    fetchMock.mockResolvedValue(imageResponse(ICO_BYTES, mime));
+
+    await expect(fetchLogo('https://docs.example.com/favicon.ico')).resolves.toBe(
+      `data:${mime};base64,${ICO_BYTES.toString('base64')}`
     );
   });
 

@@ -29,7 +29,11 @@ export const generateFromDocumentation = async ({
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   logger: Logger;
   abortSignal?: AbortSignal;
-}): Promise<CreateConnectorTypeRequest> => {
+}): Promise<{
+  connectorType: CreateConnectorTypeRequest;
+  logoUrl?: string;
+  documentUrl: string;
+}> => {
   const inference = await getInference();
   if (!inference) {
     throw new GenerateConnectorTypeError(
@@ -44,11 +48,12 @@ export const generateFromDocumentation = async ({
     configurationUtilities: getActionsConfigurationUtilities(),
     logger,
   });
-  return generateConnectorTypeSpec({
+  const connectorType = await generateConnectorTypeSpec({
     inferenceClient: inference.getClient({ request }),
     featureId: CONNECTOR_BUILDER_INFERENCE_FEATURE_ID,
     document,
     logger,
     abortSignal,
   });
+  return { connectorType, logoUrl: document.logoUrl, documentUrl: document.url };
 };

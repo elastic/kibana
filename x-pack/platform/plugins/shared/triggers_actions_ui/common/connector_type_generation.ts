@@ -29,4 +29,6 @@ export interface GenerateConnectorTypeRequest {
 
 export interface GenerateConnectorTypeResponse {
   connectorType: CreateConnectorTypeRequest;
+  logoUrl?: string;
+  documentUrl?: string;
 }

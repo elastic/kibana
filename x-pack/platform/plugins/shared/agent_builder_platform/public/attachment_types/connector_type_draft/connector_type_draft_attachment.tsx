@@ -60,7 +60,7 @@ export const createConnectorTypeDraftAttachmentDefinition = ({
           try {
             sessionStorage.setItem(
               `${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${key}`,
-              JSON.stringify(attachment.data.draft)
+              JSON.stringify({ draft: attachment.data.draft, logoUrl: attachment.data.logo_url })
             );
           } catch {
             notifications.toasts.addDanger({

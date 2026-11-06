@@ -211,6 +211,34 @@ export const extractText = ({
   return $('body').text().replace(/\s+/g, ' ').trim();
 };
 
+/** Finds a page icon, using the conventional favicon path when no icon link is present. */
+export const findDocumentationLogoUrl = (body: string, documentUrl: string): string => {
+  const $ = load(body);
+  const links = $('link[rel][href]').toArray();
+  const iconLink = links.find((link) =>
+    $(link).attr('rel')?.toLowerCase().split(/\s+/).includes('icon')
+  );
+  const touchIconLink = links.find((link) =>
+    $(link).attr('rel')?.toLowerCase().split(/\s+/).includes('apple-touch-icon')
+  );
+  const selectedLink = iconLink ?? touchIconLink;
+  const href = selectedLink ? $(selectedLink).attr('href') : undefined;
+  if (href) {
+    try {
+      const logoUrl = new URL(href, documentUrl);
+      if (
+        (logoUrl.protocol === 'http:' || logoUrl.protocol === 'https:') &&
+        logoUrl.toString().length <= 2048
+      ) {
+        return logoUrl.toString();
+      }
+    } catch {
+      // Fall back to the site's conventional favicon path.
+    }
+  }
+  return new URL('/favicon.ico', documentUrl).toString();
+};
+
 const readBody = async (
   response: DocumentationResponse,
   maxContentLength: number
@@ -389,12 +417,13 @@ export const fetchDocumentation = async ({
     maxRedirects,
     accept: ACCEPT_HEADER,
     allowedContentTypes: ALLOWED_CONTENT_TYPES,
-    read: async (response, { url: fetchedUrl, mediaType, maxContentLength }) => ({
-      url: fetchedUrl,
-      contentType: mediaType,
-      text: extractText({
+    read: async (response, { url: fetchedUrl, mediaType, maxContentLength }) => {
+      const body = await readBody(response, maxContentLength);
+      return {
+        url: fetchedUrl,
         contentType: mediaType,
-        body: await readBody(response, maxContentLength),
-      }),
-    }),
+        text: extractText({ contentType: mediaType, body }),
+        logoUrl: findDocumentationLogoUrl(mediaType === 'text/html' ? body : '', fetchedUrl),
+      };
+    },
   });

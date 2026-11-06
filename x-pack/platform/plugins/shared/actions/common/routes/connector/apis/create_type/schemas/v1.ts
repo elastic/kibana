@@ -30,8 +30,10 @@ export const CONNECTOR_TYPE_ICON_MIME_TYPES = [
   'image/gif',
   'image/webp',
   'image/svg+xml',
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
 ] as const;
-const ICON_DATA_URI_PREFIX_MAX_LENGTH = 'data:image/svg+xml;base64,'.length;
+const ICON_DATA_URI_PREFIX_MAX_LENGTH = 'data:image/vnd.microsoft.icon;base64,'.length;
 /** Length of the base64 `data:` URI of a logo of the largest allowed size. */
 export const CONNECTOR_TYPE_ICON_MAX_LENGTH =
   ICON_DATA_URI_PREFIX_MAX_LENGTH + 4 * Math.ceil(CONNECTOR_TYPE_ICON_MAX_BYTES / 3);
@@ -51,8 +53,8 @@ export const connectorTypeIconSchema = lazySchema(() =>
     // Cheap bound first: it stops oversized input before the checks below read it.
     .max(CONNECTOR_TYPE_ICON_MAX_LENGTH, { message: ICON_TOO_LARGE_MESSAGE })
     .regex(
-      /^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,[A-Za-z0-9+/]+={0,2}$/,
-      'Logo must be a base64 PNG, JPEG, GIF, WebP or SVG image.'
+      /^data:image\/(?:png|jpeg|gif|webp|svg\+xml|x-icon|vnd\.microsoft\.icon);base64,[A-Za-z0-9+/]+={0,2}$/,
+      'Logo must be a base64 PNG, JPEG, GIF, WebP, SVG or ICO image.'
     )
     .refine((icon) => decodedIconBytes(icon) <= CONNECTOR_TYPE_ICON_MAX_BYTES, {
       message: ICON_TOO_LARGE_MESSAGE,

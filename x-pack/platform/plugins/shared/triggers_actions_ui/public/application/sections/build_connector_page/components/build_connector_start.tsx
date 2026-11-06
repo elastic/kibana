@@ -30,7 +30,7 @@ import { AiAssistantPanel } from './ai_assistant_panel';
 import { YamlImportPanel } from './yaml_import_panel';
 
 interface Props {
-  onApply: (definition: Partial<CreateConnectorTypeRequest>) => void;
+  onApply: (definition: Partial<CreateConnectorTypeRequest> & { logoUrl?: string }) => void;
   onStartFromScratch: () => void;
   dynamicConnectorTypes: DynamicConnectorType[];
   dynamicConnectorTypesLoading: boolean;
@@ -100,7 +100,7 @@ export const BuildConnectorStart: React.FC<Props> = ({
                 <EuiTitle size="m">
                   <h2>
                     {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.aiTitle', {
-                      defaultMessage: 'Generate with AI',
+                      defaultMessage: 'AI assistant',
                     })}
                   </h2>
                 </EuiTitle>

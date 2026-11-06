@@ -15,6 +15,7 @@ export const connectorTypeDraftAttachmentDataSchema = lazySchema(() =>
   z.object({
     draft: createConnectorTypeRequestSchema,
     documentation_url: z.url().max(2048),
+    logo_url: z.url().max(2048).optional(),
   })
 );
 

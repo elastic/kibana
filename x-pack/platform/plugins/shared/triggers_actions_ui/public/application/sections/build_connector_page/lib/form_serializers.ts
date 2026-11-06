@@ -205,13 +205,13 @@ const toFormAuth = (
 
 /** Turns a (possibly partial) request body, e.g. parsed from YAML, into form state. */
 export const requestToFormData = (
-  request: Partial<CreateConnectorTypeRequest>
+  request: Partial<CreateConnectorTypeRequest> & { logoUrl?: string }
 ): BuildConnectorFormData => ({
   id: normalizeConnectorTypeId(request.id),
   displayName: request.displayName ?? '',
   description: request.description ?? '',
   icon: request.icon ?? '',
-  logoUrl: '',
+  logoUrl: request.logoUrl ?? '',
   auth: toFormAuth(request.auth),
   config: request.config ?? [],
   actions: Object.entries(request.actions ?? {}).map(([name, action]) =>

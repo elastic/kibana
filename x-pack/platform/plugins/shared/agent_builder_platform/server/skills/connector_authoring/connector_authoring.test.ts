@@ -379,7 +379,8 @@ describe('connector-authoring inline tools', () => {
           },
         },
       };
-      const generateConnectorTypeDraft = jest.fn().mockResolvedValue(draft);
+      const logoUrl = 'https://jsonplaceholder.typicode.com/favicon.ico';
+      const generateConnectorTypeDraft = jest.fn().mockResolvedValue({ draft, logoUrl });
       const tool = createDraftConnectorTypeTool({
         getTriggersActionsUiStart: async () => ({ generateConnectorTypeDraft } as never),
       });
@@ -397,6 +398,17 @@ describe('connector-authoring inline tools', () => {
       expect(attachments.get(attachmentId)?.data.data).toMatchObject({
         draft,
         documentation_url: documentationUrl,
+        logo_url: logoUrl,
+      });
+      expect(tool.confirmation?.askUser).toBe('always');
+      expect(
+        tool.confirmation?.getConfirmation?.({
+          toolParams: { documentation_url: documentationUrl },
+          context,
+        })
+      ).toMatchObject({
+        title: 'Draft a new connector type?',
+        message: expect.stringContaining(documentationUrl),
       });
     });
 

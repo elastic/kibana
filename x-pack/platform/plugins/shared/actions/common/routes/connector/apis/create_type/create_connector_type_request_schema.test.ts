@@ -311,6 +311,8 @@ describe('createConnectorTypeRequestSchema', () => {
       ['jpeg', 'data:image/jpeg;base64,/9j/4AAQ'],
       ['webp', 'data:image/webp;base64,UklGRg=='],
       ['gif', 'data:image/gif;base64,R0lGODlh'],
+      ['ico', 'data:image/x-icon;base64,AAABAAE='],
+      ['vnd.microsoft.icon', 'data:image/vnd.microsoft.icon;base64,AAABAAE='],
     ])('accepts a base64 %s data URI', (_type, icon) => {
       expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon }).success).toBe(
         true

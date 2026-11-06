@@ -12,6 +12,7 @@ import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { createConnectorTypeRequestSchema } from '@kbn/actions-plugin/common';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
@@ -43,6 +44,13 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
 
 type ConnectorAuthStatusError = string | undefined;
+
+const connectorTypeDraftHandoffSchema = lazySchema(() =>
+  z.object({
+    draft: createConnectorTypeRequestSchema,
+    logoUrl: z.url().max(2048).optional(),
+  })
+);
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -168,7 +176,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     } catch {
       parsedDraft = undefined;
     }
-    const result = createConnectorTypeRequestSchema.safeParse(parsedDraft);
+    const result = connectorTypeDraftHandoffSchema.safeParse(parsedDraft);
     if (!result.success) {
       toasts.addDanger({
         title: i18n.translate('xpack.triggersActionsUI.connectors.home.invalidBuilderDraft', {
@@ -179,7 +187,9 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     }
     history.push({
       pathname: routeToBuildConnector,
-      state: { initialDefinition: result.data },
+      state: {
+        initialDefinition: { ...result.data.draft, logoUrl: result.data.logoUrl },
+      },
     });
   }, [history, location.pathname, location.search, toasts]);
 

@@ -19,9 +19,11 @@ import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { GenerateConnectorTypeErrorReason } from '../../../../../common/connector_type_generation';
 import { useGenerateConnectorType } from '../../../hooks/use_generate_connector_type';
+import { fetchConnectorTypeLogo } from '../../../lib/action_connector_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface Props {
-  onApply: (connectorType: Partial<CreateConnectorTypeRequest>) => void;
+  onApply: (connectorType: Partial<CreateConnectorTypeRequest> & { logoUrl?: string }) => void;
   isDisabled?: boolean;
 }
 
@@ -74,6 +76,7 @@ const getErrorGuidance = (reason?: GenerateConnectorTypeErrorReason): string | u
 };
 
 const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false }) => {
+  const { http } = useKibana().services;
   const [url, setUrl] = useState('');
   const { isLoading, generateConnectorTypeError, generateConnectorType } =
     useGenerateConnectorType();
@@ -83,11 +86,29 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
   const guidance = getErrorGuidance(generateConnectorTypeError?.reason);
 
   const onGenerate = useCallback(async () => {
-    const connectorType = await generateConnectorType(trimmedUrl);
-    if (connectorType) {
-      onApply(connectorType);
+    const result = await generateConnectorType(trimmedUrl);
+    if (result) {
+      const { connectorType } = result;
+      const fallbackUrl = new URL('/favicon.ico', result.documentUrl ?? trimmedUrl).toString();
+      const candidates =
+        result.logoUrl && result.logoUrl !== fallbackUrl
+          ? [result.logoUrl, fallbackUrl]
+          : [fallbackUrl];
+      let icon: string | undefined;
+      let logoUrl: string | undefined;
+      for (const candidate of candidates) {
+        try {
+          const logo = await fetchConnectorTypeLogo({ http, url: candidate });
+          icon = logo.icon;
+          logoUrl = candidate;
+          break;
+        } catch {
+          // Try the conventional favicon path if the page's icon link cannot be loaded.
+        }
+      }
+      onApply(icon && logoUrl ? { ...connectorType, icon, logoUrl } : connectorType);
     }
-  }, [generateConnectorType, onApply, trimmedUrl]);
+  }, [generateConnectorType, http, onApply, trimmedUrl]);
 
   return (
     <>
@@ -129,7 +150,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
           >
             {i18n.translate(
               'xpack.triggersActionsUI.sections.buildConnectorPage.aiGenerateButtonLabel',
-              { defaultMessage: 'Generate connector type' }
+              { defaultMessage: 'Generate draft' }
             )}
           </EuiButton>
         </EuiFlexItem>

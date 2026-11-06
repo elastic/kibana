@@ -7,8 +7,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
-import type { GenerateConnectorTypeErrorReason } from '../../../common/connector_type_generation';
+import type {
+  GenerateConnectorTypeErrorReason,
+  GenerateConnectorTypeResponse,
+} from '../../../common/connector_type_generation';
 import { generateConnectorType as generateConnectorTypeApi } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -32,7 +34,7 @@ export interface GenerateConnectorTypeError {
 interface UseGenerateConnectorTypeReturnValue {
   isLoading: boolean;
   generateConnectorTypeError: GenerateConnectorTypeError | null;
-  generateConnectorType: (url: string) => Promise<CreateConnectorTypeRequest | undefined>;
+  generateConnectorType: (url: string) => Promise<GenerateConnectorTypeResponse | undefined>;
 }
 
 const isGenerateConnectorTypeErrorReason = (
@@ -61,7 +63,7 @@ export const useGenerateConnectorType = (): UseGenerateConnectorTypeReturnValue 
           setIsLoading(false);
         }
 
-        return res.connectorType;
+        return res;
       } catch (error) {
         if (isMounted.current) {
           setIsLoading(false);

@@ -113,6 +113,7 @@ describe('createGenerateConnectorTypeRoute', () => {
       url: 'https://docs.example.com/api',
       contentType: 'text/html',
       text: 'docs',
+      logoUrl: 'https://docs.example.com/favicon.ico',
     });
     generateConnectorTypeSpecMock.mockResolvedValue(connectorType);
     const response = httpServerMock.createResponseFactory();
@@ -129,7 +130,13 @@ describe('createGenerateConnectorTypeRoute', () => {
         document: expect.objectContaining({ text: 'docs' }),
       })
     );
-    expect(response.ok).toHaveBeenCalledWith({ body: { connectorType } });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        connectorType,
+        logoUrl: 'https://docs.example.com/favicon.ico',
+        documentUrl: 'https://docs.example.com/api',
+      },
+    });
   });
 
   it.each<[GenerateConnectorTypeErrorReason, number]>([

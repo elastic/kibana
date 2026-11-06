@@ -39,7 +39,11 @@ describe('connector type draft attachment', () => {
     const attachment = {
       id: 'attachment-1',
       type: CONNECTOR_TYPE_DRAFT_ATTACHMENT_TYPE,
-      data: { draft, documentation_url: 'https://jsonplaceholder.typicode.com/' },
+      data: {
+        draft,
+        documentation_url: 'https://jsonplaceholder.typicode.com/',
+        logo_url: 'https://jsonplaceholder.typicode.com/favicon.ico',
+      },
     } as unknown as ConnectorTypeDraftAttachment;
     const buttons = definition.getActionButtons!({
       attachment,
@@ -52,7 +56,10 @@ describe('connector type draft attachment', () => {
 
     expect(
       JSON.parse(sessionStorage.getItem(`${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}attachment-1`) ?? '')
-    ).toEqual(draft);
+    ).toEqual({
+      draft,
+      logoUrl: 'https://jsonplaceholder.typicode.com/favicon.ico',
+    });
     expect(navigateToApp).toHaveBeenCalledWith('management', {
       path: `/insightsAndAlerting/triggersActionsConnectors/connectors?${CONNECTOR_TYPE_DRAFT_QUERY_PARAM}=attachment-1`,
     });

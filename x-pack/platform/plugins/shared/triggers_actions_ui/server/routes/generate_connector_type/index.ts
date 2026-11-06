@@ -61,7 +61,7 @@ export const createGenerateConnectorTypeRoute = ({
       try {
         const { signal, unsubscribe } = abortSignalFrom(request.events.aborted$);
         try {
-          const connectorType = await generateFromDocumentation({
+          const { connectorType, logoUrl, documentUrl } = await generateFromDocumentation({
             url: request.body.url,
             request,
             getInference,
@@ -69,7 +69,7 @@ export const createGenerateConnectorTypeRoute = ({
             logger,
             abortSignal: signal,
           });
-          return response.ok({ body: { connectorType } });
+          return response.ok({ body: { connectorType, logoUrl, documentUrl } });
         } finally {
           unsubscribe();
         }

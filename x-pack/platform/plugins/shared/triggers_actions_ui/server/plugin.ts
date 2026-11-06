@@ -33,6 +33,7 @@ import {
 } from './routes';
 import { generateFromDocumentation } from './routes/generate_connector_type/generate_from_documentation';
 import { authorizeDraftGeneration } from './routes/generate_connector_type/authorize_draft_generation';
+import { fetchConnectorTypeLogo } from './routes/connector_type_logo/fetch_logo';
 
 type TriggersActionsUiRequestHandlerContext = CustomRequestHandlerContext<{
   actions: ActionsApiRequestHandlerContext;
@@ -45,7 +46,7 @@ export interface PluginStartContract {
   generateConnectorTypeDraft: (
     url: string,
     request: KibanaRequest
-  ) => Promise<CreateConnectorTypeRequest>;
+  ) => Promise<{ draft: CreateConnectorTypeRequest; logoUrl?: string }>;
 }
 
 interface PluginsSetup {
@@ -119,13 +120,33 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     this.generateConnectorTypeDraft = async (url, request) => {
       const [, { security }] = await core.getStartServices();
       await authorizeDraftGeneration(security, request);
-      return generateFromDocumentation({
+      const {
+        connectorType: draft,
+        logoUrl,
+        documentUrl,
+      } = await generateFromDocumentation({
         url,
         request,
         getInference: async () => (await core.getStartServices())[1].inference,
         getActionsConfigurationUtilities: () => plugins.actions.getActionsConfigurationUtilities(),
         logger: this.logger,
       });
+      const fallbackUrl = new URL('/favicon.ico', documentUrl).toString();
+      const candidates =
+        logoUrl && logoUrl !== fallbackUrl ? [logoUrl, fallbackUrl] : [fallbackUrl];
+      for (const candidate of candidates) {
+        try {
+          const icon = await fetchConnectorTypeLogo({
+            url: candidate,
+            configurationUtilities: plugins.actions.getActionsConfigurationUtilities(),
+            logger: this.logger,
+          });
+          return { draft: { ...draft, icon }, logoUrl: candidate };
+        } catch {
+          // Try the conventional favicon path if the page's icon link cannot be loaded.
+        }
+      }
+      return { draft };
     };
   }
 

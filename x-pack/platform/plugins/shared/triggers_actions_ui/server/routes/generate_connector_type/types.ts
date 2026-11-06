@@ -11,6 +11,7 @@ export interface FetchedDocument {
   url: string;
   contentType: string;
   text: string;
+  logoUrl?: string;
 }
 
 export class GenerateConnectorTypeError extends Error {

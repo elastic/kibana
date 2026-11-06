@@ -215,7 +215,7 @@ describe('ActionsConnectorsHome', () => {
     const draftKey = 'draft-1';
     sessionStorage.setItem(
       `${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`,
-      JSON.stringify(draft)
+      JSON.stringify({ draft, logoUrl: 'https://jsonplaceholder.typicode.com/favicon.ico' })
     );
     const url = `/connectors?${CONNECTOR_TYPE_DRAFT_QUERY_PARAM}=${draftKey}`;
     const props = connectorsTabProps();
@@ -226,7 +226,10 @@ describe('ActionsConnectorsHome', () => {
 
     await waitFor(() => expect(props.history.location.pathname).toBe('/connectors/build'));
     expect(props.history.location.state).toEqual({
-      initialDefinition: expect.objectContaining({ displayName: 'JSONPlaceholder' }),
+      initialDefinition: expect.objectContaining({
+        displayName: 'JSONPlaceholder',
+        logoUrl: 'https://jsonplaceholder.typicode.com/favicon.ico',
+      }),
     });
     expect(props.history.location.search).toBe('');
     expect(sessionStorage.getItem(`${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`)).toBeNull();
