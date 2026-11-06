@@ -23,6 +23,14 @@ export interface SignificantEventsAlertingContext {
    * `rulesClient`.
    */
   readonly alertingV2RulesClient: RulesClientApi;
+  /**
+   * Runs `fn` with the rules client of the space's detection engine account, refused with 503 when
+   * the space is not set up. Maintenance uses it to turn rules back on, because a rule runs on the
+   * key of whoever enables it.
+   */
+  readonly withAccountAlertingV2RulesClient: <T>(
+    fn: (accountClient: RulesClientApi) => Promise<T>
+  ) => Promise<T>;
 }
 
 export interface ResolveSignificantEventsAlertingContextParams {
@@ -73,6 +81,7 @@ export function createSignificantEventsAlertingContextResolver(
             params.withAccountRulesClient((accountClient) => fn(toRulesManagement(accountClient))),
         }),
         alertingV2RulesClient,
+        withAccountAlertingV2RulesClient: params.withAccountRulesClient,
       };
     })();
     return promise;

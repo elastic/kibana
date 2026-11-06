@@ -25,6 +25,23 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('resume', () => {
+    it('enables the rules through the account in a set-up space', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      const { service, v2RulesClient, withAccountAlertingV2RulesClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      await service.resume({ request: REQUEST });
+
+      expect(withAccountAlertingV2RulesClient).toHaveBeenCalledTimes(1);
+      expect(accountClient.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
+      expect(v2RulesClient?.bulkEnableRules).not.toHaveBeenCalled();
+    });
+
     it('leaves the rules of a source disabled before or during the pause off', async () => {
       const { api } = makeManagementApi();
       const { service, v2RulesClient } = makeService({

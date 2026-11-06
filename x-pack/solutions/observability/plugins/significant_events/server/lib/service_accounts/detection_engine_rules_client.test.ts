@@ -9,6 +9,7 @@ import type {
   IRulesManagementClient,
   SignificantEventsRuleDefinition,
 } from '../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
+import { BulkCreateRulesError } from '../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import { DetectionEngineRulesClient } from './detection_engine_rules_client';
 
 const createRulesManagementClient = (): jest.Mocked<IRulesManagementClient> => ({
@@ -75,6 +76,31 @@ describe('DetectionEngineRulesClient', () => {
 
     await client.setRulesEnabled(['rule-2'], true);
     expect(account.rotateRulesApiKey).toHaveBeenLastCalledWith(['rule-2']);
+  });
+
+  it('keeps the created ids when re-keying fails after a mixed bulk create', async () => {
+    const { client, account } = setup();
+    account.bulkCreateRules.mockResolvedValueOnce({ createdIds: ['new'] });
+    account.rotateRulesApiKey.mockRejectedValueOnce(new Error('rotation failed'));
+
+    const error = await client
+      .bulkCreateRules([
+        { id: 'new', definition },
+        { id: 'existing', definition },
+      ])
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(BulkCreateRulesError);
+    expect(error).toMatchObject({ createdIds: ['new'], conflictIds: ['existing'] });
+  });
+
+  it('does not run as the account for an empty id list', async () => {
+    const { client, accountRuns } = setup();
+
+    await client.setRulesEnabled([], true);
+    await client.rotateRulesApiKey([]);
+
+    expect(accountRuns()).toBe(0);
   });
 
   it('disables and deletes rules as the caller, so turning rules off works without the account', async () => {

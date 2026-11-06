@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type {
-  IRulesManagementClient,
-  RuleOwnershipTagPrefix,
-  SignificantEventsRuleDefinition,
+import {
+  BulkCreateRulesError,
+  type IRulesManagementClient,
+  type RuleOwnershipTagPrefix,
+  type SignificantEventsRuleDefinition,
 } from '../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 
 type RunAsAccount = <T>(fn: (accountRules: IRulesManagementClient) => Promise<T>) => Promise<T>;
@@ -50,9 +51,19 @@ export class DetectionEngineRulesClient implements IRulesManagementClient {
       const result = await accountRules.bulkCreateRules(rules);
       // Only the rules that were updated in place keep their old key; created ones have the account's.
       const created = new Set(result.createdIds);
-      await accountRules.rotateRulesApiKey(
-        rules.map(({ id }) => id).filter((id) => !created.has(id))
-      );
+      const updatedIds = rules.map(({ id }) => id).filter((id) => !created.has(id));
+      try {
+        await accountRules.rotateRulesApiKey(updatedIds);
+      } catch (error) {
+        // The rules were already written. Keep the created ids in the error so the caller can
+        // delete them when it rolls the batch back; a plain error would hide them.
+        throw new BulkCreateRulesError(
+          error instanceof Error ? error : new Error(String(error)),
+          result.createdIds,
+          updatedIds,
+          []
+        );
+      }
       return result;
     });
   }
@@ -66,6 +77,10 @@ export class DetectionEngineRulesClient implements IRulesManagementClient {
   }
 
   setRulesEnabled(ids: string[], enabled: boolean): Promise<void> {
+    // Nothing to do, and no reason to mint the account's credential or fail a space that is not set up.
+    if (ids.length === 0) {
+      return Promise.resolve();
+    }
     return enabled
       ? this.runAsAccount(async (rules) => {
           await rules.setRulesEnabled(ids, true);
@@ -76,6 +91,9 @@ export class DetectionEngineRulesClient implements IRulesManagementClient {
   }
 
   rotateRulesApiKey(ids: string[]): Promise<void> {
+    if (ids.length === 0) {
+      return Promise.resolve();
+    }
     return this.runAsAccount((rules) => rules.rotateRulesApiKey(ids));
   }
 

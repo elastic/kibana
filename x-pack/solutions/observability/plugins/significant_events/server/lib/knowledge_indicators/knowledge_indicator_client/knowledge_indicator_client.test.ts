@@ -105,6 +105,7 @@ function createAlertingContext(
     alertsReader: ALERTS_READER_V2,
     rulesClient: rulesManagementClient,
     alertingV2RulesClient: {} as SignificantEventsAlertingContext['alertingV2RulesClient'],
+    withAccountAlertingV2RulesClient: jest.fn(),
   };
 }
 
