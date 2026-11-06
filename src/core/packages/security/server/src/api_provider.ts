@@ -14,6 +14,7 @@ import type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 
 import type { CoreAuditService } from './audit';
@@ -103,6 +104,17 @@ export interface ServiceAccountsServiceContract
     pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  /**
+   * Names the account a workload is bound to, reading it as Kibana.
+   * @param pluginId - The id of the plugin that owns the workload.
+   * @param params - The parameters.
+   * @returns The account's summary, or `null` when there is none to report.
+   */
+  getWorkloadServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null>;
 
   /**
    * Executes a function for a workload, scoped to the Service Account.
