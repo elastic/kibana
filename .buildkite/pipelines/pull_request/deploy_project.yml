@@ -5,6 +5,7 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
       diskSizeGb: 150
     timeout_in_minutes: 90
     retry:
@@ -17,6 +18,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
