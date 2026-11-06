@@ -227,14 +227,24 @@ export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
   });
 
   const { output } = runtime;
+  const logs = output?.kind === 'code' && output.logs.length > 0 ? output.logs : undefined;
 
+  // Without a console below the editor, the handle takes the footer divider's place.
   return (
-    <CellFrame cell={cell} runtime={runtime} onRun={() => run(draft)}>
+    <CellFrame
+      cell={cell}
+      runtime={runtime}
+      onRun={() => run(draft)}
+      resizeHandle={logs ? undefined : resizeHandle}
+    >
       <div
         ref={editorRef}
-        css={css`
-          margin-block-end: ${euiTheme.size.s};
-        `}
+        css={
+          logs &&
+          css`
+            margin-block-end: ${euiTheme.size.s};
+          `
+        }
       >
         <CodeEditor
           languageId="javascript"
@@ -260,11 +270,11 @@ export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
           dataTestSubj={`notebookCodeEditor-${cell.name}`}
         />
       </div>
-      {resizeHandle}
-      {output?.kind === 'code' && output.logs.length > 0 && (
+      {logs && (
         <>
+          {resizeHandle}
           <EuiSpacer size="s" />
-          <CodeConsole cellId={cell.id} logs={output.logs} />
+          <CodeConsole cellId={cell.id} logs={logs} />
         </>
       )}
     </CellFrame>
