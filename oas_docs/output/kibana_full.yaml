@@ -51879,6 +51879,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -51997,13 +52002,13 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
                           type: array
                         packages:
-                          description: Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.
+                          description: Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.
                           items:
                             additionalProperties: false
                             type: object
@@ -52029,6 +52034,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental; added in 9.7.0
                         provider:
                           description: Cloud provider.
                           enum:
@@ -52322,6 +52336,15 @@ paths:
                     type: string
                   maxItems: 100
                   type: array
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                  type: object
+                  x-state: Experimental; added in 9.7.0
                 provider:
                   description: Cloud provider.
                   enum:
@@ -52489,6 +52512,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -52607,7 +52635,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -52618,6 +52646,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -52924,6 +52961,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -53042,7 +53084,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -53053,6 +53095,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -53254,6 +53305,11 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      namespace:
+                        description: Data stream namespace the stack was last launched or updated with.
+                        maxLength: 100
+                        minLength: 1
+                        type: string
                       serviceConfigs:
                         description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                         items:
@@ -53373,7 +53429,7 @@ paths:
                   maxItems: 100
                   type: array
                 packagePolicyIds:
-                  description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                  description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                   items:
                     maxLength: 255
                     type: string
@@ -53384,6 +53440,15 @@ paths:
                     maxLength: 255
                     type: string
                   type: object
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
+                  type: object
+                  x-state: Experimental; added in 9.7.0
                 serviceNames:
                   additionalProperties:
                     maxLength: 256
@@ -53508,6 +53573,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -53626,7 +53696,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -53637,6 +53707,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -53870,6 +53949,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -53988,7 +54072,7 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
@@ -53999,6 +54083,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental; added in 9.7.0
                         provider:
                           description: Cloud provider.
                           enum:

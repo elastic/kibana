@@ -10,15 +10,14 @@ import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
-import { getSubjectTitle, type SubjectRowData } from './subject_title';
-import { isModifiedClick, useAlertsListLink, useSubjectLink } from './subject_link';
-import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
+import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './subject_title';
+import { useAlertsListLink, useSubjectLink } from './subject_link';
+import { useSubjectFlyout } from './use_subject_flyout';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -233,14 +232,12 @@ const CompactRow = ({
  * The subdued line under a row's title. Alerts listed under an "N alerts" row usually share the
  * rule name, so they also show when each alert started.
  */
-const getSubjectDescription = (
-  { type, snapshot }: SubjectRowData,
-  isNested: boolean
-): React.ReactNode => {
+const getSubjectDescription = (subject: SubjectRowData, isNested: boolean): React.ReactNode => {
+  const { type, snapshot } = subject;
   const start =
     type === 'alert' && isNested && snapshot?.start ? new Date(snapshot.start) : undefined;
   if (start === undefined || Number.isNaN(start.getTime())) {
-    return subjectTriggerLabel(type);
+    return subjectTriggerLabel(getSubjectDisplayType(subject));
   }
   return (
     <FormattedMessage
@@ -273,30 +270,14 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   isNested = false,
 }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
-  const { services } = useKibana<SubjectServices>();
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const source = subject.snapshot?.source;
-  // An alert opens next to the investigation; everything else keeps its link.
-  const opensFlyout = subject.type === 'alert' && canOpenSubjectFlyout(services, source);
-
-  const onRowClick = (event: React.MouseEvent) => {
-    if (!opensFlyout) {
-      onLinkClick?.(event);
-      return;
-    }
-    // A new-tab or new-window click keeps the browser's own behavior, so `href` still matters.
-    if (isModifiedClick(event)) {
-      return;
-    }
-    event.preventDefault();
-    setIsFlyoutOpen(true);
-  };
+  const { onClick: onRowClick, flyout } = useSubjectFlyout(subject, href, { onLinkClick });
+  const displayType = getSubjectDisplayType(subject);
 
   return (
     <>
       <CompactRow
-        iconType={SUBJECT_ICONS[subject.type]}
-        tone={SUBJECT_ICON_TONES[subject.type]}
+        iconType={SUBJECT_ICONS[displayType]}
+        tone={SUBJECT_ICON_TONES[displayType]}
         title={getSubjectTitle(subject)}
         description={getSubjectDescription(subject, isNested)}
         href={href}
@@ -305,26 +286,10 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
         isNested={isNested}
         data-test-subj={`investigationSubject-${subject.type}`}
       />
-      {isFlyoutOpen && (
-        <React.Suspense fallback={null}>
-          <LazySubjectDetailsFlyout
-            alertId={subject.id}
-            source={source}
-            detailsHref={href}
-            onClose={() => setIsFlyoutOpen(false)}
-            services={services}
-          />
-        </React.Suspense>
-      )}
+      {flyout}
     </>
   );
 };
-
-/** The flyout pulls in the alerting v2 episode UI, so it loads when a subject is clicked. */
-const LazySubjectDetailsFlyout = React.lazy(async () => {
-  const { SubjectDetailsFlyout } = await import('./subject_details_flyout');
-  return { default: SubjectDetailsFlyout };
-});
 
 const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 
