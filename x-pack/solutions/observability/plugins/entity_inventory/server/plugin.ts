@@ -112,8 +112,7 @@ export class EntityInventoryPlugin
         `Entity inventory found ${typeNames.length} entity definitions: ${typeNames.join(', ')}`
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Entity inventory could not read the entity definitions: ${message}`);
+      this.logger.warn(`Entity inventory could not read the entity definitions: ${error.message}`);
     }
   };
 }
