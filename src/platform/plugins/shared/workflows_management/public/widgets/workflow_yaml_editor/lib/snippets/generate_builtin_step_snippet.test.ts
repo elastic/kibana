@@ -177,7 +177,8 @@ describe('generateBuiltInStepSnippet', () => {
       expect(result).toContain('name: workflow_output_step');
       expect(result).toContain('type: workflow.output');
       expect(result).toContain('with:');
-      expect(result).toContain('output_name');
+      expect(result).toContain('result: "{{ steps.previous_step.output }}"');
+      expect(result).not.toContain('${');
     });
 
     it('should generate a workflow.output snippet with declared outputs', () => {
@@ -192,8 +193,9 @@ describe('generateBuiltInStepSnippet', () => {
         { full: true, withStepsSection: false },
         workflowOutputs
       );
-      expect(result).toContain('result:');
-      expect(result).toContain('count:');
+      expect(result).toContain('result: value');
+      expect(result).toContain('count: 0');
+      expect(result).not.toContain('${');
     });
 
     it('should use string placeholder for string-type outputs', () => {
@@ -208,6 +210,18 @@ describe('generateBuiltInStepSnippet', () => {
         workflowOutputs
       );
       expect(result).toContain('message:');
+    });
+  });
+
+  describe('workflow.fail step', () => {
+    it('should generate a workflow.fail snippet with a message', () => {
+      const result = generateBuiltInStepSnippet('workflow.fail', {
+        full: true,
+        withStepsSection: false,
+      });
+      expect(result).toContain('type: workflow.fail');
+      expect(result).toContain('with:');
+      expect(result).toContain('message: Workflow failed');
     });
   });
 
