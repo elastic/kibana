@@ -124,4 +124,39 @@ describe('DailyLimitField', () => {
 
     expect(onRaiseLimit).toHaveBeenCalledWith(15);
   });
+
+  it('hides the number input when unlimited while keeping the recommended badge', () => {
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <I18nProvider>
+        <DailyLimitField value="20" helpText="Help text" onChange={onChange} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationDailyLimit')).toHaveValue(20);
+    expect(screen.getByText('Recommended: 15–20')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+    expect(onChange).toHaveBeenCalledWith('unlimited');
+
+    rerender(
+      <I18nProvider>
+        <DailyLimitField value="unlimited" helpText="Help text" onChange={onChange} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('automationDailyLimit')).not.toBeInTheDocument();
+    expect(screen.getByText('Recommended: 15–20')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+    expect(onChange).toHaveBeenCalledWith('20');
+
+    rerender(
+      <I18nProvider>
+        <DailyLimitField value="20" helpText="Help text" onChange={onChange} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationDailyLimit')).toHaveValue(20);
+  });
 });
