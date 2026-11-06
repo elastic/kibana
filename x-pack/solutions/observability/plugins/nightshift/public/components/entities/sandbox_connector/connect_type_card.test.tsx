@@ -56,7 +56,7 @@ describe('ConnectTypeCard', () => {
 
   describe('without connectors of the type', () => {
     it('creates one from Connect and assigns it to the agent', async () => {
-      const { getAddConnectorFlyout, agents } = setup({ connectors: [] });
+      const { getAddConnectorFlyout, agents, toasts } = setup({ connectors: [] });
       // Connect is locked until the agent's permissions are known.
       await waitFor(() => expect(screen.getByTestId('.http-connect')).toBeEnabled());
 
@@ -75,6 +75,7 @@ describe('ConnectTypeCard', () => {
           connectorId: 'new',
         })
       );
+      expect(toasts.addSuccess).toHaveBeenCalledWith({ title: 'new connected' });
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
+import { EuiListGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import {
@@ -19,12 +19,6 @@ import { ConnectorListItem } from './connector_list_item';
 const editNoPermissionTooltip = i18n.translate('xpack.nightshift.connectorList.editNoPermission', {
   defaultMessage: 'You need permission to edit connectors.',
 });
-
-const listStyles = css`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
 
 export function ConnectorList({
   connectors,
@@ -44,7 +38,7 @@ export function ConnectorList({
   const { assignedIds, assign, unassign, canEditAgent, updatingId } = useAgentConnectors();
 
   return (
-    <ul css={listStyles} data-test-subj={dataTestSubj}>
+    <EuiListGroup maxWidth={false} data-test-subj={dataTestSubj}>
       {connectors.map((connector) => (
         <ConnectorListItem
           key={connector.id}
@@ -73,6 +67,6 @@ export function ConnectorList({
           }
         />
       ))}
-    </ul>
+    </EuiListGroup>
   );
 }

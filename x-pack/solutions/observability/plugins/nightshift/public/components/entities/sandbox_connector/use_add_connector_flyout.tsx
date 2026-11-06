@@ -36,7 +36,8 @@ export function useAddConnectorFlyout({
       initialConnector: getInitialSandboxConnector(addingType),
       onClose: () => setAddingType(undefined),
       onConnectorCreated: (connector) => {
-        assign(connector);
+        // Create + assign is one action: one "connected" toast, not Created + added.
+        assign(connector, { toast: 'connected' });
         refresh();
         onCreated?.(connector);
       },

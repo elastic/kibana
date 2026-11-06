@@ -295,7 +295,7 @@ export function NightshiftPage(): React.ReactElement | null {
   }
 
   // Until the space is set up, every page shows the regular onboarding, which starts at its
-  // "Enable Elastic Nightshift" step, for everyone: only admins can complete it.
+  // "Enable Elastic nightshift" step, for everyone: only admins can complete it.
   if (isSetupPending || needsSetup) {
     return (
       <ObservabilityPageTemplate
@@ -477,7 +477,8 @@ export function NightshiftPage(): React.ReactElement | null {
             ) : isOnboarding ? (
               <NightshiftOnboarding
                 latestInvestigation={onboarding.latestInvestigation}
-                automationsHref={canUseAutomations ? automationsHref : undefined}
+                automations={onboarding.automations}
+                canCreateAutomation={canUseAutomations}
                 onFinish={finishOnboarding}
               />
             ) : onboarding.isLoading ? (

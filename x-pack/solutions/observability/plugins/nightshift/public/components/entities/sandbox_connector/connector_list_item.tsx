@@ -11,6 +11,9 @@ import {
   EuiBadge,
   EuiButtonIcon,
   EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroupItem,
   EuiLoadingSpinner,
   EuiToolTip,
   useEuiTheme,
@@ -18,8 +21,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-
-const ACTIONS_CLASS = 'nightshiftConnectorListItem__actions';
 
 export function ConnectorListItem({
   connector,
@@ -45,36 +46,6 @@ export function ConnectorListItem({
   const { euiTheme } = useEuiTheme();
   const checkboxId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorListItem' });
 
-  const rowStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    border-radius: ${euiTheme.border.radius.medium};
-
-    &:hover,
-    &:focus-within {
-      background: ${euiTheme.colors.backgroundBaseSubdued};
-
-      .${ACTIONS_CLASS} {
-        opacity: 1;
-      }
-    }
-  `;
-  const labelStyles = css`
-    display: inline-flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-  `;
-
-  const actionsStyles = css`
-    display: flex;
-    gap: ${euiTheme.size.xs};
-    margin-left: auto;
-    opacity: 0;
-    transition: opacity ${euiTheme.animation.fast};
-  `;
-
   const openDetailsLabel = i18n.translate('xpack.nightshift.connectorList.openDetails', {
     defaultMessage: 'Open details for {name}',
     values: { name: connector.name },
@@ -91,60 +62,86 @@ export function ConnectorListItem({
       onChange={(event) => onToggle(event.target.checked)}
       disabled={isUpdating || toggleDisabledReason !== undefined}
       label={
-        <span css={labelStyles}>
-          {connector.name}
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{connector.name}</EuiFlexItem>
           {isUpdating && (
-            <EuiLoadingSpinner
-              size="s"
-              data-test-subj={`nightshiftConnectorListUpdating-${connector.id}`}
-            />
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner
+                size="s"
+                data-test-subj={`nightshiftConnectorListUpdating-${connector.id}`}
+              />
+            </EuiFlexItem>
           )}
           {connector.is_preconfigured && (
-            <EuiBadge color="hollow">
-              {i18n.translate('xpack.nightshift.connectorList.preconfiguredBadge', {
-                defaultMessage: 'Preconfigured',
-              })}
-            </EuiBadge>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.nightshift.connectorList.preconfiguredBadge', {
+                  defaultMessage: 'Preconfigured',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
           )}
-        </span>
+        </EuiFlexGroup>
       }
       data-test-subj={`nightshiftConnectorListToggle-${connector.id}`}
     />
   );
 
   return (
-    <li css={rowStyles} data-test-subj={`nightshiftConnectorListItem-${connector.id}`}>
-      {toggleDisabledReason === undefined ? (
-        checkbox
-      ) : (
-        <EuiToolTip position="top" content={toggleDisabledReason}>
-          {checkbox}
-        </EuiToolTip>
-      )}
-      <div className={ACTIONS_CLASS} css={actionsStyles}>
-        <EuiToolTip
-          content={openDetailsDisabledReason ?? openDetailsLabel}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="maximize"
-            aria-label={openDetailsLabel}
-            isDisabled={openDetailsDisabledReason !== undefined}
-            onClick={onOpenDetails}
-            data-test-subj={`nightshiftConnectorListOpenDetails-${connector.id}`}
-          />
-        </EuiToolTip>
-        <EuiToolTip content={deleteDisabledReason ?? deleteLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={deleteLabel}
-            isDisabled={deleteDisabledReason !== undefined}
-            onClick={onDelete}
-            data-test-subj={`nightshiftConnectorListDelete-${connector.id}`}
-          />
-        </EuiToolTip>
-      </div>
-    </li>
+    <EuiListGroupItem
+      data-test-subj={`nightshiftConnectorListItem-${connector.id}`}
+      // EUI only paints hover on interactive (button/link) rows. This row can't be a
+      // button — it nests a checkbox and action icons — so apply the same hover token.
+      css={css`
+        &:hover,
+        &:focus-within {
+          background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+      `}
+      label={
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={true}>
+            {toggleDisabledReason === undefined ? (
+              checkbox
+            ) : (
+              <EuiToolTip position="top" content={toggleDisabledReason}>
+                {checkbox}
+              </EuiToolTip>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={openDetailsDisabledReason ?? openDetailsLabel}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="maximize"
+                    color="text"
+                    aria-label={openDetailsLabel}
+                    isDisabled={openDetailsDisabledReason !== undefined}
+                    onClick={onOpenDetails}
+                    data-test-subj={`nightshiftConnectorListOpenDetails-${connector.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={deleteDisabledReason ?? deleteLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    aria-label={deleteLabel}
+                    isDisabled={deleteDisabledReason !== undefined}
+                    onClick={onDelete}
+                    data-test-subj={`nightshiftConnectorListDelete-${connector.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
   );
 }
