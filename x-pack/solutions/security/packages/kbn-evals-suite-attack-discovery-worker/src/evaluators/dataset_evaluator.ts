@@ -404,6 +404,9 @@ export const createEvaluateDataset =
         // Nothing in the runner reviews the seeded discovery, so the row reviews it itself. Its
         // execution id stays out of `dispatchedReviewExecutionIds` so coverage counts stay the runner's.
         if (seeded.seededDiscoveryId !== undefined) {
+          // Reviews the runner dispatched and parked at the analyst gate are read by now, and they
+          // hold the review workflow's concurrency slot, which the floor-parent run waits on.
+          await client.cancelPending();
           const { execution: review, timedOutAfterMs: reviewTimedOut } = await client.runReview({
             spaceId,
             floorWorkflowId,

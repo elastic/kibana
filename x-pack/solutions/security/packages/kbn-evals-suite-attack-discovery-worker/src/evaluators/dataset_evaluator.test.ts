@@ -448,6 +448,35 @@ describe('createEvaluateDataset', () => {
       expect(cleanup).toHaveBeenCalledTimes(1);
     });
 
+    it('cancels the runner-dispatched reviews that are parked before the floor is rewritten', async () => {
+      seedWithDiscovery();
+      const events: string[] = [];
+      const parked: string[] = [];
+      // Collecting makes the client track a review the runner dispatched and left at the analyst
+      // gate (`collect.ts` calls `client.track`); it holds the review workflow's slot until cancelled.
+      collect.mockImplementation(async () => {
+        parked.push('parked-review');
+        return quietArtifacts();
+      });
+      collectReview.mockResolvedValue(settledReview);
+      (client.cancelPending as jest.Mock).mockImplementationOnce(async () => {
+        events.push(...parked.splice(0).map((id) => `cancel ${id}`));
+      });
+      (client.runReview as jest.Mock).mockImplementationOnce(async () => {
+        events.push('floor rewrite');
+        return {
+          execution: {
+            id: 'review-1',
+            workflowId: 'system-security-attack-discovery-review',
+            status: 'completed',
+            stepExecutions: [],
+          },
+        };
+      });
+      await expect(evaluateRow('seeded-false-positive')).resolves.toBeUndefined();
+      expect(events).toEqual(['cancel parked-review', 'floor rewrite']);
+    });
+
     it('keeps the seeded review out of the runner-dispatched review ids', async () => {
       seedWithDiscovery();
       collect.mockResolvedValue(

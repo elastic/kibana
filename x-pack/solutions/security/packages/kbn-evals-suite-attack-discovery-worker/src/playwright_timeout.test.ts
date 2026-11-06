@@ -7,6 +7,7 @@
 
 import { WORKER_SCENARIOS } from '../datasets/worker_rows';
 import {
+  FLOOR_IDLE_WAIT_MS,
   getPlaywrightTestTimeoutMs,
   REVIEW_SETTLE_TIMEOUT_MS,
   RUNNER_TIMEOUT_MS,
@@ -23,9 +24,18 @@ describe('getPlaywrightTestTimeoutMs', () => {
     const worstRowMs = RUNNER_TIMEOUT_MS + 2 * REVIEW_SETTLE_TIMEOUT_MS;
 
     expect(getPlaywrightTestTimeoutMs(1)).toBeGreaterThan(worstRowMs);
-    // The second review wait is paid once (one row starts a floor-parent review), not per row.
+    // The second review wait and its two idle waits are paid once (one row starts a floor-parent
+    // review), not per row.
     expect(getPlaywrightTestTimeoutMs(2) - getPlaywrightTestTimeoutMs(1)).toBe(
-      getPlaywrightTestTimeoutMs(1) - REVIEW_SETTLE_TIMEOUT_MS
+      getPlaywrightTestTimeoutMs(1) - REVIEW_SETTLE_TIMEOUT_MS - 2 * FLOOR_IDLE_WAIT_MS
+    );
+  });
+
+  it('covers the floor settle wait of every row and the floor-parent review idle waits', () => {
+    const rowMs = RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + FLOOR_IDLE_WAIT_MS;
+
+    expect(getPlaywrightTestTimeoutMs(1)).toBeGreaterThan(
+      rowMs + REVIEW_SETTLE_TIMEOUT_MS + 2 * FLOOR_IDLE_WAIT_MS
     );
   });
 

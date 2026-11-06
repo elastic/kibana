@@ -161,8 +161,8 @@ export class AttackDiscoveryWorkerClient {
   /**
    * Runs the floor worker through the normal route, follows it to the child it dispatches
    * (`childWorkflowId`) and polls that child until `isDone` accepts it or it ends. Finding the
-   * child and polling it share one deadline of `maxWaitMs`, so the whole call is bounded by it. A
-   * timeout or an execution with no steps is returned, not thrown, so the row is scored (and fails
+   * child and polling it share one deadline of `maxWaitMs`; once the child has ended, the floor
+   * gets a further `FLOOR_IDLE_WAIT_MS` to settle, so a call takes at most the sum. A timeout or an execution with no steps is returned, not thrown, so the row is scored (and fails
    * by name) instead of vanishing from the results. When the floor ends without starting the
    * child, the floor's own execution is returned. Every execution started is pushed to `started`.
    */
@@ -230,13 +230,23 @@ export class AttackDiscoveryWorkerClient {
       this.forget(childExecutionId);
       // The engine only schedules the parent's resume when its child ends, so the floor can still
       // be active here. Leaving it unsettled would make the next floor-parent run see a busy floor.
-      const floor = await this.pollUntil({
+      // This is housekeeping: a failed read must not discard the finished child's result.
+      await this.pollUntil({
         spaceId,
         executionId: floorExecutionId,
         deadline: Date.now() + FLOOR_IDLE_WAIT_MS,
         maxWaitMs: FLOOR_IDLE_WAIT_MS,
-      });
-      if (isTerminal(floor.execution.status)) this.forget(floorExecutionId);
+      }).then(
+        ({ execution: floor }) => {
+          if (isTerminal(floor.status)) this.forget(floorExecutionId);
+        },
+        (error) =>
+          this.log.warning(
+            `Could not read floor execution ${floorExecutionId} after its child ended: ${errorMessage(
+              error
+            )}`
+          )
+      );
     }
     return polled;
   }

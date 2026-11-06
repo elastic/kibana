@@ -112,12 +112,15 @@ export const ROW_OVERHEAD_MS = 10 * 60_000;
 /**
  * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
  * timeouts, plus one more review wait for the seeded false-positive row's floor-parent review.
+ * Each run also lets the floor settle after its child ends, and the floor-parent run waits for
+ * the floor and review to go idle first, each up to `FLOOR_IDLE_WAIT_MS`.
  * Otherwise a slow model is killed mid-dataset with no scores, and the failure reads as a generic
  * test timeout instead of the suite's labeled one.
  */
 export const getPlaywrightTestTimeoutMs = (rowCount: number): number =>
-  rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS) +
-  REVIEW_SETTLE_TIMEOUT_MS;
+  rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS + FLOOR_IDLE_WAIT_MS) +
+  REVIEW_SETTLE_TIMEOUT_MS +
+  2 * FLOOR_IDLE_WAIT_MS;
 
 export const COHORT_ENV = 'AD_WORKER_EVAL_COHORT';
 export const REFERENCE_MODEL_ENV = 'AD_WORKER_EVAL_REFERENCE_MODEL';

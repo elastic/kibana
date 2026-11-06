@@ -8,7 +8,7 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parse } from 'yaml';
-import { FLOOR_IDLE_WAIT_MS } from './constants';
+import { FLOOR_IDLE_WAIT_MS, FLOOR_TICK_POLL_INTERVAL_MS, RUNNER_WORKFLOW_ID } from './constants';
 import { AttackDiscoveryWorkerClient, describeFloorDrift, usingClient } from './worker_client';
 
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
@@ -112,6 +112,7 @@ const fakeKibana = ({
   active = {},
   floorBusyListings = 0,
   floorRunningReads = 0,
+  floorReadFails = false,
   children = [{ workflowId: 'system-security-attack-discovery-review', executionId: 'review-9' }],
   initialYaml = FLOOR_YAML,
   floorStatus = 'failed',
@@ -134,6 +135,8 @@ const fakeKibana = ({
   floorBusyListings?: number;
   /** The floor execution reads `running` this many times before its `floorStatus` (resume pending). */
   floorRunningReads?: number;
+  /** Reading the floor execution (`floor-1`) fails, as a transient API error would. */
+  floorReadFails?: boolean;
   children?: Array<{ workflowId: string; executionId: string }>;
   initialYaml?: string;
   floorStatus?: string;
@@ -201,6 +204,7 @@ const fakeKibana = ({
       };
     }
     if (execution === 'floor-1') {
+      if (floorReadFails) throw Object.assign(new Error('floor read down'), { status: 502 });
       return {
         id: 'floor-1',
         status: cancelled.has('floor-1')
@@ -415,29 +419,64 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
   });
 
   describe('after the child ends while the floor parent is still resuming', () => {
-    beforeEach(() => jest.useFakeTimers({ doNotFake: ['nextTick'] }));
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ['nextTick'] });
+      (log.warning as jest.Mock).mockClear();
+    });
     afterEach(() => jest.useRealTimers());
+
+    const runRunner = (kibana: ReturnType<typeof fakeKibana>) => {
+      const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+      const result = client.run({ spaceId: 's', floorWorkflowId: 'floor' }).then(
+        (value) => ({ value }),
+        (error: unknown) => ({ error })
+      );
+      return { client, result };
+    };
+    const runnerChild = [{ workflowId: RUNNER_WORKFLOW_ID, executionId: 'review-9' }];
 
     it('returns only once the floor execution is terminal', async () => {
       const kibana = fakeKibana({ floorRunningReads: 3 });
       const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
-      const result = review(client);
+      const result = review(client).then(
+        (value) => ({ value }),
+        (error: unknown) => ({ error })
+      );
       await jest.advanceTimersByTimeAsync(60_000);
-      await expect(result).resolves.toBeDefined();
+      expect(await result).toHaveProperty('value');
       const floorReads = kibana.calls.filter(({ path }) => path.endsWith('/executions/floor-1'));
       expect(floorReads.length).toBeGreaterThan(3);
       expect(kibana.cancelled.size).toBe(0);
     });
 
-    it('warns and still returns the child when the floor does not settle in time', async () => {
-      const kibana = fakeKibana({ floorRunningReads: Number.MAX_SAFE_INTEGER });
-      const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
-      const result = review(client);
+    it('warns, returns the runner and leaves only the floor to cancel when it does not settle', async () => {
+      const kibana = fakeKibana({
+        children: runnerChild,
+        floorRunningReads: Number.MAX_SAFE_INTEGER,
+      });
+      const { client, result } = runRunner(kibana);
       await jest.advanceTimersByTimeAsync(FLOOR_IDLE_WAIT_MS + 60_000);
-      const polled = await result;
-      expect(polled.execution.id).toBe('review-9');
+      const outcome = await result;
+      expect(outcome).toHaveProperty('value.execution.id', 'review-9');
       expect(log.warning).toHaveBeenCalledWith(
         expect.stringMatching(/Execution floor-1 did not settle/)
+      );
+      await client.cancelPending();
+      expect(
+        kibana.calls.filter(({ path }) => path.endsWith('/cancel')).map(({ path }) => path)
+      ).toEqual([expect.stringContaining('/executions/floor-1/cancel')]);
+    });
+
+    it('still returns the finished child when reading the floor execution fails', async () => {
+      const kibana = fakeKibana({ children: runnerChild, floorReadFails: true });
+      const { result } = runRunner(kibana);
+      await jest.advanceTimersByTimeAsync(60_000);
+      const outcome = await result;
+      expect(outcome).toHaveProperty('value.execution.id', 'review-9');
+      expect(log.warning).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /Could not read floor execution floor-1 after its child ended: floor read down/
+        )
       );
     });
   });
@@ -446,12 +485,19 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
     beforeEach(() => jest.useFakeTimers({ doNotFake: ['nextTick'] }));
     afterEach(() => jest.useRealTimers());
 
+    const listingsOf = (kibana: ReturnType<typeof fakeKibana>, workflowId: string) =>
+      kibana.calls.filter(({ path }) => path.endsWith(`/workflow/${workflowId}/executions`));
+
     it('waits for the floor to go idle, then rewrites and runs', async () => {
       const kibana = fakeKibana({ floorBusyListings: 3 });
       const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
-      const result = review(client);
+      const outcome = review(client).then(
+        (value) => ({ value }),
+        (error: unknown) => ({ error })
+      );
       await jest.advanceTimersByTimeAsync(60_000);
-      await expect(result).resolves.toBeDefined();
+      expect(await outcome).toHaveProperty('value');
+      expect(listingsOf(kibana, 'floor').length).toBeGreaterThan(3);
       expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(2);
       expect(kibana.cancelled.size).toBe(0);
       expect(kibana.storedYaml()).toBe(FLOOR_YAML);
@@ -461,16 +507,26 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
       ['the floor', 'floor'],
       ['the review', 'system-security-attack-discovery-review'],
     ])(
-      'throws the busy error for %s once the wait is over, and changes nothing',
+      'keeps polling %s until the wait is over, then throws the busy error and changes nothing',
       async (_label, workflowId) => {
         const kibana = fakeKibana({ active: { [workflowId]: ['busy-1'] } });
         const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
-        const result = review(client).then(
-          () => undefined,
-          (thrown: unknown) => thrown
+        let settled = false;
+        const outcome = review(client).then(
+          () => {
+            settled = true;
+            return undefined;
+          },
+          (thrown: unknown) => {
+            settled = true;
+            return thrown;
+          }
         );
-        await jest.advanceTimersByTimeAsync(FLOOR_IDLE_WAIT_MS + 10_000);
-        expect(String(await result)).toMatch(
+        await jest.advanceTimersByTimeAsync(FLOOR_IDLE_WAIT_MS - FLOOR_TICK_POLL_INTERVAL_MS);
+        expect(settled).toBe(false);
+        expect(listingsOf(kibana, workflowId).length).toBeGreaterThan(1);
+        await jest.advanceTimersByTimeAsync(2 * FLOOR_TICK_POLL_INTERVAL_MS);
+        expect(String(await outcome)).toMatch(
           new RegExp(`"${workflowId}" has active executions \\(busy-1\\)`)
         );
         expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
