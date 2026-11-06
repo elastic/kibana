@@ -10,7 +10,10 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { SubscriptionStatus, SubscriptionStatusAction } from './types';
 
 const DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
-/** Length of the trial Elasticsearch starts. Extended trials run longer, so the meter is clamped. */
+/**
+ * Length of the trial Elasticsearch starts. The license only exposes its expiry date, not its issue
+ * date, so the meter assumes this length. Extended trials run longer, so the meter is clamped.
+ */
 const TRIAL_LENGTH_IN_DAYS = 30;
 const URGENT_DAYS_LEFT = 3;
 
