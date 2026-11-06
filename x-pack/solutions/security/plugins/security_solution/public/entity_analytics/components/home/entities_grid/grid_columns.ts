@@ -22,24 +22,34 @@ import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/t
 // Ordered list of all grid columns; GridColumnId and the rows-mode lists derive from it.
 const COLUMNS = [
   { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
-  { id: 'group_size', displayAsText: 'Records', initialWidth: 100 },
+  { id: 'group_size', displayAsText: 'Records', initialWidth: 100, schema: 'numeric' },
   {
     id: 'entity.relationships.resolution.resolved_to',
     displayAsText: 'Resolved to',
     initialWidth: 200,
   },
   { id: 'entity.EngineMetadata.Type', displayAsText: 'Entity type', initialWidth: 120 },
-  { id: 'entity.risk.calculated_score_norm', displayAsText: 'Risk score', initialWidth: 120 },
-  { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
+  {
+    id: 'entity.risk.calculated_score_norm',
+    displayAsText: 'Risk score',
+    initialWidth: 85,
+    schema: 'numeric',
+  },
+  {
+    id: 'risk_score_change',
+    displayAsText: 'Risk score change',
+    initialWidth: 160,
+    schema: 'numeric',
+  },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
-  { id: 'entity.source', displayAsText: 'Source', initialWidth: 140 },
-  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 140 },
-  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120 },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100 },
+  { id: 'entity.source', displayAsText: 'Source', initialWidth: 170 },
+  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 180 },
+  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 140 },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 110, schema: 'numeric' },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 90, schema: 'numeric' },
   { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200 },
-  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180 },
-  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
+  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 140 },
+  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 140 },
 ] as const satisfies readonly EuiDataGridColumn[];
 
 export type GridColumnId = (typeof COLUMNS)[number]['id'];

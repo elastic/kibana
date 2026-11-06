@@ -951,7 +951,7 @@ To retrieve machine learning job IDs, which are required to create machine learn
 ...
 ```
 
-Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+Additionally, you can set up notifications for when rules create alerts. The notifications use [Kibana Classic Alerting](https://www.elastic.co/docs/explore-analyze/alerting/alerts). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
 * Slack
 * Email
@@ -968,8 +968,8 @@ To retrieve connector IDs, which are required to configure rule notifications, c
 
 For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-* [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-* [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
+* [Kibana Classic Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+* [Kibana Classic Alerting](https://www.elastic.co/docs/explore-analyze/alerting/alerts)
 * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
 
     */
