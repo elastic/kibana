@@ -147,6 +147,32 @@ describe('BulkActionsResolver', () => {
         resolver.updateCheckTaskState('task1:check', { nbAgentsProcessed: 1 })
       ).rejects.toThrow('Could not update the state of task task1:check: Not Found');
     });
+
+    it('bumps only the timestamp for a heartbeat, leaving the checkpoint alone', async () => {
+      // a heartbeat landing after a batch advanced the checkpoint must not roll it back
+      await resolver.updateCheckTaskState('task1:check', {});
+
+      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
+      expect(stateMapFn({ searchAfter: ['a'], nbAgentsProcessed: 20000 }, 'task1:check')).toEqual({
+        searchAfter: ['a'],
+        nbAgentsProcessed: 20000,
+        checkpointUpdatedAt: expect.any(String),
+      });
+    });
+  });
+
+  describe('taskExists', () => {
+    it('is true for a task that exists', async () => {
+      taskManager.get.mockResolvedValue({ id: 'task1' } as any);
+
+      await expect(resolver.taskExists('task1')).resolves.toBe(true);
+    });
+
+    it('is false when the task cannot be read, so the caller still schedules', async () => {
+      taskManager.get.mockRejectedValue(new Error('Saved object not found'));
+
+      await expect(resolver.taskExists('task1')).resolves.toBe(false);
+    });
   });
 });
 
@@ -156,6 +182,7 @@ describe('createRetryTask', () => {
   let resolver: {
     removeIfExists: jest.Mock;
     getCheckTaskState: jest.Mock;
+    taskExists: jest.Mock;
     getTaskId: jest.Mock;
     run: jest.Mock;
   };
@@ -165,6 +192,11 @@ describe('createRetryTask', () => {
   const CHECK_TASK_ID = `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`;
   const RETRY_TASK_ID = `${BulkActionTaskType.REASSIGN_RETRY}:action1`;
   const CHECK_TASK_SCHEDULE = { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` };
+  /** A checkpoint the runner wrote but has not touched since the previous check task run. */
+  const STALLED_CHECKPOINT = {
+    checkpointUpdatedAt: '2026-10-16T18:48:34.000Z',
+    lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
+  };
 
   const createTaskInstance = (
     overrides: Partial<ConcreteTaskInstance> = {}
@@ -195,6 +227,7 @@ describe('createRetryTask', () => {
     resolver = {
       removeIfExists: jest.fn(),
       getCheckTaskState: jest.fn(),
+      taskExists: jest.fn().mockResolvedValue(false),
       getTaskId: jest.fn((actionId: string, type: string) => `${type}:${actionId}`),
       run: jest.fn(),
     };
@@ -361,15 +394,64 @@ describe('createRetryTask', () => {
         jest.fn()
       ).run();
 
+      // the freshest checkpoint timestamp is what gets recorded as observed, so the next run
+      // compares against what this one actually saw rather than against a stale value
       expect(result).toEqual({
         state: {
           searchAfter: ['newer'],
           nbAgentsProcessed: 40000,
           checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
-          lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
+          lastObservedCheckpointAt: '2026-10-16T18:50:00.000Z',
         },
         schedule: CHECK_TASK_SCHEDULE,
       });
+    });
+
+    it('re-reads the state after the liveness probe before deciding to resume', async () => {
+      // the runner heartbeats while a batch is in flight; one landing during the probe above
+      // would otherwise be missed and earn a live runner a second runner alongside it
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['lastAgent'],
+        checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
+      });
+
+      await createRetryTask(
+        createTaskInstance({
+          state: {
+            searchAfter: ['lastAgent'],
+            checkpointUpdatedAt: '2026-10-16T18:48:34.000Z',
+            lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
+          },
+        }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).not.toHaveBeenCalled();
+    });
+
+    it('does not resume into a retry task that is already queued', async () => {
+      // ensureScheduled is a no-op on an id that already exists, so this would log a resume and
+      // spend an attempt without scheduling anything
+      resolver.taskExists.mockResolvedValue(true);
+
+      const result = await createRetryTask(
+        createTaskInstance({
+          state: {
+            searchAfter: ['lastAgent'],
+            checkpointUpdatedAt: '2026-10-16T18:48:34.000Z',
+            lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
+          },
+        }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.taskExists).toHaveBeenCalledWith(RETRY_TASK_ID);
+      expect(resolver.run).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({ state: expect.not.objectContaining({ resumeCount: 1 }) })
+      );
     });
 
     it('hands the resume to the retry task rather than running it here', async () => {
@@ -409,7 +491,13 @@ describe('createRetryTask', () => {
       // the saved cursor's implicit _shard_doc tiebreaker only means anything inside the point in
       // time that produced it; a stall shorter than the keep alive leaves it usable
       await createRetryTask(
-        createTaskInstance({ state: { searchAfter: ['lastAgent'] } }),
+        createTaskInstance({
+          state: {
+            searchAfter: ['lastAgent'],
+            pitId: 'stale-pit',
+            ...STALLED_CHECKPOINT,
+          },
+        }),
         getDeps,
         jest.fn()
       ).run();
@@ -426,7 +514,13 @@ describe('createRetryTask', () => {
     it('prefers the checkpointed point in time over the one the action started with', async () => {
       // Elasticsearch can hand back a new id on any search, and only the latest is valid
       await createRetryTask(
-        createTaskInstance({ state: { searchAfter: ['lastAgent'], pitId: 'latest-pit' } }),
+        createTaskInstance({
+          state: {
+            searchAfter: ['lastAgent'],
+            pitId: 'latest-pit',
+            ...STALLED_CHECKPOINT,
+          },
+        }),
         getDeps,
         jest.fn()
       ).run();
@@ -511,7 +605,10 @@ describe('createRetryTask', () => {
             retryParams: { retryCount: 1, searchAfter: ['legacy'] },
             isCheckTask: true,
           },
-          state: { searchAfter: ['current'] },
+          state: {
+            searchAfter: ['current'],
+            ...STALLED_CHECKPOINT,
+          },
         }),
         getDeps,
         jest.fn()
@@ -520,6 +617,31 @@ describe('createRetryTask', () => {
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ searchAfter: ['current'] }),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('does not hand back a cursor the runner deliberately cleared', async () => {
+      // a 400 restart clears the cursor and the count together; falling back to the params would
+      // resurrect the cursor Elasticsearch just rejected
+      await createRetryTask(
+        createTaskInstance({
+          params: {
+            actionParams: { kuery: '', actionId: 'action1', total: 100000, batchSize: 10000 },
+            retryParams: { retryCount: 1, searchAfter: ['rejected'], nbAgentsProcessed: 30000 },
+            isCheckTask: true,
+          },
+          state: { nbAgentsProcessed: 0, ...STALLED_CHECKPOINT },
+        }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 }),
         expect.anything(),
         expect.anything(),
         expect.anything()
@@ -539,13 +661,17 @@ describe('createRetryTask', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stalled after'));
     });
 
-    it('keeps watching when scheduling the resume fails', async () => {
+    it('keeps watching, and counts the attempt, when scheduling the resume fails', async () => {
       resolver.run.mockRejectedValue(new Error('Request timed out'));
 
       const result = await createRetryTask(createTaskInstance(), getDeps, jest.fn()).run();
 
-      // the watchdog survives, so the next tick can try again
-      expect(result).toEqual({ state: {}, schedule: CHECK_TASK_SCHEDULE });
+      // the watchdog survives so the next tick can try again, but the attempt still counts:
+      // otherwise an action whose resume can never be scheduled is watched forever
+      expect(result).toEqual({
+        state: expect.objectContaining({ resumeCount: 1 }),
+        schedule: CHECK_TASK_SCHEDULE,
+      });
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Request timed out'),
         expect.anything()

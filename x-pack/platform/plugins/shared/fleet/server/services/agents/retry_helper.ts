@@ -11,8 +11,28 @@ import { BulkActionTaskType } from './bulk_action_types';
 
 export const MAX_RETRY_COUNT = 20;
 
+/**
+ * Raised when Elasticsearch rejects the `search_after` cursor a run resumed from, as opposed to
+ * any other bad request. Only the first search of a run can raise it: every later page searches
+ * with a cursor Elasticsearch has just handed back, and a batch's own writes raise ordinary
+ * errors.
+ */
+export class RejectedCheckpointError extends Error {
+  constructor(public readonly cause: Error) {
+    super(cause.message);
+    this.name = 'RejectedCheckpointError';
+  }
+}
+
 /** How often the check task wakes up to verify that the action is still making progress. */
 export const CHECK_TASK_INTERVAL_MINUTES = 5;
+
+/**
+ * How often a running runner refreshes `checkpointUpdatedAt` while a batch is in flight. It has
+ * to be comfortably below CHECK_TASK_INTERVAL_MINUTES so that there is always at least one
+ * refresh between two consecutive check task runs, otherwise a live runner still looks dead.
+ */
+export const RUNNER_HEARTBEAT_INTERVAL_MINUTES = 2;
 
 /**
  * Upper bound on how many times the check task may restart a stalled runner before giving up,
@@ -27,22 +47,13 @@ export interface RetryParams {
   taskId?: string;
   /** Agents processed by earlier runs of this action, so the count stays cumulative. */
   nbAgentsProcessed?: number;
-  /**
-   * Set once an action has been restarted from the beginning because Elasticsearch rejected its
-   * saved cursor. `processBatch` identifies an already actioned batch by its first agent, which
-   * only identifies a batch while batch boundaries are stable; a restart under a different sort
-   * moves them, so a new batch could share its first agent with an old one while also holding
-   * agents that were never actioned. The guard is therefore dropped for the rest of the action,
-   * which is consistent with a restart re-actioning agents anyway.
-   */
-  skipBatchDedupe?: boolean;
 }
 
 /**
  * State of the recurring check task that watches over a bulk action runner.
  *
- * `searchAfter` / `nbAgentsProcessed` / `checkpointUpdatedAt` are written by the runner after
- * every batch; `lastObservedCheckpointAt` / `resumeCount` are written by the check task itself.
+ * `searchAfter` / `pitId` / `nbAgentsProcessed` / `checkpointUpdatedAt` are written by the runner;
+ * `lastObservedCheckpointAt` / `resumeCount` are written by the check task itself.
  */
 export interface BulkActionCheckTaskState {
   searchAfter?: SortResults;
@@ -52,6 +63,15 @@ export interface BulkActionCheckTaskState {
    */
   pitId?: string;
   nbAgentsProcessed?: number;
+  /**
+   * Last time the runner wrote to this state, either by advancing past a batch or by a heartbeat
+   * while one was in flight. Its only use is liveness: the check task resumes the action when it
+   * has not moved since the previous run.
+   *
+   * Its presence is also what tells a cleared checkpoint apart from one that was never written:
+   * once the runner has stamped it, the checkpoint in the task's params is stale by definition
+   * and must not be read as a fallback.
+   */
   checkpointUpdatedAt?: string;
   lastObservedCheckpointAt?: string;
   resumeCount?: number;

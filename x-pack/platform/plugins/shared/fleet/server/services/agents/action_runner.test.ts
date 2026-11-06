@@ -21,7 +21,11 @@ import {
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentActions } from './actions';
 import { getAgentsByKuery, openPointInTime } from './crud';
-import { CHECK_TASK_INTERVAL_MINUTES, MAX_RETRY_COUNT } from './retry_helper';
+import {
+  CHECK_TASK_INTERVAL_MINUTES,
+  MAX_RETRY_COUNT,
+  RUNNER_HEARTBEAT_INTERVAL_MINUTES,
+} from './retry_helper';
 
 jest.mock('./crud');
 jest.mock('./actions');
@@ -46,6 +50,8 @@ class TestActionRunner extends ActionRunner {
   public processAgentsError?: Error;
   /** Let the first N batches succeed before `processAgentsError` is thrown. */
   public failFromBatch = 0;
+  /** Held by a batch that is still in flight, to exercise the heartbeat. */
+  public batchInFlight?: Promise<void>;
 
   protected getActionType() {
     return 'test-action';
@@ -56,6 +62,9 @@ class TestActionRunner extends ActionRunner {
   }
 
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    if (this.batchInFlight) {
+      await this.batchInFlight;
+    }
     if (this.processAgentsError && this.processedBatches.length >= this.failFromBatch) {
       throw this.processAgentsError;
     }
@@ -65,6 +74,14 @@ class TestActionRunner extends ActionRunner {
 }
 
 const createAgent = (id: string): Agent => ({ id, sort: [id] } as unknown as Agent);
+
+const badRequest = (type: string) =>
+  new EsErrors.ResponseError({
+    statusCode: 400,
+    body: { error: { type } },
+    warnings: [],
+    meta: {} as any,
+  });
 
 /** Mock `getAgentsByKuery` to return `nbPages` pages of `perPage` agents. */
 const mockAgentPages = (nbPages: number, perPage: number) => {
@@ -304,34 +321,23 @@ describe('ActionRunner', () => {
     });
 
     it('restarts from the beginning when Elasticsearch rejects the saved cursor', async () => {
-      mockAgentPages(2, 2);
       // a checkpoint taken under the pre-upgrade sort has one value per old sort clause, so it
-      // no longer fits the sort this runner uses and Elasticsearch rejects it
+      // no longer fits the sort this runner uses and the search that replays it is rejected
+      mockedGetAgentsByKuery.mockRejectedValue(badRequest('illegal_argument_exception'));
       const runner = createRunner(
         {},
         { searchAfter: ['2026-01-01', 'host-a', 12345], nbAgentsProcessed: 40 }
       );
-      runner.processAgentsError = new EsErrors.ResponseError({
-        statusCode: 400,
-        body: { error: { type: 'illegal_argument_exception' } },
-        warnings: [],
-        meta: {} as any,
-      });
 
       await runner.runActionAsyncWithRetry();
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('rejected the saved checkpoint')
       );
-      // cursor and count restart together, otherwise the count would never match the total, and
-      // the batch dedupe guard is dropped because the new sort moves the batch boundaries it keys on
+      // cursor and count restart together, otherwise the count would never match the total
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({
-          searchAfter: undefined,
-          nbAgentsProcessed: 0,
-          skipBatchDedupe: true,
-        }),
+        expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 }),
         TASK_TYPE,
         RETRY_TASK_ID
       );
@@ -342,18 +348,33 @@ describe('ActionRunner', () => {
       );
     });
 
+    it('keeps the count on a 400 raised by the first batch of a resumed run', async () => {
+      mockAgentPages(2, 2);
+      // the search replaying the cursor succeeded, so Elasticsearch accepted it; this 400 comes
+      // from the batch's own writes and must be retried rather than restart the action
+      const runner = createRunner({}, { searchAfter: ['agent-1'], nbAgentsProcessed: 40 });
+      runner.processAgentsError = badRequest('illegal_argument_exception');
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining('rejected the saved checkpoint')
+      );
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ searchAfter: ['agent-1'], nbAgentsProcessed: 40 }),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
     it('keeps the count on a 400 raised once the cursor has been accepted', async () => {
       mockAgentPages(3, 2);
       const runner = createRunner({ total: 6 }, { searchAfter: ['agent-1'], nbAgentsProcessed: 2 });
       // the first batch pages fine, so Elasticsearch accepted the resumed cursor; this 400 comes
       // from somewhere else and must not restart the action
       runner.failFromBatch = 1;
-      runner.processAgentsError = new EsErrors.ResponseError({
-        statusCode: 400,
-        body: { error: { type: 'illegal_argument_exception' } },
-        warnings: [],
-        meta: {} as any,
-      });
+      runner.processAgentsError = badRequest('illegal_argument_exception');
 
       await runner.runActionAsyncWithRetry();
 
@@ -369,14 +390,8 @@ describe('ActionRunner', () => {
     });
 
     it('keeps the count on a 400 raised before any cursor was saved', async () => {
-      mockAgentPages(2, 2);
+      mockedGetAgentsByKuery.mockRejectedValue(badRequest('parsing_exception'));
       const runner = createRunner({}, { searchAfter: undefined, nbAgentsProcessed: 40 });
-      runner.processAgentsError = new EsErrors.ResponseError({
-        statusCode: 400,
-        body: { error: { type: 'parsing_exception' } },
-        warnings: [],
-        meta: {} as any,
-      });
 
       await runner.runActionAsyncWithRetry();
 
@@ -465,6 +480,42 @@ describe('ActionRunner', () => {
       );
     });
 
+    it('heartbeats the checkpoint while a batch is in flight, and stops when the run ends', async () => {
+      jest.useFakeTimers();
+      try {
+        mockAgentPages(1, 2);
+        let releaseBatch = () => {};
+        const runner = createRunner({ total: 2 });
+        runner.batchInFlight = new Promise<void>((resolve) => {
+          releaseBatch = resolve;
+        });
+
+        const run = runner.runActionAsyncWithRetry();
+        await jest.advanceTimersByTimeAsync(RUNNER_HEARTBEAT_INTERVAL_MINUTES * 60 * 1000);
+
+        // only the timestamp is refreshed: the cursor and the count are valid between batches
+        // only, and a heartbeat landing after a batch advanced them would roll them back
+        expect(resolver.updateCheckTaskState).toHaveBeenCalledWith(CHECK_TASK_ID, {});
+
+        releaseBatch();
+        await run;
+
+        const callsWhileRunning = resolver.updateCheckTaskState.mock.calls.length;
+        await jest.advanceTimersByTimeAsync(RUNNER_HEARTBEAT_INTERVAL_MINUTES * 60 * 1000 * 2);
+
+        // a timer left behind would keep a finished action looking alive forever
+        expect(resolver.updateCheckTaskState).toHaveBeenCalledTimes(callsWhileRunning);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('heartbeats often enough to be seen between two check task runs', () => {
+      // the check task compares the checkpoint timestamp against the one it saw an interval ago,
+      // so a live runner has to write at least once between two of its runs
+      expect(RUNNER_HEARTBEAT_INTERVAL_MINUTES).toBeLessThan(CHECK_TASK_INTERVAL_MINUTES);
+    });
+
     it('pages on a unique sort key, so a checkpoint survives a new point in time', async () => {
       mockAgentPages(2, 2);
 
@@ -510,19 +561,21 @@ describe('ActionRunner', () => {
       expect(mockedOpenPointInTime).not.toHaveBeenCalled();
     });
 
-    it('counts a batch the dedupe guard skips, so the count still reaches the total', async () => {
+    it('counts a batch whose agents were all actioned, so the count still reaches the total', async () => {
       mockAgentPages(2, 2);
       // the previous run actioned batch 1 but died before checkpointing it, so the resume starts
       // from scratch and finds its action document
       mockedGetAgentActions.mockResolvedValue([
-        { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
+        { agents: ['agent-0', 'agent-1'], type: 'POLICY_REASSIGN' },
       ] as any);
 
       const runner = createRunner({}, { nbAgentsProcessed: 0, searchAfter: undefined });
       await runner.runActionAsyncWithRetry();
 
-      // batch 1 is not actioned again, but its agents are done and must be counted: leaving them
-      // out would hold the count below `total` and completion would never be recognised
+      // batch 1 does not reach processAgents at all — the subclasses that reject a batch with
+      // nothing left to do would otherwise fail it through the whole retry budget — but its
+      // agents are done and must be counted, or the count stays below `total` and completion is
+      // never recognised
       expect(runner.processedBatches).toEqual([['agent-2', 'agent-3']]);
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
         CHECK_TASK_ID,
@@ -530,21 +583,53 @@ describe('ActionRunner', () => {
       );
     });
 
-    it('actions a batch again rather than dedupe it after a restart from scratch', async () => {
+    it('drops only the already actioned agents from a batch, not the whole batch', async () => {
       mockAgentPages(2, 2);
-      // a document from before the restart, whose batch no longer means the same set of agents
+      // after a restart from the beginning the same agents repage into different batches, so a
+      // batch can share its first agent with an actioned one while holding agents that are new
+      mockedGetAgentActions.mockResolvedValue([
+        { agents: ['agent-0', 'agent-2'], type: 'POLICY_REASSIGN' },
+      ] as any);
+
+      const runner = createRunner({}, { nbAgentsProcessed: 0, searchAfter: undefined });
+      await runner.runActionAsyncWithRetry();
+
+      // keying the guard on a batch's first agent would have skipped both batches entirely and
+      // silently dropped agent-1 and agent-3
+      expect(runner.processedBatches).toEqual([['agent-1'], ['agent-3']]);
+    });
+
+    it('reads the actioned agents once per run rather than once per batch', async () => {
+      mockAgentPages(3, 2);
       mockedGetAgentActions.mockResolvedValue([
         { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
       ] as any);
 
-      const runner = createRunner({}, { skipBatchDedupe: true });
+      await createRunner({ total: 6 }).runActionAsyncWithRetry();
+
+      expect(mockedGetAgentActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not dedupe update tags, whose retries re-action agents whose write did not land', async () => {
+      mockAgentPages(1, 2);
+      mockedGetAgentActions.mockResolvedValue([
+        { agents: ['agent-0', 'agent-1'], type: 'UPDATE_TAGS' },
+      ] as any);
+
+      const runner = createRunner({ total: 2 });
       await runner.runActionAsyncWithRetry();
 
-      // matching on the first agent could otherwise skip a batch holding agents never actioned
-      expect(runner.processedBatches).toEqual([
-        ['agent-0', 'agent-1'],
-        ['agent-2', 'agent-3'],
-      ]);
+      // the retry's kuery already excludes the agents whose tags were written, so an agent that
+      // still matches it has to run again
+      expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
+    });
+
+    it('does not look for actioned agents on a first attempt', async () => {
+      mockAgentPages(1, 2);
+
+      await createRunner({ total: 2 }, { retryCount: undefined }).runActionAsyncWithRetry();
+
+      expect(mockedGetAgentActions).not.toHaveBeenCalled();
     });
 
     it('does not inflate the count when resuming, because the cursor moves with it', async () => {

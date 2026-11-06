@@ -209,7 +209,9 @@ export class BulkActionsResolver {
    */
   public async updateCheckTaskState(
     taskId: string,
-    checkpoint: Pick<BulkActionCheckTaskState, 'searchAfter' | 'pitId' | 'nbAgentsProcessed'>
+    checkpoint: Partial<
+      Pick<BulkActionCheckTaskState, 'searchAfter' | 'pitId' | 'nbAgentsProcessed'>
+    >
   ) {
     const logger = appContextService.getLogger();
     if (!this.taskManager) {
@@ -238,8 +240,8 @@ export class BulkActionsResolver {
   }
 
   /**
-   * Read a check task's current state. Used to merge watcher metadata onto the freshest
-   * checkpoint rather than onto the one claimed at the start of the run.
+   * Read a check task's current state. Used both to decide on the freshest checkpoint rather than
+   * on the one claimed at the start of the run, and to merge watcher metadata onto it.
    */
   public async getCheckTaskState(taskId: string): Promise<BulkActionCheckTaskState | undefined> {
     if (!this.taskManager) {
@@ -253,6 +255,24 @@ export class BulkActionsResolver {
         .getLogger()
         .debug(`Could not read the state of task ${taskId}: ${error.message}`);
       return undefined;
+    }
+  }
+
+  /**
+   * Whether a task document exists. Used by the check task to tell a retry that is already queued
+   * from an action that nothing is going to pick up: `ensureScheduled` is a no-op on an id that
+   * already exists, so resuming into one would do nothing while still spending a resume attempt.
+   */
+  public async taskExists(taskId: string): Promise<boolean> {
+    if (!this.taskManager) {
+      return false;
+    }
+    try {
+      return !!(await this.taskManager.get(taskId));
+    } catch (error) {
+      // A missing task throws a 404 from the saved objects client; anything else is also safest
+      // read as "cannot tell", which lets the caller go ahead and schedule.
+      return false;
     }
   }
 }
@@ -291,8 +311,9 @@ const hasRecentActionDoc = async (
 
 /**
  * Handler for the recurring check task that watches a bulk action runner. It only restarts the
- * runner when the action has made no progress since the previous run, so a slow-but-alive runner
- * never ends up with a second runner alongside it.
+ * runner when nothing has written to the checkpoint since the previous run, so a slow-but-alive
+ * runner — which heartbeats the checkpoint while a batch is in flight — never ends up with a
+ * second runner alongside it.
  */
 const runCheckTask = async (
   taskInstance: ConcreteTaskInstance,
@@ -342,16 +363,48 @@ const runCheckTask = async (
     return deleteSelf();
   }
 
-  const checkpointMoved =
-    !!state.checkpointUpdatedAt && state.checkpointUpdatedAt !== state.lastObservedCheckpointAt;
-  const hasRecentBatch = await hasRecentActionDoc(esClient, actionId, CHECK_TASK_INTERVAL_MINUTES);
-
-  if (checkpointMoved || hasRecentBatch) {
-    logger.debug(`Bulk action ${actionId} is still progressing, not resuming`);
-    return await withWatcherFields({ lastObservedCheckpointAt: state.checkpointUpdatedAt });
+  if (!resolver) {
+    logger.warn(`Cannot resume bulk action ${actionId}, the bulk actions resolver is unavailable`);
+    return { state, schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` } };
   }
 
-  const resumeCount = (state.resumeCount ?? 0) + 1;
+  const hasRecentBatch = await hasRecentActionDoc(esClient, actionId, CHECK_TASK_INTERVAL_MINUTES);
+
+  // Re-read the state after the probe above rather than deciding on the state claimed at the
+  // start of this run. A live runner heartbeats every RUNNER_HEARTBEAT_INTERVAL_MINUTES, and a
+  // heartbeat landing during the probe would otherwise be missed and earn it a second runner.
+  const freshState = (await resolver.getCheckTaskState(taskInstance.id)) ?? state;
+  const { checkpointUpdatedAt } = freshState;
+  const checkpointMoved =
+    !!checkpointUpdatedAt && checkpointUpdatedAt !== state.lastObservedCheckpointAt;
+
+  if (checkpointMoved || hasRecentBatch) {
+    logger.debug(`Bulk action ${actionId} is still alive, not resuming`);
+    return await withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt });
+  }
+
+  // Re-check completion against the fresh state: the runner may have finished during the probe,
+  // and its own removal of this task races with the return value below.
+  if (total !== undefined && (freshState.nbAgentsProcessed ?? 0) >= total) {
+    logger.debug(
+      `Bulk action ${actionId} is complete (${freshState.nbAgentsProcessed}/${total} agents), removing check task ${taskInstance.id}`
+    );
+    return deleteSelf();
+  }
+
+  const retryTaskId = resolver.getTaskId(actionId, taskInstance.taskType);
+
+  // A retry task under this id is already going to restart the action, and `ensureScheduled`
+  // would be a no-op on it, so resuming into it would log a resume and spend an attempt without
+  // scheduling anything.
+  if (await resolver.taskExists(retryTaskId)) {
+    logger.debug(
+      `Bulk action ${actionId} already has a retry task queued as ${retryTaskId}, not resuming`
+    );
+    return await withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt });
+  }
+
+  const resumeCount = (freshState.resumeCount ?? 0) + 1;
   if (resumeCount > MAX_CHECK_TASK_RESUMES) {
     logger.warn(
       `Bulk action ${actionId} stalled after ${MAX_CHECK_TASK_RESUMES} resume attempts, giving up and removing check task ${taskInstance.id}`
@@ -360,51 +413,70 @@ const runCheckTask = async (
   }
 
   logger.info(
-    `Bulk action ${actionId} made no progress in the last ${CHECK_TASK_INTERVAL_MINUTES}m, resuming (attempt ${resumeCount}) from batch ${state.searchAfter}`
+    `Bulk action ${actionId} made no progress in the last ${CHECK_TASK_INTERVAL_MINUTES}m, resuming (attempt ${resumeCount}) from batch ${freshState.searchAfter}`
   );
 
+  // A checkpoint the runner has written supersedes the one in the task's params, including when
+  // it has been cleared: a 400 restart clears the cursor deliberately, and falling back to the
+  // params would hand the rejected cursor straight back. `checkpointUpdatedAt` is what tells the
+  // two apart — only a check task created before the checkpoint moved into task state still has
+  // a checkpoint in its params worth reading.
+  //
   // getRetryParams is applied last so action types that must restart from scratch (update tags,
   // whose kuery excludes already-tagged agents) still have the checkpoint stripped.
   const params = taskInstance.params as BulkActionTaskParams;
+  const checkpoint: Pick<RetryParams, 'searchAfter' | 'nbAgentsProcessed' | 'pitId'> =
+    checkpointUpdatedAt
+      ? {
+          searchAfter: freshState.searchAfter,
+          nbAgentsProcessed: freshState.nbAgentsProcessed,
+          // The point in time is taken from the checkpoint, not from the params: Elasticsearch
+          // may hand back a new id on any search, and only the latest one is guaranteed to be
+          // valid. It is kept rather than cleared because a stall shorter than its keep alive
+          // leaves it usable, and if it has expired the search 404s and that handler clears it so
+          // the next run opens a fresh one.
+          pitId: freshState.pitId,
+        }
+      : {
+          searchAfter: params.retryParams?.searchAfter,
+          nbAgentsProcessed: params.retryParams?.nbAgentsProcessed,
+          pitId: params.retryParams?.pitId,
+        };
   const retryParams = getRetryParams(taskInstance.taskType, {
     ...params.retryParams,
-    // A check task scheduled before this change kept its checkpoint in params rather than state.
-    searchAfter: state.searchAfter ?? params.retryParams?.searchAfter,
-    nbAgentsProcessed: state.nbAgentsProcessed ?? params.retryParams?.nbAgentsProcessed,
-    // The point in time is taken from the checkpoint, not from the params: Elasticsearch may
-    // hand back a new id on any search, and only the latest one is guaranteed to be valid. It is
-    // kept rather than cleared because a stall shorter than its keep alive leaves it usable, and
-    // if it has expired the search 404s and that handler clears it so the next run opens a fresh
-    // one.
-    pitId: state.pitId ?? params.retryParams?.pitId,
+    ...checkpoint,
   });
 
   // The runner is started by its own retry task rather than detached from this one. It outlives
   // this task's timeout either way, but running it elsewhere keeps it from writing a checkpoint
   // while Task Manager is persisting the state returned below, and gives the resume the same
   // scheduling and failure handling as an ordinary retry.
-  if (!resolver) {
-    logger.warn(`Cannot resume bulk action ${actionId}, the bulk actions resolver is unavailable`);
-    return { state, schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` } };
+  try {
+    await resolver.run(
+      actionParams,
+      { ...retryParams, retryCount: 1, taskId: retryTaskId },
+      taskInstance.taskType,
+      retryTaskId,
+      // Scheduling must not retry on its own backoff here. This task is itself the retry loop, so
+      // a transient failure costs one interval, while the default backoff sleeps longer than the
+      // 1m task timeout. An expired run is worse than a late one: `shouldUpdateExpiredTask` in
+      // Task Manager reads the schedule off the stored document, so a check task created before
+      // this was recurring would have the schedule returned below discarded and be removed as a
+      // finished one-shot task, leaving the action unwatched.
+      { maxRetryAttempts: 0 }
+    );
+  } catch (error) {
+    // The attempt is counted either way, so an action whose resume keeps failing to schedule
+    // trips MAX_CHECK_TASK_RESUMES instead of being watched forever.
+    logger.error(
+      `Could not schedule the resume of bulk action ${actionId} (attempt ${resumeCount}): ${error.message}`,
+      { error }
+    );
   }
-  const retryTaskId = resolver.getTaskId(actionId, taskInstance.taskType);
-  await resolver.run(
-    actionParams,
-    { ...retryParams, retryCount: 1, taskId: retryTaskId },
-    taskInstance.taskType,
-    retryTaskId,
-    // Scheduling must not retry on its own backoff here. This task is itself the retry loop, so a
-    // transient failure costs one interval, while the default backoff sleeps longer than the 1m
-    // task timeout. An expired run is worse than a late one: `shouldUpdateExpiredTask` in Task
-    // Manager reads the schedule off the stored document, so a check task created before this was
-    // recurring would have the schedule returned below discarded and be removed as a finished
-    // one-shot task, leaving the action unwatched.
-    { maxRetryAttempts: 0 }
-  );
 
   return await withWatcherFields({
     resumeCount,
-    lastObservedCheckpointAt: state.checkpointUpdatedAt,
+    lastObservedCheckpointAt: checkpointUpdatedAt,
   });
 };
 
