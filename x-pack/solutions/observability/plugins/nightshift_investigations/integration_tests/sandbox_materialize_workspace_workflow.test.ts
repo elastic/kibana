@@ -85,10 +85,10 @@ describe('sandbox materialize workspace workflow, first execution', () => {
     );
     // Each call names its own step, and all of them name the same run of the workflow, which is
     // what lets the audit events of one run be followed from step to sandbox.
-    const workloads = fixture.sandboxStart.getSessionForSpace.mock.calls.map(([, , w]) => w);
-    expect(new Set(workloads.map((w) => (w as { stepId: string }).stepId)).size).toBe(4);
+    const callers = fixture.sandboxStart.getSessionForSpace.mock.calls.map(([, , w]) => w);
+    expect(new Set(callers.map((w) => (w as { stepId: string }).stepId)).size).toBe(4);
     expect(
-      new Set(workloads.map((w) => (w as { workflowExecutionId?: string }).workflowExecutionId))
+      new Set(callers.map((w) => (w as { workflowExecutionId?: string }).workflowExecutionId))
     ).toEqual(new Set(['fake_workflow_execution_id']));
     for (const writer of [
       hydrateCortexWorkspace,

@@ -11,7 +11,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
-import { getSandboxStepWorkload } from './sandbox_workload';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck sandbox allocate so it cannot stall hydrate or optimize. */
@@ -89,7 +89,7 @@ export const obtainSandboxStepDefinition = ({
         const session = sandboxStart.getSessionForSpace(
           spaceId,
           conversationId,
-          getSandboxStepWorkload(context)
+          getSandboxStepCaller(context)
         );
 
         // Stat is enough: the session allocates on the first RPC, including workspace restore.

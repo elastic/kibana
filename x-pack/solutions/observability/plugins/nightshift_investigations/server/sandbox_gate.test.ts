@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { CoreAuditService } from '@kbn/core-security-server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
-import type { SandboxWorkload } from './sandbox_audit';
+import type { SandboxCaller } from './sandbox_audit';
 import {
   SANDBOX_AUDIT_UNAVAILABLE_MESSAGE,
   SANDBOX_DISABLED_MESSAGE,
@@ -27,7 +27,7 @@ const audit = {
 } as unknown as CoreAuditService;
 
 const request = {} as KibanaRequest;
-const workload: SandboxWorkload = { type: 'tool', toolId: 'tool', toolCallId: 'call' };
+const caller: SandboxCaller = { type: 'tool', toolId: 'tool', toolCallId: 'call' };
 const logger = loggerMock.create();
 
 describe('createGatedSandboxStart', () => {
@@ -42,7 +42,7 @@ describe('createGatedSandboxStart', () => {
       logger,
     });
 
-    const session = getSandboxStart()!.getSession(request, 'conversation-1', workload);
+    const session = getSandboxStart()!.getSession(request, 'conversation-1', caller);
 
     expect(sandboxStart.getSession).toHaveBeenCalledWith(request, 'conversation-1');
     expect(session.isReset).toBe(true);
@@ -58,10 +58,10 @@ describe('createGatedSandboxStart', () => {
     });
 
     const gated = getSandboxStart()!;
-    expect(() => gated.getSession(request, 'conversation-1', workload)).toThrow(
+    expect(() => gated.getSession(request, 'conversation-1', caller)).toThrow(
       SANDBOX_DISABLED_MESSAGE
     );
-    expect(() => gated.getSessionForSpace('default', 'conversation-1', workload)).toThrow(
+    expect(() => gated.getSessionForSpace('default', 'conversation-1', caller)).toThrow(
       SANDBOX_DISABLED_MESSAGE
     );
     expect(sandboxStart.getSession).not.toHaveBeenCalled();
@@ -77,10 +77,10 @@ describe('createGatedSandboxStart', () => {
     });
 
     const gated = getSandboxStart()!;
-    expect(() => gated.getSession(request, 'conversation-1', workload)).toThrow(
+    expect(() => gated.getSession(request, 'conversation-1', caller)).toThrow(
       SANDBOX_AUDIT_UNAVAILABLE_MESSAGE
     );
-    expect(() => gated.getSessionForSpace('default', 'conversation-1', workload)).toThrow(
+    expect(() => gated.getSessionForSpace('default', 'conversation-1', caller)).toThrow(
       SANDBOX_AUDIT_UNAVAILABLE_MESSAGE
     );
     expect(sandboxStart.getSession).not.toHaveBeenCalled();

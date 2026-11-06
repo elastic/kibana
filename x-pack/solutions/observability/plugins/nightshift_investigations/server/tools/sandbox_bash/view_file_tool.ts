@@ -14,7 +14,7 @@ import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbo
 import {
   getConversationId,
   getSandboxCallContext,
-  getSandboxWorkload,
+  getSandboxCaller,
   resolveAbsolutePath,
 } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
@@ -89,7 +89,7 @@ export const createSandboxViewFileTool = ({
       session = sandboxStart.getSession(
         context.request,
         rawConversationId,
-        getSandboxWorkload(context)
+        getSandboxCaller(context)
       );
     } catch (err) {
       return {

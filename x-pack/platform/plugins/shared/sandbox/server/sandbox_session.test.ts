@@ -113,7 +113,7 @@ describe('SandboxSessionImpl', () => {
       expect.stringContaining('Sandbox pod evicted'),
       expect.objectContaining({
         http: { request: { id: 'req-1' } },
-        rpc: expect.objectContaining({ response: { status_code: 'UNAVAILABLE' } }),
+        rpc: expect.objectContaining({ status_code: 'UNAVAILABLE' }),
       })
     );
   });

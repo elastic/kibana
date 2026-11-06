@@ -11,7 +11,7 @@ import type { AuditLogger, CoreAuditService } from '@kbn/core-security-server';
 import type { SandboxRpcInfo, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SandboxRpcError } from '@kbn/sandbox-plugin/server';
 import { auditedSandboxSession, createAuditedSandboxStart } from './sandbox_audit';
-import type { SandboxWorkload } from './sandbox_audit';
+import type { SandboxCaller } from './sandbox_audit';
 
 const rpc = (overrides: Partial<SandboxRpcInfo> = {}): SandboxRpcInfo => ({
   requestId: 'proxy-req-1',
@@ -22,13 +22,13 @@ const rpc = (overrides: Partial<SandboxRpcInfo> = {}): SandboxRpcInfo => ({
   ...overrides,
 });
 
-const toolWorkload: SandboxWorkload = {
+const toolCaller: SandboxCaller = {
   type: 'tool',
   toolId: 'nightshift_sandbox_bash',
   toolCallId: 'call-1',
 };
 
-const stepWorkload: SandboxWorkload = {
+const stepCaller: SandboxCaller = {
   type: 'workflow_step',
   stepType: 'nightshift.obtainSandbox',
   stepId: 'obtain',
@@ -53,8 +53,8 @@ describe('auditedSandboxSession', () => {
   let audit: jest.Mocked<AuditLogger>;
   const logger = loggerMock.create();
 
-  const audited = (workload: SandboxWorkload = toolWorkload, spaceId?: string) =>
-    auditedSandboxSession({ session, audit, workload, spaceId, logger });
+  const audited = (caller: SandboxCaller = toolCaller, spaceId?: string) =>
+    auditedSandboxSession({ session, audit, caller, spaceId, logger });
   const logged = () => audit.log.mock.calls[0][0] as unknown as Record<string, any>;
 
   beforeEach(() => {
@@ -79,7 +79,7 @@ describe('auditedSandboxSession', () => {
         duration: 12_345,
       },
       kibana: {
-        workload: {
+        sandbox_caller: {
           plugin_id: 'nightshiftInvestigations',
           type: 'tool',
           id: 'nightshift_sandbox_bash',
@@ -88,9 +88,8 @@ describe('auditedSandboxSession', () => {
       },
       sandbox: { conversation_id: 'default__conv-1', proxy_request_id: 'proxy-req-1' },
       rpc: {
-        system: { name: 'grpc' },
         method: 'sandbox.SandboxService/StatFiles',
-        response: { status_code: 'OK' },
+        status_code: 'OK',
       },
     });
   });
@@ -123,7 +122,7 @@ describe('auditedSandboxSession', () => {
 
     expect(audit.log).toHaveBeenCalledTimes(1);
     expect(logged().event).toMatchObject({ outcome: 'failure', category: ['process'] });
-    expect(logged().rpc.response.status_code).toBe('UNAVAILABLE');
+    expect(logged().rpc.status_code).toBe('UNAVAILABLE');
   });
 
   it('writes no event for an error raised before any RPC', async () => {
@@ -160,11 +159,11 @@ describe('auditedSandboxSession', () => {
   it('describes a workflow step by its type, its run and its id', async () => {
     session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });
 
-    await audited(stepWorkload, 'my-space').statFiles(['/workspace']);
+    await audited(stepCaller, 'my-space').statFiles(['/workspace']);
 
     expect(logged().kibana).toEqual({
       space_id: 'my-space',
-      workload: {
+      sandbox_caller: {
         plugin_id: 'nightshiftInvestigations',
         type: 'workflow_step',
         id: 'nightshift.obtainSandbox',
@@ -179,7 +178,7 @@ describe('auditedSandboxSession', () => {
 
     await audited({ type: 'findings_recorder' }).statFiles(['/a']);
 
-    expect(logged().kibana.workload).toEqual({
+    expect(logged().kibana.sandbox_caller).toEqual({
       plugin_id: 'nightshiftInvestigations',
       type: 'findings_recorder',
       id: 'final_pass',
@@ -246,7 +245,7 @@ describe('auditedSandboxSession', () => {
 
   it('exposes the pod session as a stable key and its reset state live', () => {
     const first = audited();
-    const second = audited(stepWorkload);
+    const second = audited(stepCaller);
 
     expect(first.sessionKey).toBe(session);
     expect(second.sessionKey).toBe(first.sessionKey);
@@ -280,7 +279,7 @@ describe('createAuditedSandboxStart', () => {
     const { session, scoped, unscoped, audit, sandboxStart, start } = setup();
     session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });
 
-    await start.getSession(request, 'conv-1', toolWorkload).statFiles(['/a']);
+    await start.getSession(request, 'conv-1', toolCaller).statFiles(['/a']);
 
     expect(sandboxStart.getSession).toHaveBeenCalledWith(request, 'conv-1');
     expect(audit.asScoped).toHaveBeenCalledWith(request);
@@ -292,7 +291,7 @@ describe('createAuditedSandboxStart', () => {
     const { session, scoped, unscoped, sandboxStart, start } = setup();
     session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });
 
-    await start.getSessionForSpace('my-space', 'conv-1', stepWorkload).statFiles(['/a']);
+    await start.getSessionForSpace('my-space', 'conv-1', stepCaller).statFiles(['/a']);
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('my-space', 'conv-1');
     expect(unscoped.log).toHaveBeenCalledTimes(1);

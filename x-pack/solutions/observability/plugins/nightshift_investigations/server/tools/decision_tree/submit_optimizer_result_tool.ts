@@ -33,7 +33,7 @@ import type { DecisionTreeDetail, DecisionTreeStore } from '../../decision_trees
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
 import {
   getConversationId,
-  getSandboxWorkload,
+  getSandboxCaller,
   getScopedConversationId,
   resolveAbsolutePath,
 } from '../sandbox_bash/tool_utils';
@@ -152,7 +152,7 @@ export const createSubmitOptimizerResultTool = ({
       session = sandboxStart.getSession(
         context.request,
         rawConversationId,
-        getSandboxWorkload(context)
+        getSandboxCaller(context)
       );
     } catch (err) {
       return {
