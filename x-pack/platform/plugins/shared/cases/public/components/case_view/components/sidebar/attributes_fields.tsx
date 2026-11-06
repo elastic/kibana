@@ -25,7 +25,10 @@ import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesToast } from '../../../../common/use_cases_toast';
-import { ROOM_OWNER_STAYS_ASSIGNED } from '../room/translations';
+import {
+  ROOM_OWNER_STAYS_ASSIGNED_TEXT,
+  ROOM_OWNER_STAYS_ASSIGNED_TITLE,
+} from '../room/translations';
 import type { Assignee } from '../../../user_profiles/types';
 
 export interface AttributesFieldsProps {
@@ -62,13 +65,15 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
   const onAssigneesChanged = useCallback(
     (assignees: Assignee[]) => {
       if (roomOwnerUid && !assignees.some(({ uid }) => uid === roomOwnerUid)) {
-        showInfoToast(ROOM_OWNER_STAYS_ASSIGNED);
+        const owner = userProfiles.get(roomOwnerUid)?.user;
+        const name = owner?.full_name || owner?.username || roomOwnerUid;
+        showInfoToast(ROOM_OWNER_STAYS_ASSIGNED_TITLE(name), ROOM_OWNER_STAYS_ASSIGNED_TEXT(name));
         onUpdateAssignees([...assignees, { uid: roomOwnerUid }]);
         return;
       }
       onUpdateAssignees(assignees);
     },
-    [onUpdateAssignees, roomOwnerUid, showInfoToast]
+    [onUpdateAssignees, roomOwnerUid, showInfoToast, userProfiles]
   );
 
   // Status editing mirrors the header status pill: closing a case routes through the

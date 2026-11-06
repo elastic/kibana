@@ -292,32 +292,36 @@ function throwIfAccessChangeWithoutValidLicense(
 
 /**
  * The actor restricting a case is added to its assignees so they cannot lock
- * themselves out. This is a deliberate system action: it does not require the
- * assign privilege, unlike caller-provided assignee changes.
+ * themselves out. So is the person who owns the case's room: Agent Builder always
+ * lets a conversation's owner in, so they must be inside the case's access too.
+ * This is a deliberate system action: it does not require the assign privilege,
+ * unlike caller-provided assignee changes.
  */
 function addActorToAssigneesOnRestrict(requests: UpdateRequestWithOriginalCase[], user: User) {
-  if (user.profile_uid == null) {
-    return;
-  }
-
   for (const { updateReq, originalCase } of requests) {
     if (updateReq.access?.mode !== CaseAccessMode.RESTRICTED) {
       continue;
     }
 
     const finalAssignees = updateReq.assignees ?? originalCase.attributes.assignees;
+    const missing = [user.profile_uid, originalCase.attributes.room_owner_uid].filter(
+      (uid, index, all): uid is string =>
+        uid != null &&
+        all.indexOf(uid) === index &&
+        !finalAssignees.some((assignee) => assignee.uid === uid)
+    );
 
-    if (!finalAssignees.some(({ uid }) => uid === user.profile_uid)) {
-      if (finalAssignees.length >= MAX_ASSIGNEES_PER_CASE) {
+    if (missing.length > 0) {
+      if (finalAssignees.length + missing.length > MAX_ASSIGNEES_PER_CASE) {
         throw Boom.badRequest(
-          `Cannot restrict case ${updateReq.id}: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you as an assignee.`
+          `Cannot restrict case ${updateReq.id}: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you and the room's owner as assignees.`
         );
       }
 
       // keep the user action and the persisted payload uid-only
       updateReq.assignees = [
         ...finalAssignees.map(({ uid }) => ({ uid })),
-        { uid: user.profile_uid },
+        ...missing.map((uid) => ({ uid })),
       ];
     }
   }
@@ -1015,7 +1019,12 @@ export const bulkUpdate = async (
 
     await throwIfClosingWithOpenRequiredTasks({ casesToUpdate, clientArgs, hasPlatinumLicense });
 
-    throwIfUnassigningRoomOwner(casesToUpdate);
+    await throwIfUnassigningRoomOwner(casesToUpdate, async (uid) => {
+      const profile = (
+        await getUserProfilesSafe(clientArgs.securityStartPlugin, new Set([uid]), clientArgs.logger)
+      )?.get(uid);
+      return profile?.user.full_name || profile?.user.username;
+    });
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
     // Owners are collected for both cases that include extended_fields in the request and

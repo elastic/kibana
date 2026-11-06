@@ -115,16 +115,23 @@ export const syncRoomAccess = async (theCase: Case, clientArgs: CasesClientArgs)
  * Keeping them assigned keeps that owner inside the case's own access, so a restricted case never
  * leaves someone in its room who can't see the case.
  */
-export const throwIfUnassigningRoomOwner = (
+export const throwIfUnassigningRoomOwner = async (
   casesToUpdate: Array<{
     updateReq: { id: string; assignees?: Array<{ uid: string }> };
     originalCase: { attributes: { room_owner_uid?: string | null; title: string } };
-  }>
+  }>,
+  /** Resolves the owner's display name for the message; the message reads without it too. */
+  getDisplayName: (uid: string) => Promise<string | undefined> = async () => undefined
 ) => {
   for (const { updateReq, originalCase } of casesToUpdate) {
     const owner = originalCase.attributes.room_owner_uid;
     if (owner && updateReq.assignees && !updateReq.assignees.some(({ uid }) => uid === owner)) {
-      throw Boom.badRequest(i18n.ROOM_OWNER_STAYS_ASSIGNED(originalCase.attributes.title));
+      const name = await getDisplayName(owner).catch(() => undefined);
+      throw Boom.badRequest(
+        name
+          ? i18n.ROOM_OWNER_STAYS_ASSIGNED(name, originalCase.attributes.title)
+          : i18n.ROOM_OWNER_STAYS_ASSIGNED_UNNAMED(originalCase.attributes.title)
+      );
     }
   }
 };

@@ -205,16 +205,24 @@ describe('case room', () => {
     expect(casesClient.attachments.add).not.toHaveBeenCalled();
   });
 
-  it("refuses to unassign the room's owner, and allows every other assignee change", () => {
+  it("refuses to unassign the room's owner, naming them, and allows every other change", async () => {
     const originalCase = {
       attributes: { room_owner_uid: 'u-jordan', title: 'Credential dumping' },
     };
-    expect(() =>
+    await expect(
+      throwIfUnassigningRoomOwner(
+        [{ updateReq: { id: 'case-1', assignees: [{ uid: 'u-priya' }] }, originalCase }],
+        async () => 'Jordan Alvarez'
+      )
+    ).rejects.toThrow(
+      'Jordan Alvarez can\'t be removed from the assignees of "Credential dumping". Jordan Alvarez opened this case\'s room and owns it'
+    );
+    await expect(
       throwIfUnassigningRoomOwner([
         { updateReq: { id: 'case-1', assignees: [{ uid: 'u-priya' }] }, originalCase },
       ])
-    ).toThrow('owns the room');
-    expect(() =>
+    ).rejects.toThrow('The person who opened the room of "Credential dumping"');
+    await expect(
       throwIfUnassigningRoomOwner([
         { updateReq: { id: 'case-1', assignees: [{ uid: 'u-jordan' }] }, originalCase },
         { updateReq: { id: 'case-1' }, originalCase },
@@ -223,6 +231,6 @@ describe('case room', () => {
           originalCase: { attributes: { title: 'No room yet' } },
         },
       ])
-    ).not.toThrow();
+    ).resolves.toBeUndefined();
   });
 });

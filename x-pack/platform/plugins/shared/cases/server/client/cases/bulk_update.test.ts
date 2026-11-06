@@ -4962,6 +4962,34 @@ describe('update', () => {
       expect(updatedAttributes.assignees).toEqual([{ uid: 'someone-else' }, { uid: actorUid }]);
     });
 
+    it("also assigns the room's owner on restrict, so the room stays inside the case's access", async () => {
+      mockLoadedCase(
+        buildCaseFixture({ assignees: [{ uid: 'someone-else' }], room_owner_uid: 'room-owner' })
+      );
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              access: { mode: CaseAccessMode.RESTRICTED },
+            },
+          ],
+        },
+        clientArgs,
+        restrictedCasesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.assignees).toEqual([
+        { uid: 'someone-else' },
+        { uid: actorUid },
+        { uid: 'room-owner' },
+      ]);
+    });
+
     it('throws when changing access without a platinum license', async () => {
       clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
       mockLoadedCase(buildCaseFixture());

@@ -60,9 +60,16 @@ export const POSTED_FROM_ROOM_BY = (name: string) =>
     values: { name },
   });
 
-export const ROOM_OWNER_STAYS_ASSIGNED = (caseTitle: string) =>
+export const ROOM_OWNER_STAYS_ASSIGNED = (name: string, caseTitle: string) =>
   i18n.translate('xpack.cases.server.room.ownerStaysAssigned', {
     defaultMessage:
-      'The person who opened the room of case "{caseTitle}" owns the room, so they stay assigned to the case. Keep them in the assignees.',
+      '{name} can\'t be removed from the assignees of "{caseTitle}". {name} opened this case\'s room and owns it, so they stay assigned while the room exists. You can still add or remove anyone else.',
+    values: { name, caseTitle },
+  });
+
+export const ROOM_OWNER_STAYS_ASSIGNED_UNNAMED = (caseTitle: string) =>
+  i18n.translate('xpack.cases.server.room.ownerStaysAssignedUnnamed', {
+    defaultMessage:
+      'The person who opened the room of "{caseTitle}" can\'t be removed from its assignees. They own the room, so they stay assigned while the room exists. You can still add or remove anyone else.',
     values: { caseTitle },
   });

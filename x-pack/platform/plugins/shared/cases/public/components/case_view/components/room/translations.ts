@@ -89,7 +89,14 @@ export const AGENT_WAITING = t(
   'Elastic AI Agent is waiting for you to confirm a change before it continues.'
 );
 export const ANSWER_IN_AGENT_BUILDER = t('answerInAgentBuilder', 'Confirm in Agent Builder');
-export const ROOM_OWNER_STAYS_ASSIGNED = t(
-  'ownerStaysAssigned',
-  'The person who opened the room owns it, so they stay assigned to this case.'
-);
+export const ROOM_OWNER_STAYS_ASSIGNED_TITLE = (name: string) =>
+  i18n.translate('xpack.cases.room.ownerStaysAssigned.title', {
+    defaultMessage: '{name} stays assigned',
+    values: { name },
+  });
+export const ROOM_OWNER_STAYS_ASSIGNED_TEXT = (name: string) =>
+  i18n.translate('xpack.cases.room.ownerStaysAssigned.text', {
+    defaultMessage:
+      "{name} opened this case's room and owns it, so they can't be removed from the assignees while the room exists. Your other changes were saved.",
+    values: { name },
+  });
