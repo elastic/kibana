@@ -224,4 +224,26 @@ describe('postFrequentCancellationsTip', () => {
     await expect(postFrequentCancellationsTip()).resolves.toBeUndefined();
     expect(mockUpsertComment).not.toHaveBeenCalled();
   });
+
+  it('aborts a stalled GitHub request after 15 seconds and resolves', async () => {
+    jest.useFakeTimers({ doNotFake: ['Date'] });
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    let signal: AbortSignal | undefined;
+    mockUpsertComment.mockImplementationOnce((options: { signal: AbortSignal }) => {
+      signal = options.signal;
+      return new Promise(() => {});
+    });
+
+    try {
+      const tip = postFrequentCancellationsTip();
+      await jest.advanceTimersByTimeAsync(14_999);
+      expect(signal?.aborted).toBe(false);
+
+      await jest.advanceTimersByTimeAsync(1);
+      await expect(tip).resolves.toBeUndefined();
+      expect(signal?.aborted).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
