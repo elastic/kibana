@@ -48,17 +48,19 @@ const statefulStats = (docs: number, bytes: number) => ({
 
 const setup = ({ esql = 'FROM logs-nginx-* | WHERE status >= 500', isServerless = false } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const meteringEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
   const measure = () =>
     measureSourceVolume({
       esClient,
+      meteringEsClient,
       esql,
       isServerless,
       window,
       signal: new AbortController().signal,
       logger,
     });
-  return { esClient, logger, measure };
+  return { esClient, meteringEsClient, logger, measure };
 };
 
 describe('measureSourceVolume', () => {
@@ -114,12 +116,12 @@ describe('measureSourceVolume', () => {
   });
 
   it('sizes exact expressions with serverless metering stats', async () => {
-    const { esClient, measure } = setup({
+    const { esClient, meteringEsClient, measure } = setup({
       esql: 'FROM <logs-{now/d}>,-logs-archive-*',
       isServerless: true,
     });
     esClient.esql.query.mockResolvedValue(countOf(42));
-    esClient.transport.request.mockResolvedValue({
+    meteringEsClient.transport.request.mockResolvedValue({
       indices: [
         { num_docs: 10, size_in_bytes: 1000 },
         { num_docs: 10, size_in_bytes: 3000 },
@@ -127,14 +129,36 @@ describe('measureSourceVolume', () => {
     });
 
     await expect(measure()).resolves.toMatchObject({ doc_count: 42, bytes_estimated: 8400 });
-    expect(esClient.transport.request).toHaveBeenCalledWith(
+    expect(meteringEsClient.transport.request).toHaveBeenCalledWith(
       {
         method: 'GET',
         path: `/_metering/stats/${encodeURIComponent('<logs-{now/d}>,-logs-archive-*')}`,
       },
       expect.anything()
     );
+    expect(esClient.transport.request).not.toHaveBeenCalled();
     expect(esClient.indices.stats).not.toHaveBeenCalled();
+  });
+
+  it('drops the stateful estimate when any index stats shard fails', async () => {
+    const { esClient, measure } = setup();
+    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.indices.stats.mockResolvedValue({
+      ...statefulStats(1000, 500_000),
+      _shards: { total: 2, successful: 1, failed: 1 },
+    });
+
+    await expect(measure()).resolves.toEqual({
+      status: 'ok',
+      has_remote: false,
+      doc_count: 42,
+    });
+    expect(esClient.indices.stats).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter_path: expect.arrayContaining(['_shards.failed']),
+      }),
+      expect.anything()
+    );
   });
 
   it('reports a failed count as an error with the ES error type', async () => {

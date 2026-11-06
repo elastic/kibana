@@ -490,7 +490,7 @@ export const createInvestigatorServiceAccountService = ({
     logger.info(`Nightshift agent in space [${spaceId}] runs as its callers again`);
   };
 
-  // The telemetry task runs as the enabling admin; it stops once no space is set up.
+  // The shared task retains the last enabling admin's credentials.
   const removeSourceVolumeTaskIfUnused = async (): Promise<void> => {
     const states = await listInstalledWorkflowStates();
     if (

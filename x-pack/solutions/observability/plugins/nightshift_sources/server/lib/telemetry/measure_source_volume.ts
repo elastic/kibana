@@ -130,18 +130,22 @@ const averageDocumentBytes = async ({
       const bytes = indices.reduce((sum, { size_in_bytes: sizeInBytes }) => sum + sizeInBytes, 0);
       return docs > 0 ? bytes / docs : undefined;
     }
-    const { _all: all } = await esClient.indices.stats(
+    const { _shards: shards, _all: all } = await esClient.indices.stats(
       {
         index: indexPatterns,
         metric: ['docs', 'store'],
         expand_wildcards: ['open', 'hidden'],
         filter_path: [
+          '_shards.failed',
           '_all.primaries.docs.count',
           '_all.primaries.store.total_data_set_size_in_bytes',
         ],
       },
       { signal }
     );
+    if ((shards?.failed ?? 0) > 0) {
+      return undefined;
+    }
     const docs = all?.primaries?.docs?.count ?? 0;
     const bytes = all?.primaries?.store?.total_data_set_size_in_bytes ?? 0;
     return docs > 0 ? bytes / docs : undefined;
@@ -156,6 +160,7 @@ const averageDocumentBytes = async ({
 /** Never throws: a failed count is reported in `status`; a failed size read drops `bytes_estimated`. */
 export const measureSourceVolume = async ({
   esClient,
+  meteringEsClient,
   esql,
   isServerless,
   window,
@@ -163,6 +168,7 @@ export const measureSourceVolume = async ({
   logger,
 }: {
   esClient: ElasticsearchClient;
+  meteringEsClient: ElasticsearchClient;
   esql: string;
   isServerless: boolean;
   window: MeasurementWindow;
@@ -206,7 +212,7 @@ export const measureSourceVolume = async ({
 
   try {
     const averageBytes = await averageDocumentBytes({
-      esClient,
+      esClient: isServerless ? meteringEsClient : esClient,
       indexPatterns,
       isServerless,
       signal,

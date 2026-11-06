@@ -38,6 +38,7 @@ const MAX_CONCURRENT_MEASUREMENTS = 5;
 export interface SourceVolumeTaskDeps {
   analytics: AnalyticsServiceStart;
   esClient: ElasticsearchClient;
+  meteringEsClient: ElasticsearchClient;
   soRepository: ISavedObjectsRepository;
   isServerless: boolean;
   logger: Logger;
@@ -76,7 +77,14 @@ const listSources = async (
 };
 
 export const reportSourceVolumes = async (
-  { analytics, esClient, soRepository, isServerless, logger }: SourceVolumeTaskDeps,
+  {
+    analytics,
+    esClient,
+    meteringEsClient,
+    soRepository,
+    isServerless,
+    logger,
+  }: SourceVolumeTaskDeps,
   signal: AbortSignal
 ): Promise<void> => {
   const end = Date.now();
@@ -103,6 +111,7 @@ export const reportSourceVolumes = async (
           enabled,
           ...(await measureSourceVolume({
             esClient,
+            meteringEsClient,
             esql,
             isServerless,
             window,
@@ -113,7 +122,7 @@ export const reportSourceVolumes = async (
       })
     )
   );
-  // Measurements in flight when the abort fired came back as timeouts; the event would be partial.
+  // Do not report an event when cancellation races completed measurements.
   signal.throwIfAborted();
 
   analytics.reportEvent(SOURCE_VOLUME_EVENT_TYPE, {

@@ -55,6 +55,7 @@ const setup = (sources: Array<SavedObjectsFindResult<NightshiftSourceAttributes>
   const deps: SourceVolumeTaskDeps = {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    meteringEsClient: elasticsearchServiceMock.createElasticsearchClient(),
     soRepository,
     isServerless: false,
     logger: loggingSystemMock.createLogger(),

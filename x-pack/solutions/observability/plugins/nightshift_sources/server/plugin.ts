@@ -112,12 +112,14 @@ export class NightshiftSourcesPlugin
       taskManager: plugins.taskManager,
       getDeps: async (request) => {
         const [coreStart] = await core.getStartServices();
+        const scopedEsClient = coreStart.elasticsearch.client.asScoped(request, {
+          projectRouting: 'expression',
+          value: PROJECT_ROUTING_ALL,
+        });
         return {
           analytics: coreStart.analytics,
-          esClient: coreStart.elasticsearch.client.asScoped(request, {
-            projectRouting: 'expression',
-            value: PROJECT_ROUTING_ALL,
-          }).asCurrentUser,
+          esClient: scopedEsClient.asCurrentUser,
+          meteringEsClient: scopedEsClient.asSecondaryAuthUser,
           soRepository: coreStart.savedObjects.createInternalRepository([
             NIGHTSHIFT_SOURCE_SO_TYPE,
           ]),
