@@ -87,6 +87,7 @@ describe('EventLoopWatchdog', () => {
       },
     });
     expect(worker.start).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith('Event loop watchdog started');
   });
 
   it('defaults the entry to the worker module', () => {

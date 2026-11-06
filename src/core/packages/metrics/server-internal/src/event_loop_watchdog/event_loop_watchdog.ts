@@ -90,9 +90,7 @@ export class EventLoopWatchdog {
       onExhausted: () => this.clearHeartbeat(),
     });
     this.worker.start();
-    logger.info(
-      `Event loop watchdog started (block threshold ${thresholdsMs.running}ms, ${thresholdsMs.starting}ms while starting)`
-    );
+    logger.info('Event loop watchdog started');
     this.warnIfSilent();
   }
 
