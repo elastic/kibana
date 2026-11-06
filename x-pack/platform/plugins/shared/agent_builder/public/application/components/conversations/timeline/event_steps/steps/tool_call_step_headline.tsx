@@ -49,8 +49,22 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
     white-space: nowrap;
   `;
 
+  // the tool badge can be truncated (EuiBadge renders an ellipsis), but never takes more than half of the row
+  const badgeItemStyles = css`
+    min-width: 0;
+    max-width: 50%;
+  `;
+
+  const statusItemStyles = css`
+    flex-shrink: 0;
+  `;
+
   const toolBadge = (
-    <EuiBadge color={hasErrorResult ? 'danger' : 'default'}>
+    <EuiBadge
+      color={hasErrorResult ? 'danger' : 'default'}
+      title={`${toolBadgeToolLabel}: ${step.tool_id}`}
+      data-test-subj="agentBuilderToolCallBadge"
+    >
       <strong
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
@@ -81,8 +95,10 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
             {step.intent}
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem grow={false}>{toolBadge}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={badgeItemStyles}>
+          {toolBadge}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={statusItemStyles}>
           <span css={suffixStyles}>
             {hasResults ? (
               <FormattedMessage
