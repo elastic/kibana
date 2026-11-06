@@ -67,6 +67,15 @@ export const RETRIES = {
 } as const;
 
 /**
+ * Agent queue for each type of Jest job, and how many Jest config processes one job runs at once
+ * (`JEST_MAX_PARALLEL`). ci-stats sizes the groups for the same number of processes.
+ */
+export const JEST_AGENTS = {
+  UNIT: { queue: 'n2-8-spot', maxParallel: 6 },
+  INTEGRATION: { queue: 'n2-4-spot', maxParallel: 1 },
+} as const;
+
+/**
  * ci-stats duration estimation parameters spread into each test-type group.
  * Controls how configs are binned into parallel jobs.
  */
@@ -75,13 +84,13 @@ export const CI_STATS_DEFAULTS = {
     defaultMin: 4,
     overheadMin: 0.2,
     warmupMin: 4,
-    concurrency: 3,
+    concurrency: JEST_AGENTS.UNIT.maxParallel,
   },
   JEST_INTEGRATION: {
     defaultMin: 15,
     overheadMin: 0.2,
     warmupMin: 5,
-    concurrency: 1,
+    concurrency: JEST_AGENTS.INTEGRATION.maxParallel,
   },
   FUNCTIONAL: {
     defaultMin: 60,

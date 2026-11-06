@@ -58,6 +58,7 @@ steps:
     label: 'Spoof Status Checks'
     env:
       STATUS_CHECKS: |
+        CLA
         prbot:backport labels
         prbot:outdated
         prbot:release note labels

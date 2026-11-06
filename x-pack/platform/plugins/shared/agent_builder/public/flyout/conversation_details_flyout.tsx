@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -33,11 +33,10 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
-import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
-import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
+import { useConversationFlyoutWidthProps } from './conversation_details_flyout_width';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
-  defaultMessage: 'Chat info',
+  defaultMessage: 'Summary',
 });
 
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
@@ -283,9 +282,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
-  // Resolved once per open: EUI re-seeds the flyout whenever `size` changes, so reading the
-  // remembered width again on every render would fight the user's drag.
-  const widthPropsRef = useRef(getConversationDetailsFlyoutWidthProps());
+  const widthProps = useConversationFlyoutWidthProps();
 
   const trailingActions = useMemo(() => {
     if (!conversation?.template_id) {
@@ -304,10 +301,9 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
-      {...widthPropsRef.current}
+      {...widthProps}
       type="push"
       paddingSize="m"
-      css={flyoutMenuRowStyles}
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
