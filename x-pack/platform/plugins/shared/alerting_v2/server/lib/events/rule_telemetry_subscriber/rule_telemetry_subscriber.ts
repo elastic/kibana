@@ -60,10 +60,9 @@ export class RuleTelemetrySubscriber extends BaseEventBusSubscriber {
   }
 
   protected getSubscriptions(): EventBusSubscriptionSpec[] {
-    return RULE_OPERATIONS.map((eventType) => ({
-      eventType,
-      handler: (event, context) => this.#reportRuleChanged(event as ReportedRuleEvent, context),
-    }));
+    return RULE_OPERATIONS.map((eventType) =>
+      this.on(eventType, (event, context) => this.#reportRuleChanged(event, context))
+    );
   }
 
   #reportRuleChanged(event: ReportedRuleEvent, { origin }: AlertingPublisherContext): void {

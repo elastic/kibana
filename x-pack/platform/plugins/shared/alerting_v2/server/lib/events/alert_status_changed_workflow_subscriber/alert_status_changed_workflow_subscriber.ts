@@ -51,10 +51,7 @@ export class AlertStatusChangedWorkflowSubscriber extends BaseEventBusSubscriber
 
   protected getSubscriptions(): EventBusSubscriptionSpec[] {
     return [
-      {
-        eventType: ALERT_STATUS_CHANGED_EVENT_TYPE,
-        handler: (event, context) => this.#dispatch(event as AlertStatusChangedEvent, context),
-      },
+      this.on(ALERT_STATUS_CHANGED_EVENT_TYPE, (event, context) => this.#dispatch(event, context)),
     ];
   }
 

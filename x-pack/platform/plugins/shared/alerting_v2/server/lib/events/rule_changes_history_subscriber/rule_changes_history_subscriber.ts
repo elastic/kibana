@@ -56,10 +56,7 @@ export class RuleChangesHistorySubscriber extends BaseEventBusSubscriber {
 
   protected getSubscriptions(): EventBusSubscriptionSpec[] {
     return (Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP) as Array<RuleEvent['type']>).map(
-      (eventType) => ({
-        eventType,
-        handler: (event, context) => this.#dispatch(event as RuleEvent, context),
-      })
+      (eventType) => this.on(eventType, (event, context) => this.#dispatch(event, context))
     );
   }
 

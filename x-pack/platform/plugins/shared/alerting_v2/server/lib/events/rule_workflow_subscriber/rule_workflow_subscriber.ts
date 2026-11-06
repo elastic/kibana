@@ -43,10 +43,9 @@ export class RuleWorkflowSubscriber extends BaseEventBusSubscriber {
   }
 
   protected getSubscriptions(): EventBusSubscriptionSpec[] {
-    return RULE_WORKFLOW_TRIGGERS.map((trigger) => ({
-      eventType: trigger.eventType,
-      handler: (event, context) => this.#dispatch(trigger, event as RuleEvent, context),
-    }));
+    return RULE_WORKFLOW_TRIGGERS.map((trigger) =>
+      this.on(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+    );
   }
 
   async #dispatch(

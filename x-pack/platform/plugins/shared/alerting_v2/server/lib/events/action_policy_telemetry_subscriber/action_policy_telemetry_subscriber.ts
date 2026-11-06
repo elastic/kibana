@@ -48,11 +48,9 @@ export class ActionPolicyTelemetrySubscriber extends BaseEventBusSubscriber {
   }
 
   protected getSubscriptions(): EventBusSubscriptionSpec[] {
-    return ACTION_POLICY_OPERATIONS.map((eventType) => ({
-      eventType,
-      handler: (event, context) =>
-        this.#reportActionPolicyChanged(event as ActionPolicyEvent, context),
-    }));
+    return ACTION_POLICY_OPERATIONS.map((eventType) =>
+      this.on(eventType, (event, context) => this.#reportActionPolicyChanged(event, context))
+    );
   }
 
   #reportActionPolicyChanged(event: ActionPolicyEvent, { origin }: AlertingPublisherContext): void {

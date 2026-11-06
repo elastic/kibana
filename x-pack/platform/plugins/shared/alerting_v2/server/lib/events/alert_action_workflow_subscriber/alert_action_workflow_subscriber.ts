@@ -69,10 +69,9 @@ export class AlertActionWorkflowSubscriber extends BaseEventBusSubscriber {
   }
 
   protected getSubscriptions(): EventBusSubscriptionSpec[] {
-    return ALERT_ACTION_WORKFLOW_TRIGGERS.map((trigger) => ({
-      eventType: trigger.eventType,
-      handler: (event, context) => this.#dispatch(trigger, event as AlertActionEvent, context),
-    }));
+    return ALERT_ACTION_WORKFLOW_TRIGGERS.map((trigger) =>
+      this.on(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+    );
   }
 
   async #dispatch(

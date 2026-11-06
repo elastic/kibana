@@ -30,8 +30,8 @@ describe('BaseEventBusSubscriber', () => {
   const handlerA = jest.fn();
   const handlerB = jest.fn();
   const specs: EventBusSubscriptionSpec[] = [
-    { eventType: 'rule.created', handler: handlerA },
-    { eventType: 'rule.updated', handler: handlerB },
+    { attach: (bus) => bus.subscribe('rule.created', handlerA) },
+    { attach: (bus) => bus.subscribe('rule.updated', handlerB) },
   ];
 
   const createBus = () => createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
