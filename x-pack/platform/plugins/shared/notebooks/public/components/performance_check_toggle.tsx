@@ -8,7 +8,8 @@
 import React from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const LABEL = i18n.translate('xpack.notebook.performanceCheck.label', {
@@ -25,6 +26,7 @@ const ARIA_LABEL = i18n.translate('xpack.notebook.performanceCheck.toggle', {
 
 /** Toggles the notebook performance check from the developer toolbar. */
 export const PerformanceCheckToggle = ({ enabled$ }: { enabled$: BehaviorSubject<boolean> }) => {
+  const { euiTheme } = useEuiTheme();
   const enabled = useObservable(enabled$, enabled$.getValue());
   return (
     <EuiToolTip content={TOOLTIP}>
@@ -35,9 +37,16 @@ export const PerformanceCheckToggle = ({ enabled$ }: { enabled$: BehaviorSubject
         aria-pressed={enabled}
         data-test-subj="notebookPerformanceCheckToggle"
       >
-        <EuiHealth color={enabled ? 'success' : 'danger'} textSize="xs">
+        <span
+          css={css`
+            display: inline-flex;
+            align-items: center;
+            gap: ${euiTheme.size.xs};
+          `}
+        >
+          <EuiIcon type="dot" size="s" color={enabled ? 'success' : 'danger'} aria-hidden={true} />
           {LABEL}
-        </EuiHealth>
+        </span>
       </EuiBadge>
     </EuiToolTip>
   );
