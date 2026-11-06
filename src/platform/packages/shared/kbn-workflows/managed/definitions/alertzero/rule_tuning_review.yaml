@@ -210,10 +210,14 @@ steps:
   # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
   # and `origin` survives the agent's edits to the card while the ids in `text` do
   # not. The content is passed by value because resolving by origin looks the rule
-  # up by rule_id. The fixed attachment id makes the refresh below deterministic.
+  # up by rule_id. The fixed attachment id makes the refreshes below deterministic:
+  # a resumed review finds the earlier review's copy under the same id and writes
+  # the current rule as a new version instead of failing with a duplicate id.
   - name: attach_rule
     type: ai.attachment.add
-    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
+    if: >-
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
+        and steps.find_or_create_investigation.output.created == true }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: "tuned-rule"
@@ -227,16 +231,50 @@ steps:
     on-failure:
       continue: true
 
+  - name: resume_rule_attachment
+    type: ai.attachment.update
+    if: >-
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
+        and steps.find_or_create_investigation.output.created != true }}
+    with:
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      attachment_id: "tuned-rule"
+      data:
+        text: "{{ steps.fetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.fetch_rule.output.name }}"
+      description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
   # By value: the first 20 harvested false-positive ids. The schema rejects a
   # longer list. A fixed id makes a retry of this run 409 instead of appending
-  # a second copy.
+  # a second copy, and lets a resumed review replace the earlier review's list
+  # with the alerts this review was started for.
   - name: attach_alerts
     type: ai.attachment.add
-    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
+    if: >-
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
+        and steps.find_or_create_investigation.output.created == true }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: fp-alerts
       type: security.alerts
+      data:
+        alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
+      description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  - name: resume_alerts_attachment
+    type: ai.attachment.update
+    if: >-
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
+        and steps.find_or_create_investigation.output.created != true }}
+    with:
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      attachment_id: fp-alerts
       data:
         alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
       description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
@@ -1649,13 +1687,23 @@ steps:
           and (steps.propose_exception.output.status == 'succeeded'
             or steps.refetch_rule.output.revision > steps.fetch_rule.output.revision) }}
 
+  # Whether the rule attachment exists to refresh: whichever of attach_rule and
+  # resume_rule_attachment ran for this review must have returned an id. Computed
+  # here because Liquid cannot group a condition with parentheses.
+  - name: rule_attachment_written
+    type: data.set
+    with:
+      written: >-
+        ${{ steps.attach_rule.output.attachment_id != null
+          or steps.resume_rule_attachment.output.attachment_id != null }}
+
   # The rule attachment is a snapshot and never refreshes, so after the patch it
-  # would silently show the pre-tuning rule. This writes the patched rule as
-  # version 2; version 1 keeps the before state in the attachment history.
+  # would silently show the pre-tuning rule. This writes the patched rule as a new
+  # version; the earlier versions keep the before state in the attachment history.
   - name: refresh_rule_attachment
     type: ai.attachment.update
     if: >-
-      ${{ steps.attach_rule.error == null
+      ${{ steps.rule_attachment_written.output.written == true
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:

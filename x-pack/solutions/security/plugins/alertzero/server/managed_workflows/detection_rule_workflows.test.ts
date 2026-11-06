@@ -1367,18 +1367,22 @@ describe('detection rule workflows', () => {
 
       // No agent runs in the investigation to reference an attachment, so without
       // `render_inline` the analyst only finds these in the attachment list.
-      it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception', 'attach_alerts'])(
-        'renders %s inline in the investigation',
-        (stepName) => {
-          const step = reviewSteps.find(({ name }) => name === stepName)!;
+      it.each([
+        'attach_rule',
+        'resume_rule_attachment',
+        'refresh_rule_attachment',
+        'attach_exception',
+        'attach_alerts',
+        'resume_alerts_attachment',
+      ])('renders %s inline in the investigation', (stepName) => {
+        const step = reviewSteps.find(({ name }) => name === stepName)!;
 
-          expect(step.with?.render_inline).toBe(true);
-          expect(step.with?.conversation_id).toBe(
-            '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
-          );
-          expect(step['on-failure']).toEqual({ continue: true });
-        }
-      );
+        expect(step.with?.render_inline).toBe(true);
+        expect(step.with?.conversation_id).toBe(
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
+        );
+        expect(step['on-failure']).toEqual({ continue: true });
+      });
 
       // The card previews the same item the action creates, but its historical
       // description must not claim that a still-pending or dismissed item was added.
@@ -1405,6 +1409,42 @@ describe('detection rule workflows', () => {
           'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
         );
         expect(reviewSteps.indexOf(attach)).toBeLessThan(reviewSteps.indexOf(propose));
+      });
+
+      // A resumed review lands on the Investigation an earlier review attached to under
+      // the same fixed ids, so adding again would 409. The resume steps update those
+      // attachments with this review's rule and alerts instead, and the post-tuning
+      // refresh accepts either writer.
+      it.each([
+        ['attach_rule', 'resume_rule_attachment', 'tuned-rule'],
+        ['attach_alerts', 'resume_alerts_attachment', 'fp-alerts'],
+      ])('updates %s on a resumed review through %s', (addName, resumeName, attachmentId) => {
+        const add = reviewSteps.find(({ name }) => name === addName)!;
+        const resume = reviewSteps.find(({ name }) => name === resumeName)!;
+
+        expect(add.if).toContain('steps.find_or_create_investigation.output.created == true');
+        expect(resume.type).toBe('ai.attachment.update');
+        expect(resume.if).toContain('steps.find_or_create_investigation.output.created != true');
+        expect(resume.with?.attachment_id).toBe(attachmentId);
+        expect(resume.with?.data).toEqual(add.with?.data);
+        expect(resume.with?.description).toBe(add.with?.description);
+        expect(reviewSteps.indexOf(resume)).toBe(reviewSteps.indexOf(add) + 1);
+      });
+
+      it('refreshes the rule attachment whichever step wrote it', () => {
+        const written = reviewSteps.find(({ name }) => name === 'rule_attachment_written')!;
+        const refresh = reviewSteps.find(({ name }) => name === 'refresh_rule_attachment')!;
+
+        expect(written.type).toBe('data.set');
+        expect(String(written.with?.written)).toContain(
+          'steps.attach_rule.output.attachment_id != null'
+        );
+        expect(String(written.with?.written)).toContain(
+          'steps.resume_rule_attachment.output.attachment_id != null'
+        );
+        expect(refresh.if).toContain('steps.rule_attachment_written.output.written == true');
+        expect(refresh.if).not.toContain('steps.attach_rule.error');
+        expect(reviewSteps.indexOf(written)).toBeLessThan(reviewSteps.indexOf(refresh));
       });
 
       // The proposal text no longer links alert ids. The attachment takes the
