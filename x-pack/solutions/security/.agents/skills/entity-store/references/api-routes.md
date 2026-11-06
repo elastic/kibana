@@ -21,6 +21,7 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | POST | `/api/security/entity_store/install` | Install entity store |
 | POST | `/api/security/entity_store/start` | Start/reschedule extraction tasks |
 | POST | `/api/security/entity_store/stop` | Stop extraction tasks |
+| POST | `/api/security/entity_store/update_api_key` | Re-grant the API key of every Entity Store task (extract, history snapshot, status report, resilience, maintainers) as the caller. Needs install privileges. Body `{}`, returns `{ ok, updated, failed }` |
 | POST | `/api/security/entity_store/uninstall` | Uninstall entity store |
 | GET | `/api/security/entity_store/status` | Status (`?include_components=true`) |
 | PUT | `/api/security/entity_store` | Update `logExtraction` config without reinstall |
