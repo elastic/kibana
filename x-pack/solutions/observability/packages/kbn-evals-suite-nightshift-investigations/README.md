@@ -349,10 +349,11 @@ NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
 - The knowledge comes from the endpoint the [connector set](#connector-sets) investigates:
   `nightshiftKnowledge.default` for customer0 and `nightshiftKnowledge.orcabench` for ORCA, each
   with the `url` and `apiKey` of the Elasticsearch cluster behind that endpoint's Kibana, and the
-  `spaceId` that holds its knowledge (default `default`). Without a profile block, the hook reads
-  `NIGHTSHIFT_KNOWLEDGE_ES_URL`, `NIGHTSHIFT_KNOWLEDGE_ES_API_KEY` and
-  `NIGHTSHIFT_KNOWLEDGE_SPACE_ID` from the shell. The key needs only `read` on
-  `ai-index-idx-nightshift-*`.
+  `spaceId` that holds its knowledge (default `default`). For the default set only, without a
+  profile block, the hook reads `NIGHTSHIFT_KNOWLEDGE_ES_URL`, `NIGHTSHIFT_KNOWLEDGE_ES_API_KEY`
+  and `NIGHTSHIFT_KNOWLEDGE_SPACE_ID` from the shell; an ORCA run needs its own block, so stale
+  customer0 values in the shell can't load customer0 knowledge into it. See
+  [Knowledge source key](#knowledge-source-key).
 - Before the first example, the eval clears all three knowledge indices in its space, then copies
   every selected system's documents from the source space, moving their ids and `space_id` into its
   own space. Embeddings are recomputed by the eval cluster on write. A source space with no
@@ -364,6 +365,43 @@ NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
 - Every score records `knowledge` (the selection, or `none`), `knowledge_source`, and per system the
   number of documents loaded and the newest one's `@timestamp`.
 - Changing `NIGHTSHIFT_KNOWLEDGE` restarts Scout, since it changes the server's flags.
+
+### Knowledge source key
+
+The knowledge indices live on the Elasticsearch cluster behind the endpoint's deployed Kibana, and
+the connector keys don't grant access to them, so the copy needs its own key. The `dev-vault` profile
+has no `nightshiftKnowledge` block yet, so for now each developer mints a short-lived read-only key
+with credentials for that cluster (any user with `manage_own_api_key`):
+
+```bash
+curl -s -u "$ES_USER:$ES_PASSWORD" -H 'Content-Type: application/json' \
+  -X POST "$KNOWLEDGE_ES_URL/_security/api_key" -d '{
+    "name": "nightshift-evals-knowledge-read-<you>",
+    "expiration": "7d",
+    "role_descriptors": { "knowledge_read": { "indices": [
+      { "names": ["ai-index-idx-nightshift-*"], "privileges": ["read"] }
+    ] } }
+  }'
+```
+
+Use the response's `encoded` value as the key, and keep it out of the repo, for example in a
+`chmod 600` file loaded before the run:
+
+```bash
+# ~/.nightshift-knowledge-c0.env
+NIGHTSHIFT_KNOWLEDGE_ES_URL=https://<cluster>.es.<region>.elastic.cloud
+NIGHTSHIFT_KNOWLEDGE_ES_API_KEY=<encoded>
+NIGHTSHIFT_KNOWLEDGE_SPACE_ID=default
+```
+
+```bash
+set -a; source ~/.nightshift-knowledge-c0.env; set +a
+NIGHTSHIFT_KNOWLEDGE=memory,cortex node scripts/evals start --suite nightshift-investigations ...
+```
+
+The URL must not embed credentials, and the hook fails the run before Scout starts when the key or
+URL is missing. A key past its expiration fails the copy with a 401; mint a new one. CI and the
+`orcabench` connector set need the key in the profile's `nightshiftKnowledge.<set>` block instead.
 
 Known limitation: the copy is the source space's knowledge as it is at run time. It is not
 filtered against the cases under test, so it can hold knowledge that an earlier investigation of

@@ -569,6 +569,16 @@ describe('ORCA CI shard', () => {
         "unknown NIGHTSHIFT_KNOWLEDGE system 'wiki'",
       ],
       [existing, { NIGHTSHIFT_KNOWLEDGE: 'memory' }, 'nightshiftKnowledge.default.url and apiKey'],
+      [
+        { ...existing, nightshiftOrcaEs: orca, nightshiftKnowledge: { default: c0 } },
+        {
+          EVAL_SHARD_ID: 'orcabench',
+          NIGHTSHIFT_KNOWLEDGE: 'memory',
+          NIGHTSHIFT_KNOWLEDGE_ES_URL: c0.url,
+          NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: c0.apiKey,
+        },
+        'nightshiftKnowledge.orcabench.url and apiKey',
+      ],
       [{ sandbox: SANDBOX }, { NIGHTSHIFT_KNOWLEDGE: 'memory' }, 'requires a connector set'],
       [
         { ...existing, nightshiftKnowledge: { default: { ...c0, url: 'https://u:p@c0.example' } } },

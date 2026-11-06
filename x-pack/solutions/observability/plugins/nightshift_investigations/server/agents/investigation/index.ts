@@ -295,29 +295,7 @@ export const getInvestigationAgentType = ({
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
-  {
-    sandboxEnabled,
-    wikiEnabled,
-    memoryEnabled = false,
-    decisionTreesEnabled = false,
-    investigationToolsEnabled,
-    proposalsEnabled,
-    getCustomContextInstructions,
-    getInheritedConnectorIds,
-    logger,
-  }: InvestigationAgentTypeOptions
+  options: InvestigationAgentTypeOptions
 ): void => {
-  agentBuilder.agents.registerType(
-    getInvestigationAgentType({
-      sandboxEnabled,
-      wikiEnabled,
-      memoryEnabled,
-      decisionTreesEnabled,
-      investigationToolsEnabled,
-      proposalsEnabled,
-      getCustomContextInstructions,
-      getInheritedConnectorIds,
-      logger,
-    })
-  );
+  agentBuilder.agents.registerType(getInvestigationAgentType(options));
 };

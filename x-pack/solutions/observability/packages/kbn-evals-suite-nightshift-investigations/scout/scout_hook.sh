@@ -176,16 +176,19 @@ if [[ -n "$knowledge" ]]; then
   fi
   knowledge_url="$(config_value ".nightshiftKnowledge.\"$connector_set\".url")"
   knowledge_key="$(config_value ".nightshiftKnowledge.\"$connector_set\".apiKey")"
-  if [[ -z "$knowledge_url$knowledge_key" ]]; then
+  knowledge_space="$(config_value ".nightshiftKnowledge.\"$connector_set\".spaceId")"
+  # The shell fallback is not tied to a connector set, so only the default set may use it; an ORCA
+  # run with stale customer0 values in the shell must fail rather than load customer0 knowledge.
+  if [[ "$connector_set" == default && -z "$knowledge_url$knowledge_key" ]]; then
     knowledge_url="${NIGHTSHIFT_KNOWLEDGE_ES_URL:-}"
     knowledge_key="${NIGHTSHIFT_KNOWLEDGE_ES_API_KEY:-}"
+    knowledge_space="${knowledge_space:-${NIGHTSHIFT_KNOWLEDGE_SPACE_ID:-}}"
   fi
-  knowledge_space="$(config_value ".nightshiftKnowledge.\"$connector_set\".spaceId")"
-  knowledge_space="${knowledge_space:-${NIGHTSHIFT_KNOWLEDGE_SPACE_ID:-default}}"
+  knowledge_space="${knowledge_space:-default}"
   if [[ -z "$knowledge_url" || -z "$knowledge_key" || "$knowledge_url" == *@* ]]; then
     echo "nightshift-investigations scout hook: NIGHTSHIFT_KNOWLEDGE requires" \
-      "nightshiftKnowledge.$connector_set.url and apiKey (or NIGHTSHIFT_KNOWLEDGE_ES_URL and" \
-      "NIGHTSHIFT_KNOWLEDGE_ES_API_KEY), with no credentials in the URL" >&2
+      "nightshiftKnowledge.$connector_set.url and apiKey (the default set may instead use" \
+      "NIGHTSHIFT_KNOWLEDGE_ES_URL and NIGHTSHIFT_KNOWLEDGE_ES_API_KEY), with no credentials in the URL" >&2
     exit 1
   fi
 fi
