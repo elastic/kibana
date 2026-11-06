@@ -16,6 +16,7 @@ export {
   type DiscoverADAnomaliesContext,
   type DiscoverADAnomalyContext,
   type DiscoverADAnomalyRange,
+  type DiscoverADJobSelection,
   type CreateCategorizationADJobContext,
   type SuggestADJobsContext,
   type UpdateADJobsProjectRoutingContext,

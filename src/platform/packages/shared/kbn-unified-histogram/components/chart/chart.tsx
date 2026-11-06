@@ -9,9 +9,19 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type { EuiIconProps } from '@elastic/eui';
-import { EuiDelayRender, EuiIcon, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDelayRender,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiProgress,
+  EuiSpacer,
+  EuiSwitch,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
@@ -107,6 +117,10 @@ const AnomaliesShownIcon = (props: Omit<EuiIconProps, 'type'>) => {
 
 const suggestAdJobsLabel = i18n.translate('unifiedHistogram.suggestAdJobsButtonLabel', {
   defaultMessage: 'Anomaly detection',
+});
+
+const showAnomaliesLabel = i18n.translate('unifiedHistogram.showAnomaliesSwitchLabel', {
+  defaultMessage: 'Show anomalies',
 });
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -255,7 +269,11 @@ export function UnifiedHistogramChart({
     onLoad,
   });
 
-  const anomalyOverlay = useAnomalyRanges({ services, dataSource, fetch$ });
+  const { overlay: anomalyOverlay, jobSelection: anomalyJobSelection } = useAnomalyRanges({
+    services,
+    dataSource,
+    fetch$,
+  });
   const lensPropsContext = useMemo(
     () =>
       baseLensPropsContext && anomalyOverlay?.ranges.length
@@ -395,16 +413,43 @@ export function UnifiedHistogramChart({
     });
   }
 
-  if (onSuggestAdJobs) {
-    actions.push({
-      label: suggestAdJobsLabel,
-      toolTipContent: suggestAdJobsLabel,
-      // Light blue while the chart shows anomalies
-      iconType: anomalyOverlay?.ranges.length ? AnomaliesShownIcon : 'machineLearningApp',
-      'data-test-subj': 'unifiedHistogramSuggestAdJobs',
-      onClick: onSuggestAdJobs,
-    });
-  }
+  // Anomaly detection has a group of its own, left of the other actions, with a switch to show the anomalies
+  // of the selected job
+  const anomalyDetectionControls =
+    chartVisible && onSuggestAdJobs ? (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        {anomalyJobSelection?.jobId ? (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={showAnomaliesLabel} disableScreenReaderOutput>
+              <EuiSwitch
+                compressed
+                showLabel={false}
+                label={showAnomaliesLabel}
+                checked={anomalyJobSelection.showAnomalies}
+                onChange={(e) => anomalyJobSelection.setShowAnomalies(e.target.checked)}
+                data-test-subj="unifiedHistogramShowAnomalies"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <IconButtonGroup
+            legend={suggestAdJobsLabel}
+            buttonSize="s"
+            buttons={[
+              {
+                label: suggestAdJobsLabel,
+                toolTipContent: suggestAdJobsLabel,
+                // Light blue while the chart shows anomalies
+                iconType: anomalyOverlay?.ranges.length ? AnomaliesShownIcon : 'machineLearningApp',
+                'data-test-subj': 'unifiedHistogramSuggestAdJobs',
+                onClick: onSuggestAdJobs,
+              },
+            ]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
 
   return (
     <>
@@ -417,12 +462,21 @@ export function UnifiedHistogramChart({
           rightSide: chartVisible ? actions : [],
           additionalControls: {
             prependRight: (
-              <span style={{ marginRight: 4 }}>
-                <ApproximationBadge
-                  isApproximationApplied={chartVisible && isApproximationApplied}
-                  data-test-subj="unifiedHistogramApproximationApplied"
-                />
-              </span>
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <span style={{ marginRight: 4 }}>
+                    <ApproximationBadge
+                      isApproximationApplied={chartVisible && isApproximationApplied}
+                      data-test-subj="unifiedHistogramApproximationApplied"
+                    />
+                  </span>
+                </EuiFlexItem>
+                {anomalyDetectionControls ? (
+                  <EuiFlexItem grow={false} css={{ marginRight: 8 }}>
+                    {anomalyDetectionControls}
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
             ),
           },
         }}

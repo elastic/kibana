@@ -27,13 +27,14 @@ export function createDiscoverADAnomaliesAction(
         defaultMessage: 'Show anomalies on the Discover chart',
       }),
     async execute(context: ActionExecutionContext<DiscoverADAnomaliesContext>) {
-      const { indexPattern, timeRange, chartWidth, signal, onAnomalyRanges } = context;
+      const { indexPattern, timeRange, chartWidth, signal, onAnomalyRanges, onJobSelection } =
+        context;
 
       const [
         [coreStart],
         { mlApiProvider },
         { loadAnomalyRanges },
-        { getSelectedJobId$, getShowAnomalies$ },
+        { getSelectedJobId$, getShowAnomalies$, setShowAnomalies },
       ] = await Promise.all([
         getStartServices(),
         import('../application/services/ml_api_service'),
@@ -62,6 +63,13 @@ export function createDiscoverADAnomaliesAction(
           getSelectedJobId$(indexPattern),
           getShowAnomalies$(indexPattern),
         ]).subscribe(([jobId, showAnomalies]) => {
+          if (!signal?.aborted) {
+            onJobSelection?.({
+              jobId,
+              showAnomalies,
+              setShowAnomalies: (show) => setShowAnomalies(indexPattern, show),
+            });
+          }
           provideAnomalyRanges(jobId, showAnomalies).catch(() => {});
         });
         const stop = () => {

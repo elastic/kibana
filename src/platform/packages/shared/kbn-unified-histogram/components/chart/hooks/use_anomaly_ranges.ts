@@ -25,9 +25,17 @@ import { useAdIndexPattern } from './use_ad_index_pattern';
 const discoverAdAnomaliesTrigger: typeof DISCOVER_AD_ANOMALIES_TRIGGER =
   'DISCOVER_AD_ANOMALIES_TRIGGER';
 
+/** The anomaly detection job selected for the chart, and whether its anomalies are shown. */
+export interface UnifiedHistogramAnomalyJobSelection {
+  jobId?: string;
+  showAnomalies: boolean;
+  setShowAnomalies: (show: boolean) => void;
+}
+
 /**
  * Returns the time ranges in which anomaly detection jobs for the data source found anomalies,
- * with the time range of the chart, loaded every time the chart is fetched. It is undefined when nothing provides them.
+ * with the time range of the chart, loaded every time the chart is fetched, and the job which is selected.
+ * They are undefined when nothing provides them.
  */
 export const useAnomalyRanges = ({
   services,
@@ -37,12 +45,17 @@ export const useAnomalyRanges = ({
   services: UnifiedHistogramServices;
   dataSource: DataSource | undefined;
   fetch$: UnifiedHistogramFetch$;
-}): UnifiedHistogramAnomalyOverlay | undefined => {
+}): {
+  overlay: UnifiedHistogramAnomalyOverlay | undefined;
+  jobSelection: UnifiedHistogramAnomalyJobSelection | undefined;
+} => {
   const [overlay, setOverlay] = useState<UnifiedHistogramAnomalyOverlay>();
+  const [jobSelection, setJobSelection] = useState<UnifiedHistogramAnomalyJobSelection>();
   const { indexPattern } = useAdIndexPattern(dataSource);
 
   useEffect(() => {
     setOverlay(undefined);
+    setJobSelection(undefined);
     if (!indexPattern) {
       return;
     }
@@ -70,6 +83,11 @@ export const useAnomalyRanges = ({
               setOverlay({ ranges: newRanges, timeRange });
             }
           },
+          onJobSelection: (selection: UnifiedHistogramAnomalyJobSelection) => {
+            if (!signal.aborted) {
+              setJobSelection(selection);
+            }
+          },
         })
         .catch(() => {});
     });
@@ -80,5 +98,5 @@ export const useAnomalyRanges = ({
     };
   }, [services.data, services.uiActions, fetch$, indexPattern]);
 
-  return overlay;
+  return { overlay, jobSelection };
 };

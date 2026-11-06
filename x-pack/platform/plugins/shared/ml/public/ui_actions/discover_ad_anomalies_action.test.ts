@@ -117,6 +117,38 @@ describe('discover anomalies action', () => {
     await done;
   });
 
+  it('tells which job is selected, and whether its anomalies are shown, and lets them be hidden', async () => {
+    setSelectedJobId(INDEX_PATTERN, 'a');
+    const abortController = new AbortController();
+    const onJobSelection = jest.fn();
+    const done = action.execute({
+      trigger,
+      indexPattern: INDEX_PATTERN,
+      timeRange,
+      signal: abortController.signal,
+      onAnomalyRanges: jest.fn(),
+      onJobSelection,
+    });
+    await flushPromises();
+
+    expect(onJobSelection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ jobId: 'a', showAnomalies: true })
+    );
+
+    onJobSelection.mock.lastCall[0].setShowAnomalies(false);
+    expect(onJobSelection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ jobId: 'a', showAnomalies: false })
+    );
+
+    setSelectedJobId(INDEX_PATTERN, undefined);
+    expect(onJobSelection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ jobId: undefined, showAnomalies: false })
+    );
+
+    abortController.abort();
+    await done;
+  });
+
   it('stops providing anomalies when it is aborted', async () => {
     const abortController = new AbortController();
     const onAnomalyRanges = jest.fn();

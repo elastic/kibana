@@ -117,6 +117,22 @@ export interface DiscoverADAnomaliesContext {
    * Called with the anomaly ranges found, which are empty when there are no matching jobs or anomalies.
    */
   onAnomalyRanges: (ranges: DiscoverADAnomalyRange[]) => void;
+  /**
+   * Called with the job which is selected for the index pattern, and again each time it, or whether its
+   * anomalies are shown, changes.
+   */
+  onJobSelection?: (selection: DiscoverADJobSelection) => void;
+}
+
+/**
+ * The anomaly detection job selected for the Discover chart, and whether its anomalies are shown.
+ */
+export interface DiscoverADJobSelection {
+  /** The selected job, which is undefined when there is none. */
+  jobId?: string;
+  showAnomalies: boolean;
+  /** Shows or hides the anomalies of the selected job on the chart, without deselecting it. */
+  setShowAnomalies: (show: boolean) => void;
 }
 
 export const DISCOVER_AD_ANOMALIES_ACTION = 'discoverADAnomaliesAction';
