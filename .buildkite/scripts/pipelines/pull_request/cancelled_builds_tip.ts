@@ -70,8 +70,8 @@ export const countBuildsCancelledByPushes = (
 };
 
 export const getCancelledBuildsTipMessage = (user: string, cancelledBuilds: number): string =>
-  `👋 @${user}, your recent pushes cancelled ${cancelledBuilds} CI builds on this PR that were still running. ` +
-  "When iterating, we recommend converting the PR to draft: drafts don't run CI on every push, " +
+  `👋 @${user}, are you still iterating on this PR? ${cancelledBuilds} CI builds were cancelled by new pushes before they finished. ` +
+  "If you don't need CI on every push yet, we recommend converting the PR to draft: drafts don't run CI automatically, " +
   'and you can comment `/ci` whenever you want a build.';
 
 const postTip = async (): Promise<void> => {
