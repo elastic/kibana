@@ -55,6 +55,29 @@ describe('createSyncUserActionBuilder', () => {
     );
   });
 
+  it('names who changed the incident when the external system says', () => {
+    const userAction = getUserAction('sync', UserActionActions.update, {
+      payload: {
+        sync: {
+          connectorName: 'ServiceNow',
+          externalId: 'external_id',
+          externalTitle: 'INC01',
+          externalUrl: 'basicPush.com',
+          updatedFields: ['status'],
+          conflictedFields: [],
+          externalUpdatedBy: 'Jane Smith',
+        },
+      },
+    });
+    const builder = createSyncUserActionBuilder({ ...builderArgs, userAction });
+
+    renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+    expect(screen.getByTestId('sync-label')).toHaveTextContent(
+      'updated status, changed by Jane Smith via ServiceNow'
+    );
+  });
+
   it('renders a no-change entry when nothing was applied', () => {
     const userAction = getUserAction('sync', UserActionActions.update, {
       payload: {

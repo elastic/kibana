@@ -34,6 +34,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     agentic: {
       enabled: true,
     },
+    knowledge: {
+      enabled: true,
+    },
     attachments: {
       enabled: true,
     },

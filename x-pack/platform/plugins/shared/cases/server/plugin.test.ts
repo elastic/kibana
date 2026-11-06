@@ -65,6 +65,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     customStatuses: { enabled: false },
     tasks: { enabled: true },
     agentic: { enabled: true },
+    knowledge: { enabled: true },
     ...overrides,
   };
 }
@@ -349,6 +350,9 @@ describe('Cases Plugin', () => {
               "enabled": true,
               "taskIntervalMinutes": 10,
               "taskStartDelayMinutes": 10,
+            },
+            "knowledge": Object {
+              "enabled": true,
             },
             "markdownPlugins": Object {
               "lens": true,

@@ -88,6 +88,8 @@ pauseReasons:
   $ref: 'pause_reasons_configuration.yaml'
 closeReason:
   $ref: 'case_close_reason_configuration.yaml'
+knowledge:
+  $ref: 'case_knowledge_configuration.yaml'
 templates:
   $ref: 'templates.yaml'
 workflowTags:

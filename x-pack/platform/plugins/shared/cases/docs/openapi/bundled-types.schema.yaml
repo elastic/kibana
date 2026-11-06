@@ -396,6 +396,8 @@ paths:
                       $ref: '#/components/schemas/pause_reasons_configuration'
                     closeReason:
                       $ref: '#/components/schemas/case_close_reason_configuration'
+                    knowledge:
+                      $ref: '#/components/schemas/case_knowledge_configuration'
                     templates:
                       $ref: '#/components/schemas/templates'
                     workflowTags:
@@ -615,6 +617,8 @@ paths:
                     $ref: '#/components/schemas/pause_reasons_configuration'
                   closeReason:
                     $ref: '#/components/schemas/case_close_reason_configuration'
+                  knowledge:
+                    $ref: '#/components/schemas/case_knowledge_configuration'
                   templates:
                     $ref: '#/components/schemas/templates'
                   workflowTags:
@@ -836,6 +840,8 @@ paths:
                     $ref: '#/components/schemas/pause_reasons_configuration'
                   closeReason:
                     $ref: '#/components/schemas/case_close_reason_configuration'
+                  knowledge:
+                    $ref: '#/components/schemas/case_knowledge_configuration'
                   templates:
                     $ref: '#/components/schemas/templates'
                   workflowTags:
@@ -4666,6 +4672,17 @@ components:
           maxItems: 50
           items:
             type: string
+    case_knowledge_configuration:
+      title: Case knowledge configuration
+      description: |
+        Technical preview. Whether closed cases publish their outcome (close reason, verdicts, and the rules, hosts, users, and observables involved) as a knowledge indicator to the `cases-outcomes` AI index of the context engine. Restricted cases are never published, and reopening a case removes its outcome. Missing means publishing is on.
+      type: object
+      properties:
+        publishOutcomes:
+          type: boolean
+          description: Whether closed cases publish their outcome to the context engine.
+      required:
+        - publishOutcomes
     template_tags:
       description: |
         The words and phrases that help categorize templates. It can be an empty array.
@@ -4851,6 +4868,8 @@ components:
           $ref: '#/components/schemas/pause_reasons_configuration'
         closeReason:
           $ref: '#/components/schemas/case_close_reason_configuration'
+        knowledge:
+          $ref: '#/components/schemas/case_knowledge_configuration'
         templates:
           $ref: '#/components/schemas/templates'
         workflowTags:
@@ -4945,6 +4964,8 @@ components:
           $ref: '#/components/schemas/pause_reasons_configuration'
         closeReason:
           $ref: '#/components/schemas/case_close_reason_configuration'
+        knowledge:
+          $ref: '#/components/schemas/case_knowledge_configuration'
         externalSync:
           $ref: '#/components/schemas/external_sync_settings'
         externalSyncFields:

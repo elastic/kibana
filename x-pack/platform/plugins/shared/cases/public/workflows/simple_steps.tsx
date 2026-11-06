@@ -25,6 +25,7 @@ import { getCasesByAlertIdStepCommonDefinition } from '../../common/workflows/st
 import { getCasesStepCommonDefinition } from '../../common/workflows/steps/get_cases';
 import { pushCasesStepCommonDefinition } from '../../common/workflows/steps/push_cases';
 import { syncCaseStepCommonDefinition } from '../../common/workflows/steps/sync_case';
+import { getCaseOutcomeStepCommonDefinition } from '../../common/workflows/steps/get_case_outcome';
 import { setDescriptionStepCommonDefinition } from '../../common/workflows/steps/set_description';
 import { setExtendedFieldsStepCommonDefinition } from '../../common/workflows/steps/set_extended_fields';
 import { setSeverityStepCommonDefinition } from '../../common/workflows/steps/set_severity';
@@ -150,4 +151,8 @@ export const syncCaseStepDefinition = createPublicCaseStepDefinition({
 
 export const deleteAttachmentsStepDefinition = createPublicCaseStepDefinition({
   ...deleteAttachmentsStepCommonDefinition,
+});
+
+export const getCaseOutcomeStepDefinition = createPublicCaseStepDefinition({
+  ...getCaseOutcomeStepCommonDefinition,
 });

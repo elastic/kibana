@@ -13,6 +13,7 @@ import type {
   CaseCustomFields,
   CaseSeverity,
   CloseReasonConfiguration,
+  KnowledgeConfiguration,
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
@@ -39,6 +40,7 @@ export interface ConfigurationPersistedAttributes {
   statuses?: PersistedCaseStatusesConfiguration;
   pauseReasons?: string[];
   closeReason?: CloseReasonConfiguration;
+  knowledge?: KnowledgeConfiguration;
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**

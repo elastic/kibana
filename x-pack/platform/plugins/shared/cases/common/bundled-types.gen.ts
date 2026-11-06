@@ -1488,6 +1488,22 @@ export const CaseCloseReasonConfiguration = lazySchema(() =>
 export type CaseCloseReasonConfiguration = z.infer<typeof CaseCloseReasonConfiguration>;
 
 /**
+  * Technical preview. Whether closed cases publish their outcome (close reason, verdicts, and the rules, hosts, users, and observables involved) as a knowledge indicator to the `cases-outcomes` AI index of the context engine. Restricted cases are never published, and reopening a case removes its outcome. Missing means publishing is on.
+
+  */
+export const CaseKnowledgeConfiguration = lazySchema(() =>
+  z.object({
+    /**
+     * Whether closed cases publish their outcome to the context engine.
+     */
+    publishOutcomes: z
+      .boolean()
+      .describe('Whether closed cases publish their outcome to the context engine.'),
+  })
+);
+export type CaseKnowledgeConfiguration = z.infer<typeof CaseKnowledgeConfiguration>;
+
+/**
   * The words and phrases that help categorize templates. It can be an empty array.
 
   */
@@ -1729,6 +1745,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
     statuses: CaseStatusesConfiguration.optional(),
     pauseReasons: PauseReasonsConfiguration.optional(),
     closeReason: CaseCloseReasonConfiguration.optional(),
+    knowledge: CaseKnowledgeConfiguration.optional(),
     templates: Templates.optional(),
     /**
       * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
@@ -1854,6 +1871,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
     statuses: CaseStatusesConfiguration.optional(),
     pauseReasons: PauseReasonsConfiguration.optional(),
     closeReason: CaseCloseReasonConfiguration.optional(),
+    knowledge: CaseKnowledgeConfiguration.optional(),
     externalSync: ExternalSyncSettings.optional(),
     /**
      * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.

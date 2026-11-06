@@ -604,6 +604,9 @@
                       "closeReason": {
                         "$ref": "#/components/schemas/case_close_reason_configuration"
                       },
+                      "knowledge": {
+                        "$ref": "#/components/schemas/case_knowledge_configuration"
+                      },
                       "templates": {
                         "$ref": "#/components/schemas/templates"
                       },
@@ -905,6 +908,9 @@
                     },
                     "closeReason": {
                       "$ref": "#/components/schemas/case_close_reason_configuration"
+                    },
+                    "knowledge": {
+                      "$ref": "#/components/schemas/case_knowledge_configuration"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
@@ -1211,6 +1217,9 @@
                     },
                     "closeReason": {
                       "$ref": "#/components/schemas/case_close_reason_configuration"
+                    },
+                    "knowledge": {
+                      "$ref": "#/components/schemas/case_knowledge_configuration"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
@@ -5245,6 +5254,16 @@
           },
           "externalSync": {
             "$ref": "#/components/schemas/external_sync_settings"
+          },
+          "agent": {
+            "type": "object",
+            "description": "Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted.",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "example": false
+              }
+            }
           }
         }
       },
@@ -6202,6 +6221,16 @@
           "source": {
             "$ref": "#/components/schemas/case_source"
           },
+          "room_conversation_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Agent Builder conversation that is the case's room, created the first time someone opens the room."
+          },
+          "room_owner_uid": {
+            "type": "string",
+            "nullable": true,
+            "description": "The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists."
+          },
           "paused_at": {
             "type": "string",
             "format": "date-time",
@@ -6792,6 +6821,20 @@
           }
         }
       },
+      "case_knowledge_configuration": {
+        "title": "Case knowledge configuration",
+        "description": "Technical preview. Whether closed cases publish their outcome (close reason, verdicts, and the rules, hosts, users, and observables involved) as a knowledge indicator to the `cases-outcomes` AI index of the context engine. Restricted cases are never published, and reopening a case removes its outcome. Missing means publishing is on.\n",
+        "type": "object",
+        "properties": {
+          "publishOutcomes": {
+            "type": "boolean",
+            "description": "Whether closed cases publish their outcome to the context engine."
+          }
+        },
+        "required": [
+          "publishOutcomes"
+        ]
+      },
       "template_tags": {
         "description": "The words and phrases that help categorize templates. It can be an empty array.\n",
         "type": "array",
@@ -7038,6 +7081,9 @@
           "closeReason": {
             "$ref": "#/components/schemas/case_close_reason_configuration"
           },
+          "knowledge": {
+            "$ref": "#/components/schemas/case_knowledge_configuration"
+          },
           "templates": {
             "$ref": "#/components/schemas/templates"
           },
@@ -7157,6 +7203,9 @@
           },
           "closeReason": {
             "$ref": "#/components/schemas/case_close_reason_configuration"
+          },
+          "knowledge": {
+            "$ref": "#/components/schemas/case_knowledge_configuration"
           },
           "externalSync": {
             "$ref": "#/components/schemas/external_sync_settings"

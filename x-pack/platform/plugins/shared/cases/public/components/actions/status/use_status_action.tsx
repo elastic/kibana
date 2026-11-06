@@ -151,7 +151,7 @@ export const useStatusAction = ({
       status: CaseStatuses | CaseStatusConfiguration,
       closeReason?: string,
       pauseReason?: string,
-      closeOptions?: { closeLinkedInvestigations?: boolean }
+      closeOptions?: { closeLinkedInvestigations?: boolean; version?: string }
     ) => {
       onAction();
       // A bare category lands on its default status.
@@ -161,7 +161,12 @@ export const useStatusAction = ({
         ...(isCustomStatusesEnabled && { status_key: target.key }),
         ...(pauseReason != null && { pause_reason: pauseReason }),
         id: theCase.id,
-        version: theCase.version,
+        // The close modal can write to the case first (closing notes); it passes the version
+        // that write left, so the close doesn't conflict with it.
+        version:
+          selectedCases.length === 1 && closeOptions?.version != null
+            ? closeOptions.version
+            : theCase.version,
         closeReason,
         ...(closeOptions?.closeLinkedInvestigations != null && {
           closeLinkedInvestigations: closeOptions.closeLinkedInvestigations,

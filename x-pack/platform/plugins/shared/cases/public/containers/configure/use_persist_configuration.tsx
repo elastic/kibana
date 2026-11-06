@@ -43,6 +43,7 @@ export const usePersistConfiguration = () => {
       workflowTags,
       statuses,
       pauseReasons,
+      knowledge,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -59,6 +60,7 @@ export const usePersistConfiguration = () => {
           workflowTags,
           statuses,
           pauseReasons,
+          knowledge,
         });
       }
 
@@ -76,6 +78,7 @@ export const usePersistConfiguration = () => {
         workflowTags,
         statuses,
         pauseReasons,
+        knowledge,
       });
     },
     {

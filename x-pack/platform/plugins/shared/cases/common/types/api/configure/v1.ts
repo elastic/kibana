@@ -35,6 +35,7 @@ import {
 } from '../../domain/custom_field/v1';
 import {
   CloseReasonConfigurationSchema,
+  KnowledgeConfigurationSchema,
   ClosureTypeSchema,
   ConfigurationBasicWithoutOwnerSchema,
 } from '../../domain/configure/v1';
@@ -268,6 +269,7 @@ export const ConfigurationRequestSchema = lazySchema(() =>
     statuses: CaseStatusesConfigurationSchema.optional(),
     pauseReasons: PauseReasonsConfigurationSchema.optional(),
     closeReason: CloseReasonConfigurationSchema.optional(),
+    knowledge: KnowledgeConfigurationSchema.optional(),
     externalSync: ExternalSyncSettingsSchema.optional(),
     externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
     externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
@@ -300,6 +302,7 @@ export const ConfigurationPatchRequestSchema = lazySchema(() =>
     statuses: CaseStatusesConfigurationSchema.optional(),
     pauseReasons: PauseReasonsConfigurationSchema.optional(),
     closeReason: CloseReasonConfigurationSchema.optional(),
+    knowledge: KnowledgeConfigurationSchema.optional(),
     externalSync: ExternalSyncSettingsSchema.optional(),
     externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
     externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),

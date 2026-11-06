@@ -19,11 +19,20 @@ const toFieldList = (fields: string[]) =>
   fields.map((field) => getExternalSyncFieldLabel(field).toLowerCase()).join(', ');
 
 const getLabel = (payload: SnakeToCamelCase<SyncUserAction>['payload']['sync']) => {
-  const { updatedFields, conflictedFields, connectorName, externalTitle, externalUrl } = payload;
+  const {
+    updatedFields,
+    conflictedFields,
+    connectorName,
+    externalTitle,
+    externalUrl,
+    externalUpdatedBy,
+  } = payload;
   const summary =
-    updatedFields.length > 0
-      ? i18n.SYNCED_FIELDS_FROM(toFieldList(updatedFields), connectorName)
-      : i18n.SYNCED_NO_CHANGES_FROM(connectorName);
+    updatedFields.length === 0
+      ? i18n.SYNCED_NO_CHANGES_FROM(connectorName)
+      : externalUpdatedBy
+      ? i18n.SYNCED_FIELDS_CHANGED_BY(toFieldList(updatedFields), externalUpdatedBy, connectorName)
+      : i18n.SYNCED_FIELDS_FROM(toFieldList(updatedFields), connectorName);
 
   return (
     <EuiFlexGroup

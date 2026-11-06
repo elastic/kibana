@@ -202,6 +202,12 @@ export const ConfigSchema = schema.object({
   agentic: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: closed cases publish their outcome to the context engine's `cases-outcomes`
+  // AI index, and the case view shows prior outcomes of similar cases. Needs `agentic` too.
+  knowledge: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

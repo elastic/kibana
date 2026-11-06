@@ -13,6 +13,7 @@ export * from './application';
 export * from './observables';
 export * from './attachments';
 export * from './workflow';
+export * from './knowledge';
 
 /**
  * Cases connector limits.

@@ -134,6 +134,16 @@ export const CloseReasonConfigurationSchema = lazySchema(() =>
   })
 );
 
+/**
+ * Whether closed cases publish their outcome to the context engine's `cases-outcomes` AI index.
+ * Missing means on.
+ */
+export const KnowledgeConfigurationSchema = lazySchema(() =>
+  z.object({
+    publishOutcomes: z.boolean(),
+  })
+);
+
 export const ConfigurationBasicWithoutOwnerSchema = lazySchema(() =>
   z.object({
     /**
@@ -178,9 +188,15 @@ export const ConfigurationBasicWithoutOwnerSchema = lazySchema(() =>
      * owner's default on read when it was never saved.
      */
     closeReason: CloseReasonConfigurationSchema.optional(),
+    /**
+     * Whether closed cases publish their outcome to the context engine. Filled with the default
+     * (on) on read when it was never saved.
+     */
+    knowledge: KnowledgeConfigurationSchema.optional(),
   })
 );
 
+export type KnowledgeConfiguration = z.infer<typeof KnowledgeConfigurationSchema>;
 export type CloseReasonConfiguration = z.infer<typeof CloseReasonConfigurationSchema>;
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({

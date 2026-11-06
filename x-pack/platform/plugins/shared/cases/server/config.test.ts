@@ -140,6 +140,9 @@ describe('config validation', () => {
             "taskIntervalMinutes": 10,
             "taskStartDelayMinutes": 10,
           },
+          "knowledge": Object {
+            "enabled": true,
+          },
           "markdownPlugins": Object {
             "lens": true,
           },

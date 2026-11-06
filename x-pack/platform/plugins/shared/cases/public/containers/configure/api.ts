@@ -133,6 +133,7 @@ const convertConfigureResponseToCasesConfigure = (
     statuses,
     pauseReasons,
     closeReason,
+    knowledge,
   } = configuration;
 
   return {
@@ -153,5 +154,6 @@ const convertConfigureResponseToCasesConfigure = (
     statuses,
     pauseReasons,
     closeReason,
+    knowledge,
   };
 };

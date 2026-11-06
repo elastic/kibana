@@ -914,3 +914,24 @@ export const SYNC_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
       'This step reads the external incident linked to a case and applies its changes (title, description, status, tags, comments and mapped fields) according to the connector sync rules. Identify the case by its id, or by the external incident id (and connector id) carried by the external system webhook. The step returns the updated cases. Cases that were never pushed are skipped.',
   }
 );
+
+export const GET_CASE_OUTCOME_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.getCaseOutcome.label',
+  { defaultMessage: 'Cases - Get case outcome' }
+);
+
+export const GET_CASE_OUTCOME_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.getCaseOutcome.description',
+  {
+    defaultMessage:
+      'Builds the knowledge item for a closed case: its close reason, verdicts, closing notes, rules, and observables. Returns publish: false when the case is restricted, still open, or in a space that turned publishing off.',
+  }
+);
+
+export const GET_CASE_OUTCOME_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.getCaseOutcome.documentation.details',
+  {
+    defaultMessage:
+      'Returns publish (true or false), retract (true when a published outcome should be removed, such as after a reopen), ki_id (one per case), and, when publish is true, ki: a knowledge item ready for the context-engine.createKi step. Restricted cases are never published. Only the comment the closer wrote just before closing is included, as the closing notes.',
+  }
+);

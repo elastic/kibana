@@ -111,6 +111,9 @@ export interface CasesUiConfigType {
   agentic?: {
     enabled: boolean;
   };
+  knowledge?: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -195,6 +198,7 @@ export type CasesConfigurationUI = Pick<
   | 'statuses'
   | 'pauseReasons'
   | 'closeReason'
+  | 'knowledge'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

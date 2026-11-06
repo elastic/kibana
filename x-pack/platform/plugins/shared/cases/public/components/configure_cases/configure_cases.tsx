@@ -25,6 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useCasesConfig, useKibana } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
@@ -43,6 +44,8 @@ import { CasesDeepLinkId } from '../../common/navigation';
 import { ConnectorTypes } from '../../../common/types/domain';
 import { ObservableTypes } from '../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
+import { KnowledgeSection, KNOWLEDGE_DESCRIPTION, KNOWLEDGE_TITLE } from './knowledge_section';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
@@ -72,8 +75,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();
   const { permissions, owner } = useCasesContext();
-  const { docLinks } = useKibana().services;
-  const { customStatusesEnabled } = useCasesConfig();
+  const { docLinks, uiSettings } = useKibana().services;
+  const { customStatusesEnabled, knowledgeEnabled } = useCasesConfig();
 
   const workflowsAvailableForCases = useAreWorkflowsAvailableForCases();
 
@@ -116,6 +119,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeKnowledgePublishOutcomes,
+    publishOutcomes,
     onChangeExternalSync,
     onChangeExternalSyncFields,
     onChangeExternalSyncFieldMappings,
@@ -147,6 +152,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
   const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
   const showTaskListsSection = tasksAuthorized && permissions.settings;
+  // Security only: AlertZero cases are the outcomes agents learn from today.
+  const showKnowledgeSection = knowledgeEnabled && owner[0] === SECURITY_SOLUTION_OWNER;
+  const contextEngineEnabled = uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
   const syncControlsDisabled =
     isPersistingConfiguration ||
     isLoadingCaseConfiguration ||
@@ -287,6 +295,30 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       onChangeClosureType={onChangeClosureType}
                     />
                   </SettingsSection>
+                )}
+
+                {showKnowledgeSection && (
+                  <>
+                    <EuiHorizontalRule margin="l" />
+                    <SettingsSection
+                      data-test-subj="cases-knowledge-section"
+                      title={KNOWLEDGE_TITLE}
+                      description={KNOWLEDGE_DESCRIPTION}
+                    >
+                      <KnowledgeSection
+                        publishOutcomes={publishOutcomes}
+                        onChange={onChangeKnowledgePublishOutcomes}
+                        contextEngineEnabled={contextEngineEnabled}
+                        disabled={
+                          isPersistingConfiguration ||
+                          isLoadingCaseConfiguration ||
+                          isFetchingCaseConfiguration ||
+                          isConfigurationFetchError ||
+                          !permissions.settings
+                        }
+                      />
+                    </SettingsSection>
+                  </>
                 )}
 
                 {showStatusesSection && <EuiHorizontalRule margin="l" />}

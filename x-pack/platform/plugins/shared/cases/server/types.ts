@@ -6,6 +6,10 @@
  */
 
 import type { SystemTemplateDefinition } from './system_templates';
+import type {
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+} from '@kbn/context-engine-plugin/server';
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 
 /**
@@ -82,6 +86,7 @@ export interface CasesServerSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface CasesServerStartDependencies {
@@ -96,6 +101,7 @@ export interface CasesServerStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  contextEngine?: ContextEnginePluginStart;
   /**
    * Data views server plugin — needed by cases-analytics v2 to create
    * per-space managed `Cases` data views. Optional because v2 is the only

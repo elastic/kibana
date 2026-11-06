@@ -274,6 +274,7 @@ function transformToExternalModel(
   const closeReason =
     configuration.attributes.closeReason ??
     getDefaultCloseReasonConfiguration(configuration.attributes.owner);
+  const knowledge = configuration.attributes.knowledge ?? { publishOutcomes: true };
 
   return {
     ...configuration,
@@ -288,6 +289,7 @@ function transformToExternalModel(
       statuses,
       pauseReasons,
       closeReason,
+      knowledge,
     },
   };
 }

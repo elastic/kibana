@@ -545,6 +545,12 @@ export const SYNCED_FIELDS_FROM = (fields: string, connectorName: string) =>
     defaultMessage: 'updated {fields} from {connectorName}',
   });
 
+export const SYNCED_FIELDS_CHANGED_BY = (fields: string, name: string, connectorName: string) =>
+  i18n.translate('xpack.cases.caseView.actionLabel.syncedFieldsChangedBy', {
+    values: { fields, name, connectorName },
+    defaultMessage: 'updated {fields}, changed by {name} via {connectorName}',
+  });
+
 export const SYNCED_NO_CHANGES_FROM = (connectorName: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.syncedNoChangesFrom', {
     values: { connectorName },

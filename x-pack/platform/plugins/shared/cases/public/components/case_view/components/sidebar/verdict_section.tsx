@@ -22,6 +22,7 @@ import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useRefreshCaseViewPage } from '../../use_on_refresh_case_view_page';
 import { VerdictBadge } from '../../../verdict/verdict_badge';
 import * as i18n from '../../../verdict/translations';
+import { PriorOutcomes } from './prior_outcomes';
 
 export const useShowVerdictSection = (caseData: CaseUI): boolean => {
   const { agenticEnabled } = useCasesConfig();
@@ -117,6 +118,8 @@ export const VerdictSection: React.FC<{ caseData: CaseUI }> = ({ caseData }) => 
           {section.render({ caseData, canUpdate: permissions.update, refreshCase })}
         </React.Fragment>
       ))}
+      <EuiSpacer size="s" />
+      <PriorOutcomes caseData={caseData} />
     </div>
   );
 };

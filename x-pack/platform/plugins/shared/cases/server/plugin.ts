@@ -22,6 +22,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { CASES_MANAGED_WORKFLOW_PLUGIN_ID } from '@kbn/workflows/managed';
 import {
   APP_ID,
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -95,6 +96,11 @@ import { getExternalSyncRoutes } from './routes/api/external_sync';
 import { LicensingService } from './services/licensing';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
+import { installCasesManagedWorkflows, registerCasesOutcomesAiIndex } from './knowledge/register';
+import { createIsContextEngineEnabled } from './knowledge/is_context_engine_enabled';
+import { getCaseOutcomeStepDefinition } from './workflows/steps/get_case_outcome';
+import { createPriorOutcomesRoute } from './routes/api/internal/get_prior_outcomes';
+import { subscribeRetractOutcomeOnRestrict } from './knowledge/retract_on_restrict';
 import type { SystemTemplateDefinition } from './system_templates';
 import { SystemTemplateRegistry, ensureSystemTemplates } from './system_templates';
 import { createEnsureSystemTemplatesRoute } from './routes/api/internal/ensure_system_templates';
@@ -359,6 +365,38 @@ export class CasePlugin
               }),
             ]
           : []),
+        ...(this.isKnowledgeEnabled() && plugins.contextEngine
+          ? [
+              createPriorOutcomesRoute({
+                getSpaceId,
+                isAvailable: async (request, spaceId) => {
+                  const [coreStart, pluginsStart] = await core.getStartServices();
+                  if (!(await createIsContextEngineEnabled(async () => coreStart)(spaceId))) {
+                    return false;
+                  }
+                  const authz = pluginsStart.security?.authz;
+                  if (!authz || !authz.mode.useRbacForRequest(request)) {
+                    return true;
+                  }
+                  const { hasAllRequested } = await authz.checkPrivilegesDynamicallyWithRequest(
+                    request
+                  )({ kibana: [authz.actions.api.get('contextEngine:read')] });
+                  return hasAllRequested;
+                },
+                getQuery: async (request) => {
+                  const [coreStart, pluginsStart] = await core.getStartServices();
+                  if (!pluginsStart.contextEngine) {
+                    throw new Error('The context engine is not available');
+                  }
+                  const readService = pluginsStart.contextEngine.getAiIndexDataReadService({
+                    esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+                    request,
+                  });
+                  return (params) => readService.query(params);
+                },
+              }),
+            ]
+          : []),
         ...(this.caseConfig.bidirectionalSync.enabled
           ? getExternalSyncRoutes({
               getStartServices: async () => {
@@ -418,6 +456,22 @@ export class CasePlugin
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
+    // Closed cases publish their outcome to the context engine (technical preview).
+    if (this.isKnowledgeEnabled() && plugins.contextEngine) {
+      registerCasesOutcomesAiIndex(plugins.contextEngine);
+      // Without an owner registered at setup, the workflows plugin removes the installed workflow
+      // as an orphan.
+      plugins.workflowsExtensions?.registerManagedWorkflowOwner(CASES_MANAGED_WORKFLOW_PLUGIN_ID);
+      plugins.workflowsExtensions?.registerStepDefinition(
+        getCaseOutcomeStepDefinition({
+          getCasesClient: getCasesClient('workflow'),
+          isContextEngineEnabled: createIsContextEngineEnabled(
+            async () => (await core.getStartServices())[0]
+          ),
+        })
+      );
+    }
+
     const isCasesAgentBuilderAllowed =
       !this.isServerless ||
       (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
@@ -456,6 +510,10 @@ export class CasePlugin
         this.systemTemplates.register(owner, definition);
       },
     };
+  }
+
+  private isKnowledgeEnabled(): boolean {
+    return this.caseConfig.agentic.enabled && this.caseConfig.knowledge.enabled;
   }
 
   private ensureSystemTemplates(
@@ -634,6 +692,20 @@ export class CasePlugin
     // this.casesEventBus will be set to a defined value in the setup() function
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
+
+    if (this.isKnowledgeEnabled() && plugins.contextEngine && plugins.workflowsExtensions) {
+      void installCasesManagedWorkflows({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger: this.logger,
+      });
+    }
+    if (this.isKnowledgeEnabled() && plugins.contextEngine && this.casesEventBus) {
+      subscribeRetractOutcomeOnRestrict({
+        eventBus: this.casesEventBus,
+        getEsClient: async (request) => core.elasticsearch.client.asScoped(request).asCurrentUser,
+        logger: this.logger,
+      });
+    }
 
     if (this.caseConfig.agentic.enabled && this.caseConfig.chat.enabled && plugins.agentBuilder) {
       subscribeRoomAccessToCaseUpdates({

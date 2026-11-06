@@ -7,12 +7,33 @@
 
 import React from 'react';
 import { noop } from 'lodash';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseUI } from '../../../../common/ui/types';
 import type { CaseVerdict } from '../../../../common/types/domain';
 import { caseViewSectionRegistry } from '../../../client/case_view_sections';
 import { VERDICT_LABELS } from '../../verdict/translations';
+import { useCasesConfig } from '../../../common/lib/kibana';
+
+const NOTES_LABEL = i18n.translate('xpack.cases.closeCaseModal.notesLabel', {
+  defaultMessage: 'Closing notes',
+});
+const NOTES_OPTIONAL = i18n.translate('xpack.cases.closeCaseModal.optional', {
+  defaultMessage: 'Optional',
+});
+const NOTES_PLACEHOLDER = i18n.translate('xpack.cases.closeCaseModal.notesPlaceholder', {
+  defaultMessage: 'What happened and what you did',
+});
+const NOTES_HELP_PUBLISHED = i18n.translate('xpack.cases.closeCaseModal.notesHelp.published', {
+  defaultMessage: 'Added to the case as a comment and included in the published case outcome.',
+});
+const NOTES_HELP_RESTRICTED = i18n.translate('xpack.cases.closeCaseModal.notesHelp.restricted', {
+  defaultMessage:
+    "Added to the case as a comment. This case is restricted, so its outcome isn't published to knowledge.",
+});
+const NOTES_HELP_COMMENT = i18n.translate('xpack.cases.closeCaseModal.notesHelp.comment', {
+  defaultMessage: 'Added to the case as a comment.',
+});
 
 const CLOSE_REASON_VERDICTS: Record<string, CaseVerdict> = {
   true_positive: 'true_positive',
@@ -58,8 +79,23 @@ export const CloseOutcome: React.FC<{
   closeReason?: string;
   closeLinkedInvestigations: boolean;
   setCloseLinkedInvestigations: (value: boolean) => void;
-}> = ({ caseData, closeReason, closeLinkedInvestigations, setCloseLinkedInvestigations }) => {
+  closingNotes: string;
+  setClosingNotes: (value: string) => void;
+}> = ({
+  caseData,
+  closeReason,
+  closeLinkedInvestigations,
+  setCloseLinkedInvestigations,
+  closingNotes,
+  setClosingNotes,
+}) => {
+  const { knowledgeEnabled } = useCasesConfig();
   const line = verdictLine(closeReason, caseData.aiVerdict?.verdict);
+  const notesHelp = !knowledgeEnabled
+    ? NOTES_HELP_COMMENT
+    : caseData.access?.mode === 'restricted'
+    ? NOTES_HELP_RESTRICTED
+    : NOTES_HELP_PUBLISHED;
   const sections = caseViewSectionRegistry.getVisible('closeModal', caseData);
 
   return (
@@ -74,6 +110,17 @@ export const CloseOutcome: React.FC<{
           </>
         ) : null}
       </div>
+      <EuiSpacer size="m" />
+      <EuiFormRow label={NOTES_LABEL} labelAppend={NOTES_OPTIONAL} helpText={notesHelp} fullWidth>
+        <EuiTextArea
+          fullWidth
+          rows={3}
+          value={closingNotes}
+          placeholder={NOTES_PLACEHOLDER}
+          onChange={(event) => setClosingNotes(event.target.value)}
+          data-test-subj="close-case-notes"
+        />
+      </EuiFormRow>
       {sections.map((section) => (
         <React.Fragment key={section.id}>
           <EuiSpacer size="m" />

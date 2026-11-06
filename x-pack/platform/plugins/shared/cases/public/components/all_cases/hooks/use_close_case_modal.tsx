@@ -18,7 +18,9 @@ import {
 import { CloseCaseModal } from '../components/close_case_modal';
 import type { CloseReasonOption } from '../components/close_case_modal';
 import type { CaseUI } from '../../../../common/ui/types';
-import { useCasesConfig } from '../../../common/lib/kibana';
+import { useCasesConfig, useToasts } from '../../../common/lib/kibana';
+import { createAttachments, getCase } from '../../../containers/api';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { CloseOutcome } from '../components/close_outcome';
 import { useCasesFeatures } from '../../../common/use_cases_features';
@@ -38,12 +40,22 @@ const closeCaseTitle = (incrementalId?: number | null) =>
       })
     : i18n.translate('xpack.cases.closeCaseModal.title', { defaultMessage: 'Close case' });
 
+const NOTES_SAVING = i18n.translate('xpack.cases.closeCaseModal.notesSaving', {
+  defaultMessage: 'Adding the closing notes...',
+});
+
+const NOTES_FAILED = i18n.translate('xpack.cases.closeCaseModal.notesFailed', {
+  defaultMessage: "Couldn't add the closing notes. The case is still open.",
+});
+
 const CLOSE_REASON_PLACEHOLDER = i18n.translate('xpack.cases.closeCaseModal.reasonPlaceholder', {
   defaultMessage: 'Select a close reason',
 });
 
 export interface CloseCaseOptions {
   closeLinkedInvestigations?: boolean;
+  /** The case's version after the modal's own writes (closing notes), when it made any. */
+  version?: string;
 }
 
 interface UseCloseCaseModalProps {
@@ -79,6 +91,9 @@ export const useCloseCaseModal = ({
     canSyncCloseReasonToAlerts || (agenticEnabled && (closeReasonConfig?.show ?? true));
   const reasonSource = agenticEnabled ? closeReasonConfig?.source ?? 'both' : 'alerts';
   const [closeLinkedInvestigations, setCloseLinkedInvestigations] = useState(true);
+  const [closingNotes, setClosingNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const toasts = useToasts();
 
   const initialCloseReasonOptions = useMemo(() => {
     const customCloseReasons = uiSettings.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY, []);
@@ -140,12 +155,35 @@ export const useCloseCaseModal = ({
     setIsCloseCaseModalVisible(false);
   }, []);
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
+    // Close case is disabled while the notes are saved; this catches a click already in flight.
+    if (isSubmitting) {
+      return;
+    }
+    const notes = closingNotes.trim();
+    const options: CloseCaseOptions | undefined =
+      agenticEnabled && caseData ? { closeLinkedInvestigations } : undefined;
+    // The notes are a comment by the closer, written just before the close; the published outcome
+    // reads them from there. Posting changes the case's version, so the close uses the new one.
+    if (options && caseData && notes.length > 0) {
+      setIsSubmitting(true);
+      try {
+        await createAttachments({
+          caseId: caseData.id,
+          attachments: [
+            { type: COMMENT_ATTACHMENT_TYPE, data: { content: notes }, owner: caseData.owner },
+          ],
+        });
+        options.version = (await getCase({ caseId: caseData.id })).version;
+      } catch (error) {
+        toasts.addError(error, { title: NOTES_FAILED });
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
     closeCloseCaseModal();
-    onCloseCase(
-      selectedCloseReason?.key,
-      agenticEnabled && caseData ? { closeLinkedInvestigations } : undefined
-    );
+    onCloseCase(selectedCloseReason?.key, options);
   }, [
     closeCloseCaseModal,
     onCloseCase,
@@ -153,6 +191,9 @@ export const useCloseCaseModal = ({
     agenticEnabled,
     caseData,
     closeLinkedInvestigations,
+    closingNotes,
+    toasts,
+    isSubmitting,
   ]);
 
   const openCloseCaseModal = useCallback(() => {
@@ -160,6 +201,7 @@ export const useCloseCaseModal = ({
       const nextCloseReasonOptions = createCloseReasonOptions();
       setCloseReasonOptions(nextCloseReasonOptions);
       setCloseLinkedInvestigations(true);
+      setClosingNotes('');
       setIsCloseCaseModalVisible(true);
     } else {
       // Should automatically close without reason when case sync to alerts is disabled
@@ -186,7 +228,11 @@ export const useCloseCaseModal = ({
           ) : undefined
         }
         confirmDisabledReason={
-          openRequiredTasks.length > 0 ? REQUIRED_TASKS_MISSING(openRequiredTasks.length) : undefined
+          isSubmitting
+            ? NOTES_SAVING
+            : openRequiredTasks.length > 0
+            ? REQUIRED_TASKS_MISSING(openRequiredTasks.length)
+            : undefined
         }
         {...(agenticEnabled && !canSyncCloseReasonToAlerts
           ? {
@@ -202,6 +248,8 @@ export const useCloseCaseModal = ({
             closeReason={selectedCloseReason?.key}
             closeLinkedInvestigations={closeLinkedInvestigations}
             setCloseLinkedInvestigations={setCloseLinkedInvestigations}
+            closingNotes={closingNotes}
+            setClosingNotes={setClosingNotes}
           />
         ) : null}
       </CloseCaseModal>

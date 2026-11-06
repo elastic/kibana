@@ -126,6 +126,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     workflowTags,
     statuses: configuredStatuses,
     pauseReasons: configuredPauseReasons,
+    knowledge,
   } = currentConfiguration;
   const statuses = useMemo(() => getEffectiveStatuses(configuredStatuses), [configuredStatuses]);
   const pauseReasons = useMemo(() => configuredPauseReasons ?? [], [configuredPauseReasons]);
@@ -288,6 +289,33 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         version: configurationVersion,
         closureType,
         extractObservables: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
+      connector,
+      customFields,
+      templates,
+      observableTypes,
+      workflowTags,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeKnowledgePublishOutcomes = useCallback(
+    (value: boolean) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        observableTypes,
+        workflowTags,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        knowledge: { publishOutcomes: value },
       });
     },
     [
@@ -838,6 +866,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeKnowledgePublishOutcomes,
+    publishOutcomes: knowledge?.publishOutcomes ?? true,
     onChangeExternalSync,
     onChangeExternalSyncFields,
     onChangeExternalSyncFieldMappings,
