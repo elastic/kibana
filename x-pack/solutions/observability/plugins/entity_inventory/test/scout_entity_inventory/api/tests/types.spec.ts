@@ -31,74 +31,78 @@ interface InventoryTypeResponse {
   sources: Array<{ indexPattern: string; filter?: string }>;
 }
 
-apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.classic }, () => {
-  let adminCookieHeader: Record<string, string>;
+apiTest.describe(
+  'GET /internal/entity_inventory/types',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    let adminCookieHeader: Record<string, string>;
 
-  // Internal routes are called by the browser with a session cookie, not an API key.
-  apiTest.beforeAll(async ({ samlAuth, apiServices }) => {
-    ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
-    await apiServices.spaces.create({ id: SPACE_ID });
-  });
-
-  apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.spaces.delete(SPACE_ID);
-  });
-
-  apiTest('returns k8s.deployment with identity, columns and sources', async ({ apiClient }) => {
-    const response = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-      responseType: 'json',
+    // Internal routes are called by the browser with a session cookie, not an API key.
+    apiTest.beforeAll(async ({ samlAuth, apiServices }) => {
+      ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
+      await apiServices.spaces.create({ id: SPACE_ID });
     });
 
-    expect(response).toHaveStatusCode(200);
-    const { types }: { types: InventoryTypeResponse[] } = response.body;
-    const k8sDeployment = types.find(({ type }) => type === 'k8s.deployment');
-
-    expect(k8sDeployment).toBeDefined();
-    expect(k8sDeployment?.name).toBe('K8s Deployment');
-    expect(k8sDeployment?.identityFields).toStrictEqual(K8S_DEPLOYMENT_IDENTITY_FIELDS);
-    expect(k8sDeployment?.columns[0].name).toBe('entity.id');
-    expect(k8sDeployment?.sources).toHaveLength(2);
-  });
-
-  apiTest('returns only the types this plugin registers', async ({ apiClient }) => {
-    const response = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-      responseType: 'json',
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.spaces.delete(SPACE_ID);
     });
 
-    expect(response).toHaveStatusCode(200);
-    const { types }: { types: InventoryTypeResponse[] } = response.body;
-
-    expect(types.map(({ type }) => type)).toStrictEqual(INVENTORY_TYPES);
-  });
-
-  apiTest('returns the same types in a non-default space', async ({ apiClient }) => {
-    const defaultSpaceResponse = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-      responseType: 'json',
-    });
-    const customSpaceResponse = await apiClient.get(`s/${SPACE_ID}/${TYPES_PATH}`, {
-      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-      responseType: 'json',
-    });
-
-    expect(defaultSpaceResponse).toHaveStatusCode(200);
-    expect(customSpaceResponse).toHaveStatusCode(200);
-    expect(customSpaceResponse.body).toStrictEqual(defaultSpaceResponse.body);
-  });
-
-  apiTest(
-    'rejects a viewer, which lacks the entity_inventory_read privilege',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
+    apiTest('returns k8s.deployment with identity, columns and sources', async ({ apiClient }) => {
       const response = await apiClient.get(TYPES_PATH, {
-        headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
-});
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+      const k8sDeployment = types.find(({ type }) => type === 'k8s.deployment');
+
+      expect(k8sDeployment).toBeDefined();
+      expect(k8sDeployment?.name).toBe('K8s Deployment');
+      expect(k8sDeployment?.identityFields).toStrictEqual(K8S_DEPLOYMENT_IDENTITY_FIELDS);
+      expect(k8sDeployment?.columns[0].name).toBe('entity.id');
+      expect(k8sDeployment?.sources).toHaveLength(2);
+    });
+
+    apiTest('returns only the types this plugin registers', async ({ apiClient }) => {
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+
+      expect(types.map(({ type }) => type)).toStrictEqual(INVENTORY_TYPES);
+    });
+
+    apiTest('returns the same types in a non-default space', async ({ apiClient }) => {
+      const defaultSpaceResponse = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+      const customSpaceResponse = await apiClient.get(`s/${SPACE_ID}/${TYPES_PATH}`, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+
+      expect(defaultSpaceResponse).toHaveStatusCode(200);
+      expect(customSpaceResponse).toHaveStatusCode(200);
+      expect(customSpaceResponse.body).toStrictEqual(defaultSpaceResponse.body);
+    });
+
+    apiTest(
+      'rejects a viewer, which lacks the entity_inventory_read privilege',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(TYPES_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+  }
+);

@@ -30,7 +30,7 @@ interface ListResponse {
 
 apiTest.describe(
   'GET /internal/entity_inventory/entities/{type}/list',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let adminCookieHeader: Record<string, string>;
 
