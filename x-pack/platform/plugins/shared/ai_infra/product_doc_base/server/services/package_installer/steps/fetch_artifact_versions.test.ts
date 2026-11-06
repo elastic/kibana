@@ -58,17 +58,21 @@ const artifactRepositoryUrl = 'https://lost.com';
 const localArtifactRepositoryUrl = 'file://usr/local/local_artifacts';
 const inferenceId = defaultInferenceEndpoints.ELSER;
 
+// Expected result; unless given, the published products are the ones with versions
 const expectVersions = (
-  versions: Partial<Record<ProductName | 'openapi', string[]>>
-): Record<ProductName | 'openapi', string[]> => {
+  versions: Partial<Record<ProductName | 'openapi', string[]>>,
+  publishedProducts: Array<ProductName | 'openapi'> = (
+    Object.keys(versions) as Array<ProductName | 'openapi'>
+  ).filter((product) => versions[product]?.length)
+) => {
   const response = {} as Record<ProductName | 'openapi', string[]>;
   Object.values(DocumentationProduct).forEach((productName) => {
     response[productName] = [];
   });
   response.openapi = [];
   return {
-    ...response,
-    ...versions,
+    versions: { ...response, ...versions },
+    publishedProducts: expect.arrayContaining(publishedProducts),
   };
 };
 
@@ -129,13 +133,7 @@ describe('fetchArtifactVersions', () => {
       expect.any(Function)
     );
 
-    expect(result).toEqual({
-      elasticsearch: ['8.16'],
-      kibana: ['8.16'],
-      observability: [],
-      openapi: [],
-      security: [],
-    });
+    expect(result).toEqual(expectVersions({ elasticsearch: ['8.16'], kibana: ['8.16'] }));
   });
 
   it('supports win32 env', async () => {
@@ -293,11 +291,10 @@ describe('fetchArtifactVersions', () => {
       await expect(
         fetchArtifactVersions({ artifactRepositoryUrl, inferenceId: E5 })
       ).resolves.toEqual(
-        expectVersions({
-          kibana: ['9.6', '9.6', `latest-${E5_UPLOAD}`],
-          elasticsearch: [],
-          openapi: [],
-        })
+        expectVersions(
+          { kibana: ['9.6', '9.6', `latest-${E5_UPLOAD}`], elasticsearch: [], openapi: [] },
+          ['kibana', 'elasticsearch', 'openapi']
+        )
       );
     });
 

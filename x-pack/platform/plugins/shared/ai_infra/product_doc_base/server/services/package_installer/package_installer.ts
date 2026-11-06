@@ -50,6 +50,7 @@ import {
   fetchSecurityLabsVersions,
   createIndex,
   populateIndex,
+  type ArtifactRepositoryVersions,
 } from './steps';
 
 import { overrideInferenceSettings } from './steps/create_index';
@@ -216,8 +217,13 @@ export class PackageInstaller {
       if (productState.status === 'uninstalled') {
         continue;
       }
-      const availableVersions = repositoryVersions[productName];
-      if (!availableVersions || !availableVersions.length) {
+      const availableVersions = repositoryVersions.versions[productName];
+      if (!availableVersions.length) {
+        if (repositoryVersions.publishedProducts.includes(productName)) {
+          this.log.warn(
+            `Skipping update of product [${productName}]: no artifact available for inference ID [${inferenceId}]`
+          );
+        }
         continue;
       }
       let installableVersion: string;
@@ -281,33 +287,82 @@ export class PackageInstaller {
   }
 
   /**
+   * The installable version of a product, or `undefined` when the repository has no artifact of
+   * the product for the inference ID. That is recorded as a failed installation so the status
+   * reports why nothing is installed, unless the product is installed or absent from the repository.
+   */
+  private async resolveInstallableVersionOrRecordFailure({
+    productName,
+    inferenceId,
+    repositoryVersions,
+    previousStatus,
+  }: {
+    productName: ProductName;
+    inferenceId: string;
+    repositoryVersions: ArtifactRepositoryVersions;
+    previousStatus?: InstallationStatus;
+  }): Promise<string | undefined> {
+    const { versions, publishedProducts } = repositoryVersions;
+    const availableVersions = versions[productName];
+    if (!availableVersions.length && !publishedProducts.includes(productName)) {
+      this.log.warn(`No version found for product [${productName}]`);
+      return undefined;
+    }
+    if (availableVersions.length) {
+      try {
+        return await this.resolveInstallableVersion({
+          productName,
+          inferenceId,
+          availableVersions,
+        });
+      } catch (error) {
+        if (!isArtifactMissingError(error)) {
+          throw error;
+        }
+      }
+    }
+    const message = getMissingArtifactMessage({
+      productName,
+      productVersion: this.isServerless ? LATEST_PRODUCT_VERSION : this.currentVersion,
+      inferenceId,
+    });
+    this.log.warn(`Skipping install of product [${productName}]: ${message}`);
+    if (previousStatus === 'installed') {
+      this.log.warn(`Keeping the installed documentation for product [${productName}]`);
+    } else {
+      await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
+    }
+    return undefined;
+  }
+
+  /**
    * Installs the version of a single product selected for this deployment, falling back to
-   * previous versions when the selected artifact is not available. Resolves to `false` when the
-   * repository has no version for the product and nothing was installed.
+   * previous versions when the selected artifact is not available. Resolves to `false` when
+   * nothing was installed: the repository has no artifact for the product and inference ID.
    */
   async installProduct(params: {
     productName: ProductName;
     inferenceId?: string;
   }): Promise<boolean> {
     const { productName, inferenceId } = params;
-    const [repositoryVersions, inferenceInfo] = await Promise.all([
-      this.fetchArtifactVersions(inferenceId ?? this.elserInferenceId),
+    const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
+    const [repositoryVersions, inferenceInfo, installStatuses] = await Promise.all([
+      this.fetchArtifactVersions(effectiveInferenceId),
       this.getInferenceInfo(inferenceId),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId: effectiveInferenceId }),
     ]);
-    const availableVersions = repositoryVersions[productName];
-    if (!availableVersions || !availableVersions.length) {
-      this.log.warn(`No version found for product [${productName}]`);
+    const installableVersion = await this.resolveInstallableVersionOrRecordFailure({
+      productName,
+      inferenceId: effectiveInferenceId,
+      repositoryVersions,
+      previousStatus: installStatuses[productName]?.status,
+    });
+    if (!installableVersion) {
       return false;
     }
-    const selectedVersion = selectVersion(
-      this.currentVersion,
-      availableVersions,
-      this.isServerless
-    );
-    await this.installPackageWithVersionFallback({
+    await this.installPackage({
       productName,
-      selectedVersion,
-      availableVersions,
+      productVersion: installableVersion,
       customInference: inferenceInfo,
     });
     return true;
@@ -328,17 +383,16 @@ export class PackageInstaller {
       this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
-    const availableVersions = repositoryVersions[productName];
-    if (!availableVersions?.length) {
-      this.log.warn(`No version found for product [${productName}]`);
-      return false;
-    }
     const productState = installStatuses[productName];
-    const installableVersion = await this.resolveInstallableVersion({
+    const installableVersion = await this.resolveInstallableVersionOrRecordFailure({
       productName,
       inferenceId,
-      availableVersions,
+      repositoryVersions,
+      previousStatus: productState?.status,
     });
+    if (!installableVersion) {
+      return false;
+    }
     if (
       productState &&
       !isUpdateNeeded({
@@ -380,8 +434,8 @@ export class PackageInstaller {
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const productState = installStatuses[productName];
-    const availableVersions = repositoryVersions[productName];
-    if (!productState || productState.status === 'uninstalled' || !availableVersions?.length) {
+    const availableVersions = repositoryVersions.versions[productName];
+    if (!productState || productState.status === 'uninstalled' || !availableVersions.length) {
       this.log.info(
         `Skipping update of product [${productName}]: not installed or no version available`
       );
@@ -455,7 +509,7 @@ export class PackageInstaller {
       this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
-    const availableVersions = repositoryVersions.openapi;
+    const availableVersions = repositoryVersions.versions.openapi;
     if (!availableVersions.length) {
       this.log.warn('Skipping update of the OpenAPI spec: no version available');
       return;
@@ -493,33 +547,6 @@ export class PackageInstaller {
     ) {
       await this.installOpenAPISpec({ version: installableVersion, inferenceId });
     }
-  }
-
-  private async installPackageWithVersionFallback({
-    productName,
-    selectedVersion,
-    availableVersions,
-    customInference,
-  }: {
-    productName: ProductName;
-    selectedVersion: string;
-    availableVersions: string[];
-    customInference?: InferenceInferenceEndpointInfo;
-  }) {
-    const fallbackVersions = getPreviousVersions(selectedVersion, availableVersions);
-    const candidateVersions = [selectedVersion, ...fallbackVersions];
-    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
-    const installableVersion = await this.findInstallableProductVersion({
-      productName,
-      candidateVersions,
-      inferenceId,
-    });
-
-    await this.installPackage({
-      productName,
-      productVersion: installableVersion,
-      customInference,
-    });
   }
 
   async installPackage({
@@ -625,18 +652,9 @@ export class PackageInstaller {
         `Documentation installation successful for product [${productName}] and version [${productVersion}]`
       );
     } catch (e) {
-      let message = e.message;
-      if (isArtifactMissingError(e)) {
-        message = i18n.translate('aiInfra.productDocBase.packageInstaller.noArtifactAvailable', {
-          values: {
-            productName,
-            productVersion,
-            inferenceId,
-          },
-          defaultMessage:
-            'No documentation artifact available for product [{productName}]/[{productVersion}] for Inference ID [{inferenceId}]. Please select a different model or contact your administrator.',
-        });
-      }
+      const message = isArtifactMissingError(e)
+        ? getMissingArtifactMessage({ productName, productVersion, inferenceId })
+        : e.message;
       this.log.error(
         `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`
       );
@@ -1237,7 +1255,9 @@ export class PackageInstaller {
       fallbackVersionsLoaded = true;
     } else if (!explicitVersionProvided) {
       const repositoryVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
-      candidateVersions.push(...getPreviousVersions(selectedVersion, repositoryVersions.openapi));
+      candidateVersions.push(
+        ...getPreviousVersions(selectedVersion, repositoryVersions.versions.openapi)
+      );
       fallbackVersionsLoaded = true;
     }
 
@@ -1267,7 +1287,7 @@ export class PackageInstaller {
           try {
             const repositoryVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
             candidateVersions.push(
-              ...getPreviousVersions(selectedVersion, repositoryVersions.openapi)
+              ...getPreviousVersions(selectedVersion, repositoryVersions.versions.openapi)
             );
           } catch (fetchError) {
             this.log.warn(
@@ -1370,6 +1390,21 @@ export class PackageInstaller {
     }
   }
 }
+
+const getMissingArtifactMessage = ({
+  productName,
+  productVersion,
+  inferenceId,
+}: {
+  productName: ProductName;
+  productVersion: string;
+  inferenceId: string;
+}): string =>
+  i18n.translate('aiInfra.productDocBase.packageInstaller.noArtifactAvailable', {
+    values: { productName, productVersion, inferenceId },
+    defaultMessage:
+      'No documentation artifact available for product [{productName}]/[{productVersion}] for Inference ID [{inferenceId}]. Please select a different model or contact your administrator.',
+  });
 
 // An item needs (re)installing when its version differs from the selected one, or when the update is
 // forced and nobody else has (re)installed it at that version since the forced update was requested

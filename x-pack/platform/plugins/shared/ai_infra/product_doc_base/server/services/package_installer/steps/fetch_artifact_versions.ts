@@ -22,6 +22,13 @@ import { getFetchOptions } from '../../proxy';
 import { LATEST_PRODUCT_VERSION } from '../../../../common/consts';
 type ArtifactAvailableVersions = Record<ProductName | 'openapi', string[]>;
 
+export interface ArtifactRepositoryVersions {
+  /** Versions whose artifact may exist for the inference ID, per product */
+  versions: ArtifactAvailableVersions;
+  /** Products with at least one artifact in the repository, for any inference ID */
+  publishedProducts: Array<ProductName | 'openapi'>;
+}
+
 const normalizeArtifactKey = (artifactName: string): string => {
   const withExtension = artifactName.endsWith('.zip') ? artifactName : `${artifactName}.zip`;
   return withExtension.toLowerCase();
@@ -33,7 +40,8 @@ const normalizeArtifactKey = (artifactName: string): string => {
  * Versioned (semver) entries are listed whatever the inference ID they were published for: the
  * installer probes the artifact of the requested inference ID and falls back to previous versions.
  * `latest` entries are versioned by the upload date of the artifact, so only the artifact published
- * for `inferenceId` counts: a republish of another variant must not trigger a re-download.
+ * for `inferenceId` counts: a republish of another variant must not trigger a re-download. A product
+ * published for other inference IDs only is reported in `publishedProducts` with no version.
  */
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
@@ -43,7 +51,7 @@ export const fetchArtifactVersions = async ({
   artifactRepositoryUrl: string;
   artifactRepositoryProxyUrl?: string;
   inferenceId: string;
-}): Promise<ArtifactAvailableVersions> => {
+}): Promise<ArtifactRepositoryVersions> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
   let xml: string;
@@ -75,6 +83,7 @@ export const fetchArtifactVersions = async ({
       allowedProductNames.forEach((product) => {
         record[product as ProductName] = [];
       });
+      const publishedProducts = new Set<ProductName | 'openapi'>();
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
@@ -84,6 +93,7 @@ export const fetchArtifactVersions = async ({
           return;
         }
         const { productName, productVersion } = parsed;
+        publishedProducts.add(productName);
         if (productVersion !== LATEST_PRODUCT_VERSION) {
           record[productName].push(productVersion);
           return;
@@ -99,7 +109,7 @@ export const fetchArtifactVersions = async ({
         }
       });
 
-      resolve(record);
+      resolve({ versions: record, publishedProducts: [...publishedProducts] });
     });
   });
 };
