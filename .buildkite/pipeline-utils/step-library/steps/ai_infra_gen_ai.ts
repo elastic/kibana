@@ -8,7 +8,7 @@
  */
 
 import { commandStep, groupStep } from '../helpers.ts';
-import { retry, spotAgent, spotZones } from '../presets.ts';
+import { pdBalanced, retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const aiInfraGenAiSteps = (): readonly Step[] => [
@@ -35,7 +35,7 @@ export const aiInfraGenAiSteps = (): readonly Step[] => [
         key: 'ai-infra-gen-ai-inference-api',
         timeout_in_minutes: 120,
         parallelism: 1,
-        agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+        agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
         artifact_paths: ['target/llm_smoke_judgements.jsonl'],
         retry: retry.agentLossOrAnyOnce,
       }),

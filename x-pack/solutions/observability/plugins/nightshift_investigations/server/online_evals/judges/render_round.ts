@@ -6,6 +6,8 @@
  */
 
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { MessageRole, type Message, type ToolCallArguments } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /** Tool arguments and results can be large; each one is cut to this many characters. */
@@ -69,4 +71,54 @@ export const renderRound = (round: EvidenceRound): string => {
     ...renderedSteps,
     `## Agent final answer\n${round.response.message}`,
   ].join('\n\n');
+};
+
+const toToolCallArguments = (value: unknown): ToolCallArguments => {
+  const serialized = stringify(value);
+  if (serialized.length > MAX_TOOL_FIELD_CHARS) {
+    return { arguments: truncate(serialized, MAX_TOOL_FIELD_CHARS) };
+  }
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as ToolCallArguments)
+    : { value };
+};
+
+/**
+ * Renders the round as the conversation the agent had: the user input, then each tool call as an
+ * assistant message (carrying the agent's note before the call, when it wrote one) followed by its
+ * tool result, then the agent's final answer as an assistant
+ * message. Tool calls past the character budget are counted in `omittedToolCalls`, not rendered.
+ */
+export const renderTraceMessages = (
+  round: EvidenceRound
+): { messages: Message[]; omittedToolCalls: number } => {
+  const messages: Message[] = [{ role: MessageRole.User, content: round.input.message }];
+  let usedChars = 0;
+  let omittedToolCalls = 0;
+
+  round.steps.forEach((step, index) => {
+    if (usedChars >= MAX_TOOL_CALLS_CHARS) {
+      omittedToolCalls++;
+      return;
+    }
+    // Ids only pair a call with its result. Providers restrict their characters, so don't reuse the agent's.
+    const toolCallId = `call_${index + 1}`;
+    // The same normalization Agent Builder applies to tool names it sends to a provider.
+    const name = sanitizeToolId(step.tool_id ?? 'unknown_tool');
+    const args = toToolCallArguments(step.arguments);
+    const response = truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS) || '(empty)';
+    const note = step.reasoning ? truncate(step.reasoning, MAX_TOOL_FIELD_CHARS) : null;
+    usedChars += JSON.stringify(args).length + response.length + (note?.length ?? 0);
+    messages.push(
+      {
+        role: MessageRole.Assistant,
+        content: note,
+        toolCalls: [{ toolCallId, function: { name, arguments: args } }],
+      },
+      { role: MessageRole.Tool, name, toolCallId, response: { result: response } }
+    );
+  });
+
+  messages.push({ role: MessageRole.Assistant, content: round.response.message });
+  return { messages, omittedToolCalls };
 };
