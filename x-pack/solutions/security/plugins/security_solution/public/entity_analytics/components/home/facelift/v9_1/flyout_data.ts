@@ -9,4 +9,4 @@
  * Shared flyout mocks for facelift v.5 — see `./data.ts` for the sharing policy.
  */
 
-export * from '../mocks/flyout_data';
+export * from '../prototype_data/flyout_data';

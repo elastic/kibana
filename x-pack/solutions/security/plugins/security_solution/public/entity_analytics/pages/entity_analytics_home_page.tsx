@@ -8,12 +8,12 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -40,6 +40,39 @@ import {
   FACELIFT_V9_1_DEFAULT_FROM,
   FACELIFT_V9_1_DEFAULT_TO,
 } from '../components/home/facelift/v9_1/time_range';
+
+const EARLY_EXPLORATIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.earlyExplorationsBadge',
+  { defaultMessage: 'Early explorations – WIP' }
+);
+
+const EarlyExplorationsBadge: React.FC<{ badgeText: string }> = ({ badgeText }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiBadge
+      color="accent"
+      css={css`
+        font-size: ${euiTheme.size.base};
+        line-height: ${euiTheme.size.l};
+        padding-block: ${euiTheme.size.xs};
+        padding-inline: ${euiTheme.size.m};
+        /* The header already leaves 8px after the title; this brings it to 16px. */
+        margin-inline-start: ${euiTheme.size.s};
+      `}
+      data-test-subj="eaEarlyExplorationsBadge"
+    >
+      {badgeText}
+    </EuiBadge>
+  );
+};
+
+const HEADER_BADGES: AppHeaderBadge[] = [
+  {
+    label: EARLY_EXPLORATIONS_LABEL,
+    color: 'accent',
+    renderCustomBadge: EarlyExplorationsBadge,
+  },
+];
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -241,7 +274,12 @@ const EntityAnalyticsHomePageContent = () => {
         `}
       />
 
-      <AppHeader title={PAGE_TITLE} menu={faceliftAppMenu} docLink={ENTITY_ANALYTICS_DOC_LINK} />
+      <AppHeader
+        title={PAGE_TITLE}
+        badges={HEADER_BADGES}
+        menu={faceliftAppMenu}
+        docLink={ENTITY_ANALYTICS_DOC_LINK}
+      />
 
       <div
         css={css`

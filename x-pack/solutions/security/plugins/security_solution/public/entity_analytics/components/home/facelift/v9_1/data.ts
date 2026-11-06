@@ -10,7 +10,7 @@
  * preset window chosen in the KQL bar (24h / 7d / 30d).
  *
  * UI under `./` is an independent snapshot. Entity fixtures stay single-sourced
- * from `../mocks/data`; window-facing values and labels are overridden here so
+ * from `../prototype_data/data`; window-facing values and labels are overridden here so
  * older prototypes keep their “Today” / 24h copy.
  *
  * The card helpers below deliberately share one membership set per card and
@@ -34,7 +34,7 @@ import type {
   SignalCardData,
   SignalCardId,
   TableView,
-} from '../mocks/data';
+} from '../prototype_data/data';
 import {
   EMPTY_PAGE_FILTERS,
   IDENTITIES,
@@ -51,14 +51,14 @@ import {
   recordMatchesPageFilters,
   recordsForIdentity,
   watchlistsForIdentity,
-} from '../mocks/data';
-import { getResolvedEntities as getResolvedEntitiesV2 } from '../mocks/resolved_entities_data';
+} from '../prototype_data/data';
+import { getResolvedEntities as getResolvedEntitiesV2 } from '../prototype_data/resolved_entities_data';
 import { getActiveTimeRange } from './active_time_range';
 import { memberIdsInWindow, riskPointsInWindow } from './signal_windows';
 import type { FaceliftTimeRangeId } from './time_range';
 import { FACELIFT_TIME_RANGES, expandTrendToThirtyDays } from './time_range';
 
-export * from '../mocks/data';
+export * from '../prototype_data/data';
 
 /** “Risk movers” threshold, in risk score points gained inside the window. */
 export const RISK_MOVER_THRESHOLD_POINTS = 10;

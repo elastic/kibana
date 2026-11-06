@@ -26,6 +26,10 @@ import {
   type PrototypeStates,
   type StateOption,
 } from '../../../entity_analytics/components/home/facelift/v9_1/prototype_states';
+import {
+  setShowDiscussionNotes,
+  useShowDiscussionNotes,
+} from '../../../entity_analytics/components/entity_timeline';
 
 const ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.globalHeader.prototypeSettingsAriaLabel',
@@ -50,6 +54,11 @@ const ERROR_STATES_ITEM = i18n.translate(
 const PROPOSED_DESIGN_ITEM = i18n.translate(
   'xpack.securitySolution.globalHeader.prototypeSettingsProposedDesign',
   { defaultMessage: 'Proposed design' }
+);
+
+const DISCUSSION_NOTES_ITEM = i18n.translate(
+  'xpack.securitySolution.globalHeader.prototypeSettingsDiscussionNotes',
+  { defaultMessage: 'Timeline discussion notes' }
 );
 
 const ROOT_PANEL_ID = 0;
@@ -95,16 +104,45 @@ const UI_STATES_MENUS: Array<{
 export const PrototypeSettingsNavControl: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [uiStates, updateUiStates] = usePrototypeStates();
+  const showDiscussionNotes = useShowDiscussionNotes();
 
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-    const rootItems: EuiContextMenuPanelDescriptor['items'] = UI_STATES_MENUS.map((menu) => ({
-      name: menu.name,
-      panel: menu.panelId,
-      'data-test-subj': `eaPrototypeSettings${menu.testId}`,
-    }));
+    const rootItems: EuiContextMenuPanelDescriptor['items'] = [
+      ...UI_STATES_MENUS.map((menu) => ({
+        name: menu.name,
+        panel: menu.panelId,
+        'data-test-subj': `eaPrototypeSettings${menu.testId}`,
+      })),
+      { isSeparator: true as const, key: 'discussionNotesSeparator' },
+      {
+        name: (
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem>{DISCUSSION_NOTES_ITEM}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={DISCUSSION_NOTES_ITEM}
+                showLabel={false}
+                checked={showDiscussionNotes}
+                onChange={(event) => {
+                  event.stopPropagation();
+                  setShowDiscussionNotes(!showDiscussionNotes);
+                }}
+                data-test-subj="eaPrototypeSettingsDiscussionNotesSwitch"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        onClick: (event) => {
+          event.preventDefault();
+          setShowDiscussionNotes(!showDiscussionNotes);
+        },
+        'data-test-subj': 'eaPrototypeSettingsDiscussionNotes',
+      },
+    ];
 
     const nextPanels: EuiContextMenuPanelDescriptor[] = [
       {
@@ -154,8 +192,7 @@ export const PrototypeSettingsNavControl: React.FC = () => {
           ...menu.options.map((option) => ({
             name: option.label,
             icon: option.key === uiStates[menu.group] ? 'check' : 'empty',
-            onClick: () =>
-              updateUiStates({ [menu.group]: option.key } as Partial<PrototypeStates>),
+            onClick: () => updateUiStates({ [menu.group]: option.key } as Partial<PrototypeStates>),
             'data-test-subj': `eaPrototypeSettings${menu.testId}Option-${option.key}`,
           })),
         ],
@@ -163,7 +200,7 @@ export const PrototypeSettingsNavControl: React.FC = () => {
     });
 
     return nextPanels;
-  }, [uiStates, updateUiStates]);
+  }, [showDiscussionNotes, uiStates, updateUiStates]);
 
   return (
     <EuiPopover

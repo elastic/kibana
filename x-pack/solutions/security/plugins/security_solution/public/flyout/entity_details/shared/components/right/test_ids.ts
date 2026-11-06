@@ -19,6 +19,7 @@ export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` a
 
 export const ENTITY_PANEL_OVERVIEW_TAB_TEST_ID = `${PREFIX}EntityPanelOverviewTab` as const;
 export const ENTITY_PANEL_TABLE_TAB_TEST_ID = `${PREFIX}EntityPanelTableTab` as const;
+export const ENTITY_PANEL_TIMELINE_TAB_TEST_ID = `${PREFIX}EntityPanelTimelineTab` as const;
 export const ENTITY_PANEL_TABLE_CONTENT_TEST_ID = `${PREFIX}EntityPanelTableContent` as const;
 export const ENTITY_PANEL_TABLE_SEARCH_INPUT_TEST_ID =
   `${PREFIX}EntityPanelTableSearchInput` as const;

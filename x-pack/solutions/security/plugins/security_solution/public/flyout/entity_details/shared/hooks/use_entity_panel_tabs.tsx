@@ -12,14 +12,19 @@ import type { EntityStoreRecord } from './use_entity_from_store';
 import {
   ENTITY_PANEL_OVERVIEW_TAB_TEST_ID,
   ENTITY_PANEL_TABLE_TAB_TEST_ID,
+  ENTITY_PANEL_TIMELINE_TAB_TEST_ID,
 } from '../components/right/test_ids';
+import { getFaceliftEntityTimeline } from '../../../../entity_analytics/components/home/facelift/prototype_data/entity_timeline_data';
 
 export const OVERVIEW_TAB_ID = 'overview';
 export const TABLE_TAB_ID = 'table';
+export const TIMELINE_TAB_ID = 'timeline';
 
 interface UseEntityPanelTabsParams {
   /** The entity store record (used to determine if tabs should show) */
   entityRecord: EntityStoreRecord | null | undefined;
+  /** Adds the Timeline tab when the entity has timeline data (prototype fixture only). */
+  includeTimeline?: boolean;
 }
 
 interface UseEntityPanelTabsResult {
@@ -33,6 +38,7 @@ interface UseEntityPanelTabsResult {
 
 export const useEntityPanelTabs = ({
   entityRecord,
+  includeTimeline = false,
 }: UseEntityPanelTabsParams): UseEntityPanelTabsResult => {
   const [selectedTabId, setSelectedTabId] = useState<string>(OVERVIEW_TAB_ID);
 
@@ -40,6 +46,10 @@ export const useEntityPanelTabs = ({
     if (!entityRecord) {
       return null;
     }
+
+    const hasTimeline =
+      includeTimeline &&
+      getFaceliftEntityTimeline(entityRecord.entity?.id, entityRecord.entity?.name) != null;
 
     return [
       {
@@ -62,8 +72,22 @@ export const useEntityPanelTabs = ({
           />
         ),
       },
+      ...(hasTimeline
+        ? [
+            {
+              id: TIMELINE_TAB_ID,
+              'data-test-subj': ENTITY_PANEL_TIMELINE_TAB_TEST_ID,
+              name: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.timelineTabLabel"
+                  defaultMessage="Timeline"
+                />
+              ),
+            },
+          ]
+        : []),
     ];
-  }, [entityRecord]);
+  }, [entityRecord, includeTimeline]);
 
   return { tabs, selectedTabId, setSelectedTabId };
 };

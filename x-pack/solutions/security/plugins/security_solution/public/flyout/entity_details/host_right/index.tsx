@@ -303,7 +303,7 @@ export const HostPanel = memo(function HostPanel({
           />
         )}
         {tabsNode}
-        {tabs && <EuiSpacer size="l" />}
+        {tabs && <EuiSpacer size="m" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
           <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
         ) : (

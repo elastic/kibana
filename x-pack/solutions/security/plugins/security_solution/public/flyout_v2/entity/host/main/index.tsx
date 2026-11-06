@@ -425,7 +425,7 @@ export const Host: FC<HostProps> = memo(function Host({
           />
         )}
         {tabsNode}
-        {tabs && <EuiSpacer size="l" />}
+        {tabs && <EuiSpacer size="m" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
           <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
         ) : (

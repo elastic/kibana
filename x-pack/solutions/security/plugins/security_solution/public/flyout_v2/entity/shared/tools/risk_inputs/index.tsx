@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { RiskInputsTab } from '../../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import { EntityTimeline } from '../../../../../entity_analytics/components/entity_timeline';
+import { getFaceliftEntityTimeline } from '../../../../../entity_analytics/components/home/facelift/prototype_data/entity_timeline_data';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
@@ -39,6 +41,10 @@ export interface RiskInputsProps {
 export const RiskInputs = memo(
   ({ entityType, entityName, entityId, onShowEntity, subTab }: RiskInputsProps) => {
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
+    const timelineData = useMemo(
+      () => getFaceliftEntityTimeline(entityId, entityName),
+      [entityId, entityName]
+    );
 
     const onShowAlert = useCallback(
       (id: string, indexName: string, title?: string) => {
@@ -65,13 +71,17 @@ export const RiskInputs = memo(
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody data-test-subj={RISK_INPUTS_TOOL_TEST_ID}>
-          <RiskInputsTab
-            entityType={entityType}
-            entityName={entityName}
-            entityId={entityId}
-            onShowAlert={onShowAlert}
-            subTab={subTab}
-          />
+          {timelineData ? (
+            <EntityTimeline data={timelineData} lens="risk" />
+          ) : (
+            <RiskInputsTab
+              entityType={entityType}
+              entityName={entityName}
+              entityId={entityId}
+              onShowAlert={onShowAlert}
+              subTab={subTab}
+            />
+          )}
         </EuiFlyoutBody>
       </>
     );

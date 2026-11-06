@@ -208,7 +208,7 @@ export const ServicePanel = memo(function ServicePanel({
           />
         )}
         {tabsNode}
-        {tabs && <EuiSpacer size="l" />}
+        {tabs && <EuiSpacer size="m" />}
         {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
           <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
         ) : (

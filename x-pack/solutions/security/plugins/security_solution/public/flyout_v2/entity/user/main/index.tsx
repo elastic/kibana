@@ -52,7 +52,10 @@ import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
+  TIMELINE_TAB_ID,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
+import { EntityTimeline } from '../../../../entity_analytics/components/entity_timeline';
+import { getFaceliftEntityTimeline } from '../../../../entity_analytics/components/home/facelift/prototype_data/entity_timeline_data';
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
@@ -245,7 +248,12 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    includeTimeline: true,
   });
+  const timelineData = useMemo(
+    () => getFaceliftEntityTimeline(panelDisplayEntityId, userName),
+    [panelDisplayEntityId, userName]
+  );
 
   const tabsNode = tabs ? (
     <EntityPanelHeaderTabs
@@ -445,9 +453,11 @@ export const User: FC<UserProps> = memo(function User({
           />
         )}
         {tabsNode}
-        {tabs && <EuiSpacer size="l" />}
+        {tabs && <EuiSpacer size="m" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedUser.entityRecord ? (
           <EntityStoreTableTab entityRecord={observedUser.entityRecord} />
+        ) : tabs && selectedTabId === TIMELINE_TAB_ID && timelineData ? (
+          <EntityTimeline data={timelineData} lens="full" />
         ) : (
           <Content
             identityFields={documentEntityIdentifiers}

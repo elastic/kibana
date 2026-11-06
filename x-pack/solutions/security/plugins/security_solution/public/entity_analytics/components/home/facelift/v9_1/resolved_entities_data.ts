@@ -7,7 +7,7 @@
 
 /**
  * Table rows for facelift v.9.1: the shared v.2 builders from
- * `../mocks/resolved_entities_data`, with the columns that describe a period of
+ * `../prototype_data/resolved_entities_data`, with the columns that describe a period of
  * activity projected onto the window picked in the KQL bar.
  *
  * Risk score change, Alerts, Anomalies and Cases all answer "how much
@@ -30,19 +30,19 @@ import type {
   EntityRow,
   RawRecordRow,
   ResolvedEntityRow,
-} from '../mocks/resolved_entities_data';
+} from '../prototype_data/resolved_entities_data';
 import {
   ALERT_SEVERITIES,
   getRawRecords as getRawRecordsV2,
   getResolvedEntities as getResolvedEntitiesV2,
-} from '../mocks/resolved_entities_data';
+} from '../prototype_data/resolved_entities_data';
 import type { PageFilters } from './data';
 import { EMPTY_PAGE_FILTERS, scoreDeltaPercent } from './data';
 import { getActiveTimeRange } from './active_time_range';
 import { countInWindow, riskPointsInWindow } from './signal_windows';
 import type { FaceliftTimeRangeId } from './time_range';
 
-export * from '../mocks/resolved_entities_data';
+export * from '../prototype_data/resolved_entities_data';
 
 const NO_ALERTS: AlertSeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
 
