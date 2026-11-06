@@ -212,6 +212,13 @@ export interface ConversationClient {
     options: ConversationWriteOptions & { activity?: ActivityContext }
   ): Promise<ConversationAccessControl>;
   /**
+   * The owner of a conversation in the client's space, read without an access check. Only for
+   * server-side callers that authorize on their own (see `updateAccessControlAsOwner`).
+   */
+  getOwnerWithoutAccessCheck(
+    conversationId: string
+  ): Promise<{ id?: string; username: string } | undefined>;
+  /**
    * Adds entries to a private conversation's ACL without removing existing entries or
    * changing the access mode. A no-op for public conversations. Existing entries are left
    * unchanged — even when the requested role differs; role changes go through
@@ -1335,6 +1342,17 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
+  }
+
+  async getOwnerWithoutAccessCheck(
+    conversationId: string
+  ): Promise<{ id?: string; username: string } | undefined> {
+    const document = await this.getDocument(conversationId);
+    if (!document) {
+      return undefined;
+    }
+    const { user } = fromEsWithoutRounds(document, this.getUser());
+    return { ...(user.id !== undefined ? { id: user.id } : {}), username: user.username };
   }
 
   async updateAccessControl(

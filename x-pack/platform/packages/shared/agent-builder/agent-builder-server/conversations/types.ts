@@ -17,6 +17,7 @@ import type {
   ConversationListResult,
   MetadataFieldValue,
   ConversationAddEventInput,
+  EventActor,
 } from '@kbn/agent-builder-common';
 
 /** Request for adding events to a conversation. */
@@ -131,4 +132,16 @@ export interface ConversationPublicClient {
    * Only custom event types are accepted; built-in event types (timeline and activity) are rejected.
    */
   addEvents(request: ConversationAddEventsRequest): Promise<ConversationEvent[]>;
+  /**
+   * Replaces a conversation's access control (mode and entries) as the conversation's owner, for
+   * plugins that make a conversation's visibility follow another record they authorize (a case
+   * that links an investigation). The caller must authorize the change itself first: this does
+   * not check the request's user against the conversation. `actor` is recorded on the access
+   * change in the conversation's activity, so the person who caused it shows instead of the owner.
+   */
+  updateAccessControlAsOwner(
+    conversationId: string,
+    accessControl: Required<ConversationAccessControlInput>,
+    options?: { actor?: EventActor }
+  ): Promise<void>;
 }
