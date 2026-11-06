@@ -13,7 +13,7 @@ import {
 } from '../../common/constants';
 import type { AiIndexDest, KiTypeCount } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
-import { EXCLUDE_MEMORY_KI_TYPES_CONDITION } from './example_queries';
+import { EXCLUDE_MEMORY_KI_TYPES_CONDITION, FACT_TYPE_PATTERN } from './example_queries';
 import { kiLifecyclePipeline } from './ki_lifecycle';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -26,6 +26,7 @@ const KEYWORD_TYPES: ReadonlySet<string> = new Set(['keyword', 'constant_keyword
 export interface AiIndexAggregationsDescription {
   kiTypeCounts: KiTypeCount[];
   tagCounts: AiIndexTagCount[];
+  factTypeCounts: KiTypeCount[];
 }
 
 export interface DescribeAiIndexAggregationsParams {
@@ -33,9 +34,17 @@ export interface DescribeAiIndexAggregationsParams {
   dest: AiIndexDest;
   spaceId: string;
   fields: AiIndexField[];
+  /** Also counts the `fact.*` types dreaming writes, which `kiTypeCounts` leaves out. */
+  countFactTypes?: boolean;
 }
 
-const NO_COUNTS: AiIndexAggregationsDescription = { kiTypeCounts: [], tagCounts: [] };
+const NO_COUNTS: AiIndexAggregationsDescription = {
+  kiTypeCounts: [],
+  tagCounts: [],
+  factTypeCounts: [],
+};
+
+const FACT_TYPES_CONDITION = `type LIKE "${FACT_TYPE_PATTERN}"`;
 
 const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
   fields.some(
@@ -47,12 +56,12 @@ const countsQuery = (
   { type, value }: AiIndexDest,
   field: string,
   size: number,
-  excludeMemory: boolean
+  condition: string | undefined
 ): string =>
   [
     `FROM ${value} METADATA _id, _index`,
     ...kiLifecyclePipeline(type),
-    ...(excludeMemory ? [`WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`] : []),
+    ...(condition ? [`WHERE ${condition}`] : []),
     ...(field === KI_TAGS_FIELD ? [`MV_EXPAND ${field}`] : []),
     `WHERE ${field} IS NOT NULL`,
     `STATS count = COUNT(*) BY ${field}`,
@@ -83,6 +92,7 @@ export const describeAiIndexAggregations = async ({
   dest,
   spaceId,
   fields,
+  countFactTypes = false,
 }: DescribeAiIndexAggregationsParams): Promise<AiIndexAggregationsDescription> => {
   const hasType = isAggregatableKeyword(fields, KI_TYPE_FIELD);
   const hasTags = isAggregatableKeyword(fields, KI_TAGS_FIELD);
@@ -90,25 +100,34 @@ export const describeAiIndexAggregations = async ({
     return NO_COUNTS;
   }
 
-  const [types, tags] = await Promise.all([
-    hasType
-      ? runCounts(
-          esClient,
-          spaceId,
-          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, true)
-        )
-      : [],
+  const typeCounts = (condition: string) =>
+    runCounts(
+      esClient,
+      spaceId,
+      countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, condition)
+    );
+  const [types, tags, factTypes] = await Promise.all([
+    hasType ? typeCounts(EXCLUDE_MEMORY_KI_TYPES_CONDITION) : [],
     hasTags
       ? runCounts(
           esClient,
           spaceId,
-          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS, hasType)
+          countsQuery(
+            dest,
+            KI_TAGS_FIELD,
+            MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
+            hasType ? EXCLUDE_MEMORY_KI_TYPES_CONDITION : undefined
+          )
         )
       : [],
+    hasType && countFactTypes ? typeCounts(FACT_TYPES_CONDITION) : [],
   ]);
 
+  const toTypeCounts = (rows: Array<Record<string, unknown>>): KiTypeCount[] =>
+    rows.map((row) => ({ type: String(row.type), count: Number(row.count) }));
   return {
-    kiTypeCounts: types.map((row) => ({ type: String(row.type), count: Number(row.count) })),
+    kiTypeCounts: toTypeCounts(types),
     tagCounts: tags.map((row) => ({ tag: String(row.tags), count: Number(row.count) })),
+    factTypeCounts: toTypeCounts(factTypes),
   };
 };
