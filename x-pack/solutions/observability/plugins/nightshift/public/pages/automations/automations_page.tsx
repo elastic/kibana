@@ -29,6 +29,7 @@ import {
   useCurrentUsername,
   useDeleteAutomation,
   useRefreshAutomations,
+  useRunAutomation,
   useFetchAutomations,
   type Automation,
 } from '../../data/automations/use_automations';
@@ -74,6 +75,7 @@ export const AutomationsPage = (): React.ReactElement => {
       : undefined;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const deleteAutomation = useDeleteAutomation();
+  const runAutomation = useRunAutomation();
   const refreshAutomations = useRefreshAutomations();
   const cloneAutomation = useCreateAutomation(true);
   const currentUsername = useCurrentUsername();
@@ -81,6 +83,8 @@ export const AutomationsPage = (): React.ReactElement => {
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
   const [rangeLabel, setRangeLabel] = useState(listLabels.last48Hours);
   const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
+  const requestRun = (automation: Automation) =>
+    runAutomation.mutate(automation, { onSuccess: () => setRefreshedAt(Date.now()) });
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
@@ -160,6 +164,8 @@ export const AutomationsPage = (): React.ReactElement => {
       <AutomationsTable
         automations={visibleAutomations}
         canManage={canManage}
+        onRun={requestRun}
+        isRunPending={runAutomation.isLoading}
         editDisabledReason={editDisabledReason}
         runCounts={runCounts}
         usedToday={usedToday}
@@ -258,6 +264,8 @@ export const AutomationsPage = (): React.ReactElement => {
           automations={orderedAutomations}
           automation={detailAutomation}
           canManage={canManage}
+          onRun={requestRun}
+          isRunPending={runAutomation.isLoading}
           editDisabledReason={editDisabledReason}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}
           runRange={runRange}

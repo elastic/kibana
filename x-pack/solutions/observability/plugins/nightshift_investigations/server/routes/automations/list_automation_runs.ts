@@ -9,12 +9,18 @@ import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
+import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { readAutomationUsage } from '../../lib/automations/automation_budget';
 
-const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
+const SKIP_REASONS = [
+  'daily_limit',
+  'investigation_limit',
+  'no_open_investigation',
+  'automation_disabled',
+] as const;
 const MAX_ERROR_LENGTH = 200;
 
 const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
@@ -134,8 +140,10 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
       const recoveredStep = recoveredAlertSteps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id);
-      const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
-      const step = startedStep ?? recoveredStep;
+      const isRecoveryFollowUp =
+        recoveredStep !== undefined &&
+        (startedStep === undefined || (!startedStep.output && Boolean(recoveredStep.output)));
+      const step = isRecoveryFollowUp ? recoveredStep : startedStep;
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -146,7 +154,11 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           : {};
       const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
 
-      const skipReason = SKIP_REASONS.find((reason) => reason === output['skip_reason']);
+      const skipReason = SKIP_REASONS.find(
+        (reason) =>
+          reason === output['skip_reason'] &&
+          (reason !== 'automation_disabled' || exec.status === ExecutionStatus.COMPLETED)
+      );
       const ruleName = getString(input['rule_name']);
       const recoveredTitle = ruleName ? `Recovered: ${ruleName}` : undefined;
       const title = isRecoveryFollowUp ? recoveredTitle : getString(input['title']);
@@ -159,7 +171,9 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt,
         duration: exec.duration,
-        triggeredBy: exec.triggeredBy,
+        triggeredBy:
+          exec.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE ? 'manual' : exec.triggeredBy,
+        executedBy: exec.executedBy,
         title,
         message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),
@@ -170,7 +184,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     });
 
     return {
-      runs,
+      runs: runs.filter(({ skipReason }) => skipReason !== 'automation_disabled'),
       total: executions.total,
       usedToday,
       page: executions.page,

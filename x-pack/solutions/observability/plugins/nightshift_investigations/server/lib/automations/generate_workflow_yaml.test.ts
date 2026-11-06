@@ -236,6 +236,7 @@ describe('generateWorkflowYaml', () => {
         type: 'nightshift.followUpRecoveredAlert',
         if: "${{ event.alert.status == 'recovered' }}",
         with: {
+          automation_id: 'auto-123',
           alert_uuid: '{{ event.alert.uuid }}',
           alert_id: '${{ event.alert.id }}',
           alert_start: '${{ event.alert.start }}',
@@ -306,6 +307,7 @@ describe('generateWorkflowYaml', () => {
         'alert_id',
         'alert_start',
         'alert_uuid',
+        'automation_id',
         'recovered_at',
         'rule_id',
         'rule_name',
@@ -592,7 +594,7 @@ describe('generateWorkflowYaml', () => {
       ]);
     });
 
-    it('preserves the disabled state', () => {
+    it('keeps the workflow runnable when the automation is disabled', () => {
       expect(
         parse(
           generateWorkflowYaml({
@@ -600,7 +602,7 @@ describe('generateWorkflowYaml', () => {
             automation: { ...scheduledAutomation(), isEnabled: false },
           })
         ).enabled
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 

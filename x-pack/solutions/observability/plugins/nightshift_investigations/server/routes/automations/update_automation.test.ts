@@ -15,7 +15,10 @@ const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/auto
 const soClient = { get: jest.fn(), update: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
 const updateWorkflow = jest.fn();
-const getWorkflowsManagement = jest.fn().mockReturnValue({ management: { updateWorkflow } });
+const getWorkflow = jest.fn();
+const getWorkflowsManagement = jest
+  .fn()
+  .mockReturnValue({ management: { updateWorkflow, getWorkflow } });
 
 const existing = {
   name: 'Triage',
@@ -46,6 +49,7 @@ let serviceAccountService = createServiceAccountService();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  getWorkflow.mockResolvedValue(null);
   serviceAccountService = createServiceAccountService();
   soClient.get.mockResolvedValue({ attributes: existing });
 });
@@ -307,7 +311,7 @@ it('rejects clearing instructions on a saved scheduled automation', async () => 
   expect(soClient.update).not.toHaveBeenCalled();
 });
 
-it('disables a scheduled automation through the normal workflow update', async () => {
+it('disables a legacy scheduled automation while upgrading its workflow', async () => {
   soClient.get.mockResolvedValue({
     attributes: {
       ...existing,
@@ -321,7 +325,7 @@ it('disables a scheduled automation through the normal workflow update', async (
     'default',
     expect.anything()
   );
-  expect(parse(updateWorkflow.mock.calls[0][1].yaml).enabled).toBe(false);
+  expect(parse(updateWorkflow.mock.calls[0][1].yaml).enabled).toBe(true);
   expect(soClient.update).toHaveBeenCalledWith(
     'nightshift-automation',
     'automation-1',
@@ -359,4 +363,36 @@ it('refuses callers who cannot write a bound workflow before writing anything', 
   await expect(call({ isEnabled: false })).rejects.toThrow('manage_security');
   expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('toggles an upgraded automation without writing or rescheduling its workflow', async () => {
+  getWorkflow.mockResolvedValue({
+    valid: true,
+    enabled: true,
+    definition: {
+      consts: { nightshiftAutomationRuntimeVersion: 1 },
+      settings: { run_as: 'kibana/nightshift_automations' },
+    },
+  });
+  const result = await call({ isEnabled: false });
+  expect(result.isEnabled).toBe(false);
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ isEnabled: false, workflowId: 'workflow-1' }),
+    { mergeAttributes: false }
+  );
+  expect(updateWorkflow).not.toHaveBeenCalled();
+});
+
+it('upgrades a legacy automation on toggle while retaining its workflow id', async () => {
+  getWorkflow.mockResolvedValue({
+    valid: true,
+    enabled: false,
+    definition: { settings: { run_as: 'kibana/nightshift_automations' } },
+  });
+  const result = await call({ isEnabled: false });
+  expect(result.workflowId).toBe('workflow-1');
+  expect(result.isEnabled).toBe(false);
+  expect(parse(updateWorkflow.mock.calls[0][1].yaml).enabled).toBe(true);
 });

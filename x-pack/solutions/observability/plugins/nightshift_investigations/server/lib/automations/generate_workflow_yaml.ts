@@ -8,6 +8,10 @@
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
+import {
+  AUTOMATION_RUNTIME_POLICY_KEY,
+  AUTOMATION_RUNTIME_POLICY_VERSION,
+} from '../../../common/automation_run';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
@@ -100,7 +104,8 @@ export function generateWorkflowYaml({
 
   const workflowObj = {
     name: automation.name,
-    enabled: automation.isEnabled,
+    enabled: true,
+    consts: { [AUTOMATION_RUNTIME_POLICY_KEY]: AUTOMATION_RUNTIME_POLICY_VERSION },
     tags: ['nightshift', 'automation'],
     settings: {
       ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
@@ -172,7 +177,14 @@ function generateAlertWorkflow(
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
-      ...(alertRows.length > 0 ? [RECOVERED_ALERT_STEP] : []),
+      ...(alertRows.length > 0
+        ? [
+            {
+              ...RECOVERED_ALERT_STEP,
+              with: { ...RECOVERED_ALERT_STEP.with, automation_id: automationId },
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -209,7 +221,10 @@ function generateAlertV2Workflow(
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
-      RECOVERED_ALERT_V2_STEP,
+      {
+        ...RECOVERED_ALERT_V2_STEP,
+        with: { ...RECOVERED_ALERT_V2_STEP.with, automation_id: automationId },
+      },
     ],
   };
 }

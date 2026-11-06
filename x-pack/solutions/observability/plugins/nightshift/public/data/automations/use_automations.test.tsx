@@ -16,6 +16,7 @@ import {
   useDeleteAutomation,
   useFetchAutomations,
   useRefreshAutomations,
+  useRunAutomation,
   useToggleAutomation,
 } from './use_automations';
 
@@ -115,6 +116,35 @@ describe('use_automations', () => {
       signal: null,
     });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
+  });
+
+  it('requests a run without configuration overrides and refreshes run history', async () => {
+    investigationsFetch.mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const { result, invalidateQueries } = renderWithClient(() => useRunAutomation());
+    act(() => result.current.mutate({ id: 'automation-1', name: 'Triage' }));
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Run requested', text: 'Triage' })
+    );
+    expect(investigationsFetch).toHaveBeenCalledWith(
+      'POST /internal/nightshift/automations/{id}/run',
+      {
+        params: { path: { id: 'automation-1' } },
+        signal: null,
+      }
+    );
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
+  });
+
+  it('reports a rejected run without showing acceptance feedback', async () => {
+    investigationsFetch.mockRejectedValue(new Error('Workflow is invalid'));
+    const { result } = renderWithClient(() => useRunAutomation());
+    act(() => result.current.mutate({ id: 'automation-1', name: 'Triage' }));
+    await waitFor(() =>
+      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Failed to run automation',
+      })
+    );
+    expect(addSuccess).not.toHaveBeenCalled();
   });
 
   it('toggles and deletes automations', async () => {
