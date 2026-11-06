@@ -11,11 +11,13 @@ import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builde
 import {
   registerAgenticInvestigationTemplateUI,
   type CloseInvestigationModalRenderProps,
+  type DeleteInvestigationModalRenderProps,
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
   type LiveStateSlotRenderProps,
   type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
+  type Investigation,
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
@@ -196,12 +198,75 @@ export const investigationTemplate: TemplateDefinition = {
         return GatedCloseInvestigationModal;
       });
 
+    // Footer Close/Delete: no Suspense spinner under the Actions button (null fallback), and
+    // warm the same chunks `makeLazyWithProviders` needs as soon as Actions is on screen.
+    let footerActionChunksPreloaded = false;
+    const preloadFooterActionChunks = () => {
+      if (footerActionChunksPreloaded) {
+        return;
+      }
+      footerActionChunksPreloaded = true;
+      void Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('../../shared/connected_status/connected_close_investigation_modal'),
+        import('../../shared/connected_status/connected_delete_investigation_modal'),
+        import('../../shared/privileges/privilege_gate'),
+      ]);
+    };
+
     const renderCloseInvestigationModal = (props: CloseInvestigationModalRenderProps) =>
       React.createElement(
         EscalationModalBoundary,
-        null,
+        { fallback: null },
         React.createElement(LazyConnectedCloseInvestigationModal, props)
       );
+
+    const LazyConnectedDeleteInvestigationModal =
+      makeLazyWithProviders<DeleteInvestigationModalRenderProps>(async () => {
+        const [{ ConnectedDeleteInvestigationModal }, { PrivilegeGate }] = await Promise.all([
+          import('../../shared/connected_status/connected_delete_investigation_modal'),
+          import('../../shared/privileges/privilege_gate'),
+        ]);
+        const GatedDeleteInvestigationModal: React.FC<DeleteInvestigationModalRenderProps> = (
+          props
+        ) =>
+          React.createElement(
+            PrivilegeGate,
+            { privilege: 'manageInvestigations' },
+            React.createElement(ConnectedDeleteInvestigationModal, props)
+          );
+        return GatedDeleteInvestigationModal;
+      });
+
+    const LazyManageInvestigationsGate = makeLazyWithProviders<React.PropsWithChildren>(
+      async () => {
+        const { PrivilegeGate } = await import('../../shared/privileges/privilege_gate');
+        const ManageInvestigationsGate: React.FC<React.PropsWithChildren> = ({ children }) =>
+          React.createElement(PrivilegeGate, { privilege: 'manageInvestigations' }, children);
+        return ManageInvestigationsGate;
+      }
+    );
+
+    const renderDeleteInvestigationModal = (props: DeleteInvestigationModalRenderProps) =>
+      React.createElement(
+        EscalationModalBoundary,
+        { fallback: null },
+        React.createElement(LazyConnectedDeleteInvestigationModal, props)
+      );
+
+    const onReopenInvestigation = async (investigation: Investigation) => {
+      const [{ reopenInvestigation }, queryClient] = await Promise.all([
+        import('../../shared/connected_status/reopen_investigation'),
+        getSharedInvestigationsQueryClient(),
+      ]);
+      await reopenInvestigation({
+        investigation,
+        http: core.http,
+        notifications: core.notifications,
+        queryClient,
+      });
+    };
 
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
@@ -220,6 +285,16 @@ export const investigationTemplate: TemplateDefinition = {
           React.createElement(LazySeverityPicker, props)
         ),
       renderCloseInvestigationModal,
+      onReopenInvestigation,
+      renderDeleteInvestigationModal,
+      wrapActionsMenu: (menu) => {
+        preloadFooterActionChunks();
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(LazyManageInvestigationsGate, null, menu)
+        );
+      },
       renderOverview: (props) =>
         React.createElement(
           EscalationModalBoundary,
