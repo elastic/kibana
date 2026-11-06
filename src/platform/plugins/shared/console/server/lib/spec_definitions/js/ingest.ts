@@ -11,7 +11,11 @@ import type { SpecDefinitionsService } from '../../../services';
 import { BOOLEAN } from './shared';
 
 const commonPipelineParams = {
-  on_failure: [],
+  on_failure: [
+    {
+      __scope_link: '_processor',
+    },
+  ],
   ignore_failure: {
     __one_of: [false, true],
   },
