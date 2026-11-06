@@ -25,7 +25,6 @@ export {
   customContentStateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
-  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from './schema';
 export type { CustomContentState } from './schema';

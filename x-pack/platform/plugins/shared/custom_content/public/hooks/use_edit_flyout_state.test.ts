@@ -55,7 +55,7 @@ const mockOnRunPreview = jest.fn();
 const mockEuiTheme = {} as unknown as EuiThemeComputed;
 
 const baseParams = {
-  esqlQuery: 'FROM logs | LIMIT 10',
+  esqlQueries: ['FROM logs | LIMIT 10'],
   template: 'hello',
   timeRange: undefined,
   colorMode: 'LIGHT' as const,
@@ -79,7 +79,7 @@ describe('useEditFlyoutState', () => {
     it('initializes draft state to empty strings when props are undefined', () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({
-          esqlQuery: undefined,
+          esqlQueries: [],
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
@@ -149,7 +149,7 @@ describe('useEditFlyoutState', () => {
     it('does nothing when draftEsqlQuery is empty', async () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({
-          esqlQuery: undefined,
+          esqlQueries: [],
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
@@ -202,7 +202,10 @@ describe('useEditFlyoutState', () => {
       });
 
       const { result } = renderHook(() =>
-        useEditFlyoutState({ ...baseParams, additionalEsqlQueries: ['FROM metrics | LIMIT 5'] })
+        useEditFlyoutState({
+          ...baseParams,
+          esqlQueries: [...baseParams.esqlQueries, 'FROM metrics | LIMIT 5'],
+        })
       );
 
       await act(async () => {
@@ -239,14 +242,14 @@ describe('useEditFlyoutState', () => {
       expect(mockFillTemplate).toHaveBeenCalledWith('hello', [{ columns: [], rows: [] }]);
     });
 
-    it('does not fetch the additional queries of a panel that has no first query', async () => {
+    it('does not fetch the other queries once the first query is cleared in the editor', async () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({
           ...baseParams,
-          esqlQuery: undefined,
-          additionalEsqlQueries: ['FROM metrics'],
+          esqlQueries: ['FROM logs', 'FROM metrics'],
         })
       );
+      act(() => result.current.setDraftEsqlQuery(''));
 
       await act(async () => {
         await result.current.handleRender();
@@ -257,9 +260,7 @@ describe('useEditFlyoutState', () => {
     });
 
     it('skips fetch and uses draft template directly when no esql query', async () => {
-      const { result } = renderHook(() =>
-        useEditFlyoutState({ ...baseParams, esqlQuery: undefined })
-      );
+      const { result } = renderHook(() => useEditFlyoutState({ ...baseParams, esqlQueries: [] }));
 
       await act(async () => {
         await result.current.handleRender();

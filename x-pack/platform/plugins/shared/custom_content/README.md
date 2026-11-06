@@ -10,7 +10,7 @@ A `custom_content` panel stores two pieces of state (both optional) alongside th
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `esql_query` | `string[] \| undefined` | Optional ES\|QL queries whose results are injected into the template at render time. The first is the panel's main query (`rows`); up to ten are allowed (`CUSTOM_CONTENT_MAX_ESQL_QUERIES`) and the rest are read by position as `queries[n]`. Read and write it via `readEsqlQuery` / `readAdditionalEsqlQueries` / `toEsqlQueryState`. Only hand-edited panels hold more than one for now: the flyout does not change the others, and the agent tools keep them as they are |
+| `esql_query` | `string[] \| undefined` | Optional ES\|QL queries whose results are injected into the template at render time. The first is the panel's main query (`rows`); up to ten are allowed (`CUSTOM_CONTENT_MAX_ESQL_QUERIES`) and the rest are read by position as `queries[n]`. The whole list is passed around as one array; only the chat attachment keeps the first query in its own field (`esql_query`, with the rest in `additional_esql_queries`), converted by `readContextQueries` / `toContextQueries`. Only hand-edited panels hold more than one for now: the flyout does not change the others, and the agent tools keep them as they are |
 | `template` | `string \| undefined` | LiquidJS HTML template — the actual rendered content |
 
 Panels are saved as part of the dashboard's serialized state (standard embeddable contract, `server/embeddable/schemas.ts`). No separate saved object is created. Both `template` and `esql_query` participate in unsaved-change detection (`esql_query` compares with `deepEquality`, since a fresh array would otherwise look changed on every serialize).

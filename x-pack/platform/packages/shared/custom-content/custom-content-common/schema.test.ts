@@ -16,7 +16,6 @@ import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
-  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from './schema';
 
@@ -209,22 +208,7 @@ describe('esql_query accessors', () => {
     expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
   });
 
-  it('reads the main query and the additional ones separately', () => {
-    const state = { esql_query: ['FROM a', 'FROM b', 'FROM c'] };
-    expect(readEsqlQuery(state)).toBe('FROM a');
-    expect(readAdditionalEsqlQueries(state)).toEqual(['FROM b', 'FROM c']);
-  });
-
-  it('reads no additional queries from a single-query or empty panel', () => {
-    expect(readAdditionalEsqlQueries({ esql_query: ['FROM a'] })).toEqual([]);
-    expect(readAdditionalEsqlQueries({})).toEqual([]);
-  });
-
-  it('keeps the additional queries after the main one when building state', () => {
-    expect(toEsqlQueryState('FROM a', ['FROM b'])).toEqual(['FROM a', 'FROM b']);
-  });
-
-  it('drops the additional queries when there is no main query', () => {
-    expect(toEsqlQueryState(undefined, ['FROM b'])).toBeUndefined();
+  it('reads the first query of a panel with several as the main one', () => {
+    expect(readEsqlQuery({ esql_query: ['FROM a', 'FROM b', 'FROM c'] })).toBe('FROM a');
   });
 });

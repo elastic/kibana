@@ -31,8 +31,7 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 
 let capturedComponentProps:
   | {
-      esqlQuery?: string;
-      additionalEsqlQueries?: readonly string[];
+      esqlQueries?: readonly string[];
       isGenerating?: boolean;
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
@@ -42,8 +41,7 @@ let capturedComponentProps:
 
 jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
-    esqlQuery: string | undefined;
-    additionalEsqlQueries?: readonly string[];
+    esqlQueries: readonly string[];
     savedTemplate: string | undefined;
     generationVersion: number;
     timeRange: { from: string; to: string } | undefined;
@@ -57,7 +55,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
     return (
       <div
         data-test-subj="mockCustomContentComponent"
-        data-esql-query={props.esqlQuery ?? ''}
+        data-esql-query={props.esqlQueries[0] ?? ''}
         data-saved-template={props.savedTemplate ?? ''}
         data-generation-version={props.generationVersion}
         data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
@@ -73,8 +71,7 @@ let capturedFlyoutProps:
       onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
       onClose: () => void;
       onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
-      esqlQuery?: string;
-      additionalEsqlQueries?: readonly string[];
+      esqlQueries?: readonly string[];
     }
   | undefined;
 
@@ -351,8 +348,10 @@ describe('customContentEmbeddableFactory', () => {
       const { embeddable } = await buildEmbeddable(multiQueryState);
       await act(async () => render(<embeddable.Component />));
 
-      expect(capturedComponentProps?.esqlQuery).toBe('FROM logs | STATS count = COUNT(*)');
-      expect(capturedComponentProps?.additionalEsqlQueries).toEqual(['FROM metrics | LIMIT 5']);
+      expect(capturedComponentProps?.esqlQueries).toEqual([
+        'FROM logs | STATS count = COUNT(*)',
+        'FROM metrics | LIMIT 5',
+      ]);
     });
 
     it('follows the last saved state on reset', async () => {
@@ -684,8 +683,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => embeddable.api.onEdit());
       await renderFlyoutContent();
 
-      expect(capturedFlyoutProps?.esqlQuery).toBe('FROM a');
-      expect(capturedFlyoutProps?.additionalEsqlQueries).toEqual(['FROM b', 'FROM c']);
+      expect(capturedFlyoutProps?.esqlQueries).toEqual(['FROM a', 'FROM b', 'FROM c']);
     });
 
     it('publishes every query of the panel, so a control finds the panel by any of them', async () => {
@@ -719,21 +717,21 @@ describe('customContentEmbeddableFactory', () => {
       expect(embeddable.api.serializeState().esql_query).toEqual(['FROM c']);
     });
 
-    it('hands the flyout the same list of additional queries when an update leaves them as they were', async () => {
+    it('hands the flyout the same list of queries when an update leaves them as they were', async () => {
       const state = { ...baseState, esql_query: ['FROM a', 'FROM b'] };
       const { embeddable } = await buildEmbeddable(state);
       await act(async () => render(<embeddable.Component />));
       const openedWith = async () => {
         await act(async () => embeddable.api.onEdit());
         await renderFlyoutContent();
-        return capturedFlyoutProps?.additionalEsqlQueries;
+        return capturedFlyoutProps?.esqlQueries;
       };
 
       const before = await openedWith();
       act(() => embeddable.api.applySerializedState({ ...state }));
       const after = await openedWith();
 
-      expect(before).toEqual(['FROM b']);
+      expect(before).toEqual(['FROM a', 'FROM b']);
       expect(after).toBe(before);
     });
 

@@ -22,9 +22,8 @@ import { CUSTOM_CONTENT_IFRAME_SANDBOX } from './constants';
 export interface CustomContentComponentProps {
   services: CustomContentRendererServices;
   embeddableId: string;
-  esqlQuery: string | undefined;
-  /** Further queries, exposed to the template as `queries[1]`, `queries[2]`, ... after `esqlQuery`. */
-  additionalEsqlQueries?: readonly string[];
+  /** The panel's queries: the first is `rows` in the template, the others `queries[1]`, `queries[2]`, ... None for a static panel. */
+  esqlQueries: readonly string[];
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
@@ -74,8 +73,7 @@ const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
 export const CustomContentComponent = ({
   services,
   embeddableId,
-  esqlQuery,
-  additionalEsqlQueries,
+  esqlQueries,
   timeRange,
   generationVersion,
   savedTemplate,
@@ -98,8 +96,7 @@ export const CustomContentComponent = ({
   const { html, isLoading, error, noContent } = useCustomContentHtml({
     services,
     embeddableId,
-    esqlQuery,
-    additionalEsqlQueries,
+    esqlQueries,
     timeRange,
     generationVersion,
     savedTemplate,

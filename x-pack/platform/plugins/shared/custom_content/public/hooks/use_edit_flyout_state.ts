@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { useReducer, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -37,9 +37,8 @@ export interface EditFlyoutState {
 }
 
 export interface UseEditFlyoutStateParams {
-  esqlQuery: string | undefined;
-  /** The panel's queries after the first, read by the template as `queries[1]`, ... Previewed, not edited. */
-  additionalEsqlQueries?: readonly string[];
+  /** The panel's queries. The editor changes the first; the others are kept as they are. */
+  esqlQueries: readonly string[];
   template: string | undefined;
   timeRange: TimeRange | undefined;
   colorMode: EuiThemeColorModeStandard;
@@ -52,11 +51,8 @@ export interface UseEditFlyoutStateParams {
   onRunPreview: (html: string) => void;
 }
 
-const NO_ADDITIONAL_QUERIES: readonly string[] = [];
-
 export const useEditFlyoutState = ({
-  esqlQuery,
-  additionalEsqlQueries = NO_ADDITIONAL_QUERIES,
+  esqlQueries,
   template,
   timeRange,
   colorMode,
@@ -68,8 +64,10 @@ export const useEditFlyoutState = ({
   esqlVariables,
   onRunPreview,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
+  // Previewed with the first query, not edited.
+  const additionalEsqlQueries = useMemo(() => esqlQueries.slice(1), [esqlQueries]);
   const [state, dispatch] = useReducer(flyoutReducer, {
-    draftEsqlQuery: esqlQuery ?? '',
+    draftEsqlQuery: esqlQueries[0] ?? '',
     draftTemplate: template ?? '',
     isDataLoading: false,
     esqlData: null,

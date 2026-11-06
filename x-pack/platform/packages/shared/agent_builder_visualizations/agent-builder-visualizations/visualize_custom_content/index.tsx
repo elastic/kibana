@@ -178,7 +178,7 @@ export const VisualizeCustomContent = ({
         <CustomContentComponent
           services={services.customContent}
           embeddableId="agent-builder-custom-content"
-          esqlQuery={esql}
+          esqlQueries={esql ? [esql] : []}
           timeRange={effectiveTimeRange}
           generationVersion={0}
           savedTemplate={template}

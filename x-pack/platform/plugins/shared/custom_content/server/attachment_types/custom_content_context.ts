@@ -11,14 +11,16 @@ import {
   customContentContextAttachmentDataSchema,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
+import { readContextQueries } from '../../common/panel_context_queries';
 
 const formatPanelContext = (data: CustomContentContextAttachmentData): string => {
   const parts = [`Custom content panel (embeddable_id: ${data.embeddable_id}):`];
 
-  if (data.esql_query) {
-    parts.push(`\nES|QL Query:\n\`\`\`esql\n${data.esql_query}\n\`\`\``);
+  const [esqlQuery, ...additionalQueries] = readContextQueries(data);
+  if (esqlQuery) {
+    parts.push(`\nES|QL Query:\n\`\`\`esql\n${esqlQuery}\n\`\`\``);
   }
-  (data.additional_esql_queries ?? []).forEach((query, index) => {
+  additionalQueries.forEach((query, index) => {
     parts.push(
       `\nAdditional ES|QL query, read by the template as queries[${
         index + 1

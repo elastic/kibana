@@ -26,9 +26,8 @@ const RENDER_ERROR_MESSAGE = i18n.translate('xpack.customContent.renderError', {
 export interface UseCustomContentHtmlParams {
   services: CustomContentRendererServices;
   embeddableId: string;
-  esqlQuery: string | undefined;
-  /** Further queries, exposed to the template as `queries[1]`, `queries[2]`, ... after `esqlQuery`. */
-  additionalEsqlQueries?: readonly string[];
+  /** The panel's queries: the first is `rows` in the template, the others `queries[1]`, `queries[2]`, ... None for a static panel. */
+  esqlQueries: readonly string[];
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
@@ -52,10 +51,8 @@ export interface UseCustomContentHtmlResult {
   noContent: boolean;
 }
 
-const NO_QUERIES: readonly string[] = [];
-
 /** Keeps the same array while its items are the same, for callers that build the list inline. */
-const useStableList = (list: readonly string[] = NO_QUERIES): readonly string[] => {
+const useStableList = (list: readonly string[]): readonly string[] => {
   const stable = useRef(list);
   const isSame =
     stable.current.length === list.length &&
@@ -67,8 +64,7 @@ const useStableList = (list: readonly string[] = NO_QUERIES): readonly string[] 
 export function useCustomContentHtml({
   services,
   embeddableId,
-  esqlQuery,
-  additionalEsqlQueries,
+  esqlQueries,
   timeRange,
   generationVersion,
   savedTemplate,
@@ -90,38 +86,31 @@ export function useCustomContentHtml({
   const trimmedTemplate = savedTemplate?.trim() || undefined;
   const { http, uiSettings, search } = services;
   // Callers build the list inline, so compare it by value to keep it from refetching on every render.
-  const stableAdditionalQueries = useStableList(additionalEsqlQueries);
+  const stableEsqlQueries = useStableList(esqlQueries);
 
   useEffect(() => {
-    if (trimmedTemplate && !esqlQuery) {
+    if (trimmedTemplate && stableEsqlQueries.length === 0) {
       setFilledHtml(stripMarkdownFences(trimmedTemplate));
       setIsLoading(false);
       setError(undefined);
       return;
     }
 
-    if (trimmedTemplate && esqlQuery) {
+    if (trimmedTemplate) {
       const controller = new AbortController();
       const template = stripMarkdownFences(trimmedTemplate);
 
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlDatasets(
-        search,
-        http,
-        [esqlQuery, ...stableAdditionalQueries],
-        timeRange,
-        controller.signal,
-        {
-          isApproximate,
-          projectRouting,
-          query,
-          filters,
-          esQueryConfig: getEsQueryConfig(uiSettings),
-          esqlVariables,
-          requestAdapter,
-        }
-      )
+      fetchEsqlDatasets(search, http, stableEsqlQueries, timeRange, controller.signal, {
+        isApproximate,
+        projectRouting,
+        query,
+        filters,
+        esQueryConfig: getEsQueryConfig(uiSettings),
+        esqlVariables,
+        requestAdapter,
+      })
         .then(({ datasets, approximationApplied }) => {
           if (!controller.signal.aborted) setApproximationApplied?.(approximationApplied);
           return fillTemplateDatasets(template, datasets);
@@ -149,8 +138,7 @@ export function useCustomContentHtml({
     setIsLoading(false);
   }, [
     embeddableId,
-    esqlQuery,
-    stableAdditionalQueries,
+    stableEsqlQueries,
     generationVersion,
     trimmedTemplate,
     timeRange,

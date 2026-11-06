@@ -16,7 +16,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('carries the panel state and type', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
       panelTitle: 'My panel',
     });
@@ -33,8 +33,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('carries the additional queries after the main one', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div/>',
-      esqlQuery: 'FROM logs',
-      additionalEsqlQueries: ['FROM metrics', 'FROM traces'],
+      esqlQueries: ['FROM logs', 'FROM metrics', 'FROM traces'],
       embeddableId: 'panel-1',
     });
 
@@ -44,22 +43,21 @@ describe('buildCustomContentContextAttachment', () => {
     });
   });
 
-  it('omits additional_esql_queries when there are none, or no main query to extend', () => {
+  it('omits additional_esql_queries when there are none, and every query when the panel has none', () => {
     expect(
       buildCustomContentContextAttachment({
         template: '<div/>',
-        esqlQuery: 'FROM logs',
-        additionalEsqlQueries: [],
+        esqlQueries: ['FROM logs'],
         embeddableId: 'panel-1',
       }).data
     ).not.toHaveProperty('additional_esql_queries');
     expect(
       buildCustomContentContextAttachment({
         template: '<div/>',
-        additionalEsqlQueries: ['FROM metrics'],
+        esqlQueries: [],
         embeddableId: 'panel-1',
       }).data
-    ).not.toHaveProperty('additional_esql_queries');
+    ).toMatchObject({ esql_query: undefined });
   });
 
   // Without a stable id each push appends a new attachment, and the update tool reads the first
@@ -67,12 +65,12 @@ describe('buildCustomContentContextAttachment', () => {
   it('derives a stable id from the embeddable id so re-pushes replace rather than accumulate', () => {
     const first = buildCustomContentContextAttachment({
       template: '<div>v1</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
     });
     const second = buildCustomContentContextAttachment({
       template: '<div>v2</div>',
-      esqlQuery: 'FROM metrics',
+      esqlQueries: ['FROM metrics'],
       embeddableId: 'panel-1',
     });
 
@@ -90,7 +88,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('carries the panel time range so the chat preview matches what the user was looking at', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
       panelTitle: 'My panel',
       fetchContext: { timeRange: { from: 'now-7d', to: 'now' } },
@@ -102,7 +100,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('omits time_range entirely when the panel has no resolved range', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
     });
 
@@ -112,7 +110,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('carries the panel height so the preview starts at the size the user saw', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
       panelTitle: 'My panel',
       panelHeight: 480,
@@ -125,7 +123,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('omits panel_height when the panel could not be measured', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
     });
 
@@ -135,7 +133,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('carries ES|QL control variables', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs | WHERE host.name == ?host',
+      esqlQueries: ['FROM logs | WHERE host.name == ?host'],
       embeddableId: 'panel-1',
       panelTitle: 'My panel',
       fetchContext: {
@@ -151,7 +149,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('omits esql_variables when the panel has none', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
       fetchContext: { esqlVariables: [] },
     });
@@ -162,7 +160,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('carries the panel fetch context', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
       fetchContext: {
         filters: [{ meta: { key: 'host.name' } }] as never,
@@ -183,7 +181,7 @@ describe('buildCustomContentContextAttachment', () => {
   it('omits fetch context the panel does not have', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
     });
 
@@ -200,7 +198,7 @@ describe('buildCustomContentContextAttachment', () => {
 
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       embeddableId: 'panel-1',
       fetchContext: {
         filters: [hugeFilter] as never,

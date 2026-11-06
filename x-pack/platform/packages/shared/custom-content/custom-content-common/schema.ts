@@ -21,11 +21,9 @@ import {
  * Persisted content of a custom content panel. No `prompt`: on an edit the prompt is a delta
  * ("remove the background color"), not a description, so the template is the source of truth.
  *
- * `esql_query` holds one or more queries. The first is the panel's main query and the template reads
- * it as `rows`; the template reads the n-th as `queries[n]`. Read and write it through
- * {@link readEsqlQuery} / {@link readAdditionalEsqlQueries} / {@link toEsqlQueryState} rather than
- * indexing directly. The editor does not change the others yet, and neither do the agent tools; they
- * are kept as they are.
+ * `esql_query` holds one or more queries, in the order the template reads them: the first is its
+ * `rows`, the n-th is `queries[n]`. The editor does not change the others yet, and neither do the
+ * agent tools; they are kept as they are.
  */
 export const customContentStateSchema = lazySchema(() =>
   z.object({
@@ -44,20 +42,9 @@ export type CustomContentState = z.output<typeof customContentStateSchema>;
 export const readEsqlQuery = (state: Pick<CustomContentState, 'esql_query'>): string | undefined =>
   state.esql_query?.[0];
 
-/** The queries after the main one, which the template reads as `queries[1]`, `queries[2]`, ... */
-export const readAdditionalEsqlQueries = (
-  state: Pick<CustomContentState, 'esql_query'>
-): string[] => state.esql_query?.slice(1) ?? [];
-
-/**
- * Builds the persisted `esql_query` field from the main query and any additional ones, omitting it
- * when there is no main query: additional queries are meaningless without it.
- */
-export const toEsqlQueryState = (
-  esqlQuery: string | undefined,
-  additionalEsqlQueries: readonly string[] = []
-): string[] | undefined =>
-  esqlQuery === undefined ? undefined : [esqlQuery, ...additionalEsqlQueries];
+/** Builds the persisted `esql_query` field from a single query, omitting it when there is none. */
+export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | undefined =>
+  esqlQuery === undefined ? undefined : [esqlQuery];
 
 /**
  * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation

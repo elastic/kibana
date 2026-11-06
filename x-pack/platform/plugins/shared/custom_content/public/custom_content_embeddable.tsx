@@ -63,9 +63,6 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
   CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
-  readEsqlQuery,
-  readAdditionalEsqlQueries,
-  toEsqlQueryState,
 } from '@kbn/custom-content-common';
 import {
   CustomContentComponent,
@@ -75,6 +72,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { getServices } from './services';
+import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
 import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
 import {
@@ -152,20 +150,21 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
-    const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
-    // Only a hand-edited panel has these. They are kept and saved as they are, never edited here.
-    const additionalEsqlQueries$ = new BehaviorSubject<string[]>(
-      readAdditionalEsqlQueries(initialState)
-    );
+    // The panel's queries, the first of which is `rows` in its template. Only a hand-edited panel has
+    // more than one, and the editor changes only the first.
+    const esqlQueries$ = new BehaviorSubject<string[]>(initialState.esql_query ?? []);
     // Sets the queries only when they change, so an update that leaves them as they are neither fires
     // a state change nor hands subscribers a new list.
-    const setAdditionalEsqlQueries = (queries: string[]) => {
-      const current = additionalEsqlQueries$.getValue();
+    const setEsqlQueries = (queries: readonly string[]) => {
+      const current = esqlQueries$.getValue();
       const isSame =
         current.length === queries.length &&
         current.every((query, index) => query === queries[index]);
-      if (!isSame) additionalEsqlQueries$.next(queries);
+      if (!isSame) esqlQueries$.next([...queries]);
     };
+    // The other queries extend the first, so there is nothing for them to extend once it is removed.
+    const replaceMainQuery = (queries: readonly string[], mainQuery: string | undefined) =>
+      mainQuery ? [mainQuery, ...queries.slice(1)] : [];
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -206,26 +205,22 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
-      esql_query: toEsqlQueryState(esqlQuery$.getValue(), additionalEsqlQueries$.getValue()),
+      esql_query: esqlQueries$.getValue().length ? [...esqlQueries$.getValue()] : undefined,
       template: template$.getValue(),
     });
 
-    // The additional queries extend the main one, so data without it carries none.
-    const applyAttachmentData = (data: {
-      panel_template: string;
-      esql_query?: string;
-      additional_esql_queries?: string[];
-    }) => {
+    const applyAttachmentData = (
+      data: Parameters<typeof readContextQueries>[0] & {
+        panel_template: string;
+      }
+    ) => {
       template$.next(data.panel_template);
-      esqlQuery$.next(data.esql_query);
-      setAdditionalEsqlQueries(data.esql_query ? data.additional_esql_queries ?? [] : []);
+      setEsqlQueries(readContextQueries(data));
     };
 
     const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
       if ('esqlQuery' in update) {
-        esqlQuery$.next(update.esqlQuery);
-        // The additional queries extend the main one, so there is nothing for them to extend once it is removed.
-        if (!update.esqlQuery) setAdditionalEsqlQueries([]);
+        setEsqlQueries(replaceMainQuery(esqlQueries$.getValue(), update.esqlQuery));
       }
       if ('template' in update) template$.next(update.template);
     };
@@ -237,11 +232,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
-        esqlQuery$.pipe(
-          skip(1),
-          map(() => undefined)
-        ),
-        additionalEsqlQueries$.pipe(
+        esqlQueries$.pipe(
           skip(1),
           map(() => undefined)
         ),
@@ -259,8 +250,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});
-        esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
-        setAdditionalEsqlQueries(lastSaved ? readAdditionalEsqlQueries(lastSaved) : []);
+        setEsqlQueries(lastSaved?.esql_query ?? []);
         template$.next(lastSaved?.template);
       },
     });
@@ -276,7 +266,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       dataLoading$,
       // A static panel makes no request, so it offers no Inspect entry.
       getInspectorAdapters: () =>
-        esqlQuery$.getValue() ? { requests: requestAdapter } : undefined,
+        esqlQueries$.getValue().length ? { requests: requestAdapter } : undefined,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
@@ -285,7 +275,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         getTelemetry().trackEditFlyoutOpened({
           isNewPanel,
           hasTemplate: Boolean(template$.getValue()),
-          hasEsqlQuery: Boolean(esqlQuery$.getValue()),
+          hasEsqlQuery: esqlQueries$.getValue().length > 0,
         });
         let hasSaved = false;
         const flyoutRef = openLazyFlyout({
@@ -323,9 +313,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
-                    esqlQuery: draftEsqlQuery,
                     // The editor does not change the other queries yet, so the chat gets the panel's own.
-                    additionalEsqlQueries: additionalEsqlQueries$.getValue(),
+                    esqlQueries: replaceMainQuery(esqlQueries$.getValue(), draftEsqlQuery),
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),
@@ -359,8 +348,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               return (
                 <EditCustomContentFlyout
-                  esqlQuery={esqlQuery$.getValue()}
-                  additionalEsqlQueries={additionalEsqlQueries$.getValue()}
+                  esqlQueries={esqlQueries$.getValue()}
                   template={template$.getValue()}
                   timeRange={timeRange}
                   isApproximate={isApproximate}
@@ -405,25 +393,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       isEditingEnabled: () => true,
     });
 
-    // Every query of the panel, the main one first. A panel with no main query has none.
-    const queries$ = combineLatest([esqlQuery$, additionalEsqlQueries$]).pipe(
-      map(([esqlQueryValue, additionalQueries]) =>
-        esqlQueryValue ? [esqlQueryValue, ...additionalQueries] : []
-      ),
-      distinctUntilChanged(
-        (a, b) => a.length === b.length && a.every((query, index) => query === b[index])
-      )
-    );
-
     // Lets an ES|QL control find the panels whose queries use its variable, whichever query that is.
-    const esqlUsageSubscription = queries$
+    const esqlUsageSubscription = esqlQueries$
       .pipe(map((queries) => queries.map((query) => ({ esql: query }))))
       .subscribe(esql$);
 
     // Important for unified search support: KQL bar and filter builder suggestions, and whether the
     // dashboard offers its time picker. Every query counts, since every query is fetched with the
     // dashboard's time range, so a data view is published for each one.
-    const dataViewsSubscription = combineLatest([queries$, projectRouting$])
+    const dataViewsSubscription = combineLatest([esqlQueries$, projectRouting$])
       .pipe(
         map(([queries, routingValue]) => ({ queries, routingValue })),
         distinctUntilChanged(
@@ -484,8 +462,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: function CustomContentEmbeddableComponent() {
         const [
-          esqlQuery,
-          additionalEsqlQueries,
+          esqlQueries,
           savedTemplate,
           panelTitle,
           isApproximate,
@@ -498,8 +475,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isGenerating,
           viewMode,
         ] = useBatchedPublishingSubjects(
-          esqlQuery$,
-          additionalEsqlQueries$,
+          esqlQueries$,
           template$,
           titleManager.api.title$,
           isApproximate$,
@@ -622,8 +598,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             <CustomContentComponent
               services={rendererServices}
               embeddableId={uuid}
-              esqlQuery={esqlQuery}
-              additionalEsqlQueries={additionalEsqlQueries}
+              esqlQueries={esqlQueries}
               timeRange={timeRange}
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}
