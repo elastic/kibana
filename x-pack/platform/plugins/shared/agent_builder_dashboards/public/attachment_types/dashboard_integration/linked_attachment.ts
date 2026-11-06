@@ -91,3 +91,30 @@ export const canShowAttachmentInDashboard = ({
   // linking an unsaved copy of another saved dashboard would move the attachment's origin on save
   return !attachment.origin && isNewEmptyDashboard(api);
 };
+
+export type AttachmentTarget = 'apply' | 'open_saved_dashboard' | 'open_new_dashboard';
+
+/**
+ * Where an attachment is shown: applied to the open dashboard, or opened as its saved dashboard
+ * or as a new unsaved one, so the open dashboard is not overwritten.
+ */
+export const resolveAttachmentTarget = async ({
+  api,
+  store,
+  attachment,
+  checkSavedDashboardExist,
+}: {
+  api: DashboardApi;
+  store: AppliedAttachmentsStore;
+  attachment: Pick<DashboardAttachment, 'id' | 'origin'>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+}): Promise<AttachmentTarget> => {
+  if (canShowAttachmentInDashboard({ api, store, attachment })) {
+    return 'apply';
+  }
+  if (attachment.origin && (await checkSavedDashboardExist(attachment.origin))) {
+    return 'open_saved_dashboard';
+  }
+  // the attachment's saved dashboard was deleted, so a new, empty dashboard can stand for it
+  return isNewEmptyDashboard(api) ? 'apply' : 'open_new_dashboard';
+};
