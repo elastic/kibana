@@ -57,9 +57,7 @@ describe('Agent policy API handlers', () => {
       jest.spyOn(appContextService, 'getSecurityCore').mockReturnValue({
         authc: { getCurrentUser: jest.fn().mockReturnValue(undefined) },
       } as any);
-      jest
-        .spyOn(appContextService, 'getInternalUserSOClientForSpaceId')
-        .mockReturnValue({} as any);
+      jest.spyOn(appContextService, 'getInternalUserSOClientForSpaceId').mockReturnValue({} as any);
       agentPolicyServiceMock.update.mockResolvedValue({ id: 'policy' } as AgentPolicy);
     });
 
