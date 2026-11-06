@@ -9,14 +9,19 @@ import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
-import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
+import { applyAttachmentToDashboard } from './apply_attachment';
+import type { AppliedAttachmentsStore } from './applied_attachments_store';
+import { canShowAttachmentInDashboard } from './linked_attachment';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  appliedAttachments: AppliedAttachmentsStore;
   upsertAttachment: (attachment: DashboardAttachment) => void;
+  /** Called instead of applying an update that belongs to another dashboard. */
+  onOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
 }
 
 const isDashboardUpdatedUiEvent = (
@@ -31,7 +36,9 @@ const isDashboardUpdatedUiEvent = (
 export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
   api,
+  appliedAttachments,
   upsertAttachment,
+  onOtherDashboardUpdated,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
     .pipe(
@@ -47,12 +54,10 @@ export const createAgentLiveUpdatesSubscription = ({
 
       upsertAttachment(attachment);
 
-      const currentSavedObjectId = api.savedObjectId$.getValue();
-
-      // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
-      if (currentSavedObjectId && attachment.origin !== currentSavedObjectId) {
+      if (!canShowAttachmentInDashboard({ api, store: appliedAttachments, attachment })) {
+        onOtherDashboardUpdated(attachment);
         return;
       }
 
-      api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
+      void applyAttachmentToDashboard({ store: appliedAttachments, api, attachment });
     });
