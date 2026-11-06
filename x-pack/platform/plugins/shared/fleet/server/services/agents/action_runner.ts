@@ -14,6 +14,7 @@ import { isResponseError } from '@kbn/es-errors';
 import moment from 'moment';
 
 import type { Agent } from '../../types';
+import { AgentActionNotFoundError } from '../../errors';
 import { appContextService } from '../app_context';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
@@ -46,9 +47,12 @@ export const PIT_KEEP_ALIVE = '10m';
  * that tie on both fields. The order itself does not matter here, only that it is total.
  *
  * `agent` is optional on `FleetServerAgent`, so this leans on Fleet Server writing `agent.id` on
- * every document it enrolls. Documents missing it would tie on "missing last" and the order would
- * not be total for that group; the field is mapped as a keyword, so such a tie degrades to the
- * same silent skip the default sort has, not to an error.
+ * every document it enrolls — nothing in Kibana creates a `.fleet-agents` document. Several
+ * documents missing it would tie on "missing last", fall back to the point in time's `_shard_doc`
+ * as the default sort does, and could be skipped across a reopen. There is no strictly better key
+ * available here: the document `_id` is the agent id, but sorting on `_id` needs fielddata, which
+ * Elasticsearch disallows by default. The field is mapped as a keyword, so a tie degrades to the
+ * same silent skip the default sort already had, not to an error.
  */
 export const ACTION_SORT_FIELD = 'agent.id';
 export const ACTION_SORT_ORDER = 'asc' as const;
@@ -324,10 +328,15 @@ export abstract class ActionRunner {
    * by a batch.
    *
    * Without this, a batch slower than CHECK_TASK_INTERVAL_MINUTES is indistinguishable from a
-   * dead runner and the watchdog starts a second runner alongside it. The trade-off is that a
-   * runner alive but wedged inside `processAgents` now holds the action indefinitely rather than
-   * being resumed underneath itself; `MAX_CHECK_TASK_RESUMES` and the retry budget bound every
-   * other path, and a resume that duplicates a live runner is the worse of the two outcomes.
+   * dead runner and the watchdog starts a second runner alongside it. A resume racing a live
+   * runner is the worse of the two outcomes, so the heartbeat is the right default.
+   *
+   * The cost is that a runner alive but wedged inside `processAgents` — a hung Elasticsearch call
+   * with no timeout, say — keeps heartbeating, so the watchdog reads it as alive, never resumes,
+   * and never increments `resumeCount` towards `MAX_CHECK_TASK_RESUMES`. That path has no bound
+   * of its own, which is why the check task also stops unconditionally at `MAX_CHECK_TASK_RUNS`.
+   * Such an action stays `IN_PROGRESS`, as it did before this PR; what the ceiling prevents is a
+   * recurring task watching it for the lifetime of the Kibana process.
    */
   private startHeartbeat() {
     if (!this.checkTaskId || this.heartbeatTimer) {
@@ -368,6 +377,10 @@ export abstract class ActionRunner {
    * `UPDATE_TAGS` documents are left out. Those retries restart from scratch behind a kuery that
    * already excludes the agents whose tags were written, so an agent still matching the kuery
    * while appearing in such a document is one whose write did not land, and it has to run again.
+   *
+   * Only "this action has written nothing yet" is swallowed. Any other read failure has to
+   * propagate: deduplication that fails open re-actions every agent of every earlier run, so a
+   * transient Elasticsearch timeout would be far more costly than failing the batch and retrying.
    */
   private async getActionedAgentIds(): Promise<Set<string>> {
     if (this.actionedAgentIds) {
@@ -385,10 +398,28 @@ export abstract class ActionRunner {
         }
       }
     } catch (error) {
-      appContextService.getLogger().debug(error.message); // if action not found, swallow
+      if (!(error instanceof AgentActionNotFoundError)) {
+        throw error;
+      }
+      appContextService
+        .getLogger()
+        .debug(`No action document yet for action ${this.actionParams.actionId}, nothing to skip`);
     }
     this.actionedAgentIds = actionedAgentIds;
     return actionedAgentIds;
+  }
+
+  /**
+   * Whether an error from `processAgents` means the batch held nothing the action could act on,
+   * as opposed to a failure worth retrying. Subclasses that reject such a batch override this.
+   *
+   * It is only consulted for a batch that was partially deduplicated, which is the one case where
+   * the answer is certain: a document covering part of the batch means an earlier run finished
+   * the batch and wrote its error results, so the agents left over are the ones it deliberately
+   * excluded and replaying them cannot produce a different outcome.
+   */
+  protected isBatchWithoutActionableAgents(error: Error): boolean {
+    return false;
   }
 
   /**
@@ -427,17 +458,35 @@ export abstract class ActionRunner {
       // hold the count below `total` so the check task's completion fallback never fires.
       return { actionId: this.actionParams.actionId! };
     }
-    if (remainingAgents.length < agents.length) {
+    if (remainingAgents.length === agents.length) {
+      return await this.processAgents(remainingAgents);
+    }
+
+    appContextService
+      .getLogger()
+      .debug(
+        `Dropping ${
+          agents.length - remainingAgents.length
+        } already actioned agents from a batch of action ${this.actionParams.actionId}`
+      );
+
+    try {
+      return await this.processAgents(remainingAgents);
+    } catch (error) {
+      // An earlier run finished this batch — that is what the document covering part of it means —
+      // so the agents it left out are ones it could not act on: already on the target policy,
+      // hosted, agentless. Replaying them throws the same error every time, which would spend the
+      // whole retry budget on this batch and never reach the agents behind it.
+      if (!this.isBatchWithoutActionableAgents(error)) {
+        throw error;
+      }
       appContextService
         .getLogger()
         .debug(
-          `Dropping ${
-            agents.length - remainingAgents.length
-          } already actioned agents from a batch of action ${this.actionParams.actionId}`
+          `Skipping a replayed batch of action ${this.actionParams.actionId} with no actionable agents left: ${error.message}`
         );
+      return { actionId: this.actionParams.actionId! };
     }
-
-    return await this.processAgents(remainingAgents);
   }
 
   async processAgentsInBatches(): Promise<{ actionId: string }> {
@@ -491,47 +540,50 @@ export abstract class ActionRunner {
     await this.updateCheckpoint();
     this.startHeartbeat();
 
-    try {
-      // Only the first search of a run can be the one Elasticsearch rejects the resumed cursor
-      // on, so it is the only one wrapped: every later page searches with a cursor Elasticsearch
-      // has just handed back, and a failure from a batch's own writes has to stay an ordinary
-      // retryable error rather than restart the action.
-      let res;
+    // Only the first search of a run can be the one Elasticsearch rejects the resumed cursor on,
+    // so it is the only one wrapped: every later page searches with a cursor Elasticsearch has
+    // just handed back, and a failure from a batch's own writes has to stay an ordinary retryable
+    // error rather than restart the action.
+    const getPage = async (isFirstPage: boolean) => {
       try {
-        res = await getAgents();
+        return await getAgents();
       } catch (error) {
-        if (this.retryParams.searchAfter && isResponseError(error) && error.statusCode === 400) {
+        if (
+          isFirstPage &&
+          this.retryParams.searchAfter &&
+          isResponseError(error) &&
+          error.statusCode === 400
+        ) {
           throw new RejectedCheckpointError(error);
         }
         throw error;
       }
+    };
 
-      let currentAgents = res.agents;
-      if (currentAgents.length === 0) {
-        appContextService
-          .getLogger()
-          .debug('currentAgents returned 0 hits, returning from bulk action query');
-        return { actionId: this.actionParams.actionId! }; // stop executing if there are no more results
-      }
-
-      await this.processBatch(currentAgents);
-      let allAgentsProcessed = currentAgents.length;
-      await this.advanceCheckpoint(currentAgents);
-
-      while (allAgentsProcessed < res.total) {
-        const nextPage = await getAgents();
-        currentAgents = nextPage.agents;
-        if (currentAgents.length === 0) {
+    try {
+      let allAgentsProcessed = 0;
+      let total = 0;
+      // One loop for every page, so the point in time is closed on the no-hits exit too rather
+      // than left open for its whole keep alive.
+      for (let isFirstPage = true; isFirstPage || allAgentsProcessed < total; isFirstPage = false) {
+        const page = await getPage(isFirstPage);
+        if (isFirstPage) {
+          total = page.total;
+        }
+        if (page.agents.length === 0) {
           appContextService
             .getLogger()
             .debug('currentAgents returned 0 hits, returning from bulk action query');
           break; // stop executing if there are no more results
         }
-        await this.processBatch(currentAgents);
-        allAgentsProcessed += currentAgents.length;
-        await this.advanceCheckpoint(currentAgents);
+        await this.processBatch(page.agents);
+        allAgentsProcessed += page.agents.length;
+        await this.advanceCheckpoint(page.agents);
       }
 
+      // Closed on the way out of a finished run only, not in the `finally`: a run that throws
+      // hands its point in time to the retry, which resumes the cursor against the very point in
+      // time that produced it. One that is never resumed expires on its own keep alive.
       if (this.retryParams.pitId) {
         await closePointInTime(this.esClient, this.retryParams.pitId);
       }

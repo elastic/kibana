@@ -12,6 +12,7 @@ import type {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 
 import { appContextService } from '../app_context';
@@ -28,6 +29,7 @@ import type { BulkActionCheckTaskState, RetryParams } from './retry_helper';
 import {
   CHECK_TASK_INTERVAL_MINUTES,
   MAX_CHECK_TASK_RESUMES,
+  MAX_CHECK_TASK_RUNS,
   getRetryParams,
 } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
@@ -259,29 +261,46 @@ export class BulkActionsResolver {
   }
 
   /**
-   * Whether a task document exists. Used by the check task to tell a retry that is already queued
-   * from an action that nothing is going to pick up: `ensureScheduled` is a no-op on an id that
-   * already exists, so resuming into one would do nothing while still spending a resume attempt.
+   * A task document's status, or undefined when there is none. Used by the check task to tell a
+   * retry that is still going to run from one that is only taking up its id: `ensureScheduled` is
+   * a no-op on an id that already exists, so a task left behind in a terminal status has to be
+   * removed before a resume can be scheduled under it.
    */
-  public async taskExists(taskId: string): Promise<boolean> {
+  public async getTaskStatus(taskId: string): Promise<TaskStatus | undefined> {
     if (!this.taskManager) {
-      return false;
+      return undefined;
     }
     try {
-      return !!(await this.taskManager.get(taskId));
+      return (await this.taskManager.get(taskId))?.status;
     } catch (error) {
       // A missing task throws a 404 from the saved objects client; anything else is also safest
       // read as "cannot tell", which lets the caller go ahead and schedule.
-      return false;
+      return undefined;
     }
   }
 }
+
+/**
+ * Statuses that mean a scheduled task is still going to run. These task types are registered with
+ * `maxAttempts: 1`, so a retry task whose run threw or expired is left `Failed` and will never
+ * run again; treating that as queued would stop the watchdog resuming the action while also never
+ * incrementing `resumeCount`, so nothing would ever bound it.
+ */
+const PENDING_TASK_STATUSES: readonly TaskStatus[] = [
+  TaskStatus.Idle,
+  TaskStatus.Claiming,
+  TaskStatus.Running,
+];
 
 /**
  * Liveness probe against `.fleet-actions`: whether a document for this action was written within
  * the given window. Only ever used as a positive signal that a runner is alive, never to conclude
  * that an action is finished — runners do not all write exactly one document per batch, and
  * rollback writes its documents under its own action ids rather than the runner's.
+ *
+ * A runner on this code heartbeats the checkpoint, which is a stronger and cheaper signal, so
+ * this is now mainly here for a check task created before the heartbeat existed: its runner
+ * writes nothing between batches, and an action document is the only sign it is still alive.
  */
 const hasRecentActionDoc = async (
   esClient: ElasticsearchClient,
@@ -344,10 +363,15 @@ const runCheckTask = async (
    * handled here, and bulkUpdateSchedules only updates Idle tasks, so `ensureScheduled` from the
    * resumed runner cannot do it.
    */
+  const runCount = (state.runCount ?? 0) + 1;
   const withWatcherFields = async (
     fields: Partial<BulkActionCheckTaskState>
   ): Promise<CheckTaskRunResult> => ({
-    state: { ...((await resolver?.getCheckTaskState(taskInstance.id)) ?? state), ...fields },
+    state: {
+      ...((await resolver?.getCheckTaskState(taskInstance.id)) ?? state),
+      runCount,
+      ...fields,
+    },
     schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` },
   });
 
@@ -363,16 +387,36 @@ const runCheckTask = async (
     return deleteSelf();
   }
 
+  // Unconditional ceiling, checked before anything that could make this run look alive. Every
+  // other limit here only bounds a path that resumes, and a runner wedged inside `processAgents`
+  // keeps heartbeating, so it is read as alive forever and never reaches one. Without this the
+  // watchdog would outlive the action for as long as Kibana runs.
+  if (runCount > MAX_CHECK_TASK_RUNS) {
+    logger.warn(
+      `Bulk action ${actionId} has not completed after ${MAX_CHECK_TASK_RUNS} check task runs (${
+        state.nbAgentsProcessed ?? 0
+      }/${total} agents), removing check task ${taskInstance.id} and giving up on it`
+    );
+    return deleteSelf();
+  }
+
   if (!resolver) {
     logger.warn(`Cannot resume bulk action ${actionId}, the bulk actions resolver is unavailable`);
-    return { state, schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` } };
+    return await withWatcherFields({});
   }
 
   const hasRecentBatch = await hasRecentActionDoc(esClient, actionId, CHECK_TASK_INTERVAL_MINUTES);
+  const retryTaskId = resolver.getTaskId(actionId, taskInstance.taskType);
+  const retryTaskStatus = await resolver.getTaskStatus(retryTaskId);
+  const hasPendingRetryTask = !!retryTaskStatus && PENDING_TASK_STATUSES.includes(retryTaskStatus);
 
-  // Re-read the state after the probe above rather than deciding on the state claimed at the
-  // start of this run. A live runner heartbeats every RUNNER_HEARTBEAT_INTERVAL_MINUTES, and a
-  // heartbeat landing during the probe would otherwise be missed and earn it a second runner.
+  // Read the state last, after every other round trip, rather than deciding on the state claimed
+  // at the start of this run. A live runner heartbeats every RUNNER_HEARTBEAT_INTERVAL_MINUTES,
+  // and a heartbeat landing during one of those reads would otherwise be missed and earn it a
+  // second runner. A heartbeat landing after this read still cannot stop the scheduling below;
+  // closing that last window needs a conditional claim on the task document, which Task Manager's
+  // state API does not offer. What survives it is one duplicated boundary batch, which
+  // `processBatch` deduplicates per agent.
   const freshState = (await resolver.getCheckTaskState(taskInstance.id)) ?? state;
   const { checkpointUpdatedAt } = freshState;
   const checkpointMoved =
@@ -383,8 +427,8 @@ const runCheckTask = async (
     return await withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt });
   }
 
-  // Re-check completion against the fresh state: the runner may have finished during the probe,
-  // and its own removal of this task races with the return value below.
+  // Re-check completion against the fresh state: the runner may have finished during the reads
+  // above, and its own removal of this task races with the return value below.
   if (total !== undefined && (freshState.nbAgentsProcessed ?? 0) >= total) {
     logger.debug(
       `Bulk action ${actionId} is complete (${freshState.nbAgentsProcessed}/${total} agents), removing check task ${taskInstance.id}`
@@ -392,14 +436,12 @@ const runCheckTask = async (
     return deleteSelf();
   }
 
-  const retryTaskId = resolver.getTaskId(actionId, taskInstance.taskType);
-
-  // A retry task under this id is already going to restart the action, and `ensureScheduled`
-  // would be a no-op on it, so resuming into it would log a resume and spend an attempt without
-  // scheduling anything.
-  if (await resolver.taskExists(retryTaskId)) {
+  // A retry task that is still going to run will restart the action by itself, and
+  // `ensureScheduled` would be a no-op on its id, so resuming into it would log a resume and
+  // spend an attempt without scheduling anything.
+  if (hasPendingRetryTask) {
     logger.debug(
-      `Bulk action ${actionId} already has a retry task queued as ${retryTaskId}, not resuming`
+      `Bulk action ${actionId} already has a retry task queued as ${retryTaskId} (${retryTaskStatus}), not resuming`
     );
     return await withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt });
   }
@@ -452,6 +494,15 @@ const runCheckTask = async (
   // while Task Manager is persisting the state returned below, and gives the resume the same
   // scheduling and failure handling as an ordinary retry.
   try {
+    // A retry task left behind in a terminal status (Failed, after its single attempt threw or
+    // expired) still owns its id, and `ensureScheduled` would silently do nothing. Clear it first
+    // so the resume below actually creates a task.
+    if (retryTaskStatus) {
+      logger.debug(
+        `Removing the ${retryTaskStatus} retry task ${retryTaskId} of bulk action ${actionId} before resuming it`
+      );
+      await resolver.removeIfExists(retryTaskId);
+    }
     await resolver.run(
       actionParams,
       { ...retryParams, retryCount: 1, taskId: retryTaskId },
@@ -500,8 +551,11 @@ export function createRetryTask(
           logger.error(`Bulk action check task ${taskInstance.id} failed: ${error.message}`, {
             error,
           });
+          const state: BulkActionCheckTaskState = taskInstance.state ?? {};
           return {
-            state: taskInstance.state ?? {},
+            // The run still counts towards MAX_CHECK_TASK_RUNS, or a check task whose every run
+            // throws would never reach the ceiling that is meant to be unconditional.
+            state: { ...state, runCount: (state.runCount ?? 0) + 1 },
             schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` },
           };
         }

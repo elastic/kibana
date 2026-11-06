@@ -40,6 +40,15 @@ export const RUNNER_HEARTBEAT_INTERVAL_MINUTES = 2;
  */
 export const MAX_CHECK_TASK_RESUMES = 20;
 
+/**
+ * Absolute ceiling on how many times the check task may run for one action, whatever it observes.
+ * `MAX_CHECK_TASK_RESUMES` only bounds the paths that resume, and a runner wedged inside
+ * `processAgents` keeps heartbeating, so it looks alive forever and never trips that limit. This
+ * stops the watchdog outliving any plausible action: 24 hours at the default interval, against an
+ * action the issue measures in minutes at 100k agents.
+ */
+export const MAX_CHECK_TASK_RUNS = (24 * 60) / CHECK_TASK_INTERVAL_MINUTES;
+
 export interface RetryParams {
   pitId?: string;
   searchAfter?: SortResults;
@@ -75,6 +84,8 @@ export interface BulkActionCheckTaskState {
   checkpointUpdatedAt?: string;
   lastObservedCheckpointAt?: string;
   resumeCount?: number;
+  /** How many times the check task has run for this action, bounded by MAX_CHECK_TASK_RUNS. */
+  runCount?: number;
 }
 
 export function getRetryParams(taskType: string, retryParams: RetryParams): RetryParams {

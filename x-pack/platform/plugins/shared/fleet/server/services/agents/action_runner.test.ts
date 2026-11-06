@@ -10,6 +10,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Agent } from '../../types';
+import { AgentActionNotFoundError } from '../../errors';
 import { appContextService } from '../app_context';
 
 import {
@@ -20,7 +21,7 @@ import {
 } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentActions } from './actions';
-import { getAgentsByKuery, openPointInTime } from './crud';
+import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
 import {
   CHECK_TASK_INTERVAL_MINUTES,
   MAX_RETRY_COUNT,
@@ -36,6 +37,7 @@ jest.mock('../spaces/agent_namespaces', () => ({
 
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockedOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
+const mockedClosePointInTime = closePointInTime as jest.MockedFunction<typeof closePointInTime>;
 const mockedGetAgentActions = getAgentActions as jest.MockedFunction<typeof getAgentActions>;
 
 const logger = loggerMock.create();
@@ -52,6 +54,8 @@ class TestActionRunner extends ActionRunner {
   public failFromBatch = 0;
   /** Held by a batch that is still in flight, to exercise the heartbeat. */
   public batchInFlight?: Promise<void>;
+  /** Makes `processAgentsError` read as "nothing in this batch was actionable". */
+  public batchWithoutActionableAgents = false;
 
   protected getActionType() {
     return 'test-action';
@@ -59,6 +63,10 @@ class TestActionRunner extends ActionRunner {
 
   protected getTaskType() {
     return TASK_TYPE;
+  }
+
+  protected isBatchWithoutActionableAgents(): boolean {
+    return this.batchWithoutActionableAgents;
   }
 
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -516,6 +524,32 @@ describe('ActionRunner', () => {
       expect(RUNNER_HEARTBEAT_INTERVAL_MINUTES).toBeLessThan(CHECK_TASK_INTERVAL_MINUTES);
     });
 
+    it('closes the point in time when the search comes back empty', async () => {
+      // the early return used to skip the close, leaving the point in time open for its whole
+      // keep alive on every action whose kuery matches nothing
+      mockedGetAgentsByKuery.mockResolvedValue({
+        agents: [],
+        total: 0,
+        page: 1,
+        perPage: 2,
+      } as Awaited<ReturnType<typeof getAgentsByKuery>>);
+
+      await createRunner().runActionAsyncWithRetry();
+
+      expect(mockedClosePointInTime).toHaveBeenCalledWith(esClient, 'stale-pit');
+    });
+
+    it('leaves the point in time open for the retry when a batch fails', async () => {
+      mockAgentPages(2, 2);
+      const runner = createRunner();
+      runner.processAgentsError = new Error('batch failed');
+
+      await runner.runActionAsyncWithRetry();
+
+      // the retry resumes the cursor against the very point in time that produced it
+      expect(mockedClosePointInTime).not.toHaveBeenCalled();
+    });
+
     it('pages on a unique sort key, so a checkpoint survives a new point in time', async () => {
       mockAgentPages(2, 2);
 
@@ -622,6 +656,86 @@ describe('ActionRunner', () => {
       // the retry's kuery already excludes the agents whose tags were written, so an agent that
       // still matches it has to run again
       expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
+    });
+
+    it('fails the batch when the actioned agents cannot be read, rather than deduping nothing', async () => {
+      mockAgentPages(2, 2);
+      // deduplication that fails open re-actions every agent of every earlier run, which is far
+      // worse than failing this batch and retrying it
+      mockedGetAgentActions.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      const runner = createRunner();
+      await runner.runActionAsyncWithRetry();
+
+      expect(runner.processedBatches).toEqual([]);
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
+    it('treats an unknown action id as nothing to skip', async () => {
+      mockAgentPages(1, 2);
+      mockedGetAgentActions.mockRejectedValue(new AgentActionNotFoundError('Action not found'));
+
+      const runner = createRunner({ total: 2 });
+      await runner.runActionAsyncWithRetry();
+
+      expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
+      expect(resolver.run).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
+    it('skips a replayed batch whose remaining agents are ones the action cannot act on', async () => {
+      mockAgentPages(1, 2);
+      // the earlier run finished this batch: it actioned agent-0 and excluded agent-1, which is
+      // why only agent-0 is in the document
+      mockedGetAgentActions.mockResolvedValue([
+        { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
+      ] as any);
+
+      const runner = createRunner({ total: 2 });
+      runner.batchWithoutActionableAgents = true;
+      runner.processAgentsError = new Error('No agents to reassign');
+
+      await runner.runActionAsyncWithRetry();
+
+      // replaying agent-1 throws the same error every time, which would spend the whole retry
+      // budget on this batch and never reach the agents behind it
+      expect(resolver.run).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ nbAgentsProcessed: 2 })
+      );
+    });
+
+    it('does not swallow that error for a batch that was not replayed', async () => {
+      mockAgentPages(1, 2);
+      // nothing of this batch has been actioned, so there is no evidence an earlier run already
+      // decided these agents were not actionable
+      const runner = createRunner({ total: 2 });
+      runner.batchWithoutActionableAgents = true;
+      runner.processAgentsError = new Error('No agents to reassign');
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
     });
 
     it('does not look for actioned agents on a first attempt', async () => {

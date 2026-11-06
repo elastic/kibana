@@ -12,13 +12,18 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { appContextService } from '../app_context';
 
 import { BulkActionsResolver, createRetryTask } from './bulk_actions_resolver';
 import { BulkActionTaskType } from './bulk_action_types';
-import { CHECK_TASK_INTERVAL_MINUTES, MAX_CHECK_TASK_RESUMES } from './retry_helper';
+import {
+  CHECK_TASK_INTERVAL_MINUTES,
+  MAX_CHECK_TASK_RESUMES,
+  MAX_CHECK_TASK_RUNS,
+} from './retry_helper';
 
 const logger = loggerMock.create();
 
@@ -161,17 +166,17 @@ describe('BulkActionsResolver', () => {
     });
   });
 
-  describe('taskExists', () => {
-    it('is true for a task that exists', async () => {
-      taskManager.get.mockResolvedValue({ id: 'task1' } as any);
+  describe('getTaskStatus', () => {
+    it('returns the status of a task that exists', async () => {
+      taskManager.get.mockResolvedValue({ id: 'task1', status: TaskStatus.Idle } as any);
 
-      await expect(resolver.taskExists('task1')).resolves.toBe(true);
+      await expect(resolver.getTaskStatus('task1')).resolves.toEqual(TaskStatus.Idle);
     });
 
-    it('is false when the task cannot be read, so the caller still schedules', async () => {
+    it('is undefined when the task cannot be read, so the caller still schedules', async () => {
       taskManager.get.mockRejectedValue(new Error('Saved object not found'));
 
-      await expect(resolver.taskExists('task1')).resolves.toBe(false);
+      await expect(resolver.getTaskStatus('task1')).resolves.toBeUndefined();
     });
   });
 });
@@ -182,7 +187,7 @@ describe('createRetryTask', () => {
   let resolver: {
     removeIfExists: jest.Mock;
     getCheckTaskState: jest.Mock;
-    taskExists: jest.Mock;
+    getTaskStatus: jest.Mock;
     getTaskId: jest.Mock;
     run: jest.Mock;
   };
@@ -227,7 +232,7 @@ describe('createRetryTask', () => {
     resolver = {
       removeIfExists: jest.fn(),
       getCheckTaskState: jest.fn(),
-      taskExists: jest.fn().mockResolvedValue(false),
+      getTaskStatus: jest.fn().mockResolvedValue(undefined),
       getTaskId: jest.fn((actionId: string, type: string) => `${type}:${actionId}`),
       run: jest.fn(),
     };
@@ -402,6 +407,7 @@ describe('createRetryTask', () => {
           nbAgentsProcessed: 40000,
           checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
           lastObservedCheckpointAt: '2026-10-16T18:50:00.000Z',
+          runCount: 1,
         },
         schedule: CHECK_TASK_SCHEDULE,
       });
@@ -433,7 +439,7 @@ describe('createRetryTask', () => {
     it('does not resume into a retry task that is already queued', async () => {
       // ensureScheduled is a no-op on an id that already exists, so this would log a resume and
       // spend an attempt without scheduling anything
-      resolver.taskExists.mockResolvedValue(true);
+      resolver.getTaskStatus.mockResolvedValue(TaskStatus.Idle);
 
       const result = await createRetryTask(
         createTaskInstance({
@@ -447,7 +453,7 @@ describe('createRetryTask', () => {
         jest.fn()
       ).run();
 
-      expect(resolver.taskExists).toHaveBeenCalledWith(RETRY_TASK_ID);
+      expect(resolver.getTaskStatus).toHaveBeenCalledWith(RETRY_TASK_ID);
       expect(resolver.run).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({ state: expect.not.objectContaining({ resumeCount: 1 }) })
@@ -648,6 +654,56 @@ describe('createRetryTask', () => {
       );
     });
 
+    it('clears a failed retry task before resuming, since ensureScheduled would no-op on it', async () => {
+      // these task types are registered with maxAttempts: 1, so a retry task whose run threw or
+      // expired is left Failed and will never run again while still owning its id
+      resolver.getTaskStatus.mockResolvedValue(TaskStatus.Failed);
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['lastAgent'], ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.removeIfExists).toHaveBeenCalledWith(RETRY_TASK_ID);
+      expect(resolver.run).toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({ state: expect.objectContaining({ resumeCount: 1 }) })
+      );
+    });
+
+    it('stops watching an action that never completes, however alive it looks', async () => {
+      // a runner wedged inside processAgents keeps heartbeating, so it is read as alive forever
+      // and no resume limit is ever reached; without this ceiling the task recurs indefinitely
+      mockRecentBatch(true);
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { runCount: MAX_CHECK_TASK_RUNS, nbAgentsProcessed: 20000 } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.run).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`has not completed after ${MAX_CHECK_TASK_RUNS} check task runs`)
+      );
+    });
+
+    it('counts every run towards the ceiling, including ones that resume nothing', async () => {
+      mockRecentBatch(true);
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { runCount: 7, ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(result).toEqual(
+        expect.objectContaining({ state: expect.objectContaining({ runCount: 8 }) })
+      );
+    });
+
     it('stops resuming after MAX_CHECK_TASK_RESUMES attempts', async () => {
       const result = await createRetryTask(
         createTaskInstance({ state: { resumeCount: MAX_CHECK_TASK_RESUMES } }),
@@ -682,12 +738,17 @@ describe('createRetryTask', () => {
       esClient.search.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
 
       const result = await createRetryTask(
-        createTaskInstance({ state: { resumeCount: 3 } }),
+        createTaskInstance({ state: { resumeCount: 3, runCount: 4 } }),
         getDeps,
         jest.fn()
       ).run();
 
-      expect(result).toEqual({ state: { resumeCount: 3 }, schedule: CHECK_TASK_SCHEDULE });
+      // the run still counts towards the ceiling, or a check task whose every run throws would
+      // never reach a limit that is meant to be unconditional
+      expect(result).toEqual({
+        state: { resumeCount: 3, runCount: 5 },
+        schedule: CHECK_TASK_SCHEDULE,
+      });
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('check task'),
         expect.anything()
