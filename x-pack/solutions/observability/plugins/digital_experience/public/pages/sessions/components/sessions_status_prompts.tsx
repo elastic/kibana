@@ -12,6 +12,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { httpErrorMessage } from '../../../utils/http_error_message';
 
 const ASK_ADMIN_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askAdminText', {
   defaultMessage:
@@ -28,7 +29,7 @@ const EnableError = ({ error }: { error: Error }) => (
       title={i18n.translate('xpack.digitalExperience.sessions.status.enableErrorTitle', {
         defaultMessage: 'Could not set up sessions',
       })}
-      text={error.message}
+      text={httpErrorMessage(error)}
     />
   </>
 );

@@ -328,14 +328,17 @@ describe('SessionsTab', () => {
     const respond = mockFetch.getMockImplementation();
     mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {
       if (endpoint === ENABLE_ENDPOINT) {
-        throw new Error('Could not enable sessions.');
+        // As Kibana's HTTP client fails: the status text as the message, the route's in the body.
+        throw Object.assign(new Error('Forbidden'), {
+          body: { statusCode: 403, message: 'Missing privileges: cluster:manage_transform' },
+        });
       }
       return respond?.(endpoint, ...rest);
     });
     renderTab();
 
     expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
-      'Could not enable sessions.'
+      'Missing privileges: cluster:manage_transform'
     );
   });
 
