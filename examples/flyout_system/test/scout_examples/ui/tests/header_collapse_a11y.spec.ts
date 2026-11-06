@@ -159,6 +159,7 @@ test.describe(
 
         // The panel is portalled, so collapsing would leave it floating over a hidden trigger.
         await app.wheelOverHeader(form, session, WHEEL_DELTA);
+        await app.waitForCollapseEvaluation(form, session);
         await expect(region).not.toHaveAttribute('aria-hidden', 'true');
         await expect(popover).toBeVisible();
 
