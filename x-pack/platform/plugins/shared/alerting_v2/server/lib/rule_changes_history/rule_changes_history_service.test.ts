@@ -66,6 +66,14 @@ describe('RuleChangesHistoryService', () => {
       expect(opts).toMatchObject({ correlationId: 'corr-1' });
     });
 
+    it('passes refresh through to logBulk only when it is provided', async () => {
+      await service.logRuleChanges({ ...baseParams, refresh: 'wait_for' });
+      await service.logRuleChanges(baseParams);
+
+      expect(clientMock.logBulk.mock.calls[0][1]).toMatchObject({ refresh: 'wait_for' });
+      expect(clientMock.logBulk.mock.calls[1][1]).not.toHaveProperty('refresh');
+    });
+
     it('omits correlationId when it is not provided', async () => {
       await service.logRuleChanges(baseParams);
 

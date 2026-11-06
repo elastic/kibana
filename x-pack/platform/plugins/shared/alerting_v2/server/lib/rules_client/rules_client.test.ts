@@ -32,6 +32,7 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import type { CreateRulesClientOptions } from './types';
+import type { RuleChangesHistoryEventLogger } from '../events/rule_changes_history_subscriber/rule_changes_history_event_logger';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -100,6 +101,7 @@ describe('RulesClient', () => {
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
   let artifactTypeRegistry: ArtifactTypeRegistry;
+  let changeHistoryEventLogger: jest.Mocked<Pick<RuleChangesHistoryEventLogger, 'log'>>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -112,6 +114,7 @@ describe('RulesClient', () => {
     artifactTypeRegistry = new ArtifactTypeRegistry();
     registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
+    changeHistoryEventLogger = { log: jest.fn().mockResolvedValue(undefined) };
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
     jest.spyOn(ruleEventPublisher, 'emitRuleDeleted');
@@ -183,7 +186,8 @@ describe('RulesClient', () => {
       loggerService,
       artifactTypeRegistry,
       'user',
-      rulesClientOptions
+      rulesClientOptions,
+      changeHistoryEventLogger as unknown as RuleChangesHistoryEventLogger
     );
   }
 
@@ -1747,6 +1751,22 @@ describe('RulesClient', () => {
         expect(res.created).toBe(false);
       });
 
+      it('leaves the change-history write to the event subscriber', async () => {
+        const client = createClient();
+        const existingDoc = { id: 'rule-id-1', attributes: baseSoAttrs, version: 'WzEsMV0=' };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(changeHistoryEventLogger.log).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
+          expect.not.objectContaining({ changeHistoryLogged: expect.anything() }),
+        ]);
+      });
+
       it('keeps the existing template', async () => {
         const client = createClient();
         const existingDoc = {
@@ -2024,6 +2044,155 @@ describe('RulesClient', () => {
       });
 
       expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('restoreRule', () => {
+    const snapshot = {
+      ...baseCreateData,
+      metadata: { name: 'restored' },
+      id: 'rule-id-1',
+      version: 2,
+      enabled: true,
+      created_by: { profile_uid: 'snapshot-creator' },
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_by: { profile_uid: 'snapshot-updater' },
+      updated_at: '2024-02-01T00:00:00.000Z',
+    };
+
+    const mockExistingRule = (overrides: Partial<RuleSavedObjectAttributes> = {}) => {
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-1',
+        attributes: {
+          ...baseSoAttrs,
+          version: 5,
+          enabled: false,
+          createdBy: { profile_uid: 'current-creator' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+          metadata: { name: 'current', template: { id: 'template-1' } },
+          ...overrides,
+        },
+        version: 'WzEsMV0=',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+    };
+
+    it('applies the snapshot configuration, bumps the version and keeps enabled, creation and template', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      const rule = await client.restoreRule({ id: 'rule-id-1', snapshot });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
+        id: 'rule-id-1',
+        attrs: expect.objectContaining({
+          metadata: expect.objectContaining({ name: 'restored', template: { id: 'template-1' } }),
+          version: 6,
+          enabled: false,
+          createdBy: { profile_uid: 'current-creator' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+          updatedBy: { profile_uid: 'elastic_profile_uid' },
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        version: 'WzEsMV0=',
+        references: [],
+      });
+      expect(rule).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-1',
+          version: 6,
+          enabled: false,
+          metadata: expect.objectContaining({ name: 'restored' }),
+        })
+      );
+      expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
+        expect.objectContaining({ ruleId: 'rule-id-1', rule, changeHistoryLogged: true }),
+      ]);
+    });
+
+    it('writes its change-history entry and waits for it to be searchable before emitting', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      const rule = await client.restoreRule({ id: 'rule-id-1', snapshot });
+
+      expect(changeHistoryEventLogger.log).toHaveBeenCalledWith(
+        {
+          type: 'rule.updated',
+          payload: { ruleId: 'rule-id-1', spaceId: 'space-1', rule },
+        },
+        expect.objectContaining({ request }),
+        { refresh: 'wait_for' }
+      );
+      expect(changeHistoryEventLogger.log.mock.invocationCallOrder[0]).toBeLessThan(
+        jest.mocked(ruleEventPublisher.emitRuleUpdated).mock.invocationCallOrder[0]
+      );
+    });
+
+    it('restores when current_version matches the current version', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      await client.restoreRule({ id: 'rule-id-1', snapshot, currentVersion: 5 });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('compares current_version against the reported version of a rule without a stored counter', async () => {
+      const client = createClient();
+      mockExistingRule({ version: undefined });
+
+      await client.restoreRule({ id: 'rule-id-1', snapshot, currentVersion: 1 });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws RULE_VERSION_CONFLICT when current_version is stale', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      await expect(
+        client.restoreRule({ id: 'rule-id-1', snapshot, currentVersion: 4 })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT },
+      });
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws RULE_NOT_FOUND when the rule was deleted', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+      );
+
+      await expect(client.restoreRule({ id: 'rule-id-1', snapshot })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND },
+      });
+    });
+
+    it('throws INVALID_RULE_DATA when the snapshot has keys the current schema does not know', async () => {
+      const client = createClient();
+
+      await expect(
+        client.restoreRule({ id: 'rule-id-1', snapshot: { ...snapshot, future_field: true } })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA, details: { context: 'restore' } },
+      });
+      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+    });
+
+    it('throws IMMUTABLE_FIELDS_CHANGED when the snapshot kind differs from the rule', async () => {
+      const client = createClient();
+      mockExistingRule({ kind: 'signal', recovery: undefined, no_data: undefined });
+
+      await expect(client.restoreRule({ id: 'rule-id-1', snapshot })).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED },
+      });
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
   });
 

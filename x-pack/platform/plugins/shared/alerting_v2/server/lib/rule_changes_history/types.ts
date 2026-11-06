@@ -46,4 +46,6 @@ export interface LogRuleChangesParams {
   eventType?: RuleChangesHistoryEventType;
   /** Shared id linking entries written by the same (bulk) operation. */
   correlationId?: string;
+  /** Waits for the entries to be searchable before resolving. */
+  refresh?: 'wait_for';
 }

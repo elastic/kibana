@@ -52,7 +52,9 @@ import {
   getRuleAlreadyExistsMessage,
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
+  type RuleValidationContext,
 } from '../errors/rule_error_messages';
+import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import {
   bulkScheduleRuleExecutorTasks,
   ensureRuleExecutorTaskScheduled,
@@ -62,6 +64,8 @@ import type { AlertingPublisherContext } from '../events/domain_events';
 import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
+import { RULE_UPDATED_EVENT_TYPE } from '../events/rule_event_publisher/events';
+import { RuleChangesHistoryEventLogger } from '../events/rule_changes_history_subscriber/rule_changes_history_event_logger';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -114,6 +118,7 @@ import {
   bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
+  toRestoreRuleData,
 } from './utils';
 
 const withApm = withApmDecorator('RulesClient');
@@ -240,7 +245,9 @@ export class RulesClient {
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(EventOriginActorToken) actor: EventOriginActor,
-    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
+    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions,
+    @inject(RuleChangesHistoryEventLogger)
+    private readonly changeHistoryEventLogger: RuleChangesHistoryEventLogger
   ) {
     this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
     this.config = pluginConfigAccessor.get<PluginConfig>();
@@ -350,11 +357,7 @@ export class RulesClient {
     }
   }
 
-  private parseRuleData<T>(
-    schema: z.ZodType<T>,
-    data: unknown,
-    context: 'create' | 'update' | 'upsert'
-  ): T {
+  private parseRuleData<T>(schema: z.ZodType<T>, data: unknown, context: RuleValidationContext): T {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
@@ -1949,6 +1952,42 @@ export class RulesClient {
       return { rule, created: true };
     }
 
+    const rule = await this.replaceExistingRule({ id, parsed });
+    return { rule, created: false };
+  }
+
+  /**
+   * Replaces the rule's configuration with a change-history snapshot. The
+   * current `enabled` state is kept and the version is bumped. Resolves once
+   * the restore's change-history entry is searchable.
+   */
+  @withApm
+  public async restoreRule({
+    id,
+    snapshot,
+    currentVersion,
+  }: {
+    id: string;
+    snapshot: Record<string, unknown>;
+    currentVersion?: number;
+  }): Promise<RuleResponse> {
+    const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
+
+    return this.replaceExistingRule({ id, parsed, currentVersion, awaitChangeHistory: true });
+  }
+
+  private async replaceExistingRule({
+    id,
+    parsed,
+    currentVersion,
+    awaitChangeHistory = false,
+  }: {
+    id: string;
+    parsed: PutRuleData;
+    currentVersion?: number;
+    awaitChangeHistory?: boolean;
+  }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1957,6 +1996,16 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
+
+    if (
+      currentVersion !== undefined &&
+      currentVersion !== (existingAttrs.version ?? RULE_VERSION_FALLBACK)
+    ) {
+      throw Boom.conflict(getRuleVersionConflictMessage(id), {
+        code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
+        details: { rule_id: id },
+      });
+    }
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
@@ -2001,14 +2050,26 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    if (awaitChangeHistory) {
+      await this.changeHistoryEventLogger.log(
+        {
+          type: RULE_UPDATED_EVENT_TYPE,
+          payload: { ruleId: rule.id, spaceId: this.spaceId, rule },
+        },
+        this.eventContext,
+        { refresh: 'wait_for' }
+      );
+    }
+
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
         ruleId: rule.id,
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        ...(awaitChangeHistory ? { changeHistoryLogged: true } : {}),
       },
     ]);
-    return { rule, created: false };
+    return rule;
   }
 }

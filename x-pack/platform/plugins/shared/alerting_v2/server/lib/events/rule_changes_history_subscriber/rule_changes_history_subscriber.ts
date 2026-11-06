@@ -6,17 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { CoreStart } from '@kbn/core-di-server';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import {
-  RuleChangesHistoryServiceToken,
-  type RuleChangesHistoryServiceContract,
-} from '../../rule_changes_history';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import {
   AlertingDomainEventBusToken,
@@ -25,16 +18,13 @@ import {
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
 import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
+import { RuleChangesHistoryEventLogger } from './rule_changes_history_event_logger';
 
 /**
  * Singleton bus subscriber that logs rule-lifecycle domain events to the rule
- * changes-history data stream via {@link RuleChangesHistoryServiceContract}.
- *
- * The event carries the domain rule (`rule`) which becomes the change-history
- * snapshot; the change author is resolved here from the publishing request.
- * Events without a `rule` (e.g. the bulk-delete fallback where the pre-delete
- * state could not be read) are skipped since there is nothing orderable to
- * persist.
+ * changes-history data stream via {@link RuleChangesHistoryEventLogger}.
+ * Events whose publisher already logged them (`changeHistoryLogged`) are
+ * skipped.
  */
 @injectable()
 export class RuleChangesHistorySubscriber {
@@ -45,10 +35,8 @@ export class RuleChangesHistorySubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
-    @inject(RuleChangesHistoryServiceToken)
-    private readonly changeHistory: RuleChangesHistoryServiceContract,
-    @inject(CoreStart('userProfile'))
-    private readonly userProfile: UserProfileServiceStart,
+    @inject(RuleChangesHistoryEventLogger)
+    private readonly eventLogger: RuleChangesHistoryEventLogger,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('events');
@@ -83,41 +71,10 @@ export class RuleChangesHistorySubscriber {
   }
 
   async #dispatch(event: RuleEvent, context: AlertingPublisherContext): Promise<void> {
-    const { ruleId, spaceId, rule, correlationId } = event.payload;
-
-    // Nothing orderable to log without the domain rule and its version sequence.
-    if (!rule) {
+    if (event.payload.changeHistoryLogged) {
       return;
     }
-    const sequence = rule.version;
 
-    const { action, eventType } = RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP[event.type];
-
-    try {
-      const profile = await this.userProfile.getCurrent({ request: context.request });
-      const author = {
-        uid: profile?.uid ?? null,
-        username: profile?.user.username ?? null,
-      };
-
-      await this.changeHistory.logRuleChanges({
-        spaceId,
-        author,
-        entries: [{ id: ruleId, snapshot: rule, sequence }],
-        action,
-        eventType,
-        correlationId,
-      });
-    } catch (err) {
-      this.logger.error({
-        error: err,
-        code: ALERTING_LOG_CODES.EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED,
-        labels: {
-          event_type: event.type,
-          rule_id: ruleId,
-          space_id: spaceId,
-        },
-      });
-    }
+    await this.eventLogger.log(event, context);
   }
 }

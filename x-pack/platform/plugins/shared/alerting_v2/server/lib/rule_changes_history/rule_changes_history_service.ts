@@ -60,6 +60,7 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
     timestamp = new Date(),
     eventType,
     correlationId,
+    refresh,
   }: LogRuleChangesParams): Promise<void> {
     if (entries.length === 0) {
       return;
@@ -83,6 +84,7 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
         userProfileId: author.uid ?? undefined,
         ...(correlationId ? { correlationId } : {}),
         ...(data ? { data } : {}),
+        ...(refresh ? { refresh } : {}),
       });
     } catch (error) {
       this.logger.warn(`Unable to log rule changes history for action "${action}": ${error}`);

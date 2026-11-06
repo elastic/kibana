@@ -31,6 +31,7 @@ export { RuleChangesHistoryService } from './rule_changes_history_service';
 export type {
   GetRuleChangeArgs,
   ListRuleChangesArgs,
+  RuleChangeSnapshot,
   RuleChangesHistoryClientContract,
 } from './rule_changes_history_client';
 export { RuleChangesHistoryClient } from './rule_changes_history_client';

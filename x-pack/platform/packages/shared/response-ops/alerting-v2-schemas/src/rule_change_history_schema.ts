@@ -59,6 +59,24 @@ export const getRuleChangeHistoryEventParamsSchema = lazySchema(() =>
 );
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
+/** Path params for `POST …/change_history/rules/{change_id}/_restore`. */
+export const restoreRuleChangeParamsSchema = getRuleChangeHistoryEventParamsSchema;
+export type RestoreRuleChangeParams = GetRuleChangeHistoryEventParams;
+
+/** Query params for `POST …/change_history/rules/{change_id}/_restore`. */
+export const restoreRuleChangeQuerySchema = lazySchema(() =>
+  z
+    .object({
+      current_version: queryIntSchema({ min: 1, max: Number.MAX_SAFE_INTEGER })
+        .optional()
+        .describe(
+          'The rule version the caller last saw. When set, the restore is rejected with a conflict if the rule has changed since.'
+        ),
+    })
+    .strict()
+);
+export type RestoreRuleChangeQuery = z.infer<typeof restoreRuleChangeQuerySchema>;
+
 /**
  * Actor for a change-history row. Unattributed writes may carry an empty
  * `name` (the write path stores `username ?? ''`).

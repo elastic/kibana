@@ -28,6 +28,7 @@ import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_ev
 import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { EventBus, Subscription } from '../event_bus';
 import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber';
+import { RuleChangesHistoryEventLogger } from './rule_changes_history_event_logger';
 import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 type CapturedHandler = (
@@ -68,7 +69,11 @@ describe('RuleChangesHistorySubscriber', () => {
     userProfile = userProfileServiceMock.createStart();
     userProfile.getCurrent.mockResolvedValue(profile);
     ({ loggerService, mockLogger } = createLoggerService());
-    subscriber = new RuleChangesHistorySubscriber(bus, changeHistory, userProfile, loggerService);
+    subscriber = new RuleChangesHistorySubscriber(
+      bus,
+      new RuleChangesHistoryEventLogger(changeHistory, userProfile, loggerService),
+      loggerService
+    );
     request = httpServerMock.createKibanaRequest();
   });
 
@@ -160,6 +165,17 @@ describe('RuleChangesHistorySubscriber', () => {
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
     });
 
+    it('skips events whose publisher already logged them to change history', async () => {
+      subscriber.start();
+
+      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
+        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, changeHistoryLogged: true }),
+        { request, origin: { actor: 'user', channel: 'api' } }
+      );
+
+      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
+    });
+
     it('omits timestamp so logRuleChanges defaults to now', async () => {
       subscriber.start();
 
@@ -229,5 +245,29 @@ describe('RuleChangesHistorySubscriber', () => {
     it('is safe to call when no subscriptions are active', () => {
       expect(() => subscriber.stop()).not.toThrow();
     });
+  });
+});
+
+describe('RuleChangesHistoryEventLogger', () => {
+  it('passes refresh through so callers can wait for the entry to be searchable', async () => {
+    const changeHistory = createRuleChangesHistoryServiceMock();
+    const userProfile = userProfileServiceMock.createStart();
+    userProfile.getCurrent.mockResolvedValue(profile);
+    const { loggerService } = createLoggerService();
+    const eventLogger = new RuleChangesHistoryEventLogger(
+      changeHistory,
+      userProfile,
+      loggerService
+    );
+
+    await eventLogger.log(
+      eventOf(RULE_UPDATED_EVENT_TYPE),
+      { request: httpServerMock.createKibanaRequest(), origin: { actor: 'user', channel: 'api' } },
+      { refresh: 'wait_for' }
+    );
+
+    expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
+      expect.objectContaining({ action: RuleChangesHistoryAction.ruleUpdate, refresh: 'wait_for' })
+    );
   });
 });
