@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
-import { isEqual, pick } from 'lodash';
+import { isEqual } from 'lodash';
 import { MANAGED_BY } from '../definitions/constants';
 import { InventoryTypeDefinitionError, InventoryTypeNotFoundError } from '../inventory/errors';
 import {
@@ -25,7 +25,6 @@ import {
 } from '../inventory/executor';
 import type { PlanResult, SourceError } from '../inventory/executor';
 import {
-  ENTITY_ID_COLUMN,
   buildColumns,
   generateListQueries,
   getDynamicBlock,
@@ -33,13 +32,13 @@ import {
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
+import type { ListRequest } from '../inventory/types';
 import type {
   GetTypesResponse,
   InventoryType,
-  ListRequest,
   ListResponse,
   UnavailableColumn,
-} from '../inventory/types';
+} from '../routes/types';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -104,7 +103,6 @@ export class InventoryService {
    * reported in `errors[]`; neither fails the request.
    */
   list = async ({ type, window, limit }: ListRequest): Promise<ListResponse> => {
-    const startedAt = Date.now();
     const definition = await this.getManagedDefinition(type);
     const { plans, identity, columns, queries, probeErrors } = await this.planList(
       definition,
@@ -144,15 +142,12 @@ export class InventoryService {
     const ordered = orderRows(merged.rows);
     const { total, truncated } = summarizeResults(results, limit, ordered.length);
     const rows = fillColumns(applyLimit(ordered, limit), columns);
-    const returnedIds = rows.map((row) => String(row[ENTITY_ID_COLUMN]));
 
     return {
       columns: merged.columns,
       rows,
-      provenance: pick(merged.provenance, returnedIds),
       total,
       truncated,
-      took: Date.now() - startedAt,
       errors,
       unavailableColumns,
     };

@@ -13,9 +13,6 @@ import { apiTest, INTERNAL_HEADERS } from '../fixtures';
 // The archive writes every deployment at 10:00:00 and 10:01:00 on 2026-11-01.
 const K8S_DEPLOYMENT_LIST_PATH = 'internal/entity_inventory/entities/k8s.deployment/list';
 
-const AGENT_SOURCE = 'metrics-kubernetes.state_deployment-*';
-const OTEL_SOURCE = 'metrics-k8sclusterreceiver.otel-*';
-
 const CART_API_ID = 'k8s.deployment:scout-cluster/checkout/cart-api';
 const DEPLOYMENT_IDS = [
   CART_API_ID,
@@ -26,10 +23,8 @@ const DEPLOYMENT_IDS = [
 interface ListResponse {
   columns: Array<{ name: string; kind: string; type: string | null }>;
   rows: Array<Record<string, unknown>>;
-  provenance: Record<string, Record<string, string>>;
   total: number | null;
   truncated: boolean;
-  took: number;
   errors: Array<{ indexPattern: string; status: number | null; reason: string }>;
   unavailableColumns: Array<{ column: string; indexPattern: string; field: string }>;
 }
@@ -73,13 +68,6 @@ apiTest.describe(
           app: 'cart-api',
           resource_id: 'uid-checkout-cart-api',
           last_seen: '2026-11-01T10:01:00.000Z',
-        });
-        expect(body.provenance[CART_API_ID]).toStrictEqual({
-          available_replicas: AGENT_SOURCE,
-          desired_replicas: AGENT_SOURCE,
-          paused: AGENT_SOURCE,
-          app: AGENT_SOURCE,
-          resource_id: OTEL_SOURCE,
         });
         expect(body.total).toBe(3);
         expect(body.truncated).toBe(false);
@@ -155,26 +143,22 @@ apiTest.describe(
       expect(response.body.total).toBe(3);
     });
 
-    apiTest(
-      'cuts the rows at limit, reports truncated with no total, and keeps provenance to the returned rows',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(
-          `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=1`,
-          {
-            headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
-            responseType: 'json',
-          }
-        );
+    apiTest('cuts the rows at limit, reports truncated with no total', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=1`,
+        {
+          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
 
-        expect(response).toHaveStatusCode(200);
-        const { rows, provenance, total, truncated }: ListResponse = response.body;
+      expect(response).toHaveStatusCode(200);
+      const { rows, total, truncated }: ListResponse = response.body;
 
-        expect(rows).toHaveLength(1);
-        expect(Object.keys(provenance)).toStrictEqual([rows[0]['entity.id']]);
-        expect(total).toBeNull();
-        expect(truncated).toBe(true);
-      }
-    );
+      expect(rows).toHaveLength(1);
+      expect(total).toBeNull();
+      expect(truncated).toBe(true);
+    });
 
     apiTest('reports an exact total when limit equals the entity count', async ({ apiClient }) => {
       const response = await apiClient.get(
@@ -207,7 +191,6 @@ apiTest.describe(
 
       expect(body.columns).toHaveLength(13);
       expect(body.rows).toStrictEqual([]);
-      expect(body.provenance).toStrictEqual({});
       expect(body.total).toBe(0);
       expect(body.truncated).toBe(false);
       expect(body.errors).toStrictEqual([]);

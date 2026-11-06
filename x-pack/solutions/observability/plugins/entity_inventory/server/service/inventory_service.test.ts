@@ -376,17 +376,12 @@ describe('InventoryService.list', () => {
     });
     expect(response.rows[1]).toMatchObject({ resource_id: null, 'k8s.cluster.name': null });
     expect(response.columns.map(({ name }) => name)).toEqual(ALL_COLUMNS);
-    expect(response.provenance['k8s.deployment:scout-cluster/checkout/cart-api']).toMatchObject({
-      available_replicas: OTEL_PATTERN,
-      paused: STATE_PATTERN,
-    });
     expect(response).toMatchObject({
       total: 2,
       truncated: false,
       errors: [],
       unavailableColumns: [],
     });
-    expect(response.took).toEqual(expect.any(Number));
     expect(response).not.toHaveProperty('unsupportedMetrics');
     expect(response).not.toHaveProperty('documentFilterWarnings');
   });
@@ -507,9 +502,6 @@ describe('InventoryService.list', () => {
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 1 });
 
     expect(response.rows.map((row) => row['entity.id'])).toEqual([
-      'k8s.deployment:scout-cluster/checkout/cart-api',
-    ]);
-    expect(Object.keys(response.provenance)).toEqual([
       'k8s.deployment:scout-cluster/checkout/cart-api',
     ]);
     expect(response).toMatchObject({ total: 2, truncated: true });
