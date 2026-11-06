@@ -92,14 +92,7 @@ export function OnboardingAutomationStep({
 
   return (
     <div data-test-subj="nightshiftOnboardingAutomationStep">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-            defaultMessage: 'Trial investigation',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      {/* Section title lives above the onboarding grid so Get started lines up with this card. */}
       <TrialInvestigationCard
         investigation={investigation}
         onOpenInvestigation={onInvestigationClick}
@@ -157,31 +150,49 @@ function TrialInvestigationCard({
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
   const { in_progress: isActive } = investigation;
+  // Figma AI Background Base + AI Border Base (primary → assistance).
+  const aiFill = `linear-gradient(97.76deg, ${euiTheme.colors.backgroundBasePrimary} 17%, ${euiTheme.colors.backgroundBaseAssistance} 83%)`;
+  const aiBorder = `linear-gradient(97.76deg, ${euiTheme.colors.borderBasePrimary} 17%, ${euiTheme.colors.borderBaseAssistance} 83%)`;
+  const borderWidth = euiTheme.border.width.thin;
+
+  // Same radius as EuiPanel (Get started / Automations). Parent overflow clips the
+  // nested card and footer so corners stay round — no negative-margin overlap.
+  const panelRadius = euiTheme.border.radius.panel;
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="none"
+    <div
       data-test-subj="nightshiftOnboardingTrialInvestigation"
       css={css`
+        box-sizing: border-box;
         overflow: hidden;
+        border-radius: ${panelRadius};
+        border: ${borderWidth} solid transparent;
+        background-image: ${aiFill}, ${aiBorder};
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
       `}
     >
       {InvestigationCard && (
-        <InvestigationCard investigation={investigation} onClick={onOpenInvestigation} />
+        <div
+          css={css`
+            background: ${euiTheme.colors.emptyShade};
+
+            /* Drop the card's own borders so the AI ring is the only perimeter. */
+            > * {
+              border: none !important;
+              box-shadow: none !important;
+            }
+          `}
+        >
+          <InvestigationCard investigation={investigation} onClick={onOpenInvestigation} />
+        </div>
       )}
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
         responsive={false}
         css={css`
-          border-top: ${euiTheme.border.thin};
           padding: ${euiTheme.size.m} ${euiTheme.size.base};
-          background: linear-gradient(
-            99deg,
-            ${euiTheme.colors.backgroundLightPrimary},
-            ${euiTheme.colors.backgroundLightAssistance}
-          );
         `}
       >
         <EuiFlexItem grow={false}>
@@ -229,7 +240,7 @@ function TrialInvestigationCard({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 }
 
@@ -373,6 +384,7 @@ function AutomationCards({
   );
 }
 
+/** Same tinted plate as the leading Mark on earlier onboarding steps. */
 function IconTile({ icon }: { icon: string }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   return (
@@ -384,8 +396,9 @@ function IconTile({ icon }: { icon: string }): React.ReactElement {
         display: flex;
         align-items: center;
         justify-content: center;
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
+        background: ${euiTheme.colors.backgroundLightText};
+        border-radius: ${euiTheme.size.s};
+        color: ${euiTheme.colors.textParagraph};
       `}
     >
       <EuiIcon type={icon} size="m" aria-hidden={true} />

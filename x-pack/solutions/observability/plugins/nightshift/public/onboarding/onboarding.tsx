@@ -81,6 +81,11 @@ const INVESTIGATE_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Try your first investigation' }
 );
 
+const AUTOMATE_SECTION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.automate.trialTitle',
+  { defaultMessage: 'Your first investigation' }
+);
+
 const backButtonStyles = css`
   width: 100%;
 `;
@@ -356,6 +361,8 @@ export function NightshiftOnboarding({
       ? CONNECT_SUB_STEP_TITLES[connectSubStep]
       : step === 'investigate'
       ? INVESTIGATE_SECTION_TITLE
+      : step === 'automate'
+      ? AUTOMATE_SECTION_TITLE
       : undefined;
 
   return (
@@ -379,7 +386,7 @@ export function NightshiftOnboarding({
       )}
       {sectionTitle && (
         <>
-          <EuiTitle size="s">
+          <EuiTitle size={step === 'automate' ? 'xs' : 's'}>
             <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
