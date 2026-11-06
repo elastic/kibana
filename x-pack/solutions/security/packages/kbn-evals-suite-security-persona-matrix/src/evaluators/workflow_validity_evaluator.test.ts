@@ -13,7 +13,7 @@ import { buildOutput } from '../__fixtures__/task_output_builders';
 import { STUB_CONNECTOR_ID } from '../fixtures/stub_connector';
 
 const YAML =
-  'name: demo\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: a\n    type: console\n';
+  'name: demo\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n';
 
 interface Call {
   path: string;
@@ -31,7 +31,8 @@ const setup = ({
   failCancel = false,
   failPoll,
   statusAfterCancel = 'cancelled',
-  allowedConnectorIds,
+  stubVerified = true,
+  validateResult = { valid: true, errors: [] } as { valid: boolean; errors: string[] } | 'throw',
 }: {
   workflow?: Record<string, unknown>;
   statuses?: string[];
@@ -42,7 +43,8 @@ const setup = ({
   /** Poll (GET) index, 0-based, that throws. */
   failPoll?: number;
   statusAfterCancel?: string;
-  allowedConnectorIds?: readonly string[];
+  stubVerified?: boolean;
+  validateResult?: { valid: boolean; errors: string[] } | 'throw';
 } = {}) => {
   const calls: Call[] = [];
   const sleeps: number[] = [];
@@ -53,6 +55,10 @@ const setup = ({
   const fetch = jest.fn(async (call: Call) => {
     calls.push(call);
     const { path, method } = call;
+    if (method === 'POST' && path === '/api/workflows/validate') {
+      if (validateResult === 'throw') throw new Error('validate unavailable');
+      return validateResult;
+    }
     if (method === 'POST' && path === '/api/workflows/workflow') {
       if (failOn === 'create') throw new Error('invalid workflow');
       return workflow;
@@ -94,7 +100,7 @@ const setup = ({
       clock += ms;
     },
     now: () => clock,
-    ...(allowedConnectorIds ? { allowedConnectorIds } : {}),
+    stubVerified: () => stubVerified,
   });
   return { evaluator, calls, fetch, sleeps };
 };
@@ -339,86 +345,222 @@ describe('WorkflowValidity', () => {
     expect(JSON.parse(calls[0].body as string)).toEqual({ yaml: YAML });
   });
 
-  describe('connector allowlist', () => {
+  it('records settle_error, not cancel_error, when a status read fails while settling', async () => {
+    const { evaluator, fetch } = setup({ statuses: ['running'] });
+    // Fail every GET after the cancel was sent (the settle loop's reads).
+    const inner = fetch.getMockImplementation() as (call: Call) => Promise<unknown>;
+    let cancelSent = false;
+    fetch.mockImplementation(async (call: Call) => {
+      if (call.method === 'POST' && call.path.endsWith('/cancel')) cancelSent = true;
+      if (cancelSent && call.method === 'GET') throw new Error('status read failed');
+      return (await inner(call)) as Record<string, unknown>;
+    });
+    const result = await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+    expect(result.metadata).toMatchObject({
+      outcome: 'timed_out',
+      settle_error: 'status read failed',
+    });
+    expect(result.metadata).not.toHaveProperty('cancel_error');
+  });
+
+  describe('guard', () => {
     const yamlWith = (stepBody: string) =>
-      `name: demo\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: a\n${stepBody}`;
+      `name: demo\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n${stepBody}`;
     const fenced = (yaml: string) => `\`\`\`yaml\n${yaml}\n\`\`\``;
     const ranWorkflow = (calls: Call[]) => calls.some((call) => call.path.endsWith('/run'));
+    const created = (calls: Call[]) =>
+      calls.some((call) => call.method === 'POST' && call.path === '/api/workflows/workflow');
+    const stubStep = (extra = '') =>
+      `  - name: a\n    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      path: /api/status/chat.postMessage\n      method: POST\n${extra}`;
 
-    it('skips the run for a connector id that is not allowlisted, but still deletes', async () => {
+    it('runs a correct stub-bound workflow to completed', async () => {
       const { evaluator, calls } = setup();
-      const result = await run(
-        evaluator,
-        fenced(yamlWith('    type: slack\n    connector-id: prod-slack\n'))
-      );
-      expect(result.score).toBe(0);
-      expect(result.metadata).toMatchObject({
-        outcome: 'run_skipped_external_connector',
-        external_references: ['prod-slack'],
-        delete_attempts: 1,
-      });
-      expect(ranWorkflow(calls)).toBe(false);
-      expect(calls[calls.length - 1].method).toBe('DELETE');
-    });
-
-    it('runs a workflow that only references the seeded stub connector', async () => {
-      const { evaluator, calls } = setup();
-      const result = await run(
-        evaluator,
-        fenced(
-          yamlWith(
-            `    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      path: /x\n`
-          )
-        )
-      );
+      const result = await run(evaluator, fenced(yamlWith(stubStep())));
       expect(result.score).toBe(1);
+      expect(result.metadata).toMatchObject({ outcome: 'completed' });
       expect(ranWorkflow(calls)).toBe(true);
     });
 
-    it('honours a custom allowlist', async () => {
-      const { evaluator, calls } = setup({ allowedConnectorIds: ['mine'] });
-      const allowed = await run(
-        evaluator,
-        fenced(yamlWith('    type: http\n    connector-id: mine\n'))
-      );
-      expect(allowed.score).toBe(1);
-      expect(ranWorkflow(calls)).toBe(true);
-
-      const stub = setup({ allowedConnectorIds: ['mine'] });
-      const rejected = await run(
-        stub.evaluator,
-        fenced(yamlWith(`    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n`))
-      );
-      expect(rejected.metadata).toMatchObject({ outcome: 'run_skipped_external_connector' });
-    });
-
-    it('skips an http step that sets its own url even with the stub connector', async () => {
+    it('allows console, data.*, wait, if, foreach and nested stub http steps', async () => {
       const { evaluator, calls } = setup();
+      const steps = [
+        '  - name: c\n    type: console\n    with:\n      message: hi',
+        '  - name: d\n    type: data.set\n    with:\n      x: 1',
+        '  - name: d2\n    type: data.map\n    with:\n      items: []',
+        '  - name: w\n    type: wait\n    with:\n      duration: 1s',
+        `  - name: i\n    type: if\n    condition: "true"\n    steps:\n      - name: n\n        type: http\n        connector-id: ${STUB_CONNECTOR_ID}\n        with:\n          path: /x\n    else:\n      - name: e\n        type: console\n        with:\n          message: no`,
+        `  - name: f\n    type: foreach\n    foreach: "{{ inputs.xs }}"\n    steps:\n      - name: n2\n        type: http\n        connector-id: ${STUB_CONNECTOR_ID}\n        with:\n          path: /y`,
+      ].join('\n');
+      const result = await run(evaluator, fenced(yamlWith(steps)));
+      expect(result.metadata).toMatchObject({ outcome: 'completed' });
+      expect(ranWorkflow(calls)).toBe(true);
+    });
+
+    describe.each([
+      [
+        'an http step with another connector id',
+        '  - name: a\n    type: http\n    connector-id: prod-slack\n    with:\n      path: /x',
+      ],
+      [
+        'a templated connector id',
+        '  - name: a\n    type: http\n    connector-id: "{{ inputs.connector }}"\n    with:\n      path: /x',
+      ],
+      [
+        'an http step without a connector id',
+        '  - name: a\n    type: http\n    with:\n      path: /x',
+      ],
+      [
+        'a slack step',
+        '  - name: a\n    type: slack\n    connector-id: prod-slack\n    with:\n      message: hi',
+      ],
+      ['a .slack connector step', '  - name: a\n    type: .slack\n    connector-id: prod-slack'],
+      [
+        'kibana.request to the connector _execute API',
+        `  - name: a\n    type: kibana.request\n    with:\n      method: POST\n      path: /api/actions/connector/prod-slack/_execute`,
+      ],
+      [
+        'workflow.execute',
+        '  - name: a\n    type: workflow.execute\n    with:\n      workflow-id: other',
+      ],
+      [
+        'workflow.executeAsync',
+        '  - name: a\n    type: workflow.executeAsync\n    with:\n      workflow-id: other',
+      ],
+      [
+        'a HITL waitForInput step carrying a url channel',
+        '  - name: a\n    type: waitForInput\n    with:\n      channels:\n        - type: http\n          url: https://example.com/hook',
+      ],
+      ['a step with no type', '  - name: a\n    with:\n      x: 1'],
+      [
+        'an http step to the stub connector that overrides the url',
+        `  - name: a\n    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      url: https://example.com/hook\n      path: /x`,
+      ],
+      [
+        'a stub http step with a url nested anywhere under it',
+        `  - name: a\n    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      path: /x\n      fetcher:\n        redirect:\n          url: https://example.com`,
+      ],
+      [
+        'an external http step nested in a foreach',
+        `  - name: f\n    type: foreach\n    foreach: "{{ inputs.xs }}"\n    steps:\n      - name: n\n        type: http\n        connector-id: prod-slack\n        with:\n          path: /x`,
+      ],
+      [
+        'an external step in an if/else branch',
+        `  - name: i\n    type: if\n    condition: "true"\n    steps:\n      - name: ok\n        type: console\n        with:\n          message: ok\n    else:\n      - name: bad\n        type: slack\n        connector-id: prod-slack`,
+      ],
+      [
+        'an external step in a parallel branch',
+        `  - name: p\n    type: parallel\n    branches:\n      - name: b1\n        steps:\n          - name: bad\n            type: kibana.request\n            with:\n              path: /x`,
+      ],
+      [
+        'an external step in an on-failure fallback',
+        `  - name: a\n    type: console\n    with:\n      message: hi\n    on-failure:\n      fallback:\n        - name: bad\n          type: slack\n          connector-id: prod-slack`,
+      ],
+    ])('bypass shape: %s', (_name, stepBody) => {
+      it('is skipped before anything is created or run, and validated structurally', async () => {
+        const { evaluator, calls } = setup();
+        const result = await run(evaluator, fenced(yamlWith(stepBody)));
+        expect(result.score).toBe(0);
+        expect(result.metadata).toMatchObject({
+          outcome: 'run_skipped_external_connector',
+          valid_not_run: true,
+        });
+        expect(
+          (result.metadata as { skipped_steps: string[] }).skipped_steps.length
+        ).toBeGreaterThan(0);
+        expect(created(calls)).toBe(false);
+        expect(ranWorkflow(calls)).toBe(false);
+        expect(calls.some((call) => call.method === 'DELETE')).toBe(false);
+        expect(calls).toContainEqual(
+          expect.objectContaining({
+            method: 'POST',
+            path: '/api/workflows/validate',
+            version: '1',
+          })
+        );
+      });
+    });
+
+    it('skips an external step in settings.on-failure.fallback', async () => {
+      const { evaluator, calls } = setup();
+      const yaml =
+        'name: demo\nenabled: true\nsettings:\n  on-failure:\n    fallback:\n      - name: bad\n        type: slack\n        connector-id: prod-slack\ntriggers:\n  - type: manual\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n';
+      const result = await run(evaluator, fenced(yaml));
+      expect(result.metadata).toMatchObject({ outcome: 'run_skipped_external_connector' });
+      expect(created(calls)).toBe(false);
+    });
+
+    it('records valid_not_run false when the structural validation rejects the workflow', async () => {
+      const { evaluator } = setup({ validateResult: { valid: false, errors: ['bad'] } });
       const result = await run(
         evaluator,
-        fenced(
-          yamlWith(
-            `    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      url: https://example.com/hook\n`
-          )
-        )
+        fenced(yamlWith('  - name: a\n    type: slack\n    connector-id: prod-slack'))
       );
       expect(result.metadata).toMatchObject({
         outcome: 'run_skipped_external_connector',
-        external_references: ['url:https://example.com/hook'],
+        valid_not_run: false,
       });
-      expect(ranWorkflow(calls)).toBe(false);
     });
 
-    it('skips a connector id found by the text fallback when the YAML does not parse', async () => {
+    it('still skips, with a validate_error, when the validate route throws', async () => {
+      const { evaluator, calls } = setup({ validateResult: 'throw' });
+      const result = await run(
+        evaluator,
+        fenced(yamlWith('  - name: a\n    type: slack\n    connector-id: prod-slack'))
+      );
+      expect(result.metadata).toMatchObject({
+        outcome: 'run_skipped_external_connector',
+        validate_error: 'validate unavailable',
+      });
+      expect(created(calls)).toBe(false);
+    });
+
+    it('skips a workflow YAML that does not parse: run_skipped_unparsed, score 0, no create', async () => {
       const { evaluator, calls } = setup();
       const broken =
         'name: demo\nsteps:\n  - name: a\n    connector-id: prod-slack\n  bad: [unclosed\n';
       const result = await run(evaluator, fenced(broken));
-      expect(result.metadata).toMatchObject({
-        outcome: 'run_skipped_external_connector',
-        external_references: ['prod-slack'],
+      expect(result.score).toBe(0);
+      expect(result.metadata).toMatchObject({ outcome: 'run_skipped_unparsed' });
+      expect(calls).toHaveLength(0);
+    });
+
+    it('skips a document whose steps are not a list', async () => {
+      const { evaluator, calls } = setup();
+      const result = await run(evaluator, fenced('name: demo\nsteps: nope\n'));
+      expect(result.metadata).toMatchObject({ outcome: 'run_skipped_unparsed' });
+      expect(calls).toHaveLength(0);
+    });
+
+    describe('unverified stub connector', () => {
+      it('skips a stub-bound workflow with run_skipped_unverified_stub when the seed could not verify the connector', async () => {
+        const { evaluator, calls } = setup({ stubVerified: false });
+        const result = await run(evaluator, fenced(yamlWith(stubStep())));
+        expect(result.score).toBe(0);
+        expect(result.metadata).toMatchObject({
+          outcome: 'run_skipped_unverified_stub',
+          valid_not_run: true,
+        });
+        expect(created(calls)).toBe(false);
+        expect(ranWorkflow(calls)).toBe(false);
       });
-      expect(ranWorkflow(calls)).toBe(false);
+
+      it('still runs a workflow that references no connector', async () => {
+        const { evaluator, calls } = setup({ stubVerified: false });
+        const result = await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+        expect(result.metadata).toMatchObject({ outcome: 'completed' });
+        expect(ranWorkflow(calls)).toBe(true);
+      });
+
+      it('lets an unsafe step outrank the unverified stub in the outcome', async () => {
+        const { evaluator } = setup({ stubVerified: false });
+        const result = await run(
+          evaluator,
+          fenced(
+            yamlWith(`${stubStep()}\n  - name: b\n    type: slack\n    connector-id: prod-slack`)
+          )
+        );
+        expect(result.metadata).toMatchObject({ outcome: 'run_skipped_external_connector' });
+      });
     });
   });
 });

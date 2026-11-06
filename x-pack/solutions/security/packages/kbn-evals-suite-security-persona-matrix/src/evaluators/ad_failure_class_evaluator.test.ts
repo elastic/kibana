@@ -75,13 +75,20 @@ describe('AD Failure Class evaluator', () => {
     expect(classifyAdFailure({ insights: null, raw: { status: 'weird' } })).toBe('other');
   });
 
-  it.each(['succeeded', 'failed', 'canceled', 'dismissed'])(
+  it.each(['failed', 'canceled', 'dismissed'])(
     'classifies no insights, no errors and terminal status %s as never_materialized',
     (status) => {
       expect(classifyAdFailure({ insights: null, raw: { status } })).toBe('never_materialized');
       expect(classifyAdFailure({ insights: [], raw: { status } })).toBe('never_materialized');
     }
   );
+
+  it('classifies a succeeded generation with no insights as empty_result', () => {
+    expect(classifyAdFailure({ insights: null, raw: { status: 'succeeded' } })).toBe(
+      'empty_result'
+    );
+    expect(classifyAdFailure({ insights: [], raw: { status: 'succeeded' } })).toBe('empty_result');
+  });
 
   it('keeps timed_out as poll_timeout rather than never_materialized', () => {
     expect(classifyAdFailure({ insights: null, raw: { status: 'timed_out' } })).toBe(

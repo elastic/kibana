@@ -16,7 +16,9 @@ export const WORKFLOW_VALIDITY_EVALUATOR_NAME = 'WorkflowValidity';
 export type WorkflowValidityOutcome =
   | 'no_yaml'
   | 'create_failed'
+  | 'run_skipped_unparsed'
   | 'run_skipped_external_connector'
+  | 'run_skipped_unverified_stub'
   | 'run_failed'
   | 'timed_out'
   | 'completed'
@@ -24,6 +26,9 @@ export type WorkflowValidityOutcome =
   | 'skipped';
 
 const API_VERSION = '2023-10-31';
+// `POST /api/workflows/validate` is an internal route.
+const INTERNAL_API_VERSION = '1';
+const VALIDATE_PATH = '/api/workflows/validate';
 const WORKFLOWS_PATH = '/api/workflows/workflow';
 const EXECUTIONS_PATH = '/api/workflows/executions';
 const POLL_INTERVAL_MS = 2_000;
@@ -41,18 +46,32 @@ const DELETE_BACKOFF_MS = 1_000;
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
 
 /**
- * `failed` (0.5) covers a run that ended `failed` or `cancelled` on its own: the
- * workflow was valid enough to start. Our own timeout stays `timed_out` (0.5)
- * even though we cancel it. A `skipped` run never executed a step, so it proves
- * nothing and scores 0, like `run_skipped_external_connector`, which is a run
- * we refused to start. WorkflowValidity is excluded from cell means.
+ * Score per outcome. WorkflowValidity is excluded from cell means; the score is
+ * a per-example signal only.
+ *
+ * - `completed` 1: the workflow ran to a successful end.
+ * - `failed` 0.5: the run ended `failed` or `cancelled` on its own; the workflow
+ *   was valid enough to start.
+ * - `timed_out` 0.5: our own timeout, even though we cancel the run.
+ * - `skipped` 0: the engine skipped the run, so no step executed.
+ * - `run_skipped_unparsed` 0: the YAML does not parse, so it is never run.
+ * - `run_skipped_external_connector` 0: a step is outside the safe allowlist
+ *   (could reach beyond the stack); nothing is created or run. `valid_not_run`
+ *   in the metadata says whether the server accepts the YAML structurally.
+ * - `run_skipped_unverified_stub` 0: the workflow is safe but the seed could not
+ *   confirm the stub connector at its id, so the run is not attempted.
+ * - `run_failed` 0: a request in create-enable-run-poll threw.
+ * - `create_failed` 0: the server rejected the workflow.
+ * - `no_yaml` 0: the answer held no workflow.
  */
 const SCORE_BY_OUTCOME: Record<WorkflowValidityOutcome, number> = {
   completed: 1,
   failed: 0.5,
   timed_out: 0.5,
   skipped: 0,
+  run_skipped_unparsed: 0,
   run_skipped_external_connector: 0,
+  run_skipped_unverified_stub: 0,
   run_failed: 0,
   create_failed: 0,
   no_yaml: 0,
@@ -114,49 +133,121 @@ const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 const CONNECTOR_ID_KEY = 'connector-id';
-const HTTP_STEP_TYPE = /^http(?:\.|$)/;
-const CONNECTOR_ID_FALLBACK_PATTERN = /connector-id\s*:\s*["']?([^\s"'#]+)/g;
+// Step types that cannot reach beyond the stack. `http` is further restricted
+// to the stub connector; `data.*` are in-process transforms.
+const SAFE_STEP_TYPES = new Set(['console', 'wait', 'if', 'foreach']);
+const DATA_STEP_PREFIX = 'data.';
+// Arrays under these keys hold steps (`parallel.branches[].steps` reaches
+// `steps` through the branch record).
+const STEP_ARRAY_KEYS = new Set(['steps', 'else', 'fallback']);
+// Keys whose values are data or expressions, never steps.
+const DATA_KEYS = new Set(['with', 'foreach', 'if', 'condition']);
+// Root keys that hold metadata, not executable steps.
+const ROOT_METADATA_KEYS = new Set([
+  'version',
+  'name',
+  'run-name',
+  'description',
+  'enabled',
+  'tags',
+  'triggers',
+  'inputs',
+  'consts',
+  'outputs',
+]);
+
+const containsKey = (node: unknown, key: string): boolean => {
+  if (Array.isArray(node)) return node.some((child) => containsKey(child, key));
+  if (!isRecord(node)) return false;
+  return Object.entries(node).some(([k, v]) => k === key || containsKey(v, key));
+};
+
+export interface StepAudit {
+  /** Steps that must not run, as `<name>:<type>` plus the reason. */
+  unsafe: string[];
+  /** True when at least one step runs on the stub connector. */
+  usesStubConnector: boolean;
+}
 
 /**
- * Everything in the workflow that could reach beyond the stack: the id of every
- * connector a step references, plus any `http` step that sets its own `url`
- * (`params.url` overrides the connector's configured URL, so even an allowlisted
- * connector would be redirected to that host).
+ * Step-type allowlist over every step, however deeply nested (`steps`, `else`,
+ * `fallback`, `branches[].steps`, any other array of typed records). A workflow
+ * is safe to run only when it contains nothing but: `http` steps bound to the
+ * stub connector id with no `url` anywhere under them, `console`, `data.*`,
+ * `wait`, `if` and `foreach`. Every other type, including `kibana.request`,
+ * `workflow.execute*`, HITL steps and connector-typed steps such as `slack`,
+ * is unsafe. Anything not recognisably a step in a step position is unsafe too.
  */
-export const collectExternalReferences = (yaml: string): string[] => {
-  const references = new Set<string>();
-  const walk = (node: unknown): void => {
+export const auditSteps = (root: Record<string, unknown>): StepAudit => {
+  const unsafe: string[] = [];
+  let usesStubConnector = false;
+
+  const checkStep = (step: unknown): void => {
+    if (!isRecord(step)) {
+      unsafe.push('<non-object step>');
+      return;
+    }
+    const type = typeof step.type === 'string' ? step.type : undefined;
+    const label = `${typeof step.name === 'string' ? step.name : '<unnamed>'}:${
+      type ?? '<no type>'
+    }`;
+    if (type === 'http') {
+      if (step[CONNECTOR_ID_KEY] !== STUB_CONNECTOR_ID) {
+        unsafe.push(`${label} (connector-id is not the stub connector)`);
+      } else if (containsKey(step, 'url')) {
+        unsafe.push(`${label} (sets a url)`);
+      } else {
+        usesStubConnector = true;
+      }
+    } else if (
+      type === undefined ||
+      !(SAFE_STEP_TYPES.has(type) || type.startsWith(DATA_STEP_PREFIX))
+    ) {
+      unsafe.push(`${label} (step type is not allowed)`);
+    } else if (CONNECTOR_ID_KEY in step) {
+      unsafe.push(`${label} (references a connector)`);
+    }
+    Object.entries(step).forEach(([key, value]) => {
+      if (!DATA_KEYS.has(key)) walk(value, key);
+    });
+  };
+
+  const walk = (node: unknown, parentKey?: string): void => {
     if (Array.isArray(node)) {
-      node.forEach(walk);
+      node.forEach((child) => {
+        if (parentKey !== undefined && STEP_ARRAY_KEYS.has(parentKey)) checkStep(child);
+        else walk(child, parentKey);
+      });
       return;
     }
     if (!isRecord(node)) return;
-    const connectorId = node[CONNECTOR_ID_KEY];
-    if (connectorId !== undefined && connectorId !== null) {
-      references.add(String(connectorId));
+    if (typeof node.type === 'string') {
+      checkStep(node);
+      return;
     }
-    const params = node.with;
-    if (
-      typeof node.type === 'string' &&
-      HTTP_STEP_TYPE.test(node.type) &&
-      isRecord(params) &&
-      typeof params.url === 'string'
-    ) {
-      references.add(`url:${params.url}`);
-    }
-    Object.values(node).forEach(walk);
+    Object.entries(node).forEach(([key, value]) => {
+      if (!DATA_KEYS.has(key)) walk(value, key);
+    });
   };
 
+  Object.entries(root).forEach(([key, value]) => {
+    if (!ROOT_METADATA_KEYS.has(key)) walk(value, key);
+  });
+  return { unsafe, usesStubConnector };
+};
+
+type ParsedWorkflow = { ok: true; root: Record<string, unknown> } | { ok: false; reason: string };
+
+const parseWorkflow = (yaml: string): ParsedWorkflow => {
   try {
-    walk(parse(yaml));
-  } catch {
-    // Unparseable here but accepted by the server would bypass the guard, so
-    // fall back to scanning for connector ids as plain text.
-    for (const [, id] of yaml.matchAll(CONNECTOR_ID_FALLBACK_PATTERN)) {
-      references.add(id);
+    const root: unknown = parse(yaml);
+    if (!isRecord(root) || !Array.isArray(root.steps)) {
+      return { ok: false, reason: 'document has no steps list' };
     }
+    return { ok: true, root };
+  } catch (error) {
+    return { ok: false, reason: errorMessage(error) };
   }
-  return [...references];
 };
 
 export interface WorkflowValidityDeps {
@@ -164,10 +255,11 @@ export interface WorkflowValidityDeps {
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
   /**
-   * Connector ids a workflow may reference and still be run. Defaults to the
-   * local stub the seed creates; any other id may point at an external service.
+   * Whether the seed confirmed the connector at the stub id is the local `.http`
+   * stub. When false, a workflow that uses the stub connector is not run, since
+   * whatever sits at that id may be a real external connector.
    */
-  allowedConnectorIds?: readonly string[];
+  stubVerified: () => boolean;
 }
 
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -177,16 +269,20 @@ const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(r
  * stack, runs it, waits for a terminal status, then always deletes it so a
  * cell leaves nothing behind. `validate_workflow` only checks the schema.
  *
- * The run is skipped (`run_skipped_external_connector`) unless every connector
- * the workflow references is in `allowedConnectorIds`. An execution that is
- * still running at timeout is cancelled and given a moment to settle before the
- * delete, which is retried with backoff.
+ * The safety guard runs BEFORE anything is created. YAML that does not parse is
+ * `run_skipped_unparsed`; a step outside the allowlist (`auditSteps`) is
+ * `run_skipped_external_connector`; a stub-bound workflow whose stub connector
+ * the seed could not verify is `run_skipped_unverified_stub`. A skipped
+ * workflow never hits the create route; it is only sent to the validate route
+ * so the metadata can say whether it was valid YAML (`valid_not_run`).
+ * An execution still running at timeout is cancelled and given a moment to
+ * settle before the delete, which is retried with backoff.
  */
 export const createWorkflowValidityEvaluator = ({
   fetch,
   sleep = defaultSleep,
   now = Date.now,
-  allowedConnectorIds = [STUB_CONNECTOR_ID],
+  stubVerified,
 }: WorkflowValidityDeps): Evaluator => ({
   name: WORKFLOW_VALIDITY_EVALUATOR_NAME,
   kind: 'CODE',
@@ -210,9 +306,13 @@ export const createWorkflowValidityEvaluator = ({
       run_id?: string;
       execution_status?: string;
       final_execution_status?: string;
-      external_references?: string[];
+      skipped_steps?: string[];
+      valid_not_run?: boolean;
+      validate_error?: string;
+      parse_error?: string;
       error?: string;
       cancel_error?: string;
+      settle_error?: string;
       delete_error?: string;
       delete_attempts?: number;
     } = { outcome: 'no_yaml' };
@@ -243,6 +343,36 @@ export const createWorkflowValidityEvaluator = ({
       return typeof execution?.status === 'string' ? execution.status : undefined;
     };
 
+    const parsed = parseWorkflow(yaml);
+    if (!parsed.ok) {
+      detail.outcome = 'run_skipped_unparsed';
+      detail.parse_error = parsed.reason;
+      return finish();
+    }
+    const audit = auditSteps(parsed.root);
+    const skipOutcome: WorkflowValidityOutcome | undefined =
+      audit.unsafe.length > 0
+        ? 'run_skipped_external_connector'
+        : audit.usesStubConnector && !stubVerified()
+        ? 'run_skipped_unverified_stub'
+        : undefined;
+    if (skipOutcome) {
+      detail.outcome = skipOutcome;
+      if (audit.unsafe.length > 0) detail.skipped_steps = audit.unsafe;
+      try {
+        const validation = await fetch<{ valid?: boolean }>({
+          path: VALIDATE_PATH,
+          method: 'POST',
+          version: INTERNAL_API_VERSION,
+          body: JSON.stringify({ yaml }),
+        });
+        detail.valid_not_run = validation?.valid === true;
+      } catch (error) {
+        detail.validate_error = errorMessage(error);
+      }
+      return finish();
+    }
+
     let workflowId: string | undefined;
     let runId: string | undefined;
     // Last status seen for the run; a run is cancelled unless it is known terminal.
@@ -262,63 +392,55 @@ export const createWorkflowValidityEvaluator = ({
       workflowId = created.id;
       detail.workflow_id = workflowId;
 
-      const disallowed = collectExternalReferences(yaml).filter(
-        (reference) => !allowedConnectorIds.includes(reference)
-      );
-      if (disallowed.length > 0) {
-        detail.outcome = 'run_skipped_external_connector';
-        detail.external_references = disallowed;
-      } else {
-        detail.stage = 'enable';
-        detail.outcome = 'run_failed';
-        const workflowPath = `${WORKFLOWS_PATH}/${encodeURIComponent(workflowId)}`;
-        if (created.enabled === false) {
-          await fetch({
-            path: workflowPath,
-            method: 'PUT',
-            version: API_VERSION,
-            body: JSON.stringify({ enabled: true }),
-          });
-        }
-        detail.stage = 'run';
-        const started = await fetch<{ workflowExecutionId?: string }>({
-          path: `${workflowPath}/run`,
-          method: 'POST',
+      detail.stage = 'enable';
+      detail.outcome = 'run_failed';
+      const workflowPath = `${WORKFLOWS_PATH}/${encodeURIComponent(workflowId)}`;
+      if (created.enabled === false) {
+        await fetch({
+          path: workflowPath,
+          method: 'PUT',
           version: API_VERSION,
-          body: JSON.stringify({ inputs: {} }),
+          body: JSON.stringify({ enabled: true }),
         });
-        if (typeof started?.workflowExecutionId !== 'string') {
-          throw new Error('run response carried no execution id');
-        }
-        runId = started.workflowExecutionId;
-        detail.run_id = runId;
+      }
+      detail.stage = 'run';
+      const started = await fetch<{ workflowExecutionId?: string }>({
+        path: `${workflowPath}/run`,
+        method: 'POST',
+        version: API_VERSION,
+        body: JSON.stringify({ inputs: {} }),
+      });
+      if (typeof started?.workflowExecutionId !== 'string') {
+        throw new Error('run response carried no execution id');
+      }
+      runId = started.workflowExecutionId;
+      detail.run_id = runId;
 
-        // A throw while polling is a failed run, not a timeout: the outcome stays
-        // `run_failed` until the loop ends without a terminal status.
-        detail.stage = 'poll';
-        const pollStart = now();
-        let terminal = false;
-        while (now() - pollStart < POLL_TIMEOUT_MS) {
-          const status = await readStatus(runId);
-          lastStatus = status;
-          if (status !== undefined && TERMINAL_STATUSES.has(status)) {
-            detail.execution_status = status;
-            detail.outcome =
-              status === 'completed'
-                ? 'completed'
-                : status === 'timed_out'
-                ? 'timed_out'
-                : status === 'skipped'
-                ? 'skipped'
-                : 'failed';
-            terminal = true;
-            break;
-          }
-          await sleep(POLL_INTERVAL_MS);
+      // A throw while polling is a failed run, not a timeout: the outcome stays
+      // `run_failed` until the loop ends without a terminal status.
+      detail.stage = 'poll';
+      const pollStart = now();
+      let terminal = false;
+      while (now() - pollStart < POLL_TIMEOUT_MS) {
+        const status = await readStatus(runId);
+        lastStatus = status;
+        if (status !== undefined && TERMINAL_STATUSES.has(status)) {
+          detail.execution_status = status;
+          detail.outcome =
+            status === 'completed'
+              ? 'completed'
+              : status === 'timed_out'
+              ? 'timed_out'
+              : status === 'skipped'
+              ? 'skipped'
+              : 'failed';
+          terminal = true;
+          break;
         }
-        if (!terminal) {
-          detail.outcome = 'timed_out';
-        }
+        await sleep(POLL_INTERVAL_MS);
+      }
+      if (!terminal) {
+        detail.outcome = 'timed_out';
       }
     } catch (error) {
       // The stage and outcome already name where it threw.
@@ -347,7 +469,7 @@ export const createWorkflowValidityEvaluator = ({
             await sleep(CANCEL_SETTLE_INTERVAL_MS);
           }
         } catch (error) {
-          detail.cancel_error ??= errorMessage(error);
+          detail.settle_error = errorMessage(error);
         }
       }
       if (workflowId) {

@@ -37,6 +37,7 @@ import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awar
 import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
 import { createUnrequestedSideEffectsEvaluator } from './evaluators/unrequested_side_effects_evaluator';
 import { createWorkflowValidityEvaluator } from './evaluators/workflow_validity_evaluator';
+import { isStubConnectorVerified } from './fixtures/persona_matrix_tools_seed';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import {
   createPersonaMatrixInputTokensEvaluator,
@@ -718,7 +719,7 @@ export function createEvaluatePersonaMatrixDataset({
       connectorInvokedEvaluator,
       // Deterministic behaviour checks. Recorded per cell, excluded from cell
       // means via `excludeEvaluators` in the matrix config.
-      createWorkflowValidityEvaluator({ fetch }),
+      createWorkflowValidityEvaluator({ fetch, stubVerified: isStubConnectorVerified }),
       createEicarTrapEvaluator(),
       createSimulationAwarenessEvaluator(),
       createUnrequestedSideEffectsEvaluator(),

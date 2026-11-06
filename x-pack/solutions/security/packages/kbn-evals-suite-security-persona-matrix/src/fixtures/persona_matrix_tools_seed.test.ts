@@ -9,6 +9,15 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 
+jest.mock('./stub_sink', () => ({
+  SINK_ORIGIN: 'http://127.0.0.1:38465',
+  startStubSink: jest.fn(async () => ({
+    origin: 'http://127.0.0.1:38465',
+    owned: true,
+    close: async () => {},
+  })),
+}));
+
 const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
 const AGENT_TOOLS_PATH = '/api/agent_builder/agents/elastic-ai-agent';
@@ -46,6 +55,8 @@ interface ClientOptions {
   skills?: string[];
   caseIds?: string[];
   baseUrl?: string;
+  /** What GET on the stub connector id returns after a 409. `'error'` makes the GET throw. */
+  existingConnector?: { connector_type_id: string; config?: { url?: string } } | 'error';
 }
 
 const alreadyExists = (status: number) =>
@@ -57,6 +68,7 @@ const createClient = ({
   skills = [...CHRYSALIS_PARITY_AGENT.skillIds],
   caseIds = [],
   baseUrl = 'http://elastic:changeme@localhost:5620',
+  existingConnector = { connector_type_id: '.http', config: { url: 'http://127.0.0.1:38465' } },
 }: ClientOptions = {}): MockClient => ({
   // Real KbnClient keeps `user:pass@` in resolveUrl().
   resolveUrl: jest.fn((relative: string) => `${baseUrl}${relative}`),
@@ -67,6 +79,10 @@ const createClient = ({
     }
     if (method === 'GET' && path === '/api/agent_builder/skills') {
       return { data: { results: skills.map((id) => ({ id })) } };
+    }
+    if (method === 'GET' && path === STUB_PATH) {
+      if (existingConnector === 'error') throw Object.assign(new Error('boom'), { status: 500 });
+      return { data: existingConnector };
     }
     if (method === 'GET' && path === '/api/cases/_find') {
       return { data: { cases: caseIds.map((id) => ({ id })) } };
@@ -195,7 +211,7 @@ describe('persona_matrix_tools_seed', () => {
   });
 
   describe('stub connector', () => {
-    it('creates an .http stub connector with the prompt connector id on the local stack, without credentials', async () => {
+    it('creates an .http stub connector with the prompt connector id pointing at the local sink, without credentials', async () => {
       const { seedPersonaMatrixTools, STUB_CONNECTOR_ID } = await load();
       const client = createClient();
 
@@ -206,33 +222,71 @@ describe('persona_matrix_tools_seed', () => {
       expect(created).toHaveLength(1);
       expect(created[0].body).toMatchObject({
         connector_type_id: '.http',
-        config: { url: 'http://localhost:5620/api/status', hasAuth: false },
+        config: { url: 'http://127.0.0.1:38465', hasAuth: false },
         secrets: {},
       });
     });
 
-    it('treats a 409 as success and leaves the pre-existing connector alone on cleanup', async () => {
+    it('is not verified before the seed runs, and verified after creating the connector', async () => {
       const mod = await load();
-      const client = createClient({ postBehavior: 'conflict' });
-
-      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
-      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
-
-      expect(
-        calls(client).filter((req) => req.path === STUB_PATH && req.method === 'DELETE')
-      ).toHaveLength(0);
+      expect(mod.isStubConnectorVerified()).toBe(false);
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(createClient()), log });
+      expect(mod.isStubConnectorVerified()).toBe(true);
     });
 
-    it('deletes the stub connector on cleanup only when this process created it', async () => {
+    it('verifies a pre-existing .http connector whose url is the sink origin', async () => {
       const mod = await load();
-      const client = createClient();
+      const client = createClient({
+        postBehavior: 'conflict',
+        existingConnector: {
+          connector_type_id: '.http',
+          config: { url: 'http://127.0.0.1:38465/some/path' },
+        },
+      });
 
       await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
-      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
 
-      expect(
-        calls(client).filter((req) => req.path === STUB_PATH && req.method === 'DELETE')
-      ).toHaveLength(1);
+      expect(calls(client)).toContainEqual(
+        expect.objectContaining({ method: 'GET', path: STUB_PATH })
+      );
+      expect(mod.isStubConnectorVerified()).toBe(true);
+    });
+
+    it.each([
+      ['a .slack connector', { connector_type_id: '.slack', config: {} }],
+      [
+        'an .http connector pointing at another host',
+        { connector_type_id: '.http', config: { url: 'https://hooks.example.com/x' } },
+      ],
+      ['an .http connector without a url', { connector_type_id: '.http', config: {} }],
+      [
+        'an .http connector with an unparseable url',
+        { connector_type_id: '.http', config: { url: 'not a url' } },
+      ],
+      ['a connector that cannot be read', 'error' as const],
+    ])('does not trust %s already sitting at the stub id', async (_name, existingConnector) => {
+      const mod = await load();
+      const client = createClient({ postBehavior: 'conflict', existingConnector });
+
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      expect(mod.isStubConnectorVerified()).toBe(false);
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('not trusting'));
+    });
+
+    it('never deletes the stub connector on cleanup, whether created or pre-existing', async () => {
+      for (const postBehavior of ['ok', 'conflict'] as const) {
+        const mod = await load();
+        const client = createClient({ postBehavior });
+
+        await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
+        await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+        expect(
+          calls(client).filter((req) => req.path === STUB_PATH && req.method === 'DELETE')
+        ).toHaveLength(0);
+        jest.resetModules();
+      }
     });
   });
 
@@ -405,7 +459,6 @@ describe('persona_matrix_tools_seed', () => {
         ...['vt-hash-lookup', 'create-case', 'create-channel'].map(
           (id) => `/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`
         ),
-        STUB_PATH,
         PARITY_AGENT_PATH,
         `/api/cases?ids=${encodeURIComponent(JSON.stringify(['case-1', 'case-2']))}`,
       ];

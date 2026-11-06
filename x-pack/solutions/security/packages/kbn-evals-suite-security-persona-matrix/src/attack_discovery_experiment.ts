@@ -17,16 +17,16 @@ import type {
 import { createAdFailureClassEvaluator } from './evaluators/ad_failure_class_evaluator';
 import { createChainCoverageEvaluator } from './evaluators/chain_coverage_evaluator';
 
-/**
- * `@kbn/evals-suite-attack-discovery` exports no dataset or experiment name
- * constants (its names are inline literals), so this suite owns the one dataset
- * name it reports under.
- */
 // Derived from the rubric evaluator so this package needs no direct inference dependency.
 type EvaluationInferenceClient = Parameters<
   typeof createAttackDiscoveryRubricEvaluator
 >[0]['inferenceClient'];
 
+/**
+ * `@kbn/evals-suite-attack-discovery` exports no dataset or experiment name
+ * constants (its names are inline literals), so this suite owns the one dataset
+ * name it reports under.
+ */
 export const CHRYSALIS_AD_DATASET_NAME = 'Attack Discovery Chrysalis kill-chains (generate API)';
 
 /**

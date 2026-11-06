@@ -12,6 +12,7 @@ import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 import { seedProfile } from './chrysalis_seed';
 import type { AgentProfile } from '../agent_profile';
 import { STUB_CONNECTOR_ID } from './stub_connector';
+import { SINK_ORIGIN, startStubSink, type StubSink } from './stub_sink';
 
 export { STUB_CONNECTOR_ID };
 
@@ -152,8 +153,18 @@ const createdToolIds = new Set<string>();
  */
 const createdWorkflowIds = new Set<string>();
 
-/** True when THIS process created the stub connector (a pre-existing one survives cleanup). */
-let createdStubConnector = false;
+/** The local sink this process started, if it did not find one already running. */
+let stubSink: StubSink | undefined;
+
+/**
+ * True only when the connector at STUB_CONNECTOR_ID is known to be an `.http`
+ * connector aimed at the local sink, either because this process just created it
+ * or because an existing one was inspected and matched. WorkflowValidity runs
+ * authored workflows only when this holds.
+ */
+let stubConnectorVerified = false;
+
+export const isStubConnectorVerified = (): boolean => stubConnectorVerified;
 
 /** True when THIS process created the parity agent (400 "already exists" otherwise). */
 let createdParityAgent = false;
@@ -187,27 +198,66 @@ async function createToolIfMissing({
 
 const STUB_CONNECTOR_PATH = `/api/actions/connector/${STUB_CONNECTOR_ID}`;
 
-/**
- * Local sink for the stub connector. Credentials are stripped: `resolveUrl`
- * keeps `user:pass@`, and the connector is created with `hasAuth: false`.
- * The workflow `http` step appends its `path` to this URL, so the request
- * lands on the stack's own Kibana (a 404 there is expected and harmless) and
- * never leaves the stack.
- */
-const getStubConnectorUrl = (kbnClient: KbnClient): string => {
-  const url = new URL(kbnClient.resolveUrl('/api/status'));
-  url.username = '';
-  url.password = '';
-  return url.toString();
+const originOf = (url: unknown): string | undefined => {
+  if (typeof url !== 'string') return undefined;
+  try {
+    return new URL(url).origin;
+  } catch {
+    return undefined;
+  }
 };
+
+/**
+ * Whether the connector already sitting at the stub id is ours to use: an
+ * `.http` connector whose base URL has the sink's origin. Anything else (a real
+ * Slack connector, an `.http` connector aimed at another host, or one that
+ * cannot be read) must not receive authored workflows.
+ */
+async function isExistingStubTrustworthy({ kbnClient, log }: SeedToolsOptions): Promise<boolean> {
+  try {
+    const { data } = await kbnClient.request<{
+      connector_type_id?: string;
+      config?: { url?: string };
+    }>({ method: 'GET', path: STUB_CONNECTOR_PATH });
+    const trusted =
+      data?.connector_type_id === '.http' && originOf(data.config?.url) === SINK_ORIGIN;
+    if (!trusted) {
+      log.warning(
+        `[persona-matrix] connector '${STUB_CONNECTOR_ID}' exists but is type '${data?.connector_type_id}' ` +
+          `with url origin '${originOf(data?.config?.url)}', not the local sink ${SINK_ORIGIN}; ` +
+          'not trusting it, WorkflowValidity will skip its runs'
+      );
+    }
+    return trusted;
+  } catch (error) {
+    log.warning(
+      `[persona-matrix] could not read connector '${STUB_CONNECTOR_ID}'; not trusting it: ${error}`
+    );
+    return false;
+  }
+}
 
 /**
  * A workflow step `type: http` with a `connector-id` executes on an `.http`
  * connector (the execution engine's connector step splits the step type and
  * looks the saved object up by id), so the stub must be `.http`, not a Slack
- * connector. Idempotent: an existing connector with the id is reused.
+ * connector. The `.http` connector joins a step's `path` onto its base URL, so
+ * the base URL is a loopback catch-all sink (`stub_sink.ts`) that answers 200
+ * for every path; the request never leaves the machine.
+ *
+ * The connector is left in place by cleanup: its id is fixed and it is harmless.
+ * An existing connector at the id is inspected before it is reused.
  */
 async function createStubConnectorIfMissing({ kbnClient, log }: SeedToolsOptions): Promise<void> {
+  stubConnectorVerified = false;
+  try {
+    stubSink = await startStubSink();
+  } catch (error) {
+    log.warning(
+      `[persona-matrix] stub sink unavailable, WorkflowValidity will skip runs: ${error}`
+    );
+    return;
+  }
   try {
     await kbnClient.request({
       method: 'POST',
@@ -215,18 +265,20 @@ async function createStubConnectorIfMissing({ kbnClient, log }: SeedToolsOptions
       body: {
         name: 'persona-matrix local sink (stub)',
         connector_type_id: '.http',
-        config: { url: getStubConnectorUrl(kbnClient), hasAuth: false },
+        config: { url: SINK_ORIGIN, hasAuth: false },
         secrets: {},
       },
     });
-    createdStubConnector = true;
+    stubConnectorVerified = true;
     log.info(`[persona-matrix] created stub connector '${STUB_CONNECTOR_ID}'`);
   } catch (error) {
-    if (isAlreadyExists(error)) {
-      log.info(`[persona-matrix] stub connector '${STUB_CONNECTOR_ID}' already exists, reusing`);
-      return;
+    if (!isAlreadyExists(error)) {
+      throw error;
     }
-    throw error;
+    stubConnectorVerified = await isExistingStubTrustworthy({ kbnClient, log });
+    if (stubConnectorVerified) {
+      log.info(`[persona-matrix] stub connector '${STUB_CONNECTOR_ID}' already exists, reusing`);
+    }
   }
 }
 
@@ -497,19 +549,11 @@ export async function cleanupPersonaMatrixTools({
       });
   }
 
-  if (createdStubConnector) {
-    await kbnClient
-      .request({ method: 'DELETE', path: STUB_CONNECTOR_PATH })
-      .then(() => {
-        createdStubConnector = false;
-      })
-      .catch((error) => {
-        const status = (error as { status?: number })?.status;
-        if (status !== 404) {
-          log.warning(`[persona-matrix] failed to delete stub connector: ${error}`);
-        }
-      });
-  }
+  // The stub connector stays: its id is fixed and it is harmless. Only the
+  // sink this process started is stopped.
+  const sink = stubSink;
+  stubSink = undefined;
+  await sink?.close();
 
   if (createdParityAgent) {
     await kbnClient
