@@ -11,6 +11,7 @@ import { EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
+import { LastRunHint } from './last_run_hint';
 import { toReferenceIconType } from '../lib/build_data_reference_catalog';
 import type { ReferenceChipTone } from '../lib/reference_chip_styles';
 import { getReferenceChipCss } from '../lib/reference_chip_styles';
@@ -87,7 +88,7 @@ export function ReferenceChip({
   return hint ? (
     // The anchor must be able to shrink with the chip, or a long path can never truncate.
     <EuiToolTip
-      content={hint}
+      content={<LastRunHint hint={hint} expression={expression} />}
       disableScreenReaderOutput
       anchorProps={{
         css: { display: 'inline-flex', minInlineSize: 0, maxInlineSize: '100%' },

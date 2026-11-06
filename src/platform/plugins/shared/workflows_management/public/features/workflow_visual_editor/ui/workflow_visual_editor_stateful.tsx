@@ -50,6 +50,7 @@ import {
   MIN_VISIBLE_CANVAS_PX,
 } from './canvas_config_panel_shell';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
+import { LastRunWorkflowIdProvider } from './last_run_hint';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
@@ -1319,22 +1320,24 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               { defaultMessage: 'Step configuration panel' }
             )}
           >
-            <StepConfigPanel
-              mode={panel.origin}
-              stepType={panel.stepType}
-              actionLabel={panel.actionLabel}
-              initialFragment={panel.fragment}
-              connectors={connectors}
-              workflowDefinition={workflow}
-              resolveStepScope={resolveStepScope}
-              onClose={handleStepClose}
-              onRevert={handleStepRevert}
-              isFallbackStep={panelIsFallbackStep}
-              onExpandedChange={setFieldEditorExpanded}
-              onFragmentChange={handleStepDraftChange}
-              onYamlEditorMount={stepYamlEditorMount}
-              runControls={referenceTreeRunControls}
-            />
+            <LastRunWorkflowIdProvider value={workflowId}>
+              <StepConfigPanel
+                mode={panel.origin}
+                stepType={panel.stepType}
+                actionLabel={panel.actionLabel}
+                initialFragment={panel.fragment}
+                connectors={connectors}
+                workflowDefinition={workflow}
+                resolveStepScope={resolveStepScope}
+                onClose={handleStepClose}
+                onRevert={handleStepRevert}
+                isFallbackStep={panelIsFallbackStep}
+                onExpandedChange={setFieldEditorExpanded}
+                onFragmentChange={handleStepDraftChange}
+                onYamlEditorMount={stepYamlEditorMount}
+                runControls={referenceTreeRunControls}
+              />
+            </LastRunWorkflowIdProvider>
           </KibanaSectionErrorBoundary>
         </CanvasConfigPanelShell>
       )}
