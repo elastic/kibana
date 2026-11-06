@@ -26,11 +26,13 @@ interface ExplainErrorResponse {
 
 const MAX_ERROR_LENGTH = 8000;
 
+// Only an available answer is kept. HttpStart outlives a visit to Discover, so a user who sets up a
+// connector or a license after seeing an error must not stay stuck on an old "unavailable".
 const availability = new WeakMap<object, Promise<boolean>>();
 
 /**
- * Tells whether an AI connector is available, so the action can be hidden when it is not.
- * The answer is kept per http service, so the server is asked once per page.
+ * Tells whether the action can be used: an AI connector exists and the license allows it. A
+ * positive answer is kept per http service, so the server is asked once per page for it.
  */
 export function checkErrorExplanationAvailable(http: Pick<HttpStart, 'get'>): Promise<boolean> {
   const known = availability.get(http);
@@ -41,7 +43,13 @@ export function checkErrorExplanationAvailable(http: Pick<HttpStart, 'get'>): Pr
   const request = http
     .get<{ available?: boolean }>(EXPLAIN_ERROR_ROUTE)
     .then((response) => response.available === true)
-    .catch(() => false);
+    .catch(() => false)
+    .then((isAvailable) => {
+      if (!isAvailable) {
+        availability.delete(http);
+      }
+      return isAvailable;
+    });
   availability.set(http, request);
   return request;
 }

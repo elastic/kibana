@@ -24,14 +24,14 @@ import { registerGetTimeFieldRoute } from './get_timefield';
 import { registerGetSourceInfoRoute } from './get_source_info';
 import { registerNLtoESQLRoute } from './nl_to_esql_route';
 import { registerSuggestFixRoute } from './suggest_fix_route';
+import type { ExplainErrorRouteOptions } from './explain_error_route';
 import { registerExplainErrorRoute } from './explain_error_route';
-import type { DeploymentInfo } from '../deployment_info';
 
 export const registerRoutes = (
   setup: CoreSetup<EsqlServerPluginStart>,
   extensionsRegistry: ESQLExtensionsRegistry,
   initContext: PluginInitializerContext,
-  deployment?: DeploymentInfo
+  explainError: ExplainErrorRouteOptions
 ) => {
   const router = setup.http.createRouter();
 
@@ -48,5 +48,5 @@ export const registerRoutes = (
   registerGetSourceInfoRoute(router, initContext);
   registerNLtoESQLRoute(router, setup.getStartServices, initContext);
   registerSuggestFixRoute(router, setup.getStartServices, initContext);
-  registerExplainErrorRoute(router, setup.getStartServices, initContext, deployment);
+  registerExplainErrorRoute(router, setup.getStartServices, initContext, explainError);
 };

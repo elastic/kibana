@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { EXPLAIN_ERROR_ROUTE } from '@kbn/esql-types';
 import { registerExplainErrorRoute } from './explain_error_route';
@@ -20,7 +21,10 @@ jest.mock('./helpers', () => ({
 
 const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
-function buildMocks(deployment?: DeploymentInfo) {
+function buildMocks({
+  deployment,
+  hasEnterpriseLicense = true,
+}: { deployment?: DeploymentInfo; hasEnterpriseLicense?: boolean } = {}) {
   const handler = jest.fn();
   const availabilityHandler = jest.fn();
   const router = {
@@ -44,7 +48,7 @@ function buildMocks(deployment?: DeploymentInfo) {
     router as unknown as IRouter,
     getStartServices as unknown as CoreSetup<EsqlServerPluginStart>['getStartServices'],
     context as unknown as PluginInitializerContext,
-    deployment
+    { deployment, hasEnterpriseLicense: async () => hasEnterpriseLicense }
   );
 
   return {
@@ -59,6 +63,7 @@ function buildMocks(deployment?: DeploymentInfo) {
         errorMessage: 'circuit_breaking_exception - Data too large',
       },
       headers: {},
+      events: { aborted$: new Subject<void>() },
     },
   };
 }
@@ -176,8 +181,7 @@ describe('registerExplainErrorRoute', () => {
 
   it('tells the model where Elasticsearch runs, when it is known', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks({
-      type: 'ech',
-      version: '9.7.0',
+      deployment: { type: 'ech', version: '9.7.0' },
     });
     resolveConnectorId.mockResolvedValue('connector-1');
     const invoke = modelReturning({ cause: 'resources', summary: 'x', suggestions: [], query: '' });
@@ -199,5 +203,45 @@ describe('registerExplainErrorRoute', () => {
 
     const [, user] = invoke.mock.calls[0][0] as Array<[string, string]>;
     expect(user[1]).not.toContain('<environment>');
+  });
+
+  describe('license', () => {
+    it('reports unavailable without an enterprise license, even with a connector', async () => {
+      const { availabilityHandler, requestHandlerContext, request, response } = buildMocks({
+        hasEnterpriseLicense: false,
+      });
+      resolveConnectorId.mockResolvedValue('connector-1');
+
+      await availabilityHandler(requestHandlerContext, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { available: false } });
+      expect(resolveConnectorId).not.toHaveBeenCalled();
+    });
+
+    it('refuses to explain without an enterprise license, without calling the model', async () => {
+      const { handler, requestHandlerContext, request, response } = buildMocks({
+        hasEnterpriseLicense: false,
+      });
+      resolveConnectorId.mockResolvedValue('connector-1');
+
+      await handler(requestHandlerContext, request, response);
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(createScopedModel).not.toHaveBeenCalled();
+    });
+  });
+
+  it('stops the model when the request is aborted', async () => {
+    const { handler, requestHandlerContext, request, response } = buildMocks();
+    resolveConnectorId.mockResolvedValue('connector-1');
+    const invoke = modelReturning({ cause: 'resources', summary: 'x', suggestions: [], query: '' });
+
+    await handler(requestHandlerContext, request, response);
+    const { signal } = invoke.mock.calls[0][1] as { signal: AbortSignal };
+    expect(signal.aborted).toBe(false);
+
+    request.events.aborted$.next();
+    request.events.aborted$.complete();
+    expect(signal.aborted).toBe(true);
   });
 });

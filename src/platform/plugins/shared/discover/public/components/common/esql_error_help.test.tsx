@@ -8,24 +8,14 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { HttpStart } from '@kbn/core/public';
-import { EXPLAIN_ERROR_ROUTE } from '@kbn/esql-types';
 import { EsqlErrorHelp } from './esql_error_help';
 
-const buildHttp = ({
-  available = true,
-  response,
-  failure,
-}: {
-  available?: boolean;
-  response?: unknown;
-  failure?: unknown;
-}) => ({
-  get: jest.fn().mockResolvedValue({ available }),
+const buildHttp = ({ response, failure }: { response?: unknown; failure?: unknown }) => ({
   post: jest.fn(() => (failure ? Promise.reject(failure) : Promise.resolve(response))),
 });
 
@@ -43,14 +33,6 @@ const renderHelp = (
   );
 
 describe('EsqlErrorHelp', () => {
-  it('offers nothing when no AI connector is available', async () => {
-    const http = buildHttp({ available: false });
-    renderHelp(http);
-
-    await waitFor(() => expect(http.get).toHaveBeenCalledWith(EXPLAIN_ERROR_ROUTE));
-    expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
-  });
-
   it('sends the query and the error, and shows the summary and suggestions', async () => {
     const http = buildHttp({
       response: {

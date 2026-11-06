@@ -11,6 +11,8 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { schema } from '@kbn/config-schema';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { firstValueFrom } from 'rxjs';
 import { getDeploymentInfo } from './deployment_info';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
@@ -22,7 +24,11 @@ export class EsqlServerPlugin
     Plugin<
       EsqlServerPluginSetup,
       void,
-      { contentManagement: ContentManagementServerSetup; cloud?: CloudSetup },
+      {
+        contentManagement: ContentManagementServerSetup;
+        cloud?: CloudSetup;
+        licensing?: LicensingPluginSetup;
+      },
       EsqlServerPluginStart
     >
 {
@@ -35,7 +41,11 @@ export class EsqlServerPlugin
 
   public setup(
     core: CoreSetup<EsqlServerPluginStart, void>,
-    plugins: { contentManagement: ContentManagementServerSetup; cloud?: CloudSetup }
+    plugins: {
+      contentManagement: ContentManagementServerSetup;
+      cloud?: CloudSetup;
+      licensing?: LicensingPluginSetup;
+    }
   ) {
     const { initContext } = this;
 
@@ -49,12 +59,17 @@ export class EsqlServerPlugin
       }),
     });
 
-    registerRoutes(
-      core,
-      this.extensionsRegistry,
-      initContext,
-      getDeploymentInfo(initContext.env, plugins.cloud)
-    );
+    registerRoutes(core, this.extensionsRegistry, initContext, {
+      deployment: getDeploymentInfo(initContext.env, plugins.cloud),
+      // Without the licensing plugin the license cannot be checked, so the feature stays off.
+      hasEnterpriseLicense: async () => {
+        if (!plugins.licensing) {
+          return false;
+        }
+        const license = await firstValueFrom(plugins.licensing.license$);
+        return license.isActive && license.hasAtLeast('enterprise');
+      },
+    });
 
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,

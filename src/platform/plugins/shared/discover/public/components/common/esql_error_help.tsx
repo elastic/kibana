@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsqlErrorExplanation } from './explain_esql_error';
-import { checkErrorExplanationAvailable, explainEsqlError } from './explain_esql_error';
+import { explainEsqlError } from './explain_esql_error';
 
 type Stage =
   | { kind: 'idle' }
@@ -37,8 +37,8 @@ const leftAligned = css`
 `;
 
 /**
- * Offers to explain an ES|QL error with the AI, when a connector exists, and to put a corrected
- * query in the editor when the error can be fixed that way.
+ * Offers to explain an ES|QL error with the AI, and to put a corrected query in the editor when
+ * the error can be fixed that way. The caller shows it only when an AI connector is available.
  */
 export function EsqlErrorHelp({
   http,
@@ -46,7 +46,7 @@ export function EsqlErrorHelp({
   errorMessage,
   onApplyQuery,
 }: {
-  http: Pick<HttpStart, 'get' | 'post'>;
+  http: Pick<HttpStart, 'post'>;
   /** The query that failed. */
   query: string;
   errorMessage: string;
@@ -54,20 +54,7 @@ export function EsqlErrorHelp({
   onApplyQuery?: (query: string) => void;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
-  const [isAvailable, setIsAvailable] = useState(false);
   const controller = useRef<AbortController | undefined>();
-
-  useEffect(() => {
-    let isCurrent = true;
-    checkErrorExplanationAvailable(http).then((available) => {
-      if (isCurrent) {
-        setIsAvailable(available);
-      }
-    });
-    return () => {
-      isCurrent = false;
-    };
-  }, [http]);
 
   const cancel = () => {
     controller.current?.abort();
@@ -110,10 +97,6 @@ export function EsqlErrorHelp({
     cancel();
     setStage({ kind: 'idle' });
   };
-
-  if (!isAvailable) {
-    return null;
-  }
 
   if (stage.kind === 'idle') {
     return (
