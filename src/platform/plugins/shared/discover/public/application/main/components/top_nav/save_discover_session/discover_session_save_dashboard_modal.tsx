@@ -93,7 +93,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
       error={
         <FormattedMessage
           id="discover.topNav.saveModal.timeRestoreErrorMessage"
-          defaultMessage='Unable to store time with this session because no time-based data view is available. Check your data views or turn off "Store time with Discover session" and try again.'
+          defaultMessage='Unable to store time with this session because no time-based data source is available. Check your data sources or turn off "Store time with Discover session" and try again.'
         />
       }
       helpText={
