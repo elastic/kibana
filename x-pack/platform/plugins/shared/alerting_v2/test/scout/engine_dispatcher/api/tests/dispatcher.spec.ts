@@ -1971,4 +1971,38 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       });
     }
   );
+
+  apiTest(
+    'reports the dispatch activity of the window in the snapshot telemetry',
+    async ({ apiServices }) => {
+      // `test-workflow` does not exist in this environment, so np-1 fails every dispatch with
+      // `workflow_not_found`: the only outcome this spec can rely on. The event log is shared with
+      // the other specs of this config, which may leave successful dispatches in it, so only
+      // what this test adds is asserted, against a baseline taken beforehand.
+      const baseline = await apiServices.alertingV2.telemetry.runAndWaitForState();
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-series-telemetry',
+          episodeId: 'rule-1-series-telemetry-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: relativeTime(10),
+        }),
+      ]);
+      await expectStableCount(apiServices, 1, { ruleId: 'rule-1', actionTypes: ['fire'] });
+
+      const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
+
+      expect(state.has_errors).toBe(false);
+      expect(
+        state.dispatcher_dispatch_failures_count_by_reason_24hr?.workflow_not_found ?? 0
+      ).toBeGreaterThan(
+        baseline.dispatcher_dispatch_failures_count_by_reason_24hr?.workflow_not_found ?? 0
+      );
+      expect(state.dispatcher_policies_count_by_activity_24hr?.failing).toBeGreaterThanOrEqual(1);
+      expect(state.dispatcher_policies_count_by_activity_24hr?.broken).toBeGreaterThanOrEqual(1);
+    }
+  );
 });

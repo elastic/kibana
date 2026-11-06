@@ -55,6 +55,19 @@ export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
 export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
 
 /**
+ * Who owns the proposal's lifecycle: `workflow` parks a `system-create-proposal`
+ * execution behind it and that gate writes the decision, `none` is written and
+ * decided by the service directly.
+ *
+ * Set once at creation and never changed. Readers branch only on `none`, so a
+ * document written before the field existed — and anything else — takes the
+ * gated path, which keeps refusing a proposal without a `workflowExecutionId`
+ * instead of reading the omission as "gateless".
+ */
+export const proposalGateSchema = lazySchema(() => z.enum(['workflow', 'none']));
+export type ProposalGate = z.infer<typeof proposalGateSchema>;
+
+/**
  * Which feature produced the proposal, so a queue can show its own and not
  * another's. Deliberately not "machine or human" — `createdBy` already records
  * the actor behind it.
@@ -227,6 +240,12 @@ export const proposalSchema = lazySchema(() =>
      */
     previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
+    /**
+     * Which lifecycle wrote this proposal. Absent on every document written
+     * before the field existed, which is why absence reads as `workflow`.
+     * Not accepted on any request body: the creator picks it.
+     */
+    gate: proposalGateSchema.optional(),
     /** Gating execution to resume. Absent when no workflow is waiting. */
     workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
     /**
@@ -438,14 +457,20 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
- * A to-do for a human: something the analyst carries out themselves, so approving it records that
- * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
- * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
- * producer states it explicitly, and a proposal without an action that still asks for permission
- * (to run an analysis, say) keeps Approve/Decline.
+ * Manual work for the analyst (`category: todo`): approving records that they did it.
+ * UI offers "Mark as applied" (with Decline). Keyed on category, not missing action —
+ * a proposal without an action can still ask for permission and keep Approve/Decline.
  */
 export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
   proposal.category === PROPOSAL_CATEGORY_TODO;
+
+/**
+ * No gate workflow owns this proposal: the service wrote it and the service
+ * decides it, synchronously. Only an explicit `none` qualifies, so an older
+ * document stays gated rather than being read as gateless by omission.
+ */
+export const isGatelessProposal = (proposal: Pick<Proposal, 'gate'>): boolean =>
+  proposal.gate === 'none';
 
 /**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly

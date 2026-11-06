@@ -916,6 +916,42 @@ describe('useAgentBasedDeploy — updating an existing package policy', () => {
     expect(mockDeployToExistingAgentPolicies).not.toHaveBeenCalled();
   });
 
+  it('passes the onboarding deployment id to the cleanup, so Fleet lets it change the policies', async () => {
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: ['pkg-policy-A'], toUpdate: [] });
+    makeFlowMock({
+      onboardingDeploymentId: 'so-id-existing',
+      policyIdsByInstance: { gone: 'pkg-policy-A' },
+      pendingCleanupPolicyIds: { gone: 'pkg-policy-A' },
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCleanupAgentBasedPolicies.mock.calls[0][0].onboardingDeploymentId).toBe(
+      'so-id-existing'
+    );
+  });
+
+  it('passes the onboarding deployment id to policy updates, so Fleet lets them change the policies', async () => {
+    makeFlowMock({
+      onboardingDeploymentId: 'so-id-existing',
+      policyIdsByInstance: { serviceA: 'pkg-policy-A' },
+      isDirty: true,
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([bundledGroup]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateAgentBasedPolicy.mock.calls[0][2].onboardingDeploymentId).toBe(
+      'so-id-existing'
+    );
+  });
+
   it('writes the policy once when it is changed and a service is added', async () => {
     makeFlowMock({
       policyIdsByInstance: { serviceA: 'pkg-policy-A' },

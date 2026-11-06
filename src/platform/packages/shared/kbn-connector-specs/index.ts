@@ -9,6 +9,7 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
+export type { RelayActionClient } from './src/relay_action_client';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
@@ -32,6 +33,7 @@ export {
   type ConnectorTypeSkill,
 } from './src/connector_skills';
 export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
+export { getSandboxHosts } from './src/get_sandbox_hosts';
 export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,

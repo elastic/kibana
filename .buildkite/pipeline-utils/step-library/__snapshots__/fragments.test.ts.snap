@@ -67,6 +67,7 @@ exports[`pull_request fragments pull_request/agent_builder_smoke_tests 1`] = `
         },
         {
           "agents": {
+            "diskType": "pd-balanced",
             "machineType": "n2-standard-4",
             "preemptible": true,
             "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -122,6 +123,7 @@ exports[`pull_request fragments pull_request/ai_infra_gen_ai 1`] = `
       "steps": [
         {
           "agents": {
+            "diskType": "pd-balanced",
             "machineType": "n2-standard-4",
             "preemptible": true,
             "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -184,7 +186,6 @@ exports[`pull_request fragments pull_request/api_contracts 1`] = `
           },
         ],
       },
-      "soft_fail": true,
       "timeout_in_minutes": 30,
     },
   ],
@@ -544,9 +545,6 @@ exports[`pull_request fragments pull_request/check_oas_snapshot 1`] = `
         "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c",
       },
       "command": ".buildkite/scripts/steps/checks/capture_oas_snapshot.sh",
-      "depends_on": [
-        "build",
-      ],
       "env": {
         "CHECK_GATE": "true",
       },
@@ -626,6 +624,7 @@ exports[`pull_request fragments pull_request/cps_testing 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-8",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -785,6 +784,7 @@ exports[`pull_request fragments pull_request/fleet_cypress 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1027,6 +1027,7 @@ exports[`pull_request fragments pull_request/response_ops 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1061,6 +1062,7 @@ exports[`pull_request fragments pull_request/response_ops_cases 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1094,6 +1096,7 @@ exports[`pull_request fragments pull_request/scout_fleet_real_agent 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-highmem-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1127,6 +1130,7 @@ exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] 
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1155,6 +1159,7 @@ exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1189,6 +1194,7 @@ exports[`pull_request fragments pull_request/security_solution/ai4dsoc 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1224,6 +1230,7 @@ exports[`pull_request fragments pull_request/security_solution/asset_inventory 1
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1251,6 +1258,7 @@ exports[`pull_request fragments pull_request/security_solution/asset_inventory 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1286,6 +1294,7 @@ exports[`pull_request fragments pull_request/security_solution/cloud_security_po
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1313,6 +1322,7 @@ exports[`pull_request fragments pull_request/security_solution/cloud_security_po
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1348,6 +1358,7 @@ exports[`pull_request fragments pull_request/security_solution/cspm_agentless_sc
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-8",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1381,6 +1392,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "enableNestedVirtualization": true,
         "machineType": "n2-standard-4",
         "preemptible": true,
@@ -1401,6 +1413,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "enableNestedVirtualization": true,
         "machineType": "n2-standard-4",
         "preemptible": true,
@@ -1422,6 +1435,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1441,6 +1455,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1466,6 +1481,7 @@ exports[`pull_request fragments pull_request/security_solution/defend_workflows 
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "enableNestedVirtualization": true,
         "machineType": "n2-highmem-4",
         "preemptible": true,
@@ -1494,6 +1510,7 @@ exports[`pull_request fragments pull_request/security_solution/defend_workflows 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "enableNestedVirtualization": true,
         "machineType": "n2-highmem-4",
         "preemptible": true,
@@ -1530,6 +1547,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1558,6 +1576,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1586,6 +1605,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1613,6 +1633,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1647,6 +1668,7 @@ exports[`pull_request fragments pull_request/security_solution/entity_analytics 
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1675,6 +1697,7 @@ exports[`pull_request fragments pull_request/security_solution/entity_analytics 
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1709,6 +1732,7 @@ exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1736,6 +1760,7 @@ exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1816,6 +1841,7 @@ exports[`pull_request fragments pull_request/security_solution/investigations 1`
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1843,6 +1869,7 @@ exports[`pull_request fragments pull_request/security_solution/investigations 1`
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1878,6 +1905,7 @@ exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-highmem-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1905,6 +1933,7 @@ exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-highmem-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1940,6 +1969,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1968,6 +1998,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -1996,6 +2027,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2024,6 +2056,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2052,6 +2085,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2080,6 +2114,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2107,6 +2142,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2134,6 +2170,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2161,6 +2198,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2188,6 +2226,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",
@@ -2222,6 +2261,7 @@ exports[`pull_request fragments pull_request/security_solution/scout_edr_real_fl
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "enableNestedVirtualization": true,
         "machineType": "n2-highmem-4",
         "preemptible": true,
@@ -2249,6 +2289,7 @@ exports[`pull_request fragments pull_request/security_solution/scout_edr_real_fl
     },
     {
       "agents": {
+        "diskType": "pd-balanced",
         "enableNestedVirtualization": true,
         "machineType": "n2-highmem-4",
         "preemptible": true,
@@ -2393,6 +2434,7 @@ exports[`pull_request fragments pull_request/workflows_oom_testing 1`] = `
   "steps": [
     {
       "agents": {
+        "diskType": "pd-balanced",
         "machineType": "n2-standard-4",
         "preemptible": true,
         "spotZones": "us-central1-f,us-central1-c,us-central1-a",

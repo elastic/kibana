@@ -39,7 +39,6 @@ import type {
   ToolStateManager,
   WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
-import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -365,7 +364,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
-    todoStateManager: createTodoStateManager(),
     events: {
       emit: jest.fn(),
     },
@@ -388,7 +386,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
@@ -465,7 +462,6 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
@@ -512,7 +508,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
-    todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     conversationEventsService: createConversationEventTypesServiceMock(),
@@ -528,7 +523,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,

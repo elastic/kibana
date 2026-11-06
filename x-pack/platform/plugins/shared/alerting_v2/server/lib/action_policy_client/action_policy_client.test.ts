@@ -930,7 +930,7 @@ describe('ActionPolicyClient', () => {
       });
 
       const patch = (data: UpdateActionPolicyData) =>
-        client.updateActionPolicy({ data, options: { id: 'policy-leaf' } });
+        client.updateActionPolicy({ data, id: 'policy-leaf' });
 
       it('sets one matcher leaf and keeps its sibling', async () => {
         const res = await patch({ matcher: { tags: ['staging'] } });
@@ -1044,7 +1044,7 @@ describe('ActionPolicyClient', () => {
           grouping: null,
           throttle: null,
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: original-policy');
@@ -1104,7 +1104,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.updateActionPolicy({
         data: { throttle: { strategy: 'on_status_change' } },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(storedByUpdate().throttle).toStrictEqual({ strategy: 'on_status_change' });
@@ -1147,7 +1147,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.updateActionPolicy({
         data: { throttle: { strategy: 'per_status_interval', interval: '5m' } },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -1195,7 +1195,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: updated-policy');
@@ -1268,7 +1268,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       await Promise.resolve();
@@ -1322,7 +1322,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-decrypt-fail' },
+        id: 'policy-id-update-decrypt-fail',
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1372,7 +1372,7 @@ describe('ActionPolicyClient', () => {
 
       await client.updateActionPolicy({
         data: { name: 'renamed-policy' },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -1430,7 +1430,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
@@ -1476,7 +1476,7 @@ describe('ActionPolicyClient', () => {
             name: 'updated-policy',
             destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           },
-          options: { id: 'policy-id-update-throw' },
+          id: 'policy-id-update-throw',
         })
       ).rejects.toThrow('storage error');
 
@@ -1526,7 +1526,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-no-key' },
+        id: 'policy-id-update-no-key',
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
@@ -1536,7 +1536,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [] },
-          options: { id: 'policy-id-update-invalid' },
+          id: 'policy-id-update-invalid',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -1557,7 +1557,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [{ type: 'workflow', id: 'some-workflow' }] },
-          options: { id: 'policy-id-update-404' },
+          id: 'policy-id-update-404',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
@@ -3108,7 +3108,7 @@ describe('ActionPolicyClient', () => {
         () =>
           client.updateActionPolicy({
             data: { name: 'renamed' },
-            options: { id: 'policy-id-update-1' },
+            id: 'policy-id-update-1',
           }),
       ],
       ['upsertActionPolicy', () => client.upsertActionPolicy({ id: 'policy-1', data: validData })],
@@ -3243,7 +3243,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
-          options: { id: 'policy-version-conflict' },
+          id: 'policy-version-conflict',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -3647,7 +3647,7 @@ describe('ActionPolicyClient', () => {
 
       await client.updateActionPolicy({
         data: { grouping: null, throttle: null },
-        options: { id: 'policy-updated' },
+        id: 'policy-updated',
       });
 
       expect(eventPublisher.emitActionPolicyUpdated).toHaveBeenCalledTimes(1);
@@ -3669,7 +3669,7 @@ describe('ActionPolicyClient', () => {
       );
 
       await expect(
-        client.updateActionPolicy({ data: { name: 'renamed' }, options: { id: 'policy-conflict' } })
+        client.updateActionPolicy({ data: { name: 'renamed' }, id: 'policy-conflict' })
       ).rejects.toMatchObject({ output: { statusCode: 409 } });
 
       expect(eventBus.publish).not.toHaveBeenCalled();
