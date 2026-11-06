@@ -9,7 +9,7 @@
  * Strict expectations for `user.ts` identity + extraction rules, aligned with
  * `test/scout/common/es_archives/logs/data.json` documents (unless `ingestSource` is set).
  *
- * Used by Scout `dsl_translation` / `painless_translation` and by
+ * Used by Scout query translation tests and by
  * `common/domain/euid/user_ts_extraction_cases.test.ts` to guard against drift.
  */
 
@@ -17,7 +17,7 @@ import {
   ENTITY_CONFIDENCE,
   type EntityConfidence,
   USER_ENTITY_NAMESPACE,
-} from '../../../../../common/domain/definitions/user_entity_constants';
+} from '../../common/domain/definitions/user_entity_constants';
 
 export interface UserTsExpectedMeta {
   namespace: string;

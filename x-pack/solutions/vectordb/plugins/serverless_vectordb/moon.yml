@@ -48,6 +48,7 @@ tags:
   - group-vectordb
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
