@@ -117,6 +117,17 @@ export class EdotBrowserClient {
     return 'browser.brands' in this.resourceAttributes;
   }
 
+  /**
+   * The JavaScript engine, which decides how the browser writes stack traces. A browser that isn't
+   * Chromium or Firefox is taken for Safari, the other one that is still around.
+   */
+  public get browserEngine(): 'chromium' | 'firefox' | 'webkit' {
+    if (this.isChromium) {
+      return 'chromium';
+    }
+    return this.resourceAttributes['browser.name'] === 'Firefox' ? 'firefox' : 'webkit';
+  }
+
   public get hasSession(): boolean {
     return Boolean(this.options.sessionId);
   }
@@ -283,7 +294,8 @@ export class EdotBrowserClient {
     pageX: number;
     pageY: number;
     tagName: string;
-    cssSelector: string;
+    /** Unset when the instrumentation can't build a selector for the element. */
+    cssSelector?: string;
     button?: MouseButton;
     /** The element's `data-otel-*` attributes, without the prefix. */
     otelAttributes?: Record<string, string>;
@@ -294,18 +306,30 @@ export class EdotBrowserClient {
       'browser.tag_name': tagName,
       'browser.element.attributes': otelAttributes,
       'browser.mouse_event.button': button,
-      'browser.css_selector': cssSelector,
+      ...(cssSelector !== undefined ? { 'browser.css_selector': cssSelector } : {}),
     });
   }
 
-  exception({ type, message, stacktrace }: { type: string; message: string; stacktrace: string }) {
+  /**
+   * An uncaught exception. Only errors have a type and a stack trace: a thrown string or a rejected
+   * promise with a plain value has a message and nothing else.
+   */
+  exception({
+    type,
+    message,
+    stacktrace,
+  }: {
+    type?: string;
+    message: string;
+    stacktrace?: string;
+  }) {
     return this.log(
       'exception',
       'errors',
       {
-        'exception.type': type,
+        ...(type !== undefined ? { 'exception.type': type } : {}),
         'exception.message': message,
-        'exception.stacktrace': stacktrace,
+        ...(stacktrace !== undefined ? { 'exception.stacktrace': stacktrace } : {}),
       },
       SEVERITY_ERROR
     );

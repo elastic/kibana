@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { preemptibleAgent, retry } from '../presets.ts';
+import { retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const buildProjectSteps = (): readonly Step[] => [
@@ -16,7 +16,7 @@ export const buildProjectSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/artifacts/docker_image.sh',
     label: 'Build Project Image',
     key: 'build_project_image',
-    agents: preemptibleAgent('n2-standard-16'),
+    agents: spotAgent('n2-standard-16', spotZones.n2),
     timeout_in_minutes: 90,
     soft_fail: true,
     retry: retry.agentLoss,
