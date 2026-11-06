@@ -40,8 +40,10 @@ const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
 const MAX_TOOL_CALL_RESULT_CHARS = 2_000;
 const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
-const MAX_INVESTIGATION_PAGES = 8;
-const MAX_INVESTIGATION_PAGE_CHARS = 3_000;
+const MAX_PAGE_BODIES = 8;
+const MAX_PAGE_BODY_CHARS = 3_000;
+/** A shorter slug would match unrelated words in the transcript. */
+const MIN_SLUG_CHARS_TO_MATCH = 4;
 
 export interface CortexEditProposal {
   action: CortexEditAction;
@@ -57,8 +59,12 @@ export type ProposeCortexEdits = (input: {
   catalog: CortexPageSummary[];
   /** The conversation being learned from, so the catalog can mark the pages it wrote. */
   currentConversationId?: string;
-  /** Bodies of the pages this conversation wrote, so a recovery round can check their claims. */
-  investigationPages?: Array<{ slug: string; entity_type: CortexEntityType; content: string }>;
+  /**
+   * Content of the pages the round is likely to rewrite or judge: the ones this conversation wrote
+   * and the ones the transcript names. The model only knows what it is shown, so a rewrite of a page
+   * it never saw would drop what the page already holds.
+   */
+  pageBodies?: Array<{ slug: string; entity_type: CortexEntityType; content: string }>;
 }) => Promise<{ edits: CortexEditProposal[] }>;
 
 const isEntityType = (value: unknown): value is CortexEntityType =>
@@ -244,7 +250,7 @@ export const createLlmProposeCortexEdits = ({
 }: {
   inferenceClient: BoundInferenceClient;
 }): ProposeCortexEdits => {
-  return async ({ transcript, catalog, currentConversationId, investigationPages = [] }) => {
+  return async ({ transcript, catalog, currentConversationId, pageBodies = [] }) => {
     const catalogLines =
       catalog.length === 0
         ? '(empty)'
@@ -263,10 +269,10 @@ export const createLlmProposeCortexEdits = ({
             })
             .join('\n');
 
-    const investigationPageLines = investigationPages
+    const pageBodyLines = pageBodies
       .map(
         ({ slug, entity_type: entityType, content }) =>
-          `### ${entityType}/${slug}\n${content.slice(0, MAX_INVESTIGATION_PAGE_CHARS)}`
+          `### ${entityType}/${slug}\n${content.slice(0, MAX_PAGE_BODY_CHARS)}`
       )
       .join('\n\n');
 
@@ -289,7 +295,7 @@ What this round is:
 The transcript opens with a "## Round" line that says which kind of round it is.
 - initial — an investigation. Learn the durable structure and tool behaviour it established.
 - follow_up — the user's turn follows an earlier answer, shown under "## Previous answer". It may correct that answer or point at something it missed. A correction from a person outranks a single investigation: turn it into durable knowledge — what to check for this kind of symptom, where it lives (only streams, indices, fields or components that appear in the user's text or the tool calls), and how components relate — and put it under the right type and section. If it shows that an existing page is wrong, rewrite or archive that page.
-- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog were written by that investigation, and their content follows the catalog under "Pages from this investigation". When the assistant's answer says the cause was confirmed, corroborate the pages that state it. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
+- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog were written by that investigation, and their content follows the catalog under "Existing page content". When the assistant's answer says the cause was confirmed, corroborate the pages that state it. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
 
 Services and integrations:
 - When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
@@ -307,6 +313,7 @@ Rules:
 - Prefer corroborating an existing page over creating a near-duplicate.
 - New pages use action "upsert" with markdown content. Keep content short and reusable.
 - Use "corroborate" when the investigation confirms an existing page without changing it.
+- An "upsert" replaces the whole page. When the page's content is shown under "Existing page content", start from it: keep every section, fact, field name and query convention that the transcript does not contradict, add what the transcript establishes, and change only what it proves wrong. Never shorten a page by dropping knowledge that is still true, and never drop a section it has. If the transcript adds nothing to a page, "corroborate" it instead of rewriting it.
 - A slug names a recurring condition, never one occurrence of it. Never put a date, region, cloud, availability zone, cluster, node, or host in a slug — those belong in the page content. "constructor-plan-failed-capacity" is a slug; "constructor-plan-failed-capacity-aws-us-east-1-2026-09-22" is not.
 - When this investigation is another instance of a condition the catalog already documents, "corroborate" that page — and "upsert" the same slug when there is genuinely new detail to fold in. Never open a second page for the same mechanism because the date, region, or cluster differs.
 - Use "archive" only when the transcript shows a page is wrong or obsolete.
@@ -314,9 +321,7 @@ Rules:
 - slug is a short kebab-case identifier. Reuse an existing page's slug exactly. Never prefix slug with "cortex", the entity type, or a document id.
 - Propose at most ${MAX_PROPOSALS} edits. Return an empty list if nothing durable was learned.`,
       input: `Existing pages:\n${catalogLines}\n\n${
-        investigationPageLines.length > 0
-          ? `Pages from this investigation:\n${investigationPageLines}\n\n`
-          : ''
+        pageBodyLines.length > 0 ? `Existing page content:\n${pageBodyLines}\n\n` : ''
       }Investigation transcript:\n${transcript}`,
       schema: {
         type: 'object',
@@ -584,37 +589,39 @@ export const optimizeCortex = async ({
   ].join('\n');
 
   const currentConversationId = provenance?.conversationId;
-  // A recovery round judges the claims of its own investigation, so it reads those pages in full.
-  const investigationPages =
-    roundKind === 'alert_recovery' && currentConversationId !== undefined
-      ? (
-          await Promise.all(
-            pages
-              .filter((page) => page.authored_by?.includes(currentConversationId))
-              .slice(0, MAX_INVESTIGATION_PAGES)
-              .map((page) => store.get(page.id))
-          )
-        ).flatMap((page) =>
-          page && page.status !== 'archived'
-            ? [
-                {
-                  slug: canonicalizeSlug(
-                    page.entity_type,
-                    slugFromCortexId(page.id, page.entity_type)
-                  ),
-                  entity_type: page.entity_type,
-                  content: page.content,
-                },
-              ]
-            : []
-        )
-      : [];
+  // The model rewrites a page as a whole, so it has to read the pages it may rewrite: the ones this
+  // conversation wrote when a later round judges or corrects them, and the ones the transcript names.
+  const transcriptText = transcript.toLowerCase();
+  const slugOf = (page: CortexPageSummary) =>
+    canonicalizeSlug(page.entity_type, slugFromCortexId(page.id, page.entity_type));
+  const isAuthoredHere = (page: CortexPageSummary) =>
+    roundKind !== 'initial' &&
+    currentConversationId !== undefined &&
+    page.authored_by?.includes(currentConversationId) === true;
+  const isNamed = (page: CortexPageSummary) =>
+    slugOf(page).length >= MIN_SLUG_CHARS_TO_MATCH && transcriptText.includes(slugOf(page));
+  const liveInOrder = pages.filter((page) => page.status !== 'archived');
+  const wanted = [
+    ...liveInOrder.filter(isAuthoredHere),
+    ...liveInOrder.filter((page) => !isAuthoredHere(page) && isNamed(page)),
+  ].slice(0, MAX_PAGE_BODIES);
+  const pageBodies = (await Promise.all(wanted.map((page) => store.get(page.id)))).flatMap((page) =>
+    page && page.status !== 'archived'
+      ? [
+          {
+            slug: slugOf(page),
+            entity_type: page.entity_type,
+            content: page.content,
+          },
+        ]
+      : []
+  );
 
   const { edits } = await proposeEdits({
     transcript,
     catalog: pages,
     currentConversationId,
-    ...(investigationPages.length > 0 ? { investigationPages } : {}),
+    ...(pageBodies.length > 0 ? { pageBodies } : {}),
   });
   logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {

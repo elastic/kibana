@@ -946,7 +946,7 @@ describe('authorship and recovery context', () => {
       proposeEdits,
     });
 
-    expect(proposeEdits.mock.calls[0][0].investigationPages).toEqual([
+    expect(proposeEdits.mock.calls[0][0].pageBodies).toEqual([
       { slug: 'orders-consumer', entity_type: 'service', content: '## Dependencies\n- orders-db' },
     ]);
   });
@@ -987,28 +987,105 @@ describe('authorship and recovery context', () => {
     }
   );
 
-  it.each(['initial', 'follow_up'] as const)(
-    'does not load page content for a %s round',
-    async (roundKind) => {
-      const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
-      const store = recoveryStore();
+  const optimizeWith = async ({
+    store,
+    roundKind,
+    userMessage,
+  }: {
+    store: CortexPageStore;
+    roundKind: 'initial' | 'follow_up' | 'alert_recovery';
+    userMessage: string;
+  }) => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+    await optimizeCortex({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage,
+      assistantMessage: 'ok',
+      toolCalls: [],
+      roundKind,
+      provenance: { conversationId: 'conversation-1' },
+      proposeEdits,
+    });
+    return proposeEdits.mock.calls[0][0];
+  };
 
-      await optimizeCortex({
-        store,
-        telemetry: createTelemetry(),
-        logger: loggerMock.create(),
-        userMessage: 'hello',
-        assistantMessage: 'ok',
-        toolCalls: [],
-        roundKind,
-        provenance: { conversationId: 'conversation-1' },
-        proposeEdits,
-      });
+  it('loads no page content when nothing is named and nothing was written by this conversation', async () => {
+    const store = recoveryStore();
 
-      expect(proposeEdits.mock.calls[0][0].investigationPages).toBeUndefined();
-      expect(store.get).not.toHaveBeenCalled();
-    }
-  );
+    const input = await optimizeWith({ store, roundKind: 'initial', userMessage: 'hello' });
+
+    expect(input.pageBodies).toBeUndefined();
+    expect(store.get).not.toHaveBeenCalled();
+  });
+
+  it('gives a follow-up the pages this conversation wrote, so a correction can edit them', async () => {
+    const input = await optimizeWith({
+      store: recoveryStore(),
+      roundKind: 'follow_up',
+      userMessage: 'hello',
+    });
+
+    expect(input.pageBodies).toEqual([
+      { slug: 'orders-consumer', entity_type: 'service', content: '## Dependencies\n- orders-db' },
+    ]);
+  });
+
+  it('gives any round the content of a page the transcript names, whoever wrote it', async () => {
+    const input = await optimizeWith({
+      store: recoveryStore(),
+      roundKind: 'initial',
+      userMessage: 'Why is the payments service slow?',
+    });
+
+    expect(input.pageBodies).toEqual([
+      { slug: 'payments', entity_type: 'service', content: '## Dependencies\n- ledger' },
+    ]);
+  });
+
+  it('does not match a short slug against unrelated words', async () => {
+    const short = written('db', ['conversation-2']);
+    const store = createStore({
+      list: jest.fn().mockResolvedValue({
+        pages: [short],
+        stats: { total: 1, established: 0, total_corroborations: 0 },
+      }),
+      get: jest.fn().mockResolvedValue(short),
+    });
+
+    const input = await optimizeWith({
+      store,
+      roundKind: 'initial',
+      userMessage: 'The db is slow',
+    });
+
+    expect(input.pageBodies).toBeUndefined();
+  });
+
+  it('leaves out archived pages and caps how many pages it loads', async () => {
+    const many = Array.from({ length: 12 }, (_, index) => written(`service-${index}`, []));
+    const archived = { ...written('service-archived', []), status: 'archived' as const };
+    const all = [archived, ...many];
+    const store = createStore({
+      list: jest.fn().mockResolvedValue({
+        pages: all,
+        stats: { total: all.length, established: 0, total_corroborations: 0 },
+      }),
+      get: jest.fn().mockImplementation(async (id: string) => all.find((page) => page.id === id)),
+    });
+
+    const input = await optimizeWith({
+      store,
+      roundKind: 'initial',
+      userMessage: all.map((page) => page.slug).join(' '),
+    });
+
+    expect(input.pageBodies).toHaveLength(8);
+    expect(input.pageBodies.map(({ slug }: { slug: string }) => slug)).not.toContain(
+      'service-archived'
+    );
+  });
 });
 
 describe('applyCortexEdits non-temporal check', () => {
@@ -1296,11 +1373,11 @@ describe('createLlmProposeCortexEdits prompt', () => {
     expect(input).not.toContain('[this investigation]');
   });
 
-  it('shows the content of the pages this investigation wrote', async () => {
+  it('shows the content of the pages the round may rewrite', async () => {
     const { input } = await run({
       transcript: '',
       catalog: [],
-      investigationPages: [
+      pageBodies: [
         {
           slug: 'orders-consumer',
           entity_type: 'service',
@@ -1309,14 +1386,22 @@ describe('createLlmProposeCortexEdits prompt', () => {
       ],
     });
 
-    expect(input).toContain('Pages from this investigation:\n### service/orders-consumer');
+    expect(input).toContain('Existing page content:\n### service/orders-consumer');
     expect(input).toContain('- orders-db');
   });
 
   it('leaves out the section when there are no such pages', async () => {
     const { input } = await run({ transcript: '', catalog: [] });
 
-    expect(input).not.toContain('Pages from this investigation');
+    expect(input).not.toContain('Existing page content');
+  });
+
+  it('tells the model to start a rewrite from the existing content and not to drop knowledge', async () => {
+    const { system } = await run({ transcript: '', catalog: [] });
+
+    expect(system).toContain('An "upsert" replaces the whole page');
+    expect(system).toContain('start from it');
+    expect(system).toContain('never drop a section it has');
   });
 
   it('asks for slugs as relation nodes and says which way an edge points', async () => {
