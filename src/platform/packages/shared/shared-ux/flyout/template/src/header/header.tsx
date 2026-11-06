@@ -24,7 +24,7 @@ import {
   useEuiMemoizedStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { InfoBlocks } from '@kbn/flyout-info-blocks';
@@ -148,8 +148,23 @@ const badgeGroupStyles = () => ({
 });
 
 /** Overflow badge that reveals the collapsed badges in a popover. */
-const BadgeOverflow = ({ badges }: { badges: ReactNode[] }) => {
+const BadgeOverflow = ({
+  badges,
+  isForcedCollapsed,
+}: {
+  badges: ReactNode[];
+  isForcedCollapsed: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // The scroll guard keeps the header expanded while this popover is open, so only the
+  // `collapsed` prop can hide its trigger, and the portalled panel must not outlive it.
+  useEffect(() => {
+    if (isForcedCollapsed) {
+      setIsOpen(false);
+    }
+  }, [isForcedCollapsed]);
+
   const label = i18n.translate('sharedUXPackages.flyoutTemplate.header.badgeOverflowLabel', {
     defaultMessage: '+{count} more',
     values: { count: badges.length },
@@ -366,7 +381,9 @@ export const HeaderZone = ({
                   <EuiSpacer size="s" />
                   <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
                     {visibleBadges}
-                    {overflowBadges.length > 0 && <BadgeOverflow badges={overflowBadges} />}
+                    {overflowBadges.length > 0 && (
+                      <BadgeOverflow badges={overflowBadges} isForcedCollapsed={collapsed} />
+                    )}
                   </EuiBadgeGroup>
                 </>
               )}
