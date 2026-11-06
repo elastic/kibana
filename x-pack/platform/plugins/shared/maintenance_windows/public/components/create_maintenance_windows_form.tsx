@@ -497,7 +497,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           <EuiFlexGroup>
             {isEditMode && (
               <EuiFlexItem grow={false}>
-                <EuiButton color="danger" onClick={() => setIsModalVisible(true)}>
+                <EuiButton color="primary" onClick={() => setIsModalVisible(true)}>
                   {i18n.ARCHIVE}
                 </EuiButton>
                 {isModalVisible && (
