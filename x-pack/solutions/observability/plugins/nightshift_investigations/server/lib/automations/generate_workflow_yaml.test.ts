@@ -417,6 +417,7 @@ describe('generateWorkflowYaml', () => {
           expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
           expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
           expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.future_producer'))).toBe(false);
         });
 
         it('keeps only the first-party sources when external is excluded', () => {
