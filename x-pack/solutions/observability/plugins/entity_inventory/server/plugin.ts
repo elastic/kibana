@@ -13,9 +13,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EntityStoreSetupContract, EntityStoreStartContract } from '@kbn/entity-store/server';
+import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { ENTITY_DEFINITIONS } from './definitions';
 import { InventoryService } from './service/inventory_service';
 import { entityInventoryRouteRepository } from './routes';
 import type { EntityInventoryConfig } from './config';
@@ -47,9 +46,8 @@ export class EntityInventoryPlugin
 
   public setup(
     core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>,
-    { entityStore }: EntityInventorySetupDependencies
+    _plugins: EntityInventorySetupDependencies
   ): EntityInventoryPluginSetup {
-    this.registerEntityDefinitions(entityStore);
     registerRoutes({
       repository: entityInventoryRouteRepository,
       dependencies: { getInventoryService: this.createInventoryService(core) },
@@ -84,24 +82,6 @@ export class EntityInventoryPlugin
         this.logger
       );
     };
-
-  /**
-   * Registers every definition in `ENTITY_DEFINITIONS` with the entity store. The registry logs and
-   * skips a definition it rejects and never throws, so a bad definition costs that one type and
-   * leaves the rest registered; only the count is logged here, never the reason again.
-   */
-  private registerEntityDefinitions = (entityStore: EntityStoreSetupContract): void => {
-    const rejected = ENTITY_DEFINITIONS.filter(
-      (definition) => !entityStore.registerEntityDefinition(definition).ok
-    );
-    if (rejected.length > 0) {
-      this.logger.error(
-        `Entity inventory could not register ${rejected.length} of ${
-          ENTITY_DEFINITIONS.length
-        } entity definitions: ${rejected.map(({ type }) => type).join(', ')}`
-      );
-    }
-  };
 
   private logRegisteredEntityDefinitions = async (
     entityStore: EntityStoreStartContract

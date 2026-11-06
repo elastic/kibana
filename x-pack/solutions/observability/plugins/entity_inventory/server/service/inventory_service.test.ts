@@ -7,8 +7,11 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityDefinitionsClient } from '@kbn/entity-store/server';
-import { k8sDeploymentDefinition } from '../definitions/kubernetes/k8s_deployment';
-import { hostLikeFixture, k8sNodeFixture } from '../inventory/__fixtures__/definitions';
+import {
+  hostLikeFixture,
+  k8sDeploymentOtelAndAgentFixture,
+  k8sNodeFixture,
+} from '../inventory/__fixtures__/definitions';
 import { buildColumns } from '../inventory/generator';
 import { InventoryService } from './inventory_service';
 
@@ -32,15 +35,15 @@ const createService = (definitions: RegisteredDefinitions) => {
 
 describe('InventoryService.listTypes', () => {
   it('returns type, name, description, identity fields, columns and sources for k8s.deployment', async () => {
-    const { service } = createService([k8sDeploymentDefinition]);
+    const { service } = createService([k8sDeploymentOtelAndAgentFixture]);
 
     const { types } = await service.listTypes();
 
     expect(types).toEqual([
       {
         type: 'k8s.deployment',
-        name: k8sDeploymentDefinition.name,
-        description: k8sDeploymentDefinition.description,
+        name: k8sDeploymentOtelAndAgentFixture.name,
+        description: k8sDeploymentOtelAndAgentFixture.description,
         identityFields: [
           'k8s.cluster.name',
           'k8s.namespace.name',
@@ -131,7 +134,7 @@ describe('InventoryService.listTypes', () => {
     jest.mocked(buildColumns).mockImplementationOnce(() => {
       throw new Error('column derivation crashed');
     });
-    const { service, logger } = createService([k8sDeploymentDefinition]);
+    const { service, logger } = createService([k8sDeploymentOtelAndAgentFixture]);
 
     await expect(service.listTypes()).rejects.toThrow('column derivation crashed');
     expect(logger.warn).not.toHaveBeenCalled();
@@ -288,7 +291,7 @@ const { dynamic: _nodeDynamic, ...k8sNodeWithoutDynamic } = k8sNodeFixture;
 
 describe('InventoryService.list', () => {
   it('probes each source pattern once, then runs one FROM query per source', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
@@ -313,7 +316,7 @@ describe('InventoryService.list', () => {
   });
 
   it('adds a TS plan before the FROM plan of a source whose probe found a time-series index', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
       {
@@ -336,7 +339,7 @@ describe('InventoryService.list', () => {
   });
 
   it('reports a failed probe in errors and runs no plan of that source', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
       {
@@ -358,7 +361,7 @@ describe('InventoryService.list', () => {
   });
 
   it('merges rows across sources, newest last_seen first, with exact total and every column on every row', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
         stateRow('payments', '2026-11-01T10:01:00.000Z'),
@@ -396,7 +399,9 @@ describe('InventoryService.list', () => {
     ['another plugin', { kind: 'plugin' as const, id: 'entityStore' }],
     ['an integration', { kind: 'integration' as const, package: 'kubernetes' }],
   ])('lists the rows of a type that %s registered', async (_label, managedBy) => {
-    const { service, esClient } = createService([{ ...k8sDeploymentDefinition, managedBy }]);
+    const { service, esClient } = createService([
+      { ...k8sDeploymentOtelAndAgentFixture, managedBy },
+    ]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
         stateRow('cart-api', '2026-11-01T10:00:00.000Z'),
@@ -413,7 +418,7 @@ describe('InventoryService.list', () => {
   });
 
   it('starts every list query before any resolves', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     const pending: Array<() => void> = [];
     esClient.esql.query.mockImplementation(({ query }) =>
       isProbe(query)
@@ -433,7 +438,7 @@ describe('InventoryService.list', () => {
   });
 
   it('reports a failed query in errors with its status and reason and returns the other source', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esError(400, 'verification_exception', 'Unknown column [x]'),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
@@ -454,7 +459,7 @@ describe('InventoryService.list', () => {
   });
 
   it('drops a plan whose pattern maps no @timestamp and one whose identity is unmapped', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], { nullTyped: STATE_COLUMNS }),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [], { nullTyped: IDENTITY_COLUMNS }),
@@ -480,7 +485,7 @@ describe('InventoryService.list', () => {
   });
 
   it('returns no rows and an exact zero total when no source has data in the window', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
@@ -493,7 +498,7 @@ describe('InventoryService.list', () => {
   });
 
   it('returns no rows and lists each failure when every query fails', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esError(403, 'security_exception', 'unauthorized'),
       [OTEL_PATTERN]: { throws: new Error('connect ECONNREFUSED') },
@@ -513,7 +518,7 @@ describe('InventoryService.list', () => {
   });
 
   it('nulls an attribute no index of its source maps and lists it in unavailableColumns', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], {}),
       [OTEL_PATTERN]: esqlResponse(
@@ -533,7 +538,7 @@ describe('InventoryService.list', () => {
   });
 
   it('returns limit rows with an exact total when no plan is cut', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
         stateRow('payments', '2026-11-01T10:01:00.000Z'),
@@ -550,7 +555,7 @@ describe('InventoryService.list', () => {
   });
 
   it('reports total null and truncated when a plan returns more rows than requested', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
         stateRow('payments', '2026-11-01T10:01:00.000Z'),
@@ -566,7 +571,7 @@ describe('InventoryService.list', () => {
   });
 
   it('reports a partial result in errors with total null, keeping its rows and not truncating', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(
         STATE_COLUMNS,
@@ -598,7 +603,7 @@ describe('InventoryService.list', () => {
     [
       'an unknown type',
       'k8s.unknown',
-      [k8sDeploymentDefinition],
+      [k8sDeploymentOtelAndAgentFixture],
       'no entity definition is registered for it',
     ],
     [
@@ -622,7 +627,7 @@ describe('InventoryService.list', () => {
   );
 
   it('passes the abort signal to every probe and list query', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
       {
@@ -643,7 +648,7 @@ describe('InventoryService.list', () => {
 
   it('throws InventoryTypeDefinitionError when the definition cannot be turned into queries', async () => {
     const invalid = {
-      ...k8sDeploymentDefinition,
+      ...k8sDeploymentOtelAndAgentFixture,
       dynamic: {
         sources: [{ indexPattern: STATE_PATTERN, attributes: [{ name: 'last_seen', field: 'x' }] }],
       },
@@ -675,7 +680,7 @@ describe('InventoryService.list diagnostics', () => {
   });
 
   it('reports provenance for the returned rows only, naming the source of each attribute', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
         stateRow('payments', '2026-11-01T10:01:00.000Z'),
@@ -697,7 +702,7 @@ describe('InventoryService.list diagnostics', () => {
   });
 
   it('lists every plan query sent, in plan order, with its text, parameters and stats, and no probe', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
       {
@@ -732,7 +737,7 @@ describe('InventoryService.list diagnostics', () => {
   });
 
   it('lists a failed plan query with null stats and no rows', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esError(400, 'verification_exception', 'Unknown column [x]'),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
@@ -751,7 +756,7 @@ describe('InventoryService.list diagnostics', () => {
   });
 
   it('leaves out the plan queries of a source whose probe failed', async () => {
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
       {
@@ -768,7 +773,7 @@ describe('InventoryService.list diagnostics', () => {
 
   it('reports took as the wall time of the whole call, probes included', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
-    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     // Each probe and plan query takes 100ms of wall time: two probes, then two FROM queries.
     esClient.esql.query.mockImplementation(async ({ query }) => {
       jest.advanceTimersByTime(100);

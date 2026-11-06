@@ -112,31 +112,6 @@ Errors thrown by the inventory service reach clients through `server/routes/crea
 
 There is no UI yet.
 
-## Registered definitions
-
-`server/definitions/` holds the definitions this plugin registers with the entity store during its
-own `setup()`, grouped by family (`kubernetes/` today). `ENTITY_DEFINITIONS` is the whole list, and
-each one carries `managedBy: { kind: 'plugin', id: 'entityInventory' }`. The registry validates a
-definition when it is registered: one it rejects is logged and skipped, and Kibana keeps starting.
-At start the plugin logs the names of every definition the store holds, its own and the built-ins.
-
-Registered today:
-
-| type | identified by | sources |
-| --- | --- | --- |
-| `k8s.deployment` | `<cluster>/<namespace>/<name>`, OpenTelemetry names ranked before the Elastic Agent ones | `metrics-kubernetes.state_deployment-*`, `metrics-k8sclusterreceiver.otel-*` |
-
-The definitions under `server/inventory/__fixtures__/` are test-only and stay that way; nothing
-registers them.
-
-### Adding a definition
-
-1. Add a file under `server/definitions/<family>/` that exports a `RegistrableEntityDefinition`, with `managedBy: MANAGED_BY` (from `server/definitions/constants.ts`) and no `extraction`.
-2. Append it to that family's list (`KUBERNETES_DEFINITIONS` in `server/definitions/kubernetes/index.ts` for a Kubernetes one). A new family gets its own folder and list, spread into `ENTITY_DEFINITIONS`.
-3. Attributes may not read identity fields: the entity store schema rejects such a definition.
-4. Run `node scripts/jest x-pack/solutions/observability/plugins/entity_inventory/server/definitions/definitions.test.ts`. It checks every definition against the store schema (this is where an attribute that reads an identity field fails) and compares each identity with its snapshot in `server/definitions/__snapshots__/`; a new definition adds a snapshot entry, so review it.
-5. Start Kibana with `xpack.entityInventory.enabled: true` and check that the new type appears in the `GET /internal/entity_inventory/types` response.
-
 ## Query generation
 
 `server/inventory/generator/` turns a definition that carries a `dynamic` block into ES|QL. It is a pure function of the definition, the request and the probe result for each source's pattern: no Elasticsearch calls, so the same inputs always give the same text, and the tests are snapshots. The design and the reasons behind each rule are in the Observability design doc "Entity inventory query generation" (`docs/infra-inventory/design/` in `elastic/observability-dev`); this section is the map.
