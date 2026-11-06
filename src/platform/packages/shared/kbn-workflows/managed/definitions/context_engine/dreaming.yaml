@@ -118,7 +118,7 @@ steps:
     steps:
       - name: batches
         type: foreach
-        foreach: '{{ variables.memories | reverse | chunk: 50 | json }}'
+        foreach: '{{ variables.memories | reverse | chunk: 20 | json }}'
         steps:
           - name: read_existing
             type: elasticsearch.search
@@ -157,9 +157,15 @@ steps:
                 delay: '30s'
             with:
               prompt: |
+                {% if consts.entity_types.size > 0 -%}
                 You consolidate short-term memories into long-term memory: entities, facts about them, and relationships between entities.
 
                 You are given MEMORIES (new notes agents saved while working) and EXISTING long-term entities and facts.
+                {%- else -%}
+                You consolidate short-term memories into long-term facts.
+
+                You are given MEMORIES (new notes agents saved while working) and EXISTING long-term facts.
+                {%- endif %}
 
                 A memory is a note an agent chose to remember: its title and content. Take from it only what it states.
 
@@ -167,15 +173,21 @@ steps:
 
                 Merge rather than duplicate: if a memory restates or refines an existing item, update that item.
 
-                When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+                When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen. These are set for you: never return memory.* attributes.
 
-                Facts are read without their entities, so write each one to stand alone: name the entities it is about in its title and content, and keep every number exactly as stated.
+                An EXISTING item lists the memories it was built from as references with relation derived_from and uri ki://<memory id>. Do not return an item only for memories it already lists: they are already recorded.
+
+                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, and keep every name, number, code and date exactly as stated.
+
+                State the knowledge itself rather than copying the memory, and leave out how it was found and where it came from. When a memory holds several separate pieces of knowledge, write a fact for each.
+                {%- if consts.entity_types.size > 0 %}
 
                 Add a relationship of a configured type whenever the memories support it, so related entities are linked.
 
                 List every entity a fact is about in its about field, creating an entity of a configured type if none exists yet.
 
                 Give every entity a content summary of what is known about it: its attribute values and the main facts about it. When you create, update or delete a fact about an entity, update that entity and rewrite its content to match.
+                {%- endif %}
 
                 Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:
                 - question_type: a short label for the kind of question.
@@ -193,7 +205,11 @@ steps:
 
                 Ignore memories that hold nothing worth remembering. An empty change set is a valid answer.
 
+                {% if consts.entity_types.size > 0 -%}
                 How to read EXISTING: an item's type is its kind and its configured type, so entity.customer is an entity of type customer and fact.preference is a fact of type preference. On an entity, each references entry with relation relates_to is a relationship: its description is the relationship type and its uri, ki://<id>, names the target entity. On a fact, the relates_to entries with description about name the entities it is about.
+                {%- else -%}
+                How to read EXISTING: a fact's type is fact. followed by its configured type, so fact.preference is a fact of type preference.
+                {%- endif %}
 
                 FACT TYPES:
                 {%- for fact_type in consts.fact_types %}

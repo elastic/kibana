@@ -164,6 +164,83 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     );
   });
 
+  describe('the consolidate prompt', () => {
+    const memory = { id: 'm-1', type: 'memory.session_fact', title: 'Seat', content: 'Aisle.' };
+    const existing = { id: 'fact-1', type: 'fact.preference', title: 'Bob likes aisles' };
+    const deleted = {
+      id: 'fact-2',
+      type: 'fact.preference',
+      title: 'Gone',
+      governance: { lifecycle: { status: 'deleted' } },
+    };
+
+    const prompt = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) => {
+      const workflow = render(overrides);
+      const batches = findStep(findStep(workflow.steps, 'dream').steps ?? [], 'batches');
+      const consolidate = findStep(batches.steps ?? [], 'consolidate');
+      return createWorkflowLiquidEngine().parseAndRenderSync(String(consolidate.with?.prompt), {
+        consts: workflow.consts,
+        foreach: { item: [memory] },
+        steps: {
+          read_existing: {
+            output: { hits: { hits: [{ _source: existing }, { _source: deleted }] } },
+          },
+        },
+      });
+    };
+
+    it('lists the configured types and instructions, then the memories and existing items', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'FACT TYPES:\n- preference: Something a customer likes.\nENTITY TYPES:\n'
+      );
+      expect(rendered).toContain(
+        '- customer: A loyalty member. (attributes: loyalty_number, tier)\n- city\n'
+      );
+      expect(rendered).toContain('RELATIONSHIP TYPES:\n- lives_in: customer -> city\n');
+      expect(rendered).toContain(`INSTRUCTIONS:\n\n${values.instructions}\n`);
+      expect(rendered).toContain(`MEMORIES (one per line):\n${JSON.stringify(memory)}\n`);
+      expect(rendered).toContain(JSON.stringify(existing));
+      expect(rendered).not.toContain('"Gone"');
+    });
+
+    it('describes entities and relationships when entity types are configured', () => {
+      const rendered = prompt();
+
+      expect(rendered).toMatch(
+        /^You consolidate short-term memories into long-term memory: entities/
+      );
+      expect(rendered).toContain('in its about field');
+      expect(rendered).toContain('Give every entity a content summary');
+      expect(rendered).toContain('On an entity, each references entry');
+    });
+
+    it('leaves entities out when none are configured', () => {
+      const rendered = prompt({ entityTypes: [], relationshipTypes: [] });
+
+      expect(rendered).toMatch(
+        /^You consolidate short-term memories into long-term facts\.\n\nYou are given MEMORIES .* and EXISTING long-term facts\.\n\nA memory is/
+      );
+      expect(rendered).toContain(
+        'ENTITY TYPES:\nnone: do not create entities.\nRELATIONSHIP TYPES:\nnone: do not create relationships.\n'
+      );
+      expect(rendered).toContain(
+        'write a fact for each.\n\nGive an entity or fact access_patterns'
+      );
+      expect(rendered).toContain("How to read EXISTING: a fact's type is fact.");
+      expect(rendered).not.toContain('about field');
+      expect(rendered).not.toContain('content summary');
+      expect(rendered).not.toContain('relates_to');
+    });
+
+    it('tells the model not to create facts when no fact types are configured', () => {
+      expect(prompt({ factTypes: [] })).toContain(
+        'FACT TYPES:\nnone: do not create facts.\nENTITY TYPES:'
+      );
+    });
+  });
+
   it('keeps empty type lists as lists', () => {
     expect(render({ entityTypes: [], relationshipTypes: [] }).consts).toEqual(
       expect.objectContaining({ entity_types: [], relationship_types: [] })

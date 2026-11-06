@@ -39,7 +39,10 @@ const isRunInProgressError = (error: unknown): boolean =>
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 export interface DreamingScheduleService {
-  /** Installs and enables the dreaming workflow of an AI index, or removes it. */
+  /**
+   * Installs and enables the dreaming workflow of an AI index, or disables it. Disabling keeps its
+   * run history, so dreaming turned back on reads the memories since the last dream.
+   */
   reconcile(params: {
     aiIndex: AiIndexHttpItem;
     spaceId: string;
@@ -126,6 +129,21 @@ export const createDreamingScheduleService = ({
     });
   };
 
+  const disable = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
+    const workflowsManagement = await getWorkflowsManagement();
+    if (!workflowsManagement) {
+      await uninstall(aiIndexId, spaceId, request);
+      return;
+    }
+    const workflowId = dreamingWorkflowIdFor(aiIndexId, spaceId);
+    const client = await getManagedWorkflowsClient();
+    if (!(await client.getInstalledWorkflowState(workflowId, spaceId))) {
+      return;
+    }
+    await workflowsManagement.updateWorkflow(workflowId, { enabled: false }, spaceId, request);
+    await workflowsManagement.cancelAllActiveWorkflowExecutions(workflowId, spaceId, request);
+  };
+
   const automationFor = (aiIndexId: string, spaceId: string) =>
     ({ type: 'workflow', value: dreamingWorkflowIdFor(aiIndexId, spaceId) } as const);
 
@@ -133,7 +151,7 @@ export const createDreamingScheduleService = ({
     async reconcile({ aiIndex, spaceId, request }) {
       const { id: aiIndexId, dreaming } = aiIndex;
       if (!dreaming || !shouldDream(aiIndex)) {
-        await uninstall(aiIndexId, spaceId, request);
+        await disable(aiIndexId, spaceId, request);
         if (!aiIndex.managed) {
           await getAiIndexService().removeAutomation(
             aiIndexId,
@@ -141,7 +159,7 @@ export const createDreamingScheduleService = ({
             automationFor(aiIndexId, spaceId)
           );
         }
-        log.debug(() => `Removed dreaming for AI index '${aiIndexId}' in space '${spaceId}'`);
+        log.debug(() => `Turned off dreaming for AI index '${aiIndexId}' in space '${spaceId}'`);
         return;
       }
 

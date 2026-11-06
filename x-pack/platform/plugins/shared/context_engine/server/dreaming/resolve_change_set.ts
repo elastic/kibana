@@ -9,6 +9,7 @@ import {
   DREAMING_TYPE_PATTERN,
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
+  MEMORY_ATTRIBUTE_PREFIX,
   dreamingTypesOf,
   type AiIndexDreamingConfig,
   type DreamingRelationshipType,
@@ -113,6 +114,9 @@ export const referencedIds = ({ entities, facts, relationships }: DreamChangeSet
   return [...new Set(refs.filter((ref) => !ref.startsWith(NEW_REF_PREFIX)))];
 };
 
+const withoutPrefix = (type: string | undefined, prefix: string): string | undefined =>
+  type?.startsWith(prefix) ? type.slice(prefix.length) : type;
+
 class RejectedItemError extends Error {}
 
 const reject: (reason: string) => never = (reason) => {
@@ -147,13 +151,13 @@ export const resolveChangeSet = (
 
   const resolveSources = (ids: readonly string[] | undefined, current?: DreamedKi): string[] => {
     const allowed = new Set([...memories.keys(), ...(current ? citedMemoryIds(current) : [])]);
-    const sources = [...new Set(ids ?? [])];
-    const unknown = sources.filter((id) => !allowed.has(id));
-    if (unknown.length > 0) {
-      reject(`cites memories it was not shown: ${unknown.join(', ')}`);
-    }
-    if (sources.length === 0) {
+    const cited = [...new Set(ids ?? [])];
+    if (cited.length === 0) {
       reject('cites no source memories');
+    }
+    const sources = cited.filter((id) => allowed.has(id));
+    if (sources.length === 0) {
+      reject(`cites memories it was not shown: ${cited.join(', ')}`);
     }
     return sources;
   };
@@ -188,7 +192,9 @@ export const resolveChangeSet = (
         operations.push({ op: 'delete', id: entity.ref });
         return;
       }
-      const type = entity.type ?? current?.type.slice(ENTITY_TYPE_PREFIX.length);
+      const type =
+        withoutPrefix(entity.type, ENTITY_TYPE_PREFIX) ??
+        current?.type.slice(ENTITY_TYPE_PREFIX.length);
       const name = entity.name ?? current?.title;
       if (!type || !name) {
         reject('a new entity needs a type and a name');
@@ -202,6 +208,9 @@ export const resolveChangeSet = (
       }
       const attributes: Record<string, string> = {};
       for (const { key, value } of entity.attributes ?? []) {
+        if (key.startsWith(MEMORY_ATTRIBUTE_PREFIX)) {
+          continue;
+        }
         if (!allowedAttributes.has(key)) {
           reject(`attribute '${key}' is not configured for entity type '${type}'`);
         }
@@ -249,7 +258,8 @@ export const resolveChangeSet = (
       if (!current && !fact.ref.startsWith(NEW_REF_PREFIX)) {
         reject(`'${fact.ref}' is neither an existing fact nor a new key`);
       }
-      const type = fact.type ?? current?.type.slice(FACT_TYPE_PREFIX.length);
+      const type =
+        withoutPrefix(fact.type, FACT_TYPE_PREFIX) ?? current?.type.slice(FACT_TYPE_PREFIX.length);
       const title = fact.title ?? current?.title;
       const content = fact.content ?? baseContent(current?.content);
       if (!type || !title || !content) {
