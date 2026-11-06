@@ -14,6 +14,7 @@
  */
 
 import { omit, unset } from 'lodash';
+import { nodeBuilder } from '@kbn/es-query';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses, CaseAccessMode } from '../../../common/types/domain';
 import {
@@ -2768,15 +2769,19 @@ describe('CasesService', () => {
       });
     });
 
-    describe('getCaseStatuses', () => {
-      it('reads only the status field, as a status name, leaving out cases not found', async () => {
+    describe('getCaseStatusesAndAccess', () => {
+      it('reads only the status, access and assignees, leaving out cases not found', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             {
               id: 'case-1',
               type: CASE_SAVED_OBJECT,
               references: [],
-              attributes: { status: CasePersistedStatus.CLOSED },
+              attributes: {
+                status: CasePersistedStatus.CLOSED,
+                access: { mode: CaseAccessMode.RESTRICTED },
+                assignees: [{ uid: 'profile-1' }],
+              },
             },
             {
               id: 'case-2',
@@ -2788,13 +2793,49 @@ describe('CasesService', () => {
           ],
         });
 
-        const statuses = await service.getCaseStatuses({ caseIds: ['case-1', 'case-2'] });
+        const result = await service.getCaseStatusesAndAccess({ caseIds: ['case-1', 'case-2'] });
 
         expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
-          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status'] },
-          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status', 'access', 'assignees'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status', 'access', 'assignees'] },
         ]);
-        expect(statuses).toEqual(new Map([['case-1', CaseStatuses.closed]]));
+        expect(result).toEqual(
+          new Map([
+            [
+              'case-1',
+              {
+                status: CaseStatuses.closed,
+                access: { mode: CaseAccessMode.RESTRICTED },
+                assignees: [{ uid: 'profile-1' }],
+              },
+            ],
+          ])
+        );
+      });
+    });
+
+    describe('findCaseIds', () => {
+      it('returns the IDs and total of the cases matching the filter', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'case-1', type: CASE_SAVED_OBJECT, references: [], attributes: {}, score: 0 },
+          ],
+          total: 3,
+          per_page: 1,
+          page: 1,
+        });
+        const filter = nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.owner`, 'securitySolution');
+
+        const result = await service.findCaseIds({ filter, perPage: 1 });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+          type: CASE_SAVED_OBJECT,
+          filter,
+          fields: ['owner'],
+          perPage: 1,
+          page: 1,
+        });
+        expect(result).toEqual({ ids: ['case-1'], total: 3 });
       });
     });
 

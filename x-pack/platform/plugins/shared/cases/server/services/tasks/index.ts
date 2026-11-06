@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { CASE_TASK_SAVED_OBJECT, MAX_TASKS_PER_CASE } from '../../../common/constants';
 import type { CaseTask, CaseTaskAttributes } from '../../../common/types/domain/task/v1';
 import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
@@ -159,6 +159,7 @@ export class CaseTaskService {
 
   public async findTasks({
     caseIds,
+    excludeCaseIds,
     owners,
     status,
     assignees,
@@ -172,6 +173,9 @@ export class CaseTaskService {
     try {
       const filters: KueryNode[] = [];
       if (caseIds?.length) filters.push(anyOf(`${ATTR}.case_id`, caseIds));
+      if (excludeCaseIds?.length) {
+        filters.push(nodeTypes.function.buildNode('not', anyOf(`${ATTR}.case_id`, excludeCaseIds)));
+      }
       if (owners?.length) filters.push(anyOf(`${ATTR}.owner`, owners));
       if (status?.length) filters.push(anyOf(`${ATTR}.status`, status));
       if (assignees?.length) filters.push(anyOf(`${ATTR}.assignees.uid`, assignees));

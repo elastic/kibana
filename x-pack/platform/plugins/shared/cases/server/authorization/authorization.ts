@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
@@ -18,6 +19,7 @@ import type { AuthFilterHelpers, OwnerEntity } from './types';
 import {
   combineFilterWithAuthorizationFilter,
   getCaseAccessFilter,
+  getHiddenCasesFilter,
   getOwnersFilter,
   groupByAuthorization,
 } from './utils';
@@ -189,6 +191,20 @@ export class Authorization {
     }
 
     return (assignees ?? []).some(({ uid }) => uid === this.profileUid);
+  }
+
+  /** Whether restricted cases are hidden from this caller unless they are an assignee. */
+  public enforcesRestrictedCases(): boolean {
+    return this.shouldEnforceRestrictedCases();
+  }
+
+  /**
+   * Matches the restricted cases this caller may not see, or undefined when restricted cases
+   * aren't enforced for them. For finds over saved objects that point at cases, such as tasks,
+   * which can't carry the case access clause themselves.
+   */
+  public getHiddenCasesFilter(): KueryNode | undefined {
+    return this.shouldEnforceRestrictedCases() ? getHiddenCasesFilter(this.profileUid) : undefined;
   }
 
   /**

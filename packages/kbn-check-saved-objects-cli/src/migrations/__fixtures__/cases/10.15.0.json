@@ -27,7 +27,7 @@
       "external_service": null,
       "owner": "securitySolution",
       "severity": 10,
-      "status": 0,
+      "status": 10,
       "tags": [
         "fixture"
       ],
@@ -42,8 +42,14 @@
       "settings": {
         "extractObservables": false
       },
+      "extract_observables_source": "fixture",
+      "status_key": "on_hold",
+      "paused_at": "2026-02-18T01:00:00.000Z",
+      "time_paused": 0,
+      "pause_reason": "Awaiting customer",
+      "resume_to_status_key": "open",
       "access": {
-        "mode": "default"
+        "mode": "restricted"
       }
     },
     {
@@ -131,7 +137,7 @@
       "external_service": null,
       "owner": "securitySolution",
       "severity": 10,
-      "status": 0,
+      "status": 10,
       "tags": [
         "fixture"
       ],
@@ -146,8 +152,14 @@
       "settings": {
         "extractObservables": false
       },
+      "extract_observables_source": "fixture",
+      "status_key": "on_hold",
+      "paused_at": "2026-02-18T01:00:00.000Z",
+      "time_paused": 0,
+      "pause_reason": "Awaiting customer",
+      "resume_to_status_key": "open",
       "access": {
-        "mode": "default"
+        "mode": "restricted"
       }
     },
     {

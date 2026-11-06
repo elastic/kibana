@@ -248,6 +248,9 @@
             "$ref": "#/components/parameters/status"
           },
           {
+            "$ref": "#/components/parameters/status_key"
+          },
+          {
             "$ref": "#/components/parameters/tags"
           },
           {
@@ -277,6 +280,10 @@
                     },
                     "count_open_cases": {
                       "type": "integer"
+                    },
+                    "count_paused_cases": {
+                      "type": "integer",
+                      "description": "Cases in a status that pauses time tracking. Present when such statuses are configured."
                     },
                     "page": {
                       "type": "integer"
@@ -565,8 +572,31 @@
                         "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
                         "example": true
                       },
+                      "externalSync": {
+                        "$ref": "#/components/schemas/external_sync_settings"
+                      },
+                      "externalSyncFields": {
+                        "type": "array",
+                        "description": "Technical preview. Per-field sync directions and conflict rules of the configuration's connector.",
+                        "items": {
+                          "$ref": "#/components/schemas/external_sync_field_rule"
+                        }
+                      },
+                      "externalSyncFieldMappings": {
+                        "type": "array",
+                        "description": "Technical preview. External fields of the configuration's connector carried onto global case fields.",
+                        "items": {
+                          "$ref": "#/components/schemas/external_sync_field_mapping"
+                        }
+                      },
                       "owner": {
                         "$ref": "#/components/schemas/owner"
+                      },
+                      "statuses": {
+                        "$ref": "#/components/schemas/case_statuses_configuration"
+                      },
+                      "pauseReasons": {
+                        "$ref": "#/components/schemas/pause_reasons_configuration"
                       },
                       "templates": {
                         "$ref": "#/components/schemas/templates"
@@ -841,8 +871,31 @@
                       "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
                       "example": true
                     },
+                    "externalSync": {
+                      "$ref": "#/components/schemas/external_sync_settings"
+                    },
+                    "externalSyncFields": {
+                      "type": "array",
+                      "description": "Technical preview. Per-field sync directions and conflict rules of the configuration's connector.",
+                      "items": {
+                        "$ref": "#/components/schemas/external_sync_field_rule"
+                      }
+                    },
+                    "externalSyncFieldMappings": {
+                      "type": "array",
+                      "description": "Technical preview. External fields of the configuration's connector carried onto global case fields.",
+                      "items": {
+                        "$ref": "#/components/schemas/external_sync_field_mapping"
+                      }
+                    },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
+                    },
+                    "statuses": {
+                      "$ref": "#/components/schemas/case_statuses_configuration"
+                    },
+                    "pauseReasons": {
+                      "$ref": "#/components/schemas/pause_reasons_configuration"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
@@ -1121,8 +1174,31 @@
                       "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
                       "example": true
                     },
+                    "externalSync": {
+                      "$ref": "#/components/schemas/external_sync_settings"
+                    },
+                    "externalSyncFields": {
+                      "type": "array",
+                      "description": "Technical preview. Per-field sync directions and conflict rules of the configuration's connector.",
+                      "items": {
+                        "$ref": "#/components/schemas/external_sync_field_rule"
+                      }
+                    },
+                    "externalSyncFieldMappings": {
+                      "type": "array",
+                      "description": "Technical preview. External fields of the configuration's connector carried onto global case fields.",
+                      "items": {
+                        "$ref": "#/components/schemas/external_sync_field_mapping"
+                      }
+                    },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
+                    },
+                    "statuses": {
+                      "$ref": "#/components/schemas/case_statuses_configuration"
+                    },
+                    "pauseReasons": {
+                      "$ref": "#/components/schemas/pause_reasons_configuration"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
@@ -3643,6 +3719,242 @@
         }
       }
     },
+    "/api/cases/{caseId}/_sync": {
+      "post": {
+        "summary": "Sync a case from its external incident",
+        "description": "Technical preview. Fetches the incident the case was last pushed to and applies its title, description, and status to the case. Fields that changed in Kibana since the last push are kept when the case conflict strategy is `kibana`. Requires the `xpack.cases.bidirectionalSync.enabled` setting and an Enterprise license. You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. You must also have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.\n",
+        "operationId": "syncCaseDefaultSpace",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The case has not been pushed, or its connector cannot be synced from.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/external_sync/{connectorId}/_notify": {
+      "post": {
+        "summary": "Notify cases that an external incident changed",
+        "description": "Technical preview. Called by a Jira webhook or Automation rule, or a ServiceNow business rule, when an incident changes. Queues a sync of every case pushed to the incident through the connector, which runs as the service account bound to the connector. The body only identifies the incident; the incident itself is read through the connector. Requires the `xpack.cases.bidirectionalSync.enabled` setting and an Enterprise license. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. You must also have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases.\n",
+        "operationId": "notifyExternalSyncDefaultSpace",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "Jira issue change",
+                    "type": "object",
+                    "required": [
+                      "issue"
+                    ],
+                    "properties": {
+                      "issue": {
+                        "type": "object",
+                        "required": [
+                          "id"
+                        ],
+                        "properties": {
+                          "id": {
+                            "description": "The Jira issue ID the case was pushed to.",
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "integer"
+                              }
+                            ]
+                          },
+                          "fields": {
+                            "type": "object",
+                            "properties": {
+                              "updated": {
+                                "description": "When the issue was last updated.",
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "timestamp": {
+                        "description": "The webhook timestamp, in milliseconds since the epoch. Used when `issue.fields.updated` is missing.",
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ServiceNow record change",
+                    "type": "object",
+                    "required": [
+                      "sys_id"
+                    ],
+                    "properties": {
+                      "sys_id": {
+                        "description": "The ServiceNow record the case was pushed to.",
+                        "type": "string"
+                      },
+                      "sys_updated_on": {
+                        "description": "When the record was last updated.",
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              },
+              "examples": {
+                "jira": {
+                  "value": {
+                    "issue": {
+                      "id": "10042",
+                      "fields": {
+                        "updated": "2026-10-30T12:00:00.000+0000"
+                      }
+                    }
+                  }
+                },
+                "servicenow": {
+                  "value": {
+                    "sys_id": "9c573169c611228700193229fff72400",
+                    "sys_updated_on": "2026-10-30 12:00:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The sync of the cases pushed to the incident was queued.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "accepted_at",
+                    "cases"
+                  ],
+                  "properties": {
+                    "id": {
+                      "description": "The ID of the queued event.",
+                      "type": "string"
+                    },
+                    "accepted_at": {
+                      "description": "When the event was queued.",
+                      "type": "string"
+                    },
+                    "cases": {
+                      "description": "The number of cases pushed to the incident through the connector.",
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The body is not an incident change for the connector type, the connector cannot be synced from, or service accounts are disabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No case was pushed to the incident through the connector.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "No service account is bound to the sync of the connector.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/cases/{caseId}/user_actions/_find": {
       "get": {
         "summary": "Find case activity",
@@ -4095,6 +4407,22 @@
         },
         "example": "open"
       },
+      "status_key": {
+        "in": "query",
+        "name": "status_key",
+        "description": "Filters the returned cases by the key of their configured status. Technical preview.",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/string"
+            },
+            {
+              "$ref": "#/components/schemas/string_array"
+            }
+          ]
+        },
+        "example": "awaiting_customer"
+      },
       "tags": {
         "in": "query",
         "name": "tags",
@@ -4352,6 +4680,24 @@
       }
     },
     "schemas": {
+      "case_access": {
+        "type": "object",
+        "description": "The access control for the case. A restricted case and everything attached to it is visible only to its assignees. Requires the `xpack.cases.restrictedCases.enabled` setting and a Platinum license.\n",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).",
+            "enum": [
+              "default",
+              "restricted"
+            ],
+            "example": "default"
+          }
+        }
+      },
       "assignees": {
         "type": "array",
         "description": "An array containing users that are assigned to the case.",
@@ -4752,6 +5098,28 @@
         ],
         "example": "cases"
       },
+      "external_sync_settings": {
+        "type": "object",
+        "description": "Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. On a configuration these are the defaults of the configuration's connector and apply to new cases that use it. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.\n",
+        "required": [
+          "autoPush",
+          "conflictStrategy"
+        ],
+        "properties": {
+          "autoPush": {
+            "type": "boolean",
+            "example": true
+          },
+          "conflictStrategy": {
+            "type": "string",
+            "enum": [
+              "external",
+              "kibana"
+            ],
+            "example": "external"
+          }
+        }
+      },
       "settings": {
         "type": "object",
         "description": "An object that contains the case settings.",
@@ -4768,6 +5136,9 @@
             "description": "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n",
             "type": "boolean",
             "example": true
+          },
+          "externalSync": {
+            "$ref": "#/components/schemas/external_sync_settings"
           }
         }
       },
@@ -4829,6 +5200,9 @@
           "title"
         ],
         "properties": {
+          "access": {
+            "$ref": "#/components/schemas/case_access"
+          },
           "assignees": {
             "$ref": "#/components/schemas/assignees"
           },
@@ -5474,6 +5848,12 @@
           "open"
         ]
       },
+      "case_status_key": {
+        "type": "string",
+        "nullable": true,
+        "description": "The key of the configured status the case is in. Configured statuses are grouped under the built-in statuses, which `status` continues to report. Null for cases last updated before statuses were configured. Technical preview.\n",
+        "example": "awaiting_customer"
+      },
       "case_response_properties": {
         "title": "Case response properties",
         "type": "object",
@@ -5503,6 +5883,9 @@
           "version"
         ],
         "properties": {
+          "access": {
+            "$ref": "#/components/schemas/case_access"
+          },
           "assignees": {
             "$ref": "#/components/schemas/assignees"
           },
@@ -5681,6 +6064,33 @@
           "status": {
             "$ref": "#/components/schemas/case_status"
           },
+          "status_key": {
+            "$ref": "#/components/schemas/case_status_key"
+          },
+          "paused_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Set while the case is in a status that pauses time tracking.",
+            "example": "2026-10-01T15:05:00.000Z"
+          },
+          "time_paused": {
+            "type": "integer",
+            "description": "Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.",
+            "example": 86400
+          },
+          "pause_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "The reason picked when the case was paused.",
+            "example": "Awaiting vendor"
+          },
+          "resume_to_status_key": {
+            "type": "string",
+            "nullable": true,
+            "description": "The status key the case was paused from; moving the case back to it resumes time tracking.",
+            "example": "in-progress"
+          },
           "tags": {
             "type": "array",
             "items": {
@@ -5783,6 +6193,9 @@
                 "version"
               ],
               "properties": {
+                "access": {
+                  "$ref": "#/components/schemas/case_access"
+                },
                 "assignees": {
                   "$ref": "#/components/schemas/assignees"
                 },
@@ -5898,6 +6311,18 @@
                 "status": {
                   "$ref": "#/components/schemas/case_status"
                 },
+                "status_key": {
+                  "type": "string",
+                  "description": "The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.\n",
+                  "maxLength": 50,
+                  "example": "awaiting_customer"
+                },
+                "pause_reason": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "description": "One of the configured pause reasons. Required when the target status pauses time tracking and the case is not already paused; rejected when the target status does not.\n",
+                  "example": "Awaiting vendor"
+                },
                 "tags": {
                   "$ref": "#/components/schemas/case_tags"
                 },
@@ -6005,6 +6430,9 @@
           "status": {
             "$ref": "#/components/schemas/case_status"
           },
+          "status_key": {
+            "$ref": "#/components/schemas/case_status_key"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -6037,6 +6465,151 @@
           ".swimlane"
         ],
         "example": ".none"
+      },
+      "external_sync_field_rule": {
+        "type": "object",
+        "description": "Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`. Pulling `tags` and `comments` requires a connector that exposes them (Jira); other connectors leave them unchanged. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.\n",
+        "required": [
+          "field",
+          "direction"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "title",
+              "description",
+              "status",
+              "tags",
+              "comments"
+            ],
+            "example": "title"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "both",
+              "push",
+              "pull",
+              "off"
+            ],
+            "example": "both"
+          },
+          "conflictStrategy": {
+            "type": "string",
+            "enum": [
+              "external",
+              "kibana"
+            ],
+            "example": "kibana"
+          }
+        }
+      },
+      "external_sync_field_mapping": {
+        "type": "object",
+        "description": "Technical preview. Carries one external field of the configuration's connector onto a global case field. `externalField` is the field key as the external system reports it; `caseField` is the storage key of a global field definition. `direction` and `conflictStrategy` behave as for the built-in field rules. Supported for Jira and ServiceNow connectors, up to 20 mappings per connector.\n",
+        "required": [
+          "externalField",
+          "caseField",
+          "direction"
+        ],
+        "properties": {
+          "externalField": {
+            "type": "string",
+            "example": "customfield_10021"
+          },
+          "caseField": {
+            "type": "string",
+            "example": "severity_tier_as_keyword"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "both",
+              "push",
+              "pull",
+              "off"
+            ],
+            "example": "both"
+          },
+          "conflictStrategy": {
+            "type": "string",
+            "enum": [
+              "external",
+              "kibana"
+            ],
+            "example": "external"
+          }
+        }
+      },
+      "case_statuses_configuration": {
+        "type": "array",
+        "description": "The statuses available for cases. Each entry belongs to one of the built-in statuses, its category, which drives every status-dependent behavior such as alert synchronization and closure. An empty array means only the built-in statuses are available. Requires `xpack.cases.customStatuses.enabled`. Technical preview.\n",
+        "maxItems": 30,
+        "items": {
+          "type": "object",
+          "required": [
+            "key",
+            "label",
+            "category",
+            "order",
+            "isDefault",
+            "disabled"
+          ],
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.",
+              "maxLength": 50,
+              "example": "awaiting_customer"
+            },
+            "label": {
+              "type": "string",
+              "description": "The label shown on cases.",
+              "maxLength": 50,
+              "example": "Awaiting customer"
+            },
+            "category": {
+              "$ref": "#/components/schemas/case_status"
+            },
+            "order": {
+              "type": "integer",
+              "description": "The display position of the status.",
+              "example": 3
+            },
+            "isDefault": {
+              "type": "boolean",
+              "description": "Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.",
+              "example": false
+            },
+            "disabled": {
+              "type": "boolean",
+              "description": "Disabled statuses cannot be applied but keep their label on cases that already use them.",
+              "example": false
+            },
+            "pausesTimeTracking": {
+              "type": "boolean",
+              "description": "Time a case spends in this status is left out of its `duration`, `time_to_investigate`, `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and `in-progress` categories, and never on a category's default status. Moving a case to such a status requires `pause_reason`.\n",
+              "default": false,
+              "example": true
+            }
+          }
+        }
+      },
+      "pause_reasons_configuration": {
+        "type": "array",
+        "description": "The reasons an analyst can pick from when moving a case to a status that pauses time tracking. At least one is required while any enabled status pauses time tracking. Requires `xpack.cases.customStatuses.enabled`. Technical preview.\n",
+        "maxItems": 10,
+        "items": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "example": [
+          "Awaiting customer",
+          "Awaiting vendor",
+          "Awaiting another team",
+          "Scheduled work"
+        ]
       },
       "template_tags": {
         "description": "The words and phrases that help categorize templates. It can be an empty array.\n",
@@ -6255,8 +6828,31 @@
             "type": "boolean",
             "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
           },
+          "externalSync": {
+            "$ref": "#/components/schemas/external_sync_settings"
+          },
+          "externalSyncFields": {
+            "type": "array",
+            "description": "Technical preview. Per-field sync directions and conflict rules of the configuration's connector.",
+            "items": {
+              "$ref": "#/components/schemas/external_sync_field_rule"
+            }
+          },
+          "externalSyncFieldMappings": {
+            "type": "array",
+            "description": "Technical preview. External fields of the configuration's connector carried onto global case fields.",
+            "items": {
+              "$ref": "#/components/schemas/external_sync_field_mapping"
+            }
+          },
           "owner": {
             "$ref": "#/components/schemas/owner"
+          },
+          "statuses": {
+            "$ref": "#/components/schemas/case_statuses_configuration"
+          },
+          "pauseReasons": {
+            "$ref": "#/components/schemas/pause_reasons_configuration"
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
@@ -6368,6 +6964,29 @@
           "extractObservables": {
             "type": "boolean",
             "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n"
+          },
+          "statuses": {
+            "$ref": "#/components/schemas/case_statuses_configuration"
+          },
+          "pauseReasons": {
+            "$ref": "#/components/schemas/pause_reasons_configuration"
+          },
+          "externalSync": {
+            "$ref": "#/components/schemas/external_sync_settings"
+          },
+          "externalSyncFields": {
+            "type": "array",
+            "description": "Technical preview. Per-field sync directions and conflict rules of the configuration's connector.",
+            "items": {
+              "$ref": "#/components/schemas/external_sync_field_rule"
+            }
+          },
+          "externalSyncFieldMappings": {
+            "type": "array",
+            "description": "Technical preview. External fields of the configuration's connector carried onto global case fields.",
+            "items": {
+              "$ref": "#/components/schemas/external_sync_field_mapping"
+            }
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
@@ -7039,6 +7658,9 @@
           },
           "status": {
             "$ref": "#/components/schemas/case_status"
+          },
+          "status_key": {
+            "$ref": "#/components/schemas/case_status_key"
           },
           "tags": {
             "type": "array",
@@ -8021,6 +8643,67 @@
         "properties": {
           "status": {
             "$ref": "#/components/schemas/case_status"
+          },
+          "status_key": {
+            "type": "string",
+            "description": "The key of the configured status the case was moved to.",
+            "example": "awaiting_customer"
+          },
+          "pause_reason": {
+            "type": "string",
+            "description": "The reason picked when the status pauses time tracking.",
+            "example": "Awaiting vendor"
+          }
+        }
+      },
+      "payload_sync": {
+        "type": "object",
+        "properties": {
+          "sync": {
+            "type": "object",
+            "description": "Technical preview. The case was reconciled from its external incident.",
+            "required": [
+              "connector_name",
+              "external_id",
+              "external_title",
+              "external_url",
+              "updated_fields",
+              "conflicted_fields"
+            ],
+            "properties": {
+              "connector_name": {
+                "type": "string"
+              },
+              "external_id": {
+                "type": "string"
+              },
+              "external_title": {
+                "type": "string"
+              },
+              "external_url": {
+                "type": "string"
+              },
+              "updated_fields": {
+                "description": "Case fields updated from the external incident.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "conflicted_fields": {
+                "description": "Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "external_updated_at": {
+                "type": "string"
+              },
+              "external_updated_by": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -8327,6 +9010,9 @@
               },
               {
                 "$ref": "#/components/schemas/payload_status"
+              },
+              {
+                "$ref": "#/components/schemas/payload_sync"
               },
               {
                 "$ref": "#/components/schemas/payload_tags"

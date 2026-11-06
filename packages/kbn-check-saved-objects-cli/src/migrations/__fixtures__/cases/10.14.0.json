@@ -189,7 +189,7 @@
       "pause_reason": "Awaiting customer",
       "resume_to_status_key": "open",
       "access": {
-        "mode": "restricted"
+        "mode": "default"
       }
     }
   ]

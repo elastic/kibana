@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_COMMENTS_PER_TASK, MAX_TASKS_PER_CASE } from '../../../common/constants';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  CASE_TASK_SAVED_OBJECT,
+  MAX_COMMENTS_PER_TASK,
+  MAX_TASKS_PER_CASE,
+} from '../../../common/constants';
 import type {
   TaskCommentCreateRequest,
   TaskCommentsResponse,
@@ -32,6 +37,9 @@ import { createCaseError, isSOError } from '../../common/error';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import { applyTaskListToCase, ensureTaskCapacity } from './apply_task_list';
+
+// Bounds the hidden-case lookup in `find`; restricted cases are expected to be few per space.
+const MAX_HIDDEN_CASES_PER_FIND = 1000;
 
 export interface TasksSubClient {
   create(caseId: string, params: TaskCreateRequest): Promise<CaseTask>;
@@ -94,7 +102,24 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
 
   const getAuthorizedTask = async (taskId: string, operation: ReadOperations | WriteOperations) => {
     const task = await taskService.getTask(taskId);
-    await getAuthorizedCase(task.case_id, operation);
+    try {
+      await getAuthorizedCase(task.case_id, operation);
+    } catch (error) {
+      // A task of a hidden case answers exactly like a missing task, so the response confirms
+      // neither the task nor its restricted case.
+      if (Boom.isBoom(error) && error.output.statusCode === 404) {
+        const notFound = SavedObjectsErrorHelpers.createGenericNotFoundError(
+          CASE_TASK_SAVED_OBJECT,
+          taskId
+        );
+        throw createCaseError({
+          message: `Failed to get task ${taskId}: ${notFound}`,
+          error: notFound,
+          logger,
+        });
+      }
+      throw error;
+    }
     return task;
   };
 
@@ -197,7 +222,18 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
           return { tasks: [], page, per_page: perPage, total: 0 };
         }
 
+        // Restricted cases the caller can't see are left out of the query itself, so neither
+        // `total` nor `search` tells them anything about those cases' tasks.
+        const hiddenCasesFilter = authorization.getHiddenCasesFilter();
+        const hiddenCases = hiddenCasesFilter
+          ? await caseService.findCaseIds({
+              filter: hiddenCasesFilter,
+              perPage: MAX_HIDDEN_CASES_PER_FIND,
+            })
+          : undefined;
+
         const { tasks, total } = await taskService.findTasks({
+          excludeCaseIds: hiddenCases?.ids,
           owners,
           status: asArray(request.status),
           assignees: asArray(request.assignees),
@@ -208,8 +244,8 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
           perPage,
         });
 
-        // Drops the tasks of restricted cases the caller may not see. The filter runs per page,
-        // so `total` can overcount by the hidden tasks on other pages.
+        // Backstop for a case restricted since the lookup above, and for hidden cases past
+        // MAX_HIDDEN_CASES_PER_FIND; only then can `total` overcount.
         const caseIds = [...new Set(tasks.map(({ case_id: caseId }) => caseId))];
         const cases = caseIds.length > 0 ? await caseService.getCases({ caseIds }) : undefined;
         const visibleCaseIds = new Set(

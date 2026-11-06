@@ -7,7 +7,7 @@
 
 import { partition, remove, uniq } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -55,6 +55,12 @@ export const getCaseAccessFilter = (profileUid?: string): KueryNode => {
     nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, profileUid),
   ]);
 };
+
+/**
+ * The cases {@link getCaseAccessFilter} leaves out: restricted cases the caller isn't assigned to.
+ */
+export const getHiddenCasesFilter = (profileUid?: string): KueryNode =>
+  nodeTypes.function.buildNode('not', getCaseAccessFilter(profileUid));
 
 /**
  * Builds an authorization entity from a case saved object, carrying the

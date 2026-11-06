@@ -53,6 +53,8 @@ export interface UpdateTaskArgs extends IndexRefresh {
 
 export interface FindTasksArgs {
   caseIds?: string[];
+  /** Cases whose tasks are left out, such as restricted cases the caller may not see. */
+  excludeCaseIds?: string[];
   owners?: string[];
   status?: CaseTaskStatus[];
   /** User profile uids. */

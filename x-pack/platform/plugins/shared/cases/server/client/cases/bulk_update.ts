@@ -86,7 +86,12 @@ import type {
   CaseStatusesConfiguration,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseAccessMode, CaseStatuses, AttachmentType, UserActionTypes } from '../../../common/types/domain';
+import {
+  CaseAccessMode,
+  CaseStatuses,
+  AttachmentType,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateCaseExtendedFields,

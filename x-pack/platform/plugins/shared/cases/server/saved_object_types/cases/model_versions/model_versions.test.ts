@@ -363,6 +363,21 @@ describe('Model versions', () => {
 
       expect(backfillFn(doc, context)).toEqual({ attributes: { access: { mode: 'default' } } });
     });
+
+    it('leaves a case that already has an access mode alone', () => {
+      const backfill = modelVersion14.changes.find(
+        (change): change is SavedObjectsModelDataBackfillChange => change.type === 'data_backfill'
+      );
+      const backfillFn = backfill?.backfillFn as SavedObjectModelDataBackfillFn;
+      const doc = {
+        id: 'case-1',
+        type: 'cases',
+        attributes: { access: { mode: 'restricted' } },
+      } as Parameters<typeof backfillFn>[0];
+      const context = {} as Parameters<typeof backfillFn>[1];
+
+      expect(backfillFn(doc, context)).toEqual({ attributes: {} });
+    });
   });
 
   describe('version 15', () => {

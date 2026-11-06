@@ -41,7 +41,8 @@
       "observables": [],
       "settings": {
         "extractObservables": false
-      }
+      },
+      "extract_observables_source": "fixture"
     },
     {
       "assignees": [
@@ -85,7 +86,8 @@
       "settings": {
         "extractObservables": false
       },
-      "extract_observables_source": "fixture"
+      "extract_observables_source": "fixture",
+      "status_key": "open"
     }
   ],
   "10.12.0": [
@@ -130,7 +132,8 @@
       "observables": [],
       "settings": {
         "extractObservables": false
-      }
+      },
+      "extract_observables_source": "fixture"
     },
     {
       "assignees": [

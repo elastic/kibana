@@ -287,7 +287,12 @@ export const getCasesByAttachmentIDs = async (
       legacyFilter: getAttachmentsFilter(CASE_COMMENT_SAVED_OBJECT),
     });
 
-    const casesInStatus = await filterByCaseStatus(caseService, casesOfAttachments, status);
+    const casesInStatus = await filterCases({
+      caseService,
+      authorization,
+      casesOfAttachments,
+      status,
+    });
 
     // After the status filter, so only the cases returned are audited.
     ensureSavedObjectsAreAuthorized(
@@ -316,30 +321,46 @@ export const getCasesByAttachmentIDs = async (
  * Only the cases with one of the statuses, or every case without a status; attachment ids left in no
  * case are dropped. Cases whose attachment outlived them are not found, so they are left out.
  */
-const filterByCaseStatus = async (
-  caseService: CasesService,
-  casesOfAttachments: CasesWithOwnerOfAttachment[],
-  status: CasesByAttachmentIDsRequest['status']
-): Promise<CasesWithOwnerOfAttachment[]> => {
-  if (status === undefined) return casesOfAttachments;
-  const statuses = asArray(status);
+/**
+ * Keeps the cases in one of `status` that the caller may see. The attachments read is scoped by
+ * owner only, so restricted cases the caller isn't assigned to are dropped here.
+ */
+const filterCases = async ({
+  caseService,
+  authorization,
+  casesOfAttachments,
+  status,
+}: {
+  caseService: CasesService;
+  authorization: CasesClientArgs['authorization'];
+  casesOfAttachments: CasesWithOwnerOfAttachment[];
+  status: CasesByAttachmentIDsRequest['status'];
+}): Promise<CasesWithOwnerOfAttachment[]> => {
+  if (status === undefined && !authorization.enforcesRestrictedCases()) return casesOfAttachments;
+  const statuses = status === undefined ? undefined : asArray(status);
   const caseIds = [
     ...new Set(casesOfAttachments.flatMap(({ cases }) => cases.map(({ id }) => id))),
   ];
-  const statusesById = await pMap(
+  const casesById = await pMap(
     chunk(caseIds, MAX_BULK_GET_CASES),
-    (ids) => caseService.getCaseStatuses({ caseIds: ids }),
+    (ids) => caseService.getCaseStatusesAndAccess({ caseIds: ids }),
     { concurrency: MAX_CONCURRENT_SEARCHES }
   );
-  const caseIdsWithStatus = new Set(
-    statusesById.flatMap((statusById) =>
-      [...statusById].flatMap(([id, caseStatus]) => (statuses.includes(caseStatus) ? [id] : []))
+  const keptCaseIds = new Set(
+    casesById.flatMap((byId) =>
+      [...byId].flatMap(([id, theCase]) =>
+        (statuses === undefined ||
+          (theCase.status !== undefined && statuses.includes(theCase.status))) &&
+        authorization.isCaseVisible(theCase)
+          ? [id]
+          : []
+      )
     )
   );
 
   return casesOfAttachments.flatMap(({ attachmentId, cases }) => {
-    const casesInStatus = cases.filter(({ id }) => caseIdsWithStatus.has(id));
-    return casesInStatus.length > 0 ? [{ attachmentId, cases: casesInStatus }] : [];
+    const keptCases = cases.filter(({ id }) => keptCaseIds.has(id));
+    return keptCases.length > 0 ? [{ attachmentId, cases: keptCases }] : [];
   });
 };
 

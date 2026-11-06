@@ -10,7 +10,7 @@ import type { Template, AttachmentAttributes } from '../../../common/types/domai
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCases, mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseAccessMode, CaseStatuses } from '../../../common/types/domain';
 import { MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP } from '../../../common/constants';
 import { Operations } from '../../authorization';
 import {
@@ -128,14 +128,14 @@ describe('get', () => {
         { attachmentId: 'host:a', caseIds: ['case-1', 'case-2'] },
         { attachmentId: 'host:b', caseIds: ['case-2'] },
       ]);
-      expect(clientArgs.services.caseService.getCaseStatuses).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.getCaseStatusesAndAccess).not.toHaveBeenCalled();
     });
 
     it('keeps only the cases with one of the statuses', async () => {
-      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+      clientArgs.services.caseService.getCaseStatusesAndAccess.mockResolvedValue(
         new Map([
-          ['case-1', CaseStatuses.closed],
-          ['case-2', CaseStatuses['in-progress']],
+          ['case-1', { status: CaseStatuses.closed, assignees: [] }],
+          ['case-2', { status: CaseStatuses['in-progress'], assignees: [] }],
         ])
       );
 
@@ -148,7 +148,7 @@ describe('get', () => {
         { attachmentId: 'host:a', caseIds: ['case-2'] },
         { attachmentId: 'host:b', caseIds: ['case-2'] },
       ]);
-      expect(clientArgs.services.caseService.getCaseStatuses).toHaveBeenCalledWith({
+      expect(clientArgs.services.caseService.getCaseStatusesAndAccess).toHaveBeenCalledWith({
         caseIds: ['case-1', 'case-2'],
       });
     });
@@ -158,10 +158,10 @@ describe('get', () => {
       clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
         ensureSavedObjectsAreAuthorized,
       });
-      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+      clientArgs.services.caseService.getCaseStatusesAndAccess.mockResolvedValue(
         new Map([
-          ['case-1', CaseStatuses.closed],
-          ['case-2', CaseStatuses.open],
+          ['case-1', { status: CaseStatuses.closed, assignees: [] }],
+          ['case-2', { status: CaseStatuses.open, assignees: [] }],
         ])
       );
 
@@ -184,12 +184,41 @@ describe('get', () => {
         { id: 'case-1', owner: 'securitySolution' },
         { id: 'case-2', owner: 'securitySolution' },
       ]);
-      expect(clientArgs.services.caseService.getCaseStatuses).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.getCaseStatusesAndAccess).not.toHaveBeenCalled();
+    });
+
+    it('leaves out restricted cases the caller may not see, with or without a status filter', async () => {
+      clientArgs.authorization.enforcesRestrictedCases.mockReturnValueOnce(true);
+      clientArgs.authorization.isCaseVisible.mockImplementation(
+        ({ access }) => access?.mode !== CaseAccessMode.RESTRICTED
+      );
+      clientArgs.services.caseService.getCaseStatusesAndAccess.mockResolvedValue(
+        new Map([
+          [
+            'case-1',
+            {
+              status: CaseStatuses.open,
+              access: { mode: CaseAccessMode.RESTRICTED },
+              assignees: [{ uid: 'someone-else' }],
+            },
+          ],
+          ['case-2', { status: CaseStatuses.open, assignees: [] }],
+        ])
+      );
+
+      await expect(getCasesByAttachmentIDs(request, clientArgs)).resolves.toEqual([
+        { attachmentId: 'host:a', caseIds: ['case-2'] },
+        { attachmentId: 'host:b', caseIds: ['case-2'] },
+      ]);
+      expect(clientArgs.services.caseService.getCaseStatusesAndAccess).toHaveBeenCalledWith({
+        caseIds: ['case-1', 'case-2'],
+      });
+      clientArgs.authorization.isCaseVisible.mockReturnValue(true);
     });
 
     it('leaves out cases that are not found', async () => {
-      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
-        new Map([['case-2', CaseStatuses.open]])
+      clientArgs.services.caseService.getCaseStatusesAndAccess.mockResolvedValue(
+        new Map([['case-2', { status: CaseStatuses.open, assignees: [] }]])
       );
 
       await expect(

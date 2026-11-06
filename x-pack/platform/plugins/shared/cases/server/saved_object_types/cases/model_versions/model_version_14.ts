@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
 import { casesSchemaV14 } from '../schemas';
 import { createSchemaOverrides } from './create_schema_overrides';
+
+// Core merges the result over the stored attributes, so a case that already has `access` is left
+// alone. Builds of the restricted-cases work wrote `access` under a lower model version; resetting
+// those cases to `default` would make restricted cases visible to everyone.
+const backfillAccess: SavedObjectModelDataBackfillFn<{ access?: unknown }> = (doc) =>
+  doc.attributes.access == null
+    ? { attributes: { access: { mode: 'default' } } }
+    : { attributes: {} };
 
 /**
  * Adds the `access.mode` keyword mapping and backfills `{ mode: 'default' }`
@@ -30,9 +41,7 @@ export const modelVersion14: SavedObjectsModelVersion = {
     },
     {
       type: 'data_backfill',
-      backfillFn: () => {
-        return { attributes: { access: { mode: 'default' } } };
-      },
+      backfillFn: backfillAccess,
     },
   ],
   schemas: {

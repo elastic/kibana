@@ -23,6 +23,8 @@ export const createAuthorizationMock = () => {
     }),
     getAndEnsureAuthorizedEntities: jest.fn(),
     isCaseVisible: jest.fn().mockReturnValue(true),
+    enforcesRestrictedCases: jest.fn().mockReturnValue(false),
+    getHiddenCasesFilter: jest.fn().mockReturnValue(undefined),
     isSuperuserRequest: jest.fn().mockReturnValue(false),
   };
   return mocked;

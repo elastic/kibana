@@ -8,7 +8,8 @@
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { toKqlExpression } from '@kbn/es-query';
+import { nodeTypes, toKqlExpression } from '@kbn/es-query';
+import { getCaseAccessFilter } from './utils';
 import { CaseAccessMode } from '../../common/types/domain';
 import { Authorization, Operations } from '.';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -1587,6 +1588,26 @@ describe('authorization', () => {
       featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
 
       spacesStart = createSpacesDisabledFeaturesMock();
+    });
+
+    describe('getHiddenCasesFilter', () => {
+      it('matches the restricted cases the caller is not assigned to', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else' });
+
+        expect(auth.enforcesRestrictedCases()).toBe(true);
+        expect(auth.getHiddenCasesFilter()).toEqual(
+          nodeTypes.function.buildNode('not', getCaseAccessFilter('u_someone_else'))
+        );
+      });
+
+      it('is undefined for a superuser or when the feature flag is disabled', async () => {
+        const superuser = await createAuth({ profileUid: 'u_someone_else', isSuperuser: true });
+        const flagOff = await createAuth({ restrictedCasesEnabled: false });
+
+        expect(superuser.enforcesRestrictedCases()).toBe(false);
+        expect(superuser.getHiddenCasesFilter()).toBeUndefined();
+        expect(flagOff.getHiddenCasesFilter()).toBeUndefined();
+      });
     });
 
     describe('isCaseVisible', () => {

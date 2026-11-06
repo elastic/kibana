@@ -154,6 +154,15 @@ describe('CaseTaskService', () => {
       });
     });
 
+    it('leaves out the tasks of excluded cases', async () => {
+      await service.findTasks({ excludeCaseIds: ['hidden-1', 'hidden-2'] });
+
+      const filter = soClient.find.mock.calls[0][0].filter;
+      expect(JSON.stringify(filter)).toContain('"function":"not"');
+      expect(JSON.stringify(filter)).toContain('hidden-1');
+      expect(JSON.stringify(filter)).toContain('hidden-2');
+    });
+
     it('wraps saved object errors in a CaseError', async () => {
       // Failure scenario: the saved objects client rejects (e.g. ES unavailable).
       soClient.find.mockRejectedValue(new Error('boom'));

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { nodeBuilder } from '@kbn/es-query';
 import { MAX_COMMENTS_PER_TASK, MAX_TASKS_PER_CASE } from '../../../common/constants';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { Operations } from '../../authorization';
@@ -118,6 +120,18 @@ describe('TasksSubClient', () => {
       );
 
       await expect(client.get(task.id)).rejects.toThrow('not found');
+    });
+
+    it('answers a task of a hidden case exactly like a missing task', async () => {
+      // failure scenario: the 404 for a hidden parent case named the restricted case
+      clientArgs.authorization.ensureAuthorized.mockRejectedValueOnce(
+        Boom.notFound(`Saved object [cases/${theCase.id}] not found`)
+      );
+
+      const error = await client.get(task.id).catch((e) => e);
+
+      expect(error.message).toContain(`Saved object [cases-tasks/${task.id}] not found`);
+      expect(error.message).not.toContain(theCase.id);
     });
 
     it('propagates authorization failures without writing', async () => {
@@ -343,6 +357,25 @@ describe('TasksSubClient', () => {
       });
       expect(result.tasks).toEqual([task]);
       expect(result.total).toBe(1);
+    });
+
+    it('leaves hidden cases out of the query, so total and search count only visible tasks', async () => {
+      // failure scenario: page-level filtering left hidden tasks in `total` and in search hits
+      const hiddenCasesFilter = nodeBuilder.is('cases.attributes.access.mode', 'restricted');
+      clientArgs.authorization.getHiddenCasesFilter.mockReturnValueOnce(hiddenCasesFilter);
+      caseService.findCaseIds.mockResolvedValueOnce({ ids: ['restricted-case'], total: 1 });
+      taskService.findTasks.mockResolvedValue({ tasks: [task], total: 7 });
+      caseService.getCases.mockResolvedValue({ saved_objects: [theCase] });
+
+      const result = await client.find({ search: 'phishing', page: 2, perPage: 1 });
+
+      expect(caseService.findCaseIds).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: hiddenCasesFilter })
+      );
+      expect(taskService.findTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ excludeCaseIds: ['restricted-case'], search: 'phishing' })
+      );
+      expect(result.total).toBe(7);
     });
 
     it('returns nothing when no requested owner is authorized', async () => {

@@ -142,7 +142,9 @@ export const createTaskTemplatesSubClient = (
     async update(templateId, params) {
       try {
         await ensureEnabled();
-        const { version, ...patch } = decodeWithExcessOrThrowZod(TaskTemplatePatchRequestSchema)(params);
+        const { version, ...patch } = decodeWithExcessOrThrowZod(TaskTemplatePatchRequestSchema)(
+          params
+        );
         await getAuthorizedTemplate(templateId, WriteOperations.UpdateTaskTemplate);
         return await taskTemplateService.updateTemplate({
           ...patch,

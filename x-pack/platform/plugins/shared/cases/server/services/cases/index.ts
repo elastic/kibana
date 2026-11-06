@@ -92,6 +92,7 @@ import {
   OwnerSchema,
 } from '../../common/types/case';
 import type {
+  CaseStatusAndAccess,
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
   CasesMapWithPageInfo,
@@ -858,22 +859,60 @@ export class CasesService {
   /**
    * The status of each case found, reading only the status field; cases not found are left out.
    */
-  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+  /**
+   * Status, access and assignees of each case found, reading only those fields. Cases not found
+   * are left out.
+   */
+  public async getCaseStatusesAndAccess({
+    caseIds,
+  }: GetCasesArgs): Promise<Map<string, CaseStatusAndAccess>> {
     try {
-      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      this.log.debug(`Attempting to GET the status and access of cases ${caseIds.join(', ')}`);
       const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
-        Pick<CasePersistedAttributes, 'status'>
-      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+        Pick<CasePersistedAttributes, 'status' | 'access' | 'assignees'>
+      >(
+        caseIds.map((id) => ({
+          type: CASE_SAVED_OBJECT,
+          id,
+          fields: ['status', 'access', 'assignees'],
+        }))
+      );
 
       return new Map(
-        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+        cases.flatMap((theCase): Array<[string, CaseStatusAndAccess]> => {
           if (isSavedObjectErrorResult(theCase)) return [];
-          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
-          return status ? [[theCase.id, status]] : [];
+          const { status, access, assignees } = theCase.attributes;
+          return [
+            [
+              theCase.id,
+              { status: STATUS_ESMODEL_TO_EXTERNAL[status], access, assignees: assignees ?? [] },
+            ],
+          ];
         })
       );
     } catch (error) {
-      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
+      this.log.error(`Error on GET the status and access of cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /** IDs of the cases matching `filter`, reading no attributes beyond the owner. */
+  public async findCaseIds({
+    filter,
+    perPage,
+  }: {
+    filter: KueryNode;
+    perPage: number;
+  }): Promise<{ ids: string[]; total: number }> {
+    try {
+      this.log.debug(`Attempting to find case IDs`);
+      const { saved_objects: cases, total } = await this.unsecuredSavedObjectsClient.find<
+        Pick<CasePersistedAttributes, 'owner'>
+      >({ type: CASE_SAVED_OBJECT, filter, fields: ['owner'], perPage, page: 1 });
+
+      return { ids: cases.map(({ id }) => id), total };
+    } catch (error) {
+      this.log.error(`Error on find case IDs: ${error}`);
       throw error;
     }
   }
