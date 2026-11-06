@@ -10,6 +10,7 @@ import { act, renderHook, render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useWatchlistsPrivileges } from '../../../../api/hooks/use_watchlists_privileges';
+import { useWatchlistManualEntitiesEnabled } from '../../../../hooks/use_watchlist_manual_entities_enabled';
 import { GET_WATCHLISTS_QUERY_KEY } from '../../../../api/hooks/use_get_watchlists';
 import { ENTITY_GRID_QUERY_KEY } from '../common';
 import type { AddToWatchlistModalProps } from '../components/add_to_watchlist_modal';
@@ -17,6 +18,7 @@ import { useAddToWatchlistAction } from './use_add_to_watchlist_action';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../api/hooks/use_watchlists_privileges');
+jest.mock('../../../../hooks/use_watchlist_manual_entities_enabled');
 
 const mockModal = jest.fn((_: AddToWatchlistModalProps) => <div data-test-subj="mockModal" />);
 jest.mock('../components/add_to_watchlist_modal', () => ({
@@ -25,6 +27,7 @@ jest.mock('../components/add_to_watchlist_modal', () => ({
 
 const mockFlag = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockPrivileges = useWatchlistsPrivileges as jest.Mock;
+const mockManualEntities = useWatchlistManualEntitiesEnabled as jest.Mock;
 
 const queryClient = new QueryClient();
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -40,6 +43,7 @@ describe('useAddToWatchlistAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFlag.mockReturnValue(true);
+    mockManualEntities.mockReturnValue(true);
     mockPrivileges.mockReturnValue({ data: { has_all_required: true }, error: null });
   });
 
@@ -50,6 +54,7 @@ describe('useAddToWatchlistAction', () => {
 
   it.each([
     ['the feature flag is off', () => mockFlag.mockReturnValue(false)],
+    ['the manually added entities flag is off', () => mockManualEntities.mockReturnValue(false)],
     [
       'the user lacks a required privilege',
       () => mockPrivileges.mockReturnValue({ data: { has_all_required: false }, error: null }),

@@ -11,6 +11,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { toEntitySourceArray } from '../../../../../flyout/entity_details/shared/components/entity_source_value';
 import { GET_WATCHLISTS_QUERY_KEY } from '../../../../api/hooks/use_get_watchlists';
 import { useWatchlistsPrivileges } from '../../../../api/hooks/use_watchlists_privileges';
+import { useWatchlistManualEntitiesEnabled } from '../../../../hooks/use_watchlist_manual_entities_enabled';
 import { AddToWatchlistModal } from '../components/add_to_watchlist_modal';
 import type { Row } from '../common';
 import { OWN_WATCHLISTS_FIELD, WATCHLISTS_FIELD } from '../queries/resolved_entities';
@@ -24,17 +25,21 @@ interface Target {
 
 /**
  * The "Add to watchlist" row action and its modal. The action is undefined, which hides the menu
- * item, when watchlists are off or the user cannot manage them.
+ * item, when watchlists or manually added entities are off, or the user cannot manage watchlists.
  */
 export const useAddToWatchlistAction = () => {
   const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
+  const isManualEntitiesEnabled = useWatchlistManualEntitiesEnabled();
   const { data: privileges, error: privilegesError } = useWatchlistsPrivileges();
   const invalidateEntityGrid = useInvalidateEntityGrid();
   const queryClient = useQueryClient();
   const [target, setTarget] = useState<Target>();
 
   const canAddToWatchlist =
-    isWatchlistsEnabled && !privilegesError && (privileges?.has_all_required ?? false);
+    isWatchlistsEnabled &&
+    isManualEntitiesEnabled &&
+    !privilegesError &&
+    (privileges?.has_all_required ?? false);
 
   const onAddToWatchlist = useCallback((row: Row) => {
     const entityId = getEntityId(row);

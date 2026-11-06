@@ -164,6 +164,12 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
 export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
   'securitySolution.useNewEntityAnalyticsPage' as const;
+/**
+ * LaunchDarkly flag for adding entities to a watchlist by hand (the grid's row action) and removing
+ * them again (the watchlist edit flyout). Off unless a deployment turns it on, on-prem included.
+ */
+export const ENTITY_ANALYTICS_WATCHLIST_MANUAL_ENTITIES_FLAG =
+  'securitySolution.entityAnalyticsWatchlistManualEntities' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
