@@ -150,6 +150,64 @@ describe('applyOperations', () => {
     );
   });
 
+  it('writes nothing for an item that already cites every memory, so a rerun adds nothing', async () => {
+    const cited = [{ uri: 'ki://m-1', relation: 'derived_from' as const }];
+    stored.set('entity-person-bob', {
+      id: 'entity-person-bob',
+      type: 'entity.person',
+      title: 'Bob',
+      references: [
+        ...cited,
+        { uri: 'ki://entity-team-ops', relation: 'relates_to', description: 'member_of' },
+      ],
+    });
+    stored.set('fact-1', {
+      id: 'fact-1',
+      type: 'fact.preference',
+      title: 'Old',
+      references: cited,
+    });
+
+    const counts = await applyOperations(context(), [
+      {
+        op: 'upsert_entity',
+        id: 'entity-person-bob',
+        type: 'person',
+        name: 'Bob',
+        content: 'Bob, again.',
+        attributes: {},
+        sourceMemoryIds: ['m-1'],
+      },
+      {
+        op: 'upsert_fact',
+        id: 'fact-1',
+        type: 'preference',
+        title: 'Old, again',
+        content: 'Old.',
+        sourceMemoryIds: ['m-1'],
+      },
+      {
+        op: 'relationship',
+        sourceId: 'entity-person-bob',
+        targetId: 'entity-team-ops',
+        type: 'member_of',
+        remove: false,
+        sourceMemoryIds: ['m-1'],
+      },
+      {
+        op: 'relationship',
+        sourceId: 'entity-person-bob',
+        targetId: 'entity-team-dev',
+        type: 'member_of',
+        remove: true,
+        sourceMemoryIds: [],
+      },
+    ]);
+
+    expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
+    expect(putKiRevision).not.toHaveBeenCalled();
+  });
+
   it('replaces the entities a fact is about, and renders its access patterns', async () => {
     stored.set('fact-1', {
       id: 'fact-1',

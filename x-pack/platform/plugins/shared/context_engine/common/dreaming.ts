@@ -34,6 +34,8 @@ export const DREAMING_MEMORY_KI_TYPES: readonly string[] = [
   'memory.session',
 ];
 
+/** The prefix of the attributes dreaming sets itself, rather than the model. */
+export const MEMORY_ATTRIBUTE_PREFIX = 'memory.';
 /** How many memories a fact or entity was seen in. */
 export const OCCURRENCES_ATTRIBUTE = 'memory.number_of_occurrences';
 /** When the latest memory a fact or entity was seen in was recorded. */

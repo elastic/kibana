@@ -261,6 +261,15 @@ const sightingAttributes = (
   };
 };
 
+/** Whether a KI already cites every memory, so writing it again would add nothing. */
+const citesAll = (current: DreamedKi | undefined, sourceMemoryIds: readonly string[]): boolean => {
+  if (!current) {
+    return false;
+  }
+  const cited = new Set(citedMemoryIds(current));
+  return sourceMemoryIds.every((id) => cited.has(id));
+};
+
 const withAccessPatterns = (
   current: DreamedKi | undefined,
   content: string | undefined,
@@ -279,22 +288,32 @@ const withAccessPatterns = (
 };
 
 const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =>
-  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => ({
-    ...current,
-    id: operation.id,
-    type: `${ENTITY_TYPE_PREFIX}${operation.type}`,
-    title: operation.name,
-    ...(operation.description !== undefined && { description: operation.description }),
-    ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
-      ...current?.attributes,
-      ...operation.attributes,
-      ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
-    }),
-    references: addReferences(current?.references, sourceReferences(operation.sourceMemoryIds)),
-  }));
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) =>
+    citesAll(current, operation.sourceMemoryIds)
+      ? undefined
+      : {
+          ...current,
+          id: operation.id,
+          type: `${ENTITY_TYPE_PREFIX}${operation.type}`,
+          title: operation.name,
+          ...(operation.description !== undefined && { description: operation.description }),
+          ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
+            ...current?.attributes,
+            ...operation.attributes,
+            ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
+          }),
+          references: addReferences(
+            current?.references,
+            sourceReferences(operation.sourceMemoryIds)
+          ),
+        }
+  );
 
 const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
   writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
+    if (citesAll(current, operation.sourceMemoryIds)) {
+      return undefined;
+    }
     const { about } = operation;
     const kept =
       about === undefined
@@ -333,13 +352,22 @@ const applyRelationship = (context: ApplyContext, operation: RelationshipOperati
       relation: 'relates_to',
       description: operation.type,
     };
+    const linked = current.references?.some(
+      (reference) => referenceKey(reference) === referenceKey(relationship)
+    );
     if (operation.remove) {
+      if (!linked) {
+        return undefined;
+      }
       return {
         ...current,
         references: current.references?.filter(
           (reference) => referenceKey(reference) !== referenceKey(relationship)
         ),
       };
+    }
+    if (linked && citesAll(current, operation.sourceMemoryIds)) {
+      return undefined;
     }
     return {
       ...current,

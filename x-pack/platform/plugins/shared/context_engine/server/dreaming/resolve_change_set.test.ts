@@ -222,7 +222,70 @@ describe('resolveChangeSet', () => {
     expect((operations[0] as UpsertEntityOperation).attributes).toEqual({ role: 'SRE' });
   });
 
-  it('rejects items that cite memories the model was not shown, or none', () => {
+  it('accepts a type given with its fact. or entity. prefix', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          { ref: 'new:1', type: 'entity.team', name: 'Platform Team', source_memory_ids: ['m-1'] },
+        ],
+        facts: [
+          {
+            ref: 'new:2',
+            type: 'fact.preference',
+            title: 'Bob prefers tea',
+            content: 'Bob drinks tea.',
+            source_memory_ids: ['m-1'],
+          },
+        ],
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([]);
+    expect(operations.map((operation) => 'type' in operation && operation.type)).toEqual([
+      'team',
+      'preference',
+    ]);
+  });
+
+  it('drops the memory attributes the model copies back, rather than rejecting the entity', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          {
+            ref: 'entity-person--bob',
+            content: 'Bob is an SRE.',
+            attributes: [
+              { key: 'role', value: 'SRE' },
+              { key: 'memory.number_of_occurrences', value: '3' },
+              { key: 'memory.last_seen_at', value: '2026-09-01T10:00:00.000Z' },
+            ],
+            source_memory_ids: ['m-1'],
+          },
+        ],
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([]);
+    expect((operations[0] as UpsertEntityOperation).attributes).toEqual({ role: 'SRE' });
+  });
+
+  it('drops the memories an item cites but was not shown, as long as one it was shown remains', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          { ref: 'new:1', type: 'team', name: 'A', source_memory_ids: ['m-1', 'm-1-typo'] },
+        ],
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([]);
+    expect((operations[0] as UpsertEntityOperation).sourceMemoryIds).toEqual(['m-1']);
+  });
+
+  it('rejects items that cite only memories the model was not shown, or none', () => {
     const { rejected } = resolveChangeSet(
       changeSet({
         entities: [

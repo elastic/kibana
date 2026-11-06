@@ -167,7 +167,7 @@ steps:
     steps:
       - name: batches
         type: foreach
-        foreach: '{{ variables.memories | chunk: 50 | json }}'
+        foreach: '{{ variables.memories | chunk: 20 | json }}'
         steps:
           - name: read_existing
             type: elasticsearch.search
@@ -238,7 +238,9 @@ steps:
 
                 Merge rather than duplicate: if a memory restates or refines an existing item, update that item.
 
-                When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+                When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen. These are set for you: never return memory.* attributes.
+
+                An EXISTING item lists the memories it was built from as references with relation derived_from and uri ki://<memory id>. Do not return an item only for memories it already lists: they are already recorded.
 
                 Facts are read without their entities, so write each one to stand alone: name the entities it is about in its title and content, and keep every number exactly as stated.
 

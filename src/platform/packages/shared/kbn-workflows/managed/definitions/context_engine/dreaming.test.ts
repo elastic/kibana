@@ -223,6 +223,69 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     );
   });
 
+  describe('the consolidate prompt', () => {
+    const memory = { id: 'm-1', type: 'memory.session_fact', title: 'Seat', content: 'Aisle.' };
+    const existing = { id: 'fact-1', type: 'fact.preference', title: 'Bob likes aisles' };
+    const deleted = {
+      id: 'fact-2',
+      type: 'fact.preference',
+      title: 'Gone',
+      governance: { lifecycle: { status: 'deleted' } },
+    };
+
+    const prompt = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) => {
+      const workflow = render(overrides);
+      const batches = findStep(findStep(workflow.steps, 'dream').steps ?? [], 'batches');
+      const consolidate = findStep(batches.steps ?? [], 'consolidate');
+      return createWorkflowLiquidEngine().parseAndRenderSync(String(consolidate.with?.prompt), {
+        consts: workflow.consts,
+        foreach: { item: [memory] },
+        steps: {
+          read_existing: {
+            output: { hits: { hits: [{ _source: existing }, { _source: deleted }] } },
+          },
+        },
+      });
+    };
+
+    it('lists the configured types and instructions, then the memories and existing items', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'FACT TYPES:\n- preference: Something a customer likes.\nENTITY TYPES:\n'
+      );
+      expect(rendered).toContain(
+        '- customer: A loyalty member. (attributes: loyalty_number, tier)\n- city\n'
+      );
+      expect(rendered).toContain('RELATIONSHIP TYPES:\n- lives_in: customer -> city\n');
+      expect(rendered).toContain(`INSTRUCTIONS:\n\n${values.instructions}\n`);
+      expect(rendered).toContain(`MEMORIES (one per line):\n${JSON.stringify(memory)}\n`);
+      expect(rendered).toContain(JSON.stringify(existing));
+      expect(rendered).not.toContain('"Gone"');
+    });
+
+    it('tells the model which attributes and memories are already recorded', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain('These are set for you: never return memory.* attributes.');
+      expect(rendered).toContain(
+        'Do not return an item only for memories it already lists: they are already recorded.'
+      );
+    });
+
+    it('tells the model not to create entities or relationships when none are configured', () => {
+      expect(prompt({ entityTypes: [], relationshipTypes: [] })).toContain(
+        'ENTITY TYPES:\nnone: do not create entities.\nRELATIONSHIP TYPES:\nnone: do not create relationships.\n'
+      );
+    });
+
+    it('tells the model not to create facts when no fact types are configured', () => {
+      expect(prompt({ factTypes: [] })).toContain(
+        'FACT TYPES:\nnone: do not create facts.\nENTITY TYPES:'
+      );
+    });
+  });
+
   it('keeps empty type lists as lists', () => {
     expect(render({ entityTypes: [], relationshipTypes: [] }).consts).toEqual(
       expect.objectContaining({ entity_types: [], relationship_types: [] })
@@ -308,7 +371,7 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       })
     ).toEqual([{ id: 'm-1' }, { id: 'm-3', governance: { lifecycle: { status: 'active' } } }]);
     expect(findStep(findStep(render().steps, 'dream').steps ?? [], 'batches').foreach).toBe(
-      '{{ variables.memories | chunk: 50 | json }}'
+      '{{ variables.memories | chunk: 20 | json }}'
     );
   });
 });

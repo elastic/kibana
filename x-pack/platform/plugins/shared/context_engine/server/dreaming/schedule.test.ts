@@ -53,7 +53,9 @@ describe('shouldDream', () => {
 });
 
 describe('createDreamingScheduleService', () => {
-  let client: jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
+  let client: jest.Mocked<
+    Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall' | 'getInstalledWorkflowState'>
+  >;
   let workflowsManagement: {
     updateWorkflow: jest.Mock;
     cancelAllActiveWorkflowExecutions: jest.Mock;
@@ -73,6 +75,7 @@ describe('createDreamingScheduleService', () => {
     client = {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      getInstalledWorkflowState: jest.fn().mockResolvedValue({ workflowId: WORKFLOW_ID }),
     };
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
@@ -167,21 +170,58 @@ describe('createDreamingScheduleService', () => {
   it.each([
     ['dreaming is off', { dreaming: { ...dreaming, enabled: false } }],
     ['dreaming was never configured', { dreaming: undefined }],
-  ])('removes the workflow and detaches it when %s', async (_, overrides) => {
+  ])(
+    'disables the workflow, keeping its run history, and detaches it when %s',
+    async (_, overrides) => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(overrides),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install).not.toHaveBeenCalled();
+      expect(client.uninstall).not.toHaveBeenCalled();
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        { enabled: false },
+        SPACE,
+        request
+      );
+      expect(workflowsManagement.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE,
+        request
+      );
+      expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: WORKFLOW_ID,
+      });
+    }
+  );
+
+  it('leaves a workflow that was never installed alone when dreaming is off', async () => {
+    client.getInstalledWorkflowState.mockResolvedValue(null);
+
     await createService(workflowsManagement).reconcile({
-      aiIndex: aiIndex(overrides),
+      aiIndex: aiIndex({ dreaming: { ...dreaming, enabled: false } }),
       spaceId: SPACE,
       request,
     });
 
-    expect(client.install).not.toHaveBeenCalled();
+    expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalled();
+    expect(client.uninstall).not.toHaveBeenCalled();
+  });
+
+  it('uninstalls the workflow when dreaming is off and it cannot be disabled', async () => {
+    await createService(undefined).reconcile({
+      aiIndex: aiIndex({ dreaming: { ...dreaming, enabled: false } }),
+      spaceId: SPACE,
+      request,
+    });
+
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, {
       spaceId: SPACE,
       workflowIdSuffix: suffix,
-    });
-    expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
-      type: 'workflow',
-      value: WORKFLOW_ID,
     });
   });
 
