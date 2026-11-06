@@ -14,7 +14,7 @@ import {
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeCounts, LearningRecord } from '@kbn/nightshift-decision-trees';
 import { DECISION_TREE_AI_INDEX_DEST } from '../../common/decision_trees';
-import { createDecisionTreeStore } from './store';
+import { DecisionTreeVersionWriteError, createDecisionTreeStore } from './store';
 
 const MERMAID = `flowchart TD
     S1([Checkout latency]) --> E1[Query logs]
@@ -41,11 +41,18 @@ const conflict = () =>
     body: { error: { type: 'version_conflict_engine_exception' } },
   } as never);
 
-const headSource = (overrides: { version?: number; counts?: DecisionTreeCounts } = {}) => ({
+interface HeadOverrides {
+  version?: number;
+  counts?: DecisionTreeCounts;
+  content?: string;
+  metadata?: string[];
+}
+
+const headSource = (overrides: HeadOverrides = {}) => ({
   '@timestamp': '2026-09-09T12:00:00.000Z',
   type: 'decision_tree',
   title: 'Checkout High Latency',
-  content: MARKDOWN,
+  content: overrides.content ?? MARKDOWN,
   tags: ['nightshift', 'decision-tree'],
   attributes: {
     tree_id: 'symptom:checkout-high-latency',
@@ -57,11 +64,10 @@ const headSource = (overrides: { version?: number; counts?: DecisionTreeCounts }
   },
   learnings: [],
   ...(overrides.counts ? { counts: overrides.counts } : {}),
+  ...(overrides.metadata ? { evidence_gatherer_metadata: overrides.metadata } : {}),
 });
 
-const storedHead = (
-  overrides: { version?: number; counts?: DecisionTreeCounts; seqNo?: number } = {}
-) => ({
+const storedHead = (overrides: HeadOverrides & { seqNo?: number } = {}) => ({
   found: true,
   _seq_no: overrides.seqNo ?? 7,
   _primary_term: 1,
@@ -746,5 +752,133 @@ describe('counts', () => {
       if_seq_no: 4,
       document: expect.objectContaining({ counts: visited }),
     });
+  });
+});
+
+describe('commit keeping the head content', () => {
+  const NEWER_MERMAID = `${MERMAID}\n    D1 -->|maybe| X3((Pool misconfigured))`;
+  const NEWER_MARKDOWN = `# Checkout high latency\n\n\`\`\`mermaid\n${NEWER_MERMAID}\n\`\`\`\n`;
+
+  const keepHeadInput = (updateCounts: jest.Mock) => ({
+    treeId: 'symptom:checkout-high-latency',
+    keepHeadContent: true as const,
+    reinforced: false,
+    author: 'jdoe',
+    summary: 'Learnings only.',
+    learnings: [learning],
+    updateCounts,
+  });
+
+  it('keeps the content of the head it re-reads after a conflict', async () => {
+    const esClient = createEsClient();
+    esClient.get
+      .mockResolvedValueOnce(storedHead({ version: 1, seqNo: 7 }))
+      .mockResolvedValueOnce(
+        storedHead({ version: 2, seqNo: 8, content: NEWER_MARKDOWN, metadata: ['E1: x'] })
+      );
+    esClient.index.mockRejectedValueOnce(conflict());
+    const updateCounts = jest.fn(({ counts }) => counts);
+
+    const detail = await createStore(esClient).commit(keepHeadInput(updateCounts));
+
+    const [, headCall, versionCall] = esClient.index.mock.calls;
+    for (const [{ document }] of [headCall, versionCall]) {
+      expect(document).toEqual(
+        expect.objectContaining({
+          content: NEWER_MARKDOWN,
+          evidence_gatherer_metadata: ['E1: x'],
+          attributes: expect.objectContaining({ version: 3, node_count: 6, edge_count: 5 }),
+        })
+      );
+    }
+    expect(headCall[0]).toMatchObject({ if_seq_no: 8 });
+    expect(versionCall[0].id).toBe('default:dtree_checkout-high-latency_v3');
+    expect(detail.markdown).toBe(NEWER_MARKDOWN);
+    expect(
+      updateCounts.mock.calls[1][0].tree.nodes.map(
+        ({ node_id: nodeId }: { node_id: string }) => nodeId
+      )
+    ).toContain('X3');
+  });
+
+  it('refuses to keep the content of a head that does not exist', async () => {
+    const esClient = createEsClient();
+
+    await expect(createStore(esClient).commit(keepHeadInput(jest.fn()))).rejects.toThrow(
+      /does not exist/
+    );
+
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+});
+
+describe('version writes that fail after the head was saved', () => {
+  /** Commits against a stored v1 head while every version write fails. */
+  const failVersionWrite = async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue(storedHead());
+    esClient.index.mockResolvedValueOnce({}).mockRejectedValue(new Error('version shard down'));
+    return createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'jdoe',
+      summary: '',
+      learnings: [],
+      evidenceGathererMetadata: [],
+      updateCounts: zeroCounts,
+    });
+  };
+
+  const pendingOfFailedCommit = async () => {
+    const error = await failVersionWrite().catch((thrown: Error) => thrown);
+    if (!(error instanceof DecisionTreeVersionWriteError)) {
+      throw new Error('Expected the commit to fail its version write');
+    }
+    return error.pending;
+  };
+
+  it('carries the version document and the saved head on the error', async () => {
+    const error = await failVersionWrite().catch((thrown: Error) => thrown);
+
+    expect(error).toBeInstanceOf(DecisionTreeVersionWriteError);
+    expect(error).toMatchObject({
+      message: 'Saved symptom:checkout-high-latency but its version history write failed',
+      pending: {
+        treeId: 'symptom:checkout-high-latency',
+        version: 2,
+        document: expect.objectContaining({ type: 'decision_tree_version', content: MARKDOWN }),
+        head: expect.objectContaining({ version: 2, markdown: MARKDOWN }),
+      },
+    });
+  });
+
+  it('writes the version document a failed commit left behind', async () => {
+    const pending = await pendingOfFailedCommit();
+    const esClient = createEsClient();
+
+    await createStore(esClient).writePendingVersion(pending);
+
+    expect(esClient.index).toHaveBeenCalledTimes(1);
+    expect(esClient.index.mock.calls[0][0]).toMatchObject({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      id: 'default:dtree_checkout-high-latency_v2',
+      document: pending.document,
+    });
+  });
+
+  it('throws the version write error again when the retry also fails', async () => {
+    const pending = await pendingOfFailedCommit();
+    const esClient = createEsClient();
+    esClient.index.mockRejectedValue(new Error('version shard down'));
+
+    const error = await createStore(esClient)
+      .writePendingVersion(pending)
+      .catch((thrown: Error) => thrown);
+
+    expect(error).toBeInstanceOf(DecisionTreeVersionWriteError);
+    expect(error).toMatchObject({ pending });
+    expect(esClient.index).toHaveBeenCalledTimes(5);
   });
 });

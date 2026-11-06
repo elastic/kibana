@@ -45,6 +45,7 @@ import {
   DecisionTreeVersionWriteError,
   type DecisionTreeDetail,
   type DecisionTreeStore,
+  type PendingVersionWrite,
   type StoredTreeCounts,
 } from '../../decision_trees/store';
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
@@ -177,9 +178,79 @@ interface SubmissionOutcome {
   detail: string;
   /** A file edit, including its merges, was written on this attempt. */
   countedEdit?: boolean;
-  /** A traversal that this conversation had not counted yet was written on this attempt. */
-  countedTraversal?: boolean;
+  /** A visit this conversation had not counted yet was written on this attempt. */
+  countedVisit?: boolean;
+  /** A reinforcement this conversation had not counted yet was written on this attempt. */
+  countedReinforcement?: boolean;
+  /** Learnings written to the head on this attempt, even when the version write then failed. */
+  persistedLearnings?: LearningRecord[];
+  /** The version document still owed by a commit whose head was saved. */
+  pendingVersion?: PendingVersionWrite;
 }
+
+/** Which parts of a traversal this conversation has not counted yet. */
+interface TraversalCounting {
+  visit: boolean;
+  reinforce: boolean;
+}
+
+/** What a conversation already wrote, kept until a submit fully succeeds. */
+interface RetryState {
+  /** When the state was last written, in epoch milliseconds. */
+  updatedAt: number;
+  /** Tree slugs whose file edit, including merges, reached the head. */
+  edits: Set<string>;
+  /** Tree slugs whose visit was counted. */
+  visits: Set<string>;
+  /** Tree slugs whose causal-path reinforcement was counted. */
+  reinforcements: Set<string>;
+  /** {@link learningRetryKey} of each learning written to a head. */
+  persistedLearnings: Set<string>;
+  /** Version documents owed by heads that were saved, by tree slug. */
+  pendingVersions: Map<string, PendingVersionWrite>;
+}
+
+/** A conversation that has not retried for this long is not coming back. */
+const RETRY_STATE_TTL_MS = 60 * 60 * 1000;
+const MAX_RETRY_STATES = 500;
+
+const freshRetryState = (): RetryState => ({
+  updatedAt: Date.now(),
+  edits: new Set(),
+  visits: new Set(),
+  reinforcements: new Set(),
+  persistedLearnings: new Set(),
+  pendingVersions: new Map(),
+});
+
+const provenanceFieldsOf = (
+  provenance?: WriteProvenance
+): { conversationId?: string; roundId?: string; workflowExecutionId?: string } => ({
+  ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
+  ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
+  ...(provenance?.workflowExecutionId
+    ? { workflowExecutionId: provenance.workflowExecutionId }
+    : {}),
+});
+
+/** Identifies one learning across attempts, so a retry does not write it to its tree again. */
+const learningRetryKey = ({
+  tree_id: treeId = '',
+  kind,
+  category,
+  connector_name: connectorName,
+  content,
+}: LearningRecord): string =>
+  JSON.stringify([
+    symptomSlugFromTreeId(treeId),
+    kind,
+    category ?? '',
+    connectorName ?? '',
+    content,
+  ]);
+
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 /**
  * Terminal tool for the reinforcement agent.
@@ -212,11 +283,20 @@ export const createSubmitOptimizerResultTool = ({
   onAppliedWrite?: (conversationId: string, write: AppliedWriteRecord) => void;
   logger: Logger;
 }): BuiltinToolDefinition<typeof submitSchema> => {
-  // Trees a conversation already wrote, kept until a submit fully succeeds. Traversals and edits
-  // are tracked separately: a saved edit must not be merged again, and an edit that had no
-  // traversal must still accept one on the retry.
-  const recordedTraversals = new Map<string, Set<string>>();
-  const recordedEdits = new Map<string, Set<string>>();
+  // What each conversation already wrote, kept until a submit fully succeeds. Map order is recency:
+  // every update deletes and re-inserts its entry, so the first key is the stalest.
+  const retryStates = new Map<string, RetryState>();
+  const pruneRetryStates = (nowMs: number) => {
+    for (const [conversationId, { updatedAt }] of retryStates) {
+      if (updatedAt < nowMs - RETRY_STATE_TTL_MS) {
+        retryStates.delete(conversationId);
+      }
+    }
+    while (retryStates.size > MAX_RETRY_STATES) {
+      const [stalest] = retryStates.keys();
+      retryStates.delete(stalest);
+    }
+  };
 
   return {
     id: DECISION_TREE_SUBMIT_TOOL_ID,
@@ -242,6 +322,8 @@ export const createSubmitOptimizerResultTool = ({
           ],
         };
       }
+      pruneRetryStates(Date.now());
+      const state = retryStates.get(conversationId) ?? freshRetryState();
 
       const sandboxStart = getSandboxStart();
       if (!sandboxStart) {
@@ -273,11 +355,17 @@ export const createSubmitOptimizerResultTool = ({
       // Peek until every submission is accepted. Draining first would drop this turn's learnings
       // when the agent has to fix a rejected file and call submit again.
       const turnLearnings = peekLearnings?.(conversationId) ?? [];
+      const pendingLearnings = turnLearnings.filter(
+        (learning) =>
+          learning.tree_id !== undefined &&
+          !state.persistedLearnings.has(learningRetryKey(learning))
+      );
       const outcomes: SubmissionOutcome[] = [];
+      const committedThisAttempt = new Set<string>();
 
       const now = new Date().toISOString();
       const learningsFor = (treeId: string): LearningRecord[] =>
-        turnLearnings.filter(
+        pendingLearnings.filter(
           (learning) =>
             learning.tree_id !== undefined &&
             symptomSlugFromTreeId(learning.tree_id) === symptomSlugFromTreeId(treeId)
@@ -288,39 +376,74 @@ export const createSubmitOptimizerResultTool = ({
       const editedSlugs = new Set(
         params.symptom_trees.map((submission) => symptomSlugFromTreeId(submission.tree_id))
       );
-      const traversalsRecorded = recordedTraversals.get(conversationId) ?? new Set<string>();
-      const editsRecorded = recordedEdits.get(conversationId) ?? new Set<string>();
-      const traversalWasRecorded = (treeId: string): boolean =>
-        traversalsRecorded.has(symptomSlugFromTreeId(treeId));
       const editWasRecorded = (treeId: string): boolean =>
-        editsRecorded.has(symptomSlugFromTreeId(treeId));
-
-      if (params.symptom_trees.length === 0 && params.traversals.length === 0) {
-        const attached = await persistLearningsWithoutEdits({
-          store,
-          author,
-          summary: params.summary,
-          learnings: turnLearnings,
-          provenance,
-          onAppliedWrite: recordWrite,
-        });
-        drainLearnings?.(conversationId);
+        state.edits.has(symptomSlugFromTreeId(treeId));
+      const countingFor = (traversal?: Traversal): TraversalCounting => {
+        if (!traversal) {
+          return { visit: false, reinforce: false };
+        }
+        const slug = symptomSlugFromTreeId(traversal.tree_id);
         return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                text:
-                  attached.length === 0
-                    ? 'No decision-tree changes submitted. Turn complete.'
-                    : `No structural edits. Attached learnings to ${
-                        attached.length
-                      } tree(s):\n${attached.map((treeId) => `- ${treeId}`).join('\n')}`,
-                summary: params.summary,
-              },
-            },
-          ],
+          visit: traversal.visited_path.length > 0 && !state.visits.has(slug),
+          reinforce: traversal.causal_path.length > 0 && !state.reinforcements.has(slug),
         };
+      };
+
+      // Record what reached the head even when the version document did not, so the retry does
+      // not apply those counts or learnings again.
+      const recordOutcome = (treeId: string, outcome: SubmissionOutcome) => {
+        outcomes.push(outcome);
+        const slug = symptomSlugFromTreeId(treeId);
+        if (outcome.countedEdit) {
+          state.edits.add(slug);
+        }
+        if (outcome.countedVisit) {
+          state.visits.add(slug);
+        }
+        if (outcome.countedReinforcement) {
+          state.reinforcements.add(slug);
+        }
+        for (const learning of outcome.persistedLearnings ?? []) {
+          const key = learningRetryKey(learning);
+          state.persistedLearnings.add(key);
+          committedThisAttempt.add(key);
+        }
+        if (outcome.pendingVersion) {
+          state.pendingVersions.set(slug, outcome.pendingVersion);
+        }
+      };
+      const runPersist = async (
+        treeId: string,
+        filePath: string,
+        persist: () => Promise<SubmissionOutcome>
+      ) => {
+        try {
+          recordOutcome(treeId, await persist());
+        } catch (error) {
+          const detail = errorMessage(error);
+          logger.warn(`Rejected decision-tree submission ${treeId}: ${detail}`);
+          outcomes.push({ tree_id: treeId, file_path: filePath, status: 'rejected', detail });
+        }
+      };
+
+      // A head saved without its version document blocks further writes to that tree until the
+      // version is written, so the version history has no gap.
+      const blockedSlugs = new Set<string>();
+      for (const [slug, pendingVersion] of state.pendingVersions) {
+        try {
+          await store.writePendingVersion(pendingVersion);
+          state.pendingVersions.delete(slug);
+        } catch (error) {
+          const detail = errorMessage(error);
+          logger.warn(`Rejected decision-tree submission ${pendingVersion.treeId}: ${detail}`);
+          outcomes.push({
+            tree_id: pendingVersion.treeId,
+            file_path: '',
+            status: 'rejected',
+            detail,
+          });
+          blockedSlugs.add(slug);
+        }
       }
 
       const work: Array<{
@@ -333,15 +456,24 @@ export const createSubmitOptimizerResultTool = ({
           filePath: submission.file_path,
           persist: async () => {
             const traversal = traversals.get(symptomSlugFromTreeId(submission.tree_id));
+            const counting = countingFor(traversal);
+            const learnings = learningsFor(submission.tree_id);
             // The file and its merges are already on the head. Replaying them fails once the
-            // merged-away node is gone. Skip that replay only when the file is unchanged; a retry
-            // that adds ✅ marks still has to be saved, or the new causal path is checked against
-            // the old unmarked head and rejected forever.
+            // merged-away node is gone. Skip that replay only when the file and its metadata are
+            // unchanged; a retry that adds ✅ marks still has to be saved, or the new causal path
+            // is checked against the old unmarked head and rejected forever.
             if (editWasRecorded(submission.tree_id)) {
               const existing = await store.get(submission.tree_id);
               const submitted = await readSubmittedMarkdown(session, submission.file_path);
-              if (existing !== undefined && submitted === existing.markdown) {
-                if (!traversal || traversalWasRecorded(submission.tree_id)) {
+              if (
+                existing !== undefined &&
+                submitted === existing.markdown &&
+                sameStrings(
+                  submission.evidence_gatherer_metadata,
+                  existing.evidence_gatherer_metadata
+                )
+              ) {
+                if (!traversal || (!counting.visit && !counting.reinforce)) {
                   return {
                     tree_id: submission.tree_id,
                     file_path: submission.file_path,
@@ -351,24 +483,28 @@ export const createSubmitOptimizerResultTool = ({
                 }
                 return persistTraversal({
                   traversal,
-                  countTraversal: true,
+                  counting,
                   store,
                   author,
                   summary: params.summary,
-                  // The saved edit already committed this turn's learnings for the tree.
-                  learnings: [],
+                  learnings,
                   now,
+                  provenance,
+                  onAppliedWrite: recordWrite,
                 });
               }
               return persistSubmission({
-                submission: { ...submission, merged_nodes: [] },
+                submission: {
+                  ...submission,
+                  merged_nodes: remainingMerges(submission.merged_nodes, existing),
+                },
                 traversal,
-                countTraversal: !traversalWasRecorded(submission.tree_id),
+                counting,
                 session,
                 store,
                 author,
                 summary: params.summary,
-                learnings: [],
+                learnings,
                 now,
                 provenance,
                 onAppliedWrite: recordWrite,
@@ -377,12 +513,12 @@ export const createSubmitOptimizerResultTool = ({
             return persistSubmission({
               submission,
               traversal,
-              countTraversal: !traversalWasRecorded(submission.tree_id),
+              counting,
               session,
               store,
               author,
               summary: params.summary,
-              learnings: learningsFor(submission.tree_id),
+              learnings,
               now,
               provenance,
               onAppliedWrite: recordWrite,
@@ -397,7 +533,7 @@ export const createSubmitOptimizerResultTool = ({
             persist: () =>
               persistTraversal({
                 traversal,
-                countTraversal: !traversalWasRecorded(traversal.tree_id),
+                counting: countingFor(traversal),
                 store,
                 author,
                 summary: params.summary,
@@ -409,39 +545,6 @@ export const createSubmitOptimizerResultTool = ({
           })),
       ];
 
-      const handledSlugs = new Set(work.map((item) => symptomSlugFromTreeId(item.treeId)));
-      const learningsByTree = new Map<string, LearningRecord[]>();
-      for (const learning of turnLearnings) {
-        if (!learning.tree_id || handledSlugs.has(symptomSlugFromTreeId(learning.tree_id))) {
-          continue;
-        }
-        const group = learningsByTree.get(learning.tree_id) ?? [];
-        group.push(learning);
-        learningsByTree.set(learning.tree_id, group);
-      }
-      for (const [treeId, learnings] of learningsByTree) {
-        work.push({
-          treeId,
-          filePath: '',
-          persist: async () => {
-            const attached = await persistLearningsWithoutEdits({
-              store,
-              author,
-              summary: params.summary,
-              learnings,
-            });
-            return {
-              tree_id: treeId,
-              file_path: '',
-              status: 'persisted' as const,
-              detail: attached.includes(treeId)
-                ? 'learnings attached'
-                : 'no stored tree for these learnings',
-            };
-          },
-        });
-      }
-
       if (traversals.size < params.traversals.length) {
         outcomes.push({
           tree_id: params.traversals.map((traversal) => traversal.tree_id).join(', '),
@@ -452,34 +555,53 @@ export const createSubmitOptimizerResultTool = ({
         });
       } else {
         for (const { treeId, filePath, persist } of work) {
-          try {
-            const outcome = await persist();
-            outcomes.push(outcome);
-            const slug = symptomSlugFromTreeId(treeId);
-            // Record a write that reached the head even when the version document did not, so the
-            // retry does not apply those counts again.
-            if (outcome.countedEdit) {
-              editsRecorded.add(slug);
-            }
-            if (outcome.countedTraversal) {
-              traversalsRecorded.add(slug);
-            }
-          } catch (error) {
-            const detail = error instanceof Error ? error.message : String(error);
-            logger.warn(`Rejected decision-tree submission ${treeId}: ${detail}`);
-            outcomes.push({ tree_id: treeId, file_path: filePath, status: 'rejected', detail });
+          if (!blockedSlugs.has(symptomSlugFromTreeId(treeId))) {
+            await runPersist(treeId, filePath, persist);
           }
+        }
+
+        // Learnings no edit or traversal carried get a commit of their own, except on a rejected
+        // tree: they stay pending and go with its edit once the agent fixes it.
+        const rejectedSlugs = new Set([
+          ...blockedSlugs,
+          ...outcomes
+            .filter((outcome) => outcome.status === 'rejected')
+            .map((outcome) => symptomSlugFromTreeId(outcome.tree_id)),
+        ]);
+        const learningsByTree = new Map<string, { treeId: string; learnings: LearningRecord[] }>();
+        for (const learning of pendingLearnings) {
+          if (!learning.tree_id || committedThisAttempt.has(learningRetryKey(learning))) {
+            continue;
+          }
+          const slug = symptomSlugFromTreeId(learning.tree_id);
+          if (rejectedSlugs.has(slug)) {
+            continue;
+          }
+          const group = learningsByTree.get(slug) ?? { treeId: learning.tree_id, learnings: [] };
+          group.learnings.push(learning);
+          learningsByTree.set(slug, group);
+        }
+        for (const { treeId, learnings } of learningsByTree.values()) {
+          await runPersist(treeId, '', () =>
+            persistTreeLearnings({
+              treeId,
+              learnings,
+              store,
+              author,
+              summary: params.summary,
+              provenance,
+              onAppliedWrite: recordWrite,
+            })
+          );
         }
       }
 
       const rejected = outcomes.filter((outcome) => outcome.status === 'rejected');
       const persisted = outcomes.filter((outcome) => outcome.status === 'persisted');
-      if (rejected.length === 0) {
-        recordedTraversals.delete(conversationId);
-        recordedEdits.delete(conversationId);
-      } else {
-        recordedTraversals.set(conversationId, traversalsRecorded);
-        recordedEdits.set(conversationId, editsRecorded);
+      retryStates.delete(conversationId);
+      if (rejected.length > 0) {
+        retryStates.set(conversationId, { ...state, updatedAt: Date.now() });
+        pruneRetryStates(Date.now());
       }
 
       if (rejected.length === 0) {
@@ -499,6 +621,28 @@ export const createSubmitOptimizerResultTool = ({
                     ? [`${persisted.length} other tree(s) were saved successfully.`]
                     : []),
                 ].join('\n'),
+              },
+            },
+          ],
+        };
+      }
+
+      if (params.symptom_trees.length === 0 && params.traversals.length === 0) {
+        const attached = persisted
+          .filter((outcome) => outcome.detail === 'learnings attached')
+          .map((outcome) => outcome.tree_id);
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                text:
+                  attached.length === 0
+                    ? 'No decision-tree changes submitted. Turn complete.'
+                    : `No structural edits. Attached learnings to ${
+                        attached.length
+                      } tree(s):\n${attached.map((treeId) => `- ${treeId}`).join('\n')}`,
+                summary: params.summary,
               },
             },
           ],
@@ -538,18 +682,24 @@ const edgesOf = (steps: Traversal['visited_path'], treeId: string) => {
   return edgesFromWalk(steps);
 };
 
-/** Records a traversal on `counts`: a visit along `visited_path`, then reinforcement along `causal_path`. */
+/**
+ * Records the parts of a traversal `counting` allows on `counts`: a visit along `visited_path`,
+ * then reinforcement along `causal_path`. Both paths are validated either way.
+ */
 const applyTraversal = (
   tree: DecisionTreeView,
   counts: DecisionTreeCounts,
   { visited_path: visitedPath, causal_path: causalPath, tree_id: treeId }: Traversal,
-  now: string
+  now: string,
+  counting: TraversalCounting
 ): DecisionTreeCounts => {
   const visitedEdges = edgesOf(visitedPath, treeId);
   const causalEdges = edgesOf(causalPath, treeId);
   const visited =
-    visitedEdges.length > 0 ? recordVisit({ tree, counts, path: visitedEdges, now }) : counts;
-  return causalEdges.length > 0
+    counting.visit && visitedEdges.length > 0
+      ? recordVisit({ tree, counts, path: visitedEdges, now })
+      : counts;
+  return counting.reinforce && causalEdges.length > 0
     ? reinforcePath({ tree, counts: visited, path: causalEdges, now })
     : visited;
 };
@@ -575,11 +725,13 @@ const countsUpdateFor =
     nextTree,
     merges = [],
     traversal,
+    counting,
     now,
   }: {
     nextTree: DecisionTreeView;
     merges?: DecisionNodeMerge[];
     traversal?: Traversal;
+    counting: TraversalCounting;
     now: string;
   }): ((previous: StoredTreeCounts | undefined) => DecisionTreeCounts) =>
   (previous) => {
@@ -591,7 +743,7 @@ const countsUpdateFor =
           merges,
         })
       : countsForTree(nextTree);
-    return traversal ? applyTraversal(nextTree, carried, traversal, now) : carried;
+    return traversal ? applyTraversal(nextTree, carried, traversal, now, counting) : carried;
   };
 
 const storedCountsOf = (existing: DecisionTreeDetail): StoredTreeCounts => ({
@@ -602,6 +754,39 @@ const storedCountsOf = (existing: DecisionTreeDetail): StoredTreeCounts => ({
   ),
   counts: existing.counts,
 });
+
+const sameStrings = (left: readonly string[], right: readonly string[]): boolean =>
+  left.length === right.length && left.every((value, index) => value === right[index]);
+
+/** The merges a saved edit has not applied yet: a `from` node still on the head was not merged away. */
+const remainingMerges = (
+  merges: DecisionNodeMerge[],
+  existing: DecisionTreeDetail | undefined
+): DecisionNodeMerge[] => {
+  if (!existing) {
+    return [];
+  }
+  const headNodeIds = new Set(storedCountsOf(existing).tree.nodes.map((node) => node.node_id));
+  return merges
+    .map((merge) => ({ ...merge, from: merge.from.filter((nodeId) => headNodeIds.has(nodeId)) }))
+    .filter((merge) => merge.from.length > 0);
+};
+
+/**
+ * A commit whose head was saved but whose version document was not: the head already took this
+ * write, so it is reported as applied and rejected with the version still owed.
+ */
+const versionWriteRejection = (
+  error: unknown,
+  outcome: SubmissionOutcome,
+  onHeadSaved: (head: DecisionTreeDetail) => void
+): SubmissionOutcome => {
+  if (!(error instanceof DecisionTreeVersionWriteError)) {
+    throw error;
+  }
+  onHeadSaved(error.pending.head);
+  return { ...outcome, status: 'rejected', detail: error.message, pendingVersion: error.pending };
+};
 
 /** The submitted file's text, or undefined when it cannot be read. Validation reports that later. */
 const readSubmittedMarkdown = async (
@@ -622,7 +807,7 @@ const readSubmittedMarkdown = async (
 const persistSubmission = async ({
   submission,
   traversal,
-  countTraversal,
+  counting,
   session,
   store,
   author,
@@ -634,8 +819,8 @@ const persistSubmission = async ({
 }: {
   submission: z.infer<typeof submissionSchema>;
   traversal?: Traversal;
-  /** False when this conversation already recorded the traversal and is only resubmitting. */
-  countTraversal: boolean;
+  /** Which parts of the traversal this conversation has not counted yet. */
+  counting: TraversalCounting;
   session: SandboxSession;
   store: DecisionTreeStore;
   author: string;
@@ -716,12 +901,7 @@ const persistSubmission = async ({
   if (traversal) {
     assertCausalPathMarked(newTree, traversal);
   }
-  const updateCounts = countsUpdateFor({
-    nextTree: newTree,
-    merges,
-    traversal: countTraversal ? traversal : undefined,
-    now,
-  });
+  const updateCounts = countsUpdateFor({ nextTree: newTree, merges, traversal, counting, now });
   // Dry run against what was read, so bad paths or merges are reported before anything is written.
   updateCounts(existing ? storedCountsOf(existing) : undefined);
 
@@ -735,13 +915,25 @@ const persistSubmission = async ({
     file_path: filePath,
     status: 'persisted',
     countedEdit: true,
-    countedTraversal: Boolean(traversal) && countTraversal,
+    countedVisit: counting.visit,
+    countedReinforcement: counting.reinforce,
+    persistedLearnings: learnings,
     detail: [
       `${newTree.nodes.length} nodes, ${newTree.edges.length} edges`,
       ...traversalDetail(traversal),
       ...(reinforced && !traversal ? ['causal path marked'] : []),
     ].join(', '),
   };
+  const recordApplied = (head: DecisionTreeDetail | undefined, afterContent: string) =>
+    onAppliedWrite?.({
+      store: 'decision_tree',
+      item_id: treeId,
+      action: existing ? (reinforced ? 'reinforce' : 'update') : 'create',
+      version: head?.version ?? (existing ? existing.version + 1 : 1),
+      ...(existing ? { before_status: existing.status, before_content: existing.markdown } : {}),
+      after_status: head?.status ?? (reinforced ? 'established' : existing?.status ?? 'tentative'),
+      after_content: afterContent,
+    });
   try {
     const committed = await store.commit({
       treeId,
@@ -753,29 +945,13 @@ const persistSubmission = async ({
       learnings,
       evidenceGathererMetadata: metadata,
       updateCounts,
-      ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
-      ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
-      ...(provenance?.workflowExecutionId
-        ? { workflowExecutionId: provenance.workflowExecutionId }
-        : {}),
+      ...provenanceFieldsOf(provenance),
     });
-    onAppliedWrite?.({
-      store: 'decision_tree',
-      item_id: treeId,
-      action: existing ? (reinforced ? 'reinforce' : 'update') : 'create',
-      version: committed?.version ?? (existing ? existing.version + 1 : 1),
-      ...(existing ? { before_status: existing.status, before_content: existing.markdown } : {}),
-      after_status:
-        committed?.status ?? (reinforced ? 'established' : existing?.status ?? 'tentative'),
-      after_content: markdown,
-    });
+    recordApplied(committed, markdown);
   } catch (error) {
-    if (!(error instanceof DecisionTreeVersionWriteError)) {
-      throw error;
-    }
     // The head already has this edit. Reject the submit so the agent retries, and keep the
     // counted flags so that retry does not apply the edit or traversal again.
-    return { ...outcome, status: 'rejected', detail: error.message };
+    return versionWriteRejection(error, outcome, (head) => recordApplied(head, head.markdown));
   }
 
   return outcome;
@@ -791,7 +967,7 @@ const traversalDetail = (traversal: Traversal | undefined): string[] => [
 /** Records a traversal of a tree the agent did not edit: counts only, plus any learnings. */
 const persistTraversal = async ({
   traversal,
-  countTraversal,
+  counting,
   store,
   author,
   summary,
@@ -801,7 +977,7 @@ const persistTraversal = async ({
   onAppliedWrite,
 }: {
   traversal: Traversal;
-  countTraversal: boolean;
+  counting: TraversalCounting;
   store: DecisionTreeStore;
   author: string;
   summary: string;
@@ -811,7 +987,7 @@ const persistTraversal = async ({
   onAppliedWrite?: (write: AppliedWriteRecord) => void;
 }): Promise<SubmissionOutcome> => {
   const { tree_id: treeId } = traversal;
-  if (!countTraversal) {
+  if (!counting.visit && !counting.reinforce) {
     return {
       tree_id: treeId,
       file_path: '',
@@ -827,72 +1003,66 @@ const persistTraversal = async ({
     );
   }
 
+  // Dry run against what was read, so a bad path is reported before anything is written. The
+  // writes check again against the head they re-read, which may have changed since.
   const stored = storedCountsOf(existing);
   assertCausalPathMarked(stored.tree, traversal);
-  applyTraversal(stored.tree, stored.counts, traversal, now);
+  applyTraversal(stored.tree, stored.counts, traversal, now, counting);
   const reinforced = traversal.causal_path.length > 0;
 
   const outcome: SubmissionOutcome = {
     tree_id: treeId,
     file_path: '',
     status: 'persisted',
-    countedTraversal: true,
+    countedVisit: counting.visit,
+    countedReinforcement: counting.reinforce,
+    persistedLearnings: learnings,
     detail: ['no structural edits', ...traversalDetail(traversal)].join(', '),
   };
+  const recordApplied = (head: DecisionTreeDetail | undefined, fallbackVersion: number) =>
+    onAppliedWrite?.({
+      store: 'decision_tree',
+      item_id: treeId,
+      action: reinforced ? 'reinforce' : 'update',
+      version: head?.version ?? fallbackVersion,
+      before_status: existing.status,
+      after_status: head?.status ?? (reinforced ? 'established' : existing.status),
+      before_content: existing.markdown,
+      after_content: head?.markdown ?? existing.markdown,
+    });
   try {
     // Learnings still get their own version; a traversal alone only moves the head's counts.
-    const provenanceFields = {
-      ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
-      ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
-      ...(provenance?.workflowExecutionId
-        ? { workflowExecutionId: provenance.workflowExecutionId }
-        : {}),
-    };
     if (learnings.length > 0) {
       const committed = await store.commit({
         treeId,
-        markdown: existing.markdown,
-        tree: stored.tree,
+        keepHeadContent: true,
         reinforced,
         author,
         summary,
         learnings,
-        evidenceGathererMetadata: existing.evidence_gatherer_metadata,
-        updateCounts: countsUpdateFor({ nextTree: stored.tree, traversal, now }),
-        ...provenanceFields,
+        updateCounts: (previous) => {
+          if (!previous) {
+            throw new Error(`${treeId} no longer exists`);
+          }
+          assertCausalPathMarked(previous.tree, traversal);
+          return applyTraversal(previous.tree, previous.counts, traversal, now, counting);
+        },
+        ...provenanceFieldsOf(provenance),
       });
-      onAppliedWrite?.({
-        store: 'decision_tree',
-        item_id: treeId,
-        action: reinforced ? 'reinforce' : 'update',
-        version: committed?.version ?? existing.version + 1,
-        before_status: existing.status,
-        after_status: committed?.status ?? (reinforced ? 'established' : existing.status),
-        before_content: existing.markdown,
-        after_content: existing.markdown,
-      });
+      recordApplied(committed, existing.version + 1);
     } else {
       const updated = await store.updateCounts({
         treeId,
         reinforced,
-        update: ({ tree, counts }) => applyTraversal(tree, counts, traversal, now),
+        update: ({ tree, counts }) => {
+          assertCausalPathMarked(tree, traversal);
+          return applyTraversal(tree, counts, traversal, now, counting);
+        },
       });
-      onAppliedWrite?.({
-        store: 'decision_tree',
-        item_id: treeId,
-        action: reinforced ? 'reinforce' : 'update',
-        version: updated?.version ?? existing.version,
-        before_status: existing.status,
-        after_status: updated?.status ?? (reinforced ? 'established' : existing.status),
-        before_content: existing.markdown,
-        after_content: existing.markdown,
-      });
+      recordApplied(updated, existing.version);
     }
   } catch (error) {
-    if (!(error instanceof DecisionTreeVersionWriteError)) {
-      throw error;
-    }
-    return { ...outcome, status: 'rejected', detail: error.message };
+    return versionWriteRejection(error, outcome, (head) => recordApplied(head, head.version));
   }
 
   return outcome;
@@ -917,70 +1087,72 @@ const hasNewlyTakenEdges = (
   return newTree.edges.some((edge) => edge.is_taken && !originalTaken.has(decisionEdgeKey(edge)));
 };
 
-/** Commits this turn's learnings onto existing trees when the agent made no file edits. */
-const persistLearningsWithoutEdits = async ({
+/** Commits learnings onto a stored tree that this submit neither edited nor traversed. */
+const persistTreeLearnings = async ({
+  treeId,
+  learnings,
   store,
   author,
   summary,
-  learnings,
   provenance,
   onAppliedWrite,
 }: {
+  treeId: string;
+  learnings: LearningRecord[];
   store: DecisionTreeStore;
   author: string;
   summary: string;
-  learnings: LearningRecord[];
   provenance?: WriteProvenance;
   onAppliedWrite?: (write: AppliedWriteRecord) => void;
-}): Promise<string[]> => {
-  const byTree = new Map<string, LearningRecord[]>();
-  for (const learning of learnings) {
-    if (!learning.tree_id) {
-      continue;
-    }
-    const existing = byTree.get(learning.tree_id) ?? [];
-    existing.push(learning);
-    byTree.set(learning.tree_id, existing);
+}): Promise<SubmissionOutcome> => {
+  const existing = await store.get(treeId);
+  if (!existing) {
+    return {
+      tree_id: treeId,
+      file_path: '',
+      status: 'persisted',
+      detail: 'no stored tree for these learnings',
+    };
   }
 
-  const attached: string[] = [];
-  for (const [treeId, treeLearnings] of byTree) {
-    const existing = await store.get(treeId);
-    if (!existing) {
-      continue;
-    }
-    const tree = parseStoredDecisionTree(
-      existing.mermaid,
-      treeId,
-      existing.evidence_gatherer_metadata
-    );
-    const committed = await store.commit({
-      treeId,
-      markdown: existing.markdown,
-      tree,
-      reinforced: false,
-      author,
-      summary,
-      learnings: treeLearnings,
-      evidenceGathererMetadata: existing.evidence_gatherer_metadata,
-      updateCounts: countsUpdateFor({ nextTree: tree, now: new Date().toISOString() }),
-      ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
-      ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
-      ...(provenance?.workflowExecutionId
-        ? { workflowExecutionId: provenance.workflowExecutionId }
-        : {}),
-    });
+  const outcome: SubmissionOutcome = {
+    tree_id: treeId,
+    file_path: '',
+    status: 'persisted',
+    persistedLearnings: learnings,
+    detail: 'learnings attached',
+  };
+  const recordApplied = (head: DecisionTreeDetail | undefined) =>
     onAppliedWrite?.({
       store: 'decision_tree',
       item_id: treeId,
       action: 'attach_learnings',
-      version: committed?.version ?? existing.version + 1,
+      version: head?.version ?? existing.version + 1,
       before_status: existing.status,
-      after_status: committed?.status ?? existing.status,
+      after_status: head?.status ?? existing.status,
       before_content: existing.markdown,
-      after_content: existing.markdown,
+      after_content: head?.markdown ?? existing.markdown,
     });
-    attached.push(treeId);
+  try {
+    const committed = await store.commit({
+      treeId,
+      keepHeadContent: true,
+      reinforced: false,
+      author,
+      summary,
+      learnings,
+      updateCounts: (previous) => {
+        if (!previous) {
+          throw new Error(`${treeId} no longer exists`);
+        }
+        return previous.counts;
+      },
+      ...provenanceFieldsOf(provenance),
+    });
+    recordApplied(committed);
+  } catch (error) {
+    return versionWriteRejection(error, outcome, recordApplied);
   }
-  return attached;
+
+  return outcome;
 };

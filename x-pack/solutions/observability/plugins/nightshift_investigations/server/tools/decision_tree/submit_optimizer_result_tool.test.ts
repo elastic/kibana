@@ -55,7 +55,27 @@ const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeSto
     listVersions: jest.fn().mockResolvedValue([]),
     getVersion: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn(),
+    writePendingVersion: jest.fn().mockResolvedValue(undefined),
   } as jest.Mocked<DecisionTreeStore>);
+
+/** The error a commit throws when its head was saved but its version document was not. */
+const versionWriteError = (
+  head: DecisionTreeDetail = { ...stored(FULL_TREE), version: 2 },
+  treeId = TREE_ID
+) =>
+  new DecisionTreeVersionWriteError({
+    treeId,
+    version: head.version,
+    document: {
+      '@timestamp': '2026-09-09T12:00:00.000Z',
+      type: 'decision_tree_version',
+      title: `Checkout High Latency v${head.version}`,
+      content: head.markdown,
+      tags: [],
+      learnings: [],
+    },
+    head,
+  });
 
 const createSandboxStart = (markdown: string) => {
   const session = {
@@ -71,9 +91,9 @@ const createSandboxStart = (markdown: string) => {
   };
 };
 
-const createContext = () => ({
+const createContext = (conversationId = 'conv-1') => ({
   request: {} as never,
-  runContext: { stack: [{ type: 'agent', conversationId: 'conv-1' }] },
+  runContext: { stack: [{ type: 'agent', conversationId }] },
   esClient: { asCurrentUser: {} },
   agentConfiguration: { connector_ids: [] },
 });
@@ -256,14 +276,17 @@ describe('nightshift_submit_optimizer_result', () => {
       createContext() as never
     );
 
+    // The commit keeps the content of the head it re-reads rather than an earlier snapshot.
     expect(store.commit).toHaveBeenCalledWith(
       expect.objectContaining({
         treeId: TREE_ID,
-        markdown: stored(FULL_TREE).markdown,
+        keepHeadContent: true,
         reinforced: false,
         learnings: buffered,
-        evidenceGathererMetadata: [],
       })
+    );
+    expect(store.commit).toHaveBeenCalledWith(
+      expect.not.objectContaining({ markdown: expect.anything() })
     );
     expect(drainLearnings).toHaveBeenCalledWith('default__conv-1');
     expect('results' in result && result.results[0].data).toEqual(
@@ -859,7 +882,9 @@ describe('nightshift_submit_optimizer_result counts', () => {
       TREE_ID,
       otherTreeId,
     ]);
-    expect(store.commit.mock.calls[1][0].markdown).toBe(markdownFor(marked));
+    expect(store.commit.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ markdown: markdownFor(marked) })
+    );
     expect(store.updateCounts).not.toHaveBeenCalled();
   });
 
@@ -896,7 +921,8 @@ describe('nightshift_submit_optimizer_result counts', () => {
 
   it('does not rewrite a tree whose version write failed after the head was saved', async () => {
     const store = createStore(stored(FULL_TREE));
-    store.commit.mockRejectedValueOnce(new DecisionTreeVersionWriteError(TREE_ID));
+    const error = versionWriteError();
+    store.commit.mockRejectedValueOnce(error);
     const tool = createSubmitOptimizerResultTool({
       getSandboxStart: createSandboxStart(markdownFor(FULL_TREE)).getSandboxStart as never,
       getStore: () => store,
@@ -917,11 +943,14 @@ describe('nightshift_submit_optimizer_result counts', () => {
     };
 
     const first = await tool.handler(params, createContext() as never);
+    expect(store.writePendingVersion).not.toHaveBeenCalled();
     const second = await tool.handler(params, createContext() as never);
 
     expect('results' in first && first.results[0].type).toBe(ToolResultType.error);
     expect('results' in second && second.results[0].type).toBe(ToolResultType.other);
     expect(store.commit).toHaveBeenCalledTimes(1);
+    expect(store.writePendingVersion).toHaveBeenCalledTimes(1);
+    expect(store.writePendingVersion).toHaveBeenCalledWith(error.pending);
   });
 
   describe('a traversal of a tree the agent did not edit', () => {
@@ -984,7 +1013,10 @@ describe('nightshift_submit_optimizer_result counts', () => {
 
       expect(store.updateCounts).not.toHaveBeenCalled();
       expect(store.commit).toHaveBeenCalledWith(
-        expect.objectContaining({ markdown: stored(FULL_TREE).markdown })
+        expect.objectContaining({ treeId: TREE_ID, keepHeadContent: true })
+      );
+      expect(store.commit).toHaveBeenCalledWith(
+        expect.not.objectContaining({ markdown: expect.anything() })
       );
       expect(nodeVisits(committedCounts(store)).X1).toBe(1);
     });
@@ -1001,6 +1033,472 @@ describe('nightshift_submit_optimizer_result counts', () => {
 
       expect('results' in result && result.results[0].type).toBe(ToolResultType.error);
       expect(store.updateCounts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('retries of a partially rejected submit', () => {
+    const OTHER_TREE_ID = 'symptom:checkout-errors';
+    const OTHER_ABSOLUTE_PATH = '/workspace/decision-trees/decision_tree_checkout-errors.md';
+    const mainSubmission = (
+      overrides: Partial<{
+        evidence_gatherer_metadata: string[];
+        merged_nodes: Array<{ from: string[]; into: string }>;
+      }> = {}
+    ) => ({
+      tree_id: TREE_ID,
+      file_path: FILE_PATH,
+      evidence_gatherer_metadata: [] as string[],
+      merged_nodes: [] as Array<{ from: string[]; into: string }>,
+      ...overrides,
+    });
+    /** The other tree's file is unreadable until a test writes it, so it is rejected. */
+    const otherSubmission = {
+      tree_id: OTHER_TREE_ID,
+      file_path: 'decision-trees/decision_tree_checkout-errors.md',
+      evidence_gatherer_metadata: [] as string[],
+      merged_nodes: [] as Array<{ from: string[]; into: string }>,
+    };
+    const learningFor = (
+      treeId: string,
+      content = 'Checkout writes through a pool.'
+    ): LearningRecord => ({
+      kind: 'system',
+      tree_id: treeId,
+      category: 'architecture',
+      content,
+      keywords: [],
+    });
+
+    /** Builds the tool over a sandbox whose files are looked up by absolute path at read time. */
+    const createTool = ({
+      store,
+      files = {},
+      ...options
+    }: {
+      store: jest.Mocked<DecisionTreeStore>;
+      files?: Record<string, string>;
+    } & Partial<Parameters<typeof createSubmitOptimizerResultTool>[0]>) => {
+      const readFiles = jest.fn(async ([{ path }]: Array<{ path: string }>) => {
+        const content = files[path];
+        return [
+          content === undefined
+            ? { success: false }
+            : { success: true, content: Buffer.from(content) },
+        ];
+      });
+      const tool = createSubmitOptimizerResultTool({
+        getSandboxStart: (() => ({ getSession: () => ({ readFiles }) })) as never,
+        getStore: () => store,
+        getSpaceId: () => 'default',
+        logger: loggerMock.create(),
+        ...options,
+      });
+      const submit = (
+        params: Partial<{
+          symptom_trees: Array<ReturnType<typeof mainSubmission>>;
+          traversals: Traversal[];
+        }>,
+        conversationId?: string
+      ) =>
+        tool.handler(
+          { symptom_trees: [], traversals: [], summary: 'Retry.', ...params },
+          createContext(conversationId) as never
+        );
+      return { submit, files };
+    };
+
+    const resultOf = (result: unknown) =>
+      (result as { results: Array<{ type: string; data: { message?: string } }> }).results[0];
+    const commitsFor = (store: jest.Mocked<DecisionTreeStore>, treeId: string) =>
+      store.commit.mock.calls.filter(([input]) => input.treeId === treeId).map(([input]) => input);
+    const updateCountsFor = (store: jest.Mocked<DecisionTreeStore>, treeId: string) =>
+      store.updateCounts.mock.calls.filter(([input]) => input.treeId === treeId);
+    const provenanceFields = {
+      conversationId: 'inv-1',
+      roundId: 'round-1',
+      workflowExecutionId: 'wf-1',
+    };
+    const getProvenance = () => provenanceFields;
+
+    describe('provenance and applied writes', () => {
+      it('records both for learnings on a tree the submit neither edits nor traverses', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const onAppliedWrite = jest.fn();
+        const { submit } = createTool({
+          store,
+          peekLearnings: () => [learningFor(OTHER_TREE_ID)],
+          getProvenance,
+          onAppliedWrite,
+        });
+
+        const result = await submit({ traversals: [traversal()] });
+
+        expect(resultOf(result).type).toBe(ToolResultType.other);
+        expect(commitsFor(store, OTHER_TREE_ID)).toEqual([
+          expect.objectContaining(provenanceFields),
+        ]);
+        expect(onAppliedWrite).toHaveBeenCalledWith(
+          'default__conv-1',
+          expect.objectContaining({ item_id: OTHER_TREE_ID, action: 'attach_learnings' })
+        );
+      });
+
+      it('records the applied write of a traversal added on the retry of a saved edit', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const onAppliedWrite = jest.fn();
+        const { submit } = createTool({
+          store,
+          files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+          getProvenance,
+          onAppliedWrite,
+        });
+
+        await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+        await submit({
+          symptom_trees: [mainSubmission(), otherSubmission],
+          traversals: [traversal()],
+        });
+
+        expect(updateCountsFor(store, TREE_ID)).toHaveLength(1);
+        const writes = onAppliedWrite.mock.calls
+          .map(([, write]) => write)
+          .filter((write) => write.item_id === TREE_ID);
+        expect(writes).toEqual([
+          expect.objectContaining({ action: 'update' }),
+          expect.objectContaining({ action: 'update', version: 1 }),
+        ]);
+      });
+
+      it('stamps provenance on the learnings commit of a traversal added on the retry of a saved edit', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const onAppliedWrite = jest.fn();
+        const learning = learningFor(TREE_ID);
+        const { submit } = createTool({
+          store,
+          files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+          peekLearnings: jest.fn().mockReturnValueOnce([]).mockReturnValue([learning]),
+          getProvenance,
+          onAppliedWrite,
+        });
+
+        await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+        await submit({
+          symptom_trees: [mainSubmission(), otherSubmission],
+          traversals: [traversal()],
+        });
+
+        const [, retried] = commitsFor(store, TREE_ID);
+        expect(retried).toEqual(
+          expect.objectContaining({
+            ...provenanceFields,
+            keepHeadContent: true,
+            learnings: [learning],
+          })
+        );
+        expect(
+          onAppliedWrite.mock.calls.filter(([, write]) => write.item_id === TREE_ID)
+        ).toHaveLength(2);
+      });
+    });
+
+    describe('writes without structural edits', () => {
+      it('checks the causal path against the head the learnings commit re-reads', async () => {
+        const store = createStore(stored(CAUSAL_TREE));
+        const { submit } = createTool({ store, peekLearnings: () => [learningFor(TREE_ID)] });
+
+        await submit({ traversals: [traversal({ causal_path: MAIN_PATH })] });
+
+        const [input] = commitsFor(store, TREE_ID);
+        expect(input).toEqual(expect.objectContaining({ keepHeadContent: true }));
+        expect('markdown' in input).toBe(false);
+        expect(() =>
+          input.updateCounts({ tree: fullTree, counts: countsForTree(fullTree) })
+        ).toThrow(/Mark every causal_path edge with ✅/);
+      });
+
+      it('checks the causal path against the head a counts-only update re-reads', async () => {
+        const store = createStore(stored(CAUSAL_TREE));
+        const { submit } = createTool({ store });
+
+        await submit({ traversals: [traversal({ causal_path: MAIN_PATH })] });
+
+        const [[{ update }]] = store.updateCounts.mock.calls;
+        expect(() => update({ tree: fullTree, counts: countsForTree(fullTree) })).toThrow(
+          /Mark every causal_path edge with ✅/
+        );
+      });
+
+      it('reports the markdown of the head the commit wrote as the applied content', async () => {
+        const store = createStore(stored(CAUSAL_TREE));
+        const newerHead = { ...stored(CAUSAL_TREE), markdown: markdownFor(FULL_TREE), version: 3 };
+        store.commit.mockResolvedValue(newerHead);
+        const onAppliedWrite = jest.fn();
+        const { submit } = createTool({
+          store,
+          peekLearnings: () => [learningFor(TREE_ID)],
+          onAppliedWrite,
+        });
+
+        await submit({ traversals: [traversal({ causal_path: MAIN_PATH })] });
+
+        expect(onAppliedWrite).toHaveBeenCalledWith(
+          'default__conv-1',
+          expect.objectContaining({
+            item_id: TREE_ID,
+            version: 3,
+            before_content: stored(CAUSAL_TREE).markdown,
+            after_content: newerHead.markdown,
+          })
+        );
+      });
+    });
+
+    describe('learnings', () => {
+      it('does not attach the learnings of an untouched tree again on the retry', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const { submit } = createTool({ store, peekLearnings: () => [learningFor(TREE_ID)] });
+
+        const first = await submit({ symptom_trees: [otherSubmission] });
+        const second = await submit({ symptom_trees: [otherSubmission] });
+
+        expect(resultOf(first).type).toBe(ToolResultType.error);
+        expect(resultOf(second).type).toBe(ToolResultType.error);
+        expect(commitsFor(store, TREE_ID)).toHaveLength(1);
+      });
+
+      it('attaches a learning recorded after the edit of its tree was saved', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const learning = learningFor(TREE_ID);
+        const { submit } = createTool({
+          store,
+          files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+          peekLearnings: jest.fn().mockReturnValueOnce([]).mockReturnValue([learning]),
+        });
+
+        await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+        await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+
+        expect(commitsFor(store, TREE_ID)).toEqual([
+          expect.objectContaining({ learnings: [] }),
+          expect.objectContaining({ keepHeadContent: true, learnings: [learning] }),
+        ]);
+      });
+
+      it('holds the learnings of a rejected tree until its edit is saved', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const learning = learningFor(OTHER_TREE_ID);
+        const { submit, files } = createTool({
+          store,
+          files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+          peekLearnings: () => [learning],
+        });
+
+        const first = await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+        expect(resultOf(first).type).toBe(ToolResultType.error);
+        expect(commitsFor(store, OTHER_TREE_ID)).toEqual([]);
+
+        files[OTHER_ABSOLUTE_PATH] = markdownFor(FULL_TREE);
+        const second = await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+
+        expect(resultOf(second).type).toBe(ToolResultType.other);
+        expect(commitsFor(store, OTHER_TREE_ID)).toEqual([
+          expect.objectContaining({ markdown: markdownFor(FULL_TREE), learnings: [learning] }),
+        ]);
+      });
+
+      it('does not attach a learning again after its commit saved the head but not the version', async () => {
+        const store = createStore(stored(FULL_TREE));
+        store.commit.mockRejectedValueOnce(versionWriteError());
+        const { submit } = createTool({ store, peekLearnings: () => [learningFor(TREE_ID)] });
+
+        const first = await submit({});
+        const second = await submit({});
+
+        expect(resultOf(first).type).toBe(ToolResultType.error);
+        expect(resultOf(second).type).toBe(ToolResultType.other);
+        expect(store.writePendingVersion).toHaveBeenCalledTimes(1);
+        expect(commitsFor(store, TREE_ID)).toHaveLength(1);
+      });
+    });
+
+    describe('a version write that failed after the head was saved', () => {
+      it('reports the saved head, then writes the owed version on the retry', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const error = versionWriteError({ ...stored(CAUSAL_TREE), version: 2 });
+        store.commit.mockRejectedValueOnce(error);
+        const onAppliedWrite = jest.fn();
+        const { submit } = createTool({
+          store,
+          files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+          onAppliedWrite,
+        });
+
+        const first = await submit({ symptom_trees: [mainSubmission()] });
+        expect(resultOf(first).type).toBe(ToolResultType.error);
+        expect(onAppliedWrite).toHaveBeenCalledWith(
+          'default__conv-1',
+          expect.objectContaining({
+            item_id: TREE_ID,
+            version: 2,
+            after_content: error.pending.head.markdown,
+          })
+        );
+
+        const second = await submit({ symptom_trees: [mainSubmission()] });
+
+        expect(resultOf(second).type).toBe(ToolResultType.other);
+        expect(store.writePendingVersion).toHaveBeenCalledWith(error.pending);
+        expect(store.commit).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the owed version and rejects the tree until it is written', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const error = versionWriteError();
+        store.commit.mockRejectedValueOnce(error);
+        store.writePendingVersion.mockRejectedValueOnce(error);
+        const { submit } = createTool({
+          store,
+          files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+        });
+
+        await submit({ symptom_trees: [mainSubmission()] });
+        const second = await submit({ symptom_trees: [mainSubmission()] });
+
+        expect(resultOf(second)).toEqual({
+          type: ToolResultType.error,
+          data: { message: expect.stringContaining(`- ${TREE_ID}: ${error.message}`) },
+        });
+
+        const third = await submit({ symptom_trees: [mainSubmission()] });
+
+        expect(resultOf(third).type).toBe(ToolResultType.other);
+        expect(store.writePendingVersion).toHaveBeenCalledTimes(2);
+        expect(store.commit).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('saves evidence metadata changed on the retry of a saved edit', async () => {
+      const store = createStore(stored(FULL_TREE));
+      const metadata = ['E1: Query checkout logs in logs-*'];
+      const { submit } = createTool({ store, files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) } });
+
+      await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+      await submit({
+        symptom_trees: [mainSubmission({ evidence_gatherer_metadata: metadata }), otherSubmission],
+      });
+
+      expect(commitsFor(store, TREE_ID)).toEqual([
+        expect.objectContaining({ evidenceGathererMetadata: [] }),
+        expect.objectContaining({ evidenceGathererMetadata: metadata }),
+      ]);
+    });
+
+    it.each([
+      ['every from node is still on the head', ['E3']],
+      ['some from nodes are no longer on the head', ['E3', 'X9']],
+    ])('keeps a merge the saved edit did not apply when %s', async (_, from) => {
+      const previous = stored(FULL_TREE);
+      previous.counts = countsForTree(fullTree, {
+        nodes: [
+          { node_id: 'E2', visit_count: 2, reinforced_count: 0 },
+          { node_id: 'E3', visit_count: 3, reinforced_count: 0 },
+        ],
+        edges: [],
+      });
+      const store = createStore(previous);
+      const merged = FULL_TREE.replace('D1 -->|no| E3[Profile queries]', 'D1 -->|no| E2').replace(
+        'E3 --> X2((Slow query))',
+        'E2 --> X2((Slow query))'
+      );
+      const { submit, files } = createTool({
+        store,
+        files: { [ABSOLUTE_PATH]: markdownFor(FULL_TREE) },
+      });
+
+      await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+      files[ABSOLUTE_PATH] = markdownFor(merged);
+      const second = await submit({
+        symptom_trees: [mainSubmission({ merged_nodes: [{ from, into: 'E2' }] }), otherSubmission],
+      });
+
+      expect(resultOf(second).data.message).not.toMatch(TREE_ID);
+      const [, retried] = commitsFor(store, TREE_ID);
+      const counts = retried.updateCounts({ tree: fullTree, counts: previous.counts });
+      expect(nodeVisits(counts).E2).toBe(5);
+    });
+
+    it('reinforces a causal path added on the retry without counting the visit again', async () => {
+      const store = createStore(stored(CAUSAL_TREE));
+      const { submit } = createTool({ store });
+
+      await submit({ symptom_trees: [otherSubmission], traversals: [traversal()] });
+      await submit({
+        symptom_trees: [otherSubmission],
+        traversals: [traversal({ causal_path: MAIN_PATH })],
+      });
+
+      const calls = updateCountsFor(store, TREE_ID);
+      expect(calls).toHaveLength(2);
+      const [, [retried]] = calls;
+      expect(retried.reinforced).toBe(true);
+      const causalTree = parseMermaidDecisionTree(CAUSAL_TREE, TREE_ID);
+      const counts = retried.update({ tree: causalTree, counts: countsForTree(causalTree) });
+      expect(counts.nodes.find((node) => node.node_id === 'X1')).toMatchObject({
+        visit_count: 0,
+        reinforced_count: 1,
+      });
+    });
+
+    describe('retry bookkeeping', () => {
+      let nowMs: number;
+      beforeEach(() => {
+        nowMs = Date.parse('2026-11-05T10:00:00.000Z');
+        jest.spyOn(Date, 'now').mockImplementation(() => nowMs);
+      });
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      const partialSubmit = { symptom_trees: [otherSubmission], traversals: [traversal()] };
+
+      it('forgets a conversation that has not retried within an hour', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const { submit } = createTool({ store });
+
+        await submit(partialSubmit);
+        nowMs += 60 * 60 * 1000 + 1;
+        await submit({}, 'conv-2');
+        await submit(partialSubmit);
+
+        expect(updateCountsFor(store, TREE_ID)).toHaveLength(2);
+      });
+
+      it('forgets the stalest conversation once 500 others are waiting to retry', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const { submit } = createTool({ store });
+
+        await submit(partialSubmit);
+        for (let index = 0; index < 500; index++) {
+          await submit({ symptom_trees: [otherSubmission] }, `conv-other-${index}`);
+        }
+        await submit(partialSubmit);
+
+        expect(updateCountsFor(store, TREE_ID)).toHaveLength(2);
+      });
+
+      it('remembers a conversation that retries within the hour and under the cap', async () => {
+        const store = createStore(stored(FULL_TREE));
+        const { submit } = createTool({ store });
+
+        await submit(partialSubmit);
+        nowMs += 59 * 60 * 1000;
+        for (let index = 0; index < 10; index++) {
+          await submit({ symptom_trees: [otherSubmission] }, `conv-other-${index}`);
+        }
+        await submit(partialSubmit);
+
+        expect(updateCountsFor(store, TREE_ID)).toHaveLength(1);
+      });
     });
   });
 });

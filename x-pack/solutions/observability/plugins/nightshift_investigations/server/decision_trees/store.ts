@@ -44,12 +44,13 @@ const MAX_WRITE_ATTEMPTS = 5;
 const RETRY_DELAY_MS = 50;
 
 /**
- * The head was saved and its counts already include this commit. The version document still needs
- * to be written; a later commit must not apply the same counts again.
+ * The head was saved and its counts already include this commit. The version document in `pending`
+ * still needs to be written with `writePendingVersion`; a later commit must not apply the same
+ * counts again.
  */
 export class DecisionTreeVersionWriteError extends Error {
-  constructor(treeId: string) {
-    super(`Saved ${treeId} but its version history write failed`);
+  constructor(public readonly pending: PendingVersionWrite) {
+    super(`Saved ${pending.treeId} but its version history write failed`);
     this.name = 'DecisionTreeVersionWriteError';
   }
 }
@@ -90,7 +91,7 @@ interface DecisionTreeHeadSource {
 }
 
 /** An append-only version document, one per reinforcement turn. */
-interface DecisionTreeVersionSource {
+export interface DecisionTreeVersionSource {
   '@timestamp': string;
   type: 'decision_tree_version';
   title: string;
@@ -108,31 +109,52 @@ export interface StoredTreeCounts {
   counts: DecisionTreeCounts;
 }
 
+/** A version document whose head was saved but which itself was not written yet. */
+export interface PendingVersionWrite {
+  /** Full `symptom:<slug>` id. */
+  treeId: string;
+  version: number;
+  document: DecisionTreeVersionSource;
+  /** The head as saved, which already includes this version's content and counts. */
+  head: DecisionTreeDetail;
+}
+
+/** What a commit writes: an explicit edit, or the content of the head it re-reads. */
+export type DecisionTreeCommitContent =
+  | {
+      keepHeadContent?: false;
+      markdown: string;
+      /** Already parsed and validated by the caller, so counts stay consistent with the markdown. */
+      tree: DecisionTreeView;
+      /** Evidence-node descriptions; persisted so later reads can reapply them. */
+      evidenceGathererMetadata: string[];
+    }
+  | { keepHeadContent: true };
+
+export type DecisionTreeCommitInput = DecisionTreeCommitContent & {
+  treeId: string;
+  reinforced: boolean;
+  author: string;
+  summary: string;
+  /** Learnings recorded during this turn; merged single-slot into the head. */
+  learnings: LearningRecord[];
+  conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
+  /**
+   * Builds this version's counts from the stored head, if any. Called again whenever the head
+   * write loses a race, so it must derive everything from its argument.
+   */
+  updateCounts: (previous: StoredTreeCounts | undefined) => DecisionTreeCounts;
+};
+
 export interface DecisionTreeStore {
   list: () => Promise<DecisionTreeSummary[]>;
   get: (treeId: string) => Promise<DecisionTreeDetail | undefined>;
   /** Writes a new version of the tree and updates its head. Returns the updated head. */
-  commit: (input: {
-    treeId: string;
-    markdown: string;
-    /** Already parsed and validated by the caller, so counts stay consistent with the markdown. */
-    tree: DecisionTreeView;
-    reinforced: boolean;
-    author: string;
-    summary: string;
-    /** Learnings recorded during this turn; merged single-slot into the head. */
-    learnings: LearningRecord[];
-    /** Evidence-node descriptions; persisted so later reads can reapply them. */
-    evidenceGathererMetadata: string[];
-    conversationId?: string;
-    roundId?: string;
-    workflowExecutionId?: string;
-    /**
-     * Builds this version's counts from the stored head, if any. Called again whenever the head
-     * write loses a race, so it must derive everything from its argument.
-     */
-    updateCounts: (previous: StoredTreeCounts | undefined) => DecisionTreeCounts;
-  }) => Promise<DecisionTreeDetail>;
+  commit: (input: DecisionTreeCommitInput) => Promise<DecisionTreeDetail>;
+  /** Writes a version document a failed commit left behind; throws DecisionTreeVersionWriteError again on failure. */
+  writePendingVersion: (pending: PendingVersionWrite) => Promise<void>;
   /**
    * Ids of the trees with a version written from this investigation's rounds. The investigation id
    * is its conversation id, which `commit` stamps on each version as `conversation_id`.
@@ -307,6 +329,29 @@ const writePrecondition = (
     : {};
 };
 
+/**
+ * The content a commit writes: its explicit edit, or what this attempt's head read holds, so a
+ * retry after a lost race keeps the newer head's content rather than an older snapshot.
+ */
+const commitContent = (
+  content: DecisionTreeCommitContent,
+  existing: StoredHead | undefined,
+  fullTreeId: string
+): { markdown: string; tree: DecisionTreeView; evidenceGathererMetadata: string[] } => {
+  if (!content.keepHeadContent) {
+    const { markdown, tree, evidenceGathererMetadata } = content;
+    return { markdown, tree, evidenceGathererMetadata };
+  }
+  if (!existing) {
+    throw new Error(`Cannot keep the content of ${fullTreeId}: it does not exist`);
+  }
+  return {
+    markdown: existing.source.content,
+    tree: storedTreeCounts(existing.source).tree,
+    evidenceGathererMetadata: existing.source.evidence_gatherer_metadata ?? [],
+  };
+};
+
 const isConflict = (error: unknown): boolean => isResponseError(error) && error.statusCode === 409;
 
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -362,22 +407,16 @@ export const createDecisionTreeStore = ({
     }
   };
 
-  /**
-   * Writes the head only if it is unchanged since `readAt` was read, or only if it still does not
-   * exist when there was none, so a concurrent writer surfaces as a 409 instead of a lost update.
-   */
-  const writeVersion = async (
-    symptom: string,
-    version: number,
-    document: DecisionTreeVersionSource
-  ): Promise<void> => {
+  /** Retries the version document alone; the head it belongs to is already saved. */
+  const writeVersion = async (pending: PendingVersionWrite): Promise<void> => {
+    const id = versionDocId(spaceId, symptomSlugFromTreeId(pending.treeId), pending.version);
     for (let attemptNumber = 1; ; attemptNumber++) {
       try {
         await esClient.index(
           {
             index: DECISION_TREE_AI_INDEX_DEST,
-            id: versionDocId(spaceId, symptom, version),
-            document,
+            id,
+            document: pending.document,
             // The last write of a commit, so version history is searchable as soon as it returns.
             refresh: 'wait_for',
           },
@@ -386,13 +425,17 @@ export const createDecisionTreeStore = ({
         return;
       } catch {
         if (attemptNumber >= MAX_WRITE_ATTEMPTS) {
-          throw new DecisionTreeVersionWriteError(symptomTreeId(symptom));
+          throw new DecisionTreeVersionWriteError(pending);
         }
         await delay(RETRY_DELAY_MS * attemptNumber);
       }
     }
   };
 
+  /**
+   * Writes the head only if it is unchanged since `readAt` was read, or only if it still does not
+   * exist when there was none, so a concurrent writer surfaces as a 409 instead of a lost update.
+   */
   const writeHead = async (
     symptom: string,
     document: DecisionTreeHeadSource,
@@ -441,20 +484,18 @@ export const createDecisionTreeStore = ({
       return head ? headToDetail(head.source) : undefined;
     },
 
-    commit: async ({
-      treeId,
-      markdown,
-      tree,
-      reinforced,
-      author,
-      summary,
-      learnings,
-      evidenceGathererMetadata,
-      conversationId,
-      roundId,
-      workflowExecutionId,
-      updateCounts,
-    }) => {
+    commit: async (input) => {
+      const {
+        treeId,
+        reinforced,
+        author,
+        summary,
+        learnings,
+        conversationId,
+        roundId,
+        workflowExecutionId,
+        updateCounts,
+      } = input;
       const symptom = symptomSlugFromTreeId(treeId);
       const fullTreeId = symptomTreeId(symptom);
       const tags = ['nightshift', DECISION_TREE_TAG];
@@ -468,6 +509,11 @@ export const createDecisionTreeStore = ({
       // number, so a racing commit retries with the next one instead of overwriting this version.
       const { headDoc, versionDoc, version } = await retryOnConflict(async () => {
         const existing = await getHead(symptom);
+        const { markdown, tree, evidenceGathererMetadata } = commitContent(
+          input,
+          existing,
+          fullTreeId
+        );
         const nextVersion = toCount(existing?.source.attributes?.version) + 1;
         // A human-confirmed root cause is what promotes a tree from tentative to established; an
         // ordinary turn leaves the status where it was.
@@ -516,10 +562,16 @@ export const createDecisionTreeStore = ({
 
       // The head already holds this version and its counts. Retry only this document: running the
       // commit again would increment the visit and reinforcement counts a second time.
-      await writeVersion(symptom, version, versionDoc);
+      const head = headToDetail(headDoc);
+      await writeVersion({ treeId: fullTreeId, version, document: versionDoc, head });
 
       logger.debug(`Committed decision tree ${fullTreeId} v${version}`);
-      return headToDetail(headDoc);
+      return head;
+    },
+
+    writePendingVersion: async (pending) => {
+      await writeVersion(pending);
+      logger.debug(`Wrote pending version ${pending.treeId} v${pending.version}`);
     },
 
     updateCounts: async ({ treeId, update, reinforced = false }) => {

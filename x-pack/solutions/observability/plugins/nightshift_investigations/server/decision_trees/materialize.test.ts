@@ -41,6 +41,7 @@ const createStore = (trees: DecisionTreeDetail[]): jest.Mocked<DecisionTreeStore
     listVersions: jest.fn(),
     getVersion: jest.fn(),
     archive: jest.fn(),
+    writePendingVersion: jest.fn(),
   } as jest.Mocked<DecisionTreeStore>);
 
 const createSession = () => ({
