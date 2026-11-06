@@ -278,10 +278,18 @@ export const deleteSavedQuery = async (
   });
 };
 
+export interface PackQuery {
+  query: string;
+  interval: number;
+  /** Per-query switch: the live-query route skips `enabled: false` queries. */
+  enabled?: boolean;
+  ecs_mapping?: Record<string, { field?: string; value?: string | string[] }>;
+}
+
 export const createPack = async (
   kbnClient: KbnClient,
   name: string,
-  queries: Record<string, { query: string; interval: number }>
+  queries: Record<string, PackQuery>
 ): Promise<string> => {
   const { data } = await kbnClient.request<{ data: { saved_object_id: string } }>({
     method: 'POST',
@@ -299,5 +307,45 @@ export const deletePack = async (kbnClient: KbnClient, packId: string) => {
     path: `/api/osquery/packs/${packId}`,
     headers: API_VERSION,
     ignoreErrors: [404],
+  });
+};
+
+/** The osquery action documents dispatched for a pack id (a live query run with `pack_id`). */
+export const findPackActionDocs = async (
+  systemEs: Client,
+  packId: string
+): Promise<Array<Record<string, any>>> => {
+  await systemEs.indices.refresh({ index: OSQUERY_ACTIONS_INDEX }, { ignore: [404] });
+  const result = await systemEs.search({
+    index: OSQUERY_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    size: 10,
+    query: { term: { pack_id: packId } },
+  });
+
+  return result.hits.hits.map((hit) => hit._source as Record<string, any>);
+};
+
+/**
+ * Deletes the space copies of the Elastic prebuilt packs. `POST /internal/osquery/assets/update`
+ * copies every prebuilt pack into the space as a saved object, which would make a second run
+ * start with the packs already loaded and leak them into other specs.
+ */
+export const deleteLoadedPrebuiltPacks = async (kbnClient: KbnClient): Promise<void> => {
+  const { data } = await kbnClient.request<{ data: Array<{ pack_id: string }> }>({
+    method: 'GET',
+    path: '/internal/osquery/packs/_prebuilt',
+    headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
+  });
+  for (const { pack_id: packId } of data.data) {
+    await deletePack(kbnClient, packId);
+  }
+};
+
+export const loadPrebuiltPacks = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/internal/osquery/assets/update',
+    headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
   });
 };
