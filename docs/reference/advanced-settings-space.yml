@@ -2036,9 +2036,11 @@ groups:
       - setting: "securitySolution:defaultIndex"
         id: securitysolution-defaultindex
         description: |
-          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
+          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security), which most {{security-app}} pages query, including the [Indicators page](docs-content://solutions/security/investigate/indicators-of-compromise.md) (**Security** → **Intelligence**). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
 
           Index patterns can use wildcards. For example, `filebeat-*` matches all indices that start with `filebeat-`.
+
+          To display indicators stored on a remote cluster on the Indicators page, add the matching [cross-cluster search](docs-content://explore-analyze/cross-cluster-search.md) pattern to this list, for example `*:logs-ti_*`. Adding the pattern to `securitySolution:defaultThreatIndex` alone doesn't make those indicators appear on the Indicators page.
 
           If you leave the `-*elastic-cloud-logs-*` pattern in the list, Elastic Cloud monitoring logs are excluded from {{security-app}} queries.
         datatype: array
@@ -2058,7 +2060,9 @@ groups:
       - setting: "securitySolution:defaultThreatIndex"
         id: securitysolution-threatindices
         description: |
-          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators. Features that query these indices include the Threat Intelligence view on the Overview dashboard, indicator match rules, and the alert enrichment query.
+          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators for detection and enrichment. Features that query these indices are the Threat Intelligence view on the Overview dashboard, the default indicator index of indicator match rules, and the alert enrichment query.
+
+          This setting doesn't affect the [Indicators page](docs-content://solutions/security/investigate/indicators-of-compromise.md) (**Security** → **Intelligence**), which queries the default Security data view generated from `securitySolution:defaultIndex`. Refer to [Troubleshoot indicators of compromise](docs-content://troubleshoot/security/indicators-of-compromise.md).
 
           Do not remove or overwrite the `logs-ti_*` index pattern as it is used by {{agent}} integrations.
         datatype: array

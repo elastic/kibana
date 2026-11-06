@@ -11,19 +11,18 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
-import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
-import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
+import { useGetIntegrationById } from '../../../../common';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
-import { useIntegrationForm, usePackageNames } from '../../forms/integration_form';
+import { useIntegrationForm } from '../../forms/integration_form';
+import { INTEGRATION_DETAILS_REQUIRED_FIELDS } from '../../forms/constants';
 
 export const DataStreams = React.memo<{
   onDataStreamReanalyzeSuccess?: () => void;
@@ -39,36 +38,20 @@ export const DataStreams = React.memo<{
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration } = useGetIntegrationById(integrationId);
   const { reportDataStreamFlyoutOpened } = useTelemetry();
-  const { formData } = useIntegrationForm();
-  const packageNames = usePackageNames();
+  const { form } = useIntegrationForm();
 
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
 
-  const isCreateIntegrationPage = !integrationId;
-
-  const canAddDataStream = useMemo(() => {
-    if (!isCreateIntegrationPage) {
-      return true;
+  const handleOpenCreateDataStreamFlyout = useCallback(async () => {
+    const { areFieldsValid } = await form.validateFields(INTEGRATION_DETAILS_REQUIRED_FIELDS);
+    if (!areFieldsValid) {
+      return;
     }
-    const title = formData?.title?.trim() ?? '';
-    const normalizedTitle = normalizeTitleName(title);
-    const isDuplicate = Boolean(normalizedTitle && packageNames?.has(normalizedTitle));
-    return (
-      Boolean(title) &&
-      meetsMinLength(title) &&
-      Boolean(formData?.description?.trim()) &&
-      isValidNameFormat(title) &&
-      startsWithLetter(title) &&
-      !isDuplicate
-    );
-  }, [formData?.description, formData?.title, isCreateIntegrationPage, packageNames]);
-
-  const handleOpenCreateDataStreamFlyout = useCallback(() => {
     openCreateDataStreamFlyout();
     reportDataStreamFlyoutOpened({
       integrationId,
     });
-  }, [integrationId, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
+  }, [form, integrationId, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
 
   const renderAddDataStreamButton = useCallback(
     (layout: 'header' | 'zeroState') => {
@@ -77,25 +60,14 @@ export const DataStreams = React.memo<{
           iconType="plusCircle"
           onClick={handleOpenCreateDataStreamFlyout}
           data-test-subj="addDataStreamButton"
-          isDisabled={!canAddDataStream}
         >
           {i18n.ADD_DATA_STREAM_BUTTON}
         </EuiButton>
       );
 
-      if (canAddDataStream) {
-        return layout === 'zeroState' ? <EuiFlexItem grow={false}>{button}</EuiFlexItem> : button;
-      }
-
-      const wrapped = (
-        <EuiToolTip content={i18n.ADD_DATA_STREAM_DISABLED_TOOLTIP} position="top">
-          <span tabIndex={0}>{button}</span>
-        </EuiToolTip>
-      );
-
-      return layout === 'zeroState' ? <EuiFlexItem grow={false}>{wrapped}</EuiFlexItem> : wrapped;
+      return layout === 'zeroState' ? <EuiFlexItem grow={false}>{button}</EuiFlexItem> : button;
     },
-    [canAddDataStream, handleOpenCreateDataStreamFlyout]
+    [handleOpenCreateDataStreamFlyout]
   );
 
   return (

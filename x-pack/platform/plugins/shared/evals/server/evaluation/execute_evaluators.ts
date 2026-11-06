@@ -8,7 +8,7 @@
 import { isValidTraceId } from '@opentelemetry/api';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EvaluationSubject, EvaluateResponse, Model } from '@kbn/evals-common';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceCallbacks } from '@kbn/inference-common';
 import { isResponseError } from '@kbn/es-errors';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
@@ -22,6 +22,7 @@ import type { EvidenceRound } from '../evaluators/evidence/types';
 import type { EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
 import { EvaluationExecutionError } from './evaluation_execution_error';
+import { createModelUsageTally, MAX_ERROR_MESSAGE_LENGTH } from './model_usage_tally';
 
 /** Max evaluators graded in parallel for one trace; bounds concurrent judge-model calls. */
 export const EVALUATOR_CONCURRENCY = 4;
@@ -177,25 +178,14 @@ export const executeEvaluators = async (
     return inferenceStartPromise;
   };
 
-  // Promises are cached so concurrent evaluators sharing a connector share one client.
-  const inferenceClientByConnectorId = new Map<string, Promise<BoundInferenceClient>>();
-  const getInferenceClient = (connectorId: string): Promise<BoundInferenceClient> | undefined => {
-    const cachedClient = inferenceClientByConnectorId.get(connectorId);
-    if (cachedClient) {
-      return cachedClient;
-    }
-
-    const inferencePromise = getInference();
-    if (!inferencePromise) {
-      return undefined;
-    }
-
-    const inferenceClient = inferencePromise.then((inference) =>
-      inference.getClient({ request, bindTo: { connectorId } })
+  // One client per evaluator run, so its callbacks count only that evaluator's model calls.
+  const getInferenceClient = (
+    connectorId: string,
+    callbacks: InferenceCallbacks
+  ): Promise<BoundInferenceClient> | undefined =>
+    getInference()?.then((inference) =>
+      inference.getClient({ request, bindTo: { connectorId }, callbacks })
     );
-    inferenceClientByConnectorId.set(connectorId, inferenceClient);
-    return inferenceClient;
-  };
 
   const modelByConnectorId = new Map<string, Promise<Model | undefined>>();
   const getModel = (connectorId: string): Promise<Model | undefined> | undefined => {
@@ -253,10 +243,16 @@ export const executeEvaluators = async (
       }
     }
 
+    const usageTally = createModelUsageTally();
+    const withUsage = (result: EvaluateResponse['results'][number]) => {
+      const usage = usageTally.getUsage();
+      return usage ? { ...result, usage } : result;
+    };
+
     try {
       const inferenceClient =
         definition.kind === 'llm' && connectorId
-          ? await getInferenceClient(connectorId)
+          ? await getInferenceClient(connectorId, usageTally.callbacks)
           : undefined;
       const result = await withEvaluatorNameBaggage(definition.name, () =>
         definition.evaluate({
@@ -268,19 +264,35 @@ export const executeEvaluators = async (
         })
       );
 
-      return {
+      if (result.notApplicable) {
+        return withUsage({
+          status: 'error',
+          evaluator: await describeEvaluator(definition, connectorId),
+          error: {
+            code: 'not_applicable',
+            message: `Evaluator not applicable: ${result.notApplicable.reason}`,
+          },
+        });
+      }
+
+      return withUsage({
         status: 'ok',
         evaluator: await describeEvaluator(definition, connectorId),
         scores: result.scores,
-      };
+      });
     } catch (error) {
       const errorDetail = error instanceof Error ? error.stack ?? error.message : String(error);
       logger.error(`Failed to execute evaluator "${definition.name}": ${errorDetail}`);
-      return {
+      return withUsage({
         status: 'error',
         evaluator: await describeEvaluator(definition, connectorId),
-        error: { message: error instanceof Error ? error.message : String(error) },
-      };
+        error: {
+          message: (error instanceof Error ? error.message : String(error)).slice(
+            0,
+            MAX_ERROR_MESSAGE_LENGTH
+          ),
+        },
+      });
     }
   };
 
