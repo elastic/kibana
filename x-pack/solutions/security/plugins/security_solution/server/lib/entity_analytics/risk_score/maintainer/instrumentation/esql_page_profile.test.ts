@@ -5,7 +5,57 @@
  * 2.0.
  */
 
+import type { EsqlProfileResponse } from '@kbn/esql-language';
 import { summarizeEsqlPage } from './esql_page_profile';
+import { esqlProfileResponseValidator } from './esql_profile_response';
+
+const createCurrentProfile = (): EsqlProfileResponse => ({
+  query: null,
+  planning: null,
+  parsing: null,
+  view_resolution: null,
+  dataset_resolution: null,
+  preanalysis: null,
+  indices_resolution: null,
+  enrich_resolution: null,
+  inference_resolution: null,
+  analysis: null,
+  planning_cpu_nanos: 1,
+  field_caps_calls: 0,
+  unmapped_fields: 'default',
+  drivers: [
+    {
+      description: 'data',
+      cluster_name: 'local',
+      node_name: 'node-1',
+      start_millis: 1,
+      stop_millis: 2,
+      took_nanos: 10,
+      cpu_nanos: 4_000_000,
+      driver_nanos: 10,
+      documents_found: 7,
+      values_loaded: 4,
+      rows_emitted: 1,
+      bytes_read: 10,
+      read_nanos: 2,
+      read_cpu_nanos: 1,
+      iterations: 1,
+      operators: [
+        {
+          operator: 'EvalOperator[expression]',
+          status: {
+            process_nanos: 3_000_000,
+            pages_received: 1,
+            pages_completed: 1,
+          },
+        },
+      ],
+      sleeps: { counts: {}, first: [], last: [] },
+    },
+  ],
+  plans: [],
+  minimumTransportVersion: null,
+});
 
 describe('summarizeEsqlPage', () => {
   it('summarizes available fields from an unprofiled partial response', () => {
@@ -16,6 +66,32 @@ describe('summarizeEsqlPage', () => {
       wallMs: 18,
       tookMs: 12,
       isPartial: true,
+    });
+  });
+
+  it('validates a current profile response and summarizes its driver counters', () => {
+    const profile = createCurrentProfile();
+
+    expect(esqlProfileResponseValidator?.safeParse(profile).success).toBe(true);
+    expect(summarizeEsqlPage({ columns: [], values: [], profile }, 10)).toMatchObject({
+      cpuMs: 4,
+      documentsFound: 7,
+      valuesLoaded: 4,
+      drivers: { data: 1 },
+      topOperators: [{ operator: 'EvalOperator', ms: 3 }],
+    });
+  });
+
+  it('falls back to defensive profile reading for version-skewed responses', () => {
+    const profile = { ...createCurrentProfile(), future_profile_field: true };
+
+    expect(esqlProfileResponseValidator?.safeParse(profile).success).toBe(false);
+    expect(summarizeEsqlPage({ columns: [], values: [], profile }, 10)).toMatchObject({
+      cpuMs: 4,
+      documentsFound: 7,
+      valuesLoaded: 4,
+      drivers: { data: 1 },
+      topOperators: [{ operator: 'EvalOperator', ms: 3 }],
     });
   });
 

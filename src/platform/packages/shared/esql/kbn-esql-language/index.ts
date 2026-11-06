@@ -10,6 +10,7 @@
 export * from './src/constants';
 export * from './src/commands';
 export * from './src/language';
+export * from './src/profile_response';
 
 // Used by the ES|QL definition generation scripts in @kbn/esql-scripts
 export { Location } from './src/commands/registry/types';
