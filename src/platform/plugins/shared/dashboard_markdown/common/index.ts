@@ -16,3 +16,4 @@ export {
   APP_NAME,
   DISPLAY_NAME,
 } from './constants';
+export { markdownStateComparison } from './state_comparison';
