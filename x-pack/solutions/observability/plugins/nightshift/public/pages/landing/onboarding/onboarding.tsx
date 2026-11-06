@@ -80,6 +80,10 @@ const INVESTIGATE_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Try your first investigation' }
 );
 
+const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
+  defaultMessage: 'Enable Elastic nightshift',
+});
+
 const backButtonStyles = css`
   width: 100%;
 `;
@@ -342,7 +346,9 @@ export function NightshiftOnboarding({
     ) : undefined;
 
   const sectionTitle =
-    step === 'connect'
+    step === 'enable'
+      ? ENABLE_SECTION_TITLE
+      : step === 'connect'
       ? CONNECT_SUB_STEP_TITLES[connectSubStep]
       : step === 'investigate'
       ? INVESTIGATE_SECTION_TITLE
