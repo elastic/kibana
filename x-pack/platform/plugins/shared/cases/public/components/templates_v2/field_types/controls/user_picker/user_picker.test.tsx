@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
@@ -168,7 +168,7 @@ describe('UserPicker', () => {
     it('calls useSuggestUserProfiles with the typed search term', async () => {
       render(<FormWrapper />);
       const input = screen.getByRole('combobox');
-      await userEvent.type(input, 'dam');
+      fireEvent.change(input, { target: { value: 'dam' } });
       await waitFor(() => {
         const calls = useSuggestUserProfilesMock.mock.calls;
         const lastCall = calls[calls.length - 1][0];
