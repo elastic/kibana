@@ -32,6 +32,18 @@ export type StateComparators<StateType> = {
     | ComparatorFunction<StateType, KeyType>;
 };
 
+/**
+ * Stateless rules for comparing two serialized states of one embeddable type. They must not depend on a
+ * rendered embeddable, so containers can compare panels that are not rendered, or compare on the server.
+ */
+export interface SerializedStateComparison<StateType extends object = object> {
+  comparators: StateComparators<StateType>;
+  /**
+   * Values used in place of keys missing from a compared state.
+   */
+  defaultState?: Partial<StateType>;
+}
+
 export type CustomComparators<StateType> = {
   [KeyType in keyof StateType]?: ComparatorFunction<StateType, KeyType>;
 };

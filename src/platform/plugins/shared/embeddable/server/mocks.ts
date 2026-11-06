@@ -48,6 +48,9 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
     });
     return { ...transforms, schema: registration?.getSchema?.(mockGetDrilldownsSchema) };
   }),
+  getStateComparison: jest
+    .fn()
+    .mockImplementation((type) => mockEmbeddableServerDefinitionRegistry[type]?.stateComparison),
 });
 
 export const mockGetDrilldownsSchema: GetDrilldownsSchemaFnType = (supportedTriggers) => {

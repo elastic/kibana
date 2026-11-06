@@ -9,12 +9,12 @@
 
 import { BehaviorSubject, map, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import deepEqual from 'fast-deep-equal';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { DrilldownsManager, DrilldownActionState } from './types';
 import { createAction } from './create_action';
 import { deleteAction } from './delete_action';
 import type { SerializedDrilldowns, DrilldownState } from '../../server';
+import { drilldownsComparators } from '../../common/drilldowns/drilldowns_comparators';
 
 export function initializeDrilldownsManager(
   embeddableUuid: string,
@@ -44,9 +44,7 @@ export function initializeDrilldownsManager(
   return {
     api: { ...api },
     cleanup: deleteActions,
-    comparators: {
-      drilldowns: (a, b) => deepEqual(a ?? [], b ?? []),
-    } as StateComparators<SerializedDrilldowns>,
+    comparators: drilldownsComparators,
     anyStateChange$: drilldowns$.pipe(
       skip(1),
       map(() => undefined)
