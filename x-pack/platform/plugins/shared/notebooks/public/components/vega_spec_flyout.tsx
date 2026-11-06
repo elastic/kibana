@@ -9,7 +9,6 @@ import React, { Suspense, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
@@ -17,19 +16,17 @@ import {
   EuiSelect,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { VegaSpecEditor } from '@kbn/vis-type-vega-plugin/public';
 import type { VegaCellDefinition } from '../../common/types';
 import { getCellDisplayName } from '../model/references';
-import { createStarterSpec, VEGA_TABLE_DATASET } from '../model/vega_spec';
+import { createStarterSpec } from '../model/vega_spec';
 import type { NotebookStore } from '../model/notebook_store';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
@@ -68,7 +65,6 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
     spec: saved.spec.trim() ? saved.spec : starterFor(store, saved.sourceCell),
   }));
   const [previewed, setPreviewed] = useState(saved);
-  const source = draft.sourceCell ? cells[draft.sourceCell] : undefined;
   const esqlCells = cellOrder.flatMap((cellId) => {
     const other = cells[cellId];
     return other?.type === 'esql' ? [other] : [];
@@ -113,25 +109,6 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
             })}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>
-            {source ? (
-              <FormattedMessage
-                id="xpack.notebook.vegaCell.flyout.description"
-                defaultMessage="Chart the results of {source} with Vega or Vega-Lite. They're the {dataset} dataset."
-                values={{
-                  source: getCellDisplayName(source),
-                  dataset: <EuiCode>{VEGA_TABLE_DATASET}</EuiCode>,
-                }}
-              />
-            ) : (
-              i18n.translate('xpack.notebook.vegaCell.flyout.descriptionNoSource', {
-                defaultMessage: 'Chart your data with Vega or Vega-Lite.',
-              })
-            )}
-          </p>
-        </EuiText>
         <EuiSpacer size="m" />
         <EuiSelect
           compressed
