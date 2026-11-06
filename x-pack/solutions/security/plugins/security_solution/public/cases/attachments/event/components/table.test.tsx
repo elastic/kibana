@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { DataTableComponent } from '@kbn/securitysolution-data-table';
 import {
   EMPTY_EVENTS_TABLE_FOR_CASES_ID,
   EventsTableForCases,
@@ -31,8 +32,33 @@ import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 jest.mock('../hooks/use_events_data_view');
 jest.mock('../hooks/search_events');
 
-// Failing: See https://github.com/elastic/kibana/issues/271294
-describe.skip('EventsTableForCases', () => {
+// Mounting the real EuiDataGrid in jsdom takes seconds per test and exceeds Jest's timeout on busy
+// CI agents; its rendering is covered by the data-table package's own tests.
+jest.mock('@kbn/securitysolution-data-table', () => ({
+  ...jest.requireActual('@kbn/securitysolution-data-table'),
+  DataTableComponent: ({
+    data,
+    totalItems,
+    pagination,
+  }: React.ComponentProps<typeof DataTableComponent>) => (
+    <div data-test-subj="mockDataTable">
+      <span data-test-subj="mockDataTableTotalItems">{totalItems}</span>
+      <span data-test-subj="mockDataTablePageSize">{pagination.pageSize}</span>
+      {data.map((row) => (
+        <div key={row._id} data-test-subj="mockDataTableRow">
+          {row._id}
+        </div>
+      ))}
+      <button
+        type="button"
+        data-test-subj="mockDataTableGoToPage3"
+        onClick={() => pagination.onChangePage(3)}
+      />
+    </div>
+  ),
+}));
+
+describe('EventsTableForCases', () => {
   beforeEach(() => {
     jest.mocked(useCaseEventsDataView).mockReturnValue({
       dataView: new DataView({
@@ -75,14 +101,10 @@ describe.skip('EventsTableForCases', () => {
     // renders loading initially
     expect(screen.getByTestId(LOADING_EVENTS_TABLE_FOR_CASES_ID)).toBeInTheDocument();
 
-    // Check if value cells are displayed at all
-    await waitFor(() => {
-      expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+    const rows = await screen.findAllByTestId('mockDataTableRow');
 
-      const cells = screen.getAllByTestId('dataGridRowCell');
-
-      expect(cells.length).toBeGreaterThan(2);
-    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent('mock-id');
   });
 
   it('renders empty state for no events', async () => {
@@ -102,16 +124,12 @@ describe.skip('EventsTableForCases', () => {
 
     render(<EventsTableForCases events={newLocal} />, { wrapper: TestProviders });
 
-    await waitFor(() => {
-      // should have 4 pages (default is 25 per page, we are pulling in data for 100 events)
-      expect(screen.getByTestId('pagination-button-0')).toBeInTheDocument();
-      expect(screen.getByTestId('pagination-button-3')).toBeInTheDocument();
-    });
+    // should have 4 pages (default is 25 per page, we are pulling in data for 100 events)
+    expect(await screen.findByTestId('mockDataTableTotalItems')).toHaveTextContent('100');
+    expect(screen.getByTestId('mockDataTablePageSize')).toHaveTextContent('25');
 
     // test if the endpoint is called with proper pagination parameters
-    await act(() => {
-      screen.getByTestId('pagination-button-3').click();
-    });
+    fireEvent.click(screen.getByTestId('mockDataTableGoToPage3'));
 
     expect(jest.mocked(searchEvents)).toHaveBeenCalled();
     expect(jest.mocked(searchEvents)).toHaveBeenCalledWith(
