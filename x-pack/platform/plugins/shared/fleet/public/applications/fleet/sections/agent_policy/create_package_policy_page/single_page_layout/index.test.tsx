@@ -644,11 +644,7 @@ describe('When on the package policy create page', () => {
     });
 
     describe('On save navigate', () => {
-      async function setupSaveNavigate(
-        routeState: any,
-        queryParamsPolicyId?: string,
-        modalButtonText: RegExp = /Add Elastic Agent to your hosts/
-      ) {
+      async function setupSaveNavigate(routeState: any, queryParamsPolicyId?: string) {
         (useIntraAppState as jest.MockedFunction<any>).mockReturnValue(routeState);
         render(queryParamsPolicyId);
 
@@ -670,7 +666,9 @@ describe('When on the package policy create page', () => {
         );
 
         await act(async () => {
-          fireEvent.click(renderResult.getByText(modalButtonText).closest('button')!);
+          fireEvent.click(
+            renderResult.getByText(/Add Elastic Agent to your hosts/).closest('button')!
+          );
         });
       }
 
@@ -710,24 +708,13 @@ describe('When on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should navigate to integration policies page with the add agent help param if no route state and the agent is added later', async () => {
-        await setupSaveNavigate({}, undefined, /Add Elastic Agent later/);
-
-        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: '/detail/nginx-1.3.0/policies?showAddAgentHelpForPolicyId=agent-policy-1',
-          }
-        );
-      });
-
-      test('should navigate to integration policies page with the add agent param if no route state and no queryParamsPolicyId', async () => {
+      test('should navigate to integration policies page if no route state and no queryParamsPolicyId', async () => {
         await setupSaveNavigate({});
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: '/detail/nginx-1.3.0/policies?addAgentToPolicyId=agent-policy-1',
+            path: '/detail/nginx-1.3.0/policies',
           }
         );
       });

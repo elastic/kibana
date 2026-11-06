@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  INTEGRATION_POLICIES_ON_SAVE_QUERY_PARAMS,
-  pagePathGetters,
-} from '../../../../../constants';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
 interface GetInstallPkgRouteOptionsParams {
   currentPath: string;
@@ -74,7 +69,10 @@ export const getInstallPkgRouteOptions = ({
       },
     ];
 
-    onSaveQueryParams = INTEGRATION_POLICIES_ON_SAVE_QUERY_PARAMS;
+    onSaveQueryParams = {
+      showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
+      openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
+    };
   }
 
   const state: CreatePackagePolicyRouteState = {
