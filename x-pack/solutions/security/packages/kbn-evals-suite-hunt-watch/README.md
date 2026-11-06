@@ -146,7 +146,11 @@ Two hard rows force those paths without touching the product:
   incomplete, packaging closes the Investigation as `other` with the retired summary, and the
   narrative has to say part of the report was not searched.
   `seed_contract.test.ts` reads the bound from the Worker source so a change to it fails in Jest
-  first.
+  first. The report text deliberately describes no activity: when it said the addresses were
+  "observed scanning exposed services", some models extracted Active Scanning (T1595), and a
+  failed or ungrounded query for it is a retryable gap, so the run ended `partial` with no
+  evidence instead of retiring. The contract test rejects behavior words in the title, body and
+  categories.
 - `hard-failed-locked-investigation` (`failed`, `incomplete_stage: hunt`). The seed copies the
   clean report to `ti-report-aws-iam-clean-historic-01-locked` and, after `resetHuntReport`,
   `applyHuntFault` creates a private conversation at the report's Investigation id through the
