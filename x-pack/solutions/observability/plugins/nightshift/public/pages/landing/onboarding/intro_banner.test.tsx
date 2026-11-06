@@ -33,10 +33,7 @@ describe('OnboardingIntroBanner', () => {
     setup();
 
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
-      'Elastic nightshift is an SRE coworker'
-    );
-    expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
-      'Once you add data, it will start analyzing.'
+      'Elastic nightshift AI SRE is a co-worker'
     );
     expect(screen.queryByTestId('nightshiftOnboardingExploreLiveExample')).not.toBeInTheDocument();
   });
