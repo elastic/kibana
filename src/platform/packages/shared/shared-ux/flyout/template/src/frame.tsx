@@ -37,6 +37,9 @@ const FrameLoadingDeclaration = ({
   <FlyoutTemplateDeclaration
     frame={frame}
     props={{
+      // The frame's tabs would put this declaration in tabbed mode, which ignores the spinner
+      // because it isn't inside a Body.TabPanel.
+      tabs: [],
       children: title ? (
         <>
           <Header title={title} isLoading />
