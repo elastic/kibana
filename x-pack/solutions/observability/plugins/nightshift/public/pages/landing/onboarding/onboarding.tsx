@@ -77,10 +77,6 @@ const SKIP_LABEL = i18n.translate('xpack.nightshift.onboarding.skipStepButton', 
   defaultMessage: 'Skip this step',
 });
 
-const BACK_LABEL = i18n.translate('xpack.nightshift.onboarding.backButton', {
-  defaultMessage: 'Back',
-});
-
 const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optionalHint', {
   defaultMessage: 'Optional',
 });
@@ -303,16 +299,6 @@ export function NightshiftOnboarding({
         >
           {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}
         </EuiButton>
-        <EuiButtonEmpty
-          size="s"
-          iconType="sortLeft"
-          iconSide="left"
-          css={backButtonStyles}
-          onClick={() => setStepOverride('addData')}
-          data-test-subj="nightshiftOnboardingBackToAddDataButton"
-        >
-          {BACK_LABEL}
-        </EuiButtonEmpty>
         {isConnected && (
           <EuiButtonEmpty
             size="s"
@@ -342,16 +328,6 @@ export function NightshiftOnboarding({
             {PROCEED_LABEL}
           </EuiButton>
         )}
-        <EuiButtonEmpty
-          size="s"
-          iconType="sortLeft"
-          iconSide="left"
-          css={backButtonStyles}
-          onClick={() => setStepOverride('connectSources')}
-          data-test-subj="nightshiftOnboardingBackToConnectSourcesButton"
-        >
-          {BACK_LABEL}
-        </EuiButtonEmpty>
       </EuiFlexGroup>
     ) : step === 'automate' ? (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -367,16 +343,6 @@ export function NightshiftOnboarding({
             defaultMessage: "I'll do it later",
           })}
         </EuiButton>
-        <EuiButtonEmpty
-          size="s"
-          iconType="sortLeft"
-          iconSide="left"
-          css={backButtonStyles}
-          onClick={() => setStepOverride('investigate')}
-          data-test-subj="nightshiftOnboardingBackToInvestigateButton"
-        >
-          {BACK_LABEL}
-        </EuiButtonEmpty>
       </EuiFlexGroup>
     ) : undefined;
 

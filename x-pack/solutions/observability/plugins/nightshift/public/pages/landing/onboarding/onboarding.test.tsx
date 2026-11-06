@@ -192,11 +192,12 @@ describe('NightshiftOnboarding', () => {
       expect(mockStartSuggestions).toHaveBeenCalledTimes(1);
     });
 
-    it('links back to Add data', () => {
+    it('links back to Add data instead of offering a Back button', () => {
       mockConnectors({ '.new_relic': 1, '.github': 0 });
 
       goToSources();
 
+      expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
       expect(linkedSteps()).toEqual(['addData']);
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
       expect(currentStep()).toBe('addData');
@@ -212,11 +213,12 @@ describe('NightshiftOnboarding', () => {
       mockConnectors({ '.new_relic': 1, '.github': 0 });
     });
 
-    it('links every completed step except Enable', () => {
+    it('links every completed step except Enable, without a Back button', () => {
       renderOnboarding(investigation);
 
       expect(currentStep()).toBe('automate');
       expect(linkedSteps()).toEqual(['addData', 'connectSources', 'investigate']);
+      expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
     });
 
     it('returns to a completed step and forward again through the card', () => {
