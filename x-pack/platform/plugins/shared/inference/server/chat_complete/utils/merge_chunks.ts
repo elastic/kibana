@@ -6,6 +6,7 @@
  */
 
 import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
+import { generateFakeToolCallId } from '../../../common';
 
 interface UnvalidatedMessage {
   content: string;
@@ -29,6 +30,7 @@ interface ToolCallEntry {
  *   - otherwise (e.g. Gemini-via-EIS emits a single delta with empty id/name and full args): the
  *     call is tracked under a per-index key that can't collide with a real id, so it still merges
  *     cleanly. If the first real id for that index arrives later, the call is re-keyed to it.
+ *     A call that never receives an id is given a generated one, since consumers require it.
  * - Real `toolCallId`s, when present, still take precedence and disambiguate tool calls that
  *   share an index but have different ids.
  */
@@ -98,17 +100,29 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
     });
   }
 
+  const usedToolCallIds = new Set(
+    orderedEntries.map(({ call }) => call.toolCallId).filter((toolCallId) => toolCallId !== '')
+  );
+
   return orderedEntries.map(({ call }) => {
-    if (call.function.arguments === '') {
-      return {
-        ...call,
-        function: {
-          ...call.function,
-          arguments: '{}',
-        },
-      };
+    // Downstream consumers (e.g. Agent Builder) require every tool call to have an id
+    let toolCallId = call.toolCallId;
+    while (toolCallId === '') {
+      const candidateId = generateFakeToolCallId();
+      if (!usedToolCallIds.has(candidateId)) {
+        toolCallId = candidateId;
+        usedToolCallIds.add(candidateId);
+      }
     }
-    return call;
+
+    return {
+      ...call,
+      toolCallId,
+      function: {
+        ...call.function,
+        arguments: call.function.arguments === '' ? '{}' : call.function.arguments,
+      },
+    };
   });
 };
 

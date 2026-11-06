@@ -6,6 +6,7 @@
  */
 
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import * as commonModule from '../../../common';
 import { mergeChunks } from './merge_chunks';
 
 describe('mergeChunks', () => {
@@ -444,7 +445,7 @@ describe('mergeChunks', () => {
             name: '',
             arguments: '{"criteria":["foo"]}',
           },
-          toolCallId: '',
+          toolCallId: expect.stringMatching(/.+/),
         },
       ],
     });
@@ -484,10 +485,49 @@ describe('mergeChunks', () => {
             name: 'myFunction',
             arguments: '{ "foo": "bar" }',
           },
-          toolCallId: '',
+          toolCallId: expect.stringMatching(/.+/),
         },
       ],
     });
+  });
+
+  it('gives every call that never receives a toolCallId a distinct, non-empty id', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'firstFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+          { function: { name: 'secondFunction', arguments: '{}' }, index: 1, toolCallId: '' },
+        ],
+      },
+    ]);
+
+    const ids = message.tool_calls.map((call) => call.toolCallId);
+    expect(ids).toHaveLength(2);
+    expect(ids.every((id) => id !== '')).toBe(true);
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it('never gives a generated id that equals a real toolCallId in the same message', async () => {
+    const generateSpy = jest
+      .spyOn(commonModule, 'generateFakeToolCallId')
+      .mockReturnValueOnce('real-id')
+      .mockReturnValueOnce('generated-id');
+
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'idlessFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+          { function: { name: 'realFunction', arguments: '{}' }, index: 1, toolCallId: 'real-id' },
+        ],
+      },
+    ]);
+
+    expect(message.tool_calls.map((call) => call.toolCallId)).toEqual(['generated-id', 'real-id']);
+    generateSpy.mockRestore();
   });
 
   it('skips a fully empty delta at an index with no known toolCallId (e.g. GPT-OSS-120B via EIS)', async () => {
@@ -562,7 +602,10 @@ describe('mergeChunks', () => {
     expect(message).toEqual({
       content: '',
       tool_calls: [
-        { function: { name: 'idlessFunction', arguments: '{ "a": 1 }' }, toolCallId: '' },
+        {
+          function: { name: 'idlessFunction', arguments: '{ "a": 1 }' },
+          toolCallId: expect.not.stringMatching(/^(__index_0)?$/),
+        },
         { function: { name: 'realFunction', arguments: '{ "b": 2 }' }, toolCallId: '__index_0' },
       ],
     });
