@@ -10,10 +10,40 @@
 import Fs from 'fs';
 import Path from 'path';
 import { fileURLToPath } from 'url';
+import yauzl from 'yauzl';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from './product_doc_stub_repository';
 
 const PRODUCTS = ['kibana', 'elasticsearch', 'observability', 'security'];
 const JINA_INFERENCE_ID = '.jina-embeddings-v5-text-small';
+
+const readZipEntry = (zipPath: string, entryPath: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    yauzl.open(zipPath, { lazyEntries: true }, (openErr, zipFile) => {
+      if (openErr) {
+        return reject(openErr);
+      }
+      zipFile.on('error', reject);
+      zipFile.on('end', () => reject(new Error(`[${entryPath}] not found in [${zipPath}]`)));
+      zipFile.on('entry', (entry: yauzl.Entry) => {
+        if (entry.fileName !== entryPath) {
+          return zipFile.readEntry();
+        }
+        zipFile.openReadStream(entry, (streamErr, stream) => {
+          if (streamErr) {
+            return reject(streamErr);
+          }
+          const chunks: Buffer[] = [];
+          stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+          stream.on('error', reject);
+          stream.on('end', () => {
+            zipFile.close();
+            resolve(Buffer.concat(chunks).toString('utf8'));
+          });
+        });
+      });
+      zipFile.readEntry();
+    });
+  });
 
 describe('PRODUCT_DOC_STUB_REPOSITORY_URL', () => {
   const repositoryPath = fileURLToPath(PRODUCT_DOC_STUB_REPOSITORY_URL);
@@ -44,5 +74,19 @@ describe('PRODUCT_DOC_STUB_REPOSITORY_URL', () => {
     const entries = index.match(/<Contents>/g) ?? [];
     const dates = index.match(/<LastModified>[^<]+<\/LastModified>/g) ?? [];
     expect(dates).toHaveLength(entries.length);
+  });
+
+  // Format 1.0.0 artifacts require the legacy semantic_text index format, which current
+  // Elasticsearch rejects for new indices, so they can never be installed
+  it('ships artifacts in the current (non-legacy) manifest format', async () => {
+    for (const key of keys) {
+      const manifest = JSON.parse(
+        await readZipEntry(Path.join(repositoryPath, key), 'manifest.json')
+      );
+      expect({ key, formatVersion: manifest.formatVersion }).toEqual({
+        key,
+        formatVersion: '2.0.0',
+      });
+    }
   });
 });
