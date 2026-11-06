@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import {
   listDecisionTreeIds,
+  listDecisionTreeIdsForConversation,
   restoreDecisionTree,
   restoreDecisionTrees,
   snapshotDecisionTree,
@@ -33,18 +34,31 @@ const headHit = (treeId: string) => ({
 });
 
 interface SearchRequest {
-  query: { bool: { filter: Array<{ term: Record<string, unknown> }> } };
+  query: {
+    bool: {
+      filter: Array<{ term?: Record<string, unknown>; terms?: Record<string, unknown[]> }>;
+    };
+  };
 }
 
 const termOf = (request: SearchRequest, field: string): unknown =>
-  request.query.bool.filter.find(({ term }) => field in term)?.term[field];
+  request.query.bool.filter.find(({ term }) => term && field in term)?.term?.[field];
 
-/** Answers the head listing with `headTreeIds` and each version search with `versionsByTree`. */
+const CONVERSATION_ID = 'nightshift-reinforcement-replay-case-1';
+
+/**
+ * Answers the head listing with `headTreeIds`, the conversation provenance search with
+ * `stampedTreeIds`, and each version search with `versionsByTree`.
+ */
 const searchByType = (
   headTreeIds: string[],
-  versionsByTree: Record<string, number[]> = {}
+  versionsByTree: Record<string, number[]> = {},
+  stampedTreeIds: string[] = []
 ): jest.Mock =>
   jest.fn().mockImplementation(async (request: SearchRequest) => {
+    if (termOf(request, 'attributes.conversation_id') === CONVERSATION_ID) {
+      return { hits: { hits: stampedTreeIds.map(headHit) } };
+    }
     if (termOf(request, 'type') === 'decision_tree') {
       return { hits: { hits: headTreeIds.map(headHit) } };
     }
@@ -191,6 +205,34 @@ describe('listDecisionTreeIds', () => {
   });
 });
 
+describe('listDecisionTreeIdsForConversation', () => {
+  it('lists each tree whose head or version carries the conversation id', async () => {
+    const search = searchByType([], {}, [TREE_ID, 'symptom:other', TREE_ID]);
+
+    await expect(
+      listDecisionTreeIdsForConversation(client({ search }), CONVERSATION_ID)
+    ).resolves.toEqual([TREE_ID, 'symptom:other']);
+    expect(search.mock.calls[0][0].query.bool.filter).toEqual([
+      { terms: { type: ['decision_tree', 'decision_tree_version'] } },
+      { term: { 'attributes.conversation_id': CONVERSATION_ID } },
+      { term: { 'attributes.space_id': 'default' } },
+    ]);
+  });
+
+  it('treats a missing index as no trees', async () => {
+    const esClient = client({
+      search: jest.fn().mockRejectedValue({
+        statusCode: 404,
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      }),
+    });
+
+    await expect(listDecisionTreeIdsForConversation(esClient, CONVERSATION_ID)).resolves.toEqual(
+      []
+    );
+  });
+});
+
 describe('snapshotDecisionTrees', () => {
   it('snapshots every head in the space plus the seeded tree', async () => {
     const esClient = client({
@@ -212,45 +254,84 @@ describe('snapshotDecisionTrees', () => {
 });
 
 describe('restoreDecisionTrees', () => {
-  it('deletes a tree the replay created and puts a pre-existing tree back', async () => {
+  const replayHead = () =>
+    jest.fn().mockImplementation(async ({ id }: { id: string }) => ({
+      found: true,
+      _source: { content: `replay ${id}` },
+    }));
+
+  it('rolls back only the trees the replay owns', async () => {
     const esClient = client({
-      get: jest.fn().mockImplementation(async ({ id }: { id: string }) => ({
-        found: true,
-        _source: { content: `replay ${id}` },
-      })),
-      search: searchByType([TREE_ID, 'symptom:created'], { [TREE_ID]: [1, 2] }),
+      get: replayHead(),
+      search: searchByType(
+        [TREE_ID, 'symptom:stamped', 'symptom:foreign', 'symptom:untouched'],
+        { [TREE_ID]: [1, 2] },
+        ['symptom:stamped']
+      ),
     });
     const snapshots = new Map([
       [TREE_ID, [{ id: `${HEAD_ID}_v1`, source: { content: 'original' } }]],
+      ['symptom:untouched', [{ id: 'default:dtree_untouched', source: { content: 'untouched' } }]],
     ]);
 
-    await restoreDecisionTrees(esClient, snapshots);
+    await restoreDecisionTrees(esClient, snapshots, {
+      treeIds: [TREE_ID],
+      conversationId: CONVERSATION_ID,
+    });
 
+    // The seeded tree is put back and the tree committed under the replay's conversation, absent
+    // before it, is deleted. A tree another investigation created, and one that was in the
+    // snapshot but not owned, are never touched.
     expect(esClient.delete.mock.calls.map(([request]) => request.id)).toEqual([
       HEAD_ID,
       `${HEAD_ID}_v1`,
       `${HEAD_ID}_v2`,
-      'default:dtree_created',
+      'default:dtree_stamped',
     ]);
     expect(esClient.index.mock.calls.map(([request]) => [request.id, request.document])).toEqual([
       [`${HEAD_ID}_v1`, { content: 'original' }],
     ]);
   });
 
-  it('restores the snapshot when listing the current trees fails, then reports the failure', async () => {
+  it('puts back a pre-existing tree found only through conversation provenance', async () => {
+    const esClient = client({
+      get: replayHead(),
+      search: searchByType(['symptom:stamped'], {}, ['symptom:stamped']),
+    });
+    const snapshots = new Map([
+      ['symptom:stamped', [{ id: 'default:dtree_stamped', source: { content: 'original' } }]],
+    ]);
+
+    await restoreDecisionTrees(esClient, snapshots, {
+      treeIds: [],
+      conversationId: CONVERSATION_ID,
+    });
+
+    expect(esClient.delete.mock.calls.map(([request]) => request.id)).toEqual([
+      'default:dtree_stamped',
+    ]);
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'default:dtree_stamped', document: { content: 'original' } })
+    );
+  });
+
+  it('restores the named trees when the provenance search fails, then reports the failure', async () => {
     const search = jest
       .fn()
       .mockImplementation(async (request: SearchRequest) =>
-        termOf(request, 'type') === 'decision_tree'
+        termOf(request, 'attributes.conversation_id') === CONVERSATION_ID
           ? Promise.reject({ statusCode: 503 })
           : searchPage([])
       );
     const esClient = client({ search });
     const snapshots = new Map([[TREE_ID, [{ id: HEAD_ID, source: { content: 'original' } }]]]);
 
-    await expect(restoreDecisionTrees(esClient, snapshots)).rejects.toMatchObject({
-      statusCode: 503,
-    });
+    await expect(
+      restoreDecisionTrees(esClient, snapshots, {
+        treeIds: [TREE_ID],
+        conversationId: CONVERSATION_ID,
+      })
+    ).rejects.toMatchObject({ statusCode: 503 });
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({ id: HEAD_ID, document: { content: 'original' } })
     );
@@ -265,7 +346,12 @@ describe('restoreDecisionTrees', () => {
       ['symptom:second', [{ id: 'default:dtree_second', source: {} }]],
     ]);
 
-    await expect(restoreDecisionTrees(esClient, snapshots)).rejects.toBe(failure);
+    await expect(
+      restoreDecisionTrees(esClient, snapshots, {
+        treeIds: ['symptom:first', 'symptom:second'],
+        conversationId: CONVERSATION_ID,
+      })
+    ).rejects.toBe(failure);
     expect(index.mock.calls.map(([request]) => request.id)).toEqual([
       'default:dtree_first',
       'default:dtree_second',

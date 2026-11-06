@@ -127,6 +127,56 @@ describe('decisionTreeReinforceStepDefinition', () => {
     expect(runAgent).not.toHaveBeenCalled();
   });
 
+  describe('a replayed round', () => {
+    const results = [{ tool_result_id: 'r-1', type: ToolResultType.other, data: { stdout: '0' } }];
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'synthetic-1' }));
+    const withConversations = {
+      agents: { runAgent },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    } as unknown as AgentBuilderPluginStart;
+
+    const runReplay = (input: Record<string, unknown>) =>
+      decisionTreeReinforceStepDefinition({ getAgentBuilder: () => withConversations }).handler(
+        createContext({
+          prompt: 'Why is checkout slow?',
+          response: 'Connection pool exhausted.',
+          conversation_id: 'synthetic-1',
+          round_id: 'round-1',
+          message: 'Task: create a new decision tree',
+          turn_kind: 'initial_investigation',
+          tool_calls: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'toolu_1', params: {} }],
+          tool_results: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'toolu_1', results }],
+          ...input,
+        })
+      );
+
+    // An evaluation's synthetic conversation id is never readable, so the flag must bypass the read.
+    it('reinforces from the supplied tool calls without reading the conversation', async () => {
+      const output = await runReplay({ replay: true });
+
+      expect(get).not.toHaveBeenCalled();
+      expect(runAgent).toHaveBeenCalledTimes(1);
+      const [{ agentParams }] = runAgent.mock.calls[0];
+      expect(output.output).not.toHaveProperty('skipped');
+      expect(agentParams.conversation.rounds).toEqual([
+        expect.objectContaining({
+          id: 'round-1',
+          steps: [expect.objectContaining({ tool_call_id: 'toolu_1', results })],
+        }),
+      ]);
+    });
+
+    it('still skips the same unreadable conversation when the round is not a replay', async () => {
+      const output = await runReplay({});
+
+      expect(output).toEqual({ output: { message: '', skipped: true, submissions_json: '[]' } });
+      expect(get).toHaveBeenCalledTimes(1);
+      expect(runAgent).not.toHaveBeenCalled();
+    });
+  });
+
   it('returns the submit tool arguments in call order', async () => {
     const merged = { from: ['E3'], into: 'E2' };
     runAgent.mockResolvedValue({

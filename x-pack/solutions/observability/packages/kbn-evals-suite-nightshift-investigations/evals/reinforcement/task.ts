@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { setTimeout as delay } from 'timers/promises';
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import {
   DECISION_TREE_AI_INDEX_DEST,
@@ -18,6 +18,8 @@ import {
   countsForTree,
   extractMermaid,
   parseMermaidDecisionTree,
+  symptomSlugFromTreeId,
+  symptomTreeId,
 } from '@kbn/nightshift-decision-trees';
 import type { EvalConnector } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -31,7 +33,7 @@ import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { runInvestigation } from '../investigation/task';
 import type { InvestigationExample } from '../investigation/types';
 import { parseSubmissions, treeIdsInSubmission } from './arguments';
-import type { ReinforcementExample, ReinforcementTaskOutput } from './types';
+import type { ReinforcementExample, ReinforcementTaskOutput, SubmitArguments } from './types';
 
 const API_VERSION = '2023-10-31';
 const SPACE_ID = 'default';
@@ -200,44 +202,65 @@ export const restoreDecisionTree = async (
 };
 
 /**
- * Tree ids of every head document in the space. Throws on a full page, since a partial list would
- * leave trees out of the snapshot.
+ * Distinct tree ids of the space's documents matching `filter`. Throws on a full page, since a
+ * partial list would leave trees out.
  */
-export const listDecisionTreeIds = async (esClient: Client): Promise<string[]> => {
-  let heads;
+const searchTreeIds = async (
+  esClient: Client,
+  filter: estypes.QueryDslQueryContainer[],
+  fullPageMessage: string
+): Promise<string[]> => {
+  let response;
   try {
-    heads = await esClient.search<{ attributes?: { tree_id?: unknown } }>({
+    response = await esClient.search<{ attributes?: { tree_id?: unknown } }>({
       index: DECISION_TREE_AI_INDEX_DEST,
       size: TREE_ID_PAGE_SIZE,
       track_total_hits: false,
       _source: ['attributes.tree_id'],
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'decision_tree' } },
-            { term: { 'attributes.space_id': SPACE_ID } },
-          ],
-        },
-      },
+      query: { bool: { filter: [...filter, { term: { 'attributes.space_id': SPACE_ID } }] } },
     });
   } catch (error) {
     if (isIndexNotFound(error)) return [];
     throw error;
   }
 
-  const hits = heads.hits.hits;
-  if (hits.length >= TREE_ID_PAGE_SIZE) {
-    throw new Error(
-      `The ${SPACE_ID} space has ${TREE_ID_PAGE_SIZE} or more decision trees, so the replay cannot snapshot all of them`
-    );
-  }
+  const hits = response.hits.hits;
+  if (hits.length >= TREE_ID_PAGE_SIZE) throw new Error(fullPageMessage);
   const ids = hits
     .map((hit) => hit._source?.attributes?.tree_id)
     .filter((id): id is string => typeof id === 'string' && id.length > 0);
   return [...new Set(ids)];
 };
 
-/** Snapshots every tree in the space plus `treeIds`, so a replay that edits several trees can be undone. */
+/**
+ * Tree ids of every head document in the space. Throws on a full page, since a partial list would
+ * leave trees out of the snapshot.
+ */
+export const listDecisionTreeIds = (esClient: Client): Promise<string[]> =>
+  searchTreeIds(
+    esClient,
+    [{ term: { type: 'decision_tree' } }],
+    `The ${SPACE_ID} space has ${TREE_ID_PAGE_SIZE} or more decision trees, so the replay cannot snapshot all of them`
+  );
+
+/** Tree ids with a head or version document whose commit provenance is `conversationId`. */
+export const listDecisionTreeIdsForConversation = (
+  esClient: Client,
+  conversationId: string
+): Promise<string[]> =>
+  searchTreeIds(
+    esClient,
+    [
+      { terms: { type: ['decision_tree', 'decision_tree_version'] } },
+      { term: { 'attributes.conversation_id': conversationId } },
+    ],
+    `Conversation ${conversationId} wrote ${TREE_ID_PAGE_SIZE} or more decision tree documents, so the replay cannot list the trees it owns`
+  );
+
+/**
+ * Snapshots every tree in the space plus `treeIds`. Which trees the replay owns is only known
+ * afterward, so this covers any tree it might turn out to own.
+ */
 export const snapshotDecisionTrees = async (
   esClient: Client,
   treeIds: readonly string[]
@@ -251,21 +274,24 @@ export const snapshotDecisionTrees = async (
 };
 
 /**
- * Restores every snapshotted tree and deletes trees created since the snapshot. Keeps going past a
- * failed tree and throws the first error at the end.
+ * Rolls back only the trees the replay owns: `treeIds` plus every tree whose head or a version
+ * carries `conversationId` provenance. An owned tree in `snapshots` is put back and one absent from
+ * it is deleted; every other tree, including one another investigation wrote meanwhile, is left
+ * alone. Keeps going past a failed tree and throws the first error at the end.
  */
 export const restoreDecisionTrees = async (
   esClient: Client,
-  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>
+  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
+  { treeIds, conversationId }: { treeIds: readonly string[]; conversationId: string }
 ): Promise<void> => {
   let firstError: unknown;
-  let currentIds: string[] = [];
+  let stampedIds: string[] = [];
   try {
-    currentIds = await listDecisionTreeIds(esClient);
+    stampedIds = await listDecisionTreeIdsForConversation(esClient, conversationId);
   } catch (error) {
     firstError = error;
   }
-  for (const id of new Set([...snapshots.keys(), ...currentIds])) {
+  for (const id of new Set([...treeIds, ...stampedIds])) {
     try {
       await restoreDecisionTree(esClient, id, snapshots.get(id) ?? []);
     } catch (error) {
@@ -369,9 +395,20 @@ const reinforceStep = (execution: WorkflowExecutionDto) =>
     return typeof step.output === 'object';
   });
 
+/** Tree ids the submissions name, in the `symptom:<slug>` form the plugin stores trees under. */
+const submittedTreeIds = (submissions: readonly SubmitArguments[]): string[] =>
+  submissions
+    .flatMap((submission) => treeIdsInSubmission(submission))
+    .map(symptomSlugFromTreeId)
+    .filter((slug) => slug.length > 0)
+    .map(symptomTreeId);
+
 /**
- * Replays one investigation round through the agent-optimize workflow, which runs the
- * reinforcement agent, and returns the submit arguments plus the tree it left behind.
+ * Replays one investigation round through the agent-optimize workflow as a `replay` run, so the
+ * reinforcement agent builds the round from the supplied tool calls instead of reading a
+ * conversation. Returns the submit arguments plus the tree it left behind, then rolls back only
+ * the trees the replay owns: the seeded tree, every tree its submissions name, and every tree
+ * committed under its conversation id.
  */
 export const runReinforcementExample = async ({
   esClient,
@@ -395,6 +432,8 @@ export const runReinforcementExample = async ({
   };
 
   const snapshots = await snapshotDecisionTrees(esClient, [treeId]);
+  const conversationId = replayConversationId(example.metadata.case_id);
+  let submissions: SubmitArguments[] = [];
   let executionId: string | undefined;
   let sawTerminal = false;
   try {
@@ -409,8 +448,9 @@ export const runReinforcementExample = async ({
           inputs: {
             prompt: example.input.question,
             response: example.input.response,
-            conversation_id: replayConversationId(example.metadata.case_id),
+            conversation_id: conversationId,
             round_id: example.metadata.case_id,
+            replay: true,
             agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
             connector_id: connectorId,
             tool_calls: example.input.tool_calls,
@@ -439,6 +479,7 @@ export const runReinforcementExample = async ({
           submit_rejected?: boolean;
         }
       | undefined;
+    submissions = parseSubmissions(output?.submissions_json);
     const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
     const finished = sawTerminal;
     const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
@@ -459,14 +500,17 @@ export const runReinforcementExample = async ({
               ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
               : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
         : undefined,
-      submissions: parseSubmissions(output?.submissions_json),
+      submissions,
       submitted_mermaid: submittedMarkdown,
     };
   } finally {
     if (executionId && !sawTerminal) {
       await cancelExecution(fetch, executionId, log);
     }
-    await restoreDecisionTrees(esClient, snapshots);
+    await restoreDecisionTrees(esClient, snapshots, {
+      treeIds: [treeId, ...submittedTreeIds(submissions)],
+      conversationId,
+    });
   }
 };
 

@@ -25,11 +25,15 @@ const CANCEL_PATH = `${EXECUTION_PATH}/cancel`;
 
 type Source = Record<string, unknown> & {
   type?: string;
-  attributes?: { tree_id?: string; space_id?: string };
+  attributes?: { tree_id?: string; space_id?: string; conversation_id?: string };
 };
 
 interface SearchRequest {
-  query?: { bool?: { filter?: Array<{ term?: Record<string, unknown> }> } };
+  query?: {
+    bool?: {
+      filter?: Array<{ term?: Record<string, unknown>; terms?: Record<string, unknown[]> }>;
+    };
+  };
 }
 
 interface FetchOptions {
@@ -43,26 +47,33 @@ const otherTree: Source = {
   attributes: { tree_id: 'symptom:checkout-high-latency', space_id: 'default' },
 };
 
+const fieldOf = (source: Source, field: string): unknown =>
+  field
+    .split('.')
+    .reduce<unknown>(
+      (value, key) =>
+        value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined,
+      source
+    );
+
 /** An in-memory decision tree index that records each write in `events`. */
 const fakeEsClient = (events: string[], initial: Record<string, Source>) => {
   const docs = new Map<string, Source>(Object.entries(initial));
-  const termsOf = (request: SearchRequest): Record<string, unknown> =>
-    Object.assign({}, ...(request.query?.bool?.filter ?? []).map(({ term }) => term ?? {}));
+  const matches = (request: SearchRequest, source: Source): boolean =>
+    (request.query?.bool?.filter ?? []).every(({ term = {}, terms = {} }) =>
+      [
+        ...Object.entries(term).map(([field, value]) => fieldOf(source, field) === value),
+        ...Object.entries(terms).map(([field, values]) => values.includes(fieldOf(source, field))),
+      ].every(Boolean)
+    );
   const esClient = {
     get: jest.fn(async ({ id }: { id: string }) => {
       const source = docs.get(id);
       return source ? { found: true, _source: source } : { found: false };
     }),
     search: jest.fn(async (request: SearchRequest) => {
-      const terms = termsOf(request);
-      const treeId = terms['attributes.tree_id'];
       const hits = [...docs.entries()]
-        .filter(
-          ([, source]) =>
-            source.type === terms.type &&
-            source.attributes?.space_id === terms['attributes.space_id'] &&
-            (treeId === undefined || source.attributes?.tree_id === treeId)
-        )
+        .filter(([, source]) => matches(request, source))
         .map(([id, source]) => ({ _id: id, _source: source }));
       return { hits: { hits } };
     }),
@@ -80,17 +91,34 @@ const fakeEsClient = (events: string[], initial: Record<string, Source>) => {
   return { esClient: esClient as unknown as Client, docs };
 };
 
-const completedExecution = {
+const completedWith = (submissions: unknown[]) => ({
   id: EXECUTION_ID,
   status: ExecutionStatus.COMPLETED,
   stepExecutions: [
     {
       stepId: 'reinforce_decision_trees',
       status: ExecutionStatus.COMPLETED,
-      output: { submissions_json: '[]' },
+      output: { submissions_json: JSON.stringify(submissions) },
     },
   ],
-};
+});
+
+const completedExecution = completedWith([]);
+
+const head = (symptom: string, content: string, conversationId?: string): Source => ({
+  type: 'decision_tree',
+  content,
+  attributes: {
+    tree_id: `symptom:${symptom}`,
+    space_id: 'default',
+    ...(conversationId ? { conversation_id: conversationId } : {}),
+  },
+});
+
+const version = (symptom: string, content: string, conversationId?: string): Source => ({
+  ...head(symptom, content, conversationId),
+  type: 'decision_tree_version',
+});
 
 const fakeFetch = (
   events: string[],
@@ -132,6 +160,7 @@ describe('runReinforcementExample', () => {
     });
 
     const inputs = runInputs(fetch);
+    expect(inputs.replay).toBe(true);
     expect(inputs.round_id).toBe(CASE_ID);
     expect(String(inputs.conversation_id)).toMatch(
       new RegExp(`^nightshift-reinforcement-replay-${CASE_ID}-[0-9a-f-]{36}$`)
@@ -247,5 +276,88 @@ describe('runReinforcementExample', () => {
     );
     expect(docs.size).toBe(0);
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('Cancel failed'));
+  });
+
+  describe('rollback', () => {
+    it('leaves alone a tree another investigation writes during the replay', async () => {
+      const events: string[] = [];
+      const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+      const fetch = fakeFetch(events, {
+        readExecution: async () => {
+          docs.set('default:dtree_foreign', head('foreign', 'foreign tree', 'other-investigation'));
+          docs.set(
+            'default:dtree_foreign_v1',
+            version('foreign', 'foreign tree', 'other-investigation')
+          );
+          docs.set(OTHER_HEAD_ID, { ...otherTree, content: 'updated by another investigation' });
+          return completedExecution;
+        },
+      });
+
+      await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example,
+      });
+
+      expect([...docs.keys()].sort()).toEqual(
+        [OTHER_HEAD_ID, 'default:dtree_foreign', 'default:dtree_foreign_v1'].sort()
+      );
+      expect(docs.get(OTHER_HEAD_ID)?.content).toBe('updated by another investigation');
+    });
+
+    it('restores a pre-existing tree its submissions name and deletes one they created', async () => {
+      const events: string[] = [];
+      const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+      const fetch = fakeFetch(events, {
+        readExecution: async () => {
+          docs.set(OTHER_HEAD_ID, { ...otherTree, content: 'replay edit' });
+          docs.set(`${OTHER_HEAD_ID}_v2`, version('checkout-high-latency', 'replay edit'));
+          docs.set('default:dtree_created-by-replay', head('created-by-replay', 'new tree'));
+          return completedWith([
+            // A bare slug names the same tree as its `symptom:` id.
+            { symptom_trees: [{ tree_id: 'checkout-high-latency' }] },
+            { traversals: [{ tree_id: 'symptom:created-by-replay', visited_path: ['a', 'b'] }] },
+          ]);
+        },
+      });
+
+      await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example,
+      });
+
+      expect([...docs.keys()]).toEqual([OTHER_HEAD_ID]);
+      expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
+    });
+
+    it('restores a tree it only knows about from its conversation id provenance', async () => {
+      const events: string[] = [];
+      const original = head('stamped', 'original');
+      const { esClient, docs } = fakeEsClient(events, { 'default:dtree_stamped': original });
+      const fetch: jest.Mock = fakeFetch(events, {
+        readExecution: async () => {
+          const conversationId = String(runInputs(fetch).conversation_id);
+          docs.set('default:dtree_stamped', head('stamped', 'replay edit', conversationId));
+          docs.set('default:dtree_stamped_v1', version('stamped', 'replay edit', conversationId));
+          // A version written before its head is still the replay's.
+          docs.set('default:dtree_version-only_v1', version('version-only', 'new', conversationId));
+          return completedExecution;
+        },
+      });
+
+      await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example,
+      });
+
+      expect([...docs.keys()]).toEqual(['default:dtree_stamped']);
+      expect(docs.get('default:dtree_stamped')).toEqual(original);
+    });
   });
 });

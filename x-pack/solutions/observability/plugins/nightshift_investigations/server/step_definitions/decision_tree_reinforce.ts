@@ -106,6 +106,12 @@ export const decisionTreeReinforceStepDefinition = ({
         .max(128)
         .optional()
         .describe('Deterministic T_background trace id from materialize.'),
+      replay: z
+        .boolean()
+        .optional()
+        .describe(
+          'True when the round is a recorded transcript an evaluation replays: reinforcement learns from tool_calls and tool_results instead of reading the conversation.'
+        ),
     }),
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
@@ -158,12 +164,15 @@ export const decisionTreeReinforceStepDefinition = ({
         connector_id: connectorId,
         tool_calls: toolCalls,
         tool_results: toolResults,
+        replay,
       } = context.input;
       const request = context.contextManager.getFakeRequest();
+      // A replayed round has no conversation to read, so the loader builds it from the supplied
+      // tool calls; the input conversation id still records provenance below.
       const loadedRound = await loadInvestigationRound({
         agentBuilder,
         request,
-        conversationId: inputConversationId || undefined,
+        conversationId: replay === true ? undefined : inputConversationId || undefined,
         roundId: roundId || undefined,
         roundIndex,
         fallbackToolCalls: (toolCalls ?? []) as InvestigationToolCall[],
