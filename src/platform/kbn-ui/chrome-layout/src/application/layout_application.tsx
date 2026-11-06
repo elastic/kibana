@@ -8,12 +8,36 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID, layoutVarName } from '../constants';
 
 import { styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';
+
+const SCROLLBAR_WIDTH_VAR = layoutVarName('application.scrollbar.width');
+
+/**
+ * Publishes the scroll container's scrollbar width as a CSS variable. Flyouts portal to the body,
+ * so it is set on the document root rather than on the container.
+ */
+const useScrollbarWidthVar = (scrollContainer: React.RefObject<HTMLDivElement>) => {
+  useLayoutEffect(() => {
+    const element = scrollContainer.current;
+    if (!element) return;
+    const { style } = document.documentElement;
+    const update = () =>
+      style.setProperty(SCROLLBAR_WIDTH_VAR, `${element.offsetWidth - element.clientWidth}px`);
+    update();
+    // The scrollbar appearing or disappearing resizes the container's content box.
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+      style.removeProperty(SCROLLBAR_WIDTH_VAR);
+    };
+  }, [scrollContainer]);
+};
 
 /**
  * The application slot wrapper
@@ -31,10 +55,13 @@ export const LayoutApplication = ({
   bottomBar?: ReactNode;
 }) => {
   const { appearance } = useLayoutConfig();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  useScrollbarWidthVar(scrollContainerRef);
 
   return (
     <div css={styles.root(appearance)}>
       <div
+        ref={scrollContainerRef}
         css={styles.scrollContainer}
         id={APP_MAIN_SCROLL_CONTAINER_ID}
         className="kbnChromeLayoutApplication"

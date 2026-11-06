@@ -75,6 +75,12 @@ const globalTempHackStyles = (
         }`}
     }
 
+    // EUI aligns push flyouts to the scroll container's outer edge, but pushes the content inside
+    // its scrollbar, which leaves a scrollbar-wide strip of exposed padding beside the flyout.
+    .euiFlyout[class*='-push-right'] {
+      ${logicalCSS('margin-right', layoutVar('application.scrollbar.width', '0px'))};
+    }
+
     // When overlay is above the header (full-viewport modal style), restore square corners
     // and EUI's original shadow clip; positioning is left to the flyout's reference container.
     .euiOverlayMask[data-relative-to-header='above']

@@ -16,7 +16,7 @@ export type LayoutComponent =
   | 'navigation'
   | 'sidebar'
   | 'application';
-export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
+export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content' | 'scrollbar';
 export type LayoutProperty = keyof Pick<
   React.CSSProperties,
   | 'top'
