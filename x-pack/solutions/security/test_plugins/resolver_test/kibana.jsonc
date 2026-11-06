@@ -4,7 +4,6 @@
   "owner": "@elastic/security-solution",
   "group": "security",
   "visibility": "private",
-  "devOnly": true,
   "plugin": {
     "id": "resolverTest",
     "server": false,

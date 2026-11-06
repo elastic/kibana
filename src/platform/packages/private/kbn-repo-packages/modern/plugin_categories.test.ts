@@ -18,8 +18,6 @@ const resolverTestPlugin = Package.fromManifest(
 
 it('keeps the resolver test plugin out of default discovery', () => {
   expect(resolverTestPlugin.getPluginCategories().testPlugin).toBe(true);
-  expect(getPluginPackagesFilter({ devOnly: true })(resolverTestPlugin)).toBe(false);
-  expect(getPluginPackagesFilter({ devOnly: true, testPlugins: true })(resolverTestPlugin)).toBe(
-    true
-  );
+  expect(getPluginPackagesFilter()(resolverTestPlugin)).toBe(false);
+  expect(getPluginPackagesFilter({ testPlugins: true })(resolverTestPlugin)).toBe(true);
 });
