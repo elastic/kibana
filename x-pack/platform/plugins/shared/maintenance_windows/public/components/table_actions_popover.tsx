@@ -260,13 +260,13 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
 
     const button = useMemo(
       () => (
-        <EuiToolTip content="Upcoming events" disableScreenReaderOutput>
+        <EuiToolTip content={i18n.TABLE_ACTIONS} disableScreenReaderOutput>
           <EuiButtonIcon
             isDisabled={isLoading}
             data-test-subj="table-actions-icon-button"
-            iconType="boxesVertical"
-            size="s"
-            aria-label="Upcoming events"
+            iconType="ellipsis"
+            color="text"
+            aria-label={i18n.TABLE_ACTIONS}
             onClick={onButtonClick}
           />
         </EuiToolTip>
