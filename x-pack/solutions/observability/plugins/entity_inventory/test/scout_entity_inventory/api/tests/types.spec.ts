@@ -92,16 +92,21 @@ apiTest.describe(
     });
 
     apiTest(
-      'rejects a viewer, which lacks the entity_inventory_read privilege',
+      'returns the same types to a viewer, since the route delegates authorization to Elasticsearch',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
-        const response = await apiClient.get(TYPES_PATH, {
+        const adminResponse = await apiClient.get(TYPES_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+          responseType: 'json',
+        });
+        const viewerResponse = await apiClient.get(TYPES_PATH, {
           headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(403);
+        expect(viewerResponse).toHaveStatusCode(200);
+        expect(viewerResponse.body).toStrictEqual(adminResponse.body);
       }
     );
   }
