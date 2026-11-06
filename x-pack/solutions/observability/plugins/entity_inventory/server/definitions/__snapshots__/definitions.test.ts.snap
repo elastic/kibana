@@ -2,6 +2,18 @@
 
 exports[`registered entity definitions k8s.deployment identity compiles to a stable plan 1`] = `
 Object {
+  "compositions": Array [
+    Array [
+      "k8s.cluster.name",
+      "k8s.namespace.name",
+      "k8s.deployment.name",
+    ],
+    Array [
+      "orchestrator.cluster.name",
+      "kubernetes.namespace",
+      "kubernetes.deployment.name",
+    ],
+  ],
   "groupingFields": Array [
     "k8s.cluster.name",
     "k8s.namespace.name",
@@ -38,5 +50,6 @@ Object {
  kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
  entity.id = CONCAT(\\"k8s.deployment:\\", COALESCE(CONCAT(k8s_cluster_name_present_or_null, \\"/\\", k8s_namespace_name_present_or_null, \\"/\\", k8s_deployment_name_present_or_null), CONCAT(orchestrator_cluster_name_present_or_null, \\"/\\", kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null)))",
   "presenceFilter": "(TO_STRING(k8s.cluster.name) IS NOT NULL AND TO_STRING(k8s.cluster.name) != \\"\\" AND TO_STRING(k8s.namespace.name) IS NOT NULL AND TO_STRING(k8s.namespace.name) != \\"\\" AND TO_STRING(k8s.deployment.name) IS NOT NULL AND TO_STRING(k8s.deployment.name) != \\"\\" OR TO_STRING(orchestrator.cluster.name) IS NOT NULL AND TO_STRING(orchestrator.cluster.name) != \\"\\" AND TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")",
+  "rawIdentityColumns": Map {},
 }
 `;

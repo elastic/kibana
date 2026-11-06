@@ -12,7 +12,7 @@ import seedrandom from 'seedrandom';
 import { buildAlertDetailsUrl } from '../dispatcher/alert_details_url';
 import type { ActionPolicy, Alert, Rule } from '../dispatcher/types';
 
-/** Prefix of every synthetic id, so a test payload can never be mistaken for a real alert or rule. */
+/** Prefix of every generated synthetic id, so a generated test payload is not mistaken for a real alert or rule. */
 export const TEST_ID_PREFIX = 'test-';
 
 /** Alerts in the group of an aggregated (`all` / `per_field`) policy. */
