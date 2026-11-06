@@ -95,7 +95,7 @@ Two properties make this safe to copy for another producer:
 
 `decision` records what a human concluded; `status` records where the proposal got to. They are separate fields because they answer different questions and settle at different times.
 
-- **`decision: approved | dismissed`** — absent until someone decides, and immutable once set. Groups with `decidedBy` / `decidedAt` / `rationale` / `dismissReason`.
+- **`decision: approved | dismissed`** — absent until someone decides, and immutable once set. Groups with `decidedBy` / `decidedAt` / `decisionMode` / `rationale` / `dismissReason`.
 - **`status: pending | executing | succeeded | failed | expired | no_action`** — always defined.
 
 The split exists because a single field could not express both: `status` has to say whether an approved action succeeded, and `decision` has to survive that outcome so the queue knows a human already answered.
@@ -194,6 +194,17 @@ revision to hold them to.
 
 Every stored proposal carries `rootProposalId` and `revision`. The plugin is
 unshipped, so legacy records without these fields are not supported.
+
+`getLatestRevisions` is the same read for many chains at once, for an in-process
+caller that already holds many root ids, such as AlertZero's Alert Triage. It
+returns the live revision of each chain keyed by its root id, and leaves out a
+root with no live revision, or one whose live revision `origin` or
+`excludeExpired` filters out. A chain caught between the two writes of a revision
+has two live rows for a moment; the released one is kept, as above, and otherwise
+the later revision. It never returns a partial answer: asked for more than 10,000
+chains, or matching more live rows than one search returns, it throws
+`ProposalLookupTruncatedError`, because a caller that reads a missing chain as
+free would create a duplicate.
 
 ### Caller-supplied ids
 
@@ -404,7 +415,7 @@ The flag is a request, not a guarantee. The gate skips the human decision only w
 2. `actionWorkflowId` is set — autonomy governs whether an *action* may run unattended, and a proposal with no action has none to govern, so it is always gated regardless of the flag;
 3. the action declares `approvalPolicy: autonomy-dependent`.
 
-An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
+An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs. Its decision is recorded with `decisionMode: auto` (`manual` when a person answered), since `decidedBy` will not reliably tell a service account from a person. Every decided proposal has a `decisionMode`. `proposals.updateProposal` derives it from the gate's own signal: a decision written without `decidedBy` is one nobody answered.
 
 **An auto-approved action runs as the caller's service account.** With no approver to run as, the gate resolves the approval with `run-as-mode: inherit`, and the child runs the action the same way (`execute_as_worker`, restricted to workflows tagged `action`). `autoApprove: true` therefore needs a caller that is itself running as a service account: otherwise the resolution fails before deciding anything, and the proposal waits for a human.
 

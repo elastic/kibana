@@ -60,3 +60,6 @@ export type {
   EscalationAttachmentsSyncedEventData,
   EscalationInvestigationEventData,
 } from './conversation_events';
+
+export { canLinkEscalation } from './can_link_escalation';
+export type { EscalationLinkActor, EscalationLinkSubject } from './can_link_escalation';

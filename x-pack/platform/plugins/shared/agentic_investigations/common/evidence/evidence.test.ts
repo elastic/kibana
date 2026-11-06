@@ -9,6 +9,7 @@ import {
   MAX_EVIDENCE_CHART_ANNOTATIONS,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_REFERENCES,
   MAX_EVIDENCE_TEXT_LENGTH,
   investigationEvidenceSchema,
   type EvidenceChart,
@@ -76,6 +77,36 @@ describe('investigationEvidenceSchema', () => {
     ).toBe(false);
     expect(
       investigationEvidenceSchema.safeParse({ chart: { ...chart, y_axis: { unit: 'kg' } } }).success
+    ).toBe(false);
+  });
+});
+
+describe('evidence references', () => {
+  it('accepts http(s) links, with or without a label, and queries', () => {
+    expect(
+      investigationEvidenceSchema.safeParse({
+        references: [
+          { url: 'https://github.com/elastic/kibana/pull/1', label: 'PR' },
+          { url: 'https://example.com' },
+          { query: 'FROM logs-* | LIMIT 10' },
+        ],
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects non-http links, empty queries, mixed or unknown shapes, and too many references', () => {
+    const parse = (references: unknown[]) =>
+      investigationEvidenceSchema.safeParse({ references }).success;
+
+    expect(parse([{ url: 'ftp://example.com/file' }])).toBe(false);
+    expect(parse([{ query: '' }])).toBe(false);
+    expect(parse([{ query: 'FROM logs-*', language: 'esql' }])).toBe(false);
+    expect(parse([{ url: 'https://example.com', query: 'FROM logs-*' }])).toBe(false);
+    expect(parse([{ trace: 'abc' }])).toBe(false);
+    expect(
+      parse(
+        Array.from({ length: MAX_EVIDENCE_REFERENCES + 1 }, () => ({ url: 'https://example.com' }))
+      )
     ).toBe(false);
   });
 });

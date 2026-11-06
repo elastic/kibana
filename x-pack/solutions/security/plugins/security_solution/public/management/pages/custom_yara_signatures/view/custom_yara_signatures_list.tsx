@@ -45,6 +45,7 @@ export const CustomYaraSignaturesList = memo(() => {
       allowCardCreateAction={canWriteCustomYaraSignatures}
       showAsSimpleTable
       showEnabledColumn
+      showCommentsInViewFlyout
       ViewModeComponent={CustomYaraSignaturesViewMode}
       policyAssignmentInfoTooltip={POLICY_ASSIGNMENT_INFO_TOOLTIP}
     />

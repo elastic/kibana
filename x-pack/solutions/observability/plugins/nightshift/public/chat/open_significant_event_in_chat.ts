@@ -8,8 +8,6 @@
 import type { OpenConversationSidebarOptions } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
-import { formatChatAttachmentDescription } from './chat_attachment_description';
 
 /** Sidebar open options including conversation restore (see agent_builder `openSidebarInternal`). */
 export type OpenSignificantEventChatOptions = OpenConversationSidebarOptions & {
@@ -25,15 +23,6 @@ export const buildNewSignificantEventChatOptions = (
     defaultMessage: 'Explain this significant event: {significantEventName}',
     values: { significantEventName: event.title },
   }),
-  attachments: [
-    {
-      id: event.event_id,
-      type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-      origin: event.event_id,
-      description: formatChatAttachmentDescription('Significant Event', event.title),
-      data: event,
-    },
-  ],
 });
 
 export const buildInvestigationConversationChatOptions = (

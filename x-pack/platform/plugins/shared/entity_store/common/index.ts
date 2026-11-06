@@ -138,7 +138,11 @@ export type {
 export { entitySchema } from './domain/definitions/entity_schema';
 export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
 export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
-export { getIdentityFields, getPresenceFilter } from './domain/definitions/dynamic';
+export {
+  getIdentityCompositions,
+  getIdentityFields,
+  getPresenceFilter,
+} from './domain/definitions/dynamic';
 
 export type {
   Entity,

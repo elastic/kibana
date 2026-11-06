@@ -159,6 +159,7 @@ const storedSloDefinitionSchema = baseSloSchema.extend({
 });
 
 export {
+  artifactsWithIdSchema,
   boundedProjectRoutingSchema,
   budgetingMethodSchema,
   dashboardsWithIdSchema,

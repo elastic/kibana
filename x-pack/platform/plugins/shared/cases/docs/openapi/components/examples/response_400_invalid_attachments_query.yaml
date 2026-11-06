@@ -1,0 +1,7 @@
+summary: A query parameter exceeds its limit.
+value:
+  {
+    "error": "Bad Request",
+    "message": "[request query]: The provided perPage value is too high. The maximum allowed perPage value is 100.",
+    "statusCode": 400
+  }

@@ -13,7 +13,11 @@ import Path from 'path';
 
 import execa from 'execa';
 
-import { getMoonExecutablePath } from '@kbn/moon';
+import {
+  getAffectedMoonJestTargets,
+  getMoonExecutablePath,
+  type MoonDownstreamMode,
+} from '@kbn/moon';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -211,7 +215,7 @@ export const computeJestParallelism = (estimatedTasks: number) => {
 // ── Output parsing ─────────────────────────────────────────────────────────
 
 export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
-  const results = new Map<string, MoonJestTaskResult>();
+  const results: MoonJestTaskResult[] = [];
   const cachedProjects = new Set<string>();
   const parseFailures: string[] = [];
 
@@ -273,11 +277,12 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
         }
 
         const firstTestFile = json.testResults?.[0]?.name;
-        results.set(project, {
+        const configPath = firstTestFile
+          ? findJestConfig(Path.relative(REPO_ROOT, firstTestFile))
+          : undefined;
+        results.push({
           project,
-          configPath: firstTestFile
-            ? findJestConfig(Path.relative(REPO_ROOT, firstTestFile))
-            : undefined,
+          configPath,
           cached: false,
           passed: json.success === true,
           testCount: json.numTotalTests ?? 0,
@@ -295,11 +300,13 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
 
   // Mark cached tasks (they replay JSON output, so they'll be in results already)
   for (const project of cachedProjects) {
-    const existing = results.get(project);
-    if (existing) {
-      existing.cached = true;
+    const projectResults = results.filter((result) => result.project === project);
+    if (projectResults.length > 0) {
+      projectResults.forEach((result) => {
+        result.cached = true;
+      });
     } else {
-      results.set(project, {
+      results.push({
         project,
         cached: true,
         passed: true,
@@ -309,7 +316,7 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
     }
   }
 
-  return { tasks: [...results.values()], parseFailures };
+  return { tasks: results, parseFailures };
 };
 
 const extractMoonFailureExcerpt = (output: string) => {
@@ -424,15 +431,19 @@ export const runJestViaMoon = async ({
 }: {
   changedFiles: string[];
   verbose?: boolean;
-  downstream?: string;
+  downstream?: MoonDownstreamMode;
   onProgress?: (progress: MoonJestProgress) => void;
 }): Promise<MoonJestResult> => {
   const packageInfo = await resolveAffectedPackageInfo(changedFiles);
   const changedFilesJson = JSON.stringify({ files: changedFiles });
+  const targets = await getAffectedMoonJestTargets({ changedFilesJson, downstream });
+  if (targets.length === 0) {
+    return { taskCount: 0, cachedCount: 0, totalTests: 0, failed: [], exitCode: 0 };
+  }
 
   const moonExec = await getMoonExecutablePath();
   const { concurrency, maxWorkers } = computeJestParallelism(
-    Math.max(packageInfo.jestDirs.length, packageInfo.dirs.length)
+    Math.max(targets.length, packageInfo.jestDirs.length, packageInfo.dirs.length)
   );
   const cpus = Os.cpus().length;
   const completedProjects = new Set<string>();
@@ -441,10 +452,7 @@ export const runJestViaMoon = async ({
     moonExec,
     [
       'run',
-      ':jest',
-      '--affected',
-      '--stdin',
-      ...(downstream !== 'none' ? ['--downstream', downstream] : []),
+      ...targets,
       '--concurrency',
       String(concurrency),
       '--summary',
@@ -456,7 +464,6 @@ export const runJestViaMoon = async ({
     ],
     {
       cwd: REPO_ROOT,
-      input: changedFilesJson,
       reject: false,
       env: {
         ...process.env,

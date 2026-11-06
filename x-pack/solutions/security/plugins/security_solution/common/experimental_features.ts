@@ -98,13 +98,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
-   * Release: TBD
    *
-   * Ships disabled: this skill dispatches destructive endpoint response actions,
-   * so it must not be enabled by default on any branch. Enable it explicitly via
-   * config (or a Scout evals config) for local/CI testing.
+   * Release: 9.6.0
    */
-  endpointResponseActionsSkill: false,
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -287,6 +284,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automaticTroubleshootingSkill: true,
 
+  /** Enables the universal Automatic Troubleshooting Agent Builder skill */
+  automaticTroubleshootingUniversalSkill: false,
+
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
    * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
@@ -407,7 +407,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
-  siemRuleMigrationsAgentBuilderEnabled: false,
+  siemRuleMigrationsAgentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

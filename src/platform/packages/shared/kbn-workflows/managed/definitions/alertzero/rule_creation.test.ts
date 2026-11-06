@@ -112,15 +112,37 @@ describe('Detection Rule Creation worker', () => {
       );
       const create = action.steps.find((step) => step.name === 'create_rule');
       expect(create?.type).toBe('security.createRule');
-      expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
+      const rule = create?.with?.rule as Record<string, unknown>;
+      for (const field of Object.keys(props.actionInput.properties ?? {})) {
+        expect(rule[field]).toBe(`\${{ inputs.actionInput.${field} }}`);
+      }
     });
 
-    // A draft is reviewable only with a query, a name, a description and an attachment.
+    // The approval closes the gap only if the rule runs, so the action creates
+    // the rule enabled and the proposal tells the analyst that is what approving
+    // does.
+    it('creates the rule enabled and says so in the proposal', () => {
+      const create = action.steps.find((step) => step.name === 'create_rule');
+      expect((create?.with?.rule as Record<string, unknown>).enabled).toBe(true);
+      expect(action.steps.map((step) => step.type)).not.toContain('security.enableRule');
+
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      expect(comment).toContain('creates and enables the rule');
+      expect(comment).not.toContain('disabled');
+    });
+
+    // A draft is reviewable only with a query, a name, a description, an interval and an
+    // attachment.
     // The create action requires a name and a description, so proposing a draft without
     // them would ask the analyst to approve a rule that can never be created.
     it('previews and attaches only a complete draft with an attachment', () => {
       const ready = flagOf('draft_ready', 'ok');
-      const complete = { query: 'FROM x', name: 'Rare parent', description: 'Covers T1055' };
+      const complete = {
+        query: 'FROM x',
+        name: 'Rare parent',
+        description: 'Covers T1055',
+        interval: '5m',
+      };
       const attached = (rule: Partial<typeof complete>) =>
         draftContext({ attachment_id: 'a1', rule });
       const without = (field: keyof typeof complete) =>
@@ -135,6 +157,14 @@ describe('Detection Rule Creation worker', () => {
       expect(evaluate(ready, attached({ ...complete, description: '' }))).toBe(false);
       expect(evaluate(ready, attached(without('name')))).toBe(false);
       expect(evaluate(ready, attached(without('description')))).toBe(false);
+
+      // An interval is date math only, so an empty one or a placeholder can never be
+      // created.
+      expect(evaluate(ready, attached({ ...complete, interval: '' }))).toBe(false);
+      expect(evaluate(ready, attached(without('interval')))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, interval: '<UNKNOWN>' }))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, interval: 'unknown' }))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, interval: 'Unknown' }))).toBe(false);
 
       expect(evaluate(ready, draftContext({ attachment_id: '', rule: complete }))).toBe(false);
       expect(evaluate(ready, draftContext({ rule: complete }))).toBe(false);
@@ -161,6 +191,37 @@ describe('Detection Rule Creation worker', () => {
       ).toBe(expected);
     });
 
+    // NO_DATA comes back the same on every run. INVALID_OUTPUT, a tool error (no code)
+    // or a missing code may not. The gap text is built by the workflow, so INCOHERENT and
+    // NOT_SECURITY_RELEVANT are not expected; if the tool ever returns them, the gap is
+    // retried.
+    it.each([
+      ['NO_DATA', true],
+      ['INCOHERENT', false],
+      ['NOT_SECURITY_RELEVANT', false],
+      ['INVALID_OUTPUT', false],
+      ['', false],
+      [undefined, false],
+    ])('treats rejection code %p as final: %p', (code, expected) => {
+      expect(evaluate(flagOf('draft_ready', 'final'), draftContext({ rejection_code: code }))).toBe(
+        expected
+      );
+    });
+
+    it('asks the agent to copy the tool rejection code into a required field', () => {
+      const draft = stepByName('draft_creation');
+      const schema = draft?.with?.schema as JSONSchema7;
+      expect(schema.required).toContain('rejection_code');
+      expect((schema.properties?.rejection_code as JSONSchema7).enum).toEqual([
+        '',
+        'NO_DATA',
+        'INCOHERENT',
+        'NOT_SECURITY_RELEVANT',
+        'INVALID_OUTPUT',
+      ]);
+      expect(draft?.with?.message).toContain('copy its rejectionCode exactly');
+    });
+
     // The no-draft answer the prompt asks for has to satisfy the output schema, or
     // the agent step fails validation instead of handing draft_ready a draft to
     // reject. Empty strings in every field would not: several are enums, a number
@@ -172,6 +233,7 @@ describe('Detection Rule Creation worker', () => {
       const noDraft = {
         attachment_id: '',
         reason: 'The data source does not exist.',
+        rejection_code: 'NO_DATA',
         rule: {
           name: '',
           description: '',
@@ -196,6 +258,66 @@ describe('Detection Rule Creation worker', () => {
         rule: { ...noDraft.rule, language: '', type: '', severity: '', risk_score: '' },
       };
       expect(schema.safeParse(allEmpty).success).toBe(false);
+    });
+
+    // The preview runs as the worker's service account, which reads only the default
+    // security index patterns. A draft over other indices previews as zero matches
+    // with only a warning, which the preview reports as no_matching_indices; the
+    // comment has to say so rather than present 0 as a result.
+    it('reports a draft whose indices the preview could not see instead of 0 matches', async () => {
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      const render = (preview: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(comment, {
+          inputs: { preview_invocation_count: 3 },
+          steps: {
+            draft_creation: { output: { structured_output: { rule: {} } } },
+            preview_creation: { output: preview },
+          },
+        });
+
+      const skipped = render({ succeeded: false, no_matching_indices: true, error_text: 'w' });
+      expect(skipped).toContain('no index the Rule Coverage worker can read matches');
+      expect(skipped).not.toContain('expected matches');
+      expect(skipped).not.toContain('Backtest errors');
+
+      const unreadable = render({ succeeded: false, unreadable_indices: 'custom-xdr-*' });
+      expect(unreadable).toContain('cannot read these drafted rule indices: `custom-xdr-*`');
+      expect(unreadable).not.toContain('expected matches');
+
+      const counted = render({ succeeded: true, is_aborted: false, alert_count: 4 });
+      expect(counted).toContain('4 expected matches over 3 simulated runs');
+
+      const capped = render({
+        succeeded: true,
+        is_aborted: false,
+        alert_count: 300,
+        alert_limit_reached: true,
+      });
+      expect(capped).toContain('At least 300 expected matches over 3 simulated runs');
+      expect(capped).toContain('maximum alerts per execution');
+    });
+
+    // The draft carries no index list, so the sources the preview checks for `read`
+    // come from the query's FROM clause, whatever its case, spacing or METADATA.
+    it.each([
+      [
+        'FROM logs-acme.repro-*,custom-xdr-* METADATA _id | WHERE x',
+        ['logs-acme.repro-*', 'custom-xdr-*'],
+      ],
+      ['from logs-*, remote1:logs-*\n| where from_port > 1', ['logs-*', 'remote1:logs-*']],
+      ['FROM "logs-*", """custom-xdr-*""" METADATA _id', ['logs-*', 'custom-xdr-*']],
+      ['FROM custom-xdr-*', ['custom-xdr-*']],
+      ['', []],
+    ])('hands the preview the indices of %j', (query, expected) => {
+      const csv = createWorkflowLiquidEngine().parseAndRenderSync(
+        flagOf('probe_indices', 'csv'),
+        draftContext({ rule: { query } })
+      );
+      expect(
+        evaluate(String(inputsOf(stepByName('preview_creation')).indices), {
+          steps: { probe_indices: { output: { csv } } },
+        })
+      ).toEqual(expected);
     });
 
     // The preview informs the analyst; it does not gate the proposal.
@@ -262,8 +384,46 @@ describe('Detection Rule Creation worker', () => {
 
     it('declares every output the coverage review reads', () => {
       expect(worker.outputs?.map(({ name }) => name)).toEqual(
-        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name', 'skip_reason'])
+        expect.arrayContaining([
+          'created',
+          'reviewed',
+          'decision',
+          'rule_name',
+          'skip_reason',
+          'no_rule',
+          'proposed',
+        ])
       );
+    });
+
+    // Only a rejection a retry would not change reports no_rule. A model mistake, a tool
+    // error or a draft that could not be copied to the investigation can pass on the
+    // next sweep.
+    it.each([
+      ['a draft the tool rejected for good', { ok: false, final: true }, true],
+      ['an unusable draft a retry could fix', { ok: false, final: false }, false],
+      ['a complete draft', { ok: true, final: false }, false],
+    ])('reports no_rule for %s', (_scenario, ready, expected) => {
+      const expression = emit.no_rule.trim().slice(3, -2).trim();
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: { draft_ready: { output: ready } },
+        })
+      ).toBe(expected);
+    });
+
+    // An expired proposal was proposed. A draft that never reached the gate was not, so
+    // the caller can close its investigation and retry on the next sweep.
+    it.each([
+      ['a draft that reached the gate', true, true],
+      ['a draft that never reached the gate', false, false],
+    ])('reports proposed for %s', (_scenario, ok, expected) => {
+      const expression = emit.proposed.trim().slice(3, -2).trim();
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: { proposal_ready: { output: { ok } } },
+        })
+      ).toBe(expected);
     });
 
     // The model's reason lives in the structured output, not only in its conversation,
@@ -281,7 +441,7 @@ describe('Detection Rule Creation worker', () => {
         { ok: false },
         { reason: '' },
         null,
-        'The draft is incomplete: it needs a query, a name, a description and an attachment.',
+        'The draft is incomplete: it needs a query, a name, a description, an interval and an attachment.',
       ],
       [
         'the attachment error for a draft that could not be copied',
