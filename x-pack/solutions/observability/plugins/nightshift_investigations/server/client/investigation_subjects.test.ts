@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertSnapshot } from '../../common';
+import type { AlertSnapshot, V2AlertSnapshot } from '../../common';
 import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
@@ -136,6 +136,41 @@ describe('toStartSubjects', () => {
       },
     ]);
   });
+});
+
+describe('toStartSubjects for a significant event alert', () => {
+  const sigEventAlert = (data?: Record<string, unknown>): V2AlertSnapshot => ({
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+    source: 'elastic.significant_events',
+    data,
+  });
+  const subjectsFor = (alerts: V2AlertSnapshot[]) =>
+    toStartSubjects({
+      subject: { type: 'alert', id: 'episode-1' },
+      alerts,
+      triggerType: 'automatic',
+      investigationId: 'inv-1',
+    }).map(({ type, id }) => `${type}:${id}`);
+
+  it('adds one significant event subject per distinct event id', () => {
+    expect(
+      subjectsFor([
+        sigEventAlert({ event_id: 'evt-1' }),
+        { ...sigEventAlert({ event_id: 'evt-1' }), id: 'episode-2' },
+      ])
+    ).toEqual(['alert:episode-1', 'alert:episode-2', 'significant_event:evt-1']);
+  });
+
+  it.each([[undefined], [{}], [{ event_id: 42 }], [{ event_id: '' }]])(
+    'adds none without a usable event id: %p',
+    (data) => {
+      expect(subjectsFor([sigEventAlert(data)])).toEqual(['alert:episode-1']);
+    }
+  );
 });
 
 describe('recoverSubjectsFromInputs', () => {

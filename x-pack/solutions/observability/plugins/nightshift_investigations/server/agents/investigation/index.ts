@@ -11,6 +11,7 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/core/server';
 import {
   SET_HYPOTHESES_TOOL_ID,
@@ -198,7 +199,11 @@ export const buildNightshiftAgentConfiguration = ({
         {
           tool_ids: [
             ...(standalone
-              ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+              ? [
+                  ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+                  TIME_CONVERTER_TOOL_ID,
+                  platformSignificantEventsTools.searchEvent,
+                ]
               : [
                   ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
                   ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),

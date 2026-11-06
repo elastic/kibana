@@ -47,6 +47,7 @@ import {
 } from '@kbn/rule-data-utils';
 import {
   alertSnapshotSchema,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
   type InvestigationAlertSnapshot,
   type AlertSnapshot,
@@ -167,6 +168,31 @@ const buildEpisodesSummaryQuery = (spaceId: string, episodeIds: string[]) => {
   return asTypedEsqlQuery<EpisodeEventsEsqlRow>(query.keep(...EPISODE_EVENTS_FIELDS));
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+export const truncateV2AlertData = (data: Record<string, unknown>): Record<string, unknown> => {
+  const truncated = { ...data };
+  const originalLengths = new Map(
+    Object.entries(data).flatMap(([key, value]) =>
+      Array.isArray(value) ? [[key, value.length]] : []
+    )
+  );
+  while (JSON.stringify(truncated).length > MAX_V2_ALERT_DATA_LENGTH) {
+    const [largest] = Object.entries(truncated)
+      .flatMap(([key, value]) =>
+        Array.isArray(value) && value.length > 0
+          ? [{ key, value, size: JSON.stringify(value).length }]
+          : []
+      )
+      .sort((a, b) => b.size - a.size);
+    if (!largest) break;
+    truncated[largest.key] = largest.value.slice(0, Math.floor(largest.value.length / 2));
+    truncated[`${largest.key}_truncated`] = originalLengths.get(largest.key);
+  }
+  return truncated;
+};
+
 const fetchV2Snapshots = async (
   { esClient, getRulesClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
@@ -199,9 +225,10 @@ const fetchV2Snapshots = async (
   return new Map(
     episodes.flatMap((episode) => {
       const episodeData = dataByEpisode.get(episode['episode.id']);
+      const rawData: unknown = episodeData ? JSON.parse(episodeData) : undefined;
       const data = v2AlertSnapshotSchema.shape.data
         .catch(undefined)
-        .parse(episodeData ? JSON.parse(episodeData) : undefined);
+        .parse(isRecord(rawData) ? truncateV2AlertData(rawData) : rawData);
       const ruleId = episode['rule.id'] ?? undefined;
       const ruleName = ruleId
         ? ruleNames.get(ruleId)
