@@ -40,47 +40,45 @@ jest.mock('../../../../hooks/use_bulk_update_rule_api_key', () => ({
 
 jest.mock('./rule_summary_flyout', () => ({
   RuleSummaryFlyout: ({
+    ruleId,
     rule,
+    isLoading,
     isToggleLoading,
   }: {
-    rule: RuleApiResponse;
+    ruleId: string;
+    rule?: RuleApiResponse;
+    isLoading?: boolean;
     isToggleLoading?: boolean;
   }) => (
     <div
       data-test-subj="mockRuleSummaryFlyout"
+      data-rule-id={ruleId}
+      data-loading={String(Boolean(isLoading))}
+      data-has-rule={String(Boolean(rule))}
       data-toggle-loading={isToggleLoading ? 'true' : 'false'}
     >
-      {rule.metadata.name}
+      {rule?.metadata.name}
     </div>
-  ),
-}));
-
-jest.mock('../../../loading_flyout', () => ({
-  LoadingFlyout: ({ type, ownFocus }: { type?: string; ownFocus?: boolean }) => (
-    <div data-test-subj="mockLoadingFlyout" data-type={type} data-own-focus={String(ownFocus)} />
-  ),
-}));
-
-jest.mock('../../../entity_not_found_flyout', () => ({
-  EntityNotFoundFlyout: ({ type, ownFocus }: { type?: string; ownFocus?: boolean }) => (
-    <div
-      data-test-subj="mockEntityNotFoundFlyout"
-      data-type={type}
-      data-own-focus={String(ownFocus)}
-    />
   ),
 }));
 
 jest.mock('../source_rule_summary_flyout', () => ({
   SourceRuleSummaryFlyout: ({
     rule,
+    isLoading,
     ruleDetailsHref,
   }: {
-    rule: RuleResponse;
+    rule?: RuleResponse;
+    isLoading?: boolean;
     ruleDetailsHref: string | null;
   }) => (
-    <div data-test-subj="mockSourceRuleSummaryFlyout" data-href={ruleDetailsHref}>
-      {rule.metadata?.name}
+    <div
+      data-test-subj="mockSourceRuleSummaryFlyout"
+      data-href={ruleDetailsHref}
+      data-loading={String(Boolean(isLoading))}
+      data-has-rule={String(Boolean(rule))}
+    >
+      {rule?.metadata?.name}
     </div>
   ),
 }));
@@ -127,14 +125,15 @@ describe('RuleSummaryFlyoutContainer', () => {
   });
 
   describe('v2 rules (no sourceRuleInfo)', () => {
-    it('renders the loading flyout while the rule is in flight', () => {
+    it('renders the rule summary flyout in its loading state while the rule is in flight', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
 
       renderContainer();
 
-      expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
-      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-type', 'overlay');
-      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-own-focus', 'false');
+      const flyout = screen.getByTestId('mockRuleSummaryFlyout');
+      expect(flyout).toHaveAttribute('data-rule-id', 'rule-1');
+      expect(flyout).toHaveAttribute('data-loading', 'true');
+      expect(flyout).toHaveAttribute('data-has-rule', 'false');
     });
 
     it('renders the fetched rule', () => {
@@ -157,23 +156,30 @@ describe('RuleSummaryFlyoutContainer', () => {
       );
     });
 
-    it('renders the not found flyout when the v2 fetch fails', () => {
+    it('renders the rule summary flyout without a rule when the v2 fetch fails', () => {
       mockUseFetchRule.mockReturnValue(
-        mockFetchRuleResult({ isError: true, error: new Error('server error') })
+        mockFetchRuleResult({
+          data: makeRule('Stale rule'),
+          isError: true,
+          error: new Error('server error'),
+        })
       );
 
       renderContainer();
 
-      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
-      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
-        'data-type',
-        'overlay'
-      );
-      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
-        'data-own-focus',
-        'false'
-      );
-      expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
+      const flyout = screen.getByTestId('mockRuleSummaryFlyout');
+      expect(flyout).toHaveAttribute('data-loading', 'false');
+      expect(flyout).toHaveAttribute('data-has-rule', 'false');
+    });
+
+    it('renders the rule summary flyout without a rule when the rule does not exist', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+
+      renderContainer();
+
+      const flyout = screen.getByTestId('mockRuleSummaryFlyout');
+      expect(flyout).toHaveAttribute('data-loading', 'false');
+      expect(flyout).toHaveAttribute('data-has-rule', 'false');
     });
 
     it('does not call useFetchRule with undefined when sourceRuleInfo is absent', () => {
@@ -205,7 +211,7 @@ describe('RuleSummaryFlyoutContainer', () => {
       );
     });
 
-    it('renders loading while the source rule is being resolved', () => {
+    it('renders the source flyout in its loading state while the source rule is being resolved', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
       mockUseFetchSourceRule.mockReturnValue({
         ...noSourceRule,
@@ -214,24 +220,36 @@ describe('RuleSummaryFlyoutContainer', () => {
 
       renderContainer({ sourceRuleInfo: {} });
 
-      expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
-      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-type', 'overlay');
-      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-own-focus', 'false');
+      const flyout = screen.getByTestId('mockSourceRuleSummaryFlyout');
+      expect(flyout).toHaveAttribute('data-loading', 'true');
+      expect(flyout).toHaveAttribute('data-has-rule', 'false');
+      expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
     });
 
-    it('renders entity not found when the source cannot resolve the rule', () => {
+    it('renders the source flyout without a rule when the source cannot resolve the rule', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
       mockUseFetchSourceRule.mockReturnValue(noSourceRule);
 
       renderContainer({ sourceRuleInfo: {} });
 
-      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
-      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
-        'data-type',
-        'overlay'
-      );
-      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
-        'data-own-focus',
+      const flyout = screen.getByTestId('mockSourceRuleSummaryFlyout');
+      expect(flyout).toHaveAttribute('data-loading', 'false');
+      expect(flyout).toHaveAttribute('data-has-rule', 'false');
+      expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
+    });
+
+    it('renders the source flyout without a rule when the source fetch fails', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+      mockUseFetchSourceRule.mockReturnValue({
+        ...noSourceRule,
+        rule: { id: 'rule-1', metadata: { name: 'Stale' } } as unknown as RuleResponse,
+        isError: true,
+      });
+
+      renderContainer({ sourceRuleInfo: {} });
+
+      expect(screen.getByTestId('mockSourceRuleSummaryFlyout')).toHaveAttribute(
+        'data-has-rule',
         'false'
       );
     });
