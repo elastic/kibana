@@ -34,7 +34,11 @@ const normalize = (value: unknown): unknown => {
   }
 
   if (value && typeof value === 'object') {
-    return omitBy(mapValues(value as Record<string, unknown>, normalize), isBlank);
+    return omitBy(
+      mapValues(value as Record<string, unknown>, normalize),
+      // An explicitly empty FLS grant means no fields, rather than unrestricted access.
+      (entry, key) => !(key === 'grant' && Array.isArray(entry)) && isBlank(entry)
+    );
   }
 
   return value;

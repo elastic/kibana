@@ -51,6 +51,7 @@ import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { API_VERSIONS as SPACES_API_VERSIONS } from '@kbn/spaces-plugin/common';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -158,21 +159,23 @@ interface CheckSecurityFeaturesResponseWhenServerless {
 }
 function useFeatureCheck(
   http: HttpStart,
-  buildFlavor: 'serverless'
+  buildFlavor: 'serverless',
+  attempt: number
 ): AsyncState<CheckSecurityFeaturesResponseWhenServerless>;
 
 function useFeatureCheck(
   http: HttpStart,
-  buildFlavor: BuildFlavor
+  buildFlavor: BuildFlavor,
+  attempt: number
 ): AsyncState<CheckSecurityFeaturesResponse>;
 
-function useFeatureCheck(http: HttpStart, buildFlavor?: BuildFlavor) {
+function useFeatureCheck(http: HttpStart, buildFlavor: BuildFlavor, attempt: number) {
   return useAsync(async () => {
     if (buildFlavor !== 'serverless') {
       return http.get<CheckSecurityFeaturesResponse>('/internal/security/_check_security_features');
     }
     return { value: true };
-  }, [http, buildFlavor]);
+  }, [http, buildFlavor, attempt]);
 }
 
 function useRunAsUsers(
@@ -418,13 +421,18 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false, buildFlavor }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
-  const [previousName, setPreviousName] = useState<string>('');
+  const [nameCheckError, setNameCheckError] = useState<string>();
+  const lastCheckedName = useRef<string>();
+  const nameCheckRequest = useRef(0);
+  const saveInProgress = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [featureCheckAttempt, setFeatureCheckAttempt] = useState(0);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors, buildFlavor);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
-  const featureCheckState = useFeatureCheck(http, buildFlavor);
+  const featureCheckState = useFeatureCheck(http, buildFlavor, featureCheckAttempt);
   const remoteClustersState = useRemoteClusters(http);
   const { role, setRole, initialRole } = useRole(
     rolesAPIClient,
@@ -530,6 +538,30 @@ export const EditRolePage: FunctionComponent<Props> = ({
     </>
   );
 
+  if (featureCheckState.error && !featureCheckState.loading) {
+    return (
+      <div className="editRolePage">
+        {header}
+        <KbnDangerCallout
+          title={i18n.translate('xpack.security.management.editRole.featureCheckErrorMessage', {
+            defaultMessage: 'Unable to load security features.',
+          })}
+          actionProps={{
+            primary: {
+              onClick: () => setFeatureCheckAttempt((attempt) => attempt + 1),
+              children: i18n.translate(
+                'xpack.security.management.editRole.retryFeatureCheckButtonLabel',
+                {
+                  defaultMessage: 'Retry',
+                }
+              ),
+            },
+          }}
+        />
+      </div>
+    );
+  }
+
   if (isPageLoading) {
     return (
       <div className="editRolePage">
@@ -592,6 +624,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 ) : undefined
               }
               {...validator.validateRoleName(role)}
+              {...(nameCheckError ? { error: nameCheckError, isInvalid: true } : {})}
               {...(creatingRoleAlreadyExists
                 ? { error: 'A role with this name already exists.', isInvalid: true }
                 : {})}
@@ -603,7 +636,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 onBlur={onNameBlur}
                 data-test-subj={'roleFormNameInput'}
                 disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
-                isInvalid={creatingRoleAlreadyExists}
+                isInvalid={creatingRoleAlreadyExists || !!nameCheckError}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -645,18 +678,44 @@ export const EditRolePage: FunctionComponent<Props> = ({
     );
   };
 
-  const onNameChange = (e: ChangeEvent<HTMLInputElement>) =>
+  const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    nameCheckRequest.current++;
+    lastCheckedName.current = undefined;
+    setCreatingRoleAlreadyExists(false);
+    setNameCheckError(undefined);
     setRole({
       ...role,
       name: e.target.value,
     });
+  };
 
-  const onNameBlur = (_e: FocusEvent<HTMLInputElement>) => {
-    if (!isEditingExistingRole && previousName !== role.name) {
-      setPreviousName(role.name);
-      doesRoleExist().then((roleExists) => {
-        setCreatingRoleAlreadyExists(roleExists);
-      });
+  const onNameBlur = async (_e: FocusEvent<HTMLInputElement>) => {
+    if (isEditingExistingRole || !role.name || lastCheckedName.current === role.name) {
+      return;
+    }
+    const requestId = ++nameCheckRequest.current;
+    try {
+      await rolesAPIClient.getRole(role.name);
+      if (requestId === nameCheckRequest.current) {
+        lastCheckedName.current = role.name;
+        setNameCheckError(undefined);
+        setCreatingRoleAlreadyExists(true);
+      }
+    } catch (error) {
+      if (requestId !== nameCheckRequest.current) {
+        return;
+      }
+      if (error?.body?.statusCode === 404) {
+        lastCheckedName.current = role.name;
+        setCreatingRoleAlreadyExists(false);
+        setNameCheckError(undefined);
+      } else {
+        setNameCheckError(
+          i18n.translate('xpack.security.management.editRole.nameCheckErrorMessage', {
+            defaultMessage: 'Unable to check whether this role name is available. Try again.',
+          })
+        );
+      }
     }
   };
 
@@ -741,7 +800,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
         data-test-subj={`roleFormSaveButton`}
         fill
         onClick={saveRole}
-        disabled={isRoleReserved || creatingRoleAlreadyExists}
+        isLoading={isSaving}
+        disabled={isRoleReserved || creatingRoleAlreadyExists || !!nameCheckError || isSaving}
       >
         {saveText}
       </EuiButton>
@@ -760,6 +820,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   };
 
   const saveRole = async () => {
+    if (saveInProgress.current) {
+      return;
+    }
     validator.enableValidation();
 
     const result = validator.validateForSave(role);
@@ -767,6 +830,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(result);
     } else {
       setFormError(null);
+      saveInProgress.current = true;
+      setIsSaving(true);
 
       try {
         await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
@@ -783,6 +848,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
             })
         );
         return;
+      } finally {
+        saveInProgress.current = false;
+        setIsSaving(false);
       }
 
       if (buildFlavor === 'serverless') {
@@ -829,15 +897,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
       }
 
       backToRoleList();
-    }
-  };
-
-  const doesRoleExist = async (): Promise<boolean> => {
-    try {
-      await rolesAPIClient.getRole(role.name);
-      return true;
-    } catch (error) {
-      return false;
     }
   };
 

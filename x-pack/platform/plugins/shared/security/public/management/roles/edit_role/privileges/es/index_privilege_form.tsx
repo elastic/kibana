@@ -556,15 +556,12 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     // If turning on, then restore the saved field security if available
     const hasConfiguredFieldSecurity = this.isFieldSecurityConfigured(this.props.indexPrivilege);
 
-    const hasSavedFieldSecurity =
-      this.state.exceptedFields.length > 0 || this.state.grantedFields.length > 0;
-
     // If turning on, then request available fields
     if (willToggleOn) {
       this.loadFLSOptions(this.props.indexPrivilege.names);
     }
 
-    if (willToggleOn && !hasConfiguredFieldSecurity && hasSavedFieldSecurity) {
+    if (willToggleOn && !hasConfiguredFieldSecurity) {
       this.props.onChange({
         ...this.props.indexPrivilege,
         field_security: {
@@ -701,7 +698,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private getFieldSecurity = (indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege) => {
-    const { grant = [], except = [] } = indexPrivilege.field_security || {};
+    const { grant = ['*'], except = [] } = indexPrivilege.field_security || {};
     return { grant, except };
   };
 
@@ -709,6 +706,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege
   ) => {
     const { grant, except } = this.getFieldSecurity(indexPrivilege);
-    return except.length > 0 || (grant.length > 0 && !_.isEqual(grant, ['*']));
+    return except.length > 0 || !_.isEqual(grant, ['*']);
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -283,6 +283,138 @@ describe('<EditRolePage />', () => {
         save: true,
       },
     };
+  });
+
+  const renderEditor = (props: ReturnType<typeof getProps>) =>
+    render(
+      <TestProviders>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      </TestProviders>
+    );
+
+  it('shows a failed security feature check and retries it', async () => {
+    const props = getProps({ action: 'edit' });
+    const originalGet = props.http.get.getMockImplementation();
+    let failed = false;
+    props.http.get.mockImplementation((options) => {
+      const path = typeof options === 'string' ? options : options.path;
+      if (path === '/internal/security/_check_security_features' && !failed) {
+        failed = true;
+        return Promise.reject(new Error('unavailable'));
+      }
+      if (!originalGet) {
+        throw new Error('Expected HTTP mock');
+      }
+      return originalGet(options);
+    });
+    renderEditor(props);
+    await screen.findByText('Unable to load security features.');
+    expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await screen.findByTestId('roleFormNameInput');
+    expect(screen.queryByText('Unable to load security features.')).not.toBeInTheDocument();
+  });
+
+  it('prevents duplicate submissions and allows retrying a failed save', async () => {
+    const props = getProps({ action: 'edit' });
+    const pending = Promise.withResolvers<void>();
+    props.rolesAPIClient.saveRole.mockReturnValueOnce(pending.promise);
+    renderEditor(props);
+    const name = await screen.findByTestId('roleFormNameInput');
+    fireEvent.change(name, { target: { value: 'new-role' } });
+    const save = screen.getByTestId('roleFormSaveButton');
+    fireEvent.click(save);
+    fireEvent.click(save);
+    expect(props.rolesAPIClient.saveRole).toHaveBeenCalledTimes(1);
+    expect(save).toBeDisabled();
+    await act(async () => pending.reject(new Error('unavailable')));
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+    await waitFor(() => expect(props.rolesAPIClient.saveRole).toHaveBeenCalledTimes(2));
+  });
+
+  it.each(['exists', 'missing', 'failure'])(
+    'ignores an obsolete name lookup with outcome %s',
+    async (outcome) => {
+      const props = getProps({ action: 'edit' });
+      const oldName = Promise.withResolvers<Role>();
+      props.rolesAPIClient.getRole.mockReturnValueOnce(oldName.promise);
+      if (outcome === 'missing') {
+        props.rolesAPIClient.getRole.mockResolvedValue({
+          name: 'new-name',
+          kibana: [],
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+        });
+      } else {
+        props.rolesAPIClient.getRole.mockRejectedValue({ body: { statusCode: 404 } });
+      }
+      renderEditor(props);
+      const name = await screen.findByTestId('roleFormNameInput');
+      fireEvent.change(name, { target: { value: 'old-name' } });
+      fireEvent.blur(name);
+      fireEvent.change(name, { target: { value: 'new-name' } });
+      fireEvent.blur(name);
+      await waitFor(() => expect(props.rolesAPIClient.getRole).toHaveBeenCalledWith('new-name'));
+      await act(async () => {
+        if (outcome === 'exists') {
+          oldName.resolve({
+            name: 'old-name',
+            kibana: [],
+            elasticsearch: { cluster: [], indices: [], run_as: [] },
+          });
+        } else {
+          oldName.reject({ body: { statusCode: outcome === 'missing' ? 404 : 500 } });
+        }
+      });
+      if (outcome === 'missing') {
+        expect(screen.getByText('A role with this name already exists.')).toBeInTheDocument();
+        expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
+      } else {
+        expect(screen.queryByText('A role with this name already exists.')).not.toBeInTheDocument();
+        expect(screen.getByTestId('roleFormSaveButton')).toBeEnabled();
+      }
+      expect(
+        screen.queryByText('Unable to check whether this role name is available. Try again.')
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it('invalidates a name lookup as soon as the name changes', async () => {
+    const props = getProps({ action: 'edit' });
+    const pending = Promise.withResolvers<Role>();
+    props.rolesAPIClient.getRole.mockReturnValueOnce(pending.promise);
+    renderEditor(props);
+    const name = await screen.findByTestId('roleFormNameInput');
+    fireEvent.change(name, { target: { value: 'old-name' } });
+    fireEvent.blur(name);
+    fireEvent.change(name, { target: { value: 'new-name' } });
+    await act(async () =>
+      pending.resolve({
+        name: 'old-name',
+        kibana: [],
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+      })
+    );
+    expect(screen.queryByText('A role with this name already exists.')).not.toBeInTheDocument();
+    expect(screen.getByTestId('roleFormSaveButton')).toBeEnabled();
+  });
+
+  it('reports lookup failures and retries the same name on blur', async () => {
+    const props = getProps({ action: 'edit' });
+    props.rolesAPIClient.getRole
+      .mockRejectedValueOnce({ body: { statusCode: 500 } })
+      .mockRejectedValueOnce({ body: { statusCode: 404 } });
+    renderEditor(props);
+    const name = await screen.findByTestId('roleFormNameInput');
+    fireEvent.change(name, { target: { value: 'new-role' } });
+    fireEvent.blur(name);
+    await screen.findByText('Unable to check whether this role name is available. Try again.');
+    expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
+    fireEvent.blur(name);
+    await waitFor(() => expect(screen.getByTestId('roleFormSaveButton')).toBeEnabled());
+    expect(props.rolesAPIClient.getRole).toHaveBeenCalledTimes(2);
   });
 
   describe('with spaces enabled', () => {
@@ -1075,7 +1207,7 @@ describe('<EditRolePage />', () => {
         </TestProviders>
       );
 
-      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+      props.rolesAPIClient.getRole.mockRejectedValue({ body: { statusCode: 404 } });
 
       await waitForRender();
 
@@ -1102,7 +1234,7 @@ describe('<EditRolePage />', () => {
         </TestProviders>
       );
 
-      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+      props.rolesAPIClient.getRole.mockRejectedValue({ body: { statusCode: 404 } });
 
       await waitForRender();
 
@@ -1137,7 +1269,7 @@ describe('<EditRolePage />', () => {
         </TestProviders>
       );
 
-      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+      props.rolesAPIClient.getRole.mockRejectedValue({ body: { statusCode: 404 } });
 
       await waitForRender();
 
