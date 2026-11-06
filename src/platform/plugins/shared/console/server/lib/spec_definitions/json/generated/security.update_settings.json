@@ -146,6 +146,9 @@
                 "_tier_preference": "",
                 "_id": ""
               },
+              "require": {
+                "*": ""
+              },
               "initial_recovery": {
                 "_id": ""
               },
@@ -463,6 +466,9 @@
                 "_tier_preference": "",
                 "_id": ""
               },
+              "require": {
+                "*": ""
+              },
               "initial_recovery": {
                 "_id": ""
               },
@@ -779,6 +785,9 @@
               "include": {
                 "_tier_preference": "",
                 "_id": ""
+              },
+              "require": {
+                "*": ""
               },
               "initial_recovery": {
                 "_id": ""

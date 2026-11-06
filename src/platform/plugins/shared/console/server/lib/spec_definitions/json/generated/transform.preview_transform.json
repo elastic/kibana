@@ -3033,7 +3033,8 @@
             true,
             false
           ]
-        }
+        },
+        "indexer_request_timeout": ""
       },
       "sync": {
         "time": {
