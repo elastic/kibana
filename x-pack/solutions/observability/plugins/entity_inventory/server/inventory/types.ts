@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { OutputColumnKind } from './generator';
+import type { InventoryRow, Provenance, SourceError, TypedOutputColumn } from './executor';
+import type { NamedParams, OutputColumnKind, TimeWindow } from './generator';
 
 export interface InventoryTypeColumn {
   name: string;
@@ -30,4 +31,47 @@ export interface InventoryType {
 
 export interface GetTypesResponse {
   types: InventoryType[];
+}
+
+/** What `InventoryService.list` reads: one type, a window and how many rows to return. */
+export interface ListRequest {
+  type: string;
+  window: TimeWindow;
+  limit: number;
+}
+
+/** One generated list query with its parameters and what Elasticsearch reported for it. */
+export interface ListQueryReport {
+  indexPattern: string;
+  esql: string;
+  params: NamedParams;
+  /** Cluster time in milliseconds; null when the query failed or Elasticsearch did not report it. */
+  took: number | null;
+  documentsFound: number | null;
+  /** Rows the query returned; null when it failed. */
+  rowCount: number | null;
+}
+
+/** An attribute column one source cannot fill because no index behind its pattern maps the field. */
+export interface UnavailableColumn {
+  column: string;
+  indexPattern: string;
+  field: string;
+}
+
+/** One row per entity seen in the window, merged across the type's sources. */
+export interface ListResponse {
+  columns: TypedOutputColumn[];
+  /** Every row carries every column, null where no source produced a value. */
+  rows: InventoryRow[];
+  /** Provenance of the returned rows only. */
+  provenance: Provenance;
+  /** Exact entity count in the window, or null when a plan was cut or partial. */
+  total: number | null;
+  truncated: boolean;
+  /** End-to-end time in milliseconds, not the sum of the queries' cluster time. */
+  took: number;
+  queries: ListQueryReport[];
+  errors: SourceError[];
+  unavailableColumns: UnavailableColumn[];
 }

@@ -87,8 +87,9 @@ describe('EntityInventoryPlugin routes', () => {
   const setUpWithStartDependencies = () => {
     const getEntityDefinitionsClient = jest.fn().mockReturnValue({ list: jest.fn() });
     const core = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
     core.getStartServices.mockResolvedValue([
-      coreMock.createStart(),
+      coreStart,
       { entityStore: { getEntityDefinitionsClient } },
       undefined,
     ]);
@@ -102,6 +103,7 @@ describe('EntityInventoryPlugin routes', () => {
     }
     const [{ dependencies }] = lastCall;
     return {
+      coreStart,
       getEntityDefinitionsClient,
       getInventoryService: dependencies.getInventoryService,
     };
@@ -131,5 +133,14 @@ describe('EntityInventoryPlugin routes', () => {
     await getInventoryService(request);
 
     expect(getEntityDefinitionsClient).toHaveBeenCalledWith(request);
+  });
+
+  it('queries Elasticsearch as the requesting user', async () => {
+    const { coreStart, getInventoryService } = setUpWithStartDependencies();
+    const request = httpServerMock.createKibanaRequest();
+
+    await getInventoryService(request);
+
+    expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
   });
 });

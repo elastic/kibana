@@ -72,13 +72,17 @@ export class EntityInventoryPlugin
 
   /**
    * Builds an `InventoryService` over the request-scoped entity definitions client, which resolves
-   * the request's space itself.
+   * the request's space itself, and an Elasticsearch client that queries as the requesting user.
    */
   private createInventoryService =
     (core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>) =>
     async (request: KibanaRequest): Promise<InventoryService> => {
-      const [, { entityStore }] = await core.getStartServices();
-      return new InventoryService(entityStore.getEntityDefinitionsClient(request), this.logger);
+      const [coreStart, { entityStore }] = await core.getStartServices();
+      return new InventoryService(
+        entityStore.getEntityDefinitionsClient(request),
+        coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        this.logger
+      );
     };
 
   /**

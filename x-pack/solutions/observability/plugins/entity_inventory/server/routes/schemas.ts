@@ -41,7 +41,7 @@ export const typePathParamsSchema = lazySchema(() =>
 );
 
 // A date and time with `Z` or a numeric offset, so every bound names one instant.
-const instantSchema = z.iso.datetime({ offset: true }).max(INSTANT_MAX_LENGTH);
+const instantSchema = lazySchema(() => z.iso.datetime({ offset: true }).max(INSTANT_MAX_LENGTH));
 
 /** Path and body of `POST /internal/entity_inventory/entities/{type}/list`. */
 export const listParamsSchema = lazySchema(() =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityDefinitionsClient } from '@kbn/entity-store/server';
 import { k8sDeploymentDefinition } from '../definitions/kubernetes/k8s_deployment';
 import { hostLikeFixture, k8sNodeFixture } from './__fixtures__/definitions';
@@ -21,9 +21,13 @@ type RegisteredDefinitions = Awaited<ReturnType<EntityDefinitionsClient['list']>
 
 const createService = (definitions: RegisteredDefinitions) => {
   const list = jest.fn().mockResolvedValue(definitions);
+  const get = jest.fn(async (type: string) =>
+    definitions.find((definition) => definition.type === type)
+  );
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  const service = new InventoryService({ list }, logger);
-  return { service, list, logger };
+  const service = new InventoryService({ get, list }, esClient, logger);
+  return { service, list, esClient, logger };
 };
 
 describe('InventoryService.listTypes', () => {
@@ -134,5 +138,397 @@ describe('InventoryService.listTypes', () => {
     list.mockRejectedValue(new Error('registry unavailable'));
 
     await expect(service.listTypes()).rejects.toThrow('registry unavailable');
+  });
+});
+
+const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
+const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
+const WINDOW = { from: '2026-11-01T00:00:00.000Z', to: '2026-11-02T00:00:00.000Z' };
+const IDENTITY_COLUMNS = [
+  'k8s.cluster.name',
+  'k8s.namespace.name',
+  'k8s.deployment.name',
+  'orchestrator.cluster.name',
+  'kubernetes.namespace',
+  'kubernetes.deployment.name',
+];
+const STATE_COLUMNS = [
+  'entity.id',
+  ...IDENTITY_COLUMNS,
+  'available_replicas',
+  'desired_replicas',
+  'paused',
+  'app',
+  'last_seen',
+];
+const OTEL_COLUMNS = [
+  'entity.id',
+  ...IDENTITY_COLUMNS,
+  'available_replicas',
+  'desired_replicas',
+  'resource_id',
+  'last_seen',
+];
+const ALL_COLUMNS = [
+  'entity.id',
+  ...IDENTITY_COLUMNS,
+  'available_replicas',
+  'desired_replicas',
+  'paused',
+  'app',
+  'resource_id',
+  'last_seen',
+];
+const COLUMN_TYPES: Record<string, string> = {
+  available_replicas: 'long',
+  desired_replicas: 'long',
+  paused: 'boolean',
+  last_seen: 'date',
+};
+
+type Row = Record<string, string | number | boolean | null>;
+
+interface ResponseOptions {
+  nullTyped?: string[];
+  isPartial?: boolean;
+}
+
+// An ES|QL response for one plan: its columns in plan order and one value array per row.
+const esqlResponse = (
+  names: string[],
+  rows: Row[],
+  { nullTyped = [], isPartial }: ResponseOptions = {}
+) => ({
+  columns: names.map((name) => ({
+    name,
+    type: nullTyped.includes(name) ? 'null' : COLUMN_TYPES[name] ?? 'keyword',
+  })),
+  values: rows.map((row) => names.map((name) => row[name] ?? null)),
+  is_partial: isPartial ?? false,
+  took: 4,
+  documents_found: rows.length * 2,
+});
+
+const stateRow = (deployment: string, lastSeen: string): Row => ({
+  'entity.id': `k8s.deployment:scout-cluster/checkout/${deployment}`,
+  'orchestrator.cluster.name': 'scout-cluster',
+  'kubernetes.namespace': 'checkout',
+  'kubernetes.deployment.name': deployment,
+  available_replicas: 2,
+  desired_replicas: 3,
+  paused: false,
+  app: deployment,
+  last_seen: lastSeen,
+});
+
+const otelRow = (deployment: string, lastSeen: string): Row => ({
+  'entity.id': `k8s.deployment:scout-cluster/checkout/${deployment}`,
+  'k8s.cluster.name': 'scout-cluster',
+  'k8s.namespace.name': 'checkout',
+  'k8s.deployment.name': deployment,
+  available_replicas: 3,
+  desired_replicas: 3,
+  resource_id: `uid-${deployment}`,
+  last_seen: lastSeen,
+});
+
+type EsqlResponse = ReturnType<typeof esqlResponse>;
+
+// Answers each plan's query by its index pattern; a `{ throws }` answer is thrown as the client would.
+const answerByPattern = (
+  esClient: ReturnType<typeof createService>['esClient'],
+  answers: Record<string, EsqlResponse | { throws: Error }>
+) => {
+  esClient.esql.query.mockImplementation(async ({ query }) => {
+    const answer = answers[query.includes(STATE_PATTERN) ? STATE_PATTERN : OTEL_PATTERN];
+    if ('throws' in answer) {
+      throw answer.throws;
+    }
+    return answer;
+  });
+};
+
+const esError = (status: number, type: string, reason: string) => ({
+  throws: Object.assign(new Error(`${type}: ${reason}`), {
+    meta: { statusCode: status, body: { error: { type, reason } } },
+  }),
+});
+
+const { dynamic: _nodeDynamic, ...k8sNodeWithoutDynamic } = k8sNodeFixture;
+
+describe('InventoryService.list', () => {
+  it('runs one FROM query per source over the whole pattern, with no probe and no TS query', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+    });
+
+    const { queries } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const sent = esClient.esql.query.mock.calls.map(([body]) => body);
+    expect(sent.map(({ query }) => query.split('\n')[1])).toEqual([
+      `FROM ${STATE_PATTERN}`,
+      `FROM ${OTEL_PATTERN}`,
+    ]);
+    sent.forEach(({ query, params }) => {
+      expect(query).not.toContain('_index_mode');
+      expect(query).toContain('| LIMIT 11');
+      expect(params).toEqual([{ from: WINDOW.from }, { to: WINDOW.to }]);
+    });
+    expect(queries).toEqual([
+      expect.objectContaining({
+        indexPattern: STATE_PATTERN,
+        took: 4,
+        documentsFound: 0,
+        rowCount: 0,
+      }),
+      expect.objectContaining({
+        indexPattern: OTEL_PATTERN,
+        took: 4,
+        documentsFound: 0,
+        rowCount: 0,
+      }),
+    ]);
+  });
+
+  it('merges rows across sources, newest last_seen first, with exact total and every column on every row', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
+        stateRow('payments', '2026-11-01T10:01:00.000Z'),
+        stateRow('cart-api', '2026-11-01T10:00:00.000Z'),
+      ]),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.rows.map((row) => row['entity.id'])).toEqual([
+      'k8s.deployment:scout-cluster/checkout/cart-api',
+      'k8s.deployment:scout-cluster/checkout/payments',
+    ]);
+    response.rows.forEach((row) => expect(Object.keys(row)).toEqual(ALL_COLUMNS));
+    expect(response.rows[0]).toMatchObject({
+      available_replicas: 3,
+      paused: false,
+      resource_id: 'uid-cart-api',
+      last_seen: '2026-11-01T10:02:00.000Z',
+    });
+    expect(response.rows[1]).toMatchObject({ resource_id: null, 'k8s.cluster.name': null });
+    expect(response.columns.map(({ name }) => name)).toEqual(ALL_COLUMNS);
+    expect(response.provenance['k8s.deployment:scout-cluster/checkout/cart-api']).toMatchObject({
+      available_replicas: OTEL_PATTERN,
+      paused: STATE_PATTERN,
+    });
+    expect(response).toMatchObject({
+      total: 2,
+      truncated: false,
+      errors: [],
+      unavailableColumns: [],
+    });
+    expect(response.took).toEqual(expect.any(Number));
+    expect(response).not.toHaveProperty('unsupportedMetrics');
+    expect(response).not.toHaveProperty('documentFilterWarnings');
+  });
+
+  it('starts every query before any resolves', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    const pending: Array<() => void> = [];
+    esClient.esql.query.mockImplementation(
+      ({ query }) =>
+        new Promise((resolve) => {
+          const names = query.includes(STATE_PATTERN) ? STATE_COLUMNS : OTEL_COLUMNS;
+          pending.push(() => resolve(esqlResponse(names, [])));
+        })
+    );
+
+    const listing = service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+    await new Promise(setImmediate);
+
+    expect(esClient.esql.query).toHaveBeenCalledTimes(2);
+    pending.forEach((resolve) => resolve());
+    await expect(listing).resolves.toMatchObject({ rows: [], total: 0 });
+  });
+
+  it('reports a failed query in errors with its status and reason and returns the other source', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esError(400, 'verification_exception', 'Unknown column [x]'),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.rows).toHaveLength(1);
+    expect(response.errors).toEqual([
+      {
+        indexPattern: STATE_PATTERN,
+        status: 400,
+        reason: 'verification_exception: Unknown column [x]',
+      },
+    ]);
+    expect(response.queries[0]).toMatchObject({ took: null, documentsFound: null, rowCount: null });
+    expect(JSON.stringify(response.errors)).not.toContain('at ');
+  });
+
+  it('drops a plan whose pattern maps no @timestamp and one whose identity is unmapped', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], { nullTyped: STATE_COLUMNS }),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [], { nullTyped: IDENTITY_COLUMNS }),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.rows).toEqual([]);
+    expect(response.errors).toEqual([
+      {
+        indexPattern: STATE_PATTERN,
+        status: null,
+        reason: `no readable index behind "${STATE_PATTERN}" maps @timestamp`,
+      },
+      {
+        indexPattern: OTEL_PATTERN,
+        status: null,
+        reason: expect.stringContaining(`no index behind "${OTEL_PATTERN}" maps every field`),
+      },
+    ]);
+  });
+
+  it('returns no rows and lists each failure when every query fails', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esError(403, 'security_exception', 'unauthorized'),
+      [OTEL_PATTERN]: { throws: new Error('connect ECONNREFUSED') },
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response).toMatchObject({
+      rows: [],
+      total: 0,
+      truncated: false,
+      errors: [
+        { indexPattern: STATE_PATTERN, status: 403, reason: 'security_exception: unauthorized' },
+        { indexPattern: OTEL_PATTERN, status: null, reason: 'connect ECONNREFUSED' },
+      ],
+    });
+  });
+
+  it('nulls an attribute no index of its source maps and lists it in unavailableColumns', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], {}),
+      [OTEL_PATTERN]: esqlResponse(
+        OTEL_COLUMNS,
+        [{ ...otelRow('cart-api', '2026-11-01T10:02:00.000Z'), resource_id: null }],
+        { nullTyped: ['resource_id'] }
+      ),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.rows[0].resource_id).toBeNull();
+    expect(response.unavailableColumns).toEqual([
+      { column: 'resource_id', indexPattern: OTEL_PATTERN, field: 'k8s.deployment.uid' },
+    ]);
+    expect(response.columns.find(({ name }) => name === 'resource_id')?.type).toBeNull();
+  });
+
+  it('returns limit rows with an exact total when no plan is cut', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
+        stateRow('payments', '2026-11-01T10:01:00.000Z'),
+      ]),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 1 });
+
+    expect(response.rows.map((row) => row['entity.id'])).toEqual([
+      'k8s.deployment:scout-cluster/checkout/cart-api',
+    ]);
+    expect(Object.keys(response.provenance)).toEqual([
+      'k8s.deployment:scout-cluster/checkout/cart-api',
+    ]);
+    expect(response).toMatchObject({ total: 2, truncated: true });
+  });
+
+  it('reports total null and truncated when a plan returns more rows than requested', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
+        stateRow('payments', '2026-11-01T10:01:00.000Z'),
+        stateRow('cart-api', '2026-11-01T10:00:00.000Z'),
+      ]),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 1 });
+
+    expect(response.rows).toHaveLength(1);
+    expect(response).toMatchObject({ total: null, truncated: true });
+  });
+
+  it('reports total null and truncated when Elasticsearch answers with a partial result', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], { isPartial: true }),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response).toMatchObject({ total: null, truncated: true });
+  });
+
+  it.each([
+    ['an unknown type', 'k8s.unknown', [k8sDeploymentDefinition]],
+    ['a type without a dynamic block', k8sNodeFixture.type, [k8sNodeWithoutDynamic]],
+    [
+      'a type another plugin registered',
+      'host',
+      [
+        {
+          ...hostLikeFixture,
+          type: 'host',
+          managedBy: { kind: 'plugin' as const, id: 'entityStore' },
+        },
+      ],
+    ],
+  ])(
+    'throws InventoryTypeNotFoundError for %s without querying',
+    async (_label, type, definitions) => {
+      const { service, esClient } = createService(definitions);
+
+      await expect(service.list({ type, window: WINDOW, limit: 10 })).rejects.toMatchObject({
+        name: 'InventoryTypeNotFoundError',
+        statusCode: 404,
+      });
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    }
+  );
+
+  it('throws InventoryTypeDefinitionError when the definition cannot be turned into queries', async () => {
+    const invalid = {
+      ...k8sDeploymentDefinition,
+      dynamic: {
+        sources: [{ indexPattern: STATE_PATTERN, attributes: [{ name: 'last_seen', field: 'x' }] }],
+      },
+    };
+    const { service, esClient } = createService([invalid]);
+
+    await expect(
+      service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 })
+    ).rejects.toMatchObject({
+      name: 'InventoryTypeDefinitionError',
+      statusCode: 400,
+      message: expect.stringContaining(
+        'Entity type "k8s.deployment" cannot be queried: attribute name "last_seen" is reserved'
+      ),
+    });
+    expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 });
