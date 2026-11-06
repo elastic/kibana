@@ -25,6 +25,7 @@
  *   --es      Elasticsearch base URL (default: http://localhost:9200)
  *   --space   Kibana space id (default: default)
  *   --clean   Delete what this script wrote instead of seeding
+ *   --ui      Write alerts only, for a manual test through the UI: first | matching | mixed (see UI mode)
  *
  * Scale mode (`--scale <alerts>`) writes that many open alerts instead of the 11, spread over rules
  * and exact patterns, with decisions for a share of the patterns. It needs no model. It prints what
@@ -45,7 +46,8 @@
  *
  * UI mode (`--ui first|matching|mixed`) writes alerts only, with no decision, for a manual test that
  * goes through the UI: a real model analyses the alerts, an analyst approves the proposal, and the
- * approval stores the decision. Run the three phases in order, with a sweep between them:
+ * approval stores the decision. Run the three phases in order, and run an Alert Triage sweep (run the
+ * `system-security-floor-alert-triage-default` workflow) between them:
  *
  *   first     6 low alerts of a benign vendor updater (pattern U) in one rule
  *   matching  6 more alerts of the same pattern U
