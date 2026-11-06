@@ -191,6 +191,29 @@ describe('Inference Features API', () => {
       expect(body.features.map((f) => f.featureId)).toEqual(['security']);
     });
 
+    it('should exclude hidden features and keep visible ones', async () => {
+      featureRegistry.register({
+        featureId: 'visible_feature',
+        featureName: 'Visible',
+        featureDescription: 'Shown on Feature settings.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['gemini-3.0-pro'],
+      });
+      featureRegistry.register({
+        featureId: 'hidden_feature',
+        featureName: 'Hidden',
+        featureDescription: 'Not shown on Feature settings.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['claude-sonnet-4.6'],
+        isHidden: true,
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features.map((f) => f.featureId)).toEqual(['visible_feature']);
+    });
+
     it('should fail open and include the feature when uiSettings.get throws', async () => {
       uiSettingsGet.mockRejectedValue(new Error('uiSettings unavailable'));
 

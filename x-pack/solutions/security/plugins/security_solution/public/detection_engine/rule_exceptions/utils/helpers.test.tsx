@@ -1314,7 +1314,7 @@ describe('Exception helpers', () => {
             sha256: 'some hash',
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'signature',
         },
@@ -1366,7 +1366,7 @@ describe('Exception helpers', () => {
             sha256: 'some hash',
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'signature',
         },
@@ -1407,7 +1407,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'shellcode_thread',
           self_injection: true,
@@ -1488,7 +1488,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'shellcode_thread',
           self_injection: true,

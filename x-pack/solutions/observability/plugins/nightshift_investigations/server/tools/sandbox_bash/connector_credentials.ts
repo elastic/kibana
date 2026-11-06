@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ActionsClient } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
 import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
@@ -18,11 +19,16 @@ export type ResolvedSandboxCredentials = Awaited<
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
 
+// Actions framework settings that say nothing about how to reach the service.
+const NON_ENV_CONFIG_KEYS: ReadonlySet<string> = new Set(['selectedActions']);
+
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
   env: Record<string, string>;
   /** Secret values that must be redacted from command output before it leaves Kibana. */
   secretValues: string[];
+  /** Header env keys the credential proxy may only send to the connector's hosts. */
+  secretEnvKeys: SecretEnvKey[];
 }
 
 export type ConnectorCredentialResolution = ConnectorCredentialEnv | { errorMessage: string };
@@ -123,17 +129,20 @@ export const deriveConnectorCredentialSecretValues = (
 /**
  * Builds the CONNECTOR_* environment from framework-resolved config and auth headers.
  * Config keys map to CONNECTOR_CONFIG_<KEY>; header names map to CONNECTOR_HEADER_<NAME>.
+ * Header keys are marked as secrets bound to the connector's hosts; config stays plain env.
  */
 export const buildConnectorEnv = ({
   connectorId,
   actionTypeId,
   config,
   headers,
+  hosts,
 }: {
   connectorId: string;
   actionTypeId: string;
   config: Record<string, unknown>;
   headers: Record<string, string>;
+  hosts: string[];
 }): ConnectorCredentialEnv => {
   const env: Record<string, string> = {
     [`${CONNECTOR_ENV_PREFIX}ID`]: connectorId,
@@ -142,6 +151,7 @@ export const buildConnectorEnv = ({
   const secretValues: string[] = [];
 
   for (const [key, value] of Object.entries(config)) {
+    if (NON_ENV_CONFIG_KEYS.has(key)) continue;
     const envValue = toEnvValue(value);
     if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
   }
@@ -159,7 +169,11 @@ export const buildConnectorEnv = ({
     }
   }
 
-  return { env, secretValues: [...new Set(secretValues)] };
+  const secretEnvKeys = Object.keys(env)
+    .filter((key) => key.startsWith(`${CONNECTOR_ENV_PREFIX}HEADER_`))
+    .map((key) => ({ key, allowed_hosts: [...hosts] }));
+
+  return { env, secretValues: [...new Set(secretValues)], secretEnvKeys };
 };
 
 /**

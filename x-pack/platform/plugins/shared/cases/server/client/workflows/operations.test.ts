@@ -50,4 +50,18 @@ describe('createCasesWorkflowOperations', () => {
 
     expect(recordWorkflowExecution).toHaveBeenCalledWith(params, clientArgs);
   });
+
+  it('confirms alert indices through the request-scoped alerts service', async () => {
+    const claims = [
+      {
+        id: 'alert-1',
+        index: '.internal.alerts-security.alerts-default-000001',
+        attachedIndex: '.alerts-security.alerts-default',
+      },
+    ];
+    clientArgs.services.alertsService.confirmAlertIndices.mockResolvedValueOnce(claims);
+
+    await expect(operations.confirmAlertIndices({ claims })).resolves.toBe(claims);
+    expect(clientArgs.services.alertsService.confirmAlertIndices).toHaveBeenCalledWith({ claims });
+  });
 });

@@ -45,5 +45,6 @@
     "@kbn/es",
     "@kbn/mock-idp-utils",
     "@kbn/securitysolution-rules",
+    "@kbn/securitysolution-alerts-page-url",
   ]
 }

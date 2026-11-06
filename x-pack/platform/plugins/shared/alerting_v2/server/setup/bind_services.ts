@@ -30,6 +30,7 @@ import { DispatcherServiceInternalToken, KibanaBaseUrlToken } from '../lib/dispa
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import { ActionPolicyTestService } from '../lib/action_policy_test/action_policy_test_service';
 import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
@@ -86,7 +87,7 @@ import {
   QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { AlertingRetryService } from '../lib/services/retry_service';
+import { EsTransientRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import {
@@ -153,13 +154,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ActionPolicyTestService).toSelf().inRequestScope();
   bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
-  bind(AlertingRetryService).toSelf().inSingletonScope();
-  bind(RetryServiceToken).toService(AlertingRetryService);
+  bind(EsTransientRetryService).toSelf().inSingletonScope();
+  bind(RetryServiceToken).toService(EsTransientRetryService);
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);

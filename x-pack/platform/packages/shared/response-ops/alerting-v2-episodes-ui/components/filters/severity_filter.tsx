@@ -6,14 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFilterButton, EuiPopover, EuiHealth, useEuiTheme } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiBadge, EuiFilterButton, EuiHealth, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { EPISODE_SEVERITY_FILTER_NONE } from '../severity/severity_utils';
 import { useSeverityRegistry } from '../../hooks/use_severity_registry';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
-
-type SeverityDotColorKey = Extract<keyof EuiThemeComputed['colors'], `text${string}`>;
 
 interface AlertEpisodesSeverityFilterProps {
   selectedSeverities?: string[] | null;
@@ -30,26 +27,20 @@ export function AlertEpisodesSeverityFilter({
   const { euiTheme } = useEuiTheme();
   const { entries } = useSeverityRegistry();
 
-  const resolveDotColor = useCallback(
-    (colorKey?: string) =>
-      euiTheme.colors[(colorKey ?? 'textSubdued') as SeverityDotColorKey] ?? colorKey,
-    [euiTheme]
-  );
-
   const options = useMemo(
     () => [
-      ...entries.map(({ label, value, filterDotColor }) => ({
+      ...[...entries].reverse().map(({ label, value, color }) => ({
         label,
         value,
-        prepend: <EuiHealth color={resolveDotColor(filterDotColor)} />,
+        prepend: <EuiBadge color={color} aria-hidden />,
       })),
       {
         label: i18n.SEVERITY_FILTER_NONE_LABEL,
         value: EPISODE_SEVERITY_FILTER_NONE,
-        prepend: <EuiHealth color={resolveDotColor()} />,
+        prepend: <EuiHealth color={euiTheme.colors.textSubdued} />,
       },
     ],
-    [resolveDotColor, entries]
+    [entries, euiTheme]
   );
 
   const handleSelectionChange = useCallback(

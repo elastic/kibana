@@ -17,8 +17,6 @@
  * under the License.
  */
 
-const RESTRICTED_MODULES = { paths: ['gulp-util'] };
-
 module.exports = {
   overrides: [
     /**
@@ -28,6 +26,8 @@ module.exports = {
       files: ['**/*.js', '**/*.mjs'],
       parser: require.resolve('@babel/eslint-parser'),
 
+      // `mocha/*` and `no-unsanitized/*` rules run in oxlint (.oxlint/mocha.mts,
+      // .oxlint/javascript.mts); registered so `eslint-disable` directives naming them resolve.
       plugins: [
         'mocha',
         'import',
@@ -54,24 +54,15 @@ module.exports = {
       },
 
       rules: {
-        camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
-        'consistent-return': 'off',
         'no-multi-str': 'off',
         'no-new': 'off',
         'no-path-concat': 'off',
-        'no-restricted-modules': [2, RESTRICTED_MODULES],
         'no-return-assign': 'off',
         'no-shadow': 'off',
         'no-undef': 'error',
         'no-underscore-dangle': 'off',
-        'no-unsanitized/method': 'error',
-        'no-unsanitized/property': 'error',
         'no-unused-expressions': 'off',
-        strict: [ 'error', 'never' ],
         yoda: 'off',
-
-        'mocha/handle-done-callback': 'error',
-        'mocha/no-exclusive-tests': 'error',
       }
     },
   ]

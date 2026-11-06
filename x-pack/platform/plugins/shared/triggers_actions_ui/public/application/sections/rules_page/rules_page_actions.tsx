@@ -15,13 +15,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useKibana } from '../../../common/lib/kibana';
-import { RulesSettingsFlyout } from '../../components/rules_setting/rules_settings_flyout';
-
-const ALERT_DELETE_CATEGORY_IDS = ['management', 'observability', 'securitySolution'] as const;
+import { routeToSettings } from '../../constants';
 
 export interface RulesPageActions {
   openCreateRuleModal: () => void;
-  openSettingsFlyout: () => void;
+  navigateToSettings: () => void;
   navigateToCreateRuleForm: (ruleTypeId: string) => void;
   navigateToCreateRuleFromTemplateForm: (templateId: string) => void;
   navigateToEditRuleForm: (ruleId: string) => void;
@@ -49,7 +47,6 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
   } = useKibana().services;
 
   const [isRuleTypeModalVisible, setIsRuleTypeModalVisible] = useState(false);
-  const [isSettingsFlyoutVisible, setIsSettingsFlyoutVisible] = useState(false);
 
   // Track the latest location without re-creating navigation callbacks on every
   // search/hash change; updating ref.current in render does not trigger renders.
@@ -86,19 +83,23 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
   );
 
   const openCreateRuleModal = useCallback(() => setIsRuleTypeModalVisible(true), []);
-  const openSettingsFlyout = useCallback(() => setIsSettingsFlyoutVisible(true), []);
+  const navigateToSettings = useCallback(() => {
+    const { pathname, search, hash } = locationRef.current;
+    const returnPath = `${pathname}${search}${hash}` || '/';
+    history.push({ pathname: routeToSettings, state: { returnPath } });
+  }, [history]);
 
   const actions = useMemo<RulesPageActions>(
     () => ({
       openCreateRuleModal,
-      openSettingsFlyout,
+      navigateToSettings,
       navigateToCreateRuleForm,
       navigateToCreateRuleFromTemplateForm,
       navigateToEditRuleForm,
     }),
     [
       openCreateRuleModal,
-      openSettingsFlyout,
+      navigateToSettings,
       navigateToCreateRuleForm,
       navigateToCreateRuleFromTemplateForm,
       navigateToEditRuleForm,
@@ -121,11 +122,6 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
           showClassicBadge={showClassicBadge}
         />
       )}
-      <RulesSettingsFlyout
-        isVisible={isSettingsFlyoutVisible}
-        onClose={() => setIsSettingsFlyoutVisible(false)}
-        alertDeleteCategoryIds={[...ALERT_DELETE_CATEGORY_IDS]}
-      />
     </RulesPageActionsContext.Provider>
   );
 };

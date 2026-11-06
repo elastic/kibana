@@ -20,7 +20,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { reconcileInstances } from './instances';
+import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from './instances';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
 import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
@@ -37,6 +37,7 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
+import type { PolicySettings } from '../../common/policy_settings';
 import {
   getDescriptionError,
   getIntegrationNameError,
@@ -98,6 +99,12 @@ export interface ServiceSettingsPersistedState {
    * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
    */
   namespace?: string;
+  /**
+   * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
+   * field name. Each deployment method applies only the ones it supports. An empty value is the
+   * Fleet default; an absent one was never chosen.
+   */
+  policySettings?: PolicySettings;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -107,7 +114,8 @@ export interface ServiceSettingsPersistedState {
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
 
 /** Duplicate instance ids are `<serviceId>__dup-<n>`. */
-export const getDuplicateInstanceIdPrefix = (serviceId: string): string => `${serviceId}__dup-`;
+export const getDuplicateInstanceIdPrefix = (serviceId: string): string =>
+  `${serviceId}${DUPLICATE_INSTANCE_ID_SEPARATOR}`;
 
 export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -230,6 +238,21 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         namespace: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const policySettings = useMemo(
+    () => persisted?.policySettings ?? {},
+    [persisted?.policySettings]
+  );
+
+  const setPolicySetting = useCallback(
+    <K extends keyof PolicySettings>(key: K, value: PolicySettings[K]) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        policySettings: { ...(persisted?.policySettings ?? {}), [key]: value },
       });
     },
     [persisted, setPersisted]
@@ -575,6 +598,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    policySettings,
+    setPolicySetting,
     bareNamePackage,
     instances,
     filteredInstances,

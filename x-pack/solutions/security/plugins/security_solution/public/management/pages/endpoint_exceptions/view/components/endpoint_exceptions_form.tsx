@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
+  CreateCommentsArray,
   EntriesArray,
   ExceptionListItemSchema,
   OsTypeArray,
@@ -72,7 +73,7 @@ import {
 import { OS_TITLES, OPERATING_SYSTEM_WINDOWS_AND_MAC } from '../../../../common/translations';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 
-import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
+import { ArtifactFormComments } from '../../../../components/artifact_form_comments';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import { EndpointExceptionsApiClient } from '../../service/api_client';
 
@@ -146,7 +147,6 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
 
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
-    const [newComment, setNewComment] = useState('');
     const [hasCommentError, setHasCommentError] = useState(false);
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
@@ -176,10 +176,6 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     );
 
     const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
-
-    const [existingComments, _] = useState<ExceptionListItemSchema['comments']>(
-      (exception as ExceptionListItemSchema)?.comments
-    );
 
     const isFormValid = useMemo(() => {
       // verify that it has legit entries
@@ -362,25 +358,22 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       [getTestId, handleOnOsChange, exception?.os_types]
     );
 
-    const handleOnChangeComment = useCallback(
-      (value: string) => {
-        if (!exception) return;
-        setNewComment(value);
-        processChanged({ comments: [{ comment: value }] });
+    const handleOnChangeComments = useCallback(
+      (comments: CreateCommentsArray) => {
+        processChanged({ comments });
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [hasFormChanged, processChanged]
     );
     const commentsInputMemo = useMemo(
       () => (
-        <ExceptionItemComments
-          exceptionItemComments={existingComments}
-          newCommentValue={newComment}
-          newCommentOnChange={handleOnChangeComment}
-          setCommentError={setHasCommentError}
+        <ArtifactFormComments
+          item={exception}
+          onChange={handleOnChangeComments}
+          onErrorChange={setHasCommentError}
         />
       ),
-      [existingComments, handleOnChangeComment, newComment]
+      [exception, handleOnChangeComments]
     );
 
     const commentsSection = useMemo(
