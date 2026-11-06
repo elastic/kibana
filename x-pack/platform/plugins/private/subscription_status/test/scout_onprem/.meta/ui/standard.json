@@ -1,0 +1,21 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ccf05da84d7ea98-260487b7abd1689",
+      "title": "Subscription status badge on a self-managed trial shows the days left and links to the feature comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_onprem/ui/tests/self_managed_trial.spec.ts",
+        "line": 17,
+        "column": 61
+      }
+    }
+  ]
+}

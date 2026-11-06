@@ -10,8 +10,9 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { FilesStart } from '@kbn/files-plugin/server';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { createTextAttachmentType } from './text';
-import { createEsqlAttachmentType } from './esql';
+import { createEsqlAttachmentType, type DiscoverEsqlLocatorParams } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
@@ -58,7 +59,10 @@ export const registerAttachmentTypes = ({
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
-    createEsqlAttachmentType(),
+    createEsqlAttachmentType({
+      getDiscoverLocator: () =>
+        setupDeps.share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR),
+    }),
     createGraphAttachmentType(),
     createConnectorAttachmentType({ getActionSavedObjectsClient }),
     createConnectorSetupAttachmentType({

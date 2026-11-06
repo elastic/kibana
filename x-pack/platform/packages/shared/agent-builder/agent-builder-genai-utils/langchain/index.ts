@@ -26,7 +26,7 @@ export {
 export {
   extractTextContent,
   extractToolCalls,
-  extractToolCallsWithReasoning,
+  extractToolCallsWithIntent,
   extractToolReturn,
   createUserMessage,
   createAIMessage,
@@ -35,17 +35,16 @@ export {
   generateFakeToolCallId,
   wrapToolResultContent,
   type ToolCall,
-  type ToolCallWithReasoning,
+  type ToolCallWithIntent,
 } from './messages';
 export {
-  toolsToLangchain,
   toolToLangchain,
+  INTENT_PARAM,
   toolIdentifierFromToolCall,
   sanitizeToolId,
   createToolIdMappings,
   reverseMap,
   type ToolIdMapping,
-  type ToolsAndMappings,
   type BuildToolContentParams,
   type BuildToolContentFn,
 } from './tools';
