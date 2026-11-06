@@ -248,15 +248,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
       return groups.flatMap((group, index): EuiContextMenuPanelItemDescriptor[] =>
         index === 0 ? group : [{ isSeparator: true as const, key: `separator-${index}` }, ...group]
       );
-    }, [
-      status,
-      closePopover,
-      onEdit,
-      id,
-      toasts,
-      showModal,
-      euiTheme.colors.textDanger,
-    ]);
+    }, [status, closePopover, onEdit, id, toasts, showModal, euiTheme.colors.textDanger]);
 
     const button = useMemo(
       () => (
