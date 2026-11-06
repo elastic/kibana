@@ -243,7 +243,7 @@ const AppGridPanel = ({
           <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="trash"
-              color="danger"
+              color="text"
               aria-label={REMOVE_PANEL_LABEL}
               onClick={removePanel}
               data-test-subj="notebookAppPanelRemove"
