@@ -610,6 +610,7 @@ export class SearchInterceptor {
               strategy === undefined, // undefined strategy is treated as enhanced ES
           }),
           asResponse: true,
+          trackPerformance: true,
         }
       )
       .then((rawResponse) => {

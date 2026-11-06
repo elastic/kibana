@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve as pathResolve } from 'node:path';
 import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
@@ -63,6 +64,7 @@ import {
   type SelfClientOwnClientAuthenticationCheck,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
+import { SidecarProcess } from './sidecar_process';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -95,6 +97,8 @@ export class HttpService
 
   private readonly log: Logger;
   private readonly env: Env;
+  private sidecar?: SidecarProcess;
+  private sidecarSocketPath?: string;
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: IContextContainer;
@@ -110,10 +114,13 @@ export class HttpService
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
       configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
     ]).pipe(
-      map(
-        ([http, csp, externalUrl, permissionsPolicy]) =>
-          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
-      )
+      map(([http, csp, externalUrl, permissionsPolicy]) => {
+        const cfg = new HttpConfig(http, csp, externalUrl, permissionsPolicy);
+        if (this.sidecarSocketPath) {
+          cfg.socketPath = this.sidecarSocketPath;
+        }
+        return cfg;
+      })
     );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
@@ -125,6 +132,23 @@ export class HttpService
     this.log.debug('setting up preboot server');
 
     const config = await firstValueFrom(this.config$);
+
+    if (config.sidecar.enabled) {
+      const ext = process.platform === 'win32' ? '.exe' : '';
+      const sidecarBinPath = this.env.packageInfo.dist
+        ? pathResolve(this.env.homeDir, 'bin', `kbn_sidecar${ext}`)
+        : pathResolve(this.env.homeDir, 'src/platform/sidecar', `kbn_sidecar${ext}`);
+      const esBootstrapConfig = await this.buildElasticsearchBootstrapConfig();
+      this.sidecar = new SidecarProcess(
+        config,
+        sidecarBinPath,
+        this.log.get('sidecar'),
+        esBootstrapConfig
+      );
+      await this.sidecar.start();
+      this.sidecarSocketPath = this.sidecar.socketPath;
+      config.socketPath = this.sidecarSocketPath;
+    }
 
     const prebootSetup = await this.prebootServer.setup({
       config$: this.config$,
@@ -219,6 +243,7 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
       config,
+      sidecarSecret: this.sidecar?.secret,
       rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
@@ -433,6 +458,39 @@ export class HttpService
     return config.autoListen;
   }
 
+  private async buildElasticsearchBootstrapConfig() {
+    const { readFileSync } = await import('node:fs');
+    const esRaw = await firstValueFrom(
+      this.coreContext.configService.atPath<Record<string, any>>('elasticsearch')
+    );
+
+    const hosts = Array.isArray(esRaw.hosts)
+      ? esRaw.hosts
+      : [esRaw.hosts ?? 'http://localhost:9200'];
+    const ssl = esRaw.ssl ?? {};
+
+    const readFile = (filePath: string) => readFileSync(filePath, 'utf8');
+    const readCAs = (ca: string | string[] | undefined): string[] | undefined => {
+      if (!ca) return undefined;
+      const paths = Array.isArray(ca) ? ca : [ca];
+      return paths.map(readFile);
+    };
+
+    return {
+      hosts,
+      requestHeadersWhitelist: Array.isArray(esRaw.requestHeadersWhitelist)
+        ? esRaw.requestHeadersWhitelist
+        : ['authorization', 'es-client-authentication'],
+      customHeaders: esRaw.customHeaders ?? {},
+      ssl: {
+        verificationMode: ssl.verificationMode ?? 'full',
+        certificateAuthorities: readCAs(ssl.certificateAuthorities),
+        certificate: ssl.certificate ? readFile(ssl.certificate) : undefined,
+        key: ssl.key ? readFile(ssl.key) : undefined,
+      },
+    };
+  }
+
   public async stop() {
     this.configSubscription?.unsubscribe();
     this.configSubscription = undefined;
@@ -444,6 +502,7 @@ export class HttpService
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+    await this.sidecar?.stop();
     await this.selfClient?.close();
     this.selfClient = undefined;
   }

@@ -38,3 +38,4 @@ export { InstallChromium } from './install_chromium';
 
 export { CreateDistributionDefaults } from './create_distribution_defaults_task';
 export { BundleFipsProvider } from './fips/bundle_fips_provider_task';
+export { BuildSidecar } from './sidecar/build_sidecar_task';

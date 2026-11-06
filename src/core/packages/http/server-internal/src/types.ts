@@ -75,6 +75,7 @@ export interface InternalHttpServiceSetup
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   authRequestHeaders: IAuthHeadersStorage;
+  sidecarSecret?: string;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContextBase,
     ContextName extends keyof Omit<Context, 'resolve'>

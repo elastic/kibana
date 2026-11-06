@@ -44,6 +44,7 @@ export interface BuildOptions {
   targetServerlessPlatforms: boolean;
   targetCloudPlatforms: boolean;
   skipFipsProvider: boolean;
+  skipSidecar: boolean;
   skipServerless: boolean;
   skipDockerImageArchive: boolean;
   tarZstd: boolean;
@@ -125,6 +126,9 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CleanNodeBuilds);
     if (!options.skipFipsProvider) {
       await globalRun(Tasks.BundleFipsProvider);
+    }
+    if (!options.skipSidecar) {
+      await globalRun(Tasks.BuildSidecar);
     }
     await globalRun(Tasks.CreateDistributionDefaults);
 

@@ -27,14 +27,16 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
     : false;
   const maxPayload = config.maxPayload.getValueInBytes();
 
+  const useSocket = !!config.socketPath;
+  const effectiveConfigureTLS = useSocket ? false : configureTLS;
+
   const options: ServerOptions = {
-    host: config.host,
-    port: config.port,
+    ...(useSocket ? { port: 0, autoListen: false } : { host: config.host, port: config.port }),
     // manually configuring the listener
     // @ts-expect-error HAPI types only define http1/https listener, not http2
-    listener: getServerListener(config, { configureTLS }),
+    listener: getServerListener(config, { configureTLS: effectiveConfigureTLS }),
     // must set to true when manually passing a TLS listener, false otherwise
-    tls: configureTLS && config.ssl.enabled,
+    tls: effectiveConfigureTLS && config.ssl.enabled,
     routes: {
       cache: {
         privacy: 'private',

@@ -393,13 +393,28 @@ export class HttpServer {
       }
     }
 
+    if (this.config?.socketPath) {
+      await this.listenOnSocket(this.config.socketPath);
+    }
+
     await this.server.start();
     const serverPath =
       this.config && this.config.rewriteBasePath && this.config.basePath !== undefined
         ? this.config.basePath
         : '';
 
-    this.log.info(`http server running at ${this.server.info.uri}${serverPath}`);
+    const listenAddr = this.config?.socketPath ?? this.server.info.uri;
+    this.log.info(`http server running at ${listenAddr}${serverPath}`);
+  }
+
+  private async listenOnSocket(socketPath: string): Promise<void> {
+    const { unlink } = await import('node:fs/promises');
+    await unlink(socketPath).catch(() => {});
+    return new Promise((resolve, reject) => {
+      const listener = this.server!.listener;
+      listener.listen(socketPath, () => resolve());
+      listener.once('error', reject);
+    });
   }
 
   public async stop() {

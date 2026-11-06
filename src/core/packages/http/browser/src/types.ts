@@ -334,6 +334,12 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * Defaults to undefined.
    */
   version?: ApiVersion;
+
+  /**
+   * When true, performance timing events will be logged for this request.
+   * Used for tracking data request/response times.
+   */
+  trackPerformance?: boolean;
 }
 
 /**
