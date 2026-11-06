@@ -17,6 +17,7 @@ import {
   type StrictDataControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { rangeSliderStateComparison } from '../../common/state_comparison';
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
 
 const RANGE_SLIDER_REF_NAME = 'rangeSliderDataView' as const;
@@ -29,6 +30,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
   embeddable.registerEmbeddableServerDefinition(RANGE_SLIDER_CONTROL, {
     title: 'Range slider control',
     getSchema: () => rangeSliderControlSchema,
+    stateComparison: rangeSliderStateComparison,
     getTransforms: () => ({
       transformIn: (state: RangeSliderControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(
