@@ -1118,4 +1118,30 @@ describe('NotebookScheduler', () => {
       jest.restoreAllMocks();
     });
   });
+
+  describe('run counts', () => {
+    it('counts each recompute and resets on demand', async () => {
+      const env = track(setup([esql('q', 'FROM logs'), chart('c', 'q')]));
+      await env.open();
+      expect(env.scheduler.runCounts$.getValue()).toEqual({ q: 1, c: 1 });
+
+      await env.scheduler.runCell('q');
+      expect(env.scheduler.runCounts$.getValue()).toEqual({ q: 2, c: 2 });
+
+      env.scheduler.resetRunCounts();
+      expect(env.scheduler.runCounts$.getValue()).toEqual({});
+    });
+
+    it('does not count a cell served from its memo', async () => {
+      const env = track(setup([pinnedTime('time'), esql('q', 'FROM logs')]));
+      await env.open();
+
+      await env.scheduler.refresh(['time']);
+      expect(env.scheduler.runCounts$.getValue()).toEqual({ time: 1, q: 1 });
+
+      env.clock.now = new Date(NOW.getTime() + 60_000);
+      await env.scheduler.refresh(['time']);
+      expect(env.scheduler.runCounts$.getValue()).toEqual({ time: 2, q: 1 });
+    });
+  });
 });

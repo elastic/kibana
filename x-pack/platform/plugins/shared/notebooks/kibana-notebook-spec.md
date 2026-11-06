@@ -138,6 +138,8 @@ A plain class over the store, injected with `runQuery` so it is unit-testable wi
 
 POC testing aid: an ES|QL cell whose label contains `LONG` waits 10 s (abortable) before querying, to exercise long runs.
 
+Performance check (dev only): the developer toolbar's **Performance** badge, shown on the notebook app, turns on run counts in the dependency graph. Each cell node shows how many times the scheduler recomputed it instead of serving its memo, and **Reset run counts** clears them. Counts are kept while the check is off.
+
 **Run triggers:**
 
 - ES|QL query edits run only on Cmd+Enter / Run button (never while typing); the run then propagates to auto descendants.

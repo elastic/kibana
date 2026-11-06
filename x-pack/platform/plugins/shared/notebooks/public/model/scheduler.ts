@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import objectHash from 'object-hash';
-import { skip, type Subscription } from 'rxjs';
+import { BehaviorSubject, skip, type Subscription } from 'rxjs';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   CellDefinition,
@@ -142,6 +142,8 @@ export class NotebookScheduler {
   private readonly tasks = new Map<string, Promise<void>>();
   private readonly controllers = new Map<string, AbortController>();
   private readonly editedCells = new Set<string>();
+  /** How many times each cell has been recomputed rather than served from its memo. */
+  readonly runCounts$ = new BehaviorSubject<Readonly<Record<string, number>>>({});
 
   constructor(private readonly store: NotebookStore, { runQuery, now }: SchedulerDeps) {
     this.runQuery = runQuery;
@@ -208,6 +210,10 @@ export class NotebookScheduler {
   previewQuery(query: string, signal: AbortSignal): Promise<RunQueryResult> {
     const outputs = Object.keys(this.cells).map((id) => this.runtime(id).output);
     return this.run({ query, params: buildQueryParams(query, outputs), signal });
+  }
+
+  resetRunCounts(): void {
+    this.runCounts$.next({});
   }
 
   async whenIdle(): Promise<void> {
@@ -363,6 +369,7 @@ export class NotebookScheduler {
       );
       return;
     }
+    this.countRun(id);
     this.setStatus(id, 'running');
     await sleep(getDebugDelayMs(this.cells[id]), signal);
     const { table, truncated, durationMs } = await this.run({ query, params, signal });
@@ -407,6 +414,7 @@ export class NotebookScheduler {
       this.markStale(id, 'manual');
       return;
     }
+    this.countRun(id);
     this.setStatus(id, 'running');
     const { values, logs, error, durationMs } = await runCode({
       code,
@@ -480,6 +488,7 @@ export class NotebookScheduler {
       );
       return;
     }
+    this.countRun(id);
     this.publish(id, {
       status: 'done',
       output: sourceOutput,
@@ -504,6 +513,7 @@ export class NotebookScheduler {
         this.setStatus(id, 'done');
         return;
       }
+      this.countRun(id);
       this.publish(id, { status: 'done', output: { kind: 'input', params }, memoKey });
       return;
     }
@@ -543,9 +553,11 @@ export class NotebookScheduler {
     }
 
     if (!optionsQuery.trim()) {
+      this.countRun(id);
       this.publish(id, { status: 'done', output: { kind: 'input', params, options: [] }, memoKey });
       return;
     }
+    this.countRun(id);
     this.setStatus(id, 'running');
     const { table, durationMs } = await this.run({
       query: optionsQuery,
@@ -578,6 +590,7 @@ export class NotebookScheduler {
       this.setStatus(id, 'done');
       return;
     }
+    this.countRun(id);
     this.publish(id, { status: 'done', output: { kind: 'input', params, options }, memoKey });
   }
 
@@ -611,6 +624,11 @@ export class NotebookScheduler {
 
   private parentOutputs(id: string): Array<CellOutput | undefined> {
     return this.parents(id).map((parent) => this.runtime(parent).output);
+  }
+
+  private countRun(id: string): void {
+    const counts = this.runCounts$.getValue();
+    this.runCounts$.next({ ...counts, [id]: (counts[id] ?? 0) + 1 });
   }
 
   private setStatus(id: string, status: CellStatus): void {

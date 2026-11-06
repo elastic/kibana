@@ -23,10 +23,12 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiNotificationBadge,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -124,11 +126,37 @@ const getNodeSummary = (cell: CellDefinition, { error, output, durationMs }: Cel
   return getTypeLabel(cell);
 };
 
+/** How many times the cell has run, shown while the developer toolbar's performance check is on. */
+const RunCountBadge = ({ cellId }: { cellId: string }) => {
+  const { scheduler } = useNotebook();
+  const { euiTheme } = useEuiTheme();
+  const count = useStateFromPublishingSubject(scheduler.runCounts$)[cellId] ?? 0;
+  return (
+    <EuiNotificationBadge
+      color="subdued"
+      aria-label={i18n.translate('xpack.notebook.graph.runCount', {
+        defaultMessage: '{count, plural, one {# run} other {# runs}}',
+        values: { count },
+      })}
+      css={css`
+        position: absolute;
+        top: -${euiTheme.size.s};
+        right: -${euiTheme.size.s};
+      `}
+      data-test-subj="notebookGraphRunCount"
+    >
+      {count}
+    </EuiNotificationBadge>
+  );
+};
+
 const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode>) => {
   const { store } = useNotebook();
+  const { performanceCheck$ } = useNotebookServices();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cellId));
+  const isPerformanceCheckOn = useStateFromPublishingSubject(performanceCheck$);
   const cell = cells[cellId];
   if (!cell) return null;
 
@@ -137,6 +165,7 @@ const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode
       css={[
         getHighlightCss(highlight, euiTheme),
         css`
+          position: relative;
           width: ${width}px;
           height: ${CELL_NODE_SIZE.height}px;
           display: flex;
@@ -176,6 +205,7 @@ const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
+      {isPerformanceCheckOn && <RunCountBadge cellId={cellId} />}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -228,26 +258,29 @@ const SourceNode = ({ data: { label, width, highlight } }: NodeProps<SourceFlowN
 
 const NODE_TYPES: NodeTypes = { cell: CellNode, source: SourceNode };
 
-/** The notebook's cells and data sources as a top-to-bottom dependency graph. */
-/** Placeholder until the performance check exists: shows whether the developer toolbar turned it on. */
-const PerformanceCheckStatus = () => {
+/** Performance check controls, shown while the developer toolbar turns the check on. */
+const PerformanceCheckPanel = () => {
+  const { scheduler } = useNotebook();
   const { performanceCheck$ } = useNotebookServices();
-  const enabled = useStateFromPublishingSubject(performanceCheck$);
+  const isPerformanceCheckOn = useStateFromPublishingSubject(performanceCheck$);
+  if (!isPerformanceCheckOn) return null;
   return (
     <Panel position="top-left">
-      <EuiText size="xs" color="subdued" data-test-subj="notebookPerformanceCheckStatus">
-        {enabled
-          ? i18n.translate('xpack.notebook.performanceCheck.on', {
-              defaultMessage: 'Performance check: on',
-            })
-          : i18n.translate('xpack.notebook.performanceCheck.off', {
-              defaultMessage: 'Performance check: off',
-            })}
-      </EuiText>
+      <EuiButtonEmpty
+        size="xs"
+        iconType="refresh"
+        onClick={() => scheduler.resetRunCounts()}
+        data-test-subj="notebookGraphResetRunCounts"
+      >
+        {i18n.translate('xpack.notebook.graph.resetRunCounts', {
+          defaultMessage: 'Reset run counts',
+        })}
+      </EuiButtonEmpty>
     </Panel>
   );
 };
 
+/** The notebook's cells and data sources as a top-to-bottom dependency graph. */
 export const DependencyGraph = ({
   onSelectCell,
 }: {
@@ -364,7 +397,7 @@ export const DependencyGraph = ({
         >
           <Background />
           <Controls showInteractive={false} showFitView={false} />
-          <PerformanceCheckStatus />
+          <PerformanceCheckPanel />
         </ReactFlow>
       )}
     </div>
