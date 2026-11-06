@@ -229,6 +229,7 @@ describe('registerDashboardAppIntegration', () => {
       appliedAttachments,
       getUpdateOrigin,
       notifyOtherDashboardUpdated,
+      notifyApplyError: jest.fn(),
     });
   };
 

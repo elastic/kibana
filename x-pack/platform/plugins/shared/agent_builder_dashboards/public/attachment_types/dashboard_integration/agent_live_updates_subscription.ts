@@ -22,6 +22,7 @@ export interface AgentLiveUpdatesSubscriptionParams {
   upsertAttachment: (attachment: DashboardAttachment) => void;
   /** Called instead of applying an update that belongs to another dashboard. */
   onOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
+  onApplyError: (error: Error) => void;
 }
 
 const isDashboardUpdatedUiEvent = (
@@ -39,6 +40,7 @@ export const createAgentLiveUpdatesSubscription = ({
   appliedAttachments,
   upsertAttachment,
   onOtherDashboardUpdated,
+  onApplyError,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
     .pipe(
@@ -59,5 +61,7 @@ export const createAgentLiveUpdatesSubscription = ({
         return;
       }
 
-      void applyAttachmentToDashboard({ store: appliedAttachments, api, attachment });
+      applyAttachmentToDashboard({ store: appliedAttachments, api, attachment }).catch(
+        onApplyError
+      );
     });

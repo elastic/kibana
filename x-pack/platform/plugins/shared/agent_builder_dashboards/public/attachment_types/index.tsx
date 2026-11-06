@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { combineLatest, distinctUntilChanged, EMPTY, from, map, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, EMPTY, finalize, from, map, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
@@ -27,6 +27,13 @@ import {
   createAppliedAttachmentsStore,
   toShownVersionKey,
 } from './dashboard_integration/applied_attachments_store';
+
+const APPLY_ERROR_TITLE = i18n.translate(
+  'xpack.agentBuilderDashboards.applyAttachmentError.title',
+  {
+    defaultMessage: "Couldn't show the agent's dashboard changes",
+  }
+);
 
 export interface IdGenerator {
   readonly current: string;
@@ -115,25 +122,30 @@ export const registerDashboardAttachmentUiDefinition = ({
                   createDashboardAppIntegration$,
                   createOtherDashboardUpdateNotifier,
                   previewAttachmentInDashboard,
-                }) =>
-                  createDashboardAppIntegration$({
+                }) => {
+                  const notifyApplyError = (error: Error) =>
+                    toasts.addError(error, { title: APPLY_ERROR_TITLE });
+                  const otherDashboardUpdateNotifier = createOtherDashboardUpdateNotifier({
+                    toasts,
+                    openAttachment: (attachment) =>
+                      void previewAttachmentInDashboard({
+                        attachment,
+                        dashboardApi: api,
+                        appliedAttachments,
+                        dashboardLocator,
+                        checkSavedDashboardExist,
+                      }).catch(notifyApplyError),
+                  });
+                  return createDashboardAppIntegration$({
                     agentBuilder,
                     api,
                     draftAttachmentId,
                     appliedAttachments,
                     getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
-                    notifyOtherDashboardUpdated: createOtherDashboardUpdateNotifier({
-                      toasts,
-                      openAttachment: (attachment) =>
-                        void previewAttachmentInDashboard({
-                          attachment,
-                          dashboardApi: api,
-                          appliedAttachments,
-                          dashboardLocator,
-                          checkSavedDashboardExist,
-                        }),
-                    }),
-                  })
+                    notifyOtherDashboardUpdated: otherDashboardUpdateNotifier.notify,
+                    notifyApplyError,
+                  }).pipe(finalize(otherDashboardUpdateNotifier.removeAll));
+                }
               )
             )
           : EMPTY;
