@@ -4093,10 +4093,7 @@ describe('ProposalsService — gateless proposals', () => {
   });
 
   describe('releaseGate', () => {
-    it('refuses a decision whose status pair the guards reject', async () => {
-      // The direct path writes through `applyUpdate`, so a gateless decision
-      // passes the same pair, terminal-status and immutability guards a gated
-      // one does rather than bypassing them.
+    it('refuses a gateless proposal that is no longer pending', async () => {
       const storage = createStorage(gateless({ status: 'executing' }));
       const { service } = createService(storage);
 

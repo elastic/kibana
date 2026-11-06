@@ -267,10 +267,9 @@ export class ProposalsService {
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       createdAt: new Date().toISOString(),
-      // A gated proposal is created by the step that knows who the Worker is;
-      // a gateless one is created straight from a request, so the principal
-      // behind it is resolved here rather than taken from a caller.
-      createdBy: user ?? (gate === 'none' ? await this.deps.resolveUser(request) : undefined),
+      // The step passes the Worker it resolved; any other caller is named from
+      // its request, user or service account.
+      createdBy: user ?? (await this.deps.resolveUser(request)),
       // A fresh proposal is a single-member revision chain rooted at itself.
       // `clone()` retries deliberately do not touch it: a retry is not a revision.
       rootProposalId: id,
