@@ -81,7 +81,7 @@ describe('Significant Events run quota routes', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-09-03T08:30:00.000Z'));
     jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
     jest.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
-    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
+    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true, limit: 15 });
     jest
       .mocked(createRunQuotaInternalRepository)
       .mockReset()
@@ -296,7 +296,7 @@ describe('Significant Events run quota routes', () => {
         ...handlerParams,
         params: { body },
       } as never)
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 15 });
 
     expect(consumeRunQuota).toHaveBeenCalledWith({
       internalRepository: repository,
