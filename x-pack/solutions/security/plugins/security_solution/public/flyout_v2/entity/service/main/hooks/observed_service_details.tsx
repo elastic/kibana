@@ -7,16 +7,16 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import type { inputsModel } from '../../../../common/store';
-import type { InspectResponse } from '../../../../types';
-import { ServicesQueries } from '../../../../../common/search_strategy/security_solution/services';
-import type { ServiceItem } from '../../../../../common/search_strategy/security_solution/services/common';
-import { OBSERVED_SERVICE_QUERY_ID } from '../content';
+import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import type { inputsModel } from '../../../../../common/store';
+import type { InspectResponse } from '../../../../../types';
+import { ServicesQueries } from '../../../../../../common/search_strategy/security_solution/services';
+import type { ServiceItem } from '../../../../../../common/search_strategy/security_solution/services/common';
+import { SERVICE_PANEL_OBSERVED_SERVICE_QUERY_ID } from '../constants';
 import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
-} from '../../../../common/utils/execution_context';
+} from '../../../../../common/utils/execution_context';
 
 const OBSERVED_SERVICE_DETAILS_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
@@ -39,15 +39,18 @@ interface UseServiceDetails {
   indexNames: string[];
   skip?: boolean;
   startDate: string;
+  /** Serialized DSL identity filter; when set it replaces the default `service.name` term. */
+  filterQuery?: string;
 }
 
 export const useObservedServiceDetails = ({
   endDate,
   serviceName,
   indexNames,
-  id = OBSERVED_SERVICE_QUERY_ID,
+  id = SERVICE_PANEL_OBSERVED_SERVICE_QUERY_ID,
   skip = false,
   startDate,
+  filterQuery,
 }: UseServiceDetails): [boolean, ServiceDetailsArgs] => {
   const {
     loading,
@@ -84,13 +87,14 @@ export const useObservedServiceDetails = ({
       defaultIndex: indexNames,
       factoryQueryType: ServicesQueries.observedDetails,
       serviceName,
+      ...(filterQuery ? { filterQuery } : {}),
       timerange: {
         interval: '12h',
         from: startDate,
         to: endDate,
       },
     }),
-    [endDate, indexNames, startDate, serviceName]
+    [endDate, indexNames, startDate, serviceName, filterQuery]
   );
 
   useEffect(() => {

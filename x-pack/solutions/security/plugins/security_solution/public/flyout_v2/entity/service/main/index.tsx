@@ -7,31 +7,40 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { noop } from 'lodash/fp';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiSpacer } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
-import type { ESQuery } from '../../../../../common/typed_json';
-import { buildEntityNameFilter } from '../../../../../common/search_strategy';
+import { buildEntityNameFilter, type ServiceItem } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import {
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  type IdentityFields,
+} from '../../../../flyout/document_details/shared/utils';
+import {
+  CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
   type EntityDetailsPath,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { getHeaderRiskLevel } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import {
-  getResolvedFromRecordCount,
-  isEntityGroupView,
-} from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getHeaderRiskLevel,
+} from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
@@ -39,23 +48,29 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import { FlyoutBody } from '../../../../flyout/shared/components/flyout_body';
-import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../../../flyout/entity_details/service_right';
-import { ServicePanelContent } from '../../../../flyout/entity_details/service_right/content';
-import { ServicePanelHeader } from '../../../../flyout/entity_details/service_right/header';
-import { ServicePanelFooter } from '../../../../flyout/entity_details/service_right/footer';
-import { useObservedService } from '../../../../flyout/entity_details/service_right/hooks/use_observed_service';
 import { useFlyoutApi } from '../../../use_flyout_api';
-import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
-import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
-import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
+import { Header } from './header';
+import { Content } from './content';
+import { Footer } from './footer';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../../common/constants';
+import { useObservedService } from './hooks/use_observed_service';
+import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
   serviceName: string;
-  /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
+  /**
+   * The source document record. When provided, entityId is computed from the document's service
+   * identity fields using the EUID API. Falls back to the `entityId` prop if the EUID API returns
+   * no value.
+   */
+  hit?: DataTableRecord;
+  /**
+   * Canonical Entity Store v2 id (`entity.id`) when already resolved. Used directly when `hit` is
+   * not provided, or as a fallback when EUID resolution from `hit` yields no value.
+   */
   entityId?: string;
   /**
    * `single` (default) shows the `entityId` record only. `resolved` also loads every record that
@@ -83,12 +98,15 @@ const FIRST_RECORD_PAGINATION = {
  */
 export const Service: FC<ServiceProps> = memo(function Service({
   serviceName,
-  entityId,
+  hit,
+  entityId: entityIdProp,
   mode: requestedMode = 'single',
   scopeId = '',
   contextID,
 }) {
-  const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
+  const { uiSettings } = services;
+  const euidApi = useEntityStoreEuidApi();
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
   // Resolution-group view is only available on the new Entity Analytics page; otherwise fall back
   // to the single-entity view so the header, summary grid and copy link stay consistent.
@@ -97,58 +115,84 @@ export const Service: FC<ServiceProps> = memo(function Service({
     openServiceFlyoutAsChild,
     openEntityDetailsAsChild,
     openEntityRiskInputs,
+    openEntityAlertsInsights,
     openEntityGraphView,
     openEntityResolution,
   } = useFlyoutApi();
 
+  // Compute entityId from hit when provided; fall back to the prop when the hit yields no EUID
+  const entityId = useMemo(
+    () =>
+      (hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('service'),
+            hit.flattened
+          )
+        : undefined) ?? entityIdProp,
+    [hit, euidApi, entityIdProp]
+  );
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
   );
-  const entityFromStoreResult = useEntityFromStore({
+
+  const entityFromStoreResult = useEntityFromStore<ServiceItem>({
     entityId,
     mode,
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
-    skip: false,
+    skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
-  const euidApi = useEntityStoreEuidApi();
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    return (
-      euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getBuiltInEntityDefinition('service'),
-        entityFromStoreResult.entityRecord ?? {}
-      ) ?? {}
-    );
-  }, [entityFromStoreResult.entityRecord, euidApi]);
+    const legacyFields: IdentityFields =
+      serviceName != null && serviceName !== '' ? { 'service.name': serviceName } : {};
+    if (entityStoreV2Enabled) {
+      const fromStore =
+        euidApi?.euid?.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('service'),
+          entityFromStoreResult.entityRecord
+        ) ?? {};
+      return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
+    }
+    return legacyFields;
+  }, [entityStoreV2Enabled, entityFromStoreResult.entityRecord, euidApi, serviceName]);
 
   const serviceNameFilterQuery = useMemo(
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
     [serviceName]
   );
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,
-    filterQuery: serviceNameFilterQuery as unknown as ESQuery | undefined,
+    filterQuery: serviceNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: true,
+    skip: entityStoreV2Enabled,
   });
 
-  const { inspect, loading } = riskScoreState;
-  const { setQuery, deleteQuery } = useGlobalTime();
-  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
+  const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
+
+  const observedService = useObservedService(
+    serviceName,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.service,
       identifier: serviceName,
-      entityId: entityFromStoreResult.entityRecord?.entity?.id,
-      entityStoreV2Enabled: true,
+      entityId: entityStoreV2Enabled ? observedService.entityRecord?.entity?.id : undefined,
+      entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
       isGroupView,
@@ -162,26 +206,70 @@ export const Service: FC<ServiceProps> = memo(function Service({
     onSuccess: onAssetCriticalityChanged,
   });
 
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? serviceName);
+
+  const panelDisplayEntityId = useMemo(
+    () => (entityStoreV2Enabled ? observedService.entityRecord?.entity?.id : entityId),
+    [entityId, entityStoreV2Enabled, observedService.entityRecord?.entity?.id]
+  );
+
+  const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedService.entityRecord != null;
+
   useQueryInspector({
     deleteQuery,
-    inspect,
-    loading,
+    inspect: useEntityStoreInspectForRisk
+      ? entityFromStoreResult?.inspect ?? null
+      : inspectRiskScore,
+    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
     queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: riskScoreState.refetch,
+    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
     setQuery,
   });
 
-  const entityStoreEntityId = entityFromStoreResult.entityRecord?.entity?.id;
-  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords);
-  // Group view shows the resolution-group risk level; a lone target shows its own.
-  const riskLevel = getHeaderRiskLevel(entityFromStoreResult.entityRecord, isGroupView);
+  const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
+    ? observedService.entityRecord ?? undefined
+    : undefined;
+
+  const riskScoreStateFromStore =
+    entityStoreV2Enabled && observedService.entityRecord
+      ? buildRiskScoreStateFromEntityRecord(EntityType.service, observedService.entityRecord, {
+          refetch: observedService.refetchEntityStore ?? noop,
+          isLoading: observedService.isLoading,
+          error: null,
+          inspect: entityFromStoreResult?.inspect,
+        })
+      : null;
+
+  const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
   // Group view is read-only: a single criticality edit can't target every member.
   const onCriticalitySave =
-    !isGroupView && entityFromStoreResult.entityRecord
+    !isGroupView &&
+    !!assetCriticalityPrivileges.data?.has_write_permissions &&
+    entityFromStoreResult.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
-          updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+          updateAssetCriticalityLevel(level, observedService.entityRecord)
       : undefined;
+
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? observedService.entityRecord?.entity?.id
+    : undefined;
+
+  const noEntityInStore =
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedService.entityRecord;
+
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: observedService.entityRecord ?? null,
+    isGroupView,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
 
   const onShowService = useCallback(() => {
     openServiceFlyoutAsChild({
@@ -248,6 +336,25 @@ export const Service: FC<ServiceProps> = memo(function Service({
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
                 : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
+        case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
+          switch (path.subTab) {
+            // Services only have the alerts insight; misconfigurations and vulnerabilities never apply.
+            case CspInsightLeftPanelSubTab.VULNERABILITIES:
+            case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
+              return;
+            case CspInsightLeftPanelSubTab.ALERTS:
+              return openEntityAlertsInsights({
+                entityType: EntityType.service,
+                value: serviceName,
+                entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
+                onShowEntity: onShowService,
+                title: serviceName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
+              });
+          }
+          return;
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
           return openEntityGraphView({
@@ -267,6 +374,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityType: 'service',
             entityName: serviceName,
             scopeId,
+            mode,
             onShowEntity: onShowService,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: serviceName,
@@ -276,10 +384,13 @@ export const Service: FC<ServiceProps> = memo(function Service({
     },
     [
       openEntityRiskInputs,
+      openEntityAlertsInsights,
       openEntityGraphView,
       openEntityResolution,
       serviceName,
       scopeId,
+      panelDisplayEntityId,
+      mode,
       entityStoreEntityId,
       onShowService,
       onShowRelatedEntityFromGraph,
@@ -287,53 +398,29 @@ export const Service: FC<ServiceProps> = memo(function Service({
     ]
   );
 
-  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
-    entityRecord: entityFromStoreResult.entityRecord ?? null,
-    isGroupView,
-  });
-
-  const tabsNode = tabs ? (
-    <EntityPanelHeaderTabs
-      tabs={tabs}
-      selectedTabId={selectedTabId}
-      setSelectedTabId={setSelectedTabId}
-    />
-  ) : undefined;
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(observedService.entityRecord, isGroupView);
 
   return (
     <>
-      <ServicePanelHeader
-        serviceName={serviceName}
-        observedService={observedService}
-        isEntityInStore={!!entityFromStoreResult.entityRecord}
-        resolvedFromCount={resolvedFromCount}
-        flyoutHeaderProps={{
-          css: css`
-            padding-block: ${euiTheme.size.s} !important;
-          `,
-          panelProps: { paddingSize: 'none' },
-        }}
-        riskLevel={riskLevel}
-        headerActions={
-          isNewEntityAnalyticsPage ? (
-            <FlyoutHeaderActions>
-              <EntityAnalyticsFlyoutCopyLink
-                target={{
-                  kind: 'service',
-                  serviceName,
-                  entityId: entityStoreEntityId ?? entityId,
-                  scopeId,
-                  mode: toEntityDescriptorMode(mode),
-                }}
-              />
-            </FlyoutHeaderActions>
-          ) : undefined
-        }
-      />
-      <FlyoutBody panelProps={{ paddingSize: 'none' }}>
-        {entityFromStoreResult.entityRecord && (
+      <EuiFlyoutHeader hasBorder>
+        <Header
+          serviceName={serviceName}
+          lastSeen={observedService.lastSeen}
+          entityId={panelDisplayEntityId}
+          aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
+          mode={mode}
+          isEntityInStore={!!observedService.entityRecord}
+          riskLevel={riskLevel}
+          scopeId={scopeId}
+          showEntityAnalyticsCopyLink
+        />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {observedService.entityRecord && (
           <EntitySummaryGrid
-            entityRecord={entityFromStoreResult.entityRecord}
+            entityRecord={observedService.entityRecord}
             aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
@@ -342,43 +429,46 @@ export const Service: FC<ServiceProps> = memo(function Service({
         {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
-        {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
-          <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
+        {tabs && selectedTabId === TABLE_TAB_ID && observedService.entityRecord ? (
+          <EntityStoreTableTab entityRecord={observedService.entityRecord} />
         ) : (
-          <ServicePanelContent
-            entityRecord={entityFromStoreResult.entityRecord ?? undefined}
-            isEntityRecordLoading={entityFromStoreResult.isLoading}
-            serviceName={serviceName}
+          <Content
+            identityFields={documentEntityIdentifiers}
             observedService={observedService}
-            riskScoreState={riskScoreState}
+            riskScoreState={effectiveRiskScoreState}
             entityRiskScores={entityRiskScores}
-            recalculatingScore={recalculatingScore}
-            onAssetCriticalityChange={onAssetCriticalityChanged}
             contextID={safeContextID}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
-            entityStoreV2Enabled
+            entityRecord={
+              entityStoreV2Enabled ? observedService.entityRecord ?? undefined : undefined
+            }
+            aliasRecords={aliasRecords}
+            noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
+            hideHeaderIcons
+            showInsights
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
-            mode={mode}
-            hideHeaderIcons
           />
         )}
-      </FlyoutBody>
-      <ServicePanelFooter
-        serviceName={serviceName}
-        identityFields={documentEntityIdentifiers}
-        entity={entityFromStoreResult.entityRecord ?? undefined}
-        flyoutFooterProps={{
-          css: css`
-            padding-block: ${euiTheme.size.s} !important;
-          `,
-        }}
-        panelProps={{ paddingSize: 'none' }}
-      />
+      </EuiFlyoutBody>
+      {assetInventoryEnabled && (
+        <EuiFlyoutFooter>
+          <Footer
+            serviceName={serviceName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 });

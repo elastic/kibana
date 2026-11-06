@@ -12,7 +12,11 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../common/typed_json';
-import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
+import {
+  buildEntityNameFilter,
+  type RiskSeverity,
+  type ServiceItem,
+} from '../../../../common/search_strategy';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
@@ -20,10 +24,11 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { ServicePanelContent } from './content';
-import { ServicePanelHeader } from './header';
-import { ServicePanelFooter } from './footer';
-import { useObservedService } from './hooks/use_observed_service';
+import { Content } from '../../../flyout_v2/entity/service/main/content';
+import { Header } from '../../../flyout_v2/entity/service/main/header';
+import { Footer } from '../../../flyout_v2/entity/service/main/footer';
+import { useObservedService } from '../../../flyout_v2/entity/service/main/hooks/use_observed_service';
+import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../../flyout_v2/entity/service/main/constants';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
@@ -34,7 +39,9 @@ import {
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../common/utils/execution_context';
 import { getRiskFromEntityRecord } from '../shared/entity_store_risk_utils';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
@@ -53,7 +60,6 @@ export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: ServicePanelProps;
 }
 
-export const SERVICE_PANEL_RISK_SCORE_QUERY_ID = 'servicePanelRiskScoreQuery';
 const SERVICE_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
   'service_entity_from_store'
@@ -81,7 +87,7 @@ export const ServicePanel = memo(function ServicePanel({
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
   );
-  const entityFromStoreResult = useEntityFromStore({
+  const entityFromStoreResult = useEntityFromStore<ServiceItem>({
     entityId,
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
@@ -114,7 +120,7 @@ export const ServicePanel = memo(function ServicePanel({
 
   const { inspect, loading, data: serviceRisk } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
-  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
+  const observedService = useObservedService(serviceName, scopeId);
   const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
   const isRiskScoreExist = !!serviceRiskData?.service.risk;
 
@@ -203,17 +209,19 @@ export const ServicePanel = memo(function ServicePanel({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <ServicePanelHeader
-        serviceName={serviceName}
-        observedService={observedService}
-        isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={
-          entityFromStoreResult.entityRecord
-            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-                'Unknown') as RiskSeverity)
-            : undefined
-        }
-      />
+      <FlyoutHeader>
+        <Header
+          serviceName={serviceName}
+          lastSeen={observedService.lastSeen}
+          isEntityInStore={!!entityFromStoreResult.entityRecord}
+          riskLevel={
+            entityFromStoreResult.entityRecord
+              ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                  'Unknown') as RiskSeverity)
+              : undefined
+          }
+        />
+      </FlyoutHeader>
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (
           <EntitySummaryGrid
@@ -227,10 +235,10 @@ export const ServicePanel = memo(function ServicePanel({
         {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
           <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
         ) : (
-          <ServicePanelContent
+          <Content
             entityRecord={entityFromStoreResult.entityRecord ?? undefined}
             refetchEntityRecord={entityFromStoreResult.refetch}
-            serviceName={serviceName}
+            identityFields={documentEntityIdentifiers}
             observedService={observedService}
             riskScoreState={riskScoreState}
             entityRiskScores={entityRiskScores}
@@ -247,13 +255,15 @@ export const ServicePanel = memo(function ServicePanel({
         )}
       </FlyoutBody>
       {!isPreviewMode && (
-        <ServicePanelFooter
-          serviceName={serviceName}
-          identityFields={documentEntityIdentifiers}
-          entity={
-            entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
-          }
-        />
+        <FlyoutFooter>
+          <Footer
+            serviceName={serviceName}
+            identityFields={documentEntityIdentifiers}
+            entity={
+              entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
+            }
+          />
+        </FlyoutFooter>
       )}
     </>
   );

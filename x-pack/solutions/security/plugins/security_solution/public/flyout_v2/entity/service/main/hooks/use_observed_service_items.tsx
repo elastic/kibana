@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { ServiceItem } from '../../../../../common/search_strategy';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import type { ServiceItem } from '../../../../../../common/search_strategy';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import * as i18n from './translations';
-import type { ObservedEntityData } from '../../../../flyout_v2/entity/shared/components/observed_entity/types';
-import type { EntityTableRows } from '../../shared/components/entity_table/types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
+import type { EntityTableRows } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 
 const basicServiceFields: EntityTableRows<ObservedEntityData<ServiceItem>> = [
   {
