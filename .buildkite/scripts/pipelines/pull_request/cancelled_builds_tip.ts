@@ -51,9 +51,9 @@ export const countRecentCancelledBuilds = (
   }).length;
 
 export const getCancelledBuildsTipMessage = (user: string, cancelledBuilds: number): string =>
-  `👋 @${user}, are you still iterating on this PR? ${cancelledBuilds} CI builds were cancelled in the last day before they finished. ` +
-  "If you don't need CI on every push yet, we recommend converting the PR to draft: drafts don't run CI automatically, " +
-  'and you can comment `/ci` whenever you want a build.';
+  `👋 @${user}, if you're still iterating on this PR, consider converting it to draft: ` +
+  `${cancelledBuilds} CI builds were cancelled in the last day before they finished. ` +
+  "Drafts don't run CI automatically, and you can comment `/ci` whenever you want a build.";
 
 const postTip = async (): Promise<void> => {
   const {
