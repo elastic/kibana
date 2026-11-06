@@ -87,7 +87,7 @@ import {
   QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { AlertingRetryService } from '../lib/services/retry_service';
+import { EsTransientRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import {
@@ -160,8 +160,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
-  bind(AlertingRetryService).toSelf().inSingletonScope();
-  bind(RetryServiceToken).toService(AlertingRetryService);
+  bind(EsTransientRetryService).toSelf().inSingletonScope();
+  bind(RetryServiceToken).toService(EsTransientRetryService);
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);

@@ -26,10 +26,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
 import { ActivityLogFlyout } from '../activity_log/activity_log_flyout';
 import { useActivityLog } from '../activity_log/use_activity_log';
-import { TraceFlyout } from '../timeline/response/trace_flyout';
 
 const labels = {
   actionsAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.actionsAriaLabel', {
@@ -65,9 +63,6 @@ const labels = {
       defaultMessage: 'No activity has been recorded for this conversation.',
     }
   ),
-  loadTrace: i18n.translate('xpack.agentBuilder.conversationActions.loadTrace', {
-    defaultMessage: 'Load trace from file',
-  }),
 };
 
 interface MoreActionsButtonProps {
@@ -90,16 +85,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const { conversation } = useConversation();
   const { title: conversationTitle } = useConversationTitle();
-
-  const {
-    openFilePicker,
-    isFlyoutOpen: isTraceFlyoutOpen,
-    loadedSpans,
-    loadedTraceId,
-    closeFlyout: closeTraceFlyout,
-    fileInputRef,
-    handleFileChange,
-  } = useLoadTraceFromFile();
 
   const closePopover = () => setIsPopoverOpen(false);
   const {
@@ -137,11 +122,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     });
   }, [conversationTitle, conversation]);
 
-  const handleLoadTrace = useCallback(() => {
-    setIsPopoverOpen(false);
-    openFilePicker();
-  }, [openFilePicker]);
-
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
       return labels.fullScreen;
@@ -166,18 +146,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       })}
     >
       {labels.downloadConversation}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="load-trace"
-      icon="export"
-      onClick={handleLoadTrace}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.LOAD_TRACE_FROM_FILE,
-        detail: 'conversation',
-      })}
-    >
-      {labels.loadTrace}
     </EuiContextMenuItem>,
   ];
 
@@ -279,13 +247,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   return (
     <>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json"
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
       <EuiPopover
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
@@ -297,13 +258,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isActivityLogOpen && <ActivityLogFlyout onClose={closeActivityLog} />}
-      {isTraceFlyoutOpen && (
-        <TraceFlyout
-          traceId={loadedTraceId}
-          initialSpans={loadedSpans ?? undefined}
-          onClose={closeTraceFlyout}
-        />
-      )}
     </>
   );
 };
