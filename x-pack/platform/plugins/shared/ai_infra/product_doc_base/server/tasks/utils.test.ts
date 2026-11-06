@@ -9,14 +9,21 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import {
   REPOSITORY_VERSION_DEFER_MAX_MS,
   anySupersededForced,
+  deferForRepositoryVersion,
+  findSupersededTasks,
+  getRequestTaskStatus,
   isStaleRepositoryRequest,
   isTaskSuperseded,
   markSupersededTasks,
+  reviveSupersededTask,
+  runTaskUnderInstallLock,
   shouldDeferForRepositoryVersion,
   waitUntilTaskCompleted,
+  type InstallLockManager,
 } from './utils';
 
 describe('isTaskSuperseded', () => {
@@ -78,11 +85,10 @@ describe('isStaleRepositoryRequest', () => {
   });
 });
 
-describe('markSupersededTasks', () => {
-  const schedule = (repositoryVersion?: string) =>
-    markSupersededTasks({
+describe('findSupersededTasks', () => {
+  const find = (repositoryVersion?: string) =>
+    findSupersededTasks({
       taskManager,
-      logger: loggerMock.create(),
       taskType: 'ProductDocBase:EnsureUpToDate',
       inferenceId: '.elser',
       repositoryVersion,
@@ -102,8 +108,8 @@ describe('markSupersededTasks', () => {
     });
   });
 
-  it('marks only waiting tasks requested against an older repository version and returns them', async () => {
-    const superseded = await schedule('2026-10-12T00:00:00.000Z');
+  it('finds only waiting tasks requested against an older repository version', async () => {
+    const superseded = await find('2026-10-12T00:00:00.000Z');
 
     expect(taskManager.fetch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -118,18 +124,132 @@ describe('markSupersededTasks', () => {
         },
       })
     );
+    expect(superseded.map(({ id }) => id)).toEqual(['older']);
+  });
+
+  it('finds nothing for requests without a repository version', async () => {
+    await expect(find(undefined)).resolves.toEqual([]);
+
+    expect(taskManager.fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('markSupersededTasks', () => {
+  it('sets the superseded marker on the given tasks without deleting them', async () => {
+    const taskManager = taskManagerMock.createStart();
+
+    await markSupersededTasks({
+      taskManager,
+      logger: loggerMock.create(),
+      taskType: 'ProductDocBase:EnsureUpToDate',
+      inferenceId: '.elser',
+      tasks: [task({ id: 'older' })],
+    });
+
     expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(['older'], expect.any(Function));
     const [, mapState] = taskManager.bulkUpdateState.mock.calls[0];
     expect(mapState({ other: 1 }, 'older')).toEqual({ other: 1, superseded: true });
     expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-    expect(superseded.map(({ id }) => id)).toEqual(['older']);
   });
 
-  it('does nothing for requests without a repository version', async () => {
-    await expect(schedule(undefined)).resolves.toEqual([]);
+  it('does nothing without tasks', async () => {
+    const taskManager = taskManagerMock.createStart();
 
-    expect(taskManager.fetch).not.toHaveBeenCalled();
+    await markSupersededTasks({
+      taskManager,
+      logger: loggerMock.create(),
+      taskType: 'ProductDocBase:EnsureUpToDate',
+      inferenceId: '.elser',
+      tasks: [],
+    });
+
     expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
+  });
+});
+
+describe('reviveSupersededTask', () => {
+  it('clears the marker of a superseded task', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue(task({ id: 'fixed', state: { superseded: true } }));
+
+    await reviveSupersededTask({ taskManager, logger: loggerMock.create(), taskId: 'fixed' });
+
+    expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(['fixed'], expect.any(Function));
+    const [, mapState] = taskManager.bulkUpdateState.mock.calls[0];
+    expect(mapState({ superseded: true }, 'fixed')).toEqual({ superseded: false });
+  });
+
+  it('leaves a task that is not superseded or does not exist alone', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue(task({ id: 'fixed', state: {} }));
+    await reviveSupersededTask({ taskManager, logger: loggerMock.create(), taskId: 'fixed' });
+
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'fixed')
+    );
+    await reviveSupersededTask({ taskManager, logger: loggerMock.create(), taskId: 'fixed' });
+
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
+  });
+});
+
+describe('getRequestTaskStatus', () => {
+  const status = (docs: ConcreteTaskInstance[]) => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({ docs, versionMap: new Map() });
+    return getRequestTaskStatus({
+      taskManager,
+      taskType: 'ProductDocBase:EnsureUpToDate',
+      inferenceId: '.elser',
+    });
+  };
+
+  it('does not count a superseded task as pending', async () => {
+    await expect(
+      status([task({ status: TaskStatus.Idle, state: { superseded: true } })])
+    ).resolves.toBe('none');
+    await expect(
+      status([
+        task({ status: TaskStatus.Idle, state: { superseded: true } }),
+        task({ status: TaskStatus.Failed }),
+      ])
+    ).resolves.toBe('failed');
+    await expect(status([task({ status: TaskStatus.Idle, state: {} })])).resolves.toBe('pending');
+  });
+});
+
+describe('deferrals keep the task state', () => {
+  const state = { superseded: true };
+
+  it('runTaskUnderInstallLock hands the state back when the lock is held', async () => {
+    const withLock = jest.fn(async () => {
+      throw new LockAcquisitionError('held');
+    });
+
+    await expect(
+      runTaskUnderInstallLock({
+        lockManager: { withLock } as unknown as InstallLockManager,
+        run: jest.fn(),
+        state,
+      })
+    ).resolves.toEqual({ state, runAt: expect.any(Date) });
+  });
+
+  it('runTaskUnderInstallLock hands the state back after a run', async () => {
+    const withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+
+    await expect(
+      runTaskUnderInstallLock({
+        lockManager: { withLock } as unknown as InstallLockManager,
+        run: jest.fn(),
+        state,
+      })
+    ).resolves.toEqual({ state });
+  });
+
+  it('deferForRepositoryVersion hands the state back', () => {
+    expect(deferForRepositoryVersion(state)).toEqual({ state, runAt: expect.any(Date) });
+    expect(deferForRepositoryVersion()).toEqual({ state: {}, runAt: expect.any(Date) });
   });
 });
 

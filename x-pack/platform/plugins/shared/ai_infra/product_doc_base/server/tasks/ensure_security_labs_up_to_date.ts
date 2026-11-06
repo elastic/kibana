@@ -16,11 +16,13 @@ import type { InternalServices } from '../types';
 import {
   anySupersededForced,
   deferForRepositoryVersion,
+  findSupersededTasks,
   getInferenceScope,
   isTaskCurrentlyRunningError,
   isTaskSuperseded,
   markSupersededTasks,
   requestTaskStateSchemaByVersion,
+  reviveSupersededTask,
   runTaskUnderInstallLock,
   shouldDeferForRepositoryVersion,
   type InstallLockManager,
@@ -61,6 +63,19 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
             const inferenceId = params.inferenceId ?? defaultInferenceEndpoints.ELSER;
             const { forceUpdate, requestedAt, repositoryVersion } = params;
             const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
+            const { id: taskId, state } = context.taskInstance;
+            const superseded = async () => {
+              const result = await isTaskSuperseded({ taskManager: taskManagerStart, taskId });
+              if (result) {
+                logger.info(
+                  `Skipping Security Labs update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                );
+              }
+              return result;
+            };
+            if (await superseded()) {
+              return { state };
+            }
             if (
               shouldDeferForRepositoryVersion({
                 requestedVersion: repositoryVersion,
@@ -71,20 +86,13 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
               logger.info(
                 `Deferring Security Labs update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
               );
-              return deferForRepositoryVersion();
+              return deferForRepositoryVersion(state);
             }
             return runTaskUnderInstallLock({
               lockManager,
+              state,
               run: async () => {
-                if (
-                  await isTaskSuperseded({
-                    taskManager: taskManagerStart,
-                    taskId: context.taskInstance.id,
-                  })
-                ) {
-                  logger.info(
-                    `Skipping Security Labs update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
-                  );
+                if (await superseded()) {
                   return;
                 }
                 await packageInstaller.ensureSecurityLabsUpToDate({ inferenceId, forceUpdate });
@@ -100,18 +108,23 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
 };
 
 /**
- * One update task per inference ID and repository version: `ensureScheduled` keeps it idempotent, a
- * run in progress against another version is never deleted, and tasks are one-shot so they are
- * removed by Task Manager on completion. Waiting tasks of older versions are superseded.
+ * One update task per inference ID, repository version and force flag: `ensureScheduled` keeps it
+ * idempotent without swallowing a forced request behind an ordinary one, a run in progress against
+ * another version is never deleted, and tasks are one-shot so they are removed by Task Manager on
+ * completion. Waiting tasks of older versions are superseded. Remote repositories keep the plain id.
  */
 export const getEnsureSecurityLabsUpToDateTaskId = (
   inferenceId: string,
-  repositoryVersion?: string
+  repositoryVersion?: string,
+  forceUpdate?: boolean
 ): string => {
   const baseId = isImpliedDefaultElserInferenceId(inferenceId)
     ? ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID
     : ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID_MULTILINGUAL;
-  return repositoryVersion ? `${baseId}:${repositoryVersion}` : baseId;
+  if (!repositoryVersion) {
+    return baseId;
+  }
+  return `${baseId}:${repositoryVersion}${forceUpdate ? ':force' : ''}`;
 };
 
 export const scheduleEnsureSecurityLabsUpToDateTask = async ({
@@ -127,29 +140,36 @@ export const scheduleEnsureSecurityLabsUpToDateTask = async ({
   forceUpdate?: boolean;
   repositoryVersion?: string;
 }) => {
-  const taskId = getEnsureSecurityLabsUpToDateTaskId(inferenceId, repositoryVersion);
+  const taskType = ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE;
+  const superseded = await findSupersededTasks({
+    taskManager,
+    taskType,
+    inferenceId,
+    repositoryVersion,
+  });
+  const effectiveForceUpdate = Boolean(forceUpdate) || anySupersededForced(superseded);
+  const taskId = getEnsureSecurityLabsUpToDateTaskId(
+    inferenceId,
+    repositoryVersion,
+    effectiveForceUpdate
+  );
+  const params: EnsureSecurityLabsUpToDateTaskParams = {
+    inferenceId,
+    forceUpdate: effectiveForceUpdate || undefined,
+    requestedAt: new Date().toISOString(),
+    repositoryVersion,
+  };
 
   try {
-    const superseded = await markSupersededTasks({
-      taskManager,
-      logger,
-      taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
-      inferenceId,
-      repositoryVersion,
-    });
-    const params: EnsureSecurityLabsUpToDateTaskParams = {
-      inferenceId,
-      forceUpdate: forceUpdate || anySupersededForced(superseded) || undefined,
-      requestedAt: new Date().toISOString(),
-      repositoryVersion,
-    };
+    await reviveSupersededTask({ taskManager, logger, taskId });
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
+      taskType,
       params,
       state: {},
       scope: ['productDoc', getInferenceScope(inferenceId)],
     });
+    await markSupersededTasks({ taskManager, logger, taskType, inferenceId, tasks: superseded });
 
     await taskManager.runSoon(taskId);
 

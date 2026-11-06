@@ -99,15 +99,35 @@ describe('EnsureSecurityLabsUpToDate task', () => {
     expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
   });
 
-  it('re-reads its task under the lock and stops when it was marked superseded', async () => {
+  it('completes at once instead of deferring when it was already superseded', async () => {
+    getRepositoryVersion.mockResolvedValue('2026-10-01T00:00:00.000Z');
     taskManagerStart.get.mockResolvedValue({
       state: { superseded: true },
     } as unknown as ConcreteTaskInstance);
 
+    const result = await runTaskWith({
+      inferenceId: '.elser',
+      forceUpdate: true,
+      requestedAt: new Date().toISOString(),
+      repositoryVersion: '2026-10-12T00:00:00.000Z',
+    });
+
+    expect(taskManagerStart.get).toHaveBeenCalledWith('security-labs-task');
+    expect(getRepositoryVersion).not.toHaveBeenCalled();
+    expect(withLock).not.toHaveBeenCalled();
+    expect(ensureSecurityLabsUpToDate).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {} });
+  });
+
+  it('re-reads its task under the lock and stops when it was marked superseded after being claimed', async () => {
+    taskManagerStart.get
+      .mockResolvedValueOnce({ state: {} } as unknown as ConcreteTaskInstance)
+      .mockResolvedValue({ state: { superseded: true } } as unknown as ConcreteTaskInstance);
+
     const result = await runTask();
 
     expect(withLock).toHaveBeenCalledTimes(1);
-    expect(taskManagerStart.get).toHaveBeenCalledWith('security-labs-task');
+    expect(taskManagerStart.get).toHaveBeenCalledTimes(2);
     expect(ensureSecurityLabsUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
   });
@@ -141,9 +161,53 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
       scope: ['productDoc', 'productDoc:inference:default'],
     });
     expect(taskManager.runSoon).toHaveBeenCalledWith(versionedId);
-    expect(taskManager.get).not.toHaveBeenCalled();
+    expect(taskManager.get).toHaveBeenCalledWith(versionedId);
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
+  });
+
+  it('gives a forced request its own task id so an ordinary pending one cannot swallow it', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
+
+    await scheduleEnsureSecurityLabsUpToDateTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.elser',
+      forceUpdate: true,
+      repositoryVersion: '2026-10-12T00:00:00.000Z',
+    });
+
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: `${versionedId}:force`,
+        params: expect.objectContaining({ forceUpdate: true }),
+      })
+    );
+    expect(taskManager.runSoon).toHaveBeenCalledWith(`${versionedId}:force`);
+  });
+
+  it('revives a superseded task that has the target id before ensuring it', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
+    taskManager.get.mockResolvedValue({
+      id: versionedId,
+      state: { superseded: true },
+    } as unknown as ConcreteTaskInstance);
+
+    await scheduleEnsureSecurityLabsUpToDateTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.elser',
+      repositoryVersion: '2026-10-12T00:00:00.000Z',
+    });
+
+    expect(taskManager.bulkUpdateState).toHaveBeenCalledWith([versionedId], expect.any(Function));
+    const [, mapState] = taskManager.bulkUpdateState.mock.calls[0];
+    expect(mapState({ superseded: true }, versionedId)).toEqual({ superseded: false });
+    expect(taskManager.bulkUpdateState.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManager.ensureScheduled.mock.invocationCallOrder[0]
+    );
   });
 
   it('keeps the plain singleton id for a remote repository', async () => {
@@ -183,8 +247,36 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
 
     expect(taskManager.bulkRemove).not.toHaveBeenCalled();
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-      expect.objectContaining({ params: expect.objectContaining({ forceUpdate: true }) })
+      expect.objectContaining({
+        id: `${versionedId}:force`,
+        params: expect.objectContaining({ forceUpdate: true }),
+      })
     );
+  });
+
+  it('marks superseded tasks only after the new task is ensured', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({
+      docs: [
+        task({
+          id: `${ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID}:2026-10-01T00:00:00.000Z`,
+          status: TaskStatus.Idle,
+          params: { repositoryVersion: '2026-10-01T00:00:00.000Z' },
+        }),
+      ],
+      versionMap: new Map(),
+    });
+    taskManager.ensureScheduled.mockRejectedValue(new Error('es unavailable'));
+
+    await expect(
+      scheduleEnsureSecurityLabsUpToDateTask({
+        taskManager,
+        logger: loggerMock.create(),
+        inferenceId: '.elser',
+        repositoryVersion: '2026-10-12T00:00:00.000Z',
+      })
+    ).rejects.toThrow('es unavailable');
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
   });
 
   it('supersedes waiting tasks of older repository versions without touching a running one', async () => {
@@ -224,6 +316,9 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({ id: versionedId })
+    );
+    expect(taskManager.ensureScheduled.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManager.bulkUpdateState.mock.invocationCallOrder[0]
     );
   });
 });

@@ -36,7 +36,10 @@ describe('EnsureUpToDate task', () => {
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
   let taskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-  let runTaskWith: (params: Record<string, unknown>) => Promise<unknown>;
+  let runTaskWith: (
+    params: Record<string, unknown>,
+    state?: Record<string, unknown>
+  ) => Promise<unknown>;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
@@ -70,10 +73,10 @@ describe('EnsureUpToDate task', () => {
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][ENSURE_DOC_UP_TO_DATE_TASK_TYPE];
-    runTaskWith = (params) =>
+    runTaskWith = (params, state = {}) =>
       definition
         .createTaskRunner({
-          taskInstance: { id: 'update-task', params, state: {} },
+          taskInstance: { id: 'update-task', params, state },
         } as unknown as RunContext)
         .run();
     runTask = () => runTaskWith({ inferenceId: '.elser', forceUpdate: true, requestedAt });
@@ -156,26 +159,53 @@ describe('EnsureUpToDate task', () => {
     await expect(runTask()).rejects.toThrow('no artifact');
   });
 
-  it('defers the run when another install holds the lock', async () => {
+  it('defers the run, keeping the task state, when another install holds the lock', async () => {
     withLock.mockRejectedValue(new LockAcquisitionError('held'));
 
-    const result = await runTask();
+    const result = await runTaskWith(
+      { inferenceId: '.elser', forceUpdate: true, requestedAt },
+      { superseded: false }
+    );
 
     expect(getProductsToUpdate).not.toHaveBeenCalled();
-    expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
+    expect(result).toEqual({ state: { superseded: false }, runAt: expect.any(Date) });
   });
 
-  it('defers a recent request made against a newer repository than this node has', async () => {
+  it('defers a recent request made against a newer repository than this node has, keeping the task state', async () => {
     getRepositoryVersion.mockResolvedValue('2026-10-01T00:00:00.000Z');
 
-    const result = await runTaskWith({
-      inferenceId: '.elser',
-      requestedAt: new Date().toISOString(),
-      repositoryVersion: '2026-10-12T00:00:00.000Z',
-    });
+    const result = await runTaskWith(
+      {
+        inferenceId: '.elser',
+        requestedAt: new Date().toISOString(),
+        repositoryVersion: '2026-10-12T00:00:00.000Z',
+      },
+      { superseded: false }
+    );
 
     expect(withLock).not.toHaveBeenCalled();
-    expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
+    expect(result).toEqual({ state: { superseded: false }, runAt: expect.any(Date) });
+  });
+
+  it('completes at once instead of deferring when it was already superseded', async () => {
+    getRepositoryVersion.mockResolvedValue('2026-10-01T00:00:00.000Z');
+    taskManagerStart.get.mockResolvedValue(
+      task({ id: 'update-task', state: { superseded: true } })
+    );
+
+    const result = await runTaskWith(
+      {
+        inferenceId: '.elser',
+        forceUpdate: true,
+        requestedAt: new Date().toISOString(),
+        repositoryVersion: '2026-10-12T00:00:00.000Z',
+      },
+      { superseded: true }
+    );
+
+    expect(getRepositoryVersion).not.toHaveBeenCalled();
+    expect(withLock).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: { superseded: true } });
   });
 
   it('runs a request made against an older or the same repository', async () => {
@@ -222,11 +252,11 @@ describe('EnsureUpToDate task', () => {
     expect(getProductsToUpdate).toHaveBeenCalledWith({ inferenceId: '.elser', forceUpdate: true });
   });
 
-  it('re-reads its task under the lock and stops when it was marked superseded', async () => {
+  it('re-reads its task under the lock and stops when it was marked superseded after being claimed', async () => {
     getRepositoryVersion.mockResolvedValue('2026-10-12T00:00:00.000Z');
-    taskManagerStart.get.mockResolvedValue(
-      task({ id: 'update-task', state: { superseded: true } })
-    );
+    taskManagerStart.get
+      .mockResolvedValueOnce(task({ id: 'update-task', state: {} }))
+      .mockResolvedValue(task({ id: 'update-task', state: { superseded: true } }));
 
     const result = await runTaskWith({
       inferenceId: '.elser',
@@ -236,12 +266,13 @@ describe('EnsureUpToDate task', () => {
     });
 
     expect(withLock).toHaveBeenCalledTimes(1);
+    expect(taskManagerStart.get).toHaveBeenCalledTimes(2);
     expect(taskManagerStart.get).toHaveBeenCalledWith('update-task');
     expect(getProductsToUpdate).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
   });
 
-  it('evaluates the superseded and stale checks only once it holds the lock', async () => {
+  it('evaluates the stale check and the second superseded re-read only once it holds the lock', async () => {
     getRepositoryVersion.mockResolvedValue('2026-10-12T00:00:00.000Z');
     withLock.mockRejectedValue(new LockAcquisitionError('held'));
 
@@ -251,7 +282,7 @@ describe('EnsureUpToDate task', () => {
       repositoryVersion: '2026-10-01T00:00:00.000Z',
     });
 
-    expect(taskManagerStart.get).not.toHaveBeenCalled();
+    expect(taskManagerStart.get).toHaveBeenCalledTimes(1);
     expect(getInstalledRepositoryVersion).not.toHaveBeenCalled();
   });
 });
@@ -394,6 +425,64 @@ describe('scheduleEnsureUpToDateTask', () => {
         }),
       })
     );
+  });
+
+  it('never reuses a pending update that was marked superseded', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({
+      docs: [
+        task({
+          id: 'marked',
+          status: TaskStatus.Idle,
+          params: { forceUpdate: true, repositoryVersion: '2026-10-01T00:00:00.000Z' },
+          state: { superseded: true },
+        }),
+      ],
+      versionMap: new Map(),
+    });
+    taskManager.schedule.mockResolvedValue(task({ id: 'fresh' }));
+
+    await expect(
+      scheduleEnsureUpToDateTask({
+        taskManager,
+        logger: loggerMock.create(),
+        inferenceId: '.elser',
+        forceUpdate: true,
+        repositoryVersion: '2026-10-01T00:00:00.000Z',
+      })
+    ).resolves.toBe('fresh');
+  });
+
+  it('marks superseded tasks only after the replacement is scheduled', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockImplementation(async (options) => {
+      const statuses = (
+        options?.query as { bool: { filter: Array<{ terms?: { 'task.status': string[] } }> } }
+      ).bool.filter.find((clause) => clause.terms)?.terms?.['task.status'];
+      return {
+        docs: statuses?.includes(TaskStatus.Idle)
+          ? [
+              task({
+                id: 'older-idle',
+                status: TaskStatus.Idle,
+                params: { repositoryVersion: '2026-10-01T00:00:00.000Z' },
+              }),
+            ]
+          : [],
+        versionMap: new Map(),
+      };
+    });
+    taskManager.schedule.mockRejectedValue(new Error('es unavailable'));
+
+    await expect(
+      scheduleEnsureUpToDateTask({
+        taskManager,
+        logger: loggerMock.create(),
+        inferenceId: '.elser',
+        repositoryVersion: '2026-10-12T00:00:00.000Z',
+      })
+    ).rejects.toThrow('es unavailable');
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
   });
 
   it('reuses a pending update with the same forceUpdate flag', async () => {

@@ -81,8 +81,9 @@ export const shouldDeferForRepositoryVersion = ({
   return now - new Date(requestedAt).getTime() < REPOSITORY_VERSION_DEFER_MAX_MS;
 };
 
-export const deferForRepositoryVersion = () => ({
-  state: {},
+// Deferrals hand the task's state back unchanged so a superseded marker set meanwhile survives
+export const deferForRepositoryVersion = (state: ConcreteTaskInstance['state'] = {}) => ({
+  state,
   runAt: new Date(Date.now() + REPOSITORY_VERSION_RETRY_DELAY_MS),
 });
 
@@ -138,7 +139,8 @@ export const findTasks = async ({
  * Schedules a new task instance for a request, unless `reusePending` is set and a pending task of the
  * same type for the inference ID and repository version (optionally matching `matches`) exists, in
  * which case that task is reused. Failed leftovers of earlier requests are removed so the status only
- * reflects the latest one. Waiting tasks of older repository versions are marked superseded;
+ * reflects the latest one. A pending task already marked superseded is never reused. Waiting tasks
+ * of older repository versions are marked superseded once the new task is scheduled;
  * `mergeSuperseded` lets the new task take over what they carried (e.g. a forced update).
  */
 export const scheduleRequestTask = async <P extends RequestTaskParams>({
@@ -163,7 +165,10 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
     const [pending] = (
       await findTasks({ taskManager, taskType, inferenceId, statuses: PENDING_TASK_STATUSES })
     ).filter(
-      (task) => task.params?.repositoryVersion === params.repositoryVersion && matches(task)
+      (task) =>
+        task.state?.superseded !== true &&
+        task.params?.repositoryVersion === params.repositoryVersion &&
+        matches(task)
     );
     if (pending) {
       logger.debug(`Reusing pending task ${pending.id} (${taskType}) for [${inferenceId}]`);
@@ -179,9 +184,8 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   if (failed.length > 0) {
     await taskManager.bulkRemove(failed.map(({ id }) => id));
   }
-  const superseded = await markSupersededTasks({
+  const superseded = await findSupersededTasks({
     taskManager,
-    logger,
     taskType,
     inferenceId,
     repositoryVersion: params.repositoryVersion,
@@ -193,24 +197,22 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
     scope: ['productDoc', getInferenceScope(inferenceId)],
   });
   logger.info(`Task ${id} (${taskType}) scheduled for [${inferenceId}]`);
+  await markSupersededTasks({ taskManager, logger, taskType, inferenceId, tasks: superseded });
   return id;
 };
 
 /**
- * Marks tasks of `taskType` for the inference ID that are still waiting to run and were requested
- * against an older repository version than `repositoryVersion` as superseded: run later on an older
- * node they would reinstall that older bundle. The tasks are not deleted, since one may already be
- * running; its runner re-reads the marker under the install lock and stops. Returns the marked tasks.
+ * Tasks of `taskType` for the inference ID that are still waiting to run and were requested against
+ * an older repository version than `repositoryVersion`: run later on an older node they would
+ * reinstall that older bundle.
  */
-export const markSupersededTasks = async ({
+export const findSupersededTasks = async ({
   taskManager,
-  logger,
   taskType,
   inferenceId,
   repositoryVersion,
 }: {
   taskManager: TaskManagerStartContract;
-  logger: Logger;
   taskType: string;
   inferenceId: string;
   repositoryVersion?: string;
@@ -218,7 +220,7 @@ export const markSupersededTasks = async ({
   if (!repositoryVersion) {
     return [];
   }
-  const superseded = (
+  return (
     await findTasks({
       taskManager,
       taskType,
@@ -228,17 +230,55 @@ export const markSupersededTasks = async ({
   ).filter(
     ({ params }) => params?.repositoryVersion && params.repositoryVersion < repositoryVersion
   );
-  if (superseded.length === 0) {
-    return [];
+};
+
+/**
+ * Marks `tasks` as superseded once their replacement is scheduled. The tasks are not deleted, since
+ * one may already be running; its runner re-reads the marker and stops.
+ */
+export const markSupersededTasks = async ({
+  taskManager,
+  logger,
+  taskType,
+  inferenceId,
+  tasks,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  taskType: string;
+  inferenceId: string;
+  tasks: ConcreteTaskInstance[];
+}): Promise<void> => {
+  if (tasks.length === 0) {
+    return;
   }
   await taskManager.bulkUpdateState(
-    superseded.map(({ id }) => id),
+    tasks.map(({ id }) => id),
     (state) => ({ ...state, superseded: true })
   );
   logger.info(
-    `Marked ${superseded.length} pending ${taskType} task(s) for [${inferenceId}] as superseded: requested against an older artifact repository version than [${repositoryVersion}]`
+    `Marked ${tasks.length} pending ${taskType} task(s) for [${inferenceId}] as superseded: requested against an older artifact repository version`
   );
-  return superseded;
+};
+
+/**
+ * Clears the superseded marker of a fixed-id task that is about to be ensured again, so a new request
+ * (e.g. a forced repair after a rollback) reusing that id runs instead of stopping on the old marker.
+ */
+export const reviveSupersededTask = async ({
+  taskManager,
+  logger,
+  taskId,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  taskId: string;
+}): Promise<void> => {
+  if (!(await isTaskSuperseded({ taskManager, taskId }))) {
+    return;
+  }
+  await taskManager.bulkUpdateState([taskId], (state) => ({ ...state, superseded: false }));
+  logger.info(`Reviving superseded task ${taskId}`);
 };
 
 /** Whether the task was marked superseded since it was claimed; a task that no longer exists is not. */
@@ -285,30 +325,35 @@ export const getRequestTaskStatus = async ({
     inferenceId,
     statuses: [...PENDING_TASK_STATUSES, TaskStatus.Failed],
   });
-  if (tasks.some(({ status }) => status !== TaskStatus.Failed)) {
+  if (
+    tasks.some(({ status, state }) => status !== TaskStatus.Failed && state?.superseded !== true)
+  ) {
     return 'pending';
   }
-  return tasks.length > 0 ? 'failed' : 'none';
+  return tasks.some(({ status }) => status === TaskStatus.Failed) ? 'failed' : 'none';
 };
 
 /**
  * Runs `run` under the cluster-wide install lock so that at most one documentation install runs at a
  * time across all tasks and Kibana nodes. When another install holds the lock the run is deferred
- * instead of failing an attempt. Errors propagate so Task Manager retries the task with backoff.
+ * instead of failing an attempt, handing the task's `state` back unchanged. Errors propagate so Task
+ * Manager retries the task with backoff.
  */
 export const runTaskUnderInstallLock = async ({
   lockManager,
   run,
   metadata,
+  state = {},
 }: {
   lockManager: InstallLockManager;
   run: () => Promise<void>;
   metadata?: Record<string, unknown>;
+  state?: ConcreteTaskInstance['state'];
 }) => {
   const acquired = await tryWithInstallLock({ lockManager, run, metadata });
   return acquired
-    ? { state: {} }
-    : { state: {}, runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS) };
+    ? { state }
+    : { state, runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS) };
 };
 
 export const isTaskCurrentlyRunningError = (err: Error): boolean => {

@@ -53,6 +53,19 @@ export const registerEnsureUpToDateTaskDefinition = ({
         return {
           async run() {
             const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
+            const { id: taskId, state } = taskInstance;
+            const superseded = async () => {
+              const result = await isTaskSuperseded({ taskManager: taskManagerStart, taskId });
+              if (result) {
+                logger.info(
+                  `Skipping product documentation update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                );
+              }
+              return result;
+            };
+            if (await superseded()) {
+              return { state };
+            }
             if (
               shouldDeferForRepositoryVersion({
                 requestedVersion: repositoryVersion,
@@ -63,20 +76,16 @@ export const registerEnsureUpToDateTaskDefinition = ({
               logger.info(
                 `Deferring product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
               );
-              return deferForRepositoryVersion();
+              return deferForRepositoryVersion(state);
             }
             return runTaskUnderInstallLock({
               lockManager,
+              state,
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
               run: async () => {
-                // Checked under the lock: a newer request may have completed or superseded this
+                // Re-checked under the lock: a newer request may have completed or superseded this
                 // one while it waited, and forced updates are the documented repair path
-                if (
-                  await isTaskSuperseded({ taskManager: taskManagerStart, taskId: taskInstance.id })
-                ) {
-                  logger.info(
-                    `Skipping product documentation update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
-                  );
+                if (await superseded()) {
                   return;
                 }
                 if (
@@ -93,7 +102,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
                   );
                   return;
                 }
-                const superseded = async (
+                const uninstalledSince = async (
                   resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec
                 ) => {
                   const result = await packageInstaller.wasUninstalledSince({
@@ -112,7 +121,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
                   inferenceId,
                   forceUpdate,
                 })) {
-                  if (await superseded(ResourceTypes.productDoc)) {
+                  if (await uninstalledSince(ResourceTypes.productDoc)) {
                     return;
                   }
                   // Re-checked under the lock so concurrent update tasks do not install it twice
@@ -123,7 +132,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
                     since,
                   });
                 }
-                if (await superseded(ResourceTypes.openapiSpec)) {
+                if (await uninstalledSince(ResourceTypes.openapiSpec)) {
                   return;
                 }
                 await packageInstaller.ensureOpenApiSpecUpToDate({
