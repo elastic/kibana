@@ -77,6 +77,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
 import { useIsSelfManaged } from '../use_is_self_managed';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
+import * as driftDetection from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseDeploy = useDeploy as jest.Mock;
@@ -1200,6 +1201,51 @@ describe('AuthenticateAndDeployStep', () => {
         expect(updateDetectAndReviewStep).toHaveBeenCalledWith({
           serviceStatuses: { cloudtrail: 'instantiating' },
         });
+      });
+
+      it('gives detection the new namespace before navigating when managed integrations are also deployed', async () => {
+        const updateDetectAndReviewStep = setup({
+          isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+          staleNamespaceByFamily: { unified: 'staging' },
+          isUpdateOpenedByFamily: { unified: true },
+          currentNamespaceByFamily: { unified: 'staging' },
+        });
+        mockUseOnboardingFlow.mockReturnValue({
+          ...mockUseOnboardingFlow.mock.results[0]?.value,
+          servicesStep: { selectedServiceIds: ['cloudtrail', 'guardduty'] },
+          awsServicesMap: new Map<string, AwsServiceMatrixEntry>([
+            ['cloudtrail', unifiedService],
+            ['guardduty', miService],
+          ]),
+          detectAndReviewStep: {
+            onboardingDeploymentId: 'existing-dep-id',
+            serviceStatuses: { cloudtrail: 'receiving', guardduty: 'receiving' },
+          },
+          updateDetectAndReviewStep,
+        });
+        mockUseDeploy.mockReturnValue(makeDeployReturn({ isAlreadyDeployed: true }));
+        // The drift check fetches the saved deployment, which these tests do not serve.
+        const driftSpy = jest.spyOn(driftDetection, 'useOnboardingDriftDetection').mockReturnValue({
+          driftSettled: true,
+          driftCheckError: false,
+          retryDriftCheck: jest.fn(),
+          handleReplaceFormDirtyChange: jest.fn(),
+        });
+        const onContinue = jest.fn();
+        renderStep(onContinue);
+        fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+        await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+        driftSpy.mockRestore();
+
+        const stacksCall = updateDetectAndReviewStep.mock.calls.findIndex(
+          ([update]) => update.ecfStacks !== undefined
+        );
+        expect(updateDetectAndReviewStep.mock.calls[stacksCall][0].ecfStacks).toEqual([
+          expect.objectContaining({ family: 'unified', namespace: 'staging' }),
+        ]);
+        expect(updateDetectAndReviewStep.mock.invocationCallOrder[stacksCall]).toBeLessThan(
+          onContinue.mock.invocationCallOrder[0]
+        );
       });
 
       it('keeps the detection state when the namespace did not change', async () => {

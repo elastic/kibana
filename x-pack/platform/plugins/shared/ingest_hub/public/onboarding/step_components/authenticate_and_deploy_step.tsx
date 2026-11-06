@@ -555,8 +555,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const handleMixedEcfNext = useCallback(async () => {
     resetStatusesOfStacksChangingNamespace();
     advanceStaleSnapshots();
+    const shouldWriteEcfStacks =
+      !ecfStacksUnchanged && !!detectAndReviewStep.onboardingDeploymentId;
+    // Before navigating, so detection polls the stacks' new namespace from the start rather than
+    // finding the old one's data and marking the reset services receiving again.
+    if (shouldWriteEcfStacks) updateDetectAndReviewStep({ ecfStacks });
     onContinue();
-    if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
+    if (shouldWriteEcfStacks && detectAndReviewStep.onboardingDeploymentId) {
       await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
         ecfStacks,
         serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
@@ -564,7 +569,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
       });
-      updateDetectAndReviewStep({ ecfStacks });
     }
     // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
     // so policyIdsByInstance has no stale entry — it can slip through isAlreadyDeployed and
