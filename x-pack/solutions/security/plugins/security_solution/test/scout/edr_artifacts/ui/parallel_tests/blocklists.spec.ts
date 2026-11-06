@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { describeArtifactListPage } from '../fixtures/artifact_list_suite';
-import { describeArtifactTabPolicyDetails } from '../fixtures/artifact_tabs_suite';
-import { describeBlocklistMatchOperator } from '../fixtures/blocklist_match_operator_suite';
-import { describeBlocklistOperatorField } from '../fixtures/blocklist_operator_suite';
+import { describeArtifactListPageItemScoped } from '../fixtures/artifact_list_item_scoped_suite';
+import { describeArtifactTabPolicyDetailsItemScoped } from '../fixtures/artifact_tabs_item_scoped_suite';
 import { getArtifactTabCase } from '../fixtures/artifact_tabs_test_data';
 
 const blocklists = getArtifactTabCase('blocklists');
 
-// Suites share this file on purpose: they all mutate the same agnostic
-// `endpoint_blocklists` list, which spaces do not isolate.
-describeArtifactTabPolicyDetails(blocklists);
-describeArtifactListPage(blocklists);
-describeBlocklistOperatorField(blocklists);
-describeBlocklistMatchOperator(blocklists);
+// The agnostic `endpoint_blocklists` list is also written by
+// `blocklist_signature_operator.spec.ts` and `blocklist_match_operator.spec.ts`,
+// which may run on another worker at the same time. These suites never wipe
+// the list; they create uniquely named items and delete only those.
+describeArtifactTabPolicyDetailsItemScoped(blocklists);
+describeArtifactListPageItemScoped(blocklists);
