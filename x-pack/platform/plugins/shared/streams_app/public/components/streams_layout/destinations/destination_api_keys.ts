@@ -24,7 +24,7 @@ export interface DestinationApiKey {
 
 export interface DestinationApiKeyServices {
   generate: (destinationId: string, patterns: string[]) => Promise<DestinationApiKey>;
-  delete: (destinationId: string) => Promise<void>;
+  delete: (destinationId: string, apiKeyId: string) => Promise<void>;
 }
 
 export const createDestinationApiKeyServices = ({
@@ -49,10 +49,10 @@ export const createDestinationApiKeyServices = ({
       encoded: response.encodedApiKey,
     };
   },
-  delete: async (destinationId) => {
+  delete: async (destinationId, apiKeyId) => {
     await streamsRepositoryClient.fetch('DELETE /internal/streams/destinations/api_key', {
       params: {
-        body: { destinationId, unitId },
+        body: { destinationId, apiKeyId, unitId },
       },
       signal: null,
     });

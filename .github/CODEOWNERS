@@ -2087,6 +2087,8 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/api_integration/apis/streams @elastic/streams-ui
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout @elastic/streams-ui
+/x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2 @elastic/streams-ui
+/x-pack/platform/plugins/shared/streams/test/scout_streams_v2 @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/data_quality @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle @elastic/kibana-management
@@ -3604,6 +3606,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/nightshift_investigations @elastic/nightshift
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/discover_telemetry @elastic/observability-ui
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/cloud_trial @elastic/appex-sharedux
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/streams_v2 @elastic/streams-ui
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-investigations
