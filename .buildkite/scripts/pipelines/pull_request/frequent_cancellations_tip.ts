@@ -15,7 +15,7 @@ export const FREQUENT_CANCELLATIONS_TIP_CONTEXT = 'frequent-cancellations-tip';
 const PIPELINE_SLUG = 'kibana-pull-request';
 const MIN_CANCELLED_BUILDS = 3;
 const WINDOW_MS = 8 * 60 * 60 * 1000;
-// Builds cancelled earlier than this had barely started, so they aren't worth a tip.
+// Builds cancelled less than 10 minutes after they started had barely run, so they aren't worth a tip.
 const MIN_RUNTIME_MS = 10 * 60 * 1000;
 const BUILDS_TO_FETCH = 100;
 const TIMEOUT_MS = 15_000;
