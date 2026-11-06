@@ -95,16 +95,10 @@ const isMemoHit = (runtime: CellRuntime, memoKey: string, forced: boolean): bool
   !forced && runtime.output !== undefined && runtime.memoKey === memoKey;
 
 const LONG_RUNNING_DELAY_MS = 10_000;
-const LONG_RUNNING_NAME = /(^|_)long(_|$)/;
 
-/**
- * POC testing aid for long-running queries: ES|QL cells whose name has a `long` segment
- * (`long`, `long_errors`, `errors_long`) or whose label contains `LONG` wait before querying.
- */
+/** POC testing aid for long-running queries: ES|QL cells whose label contains `LONG` wait before querying. */
 const getDebugDelayMs = (cell: CellDefinition | undefined): number =>
-  cell && (LONG_RUNNING_NAME.test(cell.name) || cell.label?.includes('LONG'))
-    ? LONG_RUNNING_DELAY_MS
-    : 0;
+  cell?.label?.includes('LONG') ? LONG_RUNNING_DELAY_MS : 0;
 
 const sleep = (ms: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {

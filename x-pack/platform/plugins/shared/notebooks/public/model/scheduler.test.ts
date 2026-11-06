@@ -411,23 +411,29 @@ describe('NotebookScheduler', () => {
       expect(env.runtime('q').status).toBe('done');
     });
 
-    it('waits before querying a cell with a long segment in its name, and the wait can be stopped', async () => {
+    it('waits before querying a cell whose label contains LONG, and the wait can be stopped', async () => {
       jest.useFakeTimers();
       try {
-        const env = track(setup([esql('q', 'FROM logs', { name: 'long_q' })]));
+        const env = track(
+          setup([
+            esql('q', 'FROM logs', { label: 'A LONG query' }),
+            esql('r', 'FROM r', { name: 'long_r' }),
+          ])
+        );
         env.scheduler.start();
         await jest.advanceTimersByTimeAsync(9_000);
-        expect(env.fake.calls).toHaveLength(0);
+        expect(env.fake.callsFor('FROM logs')).toHaveLength(0);
+        expect(env.fake.callsFor('FROM r')).toHaveLength(1);
         expect(env.runtime('q').status).toBe('running');
 
         await jest.advanceTimersByTimeAsync(1_000);
-        expect(env.fake.calls).toHaveLength(1);
+        expect(env.fake.callsFor('FROM logs')).toHaveLength(1);
 
         void env.scheduler.runCell('q');
         await jest.advanceTimersByTimeAsync(0);
         env.scheduler.stopCell('q');
         await jest.advanceTimersByTimeAsync(10_000);
-        expect(env.fake.calls).toHaveLength(1);
+        expect(env.fake.callsFor('FROM logs')).toHaveLength(1);
         expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'stopped' });
       } finally {
         jest.useRealTimers();
