@@ -277,6 +277,42 @@ describe('triage match decisions step', () => {
     );
   });
 
+  it('keeps the closes and the notes of earlier pages when a later page cannot be read', async () => {
+    const id = decisionId('false_positive', hashOf('C:\\x.exe'));
+    const first = [
+      { _id: 'a', _source: source('C:\\x.exe'), sort: [1, 'a'] },
+      ...Array.from({ length: ALERT_FETCH_LIMIT - 1 }, (_unused, i) => ({
+        _id: `old${i}`,
+        _source: source(`C:\\other${i}.exe`),
+        sort: [i + 2, `u${i}`],
+      })),
+    ];
+    const { run, callKibanaApi, closes, notes } = setup({
+      mode: 'on',
+      alerts: [],
+      decisions: { [id]: stored('false_positive') },
+    });
+    let searches = 0;
+    const inner = callKibanaApi.getMockImplementation()!;
+    callKibanaApi.mockImplementation(
+      async (params: { path: string; body?: Record<string, any> }) => {
+        if (params.path.endsWith('/signals/search') && params.body?.size !== 0) {
+          if (++searches > 1) throw new Error('es down');
+          return { body: { hits: { hits: first } } };
+        }
+        return inner(params);
+      }
+    );
+
+    const { output } = await run();
+
+    expect(closes().flatMap(({ signal_ids: ids }) => ids)).toEqual(['a']);
+    expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+    expect(output).toEqual(
+      expect.objectContaining({ status: 'failed', closed: 1, candidates: ALERT_FETCH_LIMIT })
+    );
+  });
+
   it('does nothing when the kill switch is off, without any read', async () => {
     const { run, callKibanaApi, mget } = setup({
       alerts: [['a', source('C:\\x.exe')]],
