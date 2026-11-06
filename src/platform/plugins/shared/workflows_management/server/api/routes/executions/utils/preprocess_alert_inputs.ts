@@ -13,8 +13,8 @@ import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/se
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { fetchAlertSourcesByIds } from './fetch_by_ids';
 import { isRecord } from '@kbn/workflows-yaml';
+import { fetchAlertSourcesByIds } from './fetch_by_ids';
 import { parseTriggerSelections } from './parse_trigger_selections';
 import type {
   AlertEventRule,
