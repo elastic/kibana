@@ -9,19 +9,26 @@ import React, { useCallback, useState } from 'react';
 import { EuiBadge, EuiListGroup, EuiListGroupItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const CHANGE_STATUS_LABEL = i18n.translate('xpack.alertzero.statusToggle.changeStatus', {
-  defaultMessage: 'Change status',
-});
+const CHANGE_STATUS_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.statusToggle.changeStatus',
+  {
+    defaultMessage: 'Change status',
+  }
+);
 
 const STATUS_OPTIONS = ['open', 'closed'] as const;
 
 const STATUS_CONFIG: Record<'open' | 'closed', { label: string; color: 'primary' | 'default' }> = {
   open: {
-    label: i18n.translate('xpack.alertzero.statusToggle.open', { defaultMessage: 'Open' }),
+    label: i18n.translate('xpack.agenticInvestigations.statusToggle.open', {
+      defaultMessage: 'Open',
+    }),
     color: 'primary',
   },
   closed: {
-    label: i18n.translate('xpack.alertzero.statusToggle.closed', { defaultMessage: 'Closed' }),
+    label: i18n.translate('xpack.agenticInvestigations.statusToggle.closed', {
+      defaultMessage: 'Closed',
+    }),
     color: 'default',
   },
 };

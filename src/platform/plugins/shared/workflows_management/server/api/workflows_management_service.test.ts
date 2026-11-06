@@ -556,19 +556,28 @@ describe('WorkflowsService (facade)', () => {
     });
   });
 
+  const claim = {
+    respondedBy: 'alice',
+    respondedAt: '2026-04-29T10:00:00.000Z',
+    channel: 'inbox',
+    strippedToken: { hash: 'hash', expiresAt: '2099-01-01T00:00:00.000Z' },
+  };
+
   describe('markStepAsResponded', () => {
     it('resolves the responder via the security service and delegates with full audit metadata', async () => {
       // The service owns username resolution so callers cannot spoof audit identity.
       // Behavioral coverage of the ES update lives in the query-service tests.
       const markSpy = jest
         .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
-        .mockResolvedValue(true as never);
+        .mockResolvedValue(claim);
       try {
         const service = await buildService();
         const request = { headers: {} } as unknown as Parameters<
           typeof service.markStepAsResponded
         >[2];
-        await service.markStepAsResponded('step-exec-1', 'run-1', request, 'inbox', 'default');
+        await expect(
+          service.markStepAsResponded('step-exec-1', 'run-1', request, 'inbox', 'default')
+        ).resolves.toBe(claim);
 
         expect(markSpy).toHaveBeenCalledWith(
           'step-exec-1',
@@ -589,30 +598,53 @@ describe('WorkflowsService (facade)', () => {
   });
 
   describe('claimHitlStepForExternalResume', () => {
-    it('scopes the claim to the execution the link resolved and stamps the external channel', async () => {
+    it('scopes the claim to the execution the link resolved, stamps the external channel and returns the claim', async () => {
       const markSpy = jest
         .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
-        .mockResolvedValue(true as never);
+        .mockResolvedValue(claim);
       try {
         const service = await buildService();
-        await service.claimHitlStepForExternalResume(
-          'step-exec-1',
-          'run-1',
-          'external_resume:step-exec-1',
-          'default'
-        );
+
+        await expect(
+          service.claimHitlStepForExternalResume(
+            'step-exec-1',
+            'run-1',
+            'external_resume:step-exec-1',
+            'default'
+          )
+        ).resolves.toBe(claim);
 
         expect(markSpy).toHaveBeenCalledWith(
           'step-exec-1',
           'run-1',
-          expect.objectContaining({
-            channel: 'external',
+          {
             respondedBy: 'external_resume:step-exec-1',
-          }),
+            respondedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            channel: 'external',
+          },
           'default'
         );
       } finally {
         markSpy.mockRestore();
+      }
+    });
+  });
+
+  describe('releaseHitlStepClaim', () => {
+    it('delegates to WorkflowExecutionQueryService.releaseHitlStepClaim after init', async () => {
+      const releaseSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'releaseHitlStepClaim')
+        .mockResolvedValue(true);
+      try {
+        const service = await buildService();
+
+        await expect(service.releaseHitlStepClaim('step-exec-1', claim, 'default')).resolves.toBe(
+          true
+        );
+
+        expect(releaseSpy).toHaveBeenCalledWith('step-exec-1', claim, 'default');
+      } finally {
+        releaseSpy.mockRestore();
       }
     });
   });

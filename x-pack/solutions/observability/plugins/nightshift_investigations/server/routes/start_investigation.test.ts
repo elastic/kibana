@@ -45,12 +45,15 @@ it('loads the alert and builds the investigation context server-side', async () 
     } as never)
   ).resolves.toEqual({ investigation_id: 'investigation-1' });
   // Agent Builder titles the investigation, so no title is derived from the rule name.
-  expect(start).toHaveBeenCalledWith({
-    subject: { type: 'alert', id: 'alert-1' },
-    title: undefined,
-    context: { alerts: [expect.objectContaining({ id: 'alert-1', rule_id: 'rule-1' })] },
-    trigger_type: 'manual',
-  });
+  expect(start).toHaveBeenCalledWith(
+    {
+      subject: { type: 'alert', id: 'alert-1' },
+      title: undefined,
+      context: { alerts: [expect.objectContaining({ id: 'alert-1', rule_id: 'rule-1' })] },
+      trigger_type: 'manual',
+    },
+    { entryPoint: 'start_api' }
+  );
 });
 
 it('loads every alert id and stores the first as the subject', async () => {
@@ -78,7 +81,8 @@ it('loads every alert id and stores the first as the subject', async () => {
           expect.objectContaining({ id: 'alert-2' }),
         ],
       },
-    })
+    }),
+    { entryPoint: 'start_api' }
   );
 });
 
@@ -94,7 +98,9 @@ it('passes a caller-provided title on', async () => {
     getEpisodeLookup,
     params: { body: { subject: { type: 'alert', ids: ['alert-1'] }, title: 'Custom title' } },
   } as never);
-  expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: 'Custom title' }));
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: 'Custom title' }), {
+    entryPoint: 'start_api',
+  });
 });
 
 it('no longer accepts a concurrency key', () => {
@@ -120,7 +126,9 @@ it('forwards connector_id for an alert investigation', async () => {
       },
     },
   } as never);
-  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }), {
+    entryPoint: 'start_api',
+  });
 });
 
 it('starts a manual investigation from the question alone', async () => {
@@ -138,11 +146,14 @@ it('starts a manual investigation from the question alone', async () => {
   } as never);
 
   // Agent Builder titles the investigation, so the question is not made its title.
-  expect(start).toHaveBeenCalledWith({
-    subject: { type: 'manual', id: 'manual' },
-    message: 'Why did checkout p99 spike?',
-    trigger_type: 'manual',
-  });
+  expect(start).toHaveBeenCalledWith(
+    {
+      subject: { type: 'manual', id: 'manual' },
+      message: 'Why did checkout p99 spike?',
+      trigger_type: 'manual',
+    },
+    { entryPoint: 'start_api' }
+  );
 });
 
 it('forwards connector_id for a manual investigation', async () => {
@@ -160,7 +171,9 @@ it('forwards connector_id for a manual investigation', async () => {
     params: { body },
   } as never);
 
-  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }), {
+    entryPoint: 'start_api',
+  });
 });
 
 it('passes a manual investigation title on only when the caller gives one', async () => {
@@ -176,7 +189,9 @@ it('passes a manual investigation title on only when the caller gives one', asyn
     getEpisodeLookup,
     params: { body: explicit },
   } as never);
-  expect(start).toHaveBeenLastCalledWith(expect.objectContaining({ title: 'Checkout p99 spike' }));
+  expect(start).toHaveBeenLastCalledWith(expect.objectContaining({ title: 'Checkout p99 spike' }), {
+    entryPoint: 'start_api',
+  });
 });
 
 it('rejects a manual investigation without a question', () => {
@@ -212,7 +227,8 @@ it.each(['alert', 'manual'])(
       params: { body },
     } as never);
     expect(start).toHaveBeenCalledWith(
-      expect.objectContaining({ notificationDestinations: [destination] })
+      expect.objectContaining({ notificationDestinations: [destination] }),
+      { entryPoint: 'start_api' }
     );
     expect(
       schema.safeParse({ ...input, notificationDestinations: [{ ...destination, status: 'sent' }] })

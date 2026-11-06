@@ -196,6 +196,319 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       },
     },
   },
+  action_policies_count_by_status: {
+    enabled: {
+      type: 'long',
+      _meta: { description: 'Number of action policies that are enabled and not snoozed.' },
+    },
+    disabled: {
+      type: 'long',
+      _meta: { description: 'Number of action policies that are disabled.' },
+    },
+    snoozed: {
+      type: 'long',
+      _meta: { description: 'Number of action policies that are enabled and currently snoozed.' },
+    },
+  },
+  action_policies_count_by_grouping_mode: {
+    per_alert: {
+      type: 'long',
+      _meta: {
+        description: 'Number of action policies with grouping mode per_alert (the default).',
+      },
+    },
+    per_field: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with grouping mode per_field.' },
+    },
+    all: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with grouping mode all.' },
+    },
+  },
+  action_policies_count_by_throttle_strategy: {
+    on_status_change: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with throttle strategy on_status_change.' },
+    },
+    per_status_interval: {
+      type: 'long',
+      _meta: {
+        description: 'Number of action policies with throttle strategy per_status_interval.',
+      },
+    },
+    time_interval: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with throttle strategy time_interval.' },
+    },
+    every_time: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with throttle strategy every_time.' },
+    },
+    none: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with no throttle strategy.' },
+    },
+  },
+  action_policies_workflows_per_policy: {
+    p50: {
+      type: 'float',
+      _meta: { description: 'P50 of the number of workflows per action policy (max 10).' },
+    },
+    p99: {
+      type: 'float',
+      _meta: { description: 'P99 of the number of workflows per action policy (max 10).' },
+    },
+    avg: {
+      type: 'float',
+      _meta: { description: 'Average number of workflows per action policy (max 10).' },
+    },
+  },
+  action_policies_count_with_multiple_workflows: {
+    type: 'long',
+    _meta: { description: 'Number of action policies with more than one workflow.' },
+  },
+
+  dispatcher_alerts_count_by_outcome_24hr: {
+    dispatched: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of alerts in dispatched events over the last 24 hours. Summed per policy and per dispatcher tick, so an alert is counted again on every tick and for every policy it is dispatched to.',
+      },
+    },
+    throttled: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of alerts in throttled events over the last 24 hours. Summed per policy and per dispatcher tick, so an alert is counted again on every tick and for every policy that throttles it.',
+      },
+    },
+    unmatched: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of alerts that matched no action policy (unmatched events) over the last 24 hours. Summed per dispatcher tick, so an alert is counted again on every tick it stays unmatched.',
+      },
+    },
+  },
+  dispatcher_action_groups_count_by_outcome_24hr: {
+    dispatched: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups in dispatched events over the last 24 hours. Summed per policy and per dispatcher tick, so a group is counted again on every tick it is dispatched.',
+      },
+    },
+    throttled: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups in throttled events over the last 24 hours. Summed per policy and per dispatcher tick, so a group is counted again on every tick it is throttled.',
+      },
+    },
+  },
+  dispatcher_unique_alerts_dispatched_count_24hr: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate number of distinct alerts dispatched over the last 24 hours (cardinality, precision threshold 10000).',
+    },
+  },
+  dispatcher_workflow_executions_count_24hr: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate number of distinct workflow executions scheduled by the dispatcher over the last 24 hours.',
+    },
+  },
+  dispatcher_unique_workflows_triggered_count_24hr: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate number of distinct workflows triggered by the dispatcher over the last 24 hours.',
+    },
+  },
+  dispatcher_notifying_executions_count_24hr: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate number of dispatcher executions that dispatched at least one action group over the last 24 hours.',
+    },
+  },
+  dispatcher_notifying_spaces_count_24hr: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate number of spaces with at least one dispatched event over the last 24 hours.',
+    },
+  },
+  dispatcher_policies_count_by_activity_24hr: {
+    dispatched: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of action policies with at least one dispatched event over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    throttled: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of action policies with at least one throttled event over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    failing: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of action policies with at least one dispatch_failed event over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    broken: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of action policies with at least one dispatch_failed event and no dispatched event over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+  },
+  dispatcher_action_groups_dispatched_per_policy_24hr: {
+    p50: {
+      type: 'float',
+      _meta: {
+        description:
+          'P50 of action groups dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    p99: {
+      type: 'float',
+      _meta: {
+        description:
+          'P99 of action groups dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    avg: {
+      type: 'float',
+      _meta: {
+        description:
+          'Average action groups dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+  },
+  dispatcher_alerts_dispatched_per_policy_24hr: {
+    p50: {
+      type: 'float',
+      _meta: {
+        description:
+          'P50 of alerts dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    p99: {
+      type: 'float',
+      _meta: {
+        description:
+          'P99 of alerts dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    avg: {
+      type: 'float',
+      _meta: {
+        description:
+          'Average alerts dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+  },
+  dispatcher_workflow_executions_per_policy_24hr: {
+    p50: {
+      type: 'float',
+      _meta: {
+        description:
+          'P50 of distinct workflow executions per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    p99: {
+      type: 'float',
+      _meta: {
+        description:
+          'P99 of distinct workflow executions per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+    avg: {
+      type: 'float',
+      _meta: {
+        description:
+          'Average distinct workflow executions per action policy over the last 24 hours (top 100 policies by event count).',
+      },
+    },
+  },
+  dispatcher_throttle_ratio_per_policy_24hr: {
+    p50: {
+      type: 'float',
+      _meta: {
+        description:
+          'P50 of throttled / (dispatched + throttled) action groups per action policy over the last 24 hours, range 0-1 (top 100 policies by event count).',
+      },
+    },
+    p99: {
+      type: 'float',
+      _meta: {
+        description:
+          'P99 of throttled / (dispatched + throttled) action groups per action policy over the last 24 hours, range 0-1 (top 100 policies by event count).',
+      },
+    },
+    avg: {
+      type: 'float',
+      _meta: {
+        description:
+          'Average throttled / (dispatched + throttled) action groups per action policy over the last 24 hours, range 0-1 (top 100 policies by event count).',
+      },
+    },
+  },
+  dispatcher_uncovered_rules_count_24hr: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate number of distinct rules whose alerts matched no action policy over the last 24 hours.',
+    },
+  },
+  dispatcher_dispatch_failures_count_by_reason_24hr: {
+    missing_api_key: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of failed dispatches over the last 24 hours because the policy had no API key.',
+      },
+    },
+    workflow_not_found: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of failed dispatches over the last 24 hours because the workflow was not found.',
+      },
+    },
+    workflow_disabled: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of failed dispatches over the last 24 hours because the workflow was disabled.',
+      },
+    },
+    schedule_error: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of failed dispatches over the last 24 hours because scheduling the workflow failed.',
+      },
+    },
+    license_not_supported: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of failed dispatches over the last 24 hours because the license does not support action policies.',
+      },
+    },
+  },
 
   alerts_count: {
     type: 'long',

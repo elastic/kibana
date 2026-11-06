@@ -19,6 +19,7 @@ import { css } from '@emotion/css';
 import type { AppMountParameters } from '@kbn/core/public';
 
 import type { FleetStartServices } from '../../../../plugin';
+import { useStartServices } from '../../hooks';
 import { useIsReadOnly } from '../../hooks/use_read_only_context';
 
 import { HeaderPortal } from './header_portal';
@@ -38,6 +39,13 @@ export const IntegrationsHeader = ({
     `;
   }, [euiTheme]);
   const isReadOnly = useIsReadOnly();
+  const { cloud } = useStartServices();
+  const hasDeploymentDetails = Boolean(cloud?.isCloudEnabled && cloud.cloudId);
+
+  // Registering an empty action menu still renders an empty bar in the chrome header.
+  if (!hasDeploymentDetails && !isReadOnly) {
+    return null;
+  }
 
   return (
     <HeaderPortal {...{ setHeaderActionMenu, startServices }}>

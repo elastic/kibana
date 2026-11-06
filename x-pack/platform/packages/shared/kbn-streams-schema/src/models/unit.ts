@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { recursiveRecord } from '../shared/record_types';
 
 /**
@@ -64,6 +64,14 @@ const sourceSchema = z.strictObject({
   ...componentFields,
   path_template: z.string().max(2048).optional(),
 });
+
+export const streamsComponentValidationRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('source'), component: sourceSchema }),
+    z.strictObject({ kind: z.literal('processor'), component: componentBaseSchema }),
+    z.strictObject({ kind: z.literal('destination'), component: componentBaseSchema }),
+  ])
+);
 
 const identifierListSchema = z.array(streamsUnitIdentifierSchema).max(2000);
 
@@ -202,7 +210,11 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
    * so the 128 cap is headroom, not a format check.
    */
   config_hash: z.string().min(1).max(128).optional(),
-  /** Absolute range, ISO 8601. Both fields are required when present. */
+  /**
+   * Absolute range, ISO 8601. Both fields are required when present. It applies to every
+   * component. A processor instance is a route position, so a range that spans a change of routes
+   * can mix routes: keep it short for processors.
+   */
   time_range: z
     .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
     .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
@@ -262,8 +274,10 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
   }),
 });
 
-export const streamsUnitStatsProcessorResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
+export const streamsUnitStatsProcessorInstanceSchema = z.object({
+  pipeline_id: z.string(),
+  /** The position of the route in the pipeline, null for the processors of the pipeline itself. */
+  route_index: z.number().int().nonnegative().nullable(),
   processing_duration: z.object({ average: statsValueSchema }),
   events: z.object({
     incoming: z.object({
@@ -276,6 +290,17 @@ export const streamsUnitStatsProcessorResultSchema = z.object({
      */
     failed: z.object({ rate: statsRateSchema }),
   }),
+});
+
+export const streamsUnitStatsProcessorResultSchema = z.object({
+  error: streamsUnitStatsErrorSchema.optional(),
+  /**
+   * Where the processor ran in the window, one entry per pipeline and route. Empty when it has no
+   * data. A route is identified by its position as the telemetry reports it, so when routes are
+   * added, removed or reordered a position can mean a different route in an older part of the
+   * window: an instance is only reliable within one unit version.
+   */
+  instances: z.array(streamsUnitStatsProcessorInstanceSchema),
 });
 
 export const streamsUnitStatsMetaSchema = z.object({
@@ -336,9 +361,11 @@ export namespace StreamsUnit {
   export type StatsError = z.infer<typeof streamsUnitStatsErrorSchema>;
   export type StatsSeries = z.infer<typeof streamsUnitStatsSeriesSchema>;
   export type StatsDestinationResult = z.infer<typeof streamsUnitStatsDestinationResultSchema>;
+  export type StatsProcessorInstance = z.infer<typeof streamsUnitStatsProcessorInstanceSchema>;
   export type StatsProcessorResult = z.infer<typeof streamsUnitStatsProcessorResultSchema>;
   export type StatsMeta = z.infer<typeof streamsUnitStatsMetaSchema>;
   export type StatsResponse = z.infer<typeof streamsUnitStatsResponseSchema>;
+  export type ComponentValidationRequest = z.infer<typeof streamsComponentValidationRequestSchema>;
   export interface ConfigurationSavedObjectAttributes {
     unit_id: Identifier;
     unit: Configuration;
@@ -348,12 +375,14 @@ export namespace StreamsUnit {
     metadata: UiMetadata;
   }
   export type DiagnosticSeverity = 'error' | 'warning' | 'info';
-  /** A config-distributor finding about a unit, from `POST /v1/validate` or a rejected publish. */
+  /**
+   * A config-distributor finding, from `POST /v1/units/validate`, a rejected publish, or
+   * `POST /v1/components/validate`.
+   */
   export interface Diagnostic {
     severity: DiagnosticSeverity;
     code: string;
     message: string;
-    /** Location in the validated unit, e.g. `pipelines > p-input > routes > 0`. */
     path?: string;
     line?: number;
   }

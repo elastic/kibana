@@ -159,6 +159,129 @@ describe('useModelSettingsForm', () => {
     });
   });
 
+  describe('saved model parameters', () => {
+    const savedWithParameters = {
+      data: {
+        data: {
+          features: [
+            {
+              feature_id: 'child_1',
+              endpoints: [
+                {
+                  id: 'endpoint-a',
+                  parameters: { reasoning: { effort: 'high' } },
+                },
+                { id: 'endpoint-b' },
+              ],
+            },
+          ],
+        },
+      },
+      isLoading: false,
+    };
+
+    it('keeps saved parameters when an unrelated feature is saved', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
+              { id: 'endpoint-b' },
+            ],
+          },
+          { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
+        ],
+      });
+    });
+
+    it('keeps parameters for retained endpoints when endpoints are reordered or added', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-b', 'endpoint-a', 'ep-new']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-b' },
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
+              { id: 'ep-new' },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('removes the override and its parameters when reset to recommended endpoints', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [
+                  { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
+                  { id: 'ep-custom' },
+                ],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-a', 'endpoint-b']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
+    });
+
+    it('drops parameters when their endpoint is removed', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-b']);
+      });
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          { feature_id: 'child_1', endpoints: [{ id: 'endpoint-b' }] },
+          { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
+        ],
+      });
+    });
+  });
+
   it('falls back to Kibana default endpoint when child and parent have no recommendations', () => {
     const childWithNoRecommended: InferenceFeatureConfig = {
       ...childFeature2,
