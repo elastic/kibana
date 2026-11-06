@@ -7,7 +7,10 @@
 
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
-import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
+import type {
+  DashboardAttachment,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { applyAttachmentToDashboard } from './apply_attachment';
@@ -21,6 +24,18 @@ interface PreviewAttachmentInDashboardParams {
   dashboardLocator?: DashboardRendererProps['locator'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
+
+/** Dashboard locator params that open the attachment data, with filters in their stored form. */
+export const toDashboardLocatorParams = (data: DashboardAttachmentData) => {
+  const { filters, query, ...dashboardState } = attachmentDataToDashboardState(data);
+  return {
+    ...dashboardState,
+    filters: toStoredFilters(filters),
+    query: toStoredQuery(query),
+    // the attachment holds the dashboard's filters, so they replace the saved ones
+    preserveSavedFilters: false,
+  };
+};
 
 export const previewAttachmentInDashboard = async ({
   attachment,
@@ -45,15 +60,10 @@ export const previewAttachmentInDashboard = async ({
   if (!openSavedDashboard) {
     appliedAttachments.linkNextDashboard(dashboardApi, attachment.id);
   }
-  const { filters, query, ...dashboardState } = attachmentDataToDashboardState(attachment.data);
   // A host app's own `dashboardApi.locator` (e.g. Security's) may keep only `dashboardId` and drop
   // the attachment's panels, so navigate through the Dashboard app locator instead.
   await dashboardLocator?.navigate({
-    ...dashboardState,
-    filters: toStoredFilters(filters),
-    query: toStoredQuery(query),
-    // the attachment holds the dashboard's filters, so they replace the saved ones
-    preserveSavedFilters: false,
+    ...toDashboardLocatorParams(attachment.data),
     dashboardId: openSavedDashboard ? attachment.origin : undefined,
     viewMode: 'edit',
     changedBy: ['agent'],
