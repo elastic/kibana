@@ -205,6 +205,11 @@ export type CustomContentTemplateResolver = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
   hasExistingQuery?: boolean;
+  /**
+   * Values for the query's named parameters (`?name`), as ES|QL takes them. The time range is
+   * always given; this is for a query that also has parameters of its own.
+   */
+  esqlParams?: Array<Record<string, string | number | boolean>>;
   /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
   esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
@@ -214,14 +219,24 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery, esqlVariables }) => {
+  return async ({
+    prompt,
+    esqlQuery,
+    existingTemplate,
+    hasExistingQuery,
+    esqlParams,
+    esqlVariables,
+  }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
     if (esqlQuery) {
       try {
         const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
-        const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
+        const params = [
+          ...getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables),
+          ...(esqlParams ?? []),
+        ];
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
           ...(params.length ? { params } : {}),

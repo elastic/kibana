@@ -50,6 +50,7 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Markdown** (\`type: markdown\`) → \`w: 24–48, h: 4–9\`, from the length of its \`content\`.
 - **Datatable** (\`data_table\`) → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
 - **Custom content** → \`w: 24–48\`, \`h\` from what its \`content\` shows, for the rows its ES|QL query returns (respect its \`LIMIT\`): \`h: 6–8\` for a KPI or status card, or one short row of them; \`h: 10–16\` for a list, table or status board; \`h: 16–20\` for a multi-section layout or a drawn chart or diagram. Too short makes the panel scroll and too tall leaves an empty gap; between two sizes, take the larger.
+- **Custom app** (\`type: custom_app\`) → \`w: 48, h: 24–32\`: an interactive app with filters, a table and details needs the full width and room to show them, and a small panel scrolls.
 - **Vega and ML panels** → \`w: 24–48, h: 12–16\`.
 - **Any other type** (legacy visualizations, maps, saved searches) → \`w: 24\` by default, up to \`48\`. Keep its \`h\` when it has a grid.
 

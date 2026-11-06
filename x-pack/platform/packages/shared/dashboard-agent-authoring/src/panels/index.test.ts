@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CUSTOM_APP_EMBEDDABLE_TYPE, CUSTOM_APP_STATE_VERSION } from '@kbn/custom-app-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { buildConfigPanelContent, getEditableEmbeddableTypes, upsertPanelContentSchema } from '.';
 
@@ -107,5 +108,45 @@ describe('by-value panel type registry', () => {
         config: { content: 'new', settings: { open_links_in_new_tab: true } },
       })
     ).toEqual([MARKDOWN_EMBEDDABLE_TYPE]);
+  });
+});
+
+describe('custom app panels', () => {
+  const document = {
+    state: {},
+    root: { type: 'heading', id: 'title', text: 'Hello' },
+  };
+  const content = { source: 'config' as const, type: 'custom_app' as const, config: { document } };
+
+  it('accepts an app by value, to create a panel or to replace the app of one', () => {
+    expect(upsertPanelContentSchema.safeParse(content).success).toBe(true);
+    expect(
+      upsertPanelContentSchema.safeParse({ ...content, config: { title: 'Mine', document } })
+        .success
+    ).toBe(true);
+  });
+
+  it('refuses an app that is not valid, such as one whose custom content has no template yet', () => {
+    const unwritten = {
+      state: {},
+      root: { type: 'custom_content', id: 'board', prompt: 'A status board' },
+    };
+
+    expect(
+      upsertPanelContentSchema.safeParse({ ...content, config: { document: unwritten } }).success
+    ).toBe(false);
+  });
+
+  it('is stored as a custom app panel, with the version of its state added', () => {
+    expect(buildConfigPanelContent('custom_app', { document, title: 'Mine' })).toEqual({
+      type: CUSTOM_APP_EMBEDDABLE_TYPE,
+      config: { document, title: 'Mine', version: CUSTOM_APP_STATE_VERSION },
+    });
+  });
+
+  it('edits only panels of the custom app type', () => {
+    expect(getEditableEmbeddableTypes(upsertPanelContentSchema.parse(content))).toEqual([
+      CUSTOM_APP_EMBEDDABLE_TYPE,
+    ]);
   });
 });
