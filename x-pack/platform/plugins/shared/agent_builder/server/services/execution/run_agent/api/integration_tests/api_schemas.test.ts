@@ -8,6 +8,8 @@
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { toDescribedDefinition, toDescribedSchema } from '../describe_schema';
 import { getRegistries } from '../registry';
+import { searchApis } from '../search_apis';
+import { loadApi } from '../load_api';
 import { getValidator } from '../validate_params';
 import { prepareApiRequest } from '../prepare_request';
 import { isRecord } from '../types';
@@ -139,6 +141,50 @@ describe('@elastic/schemas registries', () => {
           description: expect.any(String),
         })
       );
+    });
+  });
+
+  describe('searchApis', () => {
+    it.each<[ApiTarget, string, string]>([
+      ['elasticsearch', 'create an index', 'indices.create'],
+      ['elasticsearch', 'cluster health', 'cluster.health'],
+      ['elasticsearch', 'index many documents at once', 'bulk'],
+      ['elasticsearch', 'anomaly detection records', 'ml.get_records'],
+      ['elasticsearch', 'indices.create', 'indices.create'],
+      [
+        'kibana',
+        'install integration package',
+        'elastic-package-manager-epm.post-fleet-epm-packages',
+      ],
+      ['kibana', 'agent builder tools', 'agent-builder.get-agent-builder-tools'],
+    ])('ranks the expected %s API in the top 5 for "%s"', async (target, search, expected) => {
+      const registries = await getRegistries();
+
+      const apis = searchApis(registries[target], search, 5);
+
+      expect(apis.map(({ api }) => api)).toContain(expected);
+    });
+
+    it.each<[ApiTarget, string]>([
+      ['elasticsearch', 'search'],
+      ['elasticsearch', 'cluster.health'],
+      ['kibana', 'dashboards.get-dashboard'],
+    ])('ranks the %s API whose identifier is "%s" first', async (target, search) => {
+      const registries = await getRegistries();
+
+      expect(searchApis(registries[target], search)[0].api).toBe(search);
+    });
+
+    it.each<[ApiTarget, string, string]>([
+      ['elasticsearch', 'indices.put-mapping', 'indices.put_mapping'],
+      ['elasticsearch', 'indices.craete', 'indices.create'],
+      ['elasticsearch', 'cluster.healht', 'cluster.health'],
+      ['kibana', 'dashboards.get-dashboards', 'dashboards.get-dashboard'],
+    ])('suggests only the intended %s identifier for "%s"', async (target, mistyped, intended) => {
+      await expect(loadApi(target, mistyped)).resolves.toEqual({
+        status: 'unknown_api',
+        suggestions: [intended],
+      });
     });
   });
 
