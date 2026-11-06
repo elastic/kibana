@@ -32,9 +32,9 @@ describe('EmsVectorTileLayer', () => {
       } as unknown as EMSTMSSource,
       layerDescriptor: {
         id: 'layerid',
-        sourceDescriptor: {
+        source_descriptor: {
           type: SOURCE_TYPES.EMS_XYZ,
-          urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
+          url_template: 'https://example.com/{x}/{y}/{z}.png',
           id: 'mockSourceId',
         } as XYZTMSSourceDescriptor,
       } as unknown as EMSVectorTileLayerDescriptor,
@@ -71,9 +71,9 @@ describe('EmsVectorTileLayer', () => {
         } as unknown as EMSTMSSource,
         layerDescriptor: {
           id: 'layerid',
-          sourceDescriptor: {
+          source_descriptor: {
             type: SOURCE_TYPES.EMS_XYZ,
-            urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
+            url_template: 'https://example.com/{x}/{y}/{z}.png',
             id: 'mockSourceId',
           } as XYZTMSSourceDescriptor,
           __dataRequests: dataRequest ? [{ dataId: SOURCE_DATA_REQUEST_ID, ...dataRequest }] : [],

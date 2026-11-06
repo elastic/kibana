@@ -89,7 +89,7 @@ export function setPauseSyncData(pauseSyncData: boolean) {
     });
 
     if (!pauseSyncData) {
-      if (getMapSettings(getState()).autoFitToDataBounds) {
+      if (getMapSettings(getState()).auto_fit_to_data_bounds) {
         dispatch(autoFitToBounds());
       } else {
         dispatch(syncDataForAllLayers(false));
@@ -131,7 +131,7 @@ export function updateMapSetting(
       settingValue,
     });
 
-    if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
+    if (settingKey === 'auto_fit_to_data_bounds' && settingValue === true) {
       dispatch(autoFitToBounds());
     }
   };
@@ -140,7 +140,7 @@ export function updateMapSetting(
 export function updateCustomIcons(customIcons: CustomIcon[]) {
   return {
     type: UPDATE_MAP_SETTING,
-    settingKey: 'customIcons',
+    settingKey: 'custom_icons',
     settingValue: customIcons,
   };
 }
@@ -172,10 +172,10 @@ export function deleteCustomIcon(value: string) {
         })
       );
     } else {
-      const newIcons = getState().map.settings.customIcons.filter(
-        ({ symbolId }) => symbolId !== value
+      const newIcons = getState().map.settings.custom_icons.filter(
+        ({ symbol_id: symbolId }) => symbolId !== value
       );
-      dispatch(updateMapSetting('customIcons', newIcons));
+      dispatch(updateMapSetting('custom_icons', newIcons));
     }
   };
 }
@@ -191,7 +191,7 @@ export function mapReady() {
 
     const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
 
-    if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
+    if (getMapSettings(getState()).initial_location === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
         dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
@@ -350,7 +350,7 @@ export function setQuery({
       ...nextQueryContext,
     });
 
-    if (getMapSettings(getState()).autoFitToDataBounds) {
+    if (getMapSettings(getState()).auto_fit_to_data_bounds) {
       dispatch(autoFitToBounds());
     } else {
       await dispatch(syncDataForAllLayers(forceRefresh));

@@ -44,7 +44,7 @@ function createEsqlLayerDescriptor(
 ): LayerDescriptor {
   return {
     id,
-    sourceDescriptor: {
+    source_descriptor: {
       type: SOURCE_TYPES.ESQL,
       esql,
     },
@@ -63,9 +63,9 @@ function createEsqlLayerDescriptor(
 function createNonEsqlLayerDescriptor(id: string): LayerDescriptor {
   return {
     id,
-    sourceDescriptor: {
+    source_descriptor: {
       type: SOURCE_TYPES.ES_SEARCH,
-      indexPatternId: 'some-index',
+      index_pattern_id: 'some-index',
     },
   } as unknown as LayerDescriptor;
 }

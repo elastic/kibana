@@ -34,11 +34,11 @@ class TestESAggSource extends AbstractESAggSource {
   constructor(metrics: AggDescriptor[]) {
     super({
       id: 'foobar',
-      indexPatternId: 'foobarid',
+      index_pattern_id: 'foobarid',
       metrics,
-      applyGlobalQuery: true,
-      applyGlobalTime: true,
-      applyForceRefresh: true,
+      apply_global_query: true,
+      apply_global_time: true,
+      apply_force_refresh: true,
     });
   }
 }

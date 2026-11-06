@@ -465,7 +465,7 @@ function updateSourcePropWithoutSync(
       dispatch(updateLayerType(layerId, newLayerType));
     }
 
-    if (propName === 'scalingType') {
+    if (propName === 'scaling_type') {
       // get joins from layer descriptor instead of layer.getJoins()
       // 1) IVectorLayer implementations may return empty array when descriptor has joins
       // 2) getJoins returns instances and descriptors are needed.
@@ -581,7 +581,7 @@ export function updateLayerMinZoom(id: string, minZoom: number) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'minZoom',
+    propName: 'min_zoom',
     newValue: minZoom,
   };
 }
@@ -590,7 +590,7 @@ export function updateLayerMaxZoom(id: string, maxZoom: number) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'maxZoom',
+    propName: 'max_zoom',
     newValue: maxZoom,
   };
 }
@@ -608,7 +608,7 @@ export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'areLabelsOnTop',
+    propName: 'are_labels_on_top',
     newValue: areLabelsOnTop,
   };
 }
@@ -617,7 +617,7 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'includeInFitToBounds',
+    propName: 'include_in_fit_to_bounds',
     newValue: includeInFitToBounds,
   };
 }
@@ -626,7 +626,7 @@ export function updateDisableTooltips(id: string, disableTooltips: boolean) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'disableTooltips',
+    propName: 'disable_tooltips',
     newValue: disableTooltips,
   };
 }

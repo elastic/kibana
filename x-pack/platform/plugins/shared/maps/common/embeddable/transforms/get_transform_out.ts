@@ -12,6 +12,7 @@ import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
 import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import { convertToSnakeCase } from '../../content_management/convert_keys';
 import type { StoredMapEmbeddableState } from './types';
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
@@ -25,7 +26,12 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
       transformTimeRangeOut<StoredMapEmbeddableState>,
       (state: StoredMapEmbeddableState) => transformDrilldownsOut(state, panelReferences)
     );
-    const state = transformsFlow(storedState);
+    const transformedState = transformsFlow(storedState);
+    // Stored map settings are camelCase, API map settings are snake_case
+    const state =
+      'mapSettings' in transformedState && transformedState.mapSettings
+        ? { ...transformedState, mapSettings: convertToSnakeCase(transformedState.mapSettings) }
+        : transformedState;
 
     // by ref
     const savedObjectRef = (panelReferences ?? []).find(

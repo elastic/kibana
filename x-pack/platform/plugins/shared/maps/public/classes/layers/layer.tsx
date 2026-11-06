@@ -173,17 +173,19 @@ export class AbstractLayer implements ILayer {
   static createDescriptor(options: Partial<LayerDescriptor>): LayerDescriptor {
     return {
       ...options,
-      sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
+      source_descriptor: options.source_descriptor ? options.source_descriptor : null,
       __dataRequests: _.get(options, '__dataRequests', []),
       id: _.get(options, 'id', uuidv4()),
       label: options.label && options.label.length > 0 ? options.label : undefined,
-      minZoom: _.get(options, 'minZoom', MIN_ZOOM),
-      maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
+      min_zoom: _.get(options, 'min_zoom', MIN_ZOOM),
+      max_zoom: _.get(options, 'max_zoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
-      includeInFitToBounds:
-        typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
+      include_in_fit_to_bounds:
+        typeof options.include_in_fit_to_bounds === 'boolean'
+          ? options.include_in_fit_to_bounds
+          : true,
     } as LayerDescriptor;
   }
 
@@ -215,7 +217,7 @@ export class AbstractLayer implements ILayer {
     clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
-    clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
+    clonedDescriptor.source_descriptor = this.getSource().cloneDescriptor();
     return [clonedDescriptor];
   }
 
@@ -236,7 +238,7 @@ export class AbstractLayer implements ILayer {
   }
 
   isIncludeInFitToBounds(): boolean {
-    return !!this._descriptor.includeInFitToBounds;
+    return !!this._descriptor.include_in_fit_to_bounds;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
@@ -322,11 +324,11 @@ export class AbstractLayer implements ILayer {
   }
 
   getMinZoom(): number {
-    return typeof this._descriptor.minZoom === 'number' ? this._descriptor.minZoom : MIN_ZOOM;
+    return typeof this._descriptor.min_zoom === 'number' ? this._descriptor.min_zoom : MIN_ZOOM;
   }
 
   getMaxZoom(): number {
-    return typeof this._descriptor.maxZoom === 'number' ? this._descriptor.maxZoom : MAX_ZOOM;
+    return typeof this._descriptor.max_zoom === 'number' ? this._descriptor.max_zoom : MAX_ZOOM;
   }
 
   getMinSourceZoom(): number {

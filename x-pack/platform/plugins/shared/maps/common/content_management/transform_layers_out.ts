@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { Writable } from '@kbn/utility-types';
 import { SOURCE_TYPES } from '../constants';
-import type { ESQLSourceDescriptor, LayerDescriptor } from '../descriptor_types';
 
-export function transformLayersOut(layers: Writable<Partial<LayerDescriptor>>[]) {
+// Layers are in stored (camelCase) format
+export function transformLayersOut(layers: Array<Record<string, unknown>>) {
   return layers.map((layer) => {
     if ('sourceDescriptor' in layer && layer.sourceDescriptor) {
       const source = layer.sourceDescriptor as { type?: string };
       if (source.type === SOURCE_TYPES.ESQL) {
-        const { columns, dataViewId, ...restOfSource } = source as ESQLSourceDescriptor & {
+        const { columns, dataViewId, ...restOfSource } = source as {
           columns?: unknown;
           dataViewId?: string;
         };

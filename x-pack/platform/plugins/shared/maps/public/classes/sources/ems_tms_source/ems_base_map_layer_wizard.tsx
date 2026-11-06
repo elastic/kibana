@@ -46,7 +46,7 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: EmsTmsSourceConfig) => {
       const layerDescriptor = EmsVectorTileLayer.createDescriptor({
-        sourceDescriptor: EMSTMSSource.createDescriptor(sourceConfig),
+        source_descriptor: EMSTMSSource.createDescriptor(sourceConfig),
       });
       previewLayers([layerDescriptor]);
     };

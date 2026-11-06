@@ -58,7 +58,7 @@ const searchArgsToSOFindOptions = (
 
   return {
     type: MAP_SAVED_OBJECT_TYPE,
-    searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
+    searchFields: options?.only_title ? ['title'] : ['title^3', 'description'],
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,

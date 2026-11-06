@@ -116,12 +116,12 @@ export function CreateSourceEditor(props: Props) {
       const sourceConfig =
         esql && esql.length
           ? ({
-              dateField,
-              geoField,
+              date_field: dateField,
+              geo_field: geoField,
               esql,
-              narrowByGlobalSearch,
-              narrowByGlobalTime,
-              narrowByMapBounds,
+              narrow_by_global_search: narrowByGlobalSearch,
+              narrow_by_global_time: narrowByGlobalTime,
+              narrow_by_map_bounds: narrowByMapBounds,
             } as ESQLSourceDescriptor)
           : null;
       props.onSourceConfigChange(sourceConfig);

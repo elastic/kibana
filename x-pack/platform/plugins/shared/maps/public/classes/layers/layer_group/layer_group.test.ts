@@ -104,8 +104,8 @@ describe('isLayerLoading', () => {
         visible: false,
       }),
       createTiledLayer({
-        maxZoom: 24,
-        minZoom: 3,
+        max_zoom: 24,
+        min_zoom: 3,
       }),
     ]);
     expect(layerGroup.isLayerLoading(1)).toBe(false);

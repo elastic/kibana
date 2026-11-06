@@ -27,7 +27,7 @@ describe('getInitialRefreshConfig', () => {
   });
 
   it('should return refreshInterval from mapState when stored with map', () => {
-    const mapState = { refreshInterval: { pause: true, value: 1000 } } as unknown as MapAttributes;
+    const mapState = { refresh_interval: { pause: true, value: 1000 } } as unknown as MapAttributes;
     const result = getInitialRefreshConfig({ mapState, globalState: {} });
     expect(result).toEqual({ pause: true, value: 1000 });
   });

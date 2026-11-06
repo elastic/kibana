@@ -47,25 +47,25 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
-      includeInFitToBounds: true,
+      include_in_fit_to_bounds: true,
       joins: [
         {
-          leftField: 'iso2',
+          left_field: 'iso2',
           right: {
-            applyGlobalQuery: true,
-            applyGlobalTime: true,
+            apply_global_query: true,
+            apply_global_time: true,
             id: '12345',
-            indexPatternId: 'apm_static_data_view_id_default',
+            index_pattern_id: 'apm_static_data_view_id_default',
             metrics: [
               {
                 field: 'transaction.duration.us',
                 type: 'avg',
               },
             ],
-            applyForceRefresh: true,
+            apply_force_refresh: true,
             term: 'client.geo.country_iso_code',
             type: 'ES_TERM_SOURCE',
-            whereQuery: {
+            where_query: {
               language: 'kuery',
               query: 'processor.event:"transaction"',
             },
@@ -73,28 +73,28 @@ describe('createLayerDescriptor', () => {
         },
       ],
       label: '[Performance] Duration',
-      maxZoom: 24,
-      minZoom: 0,
-      disableTooltips: false,
-      sourceDescriptor: {
+      max_zoom: 24,
+      min_zoom: 0,
+      disable_tooltips: false,
+      source_descriptor: {
         id: emsWorldLayerId,
-        tooltipProperties: ['name', 'iso2'],
+        tooltip_properties: ['name', 'iso2'],
         type: 'EMS_FILE',
       },
       style: {
-        isTimeAware: true,
+        is_time_aware: true,
         properties: {
           ...getDefaultStaticProperties(),
           fillColor: {
             options: {
               color: 'Green to Red',
-              colorCategory: 'palette_0',
+              color_category: 'palette_0',
               field: {
                 name: '__kbnjoin__avg_of_transaction.duration.us__12345',
                 origin: 'join',
               },
-              fieldMetaOptions: {
-                isEnabled: true,
+              field_meta_options: {
+                is_enabled: true,
                 sigma: 3,
               },
               type: 'ORDINAL',
@@ -125,33 +125,33 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
-      includeInFitToBounds: true,
+      include_in_fit_to_bounds: true,
       label: '[Performance] Duration',
-      maxZoom: 24,
-      minZoom: 0,
+      max_zoom: 24,
+      min_zoom: 0,
       query: {
         language: 'kuery',
         query: 'processor.event:"transaction"',
       },
-      sourceDescriptor: {
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        geoField: 'client.geo.location',
+      source_descriptor: {
+        apply_global_query: true,
+        apply_global_time: true,
+        geo_field: 'client.geo.location',
         id: '12345',
-        indexPatternId: 'apm_static_data_view_id_default',
+        index_pattern_id: 'apm_static_data_view_id_default',
         metrics: [
           {
             field: 'transaction.duration.us',
             type: 'avg',
           },
         ],
-        requestType: 'heatmap',
+        request_type: 'heatmap',
         resolution: 'MOST_FINE',
-        applyForceRefresh: true,
+        apply_force_refresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {
-        colorRampName: 'theclassic',
+        color_ramp_name: 'theclassic',
         type: 'HEATMAP',
       },
       type: 'HEATMAP',
@@ -169,47 +169,47 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
-      includeInFitToBounds: true,
+      include_in_fit_to_bounds: true,
       joins: [],
       label: '[Performance] Duration',
-      maxZoom: 24,
-      minZoom: 0,
-      disableTooltips: false,
+      max_zoom: 24,
+      min_zoom: 0,
+      disable_tooltips: false,
       query: {
         language: 'kuery',
         query: 'processor.event:"transaction"',
       },
-      sourceDescriptor: {
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        geoField: 'client.geo.location',
+      source_descriptor: {
+        apply_global_query: true,
+        apply_global_time: true,
+        geo_field: 'client.geo.location',
         id: '12345',
-        indexPatternId: 'apm_static_data_view_id_default',
+        index_pattern_id: 'apm_static_data_view_id_default',
         metrics: [
           {
             field: 'transaction.duration.us',
             type: 'avg',
           },
         ],
-        requestType: 'point',
+        request_type: 'point',
         resolution: 'MOST_FINE',
-        applyForceRefresh: true,
+        apply_force_refresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {
-        isTimeAware: true,
+        is_time_aware: true,
         properties: {
           ...getDefaultStaticProperties(),
           fillColor: {
             options: {
               color: 'Green to Red',
-              colorCategory: 'palette_0',
+              color_category: 'palette_0',
               field: {
                 name: 'avg_of_transaction.duration.us',
                 origin: 'source',
               },
-              fieldMetaOptions: {
-                isEnabled: true,
+              field_meta_options: {
+                is_enabled: true,
                 sigma: 3,
               },
               type: 'ORDINAL',
@@ -222,12 +222,12 @@ describe('createLayerDescriptor', () => {
                 name: 'avg_of_transaction.duration.us',
                 origin: 'source',
               },
-              fieldMetaOptions: {
-                isEnabled: true,
+              field_meta_options: {
+                is_enabled: true,
                 sigma: 3,
               },
-              maxSize: 32,
-              minSize: 7,
+              max_size: 32,
+              min_size: 7,
             },
             type: 'DYNAMIC',
           },

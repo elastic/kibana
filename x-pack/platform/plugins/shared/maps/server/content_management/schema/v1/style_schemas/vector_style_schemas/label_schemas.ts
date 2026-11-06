@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
@@ -62,27 +62,29 @@ export const labelPositionSchema = z
     description: 'Configure to place label above, in the center of, or below the Point feature',
   });
 
-export const labelZoomRangeSchema = z
-  .object({
-    options: z
-      .object({
-        useLayerZoomRange: z.boolean(),
-        minZoom: z.number(),
-        maxZoom: z.number(),
-      })
-      .strict(),
-  })
-  .strict()
-  .default({
-    options: {
-      useLayerZoomRange: true,
-      minZoom: MIN_ZOOM,
-      maxZoom: MAX_ZOOM,
-    },
-  })
-  .meta({
-    description: 'Configure to set the zoom range for which labels are displayed',
-  });
+export const labelZoomRangeSchema = lazySchema(() =>
+  z
+    .object({
+      options: z
+        .object({
+          use_layer_zoom_range: z.boolean(),
+          min_zoom: z.number(),
+          max_zoom: z.number(),
+        })
+        .strict(),
+    })
+    .strict()
+    .default({
+      options: {
+        use_layer_zoom_range: true,
+        min_zoom: MIN_ZOOM,
+        max_zoom: MAX_ZOOM,
+      },
+    })
+    .meta({
+      description: 'Configure to set the zoom range for which labels are displayed',
+    })
+);
 
 export const labelDynamicOptions = z
   .object({

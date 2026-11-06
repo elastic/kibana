@@ -19,8 +19,8 @@ export function getInitialRefreshConfig({
 }) {
   const uiSettings = getUiSettings();
 
-  if (mapState?.refreshInterval) {
-    return mapState.refreshInterval;
+  if (mapState?.refresh_interval) {
+    return mapState.refresh_interval;
   }
 
   const defaultRefreshConfig = uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);

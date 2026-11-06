@@ -65,31 +65,31 @@ const initialLocationOptions = [
 
 export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Props) {
   const onAutoFitToDataBoundsChange = (event: EuiSwitchEvent) => {
-    updateMapSetting('autoFitToDataBounds', event.target.checked);
+    updateMapSetting('auto_fit_to_data_bounds', event.target.checked);
   };
 
   const onZoomChange = (value: Value) => {
     const minZoom = Math.max(MIN_ZOOM, parseInt(value[0] as string, 10));
     const maxZoom = Math.min(MAX_ZOOM, parseInt(value[1] as string, 10));
-    updateMapSetting('minZoom', minZoom);
-    updateMapSetting('maxZoom', maxZoom);
+    updateMapSetting('min_zoom', minZoom);
+    updateMapSetting('max_zoom', maxZoom);
 
     // ensure fixed zoom and browser zoom stay within defined min/max
-    if (settings.fixedLocation.zoom < minZoom) {
+    if (settings.fixed_location.zoom < minZoom) {
       onFixedZoomChange(minZoom);
-    } else if (settings.fixedLocation.zoom > maxZoom) {
+    } else if (settings.fixed_location.zoom > maxZoom) {
       onFixedZoomChange(maxZoom);
     }
 
-    if (settings.browserLocation.zoom < minZoom) {
+    if (settings.browser_location.zoom < minZoom) {
       onBrowserZoomChange(minZoom);
-    } else if (settings.browserLocation.zoom > maxZoom) {
+    } else if (settings.browser_location.zoom > maxZoom) {
       onBrowserZoomChange(maxZoom);
     }
   };
 
   const onInitialLocationChange = (optionId: string): void => {
-    updateMapSetting('initialLocation', optionId);
+    updateMapSetting('initial_location', optionId);
   };
 
   const onFixedLatChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +101,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
     } else if (value > 90) {
       value = 90;
     }
-    updateMapSetting('fixedLocation', { ...settings.fixedLocation, lat: value });
+    updateMapSetting('fixed_location', { ...settings.fixed_location, lat: value });
   };
 
   const onFixedLonChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -113,19 +113,19 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
     } else if (value > 180) {
       value = 180;
     }
-    updateMapSetting('fixedLocation', { ...settings.fixedLocation, lon: value });
+    updateMapSetting('fixed_location', { ...settings.fixed_location, lon: value });
   };
 
   const onFixedZoomChange = (value: number) => {
-    updateMapSetting('fixedLocation', { ...settings.fixedLocation, zoom: value });
+    updateMapSetting('fixed_location', { ...settings.fixed_location, zoom: value });
   };
 
   const onBrowserZoomChange = (value: number) => {
-    updateMapSetting('browserLocation', { zoom: value });
+    updateMapSetting('browser_location', { zoom: value });
   };
 
   const useCurrentView = () => {
-    updateMapSetting('fixedLocation', {
+    updateMapSetting('fixed_location', {
       lat: center.lat,
       lon: center.lon,
       zoom: Math.round(zoom),
@@ -134,8 +134,8 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
 
   function renderInitialLocationInputs() {
     if (
-      settings.initialLocation === INITIAL_LOCATION.LAST_SAVED_LOCATION ||
-      settings.initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS
+      settings.initial_location === INITIAL_LOCATION.LAST_SAVED_LOCATION ||
+      settings.initial_location === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS
     ) {
       return null;
     }
@@ -148,16 +148,16 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
         display="columnCompressed"
       >
         <ValidatedRange
-          min={settings.minZoom}
-          max={settings.maxZoom}
+          min={settings.min_zoom}
+          max={settings.max_zoom}
           step={1}
           value={
-            settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION
-              ? settings.browserLocation.zoom
-              : settings.fixedLocation.zoom
+            settings.initial_location === INITIAL_LOCATION.BROWSER_LOCATION
+              ? settings.browser_location.zoom
+              : settings.fixed_location.zoom
           }
           onChange={
-            settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION
+            settings.initial_location === INITIAL_LOCATION.BROWSER_LOCATION
               ? onBrowserZoomChange
               : onFixedZoomChange
           }
@@ -168,7 +168,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
       </EuiFormRow>
     );
 
-    if (settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION) {
+    if (settings.initial_location === INITIAL_LOCATION.BROWSER_LOCATION) {
       return zoomFormRow;
     }
 
@@ -181,7 +181,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           display="columnCompressed"
         >
           <EuiFieldNumber
-            value={settings.fixedLocation.lat}
+            value={settings.fixed_location.lat}
             onChange={onFixedLatChange}
             compressed
           />
@@ -193,7 +193,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           display="columnCompressed"
         >
           <EuiFieldNumber
-            value={settings.fixedLocation.lon}
+            value={settings.fixed_location.lon}
             onChange={onFixedLonChange}
             compressed
           />
@@ -230,7 +230,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           label={i18n.translate('xpack.maps.mapSettingsPanel.autoFitToDataBoundsLabel', {
             defaultMessage: 'Auto fit map to data bounds',
           })}
-          checked={settings.autoFitToDataBounds}
+          checked={settings.auto_fit_to_data_bounds}
           onChange={onAutoFitToDataBoundsChange}
           compressed
           data-test-subj="autoFitToDataBoundsSwitch"
@@ -245,7 +245,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
         formRowDisplay="columnCompressed"
         min={MIN_ZOOM}
         max={MAX_ZOOM}
-        value={[settings.minZoom, settings.maxZoom]}
+        value={[settings.min_zoom, settings.max_zoom]}
         showInput="inputWithPopover"
         showRange
         showLabels
@@ -262,7 +262,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
       >
         <EuiRadioGroup
           options={initialLocationOptions}
-          idSelected={settings.initialLocation}
+          idSelected={settings.initial_location}
           onChange={onInitialLocationChange}
           name="initialMapLocation"
         />

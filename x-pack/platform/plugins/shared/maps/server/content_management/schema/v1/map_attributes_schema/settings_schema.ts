@@ -10,7 +10,7 @@ import { INITIAL_LOCATION } from '../../../../../common';
 
 export const customIconSchema = z
   .object({
-    symbolId: z.string(),
+    symbol_id: z.string(),
     svg: z.string(),
     label: z.string(),
     cutoff: z.number(),
@@ -20,15 +20,15 @@ export const customIconSchema = z
 
 export const settingsSchema = z
   .object({
-    autoFitToDataBounds: z.boolean().optional(),
-    backgroundColor: z.string().optional(),
-    customIcons: z.array(customIconSchema).optional(),
-    disableInteractive: z.boolean().optional(),
-    disableTooltipControl: z.boolean().optional(),
-    hideToolbarOverlay: z.boolean().optional(),
-    hideLayerControl: z.boolean().optional(),
-    hideViewControl: z.boolean().optional(),
-    initialLocation: z
+    auto_fit_to_data_bounds: z.boolean().optional(),
+    background_color: z.string().optional(),
+    custom_icons: z.array(customIconSchema).optional(),
+    disable_interactive: z.boolean().optional(),
+    disable_tooltip_control: z.boolean().optional(),
+    hide_toolbar_overlay: z.boolean().optional(),
+    hide_layer_control: z.boolean().optional(),
+    hide_view_control: z.boolean().optional(),
+    initial_location: z
       .union([
         z.literal(INITIAL_LOCATION.LAST_SAVED_LOCATION),
         z.literal(INITIAL_LOCATION.FIXED_LOCATION),
@@ -36,7 +36,7 @@ export const settingsSchema = z
         z.literal(INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS),
       ])
       .optional(),
-    fixedLocation: z
+    fixed_location: z
       .object({
         lat: z.number(),
         lon: z.number(),
@@ -44,21 +44,21 @@ export const settingsSchema = z
       })
       .strict()
       .optional(),
-    browserLocation: z
+    browser_location: z
       .object({
         zoom: z.number(),
       })
       .strict()
       .optional(),
-    keydownScrollZoom: z.boolean().optional(),
-    maxZoom: z.number().optional(),
-    minZoom: z.number().optional(),
+    keydown_scroll_zoom: z.boolean().optional(),
+    max_zoom: z.number().optional(),
+    min_zoom: z.number().optional(),
     projection: z.union([z.literal('globeInterpolate'), z.literal('mercator')]).optional(),
-    showScaleControl: z.boolean().optional(),
-    showSpatialFilters: z.boolean().optional(),
-    showTimesliderToggleButton: z.boolean().optional(),
-    spatialFiltersAlpa: z.number().optional(),
-    spatialFiltersFillColor: z.string().optional(),
-    spatialFiltersLineColor: z.string().optional(),
+    show_scale_control: z.boolean().optional(),
+    show_spatial_filters: z.boolean().optional(),
+    show_timeslider_toggle_button: z.boolean().optional(),
+    spatial_filters_alpa: z.number().optional(),
+    spatial_filters_fill_color: z.string().optional(),
+    spatial_filters_line_color: z.string().optional(),
   })
   .strict();

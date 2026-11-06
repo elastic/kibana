@@ -19,7 +19,7 @@ export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const tilemapSourceFromKibana = getKibanaTileMap();
   if (_.get(tilemapSourceFromKibana, 'url')) {
     const layerDescriptor = RasterTileLayer.createDescriptor({
-      sourceDescriptor: KibanaTilemapSource.createDescriptor(),
+      source_descriptor: KibanaTilemapSource.createDescriptor(),
     });
     return layerDescriptor;
   }
@@ -28,7 +28,7 @@ export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   if (isEmsEnabled) {
     const layerDescriptor = EmsVectorTileLayer.createDescriptor({
       locale: AUTOSELECT_EMS_LOCALE,
-      sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),
+      source_descriptor: EMSTMSSource.createDescriptor({ is_auto_select: true }),
     });
     return layerDescriptor;
   }

@@ -22,10 +22,14 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
 export class WMSSource extends AbstractSource implements IRasterSource {
   static type = SOURCE_TYPES.WMS;
   readonly _descriptor: WMSSourceDescriptor;
-  static createDescriptor({ serviceUrl, layers, styles }: Partial<WMSSourceDescriptor>) {
+  static createDescriptor({
+    service_url: serviceUrl,
+    layers,
+    styles,
+  }: Partial<WMSSourceDescriptor>) {
     return {
       type: WMSSource.type,
-      serviceUrl,
+      service_url: serviceUrl,
       layers,
       styles,
     } as WMSSourceDescriptor;
@@ -54,7 +58,7 @@ export class WMSSource extends AbstractSource implements IRasterSource {
   async getImmutableProperties() {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
-      { label: getUrlLabel(), value: this._descriptor.serviceUrl },
+      { label: getUrlLabel(), value: this._descriptor.service_url },
       {
         label: i18n.translate('xpack.maps.source.wms.layersLabel', {
           defaultMessage: 'Layers',
@@ -71,11 +75,11 @@ export class WMSSource extends AbstractSource implements IRasterSource {
   }
 
   async getDisplayName() {
-    return this._descriptor.serviceUrl;
+    return this._descriptor.service_url;
   }
 
   async getUrlTemplate() {
-    const client = new WmsClient({ serviceUrl: this._descriptor.serviceUrl });
+    const client = new WmsClient({ serviceUrl: this._descriptor.service_url });
     return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');
   }
 }

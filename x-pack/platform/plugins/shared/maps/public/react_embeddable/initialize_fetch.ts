@@ -53,8 +53,8 @@ export function initializeFetch({
       prevIsRestore = isRestore;
       store.dispatch(
         setMapSettings({
-          disableInteractive: isRestore,
-          hideToolbarOverlay: isRestore,
+          disable_interactive: isRestore,
+          hide_toolbar_overlay: isRestore,
         })
       );
     }

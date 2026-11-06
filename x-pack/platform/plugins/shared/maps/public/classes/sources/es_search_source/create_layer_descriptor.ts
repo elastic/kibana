@@ -32,10 +32,10 @@ export function createLayerDescriptor({
       ? SCALING_TYPES.CLUSTERS
       : SCALING_TYPES.LIMIT;
   const sourceDescriptor = ESSearchSource.createDescriptor({
-    indexPatternId,
-    geoField: geoFieldName,
-    scalingType,
+    index_pattern_id: indexPatternId,
+    geo_field: geoFieldName,
+    scaling_type: scalingType,
   });
 
-  return GeoJsonVectorLayer.createDescriptor({ sourceDescriptor, query });
+  return GeoJsonVectorLayer.createDescriptor({ source_descriptor: sourceDescriptor, query });
 }

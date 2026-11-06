@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { querySchema } from '@kbn/es-query-server';
 import { SOURCE_TYPES } from '../../../../../common';
 import { BaseESAggSourceSchema } from './es_agg_source_schemas';
 
 export const ESJoinSourceSchema = BaseESAggSourceSchema.extend({
   type: z.string(),
-  whereQuery: querySchema.optional(),
+  where_query: querySchema.optional(),
 });
 
 export const ESDistanceSourceSchema = ESJoinSourceSchema.extend({
   distance: z.number(),
-  geoField: z.string(),
+  geo_field: lazySchema(() => z.string()),
   type: z.literal(SOURCE_TYPES.ES_DISTANCE_SOURCE),
 });
 

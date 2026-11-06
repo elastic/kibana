@@ -114,8 +114,8 @@ export class UtmForm extends Component<Props, State> {
         : null;
     const { isInvalid: isZoomInvalid, error: zoomError } = withinRange(
       this.state.zoom,
-      this.props.settings.minZoom,
-      this.props.settings.maxZoom
+      this.props.settings.min_zoom,
+      this.props.settings.max_zoom
     );
 
     return (

@@ -46,7 +46,7 @@ const featureCollection = {
 };
 
 const joinDescriptor = {
-  leftField: LEFT_FIELD,
+  left_field: LEFT_FIELD,
   right: {
     id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
     __rows: [],

@@ -127,11 +127,11 @@ export class ScalingForm extends Component<Props, State> {
       layerType = LAYER_TYPE.GEOJSON_VECTOR;
     }
 
-    this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });
+    this.props.onChange({ propName: 'scaling_type', value: optionId, newLayerType: layerType });
   };
 
   _onFilterByMapBoundsChange = (event: EuiSwitchEvent) => {
-    this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
+    this.props.onChange({ propName: 'filter_by_map_bounds', value: event.target.checked });
   };
 
   _openModal = (optionId: SCALING_TYPES, messages: string[]) => {

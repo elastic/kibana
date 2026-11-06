@@ -67,7 +67,7 @@ export class Join extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    const indexPatternId = this.props.join.right?.indexPatternId;
+    const indexPatternId = this.props.join.right?.index_pattern_id;
     this._loadRightFields(typeof indexPatternId === 'string' ? indexPatternId : undefined);
   }
 
@@ -105,14 +105,14 @@ export class Join extends Component<Props, State> {
 
   _onLeftFieldChange = (leftField: string) => {
     this.props.onChange({
-      leftField,
+      left_field: leftField,
       right: this.props.join.right,
     });
   };
 
   _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
     const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
-      .indexPatternId;
+      .index_pattern_id;
     if (this.state.indexPattern?.id !== indexPatternId) {
       this.setState({
         indexPattern: undefined,
@@ -125,7 +125,7 @@ export class Join extends Component<Props, State> {
     }
 
     this.props.onChange({
-      leftField: this.props.join.leftField,
+      left_field: this.props.join.left_field,
       right: {
         ...sourceDescriptor,
       },
@@ -134,7 +134,7 @@ export class Join extends Component<Props, State> {
 
   _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({
-      leftField: this.props.join.leftField,
+      left_field: this.props.join.left_field,
       right: {
         ...this.props.join.right,
         metrics,
@@ -144,30 +144,30 @@ export class Join extends Component<Props, State> {
 
   _onWhereQueryChange = (whereQuery?: Query) => {
     this.props.onChange({
-      leftField: this.props.join.leftField,
+      left_field: this.props.join.left_field,
       right: {
         ...this.props.join.right,
-        whereQuery,
+        where_query: whereQuery,
       } as Partial<JoinSourceDescriptor>,
     });
   };
 
   _onApplyGlobalQueryChange = (applyGlobalQuery: boolean) => {
     this.props.onChange({
-      leftField: this.props.join.leftField,
+      left_field: this.props.join.left_field,
       right: {
         ...this.props.join.right,
-        applyGlobalQuery,
+        apply_global_query: applyGlobalQuery,
       } as Partial<JoinSourceDescriptor>,
     });
   };
 
   _onApplyGlobalTimeChange = (applyGlobalTime: boolean) => {
     this.props.onChange({
-      leftField: this.props.join.leftField,
+      left_field: this.props.join.left_field,
       right: {
         ...this.props.join.right,
-        applyGlobalTime,
+        apply_global_time: applyGlobalTime,
       } as Partial<JoinSourceDescriptor>,
     });
   };
@@ -181,12 +181,12 @@ export class Join extends Component<Props, State> {
     let joinExpression;
     if (right.type === SOURCE_TYPES.ES_TERM_SOURCE) {
       isJoinConfigComplete =
-        join.leftField !== undefined &&
+        join.left_field !== undefined &&
         isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
       joinExpression = (
         <TermJoinExpression
           leftSourceName={leftSourceName}
-          leftValue={join.leftField}
+          leftValue={join.left_field}
           leftFields={leftFields}
           onLeftFieldChange={this._onLeftFieldChange}
           sourceDescriptor={right as Partial<ESTermSourceDescriptor>}
@@ -196,7 +196,7 @@ export class Join extends Component<Props, State> {
       );
     } else if (isSpatialJoin(this.props.join)) {
       isJoinConfigComplete =
-        join.leftField !== undefined &&
+        join.left_field !== undefined &&
         isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
       joinExpression = (
         <SpatialJoinExpression
@@ -236,7 +236,7 @@ export class Join extends Component<Props, State> {
       globalFilterCheckbox = (
         <GlobalFilterCheckbox
           applyGlobalQuery={
-            typeof right.applyGlobalQuery === 'undefined' ? true : right.applyGlobalQuery
+            typeof right.apply_global_query === 'undefined' ? true : right.apply_global_query
           }
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
           label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
@@ -248,7 +248,7 @@ export class Join extends Component<Props, State> {
         globalTimeCheckbox = (
           <GlobalTimeCheckbox
             applyGlobalTime={
-              typeof right.applyGlobalTime === 'undefined' ? true : right.applyGlobalTime
+              typeof right.apply_global_time === 'undefined' ? true : right.apply_global_time
             }
             setApplyGlobalTime={this._onApplyGlobalTimeChange}
             label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalTimeCheckboxLabel', {
@@ -265,7 +265,7 @@ export class Join extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <WhereExpression
             indexPattern={indexPattern}
-            whereQuery={right.whereQuery}
+            whereQuery={right.where_query}
             onChange={this._onWhereQueryChange}
           />
         </EuiFlexItem>

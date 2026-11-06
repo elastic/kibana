@@ -485,7 +485,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   areLabelsOnTop() {
-    return !!this._descriptor.areLabelsOnTop;
+    return !!this._descriptor.are_labels_on_top;
   }
 
   supportsLabelsOnTop() {

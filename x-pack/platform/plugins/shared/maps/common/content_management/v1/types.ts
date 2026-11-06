@@ -20,6 +20,6 @@ export type MapCrudTypes = ContentManagementCrudTypes<
   Pick<SavedObjectUpdateOptions, 'references'>,
   {
     /** Flag to indicate to only search the text on the "title" field */
-    onlyTitle?: boolean;
+    only_title?: boolean;
   }
 >;

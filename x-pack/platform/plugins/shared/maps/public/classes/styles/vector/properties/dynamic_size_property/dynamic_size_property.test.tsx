@@ -32,7 +32,7 @@ import type { IVectorLayer } from '../../../../layers/vector_layer';
 describe('renderLegendDetailRow', () => {
   test('Should render ordinal legend for line width style property', () => {
     const sizeProp = new DynamicSizeProperty(
-      { minSize: 0, maxSize: 10, fieldMetaOptions: { isEnabled: true } },
+      { min_size: 0, max_size: 10, field_meta_options: { is_enabled: true } },
       VECTOR_STYLES.LINE_WIDTH,
       {} as unknown as IField,
       {} as unknown as IVectorLayer,
@@ -49,7 +49,7 @@ describe('renderLegendDetailRow', () => {
 
   test('Should render marker size legend for icon size property', () => {
     const sizeProp = new DynamicSizeProperty(
-      { minSize: 0, maxSize: 10, fieldMetaOptions: { isEnabled: true } },
+      { min_size: 0, max_size: 10, field_meta_options: { is_enabled: true } },
       VECTOR_STYLES.ICON_SIZE,
       {} as unknown as IField,
       {} as unknown as IVectorLayer,
@@ -92,7 +92,7 @@ describe('getMbSizeExpression', () => {
       },
     } as unknown as IField;
     const sizeProp = new DynamicSizeProperty(
-      { minSize: 8, maxSize: 32, fieldMetaOptions: { isEnabled: true } },
+      { min_size: 8, max_size: 32, field_meta_options: { is_enabled: true } },
       VECTOR_STYLES.ICON_SIZE,
       field,
       {} as unknown as IVectorLayer,

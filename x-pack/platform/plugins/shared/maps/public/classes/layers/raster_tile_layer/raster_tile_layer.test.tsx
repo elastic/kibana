@@ -17,7 +17,7 @@ import type { IRasterSource, RasterTileSourceData } from '../../sources/raster_s
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
-  urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
+  url_template: 'https://example.com/{x}/{y}/{z}.png',
 };
 
 class MockTileSource extends AbstractSource implements IRasterSource {
@@ -45,7 +45,7 @@ class MockTileSource extends AbstractSource implements IRasterSource {
   }
 
   async getDisplayName(): Promise<string> {
-    return this._descriptor.urlTemplate;
+    return this._descriptor.url_template;
   }
 
   async getUrlTemplate(): Promise<string> {

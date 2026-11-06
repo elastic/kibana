@@ -74,12 +74,12 @@ export function PassiveMap(props: Props) {
               viewMode: 'view',
               isLayerTOCOpen: false,
               mapSettings: {
-                disableInteractive: false,
-                hideToolbarOverlay: false,
-                hideLayerControl: false,
-                hideViewControl: false,
-                initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-                autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+                disable_interactive: false,
+                hide_toolbar_overlay: false,
+                hide_layer_control: false,
+                hide_view_control: false,
+                initial_location: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+                auto_fit_to_data_bounds: true, // this will auto-fit when there are changes to the filter and/or query
               },
             };
           },

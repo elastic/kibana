@@ -84,7 +84,7 @@ export function createLayerInstance(
       return new LayerGroup({ layerDescriptor: layerDescriptor as LayerGroupDescriptor });
     }
 
-    const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
+    const source: ISource = createSourceInstance(layerDescriptor.source_descriptor);
     switch (layerDescriptor.type) {
       case LAYER_TYPE.RASTER_TILE:
         return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
@@ -184,7 +184,7 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
 export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
-  return map.settings.customIcons;
+  return map.settings.custom_icons;
 };
 
 export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
@@ -299,8 +299,8 @@ export const getSpatialFiltersLayer = createSelector(
     return new GeoJsonVectorLayer({
       layerDescriptor: GeoJsonVectorLayer.createDescriptor({
         id: SPATIAL_FILTERS_LAYER_ID,
-        visible: settings.showSpatialFilters,
-        alpha: settings.spatialFiltersAlpa,
+        visible: settings.show_spatial_filters,
+        alpha: settings.spatial_filters_alpa,
         __dataRequests: [
           {
             dataId: SOURCE_DATA_REQUEST_ID,
@@ -311,13 +311,13 @@ export const getSpatialFiltersLayer = createSelector(
           [VECTOR_STYLES.FILL_COLOR]: {
             type: STYLE_TYPE.STATIC,
             options: {
-              color: settings.spatialFiltersFillColor,
+              color: settings.spatial_filters_fill_color,
             },
           },
           [VECTOR_STYLES.LINE_COLOR]: {
             type: STYLE_TYPE.STATIC,
             options: {
-              color: settings.spatialFiltersLineColor,
+              color: settings.spatial_filters_line_color,
             },
           },
         }),

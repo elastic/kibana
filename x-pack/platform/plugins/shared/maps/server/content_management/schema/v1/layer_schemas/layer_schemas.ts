@@ -40,19 +40,19 @@ const layerSchema = z
     }),
     attribution: attributionSchema.optional(),
     id: z.string(),
-    includeInFitToBounds: z.boolean().default(false).optional().meta({
+    include_in_fit_to_bounds: z.boolean().default(false).optional().meta({
       description: 'Set to false to exclude layer in fit to bounds computation',
     }),
     label: z.string().optional().meta({
       description: 'Layer name displayed in UI',
     }),
-    maxZoom: z.number().min(0).max(24).optional().meta({
+    max_zoom: z.number().min(0).max(24).optional().meta({
       description:
-        'Layer visibility max zoom level. Layer displayed when map zoom level is less than or equal to maxZoom. When both maxZoom and minZoom are provided, layer is displayed when map zoom level is between maxZoom and minZoom.',
+        'Layer visibility max zoom level. Layer displayed when map zoom level is less than or equal to max_zoom. When both max_zoom and min_zoom are provided, layer is displayed when map zoom level is between max_zoom and min_zoom.',
     }),
-    minZoom: z.number().min(0).max(24).optional().meta({
+    min_zoom: z.number().min(0).max(24).optional().meta({
       description:
-        'Layer visibility min zoom level. Layer displayed when map zoom level is greater than or equal to minZoom.  When both maxZoom and minZoom are provided, layer is displayed when map zoom level is between maxZoom and minZoom.',
+        'Layer visibility min zoom level. Layer displayed when map zoom level is greater than or equal to min_zoom.  When both max_zoom and min_zoom are provided, layer is displayed when map zoom level is between max_zoom and min_zoom.',
     }),
     parent: z.string().optional().meta({
       description:
@@ -67,12 +67,12 @@ const layerSchema = z
 
 export const EMSVectorTileLayerSchema = layerSchema
   .extend({
-    areLabelsOnTop: z.boolean().optional().meta({
+    are_labels_on_top: z.boolean().optional().meta({
       description:
         'Set to true to display labels on top of all layers regardless of layer ordering',
     }),
     locale: z.string().optional(),
-    sourceDescriptor: EMSTMSSourceSchema,
+    source_descriptor: EMSTMSSourceSchema,
     style: EMSVectorTileStyleSchema.optional(),
     type: z.literal(LAYER_TYPE.EMS_VECTOR_TILE),
   })
@@ -80,7 +80,7 @@ export const EMSVectorTileLayerSchema = layerSchema
 
 export const heatmapLayerSchema = layerSchema
   .extend({
-    sourceDescriptor: ESGeoGridSourceSchema,
+    source_descriptor: ESGeoGridSourceSchema,
     style: heatmapStyleSchema.optional(),
     type: z.literal(LAYER_TYPE.HEATMAP),
   })
@@ -96,7 +96,7 @@ export const layerGroupSchema = layerSchema
 
 export const rasterLayerSchema = layerSchema
   .extend({
-    sourceDescriptor: z.union([
+    source_descriptor: z.union([
       z
         .object({
           type: z.string(),
@@ -112,18 +112,18 @@ export const rasterLayerSchema = layerSchema
 
 const joinSchema = z
   .object({
-    leftField: z.string().optional(),
+    left_field: z.string().optional(),
     right: joinSourceSchema,
   })
   .strict();
 
 export const vectorLayerSchema = layerSchema
   .extend({
-    disableTooltips: z.boolean().default(false).optional().meta({
+    disable_tooltips: z.boolean().default(false).optional().meta({
       description: 'Set to true to disable tooltip for layer features',
     }),
     joins: z.array(joinSchema).optional(),
-    sourceDescriptor: z.union([
+    source_descriptor: z.union([
       z
         .object({
           type: z.string(),

@@ -18,7 +18,7 @@ jest.mock('../layers/vector_layer', () => {});
 const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
-  indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+  index_pattern_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   term: 'geo.dest',
   metrics: [{ type: AGG_TYPE.COUNT }],
 } as ESTermSourceDescriptor;
@@ -35,7 +35,7 @@ const mockSource = {
 
 const iso2LeftJoin = new InnerJoin(
   {
-    leftField: 'iso2',
+    left_field: 'iso2',
     right: rightSource,
   },
   mockSource
@@ -64,7 +64,7 @@ describe('createJoinSource', () => {
       expect(
         createJoinSource({
           ...rightSource,
-          indexPatternId: undefined,
+          index_pattern_id: undefined,
         })
       ).toBe(undefined);
     });
@@ -126,7 +126,7 @@ describe('joinPropertiesToFeature', () => {
   test('Should coerce to string before joining', () => {
     const zipCodeLeftJoin = new InnerJoin(
       {
-        leftField: 'zipcode',
+        left_field: 'zipcode',
         right: rightSource,
       },
       mockSource
@@ -166,7 +166,7 @@ describe('joinPropertiesToFeature', () => {
   test('Should handle falsy values', () => {
     const codeLeftJoin = new InnerJoin(
       {
-        leftField: 'code',
+        left_field: 'code',
         right: rightSource,
       },
       mockSource

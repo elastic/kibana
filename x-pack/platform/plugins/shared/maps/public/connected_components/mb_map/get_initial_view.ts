@@ -9,15 +9,15 @@ import { INITIAL_LOCATION } from '../../../common/constants';
 import type { MapCenterAndZoom, MapSettings } from '../../../common/descriptor_types';
 
 export async function getInitialView(settings: MapSettings): Promise<MapCenterAndZoom | null> {
-  if (settings.initialLocation === INITIAL_LOCATION.FIXED_LOCATION) {
+  if (settings.initial_location === INITIAL_LOCATION.FIXED_LOCATION) {
     return {
-      lat: settings.fixedLocation.lat,
-      lon: settings.fixedLocation.lon,
-      zoom: settings.fixedLocation.zoom,
+      lat: settings.fixed_location.lat,
+      lon: settings.fixed_location.lon,
+      zoom: settings.fixed_location.zoom,
     };
   }
 
-  return settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION
+  return settings.initial_location === INITIAL_LOCATION.BROWSER_LOCATION
     ? await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(
           // success callback
@@ -25,7 +25,7 @@ export async function getInitialView(settings: MapSettings): Promise<MapCenterAn
             resolve({
               lat: pos.coords.latitude,
               lon: pos.coords.longitude,
-              zoom: settings.browserLocation.zoom,
+              zoom: settings.browser_location.zoom,
             });
           },
           // error callback

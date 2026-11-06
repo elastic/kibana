@@ -10,7 +10,7 @@
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { StoredMapAttributes } from '../../server';
-import type { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { StoredLayer } from './stored_layer';
 
 interface IndexPatternReferenceDescriptor {
   indexPatternId?: string;
@@ -46,7 +46,7 @@ export function extractReferences({
 
   const extractedReferences: SavedObjectReference[] = [];
 
-  let layerList: LayerDescriptor[] = [];
+  let layerList: StoredLayer[] = [];
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
@@ -75,8 +75,7 @@ export function extractReferences({
 
     if ('joins' in layer) {
       // Extract index-pattern references from join
-      const vectorLayer = layer as VectorLayerDescriptor;
-      const joins = vectorLayer.joins ? vectorLayer.joins : [];
+      const joins = layer.joins ? layer.joins : [];
       joins.forEach((join, joinIndex) => {
         if (
           join.right &&
@@ -119,7 +118,7 @@ export function injectReferences({
     return { attributes };
   }
 
-  let layerList: LayerDescriptor[] = [];
+  let layerList: StoredLayer[] = [];
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
@@ -145,8 +144,7 @@ export function injectReferences({
 
     if ('joins' in layer) {
       // Inject index-pattern references into join
-      const vectorLayer = layer as VectorLayerDescriptor;
-      const joins = vectorLayer.joins ? vectorLayer.joins : [];
+      const joins = layer.joins ? layer.joins : [];
       joins.forEach((join) => {
         if (join.right && 'indexPatternRefName' in join.right) {
           const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
