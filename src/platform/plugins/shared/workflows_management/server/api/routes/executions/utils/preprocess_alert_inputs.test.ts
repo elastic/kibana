@@ -284,11 +284,15 @@ describe('preprocessAlertInputs', () => {
     it.each([
       ['a non-array', 'alert-1', 'inputs.event.alertIds must be an array.'],
       ['an empty string', '', 'inputs.event.alertIds must be an array.'],
-      ['a null entry', [null], 'non-empty string "_id" and "_index"'],
+      [
+        'a null entry',
+        [null],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
       [
         'an object _id',
         [{ _id: { nested: true }, _index: '.alerts-test-default' }],
-        'non-empty string "_id" and "_index"',
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
       ],
       [
         'a wildcard _index',

@@ -415,19 +415,27 @@ describe('preprocessDocumentInputs', () => {
 
     it.each([
       ['a non-array', 'doc-1', 'inputs.event.documentIds must be an array.'],
-      ['an entry without _index', [{ _id: 'doc-1' }], 'non-empty string "_id" and "_index"'],
+      [
+        'an entry without _index',
+        [{ _id: 'doc-1' }],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
       ['an entry with an empty _id', [{ _id: '', _index: 'logs' }], 'non-empty string "_id"'],
-      ['a non-object entry', ['doc-1'], 'non-empty string "_id" and "_index"'],
+      [
+        'a non-object entry',
+        ['doc-1'],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
       [
         'an over-long _index',
         [{ _id: 'doc-1', _index: 'i'.repeat(256) }],
-        'non-empty string "_id" and "_index"',
+        '"_index" (max 255 bytes)',
       ],
       [
         // 200 characters, but 600 UTF-8 bytes.
         'an _id over 512 bytes of multi-byte characters',
         [{ _id: '日'.repeat(200), _index: 'logs' }],
-        'non-empty string "_id" and "_index"',
+        '"_id" (max 512 bytes)',
       ],
     ])('rejects %s without querying', async (_name, badDocumentIds, message) => {
       const result = preprocessDocumentInputs(

@@ -63,7 +63,7 @@ export const parseTriggerSelections = ({
       !isBoundedString(_index, MAX_INDEX_NAME_BYTES)
     ) {
       throw new WorkflowTriggerInputError(
-        `Every inputs.event.${kind} entry must be an object with non-empty string "_id" and "_index" properties.`
+        `Every inputs.event.${kind} entry must be an object with non-empty string "_id" (max ${MAX_DOCUMENT_ID_BYTES} bytes) and "_index" (max ${MAX_INDEX_NAME_BYTES} bytes) properties.`
       );
     }
     if (isMultiTargetExpression(_index)) {
