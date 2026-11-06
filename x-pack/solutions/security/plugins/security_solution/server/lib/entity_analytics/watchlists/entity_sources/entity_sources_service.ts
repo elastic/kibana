@@ -397,9 +397,9 @@ export const createEntitySourcesService = ({
               await indexSyncService.markFullSyncProcessed(source, fullSyncState.completedAt);
             } catch (error) {
               logger.warn(
-                `[WatchlistSync] Failed to persist full-sync marker for source ${source.id}: ${String(
-                  error
-                )}`
+                `[WatchlistSync] Failed to persist full-sync marker for source ${
+                  source.id
+                }: ${String(error)}`
               );
             }
           }
