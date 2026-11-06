@@ -6,6 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -118,6 +119,8 @@ export interface EpisodeDataSource {
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  /** Whether the user may modify this source's alerts. Defaults to the universal capability. */
+  getWriteCapability?: (capabilities: ApplicationStart['capabilities']) => boolean;
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
 }

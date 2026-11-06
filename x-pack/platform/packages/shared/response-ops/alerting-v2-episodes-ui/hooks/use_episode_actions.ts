@@ -22,10 +22,6 @@ import {
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
 } from '../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../utils/filter_alert_actions_by_privilege';
 
 type Rule = FindRulesResponse['items'][number];
 
@@ -59,48 +55,46 @@ export const useEpisodeActions = ({
 
   return useMemo(
     () =>
-      filterAlertActionsByPrivilege(
-        createEpisodeActions({
-          http: services.http,
-          overlays: services.overlays,
-          notifications: services.notifications,
-          rendering: services.rendering,
-          application: services.application,
-          userProfile: services.userProfile,
-          docLinks: services.docLinks,
-          expressions: services.expressions,
-          spaces: services.spaces,
-          queryClient,
-          additionalDataSource,
-          isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
-          getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
-            getDiscoverHrefForRuleAndAlertTimestamp({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              ruleEsql: rulesCache[ruleId]?.query
-                ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
-                : undefined,
-              alertIsoTimestamp: episodeIsoTimestamp,
-            }),
-          getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
-            getDiscoverHrefForAlertEventsHistory({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              episodeId,
-              episodeStart,
-              spaceId,
-            }),
-          isAlertEventsHistoryAvailable: () =>
-            canOpenDiscover({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-            }),
-        }),
-        canWriteAlerts ? ALERT_ACTIONS_PRIVILEGE.all : ALERT_ACTIONS_PRIVILEGE.read
-      ),
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        additionalDataSource,
+        canWriteEpisodes: canWriteAlerts,
+        isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
+        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+          getDiscoverHrefForRuleAndAlertTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rulesCache[ruleId]?.query
+              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+              : undefined,
+            alertIsoTimestamp: episodeIsoTimestamp,
+          }),
+        getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
+          getDiscoverHrefForAlertEventsHistory({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            episodeId,
+            episodeStart,
+            spaceId,
+          }),
+        isAlertEventsHistoryAvailable: () =>
+          canOpenDiscover({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+          }),
+      }),
     [services, queryClient, additionalDataSource, rulesCache, canWriteAlerts]
   );
 };

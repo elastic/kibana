@@ -715,6 +715,9 @@ describe('privilege gating', () => {
     renderPage();
     await waitForRows();
 
+    expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteEpisodes: true })
+    );
     expect(getRowControlIds()).toEqual([
       'ALERTING_V2_ACK_EPISODE',
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
@@ -726,17 +729,15 @@ describe('privilege gating', () => {
     expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 
-  it('hides mutating episode actions when the user only has read privilege', async () => {
+  it('builds the episode actions without write privilege when the user only has read privilege', async () => {
     mockCapabilities = READ_ONLY_CAPABILITIES;
 
     renderPage();
     await waitForRows();
 
-    expect(getRowControlIds()).toEqual([OPEN_IN_DISCOVER_EPISODE_ACTION_ID]);
-    expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
-      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
-    ]);
-    expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
+    expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteEpisodes: false })
+    );
   });
 });
 

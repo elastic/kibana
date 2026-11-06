@@ -5,10 +5,47 @@
  * 2.0.
  */
 
-import { STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import {
+  OBSERVABILITY_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  STACK_MANAGEMENT_RULES_HOST,
+} from '@kbn/rule-data-utils';
 import { createClassicEpisodeSource } from './create_classic_episode_source';
 
 describe('createClassicEpisodeSource', () => {
+  describe('getWriteCapability', () => {
+    const getWriteCapability = (
+      capabilities: Record<string, Record<string, boolean>>
+    ): boolean | undefined =>
+      createClassicEpisodeSource({ ruleTypeIds: ['test-type'] }).getWriteCapability?.({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        ...capabilities,
+      } as ApplicationStart['capabilities']);
+
+    it.each([
+      ['Observability alerts write', { [OBSERVABILITY_ALERTS_FEATURE_ID]: { write: true } }],
+      ['Stack alerts write', { [STACK_ALERTS_ONLY_FEATURE_ID]: { write: true } }],
+    ])('grants write with %s', (_name, capabilities) => {
+      expect(getWriteCapability(capabilities)).toBe(true);
+    });
+
+    it('withholds write when neither feature grants it', () => {
+      expect(
+        getWriteCapability({
+          [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: true, write: false },
+          [STACK_ALERTS_ONLY_FEATURE_ID]: { show: true, write: false },
+        })
+      ).toBe(false);
+    });
+
+    it('withholds write when neither feature is granted at all', () => {
+      expect(getWriteCapability({})).toBe(false);
+    });
+  });
+
   describe('getRuleDetailsHref', () => {
     it('uses the default Stack Management host when no host is provided', () => {
       const source = createClassicEpisodeSource({ ruleTypeIds: ['test-type'] });

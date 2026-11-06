@@ -26,10 +26,12 @@ const buildActions = ({
   additionalDataSource,
   includeHistory = true,
   isAlertEventsHistoryAvailable = true,
+  canWriteEpisodes = true,
 }: {
   additionalDataSource?: EpisodeDataSource;
   includeHistory?: boolean;
   isAlertEventsHistoryAvailable?: boolean;
+  canWriteEpisodes?: boolean;
 } = {}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
@@ -37,6 +39,7 @@ const buildActions = ({
     notifications: notificationServiceMock.createStartContract(),
     rendering: renderingServiceMock.create(),
     application: applicationServiceMock.createStartContract(),
+    canWriteEpisodes,
     userProfile: userProfileServiceMock.createStart(),
     docLinks: docLinksServiceMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
@@ -121,6 +124,73 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
       'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
     ]);
+  });
+});
+
+describe('write privilege', () => {
+  const nativeEpisode = { 'episode.id': 'e1' } as AlertEpisode;
+  const sourceEpisode = { 'episode.id': 'e2', source_id: 'classic' } as AlertEpisode;
+
+  const createSource = (
+    getWriteCapability?: EpisodeDataSource['getWriteCapability']
+  ): EpisodeDataSource => ({
+    id: 'classic',
+    label: 'Classic',
+    queryKeyPrefix: ['classic'],
+    fetchEpisodes: async () => [],
+    actionExtensions: [
+      {
+        actionId: 'ALERTING_V2_ACK_EPISODE',
+        isCompatible: () => true,
+        execute: async () => ({ succeeded: 1, failed: 0 }),
+      },
+    ],
+    ...(getWriteCapability ? { getWriteCapability } : {}),
+  });
+
+  const ackAction = (actions: ReturnType<typeof buildActions>) =>
+    actions.find(({ id }) => id === 'ALERTING_V2_ACK_EPISODE');
+
+  it('hides mutating actions from a read-only user', () => {
+    const actions = buildActions({ canWriteEpisodes: false });
+
+    expect(ackAction(actions)?.isCompatible({ episodes: [nativeEpisode] })).toBe(false);
+    expect(
+      actions
+        .find(({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER')
+        ?.isCompatible({ episodes: [nativeEpisode] })
+    ).toBe(true);
+  });
+
+  it('keeps source rows writable when only the source grants write privilege', () => {
+    const actions = buildActions({
+      canWriteEpisodes: false,
+      additionalDataSource: createSource(() => true),
+    });
+
+    expect(ackAction(actions)?.isCompatible({ episodes: [sourceEpisode] })).toBe(true);
+    expect(ackAction(actions)?.isCompatible({ episodes: [nativeEpisode] })).toBe(false);
+  });
+
+  it('keeps source rows read-only when only the universal privilege is granted', () => {
+    const actions = buildActions({
+      canWriteEpisodes: true,
+      additionalDataSource: createSource(() => false),
+    });
+
+    expect(ackAction(actions)?.isCompatible({ episodes: [sourceEpisode] })).toBe(false);
+    expect(ackAction(actions)?.isCompatible({ episodes: [nativeEpisode] })).toBe(true);
+  });
+
+  it('lets a source that declares no write capability inherit the universal one', () => {
+    const writable = buildActions({ canWriteEpisodes: true, additionalDataSource: createSource() });
+    const readOnly = buildActions({
+      canWriteEpisodes: false,
+      additionalDataSource: createSource(),
+    });
+
+    expect(ackAction(writable)?.isCompatible({ episodes: [sourceEpisode] })).toBe(true);
+    expect(ackAction(readOnly)?.isCompatible({ episodes: [sourceEpisode] })).toBe(false);
   });
 });
 

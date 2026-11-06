@@ -10,6 +10,8 @@ import {
   ALERT_SEVERITY_MINOR,
   ALERT_SEVERITY_WARNING,
   getRuleDetailsRoute,
+  OBSERVABILITY_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
   STACK_MANAGEMENT_RULES_HOST,
   type LocatorHost,
 } from '@kbn/rule-data-utils';
@@ -118,6 +120,14 @@ export const createClassicEpisodeSource = ({
     fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
 
   actionExtensions: classicActionExtensions,
+
+  // The `write` UI capability stands in for the RAC `alert:all` / `rule:mute_alerts` privileges,
+  // which are not exposed as browser capabilities.
+  getWriteCapability: (capabilities) =>
+    Boolean(
+      capabilities[OBSERVABILITY_ALERTS_FEATURE_ID]?.write ||
+        capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.write
+    ),
 
   getRuleDetailsHref: (ruleId) =>
     `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
