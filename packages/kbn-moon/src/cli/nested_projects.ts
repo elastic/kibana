@@ -45,3 +45,14 @@ export const findNestedProjects = (
 
   return nested;
 };
+
+/** Returns the outermost project directories nested in `projectDir`, relative to it. */
+export const findChildProjectDirs = (
+  projectDir: string,
+  projectDirs: readonly string[]
+): string[] => {
+  const descendants = projectDirs.filter((dir) => dir.startsWith(`${projectDir}/`)).sort();
+  return descendants
+    .filter((dir) => !descendants.some((other) => other !== dir && dir.startsWith(`${other}/`)))
+    .map((dir) => dir.slice(projectDir.length + 1));
+};

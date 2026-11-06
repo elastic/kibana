@@ -1,0 +1,14 @@
+# ci_checks snapshots every registered encrypted saved object type, but the publishers
+# (alerting, actions, fleet, ...) sit upstream, so the dependency graph never reaches ESO.
+# Keep in sync with .buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/jest_implicit_consumers.ts
+tasks:
+  jest:
+    inputs:
+      - '/**/server/saved_objects/index.{ts,tsx}'
+      - '/**/server/saved_objects/model_versions/**/*.{ts,tsx}'
+      - '/**/server/saved_objects/schemas/**/*.{ts,tsx}'
+  jestIntegrationConfigs:
+    inputs:
+      - '/**/server/saved_objects/index.{ts,tsx}'
+      - '/**/server/saved_objects/model_versions/**/*.{ts,tsx}'
+      - '/**/server/saved_objects/schemas/**/*.{ts,tsx}'

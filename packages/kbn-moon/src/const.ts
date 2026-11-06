@@ -36,7 +36,13 @@ export const MOON_CONST = {
   TAG_PLUGIN: 'plugin',
   TAG_GROUP: 'group',
   TASK_NAME_JEST: 'jest',
+  TASK_NAME_JEST_INTEGRATION_CONFIGS: 'jestIntegrationConfigs',
+  TASK_NAME_SCOUT_CONFIGS: 'scoutConfigs',
+  TASK_NAME_TEST_SOURCE_UPSTREAM: 'test-source-upstream',
   TASK_NAME_JEST_CI: 'jestCI',
   TASK_NAME_LINT: 'lint',
   FILE_GROUP_SRC: 'src',
+  FILE_GROUP_JEST_CONFIGS: 'jestConfigs',
+  FILE_GROUP_JEST_INTEGRATION_CONFIGS: 'jestIntegrationConfigs',
+  FILE_GROUP_SCOUT_CONFIGS: 'scoutConfigs',
 };

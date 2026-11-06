@@ -24,7 +24,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 
 import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
-import { findNestedProjects } from './nested_projects';
+import { findChildProjectDirs, findNestedProjects } from './nested_projects';
 import {
   compactFilePathsToGlobs,
   filterPackages,
@@ -85,10 +85,9 @@ export function regenerateMoonProjects() {
     const allPackages = getPackages(REPO_ROOT);
     const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const allPackageIds = allPackages.map((pkg) => pkg.name);
+    const allPackageDirs = allPackages.map((pkg) => pkg.normalizedRepoRelativeDir);
 
-    const nestedProjects = findNestedProjects(
-      allPackages.map((pkg) => pkg.normalizedRepoRelativeDir)
-    );
+    const nestedProjects = findNestedProjects(allPackageDirs);
     if (nestedProjects.length > 0) {
       throw createFailError(
         `Moon projects must not be nested inside other projects:\n  ${nestedProjects.join('\n  ')}`
@@ -110,7 +109,9 @@ export function regenerateMoonProjects() {
 
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
-      applyTestTaskTags(projectConfig);
+      const childProjectDirs = findChildProjectDirs(pkg.normalizedRepoRelativeDir, allPackageDirs);
+      applyTestTaskTags(projectConfig, childProjectDirs);
+      applyChildProjectExclusions(projectConfig, childProjectDirs);
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -284,7 +285,7 @@ function applyTsConfigSettings(
   }
 }
 
-function applyTestTaskTags(projectConfig: MoonProjectConfig) {
+function applyTestTaskTags(projectConfig: MoonProjectConfig, childProjectDirs: string[]) {
   if (!hasSourceRoot(projectConfig)) {
     logger.warning('Skipping test task tags - no sourceRoot found in project config');
     return;
@@ -294,7 +295,9 @@ function applyTestTaskTags(projectConfig: MoonProjectConfig) {
   const hasConfig = (pattern: string) =>
     fs.globSync(pattern, {
       cwd: sourceRoot,
-      exclude: (filePath) => filePath.includes('__fixtures__'),
+      exclude: (filePath) =>
+        filePath.includes('__fixtures__') ||
+        childProjectDirs.some((dir) => filePath === dir || filePath.startsWith(`${dir}/`)),
     }).length > 0;
   const tags = [
     hasConfig('**/jest.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_UNIT,
@@ -305,6 +308,49 @@ function applyTestTaskTags(projectConfig: MoonProjectConfig) {
   if (tags.length > 0) {
     projectConfig.tags = [...new Set([...(projectConfig.tags || []), ...tags])];
   }
+}
+
+const TEST_TASKS_BY_TAG = {
+  [MOON_CONST.TAG_JEST_UNIT]: {
+    task: MOON_CONST.TASK_NAME_JEST,
+    fileGroup: MOON_CONST.FILE_GROUP_JEST_CONFIGS,
+  },
+  [MOON_CONST.TAG_JEST_INTEGRATION]: {
+    task: MOON_CONST.TASK_NAME_JEST_INTEGRATION_CONFIGS,
+    fileGroup: MOON_CONST.FILE_GROUP_JEST_INTEGRATION_CONFIGS,
+  },
+  [MOON_CONST.TAG_SCOUT]: {
+    task: MOON_CONST.TASK_NAME_SCOUT_CONFIGS,
+    fileGroup: MOON_CONST.FILE_GROUP_SCOUT_CONFIGS,
+  },
+} as const;
+
+/**
+ * Moon globs do not stop at nested project boundaries, so an ancestor project would
+ * otherwise claim its children's test configs and treat their files as its own inputs.
+ */
+function applyChildProjectExclusions(projectConfig: MoonProjectConfig, childProjectDirs: string[]) {
+  if (childProjectDirs.length === 0) {
+    return;
+  }
+
+  const exclusions = childProjectDirs.map((dir) => `!${dir}/**/*`);
+  const tasks: MoonProjectConfig['tasks'] = {
+    ...projectConfig.tasks,
+    [MOON_CONST.TASK_NAME_TEST_SOURCE_UPSTREAM]: { inputs: exclusions },
+  };
+  const fileGroups: MoonProjectConfig['fileGroups'] = { ...projectConfig.fileGroups };
+
+  for (const [tag, { task, fileGroup }] of Object.entries(TEST_TASKS_BY_TAG)) {
+    if (!projectConfig.tags?.includes(tag)) {
+      continue;
+    }
+    tasks[task] = { inputs: exclusions };
+    fileGroups[fileGroup] = exclusions;
+  }
+
+  projectConfig.tasks = tasks;
+  projectConfig.fileGroups = fileGroups;
 }
 
 type ProjectCreationResult = 'create' | 'update' | 'intact' | 'delete' | 'skip';
