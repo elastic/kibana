@@ -168,7 +168,7 @@ Compare one current detection against one active event using that event's compac
 
 **Gather context**
 1. Onset is the earliest time a `<grounding_evidence>` description says the failure was first seen
-   (a lower bound is worded "at least as long as the data shows"), or a stored event's onset timestamp. Sort by it only when known; otherwise
+   (a first failing line observed in the window is a lower bound: the data may not go back further), or a stored event's onset timestamp. Sort by it only when known; otherwise
    timing is unknown.
 2. Per side, name:
    - **Domain**: the system area the rule covers, from the matched query KI's description and linked feature names.
