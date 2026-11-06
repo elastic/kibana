@@ -48,6 +48,8 @@ export const FIXTURE_PROBES = {
   stranger: { type: 'user', id: 'u_stranger' },
   /** A service account whose ID has the same text as the owner's profile UID. */
   ownerIdServiceAccount: { type: 'service_account', id: 'u_owner' },
+  /** A user whose ID is the text form of a number, to match IDs stored as numbers. */
+  numericIdUser: { type: 'user', id: '1' },
   anonymous: undefined,
 } satisfies Record<string, Principal | undefined>;
 
@@ -96,6 +98,7 @@ const allProbesAt = (level: EntryLevel): Record<FixtureProbe, EntryLevel> => ({
   grantee: level,
   stranger: level,
   ownerIdServiceAccount: level,
+  numericIdUser: level,
   anonymous: level,
 });
 
@@ -394,7 +397,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     source: { acl: { ...VERSION, owner: { type: 'user', id: 1 }, general_access: 'none' } },
     indexable: true,
     state: 'valid',
-    access: {},
+    access: { numericIdUser: 'manage' },
   },
   {
     name: 'boolean general access is damaged',
