@@ -29,8 +29,12 @@ const JUDGE_CONNECTOR: EvalConnector = {
   taskType: 'completion',
 };
 
+const DEFAULT_CONNECTOR_SETTING = 'genAiSettings:defaultAIConnector';
+const DEFAULT_ONLY_SETTING = 'genAiSettings:defaultAIConnectorOnly';
+
 interface MockOverrides {
-  tierFeaturesWithEndpoint?: string[];
+  /** Connector a tier resolves to, keyed by `<spaceId>/<featureId>`. Others follow the bridge. */
+  tierResolutionOverrides?: Record<string, string | undefined>;
   threatIntelSupplyBySpace?: Record<
     string,
     { huntEnabled?: boolean; hardGateOk?: boolean; drift?: boolean }
@@ -39,6 +43,10 @@ interface MockOverrides {
   builtInRoleMissing?: boolean;
   /** `genAiSettings:defaultAIConnector` user value already set in a space before the preflight. */
   previousDefaultConnectorBySpace?: Record<string, string>;
+  /** `genAiSettings:defaultAIConnectorOnly` user value already set in a space before the preflight. */
+  previousDefaultOnlyBySpace?: Record<string, boolean>;
+  /** Spaces whose bridge and restore settings writes fail (index-scope writes still succeed). */
+  settingsWriteErrorSpaces?: string[];
   /** Spaces that already exist, keyed by id, as the spaces GET returns them. Others 404. */
   existingSpaces?: Record<string, Record<string, unknown>>;
   /** Receives every create (POST) and update (PUT) body sent to the spaces API. */
@@ -49,25 +57,36 @@ interface MockOverrides {
 
 const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
   const {
-    tierFeaturesWithEndpoint = [],
+    tierResolutionOverrides = {},
     threatIntelSupplyBySpace = {},
     enableWorkerErrorSpaces = [],
     builtInRoleMissing = false,
     previousDefaultConnectorBySpace = {},
+    previousDefaultOnlyBySpace = {},
+    settingsWriteErrorSpaces = [],
     settingsWrites = [],
     existingSpaces,
     spaceWrites = [],
   } = overrides;
 
+  // What the bridge last wrote per space, so the connectors route can follow it like the server.
+  const currentSettings: Record<string, Record<string, unknown>> = {};
+
   return jest.fn(async (...args: unknown[]) => {
     const first = args[0];
+    interface Options {
+      method?: string;
+      body?: string;
+      query?: Record<string, string>;
+    }
     const {
       path,
       method = 'GET',
       body,
-    }: { path: string; method?: string; body?: string } = typeof first === 'string'
-      ? { path: first, ...(args[1] as { method?: string; body?: string } | undefined) }
-      : (first as { path: string; method?: string; body?: string });
+      query,
+    }: Options & { path: string } = typeof first === 'string'
+      ? { path: first, ...(args[1] as Options | undefined) }
+      : (first as Options & { path: string });
 
     if (/^\/api\/spaces\/space\/[^/]+$/.test(path) && method === 'GET') {
       const id = decodeURIComponent(path.split('/').pop() as string);
@@ -98,26 +117,38 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     if (settingsMatch) {
       const spaceId = settingsMatch[1] ? decodeURIComponent(settingsMatch[1]) : 'default';
       if (method === 'GET') {
-        const previous = previousDefaultConnectorBySpace[spaceId];
-        return {
-          settings: previous ? { 'genAiSettings:defaultAIConnector': { userValue: previous } } : {},
-        };
+        const settings: Record<string, { userValue: unknown }> = {};
+        const previousConnector = previousDefaultConnectorBySpace[spaceId];
+        if (previousConnector)
+          settings[DEFAULT_CONNECTOR_SETTING] = { userValue: previousConnector };
+        const previousOnly = previousDefaultOnlyBySpace[spaceId];
+        if (previousOnly !== undefined)
+          settings[DEFAULT_ONLY_SETTING] = { userValue: previousOnly };
+        return { settings };
       }
-      settingsWrites.push({
-        spaceId,
-        changes: (JSON.parse(body ?? '{}') as { changes: Record<string, unknown> }).changes,
-      });
+      const { changes } = JSON.parse(body ?? '{}') as { changes: Record<string, unknown> };
+      settingsWrites.push({ spaceId, changes });
+      if (settingsWriteErrorSpaces.includes(spaceId) && DEFAULT_CONNECTOR_SETTING in changes) {
+        throw Object.assign(new Error('Bad Request'), { status: 400 });
+      }
+      currentSettings[spaceId] = { ...currentSettings[spaceId], ...changes };
       return {};
     }
-    if (/\/internal\/search_inference_endpoints\/settings$/.test(path)) {
-      return {
-        data: {
-          features: tierFeaturesWithEndpoint.map((featureId) => ({
-            feature_id: featureId,
-            endpoints: [{ id: 'some-endpoint' }],
-          })),
-        },
-      };
+    const connectorsMatch = /^\/s\/([^/]+)\/internal\/search_inference_endpoints\/connectors$/.exec(
+      path
+    );
+    if (connectorsMatch && method === 'GET') {
+      const spaceId = decodeURIComponent(connectorsMatch[1]);
+      const key = `${spaceId}/${query?.featureId}`;
+      const current = currentSettings[spaceId] ?? {};
+      // Without `defaultAIConnectorOnly` the tiers fall to their recommended endpoints.
+      const resolved =
+        key in tierResolutionOverrides
+          ? tierResolutionOverrides[key]
+          : current[DEFAULT_ONLY_SETTING] === true
+          ? (current[DEFAULT_CONNECTOR_SETTING] as string)
+          : 'recommended-endpoint';
+      return { connectors: resolved ? [{ connectorId: resolved }] : [], soEntryFound: false };
     }
     if (/\/internal\/alertzero\/workers$/.test(path) && method === 'GET') {
       return {
@@ -162,7 +193,10 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
   }) as unknown as HttpHandler;
 };
 
-const run = (fetch: HttpHandler, options: { isServerless?: boolean } = {}) =>
+const run = (
+  fetch: HttpHandler,
+  options: { isServerless?: boolean; connectorId?: string; subjectInferenceId?: string } = {}
+) =>
   runPreflight({
     fetch,
     log: new ToolingLog(),
@@ -170,6 +204,17 @@ const run = (fetch: HttpHandler, options: { isServerless?: boolean } = {}) =>
     evaluationConnector: JUDGE_CONNECTOR,
     ...options,
   });
+
+/** The last value written per space for one setting: the bridge writes first, the restore last. */
+const lastWrite = (
+  settingsWrites: NonNullable<MockOverrides['settingsWrites']>,
+  setting: string
+): Record<string, unknown> =>
+  Object.fromEntries(
+    settingsWrites
+      .filter(({ changes }) => setting in changes)
+      .map(({ spaceId, changes }) => [spaceId, changes[setting]])
+  );
 
 describe('runPreflight', () => {
   const originalCi = process.env.CI;
@@ -335,48 +380,47 @@ describe('runPreflight', () => {
     ]);
   });
 
-  it('restores each space to the default connector it had before the bridge, not to null', async () => {
+  it('pins every eval space to the subject connector only, so the tiers cannot fall back to their recommended models', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    await run(buildMockFetch({ settingsWrites }));
+
+    const bridged = settingsWrites.filter(({ changes }) => DEFAULT_ONLY_SETTING in changes);
+    expect(bridged.map(({ spaceId }) => spaceId)).toEqual([...EVAL_SPACE_IDS]);
+    for (const { changes } of bridged) {
+      expect(changes).toEqual({
+        [DEFAULT_CONNECTOR_SETTING]: CONNECTOR.id,
+        [DEFAULT_ONLY_SETTING]: true,
+      });
+    }
+  });
+
+  it('restores both bridged settings in each space to their previous values, not to null', async () => {
     const settingsWrites: MockOverrides['settingsWrites'] = [];
     const cleanup = await run(
       buildMockFetch({
         previousDefaultConnectorBySpace: { default: 'developer-connector' },
+        previousDefaultOnlyBySpace: { default: false, 'hunt-a': true },
         settingsWrites,
       })
     );
     settingsWrites.length = 0;
     await cleanup();
 
-    const restored = Object.fromEntries(
-      settingsWrites.map(({ spaceId, changes }) => [
-        spaceId,
-        changes['genAiSettings:defaultAIConnector'],
-      ])
-    );
-    expect(restored).toEqual({
+    expect(lastWrite(settingsWrites, DEFAULT_CONNECTOR_SETTING)).toEqual({
       default: 'developer-connector',
       'hunt-a': null,
       'hunt-b': null,
       'hunt-blocked': null,
     });
+    expect(lastWrite(settingsWrites, DEFAULT_ONLY_SETTING)).toEqual({
+      default: false,
+      'hunt-a': true,
+      'hunt-b': null,
+      'hunt-blocked': null,
+    });
   });
 
-  it('throws naming the assigned tier feature when an alertzero_* tier endpoint is already assigned', async () => {
-    await expect(
-      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_efficient'] }))
-    ).rejects.toThrow(/alertzero_efficient/);
-  });
-
-  it('writes no subject connector to any space when a tier endpoint is assigned', async () => {
-    const settingsWrites: MockOverrides['settingsWrites'] = [];
-    await expect(
-      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_efficient'], settingsWrites }))
-    ).rejects.toThrow(/alertzero_efficient/);
-    expect(
-      settingsWrites.filter(({ changes }) => 'genAiSettings:defaultAIConnector' in changes)
-    ).toEqual([]);
-  });
-
-  it('restores the previous connector in every space when a gate after the bridge throws', async () => {
+  it('restores both bridged settings in every space when a gate after the bridge throws', async () => {
     const settingsWrites: MockOverrides['settingsWrites'] = [];
     await expect(
       run(
@@ -388,19 +432,101 @@ describe('runPreflight', () => {
       )
     ).rejects.toThrow(/hardGate\.ok=false/);
 
-    // Last connector write per space wins: the bridge sets the subject connector, the failed
-    // preflight must put the previous value back.
-    const lastConnectorWrite = Object.fromEntries(
-      settingsWrites
-        .filter(({ changes }) => 'genAiSettings:defaultAIConnector' in changes)
-        .map(({ spaceId, changes }) => [spaceId, changes['genAiSettings:defaultAIConnector']])
-    );
-    expect(lastConnectorWrite).toEqual({
+    expect(lastWrite(settingsWrites, DEFAULT_CONNECTOR_SETTING)).toEqual({
       default: 'developer-connector',
       'hunt-a': null,
       'hunt-b': null,
       'hunt-blocked': null,
     });
+    expect(lastWrite(settingsWrites, DEFAULT_ONLY_SETTING)).toEqual({
+      default: null,
+      'hunt-a': null,
+      'hunt-b': null,
+      'hunt-blocked': null,
+    });
+  });
+
+  it('restores the spaces already bridged, and only those, when a bridge write fails partway', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    const [first, second] = EVAL_SPACE_IDS;
+    await expect(
+      run(
+        buildMockFetch({
+          previousDefaultConnectorBySpace: { [first]: 'developer-connector' },
+          // Fails the bridge write in the second space; the restore write there fails too.
+          settingsWriteErrorSpaces: [second],
+          settingsWrites,
+        })
+      )
+    ).rejects.toThrow(/Bad Request/);
+
+    const connectorWrites = settingsWrites.filter(
+      ({ changes }) => DEFAULT_CONNECTOR_SETTING in changes
+    );
+    // Bridge: first, second (fails). Restore: first, second. The later spaces are never touched.
+    expect(connectorWrites.map(({ spaceId }) => spaceId)).toEqual([first, second, first, second]);
+    expect(lastWrite(settingsWrites, DEFAULT_CONNECTOR_SETTING)).toEqual({
+      [first]: 'developer-connector',
+      [second]: null,
+    });
+  });
+
+  it('throws naming the tier, the space and the model it resolves to when a tier does not resolve to the subject', async () => {
+    await expect(
+      run(
+        buildMockFetch({
+          tierResolutionOverrides: { 'hunt-b/alertzero_frontier': 'gpt-6-sol' },
+        })
+      )
+    ).rejects.toThrow(/tier "alertzero_frontier" resolves to "gpt-6-sol" in space "hunt-b"/);
+  });
+
+  it('throws when a tier resolves to no connector at all', async () => {
+    await expect(
+      run(buildMockFetch({ tierResolutionOverrides: { 'default/alertzero_efficient': undefined } }))
+    ).rejects.toThrow(/tier "alertzero_efficient" resolves to "no connector" in space "default"/);
+  });
+
+  it('restores both bridged settings and never enables the Worker when a tier does not resolve to the subject', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    const calls: string[] = [];
+    const inner = buildMockFetch({
+      tierResolutionOverrides: { 'hunt-a/alertzero_balanced': 'gpt-6-luna' },
+      settingsWrites,
+    }) as unknown as jest.Mock;
+    const fetch = jest.fn(async (...args: unknown[]) => {
+      const first = args[0];
+      const path = typeof first === 'string' ? first : (first as { path: string }).path;
+      const method = (args[1] as { method?: string } | undefined)?.method ?? 'GET';
+      calls.push(`${method} ${path}`);
+      return inner(...args);
+    }) as unknown as HttpHandler;
+
+    await expect(run(fetch)).rejects.toThrow(/alertzero_balanced/);
+
+    expect(calls.filter((c) => c.startsWith('PATCH '))).toEqual([]);
+    for (const setting of [DEFAULT_CONNECTOR_SETTING, DEFAULT_ONLY_SETTING]) {
+      expect(lastWrite(settingsWrites, setting)).toEqual(
+        Object.fromEntries(EVAL_SPACE_IDS.map((spaceId) => [spaceId, null]))
+      );
+    }
+  });
+
+  it('accepts a tier that resolves to the inference endpoint behind a .inference stack connector', async () => {
+    await expect(
+      run(
+        buildMockFetch({
+          tierResolutionOverrides: Object.fromEntries(
+            EVAL_SPACE_IDS.flatMap((spaceId) =>
+              ['alertzero_efficient', 'alertzero_balanced', 'alertzero_frontier'].map(
+                (featureId) => [`${spaceId}/${featureId}`, 'subject-endpoint']
+              )
+            )
+          ),
+        }),
+        { connectorId: 'subject-stack-connector', subjectInferenceId: 'subject-endpoint' }
+      )
+    ).resolves.toEqual(expect.any(Function));
   });
 
   it('throws naming the built-in role when Elasticsearch does not ship it', async () => {
