@@ -878,7 +878,6 @@ src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-dashboards
 src/platform/plugins/private/maps_ems @elastic/kibana-dashboards
 src/platform/plugins/private/url_forwarding @elastic/kibana-dashboards
-src/platform/plugins/private/user_storage_test @elastic/appex-sharedux
 src/platform/plugins/private/vis_default_editor @elastic/kibana-dashboards
 src/platform/plugins/private/vis_types/gauge @elastic/kibana-dashboards
 src/platform/plugins/private/vis_types/heatmap @elastic/kibana-dashboards
@@ -955,6 +954,7 @@ src/platform/plugins/shared/visualizations @elastic/kibana-dashboards
 src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/plugins/shared/workflows_management @elastic/workflows-eng
+src/platform/plugins/test/user_storage_test @elastic/appex-sharedux
 src/platform/test
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
