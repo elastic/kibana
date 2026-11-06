@@ -34,6 +34,7 @@ import { TYPE_ICONS, getCellElementId, getStatusBorderColor, getTypeLabel } from
 import { AddToAppButton } from './add_to_app_button';
 import { CellFooter } from './cell_footer';
 import { RunButton } from './run_button';
+import { RunningBorder, canAnimateRunningBorder } from './running_border';
 import { useNotebook } from './notebook_context';
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
@@ -86,7 +87,10 @@ export const CellFrame = ({
   const isRunning = runtime?.status === 'running';
   const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
   const { euiTheme } = useEuiTheme();
-  const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
+  const borderColor =
+    isRunning && canAnimateRunningBorder()
+      ? euiTheme.border.color
+      : getStatusBorderColor(runtime?.status, euiTheme);
   const frameRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const flashColorsRef = useRef({ border: '', glow: '' });
@@ -276,6 +280,7 @@ export const CellFrame = ({
         {children}
         <CellFooter cell={cell} runtime={runtime} resizeHandle={resizeHandle} />
       </EuiPanel>
+      {runtime && <RunningBorder isRunning={isRunning} />}
       {onRun && 'runMode' in cell && !isFlyoutOpen && (
         <div
           className={RUN_GUTTER_CLASS}
