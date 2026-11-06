@@ -572,7 +572,7 @@ function buildSourceCondition(row: AlertRow): string | undefined {
       : []),
   ];
   const clause = clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
-  return row.alertSourceMode === 'exclude' ? `NOT ${clause}` : clause;
+  return row.alertSourceMode === 'exclude' ? `NOT (${clause})` : clause;
 }
 
 function buildCondition(rows: AlertRow[], statusCondition: string, withSources: boolean): string {

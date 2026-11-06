@@ -419,6 +419,17 @@ describe('generateWorkflowYaml', () => {
           expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
         });
 
+        it('keeps only the first-party sources when external is excluded', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['external'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
         it('combines external with a first-party source, and excludes both together', () => {
           const include: AlertRow = { kind: 'alert', alertSources: ['external', 'internal'] };
           expect(v2Matches(include, sourceEvent('pagerduty'))).toBe(true);
