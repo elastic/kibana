@@ -11,7 +11,6 @@ import { of } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
-import { WORKFLOWS_PAGES_ENABLED_FLAG } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
 import {
@@ -33,7 +32,7 @@ jest.mock('@kbn/esql-server-utils', () => ({
 const hostNameColumns = [{ name: 'host.name', type: 'keyword', userDefined: false }];
 
 interface MakeDepsOptions {
-  /** Value of the `workflows.pages.enabled` feature flag. */
+  /** Value of `workflowsManagement.pages.enabled`. */
   pagesEnabled?: boolean;
   /** Connector types the request can see, as `listTypes` returns them. */
   listedConnectorTypes?: Array<Record<string, unknown>>;
@@ -66,17 +65,14 @@ const makeDeps = (
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
       getCoreStart: () =>
         ({
-          featureFlags: {
-            getBooleanValue$: jest.fn((flag: string) =>
-              of(flag === WORKFLOWS_PAGES_ENABLED_FLAG ? pagesEnabled : false)
-            ),
-          },
+          featureFlags: { getBooleanValue$: jest.fn(() => of(false)) },
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
         } as any),
       licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
+      pagesEnabled,
     },
     actionsClient,
     actionsClientWithRequest,
@@ -422,7 +418,7 @@ describe('WorkflowValidationService', () => {
       [false, false],
       [true, true],
     ])(
-      'with workflows.pages.enabled %s, a page trigger is valid: %s',
+      'with workflowsManagement.pages.enabled %s, a page trigger is valid: %s',
       async (pagesEnabled, valid) => {
         const { deps } = makeDeps([], { pagesEnabled });
         const service = new WorkflowValidationService(deps);

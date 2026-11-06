@@ -70,7 +70,7 @@ describe('PageTriggerSchema', () => {
   });
 });
 
-describe('page trigger feature flag', () => {
+describe('page trigger switch (workflowsManagement.pages.enabled)', () => {
   const pageWorkflow = workflowWith([{ type: 'page', title: 'Page' }]);
 
   it('leaves the page trigger out of a generated schema by default', () => {

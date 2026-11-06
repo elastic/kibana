@@ -78,4 +78,6 @@ export interface WorkflowValidationDeps {
   getCoreStart: () => CoreStart;
   licensing: LicensingPluginStart;
   logger: Logger;
+  /** `workflowsManagement.pages.enabled`. Without it, `type: page` fails like an unknown trigger. */
+  pagesEnabled: boolean;
 }

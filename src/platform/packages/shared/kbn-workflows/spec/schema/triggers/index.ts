@@ -160,7 +160,7 @@ export function getTriggerSchema(
 }
 
 export interface TriggerSchemaOptions {
-  /** Accept the `page` trigger. Mirrors the `workflows.pages.enabled` feature flag. */
+  /** Accept the `page` trigger. Mirrors `workflowsManagement.pages.enabled`. */
   includePageTrigger?: boolean;
 }
 
