@@ -294,6 +294,9 @@ describe('AgenticInvestigationsPlugin', () => {
         AttachImpactStepId,
         GetImpactStepId,
         ReopenInvestigationStepId,
+        'investigations.create',
+        'investigations.patch',
+        'investigations.setHypotheses',
         AppendWorkflowExecutionIdStepId,
       ]);
     });

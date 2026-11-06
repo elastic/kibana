@@ -9,8 +9,14 @@ import Boom from '@hapi/boom';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
+  HYPOTHESES_CASE_ATTACHMENT_TYPE,
+  IMPACT_CASE_ATTACHMENT_TYPE,
   INVESTIGATION_CASE_ATTACHMENT_TYPE,
+  PROPOSAL_CASE_ATTACHMENT_TYPE,
+  hypothesesCaseAttachmentPayloadSchema,
+  impactCaseAttachmentPayloadSchema,
   investigationCaseAttachmentPayloadSchema,
+  proposalCaseAttachmentPayloadSchema,
 } from '../../common/cases_bridge';
 
 type UnifiedAttachmentTypeSetup = Parameters<
@@ -45,3 +51,26 @@ export const createInvestigationCaseAttachmentType = (
     };
   },
 });
+
+/**
+ * Phase 5 attachment types. A decision is a reference to a proposal; whether it belongs to the
+ * case is checked on every read (the proposal must name the case), so no `resolve` is needed.
+ * Impact and hypotheses are copies, written only by the bridge.
+ */
+export const createNextUpCaseAttachmentTypes = (): UnifiedAttachmentTypeSetup[] => [
+  {
+    id: PROPOSAL_CASE_ATTACHMENT_TYPE,
+    schema: proposalCaseAttachmentPayloadSchema,
+    workflowSchema: false,
+  },
+  {
+    id: IMPACT_CASE_ATTACHMENT_TYPE,
+    schema: impactCaseAttachmentPayloadSchema,
+    workflowSchema: false,
+  },
+  {
+    id: HYPOTHESES_CASE_ATTACHMENT_TYPE,
+    schema: hypothesesCaseAttachmentPayloadSchema,
+    workflowSchema: false,
+  },
+];

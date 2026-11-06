@@ -24,6 +24,7 @@ const setup = () => {
     getConversationProposalsService: service,
     getActionsService: service,
     getAgentBuilderConversations: service,
+    getInvestigationsClient: () => undefined,
     getAgentBuilderAttachments: service,
     getHuntServices: service,
     getScanFailuresService: service,

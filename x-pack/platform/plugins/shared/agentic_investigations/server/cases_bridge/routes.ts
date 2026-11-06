@@ -26,7 +26,10 @@ export interface CaseBridgeRouteDependencies {
   getCaseBridgeService: () => CaseBridgeService;
 }
 
-const handleCaseBridgeRouteError = (
+const isCaseError = (error: unknown): error is Error & { boomify: () => Boom.Boom } =>
+  error instanceof Error && typeof (error as { boomify?: unknown }).boomify === 'function';
+
+export const handleCaseBridgeRouteError = (
   error: unknown,
   response: KibanaResponseFactory,
   logger: Logger
@@ -34,12 +37,13 @@ const handleCaseBridgeRouteError = (
   if (error instanceof InvestigationAlreadyLinkedError) {
     return response.conflict({ body: { message: error.message } });
   }
-  // The Cases client and the bridge throw Boom errors: a case the user can't see is a 404, a
-  // missing Cases privilege a 403, an invalid case a 400.
-  if (Boom.isBoom(error) && error.output.statusCode < 500) {
+  // The Cases client throws CaseError, which carries its Boom status; the bridge throws Boom: a
+  // case the user can't see is a 404, a missing Cases privilege a 403, an invalid case a 400.
+  const boom = isCaseError(error) ? error.boomify() : error;
+  if (Boom.isBoom(boom) && boom.output.statusCode < 500) {
     return response.customError({
-      statusCode: error.output.statusCode,
-      body: { message: error.message },
+      statusCode: boom.output.statusCode,
+      body: { message: boom.message },
     });
   }
   return handleInvestigationRouteError(error, response, logger);

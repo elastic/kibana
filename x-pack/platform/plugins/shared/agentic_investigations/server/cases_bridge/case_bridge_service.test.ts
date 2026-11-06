@@ -31,7 +31,7 @@ const investigation = (id: string, metadata: Record<string, unknown> = {}) => ({
   metadata: { status: 'open', ...metadata },
 });
 
-const setup = () => {
+const setup = ({ canManage = true }: { canManage?: boolean } = {}) => {
   const conversations = {
     get: jest.fn(async (id: string) =>
       investigation(
@@ -82,6 +82,7 @@ const setup = () => {
     getInvestigationStatusService: () => statusService as never,
     getActor: () => ({ type: 'user' as never, id: 'u-jordan', username: 'jordan' }),
     getCurrentUserProfileUid: async () => 'u-jordan',
+    canManageInvestigations: async () => canManage,
   });
   return { service, conversations, casesClient, statusService };
 };
@@ -326,6 +327,23 @@ describe('CaseBridgeService', () => {
     });
   });
 
+  it("doesn't link back an investigation the linker doesn't own, even to a public case", async () => {
+    const { service, casesClient, conversations } = setup();
+    casesClient.cases.get.mockResolvedValue({ ...createdCase, access: { mode: 'default' } });
+    casesClient.attachments.bulkGet.mockResolvedValue({
+      attachments: [{ id: 'a-5', type: 'agentic.investigation', attachmentId: 'inv-5' }],
+      errors: [],
+    });
+    conversations.get.mockResolvedValueOnce({
+      ...investigation('inv-5'),
+      permissions: { update_access_control: false },
+    } as never);
+
+    await service.onInvestigationsAttached({ request, caseId: 'case-1', attachmentIds: ['a-5'] });
+
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+  });
+
   it("won't take over the access of an investigation the linker doesn't own", async () => {
     const { service, casesClient, conversations } = setup();
     casesClient.attachments.bulkGet.mockResolvedValue({
@@ -355,8 +373,8 @@ describe('CaseBridgeService', () => {
     };
 
     /** Both linked investigations name case-1 as their case. */
-    const setupLinked = (metadata: Record<string, unknown> = {}) => {
-      const result = setup();
+    const setupLinked = (metadata: Record<string, unknown> = {}, canManage = true) => {
+      const result = setup({ canManage });
       result.conversations.get.mockImplementation(async (id: string) =>
         investigation(id, { case_id: 'case-1', ...metadata })
       );
@@ -420,6 +438,18 @@ describe('CaseBridgeService', () => {
         { access_mode: 'public', entries: [] },
         expect.anything()
       );
+    });
+
+    it("keeps the investigations' access when the person changing the case can't manage investigations", async () => {
+      const { service, conversations } = setupLinked({}, false);
+
+      await service.onCaseUpdated({
+        request,
+        previousCase: before,
+        updatedCase: { ...before, access: { mode: 'default' } },
+      });
+
+      expect(conversations.updateAccessControlAsOwner).not.toHaveBeenCalled();
     });
 
     it('ignores an attachment whose investigation does not link back to the case', async () => {

@@ -14,6 +14,9 @@ import {
   type ListInvestigationsResponse,
 } from '../../common';
 import {
+  CASE_DECISIONS_URL,
+  CASE_DECISION_URL,
+  type CaseDecisionsResponse,
   INVESTIGATION_LINK_CASE_URL,
   INVESTIGATION_OPEN_CASE_URL,
   type LinkCaseResponse,
@@ -120,3 +123,27 @@ export const getCaseHref = (application: ApplicationStart, caseId: string): stri
 
 export const formatCaseNumber = (theCase: { incremental_id?: number | null; title: string }) =>
   theCase.incremental_id != null ? `#${theCase.incremental_id}` : theCase.title;
+
+export const fetchCaseDecisions = (
+  http: HttpStart,
+  caseId: string,
+  signal?: AbortSignal
+): Promise<CaseDecisionsResponse> =>
+  http.get<CaseDecisionsResponse>(
+    CASE_DECISIONS_URL.replace('{case_id}', encodeURIComponent(caseId)),
+    { version: AGENTIC_INVESTIGATIONS_API_VERSION, signal }
+  );
+
+export const decideOnCase = (
+  http: HttpStart,
+  caseId: string,
+  proposalId: string,
+  decision: 'approve' | 'dismiss'
+): Promise<CaseDecisionsResponse> =>
+  http.post<CaseDecisionsResponse>(
+    CASE_DECISION_URL.replace('{case_id}', encodeURIComponent(caseId)).replace(
+      '{proposal_id}',
+      encodeURIComponent(proposalId)
+    ),
+    { version: AGENTIC_INVESTIGATIONS_API_VERSION, body: JSON.stringify({ decision }) }
+  );

@@ -51,6 +51,8 @@ export interface FindingsWriterDeps {
   resolveUser: ResolveUser;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+  /** Copies the findings onto the investigation's case (Phase 5, behind its setting). */
+  onFindingsWritten?: (request: KibanaRequest, conversationId: string) => Promise<void>;
 }
 
 export const createFindingsWriter =
@@ -62,6 +64,7 @@ export const createFindingsWriter =
     resolveUser,
     getConversationClient,
     getAttachmentClient,
+    onFindingsWritten,
   }: FindingsWriterDeps) =>
   (request: KibanaRequest): FindingsWriter => {
     const resolveContext = async () => {
@@ -99,6 +102,7 @@ export const createFindingsWriter =
           conversations,
           attachments,
         });
+        await onFindingsWritten?.(request, conversationId);
       },
       setImpact: async ({ conversationId, summary, evidence, entities }) => {
         const { conversations, attachments, user, spaceId } = await resolveContext();
@@ -112,6 +116,7 @@ export const createFindingsWriter =
             service.set({ conversationId, summary, evidence, entities }, { spaceId, user }),
           revertImpact: (written) => service.revertAttach(written),
         });
+        await onFindingsWritten?.(request, conversationId);
       },
     };
   };

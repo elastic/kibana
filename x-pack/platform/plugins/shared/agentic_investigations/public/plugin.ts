@@ -82,7 +82,11 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginSetup {
     if (this.casesBridgeEnabled) {
       if (cases) {
-        registerCasesIntegration({ cases, getStartServices: core.getStartServices });
+        registerCasesIntegration({
+          cases,
+          getStartServices: core.getStartServices,
+          uiSettings: core.uiSettings,
+        });
       } else {
         // Without Cases there is nothing to open: keep escalations as they were.
         this.disableCasesBridge();

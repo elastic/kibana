@@ -7,20 +7,28 @@
 
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type {
   CasesPublicSetup,
+  CommonAttachmentListViewProps,
   CaseViewCloseModalSectionProps,
   CaseViewSectionProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import {
+  HYPOTHESES_CASE_ATTACHMENT_TYPE,
+  IMPACT_CASE_ATTACHMENT_TYPE,
   INVESTIGATION_CASE_ATTACHMENT_TYPE,
+  OPEN_CASES_FOR_INVESTIGATIONS_SETTING,
+  PROPOSAL_CASE_ATTACHMENT_TYPE,
+  hypothesesCaseAttachmentPayloadSchema,
+  impactCaseAttachmentPayloadSchema,
   investigationCaseAttachmentPayloadSchema,
+  proposalCaseAttachmentPayloadSchema,
 } from '../../common/cases_bridge';
 import type { AgenticInvestigationsPublicStartDependencies } from '../types';
-import { getLinkedInvestigationIds, hasLinkedInvestigations } from './case_data';
-import { ATTACHMENT } from './translations';
+import { getLinkedInvestigationIds, hasDecisions, hasLinkedInvestigations } from './case_data';
+import { ATTACHMENT, DECISIONS, EVIDENCE } from './translations';
 
 type StartServicesGetter =
   CoreSetup<AgenticInvestigationsPublicStartDependencies>['getStartServices'];
@@ -56,10 +64,17 @@ const makeLazy = <P extends object>(
 export const registerCasesIntegration = ({
   cases,
   getStartServices,
+  uiSettings,
 }: {
   cases: CasesPublicSetup;
   getStartServices: StartServicesGetter;
+  uiSettings: IUiSettingsClient;
 }): void => {
+  // Phase 5 surfaces (Decisions, Needs decision, the copied findings) show only with the setting on.
+  const isOpenCasesForInvestigationsOn = () =>
+    uiSettings.get<boolean>(OPEN_CASES_FOR_INVESTIGATIONS_SETTING, false) === true;
+  cases.decisions.setEnabled(isOpenCasesForInvestigationsOn);
+
   const LazyRelated = makeLazy<CaseViewSectionProps>(
     getStartServices,
     async () => (await import('./related_investigations_section')).RelatedInvestigationsSection
@@ -95,6 +110,78 @@ export const registerCasesIntegration = ({
       getRemovalActivity: () => ({ event: ATTACHMENT.removed }),
     })
   );
+
+  const LazyDecisions = makeLazy<CaseViewSectionProps>(
+    getStartServices,
+    async () => (await import('./decisions_panel')).DecisionsPanel
+  );
+  const LazyImpactListInner = React.lazy(async () => ({
+    default: (await import('./copied_findings_list')).ImpactList,
+  }));
+  const LazyHypothesesListInner = React.lazy(async () => ({
+    default: (await import('./copied_findings_list')).HypothesesList,
+  }));
+  // The Attachments tab renders list children without a boundary of their own.
+  const LazyImpactList: React.FC<CommonAttachmentListViewProps> = (props) => (
+    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+      <LazyImpactListInner {...props} />
+    </Suspense>
+  );
+  const LazyHypothesesList: React.FC<CommonAttachmentListViewProps> = (props) => (
+    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+      <LazyHypothesesListInner {...props} />
+    </Suspense>
+  );
+
+  cases.attachmentFramework.registerAttachment(
+    defineAttachment({
+      id: PROPOSAL_CASE_ATTACHMENT_TYPE,
+      schema: proposalCaseAttachmentPayloadSchema,
+      workflowSchema: false,
+      getIcon: () => 'checkInCircleFilled',
+      getLabel: () => DECISIONS.attachmentLabel,
+      getCreationActivity: (props) => ({
+        event: DECISIONS.added(String(props.metadata?.title ?? '')),
+        hideDefaultActions: true,
+      }),
+      getRemovalActivity: () => ({ event: DECISIONS.removed }),
+    })
+  );
+  cases.attachmentFramework.registerAttachment(
+    defineAttachment({
+      id: IMPACT_CASE_ATTACHMENT_TYPE,
+      schema: impactCaseAttachmentPayloadSchema,
+      workflowSchema: false,
+      getIcon: () => 'users',
+      getLabel: () => EVIDENCE.impactTitle,
+      getCreationActivity: () => ({ event: EVIDENCE.impactAdded, hideDefaultActions: true }),
+      getRemovalActivity: () => ({ event: EVIDENCE.removed }),
+      getAttachmentList: () => ({ children: LazyImpactList }),
+    })
+  );
+  cases.attachmentFramework.registerAttachment(
+    defineAttachment({
+      id: HYPOTHESES_CASE_ATTACHMENT_TYPE,
+      schema: hypothesesCaseAttachmentPayloadSchema,
+      workflowSchema: false,
+      getIcon: () => 'beaker',
+      getLabel: () => EVIDENCE.hypothesesTitle,
+      getCreationActivity: () => ({ event: EVIDENCE.hypothesesAdded, hideDefaultActions: true }),
+      getRemovalActivity: () => ({ event: EVIDENCE.removed }),
+      getAttachmentList: () => ({ children: LazyHypothesesList }),
+    })
+  );
+
+  cases.caseView.registerSection({
+    id: 'agenticInvestigations.decisions',
+    position: 'aboveTabs',
+    isVisible: (caseData) => isOpenCasesForInvestigationsOn() && hasDecisions(caseData),
+    render: (props) => (
+      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <LazyDecisions {...props} />
+      </Suspense>
+    ),
+  });
 
   cases.caseView.registerSection({
     id: 'agenticInvestigations.related',

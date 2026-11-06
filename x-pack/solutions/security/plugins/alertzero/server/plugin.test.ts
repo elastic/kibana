@@ -39,6 +39,7 @@ jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
 
 jest.mock('./agent', () => ({
   agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
+  getAgentType: () => ({ id: 'mock-alertzero-type', baseConfiguration: {} }),
   ensureAgentSafe: jest.fn().mockResolvedValue(undefined),
   registerAgentType: jest.fn(),
 }));
@@ -519,7 +520,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
+      expect(registerAgentType).toHaveBeenCalledWith(agentBuilder, { casesOutcomes: false });
       expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
     });
 

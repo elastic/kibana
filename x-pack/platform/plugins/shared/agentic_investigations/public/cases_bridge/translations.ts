@@ -404,3 +404,141 @@ export const ACTIONS_VIEW_CASE = (caseNumber: string) =>
     defaultMessage: 'View case {caseNumber}',
     values: { caseNumber },
   });
+
+export const DECISIONS = {
+  title: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.title', {
+    defaultMessage: 'Decisions',
+  }),
+  pendingBadge: (count: number) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.pendingBadge', {
+      values: { count },
+      defaultMessage: '{count, plural, one {# decision} other {# decisions}} pending',
+    }),
+  proposedBy: (name: string, time: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.proposedBy', {
+      values: { name, time },
+      defaultMessage: 'Proposed by {name} {time}',
+    }),
+  approve: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.approve', {
+    defaultMessage: 'Approve',
+  }),
+  dismiss: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.dismiss', {
+    defaultMessage: 'Dismiss',
+  }),
+  approveAriaLabel: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.approveAriaLabel', {
+      values: { title },
+      defaultMessage: 'Approve {title}',
+    }),
+  dismissAriaLabel: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.dismissAriaLabel', {
+      values: { title },
+      defaultMessage: 'Dismiss {title}',
+    }),
+  decidedCount: (count: number) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.decidedCount', {
+      values: { count },
+      defaultMessage: '{count} decided',
+    }),
+  approvedBy: (name: string, time: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.approvedBy', {
+      values: { name, time },
+      defaultMessage: 'Approved by {name} {time}',
+    }),
+  dismissedBy: (name: string, time: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.dismissedBy', {
+      values: { name, time },
+      defaultMessage: 'Dismissed by {name} {time}',
+    }),
+  expired: (time: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.expired', {
+      values: { time },
+      defaultMessage: 'Expired {time}',
+    }),
+  deciding: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.deciding', {
+    defaultMessage: 'Decided, being carried out',
+  }),
+  none: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.none', {
+    defaultMessage: 'No decisions pending.',
+  }),
+  noPrivilege: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.noPrivilege', {
+    defaultMessage:
+      'Approving or dismissing needs the Proposed actions privilege and permission to update this case.',
+  }),
+  loadError: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.loadError', {
+    defaultMessage: "Couldn't load the decisions",
+  }),
+  approved: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.approvedToast', {
+    defaultMessage: 'Proposal approved',
+  }),
+  dismissed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.dismissedToast', {
+    defaultMessage: 'Proposal dismissed',
+  }),
+  approveError: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.approveError', {
+      values: { title },
+      defaultMessage: "Couldn't approve {title}",
+    }),
+  dismissError: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.dismissError', {
+      values: { title },
+      defaultMessage: "Couldn't dismiss {title}",
+    }),
+  someone: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.someone', {
+    defaultMessage: 'Unknown user',
+  }),
+  attachmentLabel: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.attachmentLabel',
+    { defaultMessage: 'Decision' }
+  ),
+  added: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.addedEvent', {
+      values: { title },
+      defaultMessage: 'added a decision to make: “{title}”',
+    }),
+  removed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.removedEvent', {
+    defaultMessage: 'removed a decision',
+  }),
+};
+
+export const EVIDENCE = {
+  impactTitle: i18n.translate('xpack.agenticInvestigations.caseSection.impact.title', {
+    defaultMessage: 'Impact',
+  }),
+  hypothesesTitle: i18n.translate('xpack.agenticInvestigations.caseSection.hypotheses.title', {
+    defaultMessage: 'Hypotheses',
+  }),
+  copiedNote: i18n.translate('xpack.agenticInvestigations.caseSection.evidence.copiedNote', {
+    defaultMessage: 'Copied from the investigation when it was written.',
+  }),
+  fromInvestigationCopied: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.evidence.fromInvestigationCopied', {
+      values: { title },
+      defaultMessage: 'From {title} · Copied from the investigation when it was written.',
+    }),
+  typedEntity: (type: string, name: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.impact.typedEntity', {
+      values: { type, name },
+      defaultMessage: '{type}: {name}',
+    }),
+  impactAdded: i18n.translate('xpack.agenticInvestigations.caseSection.impact.addedEvent', {
+    defaultMessage: "added the investigation's impact",
+  }),
+  hypothesesAdded: i18n.translate('xpack.agenticInvestigations.caseSection.hypotheses.addedEvent', {
+    defaultMessage: "added the investigation's hypotheses",
+  }),
+  removed: i18n.translate('xpack.agenticInvestigations.caseSection.evidence.removedEvent', {
+    defaultMessage: 'removed copied findings',
+  }),
+  statusSupported: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.hypotheses.status.supported',
+    { defaultMessage: 'Supported' }
+  ),
+  statusRefuted: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.hypotheses.status.refuted',
+    { defaultMessage: 'Refuted' }
+  ),
+  statusOpen: i18n.translate('xpack.agenticInvestigations.caseSection.hypotheses.status.open', {
+    defaultMessage: 'Open',
+  }),
+};

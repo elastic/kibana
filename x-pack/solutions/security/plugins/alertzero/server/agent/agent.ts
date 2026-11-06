@@ -42,10 +42,7 @@ export const agentType = {
   description: ALERTZERO_THIN_AGENT_DESCRIPTION,
   avatar_icon: 'logoSecurity',
   baseConfiguration: {
-    instructions: ALERTZERO_THIN_AGENT_INSTRUCTIONS,
-    // Closed Cases outcomes (Cases' managed AI index). Assigning it attaches the context engine's
-    // retrieval skill and query tools; without the context engine on, it is dropped.
-    ai_indices: [CASES_OUTCOMES_AI_INDEX_ID],
+    // TODO - add custom instructions for this agent type
     tools: [],
     skill_ids: [],
     connector_ids: [],
@@ -53,8 +50,28 @@ export const agentType = {
   },
 } as const satisfies AgentTypeDefinition;
 
-export const registerAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.agents.registerType(agentType);
+/**
+ * With the Cases bridge on (POC), the agent also reads closed Cases outcomes (Cases' managed AI
+ * index). Assigning it attaches the context engine's retrieval skill and query tools; without
+ * the context engine on, it is dropped. With the bridge off the type is main's.
+ */
+export const getAgentType = ({ casesOutcomes }: { casesOutcomes: boolean }) =>
+  casesOutcomes
+    ? ({
+        ...agentType,
+        baseConfiguration: {
+          ...agentType.baseConfiguration,
+          instructions: ALERTZERO_THIN_AGENT_INSTRUCTIONS,
+          ai_indices: [CASES_OUTCOMES_AI_INDEX_ID],
+        },
+      } satisfies AgentTypeDefinition)
+    : agentType;
+
+export const registerAgentType = (
+  agentBuilder: AgentBuilderPluginSetup,
+  { casesOutcomes = false }: { casesOutcomes?: boolean } = {}
+): void => {
+  agentBuilder.agents.registerType(getAgentType({ casesOutcomes }));
 };
 
 export const createAgentRequest = (): AgentCreateRequest => ({

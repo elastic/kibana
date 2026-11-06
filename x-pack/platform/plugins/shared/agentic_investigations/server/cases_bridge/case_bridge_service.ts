@@ -41,6 +41,9 @@ const MAX_DESCRIPTION_LENGTH = 30000;
 const ACTOR_NAME = 'Elastic AI Agent';
 
 type CasesClient = Awaited<ReturnType<CasesServerStart['getCasesClientWithRequest']>>;
+type CaseActionSource = NonNullable<
+  Parameters<CasesServerStart['getCasesClientWithRequest']>[1]
+>['actionSource'];
 
 /** The parts of a case the bridge reads: what `cases.get` returns and what case events carry. */
 export interface BridgeCase {
@@ -59,6 +62,10 @@ export interface CaseBridgeServiceDeps {
   getInvestigationStatusService: () => InvestigationStatusService;
   getActor: (request: KibanaRequest) => EventActor | undefined;
   getCurrentUserProfileUid: (request: KibanaRequest) => Promise<string | undefined>;
+  /** The investigations manage privilege, the bar of the open-a-case and link routes. */
+  canManageInvestigations: (request: KibanaRequest) => Promise<boolean>;
+  /** After a case close or reopen reached its investigations (Phase 5 recounts decisions). */
+  onLinkedInvestigationsUpdated?: (request: KibanaRequest, caseId: string) => Promise<void>;
 }
 
 export class InvestigationAlreadyLinkedError extends Error {
@@ -116,9 +123,14 @@ export class CaseBridgeService {
   async openCase(
     request: KibanaRequest,
     investigationId: string,
-    body: Required<Omit<OpenCaseRequest, 'template_id'>> & { template_id?: string }
+    body: Required<Omit<OpenCaseRequest, 'template_id'>> & { template_id?: string },
+    options: { actionSource?: CaseActionSource; extraTags?: string[] } = {}
   ): Promise<OpenCaseResponse> {
-    const casesClient = await this.requireCases().getCasesClientWithRequest(request);
+    // A Worker opening the case (Phase 5) is recorded as the actor; a person opening it is the user.
+    const casesClient = await this.requireCases().getCasesClientWithRequest(
+      request,
+      options.actionSource ? { actionSource: options.actionSource } : undefined
+    );
     const conversations = await this.getConversationClient(request);
 
     const source = await conversations.get(investigationId);
@@ -147,7 +159,7 @@ export class CaseBridgeService {
         0,
         MAX_DESCRIPTION_LENGTH
       ),
-      tags: [ALERTZERO_CASE_TAG],
+      tags: [ALERTZERO_CASE_TAG, ...(options.extraTags ?? [])],
       owner: ALERTZERO_CASE_OWNER,
       connector: { id: 'none', name: 'none', type: '.none', fields: null },
       // Automatic push stays off while the investigations are linked: an automatic push racing
@@ -501,13 +513,16 @@ export class CaseBridgeService {
         }
         // A restricted case takes over the investigation's access, which skips Agent Builder's
         // owner check, so off the bridge's own path only the investigation's owner may do that.
+        // A linked investigation's access follows its case, which skips Agent Builder's owner
+        // check, so off the bridge's own (manage-gated) path only the investigation's owner may
+        // link it back, whether or not the case is restricted yet.
+        if (!investigation.permissions?.update_access_control) {
+          this.deps.logger.warn(
+            `Investigation ${id} was attached to case ${caseId} by someone who doesn't own it, so it wasn't linked back.`
+          );
+          continue;
+        }
         if (isRestricted(theCase)) {
-          if (!investigation.permissions?.update_access_control) {
-            this.deps.logger.warn(
-              `Investigation ${id} was attached to restricted case ${caseId} by someone who doesn't own it, so it wasn't linked back or made private.`
-            );
-            continue;
-          }
           // Lock it down before anything names the case on it.
           await this.applyCaseAccess(request, id, theCase);
         }
@@ -609,6 +624,14 @@ export class CaseBridgeService {
     }
 
     const conversations = await this.getConversationClient(request);
+    // Access follows the case only for someone who could link it through the bridge's routes:
+    // `case_id` is an ordinary investigation field, so a member could point it at their own case.
+    const mayChangeAccess = accessChanged && (await this.deps.canManageInvestigations(request));
+    if (accessChanged && !mayChangeAccess) {
+      this.deps.logger.warn(
+        `Case ${updatedCase.id} changed access, but the person who changed it can't manage investigations, so its linked investigations keep theirs.`
+      );
+    }
     for (const id of investigationIds) {
       try {
         // The attachment alone is not trusted: Cases' attachment update path doesn't re-run the
@@ -620,7 +643,7 @@ export class CaseBridgeService {
           );
           continue;
         }
-        if (accessChanged) {
+        if (mayChangeAccess) {
           await this.applyCaseAccess(request, id, updatedCase);
         }
         if (closing) {
@@ -635,6 +658,9 @@ export class CaseBridgeService {
           } changed, but updating linked investigation ${id} failed: ${toMessage(error)}`
         );
       }
+    }
+    if (closing || reopening) {
+      await this.deps.onLinkedInvestigationsUpdated?.(request, updatedCase.id);
     }
   }
 

@@ -22,6 +22,7 @@ export const registerImpactStepDefinitions = ({
   privileges,
   getAttachmentClient,
   getConversationClient,
+  onFindingsWritten,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getImpactService: () => ImpactService;
@@ -29,6 +30,7 @@ export const registerImpactStepDefinitions = ({
   privileges: InvestigationsPrivilegesChecker;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  onFindingsWritten?: (request: KibanaRequest, conversationId: string) => Promise<void>;
 }) => {
   workflowsExtensions.registerStepDefinition(
     getAttachImpactStepDefinition({
@@ -37,6 +39,7 @@ export const registerImpactStepDefinitions = ({
       privileges,
       getAttachmentClient,
       getConversationClient,
+      onFindingsWritten,
     })
   );
   workflowsExtensions.registerStepDefinition(

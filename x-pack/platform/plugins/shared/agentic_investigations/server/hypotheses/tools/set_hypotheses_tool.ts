@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../../../common/evidence';
@@ -83,11 +83,13 @@ export const createSetHypothesesTool = ({
   resolveUser,
   privileges,
   logger,
+  onFindingsWritten,
 }: {
   getHypothesesService: () => HypothesesService;
   resolveUser: ResolveUser;
   privileges: InvestigationsPrivilegesChecker;
   logger: Logger;
+  onFindingsWritten?: (request: KibanaRequest, conversationId: string) => Promise<void>;
 }) =>
   createInvestigationTool({
     id: SET_HYPOTHESES_TOOL_ID,
@@ -110,6 +112,8 @@ export const createSetHypothesesTool = ({
         hypotheses,
         user,
       });
+
+      await onFindingsWritten?.(context.request, conversationId);
 
       const notes = [
         ...getHypothesesWarnings(document.hypotheses),

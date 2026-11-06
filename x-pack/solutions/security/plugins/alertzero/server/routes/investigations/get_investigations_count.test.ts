@@ -41,6 +41,7 @@ const makeDeps = (listFn: jest.Mock) => {
     router: router as unknown as RouteDependencies['router'],
     logger,
     getAgentBuilderConversations: () => conversations,
+    getInvestigationsClient: () => undefined,
   } as unknown as RouteDependencies);
 
   const routeConfig = router.versioned.get.mock.calls[0][0];

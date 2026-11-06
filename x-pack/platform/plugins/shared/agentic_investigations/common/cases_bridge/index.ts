@@ -39,6 +39,139 @@ export const MAX_INVESTIGATIONS_PER_CASE_REQUEST = 50;
 export const CLOSE_CASE_WHEN_INVESTIGATIONS_CLOSE_SETTING =
   'agenticInvestigations:closeCaseWhenInvestigationsClose' as const;
 
+/**
+ * Next-up (Phase 5, off by default): a Worker's investigation also opens a case, and its proposals,
+ * hypotheses, and impact land on that case. Per space.
+ */
+export const OPEN_CASES_FOR_INVESTIGATIONS_SETTING =
+  'agenticInvestigations:openCasesForInvestigations' as const;
+
+/** Visibility of the cases opened for investigations: `public` (default) or `restricted`. */
+export const OPEN_CASES_FOR_INVESTIGATIONS_VISIBILITY_SETTING =
+  'agenticInvestigations:openCasesForInvestigationsVisibility' as const;
+
+/** A decision on the case: a reference to a proposal raised in a linked investigation. */
+export const PROPOSAL_CASE_ATTACHMENT_TYPE = 'agentic.proposal' as const;
+
+/**
+ * The investigation's impact and hypotheses, copied onto the case when they're written. The one
+ * place the POC copies instead of linking: one attachment per investigation, replaced on change.
+ */
+export const IMPACT_CASE_ATTACHMENT_TYPE = 'agentic.impact' as const;
+export const HYPOTHESES_CASE_ATTACHMENT_TYPE = 'agentic.hypotheses' as const;
+
+export const CASE_DECISIONS_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/cases/{case_id}/decisions` as const;
+export const CASE_DECISION_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/cases/{case_id}/decisions/{proposal_id}` as const;
+
+export const proposalCaseAttachmentPayloadSchema = z
+  .object({
+    type: z.literal(PROPOSAL_CASE_ATTACHMENT_TYPE),
+    owner: z.string().max(256),
+    attachmentId: z.string().min(1).max(1024),
+    metadata: z
+      .object({
+        title: z.string().max(1024).optional(),
+        investigation_id: z.string().max(1024).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+const MAX_COPIED_TEXT = 10_000;
+
+export const impactCaseAttachmentPayloadSchema = z
+  .object({
+    type: z.literal(IMPACT_CASE_ATTACHMENT_TYPE),
+    owner: z.string().max(256),
+    data: z
+      .object({
+        investigation_id: z.string().min(1).max(1024),
+        investigation_title: z.string().max(1024).optional(),
+        summary: z.string().max(MAX_COPIED_TEXT).optional(),
+        entities: z
+          .array(
+            z
+              .object({
+                id: z.string().max(1024),
+                name: z.string().max(1024).optional(),
+                type: z.string().max(256).optional(),
+              })
+              .strict()
+          )
+          .max(100),
+        copied_at: z.string().max(64),
+      })
+      .strict(),
+  })
+  .strict();
+export type ImpactCaseAttachmentData = z.infer<typeof impactCaseAttachmentPayloadSchema>['data'];
+
+export const hypothesesCaseAttachmentPayloadSchema = z
+  .object({
+    type: z.literal(HYPOTHESES_CASE_ATTACHMENT_TYPE),
+    owner: z.string().max(256),
+    data: z
+      .object({
+        investigation_id: z.string().min(1).max(1024),
+        investigation_title: z.string().max(1024).optional(),
+        hypotheses: z
+          .array(
+            z
+              .object({
+                candidate: z.string().max(MAX_COPIED_TEXT),
+                status: z.enum(['investigating', 'dismissed', 'confirmed']),
+                confidence: z.number().min(0).max(1).optional(),
+                reason: z.string().max(MAX_COPIED_TEXT).optional(),
+              })
+              .strict()
+          )
+          .max(50),
+        copied_at: z.string().max(64),
+      })
+      .strict(),
+  })
+  .strict();
+export type HypothesesCaseAttachmentData = z.infer<
+  typeof hypothesesCaseAttachmentPayloadSchema
+>['data'];
+
+export const caseDecisionRequestSchema = lazySchema(() =>
+  z.object({
+    decision: z.enum(['approve', 'dismiss']),
+  })
+);
+export type CaseDecisionRequest = z.infer<typeof caseDecisionRequestSchema>;
+
+export interface CaseDecisionPerson {
+  username?: string | null;
+  full_name?: string | null;
+}
+
+export interface CaseDecision {
+  proposal_id: string;
+  title: string;
+  comment?: string;
+  category?: string;
+  investigation_id?: string;
+  /** `pending` until decided; then the proposal's own status (`approved`, `dismissed`, ...). */
+  status: string;
+  decision?: 'approved' | 'dismissed';
+  created_at?: string;
+  created_by?: CaseDecisionPerson;
+  decided_at?: string;
+  decided_by?: CaseDecisionPerson;
+}
+
+export interface CaseDecisionsResponse {
+  decisions: CaseDecision[];
+  pending: number;
+  /** The caller can approve and dismiss (proposals manage and Cases update). */
+  can_decide: boolean;
+}
+
 export const investigationCaseAttachmentMetadataSchema = z
   .object({
     title: z.string().max(1024).optional(),
