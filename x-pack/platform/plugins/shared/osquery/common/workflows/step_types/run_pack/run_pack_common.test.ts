@@ -82,9 +82,9 @@ describe('runPackInputSchema', () => {
     expect(
       runPackInputSchema.safeParse({ pack_id: 'abc', ...target, wait_timeout: '31m' }).success
     ).toBe(false);
-    expect(
-      runPackInputSchema.safeParse({ pack_id: 'abc', ...target, max_rows: 0 }).success
-    ).toBe(false);
+    expect(runPackInputSchema.safeParse({ pack_id: 'abc', ...target, max_rows: 0 }).success).toBe(
+      false
+    );
     expect(
       runPackInputSchema.safeParse({ pack_id: 'abc', ...target, max_rows: 10001 }).success
     ).toBe(false);
@@ -115,6 +115,7 @@ describe('runPackOutputSchema', () => {
         runPackOutputSchema.safeParse({ status: 'failed', error_code: code, queries: [] }).success
       ).toBe(true);
     }
+
     expect(
       runPackOutputSchema.safeParse({ status: 'failed', error_code: 'NOPE', queries: [] }).success
     ).toBe(false);

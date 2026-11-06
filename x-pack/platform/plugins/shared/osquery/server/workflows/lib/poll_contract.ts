@@ -52,3 +52,17 @@ export const deriveStepStatus = (
 
   return undefined;
 };
+
+/**
+ * Pack status from its queries' statuses: every query `success` is `success`; every query
+ * `timed_out` is `timed_out`; no query `success` or `partial` is `failed`; anything else is
+ * `partial`. A `partial` query counts as some success. Callers never pass an empty list (a pack
+ * without enabled queries fails before dispatch); it reads as `failed`.
+ */
+export const rollupPackStatus = (statuses: StepStatus[]): StepStatus => {
+  if (statuses.length > 0 && statuses.every((status) => status === 'success')) return 'success';
+  if (statuses.length > 0 && statuses.every((status) => status === 'timed_out')) return 'timed_out';
+  if (!statuses.some((status) => status === 'success' || status === 'partial')) return 'failed';
+
+  return 'partial';
+};
