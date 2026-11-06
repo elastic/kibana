@@ -54,6 +54,10 @@ interface SharedSettingsSectionProps {
   namespaceError?: string;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
+  /** Whether an ECF stack is already launched. */
+  hasLaunchedEcfStack?: boolean;
+  /** Whether a selected service does not follow the namespace. */
+  hasServicesIgnoringNamespace?: boolean;
   /** The output field, offered only where an agent-based deploy can set it. */
   output?: OutputFieldProps;
   /** The proxy URL field, offered for agent-based and managed integration deploys. */
@@ -81,6 +85,8 @@ export function SharedSettingsSection({
   onNamespaceChange,
   namespaceError,
   hasDeployedServices = false,
+  hasLaunchedEcfStack = false,
+  hasServicesIgnoringNamespace = false,
   output,
   proxyUrl,
 }: SharedSettingsSectionProps) {
@@ -262,6 +268,8 @@ export function SharedSettingsSection({
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
             hasDeployedServices={hasDeployedServices}
+            hasLaunchedEcfStack={hasLaunchedEcfStack}
+            hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
             output={output}
             proxyUrl={proxyUrl}
           />

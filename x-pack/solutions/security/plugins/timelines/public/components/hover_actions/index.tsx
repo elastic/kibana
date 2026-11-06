@@ -10,29 +10,12 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
-import {
-  getCopyButton,
-  getFilterForValueButton,
-  getFilterOutValueButton,
-} from '@kbn/securitysolution-timeline-components';
-import type {
-  CopyProps,
-  FilterValueFnArgs,
-  HoverActionComponentProps,
-} from '@kbn/securitysolution-timeline-components';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
 
 export interface HoverActionsConfig {
   getAddToTimelineButton: (
     props: AddToTimelineButtonProps
   ) => ReactElement<AddToTimelineButtonProps>;
-  getCopyButton: (props: CopyProps) => ReactElement<CopyProps>;
-  getFilterForValueButton: (
-    props: HoverActionComponentProps & FilterValueFnArgs
-  ) => ReactElement<HoverActionComponentProps & FilterValueFnArgs>;
-  getFilterOutValueButton: (
-    props: HoverActionComponentProps & FilterValueFnArgs
-  ) => ReactElement<HoverActionComponentProps & FilterValueFnArgs>;
 }
 
 const AddToTimelineButtonLazy = React.lazy(() => import('./actions/add_to_timeline'));
@@ -51,7 +34,4 @@ const getAddToTimelineButtonLazy = (store: Store, props: AddToTimelineButtonProp
 export const getHoverActions = (store?: Store): HoverActionsConfig => ({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
-  getCopyButton,
-  getFilterForValueButton,
-  getFilterOutValueButton,
 });
