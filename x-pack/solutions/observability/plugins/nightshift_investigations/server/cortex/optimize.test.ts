@@ -340,6 +340,132 @@ describe('applyCortexEdits', () => {
     expect(store.corroborate).not.toHaveBeenCalled();
   });
 
+  describe('which rewrites count as a corroboration', () => {
+    const cart = (overrides: Record<string, unknown> = {}) => ({
+      id: 'cortex_service_otel-demo-cart',
+      title: 'Cart',
+      entity_type: 'service' as const,
+      status: 'tentative' as const,
+      corroborations: 0,
+      updated_at: '2026-09-09T12:00:00.000Z',
+      slug: 'otel-demo-cart',
+      content: 'Cart uses Redis.',
+      authored_by: ['conversation-1'],
+      ...overrides,
+    });
+
+    const rewrite = async ({
+      existing,
+      roundKind,
+      conversationId,
+    }: {
+      existing: ReturnType<typeof cart>;
+      roundKind?: 'initial' | 'follow_up' | 'alert_recovery';
+      conversationId?: string;
+    }) => {
+      const store = createStore({
+        list: jest.fn().mockResolvedValue({
+          pages: [existing],
+          stats: { total: 1, established: 0, total_corroborations: 0 },
+        }),
+        get: jest.fn().mockResolvedValue(existing),
+      });
+      await applyCortexEdits({
+        store,
+        telemetry: createTelemetry(),
+        logger: loggerMock.create(),
+        ...(roundKind ? { roundKind } : {}),
+        ...(conversationId ? { provenance: { conversationId } } : {}),
+        edits: [
+          {
+            action: 'upsert',
+            entity_type: 'service',
+            slug: 'otel-demo-cart',
+            title: 'Cart',
+            content: 'Cart uses Redis and flagd.',
+          },
+        ],
+      });
+      return store;
+    };
+
+    it('counts and promotes a rewrite from a different investigation', async () => {
+      const store = await rewrite({
+        existing: cart(),
+        roundKind: 'initial',
+        conversationId: 'conversation-2',
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'established', corroborations: 1 })
+      );
+    });
+
+    it('keeps the status and count of a page a follow-up rewrote', async () => {
+      const store = await rewrite({
+        existing: cart(),
+        roundKind: 'follow_up',
+        conversationId: 'conversation-2',
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: 'Cart uses Redis and flagd.',
+          status: 'tentative',
+          corroborations: 0,
+        })
+      );
+    });
+
+    it('keeps an established page established, at the same count, through a follow-up rewrite', async () => {
+      const store = await rewrite({
+        existing: cart({ status: 'established', corroborations: 2 }),
+        roundKind: 'follow_up',
+        conversationId: 'conversation-2',
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'established', corroborations: 2 })
+      );
+    });
+
+    it('does not count a rewrite that an alert-recovery round makes', async () => {
+      const store = await rewrite({
+        existing: cart(),
+        roundKind: 'alert_recovery',
+        conversationId: 'conversation-1',
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'tentative', corroborations: 0 })
+      );
+    });
+
+    it('does not let a conversation corroborate a page it wrote itself', async () => {
+      const store = await rewrite({
+        existing: cart(),
+        roundKind: 'initial',
+        conversationId: 'conversation-1',
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'tentative', corroborations: 0 })
+      );
+    });
+
+    it('revives an archived page as tentative when a follow-up rewrites it', async () => {
+      const store = await rewrite({
+        existing: cart({ status: 'archived', corroborations: 3 }),
+        roundKind: 'follow_up',
+        conversationId: 'conversation-2',
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'tentative', corroborations: 3 })
+      );
+    });
+  });
+
   it('revives a rewritten archived page as tentative without counting it', async () => {
     const existing = {
       id: 'cortex_topic_old-note',
@@ -824,6 +950,42 @@ describe('authorship and recovery context', () => {
       { slug: 'orders-consumer', entity_type: 'service', content: '## Dependencies\n- orders-db' },
     ]);
   });
+
+  it.each([
+    ['follow_up', 'tentative', 0],
+    ['initial', 'established', 1],
+  ] as const)(
+    "a %s round that rewrites another conversation's page leaves it %s at %sx",
+    async (roundKind, status, count) => {
+      const store = recoveryStore();
+
+      await optimizeCortex({
+        store,
+        telemetry: createTelemetry(),
+        logger: loggerMock.create(),
+        userMessage: 'The payments service also depends on the ledger.',
+        assistantMessage: 'Noted.',
+        toolCalls: [],
+        roundKind,
+        provenance: { conversationId: 'conversation-1' },
+        proposeEdits: jest.fn().mockResolvedValue({
+          edits: [
+            {
+              action: 'upsert',
+              entity_type: 'service',
+              slug: 'payments',
+              title: 'payments',
+              content: '## Dependencies\n- ledger\n- orders-db',
+            },
+          ],
+        }),
+      });
+
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ slug: 'payments', status, corroborations: count })
+      );
+    }
+  );
 
   it.each(['initial', 'follow_up'] as const)(
     'does not load page content for a %s round',

@@ -356,12 +356,15 @@ export const applyCortexEdits = async ({
   edits,
   telemetry,
   provenance,
+  roundKind = 'initial',
   logger,
 }: {
   store: CortexPageStore;
   edits: CortexEditProposal[];
   telemetry: CortexTelemetry;
   provenance?: WriteProvenance;
+  /** Only an initial round's rewrite of a page counts as a corroboration of it. */
+  roundKind?: CortexRoundKind;
   logger: Logger;
 }): Promise<AppliedWriteRecord[]> => {
   const { pages } = await store.list();
@@ -462,18 +465,30 @@ export const applyCortexEdits = async ({
       }
 
       const existing = await store.get(id);
-      // Rewriting a live page means this run re-established it, so it counts as a corroboration.
-      // New pages start tentative, and rewriting an archived page revives it as tentative, so a
-      // single run can never publish a fact as established. A page already touched this run keeps
-      // its status, so a page revived earlier in the run is not promoted on its old count.
+      // Rewriting a live page in a fresh investigation means that investigation re-established it,
+      // so it counts as a corroboration. A follow-up or recovery rewrite is one person's correction
+      // or one alert's outcome, and a conversation cannot corroborate a page it wrote itself, so
+      // neither promotes the page. New pages start tentative, and rewriting an archived page revives
+      // it as tentative, so a single run can never publish a fact as established. A page already
+      // touched this run keeps its status, so a page revived earlier in the run is not promoted on
+      // its old count.
       const alreadyTouched = touchedIds.has(id);
-      const confirms = existing !== undefined && existing.status !== 'archived' && !alreadyTouched;
+      const isIndependent =
+        roundKind === 'initial' &&
+        !(provenance?.conversationId && existing?.authored_by?.includes(provenance.conversationId));
+      const confirms =
+        existing !== undefined &&
+        existing.status !== 'archived' &&
+        !alreadyTouched &&
+        isIndependent;
       const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
       touchedIds.add(id);
       const status = !existing
         ? 'tentative'
-        : alreadyTouched
-        ? existing.status
+        : alreadyTouched || !confirms
+        ? existing.status === 'archived'
+          ? 'tentative'
+          : existing.status
         : statusAfterCorroboration(existing.status, corroborations ?? 0);
       const afterContent = edit.content ?? existing?.content ?? '';
       const written = await store.upsert({
@@ -606,5 +621,5 @@ export const optimizeCortex = async ({
     return [];
   }
 
-  return applyCortexEdits({ store, edits, telemetry, provenance, logger });
+  return applyCortexEdits({ store, edits, telemetry, provenance, roundKind, logger });
 };
