@@ -145,9 +145,9 @@ export abstract class ActionRunner {
         })
         .catch(async (error) => {
           try {
-            // A 404 here means the point in time opened when the action started has expired.
-            // Retrying with the same pitId would 404 again every time until the retry budget is
-            // spent, so drop it: searchAfter alone pages the live index.
+            // A 404 here means the point in time this run paged with has expired. Retrying with
+            // the same pitId would 404 again every time until the retry budget is spent, so clear
+            // it and let processAgentsInBatches open a fresh one.
             if (isResponseError(error) && error.statusCode === 404) {
               logger.error(
                 `404 error from Elasticsearch during action ${this.actionParams.actionId}, retrying without the expired point in time: ${error.message}`
@@ -287,10 +287,11 @@ export abstract class ActionRunner {
     const start = Date.now();
     let pitId = this.retryParams.pitId;
 
-    // A resumed run has had its expired point in time cleared. Open a fresh one rather than
-    // paging without one: a checkpoint saved under a point in time carries Elasticsearch's
-    // implicit `_shard_doc` tiebreaker, so it has one more value than the plain sort has
-    // clauses, and a non-PIT search would reject it with a 400.
+    // The point in time is only missing once it has expired and the 404 handler cleared it (or
+    // for an action type that restarts from scratch). Open a fresh one rather than paging without
+    // one: a checkpoint saved under a point in time carries Elasticsearch's implicit `_shard_doc`
+    // tiebreaker, so it has one more value than the plain sort has clauses, and a non-PIT search
+    // would reject it with a 400.
     if (!pitId) {
       pitId = await openPointInTime(this.esClient, PIT_KEEP_ALIVE);
       this.retryParams.pitId = pitId;
