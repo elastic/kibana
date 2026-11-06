@@ -269,7 +269,7 @@ export class WorkflowsService {
       logger: this.logger,
     });
 
-    const { workflowExecutionsDataClient, stepExecutionsDataClient } =
+    const { workflowExecutionsDataClient, stepExecutionsDataClient, executionsIoDataClient } =
       this.workflowsExecutionEngine.__internalStorage;
     this.workflowExecutionsDataClient = workflowExecutionsDataClient;
 
@@ -278,6 +278,7 @@ export class WorkflowsService {
       esClient: this.esClient,
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
+      executionsIoDataClient,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 

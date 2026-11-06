@@ -15,6 +15,7 @@ import type { DocumentVersionManager } from './document_version_manager';
 
 import type { SharedBulkItem } from '../../lib/bulk/shared_bulk';
 import { sharedBulk } from '../../lib/bulk/shared_bulk';
+import { attachExecutionIoIdsToHits, withExecutionIoIds } from '../../lib/with_execution_io_ids';
 import type {
   BulkItemResponse,
   BulkPlainItem,
@@ -45,6 +46,8 @@ export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   additionalIndexesToQuery?: string[];
   dateField: keyof TExecution;
   logger: Logger;
+  /** Step documents derive inputId and outputId from their id. Workflow documents do not. */
+  stampExecutionIoIds?: boolean;
 }
 
 export class DataStreamDataClient<TExecution extends { id: string }>
@@ -56,6 +59,10 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   constructor(private readonly deps: DataStreamDataClientDeps<TExecution>) {
     this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
     this.indexesToQuery = [this.deps.dataStreamName, ...this.additionalIndexesToQuery];
+  }
+
+  private documentWithIoIds(document: TExecution): TExecution {
+    return this.deps.stampExecutionIoIds ? withExecutionIoIds(document) : document;
   }
 
   public async search(
@@ -77,7 +84,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         });
       }
     });
-    return searchResponse;
+    return this.deps.stampExecutionIoIds
+      ? attachExecutionIoIdsToHits(searchResponse)
+      : searchResponse;
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
@@ -143,7 +152,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         if (!isSoftDeleted(doc._source) && !foundIds.has(docId)) {
           foundIds.add(docId);
           items.push({
-            document: { ...doc._source, id: docId } as TExecution,
+            document: this.documentWithIoIds({ ...doc._source, id: docId } as TExecution),
             index: doc._index,
             seqNo: doc._seq_no,
             primaryTerm: doc._primary_term,
@@ -174,7 +183,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         if (hit._id && hit._source && !isSoftDeleted(hit._source) && !foundIds.has(hit._id)) {
           foundIds.add(hit._id);
           items.push({
-            document: { ...hit._source, id: hit._id } as TExecution,
+            document: this.documentWithIoIds({ ...hit._source, id: hit._id } as TExecution),
             index: hit._index,
             seqNo: hit._seq_no,
             primaryTerm: hit._primary_term,

@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { ExecutionsIoClient } from './implementations/executions_io/executions_io_data_client';
 
 /** Backing store for execution documents. */
 export type ExecutionStorageSource = 'plain_index' | 'data_stream';
@@ -112,13 +113,14 @@ export type DataClient<TExecution extends { id: string }> = ReadonlyDataClient<T
 export type WorkflowExecutionsDataClient = DataClient<EsWorkflowExecution>;
 export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 
-/** Pair of workflow/step data access instances plus lifecycle hooks from `createDataClientBundle`. */
+/** Workflow, step, and IO data access plus lifecycle hooks from `createDataClientBundle`. */
 export interface DataClientBundle {
   initSetup: (coreSetup: CoreSetup) => Promise<void>;
   initStart: (coreStart: CoreStart) => Promise<void>;
   stop: () => Promise<void>;
   createWorkflowDataClient: () => WorkflowExecutionsDataClient;
   createStepDataClient: () => StepExecutionsDataClient;
+  createIoDataClient: () => ExecutionsIoClient;
 }
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;

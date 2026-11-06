@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { withExecutionIoIds } from './with_execution_io_ids';
 import type {
   GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
@@ -21,6 +22,8 @@ export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   defaultIndex: string;
   options?: GetExecutionsByIdsOptions<TExecution>;
   logger: Logger;
+  /** Step documents derive inputId and outputId from their id. Workflow documents do not. */
+  stampExecutionIoIds?: boolean;
 }
 
 export const getExecutionsByIds = async <TExecution extends { id: string }>({
@@ -29,6 +32,7 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
   defaultIndex,
   options,
   logger,
+  stampExecutionIoIds = false,
 }: GetExecutionsByIdsParams<TExecution>): Promise<GetExecutionsByIdsResponse<TExecution>> => {
   if (ids.length === 0) {
     return {
@@ -58,9 +62,13 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
   for (const doc of response.docs) {
     if ('found' in doc && doc.found && doc._source && doc._id) {
       // `_source.includes` can omit `id`; callers key the result by document.id.
-      const source = { ...doc._source, id: doc._id } as TExecution;
+      const source = {
+        ...doc._source,
+        id: doc._id,
+      } as TExecution;
+      const document = stampExecutionIoIds ? withExecutionIoIds(source) : source;
       items.push({
-        document: source,
+        document,
         index: doc._index,
         seqNo: doc._seq_no,
         primaryTerm: doc._primary_term,

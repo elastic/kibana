@@ -10,6 +10,7 @@
 import { instrumentAsyncMethods } from '@kbn/apm-utils';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
+import type { ExecutionsIoClient } from './executions_io/executions_io_data_client';
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
 import type {
   DataClient,
@@ -62,6 +63,24 @@ export class DeferredDataClientBundle implements DataClientBundle {
 
   createStepDataClient(): StepExecutionsDataClient {
     return this.deferClient(() => this.dataClientBundle.createStepDataClient());
+  }
+
+  createIoDataClient(): ExecutionsIoClient {
+    const { startPromise } = this;
+    if (!startPromise) {
+      throw new Error('initStart must be called before creating data clients');
+    }
+    let resolved: ExecutionsIoClient | undefined;
+    const get = () =>
+      startPromise.then(() => (resolved ??= this.dataClientBundle.createIoDataClient()));
+    const client: ExecutionsIoClient = {
+      getByIds: (ids, options) => get().then((ioClient) => ioClient.getByIds(ids, options)),
+      bulkCreate: (request) => get().then((ioClient) => ioClient.bulkCreate(request)),
+    };
+
+    instrumentAsyncMethods(`DataClientBundle(${this.deps.source})`, client);
+
+    return client;
   }
 
   private createDataClientBundle(): DataClientBundle {

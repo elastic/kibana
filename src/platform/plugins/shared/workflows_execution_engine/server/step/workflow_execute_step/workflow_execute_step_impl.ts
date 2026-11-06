@@ -20,6 +20,7 @@ import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_asyn
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
 import type { WorkflowsExecutionEngineConfig } from '../../config';
+import type { ExecutionsIoClient } from '../../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -38,6 +39,7 @@ export interface WorkflowExecuteStepImplInit {
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
+  executionsIoDataClient: ExecutionsIoClient;
   workflowLogger: IWorkflowEventLogger;
   config: WorkflowsExecutionEngineConfig;
 }
@@ -53,12 +55,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       workflowsExecutionEngine,
       workflowExecutionRepository,
       stepExecutionRepository,
+      executionsIoDataClient,
       workflowLogger,
     } = init;
     this.syncExecutor = new WorkflowExecuteSyncStrategy(
       workflowsExecutionEngine,
       workflowExecutionRepository,
       stepExecutionRepository,
+      executionsIoDataClient,
       stepExecutionRuntime,
       workflowLogger
     );

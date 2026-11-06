@@ -22,8 +22,10 @@ export async function flushState(
   options: FlushStateOptions = {}
 ) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
+  // IO before step metadata so a terminal status is not readable until this
+  // flush's payload write has finished. Logs stay concurrent with the IO write.
   await Promise.all([
-    params.stepIoService.flush(),
+    params.stepIoService.flush().then(() => params.workflowExecutionState.flush()),
     params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
   ]);
   flushSpan?.end();

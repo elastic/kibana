@@ -23,6 +23,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows/types/v1';
+import type { ExecutionsIoClient } from '../../../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
@@ -45,6 +46,7 @@ export class WorkflowExecuteSyncStrategy {
     private workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart,
     private workflowExecutionRepository: WorkflowExecutionRepository,
     private stepExecutionRepository: StepExecutionRepository,
+    private executionsIoDataClient: ExecutionsIoClient,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
@@ -226,6 +228,7 @@ export class WorkflowExecuteSyncStrategy {
             state.executionId,
             execution.stepExecutionIds
           );
+        await this.fillStepOutputs(stepExecutions);
         const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
           omit(exec, ['spaceId'])
         );
@@ -305,6 +308,23 @@ export class WorkflowExecuteSyncStrategy {
         }`
       );
       return undefined;
+    }
+  }
+
+  /**
+   * Step documents keep an output id. The value lives on the IO client.
+   */
+  private async fillStepOutputs(steps: EsWorkflowStepExecution[]): Promise<void> {
+    const ids = steps.flatMap((step) => (step.outputId ? [step.outputId] : []));
+    if (ids.length === 0) {
+      return;
+    }
+    const { items } = await this.executionsIoDataClient.getByIds(ids);
+    const values = new Map(items.map((item) => [item.document.id, item.document.value]));
+    for (const step of steps) {
+      if (step.outputId && values.has(step.outputId)) {
+        step.output = values.get(step.outputId);
+      }
     }
   }
 

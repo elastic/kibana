@@ -96,6 +96,42 @@ describe('getExecutionsByIds', () => {
     expect(new Set(allReturned).size).toBe(ids.length);
   });
 
+  it('returns calculated input and output ids when the stored document has neither', async () => {
+    const { esClient, logger } = createSetup();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'exec-1',
+          _index: DEFAULT_INDEX,
+          found: true,
+          _source: { status: 'completed' },
+        },
+      ],
+    } as never);
+
+    const result = await getExecutionsByIds<{
+      id: string;
+      status: string;
+      inputId: string;
+      outputId: string;
+    }>({
+      esClient,
+      ids: ['exec-1'],
+      defaultIndex: DEFAULT_INDEX,
+      logger,
+      stampExecutionIoIds: true,
+    });
+
+    expect(result.items[0].document).toEqual(
+      expect.objectContaining({
+        id: 'exec-1',
+        status: 'completed',
+        inputId: 'input:exec-1',
+        outputId: 'output:exec-1',
+      })
+    );
+  });
+
   it('fills document.id from _id when sourceIncludes omitted id', async () => {
     const { esClient, logger } = createSetup();
     esClient.mget.mockResolvedValue({
@@ -121,11 +157,18 @@ describe('getExecutionsByIds', () => {
       defaultIndex: DEFAULT_INDEX,
       options: { sourceIncludes: ['spaceId', 'status'] },
       logger,
+      stampExecutionIoIds: true,
     });
 
     expect(result.items).toEqual([
       expect.objectContaining({
-        document: { spaceId: 'default', status: 'waiting_for_input', id: 'step-1' },
+        document: {
+          spaceId: 'default',
+          status: 'waiting_for_input',
+          id: 'step-1',
+          inputId: 'input:step-1',
+          outputId: 'output:step-1',
+        },
         seqNo: 7,
         primaryTerm: 1,
       }),

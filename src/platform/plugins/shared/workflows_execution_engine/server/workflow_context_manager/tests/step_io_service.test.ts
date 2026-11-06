@@ -25,6 +25,72 @@ import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
+interface HarnessIoClient {
+  getByIds: jest.Mock;
+  bulkCreate: jest.Mock;
+}
+
+let activeIoClient: HarnessIoClient;
+
+function outputItems(docs: Array<{ id: string; output: unknown }>) {
+  return {
+    items: docs.map((doc) => ({
+      document: {
+        id: `output:${doc.id}`,
+        executionId: doc.id,
+        type: 'output' as const,
+        value: doc.output,
+        size: 0,
+      },
+    })),
+    missing: [] as string[],
+  };
+}
+
+/** Step-repository output mocks stand in for the IO client the service now reads. */
+function installIoReadBridge(getStepExecutionsByIds: jest.Mock, ioClient: HarnessIoClient): void {
+  const hasOutput = (value: unknown) =>
+    Array.isArray(value) && value.some((doc) => doc && typeof doc === 'object' && 'output' in doc);
+
+  const originalResolved = getStepExecutionsByIds.mockResolvedValue.bind(getStepExecutionsByIds);
+  getStepExecutionsByIds.mockResolvedValue = (value: unknown) => {
+    const result = originalResolved(value);
+    if (hasOutput(value)) {
+      ioClient.getByIds.mockResolvedValue(
+        outputItems(value as Array<{ id: string; output: unknown }>)
+      );
+    }
+    return result;
+  };
+
+  const originalOnce = getStepExecutionsByIds.mockResolvedValueOnce.bind(getStepExecutionsByIds);
+  getStepExecutionsByIds.mockResolvedValueOnce = (value: unknown) => {
+    const result = originalOnce(value);
+    if (hasOutput(value)) {
+      ioClient.getByIds.mockResolvedValue(
+        outputItems(value as Array<{ id: string; output: unknown }>)
+      );
+    }
+    return result;
+  };
+
+  const originalReturn = getStepExecutionsByIds.mockReturnValue.bind(getStepExecutionsByIds);
+  getStepExecutionsByIds.mockReturnValue = (value: unknown) => {
+    const result = originalReturn(value);
+    if (value && typeof (value as Promise<unknown>).then === 'function') {
+      ioClient.getByIds.mockReturnValue(
+        (value as Promise<Array<{ id: string; output: unknown }>>).then((docs) => outputItems(docs))
+      );
+    }
+    return result;
+  };
+}
+
+function rehydratedStepIds(): string[] {
+  const ids = (activeIoClient.getByIds.mock.calls.at(-1)?.[0] ?? []) as string[];
+  return ids.filter((id) => id.startsWith('output:')).map((id) => id.slice('output:'.length));
+}
+
 /**
  * Builds a state + service pair backed by jest-mock repositories. Returns
  * the service under test plus the state so suites can seed step docs via
@@ -49,18 +115,32 @@ function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {})
     isTestRun: false,
   } as EsWorkflowExecution;
 
-  const state = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
+  const ioClient = {
+    getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+    bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+  };
+  const state = new WorkflowExecutionState(
+    fakeWorkflowExecution,
+    workflowExecutionRepository,
+    stepExecutionRepository
+  );
   // The type requires scopeStack but tests construct via the standard `as`
   // cast — set an empty stack here so prepareForRead can read it.
   state.updateWorkflowExecution({ scopeStack: [] });
   const service = new StepIoService({
     stepRepository: stepExecutionRepository,
+    ioClient,
     state,
     evictionMinBytes: opts.evictionMinBytes ?? Infinity,
     logger: opts.logger,
   });
 
-  return { state, service, stepExecutionRepository, workflowExecutionRepository };
+  installIoReadBridge(
+    stepExecutionRepository.getStepExecutionsByIds as unknown as jest.Mock,
+    ioClient
+  );
+  activeIoClient = ioClient;
+  return { state, service, stepExecutionRepository, workflowExecutionRepository, ioClient };
 }
 
 /**
@@ -113,54 +193,103 @@ describe('StepIoService', () => {
   const EVICTION_THRESHOLD = 100; // bytes
 
   describe('flush', () => {
-    it('persists step changes before a terminal workflow status', async () => {
-      const { state, service, stepExecutionRepository, workflowExecutionRepository } =
-        buildHarness();
-      const stepWrite = Promise.withResolvers<void>();
-      stepExecutionRepository.bulkUpsert.mockReturnValue(stepWrite.promise);
+    it('creates one IO document per side and writes metadata without payloads', async () => {
+      const { state, service, stepExecutionRepository, ioClient } = buildHarness();
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
         status: ExecutionStatus.COMPLETED,
       });
+      expect(state.getStepExecution('step-1')).toEqual(
+        expect.objectContaining({ inputId: 'input:step-1', outputId: 'output:step-1' })
+      );
+
+      service.setStepInput('step-1', { foo: 'bar' });
       service.setStepOutput('step-1', { result: 'done' });
-      state.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+      await service.flush();
+      await state.flush();
 
-      const flushPromise = service.flush();
-      await Promise.resolve();
-
-      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
-      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-
-      stepWrite.resolve();
-      await flushPromise;
-
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+      expect(ioClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(ioClient.bulkCreate).toHaveBeenCalledWith({
+        documents: [
+          expect.objectContaining({ executionId: 'step-1', type: 'input', value: { foo: 'bar' } }),
+          expect.objectContaining({
+            executionId: 'step-1',
+            type: 'output',
+            value: { result: 'done' },
+          }),
+        ],
+      });
+      const upserted = stepExecutionRepository.bulkUpsert.mock.calls[0][0] as Array<{
+        input?: unknown;
+        output?: unknown;
+      }>;
+      expect(upserted).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'step-1',
+            inputId: 'input:step-1',
+            outputId: 'output:step-1',
+          }),
+        ])
+      );
+      for (const document of upserted) {
+        expect(document.input).toBeUndefined();
+        expect(document.output).toBeUndefined();
+      }
     });
 
-    it('persists non-terminal workflow and step changes concurrently', async () => {
-      const { state, service, stepExecutionRepository, workflowExecutionRepository } =
-        buildHarness();
-      const workflowWrite = Promise.withResolvers<void>();
-      const stepWrite = Promise.withResolvers<void>();
-      workflowExecutionRepository.updateWorkflowExecution.mockReturnValue(workflowWrite.promise);
-      stepExecutionRepository.bulkUpsert.mockReturnValue(stepWrite.promise);
+    it('records an IO error when a second create throws and keeps the execution status', async () => {
+      const { state, service, ioClient } = buildHarness();
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
         status: ExecutionStatus.RUNNING,
       });
-      state.updateWorkflowExecution({ status: ExecutionStatus.RUNNING });
+      service.setStepOutput('step-1', { result: 'done' });
+      await service.flush();
 
-      const flushPromise = service.flush();
-      await Promise.resolve();
+      service.setStepOutput('step-1', { result: 'again' });
+      ioClient.bulkCreate.mockRejectedValueOnce(
+        new Error('Failed to create execution IO output:step-1: document already exists')
+      );
+      await service.flush();
 
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
-      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(ioClient.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(state.getWorkflowExecution().status).toBe(ExecutionStatus.RUNNING);
+      expect(state.getWorkflowExecution().error).toEqual(
+        expect.objectContaining({ type: 'ExecutionIoPersistError' })
+      );
+    });
 
-      workflowWrite.resolve();
-      stepWrite.resolve();
-      await flushPromise;
+    it('keeps a failed create until the next flush succeeds', async () => {
+      const { state, service, ioClient } = buildHarness();
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.RUNNING,
+      });
+      service.setStepOutput('step-1', { result: 'done' });
+      ioClient.bulkCreate.mockRejectedValueOnce(new Error('connection reset'));
+
+      await service.flush();
+      expect(state.getWorkflowExecution().error).toEqual(
+        expect.objectContaining({ type: 'ExecutionIoPersistError' })
+      );
+
+      ioClient.bulkCreate.mockResolvedValueOnce({ items: [], errors: false });
+      await service.flush();
+
+      expect(ioClient.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(ioClient.bulkCreate).toHaveBeenLastCalledWith({
+        documents: [
+          expect.objectContaining({
+            executionId: 'step-1',
+            type: 'output',
+            value: { result: 'done' },
+          }),
+        ],
+      });
     });
   });
 
@@ -828,10 +957,7 @@ describe('StepIoService', () => {
 
       expect(service.getStepOutput('step-1')).toEqual(originalOutput);
       expect(service.hasEvictedOutputs()).toBe(false);
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['step-1'],
-        ['id', 'output', 'workflowRunId']
-      );
+      expect(activeIoClient.getByIds).toHaveBeenCalledWith(['output:step-1']);
     });
 
     it('is a no-op when no requested IDs are evicted', async () => {
@@ -868,7 +994,7 @@ describe('StepIoService', () => {
     });
 
     it('drops cross-execution docs returned by mget instead of restoring foreign output', async () => {
-      const { state, service, stepExecutionRepository } = buildHarness({
+      const { state, service } = buildHarness({
         evictionMinBytes: EVICTION_THRESHOLD,
       });
       seedCompletedStepWithSize(
@@ -883,18 +1009,22 @@ describe('StepIoService', () => {
       await service.flushStepChanges();
       await service.flushStepChanges();
 
-      // ES returns a doc for the same `_id` but a different workflowRunId.
-      // The service must refuse to restore it (defends against a custom
-      // resume path with mis-typed IDs or a hash collision).
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([
-        {
-          id: 'step-1',
-          stepId: 'myStep',
-          stepType: 'connector',
-          workflowRunId: 'some-other-execution',
-          output: { data: 'NOT MINE' },
-        } as unknown as EsWorkflowStepExecution,
-      ]);
+      // The IO client returns a document whose execution id is not one of the
+      // requested steps. The service must refuse to restore it.
+      activeIoClient.getByIds.mockResolvedValueOnce({
+        items: [
+          {
+            document: {
+              id: 'output:step-1',
+              executionId: 'some-other-step',
+              type: 'output',
+              value: { data: 'NOT MINE' },
+              size: 0,
+            },
+          },
+        ],
+        missing: [],
+      });
 
       await service.rehydrateOutputs(['step-1']);
 
@@ -1536,7 +1666,7 @@ describe('StepIoService', () => {
     });
 
     it('eagerly fetches outputs for data.set step types', async () => {
-      const { service, stepExecutionRepository } = await driveLoad(
+      const { service } = await driveLoad(
         [
           {
             id: '11',
@@ -1549,11 +1679,7 @@ describe('StepIoService', () => {
       );
       expect(service.hasEvictedOutputs()).toBe(false);
       expect(service.getStepOutput('11')).toEqual({ v: 1 });
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
-        2,
-        ['11'],
-        ['id', 'output']
-      );
+      expect(activeIoClient.getByIds).toHaveBeenCalledWith(['input:11', 'output:11']);
     });
 
     it('eagerly fetches outputs for waitForInput step types', async () => {
@@ -1714,10 +1840,7 @@ describe('StepIoService', () => {
       });
 
       // Only step_b is referenced by step_c — exec-a should not be rehydrated.
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['exec-b'],
-        ['id', 'output', 'workflowRunId']
-      );
+      expect(activeIoClient.getByIds).toHaveBeenCalledWith(['output:exec-b']);
     });
 
     it('rehydrates outputs referenced by the active foreach source expression', async () => {
@@ -1821,7 +1944,7 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      const rehydratedIds = rehydratedStepIds();
       expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
       expect(rehydratedIds).toHaveLength(2);
     });
@@ -1951,7 +2074,7 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      const rehydratedIds = rehydratedStepIds();
       expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
       expect(rehydratedIds).not.toEqual(expect.arrayContaining(['exec-unrelated', 'exec-decoy']));
       expect(rehydratedIds).toHaveLength(2);
@@ -2102,7 +2225,7 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      const rehydratedIds = rehydratedStepIds();
       expect(rehydratedIds).toEqual(
         expect.arrayContaining(['exec-outer-source', 'exec-inner-source', 'exec-case'])
       );
@@ -2191,7 +2314,7 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      const rehydratedIds = rehydratedStepIds();
       expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-relation']));
       expect(rehydratedIds).toHaveLength(2);
     });
@@ -2266,10 +2389,7 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['exec-alerts'],
-        ['id', 'output', 'workflowRunId']
-      );
+      expect(activeIoClient.getByIds).toHaveBeenCalledWith(['output:exec-alerts']);
     });
 
     it('falls back to all predecessors when dynamic access is detected', async () => {
@@ -2308,10 +2428,7 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['exec-a'],
-        ['id', 'output', 'workflowRunId']
-      );
+      expect(activeIoClient.getByIds).toHaveBeenCalledWith(['output:exec-a']);
     });
 
     describe('deferred-release: keeps shared predecessors resident', () => {
@@ -2374,21 +2491,21 @@ describe('StepIoService', () => {
           node: stepBNode,
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
-        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+        expect(activeIoClient.getByIds).toHaveBeenCalledTimes(1);
 
         // Step C also reads step_a — should reuse the in-memory copy.
         await service.prepareForRead({
           node: stepCNode,
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
-        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+        expect(activeIoClient.getByIds).toHaveBeenCalledTimes(1);
 
         // Step D too.
         await service.prepareForRead({
           node: stepDNode,
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
-        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+        expect(activeIoClient.getByIds).toHaveBeenCalledTimes(1);
         expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
       });
 
@@ -2473,14 +2590,14 @@ describe('StepIoService', () => {
           node: stepBNode,
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
-        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+        expect(activeIoClient.getByIds).toHaveBeenCalledTimes(1);
 
         // Attempt 2 (retry) — same node, same predecessors. No second ES hit.
         await service.prepareForRead({
           node: stepBNode,
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
-        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+        expect(activeIoClient.getByIds).toHaveBeenCalledTimes(1);
       });
     });
 

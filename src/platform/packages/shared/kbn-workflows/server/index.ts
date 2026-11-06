@@ -26,6 +26,8 @@ export type {
 
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
+export { executionIoId, parseExecutionIoId } from './execution_io_id';
+export type { ExecutionIoType } from './execution_io_id';
 
 export {
   EXTERNAL_RESUME_API_PATH,

@@ -23,13 +23,17 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
+import { ExecutionIoDataClientBundle } from '../executions_io/execution_io_data_client_bundle';
 
 export class DataStreamDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
   private workflowMetadataManager: DataStreamMetadataManager | undefined;
   private stepMetadataManager: DataStreamMetadataManager | undefined;
+  private readonly executionIoDataClientBundle: ExecutionIoDataClientBundle;
 
-  constructor(private readonly deps: CreateDataClientDeps) {}
+  constructor(private readonly deps: CreateDataClientDeps) {
+    this.executionIoDataClientBundle = new ExecutionIoDataClientBundle(deps);
+  }
 
   async initSetup(coreSetup: CoreSetup): Promise<void> {
     coreSetup.dataStreams.registerDataStream({
@@ -52,12 +56,14 @@ export class DataStreamDataClientBundle implements DataClientBundle {
         lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
+    await this.executionIoDataClientBundle.initSetup(coreSetup);
   }
 
   async initStart(coreStart: CoreStart): Promise<void> {
     await Promise.all([
       coreStart.dataStreams.initializeClient(WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name),
       coreStart.dataStreams.initializeClient(STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name),
+      this.executionIoDataClientBundle.initStart(coreStart),
     ]);
 
     this.esClient = createRetryingEsClient(
@@ -82,6 +88,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   async stop(): Promise<void> {
     this.workflowMetadataManager?.dispose();
     this.stepMetadataManager?.dispose();
+    await this.executionIoDataClientBundle.stop();
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -127,6 +134,11 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       additionalIndexesToQuery: ['.workflows-step-executions'],
       logger: this.deps.logger,
       dateField: 'startedAt',
+      stampExecutionIoIds: true,
     });
+  }
+
+  createIoDataClient() {
+    return this.executionIoDataClientBundle.createIoDataClient();
   }
 }

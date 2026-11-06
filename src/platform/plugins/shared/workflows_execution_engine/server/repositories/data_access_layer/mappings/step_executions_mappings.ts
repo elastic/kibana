@@ -58,5 +58,9 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
     // Per-step token usage, extracted from `output.metadata.usage`.
     usage: TOKEN_USAGE_MAPPING,
     stepUsage: STEP_USAGE_MAPPING,
+    inputId: mappings.keyword({ index: false }),
+    inputSize: mappings.long(),
+    outputId: mappings.keyword({ index: false }),
+    outputSize: mappings.long(),
   },
 };
