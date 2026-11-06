@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
+import { useOnboarding } from './use_onboarding';
 import { NightshiftOnboarding } from './onboarding';
+
+const mockStartSuggestions = jest.fn();
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: {} }),
@@ -22,8 +26,8 @@ jest.mock('../../../components/ui/flyout_share_url_button', () => ({
   useFlyoutShareUrlCustomAction: () => ({}),
 }));
 jest.mock('./use_onboarding', () => ({
-  useOnboarding: () => ({ data: { agent_installed: true }, isInitialLoading: false }),
-  useStartOnboardingSuggestions: () => ({ mutate: jest.fn(), isLoading: false }),
+  useOnboarding: jest.fn(),
+  useStartOnboardingSuggestions: () => ({ mutate: mockStartSuggestions, isLoading: false }),
 }));
 jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
   useInvestigatorServiceAccount: () => ({ data: {} }),
@@ -35,14 +39,20 @@ jest.mock('../../../data/sandbox_connectors/use_connectors_by_type', () => ({
 jest.mock('../header', () => ({ NightshiftHeader: () => null }));
 jest.mock('./intro_banner', () => ({ OnboardingIntroBanner: () => null }));
 jest.mock('./nightshift_setup_prompt', () => ({ NightshiftSetupPrompt: () => null }));
-jest.mock('./connect_step', () => ({
-  ...jest.requireActual('./connect_step'),
-  OnboardingConnectStep: () => null,
+jest.mock('./add_data_step', () => ({
+  ...jest.requireActual('./add_data_step'),
+  OnboardingAddDataStep: () => null,
+}));
+jest.mock('./connect_sources_step', () => ({
+  ...jest.requireActual('./connect_sources_step'),
+  OnboardingConnectSourcesStep: () => null,
 }));
 jest.mock('./first_investigation_step', () => ({
   OnboardingFirstInvestigationStep: () => null,
 }));
 jest.mock('./automation_step', () => ({ OnboardingAutomationStep: () => null }));
+
+const STEP_IDS = ['enable', 'addData', 'connectSources', 'investigate', 'automate'];
 
 /** Connector counts per sandbox-capable type in the space. */
 const mockConnectors = (countByType: Record<string, number>) =>
@@ -55,27 +65,51 @@ const mockConnectors = (countByType: Record<string, number>) =>
     error: null,
   });
 
-const renderOnboarding = () =>
+/** The space is enabled; with `explored`, a first-investigations run exists. */
+const mockOnboarding = ({ explored = false }: { explored?: boolean } = {}) =>
+  (useOnboarding as jest.Mock).mockReturnValue({
+    data: {
+      agent_installed: true,
+      ...(explored && { execution: { execution_id: 'exec-1', status: 'completed' } }),
+    },
+    isInitialLoading: false,
+  });
+
+const renderOnboarding = (latestInvestigation?: InvestigationSummary) =>
   render(
     <I18nProvider>
       <MemoryRouter>
-        <NightshiftOnboarding onFinish={jest.fn()} />
+        <NightshiftOnboarding onFinish={jest.fn()} latestInvestigation={latestInvestigation} />
       </MemoryRouter>
     </I18nProvider>
   );
 
+const currentStep = () =>
+  STEP_IDS.find(
+    (id) =>
+      screen.getByTestId(`nightshiftOnboardingStep-${id}`).getAttribute('aria-current') === 'step'
+  );
+const linkedSteps = () =>
+  STEP_IDS.filter((id) => screen.queryByTestId(`nightshiftOnboardingStepLink-${id}`));
+const stepsCard = () => screen.getByTestId('nightshiftOnboardingSteps');
+
 describe('NightshiftOnboarding', () => {
+  beforeEach(() => {
+    mockOnboarding();
+    mockStartSuggestions.mockReset();
+  });
+
   describe('Add data step', () => {
-    it('has no Proceed until a telemetry source is connected', () => {
+    it('is titled Add data and has no Proceed until a telemetry source is connected', () => {
       mockConnectors({ '.elasticsearch': 0, '.new_relic': 0 });
 
       renderOnboarding();
 
-      expect(screen.getByTestId('nightshiftOnboardingStep-connect')).toHaveAttribute(
-        'aria-current',
-        'step'
-      );
-      expect(screen.queryByTestId('nightshiftOnboardingContinueButton')).not.toBeInTheDocument();
+      expect(currentStep()).toBe('addData');
+      expect(screen.getByTestId('nightshiftOnboardingStepTitle')).toHaveTextContent('Add data');
+      expect(
+        screen.queryByTestId('nightshiftOnboardingAddDataProceedButton')
+      ).not.toBeInTheDocument();
     });
 
     it('ignores connectors that belong to the Connect other sources page', () => {
@@ -83,15 +117,83 @@ describe('NightshiftOnboarding', () => {
 
       renderOnboarding();
 
-      expect(screen.queryByTestId('nightshiftOnboardingContinueButton')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('nightshiftOnboardingAddDataProceedButton')
+      ).not.toBeInTheDocument();
     });
 
-    it('offers Proceed once a telemetry connector exists', () => {
+    it('proceeds to Connect other sources once a telemetry connector exists', () => {
       mockConnectors({ '.elasticsearch': 0, '.new_relic': 1, '.http': 2 });
 
       renderOnboarding();
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingAddDataProceedButton'));
 
-      expect(screen.getByTestId('nightshiftOnboardingContinueButton')).toHaveTextContent('Proceed');
+      expect(currentStep()).toBe('connectSources');
+      expect(screen.getByTestId('nightshiftOnboardingStepTitle')).toHaveTextContent(
+        'Connect other sources'
+      );
+    });
+  });
+
+  describe('Connect other sources step', () => {
+    const goToSources = () => {
+      renderOnboarding();
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingAddDataProceedButton'));
+    };
+
+    it('is optional while current', () => {
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+
+      goToSources();
+
+      expect(stepsCard()).toHaveTextContent('Optional');
+    });
+
+    it('starts looking for first investigations either way', () => {
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+
+      goToSources();
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton'));
+
+      expect(mockStartSuggestions).toHaveBeenCalledTimes(1);
+    });
+
+    it('links back to Add data', () => {
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+
+      goToSources();
+
+      expect(linkedSteps()).toEqual(['addData']);
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
+      expect(currentStep()).toBe('addData');
+      expect(stepsCard()).not.toHaveTextContent('Optional');
+    });
+  });
+
+  describe('after the first investigation', () => {
+    const investigation = { id: 'inv-1' } as InvestigationSummary;
+
+    beforeEach(() => {
+      mockOnboarding({ explored: true });
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+    });
+
+    it('links every completed step except Enable', () => {
+      renderOnboarding(investigation);
+
+      expect(currentStep()).toBe('automate');
+      expect(linkedSteps()).toEqual(['addData', 'connectSources', 'investigate']);
+    });
+
+    it('returns to a completed step and forward again through the card', () => {
+      renderOnboarding(investigation);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      expect(currentStep()).toBe('connectSources');
+      expect(linkedSteps()).toEqual(['addData', 'investigate', 'automate']);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingBackToSuggestionsButton'));
+      expect(currentStep()).toBe('automate');
     });
   });
 });

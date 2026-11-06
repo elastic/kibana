@@ -40,11 +40,8 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../../../data/service_accounts/use_investigator_service_account';
-import {
-  CONNECT_SUB_STEP_TITLES,
-  OnboardingConnectStep,
-  type ConnectSubStep,
-} from './connect_step';
+import { ADD_DATA_TITLE, OnboardingAddDataStep } from './add_data_step';
+import { CONNECT_SOURCES_TITLE, OnboardingConnectSourcesStep } from './connect_sources_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
@@ -52,13 +49,16 @@ import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connec
 import { isTelemetryConnectorType } from '../../../components/entities/sandbox_connector/connect_sources_grid';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
-type StepOverride = 'connect' | 'investigate' | undefined;
+type StepOverride = 'addData' | 'connectSources' | 'investigate' | undefined;
 
 const HERO_TITLES: Record<OnboardingStepId, string> = {
   enable: i18n.translate('xpack.nightshift.onboarding.heroTitleEnable', {
     defaultMessage: 'Meet Elastic nightshift',
   }),
-  connect: i18n.translate('xpack.nightshift.onboarding.heroTitle', {
+  addData: i18n.translate('xpack.nightshift.onboarding.heroTitleAddData', {
+    defaultMessage: 'Meet Elastic nightshift',
+  }),
+  connectSources: i18n.translate('xpack.nightshift.onboarding.heroTitleConnectSources', {
     defaultMessage: 'Meet Elastic nightshift',
   }),
   investigate: i18n.translate('xpack.nightshift.onboarding.heroTitleInvestigate', {
@@ -77,6 +77,10 @@ const BACK_LABEL = i18n.translate('xpack.nightshift.onboarding.backButton', {
   defaultMessage: 'Back',
 });
 
+const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optionalHint', {
+  defaultMessage: 'Optional',
+});
+
 const INVESTIGATE_SECTION_TITLE = i18n.translate(
   'xpack.nightshift.onboarding.investigate.sectionTitle',
   { defaultMessage: 'Try your first investigation' }
@@ -91,9 +95,9 @@ const backButtonStyles = css`
 `;
 
 /**
- * First-run Nightshift: add signals and alerts, try a first investigation, create a first
- * automation. The steps follow from the latest onboarding workflow execution, the space's latest
- * investigation and (in the page) whether an automation exists.
+ * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
+ * investigation, create a first automation. The steps follow from the latest onboarding workflow
+ * execution, the space's latest investigation and (in the page) whether an automation exists.
  */
 export function NightshiftOnboarding({
   latestInvestigation,
@@ -136,18 +140,16 @@ export function NightshiftOnboarding({
     setStepOverride(undefined);
   }
 
+  // Before an exploration run exists, Proceed on Add data moves to Connect other sources locally.
   const step: OnboardingStepId = !isEnabled
     ? 'enable'
-    : !isConnected || stepOverride === 'connect'
-    ? 'connect'
+    : stepOverride === 'addData' || stepOverride === 'connectSources'
+    ? stepOverride
+    : !isConnected
+    ? 'addData'
     : latestInvestigation && stepOverride !== 'investigate'
     ? 'automate'
     : 'investigate';
-
-  const [connectSubStep, setConnectSubStep] = useState<ConnectSubStep>('telemetry');
-  if (step !== 'connect' && connectSubStep !== 'telemetry') {
-    setConnectSubStep('telemetry');
-  }
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -211,19 +213,22 @@ export function NightshiftOnboarding({
     enable: {
       status: isEnabled ? 'complete' : 'current',
     },
-    connect: {
-      status: !isEnabled ? 'disabled' : step === 'connect' ? 'current' : 'complete',
-      onClick: isEnabled && step !== 'connect' ? () => setStepOverride('connect') : undefined,
-      hint:
-        step !== 'connect'
-          ? undefined
-          : connectSubStep === 'telemetry'
-          ? i18n.translate('xpack.nightshift.onboarding.steps.telemetryHint', {
-              defaultMessage: 'Telemetry',
-            })
-          : i18n.translate('xpack.nightshift.onboarding.steps.additionalSourcesHint', {
-              defaultMessage: 'Other sources (optional)',
-            }),
+    addData: {
+      status: !isEnabled ? 'disabled' : step === 'addData' ? 'current' : 'complete',
+      onClick: isEnabled && step !== 'addData' ? () => setStepOverride('addData') : undefined,
+    },
+    connectSources: {
+      status:
+        step === 'connectSources'
+          ? 'current'
+          : step === 'enable' || step === 'addData'
+          ? 'disabled'
+          : 'complete',
+      onClick:
+        step !== 'connectSources' && step !== 'enable' && step !== 'addData'
+          ? () => setStepOverride('connectSources')
+          : undefined,
+      hint: step === 'connectSources' ? OPTIONAL_HINT : undefined,
     },
     investigate: {
       status: step === 'investigate' ? 'current' : latestInvestigation ? 'complete' : 'disabled',
@@ -246,48 +251,60 @@ export function NightshiftOnboarding({
   };
 
   const stepAction =
-    step === 'connect' ? (
+    step === 'addData' ? (
       <EuiFlexGroup direction="column" gutterSize="s">
-        {connectSubStep === 'telemetry' ? (
-          hasTelemetrySource && (
-            <EuiButton
-              fill
-              fullWidth
-              size="s"
-              iconType="sortRight"
-              iconSide="right"
-              onClick={() => setConnectSubStep('additional')}
-              data-test-subj="nightshiftOnboardingContinueButton"
-            >
-              {PROCEED_LABEL}
-            </EuiButton>
-          )
-        ) : (
-          <>
-            <EuiButton
-              fill
-              fullWidth
-              size="s"
-              iconType="sortRight"
-              iconSide="right"
-              isLoading={startSuggestions.isLoading}
-              onClick={() => startSuggestions.mutate()}
-              data-test-subj="nightshiftOnboardingStartButton"
-            >
-              {PROCEED_LABEL}
-            </EuiButton>
-            <EuiButtonEmpty
-              size="s"
-              iconType="sortLeft"
-              iconSide="left"
-              css={backButtonStyles}
-              onClick={() => setConnectSubStep('telemetry')}
-              data-test-subj="nightshiftOnboardingBackToTelemetryButton"
-            >
-              {BACK_LABEL}
-            </EuiButtonEmpty>
-          </>
+        {hasTelemetrySource && (
+          <EuiButton
+            fill
+            fullWidth
+            size="s"
+            iconType="sortRight"
+            iconSide="right"
+            onClick={() => setStepOverride('connectSources')}
+            data-test-subj="nightshiftOnboardingAddDataProceedButton"
+          >
+            {PROCEED_LABEL}
+          </EuiButton>
         )}
+        {isConnected && (
+          <EuiButtonEmpty
+            size="s"
+            iconType="sortLeft"
+            iconSide="left"
+            css={backButtonStyles}
+            onClick={() => setStepOverride(undefined)}
+            data-test-subj="nightshiftOnboardingBackToSuggestionsButton"
+          >
+            {i18n.translate('xpack.nightshift.onboarding.cancelEditButton', {
+              defaultMessage: 'Back to suggestions',
+            })}
+          </EuiButtonEmpty>
+        )}
+      </EuiFlexGroup>
+    ) : step === 'connectSources' ? (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiButton
+          fill
+          fullWidth
+          size="s"
+          iconType="sortRight"
+          iconSide="right"
+          isLoading={startSuggestions.isLoading}
+          onClick={() => startSuggestions.mutate()}
+          data-test-subj="nightshiftOnboardingConnectSourcesProceedButton"
+        >
+          {PROCEED_LABEL}
+        </EuiButton>
+        <EuiButtonEmpty
+          size="s"
+          iconType="sortLeft"
+          iconSide="left"
+          css={backButtonStyles}
+          onClick={() => setStepOverride('addData')}
+          data-test-subj="nightshiftOnboardingBackToAddDataButton"
+        >
+          {BACK_LABEL}
+        </EuiButtonEmpty>
         {isConnected && (
           <EuiButtonEmpty
             size="s"
@@ -322,8 +339,8 @@ export function NightshiftOnboarding({
           iconType="sortLeft"
           iconSide="left"
           css={backButtonStyles}
-          onClick={() => setStepOverride('connect')}
-          data-test-subj="nightshiftOnboardingBackToConnectButton"
+          onClick={() => setStepOverride('connectSources')}
+          data-test-subj="nightshiftOnboardingBackToConnectSourcesButton"
         >
           {BACK_LABEL}
         </EuiButtonEmpty>
@@ -358,8 +375,10 @@ export function NightshiftOnboarding({
   const sectionTitle =
     step === 'enable'
       ? ENABLE_SECTION_TITLE
-      : step === 'connect'
-      ? CONNECT_SUB_STEP_TITLES[connectSubStep]
+      : step === 'addData'
+      ? ADD_DATA_TITLE
+      : step === 'connectSources'
+      ? CONNECT_SOURCES_TITLE
       : step === 'investigate'
       ? INVESTIGATE_SECTION_TITLE
       : undefined;
@@ -377,7 +396,8 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
       <EuiSpacer size="l" />
-      {(step === 'enable' || (step === 'connect' && !isConnected)) && (
+      {(step === 'enable' ||
+        ((step === 'addData' || step === 'connectSources') && !isConnected)) && (
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />
@@ -408,8 +428,10 @@ export function NightshiftOnboarding({
             <EuiLoadingSpinner size="l" />
           ) : step === 'enable' ? (
             <NightshiftSetupPrompt status={serviceAccount.data} />
-          ) : step === 'connect' || !execution ? (
-            <OnboardingConnectStep subStep={connectSubStep} />
+          ) : step === 'addData' || !execution ? (
+            <OnboardingAddDataStep />
+          ) : step === 'connectSources' ? (
+            <OnboardingConnectSourcesStep />
           ) : step === 'investigate' || !latestInvestigation ? (
             <OnboardingFirstInvestigationStep
               execution={execution}
