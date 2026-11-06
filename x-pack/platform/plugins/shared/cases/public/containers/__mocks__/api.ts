@@ -95,6 +95,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    access: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
@@ -169,6 +170,14 @@ export const getCaseConnectors = async (
 
 export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> =>
   Promise.resolve(getCaseUsersMockResponse());
+
+export const getCaseFiles = async (params: {
+  caseId: string;
+  page: number;
+  perPage: number;
+  searchTerm?: string;
+  signal?: AbortSignal;
+}): Promise<{ files: unknown[]; total: number }> => Promise.resolve({ files: [], total: 0 });
 
 export const deleteFileAttachments = async ({
   caseId,

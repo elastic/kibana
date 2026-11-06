@@ -15,6 +15,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
+import { CaseAccessSchema } from '../case/v1';
 import { CaseConnectorWithoutNameSchema } from '../connector/v1';
 import { CaseUserProfilesSchema } from '../user/v1';
 
@@ -172,6 +173,8 @@ export const ParsedTemplateDefinitionSchema = z.object({
   connector: CaseConnectorWithoutNameSchema.optional(),
   /** Default case settings (syncAlerts / extractObservables) applied when creating a case. */
   settings: TemplateSettingsSchema.optional(),
+  /** Default access control applied when creating a case; requires Platinum, skipped silently below it. */
+  access: CaseAccessSchema.optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(

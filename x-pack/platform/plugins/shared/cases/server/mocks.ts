@@ -819,6 +819,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     runWorkflows: {
       enabled: true,
     },
+    restrictedCases: {
+      enabled: false,
+    },
     chat: {
       enabled: true,
     },

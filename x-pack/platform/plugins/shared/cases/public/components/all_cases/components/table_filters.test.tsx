@@ -179,6 +179,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
+        "access": Array [],
         "assignees": Array [
           "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
         ],
@@ -321,6 +322,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
+        "access": Array [],
         "assignees": Array [
           "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
         ],

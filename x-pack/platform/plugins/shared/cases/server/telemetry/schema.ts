@@ -154,6 +154,10 @@ const solutionTelemetry: SolutionTelemetrySchema = {
     type: 'long',
     _meta: { description: 'Number of cases with maximum observables' },
   },
+  totalRestrictedCases: {
+    type: 'long',
+    _meta: { description: 'Number of cases restricted to their assignees' },
+  },
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -480,6 +484,10 @@ export const casesSchema: CasesTelemetrySchema = {
       totalTags: long,
       totalWithAlerts: long,
       totalWithConnectors: long,
+      totalRestrictedCases: {
+        type: 'long',
+        _meta: { description: 'Number of cases restricted to their assignees' },
+      },
       latestDates: latestDatesSchema,
     },
     sec: solutionTelemetry,

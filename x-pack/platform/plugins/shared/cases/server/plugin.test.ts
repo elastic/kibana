@@ -58,6 +58,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     },
     templates: { enabled: true },
     runWorkflows: { enabled: true },
+    restrictedCases: { enabled: false },
     attachments: { enabled: true },
     chat: { enabled: true },
     customStatuses: { enabled: false },
@@ -342,6 +343,9 @@ describe('Cases Plugin', () => {
             },
             "markdownPlugins": Object {
               "lens": true,
+            },
+            "restrictedCases": Object {
+              "enabled": false,
             },
             "runWorkflows": Object {
               "enabled": true,

@@ -8,6 +8,8 @@
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { toKqlExpression } from '@kbn/es-query';
+import { CaseAccessMode } from '../../common/types/domain';
 import { Authorization, Operations } from '.';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
@@ -1533,6 +1535,219 @@ describe('authorization', () => {
           operation: [],
         })
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe('restricted cases', () => {
+    const feature = { id: '1', cases: ['a'] };
+    const profileUid = 'u_assignee_profile_uid_0';
+    const restrictedEntity = {
+      id: '1',
+      owner: 'a',
+      access: { mode: CaseAccessMode.RESTRICTED },
+      assignees: [{ uid: profileUid }],
+    };
+
+    let securityStart: ReturnType<typeof securityMock.createStart>;
+    let featuresStart: jest.Mocked<FeaturesPluginStart>;
+    let spacesStart: jest.Mocked<SpacesPluginStart>;
+
+    const createAuth = async (
+      overrides: Partial<{
+        profileUid: string | undefined;
+        isSuperuser: boolean;
+        restrictedCasesEnabled: boolean;
+      }> = {}
+    ) =>
+      Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+        profileUid,
+        isSuperuser: false,
+        restrictedCasesEnabled: true,
+        ...overrides,
+      });
+
+    beforeEach(() => {
+      securityStart = securityMock.createStart();
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({
+          hasAllRequested: true,
+          username: 'user',
+          privileges: { kibana: [] },
+        }))
+      );
+
+      featuresStart = featuresPluginMock.createStart();
+      featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
+
+      spacesStart = createSpacesDisabledFeaturesMock();
+    });
+
+    describe('isCaseVisible', () => {
+      it('returns true for a non-restricted case regardless of assignees', async () => {
+        const auth = await createAuth();
+
+        expect(auth.isCaseVisible({ assignees: [] })).toBe(true);
+        expect(auth.isCaseVisible({ access: { mode: CaseAccessMode.DEFAULT }, assignees: [] })).toBe(
+          true
+        );
+      });
+
+      it('returns true for a restricted case when the caller is an assignee', async () => {
+        const auth = await createAuth();
+
+        expect(auth.isCaseVisible(restrictedEntity)).toBe(true);
+      });
+
+      it('returns false for a restricted case when the caller is not an assignee', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else' });
+
+        expect(auth.isCaseVisible(restrictedEntity)).toBe(false);
+      });
+
+      it('returns false for a restricted case when the caller has no user profile', async () => {
+        const auth = await createAuth({ profileUid: undefined });
+
+        expect(auth.isCaseVisible(restrictedEntity)).toBe(false);
+      });
+
+      it('returns true for a superuser that is not an assignee', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else', isSuperuser: true });
+
+        expect(auth.isCaseVisible(restrictedEntity)).toBe(true);
+      });
+
+      it('returns true when the feature flag is disabled', async () => {
+        const auth = await createAuth({
+          profileUid: 'u_someone_else',
+          restrictedCasesEnabled: false,
+        });
+
+        expect(auth.isCaseVisible(restrictedEntity)).toBe(true);
+      });
+
+      it('returns true when RBAC is not used for the request', async () => {
+        securityStart.authz.mode.useRbacForRequest.mockReturnValue(false);
+        const auth = await createAuth({ profileUid: 'u_someone_else' });
+
+        expect(auth.isCaseVisible(restrictedEntity)).toBe(true);
+      });
+    });
+
+    describe('ensureAuthorized', () => {
+      it('resolves for a restricted case when the caller is an assignee', async () => {
+        const auth = await createAuth();
+
+        await expect(
+          auth.ensureAuthorized({ entities: [restrictedEntity], operation: Operations.getCase })
+        ).resolves.not.toThrow();
+      });
+
+      it('throws a not-found error for a restricted case when the caller is not an assignee', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else' });
+
+        await expect(
+          auth.ensureAuthorized({ entities: [restrictedEntity], operation: Operations.getCase })
+        ).rejects.toThrow('Saved object [cases/1] not found');
+      });
+
+      it('audit logs the real denial reason when throwing not-found', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else' });
+
+        await expect(
+          auth.ensureAuthorized({ entities: [restrictedEntity], operation: Operations.getCase })
+        ).rejects.toThrow();
+
+        const loggedError = mockLogger.log.mock.calls[0][0]?.error;
+        expect(loggedError).toEqual({
+          code: 'RestrictedCaseAccessDenied',
+          message: 'Access to a restricted case was denied because the user is not an assignee',
+        });
+      });
+
+      it('resolves for a superuser that is not an assignee', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else', isSuperuser: true });
+
+        await expect(
+          auth.ensureAuthorized({ entities: [restrictedEntity], operation: Operations.getCase })
+        ).resolves.not.toThrow();
+      });
+
+      it('resolves for a non-assignee when the feature flag is disabled', async () => {
+        const auth = await createAuth({
+          profileUid: 'u_someone_else',
+          restrictedCasesEnabled: false,
+        });
+
+        await expect(
+          auth.ensureAuthorized({ entities: [restrictedEntity], operation: Operations.getCase })
+        ).resolves.not.toThrow();
+      });
+
+      it('throws not-found when any entity of a bulk operation is a restricted case the caller may not see', async () => {
+        const auth = await createAuth({ profileUid: 'u_someone_else' });
+
+        await expect(
+          auth.ensureAuthorized({
+            entities: [{ id: '2', owner: 'a' }, restrictedEntity],
+            operation: Operations.updateCase,
+          })
+        ).rejects.toThrow('Saved object [cases/1] not found');
+      });
+    });
+
+    describe('getAuthorizationFilter', () => {
+      it('adds the access clause for case operations', async () => {
+        const auth = await createAuth();
+
+        const { filter } = await auth.getAuthorizationFilter(Operations.findCases);
+
+        expect(toKqlExpression(filter!)).toMatchInlineSnapshot(
+          `"((NOT cases.attributes.access.mode: restricted OR cases.attributes.assignees.uid: u_assignee_profile_uid_0) AND cases.attributes.owner: a)"`
+        );
+      });
+
+      it('omits the assignee arm when the caller has no user profile', async () => {
+        const auth = await createAuth({ profileUid: undefined });
+
+        const { filter } = await auth.getAuthorizationFilter(Operations.findCases);
+
+        expect(toKqlExpression(filter!)).toMatchInlineSnapshot(
+          `"(NOT cases.attributes.access.mode: restricted AND cases.attributes.owner: a)"`
+        );
+      });
+
+      it('does not add the access clause for a superuser', async () => {
+        const auth = await createAuth({ isSuperuser: true });
+
+        const { filter } = await auth.getAuthorizationFilter(Operations.findCases);
+
+        expect(toKqlExpression(filter!)).toMatchInlineSnapshot(`"cases.attributes.owner: a"`);
+      });
+
+      it('does not add the access clause when the feature flag is disabled', async () => {
+        const auth = await createAuth({ restrictedCasesEnabled: false });
+
+        const { filter } = await auth.getAuthorizationFilter(Operations.findCases);
+
+        expect(toKqlExpression(filter!)).toMatchInlineSnapshot(`"cases.attributes.owner: a"`);
+      });
+
+      it('does not add the access clause for non-case operations', async () => {
+        const auth = await createAuth();
+
+        const { filter } = await auth.getAuthorizationFilter(Operations.getComment);
+
+        expect(toKqlExpression(filter!)).toMatchInlineSnapshot(
+          `"cases-comments.attributes.owner: a"`
+        );
+      });
     });
   });
 });

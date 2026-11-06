@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { CaseAttributes, Observable } from '../../../common/types/domain';
+import type { CaseAccess, CaseAttributes, Observable } from '../../../common/types/domain';
 import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
@@ -74,6 +74,7 @@ export interface CasePersistedAttributes {
    * a response, and only the write codec for new cases keeps it.
    */
   extract_observables_source?: string;
+  access?: CaseAccess;
 }
 
 type CasePersistedCustomFields = Array<{

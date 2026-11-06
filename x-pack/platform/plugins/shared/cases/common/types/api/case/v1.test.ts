@@ -586,3 +586,23 @@ describe('status_key', () => {
     });
   });
 });
+
+describe('access', () => {
+  it('CasePostRequestSchema accepts an optional access object and rejects an invalid access mode', () => {
+    expect(
+      CasePostRequestSchema.parse({ ...validPostRequest, access: { mode: 'restricted' } })
+    ).toStrictEqual({ ...validPostRequest, access: { mode: 'restricted' } });
+
+    expect(
+      CasePostRequestSchema.safeParse({ ...validPostRequest, access: { mode: 'hidden' } }).success
+    ).toBe(false);
+  });
+
+  it('CasesFindRequestSchema accepts access as a single mode or an array of modes', () => {
+    expect(CasesFindRequestSchema.safeParse({ access: 'restricted' }).success).toBe(true);
+    expect(CasesFindRequestSchema.safeParse({ access: ['default', 'restricted'] }).success).toBe(
+      true
+    );
+    expect(CasesFindRequestSchema.safeParse({ access: 'hidden' }).success).toBe(false);
+  });
+});

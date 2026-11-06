@@ -9,7 +9,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
-import type { CaseSeverity, CaseStatusConfiguration } from '../../../../../../common/types/domain';
+import type {
+  CaseAccessMode,
+  CaseSeverity,
+  CaseStatusConfiguration,
+} from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import { useCaseStatuses } from '../../../../status/use_case_statuses';
 import type { OnUpdateFields } from '../../../types';
@@ -57,6 +61,7 @@ interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
   onStatusChanged: (status: CaseStatusConfiguration) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
+  onAccessChanged: (mode: CaseAccessMode) => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
@@ -64,10 +69,11 @@ export const useCaseViewHeader = ({
   caseData,
   onStatusChanged,
   onSeverityChanged,
+  onAccessChanged,
   onUpdateField,
 }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
-  const { hasCaseSettings } = useCasesFeatures();
+  const { hasCaseSettings, restrictedCasesAuthorized } = useCasesFeatures();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -171,6 +177,9 @@ export const useCaseViewHeader = ({
         isSeverityMenuDisabled,
         onStatusChanged,
         onSeverityChanged,
+        ...(restrictedCasesAuthorized
+          ? { access: { isMenuDisabled: !permissions.update, onAccessChanged } }
+          : {}),
       }),
     [
       caseData,
@@ -180,6 +189,9 @@ export const useCaseViewHeader = ({
       isSeverityMenuDisabled,
       onStatusChanged,
       onSeverityChanged,
+      restrictedCasesAuthorized,
+      permissions.update,
+      onAccessChanged,
     ]
   );
 

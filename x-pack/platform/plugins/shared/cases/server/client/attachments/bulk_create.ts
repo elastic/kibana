@@ -21,6 +21,7 @@ import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/atta
 
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { BulkCreateArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
@@ -40,7 +41,7 @@ const createAttachments = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
-    services: { userActionService },
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
@@ -77,31 +78,25 @@ const createAttachments = async (
       [[], []]
     );
 
-    if (entities.length > 0) {
-      await authorization.ensureAuthorized({
-        operation: Operations.bulkCreateAttachments,
-        entities,
-      });
-    }
+    // The parent case is authorized alongside the new attachments so a restricted case the
+    // caller may not see yields a not-found outcome. An empty request has no attachment owners,
+    // so only the case is checked.
+    const theCase = await caseService.getCase({ id: caseId });
+    await authorization.ensureAuthorized({
+      operation: Operations.bulkCreateAttachments,
+      entities: [...entities, createCaseEntity(theCase)],
+    });
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-
-    // An empty request has no attachment owners, so check the case owner instead.
-    if (entities.length === 0) {
-      await authorization.ensureAuthorized({
-        operation: Operations.bulkCreateAttachments,
-        entities: [{ owner: model.savedObject.attributes.owner, id: caseId }],
-      });
-    }
 
     const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });
 
     const {
-      attributes: { owner, settings },
+      attributes: { owner, settings, access },
     } = model.savedObject;
-    const caseInfo = { id: caseId, owner };
+    const caseInfo = { id: caseId, owner, access };
 
     const idsByType = new Map<string, string[]>();
     for (const attachment of attachmentsWithIds) {

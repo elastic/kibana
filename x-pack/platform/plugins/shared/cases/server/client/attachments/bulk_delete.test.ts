@@ -21,6 +21,7 @@ import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attach
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { AttachmentForDeletion } from '../../services/attachments/types';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
@@ -407,7 +408,7 @@ describe('bulk_delete', () => {
         await expect(deleteAlerts(['missing'])).rejects.toThrow('Unauthorized');
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-          entities: [{ id: caseId, owner: mockCases[0].attributes.owner }],
+          entities: [createCaseEntity(mockCases[0])],
           operation: Operations.deleteComment,
         });
         expect(attachmentService.getter.getCaseAttachmentsForDeletion).not.toHaveBeenCalled();
@@ -789,6 +790,7 @@ describe('bulk_delete', () => {
       jest.resetAllMocks();
 
       clientArgs.fileService.getById.mockResolvedValue(mockFile([caseId]));
+      clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
       clientArgs.services.attachmentService.getter.getFileAttachmentsForDeletion.mockResolvedValue([
         fileAttachment,
       ]);

@@ -53,7 +53,7 @@ import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { getOwnersFilter } from '../../authorization/utils';
+import { createCaseEntity, getOwnersFilter } from '../../authorization/utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -207,9 +207,11 @@ export const getCasesByAlertID = async (
     });
 
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
-    // just ignore it
+    // just ignore it. Restricted cases the caller may not see are silently
+    // dropped so this route gives no indication the alert is attached to one.
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => !isSOError(caseInfo)
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> =>
+        !isSOError(caseInfo) && authorization.isCaseVisible(caseInfo.attributes)
     );
 
     ensureSavedObjectsAreAuthorized(
@@ -432,7 +434,7 @@ export const get = async (
 
     await authorization.ensureAuthorized({
       operation: Operations.getCase,
-      entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
+      entities: [createCaseEntity(theCase)],
     });
 
     if (!includeComments) {
@@ -505,12 +507,7 @@ export const resolve = async (
 
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,
-      entities: [
-        {
-          id: resolvedSavedObject.id,
-          owner: resolvedSavedObject.attributes.owner,
-        },
-      ],
+      entities: [createCaseEntity(resolvedSavedObject)],
     });
 
     if (!includeComments) {

@@ -224,4 +224,39 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
     });
   });
+
+  describe('Model version 13 to 14', () => {
+    it('backfills access.mode to default when converting from v13 to v14', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 13,
+        toVersion: 14,
+      });
+
+      expect(migrated.attributes).toEqual(
+        expect.objectContaining({ access: { mode: 'default' } })
+      );
+    });
+
+    it('removes the access field when converting from v14 to v13', () => {
+      const caseObj = createCaseSavedObjectResponse({
+        connector: createESJiraConnector({
+          fields: [{ key: 'issueType', value: 'task' }],
+        }),
+        overrides: {
+          // severity value accepted by the v1 schema (10, 20, 30, 40)
+          severity: 10,
+          total_observables: 0,
+        },
+      });
+
+      const migrated = migrator.migrate({
+        document: { ...caseObj, attributes: { ...caseObj.attributes, access: { mode: 'default' } } },
+        fromVersion: 14,
+        toVersion: 13,
+      });
+
+      expect(migrated.attributes).not.toHaveProperty('access');
+    });
+  });
 });

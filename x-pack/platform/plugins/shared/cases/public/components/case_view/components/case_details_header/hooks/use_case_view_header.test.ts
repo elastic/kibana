@@ -41,6 +41,7 @@ jest.mock('@kbn/workflows-ui', () => {
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
 const mockOnSeverityChanged = jest.fn();
+const mockOnAccessChanged = jest.fn();
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
@@ -56,6 +57,7 @@ describe('useCaseViewHeader', () => {
     onUpdateField,
     onStatusChanged: mockOnStatusChanged,
     onSeverityChanged: mockOnSeverityChanged,
+    onAccessChanged: mockOnAccessChanged,
   };
 
   beforeEach(() => {

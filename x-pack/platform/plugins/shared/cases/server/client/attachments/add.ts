@@ -18,6 +18,7 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
+import { createCaseEntity } from '../../authorization/utils';
 import type { AddArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
@@ -37,7 +38,7 @@ const createAttachment = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
-    services: { userActionService },
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
@@ -46,6 +47,9 @@ const createAttachment = async (
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
     const savedObjectID = SavedObjectsUtils.generateId();
+    // the parent case is authorized alongside the new attachment so a
+    // restricted case the caller may not see yields a not-found outcome
+    const theCase = await caseService.getCase({ id: caseId });
     await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [
@@ -53,6 +57,7 @@ const createAttachment = async (
           id: savedObjectID,
           owner: query.owner,
         },
+        createCaseEntity(theCase),
       ],
     });
 
@@ -75,10 +80,15 @@ const createAttachment = async (
     }
 
     const {
-      attributes: { owner, settings },
+      attributes: { owner, settings, access },
     } = model.savedObject;
 
-    emitAttachmentsAddedEvent(clientArgs, { id: caseId, owner }, [savedObjectID], query.type);
+    emitAttachmentsAddedEvent(
+      clientArgs,
+      { id: caseId, owner, access },
+      [savedObjectID],
+      query.type
+    );
     // This call never throws — failures are logged and do not abort the attachment creation.
     const caseWithObservables = await extractAndAddObservables(
       caseId,

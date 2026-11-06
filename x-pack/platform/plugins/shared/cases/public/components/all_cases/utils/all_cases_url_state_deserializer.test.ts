@@ -23,6 +23,7 @@ describe('allCasesUrlStateDeserializer', () => {
     expect(allCasesUrlStateDeserializer(defaultMap)).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {
+          "access": Array [],
           "assignees": Array [],
           "category": Array [],
           "extendedFieldFilters": Array [],

@@ -177,6 +177,28 @@ describe('CaseAttributesSchema', () => {
       [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
     });
   });
+
+  it('zod: accepts optional access and rejects an invalid access mode', () => {
+    const valid = CaseAttributesSchema.safeParse({
+      ...defaultRequest,
+      access: { mode: 'restricted' },
+    });
+    expect(valid.success).toBe(true);
+    expect(valid.data?.access).toStrictEqual({ mode: 'restricted' });
+
+    const invalid = CaseAttributesSchema.safeParse({
+      ...defaultRequest,
+      access: { mode: 'hidden' },
+    });
+    expect(invalid.success).toBe(false);
+  });
+
+  it('strips unknown access attributes', () => {
+    expect(
+      CaseAttributesSchema.parse({ ...defaultRequest, access: { mode: 'restricted', foo: 'bar' } })
+        .access
+    ).toStrictEqual({ mode: 'restricted' });
+  });
 });
 
 describe('CasesSchema', () => {

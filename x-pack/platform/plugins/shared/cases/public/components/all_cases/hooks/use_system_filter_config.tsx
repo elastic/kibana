@@ -14,6 +14,7 @@ import { SolutionFilter } from '../components/solution_filter';
 import { StatusFilter } from '../components/status_filter';
 import * as i18n from '../translations';
 import { SeverityFilter } from '../components/severity_filter';
+import { AccessFilter } from '../components/access_filter';
 import { AssigneesFilterPopover } from '../components/assignees_filter';
 import type { CurrentUserProfile } from '../../types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from '../types';
@@ -21,6 +22,7 @@ import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from
 interface UseFilterConfigProps {
   availableSolutions: string[];
   caseAssignmentAuthorized: boolean;
+  restrictedCasesAuthorized: boolean;
   categories: string[];
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -37,6 +39,7 @@ interface UseFilterConfigProps {
 export const getSystemFilterConfig = ({
   availableSolutions,
   caseAssignmentAuthorized,
+  restrictedCasesAuthorized,
   categories,
   countClosedCases,
   countInProgressCases,
@@ -170,6 +173,20 @@ export const getSystemFilterConfig = ({
       ),
     },
     {
+      key: 'access',
+      label: i18n.ACCESS,
+      isActive: true,
+      isAvailable: restrictedCasesAuthorized && !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          access: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <AccessFilter selectedOptionKeys={filterOptions.access} onChange={onSystemFilterChange} />
+      ),
+    },
+    {
       key: 'owner',
       label: i18n.SOLUTION,
       isActive: true,
@@ -193,6 +210,7 @@ export const getSystemFilterConfig = ({
 export const useSystemFilterConfig = ({
   availableSolutions,
   caseAssignmentAuthorized,
+  restrictedCasesAuthorized,
   categories,
   countClosedCases,
   countInProgressCases,
@@ -208,6 +226,7 @@ export const useSystemFilterConfig = ({
   const filterConfig = getSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
+    restrictedCasesAuthorized,
     categories,
     countClosedCases,
     countInProgressCases,

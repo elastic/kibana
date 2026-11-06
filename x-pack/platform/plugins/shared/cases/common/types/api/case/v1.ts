@@ -45,6 +45,8 @@ import {
   CustomFieldNumberTypeSchema,
 } from '../../domain/custom_field/v1';
 import {
+  CaseAccessModeSchema,
+  CaseAccessSchema,
   CaseCloseReasonSchema,
   CaseSchema,
   CasesSchema,
@@ -186,6 +188,10 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
    * The close reason to sync to attached alerts
    */
   closeReason: CaseCloseReasonSchema.optional(),
+  /**
+   * The access control of the case
+   */
+  access: CaseAccessSchema.optional(),
 });
 
 export const CaseStatusKeySchema = regexStringSchema({
@@ -286,6 +292,10 @@ export const CasePostRequestSchema = z.object({
   [CASE_EXTENDED_FIELDS]: z
     .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
     .optional(),
+  /**
+   * The access control of the case
+   */
+  access: CaseAccessSchema.optional(),
 });
 
 /**
@@ -436,6 +446,10 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
       z.string().max(MAX_CATEGORY_LENGTH),
     ])
     .optional(),
+  /**
+   * The access mode of the cases to filter by
+   */
+  access: z.union([CaseAccessModeSchema, z.array(CaseAccessModeSchema)]).optional(),
 });
 
 export const CasesFindRequestSchema = CasesFindRequestBaseFieldsSchema.extend({

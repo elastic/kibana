@@ -61,4 +61,5 @@ export const useCasesConfig = jest.fn().mockReturnValue({
   templatesEnabled: false,
   runWorkflowsEnabled: false,
   customStatusesEnabled: false,
+  restrictedCasesEnabled: false,
 });

@@ -47,6 +47,26 @@ export const DefaultCloseReasonSchema = z.union([
 ]);
 
 /**
+ * Access
+ */
+
+export enum CaseAccessMode {
+  DEFAULT = 'default',
+  RESTRICTED = 'restricted',
+}
+
+export const CaseAccessModeSchema = z.enum([CaseAccessMode.DEFAULT, CaseAccessMode.RESTRICTED]);
+
+/**
+ * Access control of a case. A `restricted` case is visible only to its
+ * assignees (and superusers on stateful deployments). A missing value is
+ * treated as `default` everywhere.
+ */
+export const CaseAccessSchema = z.object({
+  mode: CaseAccessModeSchema,
+});
+
+/**
  * Close reason
  */
 export const CaseCloseReasonSchema = z.union([DefaultCloseReasonSchema, z.string()]);
@@ -170,6 +190,7 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   resume_to_status_key: z.string().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  access: CaseAccessSchema.optional(),
 });
 
 export const CaseSchema = CaseAttributesSchema.extend({
@@ -219,6 +240,7 @@ export const SimilarCaseSchema = CaseSchema.extend({
 
 export type Case = z.infer<typeof CaseSchema>;
 export type Cases = z.infer<typeof CasesSchema>;
+export type CaseAccess = z.infer<typeof CaseAccessSchema>;
 export type CaseAttributes = z.infer<typeof CaseAttributesSchema>;
 export type CaseSettings = z.infer<typeof CaseSettingsSchema>;
 export type RelatedCase = z.infer<typeof RelatedCaseSchema>;

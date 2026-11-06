@@ -229,6 +229,7 @@ const PER_TYPE_FIXTURES: {
     { action: 'create' }
   ),
   delete_case: makeUserActionSO('delete_case', {}, { action: 'delete' }),
+  access: makeUserActionSO('access', { access: { mode: 'restricted' } }, { action: 'update' }),
   category: makeUserActionSO('category', { category: 'malware' }, { action: 'update' }),
   customFields: makeUserActionSO(
     'customFields',

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
+import { AccessUserActionPayloadSchema } from '../access/v1';
 import { AssigneesUserActionPayloadSchema } from '../assignees/v1';
 import { CategoryUserActionPayloadSchema } from '../category/v1';
 import {
@@ -30,6 +31,7 @@ const CommonPayloadAttributesSchema = z.object({
   owner: z.string(),
   category: CategoryUserActionPayloadSchema.shape.category.optional(),
   customFields: CustomFieldsUserActionPayloadSchema.shape.customFields.optional(),
+  access: AccessUserActionPayloadSchema.shape.access.optional(),
 });
 
 export const CreateCaseUserActionSchema = z.object({

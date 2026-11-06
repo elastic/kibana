@@ -52,6 +52,7 @@ export const useCasesConfig = () => {
       templatesEnabled: config?.templates?.enabled ?? false,
       runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
       customStatusesEnabled: config?.customStatuses?.enabled ?? false,
+      restrictedCasesEnabled: config?.restrictedCases?.enabled ?? false,
     }),
     [
       config?.attachments?.enabled,
@@ -59,6 +60,7 @@ export const useCasesConfig = () => {
       config?.templates?.enabled,
       config?.runWorkflows?.enabled,
       config?.customStatuses?.enabled,
+      config?.restrictedCases?.enabled,
     ]
   );
 };

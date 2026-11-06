@@ -1,0 +1,15 @@
+type: object
+description: >
+  The access control for the case. A restricted case and everything attached to it
+  is visible only to its assignees. Requires the `xpack.cases.restrictedCases.enabled`
+  setting and a Platinum license.
+required:
+  - mode
+properties:
+  mode:
+    type: string
+    description: Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).
+    enum:
+      - default
+      - restricted
+    example: default

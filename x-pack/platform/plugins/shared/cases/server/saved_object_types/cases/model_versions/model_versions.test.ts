@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelDataBackfillChange,
+} from '@kbn/core-saved-objects-server';
 import {
   modelVersion1,
   modelVersion2,
@@ -18,6 +22,7 @@ import {
   modelVersion11,
   modelVersion12,
   modelVersion13,
+  modelVersion14,
 } from '.';
 
 describe('Model versions', () => {
@@ -318,6 +323,44 @@ describe('Model versions', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('version 14', () => {
+    it('returns version 14 changes correctly', () => {
+      expect(modelVersion14.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "access": Object {
+                "properties": Object {
+                  "mode": Object {
+                    "type": "keyword",
+                  },
+                },
+              },
+            },
+            "type": "mappings_addition",
+          },
+          Object {
+            "backfillFn": [Function],
+            "type": "data_backfill",
+          },
+        ]
+      `);
+    });
+
+    it('backfills access.mode to default', () => {
+      const backfill = modelVersion14.changes.find(
+        (change): change is SavedObjectsModelDataBackfillChange => change.type === 'data_backfill'
+      );
+      const backfillFn = backfill?.backfillFn as SavedObjectModelDataBackfillFn;
+      const doc = { id: 'case-1', type: 'cases', attributes: {} } as Parameters<
+        typeof backfillFn
+      >[0];
+      const context = {} as Parameters<typeof backfillFn>[1];
+
+      expect(backfillFn(doc, context)).toEqual({ attributes: { access: { mode: 'default' } } });
     });
   });
 });

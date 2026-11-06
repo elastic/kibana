@@ -166,7 +166,9 @@ Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`. See \`mode\
 
 \`search\` mode returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
-Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
+Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.
+
+Restricted cases (\`access.mode: "restricted"\`) are visible only to their assignees: they are omitted from results and a direct get returns not-found when the calling user is not an assignee.`,
     schema: casesSchema,
     annotations: {
       title: 'Search Cases',

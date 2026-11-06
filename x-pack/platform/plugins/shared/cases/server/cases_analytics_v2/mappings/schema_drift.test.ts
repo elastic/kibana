@@ -70,6 +70,7 @@ const buildFullAttributes = (): {
   owner: 'securitySolution',
   title: 'A title',
   description: 'A description',
+  access: { mode: 'default' },
   tags: ['tag1'],
   category: 'malware',
   assignees: [{ uid: 'u-1', username: 'u1', full_name: 'User One', email: 'u1@e.com' }],

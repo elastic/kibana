@@ -7,11 +7,17 @@
 
 import { partition, remove, uniq } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { CASE_ATTACHMENT_SAVED_OBJECT, OWNER_FIELD } from '../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  OWNER_FIELD,
+} from '../../common/constants';
+import type { CaseAccess, CaseAssignees } from '../../common/types/domain';
+import { CaseAccessMode } from '../../common/types/domain';
 import type { Authorization } from './authorization';
-import type { AuthFilterHelpers, OperationDetails } from './types';
+import type { AuthFilterHelpers, OperationDetails, OwnerEntity } from './types';
 
 export const getOwnersFilter = (
   savedObjectType: string,
@@ -29,6 +35,39 @@ export const getOwnersFilter = (
     }, [])
   );
 };
+
+/**
+ * Filter admitting only cases the caller may see: non-restricted cases (a
+ * missing `access` is treated as `default`) or restricted cases where the
+ * caller is an assignee.
+ */
+export const getCaseAccessFilter = (profileUid?: string): KueryNode => {
+  const notRestricted = fromKueryExpression(
+    `not ${CASE_SAVED_OBJECT}.attributes.access.mode: ${CaseAccessMode.RESTRICTED}`
+  );
+
+  if (!profileUid) {
+    return notRestricted;
+  }
+
+  return nodeBuilder.or([
+    notRestricted,
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, profileUid),
+  ]);
+};
+
+/**
+ * Builds an authorization entity from a case saved object, carrying the
+ * access control fields so restricted-case visibility can be enforced.
+ */
+export const createCaseEntity = (
+  theCase: SavedObject<{ owner: string; access?: CaseAccess; assignees?: CaseAssignees }>
+): OwnerEntity => ({
+  id: theCase.id,
+  owner: theCase.attributes.owner,
+  access: theCase.attributes.access,
+  assignees: theCase.attributes.assignees,
+});
 
 export const combineFilterWithAuthorizationFilter = (
   filter?: KueryNode,

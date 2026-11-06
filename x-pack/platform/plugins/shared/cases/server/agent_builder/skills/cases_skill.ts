@@ -9,7 +9,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools, platformCoreCasesTools } from '@kbn/agent-builder-common';
 
 const SKILL_DESCRIPTION =
-  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).';
+  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs). Restricted cases are visible only to their assignees.';
 
 const EXTENDED_FIELDS_SECTION = `
 ## Extended fields (template fields)
@@ -126,6 +126,10 @@ Examples:
 | \`cases\` | General-purpose, no domain assumptions | Rarely relevant | — |
 
 Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`. Teams may define their own statuses inside those categories: a case's \`status_key\` names the configured status and \`status\` its category. To move a case to a configured status, set \`status_key\` in \`updates\`. A status that pauses time tracking requires \`pause_reason\`, one of the pause reasons from Case settings; the update is rejected with 400 without it or with a reason that is not configured. Setting \`status_key\` to a status that does not pause (or \`resume_to_status_key\` from the case) resumes it.
+
+## Restricted cases
+
+A case with \`access.mode: "restricted"\` is visible only to its assignees. Restricted cases never appear in search results for non-assignees, and getting one by id returns not-found — tell the user the case was not found rather than speculating about hidden cases. Restricting a case (create or update with \`access\`) requires a Platinum license; the acting user is added as an assignee automatically so they keep access.
 
 ## Bulk and batch
 

@@ -152,11 +152,6 @@ describe('server files', () => {
                       "casesFilesCasesRead",
                     ],
                   },
-                  "list": Object {
-                    "requiredPrivileges": Array [
-                      "casesFilesCasesRead",
-                    ],
-                  },
                 },
                 "id": "casesFilesCases",
                 "maxSizeBytes": [Function],
@@ -195,11 +190,6 @@ describe('server files', () => {
                       "observabilityFilesCasesRead",
                     ],
                   },
-                  "list": Object {
-                    "requiredPrivileges": Array [
-                      "observabilityFilesCasesRead",
-                    ],
-                  },
                 },
                 "id": "observabilityFilesCases",
                 "maxSizeBytes": [Function],
@@ -234,11 +224,6 @@ describe('server files', () => {
                     ],
                   },
                   "getById": Object {
-                    "requiredPrivileges": Array [
-                      "securitySolutionFilesCasesRead",
-                    ],
-                  },
-                  "list": Object {
                     "requiredPrivileges": Array [
                       "securitySolutionFilesCasesRead",
                     ],
@@ -283,11 +268,6 @@ describe('server files', () => {
                       "casesFilesCasesRead",
                     ],
                   },
-                  "list": Object {
-                    "requiredPrivileges": Array [
-                      "casesFilesCasesRead",
-                    ],
-                  },
                 },
                 "id": "casesFilesCases",
                 "maxSizeBytes": [Function],
@@ -324,11 +304,6 @@ describe('server files', () => {
                       "observabilityFilesCasesRead",
                     ],
                   },
-                  "list": Object {
-                    "requiredPrivileges": Array [
-                      "observabilityFilesCasesRead",
-                    ],
-                  },
                 },
                 "id": "observabilityFilesCases",
                 "maxSizeBytes": [Function],
@@ -361,11 +336,6 @@ describe('server files', () => {
                     ],
                   },
                   "getById": Object {
-                    "requiredPrivileges": Array [
-                      "securitySolutionFilesCasesRead",
-                    ],
-                  },
-                  "list": Object {
                     "requiredPrivileges": Array [
                       "securitySolutionFilesCasesRead",
                     ],
@@ -500,11 +470,6 @@ describe('server files', () => {
                     "casesFilesCasesRead",
                   ],
                 },
-                "list": Object {
-                  "requiredPrivileges": Array [
-                    "casesFilesCasesRead",
-                  ],
-                },
               },
               "id": "casesFilesCases",
               "maxSizeBytes": [Function],
@@ -630,11 +595,6 @@ describe('server files', () => {
                     "observabilityFilesCasesRead",
                   ],
                 },
-                "list": Object {
-                  "requiredPrivileges": Array [
-                    "observabilityFilesCasesRead",
-                  ],
-                },
               },
               "id": "observabilityFilesCases",
               "maxSizeBytes": [Function],
@@ -756,11 +716,6 @@ describe('server files', () => {
                   ],
                 },
                 "getById": Object {
-                  "requiredPrivileges": Array [
-                    "securitySolutionFilesCasesRead",
-                  ],
-                },
-                "list": Object {
                   "requiredPrivileges": Array [
                     "securitySolutionFilesCasesRead",
                   ],

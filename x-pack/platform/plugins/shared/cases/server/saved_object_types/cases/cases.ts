@@ -31,6 +31,7 @@ import {
   modelVersion11,
   modelVersion12,
   modelVersion13,
+  modelVersion14,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -48,6 +49,13 @@ export const createCaseSavedObjectType = (
   mappings: {
     dynamic: false,
     properties: {
+      access: {
+        properties: {
+          mode: {
+            type: 'keyword',
+          },
+        },
+      },
       assignees: {
         properties: {
           uid: {
@@ -340,6 +348,7 @@ export const createCaseSavedObjectType = (
     11: modelVersion11,
     12: modelVersion12,
     13: modelVersion13,
+    14: modelVersion14,
   },
   management: {
     importableAndExportable: true,
