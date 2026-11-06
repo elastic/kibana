@@ -221,6 +221,39 @@ describe('customContentEmbeddableFactory', () => {
     });
   });
 
+  describe('a saved query that is empty', () => {
+    const queriesOf = (embeddable: Awaited<ReturnType<typeof buildEmbeddable>>['embeddable']) => ({
+      saved: embeddable.api.serializeState().esql_query,
+      published: embeddable.api.esql$.getValue(),
+      inspectable: Boolean(embeddable.api.getInspectorAdapters?.()),
+    });
+
+    it.each([[['']], [['', 'FROM b']]])(
+      'is a panel with no query, as saved %j, so it renders static and publishes nothing',
+      async (esql_query) => {
+        const { embeddable } = await buildEmbeddable({ ...baseState, esql_query });
+
+        expect(queriesOf(embeddable)).toEqual({
+          saved: undefined,
+          published: [],
+          inspectable: false,
+        });
+      }
+    );
+
+    it('is dropped when saved state is applied later, with the queries that came after it', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: ['FROM a'] });
+
+      act(() => embeddable.api.applySerializedState({ ...baseState, esql_query: ['', 'FROM b'] }));
+
+      expect(queriesOf(embeddable)).toEqual({
+        saved: undefined,
+        published: [],
+        inspectable: false,
+      });
+    });
+  });
+
   describe('data views', () => {
     // One fake data view per index and time field, like the real ad-hoc ones (their id is made of
     // both): `FROM logs | …` is the data view of `logs`, and a query that uses `?_tstart` on

@@ -150,19 +150,23 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
+    // The other queries extend the first, so a panel with no first query, or an empty one, has none.
+    const keepIfMainQuery = (queries: readonly string[]): string[] =>
+      queries[0] ? [...queries] : [];
     // The panel's queries, the first of which is `rows` in its template. Only a hand-edited panel has
     // more than one, and the editor changes only the first.
-    const esqlQueries$ = new BehaviorSubject<string[]>(initialState.esql_query ?? []);
+    const esqlQueries$ = new BehaviorSubject<string[]>(
+      keepIfMainQuery(initialState.esql_query ?? [])
+    );
     // Sets the queries only when they change, so an update that leaves them as they are neither fires
     // a state change nor hands subscribers a new list.
     const setEsqlQueries = (queries: readonly string[]) => {
+      const next = keepIfMainQuery(queries);
       const current = esqlQueries$.getValue();
       const isSame =
-        current.length === queries.length &&
-        current.every((query, index) => query === queries[index]);
-      if (!isSame) esqlQueries$.next([...queries]);
+        current.length === next.length && current.every((query, index) => query === next[index]);
+      if (!isSame) esqlQueries$.next(next);
     };
-    // The other queries extend the first, so there is nothing for them to extend once it is removed.
     const replaceMainQuery = (queries: readonly string[], mainQuery: string | undefined) =>
       mainQuery ? [mainQuery, ...queries.slice(1)] : [];
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
