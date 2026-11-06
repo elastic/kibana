@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { RuleBuilderDefinition } from './types';
+import type { RuleBuilderCreateOption, RuleBuilderDefinition } from './types';
 import type { ThresholdFormValues } from './threshold/form_types';
 import {
   areAllStatsValid,
@@ -23,7 +23,12 @@ import { getInvalidExpressionReferences } from './threshold/validate_metric_refe
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
 import { parseThresholdEsql } from './threshold/parse_esql';
-import { THRESHOLD_CREATE_FLYOUT_TITLE, THRESHOLD_STEP_TITLE } from './threshold/translations';
+import {
+  THRESHOLD_CREATE_FLYOUT_TITLE,
+  THRESHOLD_RULE_DESCRIPTION,
+  THRESHOLD_RULE_TITLE,
+  THRESHOLD_STEP_TITLE,
+} from './threshold/translations';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
   def as RuleBuilderDefinition;
@@ -89,7 +94,14 @@ const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdForm
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
   stepTitle: THRESHOLD_STEP_TITLE,
-  createFlyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
+  createOption: {
+    title: THRESHOLD_RULE_TITLE,
+    description: THRESHOLD_RULE_DESCRIPTION,
+    iconType: 'chartThreshold',
+    order: 10,
+    flyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
+    dataTestSubj: 'createThresholdRuleCard',
+  },
   createDefaultState: () => ({
     ...DEFAULT_THRESHOLD_FORM_VALUES,
     stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),
@@ -100,17 +112,8 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
     })),
     groupByFields: [],
   }),
-  renderStep: (props) =>
-    React.createElement(RuleBuilderAlertConditionStep, {
-      state: props.state,
-      dispatch: props.dispatch,
-      services: props.services,
-    }),
-  renderRecoveryStep: (props) =>
-    React.createElement(BuilderRecoveryForm, {
-      state: props.state,
-      dispatch: props.dispatch,
-    }),
+  renderStep: (props) => React.createElement(RuleBuilderAlertConditionStep, props),
+  renderRecoveryStep: (props) => React.createElement(BuilderRecoveryForm, props),
   validate: (_state, builderState) =>
     // No builder state means the step cannot be valid yet (unlike ES|QL mode, which can proceed
     // on queryCommitted alone before builder state is initialized).
@@ -118,6 +121,50 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   parseState: parseThresholdEsql,
 });
 
-export const RULE_BUILDER_REGISTRY: Record<string, RuleBuilderDefinition> = {
-  threshold: thresholdDefinition,
-};
+export const thresholdRuleBuilder: RuleBuilderDefinition = thresholdDefinition;
+
+export interface RuleBuilderCreateCard extends RuleBuilderCreateOption {
+  type: string;
+}
+
+export interface RuleBuilderRegistryContract {
+  register(definition: RuleBuilderDefinition): void;
+  has(type: string): boolean;
+  get(type: string): RuleBuilderDefinition | undefined;
+  getCreateOptions(): RuleBuilderCreateCard[];
+}
+
+export class RuleBuilderRegistry implements RuleBuilderRegistryContract {
+  private readonly definitions = new Map<string, RuleBuilderDefinition>();
+
+  constructor() {
+    this.register(thresholdDefinition);
+  }
+
+  public register(definition: RuleBuilderDefinition): void {
+    const type = definition.type.trim();
+    if (!type) {
+      throw new Error('Rule builder type must be a non-empty string');
+    }
+    if (this.definitions.has(type)) {
+      throw new Error(`Rule builder "${type}" is already registered`);
+    }
+    this.definitions.set(type, type === definition.type ? definition : { ...definition, type });
+  }
+
+  public has(type: string): boolean {
+    return this.definitions.has(type.trim());
+  }
+
+  public get(type: string): RuleBuilderDefinition | undefined {
+    return this.definitions.get(type.trim());
+  }
+
+  public getCreateOptions(): RuleBuilderCreateCard[] {
+    return [...this.definitions.values()]
+      .flatMap((definition) =>
+        definition.createOption ? [{ type: definition.type, ...definition.createOption }] : []
+      )
+      .sort((a, b) => a.order - b.order || a.type.localeCompare(b.type));
+  }
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RULE_BUILDER_REGISTRY } from './registry';
+import { RuleBuilderRegistry, thresholdRuleBuilder } from './registry';
 import {
   Aggregation,
   Comparator,
@@ -24,14 +24,76 @@ const makeValues = (overrides: Partial<ThresholdFormValues> = {}): ThresholdForm
   ...overrides,
 });
 
-describe('RULE_BUILDER_REGISTRY', () => {
-  it('exposes createFlyoutTitle for the threshold builder', () => {
-    expect(RULE_BUILDER_REGISTRY.threshold.createFlyoutTitle).toBe('Create Threshold rule');
+describe('RuleBuilderRegistry', () => {
+  it('seeds every instance with the threshold create card', () => {
+    expect(new RuleBuilderRegistry().get('threshold')?.createOption).toEqual(
+      expect.objectContaining({
+        title: 'Threshold rule',
+        flyoutTitle: 'Create Threshold rule',
+        iconType: 'chartThreshold',
+        order: 10,
+        dataTestSubj: 'createThresholdRuleCard',
+      })
+    );
+  });
+
+  it('orders create cards and rejects a duplicate type', () => {
+    const registry = new RuleBuilderRegistry();
+
+    expect(() =>
+      registry.register({
+        type: ' ',
+        stepTitle: 'Empty',
+        createDefaultState: () => ({}),
+        renderStep: () => null,
+      })
+    ).toThrow(/non-empty/);
+
+    registry.register({
+      type: '  later-builder  ',
+      stepTitle: 'Later',
+      createOption: {
+        title: 'Later',
+        description: 'Later builder',
+        iconType: 'bell',
+        order: 20,
+        flyoutTitle: 'Create Later rule',
+        dataTestSubj: 'createLaterRuleCard',
+      },
+      createDefaultState: () => ({}),
+      renderStep: () => null,
+    });
+
+    expect(registry.getCreateOptions().map((option) => option.type)).toEqual([
+      'threshold',
+      'later-builder',
+    ]);
+    expect(() =>
+      registry.register({
+        type: 'threshold',
+        stepTitle: 'Again',
+        createDefaultState: () => ({}),
+        renderStep: () => null,
+      })
+    ).toThrow(/already registered/);
+  });
+
+  it('keeps registrations scoped to the instance they were made on', () => {
+    const registry = new RuleBuilderRegistry();
+    registry.register({
+      type: 'scoped-builder',
+      stepTitle: 'Scoped',
+      createDefaultState: () => ({}),
+      renderStep: () => null,
+    });
+
+    expect(registry.has('scoped-builder')).toBe(true);
+    expect(new RuleBuilderRegistry().has('scoped-builder')).toBe(false);
   });
 });
 
 describe('threshold builder validate', () => {
-  const { validate } = RULE_BUILDER_REGISTRY.threshold;
+  const { validate } = thresholdRuleBuilder;
 
   it('is valid when there are no evaluations', () => {
     expect(validate!(STATE, makeValues())).toBe(true);

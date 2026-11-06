@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Container, ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
@@ -32,7 +32,8 @@ import { registerTriggerDefinitions } from './lib/workflow_extensions/register_t
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
-import type { AlertingV2PublicStart } from './types';
+import type { AlertingV2PublicSetup, AlertingV2PublicStart } from './types';
+import { queueRuleBuilderRegistration } from './rule_builder_registration';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import {
@@ -82,6 +83,7 @@ const lazyPageWithContainer = (
 };
 
 export type {
+  AlertingV2PublicSetup,
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
@@ -102,6 +104,9 @@ export {
 } from './hooks/use_v2_rules_tab_new_badge';
 
 const pluginModule = new ContainerModule(({ bind }) => {
+  bind(Setup).toConstantValue({
+    registerRuleBuilder: queueRuleBuilderRegistration,
+  } satisfies AlertingV2PublicSetup);
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();

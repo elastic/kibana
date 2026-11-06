@@ -63,6 +63,8 @@ export const ALERTING_ERROR_CODES = {
    * `metadata.builder`. The transition to ES|QL mode must be explicit.
    */
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
+  /** `metadata.builder.type` is not a registered builder. */
+  BUILDER_TYPE_UNKNOWN: 'BUILDER_TYPE_UNKNOWN',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression is not valid KQL. */

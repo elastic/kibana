@@ -6,9 +6,9 @@
  */
 
 import type { BuilderState, ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
-import { RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useState } from 'react';
+import { ruleBuilderRegistry } from '../rule_builder_registry';
 import type { RuleApiResponse } from '../services/rules_api';
 import {
   ConfirmBuilderToEsqlModal,
@@ -20,7 +20,7 @@ const tryParseBuilderState = (
   query: string,
   recoveryQuery?: string
 ): BuilderState | null => {
-  const definition = RULE_BUILDER_REGISTRY[type];
+  const definition = ruleBuilderRegistry.get(type);
   if (definition?.parseState) {
     return definition.parseState(query, recoveryQuery);
   }

@@ -120,7 +120,28 @@ jest.mock('@kbn/alerting-v2-rule-form', () => {
         'Compose Discover flyout'
       );
     },
-    RULE_BUILDER_REGISTRY: { threshold: {} },
+    RuleBuilderRegistry: class {
+      public register() {}
+      public has(type: string) {
+        return type === 'threshold';
+      }
+      public get(type: string) {
+        return type === 'threshold' ? {} : undefined;
+      }
+      public getCreateOptions() {
+        return [
+          {
+            type: 'threshold',
+            title: 'Threshold rule',
+            description: 'Use the query builder to monitor metrics against threshold conditions.',
+            iconType: 'chartThreshold',
+            order: 10,
+            flyoutTitle: 'Create Threshold rule',
+            dataTestSubj: 'createThresholdRuleCard',
+          },
+        ];
+      }
+    },
     STACKED_FLYOUT_SIZE: 540,
     STACKED_FLYOUT_MIN_WIDTH: 480,
     useEuiFlyoutReregister: () => ({ flyoutKey: 0, reregister: jest.fn() }),

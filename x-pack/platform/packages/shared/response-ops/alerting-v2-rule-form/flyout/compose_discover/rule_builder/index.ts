@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-export type { RuleBuilderDefinition, RuleBuilderStepProps, BuilderState } from './types';
-export { RULE_BUILDER_REGISTRY } from './registry';
+export type {
+  RuleBuilderDefinition,
+  RuleBuilderCreateOption,
+  RuleBuilderStepProps,
+  RuleBuilderRecoveryStepProps,
+  BuilderState,
+  BuilderStateProps,
+  BuilderStateUpdateOptions,
+} from './types';
+export { RuleBuilderRegistry } from './registry';
+export type { RuleBuilderRegistryContract, RuleBuilderCreateCard } from './registry';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
-export type { BuilderStateUpdateOptions } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 export { buildThresholdEsql } from './threshold/build_esql';
 export { parseThresholdEsql, parseDiscoverQueryForBuilder } from './threshold/parse_esql';

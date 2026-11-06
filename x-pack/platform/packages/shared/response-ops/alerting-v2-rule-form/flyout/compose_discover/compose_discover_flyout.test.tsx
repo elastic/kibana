@@ -24,6 +24,7 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { FormValues, RuleQuery, RuleRecovery } from '../../form/types';
 import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
+import { RuleBuilderRegistry } from './rule_builder';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
 import type { QueryTab } from './types';
@@ -354,6 +355,7 @@ const defaultProps: ComposeDiscoverFlyoutProps = {
   onHistoryBack: jest.fn(),
   services: createMockServices(),
   onCreateRule: jest.fn(),
+  ruleBuilderRegistry: new RuleBuilderRegistry(),
 };
 
 const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
@@ -1320,6 +1322,26 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout({
         builderType: 'threshold',
         initialQuery: 'FROM logs-* | WERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.base).toBe('');
+      expect(committed?.breach.segment).toBe('');
+    });
+
+    it('does not seed a non-threshold builder from a Discover query the threshold parser accepts', () => {
+      const ruleBuilderRegistry = new RuleBuilderRegistry();
+      ruleBuilderRegistry.register({
+        type: 'custom-builder',
+        stepTitle: 'Custom',
+        createDefaultState: () => ({ marker: 'custom-default' }),
+        renderStep: () => null,
+      });
+
+      renderFlyout({
+        ruleBuilderRegistry,
+        builderType: 'custom-builder',
+        initialQuery: 'FROM logs-*',
       });
 
       const committed = readCommittedQuery?.();

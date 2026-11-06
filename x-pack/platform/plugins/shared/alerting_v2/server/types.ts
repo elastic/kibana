@@ -35,6 +35,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
+import type { BuilderTypeDefinition } from './lib/builder_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
 import type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
@@ -71,6 +72,11 @@ export interface AlertingServerSetup {
    * answers per rule run or alert write through `isEnabled`.
    */
   enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
+  /**
+   * Registers a builder type id. Create and update reject any other
+   * `metadata.builder.type`.
+   */
+  registerBuilderType(definition: BuilderTypeDefinition): void;
 }
 
 export interface AlertingServerStart {
