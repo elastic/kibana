@@ -300,6 +300,168 @@ describe('StepConfigPanel', () => {
     expect(screen.getByTestId('workflowStepConfigPanelTypeSubtitle')).toHaveTextContent(/^slack$/);
   });
 
+  describe('field descriptions', () => {
+    const SHORT = 'Where to look.';
+    const LONG =
+      'The full text of a long description that no longer fits in two lines of the panel, ' +
+      'and goes on to explain every option in detail.';
+    const describedConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'described',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          short: z.number().describe(SHORT),
+          long: z.number().describe(LONG),
+          fixed: z.number().optional().describe(LONG).meta({ templatable: false }),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Described',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const renderDescribed = (
+      fragment = 'name: d\ntype: described\nwith:\n  short: 1\n  long: 2\n'
+    ) =>
+      renderPanel({
+        stepType: 'described',
+        connectors: describedConnectors,
+        initialFragment: fragment,
+      });
+    const row = (key: string) =>
+      screen
+        .getByTestId(`workflowStepConfigField-with.${key}`)
+        .closest('.workflowStepConfigFieldRow') as HTMLElement;
+    // Generated ids are constant under jest, so find each row's own description element.
+    const descriptionIn = (key: string) =>
+      row(key).querySelector('[id^="workflowStepConfigDescription"]') as HTMLElement;
+    const isDescribedBy = (key: string) =>
+      (
+        screen
+          .getByTestId(`workflowStepConfigField-with.${key}`)
+          .getAttribute('aria-describedby') ?? ''
+      )
+        .split(' ')
+        .includes(descriptionIn(key).id);
+    const icon = (key: string) =>
+      within(row(key)).queryByTestId('workflowStepConfigFieldDescriptionIcon');
+
+    // Number fields are plain EUI inputs, so the row wires `aria-describedby` to them itself.
+    // jsdom has no layout, so a description counts as too long once it has more characters than
+    // `charsPerTwoLines`: a stand-in for the wrapped height of the hidden, two-line-clamped copy.
+    let charsPerTwoLines = 60;
+    const resizeCallbacks: Array<() => void> = [];
+    const originalResizeObserver = global.ResizeObserver;
+    const isMeasurer = (element: HTMLElement) =>
+      element.id.startsWith('workflowStepConfigDescription');
+    const hasInlineHelp = (key: string) => row(key).querySelector('.euiFormHelpText') !== null;
+
+    beforeEach(() => {
+      charsPerTwoLines = 60;
+      resizeCallbacks.length = 0;
+      Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+        configurable: true,
+        get(this: HTMLElement) {
+          return isMeasurer(this) ? 36 : 0;
+        },
+      });
+      Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+        configurable: true,
+        get(this: HTMLElement) {
+          if (!isMeasurer(this)) return 0;
+          return (this.textContent?.length ?? 0) > charsPerTwoLines ? 72 : 36;
+        },
+      });
+      global.ResizeObserver = jest.fn().mockImplementation((callback: () => void) => ({
+        observe: () => resizeCallbacks.push(callback),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
+      })) as unknown as typeof ResizeObserver;
+    });
+
+    afterEach(() => {
+      delete (HTMLElement.prototype as unknown as Record<string, unknown>).clientHeight;
+      delete (HTMLElement.prototype as unknown as Record<string, unknown>).scrollHeight;
+      global.ResizeObserver = originalResizeObserver;
+    });
+
+    it('keeps a short description under its control, with no icon', () => {
+      renderDescribed();
+      expect(within(row('short')).getByText(SHORT, { selector: '.euiFormHelpText' })).toBeVisible();
+      expect(icon('short')).toBeNull();
+    });
+
+    // The parts of a field's label, in order: title, YAML key and "Optional" when present, icon slot.
+    const labelParts = (key: string) =>
+      Array.from(
+        (row(key).querySelector('label')?.firstElementChild as HTMLElement).children
+      ) as HTMLElement[];
+
+    it('moves a long description behind an info icon at the end of the label', () => {
+      renderDescribed();
+      expect(hasInlineHelp('long')).toBe(false);
+      const parts = labelParts('long');
+      expect(parts[0]).toHaveTextContent(/^Long$/);
+      expect(parts[parts.length - 1]).toContainElement(icon('long'));
+    });
+
+    it('puts the icon after the "Optional" marker', () => {
+      renderDescribed('name: d\ntype: described\nwith:\n  short: 1\n  long: 2\n  fixed: 3\n');
+      const parts = labelParts('fixed');
+      expect(parts[parts.length - 2]).toHaveTextContent('Optional');
+      expect(parts[parts.length - 1]).toContainElement(icon('fixed'));
+    });
+
+    it('does not let a click on the icon reach the control the label points at', () => {
+      renderDescribed();
+      // `fireEvent` returns false when the event was cancelled, which stops label activation.
+      expect(fireEvent.click(icon('long')!)).toBe(false);
+    });
+
+    it('keeps the full description attached to the control while it is moved', () => {
+      renderDescribed();
+      expect(descriptionIn('long')).toHaveTextContent(LONG);
+      expect(isDescribedBy('long')).toBe(true);
+      // A short one is the row's own help text, which the row wires up itself.
+      expect(row('short').querySelector('.euiFormHelpText')).toHaveTextContent(SHORT);
+    });
+
+    it('follows the panel width: a description that stops fitting moves behind the icon', () => {
+      charsPerTwoLines = 500;
+      renderDescribed();
+      expect(icon('long')).toBeNull();
+      expect(hasInlineHelp('long')).toBe(true);
+
+      charsPerTwoLines = 60;
+      act(() => resizeCallbacks.forEach((callback) => callback()));
+      expect(icon('long')).toBeInTheDocument();
+      expect(hasInlineHelp('long')).toBe(false);
+    });
+
+    it('keeps the fixed-only hint under the control when only the description moves', () => {
+      renderDescribed('name: d\ntype: described\nwith:\n  short: 1\n  long: 2\n  fixed: 3\n');
+      expect(icon('fixed')).toBeInTheDocument();
+      expect(
+        within(row('fixed')).getByText('Read exactly as typed. Not a template.', {
+          selector: '.euiFormHelpText',
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('keeps a moved description reachable while the field shows an error', () => {
+      renderDescribed('name: d\ntype: described\nwith:\n  short: 1\n');
+      fireEvent.change(activateField('workflowStepConfigField-with.long'), {
+        target: { value: '' },
+      });
+      fireEvent.blur(screen.getByTestId('workflowStepConfigField-with.long'));
+      expect(screen.getByTestId('workflowStepConfigField-with.long')).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+      expect(icon('long')).toBeInTheDocument();
+      expect(isDescribedBy('long')).toBe(true);
+    });
+  });
+
   describe('step type subtitle', () => {
     const subtitle = () => screen.getByTestId('workflowStepConfigPanelTypeSubtitle');
 

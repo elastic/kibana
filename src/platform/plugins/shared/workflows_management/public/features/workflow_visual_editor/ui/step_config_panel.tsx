@@ -23,6 +23,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiPopover,
   EuiSwitch,
   EuiTab,
@@ -30,11 +31,20 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiFontSize,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
@@ -59,6 +69,7 @@ import { ReferenceTextInput } from './reference_text_input';
 import { ReferenceValueBox } from './reference_value_box';
 import { StepErrorHandlingSection } from './step_error_handling_section';
 import { SwitchCasesField } from './switch_cases_field';
+import { DESCRIPTION_MAX_LINES, useDescriptionOverflow } from './use_description_overflow';
 import {
   getReferenceChipEditorCss,
   useReferenceDecorations,
@@ -1363,6 +1374,15 @@ function StepForm({
   );
 }
 
+/** The info icon of a moved description, for the slot a field's label leaves for it. */
+const FieldDescriptionIconContext = createContext<React.ReactNode>(null);
+
+/** At the end of a field's label, after its title, YAML key and "Optional". */
+function FieldDescriptionIconSlot() {
+  const icon = useContext(FieldDescriptionIconContext);
+  return icon ? <span css={{ display: 'inline-flex', alignSelf: 'center' }}>{icon}</span> : null;
+}
+
 /**
  * EuiFormRow wrapper that forbids invalid-without-error — color is never the
  * only signal. When `isInvalid`, `error` is required.
@@ -1371,21 +1391,82 @@ function StepValidatedFormRow({
   isInvalid,
   error,
   helpText,
+  description,
   children,
   ...rest
-}: React.ComponentProps<typeof EuiFormRow>) {
+}: React.ComponentProps<typeof EuiFormRow> & {
+  /** The schema description: under the control while it is short, behind an info icon when long. */
+  readonly description?: string;
+}) {
+  // `helpText` is the status or hint for the control ("Defined in YAML", the fixed-only note):
+  // it is always under it.
+  const { fontSize, lineHeight } = useEuiFontSize('xs');
+  const descriptionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigDescription' });
+  const { measureRef, isLong } = useDescriptionOverflow(description);
   if (isInvalid && (error === undefined || error === null || error === '')) {
     throw new Error('StepValidatedFormRow: isInvalid requires a visible error message');
   }
+  const inlineDescription = isLong ? undefined : description;
+  const underControl =
+    inlineDescription && helpText ? (
+      <>
+        {inlineDescription} {helpText}
+      </>
+    ) : (
+      inlineDescription ?? helpText
+    );
+  const descriptionIcon =
+    description && isLong ? (
+      <EuiIconTip
+        type="info"
+        color="subdued"
+        content={description}
+        aria-label={i18n.translate('workflows.stepConfigPanel.fieldDescriptionIcon', {
+          defaultMessage: 'About this field',
+        })}
+        anchorProps={{
+          'data-test-subj': 'workflowStepConfigFieldDescriptionIcon',
+          // The icon sits inside the row's <label>: a click must not reach the control it labels.
+          onClick: (event) => event.preventDefault(),
+        }}
+      />
+    ) : undefined;
   return (
-    <EuiFormRow
-      {...rest}
-      isInvalid={isInvalid}
-      error={isInvalid ? error : undefined}
-      helpText={isInvalid ? undefined : helpText}
-    >
-      {children}
-    </EuiFormRow>
+    <div css={{ position: 'relative' }}>
+      <FieldDescriptionIconContext.Provider value={descriptionIcon}>
+        <EuiFormRow
+          {...rest}
+          isInvalid={isInvalid}
+          error={isInvalid ? error : undefined}
+          helpText={isInvalid ? undefined : underControl}
+          // A hidden element can still describe the control, so a moved description stays announced.
+          describedByIds={isLong ? [descriptionId] : undefined}
+        >
+          {children}
+        </EuiFormRow>
+      </FieldDescriptionIconContext.Provider>
+      {description ? (
+        <div
+          ref={measureRef}
+          id={descriptionId}
+          css={{
+            position: 'absolute',
+            insetInline: 0,
+            top: 0,
+            visibility: 'hidden',
+            pointerEvents: 'none',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: DESCRIPTION_MAX_LINES,
+            fontSize,
+            lineHeight,
+          }}
+        >
+          {description}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -1483,6 +1564,7 @@ function StepFieldRow({
           {optionalLabel}
         </EuiText>
       ) : null}
+      <FieldDescriptionIconSlot />
     </span>
   );
 
@@ -1604,13 +1686,15 @@ function StepFieldRow({
     defaultMessage: 'Read exactly as typed. Not a template.',
   });
   const fixedOnlyAppend = <EuiIcon type="lock" aria-hidden />;
+  const description = representable ? field.description : undefined;
+  // Status and hints stay under the control; only the description can move behind an icon.
   const helpText = !representable
     ? i18n.translate('workflows.stepConfigPanel.definedInYaml', {
         defaultMessage: 'Defined in YAML',
       })
     : fixedOnly
-    ? [field.description, fixedOnlyHint].filter(Boolean).join(' ')
-    : field.description;
+    ? fixedOnlyHint
+    : undefined;
 
   if (!representable) {
     return (
@@ -1642,6 +1726,7 @@ function StepFieldRow({
           <StepValidatedFormRow
             label={labelContent}
             labelAppend={labelAppend}
+            description={description}
             helpText={helpText}
             isInvalid={isInvalid}
             error={errorMessage}
@@ -1663,6 +1748,8 @@ function StepFieldRow({
       );
     }
 
+    // This row has no label row to hold an icon, so its description always stays under it.
+    const switchHelpText = [description, helpText].filter(Boolean).join(' ');
     return (
       <div
         className="euiFormRow workflowStepConfigFieldRow"
@@ -1700,16 +1787,16 @@ function StepFieldRow({
               showLabel={false}
               checked={value === true}
               onChange={(e) => onChange(e.target.checked)}
-              aria-describedby={helpText ? `${switchId}-help` : undefined}
+              aria-describedby={switchHelpText ? `${switchId}-help` : undefined}
               data-test-subj={testSubj}
             />
             {removeControl}
           </div>
           {sourceToggle}
         </div>
-        {helpText ? (
+        {switchHelpText ? (
           <EuiText size="xs" color="subdued" id={`${switchId}-help`}>
-            {helpText}
+            {switchHelpText}
           </EuiText>
         ) : null}
       </div>
@@ -1719,6 +1806,7 @@ function StepFieldRow({
   const rowProps = {
     label: labelContent,
     labelAppend,
+    description,
     helpText,
     isInvalid,
     error: errorMessage,
@@ -1923,6 +2011,7 @@ function StepFieldRow({
         <StepValidatedFormRow
           label={labelContent}
           labelAppend={labelAppend}
+          description={description}
           helpText={helpText}
           isInvalid={isInvalid}
           error={errorMessage}
@@ -1990,6 +2079,7 @@ function StepFieldRow({
         <StepValidatedFormRow
           label={labelContent}
           labelAppend={labelAppend}
+          description={description}
           helpText={helpText}
           isInvalid={isInvalid}
           error={errorMessage}
