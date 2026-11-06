@@ -63,23 +63,18 @@ export function StreamsLayout() {
     defaultMessage: 'Route, process, and manage your data streams from source to destination.',
   });
 
-  if (unitCheck === 'checking') {
+  if (unitCheck !== 'ready') {
     return (
       <>
         <StreamsAppHeader title={title} description={description} />
-        <StreamsAppPageTemplate.EmptyPrompt
-          data-test-subj="streamsUnitCheckLoading"
-          icon={<EuiLoadingSpinner size="xl" />}
-        />
-      </>
-    );
-  }
-
-  if (unitCheck === 'notFound') {
-    return (
-      <>
-        <StreamsAppHeader title={title} description={description} />
-        <UnitNotFoundPrompt unitId={unitId} />
+        {unitCheck === 'checking' ? (
+          <StreamsAppPageTemplate.EmptyPrompt
+            data-test-subj="streamsUnitCheckLoading"
+            icon={<EuiLoadingSpinner size="xl" />}
+          />
+        ) : (
+          <UnitNotFoundPrompt unitId={unitId} />
+        )}
       </>
     );
   }

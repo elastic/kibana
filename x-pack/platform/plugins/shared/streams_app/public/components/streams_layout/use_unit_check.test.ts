@@ -7,22 +7,15 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useUnitCheck, type UnitCheck } from './use_unit_check';
 
 jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_streams_privileges');
 
 const createHttpError = (statusCode: number): Error =>
   Object.assign(new Error(`Request failed with ${statusCode}`), {
     request: {},
     body: { statusCode, message: `Request failed with ${statusCode}`, error: 'Error' },
   });
-
-const mockV2Access = (v2: boolean) =>
-  jest.mocked(useStreamsPrivileges).mockReturnValue({
-    access: { v2 },
-  } as unknown as ReturnType<typeof useStreamsPrivileges>);
 
 const renderUnitCheck = (unitId: string) => {
   const statuses: UnitCheck[] = [];
@@ -45,7 +38,6 @@ describe('useUnitCheck', () => {
     jest.mocked(useKibana).mockReturnValue({
       dependencies: { start: { streams: { streamsRepositoryClient: { fetch } } } },
     } as unknown as ReturnType<typeof useKibana>);
-    mockV2Access(true);
   });
 
   it('does not request the default unit', () => {
@@ -53,13 +45,6 @@ describe('useUnitCheck', () => {
 
     expect(statuses[0]).toBe('ready');
     expect(statuses.every((status) => status === 'ready')).toBe(true);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
-  it('does not request without V2 access', () => {
-    mockV2Access(false);
-    renderUnitCheck('edge');
-
     expect(fetch).not.toHaveBeenCalled();
   });
 

@@ -9,20 +9,11 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { isNotFoundError } from '../../services/unit_repository';
 
 export type UnitCheck = 'checking' | 'notFound' | 'ready';
 
-interface UnitLookup {
-  unitId: string;
-  found: boolean;
-}
-
-const getStatusWithoutRequest = (unitId: string, canOpenV2: boolean): UnitCheck | undefined => {
-  if (!canOpenV2) {
-    return 'ready';
-  }
+const getStatusWithoutRequest = (unitId: string): UnitCheck | undefined => {
   if (!streamsUnitIdentifierSchema.safeParse(unitId).success) {
     return 'notFound';
   }
@@ -45,15 +36,12 @@ export const useUnitCheck = (unitId: string): UnitCheck => {
       },
     },
   } = useKibana();
-  const {
-    access: { v2: canOpenV2 },
-  } = useStreamsPrivileges();
-  const statusWithoutRequest = getStatusWithoutRequest(unitId, canOpenV2);
+  const statusWithoutRequest = getStatusWithoutRequest(unitId);
 
   const { value: lookup, loading } = useAbortableAsync(
-    ({ signal }): UnitLookup | Promise<UnitLookup> => {
+    ({ signal }) => {
       if (statusWithoutRequest) {
-        return { unitId, found: statusWithoutRequest === 'ready' };
+        return undefined;
       }
       return streamsRepositoryClient
         .fetch('GET /internal/streams/unit/{id}', { params: { path: { id: unitId } }, signal })

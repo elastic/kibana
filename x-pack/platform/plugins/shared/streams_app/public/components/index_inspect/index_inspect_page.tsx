@@ -16,7 +16,6 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { getIndexInspectBack } from './get_index_inspect_back';
 import { IndexInspectPanels } from './index_inspect_panels';
 import { IndexQualityBadge } from './index_quality_badge';
 import {
@@ -156,7 +155,24 @@ export function IndexInspectPage() {
     <>
       <StreamsAppHeader
         title={indexName}
-        back={getIndexInspectBack({ router, unitId, rangeFrom, rangeTo })}
+        back={
+          unitId
+            ? {
+                href: router.link('/v2/unit/{unitId}/{tab}', {
+                  path: { unitId, tab: 'destinations' },
+                  query: { rangeFrom, rangeTo },
+                }),
+                label: i18n.translate('xpack.streams.indexInspect.page.backToDestinations', {
+                  defaultMessage: 'Destinations',
+                }),
+              }
+            : {
+                href: router.link('/v2'),
+                label: i18n.translate('xpack.streams.indexInspect.page.backToStreams', {
+                  defaultMessage: 'Streams',
+                }),
+              }
+        }
         badges={badges}
         tabs={tabs}
         menu={menu}
