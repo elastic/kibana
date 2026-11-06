@@ -7,7 +7,7 @@
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 import type { InvestigationEntryPoint } from '../client/investigations_client';
-import type { OnlineEvalsRoundKind } from '../online_evals/classify_round';
+import type { InvestigationRoundKind } from '../investigation_round';
 
 export const NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT = 'nightshift-investigation-eval-score';
 
@@ -18,12 +18,18 @@ export type OnlineEvalGradedReport = 'first_round' | 'pre_recovery' | 'current';
 export type OnlineEvalEntryPoint = InvestigationEntryPoint;
 
 /**
- * Why an evaluator produced no score. `evidence_unmet` counts as skipped: the round didn't have
- * what the evaluator grades. `evaluation_failed` means no evaluator ran, because the evidence
+ * Why an evaluator produced no score. `evidence_unmet` and `not_applicable` count as skipped:
+ * `evidence_unmet` means the round didn't have what the evaluator grades, and `not_applicable`
+ * means the evaluator read the round and found nothing to grade, such as a recovery with no
+ * verified cause. `evaluation_failed` means no evaluator ran, because the evidence
  * couldn't be read or `evaluate()` threw. Error messages are never sent, because they can quote
  * evidence.
  */
-export type OnlineEvalErrorCode = 'evidence_unmet' | 'evaluator_error' | 'evaluation_failed';
+export type OnlineEvalErrorCode =
+  | 'evidence_unmet'
+  | 'not_applicable'
+  | 'evaluator_error'
+  | 'evaluation_failed';
 
 export interface OnlineEvalScore {
   evaluator_name: string;
@@ -55,12 +61,18 @@ export interface OnlineEvalScoreEvent {
   space_id: string;
   agent_id?: string;
   evaluator_set: string;
-  round_kind: OnlineEvalsRoundKind;
+  round_kind: InvestigationRoundKind;
   graded_report: OnlineEvalGradedReport;
   entry_point?: OnlineEvalEntryPoint;
   alert_rule_type?: string;
   judge_connector_id?: string;
   judge_model?: string;
+  judge_input_tokens?: number;
+  judge_cached_input_tokens?: number;
+  judge_output_tokens?: number;
+  judge_reasoning_tokens?: number;
+  judge_llm_calls?: number;
+  judge_llm_calls_without_usage?: number;
   scores: OnlineEvalScore[];
   evaluator_count: number;
   failed_count: number;
@@ -122,7 +134,9 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   },
   evaluator_set: {
     type: 'keyword',
-    _meta: { description: 'Set of evaluators that ran, such as reference_free or alert_outcome.' },
+    _meta: {
+      description: 'Set of evaluators that ran, such as reference_free or reference_based.',
+    },
   },
   round_kind: {
     type: 'keyword',
@@ -150,6 +164,52 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   judge_model: {
     type: 'keyword',
     _meta: { description: 'Model the judges ran on.', optional: true },
+  },
+  // Judge token totals, counted like `agent_builder_round_complete` so the two can be summed.
+  // Absent when no judge made a model call.
+  judge_input_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens of every judge call, including tokens served from cache.',
+      optional: true,
+    },
+  },
+  judge_cached_input_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens served from cache (part of judge_input_tokens), when reported.',
+      optional: true,
+    },
+  },
+  judge_output_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Output tokens of every judge call, including reasoning.',
+      optional: true,
+    },
+  },
+  judge_reasoning_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Reasoning tokens (part of judge_output_tokens), when reported.',
+      optional: true,
+    },
+  },
+  judge_llm_calls: {
+    type: 'long',
+    _meta: {
+      description:
+        'Judge model calls attempted, including calls that failed before reaching a model. A call the inference client retried counts once.',
+      optional: true,
+    },
+  },
+  judge_llm_calls_without_usage: {
+    type: 'long',
+    _meta: {
+      description:
+        'Judge calls missing from the token totals: the call failed or the provider reported no usage.',
+      optional: true,
+    },
   },
   scores: {
     type: 'array',
@@ -192,7 +252,10 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   },
   skipped_count: {
     type: 'long',
-    _meta: { description: "Evaluators skipped because the round didn't have what they grade." },
+    _meta: {
+      description:
+        "Evaluators skipped because the round didn't have what they grade, or they didn't apply to it.",
+    },
   },
   errors: {
     type: 'array',
@@ -207,7 +270,7 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
           type: 'keyword',
           _meta: {
             description:
-              'Error code: evidence_unmet (skipped), evaluator_error, or evaluation_failed when no evaluator ran.',
+              'Error code: evidence_unmet or not_applicable (skipped), evaluator_error, or evaluation_failed when no evaluator ran.',
           },
         },
       },
