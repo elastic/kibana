@@ -162,11 +162,7 @@ const coreMock = {
       addError: () => ({ id: '' }),
     },
   },
-  timelines: {
-    getHoverActions: () => ({
-      getAddToTimelineButton: () => {},
-    }),
-  },
+  timelines: {},
   logger: noopLogger,
   http: noopHttp,
   dataViews: {
