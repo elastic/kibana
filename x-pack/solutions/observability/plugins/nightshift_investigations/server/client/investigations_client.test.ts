@@ -821,6 +821,57 @@ describe('NightshiftInvestigationsClient.start()', () => {
     }
   );
 
+  it('reports a deployment quota denial, with its automation when one started it', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    investigationQuotaCallback.mockResolvedValue({ allowed: false });
+    const telemetry = { reportInvestigationSkipped: jest.fn() };
+
+    await expect(
+      makeClient({ telemetry: telemetry as never }).start(
+        {
+          subject: { type: 'significant_event', id: 'event-1' },
+          trigger_type: 'automatic',
+        },
+        { automationId: 'a1', entryPoint: 'automation' }
+      )
+    ).rejects.toThrow(InvestigationQuotaDeniedError);
+    await expect(
+      makeClient({ telemetry: telemetry as never }).start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: alertContext,
+        },
+        { entryPoint: 'start_api' }
+      )
+    ).rejects.toThrow(InvestigationQuotaDeniedError);
+
+    expect(telemetry.reportInvestigationSkipped).toHaveBeenNthCalledWith(1, {
+      trigger: 'automation',
+      origin: 'significant_event',
+      automation_id: 'a1',
+      skip_reason: 'deployment_quota',
+    });
+    expect(telemetry.reportInvestigationSkipped).toHaveBeenNthCalledWith(2, {
+      trigger: 'manual',
+      origin: 'alert',
+      skip_reason: 'deployment_quota',
+    });
+  });
+
+  it('reports nothing for a manual start, which skips the quota', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationSkipped: jest.fn() };
+
+    await startFromApi(makeClient({ telemetry: telemetry as never }), {
+      subject: { type: 'manual', id: 'question' },
+      trigger_type: 'manual',
+    });
+
+    expect(telemetry.reportInvestigationSkipped).not.toHaveBeenCalled();
+  });
+
   it('persists the subject summary into the workflow context', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
