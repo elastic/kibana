@@ -138,7 +138,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--telemetry.sendUsageTo=staging',
       `--server.maxPayload=1679958`,
       // newsfeed mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/common/newsfeed')}`,
       // otel mock service
       `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
