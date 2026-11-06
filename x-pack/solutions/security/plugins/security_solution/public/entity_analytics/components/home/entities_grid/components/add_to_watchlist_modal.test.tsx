@@ -181,6 +181,15 @@ describe('AddToWatchlistModal', () => {
     expect(screen.queryByTestId('eaGridAddToWatchlistHint')).not.toBeInTheDocument();
   });
 
+  it('names each button after its watchlist, so a screen reader can tell them apart', () => {
+    renderModal(['wl-1']);
+
+    expect(screen.getByRole('button', { name: 'Select Contractors' })).toBeEnabled();
+    // The disabled "Added" button is not focusable, so its focusable wrapper carries the name.
+    expect(screen.getByRole('group', { name: 'Added to Vendors' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Added to Vendors' })).toBeDisabled();
+  });
+
   it('puts each source on its own line', () => {
     mockTableData({
       visibleRecords: [{ ...WATCHLISTS[0], source: 'entityanalytics_okta, entityanalytics_ad' }],

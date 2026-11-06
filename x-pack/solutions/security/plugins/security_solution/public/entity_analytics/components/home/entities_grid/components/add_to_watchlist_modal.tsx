@@ -78,6 +78,16 @@ const i18nStrings = {
     'xpack.securitySolution.entityAnalytics.home.addToWatchlist.alreadyAdded',
     { defaultMessage: 'Added' }
   ),
+  selectNamed: (name: string) =>
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.addToWatchlist.selectNamed', {
+      defaultMessage: 'Select {name}',
+      values: { name },
+    }),
+  alreadyAddedNamed: (name: string) =>
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.addToWatchlist.alreadyAddedNamed', {
+      defaultMessage: 'Added to {name}',
+      values: { name },
+    }),
   alreadyAddedTooltip: i18n.translate(
     'xpack.securitySolution.entityAnalytics.home.addToWatchlist.alreadyAddedTooltip',
     { defaultMessage: 'This entity is already on this watchlist' }
@@ -280,12 +290,15 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
       {
         align: RIGHT_ALIGNMENT,
         width: '7em',
-        render: ({ id }: WatchlistTableItemType) => {
+        render: ({ id, name }: WatchlistTableItemType) => {
           if (!id) return null;
           const isAlreadyAdded = assignedWatchlistIds.includes(id);
           const selectButton = (
             <EuiButton
               size="s"
+              aria-label={
+                isAlreadyAdded ? i18nStrings.alreadyAddedNamed(name) : i18nStrings.selectNamed(name)
+              }
               iconType={isAlreadyAdded ? 'check' : undefined}
               disabled={isAlreadyAdded || mutation.isLoading}
               isLoading={mutation.isLoading && mutation.variables === id}
@@ -298,7 +311,9 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
           // Disabled buttons do not emit pointer events, so the span keeps the tooltip working.
           return isAlreadyAdded ? (
             <EuiToolTip content={i18nStrings.alreadyAddedTooltip}>
-              <span tabIndex={0}>{selectButton}</span>
+              <span tabIndex={0} role="group" aria-label={i18nStrings.alreadyAddedNamed(name)}>
+                {selectButton}
+              </span>
             </EuiToolTip>
           ) : (
             selectButton
