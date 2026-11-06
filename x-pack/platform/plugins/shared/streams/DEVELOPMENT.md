@@ -53,11 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/v2`, which redirects to `/app/streams/v2/unit/default/map`. `/app/streams` redirects there too for a user with V2 access (see "Privileges").
-
-- Unit pages are `/app/streams/v2/unit/{unitId}/{map|sources|destinations}`. An unknown unit id shows "Unit not found".
-- Index pages are `/app/streams/v2/indices/{indexName}/{overview|retention}`. The optional `unitId` query param points the back link at that unit's destinations.
-- `v2` is the one reserved top-level segment. Every other first segment is a stream name.
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
 
 ## Privileges
 
@@ -270,7 +266,7 @@ Important consequences:
 - Both types are `namespaceType: 'multiple'` and are written with `initialNamespaces: ['*']`, so every space sees the same unit. That matches config-distributor `PUT /v1/units/default` (one unit per cluster). `multiple-isolated` would hide the object from other spaces while still using a globally unique id, so a second space would 404 then collide.
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes. The one exception is `api_keys` (neither encrypted nor in AAD), which is updated on its own (see "API keys").
-- v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`). The UI reads the unit id from the URL (`/app/streams/v2/unit/{unitId}/...`).
+- v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
 - Without `xpack.streams.distributor.url`, unit PUT fails with a 503 ("streams-config-distributor URL is not configured"). There is no offline mode.
