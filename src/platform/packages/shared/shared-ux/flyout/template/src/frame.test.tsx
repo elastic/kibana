@@ -305,6 +305,44 @@ describe('a managed frame', () => {
     expect(mockEuiFlyoutMounts).toHaveBeenCalledTimes(1);
   });
 
+  it('takes the flyout menu title from the options, not from a declaration header', () => {
+    render(
+      <FlyoutTemplateManagedProvider value={managed()}>
+        <Loaded />
+      </FlyoutTemplateManagedProvider>
+    );
+
+    expect(screen.getByRole('heading', { name: 'Loaded title' })).toBeInTheDocument();
+    expect(lastFlyoutProps().flyoutMenuProps).toEqual({ title: 'Managed title' });
+  });
+
+  it('warns in development when the options give no menu title', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const value = managed({ props: { session: 'start', 'data-test-subj': 'managedFlyout' } });
+
+    render(
+      <FlyoutTemplateManagedProvider value={value}>
+        <Loaded />
+      </FlyoutTemplateManagedProvider>
+    );
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('`flyoutMenuProps.title`'));
+    warn.mockRestore();
+  });
+
+  it('does not warn when the options give a menu title', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+
+    render(
+      <FlyoutTemplateManagedProvider value={managed()}>
+        <Loaded />
+      </FlyoutTemplateManagedProvider>
+    );
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it('runs the onClose of the declaration shown when the flyout closes', () => {
     const order: string[] = [];
     const close = jest.fn(() => order.push('close'));

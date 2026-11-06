@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useCallback, useId, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, useGeneratedHtmlId } from '@elastic/eui';
 import type {
@@ -130,6 +130,15 @@ const FlyoutTemplateFrameView = ({
   // menu title comes only from the frame's own props, never from a declaration's header.
   const menuTitle = flyoutMenuProps?.title;
   const loadingTitle = typeof menuTitle === 'string' ? menuTitle : ariaLabel;
+  const isMissingMenuTitle = isManaged && session !== 'never' && !loadingTitle;
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production' && isMissingMenuTitle) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[FlyoutTemplate] A managed flyout needs a menu title. Pass `flyoutMenuProps.title` in the options of `openFlyoutTemplate`; the header title of the content is not used.'
+      );
+    }
+  }, [isMissingMenuTitle]);
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && hasHeader ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy
