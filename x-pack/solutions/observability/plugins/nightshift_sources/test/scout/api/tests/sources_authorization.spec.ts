@@ -150,7 +150,10 @@ apiTest.describe.skip(
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
     });
 
-    apiTest(
+    // Skipped while Nightshift only runs in the default space: the source write routes refuse
+    // any other one, so this cross-space case cannot be set up today. Restore it as soon as more
+    // than one space is supported.
+    apiTest.skip(
       'does not expose a source created in another space',
       async ({ apiClient, apiServices, samlAuth }) => {
         manager = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGER_ROLE);

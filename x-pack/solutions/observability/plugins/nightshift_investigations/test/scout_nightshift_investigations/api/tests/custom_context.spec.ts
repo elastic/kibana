@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags, type ApiServicesFixture } from '@kbn/scout-oblt';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_SUPPORTED_SPACE_ID } from '@kbn/nightshift-shared';
 import {
   apiTest,
   NIGHTSHIFT_MANAGE_ROLE,
@@ -19,7 +19,8 @@ import {
   uniqueId,
 } from '../fixtures';
 
-const SPACE_ID = uniqueId('nightshift-custom-context-space');
+// Writes are refused outside the default space, which is the only space Nightshift runs in.
+const SPACE_ID = NIGHTSHIFT_SUPPORTED_SPACE_ID;
 const OTHER_SPACE_ID = uniqueId('nightshift-custom-context-other');
 const SNIPPET = 'While debugging alerts, always rule out a release and config regression.';
 
@@ -43,7 +44,6 @@ apiTest.describe(
         return;
       }
       await setNightshiftEnabled(apiServices, true);
-      await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
     });
 
@@ -57,10 +57,7 @@ apiTest.describe(
         return;
       }
       try {
-        await Promise.all([
-          apiServices.spaces.delete(SPACE_ID),
-          apiServices.spaces.delete(OTHER_SPACE_ID),
-        ]);
+        await apiServices.spaces.delete(OTHER_SPACE_ID);
       } finally {
         await setNightshiftEnabled(apiServices, null);
       }

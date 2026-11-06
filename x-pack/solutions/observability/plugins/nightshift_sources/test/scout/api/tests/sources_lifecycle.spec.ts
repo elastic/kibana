@@ -63,7 +63,10 @@ apiTest.describe(
       }
     });
 
-    apiTest(
+    // Skipped while Nightshift only runs in the default space: the source write routes refuse
+    // any other one, so this cross-space case cannot be set up today. Restore it as soon as more
+    // than one space is supported.
+    apiTest.skip(
       'lists the All logs recommendation until a matching source exists',
       async ({ apiClient, apiServices }) => {
         const spaceId = `ns-recommended-${suffix}`;
@@ -451,7 +454,10 @@ apiTest.describe(
       }
     });
 
-    apiTest(
+    // Skipped while Nightshift only runs in the default space: the source write routes refuse
+    // any other one, so this cross-space case cannot be set up today. Restore it as soon as more
+    // than one space is supported.
+    apiTest.skip(
       'lists a source by id only in the space it belongs to',
       async ({ apiClient, apiServices }) => {
         const spaceId = `ns-ids-${suffix}`;
