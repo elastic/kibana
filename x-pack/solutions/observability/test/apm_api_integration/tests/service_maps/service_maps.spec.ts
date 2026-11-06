@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { first, isEmpty, last, uniq } from 'lodash';
+import { first, isEmpty, last, omit, uniq } from 'lodash';
 import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
@@ -166,9 +166,11 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 transactionType: 'request',
               },
             };
-            Object.entries(expectedStats).forEach(([serviceName, stats]) => {
-              if (statsByService.has(serviceName)) {
-                expect(statsByService.get(serviceName)).to.eql(stats);
+            Object.entries(expectedStats).forEach(([serviceName, { actualValue, ...stats }]) => {
+              const actual = statsByService.get(serviceName);
+              if (actual) {
+                expect(omit(actual, 'actualValue')).to.eql(stats);
+                expect(actual.actualValue).to.be.within(actualValue - 0.001, actualValue + 0.001);
               }
             });
           });
