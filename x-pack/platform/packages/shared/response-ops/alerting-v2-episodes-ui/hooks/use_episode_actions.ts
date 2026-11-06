@@ -17,6 +17,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { getBreachEsqlQuery, type FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '../actions';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import { useSourceWriteAccess } from './use_source_write_access';
 import {
   canOpenDiscover,
   getDiscoverHrefForAlertEventsHistory,
@@ -52,6 +53,11 @@ export const useEpisodeActions = ({
 }: UseEpisodeActionsOptions): EpisodeAction[] => {
   const queryClient = useQueryClient();
   const additionalDataSource = useAdditionalEpisodesDataSource();
+  const canWriteSourceEpisode = useSourceWriteAccess({
+    application: services.application,
+    http: services.http,
+    notifications: services.notifications,
+  });
 
   return useMemo(
     () =>
@@ -68,6 +74,7 @@ export const useEpisodeActions = ({
         queryClient,
         additionalDataSource,
         canWriteEpisodes: canWriteAlerts,
+        canWriteSourceEpisode,
         isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
         getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
           getDiscoverHrefForRuleAndAlertTimestamp({
@@ -95,6 +102,6 @@ export const useEpisodeActions = ({
             uiSettings: services.uiSettings,
           }),
       }),
-    [services, queryClient, additionalDataSource, rulesCache, canWriteAlerts]
+    [services, queryClient, additionalDataSource, rulesCache, canWriteAlerts, canWriteSourceEpisode]
   );
 };

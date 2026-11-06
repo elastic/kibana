@@ -44,6 +44,7 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/utils/with_episode_action_state';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
+import { useSourceWriteAccess } from '@kbn/alerting-v2-episodes-ui/hooks/use_source_write_access';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
@@ -104,6 +105,11 @@ export function EpisodeDetailsPage({
   const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const canWriteAlerts = useService(UserCapabilities).canWrite('alerts');
+  const canWriteSourceEpisode = useSourceWriteAccess({
+    application: services.application,
+    http: services.http,
+    notifications: services.notifications,
+  });
   const { data, http, spaces } = services;
 
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -240,6 +246,7 @@ export function EpisodeDetailsPage({
         spaces: services.spaces,
         queryClient,
         canWriteEpisodes: canWriteAlerts,
+        canWriteSourceEpisode,
         isRuleAvailable: (selectedRuleId) =>
           isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
         getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
@@ -266,7 +273,7 @@ export function EpisodeDetailsPage({
             uiSettings: services.uiSettings,
           }),
       }),
-    [services, queryClient, showRuleDependentUi, ruleState, canWriteAlerts]
+    [services, queryClient, showRuleDependentUi, ruleState, canWriteAlerts, canWriteSourceEpisode]
   );
 
   const applicableActions = useMemo(() => {

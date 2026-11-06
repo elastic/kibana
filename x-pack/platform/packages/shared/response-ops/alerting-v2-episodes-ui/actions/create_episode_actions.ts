@@ -18,7 +18,7 @@ import type { QueryClient } from '@kbn/react-query';
 import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { isSourceEpisode } from '../queries/episodes_query';
-import { withEpisodeWritePrivilege } from '../utils/episode_write_privilege';
+import { withEpisodeWritePrivilege, type CanWriteEpisode } from '../utils/episode_write_privilege';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
@@ -63,20 +63,25 @@ export interface EpisodeActionsDeps {
   additionalDataSource?: EpisodeDataSource;
   /**
    * Whether the user may modify universal alerts. Rows owned by `additionalDataSource` answer to
-   * that source's `getWriteCapability` instead.
+   * `canWriteSourceEpisode` instead.
    */
   canWriteEpisodes?: boolean;
+  /**
+   * Whether the user may modify a given row owned by `additionalDataSource`, as resolved by that
+   * source's `useWriteAccess`. Falls back to `canWriteEpisodes`.
+   */
+  canWriteSourceEpisode?: CanWriteEpisode;
 }
 
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
-  const { additionalDataSource, canWriteEpisodes = false } = deps;
+  const { additionalDataSource, canWriteEpisodes = false, canWriteSourceEpisode } = deps;
   const ext = (id: string) =>
     additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
   const actionDeps = { http: deps.http, notifications: deps.notifications };
-  const canWriteSourceEpisodes =
-    additionalDataSource?.getWriteCapability?.(deps.application.capabilities) ?? canWriteEpisodes;
   const canWriteEpisode = (episode: AlertEpisode): boolean =>
-    isSourceEpisode(episode) ? canWriteSourceEpisodes : canWriteEpisodes;
+    isSourceEpisode(episode)
+      ? canWriteSourceEpisode?.(episode) ?? canWriteEpisodes
+      : canWriteEpisodes;
 
   return [
     createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),

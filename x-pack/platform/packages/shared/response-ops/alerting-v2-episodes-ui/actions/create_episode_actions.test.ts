@@ -18,6 +18,7 @@ import { QueryClient } from '@kbn/react-query';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { AddToCaseCasesService } from '../components/add_to_case_modal';
 import type { EpisodeDataSource } from '../types/episode_data_source';
+import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 import { createAddToCaseAction } from './add_to_case';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 import { createEpisodeActions } from './create_episode_actions';
@@ -27,11 +28,13 @@ const buildActions = ({
   includeHistory = true,
   isAlertEventsHistoryAvailable = true,
   canWriteEpisodes = true,
+  canWriteSourceEpisode,
 }: {
   additionalDataSource?: EpisodeDataSource;
   includeHistory?: boolean;
   isAlertEventsHistoryAvailable?: boolean;
   canWriteEpisodes?: boolean;
+  canWriteSourceEpisode?: CanWriteEpisode;
 } = {}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
@@ -40,6 +43,7 @@ const buildActions = ({
     rendering: renderingServiceMock.create(),
     application: applicationServiceMock.createStartContract(),
     canWriteEpisodes,
+    canWriteSourceEpisode,
     userProfile: userProfileServiceMock.createStart(),
     docLinks: docLinksServiceMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
@@ -131,9 +135,7 @@ describe('write privilege', () => {
   const nativeEpisode = { 'episode.id': 'e1' } as AlertEpisode;
   const sourceEpisode = { 'episode.id': 'e2', source_id: 'classic' } as AlertEpisode;
 
-  const createSource = (
-    getWriteCapability?: EpisodeDataSource['getWriteCapability']
-  ): EpisodeDataSource => ({
+  const createSource = (): EpisodeDataSource => ({
     id: 'classic',
     label: 'Classic',
     queryKeyPrefix: ['classic'],
@@ -145,7 +147,6 @@ describe('write privilege', () => {
         execute: async () => ({ succeeded: 1, failed: 0 }),
       },
     ],
-    ...(getWriteCapability ? { getWriteCapability } : {}),
   });
 
   const ackAction = (actions: ReturnType<typeof buildActions>) =>
@@ -165,7 +166,8 @@ describe('write privilege', () => {
   it('keeps source rows writable when only the source grants write privilege', () => {
     const actions = buildActions({
       canWriteEpisodes: false,
-      additionalDataSource: createSource(() => true),
+      additionalDataSource: createSource(),
+      canWriteSourceEpisode: () => true,
     });
 
     expect(ackAction(actions)?.isCompatible({ episodes: [sourceEpisode] })).toBe(true);
@@ -175,14 +177,27 @@ describe('write privilege', () => {
   it('keeps source rows read-only when only the universal privilege is granted', () => {
     const actions = buildActions({
       canWriteEpisodes: true,
-      additionalDataSource: createSource(() => false),
+      additionalDataSource: createSource(),
+      canWriteSourceEpisode: () => false,
     });
 
     expect(ackAction(actions)?.isCompatible({ episodes: [sourceEpisode] })).toBe(false);
     expect(ackAction(actions)?.isCompatible({ episodes: [nativeEpisode] })).toBe(true);
   });
 
-  it('lets a source that declares no write capability inherit the universal one', () => {
+  it('resolves source rows individually', () => {
+    const otherSourceEpisode = { 'episode.id': 'e3', source_id: 'classic' } as AlertEpisode;
+    const actions = buildActions({
+      canWriteEpisodes: false,
+      additionalDataSource: createSource(),
+      canWriteSourceEpisode: (episode) => episode['episode.id'] === 'e2',
+    });
+
+    expect(ackAction(actions)?.isCompatible({ episodes: [sourceEpisode] })).toBe(true);
+    expect(ackAction(actions)?.isCompatible({ episodes: [otherSourceEpisode] })).toBe(false);
+  });
+
+  it('lets a source that declares no write access inherit the universal privilege', () => {
     const writable = buildActions({ canWriteEpisodes: true, additionalDataSource: createSource() });
     const readOnly = buildActions({
       canWriteEpisodes: false,

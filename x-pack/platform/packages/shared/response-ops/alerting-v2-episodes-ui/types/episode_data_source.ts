@@ -8,6 +8,7 @@
 import type { IconType } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type {
@@ -18,9 +19,16 @@ import type {
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 import type { EpisodeAction } from '../actions/types';
 import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
+import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
+}
+
+export interface EpisodeWriteAccessServices {
+  application: ApplicationStart;
+  http: HttpStart;
+  notifications: NotificationsStart;
 }
 
 export interface EpisodeSearchField {
@@ -119,8 +127,12 @@ export interface EpisodeDataSource {
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
-  /** Whether the user may modify this source's alerts. Defaults to the universal capability. */
-  getWriteCapability?: (capabilities: ApplicationStart['capabilities']) => boolean;
+  /**
+   * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can
+   * fetch authorization that is not exposed as a UI capability. Defaults to the universal
+   * capability.
+   */
+  useWriteAccess?: (services: EpisodeWriteAccessServices) => CanWriteEpisode;
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
 }
