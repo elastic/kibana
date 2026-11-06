@@ -1257,7 +1257,7 @@ describe('applyCortexEdits ontology cleanup', () => {
     '',
     '## Relations',
     '```',
-    'autoops-bootstrap -> warpstream-agent : calls',
+    'autoops-bootstrap -> warpstream-agent : depends_on',
     'warpstream-agent -> telemetry-connector : publishes_to',
     'warpstream-agent -> autoops-bootstrap : depends_on',
     'warpstream-agent -> warpstream-agent : calls',
@@ -1314,7 +1314,7 @@ describe('applyCortexEdits ontology cleanup', () => {
     const { store, logger } = await apply({ catalog: [integrationPage] });
 
     const content = writtenContent(store);
-    expect(content).toContain('autoops-bootstrap -> warpstream-agent : calls');
+    expect(content).toContain('autoops-bootstrap -> warpstream-agent : depends_on');
     expect(content).not.toContain('telemetry-connector');
     expect(content).not.toContain('warpstream-agent -> autoops-bootstrap');
     expect(content).not.toContain('warpstream-agent -> warpstream-agent');
@@ -1692,7 +1692,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
     expect(system).toContain('page slug exactly as the catalog shows it');
     expect(system).toContain('"A reads_from B" as "A pulls data from B"');
     expect(system).toContain('never add a telemetry connector as a node');
-    expect(system).toContain('State one edge per pair of components');
+    expect(system).toContain('State each edge once');
   });
 });
 

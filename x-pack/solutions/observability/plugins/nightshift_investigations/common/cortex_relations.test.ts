@@ -102,19 +102,34 @@ describe('tidyCortexOntology', () => {
     expect(dropped.map(({ reason }) => reason)).toEqual(['duplicate']);
   });
 
-  it('keeps one edge per pair, the first, when the reverse is also stated', () => {
+  it('keeps the first edge when the same kind is also stated in reverse', () => {
     const { content, dropped } = tidyCortexOntology(
       page(
         'external-dns-projects -> fleet : publishes_to',
-        'fleet -> external-dns-projects : depends_on'
+        'fleet -> external-dns-projects : publishes_to'
       )
     );
 
     expect(content).toContain('external-dns-projects -> fleet : publishes_to');
-    expect(content).not.toContain('fleet -> external-dns-projects : depends_on\n```');
+    expect(content).not.toContain('fleet -> external-dns-projects : publishes_to');
     expect(dropped).toEqual([
-      { line: 'fleet -> external-dns-projects : depends_on', reason: 'mirrored' },
+      { line: 'fleet -> external-dns-projects : publishes_to', reason: 'mirrored' },
     ]);
+  });
+
+  it('keeps a reverse edge of another kind and a reverse calls edge', () => {
+    const { content, dropped } = tidyCortexOntology(
+      page(
+        'fleet -> external-dns-projects : calls',
+        'external-dns-projects -> fleet : calls',
+        'fleet -> external-dns-projects : depends_on',
+        'external-dns-projects -> fleet : reads_from'
+      )
+    );
+
+    expect(content).toContain('external-dns-projects -> fleet : calls');
+    expect(content).toContain('external-dns-projects -> fleet : reads_from');
+    expect(dropped).toEqual([]);
   });
 
   it('drops the edges and the node line of an excluded component', () => {

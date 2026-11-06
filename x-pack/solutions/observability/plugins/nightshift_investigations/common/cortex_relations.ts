@@ -75,9 +75,10 @@ const NODE_LINE = /^\s*[-*]\s+`?([^`\s:]+)`?/;
 
 /**
  * Removes the relation lines that make an ontology page misleading, whatever the model wrote: an
- * edge from a component to itself, a repeat of an edge, the reverse of an edge already stated (one
- * edge per pair, the first wins), and an edge that only records where an excluded component's
- * telemetry is stored. An excluded component, such as a telemetry integration, is not part of the
+ * edge from a component to itself, a repeat of an edge, the reverse of an edge already stated with
+ * the same kind (the first wins; `calls` is exempt, since two services can call each other over
+ * distinct paths, and a reverse edge of another kind is a separate relation), and an edge that only
+ * records where an excluded component's telemetry is stored. An excluded component, such as a telemetry integration, is not part of the
  * system's graph, so a component "publishing to" it or "reading from" it is dropped, but a
  * `depends_on`, `calls` or `runs_on` edge to it is a real dependency and stays. An excluded node is
  * dropped once no edge names it.
@@ -94,7 +95,6 @@ export const tidyCortexOntology = (
   const relations = sectionRange(lines, /^##\s+relations\b/i);
   if (relations) {
     const seen = new Set<string>();
-    const pairs = new Set<string>();
     for (let index = relations[0]; index < relations[1]; index++) {
       const edge = RELATION_LINE.exec(lines[index]);
       if (edge === null || !isRelationKind(edge[3])) {
@@ -108,7 +108,7 @@ export const tidyCortexOntology = (
           ? 'self_edge'
           : seen.has(`${from}\u0000${to}\u0000${kind}`)
           ? 'duplicate'
-          : pairs.has(`${to}\u0000${from}`)
+          : kind !== 'calls' && seen.has(`${to}\u0000${from}\u0000${kind}`)
           ? 'mirrored'
           : undefined;
       if (reason) {
@@ -117,7 +117,6 @@ export const tidyCortexOntology = (
         continue;
       }
       seen.add(`${from}\u0000${to}\u0000${kind}`);
-      pairs.add(`${from}\u0000${to}`);
       linked.add(from);
       linked.add(to);
     }
