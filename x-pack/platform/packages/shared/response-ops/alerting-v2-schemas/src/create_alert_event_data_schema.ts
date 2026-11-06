@@ -31,7 +31,8 @@ const externalAlertStatusSchema = lazySchema(() =>
 
 const RESERVED_SOURCE_PREFIX = 'elastic';
 
-const sourceSchema = lazySchema(() =>
+/** Shared by Create Alert and Create Signal so both apply the same source rules. */
+export const externalEventSourceSchema = lazySchema(() =>
   z
     .string()
     .min(1)
@@ -54,7 +55,7 @@ const sourceSchema = lazySchema(() =>
  * want them put `rule_name` / `source_alert_url` inside `data`. The UI reads those
  * keys when present.
  */
-const createAlertEventBodyBaseObjectSchema = lazySchema(() =>
+export const createAlertEventBodyBaseObjectSchema = lazySchema(() =>
   z
     .object({
       // At least one of fingerprint / fingerprint_fields / rule_id is required
@@ -110,7 +111,7 @@ const refineIdentityFields = (
 export const createAlertEventDataSchema = lazySchema(() =>
   createAlertEventBodyBaseObjectSchema
     .extend({
-      source: sourceSchema,
+      source: externalEventSourceSchema,
     })
     .strict()
     .superRefine(refineIdentityFields)
