@@ -81,4 +81,69 @@ describe('getValueInputPopover', () => {
 
     expect(onValueChange).toHaveBeenCalledWith('document-1', { name: 'Jasmin' });
   });
+
+  it('edits a multivalue cell as JSON text and saves it back as a typed array', async () => {
+    const user = userEvent.setup();
+    const onValueChange = jest.fn();
+    const rows: DataTableRecord[] = [
+      {
+        id: 'document-1',
+        raw: {},
+        flattened: { scores: [1, 2] },
+      },
+    ];
+    const columns: DatatableColumn[] = [
+      {
+        id: 'scores',
+        name: 'scores',
+        meta: { type: 'number' },
+      },
+    ];
+    const dataTableRef: React.RefObject<EuiDataGridRefProps> = {
+      current: {
+        setIsFullScreen: jest.fn(),
+        openCellPopover: jest.fn(),
+        closeCellPopover: jest.fn(),
+        setFocusedCell: jest.fn(),
+      },
+    };
+    const telemetryService = new IndexEditorTelemetryService(
+      analyticsServiceMock.createAnalyticsServiceStart(),
+      true,
+      true,
+      'test'
+    );
+    const ValueInputPopover = getValueInputPopover({
+      rows,
+      columns,
+      onValueChange,
+      dataTableRef,
+      telemetryService,
+    });
+
+    const { unmount } = renderWithI18n(
+      <ValueInputPopover
+        rowIndex={0}
+        colIndex={0}
+        columnId="scores"
+        cellContentsElement={document.createElement('div')}
+        cellActions={[]}
+        DefaultCellPopover={() => null}
+        setCellPopoverProps={jest.fn()}
+      >
+        {'[1,2]'}
+      </ValueInputPopover>
+    );
+
+    // A number multivalue cell falls back to a text input, seeded with the JSON representation.
+    const input = screen.getByRole('textbox', { name: 'Value for scores' });
+    expect(input).toHaveValue('[1,2]');
+
+    await user.clear(input);
+    await user.paste('[1, 99]');
+
+    unmount();
+
+    expect(onValueChange).toHaveBeenCalledWith('document-1', { scores: [1, 99] });
+  });
 });

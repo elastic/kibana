@@ -51,6 +51,27 @@ export function parsePrimitive(
   return value;
 }
 
+/**
+ * Parses the text entered for a multivalue cell. A JSON array is kept as an array so each element
+ * keeps its JSON type (e.g. `["a","b"]` or `[1, 2]`); anything else falls back to the scalar parse,
+ * letting the user collapse the cell to a single value. Unlike {@link parsePrimitive}, this parses
+ * arrays even for string-typed fields, whose scalar values are otherwise kept as raw text.
+ */
+export function parseMultiValue(value: string, fieldType?: string): unknown {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Not a valid JSON array; fall through to the scalar parse below.
+    }
+  }
+  return parsePrimitive(value, fieldType);
+}
+
 export function isPlaceholderColumn(columnName: string): boolean {
   return columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX);
 }

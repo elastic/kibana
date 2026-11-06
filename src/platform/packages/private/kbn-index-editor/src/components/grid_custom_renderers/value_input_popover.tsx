@@ -16,8 +16,8 @@ import { EuiToolTip } from '@elastic/eui';
 import { EuiFocusTrap, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
-import { getInputComponentForType } from '../value_inputs_factory';
-import { getCellValue, isPlaceholderColumn } from '../../utils';
+import { getInputComponentForType, StringInput } from '../value_inputs_factory';
+import { getCellValue, isPlaceholderColumn, parseMultiValue } from '../../utils';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
 export type OnCellValueChange = (docId: string, update: Record<string, unknown>) => void;
@@ -49,9 +49,11 @@ export const getValueInputPopover =
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.id as string;
-    const cellValue =
-      getCellValue(getDisplayValue ? getDisplayValue(row, columnId) : row.flattened[columnId]) ??
-      '';
+    const rawValue = getDisplayValue ? getDisplayValue(row, columnId) : row.flattened[columnId];
+    // A cell holding an array is edited as JSON text and saved back as an array of typed values.
+    // Array-of-objects columns never reach this path: the service renders them read-only.
+    const isMultiValue = Array.isArray(rawValue);
+    const cellValue = getCellValue(rawValue) ?? '';
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -70,8 +72,10 @@ export const getValueInputPopover =
     }, [columnId]);
 
     const InputComponent = useMemo(() => {
-      return getInputComponentForType(columnType);
-    }, [columnType]);
+      // Multivalue cells are edited as JSON text, so the number/boolean inputs (which only accept a
+      // single typed value) are replaced by a text input.
+      return isMultiValue ? StringInput : getInputComponentForType(columnType);
+    }, [isMultiValue, columnType]);
 
     const onKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -132,10 +136,11 @@ export const getValueInputPopover =
     const saveValue = useCallback(
       (newValue: string) => {
         if (!isPlaceholder && docId && newValue !== cellValue) {
-          onValueChange(docId, { [columnId]: newValue });
+          const value = isMultiValue ? parseMultiValue(newValue, columnType) : newValue;
+          onValueChange(docId, { [columnId]: value });
         }
       },
-      [isPlaceholder, docId, cellValue, columnId]
+      [isPlaceholder, docId, cellValue, columnId, isMultiValue, columnType]
     );
 
     const closePopover = useCallback(

@@ -7,7 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getArrayBackedColumns } from '.';
+import { getArrayBackedColumns, parseMultiValue } from '.';
+
+describe('parseMultiValue', () => {
+  it('keeps a JSON array of strings as an array', () => {
+    expect(parseMultiValue('["a","b"]', 'string')).toEqual(['a', 'b']);
+  });
+
+  it('keeps a JSON array of numbers as an array', () => {
+    expect(parseMultiValue('[1, 2, 3]', 'number')).toEqual([1, 2, 3]);
+  });
+
+  it('keeps a JSON array of booleans as an array', () => {
+    expect(parseMultiValue('[true, false]', 'boolean')).toEqual([true, false]);
+  });
+
+  it('falls back to a scalar when the cell is collapsed to a single value', () => {
+    expect(parseMultiValue('42', 'number')).toBe(42);
+  });
+
+  it('falls back to the raw text for an invalid JSON array', () => {
+    expect(parseMultiValue('[1, 2', 'number')).toBe('[1, 2');
+  });
+});
 
 describe('getArrayBackedColumns', () => {
   it('flags columns whose ancestor is an array of objects', () => {
