@@ -270,6 +270,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Tines workflows migration API (create, get, update, start, and stop).
+   */
+  tinesWorkflowsMigration: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
