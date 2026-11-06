@@ -199,28 +199,6 @@ describe('getGeoJsonWithMeta', () => {
     expect(meta?.areResultsTrimmed).toBe(true);
   });
 
-  test('should not set areResultsTrimmed for aggregated queries when resultsCount reaches the limit', async () => {
-    mockGetLimitFromESQLQuery.mockReturnValue(3);
-    mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(3), requestParams: {} }));
-
-    const { meta } = await new ESQLSource({
-      esql: 'FROM logs | STATS count = COUNT(*) BY geotile = ST_GEOTILE(geo.coordinates, 5)',
-      geoField: 'geo.coordinates',
-      narrowByGlobalSearch: false,
-      narrowByMapBounds: false,
-      narrowByGlobalTime: false,
-    }).getGeoJsonWithMeta(
-      'test',
-      requestMeta as any,
-      jest.fn(),
-      jest.fn(),
-      makeInspectorAdapters() as any
-    );
-
-    expect(meta?.resultsCount).toBe(3);
-    expect(meta?.areResultsTrimmed).toBe(false);
-  });
-
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
     mockGetNamedParams.mockReturnValue([{ geotile: 9 }]);
     mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
