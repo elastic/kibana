@@ -59,3 +59,19 @@ describe('RunDetail long values', () => {
     expect(screen.getByText(longUrl)).toHaveStyle({ overflowWrap: 'anywhere' });
   });
 });
+
+it.each(['succeeded', 'skipped'] as const)(
+  'shows the resolved manual executor in %s run details',
+  (status) => {
+    renderRunDetail({
+      ...baseRun,
+      status,
+      triggeredBy: 'manual',
+      executedBy: 'u_alice',
+      executedByDisplayName: 'Alice Smith',
+    });
+
+    expect(screen.getByText('Manual · Alice Smith')).toBeInTheDocument();
+    expect(screen.queryByText(/u_alice/)).not.toBeInTheDocument();
+  }
+);

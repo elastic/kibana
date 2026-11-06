@@ -59,7 +59,15 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       startedBefore: z.string().max(64).optional(),
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getUserProfileService,
+    context,
+    logger,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -183,8 +191,37 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       };
     });
 
+    const visibleRuns = runs.filter(({ skipReason }) => skipReason !== 'automation_disabled');
+    // Resolve only executors of visible manual runs the caller was authorized to read.
+    const profileUids = new Set(
+      visibleRuns.flatMap(({ triggeredBy, executedBy }) =>
+        triggeredBy === 'manual' && executedBy?.startsWith('u_') ? [executedBy] : []
+      )
+    );
+    const displayNames = new Map<string, string>();
+    if (profileUids.size > 0) {
+      try {
+        const userProfile = await getUserProfileService();
+        const profiles = await userProfile.bulkGet({ uids: profileUids });
+        for (const { uid, user } of profiles) {
+          displayNames.set(uid, user.full_name?.trim() || user.email?.trim() || user.username);
+        }
+      } catch (error) {
+        logger.debug(`Failed to resolve automation run executor profiles: ${error.message}`);
+      }
+    }
+
     return {
-      runs: runs.filter(({ skipReason }) => skipReason !== 'automation_disabled'),
+      runs: visibleRuns.map((run) => ({
+        ...run,
+        executedByDisplayName:
+          run.triggeredBy === 'manual' && run.executedBy
+            ? displayNames.get(run.executedBy) ??
+              (run.executedBy.startsWith('u_') || run.executedBy === 'unknown'
+                ? undefined
+                : run.executedBy)
+            : undefined,
+      })),
       total: executions.total,
       usedToday,
       page: executions.page,

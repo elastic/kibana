@@ -45,6 +45,7 @@ export interface Run {
   duration?: number;
   triggeredBy?: string;
   executedBy?: string;
+  executedByDisplayName?: string;
   title?: string;
   message?: string;
   investigationId?: string;
@@ -88,12 +89,15 @@ const labels = {
   }),
 };
 
-export const getRunSourceLabel = ({ triggeredBy, executedBy }: Run, fallback = '—'): string => {
+export const getRunSourceLabel = (
+  { triggeredBy, executedByDisplayName }: Run,
+  fallback = '—'
+): string => {
   if (triggeredBy !== 'manual') return triggeredBy ?? fallback;
-  return executedBy
+  return executedByDisplayName
     ? i18n.translate('xpack.nightshift.automations.detail.manualRunByLabel', {
         defaultMessage: 'Manual · {user}',
-        values: { user: executedBy },
+        values: { user: executedByDisplayName },
       })
     : i18n.translate('xpack.nightshift.automations.detail.manualRunLabel', {
         defaultMessage: 'Manual',
