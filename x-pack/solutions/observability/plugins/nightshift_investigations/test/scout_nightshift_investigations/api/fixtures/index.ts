@@ -32,6 +32,15 @@ export {
 } from './write_path';
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
 export {
+  cancelScoringRuns,
+  getStepOutput,
+  listInvestigationRuns,
+  listScoringRuns,
+  startAnsweringLlm,
+  waitForFinishedRuns,
+} from './online_evals';
+export type { WorkflowRun } from './online_evals';
+export {
   NIGHTSHIFT_MANAGE_ENGINES_ROLE,
   NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,

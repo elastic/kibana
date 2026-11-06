@@ -163,15 +163,40 @@ export const findOrCreateSlackThread = (
  */
 export const NIGHTSHIFT_SCOUT_LLM_PORT = 8095;
 
+const LISTEN_ATTEMPTS = 20;
+const LISTEN_RETRY_DELAY_MS = 500;
+
+/**
+ * Listens on the Scout LLM port. The port is fixed and shared by every suite's LLM endpoint, so a
+ * port still busy for a moment is retried briefly before failing.
+ */
+export const listenOnScoutLlmPort = async (server: Server): Promise<void> => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(NIGHTSHIFT_SCOUT_LLM_PORT, '127.0.0.1', () => {
+          server.off('error', reject);
+          resolve();
+        });
+      });
+      return;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EADDRINUSE' || attempt >= LISTEN_ATTEMPTS) {
+        throw error;
+      }
+      await sleep(LISTEN_RETRY_DELAY_MS);
+    }
+  }
+};
+
 /**
  * An LLM endpoint that accepts connections and never answers, so the investigation agent stays
  * on its first model call and the investigation stays in progress without a real LLM.
  */
 export const startUnresponsiveLlm = async (): Promise<{ close: () => void }> => {
   const server: Server = createServer(() => {});
-  await new Promise<void>((resolve) =>
-    server.listen(NIGHTSHIFT_SCOUT_LLM_PORT, '127.0.0.1', resolve)
-  );
+  await listenOnScoutLlmPort(server);
   return {
     close: () => {
       server.closeAllConnections();
