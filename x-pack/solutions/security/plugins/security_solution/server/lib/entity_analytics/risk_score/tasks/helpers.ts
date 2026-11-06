@@ -7,10 +7,8 @@
 
 import datemath from '@kbn/datemath';
 
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
@@ -29,14 +27,12 @@ export const convertRangeToISO = (range: Range): Range => ({
 });
 
 /**
- *  Builds a SavedObjectsClient scoped to the given namespace. This should be used with caution, and only in cases where a real kibana request is not available to build a proper scoped client (e.g. a task manager task).
+ * Builds an internal SavedObjectsClient whose operations default to the given namespace.
+ * Use with caution, and only where a real kibana request is not available (e.g. a task manager task).
  *
- __Note__: Because the kibana system user cannot access SavedObjects itself, this client does not have the security extension enabled, which has (negative) implications both for logging and for security.
- * @param coreStart CoreStart plugin context
- * @param namespace the namespace to which the client should be scoped
- * @returns a SavedObjectsClient scoped to the given namespace
+ * Internal clients never have the security extension, because there is no user behind them. This has (negative) implications both for logging and for security.
  */
-export const buildScopedInternalSavedObjectsClientUnsafe = ({
+export const buildNamespacedInternalSavedObjectsClientUnsafe = ({
   coreStart,
   namespace,
   includedHiddenTypes,
@@ -44,24 +40,25 @@ export const buildScopedInternalSavedObjectsClientUnsafe = ({
   coreStart: CoreStart;
   namespace: string;
   includedHiddenTypes?: string[];
-}) => {
-  const fakeScopedRequest = kibanaRequestFactory({
-    headers: {},
-    spaceId: brandSpaceId(namespace),
-  });
-
-  return coreStart.savedObjects.getScopedClient(fakeScopedRequest, {
-    excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes,
-  });
-};
+}) =>
+  coreStart.savedObjects
+    .getUnsafeInternalClient({ includedHiddenTypes })
+    .asScopedToNamespace(namespace);
 
 /**
- * Builds an internal SavedObjectsClient with security/spaces extensions disabled.
- * Intended for background execution paths where no authenticated request exists.
+ * Builds an internal SavedObjectsClient with the spaces extension disabled and no default namespace.
+ * Use with caution, and only where a real kibana request is not available (e.g. a task manager task).
+ *
+ * Internal clients never have the security extension, because there is no user behind them. This has (negative) implications both for logging and for security.
+ *
+ * Do not combine this with `asScopedToNamespace`: it only scopes the spaces extension, so it would be a no-op here.
  */
-export const buildInternalSavedObjectsClientUnsafe = ({ coreStart }: { coreStart: CoreStart }) => {
+export const buildInternalSavedObjectsClientWithoutSpacesUnsafe = ({
+  coreStart,
+}: {
+  coreStart: CoreStart;
+}) => {
   return coreStart.savedObjects.getUnsafeInternalClient({
-    excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+    excludedExtensions: [SPACES_EXTENSION_ID],
   });
 };

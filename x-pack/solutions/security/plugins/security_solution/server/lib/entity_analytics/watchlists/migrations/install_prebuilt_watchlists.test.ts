@@ -52,7 +52,7 @@ jest.mock('../management/watchlist_config', () => ({
 let mockScopedSoClient: ReturnType<typeof mockSavedObjectsClient.create>;
 
 jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: jest.fn(() => mockScopedSoClient),
+  buildNamespacedInternalSavedObjectsClientUnsafe: jest.fn(() => mockScopedSoClient),
 }));
 
 const buildSpacesResponse = (spaceIds: string[]) => ({
