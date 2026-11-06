@@ -38,7 +38,7 @@ import type {
 
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
-import { checkPrivilegesFactory } from './check_privileges';
+import { checkPrivilegesFactory, type PrivilegeCheckRecovery } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
@@ -71,6 +71,9 @@ interface AuthorizationServiceSetupParams {
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 
   customBranding: CustomBrandingSetup;
+
+  /** Recovery that request-scoped privilege checks answer on the side for object-level security. */
+  privilegeCheckRecovery?: PrivilegeCheckRecovery;
 }
 
 interface AuthorizationServiceStartParams {
@@ -108,6 +111,7 @@ export class AuthorizationService {
     getSpacesService,
     getCurrentUser,
     customBranding,
+    privilegeCheckRecovery,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
@@ -119,7 +123,8 @@ export class AuthorizationService {
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
-      this.applicationName
+      this.applicationName,
+      privilegeCheckRecovery
     );
 
     const esSecurityConfig = getClusterClient()

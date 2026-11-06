@@ -15,8 +15,10 @@ export function injectMetaAttributes<T = unknown>(
   savedObject: SavedObject<T> | SavedObjectWithMetadata<T>,
   savedObjectsManagement: ISavedObjectsManagement
 ): SavedObjectWithMetadata<T> {
+  // Access control lists are shown only through the access control API.
+  const { acl, ...savedObjectWithoutAcl } = savedObject as SavedObject<T>;
   const result = {
-    ...savedObject,
+    ...savedObjectWithoutAcl,
     meta: (savedObject as SavedObjectWithMetadata).meta || {},
   };
 

@@ -17,6 +17,7 @@ import type {
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
   SavedObjectsExtensions,
+  SavedObjectsOlsExtensionFactory,
   SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -24,6 +25,8 @@ import {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
+import { OLS_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { createFailClosedOlsExtension } from './fail_closed_ols_extension';
 
 /**
  * @internal
@@ -44,6 +47,7 @@ export class SavedObjectsClientProvider {
   private readonly encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private readonly securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private readonly spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
+  private readonly olsExtensionFactory?: SavedObjectsOlsExtensionFactory;
   private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
   constructor({
@@ -52,18 +56,21 @@ export class SavedObjectsClientProvider {
     encryptionExtensionFactory,
     securityExtensionFactory,
     spacesExtensionFactory,
+    olsExtensionFactory,
   }: {
     defaultClientFactory: SavedObjectsClientFactory;
     typeRegistry: ISavedObjectTypeRegistry;
     encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
     securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
     spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
+    olsExtensionFactory?: SavedObjectsOlsExtensionFactory;
   }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
     this._typeRegistry = typeRegistry;
     this.encryptionExtensionFactory = encryptionExtensionFactory;
     this.securityExtensionFactory = securityExtensionFactory;
     this.spacesExtensionFactory = spacesExtensionFactory;
+    this.olsExtensionFactory = olsExtensionFactory;
   }
 
   setClientFactory(customClientFactory: SavedObjectsClientFactory) {
@@ -78,6 +85,12 @@ export class SavedObjectsClientProvider {
     request: KibanaRequest,
     { includedHiddenTypes, excludedExtensions = [] }: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
+    // shortcut: excluding object-level security needs a reviewed allowlist of system uses, which
+    // does not exist yet. Until then, no request-scoped client can skip it.
+    if (excludedExtensions.includes(OLS_EXTENSION_ID)) {
+      throw new Error('The "acl" saved objects extension cannot be excluded');
+    }
+
     return this._clientFactory({
       request,
       includedHiddenTypes,
@@ -98,6 +111,11 @@ export class SavedObjectsClientProvider {
       encryptionExtension: createExt(ENCRYPTION_EXTENSION_ID, this.encryptionExtensionFactory),
       securityExtension: createExt(SECURITY_EXTENSION_ID, this.securityExtensionFactory),
       spacesExtension: createExt(SPACES_EXTENSION_ID, this.spacesExtensionFactory),
+      // A provider that cannot enforce object-level security for this request returns nothing. The
+      // fallback then fails closed instead of silently disabling enforcement.
+      olsExtension:
+        this.olsExtensionFactory?.({ typeRegistry: this._typeRegistry, request }) ??
+        createFailClosedOlsExtension(this._typeRegistry),
     };
   }
 }

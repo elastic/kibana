@@ -9,6 +9,16 @@
 
 import type { AllRequiredCondition, AnyRequiredCondition, Privileges } from '@kbn/core-http-server';
 
+import type { CoreOlsService } from './ols';
+
+/**
+ * Core's authorization service contract.
+ */
+export interface CoreAuthorizationService {
+  /** Object-level security (OLS), or `null` when OLS is disabled. */
+  ols: CoreOlsService | null;
+}
+
 export enum AuthzOptOutReason {
   DelegateToESClient = 'Route delegates authorization to the scoped ES client',
   DelegateToSOClient = 'Route delegates authorization to the scoped SO client',

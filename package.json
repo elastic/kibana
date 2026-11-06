@@ -1013,6 +1013,8 @@
     "@kbn/observability-utils-server": "workspace:*",
     "@kbn/occ": "workspace:*",
     "@kbn/oidc-provider-plugin": "workspace:*",
+    "@kbn/ols": "workspace:*",
+    "@kbn/ols-ui": "workspace:*",
     "@kbn/open-telemetry-instrumented-plugin": "workspace:*",
     "@kbn/openapi-common": "workspace:*",
     "@kbn/opentelemetry-attributes": "workspace:*",

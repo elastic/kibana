@@ -30,6 +30,7 @@ import {
   catchAndReturnBoomErrors,
   logWarnOnExternalRequest,
   throwIfTypeNotVisibleByAPI,
+  stripAcl,
 } from './utils';
 
 interface RouteDependencies {
@@ -183,7 +184,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
         overwrite,
         request.body
       );
-      return response.ok({ body: result });
+      return response.ok({ body: stripAcl(result) });
     })
   );
 
@@ -216,7 +217,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
       const { type, id } = request.params;
       const { overwrite } = request.query;
       const result = await executeCreate(context, request, type, id, overwrite, request.body);
-      return response.ok({ body: result });
+      return response.ok({ body: stripAcl(result) });
     })
   );
 };

@@ -332,6 +332,7 @@ export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
   Rules = 'rules',
+  Access = 'access',
 }
 
 export interface RuleEditProps<

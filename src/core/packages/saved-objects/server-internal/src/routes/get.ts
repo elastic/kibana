@@ -22,6 +22,7 @@ import {
   catchAndReturnBoomErrors,
   logWarnOnExternalRequest,
   throwIfTypeNotVisibleByAPI,
+  stripAcl,
 } from './utils';
 
 interface RouteDependencies {
@@ -92,7 +93,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
       const object = await savedObjects.client.get(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return response.ok({ body: object });
+      return response.ok({ body: stripAcl(object) });
     })
   );
 };

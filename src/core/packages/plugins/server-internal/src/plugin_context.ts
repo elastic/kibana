@@ -274,6 +274,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
       setSecurityExtension: deps.savedObjects.setSecurityExtension,
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
+      setOlsExtension: deps.savedObjects.setOlsExtension,
       setAccessControlTransforms: deps.savedObjects.setAccessControlTransforms,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
@@ -433,6 +434,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       authc: deps.security.authc,
       audit: deps.security.audit,
       serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
+      authz: deps.security.authz,
     },
     userProfile: deps.userProfile,
     injection: {

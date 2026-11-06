@@ -16,7 +16,10 @@ import { asNotificationExecutionSource, NOTIFICATIONS_REQUESTER_ID } from '../li
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
 import type { Logger } from '@kbn/core/server';
-import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+import {
+  getAllUnsecured,
+  getAllUnsecuredWithAcl,
+} from '../application/connector/methods/get_all/get_all';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import {
   createMockConnectorFindResult,
@@ -26,6 +29,9 @@ import {
 jest.mock('../application/connector/methods/get_all/get_all');
 
 const mockGetAllUnsecured = getAllUnsecured as jest.MockedFunction<typeof getAllUnsecured>;
+const mockGetAllUnsecuredWithAcl = getAllUnsecuredWithAcl as jest.MockedFunction<
+  typeof getAllUnsecuredWithAcl
+>;
 
 const connectorTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
 
@@ -113,6 +119,31 @@ describe('getAll()', () => {
       unsecuredActionsClient.getAll(asSpaceId('custom-space'))
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
+      esClient: clusterClient.asInternalUser,
+      inMemoryConnectors,
+      kibanaIndices: ['.kibana'],
+      logger,
+      internalSavedObjectsRepository,
+      spaceId: asSpaceId('custom-space'),
+      connectorTypeRegistry,
+    });
+  });
+});
+
+describe('getAllWithAcl()', () => {
+  test('calls getAllUnsecuredWithAcl library method with the same parameters as getAll', async () => {
+    const expectedResult = [
+      {
+        connector: createMockConnectorFindResult({ id: '1', name: 'test', referencedByCount: 0 }),
+        acl: { version: [1], owner: { type: [], id: [] }, general_access: ['none'], entries: [] },
+      },
+    ];
+    mockGetAllUnsecuredWithAcl.mockResolvedValueOnce(expectedResult);
+
+    await expect(unsecuredActionsClient.getAllWithAcl(asSpaceId('custom-space'))).resolves.toEqual(
+      expectedResult
+    );
+    expect(mockGetAllUnsecuredWithAcl).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
       inMemoryConnectors,
       kibanaIndices: ['.kibana'],

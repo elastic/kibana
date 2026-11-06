@@ -23,6 +23,9 @@ import { convertSecurityApi as actualConvertSecurityApi } from './utils/convert_
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
 
+// No Saved Objects type in these tests has an access policy.
+const startDeps = { typeRegistry: { getAccessPolicy: () => undefined } };
+
 const createStubInternalContract = (): CoreSecurityDelegateContract => {
   return Symbol('stubContract') as unknown as CoreSecurityDelegateContract;
 };
@@ -254,7 +257,7 @@ describe('SecurityService', function () {
           serviceAccounts,
         } as unknown as CoreSecurityDelegateContract);
 
-        const start = service.start();
+        const start = service.start(startDeps);
         const params = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
 
         await start.serviceAccounts.asScopedToPlugin('alerting').getWorkloadBinding(params);
@@ -319,7 +322,7 @@ describe('SecurityService', function () {
   describe('#start', () => {
     it('logs a warning if the security API was not registered', () => {
       service.setup();
-      service.start();
+      service.start(startDeps);
 
       expect(loggerMock.collect(coreContext.logger as MockedLogger).warn).toMatchInlineSnapshot(`
         Array [
@@ -336,7 +339,7 @@ describe('SecurityService', function () {
       const contract = createStubInternalContract();
       registerSecurityDelegate(contract);
 
-      service.start();
+      service.start(startDeps);
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
       expect(convertSecurityApiMock).toHaveBeenCalledWith(
@@ -350,8 +353,9 @@ describe('SecurityService', function () {
       getDefaultSecurityImplementationMock.mockReturnValue(contract);
 
       service.setup();
-      service.start();
+      service.start(startDeps);
 
+      expect(getDefaultSecurityImplementationMock).toHaveBeenCalledWith(startDeps.typeRegistry);
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
       expect(convertSecurityApiMock).toHaveBeenCalledWith(
         contract,
@@ -364,7 +368,7 @@ describe('SecurityService', function () {
       convertSecurityApiMock.mockReturnValue(convertedContract);
 
       service.setup();
-      const startContract = service.start();
+      const startContract = service.start(startDeps);
 
       expect(startContract).toEqual(convertedContract);
     });

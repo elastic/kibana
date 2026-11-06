@@ -528,9 +528,15 @@ importers:
       '@kbn/aad-fixtures-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/common/plugins/aad
+      '@kbn/ols':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-ols
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
+      '@kbn/ols-ui':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-ols-ui
       '@kbn/actions-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/actions
@@ -7974,6 +7980,10 @@ importers:
   src/platform/packages/shared/home/sample_data_tab: {}
 
   src/platform/packages/shared/home/sample_data_types: {}
+
+  src/platform/packages/shared/kbn-ols: {}
+
+  src/platform/packages/shared/kbn-ols-ui: {}
 
   src/platform/packages/shared/kbn-actions-types: {}
 

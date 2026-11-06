@@ -18,6 +18,7 @@ import type {
 
 import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreAuthorizationService } from './authz';
 import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
@@ -28,6 +29,7 @@ import type { CoreServiceAccountsService } from './service_accounts';
  */
 export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
+  authz: AuthorizationServiceContract;
   audit: AuditServiceContract;
   serviceAccounts: ServiceAccountsServiceContract;
   /**
@@ -52,6 +54,8 @@ export interface CoreSecurityDelegateContract {
 export type AuthenticationServiceContract = CoreAuthenticationService;
 
 export type AuditServiceContract = CoreAuditService;
+
+export type AuthorizationServiceContract = CoreAuthorizationService;
 
 /**
  * The service accounts contract that the security provider must implement: the plugin-agnostic
