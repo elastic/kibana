@@ -75,6 +75,7 @@
     "@kbn/core-security-common",
     "@kbn/eval-kql",
     "@kbn/rrule",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/lock-manager"
   ]
 }
